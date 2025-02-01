@@ -77,6 +77,12 @@ namespace WikiFunctions.ReplaceSpecial
             UpdateEnabledStates();
         }
 
+        public new void Show(string titleText)
+        {
+            Text = titleText;
+            base.Show();
+        }
+
         private void OkButton_Click(object sender, EventArgs e)
         {
             SaveCurrentRule();
