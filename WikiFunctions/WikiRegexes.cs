@@ -663,14 +663,9 @@ namespace WikiFunctions
             "R to alternate capitalisation",
             "Redirect from capitalisation"
         };
-        
-        ///// <summary>
-        ///// Matches words
-        ///// </summary>
-        //public static readonly Regex RegexWord = new Regex(@"\w+");
 
         /// <summary>
-        /// 
+        /// Matches newline
         /// </summary>
         public static readonly Regex Newline = new Regex("\\n");
 
