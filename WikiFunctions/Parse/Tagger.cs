@@ -334,6 +334,11 @@ namespace WikiFunctions.Parse
                             articleText += Tools.Newline("{{Okategoriserad|", 2) + WikiRegexes.DateYearMonthParameter + @"}}";
                             tagsAdded.Add("[[Mall:Okategoriserad|okategoriserad]]");
                         }
+                        else if (Variables.LangCode.Equals("en")) // same template for uncat and uncat stub
+                        {
+                            articleText += Tools.Newline("{{Uncategorized|", 2) + WikiRegexes.DateYearMonthParameter + @"}}";
+                            tagsAdded.Add("[[CAT:UNCAT|uncategorised]]");
+                        }
                         else
                         {
                             articleText += Tools.Newline("{{Uncategorized stub|", 2) + WikiRegexes.DateYearMonthParameter + @"}}";

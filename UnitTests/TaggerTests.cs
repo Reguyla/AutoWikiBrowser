@@ -53,7 +53,7 @@ namespace UnitTests
         }
 
         [Test]
-        public void AddUncatStub()
+        public void AddUncatToStub()
         {
             Globals.UnitTestIntValue = 0;
             Globals.UnitTestBoolValue = true;
@@ -64,7 +64,7 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text), "page is deadend");
             ClassicAssert.IsFalse(text.Contains("Underlinked"));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text), "page is stub");
-            ClassicAssert.IsTrue(text.Contains(UncatStub), "page is uncategorised stub");
+            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text), "page is uncategorised");
 
             // uncat when not a stub
             Globals.UnitTestIntValue = 0;
@@ -114,7 +114,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text), "Don't tag for underlinked");
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "Don't tag for deadend");
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text), "Tag for stub");
-            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("uncategorized stub").IsMatch(text), "Tag for uncat stub");
+            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("uncategorized").IsMatch(text), "Tag for uncat");
 
             // Pages with MinorPlanetListFooter will have wikilinks. They should not be tagged as deadend.
             text = parser.Tagger(@"A {{MinorPlanetListFooter|A}} B", "Test", false, out noChange, ref summary);
@@ -272,16 +272,14 @@ namespace UnitTests
 
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text), "page is deadend");
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text), "page is stub");
-            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("Uncategorized stub").IsMatch(text), "page is uncategorised stub");
-            ClassicAssert.IsTrue(text.Contains(UncatStub), "page has already been tagged as uncategorised stub");
+            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("Uncategorized").IsMatch(text), "page is uncategorised");
 
             text = parser.Tagger(ShortTextWithLongComment, "Test", false, out noChange, ref summary);
             // Stub, no existing stub tag. Needs all tags
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
-            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("Uncategorized stub").IsMatch(text));
-            ClassicAssert.IsTrue(text.Contains(UncatStub));
+            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("Uncategorized").IsMatch(text));
 
             text = parser.Tagger(ShortTextWithLongComment, "List of Tests", false, out noChange, ref summary);
             // Stub, no existing stub tag but with "List of..." in its title. Needs all tags but stub
@@ -289,7 +287,6 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
             ClassicAssert.IsFalse(Tools.NestedTemplateRegex("Uncategorized stub").IsMatch(text));
-            ClassicAssert.IsFalse(text.Contains(UncatStub));
 
             text = parser.Tagger(ShortTextWithLongComment, "Meanings of minor planet names: 3001–4000", false, out noChange, ref summary);
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
@@ -307,10 +304,9 @@ namespace UnitTests
             // Stub, existing stub tag
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
-            ClassicAssert.IsTrue(text.Contains(UncatStub));
+            ClassicAssert.IsFalse(text.Contains(UncatStub));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
-
-            ClassicAssert.IsFalse(text.Contains(Uncat));
+            ClassicAssert.IsTrue(text.Contains(Uncat));
 
             Assert.That(Tools.RegexMatchCount(Regex.Escape(Stub), text), Is.EqualTo(1));
 
