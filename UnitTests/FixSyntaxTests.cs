@@ -843,23 +843,6 @@ Now [[A]], was."));
         }
 
         [Test]
-        public void FixUnbalancedBracketsPersondataEnd()
-        {
-            const string PD = @"{{Persondata<!--Metadata: see [[Wikipedia:Persondata]].-->
-|NAME=Orbe, Georgy
-|ALTERNATIVE NAMES=
-|SHORT DESCRIPTION=
-|DATE OF BIRTH=1873
-|PLACE OF BIRTH=[[Tbilisi]]
-|DATE OF DEATH=1944
-|PLACE OF DEATH=Paris
-
-{{DEFAULTSORT:Orbe, Georgy}}";
-
-            Assert.That(Parsers.FixSyntax(PD), Is.EqualTo(PD.Replace(@"Paris", @"Paris}}")));
-        }
-
-        [Test]
         public void FixUnbalancedBracketsRef()
         {
             Assert.That(Parsers.FixSyntax(@"now <ref>>foo</ref>"), Is.EqualTo(@"now <ref>foo</ref>"));

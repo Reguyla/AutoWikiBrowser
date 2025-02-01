@@ -448,15 +448,6 @@ namespace UnitTests
 ==References==
 {{Reflist}}
 
-{{Persondata <!-- Metadata: see [[Wikipedia:Persondata]]. -->
-| NAME              = 0mqgyd9wZ ow3yEcrk6
-| ALTERNATIVE NAMES =
-| SHORT DESCRIPTION =
-| DATE OF BIRTH     =
-| PLACE OF BIRTH    =
-| DATE OF DEATH     =
-| PLACE OF DEATH    =
-}}
 {{DEFAULTSORT:bJqnzFm7e, opFhLKq7z}}
 [[Category:Albanian people]]
 [[Category:Albanian Declaration of Independence]]
@@ -507,15 +498,6 @@ namespace UnitTests
 ==References==
 {{Reflist}}
 
-{{Persondata
-| NAME              = 0mqgyd9wZ ow3yEcrk6
-| ALTERNATIVE NAMES =
-| SHORT DESCRIPTION =
-| DATE OF BIRTH     =
-| PLACE OF BIRTH    =
-| DATE OF DEATH     =
-| PLACE OF DEATH    =
-}}
 {{DEFAULTSORT:bJqnzFm7e, opFhLKq7z}}";
 
             string text = parser.Tagger(t1 + LongText, "Test", false, out noChange, ref summary);
@@ -528,15 +510,6 @@ namespace UnitTests
 ==References==
 {{Reflist}}
 
-{{Persondata
-| NAME              = 0mqgyd9wZ ow3yEcrk6
-| ALTERNATIVE NAMES =
-| SHORT DESCRIPTION =
-| DATE OF BIRTH     =
-| PLACE OF BIRTH    =
-| DATE OF DEATH     =
-| PLACE OF DEATH    =
-}}
 {{DEFAULTSORT:bJqnzFm7e, opFhLKq7z}}";
 
             text = parser.Tagger(t1 + LongText, "Test", false, out noChange, ref summary);
@@ -848,17 +821,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
 {{National Heroes of Indonesia}}
 
-<!-- comments do not affect page length and therefore do not affect page tagging as well -->
-
-{{Persondata
-| NAME              = Fakhruddin, KH
-| ALTERNATIVE NAMES =
-| SHORT DESCRIPTION = National hero of Indonesia
-| DATE OF BIRTH     = 1804
-| PLACE OF BIRTH    = Indonesia
-| DATE OF DEATH     = 1904
-| PLACE OF DEATH    = Earth
-}}";
+<!-- comments do not affect page length and therefore do not affect page tagging as well -->";
 
         [Test]
         public void Remove()

@@ -343,7 +343,7 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 
 {{DEFAULTSORT:Jones, Bob}}
 [[Category:Living people]]
-[[Category:1987 births]]", "no persondata added");
+[[Category:1987 births]]", "nothing added");
 
             AssertNotChanged(@"{{Unreferenced|date=December 2009}}
 {{Dead end|date=November 2006}}

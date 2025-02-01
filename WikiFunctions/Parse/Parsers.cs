@@ -1177,7 +1177,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex IMA = Tools.NestedTemplateRegex(new[] { "Infobox musical artist", "Infobox singer" });
 
         /// <summary>
-        /// determines whether the article is about a person by looking for persondata/birth death categories, bio stub etc. for en wiki only
+        /// determines whether the article is about a person by looking for birth death categories, bio stub etc. for en wiki only
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="articleTitle">Title of the article</param>
@@ -1196,7 +1196,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex NotPersonInfoboxes = Tools.NestedTemplateRegex(new [] { "Infobox cricketer tour biography", "Infobox political party", "Infobox settlement", "italic title", "Infobox animal", "Infobox racehorse", "Infobox named horse" } );
 
         /// <summary>
-        /// determines whether the article is about a person by looking for persondata/birth death categories, bio stub etc. for en wiki only
+        /// determines whether the article is about a person by looking for birth death categories, bio stub etc. for en wiki only
         /// Should only return true if the article is the principle article about the individual (not early life/career/discography etc.)
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>

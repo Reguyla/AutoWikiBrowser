@@ -208,12 +208,12 @@ foo", "Hi", out noChange), Is.EqualTo(@"foo
 foo"));
 
             Assert.That(Parsers.ChangeToDefaultSort(@"
-foo {{persondata}}
+foo {{Infobox biography}}
 [[Category:1910 births|Lahiff, Tommy]]
 [[Category:Australian players of Australian rules football|Lahiff, Tommy]]
 [[Category:Essendon Football Club players|Lahiff, Tommy]]
 ", "foo", out noChange, false), Is.EqualTo(@"
-foo {{persondata}}
+foo {{Infobox biography}}
 [[Category:1910 births]]
 [[Category:Australian players of Australian rules football]]
 [[Category:Essendon Football Club players]]
@@ -222,7 +222,7 @@ foo {{persondata}}
 
             // can't add a DEFAULTSORT using existing cat sortkeys even if restricted, as sortkey case may be changed
             const string a = @"
-foo {{persondata}}
+foo {{Infobox biography}}
 [[Category:1910 births|Lahiff, Tommy]]
 [[Category:Australian players of Australian rules football|Lahiff, Tommy]]
 [[Category:Essendon Football Club players|Lahiff, Tommy]]
@@ -230,7 +230,7 @@ foo {{persondata}}
             Assert.That(Parsers.ChangeToDefaultSort(a, "foo", out noChange, true), Is.EqualTo(a));
 
             Assert.That(Parsers.ChangeToDefaultSort(a, "foo", out noChange, false), Is.EqualTo(@"
-foo {{persondata}}
+foo {{Infobox biography}}
 [[Category:1910 births]]
 [[Category:Australian players of Australian rules football]]
 [[Category:Essendon Football Club players]]
@@ -239,12 +239,12 @@ foo {{persondata}}
 
             // can't add a DEFAULTSORT using existing cat sortkeys if they're different
             Assert.That(Parsers.ChangeToDefaultSort(@"
-foo {{persondata}}
+foo {{Infobox biography}}
 [[Category:1910 births|Lahiff, Tommy]]
 [[Category:Australian players of Australian rules football|Lahiff, Tommy]]
 [[Category:Essendon Football Club players|TOmmy]]
 ", "foo", out noChange, true), Is.EqualTo(@"
-foo {{persondata}}
+foo {{Infobox biography}}
 [[Category:1910 births|Lahiff, Tommy]]
 [[Category:Australian players of Australian rules football|Lahiff, Tommy]]
 [[Category:Essendon Football Club players|TOmmy]]
