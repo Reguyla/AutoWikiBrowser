@@ -392,7 +392,6 @@ en, sq, ru
                 case "pl":
                 case "ru":
                 case "uk":
-                case "simple":
                     articleText += personData + strStub + categories;
                     break;
                     
