@@ -84,8 +84,7 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "uncat page and orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text), "uncat page and deadend");
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
-            ClassicAssert.IsFalse(Tools.NestedTemplateRegex("uncat").IsMatch(text));
-            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("uncategorized stub").IsMatch(text));
+            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("uncat").IsMatch(text));
 
             // stub already marked uncat but with "List of..." in pagetitle. It should not tag as stub
             text = parser.Tagger(ShortText + @"{{uncat}}", "List of Tests", false, out noChange, ref summary);
@@ -127,11 +126,7 @@ namespace UnitTests
         {
             Globals.UnitTestIntValue = 0;
 
-            string text = parser.Tagger(ShortText + @"{{stub}} {{Uncategorised|date=May 2010}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsTrue(Tools.NestedTemplateRegex("Uncategorized stub").IsMatch(text), "Uncategorised renamed to uncat stub");
-            ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
-
-            text = parser.Tagger(ShortText + @"{{stub}} {{Uncategorisedstub|date=May 2010}}", "Test", false, out noChange, ref summary);
+            string text = parser.Tagger(ShortText + @"{{stub}} {{Uncategorisedstub|date=May 2010}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(Tools.NestedTemplateRegex("Uncategorized stub").IsMatch(text), "uncatstub not renamed when already present");
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
 
@@ -177,7 +172,7 @@ namespace UnitTests
             text = parser.Tagger(ShortText + @"{{dead end}}
 {{reflist}}
 {{Uncategorised|date=May 2010}}{{stub}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsTrue(text.Contains(@"{{Uncategorized stub|date=May 2010}}"));
+            ClassicAssert.IsTrue(text.Contains(@"{{Uncategorised|date=May 2010}}"));
         }
 
         [Test]
@@ -304,7 +299,6 @@ namespace UnitTests
             text = parser.Tagger(ShortText + Stub + Uncat + Wikify + Orphan + Deadend, "Test", false, out noChange, ref summary);
             // Tagged article, dupe tags shouldn't be added
             Assert.That(Tools.RegexMatchCount(Regex.Escape(Stub), text), Is.EqualTo(1));
-            Assert.That(Tools.RegexMatchCount(Regex.Escape(UncatStub), text), Is.EqualTo(1));
             Assert.That(Tools.RegexMatchCount(Regex.Escape(Wikify), text), Is.EqualTo(1));
             Assert.That(Tools.RegexMatchCount(Regex.Escape(Orphan), text), Is.EqualTo(1));
             Assert.That(Tools.RegexMatchCount(Regex.Escape(Deadend), text), Is.EqualTo(1));
@@ -430,12 +424,6 @@ namespace UnitTests
             Globals.UnitTestIntValue = 0;
             text = parser.Tagger(@"{{improve categories}}\r\n" + ShortText, "Test", false, out noChange, ref summary);
             ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text));
-
-            // {{improve categories}} --> {{uncat stub}} if no cats and stub
-            Globals.UnitTestIntValue = 0;
-            text = parser.Tagger(@"{{improve categories}}  {{foo-stub}}\r\n" + ShortText, "Test", false, out noChange, ref summary);
-            ClassicAssert.IsTrue(text.Contains(@"{{uncategorized stub"), "improve cats to uncat stub");
-            ClassicAssert.IsFalse(text.Contains(@"{{improve categories"));
 
             // Do not add underlinked if page is small with a single wikilink
             Globals.UnitTestIntValue = 0;

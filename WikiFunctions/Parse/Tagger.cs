@@ -387,7 +387,6 @@ namespace WikiFunctions.Parse
             }
 
             // remove {{Uncategorized}} if > 0 real categories (stub categories not counted)
-            // rename {{Uncategorized}} to {{Uncategorized stub}} if stub with zero categories (stub categories not counted)
             if (WikiRegexes.Uncat.IsMatch(templates))
             {
                 if (totalCategories > 0)
@@ -427,10 +426,8 @@ namespace WikiFunctions.Parse
                                 return Tools.RenameTemplate(u2.Value, "تقاوى مش متصنفه");
                             if (Variables.LangCode.Equals("fa"))
                                 return Tools.RenameTemplate(u2.Value, "خرد رده‌بندی‌نشده");
-                            if (Variables.LangCode.Equals("en") || Variables.LangCode.Equals("simple"))
-                                return Tools.RenameTemplate(u2.Value, "Uncategorized stub");
                         }
-                        else // already uncat stub so remove plain uncat
+                        else // already uncat stub so remove plain uncat - not enwiki
                         {
                             if (!WikiRegexes.Stub.IsMatch(u2.Value))
                             {
@@ -440,7 +437,7 @@ namespace WikiFunctions.Parse
                                     tagsRemoved.Add("مش متصنفه");
                                 else if (Variables.LangCode.Equals("fa"))
                                     tagsRemoved.Add("رده‌بندی‌نشده");
-                                else
+                                else if (!Variables.LangCode.Equals("en"))
                                     tagsRemoved.Add("uncategorised");
                                 return "";
                             }
