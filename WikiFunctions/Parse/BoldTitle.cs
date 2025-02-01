@@ -52,7 +52,6 @@ namespace WikiFunctions.Parse
         private static readonly Regex BoldTitleAlready3 = new Regex(@"^\s*({{[^\{\}]+}}\s*)*'''('')?\s*\w", RegexOptions.Compiled);
         private static readonly Regex BoldTitleAlready4 = new Regex(@"^\s*'''", RegexOptions.Multiline);
         private static readonly Regex DfnTag = new Regex(@"<\s*dfn\s*>", RegexOptions.IgnoreCase);
-        private static readonly Regex NihongoTitle = Tools.NestedTemplateRegex("nihongo title");
         // bio used on it-wiki, automatically bolds link
         private static readonly Regex NoBoldTitle = Tools.NestedTemplateRegex(new[] { "year article header", "bio", "Terme défini" });
 
@@ -114,8 +113,7 @@ namespace WikiFunctions.Parse
             // 3) '''Emboldens''' the first occurrence of the article title
 
             // ignore date articles (date in American or international format), nihongo title
-            if (WikiRegexes.Dates2.IsMatch(articleTitle) || WikiRegexes.Dates.IsMatch(articleTitle)
-                || TemplateExists(alltemplates, NihongoTitle))
+            if (WikiRegexes.Dates2.IsMatch(articleTitle) || WikiRegexes.Dates.IsMatch(articleTitle))
                 return articleTextAtStart;
 
             string escTitle = Regex.Escape(articleTitle), escTitleNoBrackets = Regex.Escape(BracketedAtEndOfLine.Replace(articleTitle, ""));
