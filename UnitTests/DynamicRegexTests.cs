@@ -1092,6 +1092,7 @@ disambig|surname
 
             RegexAssert.NoMatch(WikiRegexes.Disambigs, @"{{now disambig}}");
             RegexAssert.NoMatch(WikiRegexes.Disambigs, @"{{dablink|foo}}");
+            RegexAssert.NoMatch(WikiRegexes.Disambigs, @"{{|foo}}");
             RegexAssert.Matches(@"{{dab}} <!--comm-->", WikiRegexes.Disambigs, @"{{dab}} <!--comm-->");
             RegexAssert.Matches(@"{{dab}}<!--comm-->", WikiRegexes.Disambigs, @"{{dab}}<!--comm-->
 ABC");
