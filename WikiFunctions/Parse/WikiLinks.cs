@@ -146,7 +146,7 @@ namespace WikiFunctions.Parse
             }
 
             // First check for performance, second to avoid (dodgy) apostrophe after link
-            if (wikiLinks.Any(link => link.Contains("|''")) && !articleText.Contains(@"']]'"))
+            if (wikiLinks.Any(link => link.Contains("|''") || link.Contains("| ''")) && !articleText.Contains(@"']]'"))
                 articleText = WikiRegexes.PipedWikiLink.Replace(articleText, FixLinksWikilinkBoldItalicsME);
 
             // fix excess trailing pipe, TrailingPipe regex for performance
@@ -245,14 +245,14 @@ namespace WikiFunctions.Parse
         {
             string theLinkText = m.Groups[2].Value, y = m.Value;
 
-            if (theLinkText.Length > 0 && Tools.TurnFirstToUpper(m.Groups[1].Value.Trim()).Equals(Tools.TurnFirstToUpper(m.Groups[2].Value.Trim("'".ToCharArray()).Trim())))
+            if (theLinkText.Length > 0 && Tools.TurnFirstToUpper(m.Groups[1].Value.Trim()).Equals(Tools.TurnFirstToUpper(m.Groups[2].Value.Trim().Trim("'".ToCharArray()).Trim())))
             {
-                if (WikiRegexes.Bold.Match(theLinkText).Value.Equals(theLinkText))
-                    y = "'''" + y.Replace(theLinkText, WikiRegexes.Bold.Replace(theLinkText, "$1")) + "'''";
-                else if (WikiRegexes.Italics.Match(theLinkText).Value.Equals(theLinkText))
-                    y = "''" + y.Replace(theLinkText, WikiRegexes.Italics.Replace(theLinkText, "$1")) + "''";
-                else if (WikiRegexes.BoldItalics.Match(theLinkText).Value.Equals(theLinkText))
-                    y = "'''''" + y.Replace(theLinkText, WikiRegexes.BoldItalics.Replace(theLinkText, "$1")) + "'''''";
+                if (WikiRegexes.Bold.Match(theLinkText).Value.Equals(theLinkText.Trim()))
+                    y = "'''" + y.Replace(theLinkText, WikiRegexes.Bold.Replace(theLinkText, "$1").Trim()) + "'''";
+                else if (WikiRegexes.Italics.Match(theLinkText).Value.Equals(theLinkText.Trim()))
+                    y = "''" + y.Replace(theLinkText, WikiRegexes.Italics.Replace(theLinkText, "$1").Trim()) + "''";
+                else if (WikiRegexes.BoldItalics.Match(theLinkText).Value.Equals(theLinkText.Trim()))
+                    y = "'''''" + y.Replace(theLinkText, WikiRegexes.BoldItalics.Replace(theLinkText, "$1").Trim()) + "'''''";
             }
 
             return y;

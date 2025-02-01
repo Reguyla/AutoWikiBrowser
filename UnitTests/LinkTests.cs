@@ -679,6 +679,12 @@ was [[foo|bar]] too"));
             ClassicAssert.IsFalse(nochange);
             Assert.That(Parsers.FixLinks(@"[[foo|'''''Foo''''']]", "a", out nochange), Is.EqualTo(@"'''''[[foo|Foo]]'''''"));
             ClassicAssert.IsFalse(nochange);
+            Assert.That(Parsers.FixLinks(@"[[foo|''foo'' ]]", "a", out nochange), Is.EqualTo(@"''[[foo|foo]]''"));
+            ClassicAssert.IsFalse(nochange);
+            Assert.That(Parsers.FixLinks(@"[[foo| ''foo'']]", "a", out nochange), Is.EqualTo(@"''[[foo|foo]]''"));
+            ClassicAssert.IsFalse(nochange);
+            Assert.That(Parsers.FixLinks(@"[[foo| ''foo'' ]]", "a", out nochange), Is.EqualTo(@"''[[foo|foo]]''"));
+            ClassicAssert.IsFalse(nochange);
 
             Assert.That(Parsers.FixLinks(@"[[foo|'''Foo''']] [[bar|''bar'']]", "a", out nochange), Is.EqualTo(@"'''[[foo|Foo]]''' ''[[bar|bar]]''"));
             Assert.That(Parsers.FixLinks(@"''[[foo|'''foo''']]''", "a", out nochange), Is.EqualTo(@"''[[foo|'''foo''']]''"));
