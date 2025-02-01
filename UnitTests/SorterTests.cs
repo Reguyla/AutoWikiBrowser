@@ -130,8 +130,6 @@ namespace UnitTests
         [Test]
         public void MovePersonDataTests()
         {
-            const string a = @"<!-- Metadata: see [[Wikipedia:Persondata]] -->
-";
             string b1 = @"{{Persondata
 |NAME= Hodgson, Jane Elizabeth
 |ALTERNATIVE NAMES=
@@ -152,8 +150,7 @@ namespace UnitTests
 |PLACE OF DEATH= [[Rochester, Minnesota]]
 }}";
 
-            string c1 = a + b1,
-            c2 = a + b2;
+            string c1 = b1, c2 = b2;
 
             MetaDataSorter.RemovePersonData(ref c1);
             Assert.That(c1, Is.EqualTo(""));

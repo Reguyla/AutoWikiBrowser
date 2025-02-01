@@ -654,14 +654,6 @@ en, sq, ru
                 return "";
             });
 
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Persondata_comments
-            // catch the persondata comment the line before it so that the comment and template aren't separated
-            if (articleText.Contains(WikiRegexes.PersonDataCommentEN) && Variables.LangCode.Equals("en"))
-            {
-                articleText = articleText.Replace(WikiRegexes.PersonDataCommentEN, "");
-                strPersonData = WikiRegexes.PersonDataCommentEN + strPersonData;
-            }
-
             if (!Tools.UnformattedTextNotChanged(originalArticleText, articleText))
             {
                 articleText = originalArticleText;

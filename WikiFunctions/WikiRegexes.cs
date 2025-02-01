@@ -983,25 +983,7 @@ namespace WikiFunctions
         /// Matches {{persondata}} template, or {{personendaten}} on de-wiki
         /// </summary>
         public static Regex Persondata;
-        
-        /// <summary>
-        /// The default blank Persondata template for en-wiki, from [[Template:Persondata#Usage]]
-        /// </summary>
-        public const string PersonDataDefault = @"{{Persondata
-| NAME              =
-| ALTERNATIVE NAMES =
-| SHORT DESCRIPTION =
-| DATE OF BIRTH     =
-| PLACE OF BIRTH    =
-| DATE OF DEATH     =
-| PLACE OF DEATH    =
-}}";
 
-        /// <summary>
-        /// Comment often put on the line before the Persondata template on the en-wiki
-        /// </summary>
-        public const string PersonDataCommentEN = @"<!-- Metadata: see [[Wikipedia:Persondata]] -->
-";
         /// <summary>
         /// Matches the various categories for dead people on en wiki, and the living people category
         /// </summary>
