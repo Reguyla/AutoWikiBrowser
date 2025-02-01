@@ -1154,11 +1154,10 @@ en, sq, ru
             List<string> interWikiList = new List<string>();
 
             // Performance: faster to get all wikilinks and filter on interwiki matches than simply run the regex on the whole article text
-            List<string> allWikiLinks = (from Match m in WikiRegexes.WikiLink.Matches(articleText) where m.Value.Contains(":") select m.Value + "]]").ToList();
+            var allInterwikisFound = (from Match m in WikiRegexes.WikiLink.Matches(articleText) where
+                m.Value.Contains(":") && PossibleInterwikis.Contains(m.Groups[1].Value.Substring(0, m.Groups[1].Value.IndexOf(':')).Trim().ToLower()) select m);
 
-            string allPossibleInterwikis = String.Join(" ", allWikiLinks.ToArray());
-
-            if (!(from Match m in WikiRegexes.PossibleInterwikis.Matches(allPossibleInterwikis) where PossibleInterwikis.Contains(m.Groups[1].Value.Trim().ToLower()) select m.Value).Any())
+            if (!allInterwikisFound.Any())
                 return interWikiList;
 
             // get all unformatted text in article to avoid taking interwikis from comments etc.
