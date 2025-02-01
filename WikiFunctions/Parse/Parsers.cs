@@ -1193,7 +1193,6 @@ namespace WikiFunctions.Parse
         private static readonly MetaDataSorter MDS = new MetaDataSorter();
         private static readonly Regex NobleFamilies = new Regex(@"\[\[Category:[^\[\]\|]*(([nN]oble|[Rr]oyal) families| families(\||\]\]))");
         private static readonly Regex NotAboutAPersonCategories = new Regex(@"\[\[Category:(\d{4} (establishments|animal|introductions)|.*(?:Animation|Business|Comedy|Criminal|Entertainer|Filmmaking|Tribes|Screenwriting|Sibling|Sibling musical|Sports|Writing) (duos|trios)|Articles about multiple people|Positions |Groups |Married couples|Fictional|Presidencies|Companies|Military careers|Parables of|[^\[\]\|\r\n]*(?:[Mm]usic(?:al)? groups| bands| gods| groups| troupes| nicknames| given names| pageants| teams and stables| magazines| titles| populated places)|Internet memes|[^\[\]\|\r\n]*Diaspora|Performing groups|Military animals|Collective pseudonyms|Sibling filmmakers|Surnames|Baronies)", RegexOptions.IgnoreCase);
-        private static readonly Regex CLSAR = Tools.NestedTemplateRegex(@"Infobox Chinese-language singer and actor");
         private static readonly Regex NotPersonInfoboxes = Tools.NestedTemplateRegex(new [] { "Infobox cricketer tour biography", "Infobox political party", "Infobox settlement", "italic title", "Infobox animal", "Infobox racehorse", "Infobox named horse" } );
 
         /// <summary>
@@ -1235,14 +1234,6 @@ namespace WikiFunctions.Parse
                                                     "Background", true);
 
                 if (MABackground.Contains("band") || MABackground.Contains("classical_ensemble") || MABackground.Contains("temporary"))
-                    return false;
-            }
-
-            string CLSA = CLSAR.Match(articleText).Value;
-            if (CLSA.Length > 0)
-            {
-                if (Tools.GetTemplateParameterValue(CLSA, "currentmembers").Length > 0
-                    || Tools.GetTemplateParameterValue(CLSA, "pastmembers").Length > 0)
                     return false;
             }
 
