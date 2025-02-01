@@ -1416,11 +1416,6 @@ namespace WikiFunctions
         public static readonly Regex Ibid = Tools.NestedTemplateRegex(@"Ibid");
 
         /// <summary>
-        /// Matches the {{Wikipedia books}} template
-        /// </summary>
-        public static readonly Regex WikipediaBooks = Tools.NestedTemplateRegex(new [] {"Wikipedia-Books", "wikipedia books"});
-
-        /// <summary>
         /// Matches consecutive whitespace
         /// </summary>
         public static readonly Regex WhiteSpace = new Regex(@"\s+");

@@ -340,9 +340,6 @@ en, sq, ru
                     if (TemplateExists(alltemplates, WikiRegexes.PortalTemplate))
                         articleText = MovePortalTemplates(articleText);
 
-                    if (TemplateExists(alltemplates, WikiRegexes.WikipediaBooks))
-                        articleText = MoveTemplateToSeeAlsoSection(articleText, WikiRegexes.WikipediaBooks);
-
                     if (TemplateExists(alltemplates, WikiRegexes.SisterLinks))
                         articleText = MoveSisterlinks(articleText);
 
