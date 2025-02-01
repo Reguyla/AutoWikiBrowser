@@ -632,6 +632,20 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
 Foo.(here) is a bar While remaining upright may be the primary goal of beginning riders";
             GenFixes("Foo.(here)");
             Assert.That(ArticleText, Is.EqualTo("'''Foo.(here)''' is a bar While remaining upright may be the primary goal of beginning riders"));
+            
+            ArticleText = @"{{Short description|Japanese video game developer}}
+
+{{nihongo foot|'''Treasure Co., Ltd.'''|株式会社トレジャー|''Kabushiki-gaisha Torejā''||lead=yes|group=lower-alpha}} is a Japanese
+Treasure grew a [[cult following]].";
+            for (int x =0; x <100; x++)
+            {
+                ArticleText += "Some long test to make article long enough so 5 percent rule is relevant.";
+            }
+
+            string originalArticleText = ArticleText;
+            
+            GenFixes("Treasure (company)");
+            Assert.That(ArticleText, Is.EqualTo(originalArticleText));
         }
 
         [Test]
