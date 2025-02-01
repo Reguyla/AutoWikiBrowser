@@ -1858,10 +1858,10 @@ bar
         [Test]
         public void WikiProjectBannerShellUnneededParams()
         {
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=no|activepol=no|collapsed=no|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=no}}"), "Retain blp=no");
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=no|activepol=no|collapsed=yes|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=no|collapsed=yes}}"), "Retain blp=no");
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProjectBanners|activepol=no|collapsed=no|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell}}"));
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProjectBanners|activepol=no|collapsed=yes|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|collapsed=yes}}"));
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=no|collapsed=no|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=no}}"), "Retain blp=no");
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=no|collapsed=yes|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=no|collapsed=yes}}"), "Retain blp=no");
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProjectBanners|collapsed=no|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell}}"));
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProjectBanners|collapsed=yes|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|collapsed=yes}}"));
         }
         
         [Test]
@@ -1871,7 +1871,6 @@ bar
 
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=|1={{WPBiography|foo=bar|living=yes}}}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=yes|1={{WPBiography|foo=bar|living=yes}}}}"), "appends blp=yes to WPBS");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=|1={{WikiProject Biography|foo=bar|living=yes}}}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=yes|1={{WikiProject Biography|foo=bar|living=yes}}}}"), "appends blp=yes to WPBS");
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|activepol=abc|1={{WPBiography|foo=bar|activepol=yes}}}}"), Is.EqualTo(@"{{WikiProject banner shell|activepol=yes|1={{WPBiography|foo=bar|activepol=yes}}}}"), "ignores invalid values");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blpo=|1={{WPBiography|foo=bar|blpo=yes}}}}"), Is.EqualTo(@"{{WikiProject banner shell|blpo=yes|1={{WPBiography|foo=bar|blpo=yes}}}}"), "appends blpo=yes to WPBS");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blpo=|1={{WPBiography|foo=bar|blpo=no}}}}"), Is.EqualTo(@"{{WikiProject banner shell|blpo=|1={{WPBiography|foo=bar|blpo=no}}}}"));
 
@@ -1898,16 +1897,6 @@ bar
 {{WikiProject bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|1={{WikiProject foo}}
 {{WikiProject bar}}
 {{WikiProject Biography|living=yes|foo=bar}} | blp=yes}}"), "WikiProjects pulled into WPBS, WPBIO contains living=yes");
-
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject Biography|activepol=yes|foo=bar}}{{WikiProject banner shell|1={{WikiProject foo}}
-{{WikiProject bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|1={{WikiProject foo}}
-{{WikiProject bar}}
-{{WikiProject Biography|activepol=yes|foo=bar}} | activepol=yes}}"), "WikiProjects pulled into WPBS, WPBIO contains activepol=yes");
-
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject Biography|living=yes|activepol=yes|foo=bar}}{{WikiProject banner shell|1={{WikiProject foo}}
-{{WikiProject bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|1={{WikiProject foo}}
-{{WikiProject bar}}
-{{WikiProject Biography|living=yes|activepol=yes|foo=bar}} | blp=yes | activepol=yes}}"), "WikiProjects pulled into WPBS, WPBIO contains living, activepol=yes");
 
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject bar}}
 
@@ -1963,16 +1952,6 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a + "{{BLP others}}"), Is.EqualTo(a), "removes redundant banner");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a.Replace("blpo=yes", "blpo=") + "{{Blpo}}"), Is.EqualTo(a), "empty parameter in WPBS");
             Assert.That(TalkPageFixes.WikiProjectBannerShell("{{Blpo}}"), Is.EqualTo("{{Blpo}}"));
-        }
-        
-        [Test]
-        public void WikiProjectBannerShellActivepol()
-        {
-            const string a = @"{{WikiProject banner shell|activepol=yes|1={{WPBiography|foo=bar|activepol=yes}}}}";
-
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(a + "{{Activepol}}"), Is.EqualTo(a), "removes redundant banner");
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(a.Replace("activepol=yes|", "activepol=|") + "{{activepol}}"), Is.EqualTo(a), "empty parameter in WPBS");
-            Assert.That(TalkPageFixes.WikiProjectBannerShell("{{activepol}}"), Is.EqualTo("{{activepol}}"));
         }
         
         [Test]
@@ -2053,21 +2032,6 @@ bar
             Assert.That(TalkPageFixes.WPBiography(c + @"{{blp}}"), Is.EqualTo(c + @"{{blp}}"), "no change when not living");
 
             Assert.That(TalkPageFixes.WPBiography(a + @"{{blp}}"), Is.EqualTo(a), "blp template removed when living=y");
-        }
-        
-        [Test]
-        public void WPBiographyBLPActivepol()
-        {
-            string a = @"{{WPBiography}}";
-
-            Assert.That(TalkPageFixes.WPBiography(a + @"{{blp}}"), Is.EqualTo(a.Replace(@"}}", " | living=yes}}")), "Add blp to WPBiography");
-            Assert.That(TalkPageFixes.WPBiography(a.Replace(@"}}", " |living=}}") + @"{{blp}}"), Is.EqualTo(a.Replace(@"}}", " |living=yes}}")), "Add value to empty parameter");
-            Assert.That(TalkPageFixes.WPBiography(a.Replace(@"}}", "|living=no}}") + @"{{blp}}"), Is.EqualTo(a.Replace(@"}}", "|living=no}}" + @"{{blp}}")), "No change if blp=yes and living=no");
-            Assert.That(TalkPageFixes.WPBiography(a + @"{{activepol}}"), Is.EqualTo(a.Replace(@"}}", " | living=yes | activepol=yes | politician-work-group=yes}}")), "Add activepol to WPBiography");
-            Assert.That(TalkPageFixes.WPBiography(a + @"{{active politician}}"), Is.EqualTo(a.Replace(@"}}", " | living=yes | activepol=yes | politician-work-group=yes}}")), "Add activepol via redirect to WPBiography");
-            Assert.That(TalkPageFixes.WPBiography(a.Replace(@"}}", " |activepol=}}") + @"{{activepol}}"), Is.EqualTo(a.Replace(@"}}", " |activepol= yes| living=yes | politician-work-group=yes}}")), "Add value to empty parameter");
-            Assert.That(TalkPageFixes.WPBiography(a.Replace(@"}}", " |activepol=no}}") + @"{{activepol}}"), Is.EqualTo(a.Replace(@"}}", " |activepol=yes | living=yes | politician-work-group=yes}}")), "Change value to activepol no nonsense parameter");
-            Assert.That(TalkPageFixes.WPBiography(a + @"{{blp}}{{activepol}}"), Is.EqualTo(a.Replace(@"}}", " | living=yes | activepol=yes | politician-work-group=yes}}")), "Add activepol and blp to WPBiography");
         }
 
         [Test]

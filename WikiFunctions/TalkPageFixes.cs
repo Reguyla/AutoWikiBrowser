@@ -350,10 +350,9 @@ namespace WikiFunctions.TalkPages
         }
 
         private static readonly List<string> BannerShellRedirects = new List<string>(new[] { "Article assessment", "banner shell", "Bannershell", "Coopshell", "Multiple wikiprojects", "Project banner holder", "Project shell", "Scope shell", "WikiProject banner", "Wikiproject banner holder", "Wikiprojectbanners", "WikiProject Banners", "WikiProjectBanners", "Wikiprojectbannershell", "WikiprojectBannerShell", "WikiProject bannershell", "WikiProject Banner Shell", "WikiProject BannerShell", "WikiProjectBanner Shell", "WikiProjectBannerShell", "WikiProject Banners Shell", "WikiProject cooperation shell", "WikiProject shell", "WikiProject Shell", "Wpb", "WPB", "Wpbannershell", "WP banner shell", "WP Banner Shell", "WPBannerShell", "Wpbs", "WPBS" });
-        private static readonly List<string> Nos = new List<string>(new[] { "blpo", "activepol" });
+        private static readonly List<string> Nos = new List<string>(new[] { "blpo" });
         private static readonly Regex BLPRegex = Tools.NestedTemplateRegex(new[] { "blp", "BLP", "Blpinfo" });
         private static readonly Regex BLPORegex = Tools.NestedTemplateRegex(new[] { "blpo", "BLPO", "BLP others" });
-        private static readonly Regex ActivepolRegex = Tools.NestedTemplateRegex(new[] { "activepol", "active politician", "activepolitician" });
         private static readonly Regex WPBiographyR = Tools.NestedTemplateRegex(new[] { "WPBiography", "Wikiproject Biography", "WikiProject Biography", "WPBIO", "Bio" });
         private static readonly Regex WPSongsR = Tools.NestedTemplateRegex(new[] { "WikiProject Songs", "WikiProjectSongs", "WP Songs", "Song", "WPSongs", "Songs", "WikiProject Song" });
         private static readonly Regex WPJazzR = Tools.NestedTemplateRegex(new[] { "WikiProject Jazz", "WPJAZZ", "WPJazz", "WP Jazz", "Wikiproject Jazz", "WikiProject Jazz music", "Jazz-music-project" });
@@ -409,7 +408,7 @@ namespace WikiFunctions.TalkPages
                 // remove duplicate parameters
                 newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
 
-                // clean blp=no, blpo=no, activepol=no, collapsed=no
+                // clean blp=no, blpo=no, collapsed=no
                 foreach (string theNo in Nos)
                 {
                     if (Tools.GetTemplateParameterValue(newValue, theNo).Equals("no"))
@@ -437,14 +436,6 @@ namespace WikiFunctions.TalkPages
                     newValue = Tools.SetTemplateParameterValue(newValue, "blp", "yes");
                     articletext = articletext.Replace(blpm.Value, "");
                 }
-
-                // If {{activepol}} then add activepol=yes to WPBS and remove {{activepol}}
-                Match activepolm = ActivepolRegex.Match(articletext);
-                if (activepolm.Success)
-                {
-                    newValue = Tools.SetTemplateParameterValue(newValue, "activepol", "yes");
-                    articletext = articletext.Replace(activepolm.Value, "");
-                }
                                 
                 // merge changes to article text
                 if (!newValue.Equals(m.Value))
@@ -469,7 +460,7 @@ namespace WikiFunctions.TalkPages
                     articletext = articletext.Replace(WPBS, Tools.SetTemplateParameterValue(WPBS, "1", Tools.GetTemplateParameterValue(WPBS, "1") + newParams)).TrimStart();
             }
             
-            // check living, activepol, blpo flags against WPBiography
+            // check living, blpo flags against WPBiography
             foreach (Match m in WikiRegexes.WikiProjectBannerShellTemplate.Matches(articletext))
             {
                 string newValue = m.Value;
@@ -488,15 +479,6 @@ namespace WikiFunctions.TalkPages
                     {
                         if (Tools.GetTemplateParameterValue(newValue, "blp").Equals("yes"))
                             newValue = Tools.RemoveTemplateParameter(newValue, "blp");
-                    }
-
-                    string activepolParam = Tools.GetTemplateParameterValue(WPBiographyCall, "activepol");
-                    if (activepolParam.Equals("yes"))
-                        newValue = Tools.SetTemplateParameterValue(newValue, "activepol", "yes");
-                    else if (activepolParam.Equals("no"))
-                    {
-                        if (Tools.GetTemplateParameterValue(newValue, "activepol").Equals("yes"))
-                            newValue = Tools.RemoveTemplateParameter(newValue, "activepol");
                     }
 
                     if (Tools.GetTemplateParameterValue(WPBiographyCall, "blpo").Equals("yes"))
@@ -529,17 +511,6 @@ namespace WikiFunctions.TalkPages
             {
                 string newvalue = m.Value;
                 
-                // If {{activepol}} then add living=yes, activepol=yes, politician-work-group=yes to WPBiography and remove {{activepol}}
-                Match activepolm = ActivepolRegex.Match(articletext);
-                if (activepolm.Success)
-                {
-                    newvalue = Tools.SetTemplateParameterValue(newvalue, "living", "yes");
-                    newvalue = Tools.SetTemplateParameterValue(newvalue, "activepol", "yes");
-                    newvalue = Tools.SetTemplateParameterValue(newvalue, "politician-work-group", "yes");
-                    
-                    articletext = ActivepolRegex.Replace(articletext, "");
-                }
-                
                 // If {{BLP}} then add living=yes to WPBiography and remove {{BLP}}
                 Match blpm = BLPRegex.Match(articletext);
                 if (blpm.Success & !Tools.GetTemplateParameterValue(newvalue, "living").ToLower().StartsWith("n"))
@@ -560,9 +531,6 @@ namespace WikiFunctions.TalkPages
             
             // remove {{blp}} if {{WPBiography|living=yes}}
             articletext = BLPRegex.Replace(articletext, "");
-            
-            // remove {{activepol}} if {{WPBiography|activepol=yes}}
-            articletext = ActivepolRegex.Replace(articletext, "");
             
             // move above any other WikiProject
             if (!WikiRegexes.WikiProjectBannerShellTemplate.IsMatch(articletext))
