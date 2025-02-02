@@ -289,7 +289,7 @@ namespace WikiFunctions.Parse
             // nl wiki doesn't use {{Uncategorized}} template
             // prevent wictionary redirects from being tagged as uncategorised
             if (totalCategories == 0
-                && !WikiRegexes.Uncat.IsMatch(templates)
+                && !WikiRegexes.Uncategorized.IsMatch(templates)
                 && !Variables.LangCode.Equals("nl")
                 && !Variables.IsWikia)
             {
@@ -392,11 +392,11 @@ namespace WikiFunctions.Parse
             }
 
             // remove {{Uncategorized}} if > 0 real categories (stub categories not counted)
-            if (WikiRegexes.Uncat.IsMatch(templates))
+            if (WikiRegexes.Uncategorized.IsMatch(templates))
             {
                 if (totalCategories > 0)
                 {
-                    articleText = WikiRegexes.Uncat.Replace(articleText, "").TrimStart();
+                    articleText = WikiRegexes.Uncategorized.Replace(articleText, "").TrimStart();
                     if (Variables.LangCode.Equals("ar"))
                         tagsRemoved.Add("غير مصنفة");
                     else if (Variables.LangCode.Equals("arz"))
@@ -411,7 +411,7 @@ namespace WikiFunctions.Parse
                 {
                     // rename uncat to uncat stub if no uncat stub. If uncat and uncat stub, remove uncat.
                     bool uncatstub = false;
-                    foreach (Match u in WikiRegexes.Uncat.Matches(articleText))
+                    foreach (Match u in WikiRegexes.Uncategorized.Matches(articleText))
                     {
                         if (WikiRegexes.Stub.IsMatch(u.Value))
                         {
@@ -420,7 +420,7 @@ namespace WikiFunctions.Parse
                         }
                     }
 
-                    articleText = WikiRegexes.Uncat.Replace(articleText, u2 =>
+                    articleText = WikiRegexes.Uncategorized.Replace(articleText, u2 =>
                     {
                         if (!uncatstub) // rename
                         {

@@ -64,7 +64,7 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text), "page is deadend");
             ClassicAssert.IsFalse(text.Contains("Underlinked"));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text), "page is stub");
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text), "page is uncategorised");
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text), "page is uncategorised");
 
             // uncat when not a stub
             Globals.UnitTestIntValue = 0;
@@ -75,7 +75,7 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
 
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text));
             ClassicAssert.IsFalse(text.Contains(UncatStub));
 
             // stub already marked uncat
@@ -157,16 +157,16 @@ namespace UnitTests
 
             Globals.UnitTestIntValue = 4;
             text = parser.Tagger("{{uncategorised}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger("{{uncategorised|date=January 2009}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger("{{uncategorised|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger("{{uncategorised|date=January 2009}} {{foo}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text), "Uncat removed even if other template present");
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text), "Uncat removed even if other template present");
 
             Globals.UnitTestIntValue = 0;
             text = parser.Tagger(ShortText + @"{{dead end}}
@@ -314,7 +314,7 @@ namespace UnitTests
             // Not a stub
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text));
 
             ClassicAssert.IsFalse(text.Contains(UncatStub));
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
@@ -325,7 +325,7 @@ namespace UnitTests
 
             // rename {{improve categories}} if uncategorized
             text = parser.Tagger(ShortText + ShortText + @"{{improve categories}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text));
             ClassicAssert.IsFalse(Tools.NestedTemplateRegex("improve categories").IsMatch(text));
 
             // with categories and no links, Deadend not removed
@@ -333,7 +333,7 @@ namespace UnitTests
             text = parser.Tagger(Deadend + ShortText, "Test", false, out noChange, ref summary);
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             Globals.UnitTestIntValue = 5;
 
@@ -344,7 +344,7 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
 
             ClassicAssert.IsFalse(text.Contains(UncatStub));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger(ShortText + ShortText, "Test", false, out noChange, ref summary);
             // Categorised Page
@@ -353,7 +353,7 @@ namespace UnitTests
 
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
             ClassicAssert.IsFalse(text.Contains(UncatStub));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             Globals.UnitTestBoolValue = false;
 
@@ -365,7 +365,7 @@ namespace UnitTests
 
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             ClassicAssert.IsFalse(text.Contains(UncatStub));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger(ShortText + ShortText, "Test", false, out noChange, ref summary);
             // Non orphan categorised page
@@ -375,7 +375,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             ClassicAssert.IsFalse(text.Contains(UncatStub));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger(ShortText.Replace("consectetur", "[[consectetur]]"), "Test", false, out noChange, ref summary);
             // Non Deadend stub
@@ -385,7 +385,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             ClassicAssert.IsFalse(text.Contains(UncatStub));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger(Regex.Replace(ShortText, @"(\w+)", "[[$1]]"), "Test", false, out noChange, ref summary);
             // very wikified stub
@@ -394,7 +394,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             ClassicAssert.IsFalse(text.Contains(UncatStub));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             Globals.UnitTestBoolValue = false;
 
@@ -419,12 +419,12 @@ namespace UnitTests
             // {{improve categories}} --> {{uncat}} if no cats
             Globals.UnitTestIntValue = 0;
             text = parser.Tagger(@"{{improve categories}}\r\n" + ShortText, "Test", false, out noChange, ref summary);
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text));
 
             // Do not add underlinked if page is small with a single wikilink
             Globals.UnitTestIntValue = 0;
             text = parser.Tagger(ShortTextWithSingleLink, "Test", false, out noChange, ref summary);
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text), "uncat");
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text), "uncat");
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text), "Stub");
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text), "underlinked");
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "deadend");
@@ -435,7 +435,7 @@ namespace UnitTests
             Globals.UnitTestIntValue = 1;
             text = parser.Tagger(ShortText + ShortText + @"[[Category:Living people]]", "Test", false, out noChange, ref summary);
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
         }
 
         [Test]
@@ -625,7 +625,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "deadend");
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "orphan");
             ClassicAssert.IsFalse(text.Contains(UncatStub), "english uncatstub");
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text), "uncat");
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text), "uncat");
 
             text = parser.Tagger(Regex.Replace(ShortText, @"(\w+)", "[[$1]]"), "Test", false, out noChange, ref summary);
             // very wikified stub
@@ -634,7 +634,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "deadend");
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "orphan");
             ClassicAssert.IsFalse(text.Contains(UncatStub), "english uncatstub");
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(text), "uncat");
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(text), "uncat");
 
             // dead end plus orphan but one wikilink: dead end --> orphan
             text = parser.Tagger(@"{{نهاية مسدودة|تاريخ=نوفمبر 2013}}
@@ -737,7 +737,7 @@ namespace UnitTests
 
             text = parser.Tagger(ShortText + "{{Underlinked}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "page is deadend");
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text), "uncat");
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text), "uncat");
             Globals.UnitTestBoolValue = false;
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
             #endif
@@ -852,16 +852,16 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             Globals.UnitTestIntValue = 4;
             text = parser.Tagger("{{uncategorised}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger("{{uncategorised|date=January 2009}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger("{{uncategorised|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger("{{uncategorised|date=January 2009}} {{foo}}", "Test", false, out noChange, ref summary);
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(text), "Uncat removed even if other template present");
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text), "Uncat removed even if other template present");
         }
 
         [Test]

@@ -733,9 +733,9 @@ namespace WikiFunctions.Parse
                 return YearOfBirthDeathMissingCategory(articleTextBefore, cats);
 
             // {{uncat}} --> {{Improve categories}} if we've added cats
-            if (WikiRegexes.Category.Matches(articleText).Count > catCount && WikiRegexes.Uncat.IsMatch(articleText)
+            if (WikiRegexes.Category.Matches(articleText).Count > catCount && WikiRegexes.Uncategorized.IsMatch(articleText)
                 && !WikiRegexes.CatImprove.IsMatch(articleText))
-                articleText = Tools.RenameTemplate(articleText, Tools.GetTemplateName(WikiRegexes.Uncat.Match(articleText).Value), "Improve categories");
+                articleText = Tools.RenameTemplate(articleText, Tools.GetTemplateName(WikiRegexes.Uncategorized.Match(articleText).Value), "Improve categories");
 
             return YearOfBirthDeathMissingCategory(articleText, GetCats(articleText));
         }

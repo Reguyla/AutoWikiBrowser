@@ -935,84 +935,84 @@ now stubborn}}");
         [Test]
         public void UncatTests()
         {
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Uncat|date=January 2009}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{uncategorised|date=May 2008}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Uncategorised|date=May 2008}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Uncategorisedstub|date=May 2008}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Uncategorisedstub|date = May 2008}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{uncategorised|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncat|date=January 2009}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorised|date=May 2008}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorised|date=May 2008}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorisedstub|date=May 2008}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorisedstub|date = May 2008}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorised|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
             
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.Match(@"{{Uncat}}").Groups[2].Value.Equals("Uncat"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.Match(@"{{Uncat}}").Groups[2].Value.Equals("Uncat"));
 
             // all the other redirects
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{+cat}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categories missing}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categories needed}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categories requested}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categorise}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categorízame}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categorize}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Category needed}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Categoryneeded}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Category requested}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Cat needed}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Catneeded}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{CatNeeded}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Cats needed}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Missing categories}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Ncat}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Needs cat}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Needs categories}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Needs cats}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Noc}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Nocat}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{No categories}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{No category}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Nocategory}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{nocats}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{No cats}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Nocats}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncat}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncategorised}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncategorised stub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncategorisedstub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncategorized stub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncategorizedstub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncat stub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncat-stub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch("{{Uncatstub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{+cat}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categories missing}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categories needed}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categories requested}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categorise}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categorízame}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categorize}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Category needed}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Categoryneeded}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Category requested}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Cat needed}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Catneeded}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{CatNeeded}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Cats needed}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Missing categories}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Ncat}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Needs cat}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Needs categories}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Needs cats}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Noc}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Nocat}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{No categories}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{No category}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Nocategory}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{nocats}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{No cats}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Nocats}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncat}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncategorised}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncategorised stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncategorisedstub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncategorized stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncategorizedstub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncat stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncat-stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{Uncatstub}}"));
 
             // no match
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(@"{{Uncategorized other template}}"));
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(@"{{Uncategorized other template|foo=bar}}"));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized other template}}"));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized other template|foo=bar}}"));
 
             // language variation
             #if DEBUG
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
 
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{okategoriserad}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{okategoriserad|datum=May-2013}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{okategoriserad|datum={{subst:CURRENTYEAR}}-{{subst:CURRENTMONTH}}}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Okategoriserad}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{uncategorizedstub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{uncategorized stub}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Uncategorised}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{Uncategorized}}"));
-            Assert.That(WikiRegexes.Uncat.Match(@"{{okategoriserad}}").Groups[1].Value, Is.EqualTo("okategoriserad"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{okategoriserad}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{okategoriserad|datum=May-2013}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{okategoriserad|datum={{subst:CURRENTYEAR}}-{{subst:CURRENTMONTH}}}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Okategoriserad}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorizedstub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorized stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorised}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
+            Assert.That(WikiRegexes.Uncategorized.Match(@"{{okategoriserad}}").Groups[1].Value, Is.EqualTo("okategoriserad"));
 
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
 
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{غير مصنف}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{غير مصنفة}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{بذرة غير مصنفة}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{غير مصنف}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{غير مصنفة}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{بذرة غير مصنفة}}"));
 
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
 
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{مش متصنفه}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Uncat.IsMatch(@"{{تقاوى مش متصنفه}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{مش متصنفه}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{تقاوى مش متصنفه}}"));
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();

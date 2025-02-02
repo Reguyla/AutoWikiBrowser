@@ -1555,7 +1555,7 @@ b = @"A
 {{reflist}}
 {{Uncategorized}}";
             Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.EqualTo(@"{{Uncategorized}}" + "\r\n"), "uncat moved");
-            ClassicAssert.IsFalse(WikiRegexes.Uncat.IsMatch(at));
+            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(at));
             at = @"Text.
 
 <!--{{Uncategorized}}-->

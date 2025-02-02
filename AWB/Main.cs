@@ -5754,7 +5754,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 txtEdit.Text += "\r\n\r\n[[" + _catName.CategoryName + "]]";
 
                 // remove any {{uncategorised}} tag now – tagger still counts categories based on saved page revision
-                txtEdit.Text = WikiRegexes.Uncat.Replace(txtEdit.Text, "");
+                txtEdit.Text = WikiRegexes.Uncategorized.Replace(txtEdit.Text, "");
 
                 ReparseEditBox();
             }
