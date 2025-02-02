@@ -471,6 +471,10 @@ y";
         public void FixCitationTemplates()
         {
             AssertNotChanged(@"* {{cite book |editor1-first=T |editor1-last=C |title=A |edition=E |publisher=M |page=7-124<!--HYPHEN PAGE--> }}", "Text", "No change to hyphen in page when comment");
+
+            AssertNotChanged(@"{{Infobox settlement
+<!--See the Table at Infobox Settlement for all fields and descriptions of usage-->
+<!-- Basic info  ---------------->| name = Z}}", "ABC", "Template with newline, comment, newline in name");
         }
         
         [Test]

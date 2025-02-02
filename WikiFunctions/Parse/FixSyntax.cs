@@ -235,8 +235,20 @@ namespace WikiFunctions.Parse
 
             // removal of Unicode non-breaking space or newlines in template name
             List<string> templatesWithUnicodeNonBreakingSpaceOrNewline =
-                alltemplatesDetail.Where(tc => tc.Contains("\u00a0") || tc.Contains("\u3000") ||
-                                               (tc.Contains("|") && tc.Substring(0, tc.IndexOf('|')).Contains("\r\n"))).Select(tc => Tools.GetTemplateName(tc)).ToList();
+                alltemplatesDetail.Where(tc =>
+                {
+                    if (tc.Contains("\u00a0") || tc.Contains("\u3000"))
+                        return true;
+
+                    // check template call up to first bar for newline, but if have wiki comment will be hidden so ignore if have hidetext character
+                    if (tc.Contains("|"))
+                    {
+                        string toFirstBar = tc.Substring(0, tc.IndexOf('|'));
+                        return toFirstBar.Contains("\r\n") && !toFirstBar.Contains("⌊⌊⌊⌊");
+                    }
+
+                    return false;
+                }).Select(tc => Tools.GetTemplateName(tc)).ToList();
             
             foreach (var t in templatesWithUnicodeNonBreakingSpaceOrNewline)
                 articleText = Tools.RenameTemplate(articleText, t, t, true);
