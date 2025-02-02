@@ -27,6 +27,9 @@ namespace WikiFunctions
     /// </summary>
     public static class WikiRegexes
     {
+        /// <summary>
+        /// Make namespace-related regexes such as Category, Template with each wiki's localised terms
+        /// </summary>
         private static void MakeNamespaceSpecificRegexes()
         {
             NamespacesCaseInsensitive = new Dictionary<int,Regex>();
@@ -119,7 +122,10 @@ namespace WikiFunctions
             EmptyLink = new Regex(@"\[\[\s*(?:(:?" + category + "|" + image + @")\s*:?\s*(\|.*?)?|[|\s]*)\]\]");
             EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
         }
-
+        
+        /// <summary>
+        /// Makes regexes for en-wiki, which act as the default unless language-specific regexes override them
+        /// </summary>
         private static void MakeEnLangRegexes()
         {
             DateYearMonthParameter = @"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
@@ -156,6 +162,9 @@ namespace WikiFunctions
             SeeAlso = new Regex(@"(==+)\s*see +also\s*\1", RegexOptions.IgnoreCase);
         }
         
+        /// <summary>
+        /// Creates the regex for DEFAULTSORT template, using lang-specific defaultsort magic keyword where available
+        /// </summary>
         private static void MakeDefaultSortRegex()
         {
             List<string> magic;
@@ -181,7 +190,6 @@ namespace WikiFunctions
         {
             MakeNamespaceSpecificRegexes();
             MakeEnLangRegexes();
-            
             MakeDefaultSortRegex();
 
             // set orphan, wikify, uncat, disambiguation, inuse templates, date parameter & Link FA/GA/GL strings
