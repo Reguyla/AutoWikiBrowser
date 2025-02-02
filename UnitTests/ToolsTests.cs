@@ -2039,13 +2039,14 @@ title={{abc|fdkjdsfjk=fdaskjlfds
 
             ClassicAssert.IsFalse(FooTemplate2.IsMatch(@"{{foo}}"));
             ClassicAssert.IsFalse(FooTemplate2.IsMatch(@"{{foo b_ar}}"));
-            ClassicAssert.IsFalse(FooTemplate2.IsMatch(@"{{foo
-bar|text}}"));
             ClassicAssert.IsFalse(Tools.NestedTemplateRegex("birth date").IsMatch(@"{{birth-date|May 11, 1980}}"));
 
             string nonbreakingspace = "\u00a0";
             ClassicAssert.IsTrue(FooTemplate2.IsMatch("{{Foo" + nonbreakingspace + "bar}}"));
             ClassicAssert.IsTrue(Regex.IsMatch("{{Foo" + nonbreakingspace + "bar}}", @"\u00a0"));
+            nonbreakingspace = "\u3000";
+            ClassicAssert.IsTrue(FooTemplate2.IsMatch("{{Foo" + nonbreakingspace + "bar}}"));
+            ClassicAssert.IsTrue(Regex.IsMatch("{{Foo" + nonbreakingspace + "bar}}", @"\u3000"));
         }
 
         [Test]

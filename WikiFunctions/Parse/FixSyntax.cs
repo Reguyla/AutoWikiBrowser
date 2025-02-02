@@ -233,11 +233,12 @@ namespace WikiFunctions.Parse
             if (alltemplatesDetail.Any(t => Regex.IsMatch(t, Variables.NamespacesCaseInsensitive[Namespace.Template])))
                 articleText = RemoveTemplateNamespace(articleText);
 
-            // removal of Unicode non-breaking space in template name
-            List<string> templatesWithUnicodeNonBreakingSpace =
-                alltemplatesDetail.Where(tc => tc.Contains("\u00a0")).Select(tc => Tools.GetTemplateName(tc)).ToList();
+            // removal of Unicode non-breaking space or newlines in template name
+            List<string> templatesWithUnicodeNonBreakingSpaceOrNewline =
+                alltemplatesDetail.Where(tc => tc.Contains("\u00a0") || tc.Contains("\u3000") ||
+                                               (tc.Contains("|") && tc.Substring(0, tc.IndexOf('|')).Contains("\r\n"))).Select(tc => Tools.GetTemplateName(tc)).ToList();
             
-            foreach (var t in templatesWithUnicodeNonBreakingSpace)
+            foreach (var t in templatesWithUnicodeNonBreakingSpaceOrNewline)
                 articleText = Tools.RenameTemplate(articleText, t, t, true);
 
             if (SyntaxRegexBrNewline.IsMatch(articleText))

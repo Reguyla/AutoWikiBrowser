@@ -3208,7 +3208,7 @@ Message: {2}
 
             foreach (string name in templateNames)
             {
-                string name2 = Regex.Escape(name.Trim().Replace('_', ' ')).Replace(@"\ ", @"[_ \u00a0]+");
+                string name2 = Regex.Escape(name.Trim().Replace('_', ' ')).Replace(@"\ ", @"[_\s]+");
                 theRegex.Append(FirstLetterCaseInsensitive(name2));
                 theRegex.Append("|");
             }

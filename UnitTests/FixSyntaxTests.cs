@@ -330,10 +330,20 @@ foo}}"));
             Assert.That(Parsers.FixSyntax(@"{{Template:foo
 |bar=yes}}"), Is.EqualTo(@"{{foo
 |bar=yes}}"));
-
+        }
+        [Test]
+        public void FixSyntaxTemplateWhitespace()
+        {
             string nonbreakingspace = "\u00a0";
             string templateCallWithNonBreakingSpace = "{{Foo" + nonbreakingspace + "one|1=yes}}";
             Assert.That(Parsers.FixSyntax(templateCallWithNonBreakingSpace), Is.EqualTo(@"{{Foo one|1=yes}}"), "Unicode non-breaking space clean from template name");
+            nonbreakingspace = "\u3000";
+            templateCallWithNonBreakingSpace = "{{Foo" + nonbreakingspace + "one|1=yes}}";
+            Assert.That(Parsers.FixSyntax(templateCallWithNonBreakingSpace), Is.EqualTo(@"{{Foo one|1=yes}}"), "Unicode IDEOGRAPHIC SPACE clean from template name");
+            Assert.That(Parsers.FixSyntax(@"{{foo 
+bar|val=one}}"), Is.EqualTo(@"{{foo bar|val=one}}"));
+            Assert.That(Parsers.FixSyntax(@"{{Foo 
+bar|val=one}}"), Is.EqualTo(@"{{Foo bar|val=one}}"));
         }
 
         [Test]
