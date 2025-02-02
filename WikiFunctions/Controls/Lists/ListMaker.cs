@@ -849,7 +849,7 @@ namespace WikiFunctions.Controls.Lists
         {
             // Pipe character is a separator for standard searches e.g. foo|bar to search for foo or bar by doing two searches
             // However in a source search like insource:/\|last=Smitherson/ the pipe isn't a search separator, so don't split on | for insource
-            if (UserInputTextBox.Text.Contains ("|") && !(UserInputTextBox.Text.StartsWith("insource:", StringComparison.OrdinalIgnoreCase)))
+            if (UserInputTextBox.Text.Contains ("|") && !(UserInputTextBox.Text.Contains("insource:/")))
                 MakeList((IListProvider)cmboSourceSelect.SelectedItem, UserInputTextBox.Text.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
             else
                 MakeList((IListProvider)cmboSourceSelect.SelectedItem, new[] { UserInputTextBox.Text });
