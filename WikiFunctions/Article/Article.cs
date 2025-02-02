@@ -1564,7 +1564,7 @@ namespace WikiFunctions
             SetDefaultSort(Variables.LangCode, skip.SkipNoDefaultSortAdded, restrictDefaultsortAddition);
             Variables.Profiler.Profile("SetDefaultSort");
             
-            // pass unhidden text to MetaDataSorter so that it can allow for comments around persondata, categories etc.
+            // pass unhidden text to MetaDataSorter so that it can allow for comments around categories etc.
             AWBChangeArticleText("Sort meta data",
                                  parsers.SortMetaData(ArticleText, Name), true);
 

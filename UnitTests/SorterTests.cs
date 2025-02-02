@@ -159,7 +159,7 @@ namespace UnitTests
             MetaDataSorter.RemovePersonData(ref b1);
             Assert.That(b1, Is.EqualTo(""));
 
-            const string d1 = @"{{Persondata<!-- Metadata: see [[Wikipedia:Persondata]] -->
+            const string d1 = @"{{Persondata
 |NAME= Becker, Gary
 |ALTERNATIVE NAMES=
 |SHORT DESCRIPTION= [[Economics|Economist]]
