@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace WikiFunctions
 {
@@ -123,6 +124,8 @@ namespace WikiFunctions
             EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
         }
         
+        private const string DisambigTemplatesEN = @"((?:[Nn]umber|[Hh]ospital|[Gg]eo|[Hh]n|[Ss]chool)(?:-)?dis|([Ss]pecies|)LatinNameDisambig|[[Aa]irport disambig(?:uation)?|[Cc]all sign disambiguation|[Cc]allsigndis|[Cc]hinese title disambig(uation)?|[Dd]ab|[Dd]isamb(?:ig(?:uation)?)?|[Dd]isambig-cleanup|[Dd]isambiguation with potential|[Dd]is|[Dd]isambiguation cleanup|[Gg]enus disambig(uation)?|[Hh]ndis|[Hh]ndis(?:-cleanup)?|[Hh]ospital disambiguation|[Hh]uman name disambiguation|[Hh]urricane season disambiguation|[Ll]etter-disambig|[Ll]etter-Number Combination Disambiguation|[Ll]etter–number combination disambiguation|[Ll]etter-NumberComb[Dd]isambig|[Mm]athdab|[Mm]athematic(?:al|s) disambiguation|[Mm]il-unit-dis|[Mm]ilitary unit disambiguation|[Mm]olecular formula disambiguation|[Mm]olFormDisambig|[Nn]umber disambiguation|[Pp]lace name disambiguation|[Rr]oad disambiguation|[Ss]chool disambiguation|[Ss]pecies Latin name(?: abbreviation)? disambiguation|[Ss]tation disambiguation|[Tt]axonomy disambiguation|[Ww]oO number disambiguation)";
+        
         /// <summary>
         /// Makes regexes for en-wiki, which act as the default unless language-specific regexes override them
         /// </summary>
@@ -145,7 +148,6 @@ namespace WikiFunctions
             Wikify = new Regex(@"(?:{{\s*(?:Wikify|Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}}|({{\s*(?:Article|Multiple)\s*issues\b[^{}]*?)\|\s*(?:wikify|underlinked)\s*=\s*(?:{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}|[^{}\|]+))", RegexOptions.IgnoreCase);
             InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
             LinkFGAs =  Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
-       //     DisambigString = DisambigTemplatesEN;
             ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
             Persondata = Tools.NestedTemplateRegex("persondata");
             SIAs = Tools.NestedTemplateRegex(new[]
@@ -160,6 +162,7 @@ namespace WikiFunctions
             });
             ExternalLinksHeader = new Regex(@"== *External +links? *==", RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
             SeeAlso = new Regex(@"(==+)\s*see +also\s*\1", RegexOptions.IgnoreCase);
+            Disambigs = new Regex(TemplateStart + DisambigTemplatesEN + @"\s*(?:\|[^{}]*?)?}}(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
         }
         
         /// <summary>
@@ -193,7 +196,7 @@ namespace WikiFunctions
             MakeDefaultSortRegex();
 
             // set orphan, wikify, uncat, disambiguation, inuse templates, date parameter & Link FA/GA/GL strings
-            string DisambigString = DisambigTemplatesEN;
+            string[] DisambigStringArr = {};
 
             switch(Variables.LangCode)
             {
@@ -204,7 +207,7 @@ namespace WikiFunctions
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "نهاية مسدودة"});
                     Wikify =Tools.NestedTemplateRegex(@"وصلات قليلة");
                     InUse = Tools.NestedTemplateRegex(new[] {"إنشاء", "تحرر", "Underconstruction", "تحت الإنشاء", "تحت الأنشاء", "يحرر", "إنشاء مقالة", "انشاء مقالة", "Inuse", "تحرير كثيف", "يحرر المقالة", "تحت التحرير", "قيد الاستخدام" });
-                    DisambigString = "([Dd]isambig|توضيح|صفحة توضيح|أسمياء)";
+                    DisambigStringArr = new[] { "Disambig", "توضيح", "صفحة توضيح", "أسمياء" };
                     SIAs = Tools.NestedTemplateRegex(@"الاسم الشائع للحيوان");
                     break;
                 case "arz":
@@ -213,11 +216,11 @@ namespace WikiFunctions
                     DateYearMonthParameter = @"تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "نهايه مسدوده" });
                     Wikify =Tools.NestedTemplateRegex(@"ويكى");
-                    DisambigString = "([Dd]isambig|صفحة توضيح|توضيح)";
+                    DisambigStringArr = new[] { "Disambig", "صفحة توضيح", "توضيح" };
                     break;
                 case "ca":
                     InUse = Tools.NestedTemplateRegex(new[] {"Modificant", "Editant-se", "Editant" });
-                    DisambigString = "([Dd]esambiguació|[Dd]esambigua|[Dd]isambig)";
+                    DisambigStringArr = new[] { "Desambiguació", "Desambigua", "Disambig" };
                     break;
                 case "ckb":
                     Orphan = Tools.NestedTemplateRegex(@"داڕێژە:ھەتیو");
@@ -226,7 +229,7 @@ namespace WikiFunctions
                     Wikify = new Regex(@"(?:{{\s*(?:داڕێژە:کەمبەستەر)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}})", RegexOptions.IgnoreCase);
                     break;
                 case "de":
-                    DisambigString = "([Bb]egriffsklärung)";
+                    DisambigStringArr = new[] { "Begriffsklärung" };
                     Persondata = Tools.NestedTemplateRegex("personendaten");
                     break;
                 case "el":
@@ -236,18 +239,18 @@ namespace WikiFunctions
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end" });
                     Wikify = new Regex(@"(?:{{\s*(?:Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}})", RegexOptions.IgnoreCase);
                     InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "Σε χρήση" });
-                    DisambigString = "([Αα]ποσαφήνιση|[Αα]ποσαφ|[Dd]isambig)";
+                    DisambigStringArr = new[] { "Αποσαφήνιση", "Αποσαφ", "Disambig" };
                     break;
                 case "eo":
                     InUse = Tools.NestedTemplateRegex(new[] {"Redaktas", "Redaktata", "Uzata" });
                     break;
                 case "es":
                     InUse = Tools.NestedTemplateRegex(new[] {"En uso", "Enuso" });
-                    DisambigString = "([Dd]esambiguación|[Dd]esambig|[Dd]es|[Dd]esambiguacion|[Dd]isambig)";
+                    DisambigStringArr = new[] { "Desambiguación", "Desambig", "Des", "Desambiguacion", "Disambig" };
                     break;
                 case "fa":
                     Orphan = Tools.NestedTemplateRegex(new[] {@"یتیم"});
-                    DisambigString = "(ابهام‌زدایی|ابهامزدایی|ابهام زدایی)";
+                    DisambigStringArr = new[] { "ابهام‌زدایی", "ابهامزدایی", "ابهام زدایی" };
                     break;
                 case "fr":
                     InUse = Tools.NestedTemplateRegex(new[] {"En cours" });
@@ -267,7 +270,7 @@ namespace WikiFunctions
                     InUse = Tools.NestedTemplateRegex(new[] {"WIP", "Wip" });
                     break;
                 case "pl":
-                    DisambigString = "([Dd]isambig)";
+                    DisambigStringArr = new[] { "Disambig" };
                     break;
                 case "pt":
                     InUse = Tools.NestedTemplateRegex(new[] {"Em edição", "Emuso", "Emedição"});
@@ -282,7 +285,7 @@ namespace WikiFunctions
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Tупиковая статья" });
                     Wikify = new Regex(@"({{\s*(?:Wikify|Викифицировать|Тупиковая статья|Underlinked)(?:\s*\|\s*(" +DateYearMonthParameter +@"|.*?))?}})", RegexOptions.IgnoreCase);
                     InUse = Tools.NestedTemplateRegex(new[] {"Редактирую", "Перерабатываю", "Inuse-by", "Пишу", "Inuse", "Правлю", "Перевожу", "In-use", "Processing", "Process", "Статья редактируется", "Викифицирую", "Under construction" });
-                    DisambigString = @"([Аа]ТДы|[Вв]оенные\ части|[Вв]оинские\ формирования|[Вв]оинские\ части|[Гг]оры|[Жж]ДС|[Жж]дс|[Мм]ногозначность|[Нн]Пы|[Нн]еоднозначность|[Нн]еоднозначность2|[Нн]пы|[Оо]дноименные\ фильмы|[Оо]дноимённые\ НП|[Оо]дноимённые\ воинские\ части|[Оо]дноимённые\ горные\ объекты|[Оо]дноимённые\ горы|[Оо]дноимённые\ железнодорожные\ станции|[Оо]дноимённые\ координаты|[Оо]дноимённые\ корабли|[Оо]дноимённые\ монастыри|[Оо]дноимённые\ муниципальные\ образования|[Оо]дноимённые\ муниципальные\ образования|[Оо]дноимённые\ населённые\ пункты|[Оо]дноимённые\ объекты\ АТД|[Оо]дноимённые\ озёра|[Оо]дноимённые\ острова|[Оо]дноимённые\ памятники|[Оо]дноимённые\ площади|[Оо]дноимённые\ реки|[Оо]дноимённые\ станции|[Оо]дноимённые\ станции\ метро|[Оо]дноимённые\ улицы|[Оо]дноимённые\ фильмы|[Оо]дноимённые\ храмы|[Оо]днофамильцы-тёзки|[Оо]зёра|[Оо]строва|[Рр]еки|[Сс]писок\ однофамильцев|[Сс]писок\ однофамильцев-тёзок|[Сс]писок\ полных\ тёзок|[Сс]писок\ тёзок|[Сс]писок\ тёзок-однофамильцев|[Сс]танции|[Тт]ёзки-однофамильцы|[Cc]hurchdis|[Cc]oorddis|[Dd]isambig|[Dd]isambiguation|[Mm]etrodis|[Mm]ilitarydis|[Mm]ondis|[Mm]onumdis|[Mm]ountaindis|[Mm]oviedis|[Pp]lacedis|[Rr]iverdis|[Rr]oaddis|[Ss]hipdis|[Ss]tationdis|[Ss]urname)";
+                    DisambigStringArr = new[] { "АТДы", "Военные части", "Воинские формирования", "Воинские части", "Горы", "ЖДС", "Ждс", "Многозначность", "НПы", "Неоднозначность", "Неоднозначность2", "Нпы", "Одноименные фильмы", "Одноимённые НП", "Одноимённые воинские части", "Одноимённые горные объекты", "Одноимённые горы", "Одноимённые железнодорожные станции", "Одноимённые координаты", "Одноимённые корабли", "Одноимённые монастыри", "Одноимённые муниципальные образования", "Одноимённые муниципальные образования", "Одноимённые населённые пункты", "Одноимённые объекты АТД", "Одноимённые озёра", "Одноимённые острова", "Одноимённые памятники", "Одноимённые площади", "Одноимённые реки", "Одноимённые станции", "Одноимённые станции метро", "Одноимённые улицы", "Одноимённые фильмы", "Одноимённые храмы", "Однофамильцы-тёзки", "Озёра", "Острова", "Реки", "Список однофамильцев", "Список однофамильцев-тёзок", "Список полных тёзок", "Список тёзок", "Список тёзок-однофамильцев", "Станции", "Тёзки-однофамильцы", "Churchdis", "Coorddis", "Disambig", "Disambiguation", "Metrodis", "Militarydis", "Mondis", "Monumdis", "Mountaindis", "Moviedis", "Placedis", "Riverdis", "Roaddis", "Shipdis", "Stationdis", "Surname" };
                     break;
                 case "simple":
                     SeeAlso = new Regex(@"(==+)\s*(related +pages|see +also)\s*\1", RegexOptions.IgnoreCase);        
@@ -300,7 +303,7 @@ namespace WikiFunctions
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end" });
                     Wikify = new Regex(@"{{\s*Ickewiki(?:\s*\|\s*(" + DateYearMonthParameter + @"|.*?))?}}", RegexOptions.IgnoreCase);
                     InUse = Tools.NestedTemplateRegex(new[] {"Pågår", "Information kommer", "Pågående uppdateringar", "Ständiga uppdateringar", "PÅGÅR", "Påbörjad", "Bearbetning pågår"});
-                    DisambigString = "(4LA|[Bb]etydelselista|[Dd]ab|[Dd]isambig|[Dd]isambiguation|[Ee]fternamn|[Ff]örgrening|[Ff]örgreningssida|[Ff]lertydig|[Ff]örnamn|[Gg]affel|[Gg]ren|[Gg]rensida|[Hh]ndis||[Nn]amnförgrening|[Nn]amngrensida|[Oo]rtnamn|[Rr]obotskapad förgrening|[Tt]rebokstavsförkortning|[Tt]rebokstavsförgrening)";
+                    DisambigStringArr = new[] { "4LA", "Betydelselista", "Dab", "Disambig", "Disambiguation", "Efternamn", "Förgrening", "Förgreningssida", "Flertydig", "Förnamn", "Gaffel", "Gren", "Grensida", "Hndis", "Namnförgrening", "Namngrensida", "Ortnamn", "Robotskapad förgrening", "Trebokstavsförkortning", "Trebokstavsförgrening" };
                     break;
                 case "zh":
                     DateYearMonthParameter = @"time={{subst:#time:c}}";
@@ -312,14 +315,13 @@ namespace WikiFunctions
                     break;
             }
             
-            Disambigs = new Regex(TemplateStart + DisambigString + @"\s*(?:\|[^{}]*?)?}}(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
+            if(DisambigStringArr.Any())
+                Disambigs = new Regex(Tools.NestedTemplateRegex(DisambigStringArr) + @"(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
 
             PossiblyCommentedStub =
                 new Regex(
                     @"(<!-- ?\{\{" + Variables.Stub + @"\b\}\}.*?-->|\{\{" + Variables.Stub + @"\s*(?:\|(?:[^{}]+|" + DateYearMonthParameter + @"))?}})");
         }
-        
-        private const string DisambigTemplatesEN = @"((?:[Nn]umber|[Hh]ospital|[Gg]eo|[Hh]n|[Ss]chool)(?:-)?dis|([Ss]pecies|)LatinNameDisambig|[[Aa]irport disambig(?:uation)?|[Cc]all sign disambiguation|[Cc]allsigndis|[Cc]hinese title disambig(uation)?|[Dd]ab|[Dd]isamb(?:ig(?:uation)?)?|[Dd]isambig-cleanup|[Dd]isambiguation with potential|[Dd]is|[Dd]isambiguation cleanup|[Gg]enus disambig(uation)?|[Hh]ndis|[Hh]ndis(?:-cleanup)?|[Hh]ospital disambiguation|[Hh]uman name disambiguation|[Hh]urricane season disambiguation|[Ll]etter-disambig|[Ll]etter-Number Combination Disambiguation|[Ll]etter–number combination disambiguation|[Ll]etter-NumberComb[Dd]isambig|[Mm]athdab|[Mm]athematic(?:al|s) disambiguation|[Mm]il-unit-dis|[Mm]ilitary unit disambiguation|[Mm]olecular formula disambiguation|[Mm]olFormDisambig|[Nn]umber disambiguation|[Pp]lace name disambiguation|[Rr]oad disambiguation|[Ss]chool disambiguation|[Ss]pecies Latin name(?: abbreviation)? disambiguation|[Ss]tation disambiguation|[Tt]axonomy disambiguation|[Ww]oO number disambiguation)";
 
         /// <summary>
         /// Matches the month names and provides a capturing group when used in a regular expression

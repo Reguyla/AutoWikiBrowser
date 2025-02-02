@@ -1157,6 +1157,24 @@ ABC");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Efternamn}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Förnamn}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Robotskapad förgrening}}");
+            
+            Variables.SetProjectLangCode("de");
+            WikiRegexes.MakeLangSpecificRegexes();
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Begriffsklärung}}");
+
+            Variables.SetProjectLangCode("ca");
+            WikiRegexes.MakeLangSpecificRegexes();
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Desambiguació}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Desambigua}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Disambig}}");
+
+            Variables.SetProjectLangCode("es");
+            WikiRegexes.MakeLangSpecificRegexes();
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Desambiguación}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Desambig}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Des}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Desambiguacion}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Disambig}}");
 
             Variables.SetProjectLangCode("el");
             WikiRegexes.MakeLangSpecificRegexes();
@@ -1169,6 +1187,25 @@ ABC");
             Variables.SetProjectLangCode("pl");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{disambig}}");
+            
+            Variables.SetProjectLangCode("ar");
+            WikiRegexes.MakeLangSpecificRegexes();
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{Disambig}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{توضيح}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{صفحة توضيح}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{أسمياء}}");
+            
+            Variables.SetProjectLangCode("arz");
+            WikiRegexes.MakeLangSpecificRegexes();
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{Disambig}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{صفحة توضيح}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{توضيح}}");
+            
+            Variables.SetProjectLangCode("fa");
+            WikiRegexes.MakeLangSpecificRegexes();
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{ابهام‌زدایی}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{ابهامزدایی}}");
+            RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{ابهام زدایی}}");
 
             Variables.SetProjectLangCode("ru");
             WikiRegexes.MakeLangSpecificRegexes();
