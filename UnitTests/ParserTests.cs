@@ -2203,7 +2203,12 @@ Text";
             tags.Clear();
             tags.Add("{{Expert-subject|Science fiction|date=February 2009}}");
             tags.Add("{{Expert-subject|Military history/Weaponry task force|date=February 2009}}");
-            Assert.That(Parsers.DeduplicateMaintenanceTags(tags), Is.EqualTo(tags), "Retain template argument in both");
+            Assert.That(Parsers.DeduplicateMaintenanceTags(tags), Is.EqualTo(tags), "Retain both: template argument in both");
+
+            tags.Clear();
+            tags.Add("{{Redirect|ATF}}");
+            tags.Add("{{Redirect|BATF|the gene|BATF (gene){{!}}''BATF'' (gene)|the former Indian taskforce|Bangalore Agenda Task Force}}");
+            Assert.That(Parsers.DeduplicateMaintenanceTags(tags), Is.EqualTo(tags), "Retain both: template argument in both - Redirect");
         }
     }
 

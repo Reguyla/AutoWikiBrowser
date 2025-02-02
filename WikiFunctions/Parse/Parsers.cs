@@ -751,7 +751,7 @@ namespace WikiFunctions.Parse
             return articleText;
         }
 
-        private static readonly Regex TemplateArg = new Regex(@"\|([^=\|}}]+)\|");
+        private static readonly Regex TemplateArg = new Regex(@"\|([^=\|}}]+)(?:\||}})");
 
         /// <summary>
         /// Deduplicates multiple maintenance tags. Uses earliest of date parameters, merges all other parameters.
