@@ -206,6 +206,7 @@ namespace WikiFunctions
                     break;
                 case "fr":
                     InUse = Tools.NestedTemplateRegex(new[] {"En cours" });
+                    ReferenceList = Tools.NestedTemplateRegex(new [] { "références", "references", "reflist" });
                     break;
                 case "hu":
                     InUse = Tools.NestedTemplateRegex(new[] {"Építés alatt", "Fejlesztés"});
@@ -266,24 +267,17 @@ namespace WikiFunctions
                     InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
                     LinkFGAs =  Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
                //     DisambigString = DisambigTemplatesEN;
+                    ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
                     break;
             }
             
             Disambigs = new Regex(TemplateStart + DisambigString + @"\s*(?:\|[^{}]*?)?}}(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
-
-            DisambigsGeneral = Tools.NestedTemplateRegex(new[] {"Disamb", "Disambig", "Disambiguation", "Dab"});
-            DisambigsCleanup = Tools.NestedTemplateRegex(new[] {"Disambig-cleanup", "Disambig cleanup", "Disambiguation cleanup"});
 
             Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
 
             PossiblyCommentedStub =
                 new Regex(
                     @"(<!-- ?\{\{" + Variables.Stub + @"\b\}\}.*?-->|\{\{" + Variables.Stub + @"\s*(?:\|(?:[^{}]+|" + DateYearMonthParameter + @"))?}})");
-
-            if (Variables.LangCode.Equals("fr"))
-                ReferenceList = Tools.NestedTemplateRegex(new [] { "références", "references", "reflist" });
-            else
-                ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
 
             if(Variables.Project == ProjectEnum.wikipedia && Variables.LangCode.Equals("simple"))
             {
@@ -748,14 +742,14 @@ namespace WikiFunctions
         public static Regex Disambigs;
 
         /// <summary>
-        /// Matches general disambig templates
+        /// Matches general disambig templates (en-wiki only)
         /// </summary>
-        public static Regex DisambigsGeneral;
+        public static Regex DisambigsGeneral = Tools.NestedTemplateRegex(new[] {"Disamb", "Disambig", "Disambiguation", "Dab"});
 
         /// <summary>
-        /// Matches disambig cleanup templates
+        /// Matches disambig cleanup templates (en-wiki only)
         /// </summary>
-        public static Regex DisambigsCleanup;
+        public static Regex DisambigsCleanup = Tools.NestedTemplateRegex(new[] {"Disambig-cleanup", "Disambig cleanup", "Disambiguation cleanup"});
 
         /// <summary>
         /// Matches SIA/Set index articles templates (en only; WP:SIA)
