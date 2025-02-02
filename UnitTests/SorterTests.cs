@@ -1264,6 +1264,16 @@ foo";
 [[Category:Living people]]";
             
             ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref longComment, "test").Contains(@"[[Category:Pages where template include size is exceeded]]"), "Don't pull out of long comment section");
+
+            string sameCatInComment =
+                @"<!-- [[Category:1980s cars]] Not needed because [[Category:Cars introduced in 1985]] parent cat overrules it. See [[WP:SUBCAT]] -->
+[[Category:1990s cars]]
+[[Category:Cars introduced in 1985]]
+[[Category:Honda vehicles|Today]]
+[[Category:Kei cars]]
+[[Category:Cars discontinued in 1998]]";
+            string sameCatInComment2 = sameCatInComment;
+            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(sameCatInComment2 + "\r\n"), "Handle a cat that is also in a comment");
         }
 
         [Test]

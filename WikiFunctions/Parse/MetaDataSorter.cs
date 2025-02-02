@@ -557,7 +557,7 @@ en, sq, ru
                 cut = WikiRegexes.RemoveCatsAllCats.Replace(cut, m =>
                 {
                     // don't pull cats from wiki comments/unformatted text regions
-                    if (allUnformatted.Any(u => u.Contains(m.Value.Trim()) && !u.Equals((m.Value.Trim()))))
+                    if (allUnformatted.Any(u => u.Contains(m.Value.Trim()) && !u.Equals(m.Value.Trim()) && !categoryList.Contains(u)))
                         return m.Value;
                     
                     if (!CatsForDeletion.IsMatch(m.Value))
