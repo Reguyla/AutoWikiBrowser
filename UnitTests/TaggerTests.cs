@@ -1095,7 +1095,6 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
 ''Now'' [[a]] and [[b]] and [[b]]
 
-
 {{stub}}"));
 
             Globals.UnitTestBoolValue = true;

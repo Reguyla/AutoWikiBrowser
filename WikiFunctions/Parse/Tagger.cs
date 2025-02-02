@@ -268,6 +268,12 @@ namespace WikiFunctions.Parse
                         articleText += Tools.Newline("{{cung}}", 3);
                         tagsAdded.Add("cung");
                     }
+                    else if (Variables.IsWikipediaEN)
+                    {
+                        // T382578: WP:STUBSPACING is now one blank line only for en-wiki
+                        articleText += Tools.Newline("{{stub}}", 2);
+                        tagsAdded.Add("stub");
+                    }
                     else
                     {
                         articleText += Tools.Newline("{{stub}}", 3);

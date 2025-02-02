@@ -402,7 +402,6 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 
 [[Category:Blues rock groups]]
 
-
 {{Norway-band-stub}}";
             AssertChange(before, after);
 
