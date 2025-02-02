@@ -27,7 +27,7 @@ namespace WikiFunctions
     /// </summary>
     public static class WikiRegexes
     {
-        public static void MakeLangSpecificRegexes()
+        private static void MakeNamespaceSpecificRegexes()
         {
             NamespacesCaseInsensitive = new Dictionary<int,Regex>();
             foreach (var p in Variables.NamespacesCaseInsensitive)
@@ -108,10 +108,26 @@ namespace WikiFunctions
 
             //Regex contains extra opening/closing brackets and double bot, equal sign so that we fix with FixSyntaxRedirects
             Redirect = new Regex(@"#(?:" + RedirectString + @")\s*[:|=]?\s*\[?\[?\[\[\s*:?\s*([^\|\[\]]*?)\s*(\|.*?)?\]\]\]?\]?", RegexOptions.IgnoreCase);
+            
+            int pos = Tools.FirstDifference(Variables.URL, Variables.URLLong);
+            string s = Regex.Escape(Variables.URLLong.Substring(0, pos)).Replace(@"https://", @"https?://");
+            s += "(?:" + Regex.Escape(Variables.URLLong.Substring(pos)) + @"index\.php(?:\?title=|/)|"
+                 + Regex.Escape(Variables.URL.Substring(pos)) + "/wiki/" + ")";
 
+            ExtractTitle = new Regex("^" + s + "([^?&]*)$");
+
+            EmptyLink = new Regex(@"\[\[\s*(?:(:?" + category + "|" + image + @")\s*:?\s*(\|.*?)?|[|\s]*)\]\]");
+            EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
+        }
+        
+        public static void MakeLangSpecificRegexes()
+        {
+            MakeNamespaceSpecificRegexes();
+            
             string SiaTemplate = "([Ss]urnames?|SIA|[Ss]ia|[Ss]et index article|[Ss]et ?index|[Ss]hip ?index|[Ll]ocomotive ?index|[Mm]ountain ?index|[[Rr]oad ?index|[Ss]port ?index|[[Ss]torm ? index|[Gg]iven name|[Mm]olForm ?Index|[Mm]olecular formula index|[Cc]hemistry index|[Ee]nzyme index|[Mm]edia set index|[Ll]ake ?index|[Aa]nimal common name|[Ff]ungus common name|[Pp]lant common name|[Nn]ickname|[Pp]ainting index)";
             SIAs = new Regex(TemplateStart + SiaTemplate + @"\s*(?:\|[^{}]*?)?}}");
             
+            List<string> magic;
             string s;
             
             if (Variables.MagicWords.TryGetValue("defaultsort", out magic))
@@ -130,20 +146,6 @@ namespace WikiFunctions
                                         RegexOptions.ExplicitCapture);                    
 
             Persondata = (Variables.LangCode.Equals("de") ? Tools.NestedTemplateRegex("personendaten") : Tools.NestedTemplateRegex("persondata"));
-
-            // if (Variables.URL == Variables.URLLong)
-            //     s = Regex.Escape(Variables.URL);
-            // else
-            // {
-            int pos = Tools.FirstDifference(Variables.URL, Variables.URLLong);
-            s = Regex.Escape(Variables.URLLong.Substring(0, pos)).Replace(@"https://", @"https?://");
-            s += "(?:" + Regex.Escape(Variables.URLLong.Substring(pos)) + @"index\.php(?:\?title=|/)|"
-                + Regex.Escape(Variables.URL.Substring(pos)) + "/wiki/" + ")";
-            // }
-            ExtractTitle = new Regex("^" + s + "([^?&]*)$");
-
-            EmptyLink = new Regex(@"\[\[\s*(?:(:?" + category + "|" + image + @")\s*:?\s*(\|.*?)?|[|\s]*)\]\]");
-            EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
             
             // set orphan, wikify, uncat, disambiguation, inuse templates, date parameter & Link FA/GA/GL strings
             string uncattemplate = UncatTemplatesEN;
