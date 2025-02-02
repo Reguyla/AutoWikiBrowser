@@ -988,6 +988,28 @@ now stubborn}}");
 
             // language variation
             #if DEBUG
+            Variables.SetProjectLangCode("el");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{ακατηγοριοποίητο}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Ακατηγοριοποίητο}}"));
+            
+            Variables.SetProjectLangCode("hy");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Կատեգորիա չկա}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Կչ}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
+            
+            Variables.SetProjectLangCode("ru");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Нет категорий}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{нет категорий}}")); // lowercase
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Nocat}}"));
+            
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -999,7 +1021,12 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorized stub}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorised}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
-            Assert.That(WikiRegexes.Uncategorized.Match(@"{{okategoriserad}}").Groups[1].Value, Is.EqualTo("okategoriserad"));
+            
+            Variables.SetProjectLangCode("sq");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Pa kategori}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
 
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
@@ -1007,12 +1034,24 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{غير مصنف}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{غير مصنفة}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{بذرة غير مصنفة}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorised}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorised stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized stub}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorizedstub}}"));
 
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
 
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{مش متصنفه}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{تقاوى مش متصنفه}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized stub}}"));
+            
+            Variables.SetProjectLangCode("ckb");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch("{{داڕێژە:بێ پۆل}}"));
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
