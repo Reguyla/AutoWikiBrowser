@@ -123,9 +123,7 @@ namespace WikiFunctions
             EmptyLink = new Regex(@"\[\[\s*(?:(:?" + category + "|" + image + @")\s*:?\s*(\|.*?)?|[|\s]*)\]\]");
             EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
         }
-        
-        private const string DisambigTemplatesEN = @"((?:[Nn]umber|[Hh]ospital|[Gg]eo|[Hh]n|[Ss]chool)(?:-)?dis|([Ss]pecies|)LatinNameDisambig|[[Aa]irport disambig(?:uation)?|[Cc]all sign disambiguation|[Cc]allsigndis|[Cc]hinese title disambig(uation)?|[Dd]ab|[Dd]isamb(?:ig(?:uation)?)?|[Dd]isambig-cleanup|[Dd]isambiguation with potential|[Dd]is|[Dd]isambiguation cleanup|[Gg]enus disambig(uation)?|[Hh]ndis|[Hh]ndis(?:-cleanup)?|[Hh]ospital disambiguation|[Hh]uman name disambiguation|[Hh]urricane season disambiguation|[Ll]etter-disambig|[Ll]etter-Number Combination Disambiguation|[Ll]etter–number combination disambiguation|[Ll]etter-NumberComb[Dd]isambig|[Mm]athdab|[Mm]athematic(?:al|s) disambiguation|[Mm]il-unit-dis|[Mm]ilitary unit disambiguation|[Mm]olecular formula disambiguation|[Mm]olFormDisambig|[Nn]umber disambiguation|[Pp]lace name disambiguation|[Rr]oad disambiguation|[Ss]chool disambiguation|[Ss]pecies Latin name(?: abbreviation)? disambiguation|[Ss]tation disambiguation|[Tt]axonomy disambiguation|[Ww]oO number disambiguation)";
-        
+
         /// <summary>
         /// Makes regexes for en-wiki, which act as the default unless language-specific regexes override them
         /// </summary>
@@ -162,7 +160,25 @@ namespace WikiFunctions
             });
             ExternalLinksHeader = new Regex(@"== *External +links? *==", RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
             SeeAlso = new Regex(@"(==+)\s*see +also\s*\1", RegexOptions.IgnoreCase);
-            Disambigs = new Regex(TemplateStart + DisambigTemplatesEN + @"\s*(?:\|[^{}]*?)?}}(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
+            Disambigs = new Regex(
+                Tools.NestedTemplateRegex(new[]
+                {
+                    "Airport disambig", "Airport disambiguation", "Callsigndis", "Call sign disambiguation",
+                    "Chinese title disambig", "Chinese title disambiguation", "Dab", "Dis", "Disamb", "Disambig",
+                    "Disambig-cleanup", "DisambigG", "Disambiggeo", "DisambigGeo", "Disambiguation",
+                    "Disambiguation cleanup", "Disambiguation with potential", "Genus disambig", "Genus disambiguation",
+                    "Geodab", "Geo-dis", "Geodis", "Geodisambig", "Geographic disambiguation", "Hndis", "Hndis-cleanup",
+                    "Hospitaldis", "Hospital disambiguation", "Human name disambiguation",
+                    "Human name disambiguation cleanup", "Hurricane season disambiguation", "LatinNameDisambig",
+                    "Letter-NumberCombdisambig", "Letter-NumberCombDisambig",
+                    "Letter–number combination disambiguation", "Letter-Number Combination Disambiguation", "Mathdab",
+                    "Mathematical disambiguation", "Mathematics disambiguation", "Military unit disambiguation",
+                    "Mil-unit-dis", "Molecular formula disambiguation", "MolFormDisambig", "Numberdis",
+                    "Number disambiguation", "Place name disambiguation", "Pnd ", "Road disambiguation", "Schooldis",
+                    "School disambiguation", "Species Latin name abbreviation disambiguation",
+                    "SpeciesLatinNameDisambig", "Species Latin name disambiguation", "Station disambiguation",
+                    "Taxonomy disambiguation", "WoO number disambiguation"
+                }) + @"(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
         }
         
         /// <summary>
