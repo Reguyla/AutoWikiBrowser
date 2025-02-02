@@ -1615,7 +1615,7 @@ b = @"A
             c = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}", e = @"<!--{{DEFAULTSORT:Joliet Chicago  Railroad}}-->",
             d = a + "\r\n" + b + "\r\n" + c,
             f = a + "\r\n" + b + "\r\n" + e,
-            g = c + "\r\n" + c;
+            g = c + "\r\n" + @"{{DEFAULTSORT:Joliet Chicago  Railroad 2nd different}}";
 
             Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + "\r\n" + b + "\r\n"), "standard case, return defaultsort then category");
             Assert.That(parser2.Sorter.RemoveCats(ref f, "test"), Is.EqualTo(b + "\r\n"), "Don't return commented out defaultsort");
@@ -1623,6 +1623,9 @@ b = @"A
 
             d = a + "\r\n" + b + "\r\n" + c + " <!--foo -->";
             Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + " <!--foo -->\r\n" + b + "\r\n"), "Retain comment on same line as defaultsort");
+
+            g = c + "\r\n" + c;
+            Assert.That(parser2.Sorter.RemoveCats(ref g, "test"),Is.EqualTo(c + "\r\n"), "Exact dupe DEFAULTSORT removed");
         }
 
         [Test]

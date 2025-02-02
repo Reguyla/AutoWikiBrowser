@@ -517,11 +517,24 @@ en, sq, ru
 
             // don't operate on pages with (incorrectly) multiple defaultsorts
             // ignore commented out DEFAULTSORT – https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_12#Moving_DEFAULTSORT_in_HTML_comments
+            // but exact duplicate DEFAULTSORT can be cleaned
             MatchCollection mc = WikiRegexes.Defaultsort.Matches(articleTextNoComments);
             if (mc.Count > 1)
             {
-                Tools.WriteDebug("RemoveCats", "Page " + articleTitle + " has multiple DEFAULTSORTs");
-                return "";
+                articleText = WikiRegexes.Defaultsort.Replace(articleText, d =>
+                {
+                    if (d.Index > mc[0].Index && mc[0].Value == d.Value) // exact dupe
+                        return "";
+                    return d.Value;
+                });
+
+                // check count after attempted deduplication
+                articleTextNoComments = Tools.ReplaceWithSpaces(articleText, WikiRegexes.Comments.Matches(articleText));
+                if (WikiRegexes.Defaultsort.Matches(articleTextNoComments).Count > 1)
+                {
+                    Tools.WriteDebug("RemoveCats", "Page " + articleTitle + " has multiple DEFAULTSORTs");
+                    return "";
+                }
             }
 
             string defaultSort = "";
