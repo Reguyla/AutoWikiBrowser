@@ -119,14 +119,43 @@ namespace WikiFunctions
             EmptyLink = new Regex(@"\[\[\s*(?:(:?" + category + "|" + image + @")\s*:?\s*(\|.*?)?|[|\s]*)\]\]");
             EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
         }
-        
-        public static void MakeLangSpecificRegexes()
+
+        private static void MakeEnLangRegexes()
         {
-            MakeNamespaceSpecificRegexes();
-            
-            string SiaTemplate = "([Ss]urnames?|SIA|[Ss]ia|[Ss]et index article|[Ss]et ?index|[Ss]hip ?index|[Ll]ocomotive ?index|[Mm]ountain ?index|[[Rr]oad ?index|[Ss]port ?index|[[Ss]torm ? index|[Gg]iven name|[Mm]olForm ?Index|[Mm]olecular formula index|[Cc]hemistry index|[Ee]nzyme index|[Mm]edia set index|[Ll]ake ?index|[Aa]nimal common name|[Ff]ungus common name|[Pp]lant common name|[Nn]ickname|[Pp]ainting index)";
-            SIAs = new Regex(TemplateStart + SiaTemplate + @"\s*(?:\|[^{}]*?)?}}");
-            
+            DateYearMonthParameter = @"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
+                    Orphan = Tools.NestedTemplateRegex(new[] {@"Orphan"});
+                    Uncategorized = Tools.NestedTemplateRegex(new[]
+                    {
+                        "Uncategorized",
+                        "+cat", "Categories missing", "Categories needed", "Categories requested", "Categorise",
+                        "Categorízame", "Categorize", "Category needed", "Categoryneeded", "Category requested",
+                        "Cat needed", "Catneeded", "CatNeeded", "Cats needed", "Missing categories", "Ncat",
+                        "Needs cat", "Needs categories", "Needs cats", "Noc", "Nocat", "No categories", "No category",
+                        "Nocategory", "No cats", "Nocats", "Uncat", "Uncategorised", "Uncategorised stub",
+                        "Uncategorisedstub", "Uncategorized stub", "Uncategorizedstub", "Uncat stub", "Uncat-stub",
+                        "Uncatstub"
+                    });
+                    DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "Dep", "Nuevointernallinks" });
+                    Wikify = new Regex(@"(?:{{\s*(?:Wikify|Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}}|({{\s*(?:Article|Multiple)\s*issues\b[^{}]*?)\|\s*(?:wikify|underlinked)\s*=\s*(?:{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}|[^{}\|]+))", RegexOptions.IgnoreCase);
+                    InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
+                    LinkFGAs =  Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
+               //     DisambigString = DisambigTemplatesEN;
+                    ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
+                    Persondata = Tools.NestedTemplateRegex("persondata");
+                    SIAs = Tools.NestedTemplateRegex(new[]
+                    {
+                        "SIA",
+                        "Animal common name", "Chemistry index", "Enzyme index", "Fungus common name", "Given name",
+                        "Lakeindex", "Lake index", "Locomotiveindex", "Locomotive index", "Media set index",
+                        "Molecular formula index", "MolForm Index", "MolFormIndex", "Mountainindex", "Mountain index",
+                        "Nickname", "Painting index", "Plant common name", "Road index", "Roadindex", "Set index", "Setindex",
+                        "Set index article", "Ship index", "Shipindex", "Sia", "Sport index", "Sportindex", "Stormindex",
+                        "Storm index", "Surname", "Surnames"
+                    });
+        }
+        
+        private static void MakeDefaultSortRegex()
+        {
             List<string> magic;
             string s;
             
@@ -140,13 +169,19 @@ namespace WikiFunctions
             // sv-wiki: allow comment on same line as DEFAULTSORT
             if (Variables.LangCode.Equals("sv"))
                 Defaultsort = new Regex(TemplateStart + s + @"\s*[:\|]\s*(?<key>(?>[^\{\}\r\n]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))|[^\}\r\n]*?)(?<end>\s*}}(?: *<!--[^<>]+-->)?|\r|\n)",
-                                        RegexOptions.ExplicitCapture);
+                    RegexOptions.ExplicitCapture);
             else
                 Defaultsort = new Regex(TemplateStart + s + @"\s*[:\|]\s*(?<key>(?>[^\{\}\r\n]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))|[^\}\r\n]*?)(?<end>\s*}}|\r|\n)",
-                                        RegexOptions.ExplicitCapture);                    
-
-            Persondata = (Variables.LangCode.Equals("de") ? Tools.NestedTemplateRegex("personendaten") : Tools.NestedTemplateRegex("persondata"));
+                    RegexOptions.ExplicitCapture);
+        }
+        
+        public static void MakeLangSpecificRegexes()
+        {
+            MakeNamespaceSpecificRegexes();
+            MakeEnLangRegexes();
             
+            MakeDefaultSortRegex();
+
             // set orphan, wikify, uncat, disambiguation, inuse templates, date parameter & Link FA/GA/GL strings
             string DisambigString = DisambigTemplatesEN;
 
@@ -182,6 +217,7 @@ namespace WikiFunctions
                     break;
                 case "de":
                     DisambigString = "([Bb]egriffsklärung)";
+                    Persondata = Tools.NestedTemplateRegex("personendaten");
                     break;
                 case "el":
                     Orphan = Tools.NestedTemplateRegex(@"Ορφανό");
@@ -258,25 +294,7 @@ namespace WikiFunctions
                     InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "UnderConstruction", "工事中", "Inedit", "Editing", "使用中", "2小时内重大修改 " });
                     break;
                 default:
-                    DateYearMonthParameter = @"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
-                    Orphan = Tools.NestedTemplateRegex(new[] {@"Orphan"});
-                    Uncategorized = Tools.NestedTemplateRegex(new[]
-                    {
-                        "Uncategorized",
-                        "+cat", "Categories missing", "Categories needed", "Categories requested", "Categorise",
-                        "Categorízame", "Categorize", "Category needed", "Categoryneeded", "Category requested",
-                        "Cat needed", "Catneeded", "CatNeeded", "Cats needed", "Missing categories", "Ncat",
-                        "Needs cat", "Needs categories", "Needs cats", "Noc", "Nocat", "No categories", "No category",
-                        "Nocategory", "No cats", "Nocats", "Uncat", "Uncategorised", "Uncategorised stub",
-                        "Uncategorisedstub", "Uncategorized stub", "Uncategorizedstub", "Uncat stub", "Uncat-stub",
-                        "Uncatstub"
-                    });
-                    DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "Dep", "Nuevointernallinks" });
-                    Wikify = new Regex(@"(?:{{\s*(?:Wikify|Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}}|({{\s*(?:Article|Multiple)\s*issues\b[^{}]*?)\|\s*(?:wikify|underlinked)\s*=\s*(?:{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}|[^{}\|]+))", RegexOptions.IgnoreCase);
-                    InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
-                    LinkFGAs =  Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
-               //     DisambigString = DisambigTemplatesEN;
-                    ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
+                    MakeEnLangRegexes();
                     break;
             }
             
