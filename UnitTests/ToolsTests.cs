@@ -2042,6 +2042,10 @@ title={{abc|fdkjdsfjk=fdaskjlfds
             ClassicAssert.IsFalse(FooTemplate2.IsMatch(@"{{foo
 bar|text}}"));
             ClassicAssert.IsFalse(Tools.NestedTemplateRegex("birth date").IsMatch(@"{{birth-date|May 11, 1980}}"));
+
+            string nonbreakingspace = "\u00a0";
+            ClassicAssert.IsTrue(FooTemplate2.IsMatch("{{Foo" + nonbreakingspace + "bar}}"));
+            ClassicAssert.IsTrue(Regex.IsMatch("{{Foo" + nonbreakingspace + "bar}}", @"\u00a0"));
         }
 
         [Test]
@@ -2220,6 +2224,10 @@ Start date and age
             Assert.That(Tools.GetTemplateName(@"{{_Foo_one|1=yes}}"), Is.EqualTo("Foo one"), "Leading underscore cleaned");
             Assert.That(Tools.GetTemplateName(@"{{Foo___one|1=yes}}"), Is.EqualTo("Foo one"), "underscores cleaned");
             Assert.That(Tools.GetTemplateName(@"{{Foo   one|1=yes}}"), Is.EqualTo("Foo one"), "underscores cleaned");
+
+            string nonbreakingspace = "\u00a0";
+            string templateCallWithNonBreakingSpace = "{{Foo" + nonbreakingspace + "one|1=yes}}";
+            Assert.That(Tools.GetTemplateName(templateCallWithNonBreakingSpace), Is.EqualTo("Foo one"), "Unicode non-breaking spaces cleaned");
 
             Assert.That(Tools.GetTemplateName(@"{{DISPLAYTITLE:11}}"), Is.EqualTo("DISPLAYTITLE"));
             Assert.That(Tools.GetTemplateName(@"{{DISPLAYTITLE:}}"), Is.EqualTo("DISPLAYTITLE"));
