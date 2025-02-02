@@ -148,7 +148,7 @@ namespace WikiFunctions
             Persondata = (Variables.LangCode.Equals("de") ? Tools.NestedTemplateRegex("personendaten") : Tools.NestedTemplateRegex("persondata"));
             
             // set orphan, wikify, uncat, disambiguation, inuse templates, date parameter & Link FA/GA/GL strings
-            string uncattemplate = UncatTemplatesEN;
+            string uncattemplate;
             string DisambigString = DisambigTemplatesEN;
 
             switch(Variables.LangCode)
@@ -156,6 +156,7 @@ namespace WikiFunctions
                 case "ar":
                     Orphan = Tools.NestedTemplateRegex(@"يتيمة");
                     uncattemplate = @"(غير مصنفة|غير مصنف|[Uu]ncategori[sz]ed|[Uu]ncategori[sz]ed ?stub|بذرة غير مصنفة)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     DateYearMonthParameter = @"تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "نهاية مسدودة"});
                     Wikify =Tools.NestedTemplateRegex(@"وصلات قليلة");
@@ -166,6 +167,7 @@ namespace WikiFunctions
                 case "arz":
                     Orphan = Tools.NestedTemplateRegex(@"يتيمه");
                     uncattemplate = @"(مش متصنفه|[Uu]ncategori[sz]ed|[Uu]ncategori[sz]ed ?stub|تقاوى مش متصنفه)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     DateYearMonthParameter = @"تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "نهايه مسدوده" });
                     Wikify =Tools.NestedTemplateRegex(@"ويكى");
@@ -178,6 +180,7 @@ namespace WikiFunctions
                 case "ckb":
                     Orphan = Tools.NestedTemplateRegex(@"داڕێژە:ھەتیو");
                     uncattemplate = @"داڕێژە:بێ پۆل";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "داڕێژە:بنبەست"});
                     Wikify = new Regex(@"(?:{{\s*(?:داڕێژە:کەمبەستەر)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}})", RegexOptions.IgnoreCase);
                     break;
@@ -187,6 +190,7 @@ namespace WikiFunctions
                 case "el":
                     Orphan = Tools.NestedTemplateRegex(@"Ορφανό");
                     uncattemplate = "([Αα]κατηγοριοποίητο)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     DateYearMonthParameter = @"ημερομηνία={{subst:CURRENTYEAR}} {{subst:CURRENTMONTH}}";
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end" });
                     Wikify = new Regex(@"(?:{{\s*(?:Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}})", RegexOptions.IgnoreCase);
@@ -214,6 +218,7 @@ namespace WikiFunctions
                 case "hy":
                     Orphan = Tools.NestedTemplateRegex(@"Որբ");
                     uncattemplate = "(Կատեգորիա չկա|Կչ|[Uu]ncategorized)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Underlinked", "Փակ" });
                     Wikify = new Regex(@"{{\s*Վիքիֆիկացում(?:\s*\|\s*(" + DateYearMonthParameter + @"|.*?))?}}", RegexOptions.IgnoreCase);
                     InUse = Tools.NestedTemplateRegex(new[] {"Խմբագրում եմ"});
@@ -232,6 +237,7 @@ namespace WikiFunctions
                     break;
                 case "ru":
                     uncattemplate = "([Нн]ет категорий|[Uu]ncategorized|[Uu]ncategorized stub|[Nn]ocat)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     Orphan = Tools.NestedTemplateRegex(new[] {@"изолированная статья", @"Сирота", @"Orphan"});
                     DateYearMonthParameter = @"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Tупиковая статья" });
@@ -241,12 +247,14 @@ namespace WikiFunctions
                     break;
                 case "sq":
                     uncattemplate = "([Pp]a kategori|[Uu]ncategorized)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     Orphan = Tools.NestedTemplateRegex(new[] {@"Faqe e palidhur", "Orphan"});
                     DateYearMonthParameter = @"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
                     break;
                 case "sv":
                     Orphan = Tools.NestedTemplateRegex(@"Föräldralös");
                     uncattemplate = "([Oo]kategoriserad|[Uu]ncategori[sz]ed|[Uu]ncategori[sz]ed ?stub)";
+                    Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
                     DateYearMonthParameter = @"datum={{subst:CURRENTYEAR}}-{{subst:CURRENTMONTH}}";
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end" });
                     Wikify = new Regex(@"{{\s*Ickewiki(?:\s*\|\s*(" + DateYearMonthParameter + @"|.*?))?}}", RegexOptions.IgnoreCase);
@@ -261,7 +269,17 @@ namespace WikiFunctions
                 default:
                     DateYearMonthParameter = @"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}";
                     Orphan = Tools.NestedTemplateRegex(new[] {@"Orphan"});
-               //     uncattemplate = UncatTemplatesEN;
+                    Uncat = Tools.NestedTemplateRegex(new[]
+                    {
+                        "Uncategorized",
+                        "+cat", "Categories missing", "Categories needed", "Categories requested", "Categorise",
+                        "Categorízame", "Categorize", "Category needed", "Categoryneeded", "Category requested",
+                        "Cat needed", "Catneeded", "CatNeeded", "Cats needed", "Missing categories", "Ncat",
+                        "Needs cat", "Needs categories", "Needs cats", "Noc", "Nocat", "No categories", "No category",
+                        "Nocategory", "No cats", "Nocats", "Uncat", "Uncategorised", "Uncategorised stub",
+                        "Uncategorisedstub", "Uncategorized stub", "Uncategorizedstub", "Uncat stub", "Uncat-stub",
+                        "Uncatstub"
+                    });
                     DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "Dep", "Nuevointernallinks" });
                     Wikify = new Regex(@"(?:{{\s*(?:Wikify|Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}}|({{\s*(?:Article|Multiple)\s*issues\b[^{}]*?)\|\s*(?:wikify|underlinked)\s*=\s*(?:{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}|[^{}\|]+))", RegexOptions.IgnoreCase);
                     InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
@@ -272,8 +290,6 @@ namespace WikiFunctions
             }
             
             Disambigs = new Regex(TemplateStart + DisambigString + @"\s*(?:\|[^{}]*?)?}}(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
-
-            Uncat = new Regex(@"{{\s*" + uncattemplate + @"((\s*\|[^{}]+)?\s*|\s*\|((?>[^\{\}]+|\{\{(?<DEPTH>)|\}\}(?<-DEPTH>))*(?(DEPTH)(?!))))\}\}");
 
             PossiblyCommentedStub =
                 new Regex(
@@ -290,8 +306,7 @@ namespace WikiFunctions
                 SeeAlso = new Regex(@"(==+)\s*see +also\s*\1", RegexOptions.IgnoreCase);
             }
         }
-
-        private const string UncatTemplatesEN = @"([Uu]ncat|[Cc]lassify|[Cc]at[Nn]eeded|[Uu]ncategori[sz]ed|[Cc]ategori[sz]e|[Cc]ategories needed|[Cc]ategory ?needed|[Cc]ategory requested|[Cc]ategories requested|[Nn]o ?cats?|[Uu]ncat-date|[Uu]ncategorized-date|[Nn]eeds cats?|[Cc]ats? needed|[Uu]ncategori[sz]ed ?stub)";
+        
         private const string DisambigTemplatesEN = @"((?:[Nn]umber|[Hh]ospital|[Gg]eo|[Hh]n|[Ss]chool)(?:-)?dis|([Ss]pecies|)LatinNameDisambig|[[Aa]irport disambig(?:uation)?|[Cc]all sign disambiguation|[Cc]allsigndis|[Cc]hinese title disambig(uation)?|[Dd]ab|[Dd]isamb(?:ig(?:uation)?)?|[Dd]isambig-cleanup|[Dd]isambiguation with potential|[Dd]is|[Dd]isambiguation cleanup|[Gg]enus disambig(uation)?|[Hh]ndis|[Hh]ndis(?:-cleanup)?|[Hh]ospital disambiguation|[Hh]uman name disambiguation|[Hh]urricane season disambiguation|[Ll]etter-disambig|[Ll]etter-Number Combination Disambiguation|[Ll]etter–number combination disambiguation|[Ll]etter-NumberComb[Dd]isambig|[Mm]athdab|[Mm]athematic(?:al|s) disambiguation|[Mm]il-unit-dis|[Mm]ilitary unit disambiguation|[Mm]olecular formula disambiguation|[Mm]olFormDisambig|[Nn]umber disambiguation|[Pp]lace name disambiguation|[Rr]oad disambiguation|[Ss]chool disambiguation|[Ss]pecies Latin name(?: abbreviation)? disambiguation|[Ss]tation disambiguation|[Tt]axonomy disambiguation|[Ww]oO number disambiguation)";
 
         /// <summary>
