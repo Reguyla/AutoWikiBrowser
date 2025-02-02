@@ -330,6 +330,10 @@ foo}}"));
             Assert.That(Parsers.FixSyntax(@"{{Template:foo
 |bar=yes}}"), Is.EqualTo(@"{{foo
 |bar=yes}}"));
+
+            string nonbreakingspace = "\u00a0";
+            string templateCallWithNonBreakingSpace = "{{Foo" + nonbreakingspace + "one|1=yes}}";
+            Assert.That(Parsers.FixSyntax(templateCallWithNonBreakingSpace), Is.EqualTo(@"{{Foo one|1=yes}}"), "Unicode non-breaking space clean from template name");
         }
 
         [Test]

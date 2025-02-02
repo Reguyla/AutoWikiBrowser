@@ -3087,9 +3087,6 @@ Message: {2}
         /// <returns>The updated article text</returns>
         public static string RenameTemplate(string articleText, string templateName, string newTemplateName, bool keepFirstLetterCase)
         {
-            if (templateName.Equals(newTemplateName))
-                return articleText;
-
             return NestedTemplateRegex(templateName).Replace(articleText, m => RenameTemplateME(m, newTemplateName, keepFirstLetterCase));
         }
 

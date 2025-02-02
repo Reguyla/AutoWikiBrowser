@@ -233,6 +233,13 @@ namespace WikiFunctions.Parse
             if (alltemplatesDetail.Any(t => Regex.IsMatch(t, Variables.NamespacesCaseInsensitive[Namespace.Template])))
                 articleText = RemoveTemplateNamespace(articleText);
 
+            // removal of Unicode non-breaking space in template name
+            List<string> templatesWithUnicodeNonBreakingSpace =
+                alltemplatesDetail.Where(tc => tc.Contains("\u00a0")).Select(tc => Tools.GetTemplateName(tc)).ToList();
+            
+            foreach (var t in templatesWithUnicodeNonBreakingSpace)
+                articleText = Tools.RenameTemplate(articleText, t, t, true);
+
             if (SyntaxRegexBrNewline.IsMatch(articleText))
             {
                 // remove <br> from lists (end of list line) - CHECKWIKI error 54
