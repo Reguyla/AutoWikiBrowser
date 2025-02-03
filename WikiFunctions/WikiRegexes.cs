@@ -849,9 +849,9 @@ namespace WikiFunctions
         public static readonly Regex UntemplatedQuotes = new Regex(@"(?<=[^\w]|^)[""«»‘’“”‛‟‹›“”„‘’`’“‘”].{1,2000}?[""«»‘’“”‛‟‹›“”„‘’`’“‘”](?=[^\w])", RegexOptions.Singleline);
         
         /// <summary>
-        /// Matches common curly double quotes, see [[MOS:PUNCT]]
+        /// Matches common curly double quotes, see [[MOS:PUNCT]] - exludes low-high as these are allowed in non-English text
         /// </summary>
-        public static readonly Regex CurlyDoubleQuotes = new Regex(@"[“”‟“”„“”″]");
+        public static readonly Regex CurlyDoubleQuotes = new Regex(@"[”‟””″]");
 
         // covered by TestFixNonBreakingSpaces
         /// <summary>
