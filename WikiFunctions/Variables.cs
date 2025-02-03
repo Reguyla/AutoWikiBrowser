@@ -825,6 +825,8 @@ namespace WikiFunctions
         /// </param>
         private static void SetLanguageSpecificValues(string langCode, ProjectEnum projectName)
         {
+            UntitledHeading = "Untitled";
+            
             switch (langCode)
             {
                 case "en":
@@ -1043,10 +1045,6 @@ namespace WikiFunctions
                 case "zh-yue":
                     mSummaryTag = "用";
                     WPAWB = "[[Wikipedia:AutoWikiBrowser|AWB]]幫手";
-                    break;
-
-                default:
-                    UntitledHeading = "Untitled";
                     break;
 
                     // case "xx":
