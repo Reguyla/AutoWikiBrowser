@@ -1627,9 +1627,18 @@ Hello world comment."));
             Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + "\r\n" + @"
 ==Untitled==
 ""Hello world comment4""."));
-            
+
             // heading level 3 changed to level 2
             articleTextIn = articleTextHeader + "\r\n" + @"===Foo bar===
+*Hello world comment2.";
+
+            TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
+
+            ClassicAssert.IsTrue(articleTextIn.Contains(@"==Foo bar=="));
+            ClassicAssert.IsFalse(articleTextIn.Contains(@"==Untitled=="));
+
+            // heading level 1 changed to level 2
+            articleTextIn = articleTextHeader + "\r\n" + @"=Foo bar=
 *Hello world comment2.";
             
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);

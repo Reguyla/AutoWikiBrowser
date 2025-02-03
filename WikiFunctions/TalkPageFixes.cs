@@ -317,6 +317,7 @@ namespace WikiFunctions.TalkPages
 
         private static readonly Regex FirstComment = new Regex(@"^ {0,4}[:\*\w'""](?<!_)", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex SingleCurlyBrackets = new Regex(@"{((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))})");
+        public static readonly Regex HeadingLevelOne = new Regex(@"^=([^=](?:.*?[^=])?)=(?:= *⌊⌊⌊⌊\d{1,4}⌋⌋⌋⌋| *<!--.*?-->)?\s*$", RegexOptions.Multiline);
 
         /// <summary>
         /// Adds a section 2 heading before the first comment if the talk page does not have one
@@ -338,11 +339,23 @@ namespace WikiFunctions.TalkPages
 
                 if (firstCommentIndex < firstLevelTwoHeading)
                 {
-                    // is there a heading level 3? If yes, change to level 2
+                    // is there a heading level 1 or 3? If yes, change to level 2
                     string articletexttofirstcomment = articleText.Substring(0, firstCommentIndex);
 
-                    articleText = WikiRegexes.HeadingLevelThree.IsMatch(articletexttofirstcomment) ? WikiRegexes.HeadingLevelThree.Replace(articleText, @"==$1==", 1) : articleText.Insert(firstCommentIndex, "\r\n==" + Variables.UntitledHeading + "==\r\n").TrimStart();
-                    articleText = articleText.Replace("\r\n\r\n\r\n==" + Variables.UntitledHeading, "\r\n\r\n==" + Variables.UntitledHeading);
+                    if (WikiRegexes.HeadingLevelThree.IsMatch(articletexttofirstcomment))
+                    {
+                        articleText = WikiRegexes.HeadingLevelThree.Replace(articleText, @"==$1==", 1);
+                    }
+                    else if (HeadingLevelOne.IsMatch(articletexttofirstcomment))
+                    {
+                        articleText = HeadingLevelOne.Replace(articleText, @"==$1==", 1);
+                    }
+                    else
+                    {
+                        articleText = articleText.Insert(firstCommentIndex, "\r\n==" + Variables.UntitledHeading + "==\r\n").TrimStart();
+                        // whitespace clean
+                        articleText = articleText.Replace("\r\n\r\n\r\n==" + Variables.UntitledHeading, "\r\n\r\n==" + Variables.UntitledHeading);
+                    }
                 }
             }
 
