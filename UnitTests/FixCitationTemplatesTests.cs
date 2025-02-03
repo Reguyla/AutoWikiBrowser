@@ -69,15 +69,17 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=“hello“|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=""hello""|format=PDF}} was"), "curly quotes");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=and “hello“ there|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=and ""hello"" there|format=PDF}} was"), "curly quotes partial quote");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=“hello""|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=""hello""|format=PDF}} was"), "mixed curly and straight");
-            Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=«hello»|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=""hello""|format=PDF}} was"), "balanced arrows");
+
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=“hello″|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=""hello""|format=PDF}} was"), "mixed curly");
-            Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=now «hello» at|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=now ""hello"" at|format=PDF}} was"), "partial quote arrows");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=now ‹hello› at|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=now ""hello"" at|format=PDF}} was"), "partial quote short arrows");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=now ‹hello› at ‹hello2› be|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=now ""hello"" at ""hello2"" be|format=PDF}} was"), "partial quote short arrows");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=hello» second|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello» second|format=PDF}} was"), @"no change if » used as section delimeter");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=hello> second|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello> second|format=PDF}} was"), @"no change if > used as section delimeter");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=hello « second|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello « second|format=PDF}} was"), @"no change if « used as section delimeter");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=hello› second|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello› second|format=PDF}} was"), @"no change if › used as section delimeter");
+
+            const string guillemets = @"now {{cite web| url=a.com|title=«hello»|format=PDF}} was";
+            Assert.That(Parsers.FixCitationTemplates(guillemets), Is.EqualTo(guillemets), "guillemets not changed");
         }
 
         [Test]

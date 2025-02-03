@@ -164,7 +164,6 @@ namespace WikiFunctions.Parse
         private static readonly Regex IdISSN = new Regex(@"^ISSN ?[:=]?\s*([0-9]{4}) *[- –]? *([0-9]{3}[0-9X])$", RegexOptions.IgnoreCase);
         private static readonly Regex YearOnly = new Regex(@"^[12]\d{3}$", RegexOptions.Compiled);
         private static readonly Regex ISBNDash = new Regex(@"(\d)[–](\d|X$)");
-        private static readonly Regex BalancedArrows = new Regex(@"(?:«([^»]+)»|‹([^›]+)›)");
 
         /// <summary>
         /// Performs fixes to a given citation template call
@@ -304,10 +303,8 @@ namespace WikiFunctions.Parse
                 if (paramsFound.TryGetValue(dequoteParam, out quotetitle))
                 {
                     string before = quotetitle;
-                    // convert curly quotes to straight quotes per [[MOS:PUNCT]], but » or › may be section delimeter
-                    // so only change those when balanced. Note regular <> characters are not changed.
+                    // convert curly quotes to straight quotes per [[MOS:PUNCT]]
                     quotetitle = WikiRegexes.CurlyDoubleQuotes.Replace(quotetitle, @"""");
-                    quotetitle = BalancedArrows.Replace(quotetitle, @"""$1$2""");
 
                     // trim stray quotes (but don't change title in quotes as this may be a title that is itself a quote)
                     if(!quotetitle.Trim('"').Contains(@""""))
