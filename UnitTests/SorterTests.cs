@@ -556,6 +556,9 @@ Fred has a dog.
             e = @"{{underlinked|date=May 2008}}";
             Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
 
+            e = @"{{underlinked|date=May 2008}} <!-- some comment to keep here-->";
+            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
+
             e = @"{{cleanup|date=May 2008}}";
             Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d), "template moved when not a section one");
 
