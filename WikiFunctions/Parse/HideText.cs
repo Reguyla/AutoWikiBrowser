@@ -83,6 +83,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex RetainStartBraces = new Regex(@"(?<=\[\[).+", RegexOptions.Singleline);
         private static readonly Regex RetainEndBraces = new Regex(@".+(?=\]\])", RegexOptions.Singleline);
         private static readonly Regex All = new Regex(@".+", RegexOptions.Singleline);
+        private static readonly Regex WikiCommentsLookAround = new Regex(@"(?<=<!--)(.*?)(?=-->)", RegexOptions.Singleline);
 
         /// <summary>
         /// Hides Unformatted text (nowiki, pre, math, html comments, timelines), source tags
@@ -103,8 +104,21 @@ namespace WikiFunctions.Parse
                 Replace(WikiRegexes.SourceCode.Matches(articleText), ref articleText);
             Replace(MathCodeTypoTemplates.Matches(articleText), ref articleText);
 
-            var matches = (from Match m in WikiRegexes.UnformattedText.Matches(articleText) where !LeaveMetaHeadings || !NoWikiIgnoreRegex.IsMatch(m.Value) select m).ToList();
-            Replace(matches, ref articleText);
+            // hide unformatted text, but in the case of comments keep the <!-- --> tags while hiding the inner content
+            // allows FixHeadings to see comments (before heading)
+            articleText = WikiRegexes.UnformattedText.Replace(articleText, m =>
+            {
+                string res = m.Value;
+                if (!LeaveMetaHeadings || !NoWikiIgnoreRegex.IsMatch(m.Value))
+                {
+                    if(WikiCommentsLookAround.IsMatch(res))
+                        Replace(WikiCommentsLookAround.Matches(res), ref res);
+                    else
+                        Replace(WikiRegexes.UnformattedText.Matches(res), ref res);
+                }
+
+                return res;
+            });
 
             if (HideExternalLinks)
             {

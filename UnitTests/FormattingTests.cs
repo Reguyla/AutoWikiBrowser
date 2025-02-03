@@ -636,6 +636,23 @@ Bar", "Test"), Is.EqualTo(correct), "inserts blank line if one missing");
         }
 
         [Test]
+        public void TestFixHeadingsBlankLineCommentBefore()
+        {
+            string correct = @"Foo
+
+<!--comm-->
+==1920s==
+Bar";
+            Assert.That(Parsers.FixHeadings(correct, "Test"), Is.EqualTo(correct), "no change when already one blank line -comment before");
+
+            correct = @"Foo
+<!--comm-->
+==1920s==
+Bar";
+            Assert.That(Parsers.FixHeadings(correct, "Test"), Is.EqualTo(correct), "no change when comment before");
+        }
+
+        [Test]
         public void TestFixHeadingsBadHeaders()
         {
             ClassicAssert.IsFalse(Parsers.FixHeadings(@"==Introduction==

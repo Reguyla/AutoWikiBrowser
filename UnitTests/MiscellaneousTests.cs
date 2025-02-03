@@ -221,7 +221,7 @@ File:Blogs002.jpeg|Description
         {
             // in these ones all but the last | is hidden
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_skyline=442px_-_London_Lead_Image.jpg|"), Hidden + @"\|"));
-            ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_skyline=442px_-_London_Lead_Image.jpg <!--comm-->|"), Hidden + " " + Hidden + @"\|"));
+            ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_skyline=442px_-_London_Lead_Image.jpg <!--comm-->|"), Hidden + " <!--" + Hidden + @"-->\|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_map=London (European Parliament constituency).svg   |"), Hidden + @"   \|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_map=westminster.tube.station.jubilee.arp.jpg|"), Hidden + @"\|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|Cover  = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
@@ -508,6 +508,7 @@ quux.JPEG|text
 
             AssertHidden("<!--foo-->");
             AssertHidden("<!--foo\r\nbar-->");
+            ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"<!--foo-->"), "<!--" + Hidden + @"-->"));
 
             // hideExternalLinks
             AssertHidden("[http://foo]");

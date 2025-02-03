@@ -455,6 +455,13 @@ y";
 ==Events==
 y";
             AssertNotChanged(HeadingWithoutOptionalSpace);
+
+            const string CommentThenHeading = @"x
+
+<!-- comment here-->
+==Events==
+y";
+            AssertNotChanged(CommentThenHeading);
         }
         
         [Test]

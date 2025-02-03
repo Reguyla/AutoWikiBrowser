@@ -76,6 +76,8 @@ namespace WikiFunctions.Parse
 
         private static readonly Regex HeadingSubHeading = new Regex(@"^(==+)(.*)\1((?:\r\n\1=+.*\1=+\s*)+)\r\n", RegexOptions.Multiline);
 
+        private static readonly Regex CommentThenHeading = new Regex(@"-->\r\n={1,6}(.*?)={1,6}");
+
         // Covered by: FormattingTests.TestFixHeadings(), incomplete
         /// <summary>
         /// Fix ==See also== and similar section common errors. Removes unecessary introductory headings and cleans excess whitespace (but not the optional single space at the start & end of headings).
@@ -95,6 +97,9 @@ namespace WikiFunctions.Parse
                 // Check for performance
                 if (HeadingsIncorrectWhitespaceBefore.IsMatch(articleText))
                 {
+                    // list of headings that have a comment on the line before: these are correct as is
+                    List<string> commentBeforeHeadings = CommentThenHeading.Matches(articleText).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+
                     articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(articleText, m => 
                         {
                             // avoid special case of indented text that may be code with lots of == that matches a heading
@@ -107,7 +112,11 @@ namespace WikiFunctions.Parse
                                 if(x.Groups[3].Value.Contains(m.Groups[1].Value))
                                     return m.Value;
                             }
-                                
+
+                            // if comment on the line before heading then it's correct as is
+                            if(commentBeforeHeadings.Any(c => c.Equals(m.Groups[2].Value)))
+                                return m.Value;
+
                             return "\r\n\r\n" + m.Groups[1].Value;
                         });
 
