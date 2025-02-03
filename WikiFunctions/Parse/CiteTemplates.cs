@@ -307,6 +307,7 @@ namespace WikiFunctions.Parse
                     // convert curly quotes to straight quotes per [[MOS:PUNCT]]
                     quotetitle = WikiRegexes.CurlyDoubleQuotes.Replace(quotetitle, @"""");
                     quotetitle = BalancedArrows.Replace(quotetitle, @"""$1""");
+                    quotetitle = quotetitle.Replace("’", "'"); // single curly quote
 
                     // trim stray quotes (but don't change title in quotes as this may be a title that is itself a quote)
                     if(!quotetitle.Trim('"').Contains(@""""))
