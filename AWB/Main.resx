@@ -2999,7 +2999,7 @@ Prevents the Default Edit Summary from being changed</value>
     <value>7, 14</value>
   </data>
   <data name="lbAlerts.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 35</value>
+    <value>127, 56</value>
   </data>
   <data name="lbAlerts.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -3026,7 +3026,7 @@ Prevents the Default Edit Summary from being changed</value>
     <value>7, 89</value>
   </data>
   <data name="lbDuplicateWikilinks.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 66</value>
+    <value>127, 69</value>
   </data>
   <data name="lbDuplicateWikilinks.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
