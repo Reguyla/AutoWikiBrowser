@@ -1656,6 +1656,7 @@ words2"));
             Assert.That(WikiRegexes.DateBirthAndAge.Match(@"{{birth date and age|year=1984|month=2|day=6}}").Groups[1].Value, Is.EqualTo("1984"));
 
             Assert.That(WikiRegexes.DateBirthAndAge.Match(@"{{Birth date|1972|02|18}}").Value, Is.EqualTo("{{Birth date|1972|02|18}}"));
+            Assert.That(WikiRegexes.DateBirthAndAge.Match(@"{{birth-date and age|1975}}").Groups[1].Value, Is.EqualTo("1975"), "extract year from birth-date and age");
         }
 
         [Test]
