@@ -486,7 +486,10 @@ namespace WikiFunctions
         /// Matches headings of all levels, group 1 being the heading name
         /// </summary>
         public static readonly Regex Headings = new Regex(@"^={1,6} *(.*?) *={1,6}(?: *⌊⌊⌊⌊\d{1,4}⌋⌋⌋⌋| *<!--.*?-->|< *[Bb][Rr] */ *>)?\s*$", RegexOptions.Multiline);
-        
+
+        /// <summary>
+        /// Matches headings of all levels and the whitespace before them, group 2 being the heading name
+        /// </summary>
         public static readonly Regex HeadingsWhitespaceBefore = new Regex(@"\s+(?:< *[Bb][Rr] *\/? *>\s*)*^ *(={1,6}(.*?)={1,6}[\t ]*)(?=\r\n)", RegexOptions.Multiline);
         
         /// <summary>
