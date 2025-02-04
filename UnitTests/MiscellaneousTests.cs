@@ -950,6 +950,13 @@ http://www.site.com
             Assert.That(Namespace.Determine(@"Talk:ʿAyn"), Is.EqualTo(Namespace.Talk), "handles pages with spacing modifier Unicode characters at start of name");
             Assert.That(Namespace.Determine("Module:foo"), Is.EqualTo(Namespace.Module));
             Assert.That(Namespace.Determine("Module talk:foo"), Is.EqualTo(Namespace.ModuleTalk));
+
+            Assert.That(Namespace.Determine("MOS:foo"), Is.EqualTo(Namespace.MOS));
+            Assert.That(Namespace.Determine("MOS talk:foo"), Is.EqualTo(Namespace.MOSTalk));
+            Assert.That(Namespace.Determine("TimedText:foo"), Is.EqualTo(Namespace.TimedText));
+            Assert.That(Namespace.Determine("TimedText talk:foo"), Is.EqualTo(Namespace.TimedTextTalk));
+            Assert.That(Namespace.Determine("Draf:foo"), Is.EqualTo(Namespace.Draft));
+            Assert.That(Namespace.Determine("Draf talk:foo"), Is.EqualTo(Namespace.DraftTalk));
         }
 
         [Test]

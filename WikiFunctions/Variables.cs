@@ -72,6 +72,12 @@ namespace WikiFunctions
             CanonicalNamespaces[13] = "Help talk:";
             CanonicalNamespaces[14] = "Category:";
             CanonicalNamespaces[15] = "Category talk:";
+            CanonicalNamespaces[118] = "Draft:";
+            CanonicalNamespaces[119] = "Draft talk:";
+            CanonicalNamespaces[126] = "MOS:";
+            CanonicalNamespaces[127] = "MOS talk:";
+            CanonicalNamespaces[710] = "TimedText:";
+            CanonicalNamespaces[711] = "TimedText talk:";
             CanonicalNamespaces[828] = "Module:";
             CanonicalNamespaces[829] = "Module talk:";
 
@@ -791,6 +797,8 @@ namespace WikiFunctions
             Namespaces[109] = "Book talk:";
             Namespaces[118] = "Draft:";
             Namespaces[119] = "Draft talk:";
+            Namespaces[126] = "MOS:";
+            Namespaces[127] = "MOS talk:";
             Namespaces[446] = "Education Program:";
             Namespaces[447] = "Education Program talk:";
             Namespaces[710] = "TimedText:";

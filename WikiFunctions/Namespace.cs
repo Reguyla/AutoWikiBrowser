@@ -51,6 +51,10 @@ namespace WikiFunctions
         public const int FirstCustomTalk = 101; // Portal talk on en-wiki
         public const int Book = 108;
         public const int BookTalk = 109;
+        public const int Draft = 118;
+        public const int DraftTalk = 119;
+        public const int MOS = 126;
+        public const int MOSTalk = 127;
         public const int Module = 828;
         public const int ModuleTalk = 829;
 
