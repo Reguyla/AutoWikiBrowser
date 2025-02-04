@@ -387,7 +387,7 @@ namespace WikiFunctions.Parse
             if (Namespace.Determine(articleTitle) == Namespace.Mainspace && articleText.Contains("--"))
                 articleText = SentenceClauseIncorrectMdash.Replace(articleText, m => m.Groups[1].Value + ((Regex.IsMatch(m.Groups[1].Value, @"^\d+$") && Regex.IsMatch(m.Groups[2].Value, @"^\d+$")) ? @"–" : @"—") + m.Groups[2].Value);
 
-            // T337532 MOS:ELLIPSIS replace Unicode elipsis … with 3 dots
+            // T337532 MOS:ELLIPSIS replace Unicode ellipsis … with 3 dots
             articleText = articleText.Replace("…", "...");
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#minuses
