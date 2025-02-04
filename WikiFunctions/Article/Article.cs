@@ -403,9 +403,7 @@ namespace WikiFunctions
         {
             get
             {
-                return (NameSpaceKey == Namespace.Talk
-                        || NameSpaceKey == Namespace.BookTalk
-                        || NameSpaceKey == Namespace.CategoryTalk);
+                return (NameSpaceKey == Namespace.Talk || NameSpaceKey == Namespace.CategoryTalk);
             }
         }
 

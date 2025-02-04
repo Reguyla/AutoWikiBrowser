@@ -793,14 +793,10 @@ namespace WikiFunctions
             Namespaces[5] = "Wikipedia talk:";
             Namespaces[100] = "Portal:";
             Namespaces[101] = "Portal talk:";
-            Namespaces[108] = "Book:";
-            Namespaces[109] = "Book talk:";
             Namespaces[118] = "Draft:";
             Namespaces[119] = "Draft talk:";
             Namespaces[126] = "MOS:";
             Namespaces[127] = "MOS talk:";
-            Namespaces[446] = "Education Program:";
-            Namespaces[447] = "Education Program talk:";
             Namespaces[710] = "TimedText:";
             Namespaces[711] = "TimedText talk:";
             Namespaces[828] = "Module:";

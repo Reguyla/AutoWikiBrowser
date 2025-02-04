@@ -955,8 +955,8 @@ http://www.site.com
             Assert.That(Namespace.Determine("MOS talk:foo"), Is.EqualTo(Namespace.MOSTalk));
             Assert.That(Namespace.Determine("TimedText:foo"), Is.EqualTo(Namespace.TimedText));
             Assert.That(Namespace.Determine("TimedText talk:foo"), Is.EqualTo(Namespace.TimedTextTalk));
-            Assert.That(Namespace.Determine("Draf:foo"), Is.EqualTo(Namespace.Draft));
-            Assert.That(Namespace.Determine("Draf talk:foo"), Is.EqualTo(Namespace.DraftTalk));
+            Assert.That(Namespace.Determine("Draft:foo"), Is.EqualTo(Namespace.Draft));
+            Assert.That(Namespace.Determine("Draft talk:foo"), Is.EqualTo(Namespace.DraftTalk));
         }
 
         [Test]
@@ -969,7 +969,6 @@ http://www.site.com
             Assert.That(Namespace.Determine("user:foo"), Is.EqualTo(Namespace.User));
             Assert.That(Namespace.Determine("user_talk:foo"), Is.EqualTo(Namespace.UserTalk));
             Assert.That(Namespace.Determine("user%20talk:foo"), Is.EqualTo(Namespace.UserTalk));
-            Assert.That(Namespace.Determine("Book talk:Math"), Is.EqualTo(Namespace.BookTalk));
         }
         
         [Test]
@@ -1018,7 +1017,6 @@ http://www.site.com
 
             ClassicAssert.IsFalse(Namespace.IsMainSpace("File:Test"));
             ClassicAssert.IsFalse(Namespace.IsMainSpace("Image:Test"));
-            ClassicAssert.IsFalse(Namespace.IsMainSpace("Book talk:Math"));
         }
 
         [Test]
