@@ -240,12 +240,16 @@ namespace WikiFunctions.TalkPages
 
         private static readonly Regex EnglishVariationsTemplates = Tools.NestedTemplateRegex(new[]
         {
-            "American English editnotice", "Antiguan and Barbudan English", "Australian English editnotice",
-            "Bangladeshi English", "British English editnotice", "British English Oxford spelling editnotice",
-            "Canadian English editnotice", "Ghanaian English", "Hong Kong English", "IUPAC spelling",
-            "IUPAC spelling US", "Jamaican English", "Kenyan English", "Liberian English", "Nigerian English",
-            "Sierra Leonean English", "Singaporean English", "Sri Lankan English", "Ugandan English"
+            "American English", "American English editnotice", "Antiguan and Barbudan English", "Australian English",
+            "Australian English editnotice", "Bangladeshi English", "British English", "British English editnotice",
+            "British English Oxford spelling", "British English Oxford spelling editnotice", "Canadian English",
+            "Canadian English editnotice", "Ghanaian English", "Hiberno-English", "Hong Kong English", "Indian English",
+            "IUPAC spelling", "IUPAC spelling US", "Jamaican English", "Kenyan English", "Liberian English",
+            "New Zealand English", "Nigerian English", "Pakistani English", "Philippine English", "Scottish English",
+            "Sierra Leonean English", "Singaporean English", "South African English", "Sri Lankan English",
+            "Trinidadian English", "Ugandan English"
         });
+
         private static readonly Regex TalkHistoryTemplates = Tools.NestedTemplateRegex(new[] { "Article history", "ArticleHistory" });
         private static readonly Regex TalkHistoryBTemplates = Tools.NestedTemplateRegex(new[] { "FailedGA", "Old prod", "Old prod full", "Oldprodfull", "Afd-merged-from", "Old AfD multi", "Old AfD", "Oldafdfull ", "Old peer review", "Old CfD", "Old RfD", "Old XfD multi", "Old XfD" });
         private static readonly Regex MilestoneTemplates = Tools.NestedTemplateRegex(new[] { "DYK talk", "ITN talk", "On this day" });
