@@ -1219,6 +1219,25 @@ namespace WikiFunctions
         public static readonly Regex MultipleIssuesSectionMaintenanceTemplates = Tools.NestedTemplateRegex(new [] { "BLP sources section", "BLP unsourced section", "BLP unreferenced section", "Cleanup section", "Confusing section", "Copy edit-section", "Criticism section", "Disputed-section", "Expand section", "Importance-section", "POV-section", "Refimprove section", "More citations needed section", "Rewrite section", "Unreferenced section", "Update section", "Wikify section" } );
 
         /// <summary>
+        /// Matches language maintenance templates from Category:Language maintenance templates and Category:Script_talk_header_templates
+        /// </summary>
+        public static readonly Regex LanguageMaintenanceTemplates = Tools.NestedTemplateRegex(new[]
+        {
+            "Arabic script needed", "Armenian script needed", "Bengali script needed", "Berber script needed",
+            "Burmese script needed", "Cherokee script needed", "Chinese script needed", "Chinese script needed inline",
+            "Chinese script needed inline span", "Contains special characters", "Cyrillic script needed",
+            "Devanagari script needed", "Egyptian hieroglyphic script needed", "Ge'ez script needed",
+            "Georgian script needed", "Greek script needed", "Hebrew script needed", "Hiragana script needed",
+            "IPA-ga notice", "Japanese script needed", "Japanese script needed inline", "Key needed",
+            "Khmer script needed", "Korean script needed", "Lao script needed", "Meitei script needed", "Needchunom",
+            "Needhanja", "Needkanji", "Needs IPA", "Nepali script needed", "Persian script needed",
+            "Pronunciation needed", "Romanization needed", "Samoan script needed", "Script needed",
+            "Script needed inline", "Syriac script needed", "Tamil script needed", "Thai script needed",
+            "Tibetan script needed", "Tok Pisin script needed", "Verify spelling", "Vietnamese script needed",
+            "Yiddish script needed"
+        });
+
+        /// <summary>
         /// Matches the "reflist", "references-small", "references-2column" references display templates
         /// </summary>
         public static Regex ReferenceList;
@@ -1226,7 +1245,7 @@ namespace WikiFunctions
         /// <summary>
         /// Matches infoboxes, group 1 being the template name of the infobox
         /// </summary>
-        public static readonly Regex InfoBox = new Regex(@"(?:{{[\s_]*)(?:[Tt]emplate[\s_]*:[\s_]*)?([Ii]nfobox(?:[\s_]+[^{}\|\s][^{}\|]+?)?|[^{}\|]+?[Ii]nfobox)\s*\|(?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))}}");
+        public static readonly Regex InfoBox = new Regex(@"(?:{{[\s_]*)(?::?[\s_]*(?:(?i:Template)\s*|[Mm]sg)[\s_]*:[\s_]*\s*)?([Ii]nfobox(?:[\s_]+[^{}\|\s][^{}\|]+?)?|[^{}\|]+?[Ii]nfobox)([\s_]*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(\|((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))))?\}\})");
 
         /// <summary>
         /// Matches {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} and their redirects

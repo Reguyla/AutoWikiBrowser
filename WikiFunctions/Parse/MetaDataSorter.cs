@@ -416,14 +416,34 @@ en, sq, ru
         /// <param name="zerothSection">The wiki text of the zeroth section of the article.</param>
         internal string SortZerothSection(string zerothSection)
         {
-            bool moveDisplayLowerCaseItalicTitle = DisplayLowerCaseItalicTitleNeedsMoving(zerothSection);
+            int moveDisplayLowerCaseItalicTitle = DisplayLowerCaseItalicTitleNeedsMoving(zerothSection);
             List<string> alltemplates = Parsers.GetAllTemplates(zerothSection);
+
+            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
+            if(moveDisplayLowerCaseItalicTitle == 4)
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
+
+            // Language maintenance templates after infoboxes, per [[MOS:ORDER]]
+            if (TemplateExists(alltemplates, WikiRegexes.LanguageMaintenanceTemplates))
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.LanguageMaintenanceTemplates);
+
+            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly after an infobox
+            if(moveDisplayLowerCaseItalicTitle == 3)
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
+
+            // infoboxes after templates relating to English variety and date format, per [[MOS:ORDER]]
+            if (TemplateExists(alltemplates, WikiRegexes.InfoBox))
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.InfoBox);
+
+            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly before an infobox
+            if(moveDisplayLowerCaseItalicTitle == 2)
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
             // Templates relating to English variety and date format after maintenance templates, per [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.UseDatesEnglishTemplates))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.UseDatesEnglishTemplates);
 
-            // maintenance templates above infoboxes etc., zeroth section only
+            // maintenance templates above templates relating to English variety and date format etc., zeroth section only
             if (TemplateExists(alltemplates, WikiRegexes.MultipleIssues))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.MultipleIssues);
             else if (TemplateExists(alltemplates, WikiRegexes.MaintenanceTemplates))
@@ -445,7 +465,7 @@ en, sq, ru
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.Dablinks);
 
             // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} above hatnotes per [[MOS:ORDER]] if not being kept directly above, or after an infobox
-            if (moveDisplayLowerCaseItalicTitle)
+            if (moveDisplayLowerCaseItalicTitle == 1)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
             // {{short description}} above dablinks per [[MOS:ORDER]]
@@ -456,10 +476,10 @@ en, sq, ru
         }
 
         /// <summary>
-        /// Returns whether DISPLAYTITLE/italic title/lowercase title templates need to be processed by MetaDataSorter
+        /// Finds current relative order of DISPLAYTITLE/italic title/lowercase title templates versus infobox and other templates, so MetaDataSorter knows where to sort them
         /// </summary>
         /// <param name="articleText">Article text.</param>
-        private static bool DisplayLowerCaseItalicTitleNeedsMoving(string articleText)
+        private static int DisplayLowerCaseItalicTitleNeedsMoving(string articleText)
         {
             List<string> alltemplatesZ = WikiRegexes.NestedTemplates.Matches(Tools.GetZerothSection(articleText)).Cast<Match>().Select(m => m.Value).ToList();
 
@@ -473,17 +493,19 @@ en, sq, ru
                  * If have infobox, but there are other templates inbetween, then again template should be sorted in 2nd position               
                  * If template just before infobox, or anywhere after infobox, don't sort it, as MOS:ORDER allows those positions too
                  * */
-                if (infobox == -1)
-                    return true;
-                else if (displaytitle > infobox)
-                    return false;
-                else if (infobox - displaytitle == 1)
-                    return false;
-                else
-                    return true;
+                if (infobox == -1) // no infobox
+                    return 1;
+                if (infobox - displaytitle > 1) // currently further before infobox
+                    return 1;
+                if (infobox - displaytitle == 1) // currently just before infobox
+                    return 2;
+                if (displaytitle - infobox == 1) // currently just after infobox
+                    return 3;
+                if (displaytitle > infobox) // currently further after infobox
+                    return 4;
             }
 
-            return false;
+            return 0;
         }
 
         /// <summary>

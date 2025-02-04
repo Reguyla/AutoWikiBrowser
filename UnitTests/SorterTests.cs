@@ -273,6 +273,7 @@ Article";
 {{Use mdy dates}}
 {{Use American English}}
 {{Infobox actor}}
+{{Japanese script needed}}
 Hello";
 
             Assert.That(parser2.SortMetaData(correct, "Title"), Is.EqualTo(correct), "Use mdy dates - already correctly ordered");
@@ -284,6 +285,7 @@ Hello";
 {{Prod blp}}
 {{Use American English}}
 {{Infobox actor}}
+{{Japanese script needed}}
 Hello", "Title"), Is.EqualTo(correct), "Use mdy dates starting at top");
 
             Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
@@ -293,6 +295,7 @@ Hello", "Title"), Is.EqualTo(correct), "Use mdy dates starting at top");
 {{featured article}}
 {{Prod blp}}
 {{Infobox actor}}
+{{Japanese script needed}}
 Hello", "Title"), Is.EqualTo(correct), "Use mdy dates and American English starting at top");
 
             Assert.That(parser2.SortMetaData(@"{{featured article}}
@@ -302,6 +305,7 @@ Hello", "Title"), Is.EqualTo(correct), "Use mdy dates and American English start
 {{Use American English}}
 {{Prod blp}}
 {{Infobox actor}}
+{{Japanese script needed}}
 Hello", "Title"), Is.EqualTo(correct), "featured article starting at top");
 
             const string correct2 = @"{{Short description|American character}}
@@ -315,6 +319,7 @@ Hello", "Title"), Is.EqualTo(correct), "featured article starting at top");
 {{Use mdy dates}}
 {{Use American English}}
 {{Infobox actor}}
+{{Japanese script needed}}
 Hello";
 
             Assert.That(parser2.SortMetaData(correct2, "Title"), Is.EqualTo(correct2), "Already correctly ordered with use mdy, use American and MI");
@@ -430,6 +435,7 @@ Text";
 {{featured article}}
 {{Prod blp}}
 {{Infobox actor}}
+{{Japanese script needed}}
 Hello" + noinclude, "Title"), Is.EqualTo(correct + noinclude), "Zeroth section still sorted OK if later section has noinclude");
 
             const string zerothWithNoInclude = @"{{Use mdy dates}}
@@ -439,6 +445,7 @@ Hello" + noinclude, "Title"), Is.EqualTo(correct + noinclude), "Zeroth section s
 {{featured article}}
 {{Prod blp}}
 {{Infobox actor}}
+{{Japanese script needed}}
 <noinclude>something</noinclude>
 Hello";
             Assert.That(parser2.SortMetaData(zerothWithNoInclude, "Title"), Is.EqualTo(zerothWithNoInclude), "Zeroth section NOT sorted if has noinclude");
