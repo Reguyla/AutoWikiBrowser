@@ -267,6 +267,7 @@ namespace WikiFunctions
                 case "fa":
                     Orphan = Tools.NestedTemplateRegex(new[] {@"یتیم"});
                     DisambigStringArr = new[] { "ابهام‌زدایی", "ابهامزدایی", "ابهام زدایی" };
+                    NoRefCondensingTemplates = Tools.NestedTemplateRegex(new[] { "پک", "پانویس کوتاه‌شده" });
                     break;
                 case "fr":
                     InUse = Tools.NestedTemplateRegex(new[] {"En cours" });
@@ -333,6 +334,9 @@ namespace WikiFunctions
             
             if(DisambigStringArr.Any())
                 Disambigs = new Regex(Tools.NestedTemplateRegex(DisambigStringArr) + @"(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
+
+            if(NoRefCondensingTemplates is null)
+                NoRefCondensingTemplates = Tools.NestedTemplateRegex(new[] { "NOTIMPLEMENTEDDUMMYTEMPLATE"});
 
             PossiblyCommentedStub =
                 new Regex(
@@ -1367,11 +1371,11 @@ namespace WikiFunctions
         /// Matches &lt;ref&gt; tags with group parameter, optionally named as well. Does not match regular named references
         /// </summary>
         public static readonly Regex RefsGrouped = new Regex(@"(<\s*ref\s+(?:name\s*=\s*[^<>]*?\s*)?group\s*=\s*[^<>]*?/\s*>|<\s*ref\s+(?:name\s*=\s*[^<>]*?\s*)?group\s*=\s*[^<>]*?>(?>.(?<!<\s*ref\s+group\b[^>/]*?>|<\s*/\s*ref\s*>)|<\s*ref\s+group\b[^>/]*?>(?<DEPTH>)|<\s*/\s*ref\s*>(?<-DEPTH>))*(?(DEPTH)(?!))<\s*/\s*ref\s*>)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        
+
         /// <summary>
-        /// Matches &lt;cite&gt; tags
+        /// List of templates for which named ref condensing should not take place
         /// </summary>
-        public static readonly Regex Cites = new Regex(@"<cite[^>]*?>[^<]*<\s*/cite\s*>", RegexOptions.Singleline);
+        public static Regex NoRefCondensingTemplates;
         
         /// <summary>
         /// Matches &lt;/i&gt;...&lt;i&gt; reversed italics tags, group 1 being the content between the tags

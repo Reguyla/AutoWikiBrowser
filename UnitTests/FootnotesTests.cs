@@ -562,6 +562,21 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
         }
 
         [Test]
+        public void DuplicateNamedReferencesCondenseFaWiki()
+        {
+#if DEBUG
+            Variables.SetProjectLangCode("fa");
+            WikiRegexes.MakeLangSpecificRegexes();
+            string a = @"{{پک}}now<ref name=""Fred"">The Honourable Fred Smith, 2002</ref>but later than<ref name=""Fred"">The Honourable Fred Smith, 2002</ref> was";
+            Assert.That(Parsers.DuplicateNamedReferences(a), Is.EqualTo(a));
+
+            Variables.SetProjectLangCode("en");
+            WikiRegexes.MakeLangSpecificRegexes();
+            Assert.That(Parsers.DuplicateNamedReferences(@"now<ref name=""Fred"">The Honourable Fred Smith, 2002</ref>but later than<ref name=""Fred"">The Honourable Fred Smith, 2002</ref> was"), Is.EqualTo(@"now<ref name=""Fred"">The Honourable Fred Smith, 2002</ref>but later than<ref name=""Fred""/> was"));
+#endif
+        }
+
+        [Test]
         public void DuplicateNamedReferencesCondenseQuotes()
         {
             // duplicate references condense (both named)
@@ -666,6 +681,28 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
             Assert.That(Parsers.DuplicateUnnamedReferences(F), Is.EqualTo(F));
 
             Assert.That(Parsers.DuplicateUnnamedReferences(@"{{infobox foo|bar=1<ref>""bookrags.com""</ref>}} foo <ref> ""bookrags.com"" </ref>" + namedref), Is.EqualTo(@"{{infobox foo|bar=1<ref name=""bookrags.com"">""bookrags.com""</ref>}} foo <ref name=""bookrags.com"">""bookrags.com""</ref>" + namedref), "Ref named, but not condensed if declared in template");
+        }
+
+        [Test]
+        public void DuplicateUnnamedReferencesFaWiki()
+        {
+#if DEBUG
+            Variables.SetProjectLangCode("fa");
+            WikiRegexes.MakeLangSpecificRegexes();
+            string namedref = @"now <ref name=foo>foo</ref> and <ref name=foo/>", a = @"<ref>""bookrags.com""</ref> foo <ref> ""bookrags.com"" </ref>";
+            string template = @"{{پانویس کوتاه‌شده}}";
+
+            // existing named ref – good for edit
+            Assert.That(Parsers.DuplicateUnnamedReferences(a + template + namedref), Is.EqualTo(a + template + namedref), "named ref 1 - fawiki no change");
+
+            Variables.SetProjectLangCode("en");
+            WikiRegexes.MakeLangSpecificRegexes();
+            a = @"<ref>""bookrags.com""</ref> foo <ref> ""bookrags.com"" </ref>";
+
+            // existing named ref – good for edit
+            Assert.That(Parsers.DuplicateUnnamedReferences(a + namedref), Is.EqualTo(@"<ref name=""bookrags.com"">""bookrags.com""</ref> foo <ref name=""bookrags.com""/>" + namedref), "named ref 1");
+#endif
+
         }
 
         [Test]

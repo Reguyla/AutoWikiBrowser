@@ -265,6 +265,10 @@ namespace WikiFunctions.Parse
             string articleTextOriginal = articleText;
             Dictionary<string, string> NamedRefs = new Dictionary<string, string>();
 
+            // disable if known-incompatible templates present
+            if (GetAllTemplateDetail(articleText).Any(t => WikiRegexes.NoRefCondensingTemplates.IsMatch(t)))
+                return articleText;
+
             for (; ; )
             {
                 bool reparse = false;
@@ -385,6 +389,10 @@ namespace WikiFunctions.Parse
             /* On en-wiki AWB is asked not to add named references to an article if there are none currently, as some users feel
              * this is a change of citation style, so is against the [[WP:CITE]] "don't change established style" guidelines */
             if (Variables.LangCode.Equals("en") && !HasNamedReferences(articleText))
+                return articleText;
+
+            // disable if known-incompatible templates present
+            if (GetAllTemplateDetail(articleText).Any(t => WikiRegexes.NoRefCondensingTemplates.IsMatch(t)))
                 return articleText;
 
             // get list of all unnamed refs, then filter to only those with duplicate ref content
