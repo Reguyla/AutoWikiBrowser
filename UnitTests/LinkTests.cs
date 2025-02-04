@@ -1088,5 +1088,17 @@ http://example.com }}");
             Assert.That(Parsers.FixEmptyLinksAndTemplates("[[File:]][[Image:]]"), Is.Empty);
             Assert.That(Parsers.FixEmptyLinksAndTemplates("[[File:Test]][[Image:]]"), Is.EqualTo("[[File:Test]]"));
         }
+
+        [Test]
+        public void TestFixPipeTrick()
+        {
+            bool nochanges = false;
+            Assert.That(Parsers.FixPipeTrick("[[Pipe (computing)|]]"), Is.EqualTo("[[Pipe (computing)|Pipe]]"));
+            Assert.That(Parsers.FixLinks("[[Pipe (computing)|]]", "Title", out nochanges), Is.EqualTo("[[Pipe (computing)|Pipe]]"));
+            Assert.That(Parsers.FixPipeTrick("[[Phoenix, Arizona|]]"), Is.EqualTo("[[Phoenix, Arizona|Phoenix]]"));
+            Assert.That(Parsers.FixPipeTrick("[[Yours, Mine and Ours (1968 film)|]]"), Is.EqualTo("[[Yours, Mine and Ours (1968 film)|Yours, Mine and Ours]]"));
+            Assert.That(Parsers.FixPipeTrick("[[Elgin, Kershaw County, South Carolina|]]"), Is.EqualTo("[[Elgin, Kershaw County, South Carolina|Elgin]]"));
+            Assert.That(Parsers.FixPipeTrick("[[Wikipedia:Manual of Style (Persian)|]]"), Is.EqualTo("[[Wikipedia:Manual of Style (Persian)|Manual of Style]]"));
+        }
     }
 }

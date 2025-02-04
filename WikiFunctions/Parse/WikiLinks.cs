@@ -180,6 +180,8 @@ namespace WikiFunctions.Parse
             if (hasAnySelfInterwikis && !Variables.IsWikimediaMonolingualProject)
                 articleText = FixSelfInterwikis(articleText);
 
+            articleText = FixPipeTrick(articleText);
+
             noChange = articleText.Equals(articleTextAtStart);
             return articleText;
         }
@@ -482,6 +484,44 @@ namespace WikiFunctions.Parse
         {
             articleText = DuplicatePipedLinks.Replace(articleText, "[[$1|$2]]$3$2");
             return DuplicateUnpipedLinks.Replace(articleText, "[[$1]]$2$1");
+        }
+
+        private static readonly Regex PipeTrickLinkBracket = new Regex(@"\[\[(.*?)( *\(.*\) *)\|\]\]");
+        private static readonly Regex PipeTrickLinkComma = new Regex(@"\[\[(.*?)(,.*)\|\]\]");
+
+        /// <summary>
+        /// Expands links using pipe trick - if exist in page text then were saved in an area where they are not automatically expanded on save
+        /// See https://en.wikipedia.org/wiki/Help:Pipe_trick
+        /// </summary>
+        /// <param name="articleText"></param>
+        /// <returns></returns>
+        public static string FixPipeTrick(string articleText)
+        {
+            // Performance strategy: get list of all wikilinks, filter to those using pipe trick
+            List<string> allWikiLinks = GetAllWikiLinks(articleText).Where(l => l.EndsWith("|]]")).Distinct().ToList();
+
+            if (!allWikiLinks.Any())
+                return articleText;
+
+            foreach (string l in allWikiLinks)
+            {
+                string link = l;
+                // pipe trick is on brackets and commas
+                if(PipeTrickLinkBracket.IsMatch(link))
+                    link = PipeTrickLinkBracket.Replace(link, li =>
+                    {
+                        return @"[[" + li.Groups[1].Value + li.Groups[2].Value + "|" + Tools.RemoveNamespaceString(li.Groups[1].Value) + "]]";
+                    });
+                else
+                    link = PipeTrickLinkComma.Replace(link, li =>
+                    {
+                        return @"[[" + li.Groups[1].Value + li.Groups[2].Value + "|" + Tools.RemoveNamespaceString(li.Groups[1].Value) + "]]";
+                    });
+
+                articleText = articleText.Replace(l, link);
+            }
+
+            return articleText;
         }
     }
 }
