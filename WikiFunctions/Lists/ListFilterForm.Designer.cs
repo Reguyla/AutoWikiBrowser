@@ -148,7 +148,7 @@
             this.gbNamespaces.Controls.Add(this.pageNamespaces);
             this.gbNamespaces.Location = new System.Drawing.Point(3, 0);
             this.gbNamespaces.Name = "gbNamespaces";
-            this.gbNamespaces.Size = new System.Drawing.Size(232, 267);
+            this.gbNamespaces.Size = new System.Drawing.Size(232, 277);
             this.gbNamespaces.TabIndex = 0;
             this.gbNamespaces.TabStop = false;
             this.gbNamespaces.Text = "Namespaces to keep";
@@ -160,7 +160,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pageNamespaces.Location = new System.Drawing.Point(3, 16);
             this.pageNamespaces.Name = "pageNamespaces";
-            this.pageNamespaces.Size = new System.Drawing.Size(224, 242);
+            this.pageNamespaces.Size = new System.Drawing.Size(224, 252);
             this.pageNamespaces.TabIndex = 0;
             // 
             // gbSearch
@@ -312,7 +312,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(742, 284);
+            this.ClientSize = new System.Drawing.Size(742, 294);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
