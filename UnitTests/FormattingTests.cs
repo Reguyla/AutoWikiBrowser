@@ -941,6 +941,8 @@ Bring"));
             Assert.That(parser.Mdashes("Aged 15–19", "test"), Is.EqualTo("Aged 15–19"));
 
             Assert.That(parser.Mdashes("(ages 15-18)", "test"), Is.EqualTo("(ages 15–18)"));
+
+            Assert.That(parser.Mdashes("Now 1…3 was", "test"), Is.EqualTo("Now 1...3 was"));
         }
 
         [Test]
