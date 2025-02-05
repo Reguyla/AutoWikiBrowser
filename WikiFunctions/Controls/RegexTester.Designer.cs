@@ -88,6 +88,7 @@
             this.txtFind.Name = "txtFind";
             this.txtFind.Size = new System.Drawing.Size(373, 78);
             this.txtFind.TabIndex = 1;
+            this.txtFind.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.toolTip1.SetToolTip(this.txtFind, "The regular expression to find");
             this.txtFind.TextChanged += new System.EventHandler(this.ConditionsChanged);
             this.txtFind.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressHandler);
