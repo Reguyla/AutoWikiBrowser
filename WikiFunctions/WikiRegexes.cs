@@ -1292,7 +1292,7 @@ namespace WikiFunctions
             "other ships", "other uses", "other uses2", "otheruses",
             "otheruses2", "otheruses3", "otheruses4", "other uses of", "otheruse", "outline", "redirect-acronym",
             "redirect-distinguish", "redirect-distinguish-text", "redirect-distinguish2", "redirect-multi",
-            "redirect-several", "redirect", "redirect2", "redirect3", "see also", "this", "disambig-acronym", "selfref",
+            "redirect-several", "redirect-synonym", "redirect", "redirect2", "redirect3", "see also", "technical reasons", "this", "disambig-acronym", "selfref",
             "Family name hatnote", "Bhutanese name", "British barrelled name", "Dinka name", "Ethiopian name",
             "Fijian name", "Given name hatnote", "Icelandic name", "Indian patronymic", "Indonesian name", "Malay name",
             "Norse name", "Patronymic name", "Pakistani name", "Philippine name", "Portuguese name",

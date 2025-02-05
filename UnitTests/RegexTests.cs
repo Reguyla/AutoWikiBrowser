@@ -1312,11 +1312,13 @@ cit"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-distinguish}}"), @"{{redirect-distinguish}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-several}}"), @"{{redirect-several}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-multi}}"), @"{{redirect-multi}}");
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-synonym}}"), @"{{redirect-synonym}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect2}}"), @"{{redirect2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect3}}"), @"{{redirect3}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect}}"), @"{{redirect}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{see also}}"), @"{{see also}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{selfref}}"), @"{{selfref}}");
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Technical reasons}}"), @"{{Technical reasons}}");
 
             ClassicAssert.IsFalse(WikiRegexes.Dablinks.IsMatch(@"{{For fake template|Fred the dancer|Fred(dancer)}}"));
             ClassicAssert.IsFalse(WikiRegexes.Dablinks.IsMatch(@"{{REDIRECT2|Fred the dancer|Fred Smith (dancer)}}"));
