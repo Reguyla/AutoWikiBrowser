@@ -33,6 +33,7 @@ namespace WikiFunctions.Controls
         public ArticleTextBox()
         {
             LanguageOption = RichTextBoxLanguageOptions.DualFont;
+            EnableAutoDragDrop = true;
             InitializeComponent();
         }
 
