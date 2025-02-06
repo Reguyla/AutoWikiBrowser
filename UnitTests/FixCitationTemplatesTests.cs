@@ -63,6 +63,7 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=hello""|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello|format=PDF}} was"), "stray end quote");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|trans_title=""hello|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|trans_title=hello|format=PDF}} was"), "trans title stray starting quote");
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|trans_title=hello’s today|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|trans_title=hello's today|format=PDF}} was"), "single curly quote");
+            Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|trans_title=‘hello today’|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|trans_title='hello today'|format=PDF}} was"), "single curly quote open and close");
 
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=a.com|title=""hello"" world|format=PDF}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=""hello"" world|format=PDF}} was"), "no change: partial quote");
 
