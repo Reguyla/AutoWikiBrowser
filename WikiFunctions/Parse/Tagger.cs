@@ -574,7 +574,7 @@ namespace WikiFunctions.Parse
                 else
                     // remove wikify, except section templates or wikify tags with reason parameter specified
                     articleText = WikiRegexes.Wikify.Replace(articleText,
-                            m => Tools.IsSectionOrReasonTemplate(m.Value, articleText) ? m.Value : m.Groups[1].Value)
+                            m => Tools.IsSectionOrReasonTemplate(m.Value, articleText) ? m.Value : "")
                         .TrimStart();
 
                 if (!WikiRegexes.Wikify.IsMatch(articleText))

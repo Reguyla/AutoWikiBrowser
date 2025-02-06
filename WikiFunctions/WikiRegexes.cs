@@ -143,9 +143,9 @@ namespace WikiFunctions
                 "Uncatstub"
             });
             DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "Dep", "Nuevointernallinks" });
-            Wikify = new Regex(@"(?:{{\s*(?:Wikify|Underlinked)(?:\s*\|\s*(?:" +DateYearMonthParameter +@"|.*?))?}}|({{\s*(?:Article|Multiple)\s*issues\b[^{}]*?)\|\s*(?:wikify|underlinked)\s*=\s*(?:{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}|[^{}\|]+))", RegexOptions.IgnoreCase);
+            Wikify = Tools.NestedTemplateRegex(new [] {"Wikify", "Underlinked"});
             InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
-            LinkFGAs =  Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
+            LinkFGAs = Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
             ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
             Persondata = Tools.NestedTemplateRegex("persondata");
             SIAs = Tools.NestedTemplateRegex(new[]
