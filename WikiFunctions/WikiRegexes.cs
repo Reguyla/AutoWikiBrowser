@@ -1284,7 +1284,7 @@ namespace WikiFunctions
         /// </summary>
         public static readonly Regex Dablinks = Tools.NestedTemplateRegex(new[]
         {
-            "about", "about2", "about-distinguish", "about-distinguish2", "ambiguous link", "for", "for2", "for-multi",
+            "about", "about2", "about-distinguish", "about-distinguish-text", "about-distinguish2", "about year", "about other people", "ambiguous link", "broader", "for", "for2", "for-multi",
             "for multi", "dablink", "distinguish", "distinguish2", "distinguish-otheruses", "distinguish-otheruses2",
             "further", "further2", "hatnote", "otherpeople", "otherpeople1", "otherpeople2", "otherpeople3",
             "other hurricanes", "other people", "other people2", "other people3", "other persons", "otherpersons",
@@ -1292,7 +1292,7 @@ namespace WikiFunctions
             "other ships", "other uses", "other uses2", "otheruses",
             "otheruses2", "otheruses3", "otheruses4", "other uses of", "otheruse", "outline", "redirect-acronym",
             "redirect-distinguish", "redirect-distinguish-text", "redirect-distinguish2", "redirect-multi",
-            "redirect-several", "redirect-synonym", "redirect", "redirect2", "redirect3", "see also", "technical reasons", "this", "disambig-acronym", "selfref",
+            "redirect-several", "redirect-synonym", "redirect", "redirect2", "redirect3", "see also", "see also-text", "technical reasons", "this", "disambig-acronym", "selfref",
             "Family name hatnote", "Bhutanese name", "British barrelled name", "Dinka name", "Ethiopian name",
             "Fijian name", "Given name hatnote", "Icelandic name", "Indian patronymic", "Indonesian name", "Malay name",
             "Norse name", "Patronymic name", "Pakistani name", "Philippine name", "Portuguese name",
