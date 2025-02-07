@@ -1248,6 +1248,11 @@ namespace WikiFunctions
         public static readonly Regex InfoBox = new Regex(@"(?:{{[\s_]*)(?::?[\s_]*(?:(?i:Template)\s*|[Mm]sg)[\s_]*:[\s_]*\s*)?([Ii]nfobox(?:[\s_]+[^{}\|\s][^{}\|]+?)?|[^{}\|]+?[Ii]nfobox)([\s_]*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(\|((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))))?\}\})");
 
         /// <summary>
+        /// Matches infoboxes, group 1 being the template name of the infobox; with optional same-line comment before
+        /// </summary>
+        public static readonly Regex InfoBoxOptionalCommentBefore = new Regex(@"(?:<!--\s*[^<>\r\n]+\s*-->\s*)*" + InfoBox);
+
+        /// <summary>
         /// Matches {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} and their redirects
         /// </summary>
         // "Miscapitalization", ""Lowercase-user", ""Techlim", ""User lowercase", ""Lower case", ""Lowercase", ""Lower case title", ""Lower-case title", ""Lowercasetitle", ""Smalltitle", ""Uncapitalized title", ""Uncapitalised title", ""Redirect lowercase title", ""Redirect Lowercase title", ""Lot"

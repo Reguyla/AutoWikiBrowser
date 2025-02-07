@@ -264,7 +264,7 @@ Article";
         }
 
         [Test]
-        public void UseDatesTemplates()
+        public void ZerothSectionSorting()
         {
             const string correct = @"{{Short description|American character}}
 {{other uses}}
@@ -449,6 +449,16 @@ Hello" + noinclude, "Title"), Is.EqualTo(correct + noinclude), "Zeroth section s
 <noinclude>something</noinclude>
 Hello";
             Assert.That(parser2.SortMetaData(zerothWithNoInclude, "Title"), Is.EqualTo(zerothWithNoInclude), "Zeroth section NOT sorted if has noinclude");
+
+            const string infoboxWithComment = @"{{Short description|American character}}
+{{other uses}}
+{{featured article}}
+{{Use mdy dates}}
+{{Use American English}}
+<!-- comment before infobox -->{{Infobox actor}}
+{{Japanese script needed}}
+Hello";
+            Assert.That(parser2.SortMetaData(infoboxWithComment, "Title"), Is.EqualTo(infoboxWithComment), "Handles infobox with comment first");
         }
 
         [Test]
