@@ -2303,12 +2303,14 @@ namespace AutoWikiBrowser
             this.saveXML.FileName = "settings";
             resources.ApplyResources(this.saveXML, "saveXML");
             this.saveXML.SupportMultiDottedExtensions = true;
+            this.saveXML.RestoreDirectory = true;
             // 
             // openXML
             // 
             resources.ApplyResources(this.openXML, "openXML");
             this.openXML.SupportMultiDottedExtensions = true;
             this.openXML.FileOk += new System.ComponentModel.CancelEventHandler(this.openXML_FileOk);
+            this.openXML.RestoreDirectory = true;
             // 
             // Timer
             // 
