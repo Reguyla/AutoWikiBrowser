@@ -748,7 +748,10 @@ namespace WikiFunctions.Parse
                 if (linkParam == Tools.RemoveSyntax(fileLinkTarget))
                 {
                     // use of template function to adjust parameters
-                    res = "[[" + Tools.RemoveTemplateParameter("{{" + res.Trim("[]".ToCharArray()) + "}}", "link").Trim("{}".ToCharArray()) + "]]";
+                    int len = res.Length;
+                    res = Tools.RemoveTemplateParameter("{{" + res.Substring(2, len - 4) + "}}", "link");
+                    len = res.Length;
+                    res = "[[" + res.Substring(2, len - 4) + "]]";
                 }
                 return res;
             });

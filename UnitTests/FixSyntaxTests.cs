@@ -568,6 +568,8 @@ Other
             Assert.That(p.FixImageSelfLinks(@"[[File:Foo bar.jpg|link=http://en.wikipedia.org/wiki/File:Foo_bar.jpg]]"), Is.EqualTo(@"[[File:Foo bar.jpg]]"));
             Assert.That(p.FixImageSelfLinks(@"[[File:Foo_bar.jpg|link=http://en.wikipedia.org/wiki/File:Foo_bar.jpg|thumb]]"), Is.EqualTo(@"[[File:Foo_bar.jpg|thumb]]"));
             Assert.That(p.FixImageSelfLinks(@"[[File:Foo_bar.jpg|link=http://en.wikipedia.org/wiki/File:Foo_bar.jpg|thumb|alt=hello]]"), Is.EqualTo(@"[[File:Foo_bar.jpg|thumb|alt=hello]]"));
+            Assert.That(p.FixImageSelfLinks(@"[[File:Foo_bar.jpg|link=http://en.wikipedia.org/wiki/File:Foo_bar.jpg|thumb|alt=hello {{world}}]]"), Is.EqualTo(@"[[File:Foo_bar.jpg|thumb|alt=hello {{world}}]]"));
+            Assert.That(p.FixImageSelfLinks(@"[[File:Foo_bar.jpg|link=http://en.wikipedia.org/wiki/File:Foo_bar.jpg|thumb|desc with [[link]]]]"), Is.EqualTo(@"[[File:Foo_bar.jpg|thumb|desc with [[link]]]]"));
             Assert.That(p.FixImageSelfLinks(@"[[File:Bonasone,_Bologna_1555.jpg|link=https://en.wikipedia.org/wiki/File:Bonasone,_Bologna_1555.jpg|thumb|Socrates 1555.]]"), Is.EqualTo(@"[[File:Bonasone,_Bologna_1555.jpg|thumb|Socrates 1555.]]"));
 
             string nochange1 = @"[[File:Foo.pdf|link=http://en.wikipedia.org/wiki/File:Foo.pdf?page=1]]";
