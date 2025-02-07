@@ -535,7 +535,6 @@ en, sq, ru
                 return "";
 
             List<string> categoryList = new List<string>();
-            string originalArticleText = articleText;
             string articleTextNoComments = Tools.ReplaceWithSpaces(articleText, WikiRegexes.Comments.Matches(articleText));
 
             // don't operate on pages with (incorrectly) multiple defaultsorts
@@ -576,12 +575,18 @@ en, sq, ru
                 
                 int cutoff = Math.Max(0, cq.Index - 500);
                 string cut = articleText.Substring(cutoff);
+
+                // if unformatted text is matched entirely by the cats regex then it's a commented out category, which we can handle as normal
+                // it's only larger comments (of which only a part is a cat) that are a problem
+                List<string> catsList = WikiRegexes.RemoveCatsAllCats.Matches(cut).Cast<Match>().Select(m => m.Value).ToList();
+                allUnformatted.RemoveAll(u => catsList.Contains(u));
+
                 cut = WikiRegexes.RemoveCatsAllCats.Replace(cut, m =>
                 {
                     // don't pull cats from wiki comments/unformatted text regions
                     if (allUnformatted.Any(u => u.Contains(m.Value.Trim()) && !u.Equals(m.Value.Trim()) && !categoryList.Contains(u)))
                         return m.Value;
-                    
+
                     if (!CatsForDeletion.IsMatch(m.Value))
                         categoryList.Add(m.Value.Trim());
 

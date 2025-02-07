@@ -1287,6 +1287,19 @@ foo";
         }
 
         [Test]
+        public void CategoryAndCommentTests2()
+        {
+            const string correct = @"{{DEFAULTSORT:2024-25 Turkish Basketball Super League}}
+[[Category:Basketbol Süper Ligi seasons]]
+[[Category:2024–25 in European basketball leagues|Turkish]]
+[[Category:2024–25 in Turkish basketball|1]]
+[[Category:Current basketball seasons|Turkey]]
+<!-- [[Category:Current basketball seasons|Turkey]] -->";
+            string sameCatInComment = correct;
+            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct + "\r\n"), "Handle a cat that is also in a comment - comment after");
+        }
+
+        [Test]
         public void CategoryDupeRemoval()
         {
             string cats = @"[[Category:One]]
