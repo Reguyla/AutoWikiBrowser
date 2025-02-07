@@ -723,5 +723,37 @@ namespace WikiFunctions.Parse
 
             return m.Value;
         }
+
+        /// <summary>
+        /// Removes link parameter within a [[File: wikilink if link target is same as the file i.e. self link with no other URL parameters
+        /// </summary>
+        /// <param name="articleText"></param>
+        /// <returns>Updated article text</returns>
+        public string FixImageSelfLinks(string articleText)
+        {
+            WikiFunctions.Controls.Lists.ListMaker LMaker = new WikiFunctions.Controls.Lists.ListMaker();
+            articleText = WikiRegexes.FileNamespaceLink.Replace(articleText, m =>
+            {
+                string res = m.Value;
+
+                // is value of link parameter (cleaned of URL part and tidied up
+                string linkParam = Tools.GetTemplateParameterValue("{{" + m.Groups[1].Value + "}}", "link");
+
+                linkParam = LMaker.NormalizeTitle(linkParam);
+                linkParam = Tools.RemoveSyntax(linkParam);
+
+                // is the link target, tidied up
+                string fileLinkTarget = WikiRegexes.WikiLink.Match(m.Value).Groups[1].Value;
+
+                if (linkParam == Tools.RemoveSyntax(fileLinkTarget))
+                {
+                    // use of template function to adjust parameters
+                    res = "[[" + Tools.RemoveTemplateParameter("{{" + res.Trim("[]".ToCharArray()) + "}}", "link").Trim("{}".ToCharArray()) + "]]";
+                }
+                return res;
+            });
+
+            return articleText;
+        }
     }
 }

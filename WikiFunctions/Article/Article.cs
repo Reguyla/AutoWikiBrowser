@@ -1561,6 +1561,9 @@ namespace WikiFunctions
             // run whether redirect or not, must be after FixPeopleCategories
             SetDefaultSort(Variables.LangCode, skip.SkipNoDefaultSortAdded, restrictDefaultsortAddition);
             Variables.Profiler.Profile("SetDefaultSort");
+
+            // specific fix that requires unhidden text
+            AWBChangeArticleText("FixImageSelfLinks", parsers.FixImageSelfLinks(ArticleText), true);
             
             // pass unhidden text to MetaDataSorter so that it can allow for comments around categories etc.
             AWBChangeArticleText("Sort meta data",
