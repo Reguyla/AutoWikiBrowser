@@ -1519,6 +1519,11 @@ namespace WikiFunctions.Controls.Lists
                 }
             }
 
+            // using "DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed" to enable rich formatting above means we need to set the horizontal
+            // width ourselves so that a horizontal scrollbar is shown when needed
+            string longestArticle = lbArticles.Items.Cast<Article>().Select(ar => ar.Name).ToList().OrderByDescending(s => s.Length).First();
+            lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestArticle, e.Font).Width;
+
             e.DrawFocusRectangle();
         }
 
