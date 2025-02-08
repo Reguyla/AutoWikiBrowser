@@ -78,6 +78,7 @@ namespace WikiFunctions.Parse
         }
         
         private static readonly Regex CiteTitleYear = new Regex(@"(?<=\|\s*(?:trans_)?title\s*=\s*)[^\|{}<>]*[12][0-9]{3}\b", RegexOptions.Compiled);
+        private static readonly Regex CiteTitleYearQ = new Regex(@"(?<=\|\s*(?:trans_)?title\s*=\s*"")[^\|{}<>]*[12][0-9]{3}\b", RegexOptions.Compiled);
         private static readonly Regex MathCodeTypoTemplates = Tools.NestedTemplateRegex(new [] { "math", "code", "As written", "Notatypo", "Not a typo", "Proper name", "Typo" });
         private static readonly Regex RetainBraces = new Regex(@"(?<=\[\[).+(?=\]\])", RegexOptions.Singleline);
         private static readonly Regex RetainStartBraces = new Regex(@"(?<=\[\[).+", RegexOptions.Singleline);
@@ -154,7 +155,8 @@ namespace WikiFunctions.Parse
                 if (AnyTagList.Any(t => t.Contains("imagemap")))
                     Replace(WikiRegexes.ImageMap.Matches(articleText), ref articleText);
 
-                // Hide any title or trans_title parameters with dates in them
+                // Hide any title or trans_title parameters with dates in them, first allowing for title starting with quote that we need to keep
+                Replace(CiteTitleYearQ.Matches(articleText), ref articleText);
                 Replace(CiteTitleYear.Matches(articleText), ref articleText);
 
                 // gallery tag does not require Image: namespace link before image in gallery, so hide anything before pipe

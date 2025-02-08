@@ -482,6 +482,8 @@ y";
             AssertNotChanged(@"{{Infobox settlement
 <!--See the Table at Infobox Settlement for all fields and descriptions of usage-->
 <!-- Basic info  ---------------->| name = Z}}", "ABC", "Template with newline, comment, newline in name");
+
+            AssertNotChanged(@"{{cite web |url=https://d.gov/t72|title= ""2020 Census: Puerto Rico""|website=A}}");
         }
         
         [Test]
