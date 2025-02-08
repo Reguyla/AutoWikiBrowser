@@ -459,6 +459,22 @@ Hello";
 {{Japanese script needed}}
 Hello";
             Assert.That(parser2.SortMetaData(infoboxWithComment, "Title"), Is.EqualTo(infoboxWithComment), "Handles infobox with comment first");
+
+            const string shortDescWithComment = @"{{Short description|American character}}<!--a comment-->
+{{other uses}}
+{{featured article}}
+{{Use mdy dates}}
+{{Use American English}}
+{{Infobox actor}}
+{{Japanese script needed}}
+Hello";
+            Assert.That(parser2.SortMetaData(shortDescWithComment, "Title"), Is.EqualTo(shortDescWithComment), "Handles short description with comment after");
+
+            const string shortDescWithComment2 = @"{{Short description|American character}} <!-- ""none"" is preferred when the title is sufficiently descriptive; see [[WP:SDNONE]] -->
+{{Infobox actor}}
+{{Japanese script needed}}
+Hello";
+            Assert.That(parser2.SortMetaData(shortDescWithComment2, "Title"), Is.EqualTo(shortDescWithComment2), "Handles short description with comment after, then infobox");
         }
 
         [Test]

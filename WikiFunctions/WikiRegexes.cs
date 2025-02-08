@@ -1250,7 +1250,7 @@ namespace WikiFunctions
         /// <summary>
         /// Matches infoboxes, group 1 being the template name of the infobox; with optional same-line comment before
         /// </summary>
-        public static readonly Regex InfoBoxOptionalCommentBefore = new Regex(@"(?:<!--\s*[^<>\r\n]+\s*-->\s*)*" + InfoBox);
+        public static readonly Regex InfoBoxOptionalCommentBefore = new Regex(@"(?:<!--\s*[^<>\r\n]+\s*--> *)*" + InfoBox);
 
         /// <summary>
         /// Matches {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} and their redirects
@@ -1307,9 +1307,9 @@ namespace WikiFunctions
 
         /// <summary>
         /// Matches {{short description}} template and its redirects
-        /// Plus optional wiki comment(s) after
+        /// Plus optional wiki comment(s) after, on same line
         /// </summary>
-        public static readonly Regex ShortDescriptionTemplate = new Regex(Tools.NestedTemplateRegex(new[] { "Short description", "Brief description", "Short desc", "Short-description", "Shortdescription" }, false).ToString() + @"(?:\s*<!--[^<>\r\n]+-->\s*?)*");
+        public static readonly Regex ShortDescriptionTemplate = new Regex(Tools.NestedTemplateRegex(new[] { "Short description", "Brief description", "Short desc", "Short-description", "Shortdescription" }, false).ToString() + @"(?:\s*<!--[^<>\r\n]+--> ?)*");
 
         /// <summary>
         /// matches speedy deletion templates (from Category:Speedy_deletion_templates), deletion templates (Category:Proposed_deletion-related_templates) and protection templates (Category:Protection_templates)
