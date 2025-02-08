@@ -303,6 +303,8 @@ namespace WikiFunctions.Parse
         private static readonly Regex AnyTag = new Regex(@"<([^<>]+)>");
         private static readonly Regex ImageToBar = new Regex(@"^.+?\.[a-zA-Z]{3,4}\s*(?=\||\r\n)", RegexOptions.Multiline);
         private static readonly Regex SimpleRef = new Regex(@"<ref>[^<>]+</ref>");
+        private static readonly Regex TemplatesWithContentExemptFromHideMore = Tools.NestedTemplateRegex(new[] {"Short description"});
+
         /// <summary>
         /// Hides images, external links, templates, headings
         /// </summary>
@@ -316,7 +318,15 @@ namespace WikiFunctions.Parse
             MoreHide.Clear();
             cachedOriginalArticleTextBeforeHideMore = articleText;
 
-            ReplaceMore(WikiRegexes.NestedTemplates.Matches(articleText), ref articleText);
+            articleText = WikiRegexes.NestedTemplates.Replace(articleText, m => {
+                string res = m.Value;
+
+                // if template is one of these listed then we only need to hide the template name e.g. so that Typo fixing enabled on content of {{Short description}}
+                if(TemplatesWithContentExemptFromHideMore.IsMatch(res))
+                    ReplaceMore(Regex.Matches(TemplatesWithContentExemptFromHideMore.Match(res).Groups[2].Value, Regex.Escape(TemplatesWithContentExemptFromHideMore.Match(res).Groups[2].Value)), ref res);
+                else
+                    ReplaceMore(WikiRegexes.NestedTemplates.Matches(res), ref res);
+                return res;});
 
             ReplaceMore(WikiRegexes.AllTags.Matches(articleText), ref articleText);
 

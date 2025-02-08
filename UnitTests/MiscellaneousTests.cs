@@ -153,6 +153,8 @@ abc={{bar}}
             AssertAllHiddenMore("{{foo|{{bar|{{{1|}}}}}}}");
             AssertAllHiddenMore("{{foo|\r\nbar= {blah} blah}}");
             AssertAllHiddenMore("{{foo|\r\nbar= {blah} {{{1|{{blah}}}}}}}");
+
+            RegexAssert.IsMatch("123{{" + Hidden + "|foo}}123", HideMore("123{{short description|foo}}123"));
         }
 
         [Test]
