@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -126,19 +126,19 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="menuitemMakeFromTextBoxUndo.Size" type="System.Drawing.Size, System.Drawing">
-    <value>320, 46</value>
+    <value>164, 22</value>
   </data>
   <data name="menuitemMakeFromTextBoxUndo.Text" xml:space="preserve">
     <value>&amp;Undo</value>
   </data>
   <data name="toolStripSeparator27.Size" type="System.Drawing.Size, System.Drawing">
-    <value>317, 6</value>
+    <value>161, 6</value>
   </data>
   <data name="menuitemMakeFromTextBoxCut.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+X</value>
   </data>
   <data name="menuitemMakeFromTextBoxCut.Size" type="System.Drawing.Size, System.Drawing">
-    <value>320, 46</value>
+    <value>164, 22</value>
   </data>
   <data name="menuitemMakeFromTextBoxCut.Text" xml:space="preserve">
     <value>Cu&amp;t</value>
@@ -147,7 +147,7 @@
     <value>Ctrl+C</value>
   </data>
   <data name="menuitemMakeFromTextBoxCopy.Size" type="System.Drawing.Size, System.Drawing">
-    <value>320, 46</value>
+    <value>164, 22</value>
   </data>
   <data name="menuitemMakeFromTextBoxCopy.Text" xml:space="preserve">
     <value>&amp;Copy</value>
@@ -156,44 +156,44 @@
     <value>Ctrl+V</value>
   </data>
   <data name="menuitemMakeFromTextBoxPaste.Size" type="System.Drawing.Size, System.Drawing">
-    <value>320, 46</value>
+    <value>164, 22</value>
   </data>
   <data name="menuitemMakeFromTextBoxPaste.Text" xml:space="preserve">
     <value>&amp;Paste</value>
   </data>
   <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>317, 6</value>
+    <value>161, 6</value>
   </data>
   <data name="selectAllToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+A</value>
   </data>
   <data name="selectAllToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>320, 46</value>
+    <value>164, 22</value>
   </data>
   <data name="selectAllToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Select All</value>
   </data>
   <data name="toolStripSeparator2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>317, 6</value>
+    <value>161, 6</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="toolStripTextBox1.MaxLength" type="System.Int32, mscorlib">
     <value>6</value>
   </data>
   <data name="toolStripTextBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>100, 47</value>
+    <value>100, 23</value>
   </data>
   <data name="toolStripTextBox1.Text" xml:space="preserve">
     <value>Enter line number</value>
   </data>
   <data name="goToLineToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>320, 46</value>
+    <value>164, 22</value>
   </data>
   <data name="goToLineToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Go to Line</value>
   </data>
   <data name="mnuTextBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>321, 298</value>
+    <value>165, 154</value>
   </data>
   <data name="&gt;&gt;mnuTextBox.Name" xml:space="preserve">
     <value>mnuTextBox</value>
@@ -205,13 +205,13 @@
     <value>Top, Right</value>
   </data>
   <data name="btnClose.Location" type="System.Drawing.Point, System.Drawing">
-    <value>1539, 72</value>
+    <value>577, 30</value>
   </data>
   <data name="btnClose.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="btnClose.Size" type="System.Drawing.Size, System.Drawing">
-    <value>200, 55</value>
+    <value>75, 23</value>
   </data>
   <data name="btnClose.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>
@@ -238,13 +238,13 @@
     <value>False</value>
   </data>
   <data name="btnMake.Location" type="System.Drawing.Point, System.Drawing">
-    <value>1291, 72</value>
+    <value>484, 30</value>
   </data>
   <data name="btnMake.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="btnMake.Size" type="System.Drawing.Size, System.Drawing">
-    <value>232, 55</value>
+    <value>87, 23</value>
   </data>
   <data name="btnMake.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -274,13 +274,13 @@
     <value>VB .NET 2.0</value>
   </data>
   <data name="cmboLang.Location" type="System.Drawing.Point, System.Drawing">
-    <value>909, 76</value>
+    <value>341, 32</value>
   </data>
   <data name="cmboLang.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="cmboLang.Size" type="System.Drawing.Size, System.Drawing">
-    <value>359, 39</value>
+    <value>137, 21</value>
   </data>
   <data name="cmboLang.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -304,13 +304,13 @@
     <value>True</value>
   </data>
   <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>747, 83</value>
+    <value>280, 35</value>
   </data>
   <data name="label1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 0, 8, 0</value>
   </data>
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>142, 32</value>
+    <value>55, 13</value>
   </data>
   <data name="label1.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -334,13 +334,13 @@
     <value>True</value>
   </data>
   <data name="lblStatus.Location" type="System.Drawing.Point, System.Drawing">
-    <value>221, 83</value>
+    <value>83, 35</value>
   </data>
   <data name="lblStatus.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 0, 8, 0</value>
   </data>
   <data name="lblStatus.Size" type="System.Drawing.Size, System.Drawing">
-    <value>245, 32</value>
+    <value>93, 13</value>
   </data>
   <data name="lblStatus.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -364,13 +364,13 @@
     <value>True</value>
   </data>
   <data name="chkModuleEnabled.Location" type="System.Drawing.Point, System.Drawing">
-    <value>32, 81</value>
+    <value>12, 34</value>
   </data>
   <data name="chkModuleEnabled.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="chkModuleEnabled.Size" type="System.Drawing.Size, System.Drawing">
-    <value>158, 36</value>
+    <value>65, 17</value>
   </data>
   <data name="chkModuleEnabled.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -397,31 +397,31 @@
     <value>F11</value>
   </data>
   <data name="showOnlyCodeBoxToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>431, 46</value>
+    <value>205, 22</value>
   </data>
   <data name="showOnlyCodeBoxToolStripMenuItem.Text" xml:space="preserve">
     <value>Show only code box</value>
   </data>
   <data name="viewToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>94, 45</value>
+    <value>44, 20</value>
   </data>
   <data name="viewToolStripMenuItem.Text" xml:space="preserve">
     <value>View</value>
   </data>
   <data name="guideToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>256, 46</value>
+    <value>152, 22</value>
   </data>
   <data name="guideToolStripMenuItem.Text" xml:space="preserve">
     <value>Quick &amp;guide</value>
   </data>
   <data name="manualToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>256, 46</value>
+    <value>152, 22</value>
   </data>
   <data name="manualToolStripMenuItem.Text" xml:space="preserve">
     <value>Manual</value>
   </data>
   <data name="helpToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>92, 45</value>
+    <value>44, 20</value>
   </data>
   <data name="helpToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Help</value>
@@ -433,7 +433,7 @@
     <value>16, 5, 0, 5</value>
   </data>
   <data name="menuStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1771, 55</value>
+    <value>664, 24</value>
   </data>
   <data name="menuStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -457,13 +457,13 @@
     <value>True</value>
   </data>
   <data name="chkFixedwidth.Location" type="System.Drawing.Point, System.Drawing">
-    <value>32, 134</value>
+    <value>12, 56</value>
   </data>
   <data name="chkFixedwidth.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="chkFixedwidth.Size" type="System.Drawing.Size, System.Drawing">
-    <value>251, 36</value>
+    <value>100, 17</value>
   </data>
   <data name="chkFixedwidth.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -490,13 +490,13 @@
     <value>True</value>
   </data>
   <data name="lblBuilt.Location" type="System.Drawing.Point, System.Drawing">
-    <value>747, 136</value>
+    <value>280, 57</value>
   </data>
   <data name="lblBuilt.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 0, 8, 0</value>
   </data>
   <data name="lblBuilt.Size" type="System.Drawing.Size, System.Drawing">
-    <value>365, 32</value>
+    <value>139, 13</value>
   </data>
   <data name="lblBuilt.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -532,7 +532,7 @@
     <value>8, 0, 8, 0</value>
   </data>
   <data name="lblStart.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1707, 603</value>
+    <value>640, 253</value>
   </data>
   <data name="lblStart.TabIndex" type="System.Int32, mscorlib">
     <value>9</value>
@@ -559,7 +559,7 @@
     <value>Courier New, 9pt</value>
   </data>
   <data name="txtCode.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 610</value>
+    <value>0, 256</value>
   </data>
   <data name="txtCode.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
@@ -574,7 +574,7 @@
     <value>Both</value>
   </data>
   <data name="txtCode.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1692, 376</value>
+    <value>637, 160</value>
   </data>
   <data name="txtCode.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -601,13 +601,13 @@
     <value>Courier New, 9pt</value>
   </data>
   <data name="lblEnd.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 999</value>
+    <value>0, 419</value>
   </data>
   <data name="lblEnd.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 0, 8, 0</value>
   </data>
   <data name="lblEnd.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1699, 93</value>
+    <value>637, 39</value>
   </data>
   <data name="lblEnd.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -625,13 +625,13 @@
     <value>2</value>
   </data>
   <data name="panel1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>32, 188</value>
+    <value>12, 79</value>
   </data>
   <data name="panel1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="panel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1707, 1078</value>
+    <value>640, 452</value>
   </data>
   <data name="panel1.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -655,16 +655,16 @@
     <value>47</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>16, 31</value>
+    <value>6.0, 13.0</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>1771, 1295</value>
+    <value>664, 543</value>
   </data>
   <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>8, 7, 8, 7</value>
   </data>
   <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>1760, 1264</value>
+    <value>680, 581</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Module</value>
