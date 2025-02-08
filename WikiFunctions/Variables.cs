@@ -1009,6 +1009,7 @@ namespace WikiFunctions
                 case "sr":
                     mSummaryTag = "користећи";
                     WPAWB = "[[Project:AWB|AWB]]";
+                    UntitledHeading = "Први поднаслов";
                     break;
 
                 case "sv":
