@@ -473,7 +473,6 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.lbArticles.ContextMenuStrip = this.mnuListBox;
-            this.lbArticles.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.lbArticles.FormattingEnabled = true;
             this.lbArticles.HorizontalScrollbar = true;
             this.lbArticles.Location = new System.Drawing.Point(3, 105);
