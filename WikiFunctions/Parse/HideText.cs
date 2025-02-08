@@ -322,8 +322,11 @@ namespace WikiFunctions.Parse
                 string res = m.Value;
 
                 // if template is one of these listed then we only need to hide the template name e.g. so that Typo fixing enabled on content of {{Short description}}
-                if(TemplatesWithContentExemptFromHideMore.IsMatch(res))
-                    ReplaceMore(Regex.Matches(TemplatesWithContentExemptFromHideMore.Match(res).Groups[2].Value, Regex.Escape(TemplatesWithContentExemptFromHideMore.Match(res).Groups[2].Value)), ref res);
+                if (TemplatesWithContentExemptFromHideMore.IsMatch(res))
+                {
+                    string tName = TemplatesWithContentExemptFromHideMore.Match(res).Groups[2].Value;
+                    ReplaceMore(Regex.Matches(res, Regex.Escape(tName)), ref res);
+                }
                 else
                     ReplaceMore(WikiRegexes.NestedTemplates.Matches(res), ref res);
                 return res;});
