@@ -3864,6 +3864,16 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 e.SuppressKeyPress = true;
                 cmboEditSummary.Items.Add(cmboEditSummary.Text);
             }
+
+            if (e.Modifiers == Keys.Control)
+            {
+                if (e.KeyCode == Keys.A)
+                {
+                    cmboEditSummary.SelectAll();
+                    e.SuppressKeyPress = true;
+                    e.Handled = true;
+                }
+            }
         }
 
         private void listToolStripMenuItem_Click(object sender, EventArgs e)
