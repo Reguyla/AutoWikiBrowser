@@ -1165,7 +1165,7 @@ namespace WikiFunctions
             "Citation style", "Cite check", "Cleanup", "Cleanup bare URLs", "Cleanup-bare URLs", "Cleanup biography",
             "Cleanup-biography", "Cleanup-laundry", "Cleanup list", "Cleanup-list", "Cleanup-PR", "Cleanup red links",
             "Cleanup reorganize", "Cleanup-reorganize", "Cleanup rewrite", "Cleanup-rewrite", "Cleanup school",
-            "Cleanup-school", "Cleanup-spam", "Cleanup tense", "Cleanup-tense", "COI", "Colloquial", "Condense",
+            "Cleanup-school", "Cleanup-spam", "Cleanup tense", "Cleanup-tense", "Cleanup translation", "COI", "Colloquial", "Condense",
             "Confusing", "Context", "Contradict", "Contradict-other", "Contradicts other", "Copy edit",
             "Criticism section", "Crystal", "Dead end", "Disputed", "Editorial", "Essay", "Essay-like", "Example farm",
             "Excessive examples", "Expand article", "Expert needed", "Expert-subject", "External links", "Fanpov",
