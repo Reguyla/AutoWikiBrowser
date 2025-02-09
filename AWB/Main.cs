@@ -2877,7 +2877,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     UnknownWikiProjectBannerShellParameters = TheArticle.UnknownWikiProjectBannerShellParameters();
                     if (UnknownWikiProjectBannerShellParameters.Any())
                     {
-                        string warn = "Unknown parameters in WPBannerShell: " + " (" +
+                        string warn = "Unknown parameters in WikiProject banner shell: " + " (" +
                             UnknownWikiProjectBannerShellParameters.Count + ") "
                             + string.Join(",", UnknownWikiProjectBannerShellParameters.ToArray());
                         lbAlerts.Items.Add(warn);

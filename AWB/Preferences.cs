@@ -557,7 +557,7 @@ namespace AutoWikiBrowser
             {18, "Unclosed tags"},
             {19, "Unformatted references"},
             {20, "Unknown parameters in multiple issues"},
-            {21, "Unknown parameters in WPBannerShell"},
+            {21, "Unknown parameters in WikiProject banner shell"},
             {22, "Editor's signature or link to user space"}
         };
     }
