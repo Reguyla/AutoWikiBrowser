@@ -1940,9 +1940,8 @@ bar
         [Test]
         public void WikiProjectBannerShellUnnamedParam()
         {
-            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|{{WPBiography|foo=bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|1={{WPBiography|foo=bar}}}}"), "1= added when missing");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|
-{{WPBiography|foo=bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|1=
+{{WPBiography|foo=bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|
 {{WPBiography|foo=bar}}}}"));
             
             const string otherUnnamed = @"{{WikiProject banner shell|random}}";
@@ -1974,11 +1973,11 @@ bar
         [Test]
         public void WikiProjectBannerShellMisc()
         {
-            const string a = @"{{wpbs|1=|banner collapsed=no|
+            const string a = @"{{wpbs|banner collapsed=no|
 {{WPBiography|living=yes|class=Start|priority=|listas=Hill, A}}
 {{WikiProject Gender Studies}}
 {{WikiProject Oklahoma}}
-}}", b = @"{{WikiProject banner shell|banner collapsed=no|1=
+}}", b = @"{{WikiProject banner shell|banner collapsed=no|
 {{WPBiography|living=yes|class=Start|priority=|listas=Hill, A}}
 {{WikiProject Gender Studies}}
 {{WikiProject Oklahoma}}

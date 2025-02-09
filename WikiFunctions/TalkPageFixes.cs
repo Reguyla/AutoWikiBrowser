@@ -386,7 +386,6 @@ namespace WikiFunctions.TalkPages
 
         /// <summary>
         /// Performs fixes to the WikiProject banner shell template:
-        /// Add explicit call to first unnamed parameter 1= if missing/has no value
         /// Remove duplicate parameters
         /// Moves any other WikiProjects into WPBS
         /// </summary>
@@ -410,25 +409,7 @@ namespace WikiFunctions.TalkPages
             {
                 string newValue = m.Value;
                 newValue = Tools.RemoveExcessTemplatePipes(newValue);
-                string arg1 = Tools.GetTemplateParameterValue(newValue, "1");
                 bool shellTemplate = Tools.GetTemplateName(newValue).ToLower().EndsWith("shell");
-                
-                // Add explicit call to first unnamed parameter 1= if missing/has no value
-                if (arg1.Length == 0)
-                {
-                    int argCount = Tools.GetTemplateArgumentCount(newValue);
-
-                    for (int arg = 1; arg <= argCount; arg++)
-                    {
-                        string argValue = Tools.GetTemplateArgument(newValue, arg);
-
-                        if (argValue.StartsWith(@"{{"))
-                        {
-                            newValue = newValue.Insert(Tools.GetTemplateArgumentIndex(newValue, arg), "1=");
-                            break;
-                        }
-                    }
-                }
                 
                 // remove duplicate parameters
                 newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
@@ -489,9 +470,7 @@ namespace WikiFunctions.TalkPages
             foreach (Match m in WikiRegexes.WikiProjectBannerShellTemplate.Matches(articletext))
             {
                 string newValue = m.Value;
-                string arg1 = Tools.GetTemplateParameterValue(newValue, "1");
-                
-                Match m2 = WPBiographyR.Match(arg1);
+                Match m2 = WPBiographyR.Match(newValue);
 
                 if (m2.Success)
                 {
