@@ -1935,6 +1935,23 @@ bar
 {{WikiProject foo}}}}
 "), Is.EqualTo(VitalArticle), "Support Vital article - put inside");
 
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|{{WPBiography|foo=bar}}}}
+{{WikiProject foo}}"), Is.EqualTo(@"{{WikiProject banner shell|{{WPBiography|foo=bar}}
+{{WikiProject foo}}}}
+"), "WikiProjects pulled into WPBS - new style WPBS without 1=");
+
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|class=A|{{WPBiography|foo=bar}}}}
+{{WikiProject foo}}"), Is.EqualTo(@"{{WikiProject banner shell|class=A|{{WPBiography|foo=bar}}
+{{WikiProject foo}}}}
+"), "WikiProjects pulled into WPBS - new style WPBS with class");
+
+            Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|class=A}}
+{{WikiProject foo}}
+{{WikiProject bar}}"), Is.EqualTo(@"{{WikiProject banner shell|class=A|
+{{WikiProject foo}}
+{{WikiProject bar}}}}
+
+"), "WikiProjects pulled into WPBS - new style WPBS with class, no existing WPB");
         }
         
         [Test]

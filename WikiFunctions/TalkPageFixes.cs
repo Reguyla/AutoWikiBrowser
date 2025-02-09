@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WikiFunctions.TalkPages
 {
@@ -462,8 +463,21 @@ namespace WikiFunctions.TalkPages
                         newParams += Tools.Newline(m.Value);
                     }
                 }
+
                 if (newParams.Length > 0)
-                    articletext = articletext.Replace(WPBS, Tools.SetTemplateParameterValue(WPBS, "1", Tools.GetTemplateParameterValue(WPBS, "1") + newParams)).TrimStart();
+                {
+                    // use old-style 1= if already there
+                    if(Tools.GetTemplateParameterValue(WPBS, "1").Length > 0)
+                        articletext = articletext.Replace(WPBS, Tools.SetTemplateParameterValue(WPBS, "1", Tools.GetTemplateParameterValue(WPBS, "1") + newParams)).TrimStart();
+                    else
+                    {
+                        // new-style, don't create 1=, will require | if no existing templates inside
+                        if(!WikiRegexes.NestedTemplates.IsMatch(WPBS.Substring(2)))
+                            newParams = "|" + newParams;
+
+                        articletext = articletext.Replace(WPBS, WPBS.Substring(0, WPBS.Length - 2) + newParams + "}}").TrimStart();
+                    }
+                }
             }
             
             // check living, blpo flags against WPBiography
