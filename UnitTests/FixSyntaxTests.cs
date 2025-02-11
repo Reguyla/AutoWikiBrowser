@@ -885,6 +885,8 @@ Now [[A]], was."));
             Assert.That(Parsers.FixSyntax(@"<ref>]http://www.foo.com bar]</ref>"), Is.EqualTo(@"<ref>[http://www.foo.com bar]</ref>"));
             Assert.That(Parsers.FixSyntax(@"<ref name=A>]http://www.foo.com bar]</ref>"), Is.EqualTo(@"<ref name=A>[http://www.foo.com bar]</ref>"));
             Assert.That(Parsers.FixSyntax(@"<ref>]http://www.foo.com bar] this one</ref>"), Is.EqualTo(@"<ref>[http://www.foo.com bar] this one</ref>"));
+
+            Assert.That(Parsers.FixSyntax(@"1 November 1900<ref>{in lang|pl}} Some text</ref>"), Is.EqualTo(@"1 November 1900<ref>{{in lang|pl}} Some text</ref>"), "Fix missing leading { in template at start of ref");
         }
 
         [Test]

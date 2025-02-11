@@ -223,6 +223,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex FileImageCurlyBrackets = new Regex(@"{{\s*("+Variables.NamespacesCaseInsensitive[Namespace.File]+@"\s*)", RegexOptions.Compiled);
         private static readonly Regex CiteRefEndsTripleClosingBrace = new Regex(@"([^}])\}(\}\}\s*</ref>)", RegexOptions.Compiled);
         private static readonly Regex CiteRefEndsTripleOpeningBrace = new Regex(@"(>\s*)\{\{\{+(\s*[Cc]ite)", RegexOptions.Compiled);
+        private static readonly Regex CiteRefStartsSingleOpeningBrace = new Regex(@"(>\s*\{)([^<>{}\r\n]+\}\})", RegexOptions.Compiled);
         private static readonly Regex RefExternalLinkWrongBracket = new Regex(@"(<ref[^<>/]*>)\]", RegexOptions.Compiled);
         private static readonly Regex CurlyToStraightSingleBracket = new Regex(@"([^{}()]){([^{}()]+)\)");
 
@@ -411,6 +412,9 @@ namespace WikiFunctions.Parse
 
                     // unclosed {{multiple issues, don't match into infobox
                     articleTextTemp = Regex.Replace(articleTextTemp, @"({{[Mm]ultiple issues\s*\|\s*(\s*{{[^{}]+}})+)(?<!.*{{[^{}|]*[Ii]nfobox.*)", "$1\r\n}}", RegexOptions.Singleline);
+
+                    // if it's <ref>{template}}
+                    articleTextTemp = CiteRefStartsSingleOpeningBrace.Replace(articleTextTemp, "$1{$2");
                 }
 
                 unbalancedBracket = UnbalancedBrackets(articleTextTemp, out bracketLength);
