@@ -1302,7 +1302,7 @@ namespace WikiFunctions
             "Fijian name", "Given name hatnote", "Icelandic name", "Indian patronymic", "Indonesian name", "Malay name",
             "Norse name", "Patronymic name", "Pakistani name", "Philippine name", "Portuguese name",
             "Spanish colonial name", "Spanish married name", "Traditional Norwegian name", "Western name order",
-            "Western Slavic name"
+            "Western Slavic name", "See Wiktionary"
         }, false);
 
         /// <summary>
