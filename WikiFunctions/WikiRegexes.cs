@@ -1177,7 +1177,7 @@ namespace WikiFunctions
             "News release", "No footnotes", "Non-free", "Notability", "NPOV language", "Obituary", "One source",
             "Original research", "Orphan", "Out of date", "Over coverage", "Over-coverage", "Overlinked",
             "Overly detailed", "Over-quotation", "Page numbers needed", "Peacock", "Plot", "POV", "POV-check",
-            "Primary sources", "Prose", "Prune", "Recentism", "Refimprove", "Religious text primary", "Repetition",
+            "Primary sources", "Promotional", "Prose", "Prune", "Recentism", "Refimprove", "Religious text primary", "Repetition",
             "Review", "Sections", "Self-contradictory", "Self-published", "Sources exist", "Speculation", "Story",
             "Synthesis", "Technical", "Third-party", "Tone", "Too few opinions", "Too many sections", "Travel guide",
             "Trivia", "Unbalanced", "Under construction", "Underlinked", "Undue", "Undue weight", "Unfocused", "Unreferenced",
