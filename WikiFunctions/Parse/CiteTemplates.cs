@@ -61,8 +61,7 @@ namespace WikiFunctions.Parse
             new Regex(@"\|\s*access(?:daymonth|month(?:day)?|year)\s*=\s*(?=\||}})");
 
         private static readonly Regex DateLeadingZero =
-            new Regex(@"(?<=\|\s*(?:access|archive)?\-?date\s*=\s*)(?:0([1-9]\s+" + WikiRegexes.MonthsNoGroup +
-                      @")|(\s*" + WikiRegexes.MonthsNoGroup + @"\s)+0([1-9],?))(\s+(?:20[012]|1[89]\d)\d)?(\s*(?:\||}}))");
+            new Regex(@"(?<=\|\s*(?:access|archive)?\-?date\s*=\s*)(?:0([1-9]\s+[A-Z][a-z]{2,})|(\s*[A-Z][a-z]{2,}\s)+0([1-9],?))(\s+(?:20[012]|1[89]\d)\d)?(\s*(?:\||}}))");
 
         private static readonly Regex LangTemplate = new Regex(@"(\|\s*language\s*=\s*)({{(\w{2}) icon}}\s*)(?=\||}})");
 

@@ -372,6 +372,9 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
             const string URL = @"{{cite web|url=http://www.broadwaytovegas.com/October31,1999.html |title=Out of Chapter 11 bankruptcy |publisher=Broadwaytovegas.com |accessdate=2011-02-12}}";
 
             Assert.That(Parsers.FixCitationTemplates(URL), Is.EqualTo(URL), "No change to date spacing in URL");
+
+            string d = @"{{cite web|url=a |title=b |year=2008 | accessdate=1 Mar 2008}}";
+            Assert.That(Parsers.FixCitationTemplates(@"{{cite web|url=a |title=b |year=2008 | accessdate=01 Mar 2008}}"), Is.EqualTo(d));
         }
 
         [Test]
