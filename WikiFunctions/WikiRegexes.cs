@@ -1180,7 +1180,7 @@ namespace WikiFunctions
             "Primary sources", "Prose", "Prune", "Recentism", "Refimprove", "Religious text primary", "Repetition",
             "Review", "Sections", "Self-contradictory", "Self-published", "Sources exist", "Speculation", "Story",
             "Synthesis", "Technical", "Third-party", "Tone", "Too few opinions", "Too many sections", "Travel guide",
-            "Trivia", "Unbalanced", "Underlinked", "Undue", "Undue weight", "Unfocused", "Unreferenced",
+            "Trivia", "Unbalanced", "Under construction", "Underlinked", "Undue", "Undue weight", "Unfocused", "Unreferenced",
             "Unreliable sources", "Update", "USgovtPOV", "Very long", "Weasel", "Wikify",
             "Expand Afrikaans", "Expand Albanian", "Expand Amharic", "Expand Arabic", "Expand Aragonese",
             "Expand Armenian", "Expand Assamese", "Expand Asturian", "Expand Azerbaijani", "Expand Basque",
