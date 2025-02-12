@@ -165,6 +165,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex YearOnly = new Regex(@"^[12]\d{3}$", RegexOptions.Compiled);
         private static readonly Regex ISBNDash = new Regex(@"(\d)[–](\d|X$)");
         private static readonly Regex BalancedArrows = new Regex(@"(?:‹([^›]+)›)");
+        private static readonly Regex ArchiveOrgURL = new Regex(@"^https?://(?:web\.archive\.org|archive\.today)/(?:web/)?(\d{8})(?:\d{6}/)");
 
         /// <summary>
         /// Performs fixes to a given citation template call
@@ -527,6 +528,15 @@ namespace WikiFunctions.Parse
 
             if (!theURLoriginal.Equals(theURL))
                 newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
+
+            // url=...archive to url=original, archive-url=archive
+            if (ArchiveOrgURL.IsMatch(theURL) && archiveurl.Length == 0)
+            {
+                newValue = Tools.SetTemplateParameterValue(newValue, "archive-url", theURL);
+                newValue = Tools.SetTemplateParameterValue(newValue, "archive-date", Regex.Replace(ArchiveOrgURL.Match(theURL).Groups[1].Value, @"(\d{4})(\d\d)(\d\d)", "$1-$2-$3"));
+                theURL = ArchiveOrgURL.Replace(theURL, "");
+                newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
+            }
 
             // {{dead link}} should be placed outside citation, not in format field per [[Template:Dead link]]
             Match deadLinkMatch = WikiRegexes.DeadLink.Match(format);

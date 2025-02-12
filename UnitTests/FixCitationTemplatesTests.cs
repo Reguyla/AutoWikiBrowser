@@ -899,5 +899,11 @@ publisher=The BBC|date=3 June 2009|access-date=15 January 2010}}"));
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=http://site.net cool site]|title=hello}} was"), Is.EqualTo(@"now {{cite web| url=http://site.net cool site]|title=hello}} was"));
             Assert.That(Parsers.FixCitationTemplates(@"now {{cite web| url=[http://site.net cool site|title=hello}} was"), Is.EqualTo(@"now {{cite web| url=[http://site.net cool site|title=hello}} was"));
         }
+
+        [Test]
+        public void FixCitationTemplatesArchiveUrls()
+        {
+            Assert.That(Parsers.FixCitationTemplates(@"{{cite news|title=Initiative is withdrawn|url=http://web.archive.org/web/20120930101428/http://www.swissinfo.ch/eng/swiss_news/Initiative_is_withdrawn.html?cid=26670404|access-date=25 August 2010|newspaper=[[swissinfo]]|date=25 August 2010}}"), Is.EqualTo(@"{{cite news|title=Initiative is withdrawn|url=http://www.swissinfo.ch/eng/swiss_news/Initiative_is_withdrawn.html?cid=26670404|access-date=25 August 2010|newspaper=[[swissinfo]]|date=25 August 2010|archive-url=http://web.archive.org/web/20120930101428/http://www.swissinfo.ch/eng/swiss_news/Initiative_is_withdrawn.html?cid=26670404|archive-date=2012-09-30}}"), "URL is web.archive.org");
+        }
     }
 }
