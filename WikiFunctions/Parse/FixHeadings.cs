@@ -77,6 +77,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex HeadingSubHeading = new Regex(@"^(==+)(.*)\1((?:\r\n\1=+.*\1=+\s*)+)\r\n", RegexOptions.Multiline);
 
         private static readonly Regex CommentThenHeading = new Regex(@"-->\r\n={1,6}(.*?)={1,6}");
+        private static readonly Regex HeadingLevelOne = new Regex(@"^=([^=](?:.*?[^=])?)=(?=(?: *⌊⌊⌊⌊\d{1,4}⌋⌋⌋⌋| *<!--.*?-->)?\s*$)", RegexOptions.Multiline);
 
         // Covered by: FormattingTests.TestFixHeadings(), incomplete
         /// <summary>
@@ -173,6 +174,10 @@ namespace WikiFunctions.Parse
                         articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleText, "");
                     }
                 }
+
+                // level 1 headings to level 2 on mainspace
+                if(Namespace.IsMainSpace(articleTitle) && customHeadings.Any(s => HeadingLevelOne.IsMatch(s)))
+                    articleText = HeadingLevelOne.Replace(articleText, "==$1==");
             }
 
             return articleText;

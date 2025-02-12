@@ -345,11 +345,11 @@ texty
 === hello3 ===
 "));
 
-            // level 1 not altered
+            // level 1 altered to level 2
             Assert.That(Parsers.FixHeadings(@"=level1=
 text
 ====hello====
-", "a"), Is.EqualTo(@"=level1=
+", "a"), Is.EqualTo(@"==level1==
 text
 
 ==hello==
@@ -363,11 +363,6 @@ text
 
 ====hello====
 "));
-
-            // no changes on level 1 only
-            Assert.That(Parsers.FixHeadings(@"=hello=
-text", "a"), Is.EqualTo(@"=hello=
-text"));
 
             // don't consider the "references", "see also", or "external links" level 2 headings when counting level two headings
             // single heading
@@ -450,11 +445,18 @@ text"));
 
             // not at level 1 or 2
             Assert.That(Parsers.FixHeadings(@"== '''Caernarvon''' 1536-1832 ==", "a"), Is.EqualTo(@"== '''Caernarvon''' 1536-1832 =="));
-            Assert.That(Parsers.FixHeadings(@"= '''Caernarvon''' 1536-1832 =", "a"), Is.EqualTo(@"= '''Caernarvon''' 1536-1832 ="));
+            Assert.That(Parsers.FixHeadings(@"= '''Caernarvon''' 1536-1832 =", "a"), Is.EqualTo(@"== '''Caernarvon''' 1536-1832 =="));
 
             Assert.That(Parsers.FixHeadings("=='''See Also'''==", "test"), Is.EqualTo("==See also=="), "remove bold and fix casing at once");
 
             Assert.That(Parsers.FixHeadings(@"=='''Header with bold'''==<br/>", "test"), Is.EqualTo(@"==Header with bold=="));
+        }
+
+        [Test]
+        public void TestFixHeadingsLevel1()
+        {
+            Assert.That(Parsers.FixHeadings(@"=See also=", "a"), Is.EqualTo(@"==See also=="), "L1 converted to L2 on mainspace");
+            Assert.That(Parsers.FixHeadings(@"=See also=", "Talk:A"), Is.EqualTo(@"=See also="), "No change when not mainspace");
         }
 
         [Test]
