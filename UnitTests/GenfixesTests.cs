@@ -484,6 +484,7 @@ y";
 <!-- Basic info  ---------------->| name = Z}}", "ABC", "Template with newline, comment, newline in name");
 
             AssertNotChanged(@"{{cite web |url=https://d.gov/t72|title= ""2020 Census: Puerto Rico""|website=A}}");
+            AssertNotChanged(@"{{cite news|title=""Herald"" Week-End Magazine The wreek of the malabar, Easter 1931.|url=http://trove.nla.gov.au/newspaper/|date=29 March 1947}}");
         }
         
         [Test]
