@@ -809,17 +809,22 @@ en, sq, ru
             List<string> theTemplates = templateRegex.Matches(zerothSection).Cast<Match>().Where(m => Tools.GetTemplateArgument(m.Value, 1) != "section").Select(m => m.Value).ToList();
 
             // deduplicate tags
-            theTemplates = Parsers.DeduplicateMaintenanceTags(theTemplates);
+            List<string> theTemplatesDeduplicated = Parsers.DeduplicateMaintenanceTags(theTemplates);
 
+            // remove existing from article
             foreach (string t in theTemplates)
             {
-                strTemplates += t + "\r\n";
-
                 // remove colons before template
                 zerothSection = zerothSection.Replace(":" + t + "\r\n", "");
 
                 // additionally, remove whitespace after template
                 zerothSection = Regex.Replace(zerothSection, Regex.Escape(t) + @" *(?:\r\n)?", "");
+            }
+
+            // rebuild new
+            foreach (string t in theTemplatesDeduplicated)
+            {
+                strTemplates += t + "\r\n";
             }
 
             articleText = strTemplates + zerothSection + restOfArticle;

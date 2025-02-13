@@ -652,6 +652,13 @@ Fred has a dog.
             Assert.That(MetaDataSorter.MoveTemplate(d + "\r\n" + e + "\r\n" + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d + "\r\n"), "move and dedupe");
 
             Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e + "\r\n" + d, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d), "dedupe when move not required");
+
+            Assert.That(MetaDataSorter.MoveTemplate(@"{{pp-pc}}
+{{pp-pc|small=yes}}
+
+Foo", WikiRegexes.DeletionProtectionTags), Is.EqualTo(@"{{pp-pc | small=yes}}
+
+Foo"), "dedupe when move not required - deletion tags");
         }
 
         [Test]
