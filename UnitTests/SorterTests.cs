@@ -484,7 +484,27 @@ Hello";
 {{Infobox ship characteristics
 }}
 |}";
-            Assert.That(parser2.SortMetaData(multipleInfoxbox, "Title"), Is.EqualTo(multipleInfoxbox), "Don't sort when multiple infoxboxes");
+            Assert.That(parser2.SortMetaData(multipleInfoxbox, "Title"), Is.EqualTo(multipleInfoxbox), "Don't sort when wikitable");
+        }
+
+        [Test]
+        public void ZerothSectionSortingErrors()
+        {
+            const string unbalancedMultiInfobox = @"{{Short description|A}}
+{{pp-blp|small=yes}}
+{{Use American English|date=September 2020}}
+{{Use mdy dates|date=August 2023}}
+{{Infobox person
+| name               = A
+| module             = {{Infobox TikTok personality
+| subbox               =yes    
+<!-- Use the stats_update section of the {{Infobox YouTube personality -->
+}}
+| module2            = {{Infobox musical artist
+| embed              = yes
+}}
+}}";
+            Assert.That(parser2.SortMetaData(unbalancedMultiInfobox, "Title"), Is.EqualTo(unbalancedMultiInfobox), "Handle unbalanced brackets in comments");
         }
 
         [Test]

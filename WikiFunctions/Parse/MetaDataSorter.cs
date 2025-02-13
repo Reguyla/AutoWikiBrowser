@@ -421,6 +421,9 @@ en, sq, ru
             int moveDisplayLowerCaseItalicTitle = DisplayLowerCaseItalicTitleNeedsMoving(zerothSection);
             List<string> alltemplates = Parsers.GetAllTemplates(zerothSection);
 
+            HideText Hider = new HideText(true, false, true);
+            zerothSection = Hider.Hide(zerothSection);
+
             // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
             if(moveDisplayLowerCaseItalicTitle == 4)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
@@ -483,6 +486,7 @@ en, sq, ru
             if (TemplateExists(alltemplates, WikiRegexes.ShortDescriptionTemplate))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.ShortDescriptionTemplate);
 
+            zerothSection = Hider.AddBack(zerothSection);
             return zerothSection;
         }
 
