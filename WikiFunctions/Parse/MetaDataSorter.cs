@@ -273,6 +273,7 @@ en, sq, ru
         }
 
         private static readonly Regex HatnoteGroup = Tools.NestedTemplateRegex("hatnote group");
+        private static readonly Regex WikiTable = new Regex(@"^{\|", RegexOptions.Multiline);
 
         /// <summary>
         /// Sorts article meta data
@@ -292,7 +293,8 @@ en, sq, ru
                 string zerothSection = Tools.GetZerothSection(articleText);
                 string restOfArticle = articleText.Substring(zerothSection.Length);
 
-                if(!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection))
+                // cannot safelly apply sorting if noinclude/{{{1}}}/{{:ifexist/wikitable in zeroth section
+                if(!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection) && !WikiTable.IsMatch(zerothSection))
                     articleText = SortZerothSection(zerothSection) + restOfArticle;
             }
 

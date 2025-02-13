@@ -475,6 +475,16 @@ Hello";
 {{Japanese script needed}}
 Hello";
             Assert.That(parser2.SortMetaData(shortDescWithComment2, "Title"), Is.EqualTo(shortDescWithComment2), "Handles short description with comment after, then infobox");
+
+            const string multipleInfoxbox = @"{|{{Infobox ship begin|infobox caption=PTF-3}}
+{{Infobox ship image
+}}
+{{Infobox ship career
+}}
+{{Infobox ship characteristics
+}}
+|}";
+            Assert.That(parser2.SortMetaData(multipleInfoxbox, "Title"), Is.EqualTo(multipleInfoxbox), "Don't sort when multiple infoxboxes");
         }
 
         [Test]
