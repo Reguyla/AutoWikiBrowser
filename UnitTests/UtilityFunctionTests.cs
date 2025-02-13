@@ -1046,6 +1046,7 @@ fish | name = Bert }} ''Bert'' is a good fish."));
             ClassicAssert.IsTrue(Parsers.NoIncludeIncludeOnlyProgrammingElement(@"<onlyinclude>blah</onlyinclude>"));
             ClassicAssert.IsTrue(Parsers.NoIncludeIncludeOnlyProgrammingElement(@"{{{1}}}"));
             ClassicAssert.IsTrue(Parsers.NoIncludeIncludeOnlyProgrammingElement(@"{{{3}}}"));
+            ClassicAssert.IsTrue(Parsers.NoIncludeIncludeOnlyProgrammingElement(@"{{#ifexist}}"));
 
             ClassicAssert.IsFalse(Parsers.NoIncludeIncludeOnlyProgrammingElement(@"hello"));
             ClassicAssert.IsFalse(Parsers.NoIncludeIncludeOnlyProgrammingElement(@""));
