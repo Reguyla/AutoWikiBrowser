@@ -892,7 +892,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex WordWhitespaceEndofline = new Regex(@"(\w+)\s+$", RegexOptions.Compiled);
         private static string CategoryStart;
 
-        private static readonly Regex TripleBraceNumIfExist = new Regex(@"({{{\d}}}|{{#ifexist}})", RegexOptions.Compiled);
+        private static readonly Regex TripleBraceNumIfExist = new Regex(@"({{{\d}}}|{{#ifexist)", RegexOptions.Compiled);
 
         /// <summary>
         /// Returns whether the article text has a &lt;noinclude&gt; or &lt;includeonly&gt; or '{{{1}}}' etc. which should not appear on the mainspace
