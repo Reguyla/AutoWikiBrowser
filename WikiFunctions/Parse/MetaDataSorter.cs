@@ -532,7 +532,7 @@ en, sq, ru
             return 0;
         }
 
-        private static readonly Regex TemplatesToEndOfArticle = Tools.NestedTemplateRegex(new[] { "coord" });
+        private static readonly Regex TemplatesToEndOfArticle = Tools.NestedTemplateRegex(new[] { "coord", "WikidataCoord" });
 
         /// <summary>
         /// Moves templates to end of article text from earlier sections
