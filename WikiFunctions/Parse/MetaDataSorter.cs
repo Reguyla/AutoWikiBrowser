@@ -287,6 +287,12 @@ en, sq, ru
             if (Namespace.Determine(articleTitle) == Namespace.Template || Namespace.Determine(articleTitle) == Namespace.Module) // Don't sort on templates/modules
                 return articleText;
 
+            // Performance: get all the templates so "move template" functions below only called when template(s) present in article
+            List<string> alltemplates = Parsers.GetAllTemplates(articleText);
+
+            if (TemplateExists(alltemplates, TemplatesToEndOfArticle))
+                articleText = MoveTemplateToEndOfArticle(articleText);
+
             // sort zeroth section
             if (Namespace.IsMainSpace(articleTitle) && !Tools.IsRedirect(articleText))
             {
@@ -302,9 +308,6 @@ en, sq, ru
             // if article contains some substituted template stuff, sorting the data may mess it up (further)
             if (Namespace.IsMainSpace(articleTitle) && Parsers.NoIncludeIncludeOnlyProgrammingElement(articleText))
                 return articleText;
-
-            // Performance: get all the templates so "move template" functions below only called when template(s) present in article
-            List<string> alltemplates = Parsers.GetAllTemplates(articleText);
 
             // short pages monitor check for en-wiki: keep at very end of article if present
             // See [[Template:Long comment/doc]]
@@ -521,6 +524,57 @@ en, sq, ru
             }
 
             return 0;
+        }
+
+        private static readonly Regex TemplatesToEndOfArticle = Tools.NestedTemplateRegex(new[] { "coord" });
+
+        /// <summary>
+        /// Moves templates to end of article text from earlier sections
+        /// </summary>
+        /// <param name="articleText"></param>
+        /// <returns></returns>
+        internal string MoveTemplateToEndOfArticle(string articleText)
+        {
+            List<string> allTemplatesDetail = Parsers.GetAllTemplateDetail(articleText);
+
+            allTemplatesDetail = allTemplatesDetail.Where(t => TemplatesToEndOfArticle.IsMatch(t)).ToList();
+
+            // nothing to do if no templates found
+            if(!allTemplatesDetail.Any())
+                return articleText;
+
+            // do not move the templates if nested in another template e.g. {{coord}} inside infobox
+            if(allTemplatesDetail.Any(t => TemplatesToEndOfArticle.Match(t).Index > 0))
+                return articleText;
+
+            // find last section of article
+            MatchCollection hc = WikiRegexes.Headings.Matches(articleText);
+            string lastSection = articleText, restOfArticleText = articleText;
+
+            if (hc.Count > 0)
+            {
+                int h = hc[hc.Count - 1].Index;
+                lastSection = lastSection.Substring(h);
+                restOfArticleText = articleText.Substring(0, h);
+            }
+            else
+                return articleText;
+
+            // nothing to do if template is already in last section
+            if (!TemplatesToEndOfArticle.IsMatch(restOfArticleText) || TemplatesToEndOfArticle.IsMatch(lastSection))
+                return articleText;
+
+            string allTemplatesFound = "";
+            foreach(Match m in TemplatesToEndOfArticle.Matches(articleText))
+            {
+                string templateFound = m.Value;
+                articleText = Regex.Replace(articleText, @"^" + Regex.Escape(templateFound) + @" *(?:\r\n)?", "", RegexOptions.Multiline);
+
+                articleText = articleText.Replace(templateFound, "");
+                allTemplatesFound += "\r\n" + templateFound;
+            }
+
+            return articleText + allTemplatesFound;
         }
 
         /// <summary>

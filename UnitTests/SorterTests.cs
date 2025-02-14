@@ -881,6 +881,88 @@ some words"));
         }
 
         [Test]
+        public void MoveTemplateToEndOfArticle()
+        {
+            string textBefore = @"{{short description|Text}}
+{{coord}}
+
+Text.
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            string textAfter = @"{{short description|Text}}
+
+Text.
+==Last section==
+
+{{coord}}
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section above DEFAULTSORT/cats");
+
+            Assert.That(parser2.SortMetaData(textAfter, "A"), Is.EqualTo(textAfter), "No change when template already in last section");
+
+            textBefore = @"{{short description|Text}}
+{{coord}}
+{{coord|2}}
+
+Text.
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            textAfter = @"{{short description|Text}}
+
+Text.
+==Last section==
+
+{{coord}}
+{{coord|2}}
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - 2 templates");
+
+            textBefore = @"{{short description|Text}}
+{{Infobox something|
+loc={{coord}}
+param=a}}
+Text.
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another");
+            
+            textBefore = @"{{short description|Text}}
+{{coord}}
+{{Infobox something|
+loc={{coord|2}}
+param=a}}
+Text.
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            
+            textAfter = @"{{short description|Text}}
+{{Infobox something|
+loc={{coord|2}}
+param=a}}
+{{coord}}
+Text.
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates not moved section - one a lone and one nested in another");
+        }
+
+        [Test]
         public void MovePortalTemplatesTestsDuplicates()
         {
 
