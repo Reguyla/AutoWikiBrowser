@@ -633,7 +633,7 @@ Fred has a dog.
 " + e + d;
             Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.MaintenanceTemplates), Is.EqualTo(f));
 
-            string g = @"{{BLP unsourced|date=August 2009|bot=yes}}
+            string g = @"{{BLP unreferenced|date=August 2009|bot=yes}}
 {{Underlinked|date=February 2008}}
 '''Charles M. McKim'''";
 

@@ -385,7 +385,7 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
             string before = @"{{Unreferenced|auto=yes|date=December 2009}}
 {{Underlinked|date=November 2006}}
 {{Notability|1=Music|date=September 2010}}
-{{Advert|date=December 2007}}
+{{Autobiography|date=December 2007}}
 '''Band''' is.
 
 [[Category:Blues rock groups]]
@@ -395,7 +395,7 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 {{Unreferenced|date=December 2009}}
 {{Underlinked|date=November 2006}}
 {{Notability|1=Music|date=September 2010}}
-{{Advert|date=December 2007}}
+{{Autobiography|date=December 2007}}
 }}
 
 '''Band''' is.
