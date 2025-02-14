@@ -264,7 +264,7 @@ namespace WikiFunctions.Parse
                 return originalArticleText;
 
             // extract and de-duplicate tags
-            List<string> miTags = Parsers.DeduplicateMaintenanceTags(
+            List<string> miTags = DeduplicateMaintenanceTags(
                 (from Match m in WikiRegexes.NestedTemplates.Matches(mi)
                     select m.Value).ToList());
 
