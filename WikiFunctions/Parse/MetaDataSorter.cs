@@ -290,12 +290,12 @@ en, sq, ru
             // Performance: get all the templates so "move template" functions below only called when template(s) present in article
             List<string> alltemplates = Parsers.GetAllTemplates(articleText);
 
-            if (TemplateExists(alltemplates, TemplatesToEndOfArticle))
-                articleText = MoveTemplateToEndOfArticle(articleText);
-
             // sort zeroth section
             if (Namespace.IsMainSpace(articleTitle) && !Tools.IsRedirect(articleText))
             {
+                if (TemplateExists(alltemplates, TemplatesToEndOfArticle))
+                    articleText = MoveTemplateToEndOfArticle(articleText);
+
                 string zerothSection = Tools.GetZerothSection(articleText);
                 string restOfArticle = articleText.Substring(zerothSection.Length);
 
