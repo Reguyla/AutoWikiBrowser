@@ -299,7 +299,7 @@ en, sq, ru
                 string zerothSection = Tools.GetZerothSection(articleText);
                 string restOfArticle = articleText.Substring(zerothSection.Length);
 
-                // cannot safelly apply sorting if noinclude/{{{1}}}/{{:ifexist/wikitable in zeroth section
+                // cannot safely apply sorting if noinclude/{{{1}}}/{{:ifexist/wikitable in zeroth section
                 if(!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection) && !WikiTable.IsMatch(zerothSection))
                     articleText = SortZerothSection(zerothSection) + restOfArticle;
             }
@@ -415,6 +415,8 @@ en, sq, ru
             return (Namespace.Determine(articleTitle) == Namespace.Category ?  articleText.Trim() : articleText.TrimEnd()) + shortPagesMonitor;
         }
 
+        private static readonly Regex TemplatesCannotHandle = Tools.NestedTemplateRegex(new[] { "stack begin", "stack end" });
+
         /// <summary>
         /// Sorts article meta data - zeroth section per [[MOS:ORDER]]
         /// </summary>
@@ -423,6 +425,10 @@ en, sq, ru
         {
             int moveDisplayLowerCaseItalicTitle = DisplayLowerCaseItalicTitleNeedsMoving(zerothSection);
             List<string> alltemplates = Parsers.GetAllTemplates(zerothSection);
+
+            // do nothing if zeroth section contains these templates: cannot handle them
+            if(TemplateExists(alltemplates, TemplatesCannotHandle))
+                return zerothSection;
 
             HideText Hider = new HideText(true, false, true);
             zerothSection = Hider.Hide(zerothSection);

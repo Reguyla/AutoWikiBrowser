@@ -505,6 +505,17 @@ Hello";
 }}
 }}";
             Assert.That(parser2.SortMetaData(unbalancedMultiInfobox, "Title"), Is.EqualTo(unbalancedMultiInfobox), "Handle unbalanced brackets in comments");
+
+            string stackBegin = @"{{Short description|A}}
+{{pp-blp|small=yes}}
+{{Use American English|date=September 2020}}
+{{Use mdy dates|date=August 2023}}
+{{stack begin}}
+{{Infobox person
+| name               = A
+| module             = }}
+{{stack end}}";
+            Assert.That(parser2.SortMetaData(stackBegin, "Title"), Is.EqualTo(stackBegin), "Don't sort when stack begin/stack end present");
         }
 
         [Test]
