@@ -124,6 +124,14 @@ namespace WikiFunctions
             EmptyTemplate = new Regex(@"{{(" + template + @")?[|\s]*}}");
         }
 
+        private static readonly List<string> InUseList = new[]
+        {
+            "Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use",
+            "Goce in use", "Goce inuse", "GOCE in-use", "Edited"
+        }.ToList();
+
+        private static readonly List<string> MultipleIssuesList = new[] { "multipleissues", "multiple issues", "mi", "MI", "multiple", "issues", "Articleissues", "Article issues" }.ToList();
+
         /// <summary>
         /// Makes regexes for en-wiki, which act as the default unless language-specific regexes override them
         /// </summary>
@@ -144,7 +152,7 @@ namespace WikiFunctions
             });
             DeadEnd = Tools.NestedTemplateRegex(new[] { "Dead end", "Deadend", "Internal links", "Internallinks", "Dep", "Nuevointernallinks" });
             Wikify = Tools.NestedTemplateRegex(new [] {"Wikify", "Underlinked"});
-            InUse = Tools.NestedTemplateRegex(new[] {"Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use", "Goce in use", "Goce inuse", "GOCE in-use", "Edited" });
+            InUse = Tools.NestedTemplateRegex(InUseList);
             LinkFGAs = Tools.NestedTemplateRegex(new [] {"link FA", "link GA"});
             ReferenceList = Tools.NestedTemplateRegex(new [] { "reflist", "references-small", "references-2column"});
             Persondata = Tools.NestedTemplateRegex("persondata");
@@ -1122,7 +1130,7 @@ namespace WikiFunctions
         /// Matches uncategorised templates: {{Uncategorized}}, {{Uncategorised}}, {{Uncategorised stub}} etc.
         /// </summary>
         public static Regex Uncategorized;
-        
+
         /// <summary>
         /// Matches the {{In use}}/{{in creation}} templates
         /// </summary>
@@ -1138,7 +1146,7 @@ namespace WikiFunctions
         /// <summary>
         /// Matches the {{Multiple issues}} template
         /// </summary>
-        public static readonly Regex MultipleIssues = Tools.NestedTemplateRegex(new [] { "multipleissues", "multiple issues", "mi", "MI", "multiple", "issues", "Articleissues", "Article issues" });
+        public static readonly Regex MultipleIssues = Tools.NestedTemplateRegex(MultipleIssuesList);
 
         /// <summary>
         /// Matches the {{New unreviewed article}} template
@@ -1155,33 +1163,48 @@ namespace WikiFunctions
         /// </summary>
         public static string DateYearMonthParameter;
 
+        private static readonly List<string> BotsNoBotsList = new[] { "bots", "nobots" }.ToList();
+
         /// <summary>
-        /// Matches the cleanup templates that can be moved into the {{multiple issues}} article-level template
+        /// Matches {{bots}} and {{nobots}} templates
         /// </summary>
-        public static readonly Regex MultipleIssuesArticleMaintenanceTemplates = Tools.NestedTemplateRegex(new[]
+        public static readonly Regex BotsNoBots = Tools.NestedTemplateRegex(BotsNoBotsList);
+
+        private static readonly List<string> MultipleIssuesArticleMaintenanceTemplatesList = new[]
         {
-            "Abbreviations", "All plot", "Alumni", "Autobiography", "Better sources needed", "Biblio", "BLP IMDb-only refimprove", "BLP IMDb refimprove", "BLP more footnotes needed",
-            "BLP no footnotes", "BLP one source", "BLP primary sources", "BLP self-published", "BLP sources", "BLP unreferenced", "Buzzword", "Circular", "Citations broken",
+            "Abbreviations", "All plot", "Alumni", "Autobiography", "Better sources needed", "Biblio",
+            "BLP IMDb-only refimprove", "BLP IMDb refimprove", "BLP more footnotes needed",
+            "BLP no footnotes", "BLP one source", "BLP primary sources", "BLP self-published", "BLP sources",
+            "BLP unreferenced", "Buzzword", "Circular", "Citations broken",
             "Citation style", "Citations broken", "Cite check", "Cleanup", "Cleanup bare URLs", "Cleanup biography",
             "Cleanup list", "Cleanup MOS", "Cleanup press release", "Cleanup red links",
             "Cleanup reorganize", "Cleanup rewrite", "Cleanup school", "Cleanup split",
             "Cleanup tense", "Cleanup translation", "COI", "Colloquial",
             "Confusing", "Content", "Context", "Contradicts other", "Copy edit",
-            "Criticism section", "Dead end", "Dispute about", "Disputed", "Disputed chem", "Disputed list", "Disputed map", "Dynamic list", "Essay", "Essay-like",
+            "Criticism section", "Dead end", "Dispute about", "Disputed", "Disputed chem", "Disputed list",
+            "Disputed map", "Dynamic list", "Essay", "Essay-like",
             "Excessive citations", "Excessive examples", "Expert needed", "External links", "Fan POV",
-            "Fiction", "Format footnotes", "Full citations needed", "Game guide", "Generalize", "Globalize", "Hoax", "How-to",
+            "Fiction", "Format footnotes", "Full citations needed", "Game guide", "Generalize", "Globalize", "Hoax",
+            "How-to",
             "Inappropriate person", "Incomplete list", "Independent sources", "In-universe",
             "Lead missing", "Lead rewrite", "Lead too long", "Lead too short", "Localist",
-            "Long plot", "Media IMDb refimprove", "Merge", "Merge from", "Merge to", "Missing information", "More citations needed",
+            "Long plot", "Media IMDb refimprove", "Merge", "Merge from", "Merge to", "Missing information",
+            "More citations needed",
             "More footnotes needed", "More medical citations needed", "More science citations needed", "Neologism",
-            "No footnotes", "No reliable sources", "No significant coverage", "Non-free", "Notability", "NPOV language", "NRIS only", "Obituary", "One source",
+            "No footnotes", "No reliable sources", "No significant coverage", "Non-free", "Notability", "NPOV language",
+            "NRIS only", "Obituary", "One source",
             "Only primary sources", "Original research", "Orphan", "Overlinked",
-            "Overly detailed", "Over-quotation", "Page numbers improve", "Page numbers needed", "Paid contributions", "Peacock", "POV",
+            "Overly detailed", "Over-quotation", "Page numbers improve", "Page numbers needed", "Paid contributions",
+            "Peacock", "POV",
             "Primary sources", "Promotional", "Prose", "Recentism", "Religious text primary",
-            "Resume-like", "Review", "Science review", "Sections", "Self-contradictory", "Self-published", "Self-reference cleanup", "Self-sourcing examples", "Shallow references", "Sources exist", "Spam-request", "Speculation", "Split", "Story",
+            "Resume-like", "Review", "Science review", "Sections", "Self-contradictory", "Self-published",
+            "Self-reference cleanup", "Self-sourcing examples", "Shallow references", "Sources exist", "Spam-request",
+            "Speculation", "Split", "Story",
             "Synthesis", "Technical", "Text-source", "Tone", "Too few opinions", "Too many sections", "Travel guide",
-            "Trivia", "Unbalanced", "Under construction", "Underlinked", "Undisclosed paid", "Undue weight", "Unfocused", "Unreferenced", "Unreferenced law",
-            "Unreliable sources", "Unsorted list", "Update", "USgovtPOV", "Use list-defined references", "User-generated", "Verifiability", "Verify sources", "Very long", "Weasel", "Wikify",
+            "Trivia", "Unbalanced", "Under construction", "Underlinked", "Undisclosed paid", "Undue weight",
+            "Unfocused", "Unreferenced", "Unreferenced law",
+            "Unreliable sources", "Unsorted list", "Update", "USgovtPOV", "Use list-defined references",
+            "User-generated", "Verifiability", "Verify sources", "Very long", "Weasel", "Wikify",
             "Expand Afrikaans", "Expand Albanian", "Expand Amharic", "Expand Arabic", "Expand Aragonese",
             "Expand Armenian", "Expand Assamese", "Expand Asturian", "Expand Azerbaijani", "Expand Basque",
             "Expand Bavarian", "Expand Belarusian", "Expand Belarusian (Taraškievica)", "Expand Bengali",
@@ -1211,13 +1234,21 @@ namespace WikiFunctions
             "Expand Turkish", "Expand Ukrainian", "Expand Urdu", "Expand Uzbek", "Expand Vietnamese", "Expand Volapük",
             "Expand Võro", "Expand Walloon", "Expand Waray", "Expand warning", "Expand Welsh", "Expand Western Frisian",
             "Expand West Flemish", "Expand Xhosa", "Expand Yiddish", "Expand Yoruba", "Expand Zulu"
-        });
+        }.ToList();
+
+        /// <summary>
+        /// Matches the cleanup templates that can be moved into the {{multiple issues}} article-level template
+        /// </summary>
+        public static readonly Regex MultipleIssuesArticleMaintenanceTemplates = Tools.NestedTemplateRegex(MultipleIssuesArticleMaintenanceTemplatesList);
 
         /// <summary>
         /// Matches the cleanup templates that can be moved into the {{multiple issues}} section-level template
         /// </summary>
         public static readonly Regex MultipleIssuesSectionMaintenanceTemplates = Tools.NestedTemplateRegex(new [] { "BLP sources section", "BLP unsourced section", "BLP unreferenced section", "Cleanup section", "Confusing section", "Copy edit-section", "Criticism section", "Disputed-section", "Expand section", "Importance-section", "POV-section", "Refimprove section", "More citations needed section", "Rewrite section", "Unreferenced section", "Update section", "Wikify section" } );
 
+        public static readonly Regex MosLevel6MaintenanceCleanupDispute =
+            Tools.NestedTemplateRegex(MultipleIssuesArticleMaintenanceTemplatesList.Union(InUseList).Union(BotsNoBotsList).Union(MultipleIssuesList)
+                .ToList());
         /// <summary>
         /// Matches language maintenance templates from Category:Language maintenance templates and Category:Script_talk_header_templates
         /// </summary>

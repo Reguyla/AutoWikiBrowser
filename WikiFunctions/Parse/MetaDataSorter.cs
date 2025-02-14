@@ -433,19 +433,19 @@ en, sq, ru
             HideText Hider = new HideText(true, false, true);
             zerothSection = Hider.Hide(zerothSection);
 
-            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
+            // (rest of section) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
             if(moveDisplayLowerCaseItalicTitle == 4)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
-            // Language maintenance templates after infoboxes, per [[MOS:ORDER]]
+            // (L9) Language maintenance templates after infoboxes, per [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.LanguageMaintenanceTemplates))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.LanguageMaintenanceTemplates);
 
-            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly after an infobox
+            // (L8-after) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly after an infobox
             if(moveDisplayLowerCaseItalicTitle == 3)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
-            // infoboxes after templates relating to English variety and date format, per [[MOS:ORDER]]
+            // L8 infoboxes after templates relating to English variety and date format, per [[MOS:ORDER]]
             // allow for comment before, unless we have deletion tags that themselves have comments before and after
             if (TemplateExists(alltemplates, WikiRegexes.DeletionProtectionTags))
             {
@@ -458,40 +458,38 @@ en, sq, ru
                     zerothSection = MoveTemplate(zerothSection, WikiRegexes.InfoBoxOptionalCommentBefore);
             }
 
-            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly before an infobox
+            // (L8-pre) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly before an infobox
             if(moveDisplayLowerCaseItalicTitle == 2)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
-            // Templates relating to English variety and date format after maintenance templates, per [[MOS:ORDER]]
+            // L7 Templates relating to English variety and date format after maintenance templates, per [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.UseDatesEnglishTemplates))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.UseDatesEnglishTemplates);
 
-            // maintenance templates above templates relating to English variety and date format etc., zeroth section only
-            if (TemplateExists(alltemplates, WikiRegexes.MultipleIssues))
-                zerothSection = MoveTemplate(zerothSection, WikiRegexes.MultipleIssues);
-            else if (TemplateExists(alltemplates, WikiRegexes.MaintenanceTemplates))
-                zerothSection = MoveTemplate(zerothSection, WikiRegexes.MaintenanceTemplates);
+            // L6 maintenance templates (including {{in use}}, {{bots}}) above templates relating to English variety and date format etc., zeroth section only
+            if (TemplateExists(alltemplates, WikiRegexes.MosLevel6MaintenanceCleanupDispute))
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.MosLevel6MaintenanceCleanupDispute);
 
-            // deletion/protection templates above maintenance tags, below dablinks per [[MOS:ORDER]]
+            // L5 deletion/protection templates above maintenance tags, below dablinks per [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.DeletionProtectionTags))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DeletionProtectionTags);
 
-            // featured article templates above deletion/protection templates [[MOS:ORDER]]
+            // L4 featured article templates above deletion/protection templates [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.GoodFeaturedArticleTemplates))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.GoodFeaturedArticleTemplates);
 
-            // Hatnotes/Dablinks above maintance tags per [[MOS:ORDER]]
+            // L3 Hatnotes/Dablinks above maintance tags per [[MOS:ORDER]]
             // if have {{hatnote group}} then move that not the individual dablinks
             if (TemplateExists(alltemplates, HatnoteGroup))
                 zerothSection = MoveTemplate(zerothSection, HatnoteGroup);
             else if (TemplateExists(alltemplates, WikiRegexes.Dablinks))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.Dablinks);
 
-            // {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} above hatnotes per [[MOS:ORDER]] if not being kept directly above, or after an infobox
+            // L2 {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} above hatnotes per [[MOS:ORDER]] if not being kept directly above, or after an infobox
             if (moveDisplayLowerCaseItalicTitle == 1)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
-            // {{short description}} above dablinks per [[MOS:ORDER]]
+            // L1 {{short description}} above dablinks per [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.ShortDescriptionTemplate))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.ShortDescriptionTemplate);
 
