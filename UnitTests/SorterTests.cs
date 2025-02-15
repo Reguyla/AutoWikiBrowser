@@ -446,7 +446,7 @@ Hello";
             const string correct10 = @"{{Oscars short description|Operating}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
 {{Excessive citations}}
-{{Use mdy dates|date=August 2019}}
+{{Use mdy dates|date=August 2019}} <!--comm-->
 {{Infobox OS
 | name = macOS
 | support_status = Supported
