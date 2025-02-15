@@ -857,6 +857,9 @@ en, sq, ru
         {
             string originalArticletext = articleText;
 
+            // comment handling: a comment at start of line above the template belongs to the template, a comment on the same line as template belongs to the template
+            templateRegex = new Regex(@"(?:^<!--\s*[^<>\r\n]+\s*-->\s*)*" + templateRegex + @"(?: *<!--[^<>\r\n]+--> ?)*", RegexOptions.Multiline);
+
             // get the zeroth section (text upto first heading)
             string zerothSection = Tools.GetZerothSection(articleText);
 
