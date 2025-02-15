@@ -1338,9 +1338,8 @@ namespace WikiFunctions
 
         /// <summary>
         /// Matches {{short description}} template and its redirects, and {{Oscars short description}}
-        /// Plus optional wiki comment(s) after, on same line
         /// </summary>
-        public static readonly Regex ShortDescriptionTemplate = new Regex(Tools.NestedTemplateRegex(new[] { "Short description", "Brief description", "Short desc", "Short-description", "Shortdescription", "Oscars short description" }, false).ToString() + @"(?: *<!--[^<>\r\n]+--> ?)*");
+        public static readonly Regex ShortDescriptionTemplate = Tools.NestedTemplateRegex(new[] { "Short description", "Brief description", "Short desc", "Short-description", "Shortdescription", "Oscars short description" });
 
         /// <summary>
         /// matches speedy deletion templates (from Category:Speedy_deletion_templates), deletion templates (Category:Proposed_deletion-related_templates) and protection templates (Category:Protection_templates)
@@ -1367,9 +1366,8 @@ namespace WikiFunctions
 
         /// <summary>
         /// Matches "Use mdy dates", "Use dmy dates" and "Use xxx English" templates, plus others sorted at same level - item 7 per MOS:ORDER.
-        /// Plus optional same-line comment after
         /// </summary>
-        public static readonly Regex UseDatesEnglishTemplates = new Regex(Tools.NestedTemplateRegex(new[] { "Use mdy dates", "Use dmy dates", "Use American English", "Use Antiguan and Barbudan English", "Use Australian English", "Use Bangladeshi English", "Use British English", "Use Oxford spelling", "Use Canadian English", "Use Ghanaian English", "Use Hiberno-English", "Use Hong Kong English", "Use Indian English", "Use Jamaican English", "Use Kenyan English", "Use Liberian English", "Use Malaysian English", "Use New Zealand English", "Use Nigerian English", "Use Pakistani English", "Use Philippine English", "Use Singapore English", "Use South African English", "Use Sri Lankan English", "Use Tanzanian English", "Use Trinidad and Tobago English", "Use Ugandan English", "EngvarB", "cs1 config" }) + @"(?: *<!--[^<>\r\n]+--> ?)*");
+        public static readonly Regex UseDatesEnglishTemplates = Tools.NestedTemplateRegex(new[] { "Use mdy dates", "Use dmy dates", "Use American English", "Use Antiguan and Barbudan English", "Use Australian English", "Use Bangladeshi English", "Use British English", "Use Oxford spelling", "Use Canadian English", "Use Ghanaian English", "Use Hiberno-English", "Use Hong Kong English", "Use Indian English", "Use Jamaican English", "Use Kenyan English", "Use Liberian English", "Use Malaysian English", "Use New Zealand English", "Use Nigerian English", "Use Pakistani English", "Use Philippine English", "Use Singapore English", "Use South African English", "Use Sri Lankan English", "Use Tanzanian English", "Use Trinidad and Tobago English", "Use Ugandan English", "EngvarB", "cs1 config" });
 
         /// <summary>
         /// Matches the sister links templates such as {{wiktionary}}

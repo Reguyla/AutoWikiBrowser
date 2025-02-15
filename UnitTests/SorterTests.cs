@@ -458,6 +458,21 @@ Hello";
 
             Assert.That(parser2.SortMetaData(correct10, "MacOS"), Is.EqualTo(correct10), "Handles {{oscars short description}}");
 
+            const string correct11 = @"{{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
+{{Excessive citations}}
+<!--comm re mdy-->
+{{Use mdy dates|date=August 2019}}
+{{Infobox OS
+| name = macOS
+| support_status = Supported
+}}
+{{Lowercase title}}
+{{macOS sidebar}}
+
+'''macOS''', originally.";
+
+            Assert.That(parser2.SortMetaData(correct11, "MacOS"), Is.EqualTo(correct11), "Handles comment before use mdy dates");
+
             const string noinclude = @"
 ==Heading==
 <noinclude>something</noinclude>
@@ -598,7 +613,7 @@ foo3
 -->{{Article for deletion/dated|page=Foo|timestamp=20240331140235|year=2024|month=March|day=31|substed=yes}}
 <!-- Once discussion is closed, please place on talk page: {{Old AfD multi|page=Foo|date=31 March 2024|result='''keep'''}} -->
 <!-- End of AfD message, feel free to edit beyond this point -->";
-            Assert.That(parser2.SortMetaData(dablink + "\r\n" + deletiontag + maintenancetemp + "\r\n" + foo, "Foo"),
+            Assert.That(parser2.SortMetaData(dablink + "\r\n" + deletiontag + "\r\n" + maintenancetemp + "\r\n" + foo, "Foo"),
                 Is.EqualTo(dablink + "\r\n" + deletiontag + "\r\n" + maintenancetemp + "\r\n" + foo), "deletion then maintenance, dated prod with multiple comments inc newlines");
 
             const string correct10 = @"{{short description|Operating}} <!--comm1-->
