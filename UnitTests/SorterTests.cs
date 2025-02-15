@@ -600,6 +600,19 @@ foo3
 <!-- End of AfD message, feel free to edit beyond this point -->";
             Assert.That(parser2.SortMetaData(dablink + "\r\n" + deletiontag + maintenancetemp + "\r\n" + foo, "Foo"),
                 Is.EqualTo(dablink + "\r\n" + deletiontag + "\r\n" + maintenancetemp + "\r\n" + foo), "deletion then maintenance, dated prod with multiple comments inc newlines");
+
+            const string correct10 = @"{{short description|Operating}} <!--comm1-->
+<!-- Please do not remove or change this AfD message until the discussion has been closed. -->
+<!-- The nomination page for this article already...
+-->{{Article for deletion/dated|page=Foo|timestamp=20240331140235|year=2024|month=March|day=31|substed=yes}}
+<!-- Once discussion is closed, please place on talk page: {{Old AfD multi|page=Foo|date=31 March 2024|result='''keep'''}} -->
+<!-- End of AfD message, feel free to edit beyond this point -->
+{{Excessive citations}}
+{{macOS sidebar}}
+
+'''macOS''', originally.";
+
+            Assert.That(parser2.SortMetaData(correct10, "MacOS"), Is.EqualTo(correct10), "Handles comment after {{short description}} that isn't part of AFD comments");
         }
 
         [Test]
