@@ -78,8 +78,10 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
             const string guillemets = @"now {{cite web| url=a.com|title=«hello»|format=PDF}} was";
             Assert.That(Parsers.FixCitationTemplates(guillemets), Is.EqualTo(guillemets), "guillemets not changed");
 
-            const string lowHigh = @"now {{cite web| url=a.com|title=“hello„|format=PDF}} was";
+            string lowHigh = @"now {{cite web| url=a.com|title=“hello„|format=PDF}} was";
             Assert.That(Parsers.FixCitationTemplates(lowHigh), Is.EqualTo(lowHigh), "lowHigh quotes not changed");
+            lowHigh = @"now {{cite web| url=a.com|title=“Vai devagar”|format=PDF}} was";
+            Assert.That(Parsers.FixCitationTemplates(lowHigh), Is.EqualTo(lowHigh), "Valid non-en quotes not changed");
         }
 
         [Test]
