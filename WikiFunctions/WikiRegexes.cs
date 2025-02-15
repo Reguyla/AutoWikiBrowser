@@ -1337,10 +1337,10 @@ namespace WikiFunctions
         }, false);
 
         /// <summary>
-        /// Matches {{short description}} template and its redirects
+        /// Matches {{short description}} template and its redirects, and {{Oscars short description}}
         /// Plus optional wiki comment(s) after, on same line
         /// </summary>
-        public static readonly Regex ShortDescriptionTemplate = new Regex(Tools.NestedTemplateRegex(new[] { "Short description", "Brief description", "Short desc", "Short-description", "Shortdescription" }, false).ToString() + @"(?:\s*<!--[^<>\r\n]+--> ?)*");
+        public static readonly Regex ShortDescriptionTemplate = new Regex(Tools.NestedTemplateRegex(new[] { "Short description", "Brief description", "Short desc", "Short-description", "Shortdescription", "Oscars short description" }, false).ToString() + @"(?: *<!--[^<>\r\n]+--> ?)*");
 
         /// <summary>
         /// matches speedy deletion templates (from Category:Speedy_deletion_templates), deletion templates (Category:Proposed_deletion-related_templates) and protection templates (Category:Protection_templates)

@@ -424,6 +424,40 @@ Hello";
 
             Assert.That(parser2.SortMetaData(correct8, "MacOS"), Is.EqualTo(correct8), "Already correct - {{lowercase title}} after infobox");
 
+            const string correct9 = @"{{Short description|Operating system for Apple computers}}
+{{Redirect2|OSX|OS X}}
+{{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
+{{pp-semi-indef}}
+{{bots}}
+{{in use}}
+{{Excessive citations}}
+{{Use mdy dates|date=August 2019}}
+{{Infobox OS
+| name = macOS
+| support_status = Supported
+}}
+{{Lowercase title}}
+{{macOS sidebar}}
+
+'''macOS''', originally.";
+
+            Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9), "Already correct - {{bots}} and {{in use}}");
+
+            const string correct10 = @"{{Oscars short description|Operating}}
+{{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
+{{Excessive citations}}
+{{Use mdy dates|date=August 2019}}
+{{Infobox OS
+| name = macOS
+| support_status = Supported
+}}
+{{Lowercase title}}
+{{macOS sidebar}}
+
+'''macOS''', originally.";
+
+            Assert.That(parser2.SortMetaData(correct10, "MacOS"), Is.EqualTo(correct10), "Handles {{oscars short description}}");
+
             const string noinclude = @"
 ==Heading==
 <noinclude>something</noinclude>
