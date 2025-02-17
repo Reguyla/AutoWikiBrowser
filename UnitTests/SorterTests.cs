@@ -565,6 +565,14 @@ Hello";
 | module             = }}
 {{stack end}}";
             Assert.That(parser2.SortMetaData(stackBegin, "Title"), Is.EqualTo(stackBegin), "Don't sort when stack begin/stack end present");
+
+            const string correct9 = @"{{Short description|Operating system for Apple computers}}
+{{Infobox OS
+| name = macOS
+| support_status = Supported
+}}" + "\t\r\n\r\n" + @"'''macOS''', originally.";
+
+            Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9.Replace("\t", "")), "Stray tab whitespace handled");
         }
 
         [Test]

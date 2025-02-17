@@ -287,6 +287,9 @@ en, sq, ru
             if (Namespace.Determine(articleTitle) == Namespace.Template || Namespace.Determine(articleTitle) == Namespace.Module) // Don't sort on templates/modules
                 return articleText;
 
+            // trim stray tab whitespace
+            articleText = Regex.Replace(articleText, "\t+\r\n", "\r\n");
+
             // Performance: get all the templates so "move template" functions below only called when template(s) present in article
             List<string> alltemplates = Parsers.GetAllTemplates(articleText);
 
