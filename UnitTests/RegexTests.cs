@@ -1259,7 +1259,7 @@ cit"));
         {
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{For|Fred the dancer|Fred (dancer)}}"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{for|Fred the dancer|Fred (dancer)}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{otherpeople1|Fred the dancer|Fred Smith (dancer)}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other people|Fred the dancer|Fred Smith (dancer)}}"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{For|Fred the dancer|Fred Smith (dancer)}}"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect2|Fred the dancer|Fred Smith (dancer)}}"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{For
@@ -1270,54 +1270,31 @@ cit"));
     Fred the dancer|
     Fred (dancer)}}"));
 
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Otheruse|something}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Otheruses|something}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Otheruses2|something}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{otheruse|something}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{otheruses}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other persons}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{otheruse
-|something}}"));
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{selfref|something}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses|something}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{self-reference|something}}"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Redirect-distinguish|something}}"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Redirect-distinguish-text|something}}"));
-
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{About-distinguish2}}"), @"{{About-distinguish2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{About-distinguish}}"), @"{{About-distinguish}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{about2}}"), @"{{about2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{about}}"), @"{{about}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{distinguish-otheruses2}}"), @"{{distinguish-otheruses2}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{distinguish-otheruses}}"), @"{{distinguish-otheruses}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{distinguish2}}"), @"{{distinguish2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{distinguish}}"), @"{{distinguish}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{for2}}"), @"{{for2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{for}}"), @"{{for}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{for-multi}}"), @"{{for-multi}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{for multi}}"), @"{{for multi}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{further2}}"), @"{{further2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{further}}"), @"{{further}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{hatnote}}"), @"{{hatnote}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other hurricanes}}"), @"{{other hurricanes}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other people2}}"), @"{{other people2}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other people3}}"), @"{{other people3}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other people}}"), @"{{other people}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other places3}}"), @"{{other places3}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other places}}"), @"{{other places}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other ships}}"), @"{{other ships}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses of}}"), @"{{other uses of}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses2}}"), @"{{other uses2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses}}"), @"{{other uses}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{outline}}"), @"{{outline}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-distinguish2}}"), @"{{redirect-distinguish2}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-distinguish}}"), @"{{redirect-distinguish}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-several}}"), @"{{redirect-several}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-multi}}"), @"{{redirect-multi}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect-synonym}}"), @"{{redirect-synonym}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect2}}"), @"{{redirect2}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect3}}"), @"{{redirect3}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect}}"), @"{{redirect}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{see also}}"), @"{{see also}}");
-            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{selfref}}"), @"{{selfref}}");
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{self-reference}}"), @"{{self-reference}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Technical reasons}}"), @"{{Technical reasons}}");
 
             ClassicAssert.IsFalse(WikiRegexes.Dablinks.IsMatch(@"{{For fake template|Fred the dancer|Fred(dancer)}}"));

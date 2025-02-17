@@ -1320,20 +1320,16 @@ namespace WikiFunctions
         /// </summary>
         public static readonly Regex Dablinks = Tools.NestedTemplateRegex(new[]
         {
-            "about", "about2", "about-distinguish", "about-distinguish-text", "about-distinguish2", "about year", "about other people", "ambiguous link", "broader", "for", "for2", "for-multi",
-            "for multi", "dablink", "distinguish", "distinguish2", "distinguish-otheruses", "distinguish-otheruses2",
-            "further", "further2", "hatnote", "otherpeople", "otherpeople1", "otherpeople2", "otherpeople3",
-            "other hurricanes", "other people", "other people2", "other people3", "other persons", "otherpersons",
-            "otherpersons2", "otherplaces", "other places", "otherplaces3", "other places3", "otherships",
-            "other ships", "other uses", "other uses2", "otheruses",
-            "otheruses2", "otheruses3", "otheruses4", "other uses of", "otheruse", "outline", "redirect-acronym",
-            "redirect-distinguish", "redirect-distinguish-text", "redirect-distinguish2", "redirect-multi",
-            "redirect-several", "redirect-synonym", "redirect", "redirect2", "redirect3", "see also", "see also-text", "technical reasons", "this", "disambig-acronym", "selfref",
+            "about", "about-distinguish", "about-distinguish-text", "about other people", "about year", "broader", "distinguish", 
+            "for", "for introduction", "for LMST", "for-multi", "for outline", "for timeline", "for-text", "further", "further interlanguage link", "further-text", "hatnote", "highway detail hatnote", 
+            "introductory article", "other people", "other places", "other ships", "other storms", "other uses", "other uses of", 
+            "redirect", "redirect2", "redirect-distinguish", "redirect-distinguish-for", "redirect-distinguish-text", "redirect-multi", "redirect-several", "redirect-synonym", 
+            "see also", "see also-text", "See Wiktionary", "self-reference", "similar names", "technical reasons", "transcluding article", "wikiIPA", 
             "Family name hatnote", "Bhutanese name", "British barrelled name", "Dinka name", "Ethiopian name",
             "Fijian name", "Given name hatnote", "Icelandic name", "Indian patronymic", "Indonesian name", "Malay name",
             "Norse name", "Patronymic name", "Pakistani name", "Philippine name", "Portuguese name",
             "Spanish colonial name", "Spanish married name", "Traditional Norwegian name", "Western name order",
-            "Western Slavic name", "See Wiktionary"
+            "Western Slavic name"
         }, false);
 
         /// <summary>

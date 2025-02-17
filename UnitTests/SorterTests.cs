@@ -198,7 +198,7 @@ Fred has a dog.
 {{some template}}
 ", e0 = @"{{redirect|foo|bar}}";
 
-            string e = @"{{otherpeople1|Fred the dancer|Fred Smith (dancer)}}";
+            string e = @"{{other people|Fred the dancer|Fred Smith (dancer)}}";
             Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d));
 
             Assert.That(MetaDataSorter.MoveTemplate(d + e + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "Deduplication of identical tags");
@@ -570,7 +570,7 @@ Hello";
         [Test]
         public void MoveDeletionProtection()
         {
-            string deletiontag = @"{{Prod blp}}", dablink = @"{{otherpeople1|Fred the dancer|Fred Smith (dancer)}}", 
+            string deletiontag = @"{{Prod blp}}", dablink = @"{{other people|Fred the dancer|Fred Smith (dancer)}}", 
             maintenancetemp = @"{{cleanup}}", foo = @"The rest of the article", infobox = @"{{infobox hello}}",
             mi = @"{{multiple issues|
 {{cleanup}}
