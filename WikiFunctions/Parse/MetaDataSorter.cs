@@ -430,9 +430,6 @@ en, sq, ru
             if(TemplateExists(alltemplates, TemplatesCannotHandle))
                 return zerothSection;
 
-            HideText Hider = new HideText(true, false, true);
-            zerothSection = Hider.Hide(zerothSection);
-
             // (rest of section) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
             if(moveDisplayLowerCaseItalicTitle == 4)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
@@ -493,7 +490,6 @@ en, sq, ru
             if (TemplateExists(alltemplates, WikiRegexes.ShortDescriptionTemplate))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.ShortDescriptionTemplate);
 
-            zerothSection = Hider.AddBack(zerothSection);
             return zerothSection;
         }
 
@@ -857,15 +853,18 @@ en, sq, ru
         {
             string originalArticletext = articleText;
 
-            // comment handling: a comment at start of line above the template belongs to the template, a comment on the same line as template belongs to the template
-            templateRegex = new Regex(@"(?:^<!--\s*[^<>\r\n]+\s*-->\s*)*" + templateRegex + @"(?: *<!--[^<>\r\n]+--> ?)*", RegexOptions.Multiline);
-
             // get the zeroth section (text upto first heading)
             string zerothSection = Tools.GetZerothSection(articleText);
 
-            // avoid moving commented out templates
-            if (!Variables.LangCode.Equals("en") || !templateRegex.IsMatch(WikiRegexes.Comments.Replace(zerothSection, "")))
+            List<string> t1 = Parsers.GetAllTemplates(zerothSection).Where(t => templateRegex.IsMatch("{{" + t + "}}")).ToList();
+            List<string> t2 = Parsers.GetAllTemplates(WikiRegexes.Comments.Replace(zerothSection, "")).Where(t => templateRegex.IsMatch("{{" + t + "}}")).ToList();
+
+            // avoid moving commented out templates / part commented out
+            if (!Variables.LangCode.Equals("en") || t1.Except(t2).Any())
                 return articleText;
+
+            // comment handling: a comment at start of line above the template belongs to the template, a comment on the same line as template belongs to the template
+            templateRegex = new Regex(@"(?:^<!--\s*[^<>\r\n]+\s*-->\s*)*" + templateRegex + @"(?: *<!--[^<>\r\n]+--> ?)*", RegexOptions.Multiline);
 
             // get the rest of the article including first heading (may be null if article has no headings)
             string restOfArticle = articleText.Substring(zerothSection.Length);
