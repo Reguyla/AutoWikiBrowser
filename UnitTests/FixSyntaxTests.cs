@@ -82,7 +82,9 @@ namespace UnitTests
             Assert.That(Parsers.FixSyntax(@"[http://www.site.com info; ISBN 9789201037091]"), Is.EqualTo(@"[http://www.site.com info] ISBN 9789201037091"), "ISBN out of end of http external link, semicolon");
             Assert.That(Parsers.FixSyntax(@"[http://www.site.com info ISBN 978920103709X ISBN 9789201037091]"), Is.EqualTo(@"[http://www.site.com info] ISBN 978920103709X ISBN 9789201037091"), "ISBN out of end of http external link, 2x");
 
-            const string nochange = @"[http://www.site.com ISBN 978-92-0-103709-X]";
+            string nochange = @"[http://www.site.com ISBN 978-92-0-103709-X]";
+            Assert.That(Parsers.FixSyntax(nochange), Is.EqualTo(nochange), "No change to ISBN at end of external link when no other link text");
+            nochange = @"{{cite web |title=Markus |url=https://www.lesestoff.ch/de/detail/ISBN-9783426227817/Heitz |access-date=2 August 2023 }}";
             Assert.That(Parsers.FixSyntax(nochange), Is.EqualTo(nochange), "No change to ISBN at end of external link when no other link text");
 
         }

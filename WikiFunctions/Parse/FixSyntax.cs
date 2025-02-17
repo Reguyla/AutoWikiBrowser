@@ -125,8 +125,8 @@ namespace WikiFunctions.Parse
         private static readonly Regex SyntaxRegexHorizontalRule = new Regex("^(<hr>|-{5,})", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex SyntaxRegexHeadingWithHorizontalRule = new Regex("(^==?[^=]*==?)\r\n(\r\n)?----+", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex SyntaxRegexHTTPNumber = new Regex(@"HTTP/\d\.", RegexOptions.Compiled);
-        private static readonly Regex SyntaxRegexISBN = new Regex(@"(?<!:)(?:ISBN(?:[\-–]1[03])?:|\[\[ISBN\]\]|ISBN ?\t)\s*(\d)", RegexOptions.Compiled);
-        private static readonly Regex SyntaxRegexISBN2 = new Regex(@"ISBN[\-–](?!1[03]\b)", RegexOptions.Compiled);
+        private static readonly Regex SyntaxRegexISBN = new Regex(@"(?<![:/])(?:ISBN(?:[\-–]1[03])?:|\[\[ISBN\]\]|ISBN ?\t)\s*(\d)", RegexOptions.Compiled);
+        private static readonly Regex SyntaxRegexISBN2 = new Regex(@"(?<![:/])ISBN[\-–](?!1[03]\b)", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexISBN2a = new Regex(@"ISBN–(1[03]\b)");
         private static readonly Regex SyntaxRegexISBN3 = new Regex(@"\[\[ISBN\]\]\s\[\[Special\:BookSources[^\|]*\|(?:<bdi>)?([^\]]*?)(?:</?bdi>)?\]\]", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexISBN4 = new Regex(@"\[\[International Standard Book Number\|ISBN\]\]\:?\s\[\[Special\:BookSources[^\|]*\|(?:<bdi>)?([^\]]*?)(?:</?bdi>)?\]\]", RegexOptions.Compiled);
