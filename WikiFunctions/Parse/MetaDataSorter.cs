@@ -532,22 +532,20 @@ en, sq, ru
         private static readonly Regex TemplatesToEndOfArticle = Tools.NestedTemplateRegex(new[] { "coord", "WikidataCoord" });
 
         /// <summary>
-        /// Moves templates to end of article text from earlier sections
+        /// Moves templates to end of article text, from zeroth section only
         /// </summary>
         /// <param name="articleText"></param>
         /// <returns></returns>
         internal string MoveTemplateToEndOfArticle(string articleText)
         {
-            List<string> allTemplatesDetail = Parsers.GetAllTemplateDetail(articleText);
+            string zerothSection = Tools.GetZerothSection(articleText);
+            List<string> allTemplatesDetail = Parsers.GetAllTemplateDetail(zerothSection);
 
             allTemplatesDetail = allTemplatesDetail.Where(t => TemplatesToEndOfArticle.IsMatch(t)).ToList();
 
             // nothing to do if no templates found
-            if(!allTemplatesDetail.Any())
-                return articleText;
-
             // do not move the templates if nested in another template e.g. {{coord}} inside infobox
-            if(allTemplatesDetail.Any(t => TemplatesToEndOfArticle.Match(t).Index > 0))
+            if(!allTemplatesDetail.Any() || allTemplatesDetail.Any(t => TemplatesToEndOfArticle.Match(t).Index > 0))
                 return articleText;
 
             // find last section of article
@@ -570,6 +568,10 @@ en, sq, ru
             string allTemplatesFound = "";
             foreach(Match m in TemplatesToEndOfArticle.Matches(articleText))
             {
+                // only pull templates from zeroth section
+                if(m.Index > zerothSection.Length)
+                    continue;
+
                 string templateFound = m.Value;
                 articleText = Regex.Replace(articleText, @"^" + Regex.Escape(templateFound) + @" *(?:\r\n)?", "", RegexOptions.Multiline);
 

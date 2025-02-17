@@ -1041,6 +1041,41 @@ Text.
 [[Category:One]]";
             
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates not moved section - one a lone and one nested in another");
+
+            string notzeroth = @"{{short description|Text}}
+Text.
+==First section==
+{{coord}}
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            Assert.That(parser2.SortMetaData(notzeroth, "A"), Is.EqualTo(notzeroth), "Templates not moved beyond zeroth section");
+
+            textBefore = @"{{short description|Text}}
+{{coord}}
+
+==A section==
+{{coord|2}}
+
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+
+            textAfter = @"{{short description|Text}}
+
+==A section==
+{{coord|2}}
+
+==Last section==
+
+{{coord}}
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates only taken from zeroth section");
         }
 
         [Test]
