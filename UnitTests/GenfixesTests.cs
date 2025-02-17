@@ -485,6 +485,7 @@ y";
 
             AssertNotChanged(@"{{cite web |url=https://d.gov/t72|title= ""2020 Census: Puerto Rico""|website=A}}");
             AssertNotChanged(@"{{cite news|title=""Herald"" Week-End Magazine The wreek of the malabar, Easter 1931.|url=http://trove.nla.gov.au/newspaper/|date=29 March 1947}}");
+            AssertNotChanged(@"{{cite web |author=I|date=17 February 2017 |title=Solar Impulse: ""1000 solutions pour un monde durable"" |url=http://www.a.com}}");
         }
         
         [Test]

@@ -311,7 +311,8 @@ namespace WikiFunctions.Parse
                     quotetitle = quotetitle.Replace("‘", "'"); // single curly quote open
 
                     // trim stray quotes (but don't change title in quotes as this may be a title that is itself a quote)
-                    if(!quotetitle.Trim('"').Contains(@""""))
+                    // don't change if contains hidetext marker - we can't say what quote marks are or aren't in the hidden text
+                    if(!quotetitle.Trim('"').Contains(@"""") &&!quotetitle.Contains("⌊⌊⌊⌊"))
                     {
                         if (quotetitle.StartsWith(@"""") && !quotetitle.EndsWith(@""""))
                             quotetitle = quotetitle.TrimStart('"');
