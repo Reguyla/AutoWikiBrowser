@@ -1244,15 +1244,15 @@ namespace WikiFunctions
         public static readonly Regex LanguageMaintenanceTemplates = Tools.NestedTemplateRegex(new[]
         {
             "Arabic script needed", "Armenian script needed", "Bengali script needed", "Berber script needed",
-            "Burmese script needed", "Cherokee script needed", "Chinese script needed", "Chinese script needed inline",
+            "Burmese script needed", "Cherokee script needed", "Chinese script needed",
             "Chinese script needed inline span", "Contains special characters", "Cyrillic script needed",
             "Devanagari script needed", "Egyptian hieroglyphic script needed", "Ge'ez script needed",
             "Georgian script needed", "Greek script needed", "Hebrew script needed", "Hiragana script needed",
-            "IPA-ga notice", "Japanese script needed", "Japanese script needed inline", "Key needed",
+            "IPA-ga notice", "Japanese script needed", "Key needed",
             "Khmer script needed", "Korean script needed", "Lao script needed", "Meitei script needed", "Needchunom",
             "Needhanja", "Needkanji", "Needs IPA", "Nepali script needed", "Persian script needed",
             "Romanization needed", "Samoan script needed", "Script needed",
-            "Script needed inline", "Syriac script needed", "Tamil script needed", "Thai script needed",
+            "Syriac script needed", "Tamil script needed", "Thai script needed",
             "Tibetan script needed", "Tok Pisin script needed", "Verify spelling", "Vietnamese script needed",
             "Yiddish script needed"
         });
