@@ -418,7 +418,7 @@ en, sq, ru
             return (Namespace.Determine(articleTitle) == Namespace.Category ?  articleText.Trim() : articleText.TrimEnd()) + shortPagesMonitor;
         }
 
-        private static readonly Regex TemplatesCannotHandle = Tools.NestedTemplateRegex(new[] { "stack begin", "stack end" });
+        private static readonly Regex TemplatesCannotHandle = Tools.NestedTemplateRegex(new[] { "stack begin", "stack end", "stack" });
 
         /// <summary>
         /// Sorts article meta data - zeroth section per [[MOS:ORDER]]
