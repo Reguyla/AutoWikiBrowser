@@ -765,7 +765,7 @@ namespace WikiFunctions.Parse
         public static List<string> DeduplicateMaintenanceTags(List<string> tags)
         {
             // Performance: only have work to do if have some duplicate tags
-            if(Tools.DeduplicateList(tags.Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t))).ToList()).Count == tags.Count())
+            if(Tools.DeduplicateList(tags.Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t))).ToList()).Count == tags.Count)
                 return tags;
 
             List<string> newtags = new List<string>();
@@ -797,6 +797,10 @@ namespace WikiFunctions.Parse
                             continue;
 
                         string existingParamValue = Tools.GetTemplateParameterValue(existingTag, kvp.Key);
+
+                        // positional argument and non-date named parameter, we cannot handle these, return
+                        if(eParam.Length > 0 && kvp.Key != "date")
+                            return originalTags;
 
                         if (existingParamValue.Length == 0)
                             existingTag = Tools.SetTemplateParameterValue(existingTag, kvp.Key, kvp.Value);

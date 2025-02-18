@@ -2209,6 +2209,14 @@ Text";
             tags.Add("{{Redirect|ATF}}");
             tags.Add("{{Redirect|BATF|the gene|BATF (gene){{!}}''BATF'' (gene)|the former Indian taskforce|Bangalore Agenda Task Force}}");
             Assert.That(Parsers.DeduplicateMaintenanceTags(tags), Is.EqualTo(tags), "Retain both: template argument in both - Redirect");
+
+            tags.Clear();
+            tags.Add("{{distinguish|Foo}}");
+            tags.Add("{{distinguish|text=Something}}");
+            tags2.Clear();
+            tags2.Add("{{distinguish|Foo}}");
+            tags2.Add("{{distinguish|text=Something}}");
+            Assert.That(Parsers.DeduplicateMaintenanceTags(tags), Is.EqualTo(tags2), "No change when non-date named param");
         }
     }
 
