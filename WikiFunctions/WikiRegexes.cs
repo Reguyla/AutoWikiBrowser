@@ -1262,7 +1262,7 @@ namespace WikiFunctions
             "IPA-ga notice", "Japanese script needed", "Japanese script needed inline", "Key needed",
             "Khmer script needed", "Korean script needed", "Lao script needed", "Meitei script needed", "Needchunom",
             "Needhanja", "Needkanji", "Needs IPA", "Nepali script needed", "Persian script needed",
-            "Pronunciation needed", "Romanization needed", "Samoan script needed", "Script needed",
+            "Romanization needed", "Samoan script needed", "Script needed",
             "Script needed inline", "Syriac script needed", "Tamil script needed", "Thai script needed",
             "Tibetan script needed", "Tok Pisin script needed", "Verify spelling", "Vietnamese script needed",
             "Yiddish script needed"
