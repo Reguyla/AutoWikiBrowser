@@ -800,9 +800,7 @@ namespace WikiFunctions.Parse
 
                         if (existingParamValue.Length == 0)
                             existingTag = Tools.SetTemplateParameterValue(existingTag, kvp.Key, kvp.Value);
-                        else if (existingParamValue.Equals(kvp.Value))
-                                continue;
-                        else
+                        else if (!existingParamValue.Equals(kvp.Value))
                         {
                             // conflicting parameter values
                             // if param not date cannot handle, return
