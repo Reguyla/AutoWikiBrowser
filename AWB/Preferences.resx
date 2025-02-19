@@ -859,9 +859,9 @@
     <value>1</value>
   </data>
   <data name="lblPrivacy.Text" xml:space="preserve">
-    <value>We collect anonymous usage data and store it to our private database to help the developers track use and prioritise development tasks.  Only approved AWB developers can access the individual records. 
+    <value>We collect anonymous usage data and store it to our private database to help the developers track use and prioritise development tasks. Only approved AWB developers can access the individual records. 
 
-We publish aggregrate statistics, where usernames are masked.  The client and server code is available for public inspection in our Sourceforge repository.
+We publish aggregrate statistics, where usernames are masked. The client and server code is available for public inspection in our Sourceforge repository.
 	
 	We do not collect IP or MAC addresses, computer names, or passwords.</value>
   </data>
