@@ -45,7 +45,7 @@ Is this SVN (1) or a release (2)? ");
                 
                 if (selection != 1 && selection != 2)
                 {
-                    Console.Write("Please select 1 or 2");
+                    Console.Write("Please select 1 or 2!");
                     Console.ReadLine();
                     return;
                 }
@@ -111,7 +111,7 @@ Is this SVN (1) or a release (2)? ");
                 currFolder = Path.Combine(Path.Combine(awbDir, "Plugins"), "Kingbotk Plugin");
                 Copy(currFolder, kingPath, "COPYING"); 
 
-                Console.WriteLine("Files copied to temporary directory");
+                Console.WriteLine("Files copied to temporary directory.");
 
                 new FastZip().CreateZip(filename, tmp, true, null);
 
