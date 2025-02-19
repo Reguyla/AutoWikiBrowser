@@ -77,7 +77,7 @@ namespace WikiFunctions.ReplaceSpecial
             UpdateEnabledStates();
         }
 
-        public new void Show(string titleText)
+        public void Show(string titleText)
         {
             Text = titleText;
             base.Show();
