@@ -1309,7 +1309,7 @@ namespace WikiFunctions
         /// </summary>
         public static readonly Regex Dablinks = Tools.NestedTemplateRegex(new[]
         {
-            "about", "about-distinguish", "about-distinguish-text", "about other people", "about year", "broader", "distinguish", 
+            "about", "about-distinguish", "about-distinguish-text", "about other people", "about year", "broader", "correct title", "distinguish",
             "for", "for introduction", "for LMST", "for-multi", "for outline", "for timeline", "for-text", "further", "further interlanguage link", "further-text", "hatnote", "highway detail hatnote", 
             "introductory article", "other people", "other places", "other ships", "other storms", "other uses", "other uses of", 
             "redirect", "redirect2", "redirect-distinguish", "redirect-distinguish-for", "redirect-distinguish-text", "redirect-multi", "redirect-several", "redirect-synonym", 
