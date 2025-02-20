@@ -291,8 +291,8 @@ namespace UnitTests
             Assert.That(Parsers.FixReferenceTags(@"<ref name= =""Fred"" />"), Is.EqualTo(@"<ref name=""Fred"" />"));
             Assert.That(Parsers.FixReferenceTags(@"<ref name-""Fred"">"), Is.EqualTo(@"<ref name=""Fred"">"));
             Assert.That(Parsers.FixReferenceTags(@"<ref name-Fred />"), Is.EqualTo(@"<ref name=Fred />"));
-            Assert.That(Parsers.FixReferenceTags(@"< ref name-""Fred"" />"), Is.EqualTo(@"< ref name=""Fred"" />"));
-            Assert.That(Parsers.FixReferenceTags(@"< ref name+""Fred"" />"), Is.EqualTo(@"< ref name=""Fred"" />"));
+            Assert.That(Parsers.FixReferenceTags(@"< ref name-""Fred"" />"), Is.EqualTo(@"<ref name=""Fred"" />"));
+            Assert.That(Parsers.FixReferenceTags(@"< ref name+""Fred"" />"), Is.EqualTo(@"<ref name=""Fred"" />"));
 
             // <ref NAME= --> <ref name=
             Assert.That(Parsers.FixReferenceTags(@"< ref NAME=""Fred"" />"), Is.EqualTo(@"<ref name=""Fred"" />"), "ref NAME");
@@ -324,6 +324,8 @@ namespace UnitTests
             Assert.That(Parsers.FixReferenceTags(@"A.<ref>[http://www.site.com a site]</ref
 Then"), Is.EqualTo(@"A.<ref>[http://www.site.com a site]</ref>
 Then"), "incorrect closing </ref>");
+
+            Assert.That(Parsers.FixReferenceTags(@"< ref name=""Fred"" />"), Is.EqualTo(@"<ref name=""Fred"" />"), "< ref name");
 
 #if DEBUG
             Variables.SetProjectLangCode("zh");
