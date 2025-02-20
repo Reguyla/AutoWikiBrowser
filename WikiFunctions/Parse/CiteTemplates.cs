@@ -215,7 +215,8 @@ namespace WikiFunctions.Parse
                 origyear,
                 origdate,
                 archiveurl,
-                contributionurl;
+                contributionurl,
+                website;
             if (!paramsFound.TryGetValue("url", out theURL))
                 theURL = "";
             if (!paramsFound.TryGetValue("id", out id) && !paramsFound.TryGetValue("ID", out id))
@@ -234,6 +235,8 @@ namespace WikiFunctions.Parse
                 TheMonth = "";
             if (!paramsFound.TryGetValue("work", out TheWork))
                 TheWork = "";
+            if (!paramsFound.TryGetValue("website", out website))
+                website = "";
             if (!paramsFound.TryGetValue("nopp", out nopp))
                 nopp = "";
             if (!paramsFound.TryGetValue("issue", out TheIssue))
@@ -534,6 +537,8 @@ namespace WikiFunctions.Parse
             {
                 newValue = Tools.SetTemplateParameterValue(newValue, "archive-url", theURL);
                 newValue = Tools.SetTemplateParameterValue(newValue, "archive-date", Regex.Replace(ArchiveOrgURL.Match(theURL).Groups[1].Value, @"(\d{4})(\d\d)(\d\d)", "$1-$2-$3"));
+                if (website.ToLower().StartsWith("archive"))
+                    newValue = Tools.RemoveTemplateParameter(newValue, "website");
                 theURL = ArchiveOrgURL.Replace(theURL, "");
                 newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
             }
