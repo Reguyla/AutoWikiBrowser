@@ -56,12 +56,12 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Last AWBEnabledStatus Result from Checkpage Check
+        /// Last AWBEnabledStatus Result from CheckPage Check
         /// </summary>
         public static AWBEnabledStatus Result { get; private set; }
 
         /// <summary>
-        /// Text (JSON) of the Current AWB Global Checkpage (en.wp)
+        /// Text (JSON) of the Current AWB Global CheckPage (en.wp)
         /// </summary>
         public static string GlobalVersionPage { get; private set; }
 
@@ -73,6 +73,9 @@ namespace WikiFunctions
 
         private const string CHECKPAGE_URL =
             "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSON&action=raw";
+
+        private const string CHECKPAGE_URL_TEST =
+            "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSONTest&action=raw";
 
         /// <summary>
         /// Do the actual checking for enabledness etc
