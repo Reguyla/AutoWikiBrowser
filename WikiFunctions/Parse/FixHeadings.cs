@@ -78,6 +78,7 @@ namespace WikiFunctions.Parse
 
         private static readonly Regex CommentThenHeading = new Regex(@"-->\r\n={1,6}(.*?)={1,6}");
         private static readonly Regex HeadingLevelOne = new Regex(@"^=([^=](?:.*?[^=])?)=(?=(?: *⌊⌊⌊⌊\d{1,4}⌋⌋⌋⌋| *<!--.*?-->)?\s*$)", RegexOptions.Multiline);
+        private static readonly Regex DuplicatedSameLevelHeadings = new Regex(@"^((={2,6}) *([^=\r\n<>]+) *\2)\s+\2 *\3 *\2", RegexOptions.Multiline);
 
         // Covered by: FormattingTests.TestFixHeadings(), incomplete
         /// <summary>
@@ -90,6 +91,9 @@ namespace WikiFunctions.Parse
         {
             // remove unnecessary general header from start of article
             articleText = RegexBadHeaderStartOfArticle.Replace(articleText, "");
+
+            // remove identical duplicated headings with only whitespace in between
+            articleText = DuplicatedSameLevelHeadings.Replace(articleText, "$1");
 
             // one blank line before each heading per MOS:HEAD, but not between headings
             // avoid special case of indented text that may be code with lots of == that matches a heading

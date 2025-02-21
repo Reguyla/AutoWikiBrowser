@@ -714,6 +714,47 @@ Here there";
         }
 
         [Test]
+        public void TestFixHeadingsDupeHeadings()
+        {
+            Assert.That(Parsers.FixHeadings(@"Article.<ref>a</ref>
+
+==References==
+
+==References==
+{{reflist}}", "foo"), Is.EqualTo(@"Article.<ref>a</ref>
+
+==References==
+{{reflist}}"));
+            Assert.That(Parsers.FixHeadings(@"Article.<ref>a</ref>
+
+==References==
+
+== References ==
+{{reflist}}", "foo"), Is.EqualTo(@"Article.<ref>a</ref>
+
+==References==
+{{reflist}}"));
+            Assert.That(Parsers.FixHeadings(@"Article.<ref>a</ref>
+
+== References ==
+
+== References ==
+{{reflist}}", "foo"), Is.EqualTo(@"Article.<ref>a</ref>
+
+== References ==
+{{reflist}}"));
+            Assert.That(Parsers.FixHeadings(@"Article.
+
+== Random heading ==
+
+== Random heading ==
+Text.", "foo"), Is.EqualTo(@"Article.
+
+== Random heading ==
+Text."));
+        }
+
+        [Test]
         public void UnbalancedHeadings()
         {
             ClassicAssert.IsTrue(Parsers.FixHeadings(@"==External links=
