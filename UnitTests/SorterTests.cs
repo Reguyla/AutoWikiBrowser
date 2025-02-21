@@ -1028,7 +1028,20 @@ Text.
 [[Category:One]]";
             
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another");
+
+            textBefore = @"{{short description|Text}}
+{{Infobox something|
+loc=
+{{coord}}
+param=a}}
+Text.
+==Last section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
             
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another, start of line");
+
             textBefore = @"{{short description|Text}}
 {{coord}}
 {{Infobox something|
@@ -1044,14 +1057,15 @@ Text.
 {{Infobox something|
 loc={{coord|2}}
 param=a}}
-{{coord}}
 Text.
 ==Last section==
+
+{{coord}}
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
             
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates not moved section - one a lone and one nested in another");
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "One a lone and one nested in another");
 
             string notzeroth = @"{{short description|Text}}
 Text.

@@ -544,8 +544,7 @@ en, sq, ru
             allTemplatesDetail = allTemplatesDetail.Where(t => TemplatesToEndOfArticle.IsMatch(t)).ToList();
 
             // nothing to do if no templates found
-            // do not move the templates if nested in another template e.g. {{coord}} inside infobox
-            if(!allTemplatesDetail.Any() || allTemplatesDetail.Any(t => TemplatesToEndOfArticle.Match(t).Index > 0))
+            if(!allTemplatesDetail.Any())
                 return articleText;
 
             // find last section of article
@@ -566,17 +565,22 @@ en, sq, ru
                 return articleText;
 
             string allTemplatesFound = "";
-            foreach(Match m in TemplatesToEndOfArticle.Matches(articleText))
+            foreach(Match m in WikiRegexes.NestedTemplates.Matches(articleText))
             {
+                if (!TemplatesToEndOfArticle.IsMatch(m.Value) || TemplatesToEndOfArticle.Match(m.Value).Index > 0)
+                    continue;
+
                 // only pull templates from zeroth section
                 if(m.Index > zerothSection.Length)
                     continue;
 
                 string templateFound = m.Value;
-                articleText = Regex.Replace(articleText, @"^" + Regex.Escape(templateFound) + @" *(?:\r\n)?", "", RegexOptions.Multiline);
+                if(Regex.IsMatch(articleText, @"^" + Regex.Escape(templateFound), RegexOptions.Multiline))
+                {
+                    articleText = Regex.Replace(articleText, @"^" + Regex.Escape(templateFound) + @" *(?:\r\n)?", "", RegexOptions.Multiline);
 
-                articleText = articleText.Replace(templateFound, "");
-                allTemplatesFound += "\r\n" + templateFound;
+                    allTemplatesFound += "\r\n" + templateFound;
+                }
             }
 
             return articleText + allTemplatesFound;
