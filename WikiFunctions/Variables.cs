@@ -1026,7 +1026,7 @@ namespace WikiFunctions
 
                 case "uk":
                     Stub = "[^{}|]*?(?:[Ss]tub|[Дд]оробити)";
-                    SectStub = @"\{\{[Рp]озділ\-доробити";
+                    SectStub = @"\{\{([Рp]озділ\-доробити|[Ss]ection\-stub)";
                     SectStubRegex = new Regex(SectStub, RegexOptions.Compiled);
                     mSummaryTag = "за допомогою";
                     break;
