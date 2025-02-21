@@ -1172,7 +1172,7 @@ namespace WikiFunctions
 
         private static readonly List<string> MultipleIssuesArticleMaintenanceTemplatesList = new[]
         {
-            "Abbreviations", "Academic booster", "Accessibility dispute", "AI-generated", "All plot", "Alumni", "Anachronism", "Autobiography", "Being translated", "Better sources needed", "Biblio", "BLP IMDb-only refimprove", "BLP IMDb refimprove", "BLP more footnotes needed",
+            "Abbreviations", "Academic booster", "Accessibility dispute", "AI-generated", "All plot", "Alumni", "Anachronism", "Autobiography", "Being translated", "Better sources needed", "Biblio", "Blacklisted-links", "BLP IMDb-only refimprove", "BLP IMDb refimprove", "BLP more footnotes needed",
             "BLP no footnotes", "BLP one source", "BLP primary sources", "BLP self-published", "BLP sources", "BLP unreferenced", "Broaden", "Buzzword", "Catholic cleanup", "Cherry-picked", "Chinese script needed", "Circular", "Citations broken",
             "Citation style", "Citations broken", "Cite check", "Cleanup", "Cleanup AfD", "Cleanup bare URLs", "Cleanup biography",
             "Cleanup book", "Cleanup colors", "Cleanup Congress bio", "Cleanup film", "Cleanup gallery", "Cleanup higher education", "Cleanup HTML", "Cleanup ICHD", "Cleanup image captions", "Cleanup images", "Cleanup infobox", "Cleanup lang", "Cleanup list", "Cleanup merge", "Cleanup MOS", "Cleanup press release", "Cleanup red links",
