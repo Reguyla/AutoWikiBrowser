@@ -595,6 +595,19 @@ Hello";
 }}" + "\t\r\n\r\n" + @"'''macOS''', originally.";
 
             Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9.Replace("\t", "")), "Stray tab whitespace handled");
+
+            const string ub = @"{{Short description|A}}
+{{BLP sources|date=June 2012}}
+
+{{Infobox person
+| name               = A
+| image              = A
+| caption            = A
+| birth_date         = {{Birth date and age|1955|07|07}}}<ref>A</ref>
+| birth_place        = A
+}}";
+
+            Assert.That(parser2.SortMetaData(ub, "A"), Is.EqualTo(ub), "No sort if zeroth section has unbalanced brackets");
         }
 
         [Test]

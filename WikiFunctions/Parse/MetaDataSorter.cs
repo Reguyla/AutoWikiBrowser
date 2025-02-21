@@ -433,6 +433,10 @@ en, sq, ru
             if(TemplateExists(alltemplates, TemplatesCannotHandle))
                 return zerothSection;
 
+            int bl;
+            if (Parsers.UnbalancedBrackets(zerothSection, out bl) > 0)
+                return zerothSection;
+
             // (rest of section) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
             if(moveDisplayLowerCaseItalicTitle == 4)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
