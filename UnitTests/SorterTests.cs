@@ -577,6 +577,17 @@ Hello";
 }}";
             Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when stack present");
 
+            stackTemplate = @"{{Short description|A}}
+{{pp-blp|small=yes}}
+{{Use American English|date=September 2020}}
+{{Use mdy dates|date=August 2023}}
+{{Collapsed infobox section begin}}
+{{Infobox person
+| name               = A
+| module             = }}
+{{Collapsed infobox section end}}";
+            Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when Collapsed infobox section begin/end present");
+
             const string correct9 = @"{{Short description|Operating system for Apple computers}}
 {{Infobox OS
 | name = macOS
