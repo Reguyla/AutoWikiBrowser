@@ -432,6 +432,7 @@ bar|val=one}}"), Is.EqualTo(@"{{Foo bar|val=one}}"));
             Assert.That(Parsers.FixSyntax(@"<small>   </small>"), Is.Empty);
             Assert.That(Parsers.FixSyntax(@"<includeonly>   </includeonly>"), Is.Empty);
             Assert.That(Parsers.FixSyntax(@"<noinclude>   </noinclude>"), Is.Empty);
+            Assert.That(Parsers.FixSyntax(@"<nowiki>   </nowiki>"), Is.Empty);
 
             const string Gallery = @"<gallery>Image1.jpeg</gallery>";
 

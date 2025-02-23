@@ -146,9 +146,9 @@ namespace WikiFunctions.Parse
         private static readonly Regex DoublePipeInWikiLink = new Regex(@"(?<=\[\[[^\[\[\r\n\|{}]+)\|\|(?=[^\[\[\r\n\|{}]+\]\])", RegexOptions.Compiled);
 
         /// <summary>
-        /// Matches empty gallery, center, blockquote, small, noinclude, includeonly, sub or sup tags (zero or more whitespace). Optionally with additional parameters
+        /// Matches empty gallery, center, blockquote, small, nowiki, noinclude, includeonly, sub or sup tags (zero or more whitespace). Optionally with additional parameters
         /// </summary>
-        private static readonly Regex EmptyTags = new Regex(@"<\s*(gallery|center|blockquote|small|noinclude|includeonly|su[bp])\s*(\s+[^<>]*)?>\s*<\s*/\s*\1\s*>", RegexOptions.IgnoreCase);
+        private static readonly Regex EmptyTags = new Regex(@"<\s*(gallery|center|blockquote|small|noinclude|nowiki|includeonly|su[bp])\s*(\s+[^<>]*)?>\s*<\s*/\s*\1\s*>", RegexOptions.IgnoreCase);
 
         private static readonly System.Globalization.CultureInfo BritishEnglish = new System.Globalization.CultureInfo("en-GB");
 
@@ -196,7 +196,7 @@ namespace WikiFunctions.Parse
                 articleText = articleText.Replace(@"</strike>", @"</s>");
             }
 
-            // remove empty <gallery>, <center>, <blockquote>, <sub> or <sup> tags, allow for nested tags
+            // remove empty <gallery>, <center>, <blockquote>, <nowiki>, <sub> or <sup> tags, allow for nested tags
             while(EmptyTags.IsMatch(articleText))
                 articleText = EmptyTags.Replace(articleText, "");
 
