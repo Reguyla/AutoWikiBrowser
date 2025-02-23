@@ -225,6 +225,7 @@ File:Blogs002.jpeg|Description
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_skyline=442px_-_London_Lead_Image.jpg|"), Hidden + @"\|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_skyline=442px_-_London_Lead_Image.jpg <!--comm-->|"), Hidden + " <!--" + Hidden + @"-->\|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_map=London (European Parliament constituency).svg   |"), Hidden + @"   \|"));
+            ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_map=London (European Parliament constituency).webm   |"), Hidden + @"   \|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image_map=westminster.tube.station.jubilee.arp.jpg|"), Hidden + @"\|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|Cover  = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
