@@ -127,7 +127,7 @@ namespace WikiFunctions
         private static readonly List<string> InUseList = new[]
         {
             "Inuse", "In use", "GOCEinuse", "goceinuse", "in creation", "increation", "GOCE inuse", "GOCE in use",
-            "Goce in use", "Goce inuse", "GOCE in-use", "Edited"
+            "Goce in use", "Goce inuse", "GOCE in-use", "Big edit", "Currently editing", "Edited", "Editing", "In Use", "IN USE", "In-use", "Inuse-elapsed", "Inusefor", "Iu", "Major edit", "Majoredit", "PageRefurb", "Refactoring", "Wait", "Wip", "WIP"
         }.ToList();
 
         private static readonly List<string> MultipleIssuesList = new[] { "multipleissues", "multiple issues", "mi", "MI", "multiple", "issues", "Articleissues", "Article issues" }.ToList();

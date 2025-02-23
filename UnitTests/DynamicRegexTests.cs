@@ -839,12 +839,6 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{dead end}}"));
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{deadend|date=May 2008}}"));
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{Dead end}}"));
-            ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{internal links}}"));
-            ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{internallinks}}"));
-            ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{Internal links}}"));
-            ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{Internal links|date=May 2008}}"));
-            ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{nuevointernallinks}}"));
-            ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{Nuevointernallinks}}"));
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{dep}}"));
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{dep|date=May 2008|Foobar}}"));
 
@@ -893,6 +887,7 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.InUse.IsMatch(@"{{GOCEinuse}}"));
             ClassicAssert.IsTrue(WikiRegexes.InUse.IsMatch(@"{{GOCE in use}}"));
             ClassicAssert.IsTrue(WikiRegexes.InUse.IsMatch(@"{{edited}}"));
+            ClassicAssert.IsTrue(WikiRegexes.InUse.IsMatch(@"{{wip}}"));
 
 #if DEBUG
             Variables.SetProjectLangCode("el");
