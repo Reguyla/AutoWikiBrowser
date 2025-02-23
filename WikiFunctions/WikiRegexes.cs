@@ -1342,7 +1342,7 @@ namespace WikiFunctions
             "C-uploaded", "Editnotice explanation", "Hprotected", "M-cropped", "M-protected", "Mcropped", "Mpimgprotected", "Mpprotected", "Mprotect", "Mprotected2", "OFFICE", "Office", "PP-protected", "Padlock", "Protection padlock", "Permanently protected", "Pp", "Pp-blp", "Pp-create", "Pp-dispute", "Pp-extended", "Pp-full", "Pp-jupe", "Pp-main-page", "Pp-meta", "Pp-move", "Pp-move-dispute", "Pp-move-indef", "Pp-move-vandalism", "Pp-office", "Pp-office-dmca", "Pp-pc", "Pp-pc1", "Pp-protect", "Pp-protected", 
                 "Pp-reset", "Pp-salt", "Pp-semi", "Pp-semi-indef", "Pp-semi-prot", "Pp-semi-protect", "Pp-semi-protected", "Pp-semi-protection", "Pp-semiprotected", "Pp-sock", "Pp-template", "Pp-usertalk", "Pp-vandalism", "Protected article title", "Protected image", "Protected sister project logo", "Protected title", "ProtectedMainPageImage", "R fully protected", "R semi-protected", "R template protected", "Semiprotected", "Soft redirect protection", "Sprot", "Sprotect", "Sprotect2", 
                 "Sprotected", "Sprotected2", "Temporarily protected", "Unblock-abuse", "Unblockabuse", "Uploaded from Commons", "Uprotect", "Usertalk-sprotect", "Usertalk-vprotect", "Vutprotected", 
-            "Prod blp/dated", "Proposed deletion/dated", "Transwiki/dated", "Article for deletion/dated", "Article for deletion"}).ToString() + @"(?:\s*<!--\s*[^<>\r\n]+\s*-->\s*?)*");
+            "Prod blp/dated", "Proposed deletion/dated", "Transwiki/dated", "Article for deletion/dated", "Article for deletion", "Afd-merge to" }) + @"(?:\s*<!--\s*[^<>\r\n]+\s*-->\s*?)*");
 
         /// <summary>
         /// Matches "Featured list", "Featured article", "Good article" templates
