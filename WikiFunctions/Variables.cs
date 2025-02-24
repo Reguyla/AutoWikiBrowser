@@ -80,6 +80,8 @@ namespace WikiFunctions
             CanonicalNamespaces[711] = "TimedText talk:";
             CanonicalNamespaces[828] = "Module:";
             CanonicalNamespaces[829] = "Module talk:";
+            CanonicalNamespaces[1728] = "Event:";
+            CanonicalNamespaces[1729] = "Event talk:";
 
             CanonicalNamespaceAliases = PrepareAliases(CanonicalNamespaces);
 
