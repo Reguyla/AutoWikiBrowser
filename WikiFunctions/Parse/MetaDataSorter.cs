@@ -303,13 +303,14 @@ en, sq, ru
                 string restOfArticle = articleText.Substring(zerothSection.Length);
 
                 // cannot safely apply sorting if noinclude/{{{1}}}/{{:ifexist/wikitable in zeroth section
-                if(!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection) && !WikiTable.IsMatch(zerothSection))
+                if(!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection) && !WikiTable.IsMatch(zerothSection) && !WikiRegexes.MagicWordBehaviourSwitches.IsMatch(zerothSection))
                     articleText = SortZerothSection(zerothSection) + restOfArticle;
             }
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Substituted_templates
             // if article contains some substituted template stuff, sorting the data may mess it up (further)
-            if (Namespace.IsMainSpace(articleTitle) && Parsers.NoIncludeIncludeOnlyProgrammingElement(articleText))
+            // T387084 don't apply sort where magic word behaviour switches present as these can be placed anywhere in article
+            if (Namespace.IsMainSpace(articleTitle) && (Parsers.NoIncludeIncludeOnlyProgrammingElement(articleText) || WikiRegexes.MagicWordBehaviourSwitches.IsMatch(articleText)))
                 return articleText;
 
             // short pages monitor check for en-wiki: keep at very end of article if present

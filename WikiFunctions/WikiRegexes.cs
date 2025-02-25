@@ -1580,5 +1580,10 @@ namespace WikiFunctions
         /// Matches templates from [[Category:Hatnote templates for names]], excluding name order templates
         /// </summary>
         public static readonly Regex SurnameClarificationTemplates = Tools.NestedTemplateRegex(new [] {"Arabic name", "Basque name", "Cambodian name", "Catalan name", "Chinese Indonesian name", "Chinese name", "Dinka name", "Dutch name", "Eastern Slavic name", "Galician name", "Germanic name", "Habesha name", "Hmong name", "Icelandic name", "Indian name", "Indonesian name", "Japanese name", "Korean name", "Malay name", "Mongolian name", "Multi-word family name", "Philippine name", "Portuguese name", "Romance name", "Slavic name", "Spanish name", "Turkic name", "Vietnamese name", "Welsh name", "Western name order"});
+
+        /// <summary>
+        /// Matches magic word behaviour switches from https://en.wikipedia.org/wiki/Help:Magic_words
+        /// </summary>
+        public static readonly Regex MagicWordBehaviourSwitches = new Regex(@"^__(TOC|FORCETOC|NOTOC|NOEDITSECTION|ARCHIVEDTALK|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|INDEX|NOINDEX|STATICREDIRECT|DISAMBIG)__(\s+|$)", RegexOptions.Multiline);
     }
 }

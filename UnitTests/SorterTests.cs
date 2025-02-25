@@ -608,6 +608,18 @@ Hello";
 }}";
 
             Assert.That(parser2.SortMetaData(ub, "A"), Is.EqualTo(ub), "No sort if zeroth section has unbalanced brackets");
+
+            const string magicWord = @"{{Short description|A}}
+{{BLP sources|date=June 2012}}
+__FORCETOC__
+{{Infobox person
+| name               = A
+| image              = A
+| caption            = A
+| birth_place        = A
+}}";
+
+            Assert.That(parser2.SortMetaData(magicWord, "A"), Is.EqualTo(magicWord), "No sort if zeroth section contains magic word behaviour switch");
         }
 
         [Test]
@@ -2260,6 +2272,11 @@ Text";
             Assert.That(parser2.SortMetaData(a + d + c + e, "foo"), Is.EqualTo(a + d + c + e));
             Assert.That(parser2.SortMetaData(d + e, "foo"), Is.Not.EqualTo(d + "\r\n" + e));
             Assert.That(parser2.SortMetaData(f + d, "foo"), Is.EqualTo(f + d));
+
+            const string magicWord = @"
+__FORCETOC__
+[[Category:Foo]]";
+            Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "No cat sort when magic word in final section");
         }
 
         [Test]
