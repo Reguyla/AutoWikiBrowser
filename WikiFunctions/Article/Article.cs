@@ -1026,6 +1026,7 @@ namespace WikiFunctions
                     && !(Variables.IsCommons && Namespace.Determine(Name).Equals(Namespace.Category)))
                     strTemp = Parsers.Conversions(mArticleText);
 
+                strTemp = Parsers.FixSyntaxMainspace(strTemp, Name);
                 strTemp = Parsers.FixLivingThingsRelatedDates(strTemp);
                 strTemp = Parsers.FixHeadings(strTemp, Name, out noChange);
 
