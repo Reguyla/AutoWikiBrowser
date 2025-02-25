@@ -1326,5 +1326,15 @@ now"));
             Assert.That(Parsers.FixSyntax(@"<br />"), Is.EqualTo("<br />"));
         }
 
+        [Test]
+        public void TestFixSyntaxMainspace()
+        {
+            Assert.That(Parsers.FixSyntaxMainspace(@"__NOINDEX__", "A"), Is.EqualTo(""));
+            Assert.That(Parsers.FixSyntaxMainspace(@"__INDEX__", "A"), Is.EqualTo(""));
+            Assert.That(Parsers.FixSyntaxMainspace(@"__INDEX__
+
+{{DEFAULTSORT:A}}", "A"), Is.EqualTo("{{DEFAULTSORT:A}}"));
+        }
+
     }
 }

@@ -758,5 +758,20 @@ namespace WikiFunctions.Parse
 
             return articleText;
         }
+
+        private static readonly Regex IndexNoIndexMagicWord = new Regex(@"^__(NO)?INDEX__(\s+|$)", RegexOptions.Multiline);
+        /// <summary>
+        /// Performs mainspace only syntax fixes: removal of __INDEX__ and __NOINDEX__ magic words
+        /// </summary>
+        /// <param name="articleText"></param>
+        /// <param name="articleTitle"></param>
+        /// <returns></returns>
+        public static string FixSyntaxMainspace(string articleText, string articleTitle)
+        {
+            if (!Namespace.IsMainSpace(articleTitle))
+                return articleText;
+
+            return IndexNoIndexMagicWord.Replace(articleText, "");
+        }
     }
 }
