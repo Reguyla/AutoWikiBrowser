@@ -869,7 +869,7 @@ en, sq, ru
                 return articleText;
 
             // comment handling: a comment at start of line above the template belongs to the template, a comment on the same line as template belongs to the template
-            templateRegex = new Regex(@"(?:^<!--\s*[^<>\r\n]+\s*-->\s*)*" + templateRegex + @"(?: *<!--[^<>\r\n]+--> ?)*", RegexOptions.Multiline);
+            templateRegex = new Regex(@"(?:^<!--\s*[^<>\r\n]+\s*-->\s*){0,5}" + templateRegex + @"(?: *<!--[^<>\r\n]+--> ?)*", RegexOptions.Multiline);
 
             // get the rest of the article including first heading (may be null if article has no headings)
             string restOfArticle = articleText.Substring(zerothSection.Length);
