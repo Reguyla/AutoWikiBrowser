@@ -451,17 +451,8 @@ en, sq, ru
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
 
             // L8 infoboxes after templates relating to English variety and date format, per [[MOS:ORDER]]
-            // allow for comment before, unless we have deletion tags that themselves have comments before and after
-            if (TemplateExists(alltemplates, WikiRegexes.DeletionProtectionTags))
-            {
-                if (TemplateExists(alltemplates, WikiRegexes.InfoBox))
-                    zerothSection = MoveTemplate(zerothSection, WikiRegexes.InfoBox);
-            }
-            else
-            {
-                if (TemplateExists(alltemplates, WikiRegexes.InfoBoxOptionalCommentBefore))
-                    zerothSection = MoveTemplate(zerothSection, WikiRegexes.InfoBoxOptionalCommentBefore);
-            }
+            if (TemplateExists(alltemplates, WikiRegexes.InfoBox))
+                zerothSection = MoveTemplate(zerothSection, WikiRegexes.InfoBox);
 
             // (L8-pre) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept directly before an infobox
             if(moveDisplayLowerCaseItalicTitle == 2)
