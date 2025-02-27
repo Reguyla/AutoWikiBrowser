@@ -534,6 +534,7 @@ en, sq, ru
         /// <returns></returns>
         internal string MoveTemplateToEndOfArticle(string articleText)
         {
+            string originalArticleText = articleText;
             string zerothSection = Tools.GetZerothSection(articleText);
             List<string> allTemplatesDetail = Parsers.GetAllTemplateDetail(zerothSection);
 
@@ -579,7 +580,12 @@ en, sq, ru
                 }
             }
 
-            return articleText + allTemplatesFound;
+            articleText += allTemplatesFound;
+
+            if (!Tools.UnformattedTextNotChanged(originalArticleText, articleText))
+                return originalArticleText;
+
+            return articleText;
         }
 
         /// <summary>

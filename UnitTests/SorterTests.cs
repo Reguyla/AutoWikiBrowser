@@ -1182,6 +1182,24 @@ Text.
 [[Category:One]]";
 
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates only taken from zeroth section");
+
+            string commentedOut = @"{{short description|Text}}
+Text.
+<!--{{coord}}-->
+==First section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            Assert.That(parser2.SortMetaData(commentedOut, "A"), Is.EqualTo(commentedOut), "Templates not moved out of comments");
+            commentedOut = @"{{short description|Text}}
+Text.
+<!--
+{{coord}}-->
+==First section==
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            Assert.That(parser2.SortMetaData(commentedOut, "A"), Is.EqualTo(commentedOut), "Templates not moved out of comments, 2");
         }
 
         [Test]
