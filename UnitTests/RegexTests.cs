@@ -1295,6 +1295,7 @@ cit"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{redirect}}"), @"{{redirect}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{see also}}"), @"{{see also}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{self-reference}}"), @"{{self-reference}}");
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Similar names}}"), @"{{Similar names}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Technical reasons}}"), @"{{Technical reasons}}");
 
             ClassicAssert.IsFalse(WikiRegexes.Dablinks.IsMatch(@"{{For fake template|Fred the dancer|Fred(dancer)}}"));
