@@ -888,6 +888,9 @@ en, sq, ru
             // deduplicate tags
             List<string> theTemplatesDeduplicated = Parsers.DeduplicateMaintenanceTags(theTemplates);
 
+            // determine whether multiple templates folded together e.g. as is often done with Infobox weather event template that has sub-templates
+            bool folded = theTemplates.Count > 2 && zerothSection.Contains(string.Join("", theTemplates.ToArray()));
+
             // remove existing from article
             foreach (string t in theTemplates)
             {
@@ -898,8 +901,11 @@ en, sq, ru
             // rebuild new
             foreach (string t in theTemplatesDeduplicated)
             {
-                strTemplates += t + "\r\n";
+                strTemplates += t + (folded ? "" : "\r\n");
             }
+
+            if (folded)
+                strTemplates += "\r\n";
 
             articleText = strTemplates + zerothSection + restOfArticle;
 

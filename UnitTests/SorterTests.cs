@@ -665,6 +665,24 @@ __FORCETOC__
 The 2018 competition";
 
             Assert.That(parser2.SortMetaData(manyComments, "A"), Is.EqualTo(manyComments), "Handle many comments in zeroth section");
+
+            const string foldedInfoboxes = @"{{Short description|Category 4 Pacific hurricane}}
+{{Infobox weather event
+| name = Hurricane Rosa
+| formed = September 25, 2018
+| low = October 2, 2018
+}}{{Infobox weather event/NWS
+| winds = 130
+| pressure = 936
+}}{{Infobox weather event/Effects
+| year = 2018
+| damage = 51880000
+}}{{Infobox weather event/Footer
+| season = [[2018 Pacific hurricane season]]
+}}
+
+'''Hurricane Rosa''' was";
+            Assert.That(parser2.SortMetaData(foldedInfoboxes, "A"), Is.EqualTo(foldedInfoboxes), "Handle folded infoboxes in zeroth section");
         }
 
         [Test]
