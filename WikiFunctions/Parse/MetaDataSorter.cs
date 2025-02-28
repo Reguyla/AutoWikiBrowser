@@ -891,11 +891,8 @@ en, sq, ru
             // remove existing from article
             foreach (string t in theTemplates)
             {
-                // remove colons before template
-                zerothSection = zerothSection.Replace(":" + t + "\r\n", "");
-
-                // additionally, remove whitespace after template
-                zerothSection = Regex.Replace(zerothSection, Regex.Escape(t) + @" *(?:\r\n)?", "");
+                // remove any colon before template, whitespace after template
+                zerothSection = Regex.Replace(zerothSection, ":?" + Regex.Escape(t) + @" *(?:\r\n)?", "");
             }
 
             // rebuild new
