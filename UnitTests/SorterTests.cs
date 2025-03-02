@@ -534,6 +534,13 @@ Hello";
 }}
 |}";
             Assert.That(parser2.SortMetaData(multipleInfoxbox, "Title"), Is.EqualTo(multipleInfoxbox), "Don't sort when wikitable");
+            const string hatnoteGroupHatnote = @"{{Short description|Band}}
+{{hatnote group|{{redirect|Jo1||JO1 (disambiguation)}}{{distinguish|jol (disambiguation){{!}}jol|joi (disambiguation){{!}}JOI}}}}
+{{Western name order}}
+{{Use mdy dates|date=October 2020}}
+{{Infobox musical artist}}
+Hello";
+            Assert.That(parser2.SortMetaData(hatnoteGroupHatnote, "Title"), Is.EqualTo(hatnoteGroupHatnote), "Handles hatnote group and hatnote");
         }
 
         [Test]

@@ -1298,13 +1298,9 @@ namespace WikiFunctions
         /// <summary>
         /// Matches unnamed references in format &lt;ref&gt;...&lt;/ref&gt; group 1 being the reference text
         /// </summary>
-        public static readonly Regex UnnamedReferences = new Regex(@"<\s*ref\s*>((?>.(?<!<\s*ref\s*>|<\s*/\s*ref\s*>)|<\s*ref\s*>(?<DEPTH>)|<\s*/\s*ref\s*>(?<-DEPTH>))*(?(DEPTH)(?!)))<\s*/\s*ref\s*>", RegexOptions.Singleline);        
+        public static readonly Regex UnnamedReferences = new Regex(@"<\s*ref\s*>((?>.(?<!<\s*ref\s*>|<\s*/\s*ref\s*>)|<\s*ref\s*>(?<DEPTH>)|<\s*/\s*ref\s*>(?<-DEPTH>))*(?(DEPTH)(?!)))<\s*/\s*ref\s*>", RegexOptions.Singleline);
 
-        // covered by DablinksTests
-        /// <summary>
-        /// Finds article disamiguation links from https://en.wikipedia.org/wiki/Wikipedia:Template_messages/General#Disambiguation_and_redirection and https://en.wikipedia.org/wiki/Template:Hatnote_templates (en only)
-        /// </summary>
-        public static readonly Regex Dablinks = Tools.NestedTemplateRegex(new[]
+        public static readonly List<string> DablinksList = new List<string>(new[]
         {
             "about", "about-distinguish", "about-distinguish-text", "about other people", "about year", "broader", "correct title", "distinguish",
             "for", "for introduction", "for LMST", "for-multi", "for outline", "for timeline", "for-text", "further", "further interlanguage link", "further-text", "hatnote", "highway detail hatnote", 
@@ -1316,7 +1312,12 @@ namespace WikiFunctions
             "Norse name", "Patronymic name", "Pakistani name", "Philippine name", "Portuguese name",
             "Spanish colonial name", "Spanish married name", "Traditional Norwegian name", "Western name order",
             "Western Slavic name"
-        }, false);
+        });
+        // covered by DablinksTests
+        /// <summary>
+        /// Finds article disamiguation links from https://en.wikipedia.org/wiki/Wikipedia:Template_messages/General#Disambiguation_and_redirection and https://en.wikipedia.org/wiki/Template:Hatnote_templates (en only)
+        /// </summary>
+        public static readonly Regex Dablinks = Tools.NestedTemplateRegex(DablinksList, false);
 
         /// <summary>
         /// Matches {{short description}} template and its redirects, and {{Oscars short description}}

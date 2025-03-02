@@ -272,7 +272,8 @@ en, sq, ru
             return Sort(articleText, articleTitle, true);
         }
 
-        private static readonly Regex HatnoteGroup = Tools.NestedTemplateRegex("hatnote group");
+        private static readonly List<string> DablinksPlusHatnoteGroupList = WikiRegexes.DablinksList.Union(new List<string>(new [] {"hatnote group" })).ToList();
+        private static readonly Regex DablinksPlusHatnoteGroup = Tools.NestedTemplateRegex(DablinksPlusHatnoteGroupList);
         private static readonly Regex WikiTable = new Regex(@"^{\|", RegexOptions.Multiline);
 
         /// <summary>
@@ -475,11 +476,9 @@ en, sq, ru
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.GoodFeaturedArticleTemplates);
 
             // L3 Hatnotes/Dablinks above maintance tags per [[MOS:ORDER]]
-            // if have {{hatnote group}} then move that not the individual dablinks
-            if (TemplateExists(alltemplates, HatnoteGroup))
-                zerothSection = MoveTemplate(zerothSection, HatnoteGroup);
-            else if (TemplateExists(alltemplates, WikiRegexes.Dablinks))
-                zerothSection = MoveTemplate(zerothSection, WikiRegexes.Dablinks);
+            // if have {{hatnote group}} then move that plus any standalone individual dablinks
+            if (TemplateExists(alltemplates, DablinksPlusHatnoteGroup))
+                zerothSection = MoveTemplate(zerothSection, DablinksPlusHatnoteGroup);
 
             // L2 {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} above hatnotes per [[MOS:ORDER]] if not being kept directly above, or after an infobox
             if (moveDisplayLowerCaseItalicTitle == 1)
