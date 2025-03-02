@@ -140,6 +140,8 @@ namespace UnitTests
             Assert.That(parser.FixNonBreakingSpaces(@"a 0.3mol solution"), Is.EqualTo(@"a 0.3&nbsp;mol solution"));
             Assert.That(parser.FixNonBreakingSpaces(@"a 50.247 kW laser"), Is.EqualTo(@"a 50.247&nbsp;kW laser"));
             Assert.That(parser.FixNonBreakingSpaces(@"a 50.247 mW laser"), Is.EqualTo(@"a 50.247&nbsp;mW laser"));
+            // T387630
+            // Assert.That(parser.FixNonBreakingSpaces(@"a 50.247 MW laser"), Is.EqualTo(@"a 50.247&nbsp;MW laser"));
             Assert.That(parser.FixNonBreakingSpaces(@"a 50m/s car"), Is.EqualTo(@"a 50&nbsp;m/s car"));
             Assert.That(parser.FixNonBreakingSpaces(@"at 5°C today"), Is.EqualTo(@"at 5&nbsp;°C today"));
             Assert.That(parser.FixNonBreakingSpaces(@"at 5 °C today"), Is.EqualTo(@"at 5&nbsp;°C today"));
