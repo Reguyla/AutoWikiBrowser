@@ -1124,6 +1124,27 @@ Text.
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - 2 templates");
 
             textBefore = @"{{short description|Text}}
+{{coord}}
+
+Text.
+==Last section==
+{{authority control}}
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            textAfter = @"{{short description|Text}}
+
+Text.
+==Last section==
+{{authority control}}
+
+{{coord}}
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - another template in last section");
+
+            textBefore = @"{{short description|Text}}
 {{Infobox something|
 loc={{coord}}
 param=a}}

@@ -557,7 +557,7 @@ en, sq, ru
                 return articleText;
 
             // nothing to do if template is already in last section
-            if (!TemplatesToEndOfArticle.IsMatch(restOfArticleText) || TemplatesToEndOfArticle.IsMatch(lastSection))
+            if (!TemplatesToEndOfArticle.IsMatch(restOfArticleText) || allTemplatesDetail.Any(t => lastSection.Contains(t)))
                 return articleText;
 
             string allTemplatesFound = "";
