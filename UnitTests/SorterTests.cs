@@ -525,6 +525,19 @@ Hello";
 Hello";
             Assert.That(parser2.SortMetaData(shortDescWithComment2, "Title"), Is.EqualTo(shortDescWithComment2), "Handles short description with comment after, then infobox");
 
+            const string templateWithCommentMultiLine = @"{{Short description|American character}}<!--
+a comment
+over multiple lines
+-->
+{{other uses}}
+{{featured article}}
+{{Use mdy dates}}
+{{Use American English}}
+{{Infobox actor}}
+{{Japanese script needed}}
+Hello";
+            Assert.That(parser2.SortMetaData(templateWithCommentMultiLine, "Title"), Is.EqualTo(templateWithCommentMultiLine), "Handles template with comment after, multiline comment");
+
             const string multipleInfoxbox = @"{|{{Infobox ship begin|infobox caption=PTF-3}}
 {{Infobox ship image
 }}
