@@ -244,7 +244,7 @@ namespace WikiFunctions.Parse
                     if (tc.Contains("|"))
                     {
                         string toFirstBar = tc.Substring(0, tc.IndexOf('|'));
-                        return toFirstBar.Contains("\r\n") && !toFirstBar.Contains("⌊⌊⌊⌊");
+                        return toFirstBar.Trim().Length > 2 && toFirstBar.Contains("\r\n") && !toFirstBar.Contains("⌊⌊⌊⌊");
                     }
 
                     return false;

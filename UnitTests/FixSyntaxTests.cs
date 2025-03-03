@@ -346,6 +346,10 @@ foo}}"));
 bar|val=one}}"), Is.EqualTo(@"{{foo bar|val=one}}"));
             Assert.That(Parsers.FixSyntax(@"{{Foo 
 bar|val=one}}"), Is.EqualTo(@"{{Foo bar|val=one}}"));
+            Assert.That(Parsers.FixSyntax(@"{{Foo 
+bar|val=one}} {{
+ |val2=a}}"), Is.EqualTo(@"{{Foo bar|val=one}} {{
+ |val2=a}}"), "Unnamed template handling");
         }
 
         [Test]
