@@ -1363,6 +1363,9 @@ cit"));
 
             Assert.That(WikiRegexes.InfoBox.Match(@" {{Infobox
 | hello| bye}} ").Groups[1].Value, Is.EqualTo("Infobox"));
+            ClassicAssert.IsTrue(WikiRegexes.InfoBox.IsMatch(@" {{Chembox|field=value}} "));
+            ClassicAssert.IsTrue(WikiRegexes.InfoBox.IsMatch(@" {{Chembox Properties|field=value}} "));
+            ClassicAssert.IsTrue(WikiRegexes.InfoBox.IsMatch(@" {{Chembox Structure|field=value}} "));
         }
 
         [Test]
