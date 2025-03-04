@@ -1300,18 +1300,21 @@ namespace WikiFunctions
         /// </summary>
         public static readonly Regex UnnamedReferences = new Regex(@"<\s*ref\s*>((?>.(?<!<\s*ref\s*>|<\s*/\s*ref\s*>)|<\s*ref\s*>(?<DEPTH>)|<\s*/\s*ref\s*>(?<-DEPTH>))*(?(DEPTH)(?!)))<\s*/\s*ref\s*>", RegexOptions.Singleline);
 
+        /// <summary>
+        /// Matches dablinks, including hatnotes for names from https://en.wikipedia.org/wiki/Category:Hatnote_templates_for_names
+        /// </summary>
         public static readonly List<string> DablinksList = new List<string>(new[]
         {
             "about", "about-distinguish", "about-distinguish-text", "about other people", "about year", "broader", "correct title", "distinguish",
             "for", "for introduction", "for LMST", "for-multi", "for outline", "for timeline", "for-text", "further", "further interlanguage link", "further-text", "hatnote", "highway detail hatnote", 
-            "introductory article", "other people", "other places", "other ships", "other storms", "other uses", "other uses of", 
-            "redirect", "redirect2", "redirect-distinguish", "redirect-distinguish-for", "redirect-distinguish-text", "redirect-multi", "redirect-several", "redirect-synonym", 
-            "see also", "see also-text", "See Wiktionary", "self-reference", "similar names", "technical reasons", "transcluding article", "wikiIPA", 
-            "Family name hatnote", "Bhutanese name", "British barrelled name", "Dinka name", "Ethiopian name",
-            "Fijian name", "Given name hatnote", "Icelandic name", "Indian patronymic", "Indonesian name", "Malay name",
-            "Norse name", "Patronymic name", "Pakistani name", "Philippine name", "Portuguese name",
-            "Spanish colonial name", "Spanish married name", "Traditional Norwegian name", "Western name order",
-            "Western Slavic name"
+            "introductory article", "other people", "other places", "other ships", "other storms", "other uses", "other uses of",
+            "redirect", "redirect2", "redirect-distinguish", "redirect-distinguish-for", "redirect-distinguish-text", "redirect-multi", "redirect-several", "redirect-synonym",
+            "see also", "see also-text", "See Wiktionary", "self-reference", "similar names", "technical reasons", "transcluding article", "wikiIPA",
+            "Family name hatnote", "Baptismal name", "Bhutanese name", "British barrelled name", "Burmese name", "Dinka name", "Dutch name capitalization",
+            "Ethiopian name", "Fijian name", "Given name hatnote", "Hungarian name", "Icelandic name", "Indian patronymic", "Indonesian name", "Lotuko name",
+            "Malay name", "Maldivian Name", "Matronymic name", "Medieval Italian name", "Meitei name", "Norse name", "Pakistani name", "Patronymic name",
+            "Patronymic names", "Philippine name", "Portuguese name", "Renaissance Florentine name", "Spanish colonial name", "Spanish married name",
+            "Tamil name", "Traditional Norwegian name", "Welsh name", "Western name order", "Western Slavic name"
         });
         // covered by DablinksTests
         /// <summary>
