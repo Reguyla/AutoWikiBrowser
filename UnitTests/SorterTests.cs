@@ -1741,6 +1741,15 @@ foo";
 <!-- [[Category:Current basketball seasons|Turkey]] -->";
             string sameCatInComment = correct;
             Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct + "\r\n"), "Handle a cat that is also in a comment - comment after");
+
+            const string correct2 = @"[[Category:1985 x in the United Kingdom]] <!-- Text... a parent of [[Category:1985 y in the United Kingdom]] -->
+[[Category:1985 in London]]
+[[Category:1985 y in the United Kingdom]]
+[[Category:1980s c in London]] <!-- Text... a parent of [[Category:1980s z in London]] -->
+[[Category:1980s z in London]]
+[[Category:20th century in a]]";
+            sameCatInComment = correct2;
+            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct2 + "\r\n"), "Handle a cat that is also in a comment - comment before");
         }
 
         [Test]

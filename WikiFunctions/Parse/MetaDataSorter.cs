@@ -655,10 +655,9 @@ en, sq, ru
                 int cutoff = Math.Max(0, cq.Index - 500);
                 string cut = articleText.Substring(cutoff);
 
-                // if unformatted text is matched entirely by the cats regex then it's a commented out category, which we can handle as normal
-                // it's only larger comments (of which only a part is a cat) that are a problem
+                // if unformatted text is matched by the cats regex then it's a commented out category or a category comment itself containing a category, which we can handle as normal
                 List<string> catsList = WikiRegexes.RemoveCatsAllCats.Matches(cut).Cast<Match>().Select(m => m.Value).ToList();
-                allUnformatted.RemoveAll(u => catsList.Contains(u));
+                allUnformatted.RemoveAll(u => catsList.Any(c => c.Contains(u)));
 
                 cut = WikiRegexes.RemoveCatsAllCats.Replace(cut, m =>
                 {
