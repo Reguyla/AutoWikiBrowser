@@ -847,7 +847,7 @@ Bar";
         [Test]
         public void ReorderReferencesNotEnWp()
         {
-            const string t = @"'''Article''' is great.<ref name = ""Fred1"">So says Fred</ref>
+            string t = @"'''Article''' is great.<ref name = ""Fred1"">So says Fred</ref>
 Article started off pretty good,<ref>So says John</ref><ref name = ""Fred1"" /> and finished well.
 End of.
 
@@ -857,6 +857,23 @@ End of.
             GenFixes();
 
             Assert.That(ArticleText, Is.EqualTo(t), "No change: ReorderReferences not applied within en-wp genfixes");
+#if DEBUG
+            Variables.SetProjectLangCode("uk");
+            WikiRegexes.MakeLangSpecificRegexes();
+            t = @"'''Article''' is great.<ref name = ""Fred1"">So says Fred</ref>
+Article started off pretty good,<ref>So says John</ref><ref name = ""Fred1"" /> and finished well.
+End of.
+
+==References
+{{Reflist}}";
+            ArticleText = t;
+            GenFixes();
+
+            Assert.That(ArticleText, Is.EqualTo(t), "No change: ReorderReferences not applied within uk-wp genfixes");
+
+            Variables.SetProjectLangCode("en");
+            WikiRegexes.MakeLangSpecificRegexes();
+#endif
         }
 
         [Test]
