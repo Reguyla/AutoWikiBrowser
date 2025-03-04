@@ -54,7 +54,7 @@ namespace WikiFunctions
 
             // allow comments between categories, and keep them in the same place, only grab any comment after the last category if on same line
             // whitespace: remove all whitespace after, but leave a blank newline before a heading (rare case where category not in last section)
-            RemoveCatsAllCats = new Regex(@"<!-- [^<>]*?\[\[\s*" + category + @".*?(\]\]|\|.*?\]\]).*?-->|\[\[" + category
+            RemoveCatsAllCats = new Regex(@"<!--[^<>]*?\[\[\s*" + category + @".*?(\]\]|\|.*?\]\]).*?-->|\[\[" + category
                                 + @".*?(\]\]|\|.*?\]\])(\s*⌊⌊⌊⌊\d{1,4}⌋⌋⌋⌋| *<!--.*?-->|\s*<!--.*?-->(?=\r\n\[\[\s*" + category
                                 + @")|\s*(?=\r\n==)|\s*)?", RegexOptions.Singleline);
 

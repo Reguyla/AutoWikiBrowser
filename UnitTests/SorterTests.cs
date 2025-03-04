@@ -1621,13 +1621,11 @@ text
 
             Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug1a + "\r\n"), "commented out plus comments");
 
-            string bug2 = @"{{The Surreal Life}}
+            string bug2 = @"{{DEFAULTSORT:A}}
 <!--The 1951 birth date has been upheld in court, please do not add this category.[[Category:1941 births]]-->
-
-[[Category:Living People]]
-foo";
-
-            ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref bug2, "test").Contains(@"[[Category:1941 births]]"), "commented out and not");
+[[Category:Living People]]";
+            t = bug2;
+            Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug2 + "\r\n"), "commented out and not");
 
             string nw = @"Hello
 <nowiki>[[Category:LGBT people from the United States]]
@@ -1750,6 +1748,22 @@ foo";
 [[Category:20th century in a]]";
             sameCatInComment = correct2;
             Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct2 + "\r\n"), "Handle a cat that is also in a comment - comment before");
+
+            const string correct3 = @"{{DEFAULTSORT:Juba, Master}}
+[[Category:1820s births]]
+[[Category:1850s deaths]]
+[[Category:19th-century American dancers]]
+[[Category:African-American male dancers]]
+[[Category:Blackface minstrel performers]]
+[[Category:Dancers from Rhode Island]]
+[[Category:People from Five Points, Manhattan]]
+[[Category:People from Providence, Rhode Island]]
+<!--The categories are either included by more detailed ones above, or not supported by the text (no mention of him being known as an actor or musician)
+[[Category:African-American male actors]]
+[[Category:American male actors]]
+[[Category:African-American male dancers]] -->";
+            sameCatInComment = correct3;
+            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct3 + "\r\n"), "Handle a cat that is also in a comment - comment block after");
         }
 
         [Test]
