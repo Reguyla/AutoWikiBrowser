@@ -703,6 +703,20 @@ The 2018 competition";
 
 '''Hurricane Rosa''' was";
             Assert.That(parser2.SortMetaData(foldedInfoboxes, "A"), Is.EqualTo(foldedInfoboxes), "Handle folded infoboxes in zeroth section");
+
+            const string commentBeforeOpeningSentence = @"{{Short description|English naturalist and biologist (1809–1882)}}
+{{Other people}}
+{{Featured article}}
+{{pp-move}}
+{{Use British English|date=October 2024}}
+{{Use dmy dates|date=October 2024}}
+{{Infobox person
+| name               = Charles Darwin
+}}
+<!--Please consider discussing changes on the talk page...-->
+
+'''Charles Robert Darwin'''";
+            Assert.That(parser2.SortMetaData(commentBeforeOpeningSentence, "A"), Is.EqualTo(commentBeforeOpeningSentence), "Handle comment before opening sentence in zeroth section");
         }
 
         [Test]

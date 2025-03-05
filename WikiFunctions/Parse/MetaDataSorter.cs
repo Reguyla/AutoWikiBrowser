@@ -439,6 +439,8 @@ en, sq, ru
             if (Parsers.UnbalancedBrackets(zerothSection, out bl) > 0)
                 return zerothSection;
 
+            bool deletionProtectionTagsComments = WikiRegexes.DeletionProtectionTags.Matches(zerothSection).Cast<Match>().Any(m => WikiRegexes.Comments.IsMatch(m.Value));
+
             // (rest of section) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
             if(moveDisplayLowerCaseItalicTitle == 4)
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.DisplayLowerCaseItalicTitle);
@@ -468,8 +470,14 @@ en, sq, ru
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.MosLevel6MaintenanceCleanupDispute);
 
             // L5 deletion/protection templates above maintenance tags, below dablinks per [[MOS:ORDER]]
+            // special allowance of comments on line(s) after template is required, but only apply if comments there, otherwise can pick up unrelated comments later in section
             if (TemplateExists(alltemplates, WikiRegexes.DeletionProtectionTags))
-                zerothSection = MoveTemplate(zerothSection, WikiRegexes.DeletionProtectionTags);
+            {
+                if (deletionProtectionTagsComments)
+                    zerothSection = MoveTemplate(zerothSection, WikiRegexes.DeletionProtectionTags);
+                else
+                    zerothSection = MoveTemplate(zerothSection, Tools.NestedTemplateRegex(WikiRegexes.DeletionProtectionTagsList));
+            }
 
             // L4 featured article templates above deletion/protection templates [[MOS:ORDER]]
             if (TemplateExists(alltemplates, WikiRegexes.GoodFeaturedArticleTemplates))
