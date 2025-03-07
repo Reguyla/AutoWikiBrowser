@@ -1228,6 +1228,14 @@ namespace WikiFunctions
         }.ToList();
 
         /// <summary>
+        /// Maintenance templates, sorted per MOS:ORDER level 6, but not to be included in {{Multiple issues}} - no visible rendering on page
+        /// </summary>
+        private static readonly List<string> OtherArticleMaintenanceTemplatesList = new[]
+        {
+            "Alt text missing", "Alternative text missing", "coord missing", "cbtalkonly"
+        }.ToList();
+
+        /// <summary>
         /// Matches the cleanup templates that can be moved into the {{multiple issues}} article-level template
         /// </summary>
         public static readonly Regex MultipleIssuesArticleMaintenanceTemplates = Tools.NestedTemplateRegex(MultipleIssuesArticleMaintenanceTemplatesList);
@@ -1238,7 +1246,7 @@ namespace WikiFunctions
         public static readonly Regex MultipleIssuesSectionMaintenanceTemplates = Tools.NestedTemplateRegex(new [] { "BLP sources section", "BLP unsourced section", "BLP unreferenced section", "Cleanup section", "Confusing section", "Copy edit-section", "Criticism section", "Disputed-section", "Expand section", "Importance-section", "POV-section", "Refimprove section", "More citations needed section", "Rewrite section", "Unreferenced section", "Update section", "Wikify section" } );
 
         public static readonly Regex MosLevel6MaintenanceCleanupDispute =
-            Tools.NestedTemplateRegex(MultipleIssuesArticleMaintenanceTemplatesList.Union(InUseList).Union(BotsNoBotsList).Union(MultipleIssuesList)
+            Tools.NestedTemplateRegex(MultipleIssuesArticleMaintenanceTemplatesList.Union(InUseList).Union(BotsNoBotsList).Union(MultipleIssuesList).Union(OtherArticleMaintenanceTemplatesList)
                 .ToList());
         /// <summary>
         /// Matches language maintenance templates from Category:Language maintenance templates and Category:Script_talk_header_templates

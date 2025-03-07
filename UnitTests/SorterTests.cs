@@ -720,6 +720,23 @@ The 2018 competition";
         }
 
         [Test]
+        public void ZerothSectionSortingExtras()
+        {
+            const string otherMaintenanceTemplates = @"{{Short description|Sculpture Chicago}}
+{{Featured article}}
+{{pp-move}}
+{{Alt text missing|Featured}}
+{{Use mdy dates|date=February 2025}}
+{{Use American English|date=January 2025}}
+{{Infobox artwork
+ | image = A.JPG
+ | image_size = 400px
+}}
+The text";
+            Assert.That(parser2.SortMetaData(otherMaintenanceTemplates, "A"), Is.EqualTo(otherMaintenanceTemplates), "Handle other maintenance templates in zeroth section");
+        }
+
+        [Test]
         public void MoveDeletionProtection()
         {
             string deletiontag = @"{{Prod blp}}", dablink = @"{{other people|Fred the dancer|Fred Smith (dancer)}}", 
