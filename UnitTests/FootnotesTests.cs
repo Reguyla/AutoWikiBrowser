@@ -964,7 +964,7 @@ Bar4.<ref name=""ABCDEFGHI""/>
 |journal=, |jstor=, |agency=, |archive-date=, |others=, | vauthors =, | veditors =, |translator =, |translator-last=, |translator-first=, |translator-link=, |time=,|citeseerx=,
 |name-list-style=a |script-work=, |trans-quote=, |archive-format=, |lay-url=
 |author-given=, |author-surname=, |display-subjects=, |interviewer-given=, |interviewer-surname=, |orig-date=, |quote-page=, |quote-pages=, |sbn=, |script-quote=, |subject-mask=, |s2cid=, |s2cid-access=, |title-link=, |trans-quote= , |translator1=, |trans-work= ,
-|trans-website=,|subject=,|medium=,|host=,}}"), Is.EqualTo(Found));
+|trans-website=,|subject=,|medium=,|host=,|minutes=,}}"), Is.EqualTo(Found));
 
             Assert.That(Parsers.BadCiteParameters(@"now {{cite arxiv|display-authors=0}} was"), Is.EqualTo(Found));
             Assert.That(Parsers.BadCiteParameters(@"now {{cite arxiv|vauthors=0|mode=cs2|page=0|collaboration=0}} was"), Is.EqualTo(Found));
