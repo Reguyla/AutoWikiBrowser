@@ -1185,7 +1185,7 @@ namespace WikiFunctions
             "Excessive citations", "Excessive examples", "Exit list", "Expert needed", "External links", "Famous", "Fan POV",
             "Fiction", "Fiction trivia", "Format footnotes", "Fringe theories", "Full citations needed", "Further reading cleanup", "Game guide", "Generalize", "Geographic imbalance", "Globalize", "Hoax", "Hook", "How-to",
             "Inappropriate person", "Incoming links", "incomplete disambiguation", "Incomplete list", "Inc-personnel", "Inc-results", "Independent sources", "In popular culture", "In-universe",
-            "Lacking ISBN", "Lacking overview", "Lead extra info", "Lead missing", "Lead rewrite", "Lead too long", "Lead too short", "List to table", "List years", "Localist",
+            "Lacking ISBN", "Lacking overview", "Lead extra info", "Lead missing", "Lead rewrite", "Lead too long", "Lead too short", "List missing criteria", "List to table", "List years", "Localist",
             "Long plot", "Media IMDb refimprove", "Merge", "Merge from", "Merge portions from", "Merge to", "Merging from", "Missing information", "Missing taxobox", "More citations needed",
             "More footnotes needed", "More medical citations needed", "More plot", "More science citations needed", "Mycomorphbox missing", "Needs table", "Neologism",
             "No footnotes", "No plot", "No reliable sources", "No significant coverage", "No significant coverage (sports)", "Non-free", "Notability", "Not English", "NPOV language", "NRIS only", "Obituary", "Off topic", "One other topic", "One source",
