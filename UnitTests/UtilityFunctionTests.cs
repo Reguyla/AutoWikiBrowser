@@ -871,6 +871,7 @@ foo {{Infobox biography}}
             ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> {{reflink}}"));
             ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> {{references}}"));
             ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> <references/>"));
+            ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> <references group="""" responsive=""1""></references>"));
             ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello{{GR|4}} <references/>"));
 
             // this specifies to {{GR}} not to embed <ref></ref>
