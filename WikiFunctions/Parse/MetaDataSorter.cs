@@ -310,8 +310,7 @@ en, sq, ru
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Substituted_templates
             // if article contains some substituted template stuff, sorting the data may mess it up (further)
-            // T387084 don't apply sort where magic word behaviour switches present as these can be placed anywhere in article
-            if (Namespace.IsMainSpace(articleTitle) && (Parsers.NoIncludeIncludeOnlyProgrammingElement(articleText) || WikiRegexes.MagicWordBehaviourSwitches.IsMatch(articleText)))
+            if (Namespace.IsMainSpace(articleTitle) && (Parsers.NoIncludeIncludeOnlyProgrammingElement(articleText)))
                 return articleText;
 
             // short pages monitor check for en-wiki: keep at very end of article if present
@@ -657,6 +656,10 @@ en, sq, ru
 
             if (cq.Success)
             {
+                // T387084 don't apply sort where magic word behaviour switches present as these can be placed anywhere in article
+                if (WikiRegexes.MagicWordBehaviourSwitches.IsMatch(articleText.Substring(cq.Index)))
+                    return "";
+ 
                 List<string> allUnformatted = (from Match m in WikiRegexes.UnformattedText.Matches(articleText)
                     select m.Value).ToList();
                 
@@ -688,7 +691,7 @@ en, sq, ru
 
                 // now refresh defaultsort to pick up any comment on same line after it
                 if (mc.Count > 0)
-                    mc = Regex.Matches(articleText, WikiRegexes.Defaultsort.ToString() + @"(?: *<!--[^<>]*-->)?");
+                    mc = Regex.Matches(articleText, WikiRegexes.Defaultsort + @"(?: *<!--[^<>]*-->)?");
 
                 // remove defaultsort now if we can, faster to remove from cut than whole articleText
                 if (mc.Count > 0 && cut.Contains(mc[0].Value))
@@ -705,7 +708,6 @@ en, sq, ru
                         categoryList.Insert(0, m.Value);
                         return "";
                     }, 1);
-
             }
 
             if (Variables.LangCode.Equals("sl") && LifeTime.IsMatch(articleText))

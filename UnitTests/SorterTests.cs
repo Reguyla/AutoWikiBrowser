@@ -2449,10 +2449,13 @@ Text";
             Assert.That(parser2.SortMetaData(d + e, "foo"), Is.Not.EqualTo(d + "\r\n" + e));
             Assert.That(parser2.SortMetaData(f + d, "foo"), Is.EqualTo(f + d));
 
-            const string magicWord = @"
-__FORCETOC__
+            string magicWord = @"__FORCETOC__
+
 [[Category:Foo]]";
-            Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "No cat sort when magic word in final section");
+            Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word above cats");
+            magicWord = @"[[Category:Foo]]
+__FORCETOC__";
+            Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word below cats");
         }
 
         [Test]
