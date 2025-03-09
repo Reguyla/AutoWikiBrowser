@@ -537,7 +537,7 @@ namespace WikiFunctions.Parse
             {
                 newValue = Tools.SetTemplateParameterValue(newValue, "archive-url", theURL);
                 newValue = Tools.SetTemplateParameterValue(newValue, "archive-date", Regex.Replace(ArchiveOrgURL.Match(theURL).Groups[1].Value, @"(\d{4})(\d\d)(\d\d)", "$1-$2-$3"));
-                if (website.ToLower().StartsWith("archive"))
+                if (website.ToLower().StartsWith("archive") || website.ToLower().StartsWith("web.archive"))
                     newValue = Tools.RemoveTemplateParameter(newValue, "website");
                 theURL = ArchiveOrgURL.Replace(theURL, "");
                 newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
