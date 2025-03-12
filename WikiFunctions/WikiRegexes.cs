@@ -1188,7 +1188,7 @@ namespace WikiFunctions
             "Lacking ISBN", "Lacking overview", "Lead extra info", "Lead missing", "Lead rewrite", "Lead too long", "Lead too short", "List missing criteria", "list scope", "List to table", "List years", "Localist",
             "Long plot", "Media IMDb refimprove", "Merge", "Merge from", "Merge portions from", "Merge to", "Merging from", "Missing information", "Missing taxobox", "More citations needed",
             "More footnotes needed", "More medical citations needed", "More plot", "More science citations needed", "Mycomorphbox missing", "Needs table", "Neologism",
-            "No footnotes", "No plot", "No reliable sources", "No significant coverage", "No significant coverage (sports)", "Non-free", "Notability", "Not English", "NPOV language", "NRIS only", "Obituary", "Off topic", "One other topic", "One source",
+            "No footnotes", "No plot", "No reliable sources", "No significant coverage", "No significant coverage (sports)", "Non-free", "Notability", "Not English", "NPOV language", "NRIS only", "Obituary", "Off topic", "Old news", "One other topic", "One source",
             "Only primary sources", "Original research", "Orphan", "Overlinked",
             "Overly detailed", "Over-quotation", "Page numbers improve", "Page numbers needed", "Paid contributions", "Parenthetical referencing", "Peacock", "POV", "POV lead", "POV map",
             "Primary sources", "Pro and con list", "Proofreader needed", "Promotional", "Prose", "Recategorize", "Recent birth", "Recent death", "Recentism", "Recently revised", "Religious text primary",
