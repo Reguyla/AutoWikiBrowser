@@ -560,6 +560,11 @@ namespace WikiFunctions.Parse
                     articleText = "{{Ickewiki|" + WikiRegexes.DateYearMonthParameter + templateEnd + articleText;
                     tagsAdded.Add("[[WP:PW|ickewiki]]");
                 }
+                else if (Variables.LangCode.Equals("fr"))
+                {
+                    articleText = "{{À wikifier|" + WikiRegexes.DateYearMonthParameter + templateEnd + articleText;
+                    tagsAdded.Add("À wikifier");
+                }
                 else
                 {
                     articleText = "{{Underlinked|" + WikiRegexes.DateYearMonthParameter + templateEnd + articleText;
@@ -587,10 +592,13 @@ namespace WikiFunctions.Parse
                     {
                         tagsRemoved.Add("ويكى");
                     }
-
-                    if (Variables.LangCode.Equals("fa"))
+                    else if (Variables.LangCode.Equals("fa"))
                     {
                         tagsRemoved.Add("کم‌پیوند");
+                    }
+                    else if (Variables.LangCode.Equals("fr"))
+                    {
+                        tagsRemoved.Add("À wikifier");
                     }
                     else
                     {
@@ -858,6 +866,11 @@ namespace WikiFunctions.Parse
                     articleText = "{{Öksüz|" + WikiRegexes.DateYearMonthParameter + "}}\r\n\r\n" + articleText;
                     tagsAdded.Add("[[CAT:O|orphan]]");
                 }
+                else if (Variables.LangCode.Equals("fr"))
+                {
+                    articleText = "{{Orphelin|" + WikiRegexes.DateYearMonthParameter + "}}\r\n\r\n" + articleText;
+                    tagsAdded.Add("Orphelin");
+                }
                 else
                 {
                     articleText = "{{Orphan|" + WikiRegexes.DateYearMonthParameter + "}}\r\n\r\n" + articleText;
@@ -886,6 +899,10 @@ namespace WikiFunctions.Parse
                 else if (Variables.LangCode.Equals("hy"))
                 {
                     tagsRemoved.Add("Որբ");
+                }
+                else if (Variables.LangCode.Equals("fr"))
+                {
+                    tagsRemoved.Add("orphelin");
                 }
                 else
                 {

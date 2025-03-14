@@ -778,6 +778,11 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{orphan}}"));
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{orphan|time=2014-03-07}}"));
 
+            Variables.SetProjectLangCode("fr");
+            WikiRegexes.MakeLangSpecificRegexes();
+            ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{orphan}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{orphelin}}"));
+
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
             #endif
@@ -826,6 +831,13 @@ now stubborn}}");
             
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{wikify}}"));
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{underlinked}}"));
+
+            Variables.SetProjectLangCode("fr");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{wikify}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{Underlinked}}"));
+            ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{À wikifier}}"));
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
