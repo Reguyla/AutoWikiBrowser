@@ -1191,7 +1191,7 @@ namespace WikiFunctions
             "Long plot", "Media IMDb refimprove", "Merge", "Merge from", "Merge portions from", "Merge to", "Merging from", "Missing information", "Missing taxobox", "More citations needed",
             "More footnotes needed", "More medical citations needed", "More plot", "More science citations needed", "Mycomorphbox missing", "Needs table", "Neologism",
             "No footnotes", "No plot", "No reliable sources", "No significant coverage", "No significant coverage (sports)", "Non-free", "Notability", "Not English", "NPOV language", "NRIS only", "Obituary", "Off topic", "Old news", "One other topic", "One source",
-            "Only primary sources", "Original research", "Orphan", "Overlinked",
+            "Only primary sources", "Original research", "Orphan", "Outdated as of", "Overlinked",
             "Overly detailed", "Over-quotation", "Page numbers improve", "Page numbers needed", "Paid contributions", "Parenthetical referencing", "Peacock", "POV", "POV lead", "POV map",
             "Primary sources", "Pro and con list", "Proofreader needed", "Promotional", "Prose", "Recategorize", "Recent birth", "Recent death", "Recentism", "Recently revised", "Religious text primary",
             "Research paper", "Resume-like", "Review", "Rough translation", "Science review", "Section move from", "Sections", "Self-contradictory", "Self-published", "Self-reference cleanup", "Self-sourcing examples", "Shallow references", "Sources exist", "Spam references", "Spam-request", "Specific", "Speculation", "Split", "Split portions", "Story",
