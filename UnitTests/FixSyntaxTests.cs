@@ -350,6 +350,15 @@ bar|val=one}}"), Is.EqualTo(@"{{Foo bar|val=one}}"));
 bar|val=one}} {{
  |val2=a}}"), Is.EqualTo(@"{{Foo bar|val=one}} {{
  |val2=a}}"), "Unnamed template handling");
+
+            const string tableInTemplate = @"{{Foo | {{
+{| class=""standard sortable"" style=text-align:right
+!N
+|-
+|0
+|}
+}}}}";
+            Assert.That(Parsers.FixSyntax(tableInTemplate), Is.EqualTo(tableInTemplate), "Table in unnamed template handling");
         }
 
         [Test]

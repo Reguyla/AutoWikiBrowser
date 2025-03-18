@@ -248,7 +248,7 @@ namespace WikiFunctions.Parse
                     }
 
                     return false;
-                }).Select(tc => Tools.GetTemplateName(tc)).ToList();
+                }).Select(tc => Tools.GetTemplateName(tc)).Where(t => t.Length > 0).ToList();
             
             foreach (var t in templatesWithUnicodeNonBreakingSpaceOrNewline)
                 articleText = Tools.RenameTemplate(articleText, t, t, true);
