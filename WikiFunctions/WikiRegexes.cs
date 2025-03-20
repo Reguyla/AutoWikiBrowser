@@ -280,8 +280,8 @@ namespace WikiFunctions
                 case "fr":
                     InUse = Tools.NestedTemplateRegex(new[] {"En cours" });
                     ReferenceList = Tools.NestedTemplateRegex(new [] { "références", "references", "reflist" });
-                    Orphan = Tools.NestedTemplateRegex(new[] {"orphan", "orphelin"});
-                    Wikify = Tools.NestedTemplateRegex(new [] {"Wikify", "Underlinked", "À wikifier"});
+                    Orphan = Tools.NestedTemplateRegex(new[] {"orphan", "orphelin", "Article orphelin"});
+                    Wikify = Tools.NestedTemplateRegex(new [] {"A wikifier", "Article à wikifier", "Underlinked", "Wikif", "Wikification", "Wikifier", "Wikify", "À wikifier"});
                     break;
                 case "hu":
                     InUse = Tools.NestedTemplateRegex(new[] {"Építés alatt", "Fejlesztés"});
