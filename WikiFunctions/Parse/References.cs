@@ -589,6 +589,7 @@ namespace WikiFunctions.Parse
         private static string CleanDerivedReferenceName(string derivedName)
         {
             derivedName = WikiRegexes.PipedWikiLink.Replace(derivedName, "$2"); // piped wikilinks -> text value
+            derivedName = WikiRegexes.ExternalLinks.Replace(derivedName, m => m.Value.Substring(m.Value.IndexOf(" ")).TrimEnd(']'));
 
             // remove templates, but not if whole derivedName is a template
             if(derivedName != WikiRegexes.Template.Match(derivedName).Value)

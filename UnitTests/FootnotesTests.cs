@@ -802,6 +802,7 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
             Assert.That(Parsers.DeriveReferenceName("a", @"{{cite doi|10.1112/123456}}"), Is.EqualTo(@"doi10.1112/123456"));
 
             Assert.That(Parsers.DeriveReferenceName("abc <ref name=dtic.mil>a</ref>", "http://www.dtic.mil/dtic/tr/fulltext/u2/a168577.pdf |ANALYSIS OF M16A2 RIFLE CHARACTERISTICS AND RECOMMENDED IMPROVEMENTS. Arthur D. Osborne. Mellonics Systems Development Division. Litton Systems, Inc. WD and Seward Smith ARI Field Unit at Fort Benning, Georgia. TRAINING RESEARCH LABORATORY. U. S. Army Research Institute for the Behavioral and Social Sciences. February 1986"), Is.EqualTo("ReferenceA"));
+            Assert.That(Parsers.DeriveReferenceName("a", "{{cite book |last=Perla |first=Peter P. |title=The Art of Wargaming: A Guide for Professionals and Hobbyists |publisher=[[Naval Institute Press]] |location=Annapolis, MD |year=1990 |page=[https://archive.org/details/artofwargaminggu0000perl/page/117/mode/2up?q=%22Eric+Dott%22 117-188] |isbn=0870210505 }}"), Is.EqualTo("Perla 1990 117-188"));
         }
 
         [Test]
