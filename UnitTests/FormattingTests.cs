@@ -1286,6 +1286,14 @@ was"));
             theTemplateRedirects = Parsers.LoadTemplateRedirects("{{tl|fb}}, {{tl|foob}} → {{tl|fOO bar}}");
             Assert.That(Parsers.TemplateRedirects("now {{fb}} was", theTemplateRedirects), Is.EqualTo("now {{fOO bar}} was"), "first letter case respected for non-acronym template");
             Assert.That(Parsers.TemplateRedirects("now {{Fb}} was", theTemplateRedirects), Is.EqualTo("now {{FOO bar}} was"));
+
+            theTemplateRedirects = Parsers.LoadTemplateRedirects("{{tl|yt}}, {{tl|youtube}} → {{tl|YouTube}}");
+
+            // for CamelCase templates enforce first letter uppercase
+            Assert.That(Parsers.TemplateRedirects("now {{yt}} was", theTemplateRedirects), Is.EqualTo("now {{YouTube}} was"));
+            Assert.That(Parsers.TemplateRedirects("now {{Yt}} was", theTemplateRedirects), Is.EqualTo("now {{YouTube}} was"));
+            Assert.That(Parsers.TemplateRedirects("now {{youtube}} was", theTemplateRedirects), Is.EqualTo("now {{YouTube}} was"));
+            Assert.That(Parsers.TemplateRedirects("now {{Youtube}} was", theTemplateRedirects), Is.EqualTo("now {{YouTube}} was"));
         }
 
         [Test]

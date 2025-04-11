@@ -160,13 +160,13 @@ namespace WikiFunctions.Parse
             return articleText;
         }
 
-        private static readonly Regex AcronymTemplate = new Regex(@"^[A-Z]{3}");
+        private static readonly Regex AcronymCamelCaseTemplate = new Regex(@"^([A-Z]{3}|[A-Z][a-z]+[A-Z])");
 
         private static string TemplateRedirectsME(Match m, string newTemplateName)
         {
             string originalTemplateName = m.Groups[2].Value;
 
-            if (!AcronymTemplate.IsMatch(newTemplateName))
+            if (!AcronymCamelCaseTemplate.IsMatch(newTemplateName))
             {
                 if (Tools.TurnFirstToUpper(originalTemplateName).Equals(originalTemplateName))
                     newTemplateName = Tools.TurnFirstToUpper(newTemplateName);
