@@ -1366,6 +1366,9 @@ cit"));
             ClassicAssert.IsTrue(WikiRegexes.InfoBox.IsMatch(@" {{Chembox|field=value}} "));
             ClassicAssert.IsTrue(WikiRegexes.InfoBox.IsMatch(@" {{Chembox Properties|field=value}} "));
             ClassicAssert.IsTrue(WikiRegexes.InfoBox.IsMatch(@" {{Chembox Structure|field=value}} "));
+            ClassicAssert.IsFalse(WikiRegexes.InfoBox.IsMatch(@" {{Cleanup infobox|date=November 2020}} "));
+            ClassicAssert.IsFalse(WikiRegexes.InfoBox.IsMatch(@" {{cleanup-infobox|date=November 2020}} "));
+            ClassicAssert.IsFalse(WikiRegexes.InfoBox.IsMatch(@" {{Incomplete infobox|date=November 2020}} "));
         }
 
         [Test]

@@ -1276,8 +1276,9 @@ namespace WikiFunctions
 
         /// <summary>
         /// Matches infoboxes, including chembox, group 1 being the template name of the infobox
+        /// Avoids matching "cleanup infobox" maintenance template
         /// </summary>
-        public static readonly Regex InfoBox = new Regex(@"(?:{{[\s_]*)(?::?[\s_]*(?:(?i:Template)\s*|[Mm]sg)[\s_]*:[\s_]*\s*)?((?:[Ii]nfo|[Cc]hem)box(?:[\s_]+[^{}\|\s][^{}\|]+?)?|[^{}\|]+?[Ii]nfobox)([\s_]*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(\|((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))))?\}\})");
+        public static readonly Regex InfoBox = new Regex(@"(?:{{[\s_]*)(?::?[\s_]*(?:(?i:Template)\s*|[Mm]sg)[\s_]*:[\s_]*\s*)?((?:[Ii]nfo|[Cc]hem)box(?:[\s_]+[^{}\|\s][^{}\|]+?)?|[^{}\|]+?(?<!([Cc]leanup|Incomplete)[- ]*)[Ii]nfobox)([\s_]*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(\|((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))))?\}\})");
 
         /// <summary>
         /// Matches {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} and their redirects
