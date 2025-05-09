@@ -2273,6 +2273,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             if (panel1.Visible) panel1.Hide();
             else panel1.Show();
+            showHidePanelToolStripMenuItem.Checked = panel1.Visible;
 
             SetBrowserSize();
         }
