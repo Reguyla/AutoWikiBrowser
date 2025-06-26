@@ -590,7 +590,7 @@ namespace WikiFunctions
         /// <summary>
         /// Matches links that may be interwikis, i.e. containing colon, group 1 being the wiki language, group 2 being the link target, group 3 any comment after the link
         /// </summary>
-        public static readonly Regex PossibleInterwikis = new Regex(@"\[\[\s*([-a-zA-Z]{2,12})(?<!File|Image|Media)\s*:+\s*([^\]\[]*?)\s*\]\]( *<!--.*?-->)?", RegexOptions.Singleline);
+        public static readonly Regex PossibleInterwikis = new Regex(@"\[\[\s*([-a-zA-Z]{2,12})(?<!File|Image|Media|MOS)\s*:+\s*([^\]\[]*?)\s*\]\]( *<!--.*?-->)?", RegexOptions.Singleline);
 
         /// <summary>
         /// Matches unformatted text regions: nowiki, pre, math, chem, html comments, timelines
