@@ -759,6 +759,9 @@ en, sq, ru
 
                     return "";
                 });
+                // now process {{multiple issues}} in case {{improve categories}} was in it and MI needs cleanup
+                Parsers p = new Parsers();
+                articleText = p.MultipleIssues(articleText);
             }
 
             // per MOS:ORDER {{Improve categories}} or {{Uncategorized}} after cats if in last section

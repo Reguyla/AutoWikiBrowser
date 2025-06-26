@@ -2032,6 +2032,13 @@ b = @"A
             Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 {{uncategorized}}
 "));
+            a = @"{{multiple issues|{{uncategorized}}}}
+[[Category:Foo]]
+";
+            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+{{uncategorized}}
+"));
+            Assert.That(a.Trim(), Is.EqualTo(""), "Clean up {{multiple issues}} after {{uncategorized}} move");
 
             a = @"{{uncategorized}}
 == Section ==
