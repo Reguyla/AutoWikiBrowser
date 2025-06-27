@@ -1234,7 +1234,7 @@ namespace WikiFunctions
         /// </summary>
         private static readonly List<string> OtherArticleMaintenanceTemplatesList = new[]
         {
-            "Alt text missing", "Alternative text missing", "coord missing", "cbtalkonly"
+            "Alt text missing", "Alternative text missing", "cbtalkonly"
         }.ToList();
 
         /// <summary>
