@@ -3837,7 +3837,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     e.SuppressKeyPress = true;
                     return;
                 }
-                if (e.KeyCode == Keys.E && btnPreview.Enabled)
+                if (e.KeyCode == Keys.N && btnPreview.Enabled)
                 {
                     GetPreview();
                     e.SuppressKeyPress = true;

@@ -1802,7 +1802,7 @@ namespace AutoWikiBrowser
             this.btnSave.Size = new System.Drawing.Size(117, 36);
             this.btnSave.TabIndex = 16;
             this.btnSave.Text = "&Save";
-            this.ToolTip.SetToolTip(this.btnSave, "Save the changes and continue  (Ctrl + S)");
+            this.ToolTip.SetToolTip(this.btnSave, "Save the changes and continue (Ctrl + S)");
             this.btnSave.UseVisualStyleBackColor = false;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
@@ -1816,7 +1816,7 @@ namespace AutoWikiBrowser
             this.btnPreview.Size = new System.Drawing.Size(58, 23);
             this.btnPreview.TabIndex = 9;
             this.btnPreview.Text = "Preview";
-            this.ToolTip.SetToolTip(this.btnPreview, "Preview your changes");
+            this.ToolTip.SetToolTip(this.btnPreview, "Preview your changes (Ctrl + N)");
             this.btnPreview.Click += new System.EventHandler(this.btnPreview_Click);
             // 
             // btnStart
