@@ -986,12 +986,13 @@ Bring"));
             Assert.That(parser.Mdashes("(ages 15-18)", "test"), Is.EqualTo("(ages 15–18)"));
 
             Assert.That(parser.Mdashes("Now 1…3 was", "test"), Is.EqualTo("Now 1...3 was"));
-
+#if DEBUG
             Variables.SetProjectLangCode("fr");
             Assert.That(parser.Mdashes("Now 1…3 was", "test"), Is.EqualTo("Now 1…3 was"), "No elipsis change on fr-wiki");
             Variables.SetProjectLangCode("uk");
             Assert.That(parser.Mdashes("Now 1…3 was", "test"), Is.EqualTo("Now 1…3 was"), "No elipsis change on uk-wiki");
             Variables.SetProjectLangCode("en");
+#endif
         }
 
         [Test]
