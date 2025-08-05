@@ -27,6 +27,8 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography.X509Certificates;
 
+using WikiFunctions.Controls;
+
 namespace WikiFunctions.API
 {
     //TODO: refactor XML parsing
@@ -608,73 +610,170 @@ namespace WikiFunctions.API
             xr.ReadToFollowing("tokens");
             string token = xr.GetAttribute("logintoken");
 
-            // first log in. If we got a logintoken then use it, this should be our only action=login in that case
-            bool domainSet = !string.IsNullOrEmpty(domain);
-            var post = new Dictionary<string, string>
+            // If not a bot, use the clientlogin API, which gives an opportunity to supply a OTC
+            // For now, the EmailAuth method is only handled on the en wikipedia.
+            if (!username.Contains("@") && !string.IsNullOrEmpty(token) && Variables.LangCode == "en")
             {
-                {"lgname", username},
-                {"lgpassword", password},
-            };
-            post.AddIfTrue(domainSet, "lgdomain", domain);
-            post.AddIfTrue(!string.IsNullOrEmpty(token), "lgtoken", token);
-
-            result = HttpPost(
-                new Dictionary<string, string>
+                ClientLogin(username, password, token);
+            }
+            else
+            {
+                // This is legacy code, now used for non-en or bots. Also, it's unlikely that modern wikis will have
+                // failed to provide a token above, but leaving the relevant code in doesn't hurt.
+                //
+                // first log in. If we got a logintoken then use it, this should be our only action=login in that case
+                bool domainSet = !string.IsNullOrEmpty(domain);
+                var post = new Dictionary<string, string>
                 {
+                    {"lgname", username},
+                    {"lgpassword", password},
+                };
+                post.AddIfTrue(domainSet, "lgdomain", domain);
+                post.AddIfTrue(!string.IsNullOrEmpty(token), "lgtoken", token);
+
+                result = HttpPost(
+                    new Dictionary<string, string>
+                    {
                     {"action", "login"}
-                },
-                post
-                );
+                    },
+                    post
+                    );
 
-            xr = CreateXmlReader(result);
+                xr = CreateXmlReader(result);
 
-            Tools.WriteDebug("API::Edit action/login", result);
+                Tools.WriteDebug("API::Edit action/login", result);
 
-            // if got token from new meta/tokens way, should now be logged in
-            if(!string.IsNullOrEmpty(token))
-            {
-                xr.ReadToFollowing("login");
-            }
-            else // support the old way of first action=login to be told NeedToken and given token, then second action=login sending the token
-            {
-                // if we have login section in warnings don't want to look in there for the token
-                if(result.Contains("<warnings>") && Regex.Matches(result, @"<login ").Count > 1)
+                // if got token from new meta/tokens way, should now be logged in
+                if(!string.IsNullOrEmpty(token))
                 {
-                    xr.ReadToFollowing("warnings");
                     xr.ReadToFollowing("login");
                 }
-
-                xr.ReadToFollowing("login");
-
-                var attribute = xr.GetAttribute("result");
-
-                if (attribute != null && attribute.Equals("NeedToken", StringComparison.InvariantCultureIgnoreCase))
+                else // support the old way of first action=login to be told NeedToken and given token, then second action=login sending the token
                 {
-                    AdjustCookies();
-                    token = xr.GetAttribute("token");
+                    // if we have login section in warnings don't want to look in there for the token
+                    if(result.Contains("<warnings>") && Regex.Matches(result, @"<login ").Count > 1)
+                    {
+                        xr.ReadToFollowing("warnings");
+                        xr.ReadToFollowing("login");
+                    }
 
-                    post.Add("lgtoken", token);
-                    result = HttpPost(
-                        new Dictionary<string, string> {{"action", "login"}},
-                        post
-                        );
-
-                    Tools.WriteDebug("API::Edit action/login NeedToken", result);
-                    xr = CreateXmlReader(result);
                     xr.ReadToFollowing("login");
-                }
-            }
 
-            string status = xr.GetAttribute("result");
-            if (status != null && !status.Equals("Success", StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new LoginException(this, status);
+                    var attribute = xr.GetAttribute("result");
+
+                    if (attribute != null && attribute.Equals("NeedToken", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        AdjustCookies();
+                        token = xr.GetAttribute("token");
+
+                        post.Add("lgtoken", token);
+                        result = HttpPost(
+                            new Dictionary<string, string> {{"action", "login"}},
+                            post
+                            );
+
+                        Tools.WriteDebug("API::Edit action/login NeedToken", result);
+                        xr = CreateXmlReader(result);
+                        xr.ReadToFollowing("login");
+                    }
+                }
+
+                string status = xr.GetAttribute("result");
+                if (status != null && !status.Equals("Success", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new LoginException(this, status);
+                }
             }
 
             CheckForErrors(result, "login");
             AdjustCookies();
 
             RefreshUserInfo();
+        }
+
+        public void ClientLogin(string username, string password, string token)
+        {
+            string result = HttpPost(
+                new Dictionary<string, string>
+                {
+                    {"action", "clientlogin"},
+                    {"username", username},
+                    {"loginreturnurl", "https://en.wikipedia.org/"} // Not used but required by API
+                },
+                new Dictionary<string, string>
+                {
+                    {"password", password},
+                    {"logintoken", token}
+                }
+            );
+
+            XmlReader xr = CreateXmlReader(result);
+
+            Tools.WriteDebug("API::Edit action/clientlogin", result);
+
+            xr.ReadToFollowing("clientlogin");
+            string status = (xr.GetAttribute("status") ?? "").ToUpper();
+            if (status == "PASS")
+                return;
+            string message = xr.GetAttribute("message");
+            if (status != "UI" || message == null ||
+                message.IndexOf("A verification code has been sent", StringComparison.InvariantCultureIgnoreCase) < 0)
+            {
+                throw new LoginException(this, status);
+            }
+
+            // The message is too long for InputBox. Assume the current syntax.
+            Match m = Regex.Match(message, @"\(.*?\)");
+            if (m.Success)
+            {
+                message = "Enter the code sent to your email " + m.Value;
+            }
+            InputBoxResult coderesult = InputBox.Show(message, "Enter One-Time-Code", "", ClientLoginValidator);
+            if (!coderesult.OK)
+            {
+                throw new LoginException(this, "Login cancelled");
+            }
+
+            // As of July 2025 EN uses EmailAuth, so that's the most likely.
+            // OATH and WebAuthn may need to be implemented for other wikis though.
+            result = HttpPost(
+                new Dictionary<string, string>
+                {
+                    {"action", "clientlogin"},
+                    {"logincontinue", "1"},
+                    {"token", coderesult.Text},
+                },
+                new Dictionary<string, string>
+                {
+                    {"logintoken", token},
+                }
+            );
+
+            xr = CreateXmlReader(result);
+
+            Tools.WriteDebug("API::Edit action/clientlogin2", result);
+
+            xr.ReadToFollowing("clientlogin");
+            status = (xr.GetAttribute("status") ?? "").ToUpper();
+            if (status == "PASS")
+            {
+                return;
+            }
+
+            // At this point, if status is UI (user entered the wrong code) we could loop back and try again,
+            // but there's a danger of getting caught in a loop.
+
+            throw new LoginException(this, status);
+        }
+
+        private static void ClientLoginValidator(object sender, InputBoxValidatingArgs e)
+        {
+            // Currently (July 2025) the OTC is six digits, and there is "no plan" to change that
+            if (e.Text == null || !Regex.IsMatch(e.Text, @"^\d{6}$"))
+            {
+                e.Cancel = true;
+                e.Message = "Code must be six digits";
+            }
         }
 
         public void Logout()
@@ -1480,6 +1579,7 @@ namespace WikiFunctions.API
             bool prevMessages = User.HasMessages;
             User.Update(doc);
             if (action != "login"
+                && action != "clientlogin"
                 && action != "userinfo"
                 && NewMessageThrows
                 && User.HasMessages
