@@ -1038,7 +1038,12 @@ namespace WikiFunctions
         /// Matches the various Harvard citation templates on en-wiki
         /// </summary>
         public static readonly Regex HarvTemplate = Tools.NestedTemplateRegex(new [] { "Harvard citation", "harv", "harvsp", "Harvard citation no brackets", "harvnb", "Harvard citation text", "harvtxt", "Harvcol", "Harvcolnb", "Harvcoltxt" }, false);
-        
+
+        /// <summary>
+        /// Matches the various sfn citation templates on en-wiki
+        /// </summary>
+        public static readonly Regex SfnTemplate = Tools.NestedTemplateRegex(new [] { "Sfn", "Shortened footnote template", "Shortened footnote", "Sf", "Snf", "Hf", "Sfnnb" }, false);
+
         /// <summary>
         /// Matches {{persondata}} template, or {{personendaten}} on de-wiki
         /// </summary>

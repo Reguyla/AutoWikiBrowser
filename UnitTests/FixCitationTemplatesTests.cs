@@ -718,6 +718,13 @@ journal=Crypt of Cthulhu |volume= 3|issue= 3| ";
         }
 
         [Test]
+        public void SfnTemplatesPageRange()
+        {
+            Assert.That(Parsers.FixCitationTemplates(@"{{sfn|Smith|2005|pp=55-59}}"), Is.EqualTo(@"{{sfn|Smith|2005|pp=55–59}}"));
+            Assert.That(Parsers.FixCitationTemplates(@"{{sfn|Smith|2005|p=55-59}}"), Is.EqualTo(@"{{sfn|Smith|2005|pp=55–59}}"));
+        }
+
+        [Test]
         public void HarvTemplatesPP()
         {
             Assert.That(Parsers.FixCitationTemplates(@"{{harv|Smith|2005|p=55–59}}"), Is.EqualTo(@"{{harv|Smith|2005|pp=55–59}}"), "renames p to pp for page range");

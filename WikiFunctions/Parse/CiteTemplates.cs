@@ -110,21 +110,12 @@ namespace WikiFunctions.Parse
 
             if (TemplateExists(allTemplates, WikiRegexes.HarvTemplate))
             {
-                articleText = WikiRegexes.HarvTemplate.Replace(articleText, m =>
-                {
-                    string newValue = FixPageRanges(m.Value, Tools.GetTemplateParameterValues(m.Value));
-                    string page = Tools.GetTemplateParameterValue(newValue, "p");
+                articleText = WikiRegexes.HarvTemplate.Replace(articleText, m => FixHarvSfnTemplatesME(m));
+            }
 
-                    // ignore brackets
-                    if (page.Contains(@"("))
-                        page = page.Substring(0, page.IndexOf(@"(", StringComparison.Ordinal));
-
-                    if (Regex.IsMatch(page, @"\d+\s*(?:–|&ndash;|, )\s*\d") &&
-                        Tools.GetTemplateParameterValue(newValue, "pp").Length == 0)
-                        newValue = Tools.RenameTemplateParameter(newValue, "p", "pp");
-
-                    return newValue;
-                });
+            if (TemplateExists(allTemplates, WikiRegexes.SfnTemplate))
+            {
+                articleText = WikiRegexes.SfnTemplate.Replace(articleText, m => FixHarvSfnTemplatesME(m));
             }
 
             // Performance: use TemplateDetail cache to avoid regex search on whole article text for the templates
@@ -156,6 +147,22 @@ namespace WikiFunctions.Parse
             }
 
             return articleText;
+        }
+
+        private static string FixHarvSfnTemplatesME(Match m)
+        {
+            string newValue = FixPageRanges(m.Value, Tools.GetTemplateParameterValues(m.Value));
+            string page = Tools.GetTemplateParameterValue(newValue, "p");
+
+            // ignore brackets
+            if (page.Contains(@"("))
+                page = page.Substring(0, page.IndexOf(@"(", StringComparison.Ordinal));
+
+            if (Regex.IsMatch(page, @"\d+\s*(?:–|&ndash;|, )\s*\d") &&
+                Tools.GetTemplateParameterValue(newValue, "pp").Length == 0)
+                newValue = Tools.RenameTemplateParameter(newValue, "p", "pp");
+
+            return newValue;
         }
 
         private static readonly Regex IdISBN = new Regex(@"^ISBN ?[:=]?\s*([\d \-]+X?)$");
