@@ -1585,20 +1585,31 @@ Message: {2}
             // For Wine use attempt to dynamically determine available browser, caching result
             if (WineBrowserPath == null)
             {
-                if (File.Exists("/usr/bin/firefox"))
+                if (File.Exists(@"Z:\usr\bin\firefox"))
+                    WineBrowserPath = @"Z:\usr\bin\firefox";
+                else if (File.Exists("/usr/bin/firefox"))
                     WineBrowserPath = "/usr/bin/firefox";
                 else if (File.Exists("/usr/bin/chromium-browser"))
                     WineBrowserPath = "/usr/bin/chromium-browser";
                 else if (File.Exists("/usr/bin/konqueror"))
                     WineBrowserPath = "/usr/bin/konqueror";
                 else WineBrowserPath = ""; // Windows, or Wine and none of these browsers available
+
+                WriteDebug("WineBrowserPath", WineBrowserPath);
             }
             try
             {
                 if (!Globals.UnitTestMode)
                 {
                     if (WineBrowserPath.Length > 0) // Wine
-                        System.Diagnostics.Process.Start(WineBrowserPath, url);
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                        {
+                            UseShellExecute = true,
+                            FileName = WineBrowserPath,
+                            Arguments = url
+                        });
+                    }
                     else // Windows
                         System.Diagnostics.Process.Start(url);
                 }
