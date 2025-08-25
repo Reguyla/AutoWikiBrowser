@@ -1285,6 +1285,7 @@ cit"));
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{hatnote}}"), @"{{hatnote}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other people}}"), @"{{other people}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other places}}"), @"{{other places}}");
+            ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{Other Pennsylvania townships}}"), @"{{Other Pennsylvania townships}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other ships}}"), @"{{other ships}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses of}}"), @"{{other uses of}}");
             ClassicAssert.IsTrue(WikiRegexes.Dablinks.IsMatch(@"{{other uses}}"), @"{{other uses}}");

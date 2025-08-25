@@ -1323,7 +1323,7 @@ namespace WikiFunctions
         {
             "about", "about-distinguish", "about-distinguish-text", "about other people", "about year", "broader", "correct title", "distinguish",
             "for", "for introduction", "for LMST", "for-multi", "for outline", "for timeline", "for-text", "further", "further interlanguage link", "further-text", "hatnote", "highway detail hatnote", 
-            "Inc-up", "introductory article", "other people", "other places", "other ships", "other storms", "other uses", "other uses of",
+            "Inc-up", "introductory article", "other people", "other places", "Other Pennsylvania townships", "other ships", "other storms", "other uses", "other uses of",
             "redirect", "redirect2", "redirect-distinguish", "redirect-distinguish-for", "redirect-distinguish-text", "redirect-multi", "redirect-several", "redirect-synonym",
             "see also", "see also-text", "See Wiktionary", "self-reference", "similar names", "technical reasons", "transcluding article", "wikiIPA",
             "Family name hatnote", "Baptismal name", "Bhutanese name", "British barrelled name", "Burmese name", "Dinka name", "Dutch name capitalization",
