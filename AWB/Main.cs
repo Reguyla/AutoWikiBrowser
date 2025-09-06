@@ -708,7 +708,12 @@ namespace AutoWikiBrowser
                 StatusLabelText = ex.Message;
                 if (Tools.WriteDebugEnabled)
                     Tools.WriteTextFile(ex.Message, "Log.txt", true);
-                StartDelayedRestartTimer();
+                // Sometimes (as with 429 Too Many Requests) there will be a specific delay in response headers.
+                if (ex is WebException webex && webex.Response is HttpWebResponse resp &&
+                        int.TryParse(resp.GetResponseHeader("Retry-After"), out int restart) && restart > 0)
+                    StartDelayedRestartTimer(restart + 1);  // Allow for timer slop
+                else
+                    StartDelayedRestartTimer();
             }
             else if (ex is SharedRepoException)
             {
