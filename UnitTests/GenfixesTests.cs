@@ -823,6 +823,13 @@ Bar";
             GenFixes();
 
             Assert.That(t, Is.EqualTo(ArticleText), "No change to brackets/images, 4");
+
+            t = @"[[File:Milky way.jpg|sans_cadre|centre|Representation]]";
+
+            ArticleText = t;
+            GenFixes();
+
+            Assert.That(t, Is.EqualTo(ArticleText), "No change to underscores in image parameters");
         }
 
         [Test]

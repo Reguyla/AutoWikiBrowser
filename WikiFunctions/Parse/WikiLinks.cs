@@ -138,7 +138,9 @@ namespace WikiFunctions.Parse
             // Performance: on articles with lots of links better to filter down to those that could be changed by canonicalization, rather than running regex replace against all links
             // exclude interwiki links that can be e.g. part of a URL to internet archive ([[iarchive:foo]]), so should not be changed
             // see https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_projects for full list
-            foreach (string l in wikiLinks.Where(link => link.IndexOfAny("&%_".ToCharArray()) > -1 && !Regex.IsMatch(link, @"\[\[[a-z0-9_-]{2,}:")))
+            // exclude links starting with hidden text - are likely file links so the remaining visible content could be parameters etc, so should not be changed
+            foreach (string l in wikiLinks.Where(link => link.IndexOfAny("&%_".ToCharArray()) > -1 && !Regex.IsMatch(link, @"\[\[[a-z0-9_-]{2,}:")
+                     && !Regex.IsMatch(link, @"\[\[⌊⌊⌊⌊M?\d+⌋⌋⌋⌋")))
             {
                 string res = WikiRegexes.WikiLink.Replace(l, FixLinksWikilinkCanonicalizeME);
                 if (res != l)
