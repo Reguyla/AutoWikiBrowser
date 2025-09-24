@@ -740,7 +740,7 @@ namespace WikiFunctions
         /// <summary>
         /// Matches math, pre, source, code, syntaxhighlight tags or comments
         /// </summary>
-        public static readonly Regex MathPreSourceCodeComments = new Regex(@"<pre>.*?</pre>|<!--.*?-->|<math(?: chem)?>.*?</math>|<chem>.*?</chem>|" + SourceCode, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MathPreSourceCodeComments = new Regex(@"<pre>.*?</pre>|<!--.*?-->|<math(?: chem| *display *= *"" *(?:inline|block) *"" *)?>.*?</math>|<chem>.*?</chem>|" + SourceCode, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         /// <summary>
         /// Matches anything starting with Meanings of minor planet names

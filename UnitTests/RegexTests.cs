@@ -335,6 +335,8 @@ Shul, p. 726    </ref>").Groups[2].Value, Is.EqualTo(@"Shul726"), "ref value doe
             ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"<syntaxhighlight>{{abc}}</syntaxhighlight>"));
             ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"now hello {{bye}} <pre>{now}}</pre>"));
             ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"<math>{{abc}}</math>"));
+            ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"<math display=""block"">{{abc}}</math>"));
+            ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"<math display = ""inline"" >{{abc}}</math>"));
             ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"<chem>{{abc}}</chem>"));
             ClassicAssert.IsTrue(WikiRegexes.MathPreSourceCodeComments.IsMatch(@"<math chem>{{abc}}</math>"));
             ClassicAssert.IsTrue(WikiRegexes.SourceCode.IsMatch(@"<tt>{{abc}}</tt>"));
