@@ -685,7 +685,7 @@ namespace WikiFunctions.Controls.Lists
             string escaped = Regex.Escape(Variables.URL);
 
             Regex HistoryDiff = new Regex(Regex.Replace(escaped, @"https?://", @"(?:https?://|//)?") + DiffEditURL);
-            s = HistoryDiff.Replace(s, "$1");
+            s = HistoryDiff.Replace(s, m => m.Groups[1].Value.Replace('+', '_'));
 
             // Assumsuption flaw: that all wikis use /wiki/ as the default path
             string url = Variables.URL + "/wiki/";

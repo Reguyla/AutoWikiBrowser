@@ -2198,6 +2198,8 @@ bar
 
             Assert.That(LMaker.NormalizeTitle(@"#[[Foo]]"), Is.EqualTo("#[[Foo]]"), "#wikilinked");
             Assert.That(LMaker.NormalizeTitle(@"Foo#bar"), Is.EqualTo("Foo"), "#wikilinked");
+
+            Assert.That(LMaker.NormalizeTitle(@"https://en.wikipedia.org/w/index.php?title=Sandeep+Nayak&diff=prev&oldid=1320026009"), Is.EqualTo("Sandeep Nayak"));
         }
 
         [Test]
