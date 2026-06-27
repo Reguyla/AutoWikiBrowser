@@ -55,7 +55,6 @@ namespace AutoWikiBrowser
     // TODO:Move regexes declared in method bodies (if not dynamic based on article title, etc), into class body
     // TODO:Move any Regexes to WikiRegexes as required
 
-    [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     public sealed partial class MainForm : Form, IAutoWikiBrowser
     { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
         #region Fields
