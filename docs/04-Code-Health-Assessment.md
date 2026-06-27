@@ -102,17 +102,25 @@ This assessment will inventory annotations including:
 
 
 
-| Type  | Count | Priority | Migration Impact | Status  |
+| Type  	| Count | Priority | Migration Impact | Status  |
 
-| ----- | ----: | -------- | ---------------- | ------- |
+| ------------- | ------| -------- | ---------------- |---------|
 
-| TODO  |   47  | TBD      | TBD              | Pending |
+| TODO		|   47  | TBD      | TBD              | Pending |
 
-| FIXME |   TBD | TBD      | TBD              | Pending |
+| ------------- | ------| -------- | ---------------- |---------|
 
-| HACK  |   TBD | TBD      | TBD              | Pending |
+| FIXME		|   4	| TBD      | TBD              | Pending |
 
-| XXX   |   TBD | TBD      | TBD              | Pending |
+| ------------- | ------| -------- | ---------------- |---------|
+
+| HACK		|   10  | TBD      | TBD              | Pending |
+
+| ------------- | ------| -------- | ---------------- |---------|
+
+| Workaround	|   6 	| TBD      | TBD              | Pending |
+
+| ------------- | ------| -------- | ---------------- |---------|
 
 
 
@@ -493,6 +501,121 @@ The objective is to distinguish between items that should be addressed during mi
 |// TODO: There's gotta be a better way to reconstruct the template...															|  C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Tools.cs														| 3271 		| 16	 |
 
 |-------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------|--------|
+
+
+
+\### FIXME
+|Code																											|File																				|Line	|Column
+
+|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|-------|----|
+
+|// FIXME: this position is imprefect, since above there is code that can explode, but this way					|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\AWB\\Main.cs							|1031	| 16 |
+
+|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|-------|----|
+
+|// FIXME:																										|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\UnitTests\\RegexAssert.cs				|167	| 12 |
+
+|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|-------|----|
+
+|// FIXME: Awful code is awful																					|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\API\\ApiEdit.cs			|1695	| 15 |
+
+|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|-------|----|
+
+|// FIXME: Usages of IgnoreMore with number (or M) replacement done in the FindAndReplace can cause corruption	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Parse\\FindandReplace.cs	|218	| 20 |
+
+|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|-------|----|
+
+
+
+\### HACK
+
+|Code																																	|File																											|Line	|Column|
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| lIPUay9e1ACPS3KOAQj37n5B3VaZ7XF6c4tl7NhZjOzLwCS1G9l5F6C6hHacKbKA559mcMEOoho1+Sq/														|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\AWB\\Properties\\Resources.resx							| 1741	| 66 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| // leading (back)slash is hack for incorrectly formatted breaks per																	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\UnitTests\\FormattingTests.cs								| 56	| 39 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| /// This is a hack required for some multilingual Wikimedia projects,																	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\API\\ApiEdit.cs								| 201	| 23 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| mAWBLogListener.Skipped = false;  // a bit of a hack, if plugin says not to skip I'm resetting the LogListener.Skipped value to False	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Article\\Article.cs							| 575	| 65 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| // A hack for the annoying bug with this option being mysteriously enabled to switch													|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Controls\\ArticleTextBox.cs					| 96	| 18 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| string text = editor.QueryApi(newUrl + "\&rawcontinue=1" + postfix); // HACK: Hacky hack hack											|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Lists\\Providers\\ApiListProviderBase.cs		| 81	| 88 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| // HACK																																|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\SiteInfo.cs								| 394	| 20 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| // HACK we are allowing matching on tilde character around parameter name to represent cleaned HTML comment, so may falsely match		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Tools.cs									| 2910	| 1  |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| // HACK:																																|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Variables.cs								| 674	| 16 |
+
+|---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+| //HACK:HACK:HACK:HACK:HACK:																											|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Variables.cs								| 728	| 15 |
+
+||---------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------|----|
+
+
+
+
+
+\###WORKAROUND
+
+| Code																									| File																								| Line	| Column |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+|// Workaround for https://phabricator.wikimedia.org/T41492												|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\API\\ApiEdit.cs					| 1688	| 17	 |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+|// workaround for Wine issue: use of {HOME} then +{END} leads to 100% CPU and locked application		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Controls\\Lists\\ListComparer.cs	| 235	| 17	 |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+|// workaround for Wine issue: use of {HOME} then +{END} leads to 100% CPU and locked application		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Controls\\Lists\\ListMaker.cs	| 1277	| 13	 |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+|// workaround for https://phabricator.wikimedia.org/T4700 -- {{subst:}} doesn't work within ref tags	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Parse\\FixSyntax.cs				| 461	| 13	 |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+|/// workaround for https://phabricator.wikimedia.org/T4700 -- {{subst:}} doesn't work within ref tags	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Parse\\FixSyntax.cs				| 637	| 10	 |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+|// Workaround constraint: we might incorrectly report some valid tags with < or > in them as unclosed	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Parse\\UnbalancedBrackets.cs	| 507	| 13	 |
+
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|-------|--------|
+
+
+
+
+
+
+
+
+
+
 
 
 
