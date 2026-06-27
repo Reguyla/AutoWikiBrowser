@@ -309,7 +309,18 @@ The project currently contains a mixture of framework references, project refere
 |-----------------|---------|----------:|----------------:|----------------|-------------|--------------------------------------|---------------|
 
 
-
+AutoWikiBrowser currently uses a legacy non-SDK-style project file targeting .NET Framework 4.8.1. The project will require conversion or recreation as an SDK-style .NET 8 Windows Desktop project before the final migration can be completed.
+| Area           | Finding                                                |
+| -------------- | ------------------------------------------------------ |
+| Project format | Legacy `.csproj`, not SDK-style                        |
+| Framework      | Targets `.NET Framework 4.8.1`                         |
+| UI             | WinForms app                                           |
+| COM/Browser    | Uses `Microsoft.mshtml`                                |
+| NuGet          | `Newtonsoft.Json` referenced through `..\packages\...` |
+| Platform       | Release builds as `x86`                                |
+| Deployment     | Has old ClickOnce-style publish settings               |
+| Signing        | Has old manifest/certificate settings                  |
+| Designer       | Uses `UseWinFormsOutOfProcDesigner`                    |
 
 
 \## 8. Migration Risks

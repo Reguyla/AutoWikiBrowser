@@ -31,7 +31,20 @@ The first modernization pass should focus on the core application, shared librar
 
 
 ## &#x20;# Solution Inventory
-Placeholder
+Current application versions of supporting apps within AWB
+AutoWikiBrowser currently uses a legacy non-SDK-style project file targeting .NET Framework 4.8.1. The project will require conversion or recreation as an SDK-style .NET 8 Windows Desktop project before the final migration can be completed.
+| Area           | Finding                                                |
+| -------------- | ------------------------------------------------------ |
+| Project format | Legacy `.csproj`, not SDK-style                        |
+| Framework      | Targets `.NET Framework 4.8.1`                         |
+| UI             | WinForms app                                           |
+| COM/Browser    | Uses `Microsoft.mshtml`                                |
+| NuGet          | `Newtonsoft.Json` referenced through `..\packages\...` |
+| Platform       | Release builds as `x86`                                |
+| Deployment     | Has old ClickOnce-style publish settings               |
+| Signing        | Has old manifest/certificate settings                  |
+| Designer       | Uses `UseWinFormsOutOfProcDesigner`                    |
+
 
 
 ## &#x20;# Migration Baseline
