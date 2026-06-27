@@ -236,18 +236,28 @@ NuGet
 
 
 \## 7. NuGet Packages
-
-
-
 The project currently contains a mixture of framework references, project references, and external libraries. This section inventories packages managed through NuGet and identifies those requiring updates or replacement during the .NET 8 migration.
 
+### NuGet Dependency Summary
 
+| Scope | Count | Notes |
+|------|------:|-------|
+| Application/runtime packages | 2 | Required by production code |
+| Test-only packages | 16 | Used only by UnitTests |
+| Total NuGet packages | 18 | Most NuGet usage is test-related |
 
+### Non UnitTest
 | Package | Version | Used By Projects | Directly Installed In | Purpose | Migration Action |
 
 |---------|---------|------------------|------------------------|---------|------------------|
-
 | Newtonsoft.Json | 13.0,3 | AutoWikiBrowser, WikiFunctions | AutoWikiBrowser, WikiFunctions | JSON parsing/serialization | Keep initially; verify .NET 8 compatibility |
+| SemanticVersion | 2.1.0 | WikiFunctions | WikiFunctions | A portable semantic version class library compliant with the 2.0 SemanticVersion standard (http://semver.org) | Keep initially; verify .NET 8 compatibility |
+
+
+### UnitTest-Only NuGet Packages
+| Package | Version | Used By Projects | Directly Installed In | Purpose | Migration Action |
+
+|---------|---------|------------------|------------------------|---------|------------------|
 
 | NUnit		| 4.3.2 | UnitTests | UnitTests | NUnit can be used for a wide range of testing | Keep initially; verify .NET 8 compatibility |
 
@@ -269,7 +279,6 @@ The project currently contains a mixture of framework references, project refere
 
 | Nunit3TestAdapter | 4.6.0 | UnitTests | UnitTests | The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core), versions .net framework 4.6.2 or higher, .net core 3.1, .net 5 or higher.   | Keep initially; verify .NET 8 compatibility |
 
-| SemanticVersion | 2.1.0 | WikiFunctions | WikiFunctions | A portable semantic version class library compliant with the 2.0 SemanticVersion standard (http://semver.org) | Keep initially; verify .NET 8 compatibility |
 
 | System.Buffers | 4.6.0 | UnitTests | UnitTests | System.Buffers  | Keep initially; verify .NET 8 compatibility |
 
