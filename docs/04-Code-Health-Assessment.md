@@ -446,6 +446,54 @@ The assessment will utilize the following tools:
 
 
 
+\### Visual Studio Code Analysis
+
+
+
+\*\*Tool\*\*: Visual Studio 2022 Community
+
+
+
+\*\*Analysis Date\*\*: 2026-06-27
+
+
+
+\*\*Scope\*\*: Entire Solution
+
+
+
+
+
+\####Initial analysis
+
+| Tool | Result |
+
+|------|--------|
+
+| Visual Studio 2022 Community Code Analysis | Completed |
+
+| Build Status | Builds successfully |
+
+| Blocking Errors | None confirmed |
+
+| Analysis Findings | Missing generated `SvnInfo.cs`, unresolved `m\\\_Revision`, unused variable |
+
+
+
+\#### Findings
+
+| ID | Severity | Description | Recommendation | Status |
+
+|----|:--------:|-------------|----------------|--------|
+
+| CA-001 | Medium | `WikiFunctions\\SvnInfo.cs` could not be found during analysis. | Investigate legacy SVN-generated build metadata before migration. | Open |
+
+| CA-002 | Medium | `m\_Revision` does not exist in the current context during analysis. | Determine if this is generated code or a stale reference. | Open |
+
+| CA-003 | Low | `usingDefaultJSONText` is assigned but never used. | Clean up during refactoring phase. | Deferred |
+
+
+
 \### Roslynator
 
 
