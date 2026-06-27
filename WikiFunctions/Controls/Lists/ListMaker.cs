@@ -168,7 +168,7 @@ namespace WikiFunctions.Controls.Lists
             cmboSourceSelect.DataSource = _listProviders;
 
             // Mono throws exception in relation to DisplayMember
-            if(!Globals.UsingMono)
+            if (!Globals.UsingMono)
             {
                 // Bind IListProvider.DisplayText to be the displayed text:
                 cmboSourceSelect.DisplayMember = "DisplayText";
@@ -315,7 +315,7 @@ namespace WikiFunctions.Controls.Lists
                     lbArticles.SelectedIndex = intPosition;
 
                     // Wine fix: does not scroll listbox if selected article moves out of view
-                    if (lbArticles.TopIndex > lbArticles.Items.Count-1)
+                    if (lbArticles.TopIndex > lbArticles.Items.Count - 1)
                         lbArticles.TopIndex = intPosition;
                 }
             }
@@ -466,7 +466,7 @@ namespace WikiFunctions.Controls.Lists
         {
             if (e.KeyCode == Keys.Return || e.KeyCode == Keys.Enter)
                 btnGenerate.PerformClick();
-            
+
             if (e.Modifiers == Keys.Control)
             {
                 if (e.KeyCode == Keys.A)
@@ -525,11 +525,11 @@ namespace WikiFunctions.Controls.Lists
                 txtPage.TextChanged -= txtNewArticle_TextChanged;
 
             // reset any custom formatting of text (if copied from syntax highlighted text in edit box etc.), restoring cursor position
-            string a = txtPage.Text; 
+            string a = txtPage.Text;
             int i = txtPage.SelectionStart;
             txtPage.ResetText();
             txtPage.Text = a;
-            txtPage.Select(i,0);
+            txtPage.Select(i, 0);
 
             if (Globals.UsingMono)
                 txtPage.TextChanged += txtNewArticle_TextChanged;
@@ -665,7 +665,7 @@ namespace WikiFunctions.Controls.Lists
 
             lbArticles.SelectedIndex++;
             lbArticles.SetSelected(lbArticles.SelectedIndex, false);
- 
+
             // Wine fix: does not scroll listbox if selected article moves out of view
             if ((lbArticles.TopIndex + 15) < lbArticles.SelectedIndex)
                 lbArticles.TopIndex = lbArticles.SelectedIndex;
@@ -673,11 +673,25 @@ namespace WikiFunctions.Controls.Lists
             return true;
         }
 
-        private const string DiffEditURL = @"/w(?:(?:iki)?/index\.php5?\?|/\?)title=(.*?)(?:&(?:action|diff|oldid|pe|offset|curid|redirect|type)=.*|$)";
         /// <summary>
         /// Extracts wiki page title from wiki page URL, including diff and revision history URLs
         /// </summary>
+        /// <param name="s">The wiki page URL.</param>
+        /// <returns>The normalized wiki page title.</returns>
         public string NormalizeTitle(string s)
+        {
+            return NormalizeTitleCore(s);
+        }
+
+        private const string DiffEditURL = @"/w(?:(?:iki)?/index\.php5?\?|/\?)title=(.*?)(?:&(?:action|diff|oldid|pe|offset|curid|redirect|type)=.*|$)";
+        /// <summary>
+        /// Extracts wiki page title from wiki page URL, including diff and revision history URLs
+        /// Use this to execute the logic without creating a ListMaker object
+        /// </summary>
+        /// <param name="s">The wiki page URL.</param>
+        /// <returns>The normalized wiki page title.</returns>
+        public static string NormalizeTitleCore(string s)
+
         {
             // https://en.wikipedia.org/w/index.php?title=...&action=history
             // https://en.wikipedia.org/w/index.php?title=...&diff=
@@ -728,7 +742,7 @@ namespace WikiFunctions.Controls.Lists
             if (Variables.CapitalizeFirstLetter)
                 s = Tools.TurnFirstToUpper(s);
 
-            List<Article> l = new List<Article> {new Article(s)};
+            List<Article> l = new List<Article> { new Article(s) };
 
             Add(l);
         }
@@ -756,7 +770,7 @@ namespace WikiFunctions.Controls.Lists
                 l = DeDuplicate(l);
 
             if (l.Any())
-            {            
+            {
                 lbArticles.BeginUpdate();
                 lbArticles.Items.AddRange(l.ToArray());
                 lbArticles.EndUpdate();
@@ -849,7 +863,7 @@ namespace WikiFunctions.Controls.Lists
         {
             // Pipe character is a separator for standard searches e.g. foo|bar to search for foo or bar by doing two searches
             // However in a source search like insource:/\|last=Smitherson/ the pipe isn't a search separator, so don't split on | for insource
-            if (UserInputTextBox.Text.Contains ("|") && !(UserInputTextBox.Text.Contains("insource:/")))
+            if (UserInputTextBox.Text.Contains("|") && !(UserInputTextBox.Text.Contains("insource:/")))
                 MakeList((IListProvider)cmboSourceSelect.SelectedItem, UserInputTextBox.Text.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
             else
                 MakeList((IListProvider)cmboSourceSelect.SelectedItem, new[] { UserInputTextBox.Text });
@@ -1033,9 +1047,9 @@ namespace WikiFunctions.Controls.Lists
                 // performance: AddRange performs at about 100 articles per millisecond, Remove takes about 1 millisecond per article
                 // so if removing < 1% of articles it's faster to Remove each one, otherwise faster to clear and AddRange the remainder back
                 lbArticles.BeginUpdate();
-                if (toberemoved.Count < (int)articles.Count/100)
+                if (toberemoved.Count < (int)articles.Count / 100)
                 {
-                    foreach(Article a in toberemoved)
+                    foreach (Article a in toberemoved)
                         lbArticles.Items.Remove(a);
                 }
                 else
@@ -1254,7 +1268,7 @@ namespace WikiFunctions.Controls.Lists
         {
             SelectNone();
         }
-        
+
         /// <summary>
         /// Desselects any selected items in the list box.
         /// </summary>
@@ -1266,7 +1280,7 @@ namespace WikiFunctions.Controls.Lists
 
             lbArticles.EndUpdate();
         }
-        
+
         /// <summary>
         /// Selects all items in the list box. Uses send of keyboard shortcuts for performance
         /// </summary>
@@ -1278,7 +1292,7 @@ namespace WikiFunctions.Controls.Lists
             // so use slower SetSelected if on Linux
             if (Globals.UsingLinux)
             {
-                for(int i = 0; i < lbArticles.Items.Count; i++)
+                for (int i = 0; i < lbArticles.Items.Count; i++)
                     lbArticles.SetSelected(i, true);
             }
             else
@@ -1480,7 +1494,7 @@ namespace WikiFunctions.Controls.Lists
                 {
                     e.Graphics.DrawString(a.Name, regular, (selected) ? Brushes.White : Brushes.Black, r,
                         StringFormat.GenericDefault);
-                } 
+                }
                 else
                 {
                     displayTitle = displayTitle.Replace("&amp;", "&");
@@ -1494,7 +1508,7 @@ namespace WikiFunctions.Controls.Lists
                     // italics support
                     else if (HTMLItalics.IsMatch(displayTitle))
                     {
-                        foreach(Match m in HTMLItalics.Matches(displayTitle))
+                        foreach (Match m in HTMLItalics.Matches(displayTitle))
                         {
                             for (int i = 1; i < 4; i++)
                             {
@@ -1514,8 +1528,8 @@ namespace WikiFunctions.Controls.Lists
                     // TODO bold support, sub/sup support, mulitple italics support, span to hide support
 
                     else // unsupported other formatting in displaytitle, draw as default
-                    e.Graphics.DrawString(a.Name, regular, (selected) ? Brushes.White : Brushes.Black, r,
-                            StringFormat.GenericDefault);
+                        e.Graphics.DrawString(a.Name, regular, (selected) ? Brushes.White : Brushes.Black, r,
+                                StringFormat.GenericDefault);
                 }
             }
 

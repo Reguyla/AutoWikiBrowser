@@ -53,7 +53,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex SyntaxRegexWikilinkMissingClosingBracket = new Regex(@"\[\[([^][]*?)\|?\](?=[^\]]*?(?:$|\[|\n))", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexWikilinkMissingOpeningBracket = new Regex(@"(?<=(?:^|\]|\n)[^\[]*?)\[([^][]*?)\]\](?!\])", RegexOptions.Compiled);
 
-        private static readonly Regex SyntaxRegexExternalLinkToImageURL = new Regex("\\[?\\["+Variables.NamespacesCaseInsensitive[Namespace.File]+"(http:\\/\\/.*?)\\]\\]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex SyntaxRegexExternalLinkToImageURL = new Regex("\\[?\\[" + Variables.NamespacesCaseInsensitive[Namespace.File] + "(http:\\/\\/.*?)\\]\\]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ExternalLinksStart = new Regex(@"^\[ *(?:https?|ftp|mailto|irc|gopher|telnet|nntp|worldwind|news|svn)://", RegexOptions.IgnoreCase);
 
         private static readonly Regex SyntaxRegexListRowBrTag = new Regex(@"((?:\r\n|^)[#\*:;]+.*?) *(?:<[/\\]?br ?[/\\]? ?>)+[ \t]*(?=\r\n|$)", RegexOptions.IgnoreCase);
@@ -68,8 +68,8 @@ namespace WikiFunctions.Parse
         private static readonly Regex SyntaxRemoveParagraphs = new Regex(@"(?<!^[!\|].*)</? ?[Pp]> *", RegexOptions.Multiline);
         // Match execss <br> tags only if current line does not start from ! or | (indicator of table cells)
         private static readonly Regex SyntaxRemoveBr = new Regex(@"(?:(?:<br[\s/]*> *){2,}|\r\n<br[\s/]*>\r\n<br[\s/]*>\r\n)(?<!^[!\|].*)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        
-        private static readonly Regex MaintanceTemplateWithBr = new Regex(@"({{"+WikiRegexes.MaintanceTemplatesString+@"\s*\|[^\}]*}}(\r\n)?)\<br[\s/]*\>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+        private static readonly Regex MaintanceTemplateWithBr = new Regex(@"({{" + WikiRegexes.MaintanceTemplatesString + @"\s*\|[^\}]*}}(\r\n)?)\<br[\s/]*\>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private static readonly Regex SyntaxRemoveBrQuick = new Regex(@"<br[\s/]*>\s*<br[\s/]*>", RegexOptions.IgnoreCase);
 
@@ -131,12 +131,12 @@ namespace WikiFunctions.Parse
         private static readonly Regex SyntaxRegexISBN3 = new Regex(@"\[\[ISBN\]\]\s\[\[Special\:BookSources[^\|]*\|(?:<bdi>)?([^\]]*?)(?:</?bdi>)?\]\]", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexISBN4 = new Regex(@"\[\[International Standard Book Number\|ISBN\]\]\:?\s\[\[Special\:BookSources[^\|]*\|(?:<bdi>)?([^\]]*?)(?:</?bdi>)?\]\]", RegexOptions.Compiled);
         private static readonly Regex ISBNEndash = new Regex(@"ISBN ([0-9][0-9–]+[0-9X])\b");
-        private static readonly Regex ISBNx =new Regex(@"(ISBN [0-9\-]{9,14})x", RegexOptions.Compiled);
+        private static readonly Regex ISBNx = new Regex(@"(ISBN [0-9\-]{9,14})x", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexPMID = new Regex(@"(?<!\[\[)(PMID): *(\d)", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexExternalLinkOnWholeLine = new Regex(@"^\[(\s*http.*?)\]$", RegexOptions.Compiled | RegexOptions.Singleline);
         private static readonly Regex SyntaxRegexClosingBracket = new Regex(@"([^]])\]([^]]|$)", RegexOptions.Compiled);
         private static readonly Regex SyntaxRegexOpeningBracket = new Regex(@"([^[]|^)\[([^[])", RegexOptions.Compiled);
-        private static readonly Regex SyntaxRegexFileWithHTTP = new Regex("\\[\\["+Variables.NamespacesCaseInsensitive[Namespace.File]+":[^]]*http", RegexOptions.Compiled);
+        private static readonly Regex SyntaxRegexFileWithHTTP = new Regex("\\[\\[" + Variables.NamespacesCaseInsensitive[Namespace.File] + ":[^]]*http", RegexOptions.Compiled);
         private static readonly Regex SimpleTags = new Regex(@"<[^>""\-=]+>");
         private static readonly Regex CiteTemplateWithSquareBrackets = new Regex(@"(\<ref[^\[]*)\[\[(cite ?(journal|web|book|news)[^\]]*)\]\](\<\/ref\>)", RegexOptions.Compiled);
 
@@ -173,9 +173,9 @@ namespace WikiFunctions.Parse
                 // This category should not be directly added, remove if template present else replace with template
                 if ((from Match m in ssbMc where m.Value.Equals(@"[[Category:Disambiguation pages]]") select m).Any())
                     articleText = articleText.Replace(@"[[Category:Disambiguation pages]]", TemplateExists(alltemplates, Tools.NestedTemplateRegex("disambiguation")) ? "" : @"{{Disambiguation}}");
-                
+
                 // Remove br tags after maintance templates
-                articleText = MaintanceTemplateWithBr.Replace(articleText,"$1");
+                articleText = MaintanceTemplateWithBr.Replace(articleText, "$1");
             }
 
             if (TemplateExists(alltemplates, WikiRegexes.MagicWordTemplates))
@@ -187,7 +187,7 @@ namespace WikiFunctions.Parse
 
             // fix for <sup/>, <sub/>, <center/>, <small/>, <i/> etc.
             if (SimpleTagsList.Any(s => !s.Equals("<br/>") && (s.EndsWith("/>") || s.Contains(@"\"))))
-                articleText = IncorrectClosingHtmlTags.Replace(articleText,"</$1>");
+                articleText = IncorrectClosingHtmlTags.Replace(articleText, "</$1>");
 
             // The <strike> tag is not supported in HTML5. - CHECKWIKI error 42
             if (SimpleTagsList.Any(s => s.Contains("strike")))
@@ -197,7 +197,7 @@ namespace WikiFunctions.Parse
             }
 
             // remove empty <gallery>, <center>, <blockquote>, <nowiki>, <sub> or <sup> tags, allow for nested tags
-            while(EmptyTags.IsMatch(articleText))
+            while (EmptyTags.IsMatch(articleText))
                 articleText = EmptyTags.Replace(articleText, "");
 
             // try to fix invalid opening <ref> tag
@@ -219,7 +219,7 @@ namespace WikiFunctions.Parse
             //replace html with wiki syntax - CHECKWIKI error 26 and 38
             if (SimpleTagsList.Any(s => Regex.IsMatch(s, @"<(i|b)\b")))
             {
-                while(SyntaxRegexItalicBoldEm.IsMatch(articleText))
+                while (SyntaxRegexItalicBoldEm.IsMatch(articleText))
                     articleText = SyntaxRegexItalicBoldEm.Replace(articleText, BoldItalicME);
             }
 
@@ -249,7 +249,7 @@ namespace WikiFunctions.Parse
 
                     return false;
                 }).Select(tc => Tools.GetTemplateName(tc)).Where(t => t.Length > 0).ToList();
-            
+
             foreach (var t in templatesWithUnicodeNonBreakingSpaceOrNewline)
                 articleText = Tools.RenameTemplate(articleText, t, t, true);
 
@@ -291,7 +291,7 @@ namespace WikiFunctions.Parse
                 articleText = RemoveNoPropertyFontTags.Replace(articleText, "$1");
 
             //<ref>[[cite web|url=http://www.foo.com]]</ref>
-            articleText = CiteTemplateWithSquareBrackets.Replace(articleText,"$1{{$2}}$4");
+            articleText = CiteTemplateWithSquareBrackets.Replace(articleText, "$1{{$2}}$4");
 
             if (SimpleTagsList.Any(s => s.Contains("reflist")))
                 articleText = articleText.Replace("<<reflist>>", "{{reflist}}");
@@ -332,7 +332,7 @@ namespace WikiFunctions.Parse
             {
                 articleText = RefExternalLinkMissingStartBracket.Replace(articleText, @"$1[$2");
                 articleText = RefExternalLinkMissingEndBracket.Replace(articleText, @"$1]$2");
-                
+
                 // refresh
                 ssbMc = SingleSquareBrackets.Matches(articleText);
             }
@@ -342,13 +342,13 @@ namespace WikiFunctions.Parse
             List<string> ssb = Tools.DeduplicateList((from Match m in ssbMc select m.Value).ToList());
             List<string> ssbExternalLink = ssb.FindAll(m => m.Contains("//") && (m.Contains("|") || m.Contains("\r\n") || m.Substring(3).Contains("[") || m.Trim(']').Contains("]")));
 
-            foreach(string s in ssbExternalLink)
+            foreach (string s in ssbExternalLink)
             {
-               string newvalue = s;
+                string newvalue = s;
 
                 if (newvalue.Contains("\r\n") && !newvalue.Substring(1).Contains("[") && ExternalLinksStart.IsMatch(newvalue))
-                   newvalue = newvalue.Replace("\r\n", " ");
-               
+                    newvalue = newvalue.Replace("\r\n", " ");
+
                 newvalue = SquareBracketsInExternalLinks.Replace(newvalue, SquareBracketsInExternalLinksME);
 
                 newvalue = PipedExternalLink.Replace(newvalue, "$1 $2");
@@ -403,7 +403,7 @@ namespace WikiFunctions.Parse
             {
                 articleText = DoubleBracketAtEndOfExternalLink.Replace(articleText, m => m.Value.Contains("\r\n") ? m.Value : m.Groups[1].Value);
                 articleText = DoubleBracketAtEndOfExternalLinkWithinImage.Replace(articleText, "$1");
-            
+
                 articleText = ListExternalLinkEndsCurlyBrace.Replace(articleText, "$1]");
             }
 
@@ -417,26 +417,26 @@ namespace WikiFunctions.Parse
                 articleText = IncorrectBr.Replace(articleText, "<br />");
 
             articleText = IncorrectBr2.Replace(articleText, m =>
-                {
-                    if (m.Groups[1].Value == "left")
-                        return "{{clear|left}}";
-                    if (m.Groups[1].Value == "right")
-                        return "{{clear|right}}";
+            {
+                if (m.Groups[1].Value == "left")
+                    return "{{clear|left}}";
+                if (m.Groups[1].Value == "right")
+                    return "{{clear|right}}";
 
-                    return "{{clear}}";
-                }
+                return "{{clear}}";
+            }
             );
             //<br style="clear:both;" clear="all" />
             //<br style="clear:both;" />
             articleText = IncorrectBr3.Replace(articleText, m =>
-                {
-                    if (m.Groups[1].Value == "left")
-                        return "{{clear|left}}";
-                    if (m.Groups[1].Value == "right")
-                        return "{{clear|right}}";
+            {
+                if (m.Groups[1].Value == "left")
+                    return "{{clear|left}}";
+                if (m.Groups[1].Value == "right")
+                    return "{{clear|right}}";
 
-                    return "{{clear}}";
-                }
+                return "{{clear}}";
+            }
             );
 
             // CHECKWIKI errors 55, 63, 66, 77
@@ -456,14 +456,14 @@ namespace WikiFunctions.Parse
 
             // CHECKWIKI error 65: Image description ends with break – https://checkwiki.toolforge.org/cgi-bin/checkwiki.cgi?project=enwiki&view=only&id=65
             if (ssb.Any(s => s.Contains("<")))
-                articleText = WikiRegexes.FileNamespaceLink.Replace(articleText, m=> WikilinkEndsBr.Replace(m.Value, @"]]"));
+                articleText = WikiRegexes.FileNamespaceLink.Replace(articleText, m => WikilinkEndsBr.Replace(m.Value, @"]]"));
 
             // workaround for https://phabricator.wikimedia.org/T4700 -- {{subst:}} doesn't work within ref tags
             articleText = FixSyntaxSubstRefTags(articleText);
 
             // ensure magic word behaviour switches such as __TOC__ are in upper case
             if (nobrackets.IndexOf("__", StringComparison.Ordinal) > -1)
-                articleText = WikiRegexes.MagicWordsBehaviourSwitches.Replace(articleText, m=> @"__" + m.Groups[1].Value.ToUpper() + @"__");
+                articleText = WikiRegexes.MagicWordsBehaviourSwitches.Replace(articleText, m => @"__" + m.Groups[1].Value.ToUpper() + @"__");
 
             return articleText.Trim();
         }
@@ -496,19 +496,19 @@ namespace WikiFunctions.Parse
             articleText = ISBNEndash.Replace(articleText, m => "ISBN " + m.Groups[1].Value.Replace("–", "-"));
 
             // remove ISBN from start of isbn= parameter in infoboxes
-            if(TemplateExists(GetAllTemplates(articleText), WikiRegexes.InfoBox))
+            if (TemplateExists(GetAllTemplates(articleText), WikiRegexes.InfoBox))
             {
-                foreach(string infobox in GetAllTemplateDetail(articleText).Where(t => WikiRegexes.InfoBox.IsMatch(t)))
+                foreach (string infobox in GetAllTemplateDetail(articleText).Where(t => WikiRegexes.InfoBox.IsMatch(t)))
                 {
                     string isbn = Tools.GetTemplateParameterValue(infobox, "isbn");
 
-                    if(isbn.StartsWith("ISBN"))
+                    if (isbn.StartsWith("ISBN"))
                         articleText = articleText.Replace(infobox, Tools.UpdateTemplateParameterValue(infobox, "isbn", Regex.Replace(isbn, @"^ISBN\s*:?\s*", "")));
                 }
             }
 
             // ISBN out of end of external link
-            while(ExternalLinkEndsISBN.IsMatch(articleText))
+            while (ExternalLinkEndsISBN.IsMatch(articleText))
                 articleText = ExternalLinkEndsISBN.Replace(articleText, "$1] $2");
 
             return articleText;
@@ -566,9 +566,9 @@ namespace WikiFunctions.Parse
         private static string BoldItalicME(Match m)
         {
             string ret = (m.Groups[1].Value.Equals("b", StringComparison.OrdinalIgnoreCase) ? "'''" : "''");
-            return ret + m.Groups[2].Value +ret;
+            return ret + m.Groups[2].Value + ret;
         }
-        
+
         /// <summary>
         /// Fixes bracket problems within external links, converting internal [ or ] to &#91; or &#93; respectively
         /// </summary>
@@ -580,7 +580,7 @@ namespace WikiFunctions.Parse
             string externalLink = SyntaxRegexExternalLinkOnWholeLine.Replace(m.Value, "$1");
 
             // if there are unmatched double brackets, we can't fix this
-            if((externalLink.Contains("[[") && !externalLink.Contains("]]")) ||
+            if ((externalLink.Contains("[[") && !externalLink.Contains("]]")) ||
                 (!externalLink.Contains("[[") && externalLink.Contains("]]")))
                 return (@"[" + externalLink + @"]");
 
@@ -651,7 +651,7 @@ namespace WikiFunctions.Parse
 
             return articleText;
         }
-        
+
         private static string FixSyntaxSubstRefTagsME(Match m)
         {
             return m.Value.Replace(@"{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}", DateTime.UtcNow.ToString("MMMM yyyy", BritishEnglish));
@@ -673,7 +673,7 @@ namespace WikiFunctions.Parse
             // Performance: restrict changes to portion of article text containing small tags
             if (sm.Success)
             {
-                int cutoff = Math.Max(0, sm.Index-999); // if <ref><small> then must allow offset before <small> tag
+                int cutoff = Math.Max(0, sm.Index - 999); // if <ref><small> then must allow offset before <small> tag
                 string beforesmall = articleText.Substring(0, cutoff);
                 articleText = articleText.Substring(cutoff);
 
@@ -691,7 +691,7 @@ namespace WikiFunctions.Parse
 
             return articleText;
         }
-        
+
         private static readonly Regex TableEnd = new Regex(@"^\|}", RegexOptions.Multiline);
 
         private static string FixSmallTagsME(Match m)
@@ -731,27 +731,30 @@ namespace WikiFunctions.Parse
         /// <returns>Updated article text</returns>
         public string FixImageSelfLinks(string articleText)
         {
-            WikiFunctions.Controls.Lists.ListMaker LMaker = new WikiFunctions.Controls.Lists.ListMaker();
+
             articleText = WikiRegexes.FileNamespaceLink.Replace(articleText, m =>
             {
                 string res = m.Value;
 
-                // is value of link parameter (cleaned of URL part and tidied up
+                // is value of link parameter (cleaned of URL part and tidied up)
                 string linkParam = Tools.GetTemplateParameterValue("{{" + m.Groups[1].Value + "}}", "link");
 
-                linkParam = LMaker.NormalizeTitle(linkParam);
-                linkParam = Tools.RemoveSyntax(linkParam);
-
-                // is the link target, tidied up
-                string fileLinkTarget = WikiRegexes.WikiLink.Match(m.Value).Groups[1].Value;
-
-                if (linkParam == Tools.RemoveSyntax(fileLinkTarget))
+                if (!String.IsNullOrEmpty(linkParam))
                 {
-                    // use of template function to adjust parameters
-                    int len = res.Length;
-                    res = Tools.RemoveTemplateParameter("{{" + res.Substring(2, len - 4) + "}}", "link");
-                    len = res.Length;
-                    res = "[[" + res.Substring(2, len - 4) + "]]";
+                    linkParam = Controls.Lists.ListMaker.NormalizeTitleCore(linkParam);
+                    linkParam = Tools.RemoveSyntax(linkParam);
+
+                    // is the link target, tidied up
+                    string fileLinkTarget = WikiRegexes.WikiLink.Match(m.Value).Groups[1].Value;
+
+                    if (linkParam == Tools.RemoveSyntax(fileLinkTarget))
+                    {
+                        // use of template function to adjust parameters
+                        int len = res.Length;
+                        res = Tools.RemoveTemplateParameter("{{" + res.Substring(2, len - 4) + "}}", "link");
+                        len = res.Length;
+                        res = "[[" + res.Substring(2, len - 4) + "]]";
+                    }
                 }
                 return res;
             });
