@@ -274,10 +274,10 @@ namespace AutoWikiBrowser
                 mSettingsFile = value;
                 _settingsFileDisplay = Program.Name;
 
-                #if DEBUG
+#if DEBUG
                 if (Variables.RevisionNumber > 0)
                     _settingsFileDisplay += " rev " + Variables.RevisionNumber;
-                #endif
+#endif
 
                 if (!string.IsNullOrEmpty(value))
                     _settingsFileDisplay += " – " + Path.GetFileName(value);
@@ -409,9 +409,9 @@ namespace AutoWikiBrowser
             SplashScreen.SetProgress(100);
             SplashScreen.Close();
 
-            #if DEBUG && INSTASTATS
+#if DEBUG && INSTASTATS
             UsageStats.Do(false);
-            #endif
+#endif
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -665,7 +665,7 @@ namespace AutoWikiBrowser
                     case "tpt-target-page":
                         SkipPage("Translation pages cannot currently be edited");
                         break;
-                        
+
                     case "titleblacklist-forbidden-edit":
                         SkipPage("TitleBlacklist prevents this title from being created");
                         break;
@@ -704,14 +704,18 @@ namespace AutoWikiBrowser
             }
             else if (ex is WebException || (ex is IOException && ex.Message.Contains("0x2746")))
             {
-                // some 404 error or similar, or "Unable to write data to the transport connection: Unknown error (0x2746)"
+                // Some HTTP error, often retryable, or:
+                // "Unable to write data to the transport connection: Unknown error (0x2746)"
                 StatusLabelText = ex.Message;
                 if (Tools.WriteDebugEnabled)
                     Tools.WriteTextFile(ex.Message, "Log.txt", true);
-                // Sometimes (as with 429 Too Many Requests) there will be a specific delay in response headers.
+                // Sometimes there will be a specific delay requested.
+                // RFC 2616 says it could be 429 (Too Many Requests), 503 (Service Unavailable) or 3xx.
+                // CURRENTLY mediawiki uses seconds, not http-date. Frequently a 429 specifies one second.
+                // Retry success is still not guaranteed after waiting the specified time.
                 if (ex is WebException webex && webex.Response is HttpWebResponse resp &&
                         int.TryParse(resp.GetResponseHeader("Retry-After"), out int restart) && restart > 0)
-                    StartDelayedRestartTimer(restart + 1);  // Allow for timer slop
+                    StartDelayedRestartTimer(restart);
                 else
                     StartDelayedRestartTimer();
             }
@@ -999,8 +1003,8 @@ namespace AutoWikiBrowser
                 if (!_userWarnedAboutUnicodePUA && !preParseModeToolStripMenuItem.Checked && !BotMode)
                 {
                     // provide text around PUA character so user can find it
-                    string uPUAText = page.Text.Substring(uPUA.Index-Math.Min(25, uPUA.Index), Math.Min(25, uPUA.Index) + Math.Min(25, page.Text.Length-uPUA.Index));
-                        MessageBox.Show("This page has character(s) in the Unicode Private Use Area so unfortunately can't be edited with AWB. The page will now be skipped. Surrounding text of first PUA character is: " + uPUAText);
+                    string uPUAText = page.Text.Substring(uPUA.Index - Math.Min(25, uPUA.Index), Math.Min(25, uPUA.Index) + Math.Min(25, page.Text.Length - uPUA.Index));
+                    MessageBox.Show("This page has character(s) in the Unicode Private Use Area so unfortunately can't be edited with AWB. The page will now be skipped. Surrounding text of first PUA character is: " + uPUAText);
                     _userWarnedAboutUnicodePUA = true;
                 }
 
@@ -1025,7 +1029,7 @@ namespace AutoWikiBrowser
         /// </summary>
         private void ProcessPageBackground()
         {
-            StatusLabelText = (preParseModeToolStripMenuItem.Checked ? "Processing page (pre-parse mode)": "Processing page");
+            StatusLabelText = (preParseModeToolStripMenuItem.Checked ? "Processing page (pre-parse mode)" : "Processing page");
             Application.DoEvents();
 
             // FIXME: this position is imprefect, since above there is code that can explode, but this way
@@ -1118,7 +1122,7 @@ namespace AutoWikiBrowser
                 CompleteProcessPage();
             }
         }
-        
+
         /// <summary>
         /// Event that fires when ProcessPage background thread finishes
         /// </summary>
@@ -1141,7 +1145,7 @@ namespace AutoWikiBrowser
         private void CompleteProcessPage()
         {
             Tools.WriteDebug("PageLoaded", "TheArticle.ArticleText length is " + TheArticle.ArticleText.Length);
-            
+
             // For some reason can get very poor performance setting txtEdit.Text (up to 30 seconds on longest en-wiki articles) after processing a few pages
             // Toggling word wrap seems to solve this, not sure why
             txtEdit.WordWrap = !txtEdit.WordWrap;
@@ -1250,7 +1254,7 @@ namespace AutoWikiBrowser
 
                 if (highlightAllFindToolStripMenuItem.Checked)
                     HighlightAllFind();
-                
+
                 // always clear errors in case highlight errors was previously enabled and now turned off by user
                 Errors.Clear();
 
@@ -1404,9 +1408,9 @@ namespace AutoWikiBrowser
         private void Bleepflash()
         {
             if (ContainsFocus) return;
-            #if !MONO
+#if !MONO
             if (_flash) Tools.FlashWindow(this);
-            #endif
+#endif
             if (_beep) Tools.Beep();
         }
 
@@ -1591,9 +1595,9 @@ namespace AutoWikiBrowser
             bool process = true;
             TypoStats = null;
 
-            #if DEBUG
+#if DEBUG
             Variables.Profiler.Start("ProcessPage(\"" + theArticle.Name + "\")");
-            #endif
+#endif
 
             try
             {
@@ -1919,7 +1923,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 {
                     _diffAccessViolationSeen = true;
                     Tools.WriteDebug("GetDiff", "AccessViolationException seen");
- 
+
                     webBrowser.Refresh();
                     webBrowser.Refresh();
                     GetDiff();
@@ -2051,7 +2055,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 return;
             }
 
-            #if DEBUG
+#if DEBUG
             string extext2 = @"Extra validation for debug builds (don't use a debug build if you want to save blank pages): ";
             // further attempts to track down blank page saving issue
             if (string.IsNullOrEmpty(TheArticle.ArticleText))
@@ -2065,7 +2069,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 extext2 += @"Attempted to save page with zero length txtEditText";
                 throw new Exception(extext2);
             }
-            #endif
+#endif
 
             DisableButtons();
             StartProgressBar();
@@ -2119,7 +2123,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     string sectionEditText = Summary.ModifiedSection(TheArticle.OriginalArticleText, txtEdit.Text);
 
                     if (sectionEditText.Length == 0 || !txtReviewEditSummary.Text.Contains(@"/* " + sectionEditText + @" */"))
-                        txtReviewEditSummary.Text = txtReviewEditSummary.Text.Substring(txtReviewEditSummary.Text.IndexOf(@"*/", StringComparison.Ordinal)+2);
+                        txtReviewEditSummary.Text = txtReviewEditSummary.Text.Substring(txtReviewEditSummary.Text.IndexOf(@"*/", StringComparison.Ordinal) + 2);
                 }
 
                 TheSession.Editor.Save(txtEdit.Text, AppendUsingAWBSummary(txtReviewEditSummary.Text), markAllAsMinorToolStripMenuItem.Checked,
@@ -2230,7 +2234,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     HighlightSyntax();
 
                 // scroll back to where user was
-                object[] ob = {"window.scrollTo(0, " + webBrowserYScroll + @")"};
+                object[] ob = { "window.scrollTo(0, " + webBrowserYScroll + @")" };
                 webBrowser.Document.InvokeScript("eval", ob);
 
                 // now put caret back where it was
@@ -2306,7 +2310,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 EditBoxTab.Size = _oldSize;
             }
             listMaker.Visible = MainTab.Visible = !listMaker.Visible;
-            label8.Visible =  listMaker.Visible;
+            label8.Visible = listMaker.Visible;
         }
 
         private void UpdateStatusUI()
@@ -2512,17 +2516,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     summary = @"/* " + sectionEditText + @" */ " + summary.TrimStart();
                 }
             }
-            
-            #if DEBUG
+
+#if DEBUG
             if (!Summary.IsCorrect(summary))
             {
                 Tools.WriteDebug("edit summary not correct", summary);
             }
-            #endif
+#endif
 
             return summary;
         }
-        
+
         /// <summary>
         /// Appends (translation of) "using AWB" wikilinked summary tag to edit summary
         /// </summary>
@@ -2533,7 +2537,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             if (!(TheSession.User.IsBot && chkSuppressTag.Checked)
                 && (Variables.IsWikimediaProject && !_suppressUsingAWB))
                 summary = Summary.Trim(summary) + Variables.SummaryTag;
-            
+
             return summary;
         }
 
@@ -2797,10 +2801,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
                 int wordCount = Tools.WordCount(articleText);
                 int catCount = WikiRegexes.Category.Matches(articleText).Count;
-                
+
                 bool hasAlertsOn = !alertPreferences.Any();
 
-                if ((hasAlertsOn || alertPreferences.Contains(12)) && TheArticle.NameSpaceKey == Namespace.Article  && wordCount > Parsers.StubMaxWordCount && WikiRegexes.Stub.IsMatch(templates))
+                if ((hasAlertsOn || alertPreferences.Contains(12)) && TheArticle.NameSpaceKey == Namespace.Article && wordCount > Parsers.StubMaxWordCount && WikiRegexes.Stub.IsMatch(templates))
                     lbAlerts.Items.Add("Long article with a stub tag.");
 
                 if ((hasAlertsOn || alertPreferences.Contains(14)) && catCount == 0 && !Namespace.IsTalk(TheArticle.Name))
@@ -2922,8 +2926,8 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
                     // Performance: faster to fetch all headings and filter than apply WikiRegexes.SeeAlso directly
                     Match m = (from Match h in WikiRegexes.Headings.Matches(articleText)
-                                              where WikiRegexes.SeeAlso.IsMatch(h.Value)
-                                              select h).FirstOrDefault();
+                               where WikiRegexes.SeeAlso.IsMatch(h.Value)
+                               select h).FirstOrDefault();
 
                     if (m != null && !otherErrors.ContainsKey(m.Index))
                         otherErrors.Add(m.Index, m.Length);
@@ -3050,12 +3054,12 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 RichTextBox rtb = (RichTextBox)sender;
 
                 // disable TextChanged temporarily under Mono otherwise get infinite loop
-                if(Globals.UsingMono)
+                if (Globals.UsingMono)
                     txtFind.TextChanged -= ResetFind;
 
                 rtb.ResetFormatting();
 
-                if(Globals.UsingMono)
+                if (Globals.UsingMono)
                     txtFind.TextChanged += ResetFind;
             }
 
@@ -3121,7 +3125,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             toolStripSeparator32.Visible = true;
             cEvalToolStripMenuItem.Visible = true;
 
-            #if DEBUG
+#if DEBUG
             try
             {
                 Variables.Profiler = new Profiler(Path.Combine(Application.StartupPath, "profiling.txt"), true);
@@ -3130,7 +3134,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             {
                 Variables.Profiler = new Profiler(Path.Combine(AwbDirs.UserData, "profiling.txt"), true);
             }
-            #endif
+#endif
         }
 
         [Conditional("RELEASE")]
@@ -3155,40 +3159,40 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             MyPreferences myPrefs = new MyPreferences(Variables.LangCode, Variables.Project,
                                                       Variables.CustomProject, Variables.Protocol)
-                                        {
-                                            TextBoxFont = txtEdit.Font,
-                                            LowThreadPriority = LowThreadPriority,
-                                            PrefFlash = _flash,
-                                            PrefBeep = _beep,
-                                            PrefMinimize = _minimize,
-                                            PrefSaveArticleList = _saveArticleList,
+            {
+                TextBoxFont = txtEdit.Font,
+                LowThreadPriority = LowThreadPriority,
+                PrefFlash = _flash,
+                PrefBeep = _beep,
+                PrefMinimize = _minimize,
+                PrefSaveArticleList = _saveArticleList,
 
-                                            PrefAutoSaveEditBoxEnabled = _autoSaveEditBoxEnabled,
-                                            PrefAutoSaveEditBoxFile = _autoSaveEditBoxFile,
-                                            PrefAutoSaveEditBoxPeriod = AutoSaveEditBoxPeriod,
+                PrefAutoSaveEditBoxEnabled = _autoSaveEditBoxEnabled,
+                PrefAutoSaveEditBoxFile = _autoSaveEditBoxFile,
+                PrefAutoSaveEditBoxPeriod = AutoSaveEditBoxPeriod,
 
-                                            PrefIgnoreNoBots = IgnoreNoBots,
-                                            PrefClearPageListOnProjectChange = ClearPageListOnProjectChange,
+                PrefIgnoreNoBots = IgnoreNoBots,
+                PrefClearPageListOnProjectChange = ClearPageListOnProjectChange,
 
-                                            PrefShowTimer = ShowMovingAverageTimer,
-                                            PrefAddUsingAWBOnArticleAction = Article.AddUsingAWBOnArticleAction,
-                                            PrefSuppressUsingAWB = _suppressUsingAWB,
+                PrefShowTimer = ShowMovingAverageTimer,
+                PrefAddUsingAWBOnArticleAction = Article.AddUsingAWBOnArticleAction,
+                PrefSuppressUsingAWB = _suppressUsingAWB,
 
-                                            PrefListComparerUseCurrentArticleList = _listComparerUseCurrentArticleList,
-                                            PrefListSplitterUseCurrentArticleList = _listSplitterUseCurrentArticleList,
-                                            PrefDBScannerUseCurrentArticleList = _dbScannerUseCurrentArticleList,
+                PrefListComparerUseCurrentArticleList = _listComparerUseCurrentArticleList,
+                PrefListSplitterUseCurrentArticleList = _listSplitterUseCurrentArticleList,
+                PrefDBScannerUseCurrentArticleList = _dbScannerUseCurrentArticleList,
 
-                                            PrefDiffInBotMode = doDiffInBotMode,
-                                            // show edit page no longer available as an option
-                                            PrefOnLoad = actionOnLoad == 2 ? 0 : actionOnLoad,
+                PrefDiffInBotMode = doDiffInBotMode,
+                // show edit page no longer available as an option
+                PrefOnLoad = actionOnLoad == 2 ? 0 : actionOnLoad,
 
-                                            EnableLogging = loggingEnabled,
-                                            FocusSiteTab = focusSiteTab,
+                EnableLogging = loggingEnabled,
+                FocusSiteTab = focusSiteTab,
 
-                                            PrefDomain = Variables.LoginDomain,
+                PrefDomain = Variables.LoginDomain,
 
-                                            AlertPreferences = alertPreferences
-                                        };
+                AlertPreferences = alertPreferences
+            };
 
             if (myPrefs.ShowDialog(this) == DialogResult.OK)
             {
@@ -3298,7 +3302,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             catch (WebException ex)
             {
                 // Check for HTTP 401 error.
-                var resp = (HttpWebResponse) ex.Response;
+                var resp = (HttpWebResponse)ex.Response;
                 if (resp == null) throw;
                 switch (resp.StatusCode)
                 {
@@ -3359,9 +3363,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     Parser.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
                     break;
             }
-            
+
             // commons uses alpha as https://commons.wikimedia.org/w/api.php?action=query&meta=allmessages&ammessages=Interwiki%20config-sorting%20order is not set to an override value
-            if(project == ProjectEnum.commons)
+            if (project == ProjectEnum.commons)
                 Parser.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
 
             // user interface
@@ -3397,7 +3401,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             lbltsNumberofItems.Text = "Pages: " + listMaker.NumberOfArticles;
 
-            specialFilterToolStripMenuItem1.Enabled = saveListToTextFileToolStripMenuItem.Enabled  
+            specialFilterToolStripMenuItem1.Enabled = saveListToTextFileToolStripMenuItem.Enabled
                 = clearCurrentListToolStripMenuItem.Enabled = convertFromTalkPagesToolStripMenuItem.Enabled
                 = convertToTalkPagesToolStripMenuItem.Enabled = (listMaker.NumberOfArticles > 0);
         }
@@ -3459,7 +3463,8 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         private void DelayedRestart(object sender, EventArgs e)
         {
             StopDelayedAutoSaveTimer();
-            StatusLabelText = "Restarting in " + _startInSeconds;
+            StatusLabelText = "Restarting in " +
+                (_startInSeconds > 60 ? "over a minute" : _startInSeconds.ToString());
 
             if (_startInSeconds == 0)
             {
@@ -3472,17 +3477,18 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void StartDelayedRestartTimer()
         {
-            //increase the restart delay each time, this is decreased by 1 on each successfull save
+            //increase the restart delay each time, this is decreased by 1 on each successful save
             int delay = _restartDelay + 5;
             if (delay > 60)
                 delay = 60;
 
+            _restartDelay = delay;
             StartDelayedRestartTimer(delay);
         }
 
         private void StartDelayedRestartTimer(int delay)
         {
-            _startInSeconds = _restartDelay = delay;
+            _startInSeconds = delay;
             Ticker += DelayedRestart;
         }
 
@@ -3632,7 +3638,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 StatusLabelText = "Background process running";
                 return;
             }
-            
+
             _stopProcessing = false;
             Start();
         }
@@ -3722,7 +3728,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             switch (_listComparerUseCurrentArticleList)
             {
                 case 0: // Ask
-            		if (listMaker.Any() &&
+                    if (listMaker.Any() &&
                         MessageBox.Show("Would you like to copy your current Article List to the ListComparer?",
                                         "Copy Article List?", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
@@ -3855,8 +3861,8 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     e.SuppressKeyPress = true;
                     return;
                 }
-                
-                if (e.KeyCode == Keys.B) 
+
+                if (e.KeyCode == Keys.B)
                 {
                     lbAlerts_Click(null, null);
                 }
@@ -3944,10 +3950,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     "Speedy deletion",
                     "",
                     null,
-                    scrn.Width/2, scrn.Height/3);
+                    scrn.Width / 2, scrn.Height / 3);
             if (res.OK)
             {
-                txtEdit.Text = "{{db|" + res.Text.Trim()  + "}}\r\n\r\n" + txtEdit.Text;
+                txtEdit.Text = "{{db|" + res.Text.Trim() + "}}\r\n\r\n" + txtEdit.Text;
             }
         }
 
@@ -3968,12 +3974,12 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void bypassAllRedirectsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            #if !DEBUG
+#if !DEBUG
             if (MessageBox.Show("Replacement of links to redirects with direct links is strongly discouraged, " +
                                 "however it could be useful in some circumstances. Are you sure you want to continue?",
                                 "Bypass redirects", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
-            #endif
+#endif
 
             BackgroundRequest r = new BackgroundRequest();
 
@@ -4011,7 +4017,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
                 // ignore dates in file captions etc.
                 articleTextLocal = Tools.ReplaceWithSpaces(articleTextLocal, WikiRegexes.FileNamespaceLink.Matches(articleTextLocal));
-                
+
                 // ignore dates from dated maintenance tags etc.
                 foreach (Match m2 in WikiRegexes.NestedTemplates.Matches(articleTextLocal))
                 {
@@ -4189,9 +4195,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             if (TheArticle == null)
                 return;
 
-            if ((RunProcessPageBackground != null && (RunProcessPageBackground.ThreadStatus() == ThreadState.Running 
+            if ((RunProcessPageBackground != null && (RunProcessPageBackground.ThreadStatus() == ThreadState.Running
             || RunProcessPageBackground.ThreadStatus() == ThreadState.Background)) ||
-            (RunReparseEditBoxBackground != null && (RunReparseEditBoxBackground.ThreadStatus() == ThreadState.Running 
+            (RunReparseEditBoxBackground != null && (RunReparseEditBoxBackground.ThreadStatus() == ThreadState.Running
             || RunReparseEditBoxBackground.ThreadStatus() == ThreadState.Background)))
             {
                 StatusLabelText = "Background process running";
@@ -4352,7 +4358,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             else
                 ToolTip.SetToolTip(cmboEditSummary, txtReviewEditSummary.Text);
         }
-        
+
         // If user changes default edit summary after article has been processed, refresh editable edit summary; any custom changes to editable edit summary will be lost
         private void cmboEditSummary_TextChanged(object sender, EventArgs e)
         {
@@ -4429,7 +4435,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                         // TODO: Should we be setting a default?
                         // Variables.RetfPath = "Project:AutoWikiBrowser/Typos";
                     }
-                    
+
                 }
 #if !DEBUG
                 string message = @"Check each edit before you make it. Although this has been built to be very accurate there will be errors.";
@@ -5376,7 +5382,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private bool CanShutdown
         {
-        	get { return (chkShutdown.Checked && !listMaker.Any()); }
+            get { return (chkShutdown.Checked && !listMaker.Any()); }
         }
 
         private void Shutdown()
@@ -5557,9 +5563,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 if (value) // Edit toolbar visible
                 {
                     txtReviewEditSummary.Location =
-                        new Point((int) Math.Round(txtEdit.Location.X + imgBold.Width*12.4),
+                        new Point((int)Math.Round(txtEdit.Location.X + imgBold.Width * 12.4),
                                   txtReviewEditSummary.Location.Y);
-                    txtReviewEditSummary.Size = new Size((int) Math.Round(txtEdit.Size.Width - imgBold.Width*12.4),
+                    txtReviewEditSummary.Size = new Size((int)Math.Round(txtEdit.Size.Width - imgBold.Width * 12.4),
                                                          txtReviewEditSummary.Size.Height);
                 }
                 else
@@ -5632,7 +5638,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void profileTyposToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            #if DEBUG
+#if DEBUG
             if (RegexTypos == null)
             {
                 MessageBox.Show("No typos loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -5685,7 +5691,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             MessageBox.Show("Results are saved in the file 'typos.txt'", "Profiling complete",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
-            #endif
+#endif
         }
 
         private void loadPluginToolStripMenuItem_Click(object sender, EventArgs e)
@@ -5823,7 +5829,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             {
                 RedSelection(a.Key, a.Value);
                 done++;
-                
+
                 if (done > 100)
                     break;
             }
@@ -5886,7 +5892,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void clearCurrentListToolStripMenuItem_Click(object sender, EventArgs e)
         {
-        	if (listMaker.Any() && MessageBox.Show(this, "Do you want to clear the current list?", "Clear current list", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            if (listMaker.Any() && MessageBox.Show(this, "Do you want to clear the current list?", "Clear current list", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
                 == DialogResult.Yes)
                 listMaker.Clear();
         }
@@ -5918,7 +5924,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             Profiles.ShowDialog(this);
         }
-        
+
         private void lblUserNotifications_Click(object sender, EventArgs e)
         {
             if (Variables.NotificationsEnabled && TheSession.User.IsLoggedIn)
@@ -5935,20 +5941,20 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             switch (item.Name)
             {
-            case "lblUserName":
-                text = "Click to switch user";
-                break;
-            case "lblProject":
-                text = "Click to switch project";
-                break;
-            case "lblUserNotifications":
-                text = "User notifications";
-                break;
+                case "lblUserName":
+                    text = "Click to switch user";
+                    break;
+                case "lblProject":
+                    text = "Click to switch project";
+                    break;
+                case "lblUserNotifications":
+                    text = "User notifications";
+                    break;
             }
 
             tt.Show(text, item.Owner);
         }
-        
+
         private void editToolBar_MouseHover(object sender, EventArgs e)
         {
             AWBToolTip tt = new AWBToolTip();
@@ -5959,36 +5965,36 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             switch (item.Name)
             {
-            case "btntsDelete":
-                text = "Delete this page";
-                break;
-            case "btntsIgnore":
-                text = "Skip this page without saving and continue on the next";
-                break;
-            case "btntsSave":
-                text = "Save your changes and continue";
-                break;
-            case "btntsChanges":
-                text = "Preview your changes; please use this before saving.";
-                break;
-            case "btntsPreview":
-                text = "Preview your changes";
-                break;
-            case "btntsStop":
-                text = "Stops everything";
-                break;
-            case "btntsStart":
-                text = "Start processing pages";
-                break;
-            case "btntsShowHideParameters":
-                text = "Make the edit box span bottom of window";
-                break;
-            case "btntsShowHide":
-                text = "Show or hide the panel";
-                break;
-            case "btntsFalsePositive":
-                text = "Add to false positives file";
-                break;
+                case "btntsDelete":
+                    text = "Delete this page";
+                    break;
+                case "btntsIgnore":
+                    text = "Skip this page without saving and continue on the next";
+                    break;
+                case "btntsSave":
+                    text = "Save your changes and continue";
+                    break;
+                case "btntsChanges":
+                    text = "Preview your changes; please use this before saving.";
+                    break;
+                case "btntsPreview":
+                    text = "Preview your changes";
+                    break;
+                case "btntsStop":
+                    text = "Stops everything";
+                    break;
+                case "btntsStart":
+                    text = "Start processing pages";
+                    break;
+                case "btntsShowHideParameters":
+                    text = "Make the edit box span bottom of window";
+                    break;
+                case "btntsShowHide":
+                    text = "Show or hide the panel";
+                    break;
+                case "btntsFalsePositive":
+                    text = "Add to false positives file";
+                    break;
             }
 
             tt.Show(text, item.Owner);
@@ -5996,7 +6002,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void lblProject_Click(object sender, EventArgs e)
         {
-             OpenPreferences(true);
+            OpenPreferences(true);
         }
     }
     #endregion
