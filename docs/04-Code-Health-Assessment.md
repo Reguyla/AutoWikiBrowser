@@ -747,8 +747,34 @@ Recommended approach:
 | Legacy Compatibility | Uses `#if !MONO`-era conditional compatibility patterns elsewhere in the related utility layer. | Low | Migration | Open | Review whether Mono-specific branches are still needed after .NET 8 migration. |
 
 
+### Review of WikiFunctions.Variables
+Importance: Very High
+Migration Risk: High
+Refactor Urgency: High, but defer until after baseline migration
+Recommended Action: Preserve behavior first; document initialization flow; test before refactoring
 
+### WikiFunctions Variables
 
+`WikiFunctions.Variables` is one of the most important and highest-risk components reviewed so far. It acts as the central runtime configuration hub for project selection, language settings, namespaces, URLs, proxy behavior, edit-summary text, background loading, and regex regeneration.
+
+The file contains significant legacy design patterns, including broad mutable static state, static initialization side effects, direct UI/session coupling, SVN-based build metadata, legacy `HttpWebRequest` setup, and language-specific behavior embedded in large switch statements.
+
+This component should be treated as high importance and high regression risk. During the initial .NET 8 migration, behavior should be preserved as much as possible. Refactoring should be deferred until project initialization, URL generation, namespace setup, and language-specific behavior have regression test coverage.
+
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|---|---|:---:|:---:|:---:|---|
+| Global State | `Variables` acts as a central mutable static state container for project, language, URL, namespace, proxy, summary, and runtime behavior. | High | Refactor | Open | Preserve initially, but later consider replacing with a project/session context object. |
+| Initialization Order | Static constructor performs substantial setup and conditionally calls `SetProject()` or test setup logic. | High | Migration | Open | Document startup initialization order before migration. |
+| Generated Build Metadata | `Revision` and `RevisionNumber` depend on `m_Revision`, which appears tied to legacy `SvnInfo.cs` generation. | High | Migration | Open | Replace SVN-based revision metadata with Git/version metadata or a generated build-info file. |
+| Legacy Networking | `PrepareWebRequest()` creates `HttpWebRequest` instances and uses `ServicePointManager`. | High | Migration | Open | Plan eventual migration to `HttpClient` and modern handler configuration. |
+| Security/Protocol Handling | TLS protocols are explicitly modified through `ServicePointManager.SecurityProtocol`. | Medium | Migration | Open | Review whether explicit TLS settings are still needed under .NET 8. |
+| Threading | Background request management uses shared static lists, manual locks, and `Thread.Sleep`. | Medium | Refactor | Open | Consider task-based async patterns after initial migration. |
+| UI Coupling | `Variables.MainForm` gives the core library direct access to the AWB UI/session. | High | Refactor | Open | Decouple core project settings from the main form/session where possible. |
+| Language Configuration | Large switch statement stores language-specific behavior directly in code. | Medium | Refactor | Open | Consider moving language/project configuration to data-driven structures later. |
+| Project Configuration | `SetProject()` performs many unrelated tasks: URL setup, proxy refresh, session update, regex regeneration, typo reload, namespace validation. | High | Refactor | Open | Split into smaller responsibilities after behavior is covered by tests. |
+| Fandom/Wikia Handling | Fandom and Wikia URL construction is hardcoded. | Medium | Migration | Open | Verify current Fandom URL behavior and API compatibility during migration. |
+| Test Coupling | Unit test behavior is controlled through global `Globals.UnitTestMode`. | Medium | Refactor | Open | Replace with explicit testable configuration where practical. |
+| Documentation | Several XML comments are empty or minimal. | Low | Cleanup | Open | Improve comments during cleanup phase. |
 
 \## 9. Testing Coverage
 
