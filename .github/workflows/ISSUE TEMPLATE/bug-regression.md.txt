@@ -1,0 +1,90 @@
+# Bug / Regression Report
+
+## Summary
+
+Provide a concise description of the issue.
+
+---
+
+## Issue Type
+
+* [ ] Bug
+* [ ] Regression
+* [ ] Build failure
+* [ ] Performance issue
+* [ ] UI issue
+* [ ] Documentation issue
+* [ ] Other
+
+---
+
+## Component
+
+* [ ] AWB
+* [ ] WikiFunctions
+* [ ] AWBUpdater
+* [ ] Installer
+* [ ] Build / CI
+* [ ] Documentation
+* [ ] Other
+
+---
+
+## Current Behavior
+
+Describe what is currently happening.
+
+---
+
+## Expected Behavior
+
+Describe what should happen instead.
+
+---
+
+## Steps to Reproduce
+
+1.
+2.
+3.
+
+---
+
+## Environment
+
+* Version / Branch:
+* Commit:
+* .NET Version:
+* Windows Version:
+
+---
+
+## Regression Information
+
+* [ ] This worked previously.
+* [ ] First observed after migration.
+* [ ] Existing issue (pre-migration).
+* [ ] Unknown.
+
+If known, identify the commit or pull request that introduced the issue:
+
+---
+
+## Screenshots / Logs
+
+Attach screenshots, stack traces, logs, or error messages if applicable.
+
+---
+
+## Additional Notes
+
+Any additional context that may help diagnose the issue.
+
+---
+
+## Severity
+
+* [ ] Critical
+* [ ] High
+* [ ] Medium
+* [ ] Low

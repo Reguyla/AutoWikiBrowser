@@ -1,0 +1,85 @@
+# Migration Task
+
+## Summary
+
+Provide a concise description of the migration task.
+
+---
+
+## Migration Phase
+
+* [ ] Phase 1 - Assessment
+* [ ] Phase 2 - Project Conversion
+* [ ] Phase 3 - Dependency Updates
+* [ ] Phase 4 - Build Fixes
+* [ ] Phase 5 - Functional Testing
+* [ ] Phase 6 - Performance Optimization
+* [ ] Phase 7 - Modernization
+* [ ] Other
+
+---
+
+## Component
+
+* [ ] AWB
+* [ ] WikiFunctions
+* [ ] AWBUpdater
+* [ ] UnitTests
+* [ ] Build System
+* [ ] Documentation
+* [ ] GitHub Actions
+* [ ] Installer
+* [ ] Other
+
+---
+
+## Current State
+
+Describe the existing implementation.
+
+---
+
+## Target State
+
+Describe the desired implementation after migration.
+
+---
+
+## Migration Steps
+
+* [ ] Step 1
+* [ ] Step 2
+* [ ] Step 3
+
+---
+
+## Dependencies
+
+List any prerequisite tasks or blocking issues.
+
+---
+
+## Validation
+
+* [ ] Builds successfully
+* [ ] Existing functionality preserved
+* [ ] Tests completed
+* [ ] Documentation updated
+* [ ] No new compiler warnings
+* [ ] No regressions observed
+
+---
+
+## Risk Assessment
+
+* [ ] Low
+* [ ] Medium
+* [ ] High
+
+Describe any known migration risks.
+
+---
+
+## Additional Notes
+
+Add references, links, or implementation details.

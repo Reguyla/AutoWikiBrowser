@@ -1,0 +1,89 @@
+# Pull Request
+
+## Summary
+
+Briefly describe the purpose of this pull request.
+
+---
+
+## Type of Change
+
+* [ ] Bug fix
+* [ ] Regression fix
+* [ ] New feature
+* [ ] Documentation
+* [ ] Code cleanup / refactoring
+* [ ] Performance improvement
+* [ ] Dependency update
+* [ ] .NET 8 migration
+* [ ] UI modernization
+* [ ] Build / CI
+* [ ] Other
+
+---
+
+## Related Issue(s)
+
+Fixes #
+
+Related to #
+
+---
+
+## Scope
+
+Projects affected:
+
+* [ ] AWB
+* [ ] WikiFunctions
+* [ ] AWBUpdater
+* [ ] UnitTests
+* [ ] Documentation
+* [ ] Build System
+* [ ] GitHub Actions
+
+---
+
+## Testing Performed
+
+* [ ] Builds successfully
+* [ ] Unit tests pass
+* [ ] Manual testing completed
+* [ ] Existing functionality verified
+* [ ] Performance checked
+* [ ] Not applicable
+
+Testing notes:
+
+---
+
+## Breaking Changes
+
+* [ ] No breaking changes
+
+If yes, describe:
+
+---
+
+## Documentation
+
+* [ ] Documentation updated
+* [ ] Change Control Log updated
+* [ ] Migration documentation updated
+* [ ] Not applicable
+
+---
+
+## Additional Notes
+
+Anything reviewers should know.
+
+---
+
+## Checklist
+
+* [ ] Code builds successfully
+* [ ] No unnecessary warnings introduced
+* [ ] Related issue linked
+* [ ] Documentation updated where appropriate
+* [ ] Ready for review

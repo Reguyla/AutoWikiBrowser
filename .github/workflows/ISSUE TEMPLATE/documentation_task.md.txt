@@ -1,0 +1,67 @@
+# Documentation Task
+
+## Summary
+
+Briefly describe the documentation change needed.
+
+---
+
+## Document Area
+
+* [ ] Roadmap
+* [ ] Development environment
+* [ ] Solution inventory
+* [ ] Dependency audit
+* [ ] Code health assessment
+* [ ] Migration strategy
+* [ ] Change control log
+* [ ] GitHub templates / repository docs
+* [ ] README
+* [ ] Other
+
+---
+
+## Task Type
+
+* [ ] Create new documentation
+* [ ] Update existing documentation
+* [ ] Clarify existing content
+* [ ] Fix outdated information
+* [ ] Add decision note
+* [ ] Add examples
+* [ ] Reorganize content
+* [ ] Other
+
+---
+
+## Reason
+
+Why is this documentation needed?
+
+---
+
+## Proposed Change
+
+Describe what should be added, changed, or removed.
+
+---
+
+## Related Files
+
+List affected documentation files.
+
+---
+
+## Acceptance Criteria
+
+* [ ] Documentation is clear and accurate
+* [ ] Related files are updated
+* [ ] Links are valid
+* [ ] Change Control Log updated if appropriate
+* [ ] Ready for review
+
+---
+
+## Additional Notes
+
+Add any extra context here.

@@ -1,0 +1,79 @@
+# Feature Request
+
+## Summary
+
+Provide a concise description of the requested feature.
+
+---
+
+## Category
+
+* [ ] UI / UX
+* [ ] Performance
+* [ ] .NET 8 modernization
+* [ ] Code quality
+* [ ] Plugin system
+* [ ] Editor
+* [ ] Search / Replace
+* [ ] Regex
+* [ ] Analytics
+* [ ] Automation
+* [ ] Build / CI
+* [ ] Documentation
+* [ ] Other
+
+---
+
+## Motivation
+
+Why is this feature needed?
+
+What problem does it solve?
+
+---
+
+## Proposed Solution
+
+Describe the proposed implementation or behavior.
+
+---
+
+## Alternatives Considered
+
+Describe any alternative solutions or workarounds.
+
+---
+
+## Benefits
+
+* [ ] Improves usability
+* [ ] Improves maintainability
+* [ ] Improves performance
+* [ ] Reduces technical debt
+* [ ] Improves accessibility
+* [ ] Modernizes the application
+* [ ] Other
+
+---
+
+## Migration Impact
+
+* [ ] Required for .NET 8 migration
+* [ ] Should be implemented after migration
+* [ ] Independent of migration
+
+---
+
+## Priority
+
+* [ ] Critical
+* [ ] High
+* [ ] Medium
+* [ ] Low
+* [ ] Nice to have
+
+---
+
+## Additional Notes
+
+Add screenshots, mockups, links, or other supporting information.
