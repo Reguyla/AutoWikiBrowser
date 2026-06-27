@@ -572,7 +572,19 @@ namespace WikiFunctions.API
         public string HttpGet(string url)
         {
             Tools.WriteDebug("ApiEdit::HttpGet", url);
-            return GetResponseString(CreateRequest(url));
+            while (true)
+            {
+                try
+                {
+                    return GetResponseString(CreateRequest(url));
+                }
+                catch (WebException ex)
+                {
+                    if (!Tools.HandleHttpRetry(ex))
+                        throw;
+                }
+            }
+
         }
 
         #endregion

@@ -84,15 +84,15 @@ namespace WikiFunctions.Lists.Providers
                     // API continuation needs updating https://phabricator.wikimedia.org/T104684
                     text = editor.QueryApi(newUrl + "&rawcontinue=1" + postfix); // HACK: Hacky hack hack
                 }
-                catch (WebException webex) when (webex.Response is HttpWebResponse resp &&
-                        int.TryParse(resp.GetResponseHeader("Retry-After"), out int restart) && restart >= 0)
+                catch (WebException webex)
                 {
-                    Tools.WriteDebug("ApiListProviderBase::ApiMakeList",
-                        $"HTTP {resp.StatusCode} and Retry-After {restart}; pausing and retrying");
-                    System.Threading.Thread.Sleep(restart * 1000);
-                    continue;
+                    if (Tools.HandleHttpRetry(webex))
+                    {
+                        continue;
+                    }
+                    throw;  // Or let it bubble up to a generic handler 
                 }
-                // Or let it bubble up to a generic handler
+
 
                 XmlTextReader xml = new XmlTextReader(new StringReader(text));
                 xml.MoveToContent();

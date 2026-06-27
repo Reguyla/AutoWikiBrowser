@@ -27,6 +27,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
@@ -79,7 +80,7 @@ namespace WikiFunctions
         }
 
         // see Category:Templates_for_soft_redirects
-        private static readonly Regex SoftRedirect = NestedTemplateRegex(new[] {"Soft redirect", "SoftRedirect", "Soft Redirect", "Softredirect", "Softredir", "Soft link", "Soft redir", "Soft", "Category redirect", "Commons category redirect", "Deprecated shortcut", "Interwiki redirect", "Userrename", "Wikisource redirect", "Double soft redirect"});
+        private static readonly Regex SoftRedirect = NestedTemplateRegex(new[] { "Soft redirect", "SoftRedirect", "Soft Redirect", "Softredirect", "Softredir", "Soft link", "Soft redir", "Soft", "Category redirect", "Commons category redirect", "Deprecated shortcut", "Interwiki redirect", "Userrename", "Wikisource redirect", "Double soft redirect" });
 
         /// <summary>
         /// Tests article to see if it is a redirect OR a soft redirect using {{soft redirect}}
@@ -437,25 +438,58 @@ namespace WikiFunctions
         {
             WriteDebug("Tools::GetHTML", url);
             if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
-            CookieContainer cookieJar = new CookieContainer();
 
-            HttpWebRequest rq = Variables.PrepareWebRequest(url); // Uses WikiFunctions' default UserAgent string
-            rq.CookieContainer = cookieJar;
+            // Retry success is still not guaranteed after waiting the specified time.
+            while (true)
+            {
+                CookieContainer cookieJar = new CookieContainer();
+                HttpWebRequest rq = Variables.PrepareWebRequest(url); // Uses WikiFunctions' default UserAgent string
+                rq.CookieContainer = cookieJar;
 
-            HttpWebResponse response = (HttpWebResponse)rq.GetResponse();
+                try
+                {
+                    using (HttpWebResponse response = (HttpWebResponse)rq.GetResponse())
+                    {
+                        responseURL = response.ResponseUri.ToString();
+                        using (Stream stream = response.GetResponseStream())
+                        {
+                            using (StreamReader sr = new StreamReader(stream, enc))
+                            {
+                                return sr.ReadToEnd();  // Either success or a non-retryable error
+                            }
+                        }
+                    }
+                }
+                catch (WebException ex)
+                {
+                    if (!HandleHttpRetry(ex))
+                        throw;
+                }
+            }
+        }
 
-            responseURL = response.ResponseUri.ToString();
+        // Common code to handle 429's etc. Returns true if the exception was handled and the caller should retry
+        // Otherwise the caller should rethrow. Using "throw ex" here would reset the stack
+        public static bool HandleHttpRetry(WebException ex)
+        {
+            if (ex.Response is HttpWebResponse errorResponse)
+            {
+                string retryval = errorResponse.GetResponseHeader("Retry-After");
+                int statusCode = (int)errorResponse.StatusCode;
 
-            Stream stream = response.GetResponseStream();
-            StreamReader sr = new StreamReader(stream, enc);
-
-            string text = sr.ReadToEnd();
-
-            sr.Close();
-            stream.Close();
-            response.Close();
-
-            return text;
+                if (int.TryParse(retryval, out int retrySeconds) || statusCode == 429 || statusCode == 503)
+                {
+                    // Can be zero if a 429/503 doesn't have a Retry-After, or the Retry-After is an HTTP-date (not currently used by mw)
+                    if (retrySeconds < 1)
+                        // https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits#Errors
+                        retrySeconds = String.IsNullOrEmpty(retryval) ? 5 : 60;
+                    WriteDebug("Tools::HandleHttpRetry",
+                        $"HTTP {statusCode} and Retry-After {retrySeconds}; pausing to allow retry");
+                    Thread.Sleep(retrySeconds * 1000);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -478,7 +512,7 @@ namespace WikiFunctions
             return JObject.Parse(text);
         }
 
-        #if !MONO
+#if !MONO
         [DllImport("user32.dll")]
         private static extern void FlashWindow(IntPtr hwnd, bool bInvert);
 
@@ -493,7 +527,7 @@ namespace WikiFunctions
             }
             catch { }
         }
-        #endif
+#endif
 
         // Covered by ToolsTests.CaseInsensitiveStringCompare()
         /// <summary>
@@ -739,7 +773,7 @@ namespace WikiFunctions
             return allWikiLinks.Count(s => SiteMatrix.Languages.Contains(WikiRegexes.PossibleInterwikis.Match(s + "]]").Groups[1].Value.ToLower()));
         }
 
-        private static readonly Regex TemplatesGeneratingWikilinks = NestedTemplateRegex(new [] { "flagIOC", "speciesbox", "automatic taxobox"});
+        private static readonly Regex TemplatesGeneratingWikilinks = NestedTemplateRegex(new[] { "flagIOC", "speciesbox", "automatic taxobox" });
 
         // Covered by ToolsTests.LinkCountTests
         /// <summary>
@@ -766,7 +800,7 @@ namespace WikiFunctions
             Dictionary<string, int> LinksGrouped = allWikiLinks.GroupBy(x => x).ToDictionary(x => x.Key, y => y.Count());
 
             // count only mainspace links, not image/category/interwiki/template links
-            res+= LinksGrouped.Where(l => Namespace.IsMainSpace(l.Key)).Sum(x => x.Value);
+            res += LinksGrouped.Where(l => Namespace.IsMainSpace(l.Key)).Sum(x => x.Value);
 
             if (res >= limit)
                 return limit;
@@ -820,11 +854,11 @@ namespace WikiFunctions
             // If any links in commented out text etc. need to ignore these
             // For performance, extract all unformatted text, then extract links from these and remove from list of all links
             List<string> allUnformattedText = (from Match m in WikiRegexes.UnformattedText.Matches(text)
-                select m.Value).ToList();
+                                               select m.Value).ToList();
 
             List<string> linksInUnformattedText =
                 (from Match m in WikiRegexes.SimpleWikiLink.Matches(string.Join(" ", allUnformattedText.ToArray()))
-                    select m.Value).ToList();
+                 select m.Value).ToList();
 
             foreach (string l in linksInUnformattedText)
                 allWikiLinks.Remove(l);
@@ -971,7 +1005,7 @@ namespace WikiFunctions
 
             string replaced = ReplaceWithSpaces(text, mc).TrimStart();
 
-            return (text.Length - replaced.Length+heading);
+            return (text.Length - replaced.Length + heading);
         }
 
         // Covered by ToolsTests.RemoveMatches()
@@ -1312,12 +1346,12 @@ namespace WikiFunctions
             defaultsort = defaultsort.Replace("&mdash;", "—");
 
             // normalisation - simplify double spaces to a single one
-            while(defaultsort.Contains("  "))
+            while (defaultsort.Contains("  "))
                 defaultsort = defaultsort.Replace("  ", " ");
 
             // tags check to avoid e.g. removing forward slash in tag close
-            if(!WikiRegexes.AllTags.IsMatch(defaultsort))
-            {              
+            if (!WikiRegexes.AllTags.IsMatch(defaultsort))
+            {
                 foreach (var p in SortKeyChars)
                 {
                     defaultsort = defaultsort.Replace(p[0], p[1]);
@@ -1441,7 +1475,7 @@ namespace WikiFunctions
             if (!WriteDebugEnabled)
                 return;
 
-            for(int a = 0; a < 100; a++)
+            for (int a = 0; a < 100; a++)
             {
                 try
                 {
@@ -1913,13 +1947,13 @@ Message: {2}
                 return true;
 
             List<string> after = (from Match m in WikiRegexes.UnformattedText.Matches(articleText)
-                select m.Value).ToList();
+                                  select m.Value).ToList();
 
             if (!after.Any())
                 return true;
 
             List<string> before = (from Match m in WikiRegexes.UnformattedText.Matches(originalArticleText)
-                select m.Value).ToList();
+                                   select m.Value).ToList();
 
             foreach (string s in before)
             {
@@ -2341,7 +2375,7 @@ Message: {2}
                     return dt.ToString("MMMM d, yyy", BritishEnglish);
                 case Parsers.DateLocale.International:
                     return dt.ToString("d MMMM yyy", BritishEnglish);
-                case  Parsers.DateLocale.ISO:
+                case Parsers.DateLocale.ISO:
                     return dt.ToString("yyy-MM-dd", BritishEnglish);
                 default:
                     return inputDate;
@@ -2418,7 +2452,7 @@ Message: {2}
                     separatorBefore = "\r\n";
 
                     // copy number of spaces used prior to bar
-                    int spacesBeforeBar = BeforeSpacedBars.Match(templatecopy).Value.Length-1;
+                    int spacesBeforeBar = BeforeSpacedBars.Match(templatecopy).Value.Length - 1;
 
                     if (spacesBeforeBar >= 1)
                         separatorBefore += BeforeSpacedBars.Match(templatecopy).Value.TrimEnd('|');
@@ -2493,7 +2527,7 @@ Message: {2}
         {
             Dictionary<string, string> paramsFound = new Dictionary<string, string>();
 
-            foreach(Match m in param.Matches(PipeCleanedTemplate(templateCall)))
+            foreach (Match m in param.Matches(PipeCleanedTemplate(templateCall)))
             {
                 if (!paramsFound.ContainsKey(m.Groups[1].Value))
                     paramsFound.Add(m.Groups[1].Value, templateCall.Substring(m.Groups[2].Index, m.Groups[2].Length).Trim());
@@ -2579,7 +2613,7 @@ Message: {2}
             foreach (Match m in TemplateArgument.Matches(PipeCleanedTemplate(templateCall)))
             {
                 if (count.Equals(argument))
-                    return m.Index+1;
+                    return m.Index + 1;
 
                 count++;
             }
@@ -2661,7 +2695,7 @@ Message: {2}
         /// <returns>The updated template call</returns>
         public static string RenameTemplateParameter(string templateCall, Dictionary<string, string> templateparams)
         {
-            foreach(KeyValuePair<string, string> kvp in templateparams)
+            foreach (KeyValuePair<string, string> kvp in templateparams)
             {
                 templateCall = RenameTemplateParameter(templateCall, kvp.Key, kvp.Value);
             }
@@ -2672,9 +2706,9 @@ Message: {2}
         private static string RenameTemplateParameterME(Match m, string templateCall, string newparameter)
         {
             // check for nested templates within the main template to avoid changing their parameter names
-            foreach(Match n in WikiRegexes.NestedTemplates.Matches("  " + templateCall.Substring(2)))
+            foreach (Match n in WikiRegexes.NestedTemplates.Matches("  " + templateCall.Substring(2)))
             {
-                if (n.Index > 0 && m.Index >= n.Index && m.Index <= (n.Index+n.Length))
+                if (n.Index > 0 && m.Index >= n.Index && m.Index <= (n.Index + n.Length))
                     return m.Value;
             }
 
@@ -2712,7 +2746,7 @@ Message: {2}
         /// <returns>The updated template call</returns>
         public static string RemoveTemplateParameters(string templateCall, List<string> parameters)
         {
-            foreach(string parameter in parameters)
+            foreach (string parameter in parameters)
                 templateCall = RemoveTemplateParameter(templateCall, parameter, false);
 
             return templateCall;
@@ -2737,7 +2771,7 @@ Message: {2}
             {
                 if (removeLastMatch)
                 {
-                    foreach(Match y in paramRegex.Matches(pipecleanedtemplate))
+                    foreach (Match y in paramRegex.Matches(pipecleanedtemplate))
                         m = y;
                 }
 
@@ -2771,13 +2805,13 @@ Message: {2}
         {
             string originalTemplateCall = templatecall, updatedTemplateCall = "";
 
-            while(!updatedTemplateCall.Equals(templatecall))
+            while (!updatedTemplateCall.Equals(templatecall))
             {
                 templateparams.Clear();
                 string pipecleanedtemplate = PipeCleanedTemplate(templatecall);
                 updatedTemplateCall = templatecall;
 
-                foreach(Match m in anyParam.Matches(pipecleanedtemplate))
+                foreach (Match m in anyParam.Matches(pipecleanedtemplate))
                 {
                     string paramValue = templatecall.Substring(m.Groups[2].Index, m.Groups[2].Length).Trim(),
                     paramName = m.Groups[1].Value.Trim();
@@ -2829,7 +2863,7 @@ Message: {2}
 
             Dictionary<string, string> Params = new Dictionary<string, string>();
 
-            foreach(Match m in anyParam.Matches(PipeCleanedTemplate(templatecall)))
+            foreach (Match m in anyParam.Matches(PipeCleanedTemplate(templatecall)))
             {
                 string paramValue = templatecall.Substring(m.Groups[2].Index, m.Groups[2].Length).Trim(),
                 paramName = m.Groups[1].Value.Trim();
@@ -2886,7 +2920,7 @@ Message: {2}
 
             string pipecleanedtemplate = PipeCleanedTemplate(templatecall);
 
-            foreach(Match m in anyParam.Matches(pipecleanedtemplate))
+            foreach (Match m in anyParam.Matches(pipecleanedtemplate))
             {
                 string paramName = m.Groups[1].Value.Trim();
 
@@ -2938,7 +2972,7 @@ Message: {2}
         /// <param name="newparameter">The new value for the parameter</param>
         /// <param name="caseInsensitiveParameterNames">Whether to match case insensitively on parameter name</param>
         /// <returns>List of parameter values</returns>
-        public static string MergeTemplateParametersValues(string templateCall, List<string> parameters,  string newparameter, bool caseInsensitiveParameterNames)
+        public static string MergeTemplateParametersValues(string templateCall, List<string> parameters, string newparameter, bool caseInsensitiveParameterNames)
         {
             string combined = "";
 
@@ -3177,7 +3211,7 @@ Message: {2}
             if (templateName.Length == 0)
                 return null;
 
-            return NestedTemplateRegex(new [] { templateName }, compiled);
+            return NestedTemplateRegex(new[] { templateName }, compiled);
         }
 
         /// <summary>
@@ -3342,7 +3376,7 @@ Message: {2}
         public static string ListToStringWithSeparatorAndWordSuffix(List<string> items, string separator, string suffix, string lastSeparator)
         {
             string ret = "";
-            for(int i = 0; i < items.Count; i++)
+            for (int i = 0; i < items.Count; i++)
             {
                 if (i + 1 == items.Count)
                     ret += items[i] + suffix + lastSeparator;

@@ -33,7 +33,6 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Diagnostics;
 using System.Globalization;
-using System.Security.Permissions;
 using System.Web;
 using System.Net;
 using System.Linq;
@@ -709,16 +708,25 @@ namespace AutoWikiBrowser
                 if (Tools.WriteDebugEnabled)
                     Tools.WriteTextFile(ex.Message, "Log.txt", true);
                 // Sometimes there will be a specific delay requested.
-                // RFC 2616 says it could be 429 (Too Many Requests), 503 (Service Unavailable) or 3xx.
-                // CURRENTLY mediawiki uses seconds, not http-date. Frequently a 429 specifies one second.
+                // RFC 2616 and 6585 say it could be 429 (Too Many Requests), 503 (Service Unavailable) or 3xx.
+                // CURRENTLY mediawiki uses 429 and 503, and seconds not HTTP-date.
                 // Retry success is still not guaranteed after waiting the specified time.
-                if (ex is WebException webex && webex.Response is HttpWebResponse resp &&
-                        int.TryParse(resp.GetResponseHeader("Retry-After"), out int restart) && restart > 0)
-                {
-                    Tools.WriteDebug("MainForm::ApiEditExceptionCaught",
-                        $"HTTP {resp.StatusCode} and Retry-After {restart}; pausing and retrying");
+                if (ex is WebException webex && webex.Response is HttpWebResponse resp)
 
-                    StartDelayedRestartTimer(restart);
+                {
+                    string retryval = resp.GetResponseHeader("Retry-After");
+                    int statusCode = (int)resp.StatusCode;
+                    if (int.TryParse(retryval, out int restart) || statusCode == 429 || statusCode == 503)
+                    {
+                        if (restart < 1)
+                            // https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits#Errors
+                            // No value, default to 5. Non-numeric, probably a date, use 60
+                            restart = String.IsNullOrEmpty(retryval) ? 5 : 60;
+                        StartDelayedRestartTimer(restart);
+                    }
+
+                    else
+                        StartDelayedRestartTimer();
                 }
                 else
                     StartDelayedRestartTimer();
