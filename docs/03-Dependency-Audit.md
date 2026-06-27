@@ -2,7 +2,7 @@
 
 
 
-\## 1. Executive Summary
+\## 0. Executive Summary
 
 
 
@@ -33,6 +33,111 @@ Each dependency is classified according to its current status, migration risk, a
 
 
 This document will be updated throughout the migration as dependencies are verified, upgraded, replaced, or retired.
+
+
+
+\## 1. Dependencies to look for and analyze
+
+| Dependency Type                      | Where to Look                                        | Why It Matters                                        |
+
+| ------------------------------------ | ---------------------------------------------------- | ----------------------------------------------------- |
+
+| \*\*Project references\*\*               | `.csproj`, References node                           | Determines migration order                            |
+
+| \*\*Framework assemblies\*\*             | `System.\*`, `Microsoft.\*` references                 | Some .NET Framework assemblies do not exist in .NET 8 |
+
+| \*\*Direct DLL references\*\*            | `References`, `HintPath`, `lib/`, `bin/`             | May need NuGet replacements or source updates         |
+
+| \*\*COM references\*\*                   | References node, `.csproj`                           | Often migration blockers                              |
+
+| \*\*WinForms / designer dependencies\*\* | Forms, `.Designer.cs`, `.resx`                       | Needs .NET 8 WinForms compatibility review            |
+
+| \*\*App.config / settings\*\*            | `App.config`, `.settings`, config sections           | Old configuration APIs may need changes               |
+
+| \*\*Resource files\*\*                   | `.resx`, images, icons, embedded files               | Can break during SDK-style conversion                 |
+
+| \*\*Build tools / targets\*\*            | `.targets`, `.props`, pre/post-build events          | Legacy build steps may fail in SDK-style projects     |
+
+| \*\*Test framework references\*\*        | NUnit, test adapters, mocks                          | Tests may need package upgrades                       |
+
+| \*\*Installer/updater dependencies\*\*   | setup projects, ClickOnce, AWBUpdater                | Deployment model may need rework                      |
+
+| \*\*External executables/tools\*\*       | Anything launched via `Process.Start`                | Need path/platform assumptions checked                |
+
+| \*\*Native libraries\*\*                 | `.dll`, `.ocx`, x86/x64-specific files               | Can block AnyCPU/.NET 8 migration                     |
+
+| \*\*Web/API dependencies\*\*             | Wiki API clients, `WebClient`, `HttpWebRequest`      | Old networking patterns may need modernization        |
+
+| \*\*Serialization dependencies\*\*       | XML, binary, JSON, custom config                     | `BinaryFormatter` especially is a red flag            |
+
+| \*\*Registry dependencies\*\*            | `Microsoft.Win32.Registry`                           | Windows-only and may affect portability               |
+
+| \*\*File/path dependencies\*\*           | hardcoded paths, temp folders, user folders          | Migration can expose path and permission issues       |
+
+| \*\*GAC references\*\*                   | Global Assembly Cache references                     | Not a good fit for modern .NET                        |
+
+| \*\*MSBuild/NuGet restore files\*\*      | `.sln`, `.csproj`, `packages.config`, `nuget.config` | Determines how packages/builds restore                |
+
+
+
+\### Useful search terms
+HintPath
+
+Reference Include
+
+COMReference
+
+Content Include
+
+EmbeddedResource
+
+None Include
+
+PostBuildEvent
+
+PreBuildEvent
+
+TargetFrameworkVersion
+
+packages.config
+
+App.config
+
+WebClient
+
+HttpWebRequest
+
+BinaryFormatter
+
+Registry
+
+Process.Start
+
+NuGet
+
+
+
+\### Initial priority
+
+1\. Project-to-project references
+
+2\. Direct DLL references / HintPath references
+
+3\. .NET Framework assembly references
+
+4\. WinForms/designer/resource dependencies
+
+5\. App.config/settings dependencies
+
+6\. Build events / .targets / .props files
+
+7\. Installer/updater dependencies
+
+8\. Web/API dependencies
+
+9\. Test framework dependencies
+
+10\. Native/COM dependencies
 
 
 
@@ -132,8 +237,6 @@ This document will be updated throughout the migration as dependencies are verif
 
 \## 7. NuGet Packages
 
-\### Overview
-
 
 
 The project currently contains a mixture of framework references, project references, and external libraries. This section inventories packages managed through NuGet and identifies those requiring updates or replacement during the .NET 8 migration.
@@ -192,7 +295,7 @@ The project currently contains a mixture of framework references, project refere
 
 |-----------------|---------|----------:|----------------:|----------------|-------------|--------------------------------------|---------------|
 
-| AutoWikiBrowser | Newtonsoft.Json 	| TBD 		  | TBD 	   | Investigate | Determine if NuGet or direct DLL	|		|
+| AutoWikiBrowser | Newtonsoft.Json 	| 13.0.3	  | 13.0.4 	   | Investigate | Determine if NuGet or direct DLL	| Appears to be NuGet	|
 
 |-----------------|---------|----------:|----------------:|----------------|-------------|--------------------------------------|---------------|
 
