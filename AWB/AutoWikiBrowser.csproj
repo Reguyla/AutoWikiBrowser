@@ -311,6 +311,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitignore" />
     <Content Include="globe.ico" />
     <Content Include="Resources\AutoWikiBrowser2.png" />
     <Content Include="Resources\button_bold.png" />
@@ -355,6 +356,7 @@
       <Name>WikiFunctions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
