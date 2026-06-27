@@ -1,6 +1,6 @@
 ﻿##### \####################################
 
-##### &#x20;# Plugin Strategy 
+##### &#x20;# Plugin Strategy
 
 ##### \####################################
 
@@ -74,7 +74,7 @@ Secondary Solution:
 
 ###### 
 
-Project				| Folder		| Output	| Purpose		| Migration Scope	
+Project				| Folder		| Output	| Purpose		| Migration Scope
 
 |-------------------------------|-----------------------|---------------|-----------------------|------------------------------------------|
 
@@ -150,7 +150,7 @@ UnitTests		| UnitTests	| DLL		| Tests			| Phase 1
 
 ###### \####################################
 
-Project			| Folder	| Output	| Purpose		| Migration Scope	| 
+Project			| Folder	| Output	| Purpose		| Migration Scope	|
 
 |-----------------------|---------------|---------------|-----------------------|------------------------------------------------------------|
 
@@ -194,11 +194,37 @@ NoLimitsPlugin		| Plugins	| DLL		| Optional extension	| Retire / Deferred	| Not 
 
 
 
+\## Project Dependencies
 
 
 
+\## External References
 
 
 
+\## NuGet Packages
 
+
+
+\## Build Order
+
+
+
+\## Startup Projects
+
+
+
+\## Shared Resources
+
+
+
+\## Resource Files
+
+
+
+\## Configuration Files
+
+
+
+\## Legacy Technologies
 
