@@ -776,6 +776,12 @@ This component should be treated as high importance and high regression risk. Du
 | Test Coupling | Unit test behavior is controlled through global `Globals.UnitTestMode`. | Medium | Refactor | Open | Replace with explicit testable configuration where practical. |
 | Documentation | Several XML comments are empty or minimal. | Low | Cleanup | Open | Improve comments during cleanup phase. |
 
+
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|------|----------|:-------:|:---------------:|:------:|----------------|
+| Build System | Legacy SVN-based revision metadata generation (`SvnInfo.cs`). | Medium | Migration | Open | Replace or modernize build metadata generation after migration baseline is established. |
+
+
 \## 9. Testing Coverage
 
 Testing coverage will be evaluated to determine the current level of automated validation available to support the migration.
@@ -850,7 +856,41 @@ Overall, `Tools` should be treated as a medium-risk support component. It does n
 
 `WikiRegexes` serves as the central repository for MediaWiki parsing expressions and language-specific template detection. The implementation is functionally mature and supports numerous localized wiki configurations. However, it relies heavily on mutable static state, global configuration objects, and complex regular expressions. Due to its central role in article parsing, it should be considered a high-regression-risk component. During the initial .NET 8 migration, behavior should be preserved, with refactoring deferred until comprehensive regression testing is available.
 
+###Build baseline
+| Property | Result |
+|----------|--------|
+| Build Date | 2026-06-27 |
+| Configuration | Debug |
+| Platform | AnyCPU |
+| Projects Built | 4 |
+| Build Result | Success |
+| Projects Succeeded | 4 |
+| Projects Failed | 0 |
+| Projects Skipped | 0 |
+| Overall Assessment | Solution builds successfully under .NET Framework 4.8.1. |
 
+
+### Build health
+####################################
+# 2. Build Health
+####################################
+
+### Baseline Build
+
+| Property | Result |
+|-----------|--------|
+| Build Status | Success |
+| Projects Built | 4 |
+| Projects Failed | 0 |
+| Target Framework | .NET Framework 4.8.1 |
+
+### Build Observations
+
+- Solution rebuild completed successfully.
+- `SvnInfo.cs` is regenerated or updated during the build process.
+- Revision metadata appears to be provided through the legacy `m_Revision` mechanism.
+- Static analysis references this generated source file.
+- Build generation mechanism should be evaluated during the .NET 8 migration.
 
 \## 11. Recommendations
 
