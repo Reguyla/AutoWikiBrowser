@@ -1,10 +1,8 @@
-﻿\####################################
+﻿\# 03. Dependency audit
 
-&#x20;## 1. Executive Summary
 
-\####################################
 
-\## Executive Summary
+\## 1. Executive Summary
 
 
 
@@ -38,11 +36,7 @@ This document will be updated throughout the migration as dependencies are verif
 
 
 
-\####################################
-
-&#x20;## 2. Project References
-
-\####################################
+\## 2. Project References
 
 
 
@@ -70,11 +64,7 @@ This document will be updated throughout the migration as dependencies are verif
 
 
 
-\####################################
-
-&#x20;## 3. External Dependencies
-
-\####################################
+\## 3. External Dependencies
 
 | Project         | Dependency           | Type        | Status      | Migration Risk | Notes                              |
 
@@ -94,11 +84,9 @@ This document will be updated throughout the migration as dependencies are verif
 
 
 
-\####################################
 
-&#x20;## 4. Framework Dependencies
 
-\####################################
+\## 4. Framework Dependencies
 
 | Dependency | Status    | Notes                     |
 
@@ -110,11 +98,9 @@ This document will be updated throughout the migration as dependencies are verif
 
 
 
-\####################################
 
-&#x20;## 5. Third-Party Libraries
 
-\####################################
+\## 5. Third-Party Libraries
 
 | Library         | Current Source | Status      | Notes                                                   |
 
@@ -126,11 +112,13 @@ This document will be updated throughout the migration as dependencies are verif
 
 
 
-\####################################
 
-&#x20;## 6. COM / Interop Components
 
-\####################################
+
+
+\## 6. COM / Interop Components
+
+
 
 | Component        | Status    | Migration Risk | Notes                                |
 
@@ -142,11 +130,7 @@ This document will be updated throughout the migration as dependencies are verif
 
 
 
-\####################################
-
-&#x20;## 7. NuGet Packages
-
-\####################################
+\## 7. NuGet Packages
 
 \### Overview
 
@@ -170,11 +154,7 @@ The project currently contains a mixture of framework references, project refere
 
 
 
-\####################################
 
-&#x20;## 8. Migration Risks
-
-\####################################
 
 \## 8. Migration Risks
 
@@ -206,11 +186,7 @@ The project currently contains a mixture of framework references, project refere
 
 
 
-\####################################
 
-&#x20;## 9. Recommendations
-
-\####################################
 
 \## 9. Recommendations
 
@@ -241,48 +217,4 @@ Based on the current dependency assessment so far:
 5\. Defer bundled plugins until the core application reaches feature parity under .NET 8.
 
 6\. Reassess utilities after the core migration to determine which should be modernized, retained, or retired.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

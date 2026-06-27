@@ -1,14 +1,9 @@
-﻿##### \####################################
+﻿# 02. Solution inventory
 
-##### &#x20;# Plugin Strategy
-
-##### \####################################
-
+## &#x20;# Plugin Strategy
 Initial assessment: no bundled plugin is considered essential to the core modernization effort.
 
 The plugin architecture itself should be preserved, because future extensions may use it. However, most existing bundled plugins can be excluded from the initial migration path to reduce noise and complexity.
-
-
 
 Candidate plugins to retain/review:
 
@@ -18,46 +13,32 @@ Candidate plugins to retain/review:
 
 \- Delinker
 
-
-
 All other bundled plugins are considered candidates for retirement or long-term deferral unless a future need is identified.
 
-##### \####################################
 
-##### &#x20;# Initial classification
-
-##### \####################################
+## &#x20;# Initial classification
 
 * Essential bundled plugins: none
 * Candidate plugins to retain/review: TBD
 * Candidate plugins to remove/defer: most bundled plugins
 
-##### \####################################
 
-##### &#x20;# Migration implication
 
-##### \####################################
+## &#x20;# Migration implication
 
 The first modernization pass should focus on the core application, shared libraries, and plugin interface/host behavior rather than upgrading every bundled plugin project.
 
 
 
-##### \####################################
+## &#x20;# Solution Inventory
+Placeholder
 
-##### &#x20;# Solution Inventory
 
-##### \####################################
-
-##### \####################################
-
-##### &#x20;# Migration Baseline
-
-##### \####################################
+## &#x20;# Migration Baseline
 
 Primary Solution:
 
 \- AutoWikiBrowser no plugins.sln
-
 
 
 Secondary Solution:
@@ -66,13 +47,9 @@ Secondary Solution:
 
 
 
-###### \######################################
 
-###### &#x20;# Main applications, core and updater
+## &#x20;# Main applications, core and updater
 
-###### \######################################
-
-###### 
 
 Project				| Folder		| Output	| Purpose		| Migration Scope
 
@@ -92,11 +69,9 @@ WikiFunctions			| WikiFunctions		| DLL		| Core library		| Phase 1
 
 
 
-###### \####################################
 
-###### &#x20;# Utilities and extras
+## &#x20;# Utilities and extras
 
-###### \####################################
 
 Project			| Folder	| Output	| Purpose		| Migration Scope
 
@@ -125,12 +100,8 @@ Sandbox			| Extras	| 		| Utilities		| Investigate
 
 
 
+## &#x20;# Tests
 
-###### \####################################
-
-###### &#x20;# Tests
-
-###### \####################################
 
 Project			| Folder	| Output	| Purpose		| Migration Scope
 
@@ -141,12 +112,8 @@ UnitTests		| UnitTests	| DLL		| Tests			| Phase 1
 |-----------------------|---------------|---------------|-----------------------|------------------------------------------|
 
 
+## &#x20;# Plug-ins (for future work)
 
-###### \####################################
-
-###### &#x20;# Plug-ins (for future work)
-
-###### \####################################
 
 Project			| Folder	| Output	| Purpose		| Migration Scope	|
 
@@ -190,11 +157,9 @@ NoLimitsPlugin		| Plugins	| DLL		| Optional extension	| Retire / Deferred	| Not 
 
 
 
-\####################################
 
-&#x20;## Project Dependencies
+## &#x20;## Project Dependencies
 
-\####################################
 
 | Project		| 	Depends on 		 |	Project references	 | Referenced By 		 | Notes			 	  |
 
@@ -226,11 +191,9 @@ NoLimitsPlugin		| Plugins	| DLL		| Optional extension	| Retire / Deferred	| Not 
 
 
 
-\####################################
 
-&#x20;## External References
+##&#x20;## External References
 
-\####################################
 
 The following external references have been identified during the initial inventory. Detailed compatibility analysis is documented in \*\*03-Dependency-Audit.md\*\*.
 
@@ -258,11 +221,9 @@ The following external references have been identified during the initial invent
 
 
 
-\####################################
 
-&#x20;## NuGet Packages
+##&#x20;## NuGet Packages
 
-\####################################
 
 The package management strategy for the solution has not yet been fully assessed.
 
@@ -286,12 +247,8 @@ Detailed findings will be documented in \*\*03-Dependency-Audit.md\*\*.
 
 
 
-\####################################
 
-&#x20;## Build Order
-
-\####################################
-
+##&#x20;## Build Order
 
 
 | Order	| 	Project 	 | Reason	 					 | Notes			|
@@ -316,11 +273,8 @@ Detailed findings will be documented in \*\*03-Dependency-Audit.md\*\*.
 
 
 
-\####################################
 
-&#x20;## Startup Projects
-
-\####################################
+##&#x20;## Startup Projects
 
 Documents which project is configured to launch when debugging the solution.
 
@@ -336,11 +290,7 @@ Documents which project is configured to launch when debugging the solution.
 
 
 
-\####################################
-
-\## Shared Resources
-
-\####################################
+## Shared Resources
 
 Identifies resources shared across projects, such as common images, icons, templates, scripts, or shared data files.
 
@@ -356,11 +306,7 @@ Identifies resources shared across projects, such as common images, icons, templ
 
 
 
-\####################################
-
-\## Resource Files
-
-\####################################
+## Resource Files
 
 Inventories project-specific resource files such as `.resx`, icons, embedded images, and UI assets.
 
@@ -376,11 +322,7 @@ Inventories project-specific resource files such as `.resx`, icons, embedded ima
 
 
 
-\####################################
-
-\## Configuration Files
-
-\####################################
+## Configuration Files
 
 Tracks application, build, package, and runtime configuration files that may affect migration.
 
@@ -400,11 +342,7 @@ Tracks application, build, package, and runtime configuration files that may aff
 
 
 
-\####################################
-
-\## Legacy Technologies
-
-\####################################
+## Legacy Technologies
 
 Identifies older technologies or platform-specific dependencies that may require special handling during .NET 8 migration.
 
