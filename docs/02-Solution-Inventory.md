@@ -92,8 +92,6 @@ WikiFunctions			| WikiFunctions		| DLL		| Core library		| Phase 1
 
 
 
-
-
 ###### \####################################
 
 ###### &#x20;# Utilities and extras
@@ -192,39 +190,299 @@ NoLimitsPlugin		| Plugins	| DLL		| Optional extension	| Retire / Deferred	| Not 
 
 
 
+\####################################
+
+&#x20;## Project Dependencies
+
+\####################################
+
+| Project		| 	Depends on 		 |	Project references	 | Referenced By 		 | Notes			 	  |
+
+|-----------------------|--------------------------------|-------------------------------|-------------------------------|----------------------------------------|
+
+| AutoWikiBrowser	| WikiFunctions			 | Wikifunctions		 | None				 | AWBUpdater and UnitTests appear to	  |
+
+|			|				 |				 |				 | be build dependencies only; verify why.|			
+
+|-----------------------|--------------------------------|-------------------------------|-------------------------------|----------------------------------------|
+
+| WikiFunctions		| WikiFunctions, AWBUpdater, 	 | TBD				 | AutoWikiBrowser, 		 | Core shared library			  |			
+
+|			| UnitTests			 | 				 | UnitTests			 | 					  |
+
+|-----------------------|--------------------------------|-------------------------------|-------------------------------|----------------------------------------|
+
+| AWBUpdater		| None				 | TBD				 | Build dependency of 		 | Standalone utiliy		 	  |
+
+|			|				 |				 | AutoWikiBrowser		 | (verify external dependencies)	  |
+
+|-----------------------|--------------------------------|-------------------------------|-------------------------------|----------------------------------------|
+
+| UnitTests		| AutoWikiBrowser, WikiFunctions | TBD				 | Build dependency of		 | Verify whether project		  |
+
+|			|				 |				 | AutoWikiBrowser		 | reference or test reference		  |
+
+|-----------------------|--------------------------------|-------------------------------|-------------------------------|----------------------------------------|
 
 
-\## Project Dependencies
+
+\####################################
+
+&#x20;## External References
+
+\####################################
+
+The following external references have been identified during the initial inventory. Detailed compatibility analysis is documented in \*\*03-Dependency-Audit.md\*\*.
 
 
 
-\## External References
+| Project 		| External Reference Types 					| Status 		|
+
+|-----------------------|---------------------------------------------------------------|-----------------------|
+
+| AutoWikiBrowser 	| Framework assemblies, COM/Interop, Third-party libraries 	| Identified		|
+
+|-----------------------|---------------------------------------------------------------|-----------------------|
+
+| WikiFunctions 	| Framework assemblies, Third-party libraries 			| Pending review 	|
+
+|-----------------------|---------------------------------------------------------------|-----------------------|
+
+| AWBUpdater 		| Pending analysis						| Investigate		|
+
+|-----------------------|---------------------------------------------------------------|-----------------------|
+
+| UnitTests 		| Framework assemblies						| Pending review	|
+
+|-----------------------|---------------------------------------------------------------|-----------------------|
 
 
 
-\## NuGet Packages
+\####################################
+
+&#x20;## NuGet Packages
+
+\####################################
+
+The package management strategy for the solution has not yet been fully assessed.
 
 
 
-\## Build Order
+The dependency audit will determine:
 
 
 
-\## Startup Projects
+\- Whether projects use `packages.config`
+
+\- Whether projects use `PackageReference`
+
+\- Which third-party libraries are managed through NuGet
+
+\- Which dependencies are referenced directly as assemblies
 
 
+
+Detailed findings will be documented in \*\*03-Dependency-Audit.md\*\*.
+
+
+
+\####################################
+
+&#x20;## Build Order
+
+\####################################
+
+
+
+| Order	| 	Project 	 | Reason	 					 | Notes			|
+
+|-------|------------------------|-------------------------------------------------------|------------------------------|
+
+| 1	| WikiFunctions		 | Core library used by other projects			 | 				|
+
+|-------|------------------------|-------------------------------------------------------|------------------------------|
+
+| 2	| AutoWikiBrowser	 | Main application					 |				|
+
+|-------|------------------------|-------------------------------------------------------|------------------------------|
+
+| 3	| AWBUpdater		 | Updater utility					 |				|
+
+|-------|------------------------|-------------------------------------------------------|------------------------------|
+
+| 4	| UnitTests		 | Tests compiled after application/library projects	 |				|
+
+|-------|------------------------|-------------------------------------------------------|------------------------------|
+
+
+
+\####################################
+
+&#x20;## Startup Projects
+
+\####################################
+
+Documents which project is configured to launch when debugging the solution.
+
+
+
+| Solution			 | Startup Project	 | Status	| Notes 						|
+
+|--------------------------------|-----------------------|--------------|-------------------------------------------------------|
+
+| AutoWikiBrowser no plugins.sln | TBD			 | Investigate  | Verify in Visual Studio startup project settings.	|
+
+|--------------------------------|-----------------------|--------------|-------------------------------------------------------|
+
+
+
+\####################################
 
 \## Shared Resources
 
+\####################################
 
+Identifies resources shared across projects, such as common images, icons, templates, scripts, or shared data files.
+
+
+
+| Resource	 | Location	 | Used By	 | Notes		 |
+
+|----------------|---------------|---------------|-----------------------|
+
+| TBD		 | TBD		 | TBD		 | Pending review.	 |
+
+|----------------|---------------|---------------|-----------------------|
+
+
+
+\####################################
 
 \## Resource Files
 
+\####################################
 
+Inventories project-specific resource files such as `.resx`, icons, embedded images, and UI assets.
+
+
+
+| Project	  | Resource Type		 | Location	 | Notes			 |
+
+|-----------------|------------------------------|---------------|-------------------------------|
+
+| AutoWikiBrowser | Icons / images / resources	 | AWB/Resources | Pending detailed review.	 |
+
+|-----------------|------------------------------|---------------|-------------------------------
+
+
+
+\####################################
 
 \## Configuration Files
 
+\####################################
 
+Tracks application, build, package, and runtime configuration files that may affect migration.
+
+
+
+| File		  | Location				| Purpose		    | Migration Notes			  |
+
+|-----------------|-------------------------------------|---------------------------|-------------------------------------|
+
+| app.config	  | TBD					| Application configuration | Verify existence and .NET 8 impact. |
+
+|-----------------|-------------------------------------|---------------------------|-------------------------------------|
+
+| packages.config | TBD					| NuGet package management  | Verify whether used.		  |
+
+|-----------------|-------------------------------------|---------------------------|-------------------------------------|
+
+
+
+\####################################
 
 \## Legacy Technologies
+
+\####################################
+
+Identifies older technologies or platform-specific dependencies that may require special handling during .NET 8 migration.
+
+
+
+| Technology			  | Used By		| Risk		 					| Notes					|
+
+|---------------------------------|---------------------|-------------------------------------------------------|---------------------------------------|
+
+| .NET Framework project format	  | All legacy projects	| Medium						| May require SDK-style conversion.	|
+
+|---------------------------------|---------------------|-------------------------------------------------------|---------------------------------------|
+
+| WinForms | AutoWikiBrowser	  | Low / Medium	| Supported on .NET 8 Windows, 				|					|
+
+&#x09;						  but designer/runtime behavior should be tested.	|					|
+
+|---------------------------------|---------------------|-------------------------------------------------------|---------------------------------------|
+
+| COM / Interop | AutoWikiBrowser | High		| Microsoft.mshtml requires investigation.		|					|
+
+|---------------------------------|---------------------|-------------------------------------------------------|---------------------------------------|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
