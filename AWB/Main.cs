@@ -714,7 +714,12 @@ namespace AutoWikiBrowser
                 // Retry success is still not guaranteed after waiting the specified time.
                 if (ex is WebException webex && webex.Response is HttpWebResponse resp &&
                         int.TryParse(resp.GetResponseHeader("Retry-After"), out int restart) && restart > 0)
+                {
+                    Tools.WriteDebug("MainForm::ApiEditExceptionCaught",
+                        $"HTTP {resp.StatusCode} and Retry-After {restart}; pausing and retrying");
+
                     StartDelayedRestartTimer(restart);
+                }
                 else
                     StartDelayedRestartTimer();
             }

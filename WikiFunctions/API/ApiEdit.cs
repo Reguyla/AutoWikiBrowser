@@ -86,7 +86,7 @@ namespace WikiFunctions.API
                 ProxySettings = proxy;
             }
             // GetSystemWebProxy doesn't work under Linux (no IE settings to find) and can cause 60-second timeout, so skip proxy lookup under Linux
-            else if(!Globals.UsingLinux)
+            else if (!Globals.UsingLinux)
             {
                 ProxySettings = WebRequest.GetSystemWebProxy();
 
@@ -206,7 +206,7 @@ namespace WikiFunctions.API
             Uri uri = new Uri(URL);
             string host = uri.Host;
             var newCookies = new CookieContainer();
-            var urls = new[] {uri, new Uri(uri.Scheme + Uri.SchemeDelimiter + "fnord." + host)};
+            var urls = new[] { uri, new Uri(uri.Scheme + Uri.SchemeDelimiter + "fnord." + host) };
             foreach (var u in urls)
             {
                 foreach (Cookie c in Cookies.GetCookies(u))
@@ -379,7 +379,7 @@ namespace WikiFunctions.API
             ServicePointManager.SecurityProtocol |=
                 SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
-            HttpWebRequest req = (HttpWebRequest) WebRequest.Create(url);
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
             req.KeepAlive = true;
             req.ServicePoint.Expect100Continue = false;
             req.Expect = "";
@@ -429,7 +429,7 @@ namespace WikiFunctions.API
                 };
                 req.Credentials = myCache;
 
-                req = (HttpWebRequest) SetBasicAuthHeader(req, login.UserName, login.Password);
+                req = (HttpWebRequest)SetBasicAuthHeader(req, login.UserName, login.Password);
             }
 
             try
@@ -452,7 +452,7 @@ namespace WikiFunctions.API
             }
             catch (WebException ex)
             {
-                var resp = (HttpWebResponse) ex.Response;
+                var resp = (HttpWebResponse)ex.Response;
                 if (resp == null) throw;
                 switch (resp.StatusCode)
                 {
@@ -643,14 +643,14 @@ namespace WikiFunctions.API
                 Tools.WriteDebug("API::Edit action/login", result);
 
                 // if got token from new meta/tokens way, should now be logged in
-                if(!string.IsNullOrEmpty(token))
+                if (!string.IsNullOrEmpty(token))
                 {
                     xr.ReadToFollowing("login");
                 }
                 else // support the old way of first action=login to be told NeedToken and given token, then second action=login sending the token
                 {
                     // if we have login section in warnings don't want to look in there for the token
-                    if(result.Contains("<warnings>") && Regex.Matches(result, @"<login ").Count > 1)
+                    if (result.Contains("<warnings>") && Regex.Matches(result, @"<login ").Count > 1)
                     {
                         xr.ReadToFollowing("warnings");
                         xr.ReadToFollowing("login");
@@ -667,7 +667,7 @@ namespace WikiFunctions.API
 
                         post.Add("lgtoken", token);
                         result = HttpPost(
-                            new Dictionary<string, string> {{"action", "login"}},
+                            new Dictionary<string, string> { { "action", "login" } },
                             post
                             );
 
@@ -795,7 +795,7 @@ namespace WikiFunctions.API
         {
             Reset();
             User = new UserInfo();
-            string result = HttpGet(new Dictionary<string, string> {{"action", "logout"}});
+            string result = HttpGet(new Dictionary<string, string> { { "action", "logout" } });
             CheckForErrors(result, "logout");
             Cookies = new CookieContainer();
         }
@@ -869,7 +869,7 @@ namespace WikiFunctions.API
             Reset();
             User = new UserInfo();
 
-            string result = HttpPost(new Dictionary<string, string> {{"action", "query"}},
+            string result = HttpPost(new Dictionary<string, string> { { "action", "query" } },
                 new Dictionary<string, string>
                 {
                     {"meta", "userinfo"},
@@ -1387,7 +1387,7 @@ namespace WikiFunctions.API
                                                                   + @"<!--\[if .*?-->"
                                                                   + @"|<style\b.*?>.*?</style>"
                                                                   + @"|<link rel=""stylesheet"".*?/\s?>"
-            // + @"|<script type=""text/javascript"".*?</script>"
+                                                                  // + @"|<script type=""text/javascript"".*?</script>"
                                                                   + ")",
             RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -1456,9 +1456,9 @@ namespace WikiFunctions.API
                 // look for and extract parsewarnings e.g. duplicate arguments in template call, and put at top in div of right colour (red)
                 string warnings = "";
 
-                if(xr.ReadToFollowing("parsewarnings"))
+                if (xr.ReadToFollowing("parsewarnings"))
                 {
-                    while(xr.ReadToFollowing("pw"))
+                    while (xr.ReadToFollowing("pw"))
                         warnings += xr.ReadString() + "<p>";
 
                     res = @"<div class=""previewnote"" style=""color:#d33"">" + warnings + "</div>" + res;
@@ -1633,8 +1633,8 @@ namespace WikiFunctions.API
                         throw new MediaWikiReadOnlyException(this,
                             errorMessage + "\r\n\r\nReason: " + error.Attributes["readonlyreason"].Value);
 
-                        //case "confirmemail":
-                        //
+                    //case "confirmemail":
+                    //
                     default:
                         if (errorCode.Contains("disabled"))
                         {
@@ -1664,7 +1664,8 @@ namespace WikiFunctions.API
                         {
                             Variables.NotificationsEnabled = false;
                         }
-                        else if (childNode.InnerText.Contains("The parameter \"intoken\" has been deprecated."))
+                        else if (childNode.InnerText.Contains("The parameter \"intoken\" has been deprecated.") ||
+                                 childNode.InnerText.Contains("Unrecognized parameter: intoken."))
                         {
                             UseInToken = false;
                         }

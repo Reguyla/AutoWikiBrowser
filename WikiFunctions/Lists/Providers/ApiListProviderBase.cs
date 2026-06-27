@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Web;
 using System.Xml;
 using System.IO;
@@ -53,7 +54,7 @@ namespace WikiFunctions.Lists.Providers
         /// <summary>
         /// Upper limit for number of pages returned, could be a bit exceeded by number of pages in the last request
         /// </summary>
-        public int Limit  { get; set; }
+        public int Limit { get; set; }
 
         protected string WantedAttribute = "title";
 
@@ -66,7 +67,7 @@ namespace WikiFunctions.Lists.Providers
         public List<Article> ApiMakeList(string url, int haveSoFar)
         {
             if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
-            
+
             // TODO: error handling
             List<Article> list = new List<Article>();
             string postfix = "";
@@ -77,8 +78,21 @@ namespace WikiFunctions.Lists.Providers
 
             while (list.Count + haveSoFar < Limit)
             {
-                // API continuation needs updating https://phabricator.wikimedia.org/T104684
-                string text = editor.QueryApi(newUrl + "&rawcontinue=1" + postfix); // HACK: Hacky hack hack
+                string text;
+                try
+                {
+                    // API continuation needs updating https://phabricator.wikimedia.org/T104684
+                    text = editor.QueryApi(newUrl + "&rawcontinue=1" + postfix); // HACK: Hacky hack hack
+                }
+                catch (WebException webex) when (webex.Response is HttpWebResponse resp &&
+                        int.TryParse(resp.GetResponseHeader("Retry-After"), out int restart) && restart >= 0)
+                {
+                    Tools.WriteDebug("ApiListProviderBase::ApiMakeList",
+                        $"HTTP {resp.StatusCode} and Retry-After {restart}; pausing and retrying");
+                    System.Threading.Thread.Sleep(restart * 1000);
+                    continue;
+                }
+                // Or let it bubble up to a generic handler
 
                 XmlTextReader xml = new XmlTextReader(new StringReader(text));
                 xml.MoveToContent();
@@ -106,7 +120,7 @@ namespace WikiFunctions.Lists.Providers
                             continue;
 
                         int ns;
-                        int.TryParse(xml.GetAttribute("ns"), out ns);
+                        bool nsvalid = int.TryParse(xml.GetAttribute("ns"), out ns)
                         string name = xml.GetAttribute(WantedAttribute);
 
                         if (string.IsNullOrEmpty(name))
@@ -115,7 +129,7 @@ namespace WikiFunctions.Lists.Providers
                             break;
                         }
 
-                        list.Add(ns >= 0 ? new Article(name, ns) : new Article(name));
+                        list.Add(nsvalid && ns >= 0 ? new Article(name, ns) : new Article(name));
                     }
                 }
                 if (string.IsNullOrEmpty(postfix)) break;
