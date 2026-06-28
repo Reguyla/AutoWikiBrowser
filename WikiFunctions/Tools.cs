@@ -579,6 +579,7 @@ namespace WikiFunctions
             }
 
             return -1;
+        }
 
         /// <summary>
         /// 
