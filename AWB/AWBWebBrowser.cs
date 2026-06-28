@@ -131,10 +131,10 @@ namespace AutoWikiBrowser
         {
             // webbrowser Navigate calls fail under Mono so silently ignore for the moment
             if (!Globals.UsingMono)
-                +base.Navigate(urlString, null, null,
-                    +string.Format("User-Agent: AWBWebBrowser {0}/{1} {2}\r\n",
-                        +System.Reflection.Assembly.GetExecutingAssembly().GetName(), Tools.VersionString,
-                        +Tools.DefaultUserAgentString)
+                base.Navigate(urlString, null, null,
+                    string.Format("User-Agent: AWBWebBrowser {0}/{1} {2}\r\n",
+                        System.Reflection.Assembly.GetExecutingAssembly().GetName(), Tools.VersionString,
+                        Tools.DefaultUserAgentString)
                 );
         }
     }
