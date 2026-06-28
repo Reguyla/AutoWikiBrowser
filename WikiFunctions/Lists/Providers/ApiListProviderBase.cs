@@ -86,7 +86,7 @@ namespace WikiFunctions.Lists.Providers
                 }
                 catch (WebException webex)
                 {
-                    if (Tools.HandleHttpRetry(webex))
+                    if (Tools.HandleHttpException(webex))
                     {
                         continue;
                     }

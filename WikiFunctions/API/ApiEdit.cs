@@ -580,7 +580,7 @@ namespace WikiFunctions.API
                 }
                 catch (WebException ex)
                 {
-                    if (!Tools.HandleHttpRetry(ex))
+                    if (!Tools.HandleHttpException(ex))
                         throw;
                 }
             }
