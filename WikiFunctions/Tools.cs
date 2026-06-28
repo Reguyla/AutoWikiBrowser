@@ -3514,6 +3514,26 @@ Message: {2}
         }
 
         /// <summary>
+        /// <param name="url">The URL to validate.</param>
+        /// </summary>
+        /// <c>true</c> if the URL is a valid absolute HTTP, HTTPS, or FTP URL; otherwise, <c>false</c>.
+        /// <returns></returns>
+        public static bool IsValidWebUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return false;
+
+            Uri uri;
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                return false;
+
+            return uri.Scheme == Uri.UriSchemeHttp
+                || uri.Scheme == Uri.UriSchemeHttps
+                || uri.Scheme == Uri.UriSchemeFtp;
+        }
+
+        /// <summary>
         /// Calculates md5sum of a string, see http://msdn.microsoft.com/en-us/library/system.security.cryptography.md5%28v=vs.110%29.aspx
         /// </summary>
         /// <param name="input"></param>
