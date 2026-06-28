@@ -482,7 +482,7 @@ en, sq, ru
             if (TemplateExists(alltemplates, WikiRegexes.GoodFeaturedArticleTemplates))
                 zerothSection = MoveTemplate(zerothSection, WikiRegexes.GoodFeaturedArticleTemplates);
 
-            // L3 Hatnotes/Dablinks above maintance tags per [[MOS:ORDER]]
+            // L3 Hatnotes/Dablinks above maintenance tags per [[MOS:ORDER]]
             // if have {{hatnote group}} then move that plus any standalone individual dablinks
             if (TemplateExists(alltemplates, DablinksPlusHatnoteGroup))
                 zerothSection = MoveTemplate(zerothSection, DablinksPlusHatnoteGroup);
@@ -656,7 +656,7 @@ en, sq, ru
 
             if (cq.Success)
             {
-                // T387084 don't apply sort where magic word behaviour switches present as these can be placed anywhere in article
+                // T387084 don't apply sort where magic word behavior switches present as these can be placed anywhere in article
                 if (WikiRegexes.MagicWordBehaviourSwitches.IsMatch(articleText.Substring(cq.Index)))
                     return "";
  
@@ -1081,7 +1081,7 @@ en, sq, ru
             if (TemplateRegex.Matches(articleText).Count != 1 || (onlyfromzerothsection && TemplateRegex.Matches(WikiRegexes.ZerothSection.Match(articleText).Value).Count != 1))
                 return articleText;
 
-            // return if template is already in one the the 'References', 'Notes' or 'Footnotes' sections
+            // return if template is already in one the 'References', 'Notes' or 'Footnotes' sections
             string[] sec = Tools.SplitToSections(articleText);
 
             foreach (string s in sec)

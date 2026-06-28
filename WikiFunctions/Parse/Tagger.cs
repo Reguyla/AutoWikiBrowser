@@ -27,7 +27,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -153,7 +153,7 @@ namespace WikiFunctions.Parse
                 articleText = WikiRegexes.DisambigsGeneral.Replace(articleText, "").Trim();
             }
 
-            // do orphan tagging before template analysis for categorisation tags
+            // do orphan tagging before template analysis for categorization tags
             if (!Variables.IsWikia)
                 articleText = TagOrphans(articleText, articleTitle, restrictOrphanTagging);
 
@@ -293,7 +293,7 @@ namespace WikiFunctions.Parse
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Archive_19#AWB_problems
             // nl wiki doesn't use {{Uncategorized}} template
-            // prevent wictionary redirects from being tagged as uncategorised
+            // prevent wiktionary redirects from being tagged as uncategorised
             if (totalCategories == 0
                 && !WikiRegexes.Uncategorized.IsMatch(templates)
                 && !Variables.LangCode.Equals("nl")
@@ -707,7 +707,7 @@ namespace WikiFunctions.Parse
         /// </summary>
         /// <param name="talkPageText">The wiki text of the talk page.</param>
         /// <param name="talkPageTitle">The wiki talk page title</param>
-        /// <param name="userTalkTemplatesRegex">Dictoinary of regexes matching template calls to substitute</param>
+        /// <param name="userTalkTemplatesRegex">Dictionary of regexes matching template calls to substitute</param>
         /// <returns>The updated article text</returns>
         public static string SubstUserTemplates(string talkPageText, string talkPageTitle, Regex userTalkTemplatesRegex)
         {
@@ -787,9 +787,9 @@ namespace WikiFunctions.Parse
         private static readonly Regex OtherNonOrphanPageTemplates = Tools.NestedTemplateRegex("List of lists");
 
         /// <summary>
-        /// Tags pages with insufficient incoming page links with the orphan template (localised for ru-wiki).
+        /// Tags pages with insufficient incoming page links with the orphan template (localized for ru-wiki).
         /// Removes orphan tag from pages with sufficient incoming page links.
-        /// Disambig, SIA pages and soft redirects to Wictionary are never tagged as orphan.
+        /// Disambig, SIA pages and soft redirects to Wiktionary are never tagged as orphan.
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="articleTitle">Title of the article</param>
@@ -1152,7 +1152,7 @@ namespace WikiFunctions.Parse
                     string originalArticleText = articleText;
                     articleText = Tools.NestedTemplateRegex(t2).Replace(articleText, TagUpdaterME);
 
-                    // Performance: only worth aplying Hide if we made changes to raw articleText
+                    // Performance: only worth applying Hide if we made changes to raw articleText
                     if (!originalArticleText.Equals(articleText))
                     {
                         articleText = ht.Hide(originalArticleText);
@@ -1195,7 +1195,7 @@ namespace WikiFunctions.Parse
             // remove template namespace in template name
             templatecall = RemoveTemplateNamespace(templatecall);
 
-            // check if template already dated (date= parameter, localised for some wikis)
+            // check if template already dated (date= parameter, localized for some wikis)
             string dateparam = WikiRegexes.DateYearMonthParameter.Substring(0,
                 WikiRegexes.DateYearMonthParameter.IndexOf("=", StringComparison.Ordinal));
 
@@ -1349,12 +1349,12 @@ namespace WikiFunctions.Parse
 
             // {{R from title without diacritics}}
 
-            // title and redirect target the same if dacritics removed from redirect target
+            // title and redirect target the same if diacritics removed from redirect target
             if (redirecttarget != Tools.RemoveDiacritics(redirecttarget) && Tools.RemoveDiacritics(redirecttarget).Equals(articleTitle)
                 && !Tools.NestedTemplateRegex(WikiRegexes.RFromTitleWithoutDiacriticsList).IsMatch(articleText))
                 return (articleText + " " + WikiRegexes.RFromTitleWithoutDiacriticsString);
 
-            // {{R from other capitalisation}}
+            // {{R from other capitalization}}
             if (redirecttarget.Equals(articleTitle, StringComparison.OrdinalIgnoreCase)
                 && !Tools.NestedTemplateRegex(WikiRegexes.RFromOtherCapitaliastionList).IsMatch(articleText))
                 return (articleText + " " + WikiRegexes.RFromOtherCapitalisationString);

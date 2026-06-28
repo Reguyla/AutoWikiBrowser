@@ -26,7 +26,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -454,7 +454,7 @@ namespace WikiFunctions.Parse
             // refs with same name, but one is very short, so just change to <ref name=foo/> notation
             articleText = SameNamedRefShortText(articleText);
 
-            // loop as could be a set of identical references with mulitple different names in use
+            // loop as could be a set of identical references with multiple different names in use
             string currentArticleText = "";
 
             while (!currentArticleText.Equals(articleText))
@@ -857,7 +857,7 @@ namespace WikiFunctions.Parse
 
         /// <summary>
         /// First checks for a &lt;references&lt; missing '/' to correct, otherwise:
-        /// if the article uses cite references but has no recognised template to display the references, add {{Reflist}} in the appropriate place
+        /// if the article uses cite references but has no recognized template to display the references, add {{Reflist}} in the appropriate place
         /// </summary>
         /// <param name="articleText">The wiki text of the article</param>
         /// <returns>The updated article text</returns>

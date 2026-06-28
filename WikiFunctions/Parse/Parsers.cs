@@ -29,7 +29,7 @@ namespace WikiFunctions.Parse
     //TODO:Move regexes declared in method bodies (if not dynamic based on article title, etc), into class body
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -383,7 +383,7 @@ namespace WikiFunctions.Parse
                 articleText = Regex.Replace(articleText, Regex.Escape(articleTitle.Replace(@"–", @"-").Replace(@"—", @"-")), articleTitle);
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Change_--_.28two_dashes.29_to_.E2.80.94_.28em_dash.29
-            // convert two dashes to emdash if surrouned by alphanumeric characters, except convert to endash if surrounded by numbers. -- checked for performance
+            // convert two dashes to emdash if surrounded by alphanumeric characters, except convert to endash if surrounded by numbers. -- checked for performance
             if (Namespace.Determine(articleTitle) == Namespace.Mainspace && articleText.Contains("--"))
                 articleText = SentenceClauseIncorrectMdash.Replace(articleText, m => m.Groups[1].Value + ((Regex.IsMatch(m.Groups[1].Value, @"^\d+$") && Regex.IsMatch(m.Groups[2].Value, @"^\d+$")) ? @"–" : @"—") + m.Groups[2].Value);
 
@@ -621,7 +621,7 @@ namespace WikiFunctions.Parse
                     return DateLocale.American;
             }
 
-            // check for explicit df or mf in brith/death templates
+            // check for explicit df or mf in birth/death templates
             if (Tools.GetTemplateParameterValue(BirthDate.Match(articleText).Value, "df").StartsWith("y")
                 || Tools.GetTemplateParameterValue(DeathDate.Match(articleText).Value, "df").StartsWith("y"))
                 return DateLocale.International;
@@ -695,7 +695,7 @@ namespace WikiFunctions.Parse
         /// <summary>
         /// performs URL-decoding of a page title
         /// </summary>
-        /// <param name="title">title to normalise</param>
+        /// <param name="title">title to normalize</param>
         /// <param name="trim">whether whitespace should be trimmed</param>
         public static string CanonicalizeTitleRaw(string title, bool trim)
         {
@@ -911,7 +911,7 @@ namespace WikiFunctions.Parse
 
         // Covered by: ImageTests.BasicImprovements(), incomplete
         /// <summary>
-        /// Fix common spacing/capitalisation errors in images
+        /// Fix common spacing/capitalization errors in images
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <returns>The modified article text.</returns>
@@ -980,11 +980,11 @@ namespace WikiFunctions.Parse
 
                 // Removes space or non-breaking space from percent per [[WP:PERCENT]].
                 // Avoid doing this for more spaces to prevent false positives.
-                // Don't fix space in all wikis. For instance sv:Procent requires a space inbetween
+                // Don't fix space in all wikis. For instance sv:Procent requires a space in between
                 if (Regex.IsMatch(articleText, @"%(\p{P}|\)?\s)")) // check for performance
                     articleText = WikiRegexes.Percent.Replace(articleText, " $1%$3");
 
-                // Removes space or non-breaking space from percent per [[WP:CURRENCY]]  if they consist of a nonalphabetic symbol only.
+                // Removes space or non-breaking space from percent per [[WP:CURRENCY]]  if they consist of a non-alphabetic symbol only.
                 // Avoid doing this for more spaces to prevent false positives.
                 // Don't fix space in all wikis.
                 articleText = WikiRegexes.Currency.Replace(articleText, "$1$3");
@@ -1833,7 +1833,7 @@ namespace WikiFunctions.Parse
         }
 
         /// <summary>
-        /// Check if the article uses cite references but has no recognised template to display the references; only for en-wiki
+        /// Check if the article uses cite references but has no recognized template to display the references; only for en-wiki
         /// </summary>
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#.28Yet.29_more_reference_related_changes.
         public static bool IsMissingReferencesDisplay(string articleText)
@@ -1858,7 +1858,7 @@ namespace WikiFunctions.Parse
             int maxlen = Math.Min(articleText.Length, 1000);
             string articleTextoriginal = articleText;
 
-            // Performance: as {{reflist}} normally at end of page, proces page in batches of last 1000 characters
+            // Performance: as {{reflist}} normally at end of page, process page in batches of last 1000 characters
             // Should be that last 1000 or 2000 will contain {{reflist}} and no <ref> so we can avoid processing rest of article
             for(int i = maxlen; i <= articleTextoriginal.Length; i += maxlen)
             {

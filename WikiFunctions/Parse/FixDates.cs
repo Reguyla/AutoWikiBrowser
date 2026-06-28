@@ -124,7 +124,7 @@ namespace WikiFunctions.Parse
         // fixes extra comma or space in American format dates
         private static readonly Regex IncorrectCommaAmericanDates = new Regex(WikiRegexes.Months + @"[ ,]*([1-3]?\d(?:–[1-3]?\d)?)[ ,]+([12]\d{3})\b");
 
-        // fix incorrect comma between month and year in Internaltional-format dates
+        // fix incorrect comma between month and year in International-format dates
         private static readonly Regex IncorrectCommaInternationalDates = new Regex(@"\b((?:[1-3]?\d) +" + WikiRegexes.MonthsNoGroup + @") *, *(1\d{3}|20\d{2})\b", RegexOptions.Compiled);
 
         // date ranges use an en-dash per [[WP:MOSDATE]]

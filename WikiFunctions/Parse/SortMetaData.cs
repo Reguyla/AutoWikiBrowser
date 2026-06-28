@@ -27,7 +27,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -44,13 +44,13 @@ namespace WikiFunctions.Parse
         }
 
         /// <summary>
-        /// Re-organises the Person Data, stub/disambig templates, categories and interwikis
+        /// Re-organizes the Person Data, stub/disambig templates, categories and interwikis
         /// except when a mainspace article has some 'includeonly' tags etc.
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="articleTitle">The article title.</param>
         /// <param name="fixOptionalWhitespace">Whether to request optional excess whitespace to be fixed</param>
-        /// <returns>The re-organised text.</returns>
+        /// <returns>The re-organized text.</returns>
         public string SortMetaData(string articleText, string articleTitle, bool fixOptionalWhitespace)
         {
             return (Variables.IsWikimediaProject) ? Sorter.Sort(articleText, articleTitle, fixOptionalWhitespace) : articleText;

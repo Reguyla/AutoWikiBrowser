@@ -27,7 +27,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -502,7 +502,7 @@ namespace WikiFunctions.Parse
             articleText = Tools.ReplaceWithSpaces(articleText, WikiRegexes.GalleryTag, 2);
             articleText = Tools.ReplaceWithSpaces(articleText, new Regex(WikiRegexes.Refs.ToString(), RegexOptions.Singleline));
 
-            // some (badly done) List of pages can have hundreds of unclosed small or center tags, causes regex bactracking when using <DEPTH>
+            // some (badly done) List of pages can have hundreds of unclosed small or center tags, causes regex backtracking when using <DEPTH>
             // so workaround solution: if > 10 unclosed tags, only remove tags without other tags embedded in them
             // Workaround constraint: we might incorrectly report some valid tags with < or > in them as unclosed
             if (AnyTagList.Count(s => !s.StartsWith("/")) > (AnyTagList.Count(s => s.StartsWith("/")) + 10))

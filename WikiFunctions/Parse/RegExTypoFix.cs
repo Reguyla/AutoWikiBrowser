@@ -171,7 +171,7 @@ namespace WikiFunctions.Parse
         public readonly List<TypoStat> Statistics = new List<TypoStat>();
 
         /// <summary>
-        /// Returns whether typo is sutable for group: not suitable if Allow regex doesn't match typo,
+        /// Returns whether typo is suitable for group: not suitable if Allow regex doesn't match typo,
         /// or Disallow regex matches typo
         /// </summary>
         /// <param name="typo"></param>
@@ -307,7 +307,7 @@ namespace WikiFunctions.Parse
                     {
                         for (int j = 0; j < Math.Min(GroupSize, Typos.Count - i * GroupSize); j++)
                         {
-                            // don't apply the typo if it matches on a link target in a wikinlink (but not image/interwiki/category link)
+                            // don't apply the typo if it matches on a link target in wikilink (but not image/interwiki/category link)
                             // T350636 1-minute timeout to guard against regex backtracking
                             if (!Regex.IsMatch(originalArticleText, @"\[\[[^[\]\n\|]*?" + Typos[i * GroupSize + j].Key + @"[^\[\]\r\n\|]*?(?<!\[\[[A-Z]?[a-z-]{2,}:[^[\]\n]+)(?:\]\]|\|)", RegexOptions.None, TimeSpan.FromSeconds(60)))
                                 FixTypo(ref articleText, ref summary, Typos[i * GroupSize + j], articleTitle);
@@ -419,7 +419,8 @@ namespace WikiFunctions.Parse
         private readonly List<TypoGroup> Groups = new List<TypoGroup>();
 
         /// <summary>
-        /// 
+        /// Displays a typo rule error message and instructions for reloading the
+        /// typo definitions.
         /// </summary>
         /// <param name="error"></param>
         internal static void TypoError(string error)
@@ -430,7 +431,9 @@ namespace WikiFunctions.Parse
         }
 
         /// <summary>
-        /// 
+        /// Clears the existing typo groups, loads typo rules from the configured source,
+        /// assigns each rule to the first suitable <see cref="TypoGroup"/>, and builds
+        /// the grouped regular expressions used for typo matching.
         /// </summary>
         private void MakeRegexes()
         {
@@ -626,9 +629,14 @@ namespace WikiFunctions.Parse
         }
 
         /// <summary>
-        /// 
+        /// Returns a consolidated list of all typo correction rules from every
+        /// <see cref="TypoGroup"/> in the collection.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A <see cref="List{T}"/> containing all typo replacement rules as
+        /// <see cref="KeyValuePair{TKey, TValue}"/> objects, where the key is the
+        /// matching <see cref="Regex"/> pattern and the value is the replacement text.
+        /// </returns>
         public List<KeyValuePair<Regex, string>> GetTypos()
         {
             List<KeyValuePair<Regex, string>> lst = new List<KeyValuePair<Regex, string>>();

@@ -26,7 +26,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -169,7 +169,7 @@ namespace WikiFunctions.Parse
                 && !WikiRegexes.IncludeonlyNoinclude.IsMatch(articleText)
                 && !TaxoboxColour.IsMatch(articleText))
             {
-                // remove any self-links, but not other links with different capitaliastion e.g. [[Foo]] vs [[FOO]]
+                // remove any self-links, but not other links with different capitalization e.g. [[Foo]] vs [[FOO]]
                 articleText = Regex.Replace(articleText, @"\[\[\s*(" + Tools.FirstLetterCaseInsensitive(escTitle)
                                             + @")\s*\]\]", "$1");
 

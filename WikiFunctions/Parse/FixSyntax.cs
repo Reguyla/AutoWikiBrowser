@@ -174,7 +174,7 @@ namespace WikiFunctions.Parse
                 if ((from Match m in ssbMc where m.Value.Equals(@"[[Category:Disambiguation pages]]") select m).Any())
                     articleText = articleText.Replace(@"[[Category:Disambiguation pages]]", TemplateExists(alltemplates, Tools.NestedTemplateRegex("disambiguation")) ? "" : @"{{Disambiguation}}");
 
-                // Remove br tags after maintance templates
+                // Remove br tags after maintenance templates
                 articleText = MaintanceTemplateWithBr.Replace(articleText, "$1");
             }
 
@@ -461,7 +461,7 @@ namespace WikiFunctions.Parse
             // workaround for https://phabricator.wikimedia.org/T4700 -- {{subst:}} doesn't work within ref tags
             articleText = FixSyntaxSubstRefTags(articleText);
 
-            // ensure magic word behaviour switches such as __TOC__ are in upper case
+            // ensure magic word behavior switches such as __TOC__ are in upper case
             if (nobrackets.IndexOf("__", StringComparison.Ordinal) > -1)
                 articleText = WikiRegexes.MagicWordsBehaviourSwitches.Replace(articleText, m => @"__" + m.Groups[1].Value.ToUpper() + @"__");
 
@@ -622,7 +622,7 @@ namespace WikiFunctions.Parse
             // apply some simple bracket fixing to redirect templates
             if (articleText.Contains("{{") && !articleText.Contains("}}"))
             {
-                // fix incorect closing bracket
+                // fix incorrect closing bracket
                 articleText = Regex.Replace(articleText.TrimEnd(), @"(\]\]|\]?}|}\])$", "}}");
 
                 // append missing closing }}
@@ -677,7 +677,7 @@ namespace WikiFunctions.Parse
                 string beforesmall = articleText.Substring(0, cutoff);
                 articleText = articleText.Substring(cutoff);
 
-                // don't apply if there are uncosed tags
+                // don't apply if there are unclosed tags
                 if (!UnclosedTags(articleText).Any())
                 {
                     articleText = SmallTagRegexes.Aggregate(articleText, (current, rx) => rx.Replace(current, FixSmallTagsME));

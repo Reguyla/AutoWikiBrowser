@@ -26,7 +26,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -280,7 +280,7 @@ namespace WikiFunctions.Parse
 
         /// <summary>
         /// Renames parameters in template calls.
-        /// Does not rename old to new if new paramter already in use with a value
+        /// Does not rename old to new if new parameter already in use with a value
         /// </summary>
         /// <param name="articleText">The wiki text</param>
         /// <param name="RenamedTemplateParameters">List of templates, old parameter, new parameter</param>
