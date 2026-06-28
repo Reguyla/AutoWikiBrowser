@@ -1,21 +1,12 @@
 ﻿\# 04. Code Health Assessment
 
-
-
-\## Executive Summary
-
-
+\## 1. Executive Summary
 
 This document provides a baseline assessment of the current health of the AutoWikiBrowser codebase prior to migration to .NET 8. Its purpose is to identify technical debt, legacy implementation patterns, compiler warnings, code quality concerns, and maintainability issues that may affect the modernization effort.
 
-
-
 The assessment will inventory existing TODO, FIXME, and HACK comments, evaluate static analysis findings, identify deprecated APIs, review project complexity, and document areas requiring refactoring or additional testing.
 
-
-
 The objective is not to resolve these issues immediately, but to establish a measurable baseline that supports informed migration decisions and allows progress to be tracked throughout the modernization effort.
-
 
 
 
@@ -24,11 +15,7 @@ The objective is not to resolve these issues immediately, but to establish a mea
 
 The purpose of this assessment is to establish a baseline understanding of the overall health of the AutoWikiBrowser codebase prior to migration to .NET 8.
 
-
-
 The assessment focuses on identifying:
-
-
 
 \* Existing technical debt
 
@@ -44,8 +31,6 @@ The assessment focuses on identifying:
 
 \* Opportunities for modernization discovered during the migration process
 
-
-
 The assessment is intended to document the current state of the codebase rather than prescribe immediate solutions. Findings will be used to prioritize improvements throughout the migration.
 
 
@@ -56,11 +41,7 @@ The assessment is intended to document the current state of the codebase rather 
 
 Compiler warnings will be reviewed to identify existing issues that may affect the migration to .NET 8.
 
-
-
 The assessment will document:
-
-
 
 \* Current warning counts by project
 
@@ -72,8 +53,6 @@ The assessment will document:
 
 \* Opportunities to reduce or eliminate compiler warnings during migration
 
-
-
 Compiler warnings identified during this assessment will be prioritized according to their potential impact on build stability, application behavior, and long-term maintainability.
 
 
@@ -84,11 +63,7 @@ Compiler warnings identified during this assessment will be prioritized accordin
 
 The existing codebase contains developer annotations accumulated over many years of development. These comments provide valuable insight into known issues, technical debt, unfinished work, and historical design decisions.
 
-
-
 This assessment will inventory annotations including:
-
-
 
 \* TODO
 
@@ -99,7 +74,6 @@ This assessment will inventory annotations including:
 \* XXX
 
 \* NOTE (where appropriate)
-
 
 
 | Type  	| Count | Priority | Migration Impact | Status  |
@@ -119,14 +93,9 @@ This assessment will inventory annotations including:
 | Out of sync	| 	|	   |		      |		|
 
 
-
 Each item will be classified by project, file, priority, and relevance to the .NET 8 migration.
 
-
-
 The objective is to distinguish between items that should be addressed during migration and those that can be deferred for future modernization efforts.
-
-
 
 \### Updates out of sync from Sourceforge and GITHUB
 
@@ -353,11 +322,6 @@ The objective is to distinguish between items that should be addressed during mi
 |// TODO: There's gotta be a better way to reconstruct the template... 	| C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Tools.cs | 3271 | 16 |
 
 
-
-
-
-
-
 \### HACK
 
 |Code		|File		|Line	|Column| Status |
@@ -386,8 +350,6 @@ The objective is to distinguish between items that should be addressed during mi
 
 
 
-
-
 \###WORKAROUND
 
 | Code							| File			| Line	| Column |
@@ -405,11 +367,6 @@ The objective is to distinguish between items that should be addressed during mi
 |/// workaround for https://phabricator.wikimedia.org/T4700 -- {{subst:}} doesn't work within ref tags	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Parse\\FixSyntax.cs		| 637	| 10	 |
 
 |// Workaround constraint: we might incorrectly report some valid tags with < or > in them as unclosed	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Parse\\UnbalancedBrackets.cs	| 507	| 13	 |
-
-
-
-
-
 
 
 \### FIXME
@@ -430,38 +387,17 @@ The objective is to distinguish between items that should be addressed during mi
 
 
 
-
-
-
-
 \## 5. Static Analysis (Roslynator / CodeMaid)
-
-
 
 Static analysis tools will be used to establish an objective baseline of the current code quality prior to migration.
 
-
-
 The assessment will utilize the following tools:
-
-
 
 \### Visual Studio Code Analysis
 
-
-
 \*\*Tool\*\*: Visual Studio 2022 Community
-
-
-
 \*\*Analysis Date\*\*: 2026-06-27
-
-
-
 \*\*Scope\*\*: Entire Solution
-
-
-
 
 
 \####Initial analysis
@@ -496,11 +432,7 @@ The assessment will utilize the following tools:
 
 \### Roslynator
 
-
-
 Roslynator will be used to identify:
-
-
 
 \* Code quality improvements
 
@@ -514,15 +446,9 @@ Roslynator will be used to identify:
 
 \* Modern C# language improvements where applicable
 
-
-
 \### CodeMaid
 
-
-
 CodeMaid will be used to assist with:
-
-
 
 \* Source code organization
 
@@ -534,15 +460,9 @@ CodeMaid will be used to assist with:
 
 \* General maintainability improvements
 
-
-
 Findings from static analysis will be reviewed throughout the migration process. Recommendations will be evaluated on a case-by-case basis to ensure they align with the project's guiding principles of incremental migration, feature preservation, and evidence-based decision making.
 
-
-
 The objective is to improve overall code quality while avoiding unnecessary changes that could increase migration risk.
-
-
 
 \### Sample table
 | Metric                 | Baseline | Current |       Goal |
@@ -564,16 +484,11 @@ The objective is to improve overall code quality while avoiding unnecessary chan
 
 
 
-
 \## 6. Deprecated APIs
 
 Legacy APIs and framework features will be reviewed to identify components that may require modification or replacement during migration to .NET 8.
 
-
-
 The assessment will include:
-
-
 
 \* Obsolete framework APIs
 
@@ -585,8 +500,6 @@ The assessment will include:
 
 \* APIs with recommended modern alternatives
 
-
-
 Each deprecated API will be evaluated to determine whether it should be retained, upgraded, replaced, or removed as part of the migration strategy.
 
 
@@ -597,11 +510,7 @@ Each deprecated API will be evaluated to determine whether it should be retained
 
 This section evaluates the overall complexity of the AutoWikiBrowser codebase and identifies areas that may present challenges during migration and future maintenance.
 
-
-
 The assessment will consider:
-
-
 
 \* Large or highly coupled classes
 
@@ -617,8 +526,6 @@ The assessment will consider:
 
 \* Maintainability indicators identified through static analysis
 
-
-
 The objective is to identify components where reducing complexity may improve reliability, readability, testability, and long-term maintainability without unnecessarily increasing migration scope.
 
 
@@ -629,11 +536,7 @@ The objective is to identify components where reducing complexity may improve re
 
 Technical debt accumulated throughout the lifetime of the project will be documented and evaluated to determine its impact on the .NET 8 migration and future development.
 
-
-
 Technical debt may include:
-
-
 
 \* Legacy implementation patterns
 
@@ -649,11 +552,7 @@ Technical debt may include:
 
 \* Incomplete or deferred improvements
 
-
-
 Each identified item will be evaluated to determine whether it should be:
-
-
 
 \* Addressed during the migration
 
@@ -661,10 +560,7 @@ Each identified item will be evaluated to determine whether it should be:
 
 \* Retained due to compatibility or historical considerations
 
-
-
 The objective is to make deliberate, evidence-based decisions regarding technical debt rather than attempting to eliminate it indiscriminately during the migration.
-
 
 
 \### Partial review of WikiFunctions.Tools
@@ -697,16 +593,10 @@ The objective is to make deliberate, evidence-based decisions regarding technica
 
 | Documentation | Several XML documentation comments are empty or minimal. | Low | Cleanup | Open | Improve comments during cleanup phase. |
 
-
-
 \###Partial review of Wikiregexes
 ### WikiRegexes Assessment Note
 
-
-
 `WikiRegexes` should be treated as a high-risk compatibility component. It contains many static regular expressions that are rebuilt from global project/language state. Because these regexes affect parsing, categorization, image handling, redirects, dates, templates, disambiguation detection, and language-specific behavior, changes should be minimized during the initial .NET 8 migration.
-
-
 
 Recommended approach:
 
@@ -717,8 +607,6 @@ Recommended approach:
 \- Avoid broad cleanup or formatting changes that obscure functional changes.
 
 \- Refactor only after the application builds and runs successfully on .NET 8.
-
-
 
 | Area | Finding | Severity | Migration Phase | Status | Recommendation |
 
@@ -782,16 +670,14 @@ This component should be treated as high importance and high regression risk. Du
 | Build System | Legacy SVN-based revision metadata generation (`SvnInfo.cs`). | Medium | Migration | Open | Replace or modernize build metadata generation after migration baseline is established. |
 
 
+
+
+
 \## 9. Testing Coverage
 
 Testing coverage will be evaluated to determine the current level of automated validation available to support the migration.
 
-
-
 The assessment will include:
-
-
-
 \* Existing unit test projects
 
 \* Areas currently covered by automated tests
@@ -800,10 +686,7 @@ The assessment will include:
 
 \* Opportunities to improve automated testing during and after migration
 
-
-
 The objective is to identify gaps in test coverage that may increase migration risk and to prioritize areas where additional validation would provide the greatest benefit.
-
 
 
 
@@ -812,10 +695,7 @@ The objective is to identify gaps in test coverage that may increase migration r
 
 This section summarizes significant observations identified during the code health assessment.
 
-
-
 Initial findings will be updated as additional analysis is completed and may include:
-
 
 
 \* High-priority technical debt
@@ -830,26 +710,15 @@ Initial findings will be updated as additional analysis is completed and may inc
 
 \* Opportunities for performance or maintainability improvements
 
-
-
 Findings documented in this section will serve as input for migration planning and future modernization efforts.
 
 
-
 \### WikiFunctions.Tools
-
-
-
 `WikiFunctions.Tools` appears to be a mature legacy utility class that contains core helper logic for title handling, redirects, namespace processing, human category sort keys, HTML retrieval, JSON parsing, window notification behavior, and string comparison.
-
-
 
 The code is generally stable and test-aware, with several methods already covered by unit tests. However, it also contains common legacy patterns that should be reviewed during the .NET 8 migration, including limited null handling, direct network access through `HttpWebRequest`, manual resource cleanup, static/global utility design, Windows-specific P/Invoke usage, and some large embedded regular expressions.
 
-
-
 Overall, `Tools` should be treated as a medium-risk support component. It does not appear to be an immediate migration blocker, but it contains several modernization candidates that should be addressed after the baseline migration is stable.
-
 
 
 \###WikiRegexes
@@ -870,10 +739,7 @@ Overall, `Tools` should be treated as a medium-risk support component. It does n
 | Overall Assessment | Solution builds successfully under .NET Framework 4.8.1. |
 
 
-### Build health
-####################################
 # 2. Build Health
-####################################
 
 ### Baseline Build
 
