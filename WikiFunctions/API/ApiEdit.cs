@@ -728,15 +728,21 @@ namespace WikiFunctions.API
             string status = (xr.GetAttribute("status") ?? "").ToUpper();
             if (status == "PASS")
                 return;
-            string message = xr.GetAttribute("message") ?? "";
-            // Makes the (unverified) assumption that the email will be in parens in all localizations
-            Match emailMatch = Regex.Match(message, @"\(.+?@.+?\)");
-            if (status != "UI" || !emailMatch.Success)
+
+            // Handle 2FA using EmailAuth.
+            // OATHAuth should work the same way, using the OATHToken parameter, but that's not tested.
+            if (status != "UI")
             {
                 throw new LoginException(this, status);
             }
 
-            // Handle 2FA. For now, only EmailAuth is supported (until we can test OATHAuth).
+            // Makes the (unverified) assumption that the email will be in parens in all localizations
+            Match emailMatch = Regex.Match(xr.GetAttribute("message") ?? "", @"\(.+?@.+?\)");
+            if (!emailMatch.Success)
+            {
+                throw new LoginException(this, status);
+            }
+
             postparams.Clear();
             result = HttpPost(
                 new Dictionary<string, string>
@@ -787,10 +793,11 @@ namespace WikiFunctions.API
 
                 // If status is UI (user entered the wrong code) we could loop back and try again,
                 // but there's a danger of getting caught in a loop.
-                // Also, OATHAuth should work the same way, using the OATHToken parameter, but that's not tested.
+                // The "message" attribute will be more specific, but in the server's language,
+                // unlike most of the AWB UI. So fall through to the generic exception.
             }
 
-            throw new LoginException(this, "Verification failed - " + status);
+            throw new LoginException(this, status);
         }
 
         private static void ClientLoginValidator(object sender, InputBoxValidatingArgs e)

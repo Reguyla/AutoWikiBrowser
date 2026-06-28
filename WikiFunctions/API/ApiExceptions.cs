@@ -201,9 +201,11 @@ namespace WikiFunctions.API
                         "The wiki tried to automatically create a new account for you, but your IP address has been blocked from account creation";
                 case "throttled":
                     return "You've logged in too many times in a short time.";
-                        //see https://www.mediawiki.org/wiki/API:Login#Throttling
+                //see https://www.mediawiki.org/wiki/API:Login#Throttling
                 case "blocked":
                     return "User is blocked";
+                case "ui":
+                    return "Failure during two-factor authentication";
                 default:
                     return code;
             }
