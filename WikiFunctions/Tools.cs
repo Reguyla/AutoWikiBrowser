@@ -471,43 +471,27 @@ namespace WikiFunctions
         public static string GetHTML(string url, Encoding enc, out string responseURL, IAutoWikiBrowser awb)
         {
             WriteDebug("Tools::GetHTML", url);
-            if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
+
+            if (Globals.UnitTestMode)
+                throw new Exception("You shouldn't access Wikipedia from unit tests");
 
             while (true)
             {
-                CookieContainer cookieJar = new CookieContainer();
-                HttpWebRequest rq = Variables.PrepareWebRequest(url); // Uses WikiFunctions' default UserAgent string
+                HttpWebRequest rq = Variables.PrepareWebRequest(url);
 
-                if (awb != null)
-                {
-                    Session TheSession = awb.TheSession;
-                    ApiEdit syncEditor = TheSession?.Editor?.SynchronousEditor;
-                    if (syncEditor != null && url.StartsWith(syncEditor.URL))
-                        cookies = syncEditor.Cookies;
-                    UserInfo user = TheSession?.User;
-                    if (user != null && user.IsLoggedIn)
-                    {
-                        string username = user.Name;
-                        if (!string.IsNullOrEmpty(username))
-                        {
-                            // TBD: Variables.LangCode, or siteinfo.Language?
-                            rq.UserAgent = AuthUserAgentString.Replace("###",
-                                $"{Variables.Project}:{Variables.LangCode}; User:{username}");
-                        }
-                    }
-                }
-                rq.CookieContainer = cookies ?? new CookieContainer();
+                Tools.ConfigureRequest(rq, url, awb);
 
                 try
                 {
                     using (HttpWebResponse response = (HttpWebResponse)rq.GetResponse())
                     {
                         responseURL = response.ResponseUri.ToString();
+
                         using (Stream stream = response.GetResponseStream())
                         {
                             using (StreamReader sr = new StreamReader(stream, enc))
                             {
-                                return sr.ReadToEnd();  // Either success or a non-retryable error
+                                return sr.ReadToEnd();
                             }
                         }
                     }
@@ -3565,6 +3549,67 @@ Message: {2}
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets the appropriate cookies for the supplied AWB session and URL.
+        /// </summary>
+        public static CookieContainer GetCookieContainer(string url, IAutoWikiBrowser awb)
+        {
+            if (awb == null || awb.TheSession == null)
+                return new CookieContainer();
+
+            Session session = awb.TheSession;
+
+            ApiEdit syncEditor = session.Editor != null
+                ? session.Editor.SynchronousEditor
+                : null;
+
+            if (syncEditor != null &&
+                !string.IsNullOrEmpty(syncEditor.URL) &&
+                url.StartsWith(syncEditor.URL))
+            {
+                return syncEditor.Cookies ?? new CookieContainer();
+            }
+
+            return new CookieContainer();
+        }
+
+        /// <summary>
+        /// Applies an authenticated AWB user-agent when a logged-in user is available.
+        /// </summary>
+        public static void ApplyAuthenticatedUserAgent(HttpWebRequest request, IAutoWikiBrowser awb)
+        {
+            if (request == null || awb == null || awb.TheSession == null)
+                return;
+
+            UserInfo user = awb.TheSession.User;
+
+            if (user == null || !user.IsLoggedIn)
+                return;
+
+            string username = user.Name;
+
+            if (string.IsNullOrEmpty(username))
+                return;
+
+            request.UserAgent = AuthUserAgentString.Replace("###",
+                string.Format("{0}:{1}; User:{2}",
+                    Variables.Project,
+                    Variables.LangCode,
+                    username));
+        }
+
+        /// <summary>
+        /// Applies AWB-specific HTTP request settings such as cookies and authenticated user-agent.
+        /// </summary>
+        public static void ConfigureRequest(HttpWebRequest request, string url, IAutoWikiBrowser awb)
+        {
+            if (request == null)
+                return;
+
+            request.CookieContainer = GetCookieContainer(url, awb);
+            ApplyAuthenticatedUserAgent(request, awb);
         }
 
         /// <summary>
