@@ -315,7 +315,7 @@ namespace WikiFunctions.API
                 {
                     request.Add("meta", "userinfo");
                 }
-                if (Variables.NotificationsEnabled)
+                if (Variables.NotificationsEnabled && User.HasReadNotificationsRight())
                 {
                     request["meta"] += "|notifications";
                 }
