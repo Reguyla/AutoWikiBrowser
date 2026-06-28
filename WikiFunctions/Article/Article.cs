@@ -249,7 +249,7 @@ namespace WikiFunctions
             get
             {
                 return Variables.Project == ProjectEnum.wikipedia
-                	&& (Variables.LangCode.Equals("en") || Variables.LangCode.Equals("simple"))
+                    && (Variables.LangCode.Equals("en") || Variables.LangCode.Equals("simple"))
                     && Parsers.IsArticleAboutAPerson(mArticleText, Name, true);
             }
         }
@@ -315,9 +315,14 @@ namespace WikiFunctions
         /// </summary>
         [XmlIgnore]
         public bool IsDisambiguationPage
-        { get { return (Variables.LangCode.Equals("en") || Variables.LangCode.Equals("simple")) && NameSpaceKey == Namespace.Mainspace 
-                && Parsers.GetAllTemplates(mArticleText).Any(s => WikiRegexes.Disambigs.IsMatch(@"{{" + s + "|}}")) 
-                && WikiRegexes.Disambigs.IsMatch(string.Join("", Parsers.GetAllTemplateDetail(mArticleText).ToArray())); } }
+        {
+            get
+            {
+                return (Variables.LangCode.Equals("en") || Variables.LangCode.Equals("simple")) && NameSpaceKey == Namespace.Mainspace
+                && Parsers.GetAllTemplates(mArticleText).Any(s => WikiRegexes.Disambigs.IsMatch(@"{{" + s + "|}}"))
+                && WikiRegexes.Disambigs.IsMatch(string.Join("", Parsers.GetAllTemplateDetail(mArticleText).ToArray()));
+            }
+        }
 
         /// <summary>
         /// Returns whether the article is a SIA page (en only)
@@ -377,7 +382,7 @@ namespace WikiFunctions
         { get { return mAWBLogListener.Skipped; } }
 
         /// <summary>
-        /// Returns true of article general fixes can be applied to the page: article, draft or category namespace, sandbox, template documnetation page or Anexo namespace on es-wiki and pt-wiki
+        /// Returns true of article general fixes can be applied to the page: article, draft or category namespace, sandbox, template documentation page or Anexo namespace on es-wiki and pt-wiki
         /// </summary>
         [XmlIgnore]
         public bool CanDoGeneralFixes
@@ -445,22 +450,22 @@ namespace WikiFunctions
 
                 // Send text to parser
                 string[] parsebeforebits = parser.ParseApi(
-                    new Dictionary<string, string> {{"page", mPage.Title}})
-                    .Split(new[] {"</text>"},
+                    new Dictionary<string, string> { { "page", mPage.Title } })
+                    .Split(new[] { "</text>" },
                         StringSplitOptions.None
                     );
                 string[] parseafterbits =
                     parser.ParseApi(
                         new Dictionary<string, string>
                         {{"title", mPage.Title}, {"text", mArticleText}, {"pst", null}, {"disablelimitreport", null}})
-                        .Split(new[] {"</text>"},
+                        .Split(new[] { "</text>" },
                             StringSplitOptions.None
                         );
 
                 // First half: interwiki and category links
                 // The API will churn them out in the order they go in, so we'll need to sort them ourselves
-                string[] beforecatslangs = parsebeforebits[1].Split(new[] {'<'});
-                string[] aftercatslangs = parseafterbits[1].Split(new[] {'<'});
+                string[] beforecatslangs = parsebeforebits[1].Split(new[] { '<' });
+                string[] aftercatslangs = parseafterbits[1].Split(new[] { '<' });
                 Array.Sort(beforecatslangs);
                 Array.Sort(aftercatslangs);
                 if (beforecatslangs.Length != aftercatslangs.Length
@@ -532,8 +537,11 @@ namespace WikiFunctions
         [XmlIgnore]
         public bool FindAndReplaceMadeChanges
         {
-            get { return (_after == FaRChange.MajorChange || _after == FaRChange.MinorChange
-                         || _before == FaRChange.MinorChange || _before == FaRChange.MajorChange); }
+            get
+            {
+                return (_after == FaRChange.MajorChange || _after == FaRChange.MinorChange
+                         || _before == FaRChange.MinorChange || _before == FaRChange.MajorChange);
+            }
         }
 
         /// <summary>
@@ -611,12 +619,12 @@ namespace WikiFunctions
         {
             Dictionary<int, int> UnB = new Dictionary<int, int>();
             int bracketLength;
-            
+
             string pageText = ArticleText;
 
             if (Namespace.IsTalk(Name))
                 pageText = WikiRegexes.ZerothSection.Match(ArticleText).Value;
-            
+
             int bracketIndex = Parsers.UnbalancedBrackets(pageText, out bracketLength);
 
             if (bracketIndex > -1)
@@ -691,7 +699,7 @@ namespace WikiFunctions
         }
 
         private static readonly List<string> MultipleIssuesKnowns = new List<string>(new[] { "section", "collapsed" });
-        
+
         /// <summary>
         /// Returns a list of any unknown parameters in any Multiple issues template
         /// </summary>
@@ -706,7 +714,7 @@ namespace WikiFunctions
         }
 
         private static readonly Regex LinksInHeadings = new Regex(@"^((={1,4})[^\[\]\{\}\|=\r\n]*)\[\[(?:[^\[\]\{\}\|=\r\n]+\|)?([^\[\]\{\}\|\r\n]+)(?<!.*(?:File|Image):.*)\]\]([^\{\}=\r\n]*\2)", RegexOptions.Multiline);
-        
+
         /// <summary>
         /// Returns a list of any headers containing wikilinks, mainspace articles only
         /// </summary>
@@ -843,7 +851,7 @@ namespace WikiFunctions
                     strTemp = Parsers.ReCategoriser(categoryText, categoryText2, mArticleText, out noChange, removeSortKey);
                     break;
 
-                case CategorisationOptions.RemoveCat: 
+                case CategorisationOptions.RemoveCat:
                     strTemp = Parsers.RemoveCategory(categoryText, mArticleText, out noChange);
                     action = "Removed " + categoryText;
                     break;
@@ -1459,7 +1467,7 @@ namespace WikiFunctions
 
                 AWBChangeArticleText("Rename Template Parameters", Parsers.RenameTemplateParameters(ArticleText, WikiRegexes.RenamedTemplateParameters), true);
                 Variables.Profiler.Profile("RenameTemplateParameters");
-                
+
                 // call this before MinorFixes so that Parsers.Conversions cleans up from MultipleIssues
                 if (Variables.IsWikipediaEN)
                 {
@@ -1468,7 +1476,7 @@ namespace WikiFunctions
                 }
 
                 // must call EmboldenTitles before calling FixLinks
-                if(NameSpaceKey != Namespace.Category)
+                if (NameSpaceKey != Namespace.Category)
                 {
                     EmboldenTitles(parsers, skip.SkipNoBoldTitle);
                     Variables.Profiler.Profile("EmboldenTitles");
@@ -1533,12 +1541,12 @@ namespace WikiFunctions
 
                 AWBChangeArticleText("SameRefDifferentName", Parsers.SameRefDifferentName(ArticleText), true);
                 Variables.Profiler.Profile("SameRefDifferentName");
-                
+
                 AWBChangeArticleText("Refs after punctuation", Parsers.RefsAfterPunctuation(ArticleText), true);
                 Variables.Profiler.Profile("RefsAfterPunctuation");
 
                 // ReorderReferences not for en-wp or uk-wiki genfixes, T154089, T387784
-                if(!Variables.IsWikipediaEN && Variables.LangCode != "uk")
+                if (!Variables.IsWikipediaEN && Variables.LangCode != "uk")
                 {
                     AWBChangeArticleText("ReorderReferences", Parsers.ReorderReferences(ArticleText), true);
                     Variables.Profiler.Profile("ReorderReferences");
@@ -1566,7 +1574,7 @@ namespace WikiFunctions
 
             // specific fix that requires unhidden text
             AWBChangeArticleText("FixImageSelfLinks", parsers.FixImageSelfLinks(ArticleText), true);
-            
+
             // pass unhidden text to MetaDataSorter so that it can allow for comments around categories etc.
             AWBChangeArticleText("Sort meta data",
                                  parsers.SortMetaData(ArticleText, Name), true);
