@@ -135,7 +135,7 @@ namespace AutoWikiBrowser
                     +string.Format("User-Agent: AWBWebBrowser {0}/{1} {2}\r\n",
                         +System.Reflection.Assembly.GetExecutingAssembly().GetName(), Tools.VersionString,
                         +Tools.DefaultUserAgentString)
-+                );
+                );
         }
     }
 }
