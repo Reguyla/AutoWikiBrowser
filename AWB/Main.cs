@@ -714,16 +714,9 @@ namespace AutoWikiBrowser
                 if (ex is WebException webex && webex.Response is HttpWebResponse resp)
 
                 {
-                    string retryval = resp.GetResponseHeader("Retry-After");
-                    int statusCode = (int)resp.StatusCode;
-                    if (int.TryParse(retryval, out int restart) || statusCode == 429 || statusCode == 503)
-                    {
-                        if (restart < 1)
-                            // https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits#Errors
-                            // No value, default to 5. Non-numeric, probably a date, use 60
-                            restart = String.IsNullOrEmpty(retryval) ? 5 : 60;
+                    int restart = Tools.ParseRetry(resp);
+                    if (restart >= 0)
                         StartDelayedRestartTimer(restart);
-                    }
 
                     else
                         StartDelayedRestartTimer();

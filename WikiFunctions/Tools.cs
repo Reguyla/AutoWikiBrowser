@@ -31,7 +31,9 @@ using System.Threading;
 using System.Web;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
+using WikiFunctions.API;
 using WikiFunctions.Parse;
+using WikiFunctions.Plugin;
 
 namespace WikiFunctions
 {
@@ -42,9 +44,17 @@ namespace WikiFunctions
     {
         static Tools()
         {
+            string OSVersionString = Environment.OSVersion.VersionString;
+
             DefaultUserAgentString = string.Format("WikiFunctions/{0} ({1}; .NET CLR {2})",
                 VersionString,
-                Environment.OSVersion.VersionString,
+                Environment.Version
+            );
+
+            // https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
+            AuthUserAgentString = string.Format("WikiFunctions/{0} (###) {1} .NET CLR/{2}",
+                VersionString,
+                Regex.Replace(OSVersionString, @"^(.*) ([\d\.]+)$", "$1/$2"),
                 Environment.Version
             );
         }
@@ -67,6 +77,8 @@ namespace WikiFunctions
         ///
         /// </summary>
         public static string DefaultUserAgentString
+        { get; private set; }
+        public static string AuthUserAgentString
         { get; private set; }
 
         // Covered by ToolsTests.IsRedirect()
@@ -423,8 +435,30 @@ namespace WikiFunctions
         /// <returns>The HTML.</returns>
         public static string GetHTML(string url, Encoding enc)
         {
-            string x;
-            return GetHTML(url, enc, out x);
+            return GetHTML(url, enc, out _);
+        }
+
+        /// <summary>
+        /// Gets the HTML from the given web address, passing the main form to authenticate
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="awb"></param>
+        /// <returns>The HTML.</returns>
+        public static string GetHTML(string url, IAutoWikiBrowser awb)
+        {
+            return GetHTML(url, Encoding.UTF8, out _, awb);
+        }
+
+        /// <summary>
+        /// Legacy API to get the HTML from the given web address without authentication
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="enc"></param>
+        /// <param name="responseURL"></param>
+        /// <returns>The HTML.</returns>
+        public static string GetHTML(string url, Encoding enc, out string responseURL)
+        {
+            return GetHTML(url, enc, out responseURL, null);
         }
 
         /// <summary>
@@ -434,17 +468,35 @@ namespace WikiFunctions
         /// <param name="enc">The encoding to use.</param>
         /// <param name="responseURL">The resolved URL of the webpage</param>
         /// <returns>The HTML.</returns>
-        public static string GetHTML(string url, Encoding enc, out string responseURL)
+        public static string GetHTML(string url, Encoding enc, out string responseURL, IAutoWikiBrowser awb)
         {
             WriteDebug("Tools::GetHTML", url);
             if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
 
-            // Retry success is still not guaranteed after waiting the specified time.
             while (true)
             {
                 CookieContainer cookieJar = new CookieContainer();
                 HttpWebRequest rq = Variables.PrepareWebRequest(url); // Uses WikiFunctions' default UserAgent string
-                rq.CookieContainer = cookieJar;
+
+                if (awb != null)
+                {
+                    Session TheSession = awb.TheSession;
+                    ApiEdit syncEditor = TheSession?.Editor?.SynchronousEditor;
+                    if (syncEditor != null && url.StartsWith(syncEditor.URL))
+                        cookies = syncEditor.Cookies;
+                    UserInfo user = TheSession?.User;
+                    if (user != null && user.IsLoggedIn)
+                    {
+                        string username = user.Name;
+                        if (!string.IsNullOrEmpty(username))
+                        {
+                            // TBD: Variables.LangCode, or siteinfo.Language?
+                            rq.UserAgent = AuthUserAgentString.Replace("###",
+                                $"{Variables.Project}:{Variables.LangCode}; User:{username}");
+                        }
+                    }
+                }
+                rq.CookieContainer = cookies ?? new CookieContainer();
 
                 try
                 {
@@ -468,8 +520,12 @@ namespace WikiFunctions
             }
         }
 
-        // Common code to handle 429's etc. Returns true if the exception was handled and the caller should retry
-        // Otherwise the caller should rethrow. Using "throw ex" here would reset the stack
+        /// <summary>
+        /// Common code to handle 429's etc. Returns true if the exception was handled and the caller should retry.
+        /// Otherwise the caller should rethrow. Using "throw ex" here would reset the stack
+        /// </summary>
+        /// <param name="ex">The WebException to handle.</param>
+        /// <returns>True if the exception was handled and the caller should retry, otherwise false.</returns>
         public static bool HandleHttpRetry(WebException ex)
         {
             if (ex.Response is HttpWebResponse errorResponse)
@@ -477,20 +533,52 @@ namespace WikiFunctions
                 string retryval = errorResponse.GetResponseHeader("Retry-After");
                 int statusCode = (int)errorResponse.StatusCode;
 
-                if (int.TryParse(retryval, out int retrySeconds) || statusCode == 429 || statusCode == 503)
+                int retrySeconds = ParseRetry(errorResponse);
+                if (retrySeconds == 0)
+                    return true;
+                if (retrySeconds > 0)
                 {
-                    // Can be zero if a 429/503 doesn't have a Retry-After, or the Retry-After is an HTTP-date (not currently used by mw)
-                    if (retrySeconds < 1)
-                        // https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits#Errors
-                        retrySeconds = String.IsNullOrEmpty(retryval) ? 5 : 60;
+
+                    // Note: retry success is still not guaranteed after waiting the specified time.
                     WriteDebug("Tools::HandleHttpRetry",
-                        $"HTTP {statusCode} and Retry-After {retrySeconds}; pausing to allow retry");
+                            $"HTTP {statusCode} and Retry-After {retrySeconds}; pausing to allow retry");
                     Thread.Sleep(retrySeconds * 1000);
                     return true;
                 }
             }
             return false;
         }
+
+        /// <summary>
+        /// Parses a response header to determine if there is a specific or implied retry request.
+        /// Handles status codes 429 and 503 (but not 3xx) and Retry-After headers with any status code.
+        /// See RFCs 6585 and 2616, and https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits#Errors
+        /// </summary>
+        /// <param name="response">The HTTP response to parse.</param>
+        /// <returns>The number of seconds to wait before retrying, or -1 if no retry is requested.</returns>
+        public static int ParseRetry(HttpWebResponse response)
+        {
+            int statusCode = (int)response.StatusCode;
+            // Although GetResponseHeader returns "" if it doesn't exist, that's not documented, so:
+            string retryString = response.Headers["Retry-After"];
+
+            if (statusCode == 429 || statusCode == 503 || retryString != null)
+            {
+                if (!int.TryParse(retryString, out int retrySeconds))
+                {
+                    if (DateTime.TryParse(retryString, out DateTime retryDate))
+                    {
+                        retrySeconds = Convert.ToInt32((retryDate.ToUniversalTime() - DateTime.UtcNow).TotalSeconds);
+                    }
+                    else
+                    {
+                        retrySeconds = statusCode == 503 ? 60 : 5;
+                    }
+                }
+                return Math.Max(retrySeconds, 0);
+            }
+
+            return -1;
 
         /// <summary>
         /// 
