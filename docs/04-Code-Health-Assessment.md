@@ -130,37 +130,37 @@ The objective is to distinguish between items that should be addressed during mi
 
 \### Updates out of sync from Sourceforge and GITHUB
 
-|Commit # | Change description| Change date|
+|Commit # | Change description| Change date| Status|
 
 |---------|:------------------------------------------:|:-------------------:|
 
-|\[r13011] | AWBWebBrowser: Set User-Agent for requests using embedded web browser | 2026-01-10|
+|\[r13011] | AWBWebBrowser: Set User-Agent for requests using embedded web browser | 2026-01-10| Resolved - 20260627 |
 
-|\[r13012] | T403895 revision: Don't reset default delay; allow for a long wait    | 2026-02-05|
+|\[r13012] | T403895 revision: Don't reset default delay; allow for a long wait    | 2026-02-05| Resolved - 20260627 |
 
-|\[r13013] | T415566: Remove obsolete SecurityAction.Demand decoration from MainForm class | 2026-02-05|
+|\[r13013] | T415566: Remove obsolete SecurityAction.Demand decoration from MainForm class | 2026-02-05| Resolved - 20260627 |
 
-|\[r13014] | T416505 Fix possible RetryAfter errors in AWB and plugins (actually in List provider), plus two minor bugs  | 2026-02-11|
+|\[r13014] | T416505 Fix possible RetryAfter errors in AWB and plugins (actually in List provider), plus two minor bugs  | 2026-02-11| Resolved - 20260627 |
 
-|\[r13015] | T421588: Handle rate limiting in WikiFunctions - step 1, implement GetHTML() retries| 2026-03-29|
+|\[r13015] | T421588: Handle rate limiting in WikiFunctions - step 1, implement GetHTML() retries| 2026-03-29| Resolved - 20260627 |
 
-|\[r13016] | T421588: Restore countdown timer for in-app retries| 2026-03-31|
+|\[r13016] | T421588: Restore countdown timer for in-app retries| 2026-03-31| Resolved - 20260627 |
 
-|\[r13017] | T421588: New Tools.GetHTML versions to pass authentication information| 2026-04-04|
+|\[r13017] | T421588: New Tools.GetHTML versions to pass authentication information| 2026-04-04| Resolved - 20260627 |
 
-|\[r13018] | T421991: Don't request notifications if you don't have the right| 2026-04-11|
+|\[r13018] | T421991: Don't request notifications if you don't have the right| 2026-04-11| Resolved - 20260627 |
 
-|\[r13019] | T399860 redux: better messages on 2FA failures| 2026-05-11|
+|\[r13019] | T399860 redux: better messages on 2FA failures| 2026-05-11| Resolved - 20260627 |
 
-|\[r13020] | Release version 6.5.0.0| 2026-05-12|
+|\[r13020] | Release version 6.5.0.0| 2026-05-12| Resolved - 20260627 |
 
-|\[r13021] | Tag release 6.5.0.0| 2026-05-12|
+|\[r13021] | Tag release 6.5.0.0| 2026-05-12| Resolved - 20260627 |
 
-|\[r13022] | Bump 6.5.0.1| 2026-05-12|
+|\[r13022] | Bump 6.5.0.1| 2026-05-12| Resolved - 20260627 |
 
-|\[r13023] | Belatedly update About box copyright year| 2026-05-18|
+|\[r13023] | Belatedly update About box copyright year| 2026-05-18| Resolved - 20260627 |
 
-|\[r13024] | T428372: AutoWikiBrowser memory leak when preprocessing a large list| 2026-06-15|
+|\[r13024] | T428372: AutoWikiBrowser memory leak when preprocessing a large list| 2026-06-15| Resolved - 20260627|
 
 
 
@@ -360,29 +360,29 @@ The objective is to distinguish between items that should be addressed during mi
 
 \### HACK
 
-|Code		|File		|Line	|Column|
+|Code		|File		|Line	|Column| Status |
 
 |---------------------------------------------------|:------------------------------------------------:|:-------:|----|
 
-| lIPUay9e1ACPS3KOAQj37n5B3VaZ7XF6c4tl7NhZjOzLwCS1G9l5F6C6hHacKbKA559mcMEOoho1+Sq/	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\AWB\\Properties\\Resources.resx	| 1741	| 66 |
+| lIPUay9e1ACPS3KOAQj37n5B3VaZ7XF6c4tl7NhZjOzLwCS1G9l5F6C6hHacKbKA559mcMEOoho1+Sq/	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\AWB\\Properties\\Resources.resx	| 1741	| 66 | |
 
-| // leading (back)slash is hack for incorrectly formatted breaks per	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\UnitTests\\FormattingTests.cs	| 56	| 39 |
+| // leading (back)slash is hack for incorrectly formatted breaks per	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\UnitTests\\FormattingTests.cs	| 56	| 39 | |
 
-| /// This is a hack required for some multilingual Wikimedia projects,		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\API\\ApiEdit.cs	| 201	| 23 |
+| /// This is a hack required for some multilingual Wikimedia projects,		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\API\\ApiEdit.cs	| 201	| 23 | |
 
-| mAWBLogListener.Skipped = false;  // a bit of a hack, if plugin says not to skip I'm resetting the LogListener.Skipped value to False	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Article\\Article.cs		| 575	| 65 |
+| mAWBLogListener.Skipped = false;  // a bit of a hack, if plugin says not to skip I'm resetting the LogListener.Skipped value to False	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Article\\Article.cs		| 575	| 65 | |
 
-| // A hack for the annoying bug with this option being mysteriously enabled to switch		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Controls\\ArticleTextBox.cs		| 96	| 18 |
+| // A hack for the annoying bug with this option being mysteriously enabled to switch		|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Controls\\ArticleTextBox.cs		| 96	| 18 | |
 
-| string text = editor.QueryApi(newUrl + "\&rawcontinue=1" + postfix); // HACK: Hacky hack hack	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Lists\\Providers\\ApiListProviderBase.cs	| 81	| 88 |
+| string text = editor.QueryApi(newUrl + "\&rawcontinue=1" + postfix); // HACK: Hacky hack hack	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Lists\\Providers\\ApiListProviderBase.cs	| 81	| 88 | |
 
-| // HACK	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\SiteInfo.cs	| 394	| 20 |
+| // HACK	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\SiteInfo.cs	| 394	| 20 | |
 
-| // HACK we are allowing matching on tilde character around parameter name to represent cleaned HTML comment, so may falsely match	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Tools.cs	| 2910	| 1  |
+| // HACK we are allowing matching on tilde character around parameter name to represent cleaned HTML comment, so may falsely match	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Tools.cs	| 2910	| 1 | |
 
-| // HACK:	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Variables.cs		| 674	| 16 |
+| // HACK:	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Variables.cs		| 674	| 16 | |
 
-| //HACK:HACK:HACK:HACK:HACK:	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Variables.cs	| 728	| 15 |
+| //HACK:HACK:HACK:HACK:HACK:	|C:\\Users\\\[LocalFileName]\\source\\repos\\AutoWikiBrowser\\WikiFunctions\\Variables.cs	| 728	| 15 |  |
 
 
 
@@ -896,11 +896,7 @@ Overall, `Tools` should be treated as a medium-risk support component. It does n
 
 Recommendations will be developed from the findings documented throughout this assessment.
 
-
-
 Recommendations may include:
-
-
 
 \* Refactoring opportunities
 
@@ -916,7 +912,20 @@ Recommendations may include:
 
 \* Migration sequencing recommendations
 
-
-
 Recommendations should be based on verified findings and aligned with the project's guiding principles of incremental migration, feature preservation, and evidence-based decision making.
 
+### Coding Style Consistency
+
+Initial review found inconsistent formatting resulting from the project's long development history.
+
+Examples include:
+- Inconsistent spacing after keywords (`if(` vs `if (`)
+- Multiple spaces after commas and operators
+- Mixed brace placement
+- Inconsistent blank line usage
+- Variable indentation styles
+
+These do not affect functionality but reduce readability.
+
+Recommendation:
+Adopt a repository-wide `.editorconfig` after the .NET 8 migration and perform formatting in a dedicated, formatting-only commit.
