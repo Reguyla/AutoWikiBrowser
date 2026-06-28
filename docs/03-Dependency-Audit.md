@@ -385,3 +385,7 @@ Based on the current dependency assessment so far:
 
 6\. Reassess utilities after the core migration to determine which should be modernized, retained, or retired.
 
+##10. Build time dependencies
+| Dependency Type | Item | Used By | Notes |
+|---|---|---|---|
+| Build-generated source | `WikiFunctions/SvnInfo.cs` | `Variables.Revision`, `Variables.RevisionNumber` | Legacy SVN revision metadata; updated during build. |
