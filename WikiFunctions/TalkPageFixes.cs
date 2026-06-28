@@ -241,14 +241,11 @@ namespace WikiFunctions.TalkPages
 
         private static readonly Regex EnglishVariationsTemplates = Tools.NestedTemplateRegex(new[]
         {
-            "American English", "American English editnotice", "Antiguan and Barbudan English", "Australian English",
-            "Australian English editnotice", "Bangladeshi English", "British English", "British English editnotice",
+            "American English", "American English editnotice", "Australian English",
+            "Australian English editnotice", "British English", "British English editnotice",
             "British English Oxford spelling", "British English Oxford spelling editnotice", "Canadian English",
-            "Canadian English editnotice", "Ghanaian English", "Hiberno-English", "Hong Kong English", "Indian English",
-            "IUPAC spelling", "IUPAC spelling US", "Jamaican English", "Kenyan English", "Liberian English",
-            "New Zealand English", "Nigerian English", "Pakistani English", "Philippine English", "Scottish English",
-            "Sierra Leonean English", "Singaporean English", "South African English", "Sri Lankan English",
-            "Trinidadian English", "Ugandan English"
+            "Canadian English editnotice", "Hiberno-English", "Hong Kong English", "Indian English",
+            "IUPAC spelling", "IUPAC spelling US", "New Zealand English", "Nigerian English", "Pakistani English", "Philippine English", "Scottish English", "South African English",
         });
 
         private static readonly Regex TalkHistoryTemplates = Tools.NestedTemplateRegex(new[] { "Article history", "ArticleHistory" });
