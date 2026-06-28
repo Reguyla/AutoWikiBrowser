@@ -670,7 +670,38 @@ This component should be treated as high importance and high regression risk. Du
 | Build System | Legacy SVN-based revision metadata generation (`SvnInfo.cs`). | Medium | Migration | Open | Replace or modernize build metadata generation after migration baseline is established. |
 
 
+#### Noting one of the hacks that needs to be addressed
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|---|---|:---:|:---:|:---:|---|
+| UI Coupling | `Variables.SetProject()` directly accesses `MainForm.TheSession` and calls `MainForm.LoadTypos()`. | High | Refactor | Open | Move session update, login retry handling, and typo reload behavior into a project/session coordinator. |
 
+
+#### Wikiregex URL handler inefficient
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|---|---|:---:|:---:|:---:|---|
+| URL Validation | Existing URL validation relies on a hand-written regex with outdated assumptions. | Medium | Cleanup | Open | Add `Tools.IsValidWebUrl()` using `Uri.TryCreate()` and migrate callers away from `UrlValidator.IsMatch()`.
+|
+
+New method added to Wikifunctions.Tools for now
+        /// <summary>
+        /// <param name="url">The URL to validate.</param>
+        /// </summary>
+        /// <c>true</c> if the URL is a valid absolute HTTP, HTTPS, or FTP URL; otherwise, <c>false</c>.
+        /// <returns></returns>
+        public static bool IsValidWebUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return false;
+
+            Uri uri;
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                return false;
+
+            return uri.Scheme == Uri.UriSchemeHttp
+                || uri.Scheme == Uri.UriSchemeHttps
+                || uri.Scheme == Uri.UriSchemeFtp;
+        }
 
 
 \## 9. Testing Coverage
