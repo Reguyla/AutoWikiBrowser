@@ -1345,58 +1345,58 @@ namespace WikiFunctions
 
         public static readonly List<string> DeletionProtectionTagsList = new List<string>(new[]
         {
-            "Bne", "Cc-by-nc-2.0", "Cc-by-nc-sa", "Cc-by-nc-sa-2.0", "Cc-nc", "D", "DB", "DELETE", "Db", "Db doc",
-            "Db-Reason", "Db-a1", "Db-a10", "Db-a11", "Db-a2", "Db-a3", "Db-a4", "Db-a5", "Db-a6", "Db-a7", "Db-a9",
-            "Db-ad", "Db-advert", "Db-advertising", "Db-album", "Db-animal", "Db-attack", "Db-author", "Db-band",
-            "Db-banned", "Db-because", "Db-bio", "Db-bio-notenglish", "Db-biography", "Db-blank",
-            "Db-blanked", "Db-blp", "Db-bn", "Db-bne", "Db-c1", "Db-cat-empty", "Db-ce", "Db-club", "Db-cm", "Db-comp",
-            "Db-company", "Db-contact", "Db-content", "Db-context", "Db-copypaste", "Db-copyvio", "Db-corp",
-            "Db-disambig", "Db-e", "Db-ec", "Db-empty", "Db-emptycat", "Db-error", "Db-event", "Db-f1", "Db-f10",
-            "Db-f2", "Db-f3", "Db-f7", "Db-f9", "Db-fake", "Db-foreign", "Db-fpcfail", "Db-g1", "Db-g10", "Db-g11",
-            "Db-g12", "Db-g13", "Db-g2", "Db-g3", "Db-g4", "Db-g5", "Db-g6",
-            "Db-g7", "Db-g8", "Db-gallery", "Db-gfdl", "Db-group", "Db-hoax", "Db-house", "Db-imagepage",
-            "Db-imgcopyvio", "Db-inc", "Db-internet", "Db-intertubes", "Db-invented", "Db-madeup", "Db-maint",
-            "Db-maintenance", "Db-meta", "Db-misrepresent", "Db-misrepresentation", "Db-move", "Db-movedab", "Db-mt",
-            "Db-multiple", "Db-negublp", "Db-nn", "Db-nocontent", "Db-nocontext", "Db-noncom", "Db-noncommercial",
-            "Db-nonsense", "Db-notenglish", "Db-notwebhost", "Db-org", "Db-owner",
-            "Db-p1", "Db-p2", "Db-pagemove", "Db-peo", "Db-people", "Db-person", "Db-promo", "Db-r1", "Db-r2", "Db-r3",
-            "Db-redirect", "Db-redirmisnomer", "Db-redirnone", "Db-repost", "Db-self", "Db-site", "Db-song", "Db-spam",
-            "Db-spamuser", "Db-subpage", "Db-t2", "Db-t3", "Db-talk", "Db-templatecat", "Db-test", "Db-transwiki",
-            "Db-tw", "Db-u", "Db-u1", "Db-u2", "Db-u3", "Db-u5", "Db-user", "Db-userpage", "Db-vand", "Db-vandalism",
-            "Db-web", "Db-webhost", "Db-website", "Db-xfd",
-            "Dbe", "Declinedsd", "Delbecause", "Delete", "Delete because", "Delete when empty", "DeleteVanity",
-            "Deletebecause", "Deletevanity", "Duplicate", "Dv", "Empty", "Hang on", "Hangon click preload",
-            "Hangon preload C1", "Nocontent", "Nocontext", "Notg4", "Oldcsd", "Oldcsdfull", "Salt", "Sdd", "Sdd2",
-            "Sdd3", "Should be a user space test page please delete", "Speedy", "Speedy delete",
-            "Speedy deletion templates", "Speedydelete",
-            "Db-speedy delete if article", "Speedy deletion-nonfree galleries", "Speedy deletion-foreign language",
-            "Speedy deletion-technical", "Speedy deletion-no content", "Speedy deletion-unpopulated category",
-            "Speedy deletion-vandalism", "Speedy deletion-blocked user", "Speedy deletion-duplicate template",
-            "Speedy deletion-nonexistent user", "Speedy deletion-test page", "Speedy deletion-previously deleted",
-            "Speedy deletion-musical recording", "Speedy deletion-attack", "Speedy deletion-duplicate article",
-            "Speedy deletion-no context", "Speedy deletion-nonsense", "Speedy deletion-advertising",
-            "Speedy deletion-copyright violation", "Speedy deletion-author request", "Speedy deletion",
-            "Book-prod", "BPRODNote", "BPRODWarning", "Dated book prod", "Deprod", "Deprod-afd", "Deprod-article",
-            "Deprod-contro", "Deprod-disagree", "Deprod-m", "Deprod-reprod", "Old prod full", "Please prod",
-            "Polite-prod", "Prod backlog", "Prod backlog inner", "Prod blp", "Prod contested", "Prod hint",
-            "Prod NFC use", "Prod pending", "Prod subcategory starter", "Prod-nn", "Prod-reason", "Prod-speedy",
-            "Prod-summary", "Prod-tip", "Prod2", "BLP prodded", "Prodded", "PRODNote",
-            "PRODWarning", "PRODWarning-notalk", "ProdwarningBLP", "Proposed deletion", "Proposed deletion endorsed",
-            "Proposed deletion notify", "PrSpam", "Tprod", "Transwiki",
-            "C-uploaded", "Editnotice explanation", "Hprotected", "M-cropped", "M-protected", "Mcropped",
-            "Mpimgprotected", "Mpprotected", "Mprotect", "Mprotected2", "OFFICE", "Office", "PP-protected", "Padlock",
-            "Protection padlock", "Permanently protected", "Pp", "Pp-blp", "Pp-create", "Pp-dispute", "Pp-extended",
-            "Pp-full", "Pp-jupe", "Pp-main-page", "Pp-meta", "Pp-move", "Pp-move-dispute", "Pp-move-indef",
-            "Pp-move-vandalism", "Pp-office", "Pp-office-dmca", "Pp-pc", "Pp-pc1", "Pp-protect", "Pp-protected",
-            "Pp-reset", "Pp-salt", "Pp-semi", "Pp-semi-indef", "Pp-semi-prot", "Pp-semi-protect", "Pp-semi-protected",
-            "Pp-semi-protection", "Pp-semiprotected", "Pp-sock", "Pp-template", "Pp-usertalk", "Pp-vandalism",
-            "Protected article title", "Protected image", "Protected sister project logo", "Protected title",
-            "ProtectedMainPageImage", "R fully protected", "R semi-protected", "R template protected", "Semiprotected",
-            "Soft redirect protection", "Sprot", "Sprotect", "Sprotect2",
-            "Sprotected", "Sprotected2", "Temporarily protected", "Unblock-abuse", "Unblockabuse",
-            "Uploaded from Commons", "Uprotect", "Usertalk-sprotect", "Usertalk-vprotect", "Vutprotected",
-            "Prod blp/dated", "Proposed deletion/dated", "Transwiki/dated", "Article for deletion/dated",
-            "Article for deletion", "Afd-merge to"
+        "Template:Bne", "Template:Cc-by-nc-2.0", "Template:Cc-by-nc-sa", "Template:Cc-by-nc-sa-2.0", "Template:Cc-nc", "Template:D", "Template:DB", "Template:DELETE", "Template:Db", "Template:Db doc"
+        "Db-Reason", "Template:Db-a1", "Template:Db-a10", "Template:Db-a11", "Template:Db-a2", "Template:Db-a3", "Template:Db-a4", "Template:Db-a5", "Template:Db-a6", "Template:Db-a7", "Template:Db-a9"
+        "Db-ad", "Template:Db-advert", "Template:Db-advertising", "Template:Db-album", "Template:Db-animal", "Template:Db-attack", "Template:Db-author", "Template:Db-band"
+        "Db-banned", "Template:Db-because", "Template:Db-bio", "Template:Db-bio-notenglish", "Template:Db-biography", "Template:Db-blank"
+        "Db-blanked", "Template:Db-blp", "Template:Db-bn", "Template:Db-bne", "Template:Db-c1", "Template:Db-cat-empty", "Template:Db-ce", "Template:Db-club", "Template:Db-cm", "Template:Db-comp"
+        "Db-company", "Template:Db-contact", "Template:Db-content", "Template:Db-context", "Template:Db-copypaste", "Template:Db-copyvio", "Template:Db-corp"
+        "Db-disambig", "Template:Db-e", "Template:Db-ec", "Template:Db-empty", "Template:Db-emptycat", "Template:Db-error", "Template:Db-event", "Template:Db-f1", "Template:Db-f10"
+        "Db-f2", "Template:Db-f3", "Template:Db-f7", "Template:Db-f9", "Template:Db-fake", "Template:Db-foreign", "Template:Db-fpcfail", "Template:Db-g1", "Template:Db-g10", "Template:Db-g11"
+        "Db-g12", "Template:Db-g13", "Template:Db-g2", "Template:Db-g3", "Template:Db-g4", "Template:Db-g5", "Template:Db-g6"
+        "Db-g7", "Template:Db-g8", "Template:Db-gallery", "Template:Db-gfdl", "Template:Db-group", "Template:Db-hoax", "Template:Db-house", "Template:Db-imagepage"
+        "Db-imgcopyvio", "Template:Db-inc", "Template:Db-internet", "Template:Db-intertubes", "Template:Db-invented", "Template:Db-madeup", "Template:Db-maint"
+        "Db-maintenance", "Template:Db-meta", "Template:Db-misrepresent", "Template:Db-misrepresentation", "Template:Db-move", "Template:Db-movedab", "Template:Db-mt"
+        "Db-multiple", "Template:Db-negublp", "Template:Db-nn", "Template:Db-nocontent", "Template:Db-nocontext", "Template:Db-noncom", "Template:Db-noncommercial"
+        "Db-nonsense", "Template:Db-notenglish", "Template:Db-notwebhost", "Template:Db-org", "Template:Db-owner"
+        "Db-p1", "Template:Db-p2", "Template:Db-pagemove", "Template:Db-peo", "Template:Db-people", "Template:Db-person", "Template:Db-promo", "Template:Db-r1", "Template:Db-r2", "Template:Db-r3"
+        "Db-redirect", "Template:Db-redirmisnomer", "Template:Db-redirnone", "Template:Db-repost", "Template:Db-self", "Template:Db-site", "Template:Db-song", "Template:Db-spam"
+        "Db-spamuser", "Template:Db-subpage", "Template:Db-t3", "Template:Db-talk", "Template:Db-templatecat", "Template:Db-test", "Template:Db-transwiki"
+        "Db-tw", "Template:Db-u", "Template:Db-u1", "Template:Db-u2", "Template:Db-u3", "Template:Db-u5", "Template:Db-user", "Template:Db-userpage", "Template:Db-vand", "Template:Db-vandalism"
+        "Db-web", "Template:Db-webhost", "Template:Db-website", "Template:Db-xfd"
+        "Dbe", "Template:Declinedsd", "Template:Delbecause", "Template:Delete", "Template:Delete because", "Template:Delete when empty", "Template:DeleteVanity"
+        "Deletebecause", "Template:Deletevanity", "Template:Duplicate", "Template:Dv", "Template:Empty", "Template:Hang on", "Template:Hangon click preload"
+        "Hangon preload C1", "Template:Nocontent", "Template:Nocontext", "Template:Notg4", "Template:Oldcsd", "Template:Oldcsdfull", "Template:Salt", "Template:Sdd", "Template:Sdd2"
+        "Sdd3", "Template:Should be a user space test page please delete", "Template:Speedy", "Template:Speedy delete"
+        "Speedy deletion templates", "Template:Speedydelete"
+        "Db-speedy delete if article", "Template:Speedy deletion-nonfree galleries", "Template:Speedy deletion-foreign language"
+        "Speedy deletion-technical", "Template:Speedy deletion-no content", "Template:Speedy deletion-unpopulated category"
+        "Speedy deletion-vandalism", "Template:Speedy deletion-blocked user", "Template:Speedy deletion-duplicate template"
+        "Speedy deletion-nonexistent user", "Template:Speedy deletion-test page", "Template:Speedy deletion-previously deleted"
+        "Speedy deletion-musical recording", "Template:Speedy deletion-attack", "Template:Speedy deletion-duplicate article"
+        "Speedy deletion-no context", "Template:Speedy deletion-nonsense", "Template:Speedy deletion-advertising"
+        "Speedy deletion-copyright violation", "Template:Speedy deletion-author request", "Template:Speedy deletion"
+        "Book-prod", "Template:BPRODNote", "Template:BPRODWarning", "Template:Dated book prod", "Template:Deprod", "Template:Deprod-afd", "Template:Deprod-article"
+        "Deprod-contro", "Template:Deprod-disagree", "Template:Deprod-m", "Template:Deprod-reprod", "Template:Old prod full", "Template:Please prod"
+        "Polite-prod", "Template:Prod backlog", "Template:Prod backlog inner", "Template:Prod blp", "Template:Prod contested", "Template:Prod hint"
+        "Prod NFC use", "Template:Prod pending", "Template:Prod subcategory starter", "Template:Prod-nn", "Template:Prod-reason", "Template:Prod-speedy"
+        "Prod-summary", "Template:Prod-tip", "Template:Prod2", "Template:BLP prodded", "Template:Prodded", "Template:PRODNote"
+        "PRODWarning", "Template:PRODWarning-notalk", "Template:ProdwarningBLP", "Template:Proposed deletion", "Template:Proposed deletion endorsed"
+        "Proposed deletion notify", "Template:PrSpam", "Template:Tprod", "Template:Transwiki"
+        "C-uploaded", "Template:Editnotice explanation", "Template:Hprotected", "Template:M-cropped", "Template:M-protected", "Template:Mcropped"
+        "Mpimgprotected", "Template:Mpprotected", "Template:Mprotect", "Template:Mprotected2", "Template:OFFICE", "Template:Office", "Template:PP-protected", "Template:Padlock"
+        "Protection padlock", "Template:Permanently protected", "Template:Pp", "Template:Pp-blp", "Template:Pp-create", "Template:Pp-dispute", "Template:Pp-extended"
+        "Pp-full", "Template:Pp-jupe", "Template:Pp-main-page", "Template:Pp-move", "Template:Pp-move-dispute", "Template:Pp-move-indef"
+        "Pp-move-vandalism", "Template:Pp-office", "Template:Pp-pc", "Template:Pp-pc1", "Template:Pp-protect", "Template:Pp-protected"
+        "Template:Pp-salt", "Template:Pp-semi", "Template:Pp-semi-indef", "Template:Pp-semi-prot", "Template:Pp-semi-protect", "Template:Pp-semi-protected"
+        "Pp-semi-protection", "Template:Pp-semiprotected", "Template:Pp-sock", "Template:Pp-template", "Template:Pp-usertalk", "Template:Pp-vandalism"
+        "Protected article title", "Template:Protected image", "Template:Protected sister project logo", "Template:Protected title"
+        "ProtectedMainPageImage", "Template:R fully protected", "Template:R semi-protected", "Template:R template protected", "Template:Semiprotected"
+        "Soft redirect protection", "Template:Sprot", "Template:Sprotect", "Template:Sprotect2"
+        "Sprotected", "Template:Sprotected2", "Template:Temporarily protected", "Template:Unblock-abuse", "Template:Unblockabuse"
+        "Uploaded from Commons", "Template:Uprotect", "Template:Usertalk-sprotect", "Template:Usertalk-vprotect", "Template:Vutprotected"
+        "Prod blp/dated", "Template:Proposed deletion/dated", "Template:Transwiki/dated", "Template:Article for deletion/dated"
+        "Article for deletion", "Template:Afd-merge to",
         });
         /// <summary>
         /// matches speedy deletion templates (from Category:Speedy_deletion_templates), deletion templates (Category:Proposed_deletion-related_templates) and protection templates (Category:Protection_templates)
