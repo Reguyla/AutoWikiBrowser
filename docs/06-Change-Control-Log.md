@@ -54,6 +54,7 @@ Routine Git commits should be used for source-level history. This document captu
 | Date       | ID     | Category | Description                             | Decision | Git Commit |
 | ---------- | ------ | -------- | --------------------------------------- | -------- | ---------- |
 | 2026-06-27 | CC-001 | DOC      | Created project documentation framework | Approved | Commit 9   |
+| 2026-06-27 | CC-002 | CODE	 | Added `Tools.IsValidWebUrl()` helper. Provides safer URL validation than the legacy regex and allows callers to migrate gradually. | Approved | Commit |
 
 ## 5. Major Architecture Decisions
 ## ARCH-001
