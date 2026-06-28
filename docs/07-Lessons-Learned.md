@@ -14,3 +14,7 @@ AWB currently depends on SVN-generated revision metadata (SvnInfo.cs). This depe
 
 
 
+\## Build notes
+
+`SvnInfo.cs` is a generated build artifact. If deleted, the first rebuild may recreate it but still report errors because dependent projects cannot find `WikiFunctions.dll`. Running rebuild again after `SvnInfo.cs` is regenerated allows `WikiFunctions` and dependent projects to build successfully.
+

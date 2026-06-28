@@ -876,6 +876,12 @@ Overall, `Tools` should be treated as a medium-risk support component. It does n
 | Projects Failed | 0 |
 | Target Framework | .NET Framework 4.8.1 |
 
+### SvnInfo.cs
+| Area | Finding | Severity | Notes |
+|---|---|:---:|---|
+| Build Metadata | `WikiFunctions/SvnInfo.cs` is generated during build. | Medium | If missing, the first build/analysis pass may fail or produce downstream metadata errors. A subsequent rebuild succeeds after the file is regenerated. |
+
+
 ### Build Observations
 
 - Solution rebuild completed successfully.
