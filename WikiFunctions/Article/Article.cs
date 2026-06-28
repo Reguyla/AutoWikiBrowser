@@ -409,7 +409,15 @@ namespace WikiFunctions
         {
             get
             {
-                return (NameSpaceKey == Namespace.Talk || NameSpaceKey == Namespace.CategoryTalk);
+                return (NameSpaceKey == Namespace.Talk
+                        || NameSpaceKey == Namespace.CategoryTalk)
+                        || NameSpaceKey == Namespace.CategoryTalk
+                        || NameSpaceKey == Namespace.BookTalk
+                        || NameSpaceKey == Namespace.DraftTalk
+                        || NameSpaceKey == Namespace.FileTalk
+                        || NameSpaceKey == Namespace.PortalTalk
+                        || NameSpaceKey == Namespace.TemplateTalk
+                        || NameSpaceKey == Namespace.WikipediaTalk);
             }
         }
 
