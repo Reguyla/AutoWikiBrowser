@@ -482,6 +482,15 @@ The objective is to improve overall code quality while avoiding unnecessary chan
 | Build Errors           |        0 |       0 |          0 |
 
 
+### Errors/Warnings/Messages baseline
+| Tool | Initial Result | Current Result | Notes |
+|---|---:|---:|---|
+| Visual Studio Code Analysis | 4038 messages | 686 messages | Significant reduction after resolving missing/generated source issues. |
+| Errors | 14 | 4 | Remaining issues under review. |
+| Warnings | 3 | 2 | One warning resolved. |
+
+
+
 
 
 \## 6. Deprecated APIs
@@ -703,6 +712,92 @@ New method added to Wikifunctions.Tools for now
                 || uri.Scheme == Uri.UriSchemeFtp;
         }
 
+#### New method that handles temporary HTTP/API failures that may succeed if retried.
+        /// <summary>
+        /// Handles temporary HTTP/API failures that may succeed if retried.
+        /// </summary>
+        /// <param name="webex">The web exception thrown by the request.</param>
+        /// <returns>
+        /// true if the exception was handled and the caller should retry;
+        /// false if the exception should be rethrown.
+        /// </returns>
+        public static bool HandleHttpException(System.Net.WebException webex)
+        {
+            if (webex == null)
+                return false;
+
+            System.Net.HttpWebResponse response = webex.Response as System.Net.HttpWebResponse;
+
+            if (response == null)
+                return false;
+
+            System.Net.HttpStatusCode statusCode = response.StatusCode;
+
+            if (statusCode == System.Net.HttpStatusCode.RequestTimeout ||
+                statusCode == System.Net.HttpStatusCode.BadGateway ||
+                statusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
+                statusCode == System.Net.HttpStatusCode.GatewayTimeout ||
+                (int)statusCode == 429)
+            {
+                System.Threading.Thread.Sleep(5000);
+                return true;
+            }
+
+            return false;
+        }
+
+### New helper that gets the appropriate CookieContainer for the specified URL and session.
+        /// <summary>
+        /// Helper that gets the appropriate CookieContainer for the specified URL and session.
+        /// </summary>
+        public static CookieContainer GetCookieContainer(string url, IAutoWikiBrowser awb)
+        {
+            if (awb == null)
+                return new CookieContainer();
+
+            Session session = awb.TheSession;
+
+            if (session == null)
+                return new CookieContainer();
+
+            ApiEdit editor = session.Editor != null
+                ? session.Editor.SynchronousEditor
+                : null;
+
+            if (editor != null &&
+                !string.IsNullOrEmpty(editor.URL) &&
+                url.StartsWith(editor.URL))
+            {
+                return editor.Cookies ?? new CookieContainer();
+            }
+
+            return new CookieContainer();
+        }
+
+### Parsers MultipleIssues
+
+The `MultipleIssues` parser logic is a high-value (to Wikipedia), behavior-sensitive component that modifies article maintenance templates. The code is functional and performance-aware, but it relies heavily on regex matching, string manipulation, and section-specific assumptions. It should be treated as medium-to-high regression risk. During the initial .NET 8 migration, behavior should be preserved and refactoring deferred until adequate unit tests exist for multiple-issues template scenarios.
+
+`MultipleIssues()` currently implements English-language multiple-issues handling directly in parser logic. The feature is not universally applicable across all wikis because template names, parameters, and maintenance-tag rules vary by project and language. Although similar templates exist across many Wikipedia languages, the current implementation should be treated as an English-rule implementation rather than a general MediaWiki feature. Future modernization should make this behavior data-driven by project and language.
+
+Current behavior is hardcoded to English-language rules; future behavior shhould be explicitly configured per wiki/language.
+
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|---|---|:---:|:---:|:---:|---|
+| Wiki-Specific Logic | `MultipleIssues()` currently applies only when `Variables.LangCode == "en"`, but multiple-issues-style templates exist across many Wikipedia languages with different syntax and rules. | Medium | Refactor | Open | Preserve current behavior during migration. Later, move multiple-issues template behavior into project/language-specific configuration, including Simple English Wikipedia’s `Article issues` variant. |
+
+###Visual Studio Analysis errors/Warnings/Messages
+#### Errors
+
+
+#### Warnings
+
+
+#### - Messages
+| Analyzer Rule | Description | Priority | Recommendation |
+|---|---|:---:|---|
+| IDE0018 | Variable declaration can be inlined. | Low | Defer until after C# language version is upgraded during or after .NET 8 migration. |
+| IDE0044 | Field can be made readonly. | Low | Consider after migration for AWB-owned code only; avoid third-party bundled libraries. |
 
 \## 9. Testing Coverage
 
