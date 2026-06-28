@@ -1364,7 +1364,7 @@ namespace WikiFunctions
 
         // Covered by HumanCatKeyTests.HasDiacritics
         /// <summary>
-        /// Returns whether the given string contains recognised diacritics
+        /// Returns whether the given string contains recognized diacritics
         /// </summary>
         public static bool HasDiacritics(string s)
         {
@@ -1372,7 +1372,7 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Removes recognised diacritics and double quotes, converts to Proper Case per [[WP:CAT]]
+        /// Removes recognized diacritics and double quotes, converts to Proper Case per [[WP:CAT]]
         /// </summary>
         public static string FixupDefaultSort(string s)
         {
@@ -1383,7 +1383,7 @@ namespace WikiFunctions
 
         //Covered by HumanCatKeyTests.FixUpDefaultSortTests()
         /// <summary>
-        /// Removes recognised diacritics and double quotes, converts to Proper Case per [[WP:CAT]]
+        /// Removes recognized diacritics and double quotes, converts to Proper Case per [[WP:CAT]]
         /// </summary>
         public static string FixupDefaultSort(string defaultsort, bool isArticleAboutAPerson)
         {
@@ -1418,7 +1418,7 @@ namespace WikiFunctions
             defaultsort = defaultsort.Replace("&ndash;", "–");
             defaultsort = defaultsort.Replace("&mdash;", "—");
 
-            // normalisation - simplify double spaces to a single one
+            // normalization - simplify double spaces to a single one
             while (defaultsort.Contains("  "))
                 defaultsort = defaultsort.Replace("  ", " ");
 
@@ -1685,7 +1685,7 @@ Message: {2}
 
         private static string WineBrowserPath;
         /// <summary>
-        /// Error supressed URL opener in default browser (Windows) or Firefox/Chromium/Konqueror for Wine
+        /// Error suppressed URL opener in default browser (Windows) or Firefox/Chromium/Konqueror for Wine
         /// </summary>
         public static void OpenURLInBrowser(string url)
         {
@@ -1726,7 +1726,7 @@ Message: {2}
 
         /// <summary>
         /// Forces the loading of a page in En.Wiki
-        /// Used for 'static' links to the english wikipedia
+        /// Used for 'static' links to the english Wikipedia
         /// </summary>
         public static void OpenENArticleInBrowser(string title, bool userspace)
         {
@@ -1805,7 +1805,7 @@ Message: {2}
 
         // Covered by ToolsTests.RemoveHashFromPageTitle()
         /// <summary>
-        /// Removes the # and text after from a page title. Some redirects redirect to sections, the API doesnt like this
+        /// Removes the # and text after from a page title. Some redirects redirect to sections, the API doesn't like this
         /// </summary>
         /// <param name="title">Page Title</param>
         /// <returns>Title without # and proceeding, if appropriate</returns>

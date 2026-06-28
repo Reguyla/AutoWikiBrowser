@@ -493,7 +493,7 @@ namespace WikiFunctions
         public static readonly Regex MagicWordTemplates = Tools.NestedTemplateRegex(new[] { "BASEPAGENAME", "DEFAULTSORT", "DISPLAYTITLE", "Displaytitle", "FULLPAGENAME", "Fullpagename", "Namespace",
                                                                                         "Numberofarticles", "PAGENAME", "PAGESIZE", "PROTECTIONLEVEL", "Pagename", "SUBPAGENAME", "Subpagename", "padleft" }, false);
         /// <summary>
-        /// List of magic words behaviour switches from https://en.wikipedia.org/wiki/Help:Magic_words#Behavior_switches
+        /// List of magic words behavior switches from https://en.wikipedia.org/wiki/Help:Magic_words#Behavior_switches
         /// </summary>
         public static readonly Regex MagicWordsBehaviourSwitches = new Regex (@"__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|INDEX|NOINDEX|STATICREDIRECT)__", RegexOptions.IgnoreCase);
         /// <summary>
@@ -552,12 +552,12 @@ namespace WikiFunctions
         public static readonly Regex TemplateEnd = new Regex(@"( ?(?:\r\n ?)*) *}}$");
 
         /// <summary>
-        /// Matches single and multiline templates, NOT nested templates
+        /// Matches single and multi-line templates, NOT nested templates
         /// </summary>
         public static readonly Regex TemplateMultiline = new Regex(@"{{[^{]*?}}");
 
         /// <summary>
-        /// Matches single and multiline templates, AND those with nested templates
+        /// Matches single and multi-line templates, AND those with nested templates
         /// </summary>
         public static readonly Regex NestedTemplates = new Regex(@"{{(?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))}}");
 
@@ -859,20 +859,20 @@ namespace WikiFunctions
         public static Regex LooseImage;
 
         /// <summary>
-        /// Matches quotations outside of templates but within a pair of quotation marks, notably exlcuding straight single quotes
+        /// Matches quotations outside of templates but within a pair of quotation marks, notably excluding straight single quotes
         /// </summary>
         /// see https://en.wikipedia.org/wiki/Quotation_mark_glyphs
         /// https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Ignoring_spelling_errors_within_quotation_marks.3F
         public static readonly Regex UntemplatedQuotes = new Regex(@"(?<=[^\w]|^)[""«»‘’“”‛‟‹›“”„‘’`’“‘”].{1,2000}?[""«»‘’“”‛‟‹›“”„‘’`’“‘”](?=[^\w])", RegexOptions.Singleline);
         
         /// <summary>
-        /// Matches common curly double quotes, see [[MOS:PUNCT]] - exludes low-high etc. as these are allowed in non-English text per MOS:QUOTEMARK
+        /// Matches common curly double quotes, see [[MOS:PUNCT]] - excludes low-high etc. as these are allowed in non-English text per MOS:QUOTEMARK
         /// </summary>
         public static readonly Regex CurlyDoubleQuotes = new Regex(@"[‟″]");
 
         // covered by TestFixNonBreakingSpaces
         /// <summary>
-        /// Matches abbreviated SI units without a non-breaking space, notably does not correct millimetres without a space due to firearms articles using this convention
+        /// Matches abbreviated SI units without a non-breaking space, notably does not correct millimeters without a space due to firearms articles using this convention
         /// </summary>
         /// <remarks>
         /// https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Non_breaking_spaces
@@ -1000,12 +1000,12 @@ namespace WikiFunctions
         public const string ReferenceEnd = @"(?:</ref>)";
 
         /// <summary>
-        /// Matches any of the recognised templates for displaying cite references e.g. {{reflist}}, {{refs}}, &lt;references/&gt;
+        /// Matches any of the recognized templates for displaying cite references e.g. {{reflist}}, {{refs}}, &lt;references/&gt;
         /// </summary>
         public static readonly Regex ReferencesTemplate = new Regex(ReferencesTemplates, RegexOptions.Singleline);
 
         /// <summary>
-        /// Matches any of the recognised templates for displaying cite references followed by a &gt;ref&lt; reference
+        /// Matches any of the recognized templates for displaying cite references followed by a &gt;ref&lt; reference
         /// </summary>
         public static readonly Regex RefAfterReflist = new Regex(ReferencesTemplates + ".*?" + ReferenceEnd, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
@@ -1121,7 +1121,7 @@ namespace WikiFunctions
         public static readonly Regex DoublePipeLink =  new Regex(@"\[\["+AllowedCharacters+@"\|"+AllowedCharacters+@"\|"+AllowedCharacters+@"\]\]");
 
         /// <summary>
-        /// Mathes the {{circa}} template and [[circa]] links
+        /// Matches the {{circa}} template and [[circa]] links
         /// </summary>
         public static readonly Regex CircaLinkTemplate = new Regex(@"({{[Cc]irca}}|\[\[[Cc]irca *(?:\|[Cc]a?\.?)?\]\]|\[\[[Cc]a?\.?\]*\.?)");
 
@@ -1334,7 +1334,7 @@ namespace WikiFunctions
         });
         // covered by DablinksTests
         /// <summary>
-        /// Finds article disamiguation links from https://en.wikipedia.org/wiki/Wikipedia:Template_messages/General#Disambiguation_and_redirection and https://en.wikipedia.org/wiki/Template:Hatnote_templates (en only)
+        /// Finds article disambiguation links from https://en.wikipedia.org/wiki/Wikipedia:Template_messages/General#Disambiguation_and_redirection and https://en.wikipedia.org/wiki/Template:Hatnote_templates (en only)
         /// </summary>
         public static readonly Regex Dablinks = Tools.NestedTemplateRegex(DablinksList, false);
 
@@ -1552,7 +1552,7 @@ namespace WikiFunctions
         public static readonly Regex NotesHeader = new Regex(@"== *Notes *==", RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
 
         /// <summary>
-        /// Matches the external links level 2 heading, also "Other websites" for simple wikipedia
+        /// Matches the external links level 2 heading, also "Other websites" for simple Wikipedia
         /// </summary>
         public static Regex ExternalLinksHeader;
 
@@ -1637,7 +1637,7 @@ namespace WikiFunctions
         public static readonly Regex SurnameClarificationTemplates = Tools.NestedTemplateRegex(new [] {"Arabic name", "Basque name", "Cambodian name", "Catalan name", "Chinese Indonesian name", "Chinese name", "Dinka name", "Dutch name", "Eastern Slavic name", "Galician name", "Germanic name", "Habesha name", "Hmong name", "Icelandic name", "Indian name", "Indonesian name", "Japanese name", "Korean name", "Malay name", "Mongolian name", "Multi-word family name", "Philippine name", "Portuguese name", "Romance name", "Slavic name", "Spanish name", "Turkic name", "Vietnamese name", "Welsh name", "Western name order"});
 
         /// <summary>
-        /// Matches magic word behaviour switches from https://en.wikipedia.org/wiki/Help:Magic_words
+        /// Matches magic word behavior switches from https://en.wikipedia.org/wiki/Help:Magic_words
         /// </summary>
         public static readonly Regex MagicWordBehaviourSwitches = new Regex(@"^__(TOC|FORCETOC|NOTOC|NOEDITSECTION|ARCHIVEDTALK|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|INDEX|NOINDEX|STATICREDIRECT|DISAMBIG)__(\s+|$)", RegexOptions.Multiline);
     }

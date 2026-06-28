@@ -271,7 +271,7 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Gets a name of the project, e.g. "wikipedia".
+        /// Gets a name of the project, e.g. "Wikipedia".
         /// </summary>
         public static ProjectEnum Project { get; private set; }
 
@@ -559,7 +559,7 @@ namespace WikiFunctions
          
         #endregion
 
-        // for logging, these will probably need internationalising
+        // for logging, these will probably need internationalizing
         public static string AWBVersionString(string version)
         {
             return "*" + WPAWB + " version " + version + Environment.NewLine;

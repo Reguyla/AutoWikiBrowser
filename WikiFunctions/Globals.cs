@@ -22,7 +22,7 @@ using System.Reflection;
 namespace WikiFunctions
 {
     /// <summary>
-    /// Holds some deepest-level things to be initialised prior to most other static classes,
+    /// Holds some deepest-level things to be initialized prior to most other static classes,
     /// including Variables
     /// </summary>
     public static class Globals

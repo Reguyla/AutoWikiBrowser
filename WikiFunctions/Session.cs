@@ -392,7 +392,7 @@ namespace WikiFunctions
                 // and enable bots only when in 'enabledbots' section
 
                 var usernameComparer = new UsernameComparer();
-                // Optimisation, saves running the check multiple times
+                // Optimization, saves running the check multiple times
                 bool isBotEnabled = enabledBots.Contains(User.Name, usernameComparer);
 
                 if (
@@ -597,7 +597,7 @@ namespace WikiFunctions
                 }
 
                 MessageBox.Show(
-                    "An error occured while connecting to the server or loading project information from it. " +
+                    "An error occurred while connecting to the server or loading project information from it. " +
                     "Please make sure that your internet connection works and such combination of project/language exist." +
                     "\r\nEnter the URL in the format \"en.wikipedia.org/w/\" (including path where index.php and api.php reside)." +
                     "\r\nError description: " + message,
