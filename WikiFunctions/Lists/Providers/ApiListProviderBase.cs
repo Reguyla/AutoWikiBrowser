@@ -120,7 +120,7 @@ namespace WikiFunctions.Lists.Providers
                             continue;
 
                         int ns;
-                        bool nsvalid = int.TryParse(xml.GetAttribute("ns"), out ns)
+                        bool nsvalid = int.TryParse(xml.GetAttribute("ns"), out ns);
                         string name = xml.GetAttribute(WantedAttribute);
 
                         if (string.IsNullOrEmpty(name))
