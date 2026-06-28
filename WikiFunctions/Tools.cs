@@ -3535,6 +3535,39 @@ Message: {2}
         }
 
         /// <summary>
+        /// Handles temporary HTTP/API failures that may succeed if retried.
+        /// </summary>
+        /// <param name="webex">The web exception thrown by the request.</param>
+        /// <returns>
+        /// true if the exception was handled and the caller should retry;
+        /// false if the exception should be rethrown.
+        /// </returns>
+        public static bool HandleHttpException(System.Net.WebException webex)
+        {
+            if (webex == null)
+                return false;
+
+            System.Net.HttpWebResponse response = webex.Response as System.Net.HttpWebResponse;
+
+            if (response == null)
+                return false;
+
+            System.Net.HttpStatusCode statusCode = response.StatusCode;
+
+            if (statusCode == System.Net.HttpStatusCode.RequestTimeout ||
+                statusCode == System.Net.HttpStatusCode.BadGateway ||
+                statusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
+                statusCode == System.Net.HttpStatusCode.GatewayTimeout ||
+                (int)statusCode == 429)
+            {
+                System.Threading.Thread.Sleep(5000);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Calculates md5sum of a string, see http://msdn.microsoft.com/en-us/library/system.security.cryptography.md5%28v=vs.110%29.aspx
         /// </summary>
         /// <param name="input"></param>
