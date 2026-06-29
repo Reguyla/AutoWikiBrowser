@@ -1533,10 +1533,15 @@ namespace WikiFunctions.Controls.Lists
                 }
             }
 
-            // using "DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed" to enable rich formatting above means we need to set the horizontal
-            // width ourselves so that a horizontal scrollbar is shown when needed
-            string longestArticle = lbArticles.Items.Cast<Article>().Select(ar => ar.Name).ToList().OrderByDescending(s => s.Length).First();
-            lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestArticle, e.Font).Width;
+            // using "DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed" to enable rich formatting above means
+            // we need to set the horizontal width ourselves so that a horizontal scrollbar is shown when needed
+            string longestName = String.Empty;
+            foreach (Article ar in lbArticles.Items)
+            {
+                if (ar.Name.Length > longestName.Length)
+                longestName = ar.Name;
+             }
+            lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestName, e.Font).Width;
 
             e.DrawFocusRectangle();
         }
