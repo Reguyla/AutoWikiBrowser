@@ -389,6 +389,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         private void PasteCmd()
         {
+            RulesTreeView.BeginUpdate();
             SaveCurrentRule();
             History.Save();
 
@@ -397,6 +398,7 @@ namespace WikiFunctions.ReplaceSpecial
             RulesTreeView.Select();
             RestoreSelectedRule();
             RulesTreeView.ExpandAll();
+            RulesTreeView.EndUpdate();
         }
 
         private void NewRule()
@@ -452,6 +454,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         public void AddNewRule(List<IRule> rules)
         {
+            RulesTreeView.BeginUpdate();
             RulesTreeView.Nodes.Clear();
 
             foreach (IRule r in rules)
@@ -460,6 +463,7 @@ namespace WikiFunctions.ReplaceSpecial
             }
 
             RulesTreeView.ExpandAll();
+            RulesTreeView.EndUpdate();
         }
 
         private void AddNewRule(IRule r)
