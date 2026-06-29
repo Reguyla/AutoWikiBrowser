@@ -368,7 +368,7 @@ namespace AutoWikiBrowser
                     if (!runUpdater &&
                         MessageBox.Show(
                             string.Format(
-                                "This version has been superceeded by new versions of AWB: {0}.\r\n\r\nYou may continue to use this version or update to the newest version.\r\n\r\nWould you like to automatically upgrade to the newest version?",
+                                "This version has been superseded by new versions of AWB: {0}.\r\n\r\nYou may continue to use this version or update to the newest version.\r\n\r\nWould you like to automatically upgrade to the newest version?",
                                 string.Join(", ", Updater.NewerVersions)
                                ),
                             "Upgrade?", MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -419,7 +419,7 @@ namespace AutoWikiBrowser
                 if (_minimize) Visible = false;
             }
             else
-                LastState = WindowState; // remember if maximised or normal so can restore same when dbl click tray icon
+                LastState = WindowState; // remember if maximized or normal so can restore same when dbl click tray icon
         }
         #endregion
 
@@ -457,7 +457,7 @@ namespace AutoWikiBrowser
         private bool _userWarnedAboutUnicodePUA;
 
         /// <summary>
-        /// True if AWB should be minimised to the system tray; False if it should minimise to the taskbar
+        /// True if AWB should be minimized to the system tray; False if it should minimize to the taskbar
         /// </summary>
         private bool _minimize;
 
@@ -1037,7 +1037,7 @@ namespace AutoWikiBrowser
             StatusLabelText = (preParseModeToolStripMenuItem.Checked ? "Processing page (pre-parse mode)" : "Processing page");
             Application.DoEvents();
 
-            // FIXME: this position is imprefect, since above there is code that can explode, but this way
+            // FIXME: this position is imperfect, since above there is code that can explode, but this way
             // at least we don't get bogus reports of unrelated pages
             ErrorHandler.CurrentPage = TheArticle.Name;
 
@@ -3453,7 +3453,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             btnDelete.Enabled = btntsDelete.Enabled = enabled && TheSession.User.CanDeletePage(TheSession.Page) && TheArticle != null && TheSession.Page.Exists;
             btnFind.Enabled = txtFind.TextLength > 0;
 
-            // if there are find matches, colour the Find button yellow
+            // if there are find matches, color the Find button yellow
             if (btnFind.Enabled && txtEdit.FindAll(txtFind.Text, chkFindRegex.Checked, chkFindCaseSensitive.Checked, TheArticle.Name).Any())
                 btnFind.BackColor = Color.Yellow;
             else
@@ -4242,7 +4242,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             txtEdit.Text = TheArticle.ArticleText;
             txtEdit.Visible = false;
 
-            // clear any red from previous alerts to avoid entire edit box being coloured red after reparse
+            // clear any red from previous alerts to avoid entire edit box being colored red after reparse
             txtEdit.SelectAll();
             txtEdit.SelectionBackColor = Color.White;
 
@@ -5526,7 +5526,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         }
 
         /// <summary>
-        /// Applys EditToolBar button action
+        /// Applies EditToolBar button action
         /// </summary>
         /// <param name="noSelection">String to display if no text already select</param>
         /// <param name="selectionStartOffset">Start position to highlight from end of noSelection</param>
