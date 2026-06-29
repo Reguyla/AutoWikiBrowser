@@ -164,7 +164,7 @@ and '''[[Christopher Martin (entertainer)|Christopher Play Martin]]''' (born [[J
         [Test]
         public void FixPeopleCategoriesAlreadyCategorized()
         {
-            // no matches if already categorised
+            // no matches if already categorized
             const string a = @"'''Fred Smith''' (born 1960) is a bloke.
 [[Category:1960 births]]
 [[Category:1990 deaths]]";

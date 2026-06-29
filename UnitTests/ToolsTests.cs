@@ -773,7 +773,7 @@ en.wikipedia.org"));
         [Test]
         public void OrdeOfWikimediaProjects()
         {
-            // Be very causious if changing order or Wikimedia Projects
+            // Be very cautious if changing order or Wikimedia Projects
             ClassicAssert.IsTrue(ProjectEnum.commons > ProjectEnum.species);
             ClassicAssert.IsTrue(ProjectEnum.meta > ProjectEnum.commons);
             ClassicAssert.IsTrue(ProjectEnum.mediawiki > ProjectEnum.meta);
@@ -1090,7 +1090,7 @@ John", "*"), Is.EqualTo(@"* Fred
             Assert.That(Tools.ConvertDate(iso, Parsers.DateLocale.Undetermined), Is.EqualTo(iso));
             Assert.That(Tools.ConvertDate(iso2, Parsers.DateLocale.International), Is.EqualTo(@"4 July 1890"));
 
-            // handles incorect format
+            // handles incorrect format
             string wrong = @"foo";
             Assert.That(Tools.ConvertDate(wrong, Parsers.DateLocale.International), Is.EqualTo(wrong));
             Assert.That(Tools.ConvertDate(@"2009-10", Parsers.DateLocale.International), Is.EqualTo(@"2009-10"), "day not added to year month combo");
@@ -1628,7 +1628,7 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
             // no change when parameter doesn't exist
             Assert.That(Tools.RemoveTemplateParameter(correct, "cite web", "dateformat"), Is.EqualTo(correct));
 
-            // no partial match on paramter name
+            // no partial match on parameter name
             Assert.That(Tools.RemoveTemplateParameter(correct, "cite web", "yea"), Is.EqualTo(correct));
 
             // no partial match on template name
@@ -1659,7 +1659,7 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
             // no change when parameter doesn't exist
             Assert.That(Tools.RemoveTemplateParameter(correct, "dateformat"), Is.EqualTo(correct));
 
-            // no partial match on paramter name
+            // no partial match on parameter name
             Assert.That(Tools.RemoveTemplateParameter(correct, "yea"), Is.EqualTo(correct));
 
             // parameter name case sensitive

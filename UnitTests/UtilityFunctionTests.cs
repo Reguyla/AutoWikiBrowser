@@ -125,7 +125,7 @@ namespace UnitTests
             Parsers.ChangeToDefaultSort("{{defaultsort| Tést}}{{DEFAULTSORT: Tést}}", "Foo", out noChange);
             ClassicAssert.IsTrue(noChange);
 
-            // Remove explicitally defined sort keys from categories when the page has defaultsort
+            // Remove explicitly defined sort keys from categories when the page has defaultsort
             Assert.That(Parsers.ChangeToDefaultSort("{{DEFAULTSORT:Test}}[[Category:Test|Test]]", "Foo", out noChange),
                             Is.EqualTo("{{DEFAULTSORT:Test}}[[Category:Test]]"));
             ClassicAssert.IsFalse(noChange);

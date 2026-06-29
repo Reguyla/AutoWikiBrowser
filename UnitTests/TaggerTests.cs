@@ -338,7 +338,7 @@ namespace UnitTests
             Globals.UnitTestIntValue = 5;
 
             text = parser.Tagger(ShortText, "Test", false, out noChange, ref summary);
-            // Categorised Stub
+            // Categorized Stub
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
@@ -347,7 +347,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger(ShortText + ShortText, "Test", false, out noChange, ref summary);
-            // Categorised Page
+            // Categorized Page
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
 
@@ -358,7 +358,7 @@ namespace UnitTests
             Globals.UnitTestBoolValue = false;
 
             text = parser.Tagger(ShortText, "Test", false, out noChange, ref summary);
-            // Non orphan categorised stub
+            // Non orphan categorized stub
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text));
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
@@ -368,7 +368,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text));
 
             text = parser.Tagger(ShortText + ShortText, "Test", false, out noChange, ref summary);
-            // Non orphan categorised page
+            // Non orphan categorized page
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text));
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text));
 
@@ -541,7 +541,7 @@ namespace UnitTests
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
             string text = parser.Tagger(ShortText, "Test", false, out noChange, ref summary);
-            // Stub, no existing stub tag. Sv wiki doens't have dead end nor orphan
+            // Stub, no existing stub tag. Sv wiki doesn't have dead end nor orphan
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text), "orphan");
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text), "stub");
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "dead end");
