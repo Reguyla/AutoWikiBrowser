@@ -149,6 +149,34 @@ Following completion of the .NET 8 migration, modernization efforts may include:
 - Confirm detected settings with the user.
 - Store that profile for future sessions.
 
+### Multi-Module Execution Pipeline
+
+TWAIN should support loading multiple modules at the same time and allow users to control the order in which they run.
+
+| Capability | Description |
+|---|---|
+| Multiple active modules | Users can enable more than one module for a run. |
+| Execution order | Modules can be ordered by drag/drop or priority number. |
+| Per-module settings | Each module can retain its own configuration. |
+| Preview changes | Users can see what each module changed before saving. |
+| Stop conditions | A module can stop the pipeline, skip the page, or pass control to the next module. |
+| Language support | Modules may eventually be written in C#, Python, PowerShell, etc. |
+| Logging | Each module records what it changed and why. |
+
+### Editor quality of life improvements to the module builder
+| Feature                   | Benefit                              |
+| ------------------------- | ------------------------------------ |
+|  Line numbers            | Easier debugging and error reporting |
+|  Go To Line (Ctrl+G)     | Jump directly to compiler errors     |
+|  Find (Ctrl+F)           | Search within the module             |
+|  Find & Replace (Ctrl+H) | Basic editing capability             |
+|  Incremental Search      | Highlights matches as you type       |
+|  Word Wrap Toggle        | Better readability for long lines    |
+|  Current Line Highlight  | Easier navigation                    |
+|  Bracket Matching        | Shows matching `{}`, `()`, `[]`      |
+|  Auto Indentation        | Cleaner formatting                   |
+|  Code Folding            | Collapse methods or regions          |
+|  Zoom (Ctrl+Mouse Wheel) | Accessibility                        |
 
 ### 1. Wiki Profile Selection and Detection
 The rebuilt application should not assume that the user is editing English Wikipedia. During modernization, TWAIN should support explicit wiki profile selection and custom MediaWiki site configuration.
