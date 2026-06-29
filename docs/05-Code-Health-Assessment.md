@@ -265,10 +265,15 @@ CodeMaid will be used to assist with:
 - Removal of unused code
 - File and member organization
 - General maintainability improvements
-
 Findings from static analysis will be reviewed throughout the migration process. Recommendations will be evaluated on a case-by-case basis to ensure they align with the project's guiding principles of incremental migration, feature preservation, and evidence-based decision making.
 
 The objective is to improve overall code quality while avoiding unnecessary changes that could increase migration risk.
+
+##### CodeMaid Initial Result
+
+CodeMaid was tested against `WikiFunctions.Tools`. The tool identified only minor whitespace changes, primarily extra blank lines near the beginning and end of the file. No significant formatting or structural cleanup was identified.
+
+Recommendation: keep CodeMaid configured conservatively during migration and avoid broad cleanup passes until after the .NET 8 migration is stable.
 
 ### 5.5.2. Sample table
 | Metric                 | Baseline | Current |       Goal |
@@ -465,6 +470,15 @@ Current behavior is hardcoded to English-language rules; future behavior shhould
 | Area | Finding | Severity | Migration Phase | Status | Recommendation |
 |---|---|:---:|:---:|:---:|---|
 | Test Isolation | Most unit tests fail when not connected to Wikipedia/API services. | High | Migration | Open | Separate true unit tests from integration tests and add mocks/fixtures for API-dependent behavior. |
+
+### 5.8.8. Coding style drift
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|---|---|:---:|:---:|:---:|---|
+| Naming Consistency | Naming conventions are inconsistent across the codebase, likely due to long-term multi-contributor development. | Low | Post-Migration Cleanup | Deferred | Establish a project-wide coding standard after .NET 8 migration, then apply naming cleanup in focused commits. |
+- Fix private/local naming only when already touching a file.
+- Do not mass-rename before migration.
+- Do not rename public APIs until compatibility impact is reviewed.
+
 
 ## 5.9. Testing Coverage
 
