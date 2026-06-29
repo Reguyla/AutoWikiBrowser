@@ -29,7 +29,7 @@ namespace WikiFunctions
     public static class WikiRegexes
     {
         /// <summary>
-        /// Make namespace-related regexes such as Category, Template with each wiki's localised terms
+        /// Make namespace-related regexes such as Category, Template with each wiki's localized terms
         /// </summary>
         private static void MakeNamespaceSpecificRegexes()
         {
