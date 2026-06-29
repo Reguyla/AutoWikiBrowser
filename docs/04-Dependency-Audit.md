@@ -103,6 +103,10 @@ Areas requiring review include:
 - Windows-only APIs
 - WinForms compatibility
 
+| Dependency Type | Item | Used By | Notes |
+|---|---|---|---|
+| Dynamic compilation | `Microsoft.CSharp` / `CSharpCodeProvider` | `CSharpEval` | Uses legacy .NET Framework CodeDOM compiler with `CompilerVersion = v4.0`. |
+
 ## 3.5. NuGet Packages
 The project currently contains a mixture of framework references, project references, and external libraries. This section inventories packages managed through NuGet and identifies those requiring updates or replacement during the .NET 8 migration.
 

@@ -479,6 +479,10 @@ Current behavior is hardcoded to English-language rules; future behavior shhould
 - Do not mass-rename before migration.
 - Do not rename public APIs until compatibility impact is reviewed.
 
+### 5.8.8. C# runtime evaluator
+| Area | Finding | Severity | Migration Phase | Status | Recommendation |
+|---|---|:---:|:---:|:---:|---|
+| Dynamic Compilation | `CSharpEval` uses `CSharpCodeProvider` with `CompilerVersion = v4.0` to compile user-entered code at runtime. | High | Migration | Open | Replace with Roslyn-based scripting/compilation, isolate behind a service, or evaluate whether this feature should be removed. |
 
 ## 5.9. Testing Coverage
 
