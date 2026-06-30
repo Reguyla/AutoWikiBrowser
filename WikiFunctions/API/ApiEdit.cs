@@ -460,7 +460,7 @@ namespace WikiFunctions.API
                         break;
 
                     case HttpStatusCode.NotFound: // 404
-                        return ""; // emulate the behaviour of Tools.HttpGet()
+                        return ""; // emulate the behavior of Tools.HttpGet()
                 }
 
                 // just reclassifying
@@ -1472,7 +1472,7 @@ namespace WikiFunctions.API
 
                 string res = xr.ReadString();
 
-                // look for and extract parsewarnings e.g. duplicate arguments in template call, and put at top in div of right colour (red)
+                // look for and extract parsewarnings e.g. duplicate arguments in template call, and put at top in div of right color (red)
                 string warnings = "";
 
                 if (xr.ReadToFollowing("parsewarnings"))

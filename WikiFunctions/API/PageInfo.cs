@@ -96,7 +96,7 @@ namespace WikiFunctions.API
                     TitleChangedStatus |= PageTitleStatus.Normalised;
             }
 
-            // Normalisation occurs before redirection, so if that exists, that is the title passed to the API
+            // Normalization occurs before redirection, so if that exists, that is the title passed to the API
             if (!string.IsNullOrEmpty(normalisedFrom))
             {
                 OriginalTitle = normalisedFrom;
@@ -183,7 +183,7 @@ namespace WikiFunctions.API
         { get; private set; }
 
         /// <summary>
-        /// Original title (before redirects/normalisation) of the Page
+        /// Original title (before redirects/normalization) of the Page
         /// </summary>
         public string OriginalTitle
         { get; private set; }

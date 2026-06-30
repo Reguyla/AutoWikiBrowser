@@ -152,7 +152,7 @@ namespace WikiFunctions.Controls.Lists
             {
                 new DatabaseScannerListProvider(this),
 
-                //Add these list providers later, we dont really need/want them on the Right click "Add to list from.." menu
+                //Add these list providers later, we don't really need/want them on the Right click "Add to list from.." menu
                 HtmlScraperLProvider,
                 CheckWikiLProvider,
                 CheckWikiWithNumberLProvider,

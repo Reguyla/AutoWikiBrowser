@@ -118,7 +118,7 @@ namespace WikiFunctions
             if (mAWBLogListener != null)
                 return;
 
-            // Initialise a Log Listener and add it to a TraceManager collection
+            // Initialize a Log Listener and add it to a TraceManager collection
             mAWBLogListener = new AWBLogListener(Name);
 
             if (currentTraceManager != null)
@@ -234,7 +234,7 @@ namespace WikiFunctions
         public bool IsStub { get { return Parsers.IsStub(mArticleText); } }
 
         /// <summary>
-        /// returns whether the article's title contains any recognised diacritic(s)
+        /// returns whether the article's title contains any recognized diacritic(s)
         /// </summary>
         [XmlIgnore]
         public bool HasDiacriticsInTitle
@@ -418,7 +418,7 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Returns true if the article uses cite references but has no recognised template to display the references
+        /// Returns true if the article uses cite references but has no recognized template to display the references
         /// </summary>
         [XmlIgnore]
         public bool IsMissingReferencesDisplay
@@ -595,7 +595,7 @@ namespace WikiFunctions
         /// Convert HTML characters in the article to Unicode
         /// </summary>
         /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
-        /// <param name="parsers">An initialised Parsers object</param>
+        /// <param name="parsers">An initialized Parsers object</param>
         /// <param name="removeText"></param>
         public void Unicodify(bool skipIfNoChange, Parsers parsers, HideText removeText)
         {
@@ -819,7 +819,7 @@ namespace WikiFunctions
         /// Add, remove or replace a specified category
         /// </summary>
         /// <param name="option">The action to take</param>
-        /// <param name="parsers">An initialised Parsers object</param>
+        /// <param name="parsers">An initialized Parsers object</param>
         /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
         /// <param name="categoryText">The category to add or remove; or, when replacing, the name of the old category</param>
         /// <param name="categoryText2">The name of the replacement category (recat mode only)</param>
@@ -1000,7 +1000,7 @@ namespace WikiFunctions
         /// <summary>
         /// "Auto tag" (Adds/removes wikify or stub tags if necessary)
         /// </summary>
-        /// <param name="parsers">An initialised Parsers object</param>
+        /// <param name="parsers">An initialized Parsers object</param>
         /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
         /// <param name="restrictOrphanTagging"></param>
         public void AutoTag(Parsers parsers, bool skipIfNoChange, bool restrictOrphanTagging)
@@ -1147,7 +1147,7 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Add bulletpoints to external links, if necessary
+        /// Add bullet points to external links, if necessary
         /// </summary>
         /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
         public void BulletExternalLinks(bool skipIfNoChange)
@@ -1403,7 +1403,7 @@ namespace WikiFunctions
         /// <param name="restrictDefaultsortAddition"></param>
         /// <param name="noMOSComplianceFixes"></param>
         public void PerformGeneralFixes(Parsers parsers, HideText removeText, ISkipOptions skip, bool replaceReferenceTags, bool restrictDefaultsortAddition, bool noMOSComplianceFixes)
-        { // TODO: 2009-01-28 review which of the genfixes below should be labelled 'significant'
+        { // TODO: 2009-01-28 review which of the genfixes below should be labeled 'significant'
             BeforeGeneralFixesTextChanged();
 
             // two flags for FixDates functionality
@@ -1622,7 +1622,7 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// If the text hasnt been changed prior to starting general fixes, see if the general fixes have made a change,
+        /// If the text hasn't been changed prior to starting general fixes, see if the general fixes have made a change,
         /// if it has, make a copy of the article text post general fix changes
         /// </summary>
         private void AfterGeneralFixesTextChanged()
