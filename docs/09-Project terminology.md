@@ -160,27 +160,33 @@ This document defines project-specific terminology, abbreviations, and naming co
 
 |------------------|------------|
 
-| BingSearch       | Optional plugin that assists with searching for external information using the Bing search engine. |
+| AWBPerlWrapperPlugin | Allow the processing to be done in the wonderfully friendly and terse language of PERL.|
 
-| CFD              | Optional plugin related to deletion discussion workflows. Exact functionality to be verified during plugin evaluation. |
+| BingSearch       | Assists with searching for external information using the Bing search engine. |
 
-| CheckPage Plugin | A plugin that retrieves or processes data from one or more AWB CheckPages. |
+| CFD              | A tool for speedy re-categorization per results of discussions at Wikipedia Categories for discussion. |
+
+| CSV loader       | Allows creating and updating articles using CSV data files
+
+| CheckPage Plugin | Retrieves or processes data from one or more AWB CheckPages. |
 
 | Delinker         | Plugin that removes unnecessary wikilinks from articles. |
 
-| Fronds           | Optional plugin providing additional editing functionality. Exact purpose to be verified during plugin evaluation. |
+| Fronds           | Find/Replace ON Demand Services (FRONDS) are collaboratively-created blocks (or modules) of Find-Replace combinations |
 
-| IFD              | Optional plugin related to image deletion workflows. Exact functionality to be verified during plugin evaluation. |
+| IFD              | A tool for easy replacement and removal (commenting out or full removal) of multiple images referencing "Images For Deletion" |
 
-| KingbotK Plugin  | Optional plugin that provides automated assistance for selected maintenance tasks originally developed for KingbotK workflows. |
+| KingbotK Plugin  | Provides automated assistance for selected maintenance tasks originally developed for KingbotK workflows. |
 
-| NoLimitsPlugin   | Optional plugin that extends or relaxes certain AutoWikiBrowser operating limits. Exact behavior to be verified during plugin evaluation. |
+| NoLimitsPlugin   | A tool for creating lists with more than 25,000 items. |
 
 | Plugin           | Optional extension loaded by AutoWikiBrowser to provide additional functionality. |
 
-| TheTemplator     | Plugin that assists with inserting and managing templates within articles. |
+| TheTemplator     | Assists with inserting and managing templates within articles. |
 
-| TypoScan         | Plugin that detects common spelling mistakes and typographical issues. |
+| TypoScan         | Detects common spelling mistakes and typographical issues. |
+
+| WoRMS		   | Allows downloading information from the World Register of Marine Species using web services
 
 \---
 
