@@ -80,8 +80,9 @@ Repository cloned to: `C:\Users\<username>\source\repos\AutoWikiBrowser`
 ## 2.11. Optional Software
 - Notepad++
 - Notepad
-- WinMerge
-- Powertoys
+- VS spellchecker
+- SonarLint
+- Markdown editor
 
 ## 2.12. Project Baseline
 | Item               | Value                      |
@@ -113,4 +114,8 @@ Supporting
 
 Operational
 -----------
+06 – Change Control Log
 07 – Lessons Learned
+08 - Migration-Assessment
+09 - Project Terminology
+

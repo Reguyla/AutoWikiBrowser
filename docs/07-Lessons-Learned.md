@@ -23,6 +23,7 @@ Treat the initial incident counts as a baseline only. Re-run the Upgrade Assista
 Prerequisites
 -------------
 00 – Foundation, Discovery & Planning
+01 - Migration Strategy
 02 – Development Environment
 
 Supporting
@@ -34,3 +35,5 @@ Supporting
 Operational
 -----------
 06 – Change Control Log
+08 - Migration-Assessment
+09 - Project Terminology

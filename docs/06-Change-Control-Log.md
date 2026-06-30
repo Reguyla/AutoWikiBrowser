@@ -192,6 +192,7 @@ Centralize configuration before further modernization.
 Prerequisites
 -------------
 00 – Foundation, Discovery & Planning
+01 - Migration Strategy
 02 – Development Environment
 
 Supporting
@@ -203,6 +204,8 @@ Supporting
 Operational
 -----------
 07 – Lessons Learned
+08 - Migration-Assessment
+09 - Project Terminology
 
 
 

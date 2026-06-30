@@ -199,6 +199,7 @@ Identifies older technologies or platform-specific dependencies that may require
 Prerequisites
 -------------
 00 – Foundation, Discovery & Planning
+01 - Migration Strategy
 02 - Development Environment
 
 Supporting
@@ -208,7 +209,11 @@ Supporting
 
 Operational
 -----------
+06 – Change Control Log
 07 – Lessons Learned
+08 - Migration-Assessment
+09 - Project Terminology
+
 
 
 
