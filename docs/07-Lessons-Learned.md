@@ -8,6 +8,17 @@ AWB currently depends on SVN-generated revision metadata (SvnInfo.cs). This depe
 
 `SvnInfo.cs` is a generated build artifact. If deleted, the first rebuild may recreate it but still report errors because dependent projects cannot find `WikiFunctions.dll`. Running rebuild again after `SvnInfo.cs` is regenerated allows `WikiFunctions` and dependent projects to build successfully.
 
+### Upgrade Assistant Findings May Be Inflated Before Project Conversion
+
+The initial Upgrade Assistant analysis was performed against the legacy .NET Framework project format.
+
+Many `Api.0001 (API does not exist)` incidents were associated with Windows Forms types (`System.Windows.Forms.*`), particularly within `*.Designer.cs` files.
+
+These APIs are expected to be available after conversion to SDK-style projects targeting `net8.0-windows` with `UseWindowsForms=true`.
+
+Recommendation:
+Treat the initial incident counts as a baseline only. Re-run the Upgrade Assistant after project conversion to obtain a more accurate assessment of true migration issues.
+
 ## 7.3. Related Documents
 Prerequisites
 -------------
