@@ -217,7 +217,7 @@ namespace AutoWikiBrowser
                 postvars.Add("Wiki", Variables.Host);
             else
                 postvars.Add("Wiki", Variables.Project.ToString());
-            // This returns a short string such as "wikipedia"; may want to convert to int and then to string so we store less in the db
+            // This returns a short string such as "Wikipedia"; may want to convert to int and then to string so we store less in the db
 
             // Language code:
             if (Variables.IsWikia)

@@ -291,9 +291,9 @@ namespace AutoWikiBrowser.Plugins
         }
 
         /// <summary>
-        /// Passes a reference of the main form to the plugin for initialisation
+        /// Passes a reference of the main form to the plugin for initialization
         /// </summary>
-        /// <param name="plugin">IAWBBasePlugin (Or IAWBPlugin) to initialise</param>
+        /// <param name="plugin">IAWBBasePlugin (Or IAWBPlugin) to initialize</param>
         /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
         private static void InitialisePlugin(IAWBBasePlugin plugin, IAutoWikiBrowser awb)
         {

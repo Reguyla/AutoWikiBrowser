@@ -51,7 +51,7 @@ using ThreadState = System.Threading.ThreadState;
 namespace AutoWikiBrowser
 {
     // TODO:Move any code that doesn't need to be directly behind the form to WF or other code files (Preferably WF)
-    // TODO:Move regexes declared in method bodies (if not dynamic based on article title, etc), into class body
+    // TODO:Move Regexes declared in method bodies (if not dynamic based on article title, etc), into class body
     // TODO:Move any Regexes to WikiRegexes as required
 
     public sealed partial class MainForm : Form, IAutoWikiBrowser
@@ -3078,7 +3078,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             txtEdit.ResetFind();
 
-            // when highlight enabled reset back colour for newly inserted text
+            // when highlight enabled reset back color for newly inserted text
             /* TODO: does not work fully in that: focus always scrolls to current line unnecessarily
              * text inserted at very end of text box goes before last character
             if (highlightAllFindToolStripMenuItem.Checked)
