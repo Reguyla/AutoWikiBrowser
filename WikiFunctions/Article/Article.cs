@@ -1025,39 +1025,67 @@ namespace WikiFunctions
         /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
         protected bool MinorFixes(string langCode, bool skipIfNoChange)
         {
-            bool noChange;
-            AWBChangeArticleText("Fixed interwikis", Parsers.InterwikiConversions(mArticleText, out noChange), true);
-            bool anyChanges = false;
+            bool noInterwikiChanges;
 
-            if (langCode.Equals("en") || langCode.Equals("simple"))
+            AWBChangeArticleText(
+                "Fixed interwikis",
+                Parsers.InterwikiConversions(mArticleText, out noInterwikiChanges),
+                true);
+
+            if (langCode != "en" && langCode != "simple")
+                return false;
+
+            string originalText = mArticleText;
+            string updatedText = mArticleText;
+
+            if (ShouldApplyGeneralConversions())
+                updatedText = Parsers.Conversions(updatedText);
+
+            updatedText = Parsers.FixSyntaxMainspace(updatedText, Name);
+            updatedText = Parsers.FixLivingThingsRelatedDates(updatedText);
+
+            bool noHeadingChanges;
+            updatedText = Parsers.FixHeadings(updatedText, Name, out noHeadingChanges);
+
+            bool anyChanges = !string.Equals(
+                originalText,
+                updatedText,
+                StringComparison.Ordinal);
+
+            if (skipIfNoChange && !anyChanges)
             {
-                string strTemp = mArticleText;
-
-                // do not subst on Template documentation pages, Template sandbox pages or commons category pages
-                if (!(Namespace.Determine(Name).Equals(Namespace.Template) &&
-                      (Name.EndsWith(@"/doc") || Name.EndsWith(@"/sandbox")))
-                    && !(Variables.IsCommons && Namespace.Determine(Name).Equals(Namespace.Category)))
-                    strTemp = Parsers.Conversions(mArticleText);
-
-                strTemp = Parsers.FixSyntaxMainspace(strTemp, Name);
-                strTemp = Parsers.FixLivingThingsRelatedDates(strTemp);
-                strTemp = Parsers.FixHeadings(strTemp, Name, out noChange);
-
-                anyChanges = !mArticleText.Equals(strTemp);
-
-                if (skipIfNoChange && mArticleText.Equals(strTemp))
-                {
-                    Trace.AWBSkipped("No header errors");
-                }
-                else if (!noChange)
-                    AWBChangeArticleText("Fixed header errors", strTemp, true);
-                else
-                {
-                    AWBChangeArticleText("Fixed minor formatting issues", strTemp, true);
-                    if (skipIfNoChange) Trace.AWBSkipped("No header errors");
-                }
+                Trace.AWBSkipped("No header errors");
+                return false;
             }
+
+            if (!noHeadingChanges)
+            {
+                AWBChangeArticleText("Fixed header errors", updatedText, true);
+            }
+            else
+            {
+                AWBChangeArticleText("Fixed minor formatting issues", updatedText, true);
+
+                if (skipIfNoChange)
+                    Trace.AWBSkipped("No header errors");
+            }
+
             return anyChanges;
+        }
+
+        private bool ShouldApplyGeneralConversions()
+        {
+            var pageNamespace = Namespace.Determine(Name);
+
+            bool isTemplateDocumentationOrSandbox =
+                pageNamespace.Equals(Namespace.Template) &&
+                (Name.EndsWith("/doc") || Name.EndsWith("/sandbox"));
+
+            bool isCommonsCategory =
+                Variables.IsCommons &&
+                pageNamespace.Equals(Namespace.Category);
+
+            return !isTemplateDocumentationOrSandbox && !isCommonsCategory;
         }
 
         /// <summary>
