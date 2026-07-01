@@ -119,31 +119,34 @@ The project currently contains a mixture of framework references, project refere
 | Total NuGet packages | 18 | Most NuGet usage is test-related |
 
 ### 3.5.2.Non UnitTest
-| Package | Version | Used By Projects | Directly Installed In | Purpose | Migration Action |
-|---------|---------|------------------|------------------------|---------|------------------|
-| Newtonsoft.Json | 13.0,3 | AutoWikiBrowser, WikiFunctions | AutoWikiBrowser, WikiFunctions | JSON parsing/serialization | Keep initially; verify .NET 8 compatibility |
-| SemanticVersion | 2.1.0 | WikiFunctions | WikiFunctions | A portable semantic version class library compliant with the 2.0 SemanticVersion standard (http://semver.org) | Keep initially; verify .NET 8 compatibility |
 
+| Project 	    | Package	      | Current Version | Latest Version | Status	| Vulnerability | Migration Action	| Purpose				| Notes			   |
+|---------_---------|----------------:|------------_---:|--------_-------|--------------|---------------|-----------------------|-----------------------|-----------------------------------------------|
+| AutoWikiBrowser   | Newtonsoft.Json | 13.0.3 		| 13.0.4 	 | Supported 	| None Known 	| Keep Initially 	| JSON parsing/serialization			|Keep initially; verify .NET 8 compatibility |
+| WikiFunctions     | Newtonsoft.Json | 13.0.3 		| 13.0.4	 | Supported 	| None Known 	| Keep Initially 	| JSON parsing/serialization			|Keep initially; verify .NET 8 compatibility |
+| WikiFunctions     | SemanticVersion | 2.1.0  		| None		 | Investigate 	| Unknown  	| Verify Compatibility 	| Used for version parsing 			|Keep initially; verify .NET 8 compatibility |
+| AWBUpdater	    | None	      | NA     		| NA 		 | NA		| NA		| NA			| NA						|NA					     |				
 
 ### 3.5.3.UnitTest-Only NuGet Packages
-| Package | Version | Used By Projects | Directly Installed In | Purpose | Migration Action |
-|---------|---------|------------------|------------------------|---------|------------------|
-| NUnit		| 4.3.2 | UnitTests | UnitTests | NUnit can be used for a wide range of testing | Keep initially; verify .NET 8 compatibility |
-| NUnit.Analyzers | 4.6.0 | UnitTests | UnitTests | analyzers and code fixes for test projects using NUnit 3+. The analyzers will mark wrong usages when writing tests, and the code fixes can be used to used to correct these usages. They will also aid in the transition from NUnit 3 to NUnit 4.  | Keep initially; verify .NET 8 compatibility |
-| Nunit.Console | 3.19.1 | UnitTests | UnitTests |  the nunit3-console runner and test engine for version 3 of the NUnit unit-testing framework.  | Keep initially; verify .NET 8 compatibility |
-| Nunit.ConsoleRunner | 3.19.1 | UnitTests | UnitTests | This package includes the nunit3-console runner and test engine for version 3 of the NUnit unit-testing framework.  | Keep initially; verify .NET 8 compatibility |
-| Nunit.Extension.NUnitProjectLoader | 3.8.0 | UnitTests | UnitTests |  This extension allows the engine to run NUnit projects, which have a file extension of '.nunit'. | Keep initially; verify .NET 8 compatibility |
-| Nunit.Extension.NUnitV2Driver | 3.9.0 | UnitTests | UnitTests | This extension allows NUnit to load and run tests compiled against earlier versions of the NUnit framework. Versions 2.0 through 2.7 are supported.  | Keep initially; verify .NET 8 compatibility |
-| Nunit.Extension.NUnitV2ResultWriter | 3.8.0 | UnitTests | UnitTests |  This extension allows NUnit to create result files in the V2 format, which is used by many CI servers. | Keep initially; verify .NET 8 compatibility |
-| Nunit.Extension.TeamCityEventListener | 1.0.9 | UnitTests | UnitTests |  This extension sends specially formatted messages about test progress to TeamCity as each test executes, allowing TeamCity to monitor progress. | Keep initially; verify .NET 8 compatibility |
-| Nunit.Extension.VSPRojectLoader | 3.9.0 | UnitTests | UnitTests | This extension allows NUnit to recognize and load solutions and projects in Visual Studio format. It supports files of type .sln, .csproj, .vbproj, .vjsproj, .vcproj and .fsproj.  | Keep initially; verify .NET 8 compatibility |
-| Nunit3TestAdapter | 4.6.0 | UnitTests | UnitTests | The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core), versions .net framework 4.6.2 or higher, .net core 3.1, .net 5 or higher.   | Keep initially; verify .NET 8 compatibility |
-| System.Buffers | 4.6.0 | UnitTests | UnitTests | System.Buffers  | Keep initially; verify .NET 8 compatibility |
-| System.Memory | 4.6.0 | UnitTests | UnitTests |  System.Memory | Keep initially; verify .NET 8 compatibility |
-| System.Numerics.Vectors |4.6.0 | UnitTests | UnitTests | System.Numerics.Vectors  | Keep initially; verify .NET 8 compatibility |
-| System.Runtime.CompilerServices.Unsafe | 6.1.0 | UnitTests | UnitTests | Provides the System.Runtime.CompilerServices.Unsafe class, which provides generic, low-level functionality for manipulating pointers. | Keep initially; verify .NET 8 compatibility |
-| System.Threading.Tasks.Extensions | 4.5.4 | UnitTests | UnitTests | Provides additional types that simplify the work of writing concurrent and asynchronous code. | Keep initially; verify .NET 8 compatibility |
-| System.ValueTuple | 4.5.0 | UnitTests | UnitTests | rovides the System.ValueTuple structs, which implement the underlying types for tuples in C# and Visual Basic. | Keep initially; verify .NET 8 compatibility |
+
+| Package | Current Version | Latest Version |Used By Projects | Directly Installed In | Purpose | Migration Action |
+|---------|---------|------------------|------------------|------------------------|---------|------------------|
+| NUnit	| 4.3.2 | 4.6.1 | UnitTests | UnitTests | NUnit can be used for a wide range of testing | Keep initially; verify .NET 8 compatibility |
+| NUnit.Analyzers | 4.6.0 | 4.14.0 | UnitTests | UnitTests | analyzers and code fixes for test projects using NUnit 3+. The analyzers will mark wrong usages when writing tests, and the code fixes can be used to used to correct these usages. They will also aid in the transition from NUnit 3 to NUnit 4.  | Keep initially; verify .NET 8 compatibility |
+| Nunit.Console | 3.19.1| 3.22.0 | UnitTests | UnitTests |  the nunit3-console runner and test engine for version 3 of the NUnit unit-testing framework.  | Keep initially; verify .NET 8 compatibility |
+| Nunit.ConsoleRunner | 3.19.1 | 3.22.0 | UnitTests | UnitTests | This package includes the nunit3-console runner and test engine for version 3 of the NUnit unit-testing framework.  | Keep initially; verify .NET 8 compatibility |
+| Nunit.Extension.NUnitProjectLoader | 3.8.0 | None | UnitTests | UnitTests |  This extension allows the engine to run NUnit projects, which have a file extension of '.nunit'. | Keep initially; verify .NET 8 compatibility |
+| Nunit.Extension.NUnitV2Driver		| 3.9.0 | None | UnitTests | UnitTests | This extension allows NUnit to load and run tests compiled against earlier versions of the NUnit framework. Versions 2.0 through 2.7 are supported.  | Keep initially; verify .NET 8 compatibility |
+| Nunit.Extension.NUnitV2ResultWriter	| 3.8.0 | None | UnitTests | UnitTests |  This extension allows NUnit to create result files in the V2 format, which is used by many CI servers. | Keep initially; verify .NET 8 compatibility |
+| Nunit.Extension.TeamCityEventListener	| 1.0.9 | 1.0.10 | UnitTests | UnitTests |  This extension sends specially formatted messages about test progress to TeamCity as each test executes, allowing TeamCity to monitor progress. | Keep initially; verify .NET 8 compatibility |
+| Nunit.Extension.VSPRojectLoader | 3.9.0 | None | UnitTests | UnitTests | This extension allows NUnit to recognize and load solutions and projects in Visual Studio format. It supports files of type .sln, .csproj, .vbproj, .vjsproj, .vcproj and .fsproj.  | Keep initially; verify .NET 8 compatibility |
+| Nunit3TestAdapter | 4.6.0 | 6.2.0 | UnitTests | UnitTests | The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core), versions .net framework 4.6.2 or higher, .net core 3.1, .net 5 or higher.   | Keep initially; verify .NET 8 compatibility |
+| System.Buffers | 4.6.0 | 4.6.1 | UnitTests | UnitTests | System.Buffers  | Keep initially; verify .NET 8 compatibility |
+| System.Memory | 4.6.0 | 4.6.3 | UnitTests | UnitTests |  System.Memory | Keep initially; verify .NET 8 compatibility |
+| System.Numerics.Vectors |4.6.0 | 4.6.1 | UnitTests | UnitTests | System.Numerics.Vectors  | Keep initially; verify .NET 8 compatibility |
+| System.Runtime.CompilerServices.Unsafe | 6.1.0 | 6.1.2 | UnitTests | UnitTests | Provides the System.Runtime.CompilerServices.Unsafe class, which provides generic, low-level functionality for manipulating pointers. | Keep initially; verify .NET 8 compatibility |
+| System.Threading.Tasks.Extensions | 4.5.4 | 4.6.3 | UnitTests | UnitTests | Provides additional types that simplify the work of writing concurrent and asynchronous code. | Keep initially; verify .NET 8 compatibility |
+| System.ValueTuple | 4.5.0 | 4.6.2 | UnitTests | UnitTests | rovides the System.ValueTuple structs, which implement the underlying types for tuples in C# and Visual Basic. | Keep initially; verify .NET 8 compatibility |
 
 ## 3.6. COM / Interop Components
 
