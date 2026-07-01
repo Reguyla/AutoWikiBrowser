@@ -442,7 +442,10 @@ namespace AWBUpdater
                 Clipboard.SetText(txtDetails.Text);
             }
             catch
+            {
+            }
         }
+
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -453,6 +456,8 @@ namespace AWBUpdater
                     "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
             }
             catch
+            {
+            }
         }
     }
 }
