@@ -1270,7 +1270,7 @@ namespace WikiFunctions.Controls.Lists
         }
 
         /// <summary>
-        /// Desselects any selected items in the list box.
+        /// Deselects any selected items in the list box.
         /// </summary>
         private void SelectNone()
         {
@@ -1449,7 +1449,7 @@ namespace WikiFunctions.Controls.Lists
         private static readonly Regex SpanHide = new Regex(@"< *span +style *= *"" *position *: *absolute *; *top *: *-9999px;? *"" *>.*?< */ *span *>");
 
         /// <summary>
-        /// Overrides default Item Drawing to enable different colour if the article has been pre-processed
+        /// Overrides default Item Drawing to enable different color if the article has been pre-processed
         /// Formats text per displaytitle (italics etc.) if option enabled
         /// </summary>
         private void lbArticles_DrawItem(object sender, DrawItemEventArgs e)
@@ -1469,7 +1469,7 @@ namespace WikiFunctions.Controls.Lists
 
             e.DrawBackground();
 
-            // format display title of article if option enabled, custom text format (not colour)
+            // format display title of article if option enabled, custom text format (not color)
             if (!formatDisplayTitleToolStripMenuItem.Checked || string.IsNullOrEmpty(a.DisplayTitle))
             {
                 e.Graphics.DrawString(a.Name, e.Font, (selected) ? Brushes.White : Brushes.Black, e.Bounds,
@@ -1525,7 +1525,7 @@ namespace WikiFunctions.Controls.Lists
                         }
                     }
 
-                    // TODO bold support, sub/sup support, mulitple italics support, span to hide support
+                    // TODO bold support, sub/sup support, multiple italics support, span to hide support
 
                     else // unsupported other formatting in displaytitle, draw as default
                         e.Graphics.DrawString(a.Name, regular, (selected) ? Brushes.White : Brushes.Black, r,

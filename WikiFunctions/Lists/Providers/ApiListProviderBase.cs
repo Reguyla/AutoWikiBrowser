@@ -139,7 +139,7 @@ namespace WikiFunctions.Lists.Providers
         }
 
         /// <summary>
-        /// Allows for customised evaluation of the Xml element, as it is ok to add this element to the article list
+        /// Allows for customized evaluation of the Xml element, as it is ok to add this element to the article list
         /// </summary>
         /// <param name="xml">XmlTextReader at which the current element is to be evaluated</param>
         /// <returns>Whether this element can be added</returns>

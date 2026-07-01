@@ -169,7 +169,7 @@ namespace WikiFunctions.Disambiguation
                 }
 
                 // prepare text boxes
-                // text ediable by user is the new wikilink only, not the context
+                // text editable by user is the new wikilink only, not the context
                 // if user could edit context, could create conflicting changes for nearby links
                 txtCorrection.Text = Match.Value;
 
@@ -244,7 +244,7 @@ namespace WikiFunctions.Disambiguation
         }
 
         /// <summary>
-        /// sets disabmiguation back to 'no change' state
+        /// sets disambiguation back to 'no change' state
         /// </summary>
         public void Reset()
         {

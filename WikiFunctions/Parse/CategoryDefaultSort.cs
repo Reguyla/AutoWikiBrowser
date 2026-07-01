@@ -25,7 +25,7 @@ namespace WikiFunctions.Parse
 {
 
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -81,13 +81,13 @@ namespace WikiFunctions.Parse
 
         // Covered by: RecategorizerTests.Replacement()
         /// <summary>
-        /// Re-categorises the article.
+        /// Re-categorizes the article.
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="oldCategory">The old category to replace.</param>
         /// <param name="newCategory">The new category.</param>
         /// <param name="noChange">Value that indicated whether no change was made.</param>
-        /// <returns>The re-categorised article text.</returns>
+        /// <returns>The re-categorized article text.</returns>
         public static string ReCategoriser(string oldCategory, string newCategory, string articleText, out bool noChange)
         {
             return ReCategoriser(oldCategory, newCategory, articleText, out noChange, false);
@@ -95,14 +95,14 @@ namespace WikiFunctions.Parse
 
         // Covered by: RecategorizerTests.Replacement()
         /// <summary>
-        /// Re-categorises the article.
+        /// Re-categorizes the article.
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="oldCategory">The old category to replace.</param>
         /// <param name="newCategory">The new category.</param>
         /// <param name="noChange">Value that indicated whether no change was made.</param>
         /// <param name="removeSortKey">If set, any sort key is removed when the category is replaced</param>
-        /// <returns>The re-categorised article text.</returns>
+        /// <returns>The re-categorized article text.</returns>
         public static string ReCategoriser(string oldCategory, string newCategory, string articleText, out bool noChange, bool removeSortKey)
         {
             // remove category prefix
@@ -270,7 +270,7 @@ namespace WikiFunctions.Parse
 
         /// <summary>
         /// Returns the sortkey used by all categories, if all categories use the same sortkey
-        /// Where no sortkey is used for all categories, returns the articletitle
+        /// Where no sortkey is used for all categories, returns the article title
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="articleTitle">Title of the article</param>
@@ -352,7 +352,7 @@ namespace WikiFunctions.Parse
             {
                 articleText = WikiRegexes.Defaultsort.Replace(articleText, DefaultsortME);
 
-                // match again, after normalisation
+                // match again, after normalization
                 ds = WikiRegexes.Defaultsort.Matches(articleText);
             }
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_9#AWB_didn.27t_fix_special_characters_in_a_pipe
@@ -565,7 +565,7 @@ namespace WikiFunctions.Parse
             if (dolmatch && bimatch)
                 return YearOfBirthDeathMissingCategory(articleText, cats);
 
-            // over 20 references or long and not DOB/DOD categorised at all yet: implausible
+            // over 20 references or long and not DOB/DOD categorized at all yet: implausible
             if ((articleText.Length > 15000 && !bimatch && !dolmatch) || (!dolmatch && WikiRegexes.Refs.Matches(articleText).Count > 20))
                 return YearOfBirthDeathMissingCategory(articleText, cats);
 
@@ -695,7 +695,7 @@ namespace WikiFunctions.Parse
 
             zerothSection = NotCircaTemplate.Replace(zerothSection, " ");
             // birth and death combined
-            // if not fully categorised, check it
+            // if not fully categorized, check it
             if (PersonYearOfBirthAndDeath.IsMatch(zerothSection) && (!WikiRegexes.BirthsCategory.IsMatch(articleText) || !WikiRegexes.DeathsOrLivingCategory.IsMatch(articleText)))
             {
                 Match m = PersonYearOfBirthAndDeath.Match(zerothSection);
@@ -706,7 +706,7 @@ namespace WikiFunctions.Parse
                 string deathyear = m.Groups[3].Value;
                 int deathyearint = int.Parse(deathyear);
 
-                // logical valdiation of dates
+                // logical validation of dates
                 if (birthyearint <= (deathyearint - 2) && (deathyearint - birthyearint) <= 125)
                 {
                     string birthpart = zerothSection.Substring(m.Index, m.Groups[2].Index - m.Index),
@@ -791,7 +791,7 @@ namespace WikiFunctions.Parse
 
         // Covered by: LinkTests.TestFixCategories()
         /// <summary>
-        /// Fix common spacing/capitalisation errors in categories; remove diacritics and trailing whitespace from sortkeys (not leading whitespace)
+        /// Fix common spacing/capitalization errors in categories; remove diacritics and trailing whitespace from sortkeys (not leading whitespace)
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <returns>The modified article text.</returns>

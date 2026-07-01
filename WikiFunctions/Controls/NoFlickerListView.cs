@@ -195,7 +195,7 @@ namespace WikiFunctions.Controls
         private IListViewItemComparerFactory comparerFactory;
 
         /// <summary>
-        /// Allows to override default column sorting behaviour by providing a factory for custom sorters
+        /// Allows to override default column sorting behavior by providing a factory for custom sorters
         /// </summary>
         [Browsable(false)]
         [Localizable(false)]

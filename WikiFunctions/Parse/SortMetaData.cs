@@ -32,12 +32,12 @@ namespace WikiFunctions.Parse
     public partial class Parsers
     {
         /// <summary>
-        /// Re-organises the Person Data, stub/disambig templates, categories and interwikis
+        /// Re-organizes the Person Data, stub/disambig templates, categories and interwikis
         /// except when a mainspace article has some 'includeonly' tags etc.
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>
         /// <param name="articleTitle">The article title.</param>
-        /// <returns>The re-organised text.</returns>
+        /// <returns>The re-organized text.</returns>
         public string SortMetaData(string articleText, string articleTitle)
         {
             return SortMetaData(articleText, articleTitle, true);
@@ -248,7 +248,7 @@ namespace WikiFunctions.Parse
                         articleText = articleText.Replace(m.Value, "");
                 }
 
-                // if for with blank first argument copied over then now need to put "other uses" as the argment
+                // if for with blank first argument copied over then now need to put "other uses" as the argument
                 articleText = Tools.NestedTemplateRegex("about").Replace(articleText, m2 =>
                 {
                     string res = m2.Value;

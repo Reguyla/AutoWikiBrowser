@@ -245,7 +245,7 @@ namespace WikiFunctions.Controls
         /// <returns></returns>
         public void HighlightSyntax()
         {
-            // reset background colour to avoid issues on re-parse
+            // reset background color to avoid issues on re-parse
             SetEditBoxSelection(0, RawText.Length);
             SelectionBackColor = Color.White;
                         

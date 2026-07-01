@@ -115,7 +115,7 @@ namespace WikiFunctions.Lists.Providers
         }
 
         /// <summary>
-        /// Normalises category names, removes Category: prefix
+        /// Normalizes category names, removes Category: prefix
         /// </summary>
         /// <param name="source">List of category names</param>
         public static IEnumerable<string> PrepareCategories(IEnumerable<string> source)

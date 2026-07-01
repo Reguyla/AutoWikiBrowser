@@ -12,7 +12,7 @@ namespace WikiFunctions.Controls
         private Dictionary<string, TypoStat> Data;
 
         /// <summary>
-        /// Whether this controll accumulates statistics for the whole run
+        /// Whether this control accumulates statistics for the whole run
         /// </summary>
         [DefaultValue(false)]
         public bool IsOverallStats

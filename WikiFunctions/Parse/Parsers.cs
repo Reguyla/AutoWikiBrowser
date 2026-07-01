@@ -26,7 +26,7 @@ using System.Web;
 namespace WikiFunctions.Parse
 {
     //TODO:Move Regexes to WikiRegexes as required
-    //TODO:Move regexes declared in method bodies (if not dynamic based on article title, etc), into class body
+    //TODO:Move Regexes declared in method bodies (if not dynamic based on article title, etc), into class body
 
     /// <summary>
     /// Provides functions for editing wiki text, such as formatting and re-categorization.
@@ -39,7 +39,7 @@ namespace WikiFunctions.Parse
         }
 
         /// <summary>
-        /// Re-organises the Person Data, stub/disambig templates, categories and interwikis
+        /// Re-organizes the Person Data, stub/disambig templates, categories and interwikis
         /// </summary>
         /// <param name="stubWordCount">The number of maximum number of words for a stub.</param>
         /// <param name="addHumanKey"></param>

@@ -955,7 +955,7 @@ namespace WikiFunctions.Parse
                 foreach (Match m in WikiRegexes.HeadingLevelTwo.Matches(Tools.ReplaceWith(articleText,
                     WikiRegexes.UnformattedText, 'x')))
                 {
-                    // empty setion if only whitespace between two level-2 headings
+                    // empty section if only whitespace between two level-2 headings
                     if (lastpos > -1 && articleText.Substring(lastpos, (m.Index - lastpos)).Trim().Length == 0)
                     {
                         articleText = articleText.Insert(m.Index,

@@ -26,7 +26,7 @@ using WikiFunctions.Controls.Lists;
 
 namespace WikiFunctions.Lists.Providers
 {
-    //TODO: normalise usage of FirstToUpperAndRemoveHashOnArray() and alikes
+    //TODO: normalize usage of FirstToUpperAndRemoveHashOnArray() and alikes
 
     /// <summary>
     /// Gets a list of pages in Named Categories for the ListMaker (Non-Recursive)

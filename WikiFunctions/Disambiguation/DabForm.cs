@@ -57,7 +57,7 @@ namespace WikiFunctions.Disambiguation
         private static readonly Regex DnPunctuationR = new Regex(@"(\]\])({{Disambiguation needed}})([.,'"":;]+)");
 
         /// <summary>
-        /// Displays a form that promts user for disambiguation
+        /// Displays a form that prompts user for disambiguation
         /// if no disambiguation needed, immediately returns
         /// </summary>
         /// <param name="articleText">The wiki text of the article.</param>

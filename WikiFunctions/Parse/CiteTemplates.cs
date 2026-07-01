@@ -25,7 +25,7 @@ using System.Text.RegularExpressions;
 namespace WikiFunctions.Parse
 {
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -187,7 +187,7 @@ namespace WikiFunctions.Parse
             // remove duplicated fields, ensure the URL is not touched (may have pipes in)
             newValue = Tools.RemoveDuplicateTemplateParameters(newValue, paramsFound);
 
-            // fix cite params not in lower case, allowing for ISBN, DOI identifiers being uppercase, avoiding changing text within malformatted URL
+            // fix cite params not in lower case, allowing for ISBN, DOI identifiers being uppercase, avoiding changing text within malformed URL
             foreach (
                 string notlowercaseCiteParam in
                     paramsFound.Keys
@@ -303,7 +303,7 @@ namespace WikiFunctions.Parse
                 lang = Tools.GetTemplateParameterValue(newValue, "language");
             }
 
-            // remove italics for work field for book/periodical, but not website -- auto italicised by template
+            // remove italics for work field for book/periodical, but not website -- auto italicized by template
             if (TheWork.Contains("''") && !TheWork.Contains("."))
                 newValue = WorkInItalics.Replace(newValue, "$1$2");
 

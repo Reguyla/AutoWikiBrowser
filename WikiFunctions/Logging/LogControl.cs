@@ -199,7 +199,7 @@ namespace WikiFunctions.Logging
             // find list view item under mouse, if any
             AWBLogListener currentLogListenerItem = (AWBLogListener)((ListView)sender).GetItemAt(e.X, e.Y);
 
-            // if same item, don't redisplay tooltip (avoid rapidly flickerting tooltip)
+            // if same item, don't redisplay tooltip (avoid rapidly flickering tooltip)
             if (currentLogListenerItem != null && currentLogListenerItem != previousLogListenerItem)
             {
                 previousLogListenerItem = currentLogListenerItem;

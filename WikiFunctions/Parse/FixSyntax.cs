@@ -25,7 +25,7 @@ using System.Text.RegularExpressions;
 namespace WikiFunctions.Parse
 {
     /// <summary>
-    /// Provides functions for editing wiki text, such as formatting and re-categorisation.
+    /// Provides functions for editing wiki text, such as formatting and re-categorization.
     /// </summary>
     public partial class Parsers
     {
@@ -489,7 +489,7 @@ namespace WikiFunctions.Parse
             if (ssbISBN.Contains("[[International Standard Book Number|ISBN]]"))
                 articleText = SyntaxRegexISBN4.Replace(articleText, "ISBN $1");
 
-            // Capitalise check digit X in ISBN-10 format
+            // Capitalize check digit X in ISBN-10 format
             articleText = ISBNx.Replace(articleText, "$1X");
 
             // Endash to hyphen within ISBN numbers
@@ -546,7 +546,7 @@ namespace WikiFunctions.Parse
 
             returned += (key.Trim().TrimEnd("[]".ToCharArray()).Trim() + @"}}");
 
-            // handle case where defaultsort ended by newline, preserve newline at end of defaultort returned
+            // handle case where defaultsort ended by newline, preserve newline at end of defaultsort returned
             string end = m.Groups["end"].Value;
 
             if (!end.TrimStart().Equals(@"}}"))

@@ -32,7 +32,7 @@ namespace WikiFunctions.Controls
         }
 
         /// <summary>
-        /// The AboutBox form is being initialised. Override this if you are inheriting and recycling the form.
+        /// The AboutBox form is being initialized. Override this if you are inheriting and recycling the form.
         /// </summary>
         protected virtual void Initialise()
         {

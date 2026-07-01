@@ -1325,7 +1325,7 @@ en, sq, ru
                 string IWTarget = site.Equals("jbo") ? m.Groups[2].Value.Trim() : Tools.TurnFirstToUpper(m.Groups[2].Value.Trim());
                 string IW = "[[" + site + ":" + IWTarget + "]]";
                 
-                // drop interwikis to own wiki, but not on commons where language = en and en interwikis go to wikipedia
+                // drop interwikis to own wiki, but not on commons where language = en and en interwikis go to Wikipedia
                 if (!(m.Groups[1].Value.Equals(Variables.LangCode) && !Variables.IsWikimediaMonolingualProject) && !interWikiListLinksOnly.Contains(IW))
                 {
                     interWikiListLinksOnly.Add(IW);
