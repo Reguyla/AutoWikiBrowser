@@ -32,7 +32,7 @@ using WikiFunctions.Controls;
 namespace WikiFunctions.API
 {
     //TODO: refactor XML parsing
-    //TODO: generalise edit token retrieval
+    //TODO: generalize edit token retrieval
     /// <summary>
     /// This class edits MediaWiki sites using api.php
     /// </summary>
@@ -1441,7 +1441,7 @@ namespace WikiFunctions.API
 
             /* T117870 .NET WebBrowser shows cite templates in italics as it doesn't seem to render 
              * <cite id="CITEREF..." class="citation journal"> etc. correctly (mediawiki 
-             * stylsheets should override <cite> default to not be italics)
+             * style sheets should override <cite> default to not be italics)
              * so override citation class here as workaround */
             HtmlHeaders += @" <style> .citation { font-style: normal; } </style>";
         }
