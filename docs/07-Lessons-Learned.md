@@ -16,6 +16,11 @@ Many `Api.0001 (API does not exist)` incidents were associated with Windows Form
 
 These APIs are expected to be available after conversion to SDK-style projects targeting `net8.0-windows` with `UseWindowsForms=true`.
 
+## 7.3. Future notes:
+This URL has an old code example for executing PERL scripts in AWB. https://en.wikipedia.org/wiki/User:Pseudomonas/AWBPerlWrapperPlugin 
+
+
+
 Recommendation:
 Treat the initial incident counts as a baseline only. Re-run the Upgrade Assistant after project conversion to obtain a more accurate assessment of true migration issues.
 
