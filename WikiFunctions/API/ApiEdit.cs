@@ -483,6 +483,68 @@ namespace WikiFunctions.API
         private string lastGetUrl;
 
         /// <summary>
+        /// Creates a copy of request parameters that is safe to include in
+        /// debug logs, exception details, or diagnostic reports.
+        ///
+        /// Parameter values whose names indicate credentials or API tokens are
+        /// replaced with <c>&lt;removed&gt;</c>. The original parameter dictionary
+        /// is not changed and can still be used to send the actual request.
+        /// </summary>
+        /// <param name="parameters">
+        /// The original request parameters.
+        /// </param>
+        /// <returns>
+        /// A new dictionary containing the original parameter names and either the
+        /// original value or a redacted placeholder for sensitive values.
+        /// </returns>
+        private static Dictionary<string, string> CreateSafeDiagnosticCopy(
+            IDictionary<string, string> parameters)
+        {
+            Dictionary<string, string> safeCopy =
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            if (parameters == null)
+                return safeCopy;
+
+            foreach (KeyValuePair<string, string> parameter in parameters)
+            {
+                safeCopy[parameter.Key] = IsSensitiveParameter(parameter.Key)
+                    ? "<removed>"
+                    : parameter.Value;
+            }
+
+            return safeCopy;
+        }
+
+        /// <summary>
+        /// Determines whether a request parameter name is likely to contain a
+        /// password, login credential, edit token, CSRF token, or similar secret.
+        ///
+        /// This checks for the words <c>password</c> and <c>token</c> anywhere in
+        /// the parameter name so that MediaWiki-specific names such as
+        /// <c>lgpassword</c>, <c>lgtoken</c>, and <c>logintoken</c> are also redacted.
+        /// </summary>
+        /// <param name="parameterName">
+        /// The request parameter name to inspect.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> when the parameter value should be removed from diagnostics;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        private static bool IsSensitiveParameter(string parameterName)
+        {
+            if (string.IsNullOrEmpty(parameterName))
+                return false;
+
+            return parameterName.IndexOf(
+                       "password",
+                       StringComparison.OrdinalIgnoreCase) >= 0
+                || parameterName.IndexOf(
+                       "token",
+                       StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="req"></param>
@@ -513,7 +575,10 @@ namespace WikiFunctions.API
             Tools.WriteDebug("ApiEdit::HttpPost", url);
 
             lastGetUrl = url;
-            lastPostParameters = post;
+
+            // Keep only a redacted copy for exception/debug diagnostics.
+            // The original post dictionary is still used to send the real request.
+            lastPostParameters = CreateSafeDiagnosticCopy(post);
 
             string query = BuildQuery(post);
             byte[] postData = Encoding.UTF8.GetBytes(query);
