@@ -1382,6 +1382,8 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <nowiki>|</nowiki> there}}", "param1"), Is.EqualTo(@"here <nowiki>|</nowiki> there"));
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <nowiki>|</nowiki> there|parae=aaa}}", "param1"), Is.EqualTo(@"here <nowiki>|</nowiki> there"));
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <pre>|</pre> there|parae=aaa}}", "param1"), Is.EqualTo(@"here <pre>|</pre> there"));
+            Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <ref>|</ref> there|parae=aaa}}", "param1"), Is.EqualTo(@"here <ref>|</ref> there"), "Ref with pipe");
+            Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <ref name=""a|b"">C</ref> there|parae=aaa}}", "param1"), Is.EqualTo(@"here <ref name=""a|b"">C</ref> there"), "Ref name with pipe");
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <math>foo</math> there|parae=aaa}}", "param1"), Is.EqualTo(@"here <math>foo</math> there"));
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1 = here <timeline>foo</timeline> there|parae=aaa}}", "param1"), Is.EqualTo(@"here <timeline>foo</timeline> there"));
 

@@ -3088,6 +3088,7 @@ Message: {2}
                     : ReplaceWithSpaces(restoftemplate, WikiRegexes.Comments);
 
                 restoftemplate = ReplaceWith(restoftemplate, WikiRegexes.AllTags, RepWith);
+                restoftemplate = ReplaceWith(restoftemplate, WikiRegexes.Refs, RepWith);
             }
             return (templateCall.Substring(0, 3) + restoftemplate);
         }
