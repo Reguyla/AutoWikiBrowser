@@ -1577,8 +1577,8 @@ namespace WikiFunctions
                 AWBChangeArticleText("Refs after punctuation", Parsers.RefsAfterPunctuation(ArticleText), true);
                 Variables.Profiler.Profile("RefsAfterPunctuation");
 
-                // ReorderReferences not for en-wp or uk-wiki genfixes, T154089, T387784
-                if (!Variables.IsWikipediaEN && Variables.LangCode != "uk")
+                // ReorderReferences not for en-wp, uk-wiki or ru-wiki genfixes, T154089, T387784, T418701
+                if (!Variables.IsWikipediaEN && Variables.LangCode != "uk" && Variables.LangCode != "ru")
                 {
                     AWBChangeArticleText("ReorderReferences", Parsers.ReorderReferences(ArticleText), true);
                     Variables.Profiler.Profile("ReorderReferences");

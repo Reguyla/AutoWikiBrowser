@@ -880,6 +880,23 @@ End of.
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
+
+            
+            Variables.SetProjectLangCode("ru");
+            WikiRegexes.MakeLangSpecificRegexes();
+            t = @"'''Article''' is great.<ref name = ""Fred1"">So says Fred</ref>
+Article started off pretty good,<ref>So says John</ref><ref name = ""Fred1"" /> and finished well.
+End of.
+
+==References
+{{Reflist}}";
+            ArticleText = t;
+            GenFixes();
+            
+            Assert.That(ArticleText, Is.EqualTo(t), "No change: ReorderReferences not applied within ru-wp genfixes");
+            
+            Variables.SetProjectLangCode("en");
+            WikiRegexes.MakeLangSpecificRegexes();
 #endif
         }
 
