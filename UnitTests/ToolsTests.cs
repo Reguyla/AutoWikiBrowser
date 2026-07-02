@@ -1358,6 +1358,12 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
             Back.Add("name", "X [http://site.com A | B]");
             Back.Add("other", "Y");
             Assert.That(Tools.GetTemplateParameterValues(@"{{test|name = X [http://site.com A | B]|other=Y}}"), Is.EqualTo(Back), "handles parameters including external link with pipe");
+            
+            Back.Clear();
+            Back.Add("name", "X");
+            Back.Add("other1/2", "Y");
+            Assert.That(Tools.GetTemplateParameterValues(@"{{test|name = X |other1/2=Y}}"), Is.EqualTo(Back), "handles parameter name with forward slash");
+
         }
 
         [Test]
@@ -1397,6 +1403,8 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
 
             // value with braces in
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1= here {and} was }}", "param1"), Is.EqualTo("here {and} was"));
+
+            Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param1/2 = here }}", "param1/2"), Is.EqualTo(@"here"), "Param name forward slash");
         }
 
         [Test]
