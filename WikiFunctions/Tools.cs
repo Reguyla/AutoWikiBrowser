@@ -38,7 +38,7 @@ using WikiFunctions.Plugin;
 namespace WikiFunctions
 {
     /// <summary>
-    /// Provides various tools as static methods, such as getting the html of a page
+    /// Provides various tools as static methods, such as getting the HTML of a page
     /// </summary>
     public static class Tools
     {
@@ -46,10 +46,7 @@ namespace WikiFunctions
         {
             string OSVersionString = Environment.OSVersion.VersionString;
 
-            DefaultUserAgentString = string.Format("WikiFunctions/{0} ({1}; .NET CLR {2})",
-                VersionString,
-                Environment.Version
-            );
+            DefaultUserAgentString = string.Format("WikiFunctions/{0} ({1}; .NET CLR {2})", VersionString, OSVersionString, Environment.Version);
 
             // https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
             AuthUserAgentString = string.Format("WikiFunctions/{0} (###) {1} .NET CLR/{2}",
