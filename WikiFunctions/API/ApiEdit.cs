@@ -25,7 +25,6 @@ using System.IO;
 using System.Xml;
 using System.Threading;
 using System.Text.RegularExpressions;
-using System.Security.Cryptography.X509Certificates;
 
 using WikiFunctions.Controls;
 
@@ -358,13 +357,6 @@ namespace WikiFunctions.API
             Environment.OSVersion.VersionString,
             Environment.Version);
 
-        private static bool customXertificateValidation(object sender, X509Certificate cert, X509Chain chain,
-            System.Net.Security.SslPolicyErrors error)
-        {
-            // TODO: Implement better validation. JOE 20110722
-            return true;
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -375,7 +367,6 @@ namespace WikiFunctions.API
             if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
 
             ServicePointManager.Expect100Continue = false;
-            ServicePointManager.ServerCertificateValidationCallback += customXertificateValidation;
             ServicePointManager.SecurityProtocol |=
                 SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
