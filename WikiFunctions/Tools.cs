@@ -514,7 +514,6 @@ namespace WikiFunctions
         {
             if (ex.Response is HttpWebResponse errorResponse)
             {
-                string retryval = errorResponse.GetResponseHeader("Retry-After");
                 int statusCode = (int)errorResponse.StatusCode;
 
                 int retrySeconds = ParseRetry(errorResponse);
