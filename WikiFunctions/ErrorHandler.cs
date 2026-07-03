@@ -41,7 +41,7 @@ namespace WikiFunctions
 
         private static bool HandleKnownExceptions(Exception ex)
         {
-            Tools.WriteDebug("HandleKnownExceptions", ex.StackTrace);
+            TryWriteDebug("HandleKnownExceptions", ex.StackTrace);
             // invalid regex - only ArgumentException, without subclasses
             if (ex is ArgumentException &&
                 (ex.StackTrace.Contains("System.Text.RegularExpressions") ||
@@ -146,7 +146,7 @@ namespace WikiFunctions
 
             handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
 
-            Tools.WriteDebug("HandleException", errorMessage);
+            TryWriteDebug("HandleException", errorMessage);
             handler.ShowDialog();
         }
 
@@ -434,6 +434,19 @@ namespace WikiFunctions
             for (int i = 0; i < res.Length; i++) res[i] = mc[i].Groups[1].Value;
 
             return res;
+        }
+
+        private static void TryWriteDebug(string source, string text)
+        {
+            try
+            {
+                Tools.WriteDebug(source, text);
+            }
+            catch
+            {
+                // LocalDiagnosticReport has already preserved the original exception.
+                // Legacy debug logging must not mask or replace it.
+            }
         }
 
         /// <summary>
