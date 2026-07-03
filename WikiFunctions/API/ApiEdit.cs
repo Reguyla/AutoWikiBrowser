@@ -1661,9 +1661,9 @@ namespace WikiFunctions.API
         /// Checks the XML returned by the server for error codes and throws an appropriate exception
         /// </summary>
         /// <param name="xml">Server output</param>
-        private void CheckForErrors(string xml)
+        private XmlDocument CheckForErrors(string xml)
         {
-            CheckForErrors(xml, null);
+            return CheckForErrors(xml, null);
         }
 
         private static readonly Regex MaxLag = new Regex(@": (\d+(?:\.\d+)?) seconds lagged",
