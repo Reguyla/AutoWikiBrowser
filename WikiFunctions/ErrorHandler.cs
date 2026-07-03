@@ -210,21 +210,20 @@ namespace WikiFunctions
                 {
                 }
 
-                // TODO: Phab urls
                 if (!string.IsNullOrEmpty(CurrentPage))
                 {
-                    // don't use Tools.WikiEncode here, to keep code portable to updater
-                    // as it's not a pretty URL, we don't need to follow the MediaWiki encoding rules
-                    string link = "[" + Variables.URLIndex + "?title=" + HttpUtility.UrlEncode(CurrentPage) + "&oldid=" +
-                                  CurrentRevision + "]";
+                    // Use a plain URL because this context is included in Phabricator reports.
+                    // Do not use Tools.WikiEncode here, to keep this code portable to AWBUpdater.
+                    string pageUrl = Variables.URLIndex +
+                                     "?title=" + HttpUtility.UrlEncode(CurrentPage) +
+                                     "&oldid=" + CurrentRevision;
 
-                    Duplicate = "[encountered while processing page ''" + link + "'']";
+                    Duplicate = "Encountered while processing page: " + pageUrl;
                 }
                 else if (!string.IsNullOrEmpty(ListMakerText))
                 {
-                    Duplicate = "'''ListMaker Text:''' " + ListMakerText;
+                    Duplicate = "ListMaker text was present.";
                 }
-            }
 
             /// <summary>
             /// Prints a wiki formatted bug report table
