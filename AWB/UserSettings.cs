@@ -119,14 +119,14 @@ namespace AutoWikiBrowser
         private void LoadDefaultEditSummaries()
         {
             // cmboEditSummary.Items.Clear();
-            cmboEditSummary.Items.Add("clean up");
-            cmboEditSummary.Items.Add("re-categorisation per [[WP:CFD|CFD]]");
-            cmboEditSummary.Items.Add("clean up and re-categorisation per [[WP:CFD|CFD]]");
-            cmboEditSummary.Items.Add("removing category per [[WP:CFD|CFD]]");
+            cmboEditSummary.Items.Add("[[Wikipedia:AutoWikiBrowser/General fixes|Genfixes]], [[Wikipedia:AutoWikiBrowser/Typos|Typo fixing]] and clean up");
+            cmboEditSummary.Items.Add("Re-categorisation per [[Wikipedia:Categories for discussion|CFD]]");
+            cmboEditSummary.Items.Add("Re-categorisation per [[Wikipedia:Categories for discussion|CFD]] and cleanup");
+            cmboEditSummary.Items.Add("Removing category per [[Wikipedia:Categories for discussion|CFD]]");
             cmboEditSummary.Items.Add("[[Wikipedia:Template substitution|subst:'ing]]");
             cmboEditSummary.Items.Add("[[Wikipedia:WikiProject Stub sorting|stub sorting]]");
-            cmboEditSummary.Items.Add("[[WP:AWB/T|Typo fixing]]");
-            cmboEditSummary.Items.Add("bad link repair");
+            cmboEditSummary.Items.Add("[[Wikipedia:AutoWikiBrowser/Typos|Typo fixing]]");
+            cmboEditSummary.Items.Add("Bad link repair");
             cmboEditSummary.Items.Add("Fixing [[Wikipedia:Disambiguation pages with links|links to disambiguation pages]]");
             cmboEditSummary.Items.Add("Unicodifying");
         }
