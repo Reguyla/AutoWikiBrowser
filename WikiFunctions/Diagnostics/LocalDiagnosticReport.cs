@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Runtime.Versioning;
 
 namespace WikiFunctions
 {
@@ -19,6 +21,7 @@ namespace WikiFunctions
     {
         private const int MaximumMessageLength = 4000;
         private const int MaximumStackTraceLength = 12000;
+        private const string ReportFormatVersion = "1.1";
 
         private static int _isWriting;
 
@@ -123,14 +126,50 @@ namespace WikiFunctions
             report.AppendLine("======================================");
             report.AppendLine();
 
-            report.AppendLine("Created: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-            report.AppendLine("Machine OS: " + Environment.OSVersion.VersionString);
-            report.AppendLine(".NET runtime: " + Environment.Version);
-            report.AppendLine("Process architecture: " +
+            report.AppendLine(
+                "Report format version: " + ReportFormatVersion);
+
+            report.AppendLine(
+                "Created: " +
+                DateTime.Now.ToString(
+                    "yyyy-MM-dd HH:mm:ss",
+                    CultureInfo.InvariantCulture));
+
+            report.AppendLine();
+
+            report.AppendLine("Application and runtime:");
+            AppendAssemblyInformation(
+                report,
+                "Application assembly",
+                Assembly.GetEntryAssembly());
+
+            AppendAssemblyInformation(
+                report,
+                "WikiFunctions assembly",
+                typeof(LocalDiagnosticReport).Assembly);
+
+            report.AppendLine(
+                "  OS: " + Environment.OSVersion.VersionString);
+
+            report.AppendLine(
+                "  .NET runtime: " + Environment.Version);
+
+            report.AppendLine(
+                "  Process architecture: " +
                 (Environment.Is64BitProcess ? "64-bit" : "32-bit"));
-            report.AppendLine("Operating-system architecture: " +
+
+            report.AppendLine(
+                "  Operating-system architecture: " +
                 (Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit"));
-            report.AppendLine("Application: " + GetApplicationDescription());
+
+            report.AppendLine();
+
+            AppendProcessInformation(report);
+
+            report.AppendLine();
+
+            AppendThreadInformation(report);
+
             report.AppendLine();
 
             AppendException(report, exception, 0);
@@ -162,6 +201,12 @@ namespace WikiFunctions
                     : "Inner exception " + exceptionNumber + ":");
 
             report.AppendLine("  Type: " + exception.GetType().FullName);
+
+            report.AppendLine(
+                "  HResult: 0x" +
+                exception.HResult.ToString("X8", CultureInfo.InvariantCulture) +
+                " (" + exception.HResult + ")");
+
             report.AppendLine(
                 "  Message: " +
                 SanitizeAndLimit(exception.Message, MaximumMessageLength));
@@ -184,19 +229,33 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Returns basic application assembly information without depending on
-        /// application-specific static state.
+        /// Adds identifying information about an assembly and its declared target
+        /// framework, without depending on application-specific static state.
         /// </summary>
-        private static string GetApplicationDescription()
+        private static void AppendAssemblyInformation(
+            StringBuilder report,
+            string label,
+            Assembly assembly)
         {
+            report.AppendLine(
+                "  " + label + ": " + GetAssemblyDescription(assembly));
+
+            report.AppendLine(
+                "  " + label + " target framework: " +
+                GetTargetFrameworkDescription(assembly));
+        }
+
+        /// <summary>
+        /// Returns an assembly name and version suitable for a local diagnostic report.
+        /// </summary>
+        private static string GetAssemblyDescription(Assembly assembly)
+        {
+            if (assembly == null)
+                return "Unavailable";
+
             try
             {
-                Assembly entryAssembly = Assembly.GetEntryAssembly();
-
-                if (entryAssembly == null)
-                    return "Unavailable";
-
-                AssemblyName assemblyName = entryAssembly.GetName();
+                AssemblyName assemblyName = assembly.GetName();
 
                 return assemblyName.Name + " " + assemblyName.Version;
             }
@@ -204,6 +263,123 @@ namespace WikiFunctions
             {
                 return "Unavailable";
             }
+        }
+
+        /// <summary>
+        /// Returns the target framework declared by an assembly when that metadata is
+        /// available. Older or generated assemblies may not declare this value.
+        /// </summary>
+        private static string GetTargetFrameworkDescription(Assembly assembly)
+        {
+            if (assembly == null)
+                return "Unavailable";
+
+            try
+            {
+                object[] attributes = assembly.GetCustomAttributes(
+                    typeof(TargetFrameworkAttribute),
+                    false);
+
+                if (attributes.Length == 0)
+                    return "Not declared";
+
+                TargetFrameworkAttribute targetFramework =
+                    attributes[0] as TargetFrameworkAttribute;
+
+                if (targetFramework == null ||
+                    string.IsNullOrEmpty(targetFramework.FrameworkName))
+                {
+                    return "Not declared";
+                }
+
+                return targetFramework.FrameworkName;
+            }
+            catch
+            {
+                return "Unavailable";
+            }
+        }
+
+        /// <summary>
+        /// Adds basic process details that help distinguish one running instance from
+        /// another and show how long the application had been running before failure.
+        /// </summary>
+        private static void AppendProcessInformation(StringBuilder report)
+        {
+            report.AppendLine("Process:");
+
+            try
+            {
+                using (Process process = Process.GetCurrentProcess())
+                {
+                    DateTime startTime = process.StartTime;
+                    TimeSpan uptime = DateTime.Now - startTime;
+
+                    report.AppendLine("  Process ID: " + process.Id);
+
+                    report.AppendLine(
+                        "  Started: " +
+                        startTime.ToString(
+                            "yyyy-MM-dd HH:mm:ss",
+                            CultureInfo.InvariantCulture));
+
+                    report.AppendLine(
+                        "  Uptime: " + FormatUptime(uptime));
+                }
+            }
+            catch
+            {
+                report.AppendLine("  Process details: Unavailable");
+            }
+        }
+
+        /// <summary>
+        /// Formats an elapsed duration in a stable, readable form for a diagnostic
+        /// report without depending on the user's current culture.
+        /// </summary>
+        private static string FormatUptime(TimeSpan uptime)
+        {
+            if (uptime < TimeSpan.Zero)
+                return "Unavailable";
+
+            return uptime.Days + "d " +
+                   uptime.Hours.ToString("00", CultureInfo.InvariantCulture) + "h " +
+                   uptime.Minutes.ToString("00", CultureInfo.InvariantCulture) + "m " +
+                   uptime.Seconds.ToString("00", CultureInfo.InvariantCulture) + "s";
+        }
+
+        /// <summary>
+        /// Adds thread and culture information for the thread that reported the
+        /// exception. This is useful for separating UI-thread and worker-thread faults.
+        /// </summary>
+        private static void AppendThreadInformation(StringBuilder report)
+        {
+            Thread thread = Thread.CurrentThread;
+
+            report.AppendLine("Thread:");
+            report.AppendLine("  Managed thread ID: " + thread.ManagedThreadId);
+
+            report.AppendLine(
+                "  Name: " +
+                (string.IsNullOrEmpty(thread.Name)
+                    ? "<unnamed>"
+                    : SanitizeAndLimit(thread.Name, 200)));
+
+            try
+            {
+                report.AppendLine(
+                    "  Apartment state: " + thread.GetApartmentState());
+            }
+            catch
+            {
+                report.AppendLine("  Apartment state: Unavailable");
+            }
+
+            report.AppendLine(
+                "  Current culture: " + CultureInfo.CurrentCulture.Name);
+
+            report.AppendLine(
+                "  Current UI culture: " + CultureInfo.CurrentUICulture.Name);
         }
 
         /// <summary>
