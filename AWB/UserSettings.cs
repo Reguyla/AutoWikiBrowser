@@ -129,6 +129,7 @@ namespace AutoWikiBrowser
             cmboEditSummary.Items.Add("Bad link repair");
             cmboEditSummary.Items.Add("Fixing [[Wikipedia:Disambiguation pages with links|links to disambiguation pages]]");
             cmboEditSummary.Items.Add("Unicodifying");
+            cmboEditSummary.Items.Add("Updates to WikiProjects and/or WikiprojectBannerShell");
         }
 
         private void LoadSettingsDialog()
