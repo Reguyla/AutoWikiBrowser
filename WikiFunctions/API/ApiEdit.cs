@@ -671,7 +671,7 @@ namespace WikiFunctions.API
                 },
                 new Dictionary<string, string>());
 
-            Tools.WriteDebug("API::Edit meta/tokens", result);
+            Tools.WriteDebug("API::Edit meta/tokens", "Received login-token response.");
 
             /* Result format: <query><tokens logintoken="b0fc31b291ebf9999a8e9a4bfac8ef0456c44116+\"/></query> */
             XmlReader xr = CreateXmlReader(result);
@@ -708,7 +708,7 @@ namespace WikiFunctions.API
 
                 xr = CreateXmlReader(result);
 
-                Tools.WriteDebug("API::Edit action/login", result);
+                Tools.WriteDebug("API::Edit action/login", "Received login-token response.");
 
                 // if got token from new meta/tokens way, should now be logged in
                 if (!string.IsNullOrEmpty(token))
@@ -739,7 +739,7 @@ namespace WikiFunctions.API
                             post
                             );
 
-                        Tools.WriteDebug("API::Edit action/login NeedToken", result);
+                        Tools.WriteDebug("API::Edit action/login NeedToken", "Received login-token response.");
                         xr = CreateXmlReader(result);
                         xr.ReadToFollowing("login");
                     }
@@ -778,7 +778,7 @@ namespace WikiFunctions.API
 
             XmlReader xr = CreateXmlReader(result);
 
-            Tools.WriteDebug("API::Edit action/clientlogin", result);
+            Tools.WriteDebug("API::Edit action/clientlogin", "Received login-token response.");
 
             xr.ReadToFollowing("clientlogin");
             string status = (xr.GetAttribute("status") ?? "").ToUpper();
@@ -840,7 +840,7 @@ namespace WikiFunctions.API
 
                 xr = CreateXmlReader(result);
 
-                Tools.WriteDebug("API::Edit action/clientlogin2", result);
+                Tools.WriteDebug("API::Edit action/clientlogin2", "Received login-token response.");
 
                 xr.ReadToFollowing("clientlogin");
                 status = (xr.GetAttribute("status") ?? "").ToUpper();
