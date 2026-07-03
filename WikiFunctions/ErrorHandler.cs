@@ -114,7 +114,8 @@ namespace WikiFunctions
             if (HandleKnownExceptions(ex))
                 return;
 
-            // TODO: suggest a bug report for other exceptions
+            // Show a report-ready dialog for exceptions not handled as known conditions.
+            // The user may review, copy, or manually submit the details as a bug report.
             ErrorHandler handler = new ErrorHandler
             {
                 txtError = { Text = ex.Message }
