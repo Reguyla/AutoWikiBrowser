@@ -364,11 +364,14 @@ namespace WikiFunctions.API
         /// <returns></returns>
         protected HttpWebRequest CreateRequest(string url)
         {
-            if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
+            if (Globals.UnitTestMode)
+                throw new Exception("You shouldn't access Wikipedia from unit tests");
 
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.SecurityProtocol |=
-                SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+                SecurityProtocolType.Tls11 |
+                SecurityProtocolType.Tls12 |
+                SecurityProtocolType.Tls13;
 
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
             req.KeepAlive = true;
@@ -384,13 +387,48 @@ namespace WikiFunctions.API
             {
                 req.Proxy = null;
             }
+
             req.UserAgent = UserAgent;
-            req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+            req.AutomaticDecompression =
+                DecompressionMethods.Deflate |
+                DecompressionMethods.GZip;
 
             // SECURITY: don't send cookies to third-party sites
-            if (url.StartsWith(URL)) req.CookieContainer = Cookies;
+            if (IsCurrentWikiRequest(url))
+                req.CookieContainer = Cookies;
 
             return req;
+        }
+
+        /// <summary>
+        /// Determines whether a request is being sent to the configured wiki.
+        /// Cookies are sent only to requests with the same scheme, host, and port.
+        /// </summary>
+        /// <param name="requestUrl">The absolute URL of the outgoing request.</param>
+        /// <returns>
+        /// <c>true</c> when the request targets the configured wiki; otherwise,
+        /// <c>false</c>.
+        /// </returns>
+        private bool IsCurrentWikiRequest(string requestUrl)
+        {
+            Uri requestUri;
+            Uri wikiUri;
+
+            if (!Uri.TryCreate(requestUrl, UriKind.Absolute, out requestUri) ||
+                !Uri.TryCreate(URL, UriKind.Absolute, out wikiUri))
+            {
+                return false;
+            }
+
+            return string.Equals(
+                       requestUri.Scheme,
+                       wikiUri.Scheme,
+                       StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(
+                       requestUri.Host,
+                       wikiUri.Host,
+                       StringComparison.OrdinalIgnoreCase)
+                   && requestUri.Port == wikiUri.Port;
         }
 
         private bool Aborting;
