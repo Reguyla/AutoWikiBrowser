@@ -180,7 +180,14 @@ namespace WikiFunctions
 
                 if (apiException != null)
                 {
-                    ApiExtra = apiException.GetExtraSpecificInformation();
+                    try
+                    {
+                        ApiExtra = apiException.GetExtraSpecificInformation();
+                    }
+                    catch
+                    {
+                        ApiExtra = "API-specific diagnostic information could not be collected.";
+                    }
                 }
 
                 if (AppendToErrorHandler != null)
