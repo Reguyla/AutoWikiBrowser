@@ -101,12 +101,35 @@ namespace WikiFunctions
         /// <param name="ex">Exception object to handle</param>
         public static void HandleException(Exception ex)
         {
-            if (ex == null || HandleKnownExceptions(ex)) return;
+            if (ex == null)
+                return;
+
+            // Write the local report before older diagnostic code such as
+            // HandleKnownExceptions or Tools.WriteDebug can fail.
+            string diagnosticReportPath = LocalDiagnosticReport.TryWrite(ex);
+
+            if (HandleKnownExceptions(ex))
+                return;
 
             // TODO: suggest a bug report for other exceptions
-            ErrorHandler handler = new ErrorHandler {txtError = {Text = ex.Message}};
+            ErrorHandler handler = new ErrorHandler
+            {
+                txtError = { Text = ex.Message }
+            };
 
-            var errorMessage = new BugReport(ex).PrintForPhabricator();
+            // Show the saved-file location in the normal error dialog, but do not add
+            // it to txtDetails because that text can be copied into a public bug report.
+            if (!string.IsNullOrEmpty(diagnosticReportPath))
+            {
+                handler.txtError.Text +=
+                    Environment.NewLine +
+                    Environment.NewLine +
+                    "A local diagnostic report was saved to:" +
+                    Environment.NewLine +
+                    diagnosticReportPath;
+            }
+
+            string errorMessage = new BugReport(ex).PrintForPhabricator();
             handler.txtDetails.Text = errorMessage;
 
             handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
