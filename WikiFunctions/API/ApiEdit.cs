@@ -1652,13 +1652,9 @@ namespace WikiFunctions.API
                 string postParams = "";
                 if (lastPostParameters != null)
                 {
-                    if (lastPostParameters.ContainsKey("password"))
+                    if (lastPostParameters != null)
                     {
-                        lastPostParameters["password"] = "<removed>";
-                    }
-                    if (lastPostParameters.ContainsKey("token"))
-                    {
-                        lastPostParameters["token"] = "<removed>";
+                        postParams = BuildQuery(lastPostParameters);
                     }
                     postParams = BuildQuery(lastPostParameters);
                 }
