@@ -1630,22 +1630,26 @@ namespace WikiFunctions.API
             string result = HttpPost(
                 new Dictionary<string, string>
                 {
-                    {"action", "expandtemplates"},
-                    {"prop", "wikitext"}
+            {"action", "expandtemplates"},
+            {"prop", "wikitext"}
                 },
                 new Dictionary<string, string>
                 {
-                    {"title", title},
-                    {"text", text}
+            {"title", title},
+            {"text", text}
                 });
 
-            CheckForErrors(result, "expandtemplates");
+            XmlDocument document = CheckForErrors(result, "expandtemplates");
+
             try
             {
-                XmlReader xr = CreateXmlReader(result);
-                if (!xr.ReadToFollowing("expandtemplates"))
+                XmlNode expandedTextNode =
+                    document.SelectSingleNode("/api/expandtemplates");
+
+                if (expandedTextNode == null)
                     throw new Exception("Cannot find <expandtemplates> element");
-                return xr.ReadString();
+
+                return expandedTextNode.InnerText;
             }
             catch (Exception ex)
             {
