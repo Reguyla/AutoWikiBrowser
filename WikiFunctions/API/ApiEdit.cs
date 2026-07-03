@@ -739,7 +739,7 @@ namespace WikiFunctions.API
                             post
                             );
 
-                        Tools.WriteDebug("API::Edit action/login NeedToken", "Received login-token response.");
+                        Tools.WriteDebug("API::Edit action/login NeedToken", result);
                         xr = CreateXmlReader(result);
                         xr.ReadToFollowing("login");
                     }
