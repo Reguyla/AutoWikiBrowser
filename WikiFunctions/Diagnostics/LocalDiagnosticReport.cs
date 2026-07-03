@@ -22,6 +22,7 @@ namespace WikiFunctions
         private const int MaximumMessageLength = 4000;
         private const int MaximumStackTraceLength = 12000;
         private const string ReportFormatVersion = "1.1";
+        private const int MaximumLoaderExceptions = 25;
 
         private static int _isWriting;
 
@@ -172,7 +173,7 @@ namespace WikiFunctions
 
             report.AppendLine();
 
-            AppendException(report, exception, 0);
+            AppendException(report, exception, "Exception:");
 
             report.AppendLine();
             report.AppendLine("Privacy note:");
@@ -185,20 +186,18 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Adds an exception and its inner exceptions while restricting output
-        /// to the type, sanitized message, and sanitized stack trace.
+        /// Adds an exception, its inner exceptions, and any loader exceptions exposed
+        /// by <see cref="ReflectionTypeLoadException"/>.
         /// </summary>
         private static void AppendException(
             StringBuilder report,
             Exception exception,
-            int depth)
+            string heading)
         {
-            int exceptionNumber = depth + 1;
+            if (exception == null)
+                return;
 
-            report.AppendLine(
-                depth == 0
-                    ? "Exception:"
-                    : "Inner exception " + exceptionNumber + ":");
+            report.AppendLine(heading);
 
             report.AppendLine("  Type: " + exception.GetType().FullName);
 
@@ -224,7 +223,48 @@ namespace WikiFunctions
             if (exception.InnerException != null)
             {
                 report.AppendLine();
-                AppendException(report, exception.InnerException, depth + 1);
+
+                AppendException(
+                    report,
+                    exception.InnerException,
+                    "Inner exception:");
+            }
+
+            ReflectionTypeLoadException typeLoadException =
+                exception as ReflectionTypeLoadException;
+
+            if (typeLoadException == null ||
+                typeLoadException.LoaderExceptions == null)
+            {
+                return;
+            }
+
+            int loaderExceptionCount = 0;
+
+            foreach (Exception loaderException in typeLoadException.LoaderExceptions)
+            {
+                if (loaderException == null)
+                    continue;
+
+                loaderExceptionCount++;
+
+                if (loaderExceptionCount > MaximumLoaderExceptions)
+                {
+                    report.AppendLine();
+                    report.AppendLine(
+                        "Additional loader exceptions were omitted after " +
+                        MaximumLoaderExceptions +
+                        " entries.");
+
+                    break;
+                }
+
+                report.AppendLine();
+
+                AppendException(
+                    report,
+                    loaderException,
+                    "Loader exception " + loaderExceptionCount + ":");
             }
         }
 
