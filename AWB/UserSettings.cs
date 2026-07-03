@@ -657,7 +657,10 @@ namespace AutoWikiBrowser
             listMaker.Add(p.List.ArticleList);
 
             CModule.Language = p.Module.Language;
-            CModule.Code = p.Module.Code.Replace("\n", "\r\n");
+            CModule.Code = (p.Module.Code ?? string.Empty)
+                .Replace("\r\n", "\n")
+                .Replace("\r", "\n")
+                .Replace("\n", "\r\n");
             // Don't enable custom module until code loaded, prevents phantom compile error
             CModule.ModuleEnabled = p.Module.Enabled;
             if (!CModule.ModuleEnabled)
