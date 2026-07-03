@@ -104,6 +104,9 @@ namespace WikiFunctions
             if (ex == null)
                 return;
 
+            // Record a safe high-level event before writing the local report.
+            DiagnosticSession.Record("Error", "Handling exception: " + ex.GetType().FullName);
+
             // Write the local report before older diagnostic code such as
             // HandleKnownExceptions or Tools.WriteDebug can fail.
             string diagnosticReportPath = LocalDiagnosticReport.TryWrite(ex);

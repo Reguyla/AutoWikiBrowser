@@ -21,7 +21,7 @@ namespace WikiFunctions
     {
         private const int MaximumMessageLength = 4000;
         private const int MaximumStackTraceLength = 12000;
-        private const string ReportFormatVersion = "1.1";
+        private const string ReportFormatVersion = "1.2";
         private const int MaximumLoaderExceptions = 25;
 
         private static int _isWriting;
@@ -169,9 +169,9 @@ namespace WikiFunctions
 
             report.AppendLine();
 
-            AppendThreadInformation(report);
+            AppendThreadInformation(report); report.AppendLine();
 
-            report.AppendLine();
+            AppendRecentEvents(report); report.AppendLine();
 
             AppendException(report, exception, "Exception:");
 
@@ -420,6 +420,37 @@ namespace WikiFunctions
 
             report.AppendLine(
                 "  Current UI culture: " + CultureInfo.CurrentUICulture.Name);
+        }
+
+        /// <summary>
+        /// Adds the bounded in-memory event trail that preceded the handled exception.
+        /// </summary>
+        private static void AppendRecentEvents(StringBuilder report)
+        {
+            int discardedEventCount;
+            string[] events = DiagnosticSession.GetRecentEvents(
+                out discardedEventCount);
+
+            report.AppendLine("Recent diagnostic events:");
+
+            if (events.Length == 0)
+            {
+                report.AppendLine("  No events were recorded.");
+                return;
+            }
+
+            foreach (string diagnosticEvent in events)
+            {
+                report.AppendLine("  " + diagnosticEvent);
+            }
+
+            if (discardedEventCount > 0)
+            {
+                report.AppendLine(
+                    "  Earlier events omitted because the " +
+                    "in-memory buffer reached its limit: " +
+                    discardedEventCount);
+            }
         }
 
         /// <summary>

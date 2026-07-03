@@ -108,6 +108,7 @@
     <Compile Include="CustomModules\CSharpModuleCompiler.cs" />
     <Compile Include="CustomModules\CustomModuleCompiler.cs" />
     <Compile Include="CustomModules\VbModuleCompiler.cs" />
+    <Compile Include="Diagnostics\DiagnosticSession.cs" />
     <Compile Include="Diagnostics\LocalDiagnosticReport.cs" />
     <Compile Include="Diff\Diff.cs" />
     <Compile Include="Diff\Patch.cs" />
