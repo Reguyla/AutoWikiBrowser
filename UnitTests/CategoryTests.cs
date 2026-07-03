@@ -757,6 +757,13 @@ died 2002
 [[Category:Living people]]
 [[Category:1944 births]]"));
 
+            Assert.That(Parsers.FixPeopleCategories(@"A
+
+[[Category:Year of birth missing]]
+[[Category:100 BC births]]", "foo"), Is.EqualTo(@"A
+
+[[Category:100 BC births]]"), "YOB missing removal for BC birth cat");
+
             // no change when already correct
             Assert.That(Parsers.FixPeopleCategories(@"[[Category:Pakistani lawyers]]
 [[Category:Attorneys General of Pakistan]]
@@ -769,6 +776,10 @@ died 2002
             const string a = @"Mr foo {{Infobox actor}} was great
 [[Category:1960 deaths]]";
             Assert.That(Parsers.FixPeopleCategories(a + "\r\n" + @"[[Category:Year of death missing]]", "test"), Is.EqualTo(a + "\r\n"));
+
+            const string b = @"Mr foo {{Infobox actor}} was great
+[[Category:100 BC deaths]]";
+            Assert.That(Parsers.FixPeopleCategories(b + "\r\n" + @"[[Category:Year of death missing]]", "test"), Is.EqualTo(b + "\r\n"), "YOD Missing is removed for BC death");
         }
 
         [Test]
