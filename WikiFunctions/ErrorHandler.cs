@@ -186,12 +186,24 @@ namespace WikiFunctions
                 if (AppendToErrorHandler != null)
                 {
                     StringBuilder append = new StringBuilder();
+
                     foreach (Delegate d in AppendToErrorHandler.GetInvocationList())
                     {
-                        string retval = d.DynamicInvoke().ToString();
-                        if (!string.IsNullOrEmpty(retval))
-                            append.AppendLine(retval);
+                        try
+                        {
+                            object result = d.DynamicInvoke();
+                            string value = result as string;
+
+                            if (!string.IsNullOrEmpty(value))
+                                append.AppendLine(value);
+                        }
+                        catch
+                        {
+                            // A diagnostic extension must not prevent the main error report
+                            // from being generated or displayed.
+                        }
                     }
+
                     AppendedInfo = append.ToString();
                 }
 
