@@ -1678,24 +1678,23 @@ namespace WikiFunctions.API
         {
             if (string.IsNullOrEmpty(xml)) throw new ApiBlankException(this);
 
-            var doc = new XmlDocument();
+            XmlDocument doc;
+
             try
             {
-                doc.Load(new StringReader(xml));
+                doc = LoadApiXmlDocument(xml);
             }
             catch (XmlException xe)
             {
                 Tools.WriteDebug("ApiEdit::CheckForErrors", xml);
 
                 string postParams = "";
+
                 if (lastPostParameters != null)
                 {
-                    if (lastPostParameters != null)
-                    {
-                        postParams = BuildQuery(lastPostParameters);
-                    }
                     postParams = BuildQuery(lastPostParameters);
                 }
+
                 throw new ApiXmlException(this, xe, lastGetUrl, postParams, xml);
             }
 
@@ -1912,12 +1911,57 @@ namespace WikiFunctions.API
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Creates XML reader settings suitable for MediaWiki API responses.
+        ///
+        /// DTD processing and external resource resolution are disabled because AWB
+        /// does not require them when reading API responses.
+        /// </summary>
+        /// <returns>A new XML reader settings instance for one API response.</returns>
+        private static XmlReaderSettings CreateSafeXmlReaderSettings()
+        {
+            return new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Prohibit,
+                XmlResolver = null
+            };
+        }
+
+        /// <summary>
+        /// Loads a MediaWiki API response into an XML document using the shared
+        /// safe XML reader settings.
+        /// </summary>
+        /// <param name="xml">The API response XML to load.</param>
+        /// <returns>The parsed XML document.</returns>
+        private static XmlDocument LoadApiXmlDocument(string xml)
+        {
+            XmlDocument document = new XmlDocument
+            {
+                XmlResolver = null
+            };
+
+            using (StringReader stringReader = new StringReader(xml))
+            using (XmlReader reader = XmlReader.Create(
+                stringReader,
+                CreateSafeXmlReaderSettings()))
+            {
+                document.Load(reader);
+            }
+
+            return document;
+        }
+
+        /// <summary>
+        /// Creates a forward-only XML reader for a MediaWiki API response using the
+        /// shared safe XML reader settings.
+        /// </summary>
+        /// <param name="result">The API response XML to read.</param>
+        /// <returns>An XML reader positioned before the response document.</returns>
         protected XmlReader CreateXmlReader(string result)
         {
-            return XmlReader.Create(new StringReader(result), new XmlReaderSettings
-            {
-                DtdProcessing = DtdProcessing.Parse
-            });
+            return XmlReader.Create(
+                new StringReader(result),
+                CreateSafeXmlReaderSettings());
         }
 
         #endregion
