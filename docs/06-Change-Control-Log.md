@@ -173,6 +173,13 @@ The majority of plugins are unused and increase migration complexity.
 | Feature Complete          |      | ☐      |
 | Release Candidate         |      | ☐      |
 
+###
+Created Git tag: pre-net8-api-edit-hardening
+Purpose: Verified pre-.NET 8 baseline after ApiEdit diagnostic logging,
+cookie-scoping, and related request-handling hardening.
+Also fixed some documentation; minor comment typo's; synced sourceforge edits; added some helper functions and modified some regex template matches
+Validation: Solution rebuilt successfully; AWB launched and basic testing completed.
+
 ## 6.10. Deferred Decisions
 
 | ID     | Topic            | Reason Deferred                   | Review Phase      |
