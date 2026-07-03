@@ -159,7 +159,8 @@ namespace WikiFunctions
                 AppendedInfo,
                 Version,
                 DotNetVersion,
-                Duplicate;
+                Duplicate,
+                Site;
 
             /// <summary>
             /// 
@@ -231,17 +232,35 @@ namespace WikiFunctions
 
                 if (!string.IsNullOrEmpty(CurrentPage))
                 {
-                    // Use a plain URL because this context is included in Phabricator reports.
-                    // Do not use Tools.WikiEncode here, to keep this code portable to AWBUpdater.
-                    string pageUrl = Variables.URLIndex +
-                                     "?title=" + HttpUtility.UrlEncode(CurrentPage) +
-                                     "&oldid=" + CurrentRevision;
+                    try
+                    {
+                        // Use a plain URL because this context is included in Phabricator reports.
+                        // Do not use Tools.WikiEncode here, to keep this code portable to AWBUpdater.
+                        string pageUrl = Variables.URLIndex +
+                                         "?title=" + HttpUtility.UrlEncode(CurrentPage) +
+                                         "&oldid=" + CurrentRevision;
 
-                    Duplicate = "Encountered while processing page: " + pageUrl;
+                        Duplicate = "Encountered while processing page: " + pageUrl;
+                    }
+                    catch
+                    {
+                        // The wiki configuration may be unavailable when Variables failed during
+                        // startup or while processing an earlier exception.
+                        Duplicate = "Encountered while processing a page.";
+                    }
                 }
                 else if (!string.IsNullOrEmpty(ListMakerText))
                 {
                     Duplicate = "ListMaker text was present.";
+                }
+
+                try
+                {
+                    Site = Variables.URL;
+                }
+                catch
+                {
+                    Site = null;
                 }
             }
 
@@ -296,9 +315,9 @@ namespace WikiFunctions
                 errorMessage.AppendLine(formatter.PrintLine("net", DotNetVersion));
                 errorMessage.AppendLine(formatter.PrintLine("duplicate", Duplicate));
 
-                if (!string.IsNullOrEmpty(Variables.URL))
+                if (!string.IsNullOrEmpty(Site))
                 {
-                    errorMessage.AppendLine(formatter.PrintLine("site", Variables.URL));
+                    errorMessage.AppendLine(formatter.PrintLine("site", Site));
                 }
 
                 if (!string.IsNullOrEmpty(AppendedInfo))
