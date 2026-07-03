@@ -83,7 +83,6 @@ namespace AutoWikiBrowser
             if (saveXML.ShowDialog() != DialogResult.OK)
                 return;
 
-            SavePrefs(saveXML.FileName);
             SettingsFile = saveXML.FileName;
         }
 
