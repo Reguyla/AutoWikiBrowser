@@ -224,6 +224,7 @@ namespace WikiFunctions
                 {
                     Duplicate = "ListMaker text was present.";
                 }
+            }
 
             /// <summary>
             /// Prints a wiki formatted bug report table
