@@ -116,9 +116,17 @@ namespace WikiFunctions
 
             // Show a report-ready dialog for exceptions not handled as known conditions.
             // The user may review, copy, or manually submit the details as a bug report.
+
             ErrorHandler handler = new ErrorHandler
             {
-                txtError = { Text = ex.Message }
+                txtError =
+                {
+                    Text = ex.Message +
+                           Environment.NewLine +
+                           Environment.NewLine +
+                           "Before sharing this report publicly, review the details. " +
+                           "They may include wiki, page, ListMaker, or API-related context."
+                }
             };
 
             // Show the saved-file location in the normal error dialog, but do not add
