@@ -30,8 +30,9 @@ using WikiFunctions.Controls;
 
 namespace WikiFunctions.API
 {
-    //TODO: refactor XML parsing
-    //TODO: generalize edit token retrieval
+    // TODO: Migrate remaining API operations from duplicate XmlReader parsing
+    // to validated XmlDocument access.
+    // TODO: generalize edit token retrieval
     /// <summary>
     /// This class edits MediaWiki sites using api.php
     /// </summary>
@@ -465,9 +466,13 @@ namespace WikiFunctions.API
             {
                 using (WebResponse resp = req.GetResponse())
                 {
-                    // T357908: Check if the uri has changed. If it has, it likely will cause problems down the line...
-                    // And we should tell the user to check it!
-                    // TODO: Probably should do this somewhere else/earlier... At first request to the API/wiki?
+                    // T357908: A custom wiki may redirect HTTP requests to HTTPS.
+                    // The current check prevents later requests from continuing with a mismatched
+                    // protocol, but it occurs after the redirect has already happened.
+                    //
+                    // TODO: Before login or any POST request, resolve the canonical API endpoint.
+                    // After user confirmation, update the complete active wiki/session URL state
+                    // and retry the operation using that endpoint.
                     if (req.RequestUri.Scheme != resp.ResponseUri.Scheme)
                     {
                         throw new UriChangedException(req.RequestUri.Scheme, resp.ResponseUri.Scheme);
@@ -1452,10 +1457,8 @@ namespace WikiFunctions.API
                 throw new ArgumentException("queryParamters cannot be null/empty", "queryParamters");
 
             string result = HttpGet(ApiURL + "?action=query&format=json&" + queryParameters);
-            // Should we be checking for maxlag?
-
-            // TODO: Not Json friendly
-            // CheckForErrors(result, "query");
+            // TODO: Validate JSON API errors, including maxlag, without changing the
+            // successful raw JSON response returned to callers.
 
             return result;
         }
@@ -1473,7 +1476,8 @@ namespace WikiFunctions.API
                     {"format", "xml"},
                     {"prop", "text|displaytitle|langlinks|categories"}
                 },
-                queryParameters); // TODO: Should we be checking for maxlag?
+                queryParameters); // TODO: Decide whether this generic API method should opt into the configured
+                                  // Maxlag policy. Raw query-string methods currently bypass ActionOptions.
 
             CheckForErrors(result, "parse");
 
