@@ -1720,19 +1720,6 @@ namespace WikiFunctions.API
                 throw new ApiXmlException(this, xe, lastGetUrl, postParams, xml);
             }
 
-            //TODO: can't figure out the best time for this check
-            bool prevMessages = User.HasMessages;
-            User.Update(doc);
-            if (action != "login"
-                && action != "clientlogin"
-                && action != "userinfo"
-                && NewMessageThrows
-                && User.HasMessages
-                && !prevMessages)
-            {
-                throw new NewMessagesException(this);
-            }
-
             var errors = doc.GetElementsByTagName("error");
 
             if (errors.Count > 0)
@@ -1808,10 +1795,13 @@ namespace WikiFunctions.API
                 }
             }
 
-            if (string.IsNullOrEmpty(action)) return doc; // no action to check
+            if (string.IsNullOrEmpty(action))
+                return CompleteSuccessfulResponseValidation(doc, action);
 
             var api = doc["api"];
-            if (api == null) return doc;
+
+            if (api == null)
+                return CompleteSuccessfulResponseValidation(doc, action);
 
             var redirects = api.GetElementsByTagName("r");
             if (action == "query" && redirects.Count > 0) //We have redirects
@@ -1844,7 +1834,7 @@ namespace WikiFunctions.API
 
             if (actionElement == null)
             {
-                return doc; // or shall we explode?
+                return CompleteSuccessfulResponseValidation(doc, action);
             }
 
             if (actionElement.HasAttribute("assert"))
@@ -1874,7 +1864,68 @@ namespace WikiFunctions.API
                 throw new OperationFailedException(this, action, result, xml);
             }
 
-            return doc;
+            return CompleteSuccessfulResponseValidation(doc, action);
+            }
+
+        /// <summary>
+        /// Updates cached user state after a successful API response and stops
+        /// processing when the response newly reports pending user messages.
+        /// </summary>
+        /// <param name="document">The validated API response document.</param>
+        /// <param name="action">The API action that produced the response.</param>
+        /// <returns>The same validated response document.</returns>
+        private XmlDocument CompleteSuccessfulResponseValidation(
+            XmlDocument document,
+            string action)
+        {
+            bool previouslyHadMessages = User.HasMessages;
+
+            User.Update(document);
+
+            if (ShouldThrowForNewMessages(action, previouslyHadMessages))
+                throw new NewMessagesException(this);
+
+            return document;
+        }
+
+        /// <summary>
+        /// Determines whether a successful API response has newly reported pending
+        /// messages and should interrupt normal processing.
+        ///
+        /// Login and explicit userinfo responses update cached user state but do not
+        /// interrupt the workflow with a NewMessagesException.
+        /// </summary>
+        /// <param name="action">The API action that produced the response.</param>
+        /// <param name="previouslyHadMessages">
+        /// Whether pending messages were already known before this response.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> when processing should stop because new messages were detected;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        private bool ShouldThrowForNewMessages(
+            string action,
+            bool previouslyHadMessages)
+        {
+            if (!NewMessageThrows ||
+                previouslyHadMessages ||
+                !User.HasMessages)
+            {
+                return false;
+            }
+
+            return !string.Equals(
+                       action,
+                       "login",
+                       StringComparison.OrdinalIgnoreCase)
+                   && !string.Equals(
+                       action,
+                       "clientlogin",
+                       StringComparison.OrdinalIgnoreCase)
+                   && !string.Equals(
+                       action,
+                       "userinfo",
+                       StringComparison.OrdinalIgnoreCase);
         }
 
         #endregion
