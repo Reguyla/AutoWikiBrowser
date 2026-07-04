@@ -57,6 +57,7 @@
     <Compile Include="API\ApiEdit.cs" />
     <Compile Include="API\ApiExceptions.cs" />
     <Compile Include="API\AsyncApiEdit.cs" />
+    <Compile Include="API\AsyncApiEditModern.cs" />
     <Compile Include="API\IApiEdit.cs" />
     <Compile Include="API\PageInfo.cs" />
     <Compile Include="API\SaveInfo.cs" />
