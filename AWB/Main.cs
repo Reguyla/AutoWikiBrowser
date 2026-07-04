@@ -2715,6 +2715,12 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void OldVersion()
         {
+#if DEBUG
+            // Local Debug builds are allowed to continue so developers can test
+            // login, preview, and edit workflows without the public-version gate.
+            return;
+#endif
+
             lblUserName.BackColor = Color.Red;
             DisableButtons();
 
@@ -2726,8 +2732,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 case DialogResult.Yes:
                     RunUpdater();
                     break;
+
                 case DialogResult.No:
-                    Tools.OpenURLInBrowser("https://sourceforge.net/projects/autowikibrowser/files/");
+                    Tools.OpenURLInBrowser(
+                        "https://sourceforge.net/projects/autowikibrowser/files/");
                     break;
             }
         }
