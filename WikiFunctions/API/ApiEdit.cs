@@ -1558,26 +1558,40 @@ namespace WikiFunctions.API
                     {"disablelimitreport", null}
                 });
 
-            CheckForErrors(result, "parse");
+            XmlDocument document = CheckForErrors(result, "parse");
+
             try
             {
-                XmlReader xr = CreateXmlReader(result);
-                if (!xr.ReadToFollowing("text")) throw new Exception("Cannot find <text> element");
+                XmlNode textNode = document.SelectSingleNode("/api/parse/text");
 
-                string res = xr.ReadString();
+                if (textNode == null)
+                    throw new Exception("Cannot find <text> element");
 
-                // look for and extract parsewarnings e.g. duplicate arguments in template call, and put at top in div of right color (red)
-                string warnings = "";
+                string previewHtml = textNode.InnerText;
 
-                if (xr.ReadToFollowing("parsewarnings"))
+                // Extract parse warnings, such as duplicate template parameters, and
+                // place them above the preview in the existing warning style.
+                XmlNodeList warningNodes =
+                    document.SelectNodes("/api/parse/parsewarnings/pw");
+
+                if (warningNodes != null && warningNodes.Count > 0)
                 {
-                    while (xr.ReadToFollowing("pw"))
-                        warnings += xr.ReadString() + "<p>";
+                    StringBuilder warnings = new StringBuilder();
 
-                    res = @"<div class=""previewnote"" style=""color:#d33"">" + warnings + "</div>" + res;
+                    foreach (XmlNode warningNode in warningNodes)
+                    {
+                        warnings.Append(warningNode.InnerText);
+                        warnings.Append("<p>");
+                    }
+
+                    previewHtml =
+                        @"<div class=""previewnote"" style=""color:#d33"">" +
+                        warnings +
+                        "</div>" +
+                        previewHtml;
                 }
 
-                return ExpandRelativeUrls(res);
+                return ExpandRelativeUrls(previewHtml);
             }
             catch (Exception ex)
             {

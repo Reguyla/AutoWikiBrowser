@@ -303,10 +303,16 @@ namespace WikiFunctions
                 Updater.AWBEnabledStatus versionStatus = Updater.Result;
                 VersionCheckPage = Updater.GlobalVersionPage;
 
-                // see if this version is enabled
+                // See whether this public AWB version is enabled.
                 if ((versionStatus & Updater.AWBEnabledStatus.Disabled) == Updater.AWBEnabledStatus.Disabled)
                 {
+                #if DEBUG
+                    // Allow local Debug builds to continue through the normal status,
+                    // account-registration, and configuration checks for regression testing.
+                    // Release builds retain the public version-validation requirement.
+                #else
                     return WikiStatusResult.OldVersion;
+                #endif
                 }
 
                 // Attempt to load the JSON CheckPage from the wiki
