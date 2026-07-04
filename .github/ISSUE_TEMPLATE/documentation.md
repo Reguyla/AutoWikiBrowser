@@ -4,7 +4,7 @@ name: Documentation
 
 about: Improve project documentation.
 
-title: "\Docs]: "
+title: "[Docs]: "
 
 labels: documentation
 
