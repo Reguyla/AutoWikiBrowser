@@ -19,7 +19,15 @@ These APIs are expected to be available after conversion to SDK-style projects t
 ## 7.3. Future notes:
 This URL has an old code example for executing PERL scripts in AWB. https://en.wikipedia.org/wiki/User:Pseudomonas/AWBPerlWrapperPlugin 
 
+##  7.4. GitHub Issue Templates
 
+GitHub issue templates are highly sensitive to the formatting of the YAML front matter. Although the template files and directory structure were correct, GitHub did not recognize the templates until the YAML metadata for each file was manually recreated.
+
+Recommendations:
+- Store templates under `.github/ISSUE_TEMPLATE/`
+- Validate YAML syntax carefully.
+- Use lowercase filenames.
+- Verify templates using `Issues → New Issue` after every change.
 
 Recommendation:
 Treat the initial incident counts as a baseline only. Re-run the Upgrade Assistant after project conversion to obtain a more accurate assessment of true migration issues.
