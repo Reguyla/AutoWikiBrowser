@@ -1,18 +1,18 @@
-\---
+---
 
 name: Enhancement
 
 about: Suggest a new feature or improvement.
 
-title: "\[Enhancement]: "
+title: "[Enhancement]: "
 
 labels: enhancement
 
-\---
+---
 
 
 
-\## Summary
+## Summary
 
 
 
@@ -20,7 +20,7 @@ Describe the enhancement.
 
 
 
-\## Motivation
+## Motivation
 
 
 
@@ -28,7 +28,7 @@ Why is this improvement valuable?
 
 
 
-\## Proposed Solution
+## Proposed Solution
 
 
 
@@ -36,7 +36,7 @@ Describe the preferred implementation.
 
 
 
-\## Alternatives Considered
+## Alternatives Considered
 
 
 
@@ -44,7 +44,7 @@ List any alternatives.
 
 
 
-\## Risks
+## Risks
 
 
 
@@ -52,5 +52,5 @@ Potential impact.
 
 
 
-\## Additional Notes
+## Additional Notes
 

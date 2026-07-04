@@ -1,34 +1,34 @@
-\---
+---
 
 name: Migration Task
 
 about: Track a .NET 8 migration activity.
 
-title: "\[Migration]: "
+title: "[Migration]: "
 
 labels: migration
 
-\---
+---
 
 
 
-\## Project
+## Project
 
 
 
-\-
+-
 
 
 
-\## Component
+## Component
 
 
 
-\-
+-
 
 
 
-\## Current State
+## Current State
 
 
 
@@ -36,7 +36,7 @@ Describe the existing implementation.
 
 
 
-\## Target State
+## Target State
 
 
 
@@ -44,7 +44,7 @@ Describe the desired implementation.
 
 
 
-\## Dependencies
+## Dependencies
 
 
 
@@ -52,7 +52,7 @@ Related projects, packages, or issues.
 
 
 
-\## Risks
+## Risks
 
 
 
@@ -60,7 +60,7 @@ Potential migration risks.
 
 
 
-\## Validation
+## Validation
 
 
 
@@ -68,7 +68,7 @@ How will success be verified?
 
 
 
-\## Related Documentation
+## Related Documentation
 
 
 

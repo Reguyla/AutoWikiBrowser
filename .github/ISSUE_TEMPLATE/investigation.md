@@ -1,18 +1,18 @@
-\---
+---
 
 name: Investigation
 
 about: Research an unknown or high-risk area.
 
-title: "\[Investigation]: "
+title: "[Investigation]: "
 
 labels: investigation
 
-\---
+---
 
 
 
-\## Question
+## Question
 
 
 
@@ -20,7 +20,7 @@ What needs to be investigated?
 
 
 
-\## Background
+## Background
 
 
 
@@ -28,7 +28,7 @@ Relevant context.
 
 
 
-\## Findings
+## Findings
 
 
 
@@ -36,7 +36,7 @@ Document results here.
 
 
 
-\## Recommendation
+## Recommendation
 
 
 
@@ -44,7 +44,7 @@ Suggested next step.
 
 
 
-\## References
+## References
 
 
 

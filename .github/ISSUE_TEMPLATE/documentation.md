@@ -1,14 +1,14 @@
-\---
+---
 
 name: Documentation
 
 about: Improve project documentation.
 
-title: "\[Docs]: "
+title: "[Docs]: "
 
 labels: documentation
 
-\---
+---
 
 
 
@@ -20,7 +20,7 @@ Which document?
 
 
 
-\## Summary
+## Summary
 
 
 
@@ -28,7 +28,7 @@ Describe the change.
 
 
 
-\## Reason
+## Reason
 
 
 
@@ -36,7 +36,7 @@ Why is this needed?
 
 
 
-\## Related Issues
+## Related Issues
 
 
 

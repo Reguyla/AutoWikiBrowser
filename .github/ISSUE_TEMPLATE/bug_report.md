@@ -1,18 +1,18 @@
-\---
+---
 
 name: Bug Report
 
 about: Report a defect or regression.
 
-title: "\[Bug]: "
+title: "[Bug]: "
 
 labels: bug
 
-\---
+---
 
 
 
-\## Summary
+## Summary
 
 
 
@@ -20,7 +20,7 @@ Describe the issue.
 
 
 
-\## Expected Behavior
+## Expected Behavior
 
 
 
@@ -28,7 +28,7 @@ What should happen?
 
 
 
-\## Actual Behavior
+## Actual Behavior
 
 
 
@@ -36,31 +36,31 @@ What happened instead?
 
 
 
-\## Steps to Reproduce
+## Steps to Reproduce
 
 
 
-1\.
+1.
 
-2\.
+2.
 
-3\.
-
-
-
-\## Environment
+3.
 
 
 
-\- Project:
-
-\- Branch:
-
-\- Commit:
+## Environment
 
 
 
-\## Additional Notes
+- Project:
+
+- Branch:
+
+- Commit:
+
+
+
+## Additional Notes
 
 
 
