@@ -412,6 +412,13 @@ End of."), Is.EqualTo(@"'''Article''' is great.<ref name = 'Fred9'>So says Fred<
 Article started off pretty good, <ref name = ""Fred9"" />{{Rp|12}}<ref name = 'John3' >So says John</ref> <ref name = 'Tim1'/>{{rp|11}} and finished well.
 End of."));
 
+            // rp template with nested template {{--}}
+            Assert.That(Parsers.ReorderReferences(@"'''Article''' is great.<ref name = 'Fred9'>So says Fred</ref><ref name = 'John3' /><ref name = 'Tim1'>ABC</ref>
+Article started off pretty good, <ref name = 'Tim1'/>{{rp|11{{--}}12}}<ref name = 'John3' >So says John</ref> <ref name = ""Fred9"" /> and finished well.
+End of."), Is.EqualTo(@"'''Article''' is great.<ref name = 'Fred9'>So says Fred</ref><ref name = 'John3' /><ref name = 'Tim1'>ABC</ref>
+Article started off pretty good, <ref name = ""Fred9"" /><ref name = 'John3' >So says John</ref> <ref name = 'Tim1'/>{{rp|11{{--}}12}} and finished well.
+End of."));
+
             Assert.That(Parsers.ReorderReferences(@"'''Article''' is great.<ref name = 'Fred9'>So says Fred</ref><ref name = 'John3' /><ref name = 'Tim1'>ABC</ref>
 Article started off pretty good, <ref name = 'Tim1'/><ref name = 'John3' >So says John</ref>{{rp|11}} <ref name = ""Fred9"" /> and finished well.
 End of."), Is.EqualTo(@"'''Article''' is great.<ref name = 'Fred9'>So says Fred</ref><ref name = 'John3' /><ref name = 'Tim1'>ABC</ref>
