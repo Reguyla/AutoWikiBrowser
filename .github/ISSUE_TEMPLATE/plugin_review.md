@@ -1,26 +1,26 @@
-\---
+---
 
 name: Plugin Review
 
 about: Evaluate an existing bundled plugin.
 
-title: "\[Plugin]: "
+title: "[Plugin]: "
 
 labels: plugin
 
-\---
+---
 
 
 
-\## Plugin
+## Plugin
 
 
 
-\-
+-
 
 
 
-\## Purpose
+## Purpose
 
 
 
@@ -28,7 +28,7 @@ Describe the plugin.
 
 
 
-\## Dependencies
+## Dependencies
 
 
 
@@ -36,7 +36,7 @@ Internal and external.
 
 
 
-\## Current Status
+## Current Status
 
 
 
@@ -48,17 +48,17 @@ Unknown?
 
 
 
-\## Migration Recommendation
+## Migration Recommendation
 
 
 
-\- Preserve
+- Preserve
 
-\- Replace
+- Replace
 
-\- Retire
+- Retire
 
-\- Investigate
+- Investigate
 
 
 
