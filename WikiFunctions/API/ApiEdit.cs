@@ -942,16 +942,23 @@ namespace WikiFunctions.API
                     },
                     ActionOptions.All);
 
-                CheckForErrors(result);
+                XmlDocument document = CheckForErrors(result);
 
                 try
                 {
-                    XmlReader xr = CreateXmlReader(result);
-                    if (!xr.ReadToFollowing("tokens") && !xr.ReadToFollowing("page"))
-                    {
-                        throw new Exception("Cannot find <page> element");
-                    }
-                    Page.WatchToken = xr.GetAttribute("watchtoken");
+                    // MediaWiki 1.24+ returns the token in <tokens>. Older versions
+                    // return it on the queried <page> element.
+                    XmlNode tokenSource =
+                        document.SelectSingleNode("/api/query/tokens") ??
+                        document.SelectSingleNode("/api/query/pages/page");
+
+                    if (tokenSource == null)
+                        throw new Exception("Cannot find <tokens> or <page> element");
+
+                    Page.WatchToken =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            tokenSource,
+                            "watchtoken");
                 }
                 catch (Exception ex)
                 {
