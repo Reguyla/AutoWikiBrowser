@@ -7,9 +7,10 @@ Important:
 - This class intentionally exists alongside the legacy AsyncApiEdit class.
 - Do not replace existing callers yet.
 - This first version wraps the existing synchronous ApiEdit methods in Tasks.
-- Cancellation is cooperative and currently checked before and after the
-  synchronous ApiEdit call. True in-progress HTTP cancellation will be added
-  later when ApiEdit's HTTP layer accepts CancellationToken values.
+- Cancellation is cooperative and is checked before the synchronous ApiEdit
+  call begins. Once the underlying ApiEdit call has started, it cannot yet be
+  interrupted; true in-progress HTTP cancellation will be added later when
+  ApiEdit's HTTP layer accepts CancellationToken values.
 */
 
 using System;
@@ -489,8 +490,10 @@ namespace WikiFunctions.API
         /// <summary>
         /// Requests cooperative cancellation of the current operation.
         ///
-        /// This does not force-stop a thread and does not claim that the
-        /// underlying HTTP request has already ended.
+        /// Cancellation prevents work that has not yet started. It cannot currently
+        /// interrupt an underlying synchronous ApiEdit HTTP request once that request
+        /// is already running. A completed operation therefore still reports its
+        /// actual success or failure result.
         /// </summary>
         public bool CancelCurrentOperation()
         {
@@ -602,22 +605,32 @@ namespace WikiFunctions.API
                 State = EditState.Working;
 
                 Task<TResult> worker = Task.Factory.StartNew<TResult>(
-                    delegate
-                    {
-                        linkedCancellation.Token.ThrowIfCancellationRequested();
+                   delegate
+                   {
+                       // Cancellation is honored before the synchronous ApiEdit operation
+                       // begins. This prevents a canceled operation from being started.
+                       linkedCancellation.Token.ThrowIfCancellationRequested();
 
-                        TResult result = operation(linkedCancellation.Token);
+                       TResult result = operation(linkedCancellation.Token);
 
-                        // This converts a completed synchronous operation into
-                        // cancellation if a cancellation request arrived while
-                        // the old ApiEdit method was running.
-                        linkedCancellation.Token.ThrowIfCancellationRequested();
-
-                        return result;
-                    },
-                    linkedCancellation.Token,
-                    TaskCreationOptions.None,
-                    TaskScheduler.Default);
+                       // Do not check cancellation again here.
+                       //
+                       // ApiEdit is still synchronous and cannot stop an HTTP request that
+                       // is already in progress. If cancellation was requested while Save,
+                       // Open, Preview, or another ApiEdit operation was running, the API
+                       // call may already have completed successfully.
+                       //
+                       // Treating that completed result as canceled would be misleading,
+                       // especially for SaveAsync: the edit might already be live even
+                       // though the caller receives an aborted task.
+                       //
+                       // Genuine in-progress cancellation will be added later when the
+                       // underlying ApiEdit HTTP layer accepts CancellationToken values.
+                       return result;
+                   },
+                   linkedCancellation.Token,
+                   TaskCreationOptions.None,
+                   TaskScheduler.Default);
 
                 worker.ContinueWith(
                     delegate (Task<TResult> completedWorker)
