@@ -1375,7 +1375,7 @@ namespace WikiFunctions.API
             //Reset();
             Action = "move";
 
-            if (!string.IsNullOrEmpty(Page.MoveToken))
+            if (string.IsNullOrEmpty(Page.MoveToken))
             {
                 string result = HttpGet(
                     new Dictionary<string, string>
@@ -1386,38 +1386,54 @@ namespace WikiFunctions.API
                         {"type", "csrf"},
                         {"intoken", "move"}, // Pre 1.24 compat
                         {"titles", title + "|" + newTitle}
-
                     },
                     ActionOptions.All);
 
-                CheckForErrors(result, "query");
+                XmlDocument document = CheckForErrors(result, "query");
 
-                bool invalid;
                 try
                 {
-                    XmlReader xr = CreateXmlReader(result);
+                    XmlNode invalidPage =
+                        document.SelectSingleNode("/api/query/pages/page[@invalid]");
 
-                    bool readToPage = xr.ReadToFollowing("page");
-                    invalid = xr.MoveToAttribute("invalid");
-                    if (!xr.ReadToFollowing("tokens") && readToPage)
+                    if (invalidPage != null)
                     {
-                        Page.MoveToken = xr.GetAttribute("movetoken");
+                        throw new ApiException(
+                            this,
+                            "invalidnewtitle",
+                            new ArgumentException(
+                                "Target page invalid",
+                                "newTitle"));
                     }
-                    else if (!readToPage)
-                    {
+
+                    XmlNode sourcePage =
+                        document.SelectSingleNode("/api/query/pages/page");
+
+                    if (sourcePage == null)
                         throw new Exception("Cannot find <page> element");
-                    }
 
-                    Page.MoveToken = xr.GetAttribute("csrftoken");
+                    XmlNode tokenSource =
+                        document.SelectSingleNode("/api/query/tokens") ??
+                        sourcePage;
+
+                    string tokenAttribute =
+                        tokenSource.Name == "tokens"
+                            ? "csrftoken"
+                            : "movetoken";
+
+                    Page.MoveToken =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            tokenSource,
+                            tokenAttribute);
+                }
+                catch (ApiException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
                     throw new BrokenXmlException(this, ex);
                 }
-
-                if (invalid)
-                    throw new ApiException(this, "invalidnewtitle",
-                        new ArgumentException("Target page invalid", "newTitle"));
             }
 
             if (Aborting) throw new AbortedException(this);
