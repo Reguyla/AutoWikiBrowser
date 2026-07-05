@@ -255,7 +255,7 @@ namespace WikiFunctions.Disambiguation
         {
             try
             {
-                Session.Editor.Clone().Watch(ArticleTitle);
+                Session.Editor.Clone().Unwatch(ArticleTitle);
                 MessageBox.Show("Page successfully removed from your watchlist");
             }
             catch (Exception ex)

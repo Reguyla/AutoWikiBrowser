@@ -961,17 +961,25 @@ namespace WikiFunctions.API
 
             if (Aborting) throw new AbortedException(this);
 
+            var watchParameters = new Dictionary<string, string>
+            {
+                {"title", title},
+                {"token", Page.WatchToken}
+            };
+
+            if (unwatch)
+            {
+                watchParameters.Add("unwatch", null);
+            }
+
             var result2 = HttpPost(
                 new Dictionary<string, string>
                 {
-                    {"action", "watch"}
+                   {"action", "watch"}
                 },
-                new Dictionary<string, string>
-                {
-                    {"title", title},
-                    {"token", Page.WatchToken}
-                },
+                watchParameters,
                 ActionOptions.All);
+
             CheckForErrors(result2, "watch");
         }
 
