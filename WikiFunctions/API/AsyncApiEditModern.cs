@@ -171,6 +171,18 @@ namespace WikiFunctions.API
         /// </summary>
         public event EventHandler LoggedOff;
 
+        private bool SetStateWithoutNotification(EditState value)
+        {
+            lock (SyncRoot)
+            {
+                if (mState == value)
+                    return false;
+
+                mState = value;
+                return true;
+            }
+        }
+
         /// <summary>
         /// Gets the current state of the editor.
         /// </summary>
@@ -185,15 +197,7 @@ namespace WikiFunctions.API
             }
             private set
             {
-                bool changed;
-
-                lock (SyncRoot)
-                {
-                    changed = mState != value;
-                    mState = value;
-                }
-
-                if (changed)
+                if (SetStateWithoutNotification(value))
                     RaiseStateChanged();
             }
         }
@@ -632,12 +636,17 @@ namespace WikiFunctions.API
             }
             catch (Exception ex)
             {
+                bool stateChanged = SetStateWithoutNotification(EditState.Failed);
+
                 ReleaseOperationSlot(completion.Task, linkedCancellation);
 
-                State = EditState.Failed;
+                completion.TrySetException(ex);
+
+                if (stateChanged)
+                    RaiseStateChanged();
+
                 ReportFailure(operationName, ex);
 
-                completion.TrySetException(ex);
                 return completion.Task;
             }
         }
@@ -648,50 +657,107 @@ namespace WikiFunctions.API
             TaskCompletionSource<TResult> completion,
             CancellationTokenSource linkedCancellation)
         {
+            // These variables capture the final outcome of the worker task.
+            // We do this first so we can decide exactly how the operation ended
+            // before we change state, release the gate, or notify callers.
             bool cancelled = worker.IsCanceled;
             Exception failure = null;
             TResult result = default(TResult);
 
+            // If the worker was not already marked as canceled, inspect whether it
+            // faulted or succeeded.
             if (!cancelled)
             {
                 if (worker.IsFaulted)
                 {
+                    // Unwrap the worker exception into the most useful failure object.
                     failure = GetOperationException(worker.Exception);
 
+                    // If the underlying failure was really cancellation, treat it as
+                    // cancellation instead of a normal fault.
                     if (failure is OperationCanceledException)
                         cancelled = true;
                 }
                 else
                 {
+                    // The worker completed successfully, so capture its result.
                     result = worker.Result;
                 }
             }
 
-            // Release the operation gate before raising events or completing
-            // the public task. An event handler or continuation may safely
-            // start the next operation.
-            ReleaseOperationSlot(completion.Task, linkedCancellation);
+            // Decide the final terminal state of this operation.
+            // We compute it once here so the rest of the method can follow
+            // a single clear completion path.
+            EditState finalState;
 
             if (cancelled)
-            {
-                State = EditState.Aborted;
-                RaiseAborted();
+                finalState = EditState.Aborted;
+            else if (failure != null)
+                finalState = EditState.Failed;
+            else
+                finalState = EditState.Ready;
 
+            // IMPORTANT:
+            // Commit the final state *before* releasing the operation gate.
+            //
+            // Why this matters:
+            // In the old version, the gate was released first. That allowed a new
+            // operation to start and set State = Working, after which the old
+            // operation could still come along and overwrite the state with Ready,
+            // Failed, or Aborted.
+            //
+            // By setting the terminal state first, we make sure the old operation is
+            // fully finished from a state perspective before another one can begin.
+            bool stateChanged = SetStateWithoutNotification(finalState);
+
+            // Now that the final state is committed, release the operation slot.
+            // This allows a new operation to begin safely.
+            ReleaseOperationSlot(completion.Task, linkedCancellation);
+
+            // Complete the public task and then raise notifications.
+            //
+            // We keep this ordering deliberate:
+            // 1. finalize internal state
+            // 2. release the gate
+            // 3. complete the task
+            // 4. raise notifications/events
+            //
+            // This avoids the previous race where an older operation could still
+            // change the visible state after a new one had started.
+            if (cancelled)
+            {
+                // Publish cancellation to awaiters.
                 completion.TrySetCanceled();
+
+                // Notify listeners that the state changed, if it actually did.
+                if (stateChanged)
+                    RaiseStateChanged();
+
+                // Raise the specific Aborted event for compatibility with older
+                // event-based callers.
+                RaiseAborted();
                 return;
             }
 
             if (failure != null)
             {
-                State = EditState.Failed;
-                ReportFailure(operationName, failure);
-
+                // Publish the failure to awaiters.
                 completion.TrySetException(failure);
+
+                // Notify listeners that the state changed, if it actually did.
+                if (stateChanged)
+                    RaiseStateChanged();
+
+                // Raise/log the failure after the task has been completed.
+                ReportFailure(operationName, failure);
                 return;
             }
-
-            State = EditState.Ready;
+            // Success path: publish the successful result.
             completion.TrySetResult(result);
+
+            // Notify listeners that the state changed, if it actually did.
+            if (stateChanged)
+                RaiseStateChanged();
         }
 
         private void ReleaseOperationSlot(
