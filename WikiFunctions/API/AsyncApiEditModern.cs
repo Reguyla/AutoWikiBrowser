@@ -219,13 +219,33 @@ namespace WikiFunctions.API
 
         /// <summary>
         /// Creates a separate task-based editor with a cloned ApiEdit instance.
-        /// The clone has its own operation gate and cancellation state.
+        ///
+        /// Cloning is allowed only when no operation is using the shared underlying
+        /// ApiEdit instance. The returned clone has its own operation gate,
+        /// cancellation state, and active-operation tracking.
         /// </summary>
         public AsyncApiEditModern Clone()
         {
-            return new AsyncApiEditModern(
-                (ApiEdit)SynchronousEditor.Clone(),
-                CallbackContext);
+            // Use the same gate as asynchronous operations. This prevents cloning
+            // the underlying ApiEdit while a worker thread may be changing its
+            // session, page, user, token, or other mutable state.
+            if (!OperationGate.Wait(0))
+            {
+                throw new InvocationException(
+                    "Cannot clone AsyncApiEditModern while an operation is active.");
+            }
+
+            try
+            {
+                return new AsyncApiEditModern(
+                    (ApiEdit)SynchronousEditor.Clone(),
+                    CallbackContext);
+            }
+            finally
+            {
+                // Always release the gate, including if ApiEdit.Clone() throws.
+                OperationGate.Release();
+            }
         }
 
         #region ApiEdit property forwarding
@@ -519,22 +539,45 @@ namespace WikiFunctions.API
         }
 
         /// <summary>
-        /// Resets the underlying editor only when no operation is running.
+        /// Resets the underlying editor when no asynchronous operation owns it.
         ///
-        /// Future work will add ResetAsync so callers can request cancellation,
-        /// await completion, and then reset safely.
+        /// Reset uses the same operation gate as OpenAsync, PreviewAsync, SaveAsync,
+        /// and the other asynchronous methods. This makes the availability check and
+        /// the reset action one atomic operation rather than relying on IsActive,
+        /// which is only a moment-in-time snapshot.
         /// </summary>
         public void Reset()
         {
-            if (IsActive)
+            // Do not wait here. Existing behavior rejects reset while work is active,
+            // and callers can still cancel, await WaitAsync(), then call Reset().
+            if (!OperationGate.Wait(0))
             {
                 throw new InvocationException(
                     "Cannot reset AsyncApiEditModern while an operation is active. " +
                     "Call CancelCurrentOperation(), await WaitAsync(), and then reset.");
             }
 
-            SynchronousEditor.Reset();
-            State = EditState.Ready;
+            bool stateChanged = false;
+
+            try
+            {
+                SynchronousEditor.Reset();
+
+                // Update state while the gate is still held, but delay notification
+                // until after the gate is released. This prevents an event handler
+                // from attempting a new operation before reset has fully completed.
+                stateChanged = SetStateWithoutNotification(EditState.Ready);
+            }
+            finally
+            {
+                // Always release the gate, including if SynchronousEditor.Reset()
+                // throws an exception.
+                OperationGate.Release();
+            }
+
+            // Raise the event only after reset no longer owns the operation gate.
+            if (stateChanged)
+                RaiseStateChanged();
         }
 
         #endregion
