@@ -1725,8 +1725,9 @@ namespace WikiFunctions.API
             if (errors.Count > 0)
             {
                 var error = errors[0];
-                string errorCode = error.Attributes["code"].Value;
-                string errorMessage = error.Attributes["info"].Value;
+                string errorCode = XmlResponseHelpers.RequireAttributeValue(error, "code");
+
+                string errorMessage = XmlResponseHelpers.RequireAttributeValue(error, "info");
 
                 switch (errorCode.ToLower())
                 {
@@ -1747,8 +1748,7 @@ namespace WikiFunctions.API
                     case "hookaborted":
                         throw new MediaWikiSaysNoException(this, errorMessage);
                     case "readonly":
-                        throw new MediaWikiReadOnlyException(this,
-                            errorMessage + "\r\n\r\nReason: " + error.Attributes["readonlyreason"].Value);
+                        throw new MediaWikiReadOnlyException(this, errorMessage + "\r\n\r\nReason: " + XmlResponseHelpers.RequireAttributeValue(error, "readonlyreason"));
 
                     //case "confirmemail":
                     //
@@ -1807,7 +1807,9 @@ namespace WikiFunctions.API
             if (action == "query" && redirects.Count > 0) //We have redirects
             {
                 // Workaround for https://phabricator.wikimedia.org/T41492
-                if (Namespace.IsSpecial(Namespace.Determine(redirects[redirects.Count - 1].Attributes["to"].Value)))
+                string redirectTarget = XmlResponseHelpers.RequireAttributeValue(redirects[redirects.Count - 1], "to");
+
+                if (Namespace.IsSpecial(Namespace.Determine(redirectTarget)))
                 {
                     throw new RedirectToSpecialPageException(this);
                 }

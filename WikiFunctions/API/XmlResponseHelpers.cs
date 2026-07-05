@@ -1,50 +1,43 @@
 ﻿using System;
-using System.Xml.Linq;
+using System.Xml;
 
 namespace WikiFunctions.API
 {
     internal static class XmlResponseHelpers
     {
-        internal static XDocument ParseApiXml(string xml)
+        /// <summary>
+        /// Returns the value of a required XML attribute.
+        /// Throws a descriptive exception when a malformed API response
+        /// does not include the expected attribute.
+        /// </summary>
+        internal static string RequireAttributeValue(
+            XmlNode node,
+            string attributeName)
         {
-            if (string.IsNullOrWhiteSpace(xml))
-                throw new ArgumentException("API response XML was empty.", nameof(xml));
+            if (node == null)
+                throw new ArgumentNullException("node");
 
-            return XDocument.Parse(xml);
-        }
+            if (string.IsNullOrEmpty(attributeName))
+                throw new ArgumentException(
+                    "Attribute name is required.",
+                    "attributeName");
 
-        internal static XElement RequireRoot(XDocument doc, string expectedName = "api")
-        {
-            if (doc.Root == null)
-                throw new InvalidOperationException("API response did not contain a root element.");
+            XmlAttribute attribute =
+                node.Attributes == null
+                    ? null
+                    : node.Attributes[attributeName];
 
-            if (!string.Equals(doc.Root.Name.LocalName, expectedName, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Unexpected API response root element: " + doc.Root.Name.LocalName);
+            if (attribute == null)
+            {
+                throw new InvalidOperationException(
+                    "Expected XML attribute '" +
+                    attributeName +
+                    "' was not found on <" +
+                    node.Name +
+                    ">.");
+            }
 
-            return doc.Root;
-        }
-
-        internal static XElement ElementOrNull(this XElement element, string name)
-        {
-            return element.Element(name);
-        }
-
-        internal static string AttributeValue(this XElement element, string name)
-        {
-            return element.Attribute(name)?.Value ?? string.Empty;
-        }
-
-        internal static bool HasAttribute(this XElement element, string name)
-        {
-            return element.Attribute(name) != null;
-        }
-
-        internal static XElement FirstDescendant(this XElement element, string name)
-        {
-            foreach (XElement descendant in element.Descendants(name))
-                return descendant;
-
-            return null;
+            return attribute.Value;
         }
     }
 }
