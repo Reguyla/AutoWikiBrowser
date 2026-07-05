@@ -73,6 +73,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncApiEditModernTests.cs" />
     <Compile Include="DiffTests.cs" />
     <Compile Include="DynamicRegexTests.cs" />
     <Compile Include="GenfixesTests.cs" />
