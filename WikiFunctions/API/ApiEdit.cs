@@ -1198,23 +1198,28 @@ namespace WikiFunctions.API
                     },
                     ActionOptions.All);
 
-                CheckForErrors(result);
+                XmlDocument document = CheckForErrors(result);
 
                 try
                 {
-                    XmlReader xr = CreateXmlReader(result);
-                    if (xr.ReadToFollowing("tokens"))
-                    {
-                        Page.DeleteToken = xr.GetAttribute("csrftoken");
-                    }
-                    else if (!xr.ReadToFollowing("page"))
-                    {
-                        throw new Exception("Cannot find <page> element");
-                    }
-                    else
-                    {
-                        Page.DeleteToken = xr.GetAttribute("deletetoken");
-                    }
+                    // MediaWiki 1.24+ returns the CSRF token in <tokens>.
+                    // Older compatibility responses can return deletetoken on <page>.
+                    XmlNode tokenSource =
+                        document.SelectSingleNode("/api/query/tokens") ??
+                        document.SelectSingleNode("/api/query/pages/page");
+
+                    if (tokenSource == null)
+                        throw new Exception("Cannot find <tokens> or <page> element");
+
+                    string tokenAttribute =
+                        tokenSource.Name == "tokens"
+                            ? "csrftoken"
+                            : "deletetoken";
+
+                    Page.DeleteToken =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            tokenSource,
+                            tokenAttribute);
                 }
                 catch (Exception ex)
                 {
