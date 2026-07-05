@@ -756,46 +756,64 @@ namespace WikiFunctions.API
                     post
                     );
 
-                XmlReader xr = CreateXmlReader(result);
+                XmlDocument loginDocument = LoadApiXmlDocument(result);
+
+                XmlNode loginNode =
+                    loginDocument.SelectSingleNode("/api/login");
+
+                if (loginNode == null)
+                    throw new Exception("Cannot find <login> element");
 
                 Tools.WriteDebug("API::Edit action/login", "Received login-token response.");
 
-                // if got token from new meta/tokens way, should now be logged in
-                if (!string.IsNullOrEmpty(token))
+                // Select the direct API result rather than navigating through any
+                // similarly named element that may appear inside warnings.
+                string status =
+                    XmlResponseHelpers.RequireAttributeValue(
+                        loginNode,
+                        "result");
+
+                // Older MediaWiki versions can return NeedToken on the first
+                // action=login response. Retry with the returned token.
+                if (string.IsNullOrEmpty(token) &&
+                    status.Equals(
+                        "NeedToken",
+                        StringComparison.InvariantCultureIgnoreCase))
                 {
-                    xr.ReadToFollowing("login");
+                    AdjustCookies();
+
+                    token =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            loginNode,
+                            "token");
+
+                    post.Add("lgtoken", token);
+
+                    result = HttpPost(
+                        new Dictionary<string, string>
+                        {
+            {"action", "login"}
+                        },
+                        post
+                    );
+
+                    Tools.WriteDebug(
+                        "API::Edit action/login NeedToken",
+                        result);
+
+                    loginDocument = LoadApiXmlDocument(result);
+
+                    loginNode =
+                        loginDocument.SelectSingleNode("/api/login");
+
+                    if (loginNode == null)
+                        throw new Exception("Cannot find <login> element");
+
+                    status =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            loginNode,
+                            "result");
                 }
-                else // support the old way of first action=login to be told NeedToken and given token, then second action=login sending the token
-                {
-                    // if we have login section in warnings don't want to look in there for the token
-                    if (result.Contains("<warnings>") && Regex.Matches(result, @"<login ").Count > 1)
-                    {
-                        xr.ReadToFollowing("warnings");
-                        xr.ReadToFollowing("login");
-                    }
-
-                    xr.ReadToFollowing("login");
-
-                    var attribute = xr.GetAttribute("result");
-
-                    if (attribute != null && attribute.Equals("NeedToken", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        AdjustCookies();
-                        token = xr.GetAttribute("token");
-
-                        post.Add("lgtoken", token);
-                        result = HttpPost(
-                            new Dictionary<string, string> { { "action", "login" } },
-                            post
-                            );
-
-                        Tools.WriteDebug("API::Edit action/login NeedToken", result);
-                        xr = CreateXmlReader(result);
-                        xr.ReadToFollowing("login");
-                    }
-                }
-
-                string status = xr.GetAttribute("result");
                 if (status != null && !status.Equals("Success", StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new LoginException(this, status);
