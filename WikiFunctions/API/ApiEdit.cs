@@ -1285,23 +1285,28 @@ namespace WikiFunctions.API
                     },
                     ActionOptions.All);
 
-                CheckForErrors(result);
+                XmlDocument document = CheckForErrors(result);
 
                 try
                 {
-                    XmlReader xr = CreateXmlReader(result);
-                    if (xr.ReadToFollowing("tokens"))
-                    {
-                        Page.ProtectToken = xr.GetAttribute("csrftoken");
-                    }
-                    else if (!xr.ReadToFollowing("page"))
-                    {
-                        throw new Exception("Cannot find <page> element");
-                    }
-                    else
-                    {
-                        Page.ProtectToken = xr.GetAttribute("protecttoken");
-                    }
+                    // MediaWiki 1.24+ returns the CSRF token in <tokens>.
+                    // Older compatibility responses can return protecttoken on <page>.
+                    XmlNode tokenSource =
+                        document.SelectSingleNode("/api/query/tokens") ??
+                        document.SelectSingleNode("/api/query/pages/page");
+
+                    if (tokenSource == null)
+                        throw new Exception("Cannot find <tokens> or <page> element");
+
+                    string tokenAttribute =
+                        tokenSource.Name == "tokens"
+                            ? "csrftoken"
+                            : "protecttoken";
+
+                    Page.ProtectToken =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            tokenSource,
+                            tokenAttribute);
                 }
                 catch (Exception ex)
                 {
@@ -1309,7 +1314,7 @@ namespace WikiFunctions.API
                 }
             }
 
-            if (Aborting) throw new AbortedException(this);
+                if (Aborting) throw new AbortedException(this);
 
             // if page does not exist, protection (i.e. salting) requires create protection only
             string protections;
