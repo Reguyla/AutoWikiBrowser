@@ -190,6 +190,143 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void PreviewAsync_WhenLoggedOff_RaisesLoggedOffWithoutOperationFailed()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                PreviewExceptionFactory =
+                    delegate (ApiEdit apiEdit)
+                    {
+                        return new LoggedOffException(apiEdit);
+                    }
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            ManualResetEventSlim loggedOffRaised =
+                new ManualResetEventSlim(false);
+
+            ManualResetEventSlim operationFailedRaised =
+                new ManualResetEventSlim(false);
+
+            editor.LoggedOff +=
+                delegate (object sender, EventArgs e)
+                {
+                    loggedOffRaised.Set();
+                };
+
+            editor.OperationFailed +=
+                delegate (object sender, AsyncApiEditOperationFailedEventArgs e)
+                {
+                    operationFailedRaised.Set();
+                };
+
+            var previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text that triggers a logged-off failure");
+
+            Assert.That(
+                delegate
+                {
+                    previewTask.GetAwaiter().GetResult();
+                },
+                Throws.TypeOf<LoggedOffException>());
+
+            Assert.That(
+                loggedOffRaised.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "LoggedOff was not raised within the test timeout.");
+
+            // Once LoggedOff has been raised, ReportFailure(...) has completed its
+            // special-case branch. This failure must not also be reported as a
+            // generic OperationFailed event.
+            Assert.That(operationFailedRaised.IsSet, Is.False);
+
+            Assert.That(operations.PreviewCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Failed));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
+        [Test]
+        public void PreviewAsync_WhenMaxlagOccurs_RaisesMaxlagExceededWithoutOperationFailed()
+        {
+            const double expectedMaxlag = 12.5;
+            const int expectedRetryAfter = 10;
+
+            FakeOperations operations = new FakeOperations
+            {
+                PreviewExceptionFactory =
+                    delegate (ApiEdit apiEdit)
+                    {
+                        return new MaxlagException(
+                            apiEdit,
+                            expectedMaxlag,
+                            expectedRetryAfter);
+                    }
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            ManualResetEventSlim maxlagRaised =
+                new ManualResetEventSlim(false);
+
+            ManualResetEventSlim operationFailedRaised =
+                new ManualResetEventSlim(false);
+
+            double reportedMaxlag = 0;
+            int reportedRetryAfter = 0;
+
+            editor.MaxlagExceeded +=
+                delegate (object sender, AsyncApiEditMaxlagEventArgs e)
+                {
+                    reportedMaxlag = e.Maxlag;
+                    reportedRetryAfter = e.RetryAfter;
+                    maxlagRaised.Set();
+                };
+
+            editor.OperationFailed +=
+                delegate (object sender, AsyncApiEditOperationFailedEventArgs e)
+                {
+                    operationFailedRaised.Set();
+                };
+
+            var previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text that triggers maxlag");
+
+            Assert.That(
+                delegate
+                {
+                    previewTask.GetAwaiter().GetResult();
+                },
+                Throws.TypeOf<MaxlagException>());
+
+            Assert.That(
+                maxlagRaised.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "MaxlagExceeded was not raised within the test timeout.");
+
+            // Maxlag is a special API condition. It should not also be raised as
+            // the generic OperationFailed compatibility event.
+            Assert.That(operationFailedRaised.IsSet, Is.False);
+
+            Assert.That(reportedMaxlag, Is.EqualTo(expectedMaxlag));
+            Assert.That(reportedRetryAfter, Is.EqualTo(expectedRetryAfter));
+
+            Assert.That(operations.PreviewCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Failed));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -215,6 +352,10 @@ namespace UnitTests
             : IAsyncApiEditModernOperations
         {
             public string PreviewResult { get; set; }
+
+            // Allows an individual test to make Preview(...) throw a controlled
+            // exception using the same ApiEdit instance passed into the operation.
+            public Func<ApiEdit, Exception> PreviewExceptionFactory { get; set; }
 
             // When set, Preview(...) throws this exception instead of returning a result.
             public Exception PreviewException { get; set; }
@@ -266,6 +407,14 @@ namespace UnitTests
                 PreviewEditor = editor;
                 PreviewTitle = title;
                 PreviewText = text;
+
+                if (PreviewExceptionFactory != null)
+                {
+                    Exception exception = PreviewExceptionFactory(editor);
+
+                    if (exception != null)
+                        throw exception;
+                }
 
                 if (BlockPreview)
                 {
