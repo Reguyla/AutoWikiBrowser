@@ -1058,11 +1058,11 @@ namespace WikiFunctions.API
 
             string result = HttpGet(query, ActionOptions.All);
 
-            CheckForErrors(result, "query");
+            XmlDocument document = CheckForErrors(result, "query");
 
             try
             {
-                Page = new PageInfo(result);
+                Page = new PageInfo(document);
 
                 Action = "edit";
             }
@@ -1088,11 +1088,11 @@ namespace WikiFunctions.API
 
             string result = HttpGet(query, ActionOptions.None);
 
-            CheckForErrors(result, "query");
+            XmlDocument document = CheckForErrors(result, "query");
 
             try
             {
-                return new PageInfo(result).Exists;
+                return new PageInfo(document).Exists;
             }
             catch (Exception ex)
             {

@@ -17,7 +17,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Xml;
-using System.IO;
 using System;
 namespace WikiFunctions.API
 {
@@ -32,13 +31,18 @@ namespace WikiFunctions.API
 
         // TODO: adopt for retrieval of information for protection, deletion, etc.
         internal PageInfo(string xml)
+            : this(CreateXmlDocument(xml))
         {
-            XmlReader xr = XmlReader.Create(new StringReader(xml));
+        }
+
+        internal PageInfo(XmlDocument doc)
+        {
+            if (doc == null)
+                throw new ArgumentNullException("doc");
+
+            XmlReader xr = new XmlNodeReader(doc);
 
             string normalisedFrom = null, redirectFrom = null;
-
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
 
             var redirects = doc.GetElementsByTagName("r");
 
@@ -289,6 +293,18 @@ namespace WikiFunctions.API
         /// </summary>
         public bool IsWatched
         { get; set; }
+
+        /// <summary>
+        /// Parses XML for callers that still provide a raw API response string.
+        /// Callers that already have a validated XmlDocument should use the
+        /// XmlDocument constructor to avoid parsing the same response again.
+        /// </summary>
+        private static XmlDocument CreateXmlDocument(string xml)
+        {
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xml);
+            return document;
+        }
 
         /// <summary>
         /// Was the specified PageInfo redirected to get to the final target
