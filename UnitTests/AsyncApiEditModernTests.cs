@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using WikiFunctions.API;
 
@@ -131,6 +132,64 @@ namespace UnitTests
                 Is.EqualTo(AsyncApiEditModern.EditState.Ready));
         }
 
+        [Test]
+        public void PreviewAsync_WhenOperationFails_SetsFailedStateAndRaisesOperationFailed()
+        {
+            InvalidOperationException expectedException =
+                new InvalidOperationException("Controlled preview failure.");
+
+            FakeOperations operations = new FakeOperations
+            {
+                PreviewException = expectedException
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            string reportedOperationName = null;
+            Exception reportedException = null;
+
+            ManualResetEventSlim operationFailedRaised =
+                new ManualResetEventSlim(false);
+
+            editor.OperationFailed +=
+                delegate (object sender, AsyncApiEditOperationFailedEventArgs e)
+                {
+                    reportedOperationName = e.OperationName;
+                    reportedException = e.Exception;
+                    operationFailedRaised.Set();
+                };
+
+            Task<string> previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text that will fail");
+
+            Assert.That(
+                delegate
+                {
+                    previewTask.GetAwaiter().GetResult();
+                },
+                Throws.TypeOf<InvalidOperationException>());
+
+            Assert.That(
+                operationFailedRaised.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "OperationFailed was not raised within the test timeout.");
+
+            Assert.That(
+                reportedOperationName,
+                Is.EqualTo("Preview"));
+
+            Assert.That(
+                reportedException,
+                Is.SameAs(expectedException));
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Failed));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -156,6 +215,9 @@ namespace UnitTests
             : IAsyncApiEditModernOperations
         {
             public string PreviewResult { get; set; }
+
+            // When set, Preview(...) throws this exception instead of returning a result.
+            public Exception PreviewException { get; set; }
 
             // When true, Preview(...) pauses until the test releases it.
             public bool BlockPreview { get; set; }
@@ -220,6 +282,8 @@ namespace UnitTests
                             "The test did not release the blocked preview operation.");
                     }
                 }
+                if (PreviewException != null)
+                    throw PreviewException;
 
                 return PreviewResult;
             }
