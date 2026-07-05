@@ -1620,6 +1620,12 @@ namespace WikiFunctions.API
 
         public void Rollback(string title, string user)
         {
+            if (string.IsNullOrEmpty(title))
+                throw new ArgumentException("Page name required", "title");
+
+            if (string.IsNullOrEmpty(user))
+                throw new ArgumentException("User name required", "user");
+
             if (string.IsNullOrEmpty(Page.RollbackToken))
             {
                 string result = HttpGet(
@@ -1634,14 +1640,28 @@ namespace WikiFunctions.API
                     },
                     ActionOptions.All);
 
-                CheckForErrors(result, "query");
+                XmlDocument document = CheckForErrors(result, "query");
 
-                XmlReader xr = CreateXmlReader(result);
-                if (!xr.ReadToFollowing("tokens") && !xr.ReadToFollowing("page"))
+                try
                 {
-                    throw new Exception("Cannot find <page> element");
+                    // MediaWiki 1.24+ returns the rollback token in <tokens>.
+                    // Older compatibility responses can return it on <page>.
+                    XmlNode tokenSource =
+                        document.SelectSingleNode("/api/query/tokens") ??
+                        document.SelectSingleNode("/api/query/pages/page");
+
+                    if (tokenSource == null)
+                        throw new Exception("Cannot find <tokens> or <page> element");
+
+                    Page.RollbackToken =
+                        XmlResponseHelpers.RequireAttributeValue(
+                            tokenSource,
+                            "rollbacktoken");
                 }
-                Page.RollbackToken = xr.GetAttribute("rollbacktoken");
+                catch (Exception ex)
+                {
+                    throw new BrokenXmlException(this, ex);
+                }
             }
 
             var result2 = HttpPost(
@@ -1649,11 +1669,12 @@ namespace WikiFunctions.API
                 {
                     {"action", "rollback"}
                 },
-                new Dictionary<string, string>
+             new Dictionary<string, string>
                 {
                     {"title", title},
+                    {"user", user},
                     {"token", Page.RollbackToken}
-                });
+             });
 
             CheckForErrors(result2, "rollback");
         }
