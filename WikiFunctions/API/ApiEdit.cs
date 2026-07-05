@@ -973,12 +973,63 @@ namespace WikiFunctions.API
             }
         }
 
+        /// <summary>
+        /// Logs out of the current wiki session.
+        ///
+        /// MediaWiki requires logout requests to use a CSRF token and be sent as a
+        /// POST request. The token is requested before any local session state is
+        /// cleared so that a failed logout does not leave AWB believing it is logged
+        /// out while the server session remains active.
+        /// </summary>
         public void Logout()
         {
+            // Obtain an authenticated CSRF token before clearing local session state.
+            string tokenResult = HttpGet(
+                new Dictionary<string, string>
+                {
+            {"action", "query"},
+            {"meta", "tokens"}
+                });
+
+            XmlDocument document = CheckForErrors(tokenResult, "query");
+
+            string csrfToken;
+
+            try
+            {
+                XmlNode tokenNode =
+                    document.SelectSingleNode("/api/query/tokens");
+
+                if (tokenNode == null)
+                    throw new Exception("Cannot find <tokens> element");
+
+                csrfToken =
+                    XmlResponseHelpers.RequireAttributeValue(
+                        tokenNode,
+                        "csrftoken");
+            }
+            catch (Exception ex)
+            {
+                throw new BrokenXmlException(this, ex);
+            }
+
+            // Logout is a state-changing API action and therefore requires POST plus
+            // the CSRF token obtained above.
+            string result = HttpPost(
+                new Dictionary<string, string>
+                {
+            {"action", "logout"}
+                },
+                new Dictionary<string, string>
+                {
+            {"token", csrfToken}
+                });
+
+            CheckForErrors(result, "logout");
+
+            // Clear local state only after the server confirms the logout succeeded.
             Reset();
             User = new UserInfo();
-            string result = HttpGet(new Dictionary<string, string> { { "action", "logout" } });
-            CheckForErrors(result, "logout");
             Cookies = new CookieContainer();
         }
 
