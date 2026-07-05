@@ -69,6 +69,7 @@ namespace WikiFunctions.API
             new SemaphoreSlim(1, 1);
 
         private readonly SynchronizationContext CallbackContext;
+        private readonly IAsyncApiEditModernOperations ApiOperations;
 
         private CancellationTokenSource ActiveOperationCancellation;
         private Task ActiveOperation = CompletedTask;
@@ -113,12 +114,33 @@ namespace WikiFunctions.API
         public AsyncApiEditModern(
             ApiEdit editor,
             SynchronizationContext callbackContext)
+            : this(
+                editor,
+                callbackContext,
+                new ApiEditModernOperations())
+        {
+        }
+
+        /// <summary>
+        /// Internal constructor used by tests to supply controlled ApiEdit behavior.
+        ///
+        /// Production callers use the public constructor above, which supplies the
+        /// normal ApiEditModernOperations adapter.
+        /// </summary>
+        internal AsyncApiEditModern(
+            ApiEdit editor,
+            SynchronizationContext callbackContext,
+            IAsyncApiEditModernOperations apiOperations)
         {
             if (editor == null)
                 throw new ArgumentNullException("editor");
 
+            if (apiOperations == null)
+                throw new ArgumentNullException("apiOperations");
+
             SynchronousEditor = editor;
             CallbackContext = callbackContext;
+            ApiOperations = apiOperations;
             mState = EditState.Ready;
         }
 
@@ -238,8 +260,9 @@ namespace WikiFunctions.API
             try
             {
                 return new AsyncApiEditModern(
-                    (ApiEdit)SynchronousEditor.Clone(),
-                    CallbackContext);
+                    ApiOperations.Clone(SynchronousEditor),
+                    CallbackContext,
+                    ApiOperations);
             }
             finally
             {
@@ -320,8 +343,7 @@ namespace WikiFunctions.API
                 "Open",
                 delegate (CancellationToken token)
                 {
-                    SynchronousEditor.Open(title, resolveRedirects);
-                    return SynchronousEditor.Page;
+                    return ApiOperations.Open(SynchronousEditor, title, resolveRedirects);
                 },
                 cancellationToken);
         }
@@ -345,7 +367,7 @@ namespace WikiFunctions.API
                 "Preview",
                 delegate (CancellationToken token)
                 {
-                    return SynchronousEditor.Preview(title, text);
+                    return ApiOperations.Preview(SynchronousEditor, title, text);
                 },
                 cancellationToken);
         }
@@ -377,7 +399,8 @@ namespace WikiFunctions.API
                 "Save",
                 delegate (CancellationToken token)
                 {
-                    return SynchronousEditor.Save(
+                    return ApiOperations.Save(
+                        SynchronousEditor,
                         pageText,
                         summary,
                         minor,
@@ -406,7 +429,7 @@ namespace WikiFunctions.API
                 "Login",
                 delegate (CancellationToken token)
                 {
-                    SynchronousEditor.Login(username, password);
+                    ApiOperations.Login(SynchronousEditor, username, password);
                 },
                 cancellationToken);
         }
@@ -422,7 +445,7 @@ namespace WikiFunctions.API
                 "Logout",
                 delegate (CancellationToken token)
                 {
-                    SynchronousEditor.Logout();
+                    ApiOperations.Logout(SynchronousEditor);
                 },
                 cancellationToken);
         }
@@ -442,7 +465,7 @@ namespace WikiFunctions.API
                 "QueryApi",
                 delegate (CancellationToken token)
                 {
-                    SynchronousEditor.QueryApi(queryParameters);
+                    ApiOperations.QueryApi(SynchronousEditor, queryParameters);
                 },
                 cancellationToken);
         }
@@ -467,7 +490,7 @@ namespace WikiFunctions.API
                 {
                     token.ThrowIfCancellationRequested();
 
-                    return SynchronousEditor.ParseApi(queryParameters);
+                    return ApiOperations.ParseApi(SynchronousEditor, queryParameters);
                 },
                 cancellationToken);
         }
@@ -484,7 +507,7 @@ namespace WikiFunctions.API
                 "RefreshUserInfo",
                 delegate (CancellationToken token)
                 {
-                    SynchronousEditor.RefreshUserInfo();
+                    ApiOperations.RefreshUserInfo(SynchronousEditor);
                 },
                 cancellationToken);
         }
@@ -561,7 +584,7 @@ namespace WikiFunctions.API
 
             try
             {
-                SynchronousEditor.Reset();
+                ApiOperations.Reset(SynchronousEditor);
 
                 // Update state while the gate is still held, but delay notification
                 // until after the gate is released. This prevents an event handler
