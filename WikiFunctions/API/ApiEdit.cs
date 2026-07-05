@@ -717,9 +717,16 @@ namespace WikiFunctions.API
             Tools.WriteDebug("API::Edit meta/tokens", "Received login-token response.");
 
             /* Result format: <query><tokens logintoken="b0fc31b291ebf9999a8e9a4bfac8ef0456c44116+\"/></query> */
-            XmlReader xr = CreateXmlReader(result);
-            xr.ReadToFollowing("tokens");
-            string token = xr.GetAttribute("logintoken");
+            XmlDocument document = CheckForErrors(result, "query");
+
+            XmlNode tokenNode =
+                document.SelectSingleNode("/api/query/tokens");
+
+            string token = tokenNode == null || tokenNode.Attributes == null
+                ? null
+                : tokenNode.Attributes["logintoken"] == null
+                    ? null
+                    : tokenNode.Attributes["logintoken"].Value; 
 
             // If not a bot, use the clientlogin API, which gives an opportunity to supply a OTC
             if (!username.Contains("@") && !string.IsNullOrEmpty(token))
@@ -749,7 +756,7 @@ namespace WikiFunctions.API
                     post
                     );
 
-                xr = CreateXmlReader(result);
+                XmlReader xr = CreateXmlReader(result);
 
                 Tools.WriteDebug("API::Edit action/login", "Received login-token response.");
 
