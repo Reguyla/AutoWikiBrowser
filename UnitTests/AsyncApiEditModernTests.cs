@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using NUnit.Framework;
 using WikiFunctions.API;
 
@@ -36,6 +37,7 @@ namespace UnitTests
 
             Assert.That(operations.PreviewCallCount, Is.EqualTo(1));
             Assert.That(operations.PreviewTitle, Is.EqualTo("Sandbox"));
+
             Assert.That(
                 operations.PreviewText,
                 Is.EqualTo("Controlled test text"));
@@ -49,6 +51,84 @@ namespace UnitTests
                 Is.EqualTo(AsyncApiEditModern.EditState.Ready));
 
             Assert.That(editor.IsActive, Is.False);
+        }
+
+        [Test]
+        public void ActivePreview_RejectsConcurrentOperationsResetAndClone()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                BlockPreview = true,
+                PreviewResult = "<p>Completed preview</p>"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            var runningPreview = editor.PreviewAsync(
+                "Sandbox",
+                "Text being previewed");
+
+            try
+            {
+                // Wait until the fake confirms that the worker operation has
+                // started and is holding AsyncApiEditModern's operation gate.
+                Assert.That(
+                    operations.PreviewStarted.Wait(TimeSpan.FromSeconds(5)),
+                    Is.True,
+                    "The preview operation did not start within the test timeout.");
+
+                Assert.That(editor.IsActive, Is.True);
+
+                Assert.That(
+                    editor.State,
+                    Is.EqualTo(AsyncApiEditModern.EditState.Working));
+
+                // A second operation must be rejected while the first one owns
+                // the shared-operation gate.
+                Assert.That(
+                    delegate
+                    {
+                        editor.PreviewAsync("Other page", "Other text");
+                    },
+                    Throws.TypeOf<InvocationException>());
+
+                // Reset must not touch the shared ApiEdit while preview is active.
+                Assert.That(
+                    delegate
+                    {
+                        editor.Reset();
+                    },
+                    Throws.TypeOf<InvocationException>());
+
+                // Clone must not clone the shared ApiEdit while preview is active.
+                Assert.That(
+                    delegate
+                    {
+                        editor.Clone();
+                    },
+                    Throws.TypeOf<InvocationException>());
+            }
+            finally
+            {
+                // Always release the blocked preview, including when an assertion
+                // above fails. This prevents a worker task being left running.
+                operations.AllowPreviewToComplete.Set();
+            }
+
+            // The fake should now be allowed to return normally.
+            Assert.That(
+                runningPreview.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "The preview operation did not complete within the test timeout.");
+
+            string result = runningPreview.GetAwaiter().GetResult();
+
+            Assert.That(result, Is.EqualTo("<p>Completed preview</p>"));
+            Assert.That(editor.IsActive, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
         }
 
         /// <summary>
@@ -77,6 +157,27 @@ namespace UnitTests
         {
             public string PreviewResult { get; set; }
 
+            // When true, Preview(...) pauses until the test releases it.
+            public bool BlockPreview { get; set; }
+
+            // The fake sets this signal after Preview(...) begins executing.
+            public ManualResetEventSlim PreviewStarted
+            {
+                get { return PreviewStartedSignal; }
+            }
+
+            // The test sets this signal to allow the blocked preview to finish.
+            public ManualResetEventSlim AllowPreviewToComplete
+            {
+                get { return AllowPreviewToCompleteSignal; }
+            }
+
+            private readonly ManualResetEventSlim PreviewStartedSignal =
+                new ManualResetEventSlim(false);
+
+            private readonly ManualResetEventSlim AllowPreviewToCompleteSignal =
+                new ManualResetEventSlim(false);
+
             public int PreviewCallCount { get; private set; }
 
             public ApiEdit PreviewEditor { get; private set; }
@@ -103,6 +204,22 @@ namespace UnitTests
                 PreviewEditor = editor;
                 PreviewTitle = title;
                 PreviewText = text;
+
+                if (BlockPreview)
+                {
+                    // Tell the test the asynchronous worker reached the fake
+                    // Preview operation and is now holding the operation gate.
+                    PreviewStartedSignal.Set();
+
+                    // Hold the fake operation open until the test performs its
+                    // concurrent-operation, Reset, and Clone checks.
+                    if (!AllowPreviewToCompleteSignal.Wait(
+                        TimeSpan.FromSeconds(10)))
+                    {
+                        throw new TimeoutException(
+                            "The test did not release the blocked preview operation.");
+                    }
+                }
 
                 return PreviewResult;
             }
