@@ -250,7 +250,11 @@ namespace UnitTests
 
             FakeOperations operations = new FakeOperations
             {
-                PreviewException = expectedException
+                PreviewExceptionFactory =
+                    delegate (ApiEdit apiEdit)
+                    {
+                        return expectedException;
+                    }
             };
 
             AsyncApiEditModern editor = CreateEditor(operations);
@@ -271,7 +275,7 @@ namespace UnitTests
 
             Task<string> previewTask = editor.PreviewAsync(
                 "Sandbox",
-                "Text that will fail");
+                "Text that triggers a normal failure");
 
             Assert.That(
                 delegate
@@ -292,6 +296,8 @@ namespace UnitTests
             Assert.That(
                 reportedException,
                 Is.SameAs(expectedException));
+
+            Assert.That(operations.PreviewCallCount, Is.EqualTo(1));
 
             Assert.That(
                 editor.State,
