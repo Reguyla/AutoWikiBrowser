@@ -510,6 +510,97 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void PreviewAsync_WhenOperationFails_PostsOperationFailedToCallbackContext()
+        {
+            InvalidOperationException expectedException =
+                new InvalidOperationException("Controlled callback-context failure.");
+
+            FakeOperations operations = new FakeOperations
+            {
+                PreviewExceptionFactory =
+                    delegate (ApiEdit apiEdit)
+                    {
+                        return expectedException;
+                    }
+            };
+
+            RecordingSynchronizationContext callbackContext =
+                new RecordingSynchronizationContext();
+
+            AsyncApiEditModern editor = CreateEditor(
+                operations,
+                callbackContext);
+
+            int operationFailedCount = 0;
+            string reportedOperationName = null;
+            Exception reportedException = null;
+            List<int> eventThreadIds = new List<int>();
+
+            editor.OperationFailed +=
+                delegate (object sender, AsyncApiEditOperationFailedEventArgs e)
+                {
+                    operationFailedCount++;
+                    reportedOperationName = e.OperationName;
+                    reportedException = e.Exception;
+                    eventThreadIds.Add(Thread.CurrentThread.ManagedThreadId);
+                };
+
+            Task<string> previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text that triggers a callback-context failure");
+
+            // The failure path posts three callbacks:
+            // 1. StateChanged for Ready -> Working
+            // 2. StateChanged for Working -> Failed
+            // 3. OperationFailed for the original exception.
+            //
+            // Waiting for all three posts also confirms the operation has reached its
+            // completion and notification path without calling Task.Wait(...), which
+            // would throw AggregateException for an intentionally faulted task.
+            Assert.That(
+                callbackContext.WaitForPostCount(
+                    3,
+                    TimeSpan.FromSeconds(5)),
+                Is.True,
+                "Expected callbacks were not posted to the supplied context.");
+
+            Assert.That(previewTask.IsCompleted, Is.True);
+
+            Assert.That(
+                delegate
+                {
+                    previewTask.GetAwaiter().GetResult();
+                },
+                Throws.TypeOf<InvalidOperationException>());
+
+            // The callback context queues notifications, so the event handler must
+            // not have executed until the test explicitly processes the queue.
+            Assert.That(operationFailedCount, Is.EqualTo(0));
+
+            callbackContext.RunAll();
+
+            Assert.That(operationFailedCount, Is.EqualTo(1));
+
+            Assert.That(
+                reportedOperationName,
+                Is.EqualTo("Preview"));
+
+            Assert.That(
+                reportedException,
+                Is.SameAs(expectedException));
+
+            Assert.That(
+                eventThreadIds,
+                Is.All.EqualTo(Thread.CurrentThread.ManagedThreadId));
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Failed));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
