@@ -53,6 +53,7 @@ namespace AutoWikiBrowser
     // TODO:Move any code that doesn't need to be directly behind the form to WF or other code files (Preferably WF)
     // TODO:Move Regexes declared in method bodies (if not dynamic based on article title, etc), into class body
     // TODO:Move any Regexes to WikiRegexes as required
+    // TODO:Invesitigate splitting this into smaller, more manageable modules instead of a 6000+ line monolith
 
     public sealed partial class MainForm : Form, IAutoWikiBrowser
     { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
