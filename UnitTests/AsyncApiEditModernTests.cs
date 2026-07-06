@@ -443,6 +443,73 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void PreviewAsync_WhenCallbackContextIsSupplied_PostsStateChangedToThatContext()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                PreviewResult = "<p>Context test preview</p>"
+            };
+
+            RecordingSynchronizationContext callbackContext =
+                new RecordingSynchronizationContext();
+
+            AsyncApiEditModern editor = CreateEditor(
+                operations,
+                callbackContext);
+
+            int stateChangedCount = 0;
+            List<int> eventThreadIds = new List<int>();
+
+            editor.StateChanged +=
+                delegate (object sender, EventArgs e)
+                {
+                    stateChangedCount++;
+                    eventThreadIds.Add(Thread.CurrentThread.ManagedThreadId);
+                };
+
+            Task<string> previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text for callback-context testing");
+
+            Assert.That(
+                previewTask.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "The preview operation did not complete within the test timeout.");
+
+            Assert.That(
+                callbackContext.WaitForPostCount(
+                    2,
+                    TimeSpan.FromSeconds(5)),
+                Is.True,
+                "StateChanged notifications were not posted to the callback context.");
+
+            // The custom context has queued the callbacks but has not executed them.
+            // This proves the events were posted rather than invoked directly.
+            Assert.That(stateChangedCount, Is.EqualTo(0));
+
+            // Simulate the UI message loop processing queued callbacks.
+            callbackContext.RunAll();
+
+            // A successful operation changes state twice:
+            // Ready -> Working, then Working -> Ready.
+            Assert.That(stateChangedCount, Is.EqualTo(2));
+
+            Assert.That(
+                eventThreadIds,
+                Is.All.EqualTo(Thread.CurrentThread.ManagedThreadId));
+
+            Assert.That(
+                previewTask.GetAwaiter().GetResult(),
+                Is.EqualTo("<p>Context test preview</p>"));
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -451,9 +518,16 @@ namespace UnitTests
         private static AsyncApiEditModern CreateEditor(
             IAsyncApiEditModernOperations operations)
         {
+            return CreateEditor(operations, null);
+        }
+
+        private static AsyncApiEditModern CreateEditor(
+            IAsyncApiEditModernOperations operations,
+            SynchronizationContext callbackContext)
+        {
             return new AsyncApiEditModern(
                 new ApiEdit("https://example.invalid/w/"),
-                null,
+                callbackContext,
                 operations);
         }
 
@@ -612,6 +686,101 @@ namespace UnitTests
             {
                 throw new NotSupportedException(
                     "Clone was not configured for this test.");
+            }
+        }
+        /// <summary>
+        /// Test synchronization context that queues posted callbacks until a test
+        /// explicitly runs them. This lets tests verify that AsyncApiEditModern uses
+        /// SynchronizationContext.Post rather than invoking event handlers directly.
+        /// </summary>
+        private sealed class RecordingSynchronizationContext
+            : SynchronizationContext
+        {
+            private readonly object SyncRoot = new object();
+
+            private readonly Queue<PostedCallback> PostedCallbacks =
+                new Queue<PostedCallback>();
+
+            private int PostCount;
+
+            public override void Post(
+                SendOrPostCallback callback,
+                object state)
+            {
+                if (callback == null)
+                    throw new ArgumentNullException("callback");
+
+                lock (SyncRoot)
+                {
+                    PostedCallbacks.Enqueue(
+                        new PostedCallback(callback, state));
+
+                    PostCount++;
+
+                    Monitor.PulseAll(SyncRoot);
+                }
+            }
+
+            /// <summary>
+            /// Waits until at least the requested number of callbacks have been
+            /// queued through Post(...).
+            /// </summary>
+            public bool WaitForPostCount(
+                int expectedPostCount,
+                TimeSpan timeout)
+            {
+                DateTime deadline = DateTime.UtcNow.Add(timeout);
+
+                lock (SyncRoot)
+                {
+                    while (PostCount < expectedPostCount)
+                    {
+                        TimeSpan remaining = deadline - DateTime.UtcNow;
+
+                        if (remaining <= TimeSpan.Zero)
+                            return false;
+
+                        Monitor.Wait(SyncRoot, remaining);
+                    }
+
+                    return true;
+                }
+            }
+
+            /// <summary>
+            /// Executes all callbacks that have been posted so far.
+            /// </summary>
+            public void RunAll()
+            {
+                while (true)
+                {
+                    PostedCallback postedCallback;
+
+                    lock (SyncRoot)
+                    {
+                        if (PostedCallbacks.Count == 0)
+                            return;
+
+                        postedCallback = PostedCallbacks.Dequeue();
+                    }
+
+                    postedCallback.Callback(postedCallback.State);
+                }
+            }
+
+            private sealed class PostedCallback
+            {
+                public PostedCallback(
+                    SendOrPostCallback callback,
+                    object state)
+                {
+                    Callback = callback;
+                    State = state;
+                }
+
+                public SendOrPostCallback Callback { get; private set; }
+
+                public object State { get; private set; }
             }
         }
     }
