@@ -725,7 +725,12 @@ namespace WikiFunctions
             //refresh once more in case project settings were reset due to error with loading
             RefreshProxy();
 
-            //HACK:HACK:HACK:HACK:HACK:
+            // Project initialization currently depends on the active WinForms session.
+            // If a wiki requires authentication before project data can be read, retain
+            // the requested settings and retry after login instead of applying partial state.
+            //
+            // TODO: Separate project-state configuration from MainForm/session coordination
+            // so project switching can be validated and tested without UI coupling.
             if (MainForm != null && MainForm.TheSession != null)
             {
                 try
