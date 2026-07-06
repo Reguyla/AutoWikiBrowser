@@ -117,7 +117,7 @@ namespace WikiFunctions.Parse
         /// </summary>
         public void MakeList()
         {
-            _replacementList.Clear();
+            dataGridView1.EndEdit();_replacementList.Clear();
 
             foreach (DataGridViewRow dataGridRow in dataGridView1.Rows)
             {
