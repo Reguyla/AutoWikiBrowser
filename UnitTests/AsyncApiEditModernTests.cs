@@ -133,6 +133,116 @@ namespace UnitTests
         }
 
         [Test]
+        public void ActivePreview_WhenCancellationRequested_CompletesWithActualResult()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                BlockPreview = true,
+                PreviewResult = "<p>Preview completed after cancellation request</p>"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            ManualResetEventSlim abortedRaised =
+                new ManualResetEventSlim(false);
+
+            editor.Aborted +=
+                delegate (object sender, EventArgs e)
+                {
+                    abortedRaised.Set();
+                };
+
+            var runningPreview = editor.PreviewAsync(
+                "Sandbox",
+                "Text being previewed");
+
+            try
+            {
+                // Wait until the fake Preview(...) method has started. At this point,
+                // the synchronous operation is already in progress and owns the gate.
+                Assert.That(
+                    operations.PreviewStarted.Wait(TimeSpan.FromSeconds(5)),
+                    Is.True,
+                    "The preview operation did not start within the test timeout.");
+
+                Assert.That(editor.IsActive, Is.True);
+
+                Assert.That(
+                    editor.State,
+                    Is.EqualTo(AsyncApiEditModern.EditState.Working));
+
+                // This is a cooperative cancellation request. It cannot interrupt the
+                // already-running synchronous fake Preview(...) call.
+                Assert.That(editor.CancelCurrentOperation(), Is.True);
+
+                // The operation should remain active until the underlying synchronous
+                // call is allowed to return.
+                Assert.That(editor.IsActive, Is.True);
+
+                Assert.That(
+                    editor.State,
+                    Is.EqualTo(AsyncApiEditModern.EditState.Working));
+            }
+            finally
+            {
+                // Let the fake synchronous operation finish normally.
+                operations.AllowPreviewToComplete.Set();
+            }
+
+            Assert.That(
+                runningPreview.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "The preview operation did not complete within the test timeout.");
+
+            string result = runningPreview.GetAwaiter().GetResult();
+
+            // The actual successful result must be preserved. A late cancellation
+            // request must not make this operation appear to have been aborted.
+            Assert.That(
+                result,
+                Is.EqualTo("<p>Preview completed after cancellation request</p>"));
+
+            Assert.That(editor.IsActive, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(abortedRaised.IsSet, Is.False);
+        }
+
+        [Test]
+        public void PreviewAsync_WhenTokenIsAlreadyCanceled_ReturnsCanceledTaskWithoutInvokingPreview()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                PreviewResult = "<p>This result should never be returned</p>"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            CancellationTokenSource cancellation =
+                new CancellationTokenSource();
+
+            cancellation.Cancel();
+
+            Task<string> previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text that should not be previewed",
+                cancellation.Token);
+
+            Assert.That(previewTask.IsCanceled, Is.True);
+
+            Assert.That(operations.PreviewCallCount, Is.EqualTo(0));
+
+            Assert.That(editor.IsActive, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+        }
+
+        [Test]
         public void PreviewAsync_WhenOperationFails_SetsFailedStateAndRaisesOperationFailed()
         {
             InvalidOperationException expectedException =

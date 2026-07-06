@@ -645,7 +645,8 @@ namespace WikiFunctions.API
             if (operation == null)
                 throw new ArgumentNullException("operation");
 
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+                return CreateCanceledTask<TResult>();
 
             if (!OperationGate.Wait(0))
             {
@@ -873,6 +874,15 @@ namespace WikiFunctions.API
                 return flattened.InnerExceptions[0];
 
             return flattened;
+        }
+        private static Task<TResult> CreateCanceledTask<TResult>()
+        {
+            TaskCompletionSource<TResult> completion =
+                new TaskCompletionSource<TResult>();
+
+            completion.SetCanceled();
+
+            return completion.Task;
         }
 
         private static Task CreateCompletedTask()
