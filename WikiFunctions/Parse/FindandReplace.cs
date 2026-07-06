@@ -25,7 +25,8 @@ using WikiFunctions.Controls;
 
 namespace WikiFunctions.Parse
 {
-    //TODO: User IArticleComparer derivatives where possible
+    // TODO: Review title-related comparisons for use of IArticleComparer where
+    // wiki-specific title normalization is required. Do not apply it to article text.
 
     /// <summary>
     /// Provides a form and functions for setting and applying multiple find and replacements on a text string.
@@ -678,7 +679,9 @@ namespace WikiFunctions.Parse
         private void btnSearch_Click(object sender, EventArgs e)
         {
             // row index of currently highlighted cell (if any)
-            int a = dataGridView1.CurrentCell.RowIndex;
+            int currentRowIndex = dataGridView1.CurrentCell == null
+                ? -1 
+                : dataGridView1.CurrentCell.RowIndex;
 
             // get list of all cells with text match
             List<DataGridViewCell> cells = new List<DataGridViewCell>();
@@ -701,7 +704,7 @@ namespace WikiFunctions.Parse
             DataGridViewCell c2;
 
             // if no current grid focus, pick first match
-            if (a < 0)
+            if (currentRowIndex < 0)
             {
                 c2 = cells[0];
             }
@@ -709,7 +712,7 @@ namespace WikiFunctions.Parse
             {
                 // look for a match on a row after current grid focus
                 // if no match, go back to start of grid i.e. first match
-                List<DataGridViewCell> cells2 = cells.FindAll(x => x.RowIndex > a);
+                List<DataGridViewCell> cells2 = cells.FindAll(x => x.RowIndex > currentRowIndex);
                 if (cells2.Count > 0)
                     c2 = cells2[0];
                 else
