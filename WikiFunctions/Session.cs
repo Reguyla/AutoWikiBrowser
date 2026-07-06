@@ -567,14 +567,14 @@ namespace WikiFunctions
                 }
                 else
                 {
-                    var resp = (HttpWebResponse) ex.Response;
-                    if (resp == null) throw;
+                    HttpWebResponse response = ex.Response as HttpWebResponse;
 
-                    // Check for HTTP 401 error.
-                    switch (resp.StatusCode)
+                    // Preserve the existing authentication behavior. The caller handles
+                    // unauthorized access separately.
+                    if (response != null &&
+                        response.StatusCode == HttpStatusCode.Unauthorized)
                     {
-                        case HttpStatusCode.Unauthorized: // 401
-                            throw;
+                        throw;
                     }
 
                     message = ex.Message;
@@ -586,7 +586,9 @@ namespace WikiFunctions
             }
             catch (Exception ex)
             {
-                // TODO:Better error handling
+                // TODO: Classify project-loading failures more precisely so invalid URLs,
+                // connection/TLS failures, malformed project configuration, and unexpected
+                // exceptions receive accurate user-facing messages and diagnostics.
 
                 string message = "";
 
