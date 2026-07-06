@@ -22,6 +22,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+//TODO: Investigate moving this to a plugin or module. Unique to Wikipedia
+
 namespace WikiFunctions.Parse
 {
 
