@@ -164,26 +164,36 @@ namespace UnitTests
             Matches("", regex, input, expected);
         }
 
-        // FIXME:
-        public static void Matches(string message, Regex regex, string input, params string[] expected)
+        /// <summary>
+        /// Asserts that all matches produced by the regular expression equal the
+        /// expected match values, in the same order.
+        /// </summary>
+        /// <param name="message">Optional assertion message shown when the comparison fails.</param>
+        /// <param name="regex">The regular expression to evaluate.</param>
+        /// <param name="input">The input text to search.</param>
+        /// <param name="expected">The complete ordered list of expected match values.</param>
+        public static void Matches(
+            string message,
+            Regex regex,
+            string input,
+            params string[] expected)
         {
+            if (regex == null)
+                throw new ArgumentNullException("regex");
+
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            if (expected == null)
+                throw new ArgumentNullException("expected");
+
             if (expected.Length == 0)
-                throw new ArgumentException("Expected is empty", "expected");
+                throw new ArgumentException("At least one expected match is required.", "expected");
 
-            // MatchCollection mc = regex.Matches(input);
-
-            // int firstDifference = -1;
-            // for (int i = 0; i < Math.Min(mc.Count, expected.Length) && firstDifference < 0; i++)
-            // {
-            //    if (mc[i].Value != expected[i]) firstDifference = i;
-            // }
-
-            // if (firstDifference >= 0 || mc.Count != expected.Length)
-            // {
-            //    string errorMessage = "";
-            //    if (message.Length >= 0) errorMessage = message + "";
-            // }
-            Assert.That(MatchesToStrings(regex.Matches(input)), Is.EqualTo(expected).AsCollection, message);
+            Assert.That(
+                MatchesToStrings(regex.Matches(input)),
+                Is.EqualTo(expected).AsCollection,
+                message);
         }
         #endregion
 
