@@ -23,6 +23,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using WikiFunctions.Lists.Providers;
 
+//TODO: Investigate converting this to a plug-in or module.
+//There is a lot we can do to improve this
+
 namespace WikiFunctions.Parse
 {
 
