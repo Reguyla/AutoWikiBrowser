@@ -23,6 +23,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
+//TODO: Investigate moving this to a plugin or module. Unique to Wikipedia
+
 namespace WikiFunctions.TalkPages
 {
     public enum DEFAULTSORT
