@@ -1657,18 +1657,20 @@ namespace WikiFunctions
         /// Matches PAGENAME, PAGENAMEE, BASEPAGENAME, BASEPAGENAMEE templates
         /// </summary>
         public static readonly Regex BASEPAGENAMETemplates = Tools.NestedTemplateRegex(BASEPAGENAMETemplatesL);
-        
+
         /// <summary>
-        /// 
+        /// Validates whether a string is formatted as a basic HTTP, HTTPS, or FTP URL.
         /// </summary>
         /// <remarks>
-        /// From http://www.dreamincode.net/code/snippet3490.htm
+        /// This pattern performs lightweight URL format validation and is not intended
+        /// to fully implement RFC-compliant URI parsing.
+        /// Original source: http://www.dreamincode.net/code/snippet3490.htm
         /// </remarks>
         public static readonly Regex UrlValidator =
             new Regex(
-                @"^(https?|ftp)\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$",
+                @"^(https?|ftp)\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,63}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$"
                 RegexOptions.Compiled);
-        
+
         /// <summary>
         /// Matches templates from [[Category:Hatnote templates for names]], excluding name order templates
         /// </summary>
