@@ -1668,7 +1668,7 @@ namespace WikiFunctions
         /// </remarks>
         public static readonly Regex UrlValidator =
             new Regex(
-                @"^(https?|ftp)\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,63}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$"
+                @"^(https?|ftp)\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,63}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$",
                 RegexOptions.Compiled);
 
         /// <summary>
