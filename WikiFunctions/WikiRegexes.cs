@@ -1205,7 +1205,7 @@ namespace WikiFunctions
             "Science review", "Section move from", "Sections", "Self-contradictory", "Self-published", "Self-reference cleanup", "Self-sourcing examples", "Shallow references", "Sources exist", "Spam references", "Spam-request", "Specific", "Speculation", "Split", "Split portions", "Story", "Subsections", "Summary style", "Synthesis",
             "Technical", "Term paper", "Text-source", "Textbook", "Time-context", "Title change", "Tone", "Too few opinions", "Too many charts", "Too many photos", "Too many list sections", "Too many sections", "Translated page", "Travel guide", "Trivia",
             "Unbalanced", "Unclear date", "Under construction", "Underlinked", "Undisclosed paid", "Undue weight", "Unfocused", "Units attention", "Unreferenced", "Unreferenced category", "Unreferenced law",
-            "Unreliable sources", "Unsorted list", "Update", "Update-EB", "Upscaled images", "Use list-defined references", "User-generated", "Verifiability", "Verify sources", "Very long", "Weasel", "Wikify", "You",
+            "Unreliable sources", "Unsorted list", "Update", "Update-EB", "Upscaled images", "User-generated", "Verifiability", "Verify sources", "Very long", "Weasel", "Wikify", "You",
             "Expand Afrikaans", "Expand Albanian", "Expand Amharic", "Expand Arabic", "Expand Aragonese",
             "Expand Armenian", "Expand Assamese", "Expand Asturian", "Expand Azerbaijani", "Expand Basque",
             "Expand Bavarian", "Expand Belarusian", "Expand Belarusian (Taraškievica orthography)", "Expand Bengali",
