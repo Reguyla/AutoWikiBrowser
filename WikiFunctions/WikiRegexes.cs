@@ -206,31 +206,48 @@ namespace WikiFunctions
                     "Taxonomy disambiguation", "WoO number disambiguation"
                 }) + @"(?: *<!--.*?-->(?=\r\n|$))?", RegexOptions.Multiline);
         }
-        
+
         /// <summary>
-        /// Creates the regex for DEFAULTSORT template, using lang-specific defaultsort magic keyword where available
+        /// Creates the regex for DEFAULTSORT template, using lang-specific defaultsort magic keyword where available.
         /// </summary>
         private static void MakeDefaultSortRegex()
         {
             List<string> magic;
-            string s;
-            
+            string defaultSortKeywordPattern;
+
             if (Variables.MagicWords.TryGetValue("defaultsort", out magic))
-                s = "(?i:" + string.Join("|", magic.ToArray()).Replace(":", "") + ")";
+            {
+                defaultSortKeywordPattern = "(?i:" + string.Join("|", magic.ToArray()).Replace(":", "") + ")";
+            }
             else
-                s = (Variables.LangCode.Equals("en"))
+            {
+                defaultSortKeywordPattern = Variables.LangCode.Equals("en")
                     ? "(?:(?i:defaultsort(key|CATEGORYSORT)?))"
                     : "(?i:defaultsort)";
+            }
 
-            // sv-wiki: allow comment on same line as DEFAULTSORT
-            if (Variables.LangCode.Equals("sv"))
-                Defaultsort = new Regex(TemplateStart + s + @"\s*[:\|]\s*(?<key>(?>[^\{\}\r\n]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))|[^\}\r\n]*?)(?<end>\s*}}(?: *<!--[^<>]+-->)?|\r|\n)",
-                    RegexOptions.ExplicitCapture);
-            else
-                Defaultsort = new Regex(TemplateStart + s + @"\s*[:\|]\s*(?<key>(?>[^\{\}\r\n]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))|[^\}\r\n]*?)(?<end>\s*}}|\r|\n)",
-                    RegexOptions.ExplicitCapture);
+            const string DefaultSortSeparatorPattern = @"\s*[:\|]\s*";
+
+            const string DefaultSortKeyPattern =
+                @"(?<key>" +
+                @"(?>[^\{\}\r\n]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*" +
+                @"(?(DEPTH)(?!))" +
+                @"|[^\}\r\n]*?" +
+                @")";
+
+            string defaultSortEndPattern = Variables.LangCode.Equals("sv")
+                ? @"(?<end>\s*}}(?: *<!--[^<>]+-->)?|\r|\n)"
+                : @"(?<end>\s*}}|\r|\n)";
+
+            Defaultsort = new Regex(
+                TemplateStart +
+                defaultSortKeywordPattern +
+                DefaultSortSeparatorPattern +
+                DefaultSortKeyPattern +
+                defaultSortEndPattern,
+                RegexOptions.ExplicitCapture);
         }
-        
+
         public static void MakeLangSpecificRegexes()
         {
             MakeNamespaceSpecificRegexes();
