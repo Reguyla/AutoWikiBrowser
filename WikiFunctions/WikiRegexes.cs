@@ -68,7 +68,25 @@ namespace WikiFunctions
             // Supported file extensions taken from https://commons.wikimedia.org/wiki/Commons:File_types
             string ImagesString = @"(?:\[\[\s*)?" + image +
                     @"[ \%\!""$&'’\(\)\*,\-.\/0-9:;=\?@\w\\\^_`~\x80-\xFF\+–]+\.[a-zA-Z]{3,4}\b(?:\s*(?:\]\]|\|))?";
-            const string ImageInTemplateString = @"|{{\s*[Gg]allery\s*(?:\|(?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!)))?}}|(?<=\|\s*(?:[a-zA-Z\d][a-zA-Z\d_ ]*\s*=)?)[^\|{}=\r\n\[\]]+?\.(?i:djvu|gif|jpe?g|og[agv]|pdf|png|svg|tiff?|mid|xcf|webm)(?=\s*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(?:\||}}))";
+
+            const string ImageExtensionPattern = @"(?i:djvu|gif|jpe?g|og[agv]|pdf|png|svg|tiff?|mid|xcf|webm)";
+
+            const string BalancedGalleryTemplatePattern =
+                @"\{\{\s*[Gg]allery\s*" +
+                @"(?:\|(?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!)))?" +
+                @"\}\}";
+
+            const string ImageFilenameInTemplatePattern =
+                @"(?<=\|\s*(?:[a-zA-Z\d][a-zA-Z\d_ ]*\s*=)?)" +
+                @"[^\|{}=\r\n\[\]]+?\." + ImageExtensionPattern +
+                @"(?=\s*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(?:\||\}\}))";
+
+            // Extends ImagesString to also match:
+            //   {{Gallery}} templates
+            //   image filenames used as template parameter values.
+            const string ImageInTemplateString =
+                @"|" + BalancedGalleryTemplatePattern +
+                @"|" + ImageFilenameInTemplatePattern;
 
             Images = new Regex(ImagesString + ImageInTemplateString);
 
