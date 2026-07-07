@@ -142,16 +142,30 @@ namespace AutoWikiBrowser
             
             try
             {
+                bool statsSent;
+
                 if (EstablishedContact)
                 {
-                    if (Program.AWB.NumberOfEdits > LastEditCount || NewPluginsAdded
-                        || HaveUserNameToSend) SubsequentContact();
+                    if (Program.AWB.NumberOfEdits > LastEditCount ||
+                        NewPluginsAdded ||
+                        HaveUserNameToSend)
+                    {
+                        statsSent = SubsequentContact();
+                    }
+                    else
+                    {
+                        statsSent = true;
+                    }
                 }
                 else
-                    FirstContact();
+                {
+                    statsSent = FirstContact();
+                }
 
-                // success:
-                LastEditCount = Program.AWB.NumberOfEdits;
+                if (statsSent)
+                {
+                    LastEditCount = Program.AWB.NumberOfEdits;
+                }
             }
             catch (Exception ex)
             {
@@ -198,10 +212,10 @@ namespace AutoWikiBrowser
         /// <summary>
         /// Send usage stats to server
         /// </summary>
-        private static void FirstContact()
+        private static bool FirstContact()
         {
 #if !DEBUG && !INSTASTATS
-            if (Program.AWB.NumberOfEdits == 0) return;
+            if (Program.AWB.NumberOfEdits == 0) return false;
 #endif
             NameValueCollection postvars = new NameValueCollection
                                                {
@@ -252,13 +266,21 @@ namespace AutoWikiBrowser
                              Plugins.Plugin.AWBBasePlugins.Values,
                              Plugins.Plugin.ListMakerPlugins.Values);
 
-            ReadXML(PostData(postvars));
+            string response;
+
+            if (!TryPostData(postvars, out response))
+            {
+                return false;
+            }
+
+            ReadXML(response);
+            return true;
         }
 
         /// <summary>
         /// Send updated usage stats to server
         /// </summary>
-        private static void SubsequentContact()
+        private static bool SubsequentContact()
         {
             NameValueCollection postvars = new NameValueCollection
                                                {
@@ -273,12 +295,19 @@ namespace AutoWikiBrowser
             if (Program.AWB.NumberOfEdits > LastEditCount)
                 postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
 
-            PostData(postvars);
+            string response;
 
-            // Clear lists as we've posted
+            if (!TryPostData(postvars, out response))
+            {
+                return false;
+            }
+
+            // Clear lists only after the update was successfully sent.
             NewAWBPlugins.Clear();
             NewAWBBasePlugins.Clear();
             NewListMakerPlugins.Clear();
+
+            return true;
         }
 
         /// <summary>
@@ -288,27 +317,37 @@ namespace AutoWikiBrowser
         { get { return (RecordId > 0); } }
 
         /// <summary>
-        /// Post a collection of names/values to server
+        /// Attempts to post usage statistics to the server.
         /// </summary>
-        /// <param name="postvars"></param>
-        /// <returns></returns>
-        private static string PostData(NameValueCollection postvars)
+        /// <param name="postvars">The values to send.</param>
+        /// <param name="response">The server response when the request succeeds.</param>
+        /// <returns>
+        /// <c>true</c> when the server returned HTTP 200; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool TryPostData(
+            NameValueCollection postvars,
+            out string response)
         {
+            response = null;
+
             try
             {
                 Program.AWB.StartProgressBar();
                 StatusLabelText = "Contacting stats server...";
                 Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.WaitCursor;
 
-                return Tools.PostData(postvars, StatsURL);
+                response = Tools.PostData(postvars, StatsURL);
+                return true;
             }
             catch (WebException ex)
             {
                 Tools.WriteDebug("UsageStats", ex.Message);
+                return false;
             }
             catch (IOException ex)
             {
                 Tools.WriteDebug("UsageStats", ex.Message);
+                return false;
             }
             finally
             {
@@ -316,7 +355,6 @@ namespace AutoWikiBrowser
                 StatusLabelText = "";
                 Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.Default;
             }
-            return null;
         }
         #endregion
 
