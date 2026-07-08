@@ -83,10 +83,14 @@ namespace WikiFunctions.API
             bool resolveRedirects,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            editor.Open(title, resolveRedirects);
-            return editor.Page;
+            return ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Open(title, resolveRedirects);
+                    return editor.Page;
+                });
         }
 
         public string Preview(
@@ -95,9 +99,13 @@ namespace WikiFunctions.API
             string text,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            return editor.Preview(title, text);
+            return ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    return editor.Preview(title, text);
+                });
         }
 
         public SaveInfo Save(
@@ -109,34 +117,45 @@ namespace WikiFunctions.API
             string contentModel,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            return editor.Save(
-                pageText,
-                summary,
-                minor,
-                watch,
-                contentModel);
+            return ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    return editor.Save(
+                        pageText,
+                        summary,
+                        minor,
+                        watch,
+                        contentModel);
+                });
         }
-
         public void Login(
             ApiEdit editor,
             string username,
             string password,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            editor.Login(username, password);
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Login(username, password);
+                });
         }
 
         public void Logout(
             ApiEdit editor,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            editor.Logout();
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Logout();
+                });
         }
 
         public void QueryApi(
@@ -144,9 +163,13 @@ namespace WikiFunctions.API
             string queryParameters,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            editor.QueryApi(queryParameters);
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.QueryApi(queryParameters);
+                });
         }
 
         public string ParseApi(
@@ -154,18 +177,26 @@ namespace WikiFunctions.API
             Dictionary<string, string> queryParameters,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            return editor.ParseApi(queryParameters);
+            return ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    return editor.ParseApi(queryParameters);
+                });
         }
 
         public void RefreshUserInfo(
             ApiEdit editor,
             CancellationToken cancellationToken)
         {
-            RequireEditor(editor);
-
-            editor.RefreshUserInfo();
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.RefreshUserInfo();
+                });
         }
 
         public void Reset(ApiEdit editor)
@@ -180,6 +211,38 @@ namespace WikiFunctions.API
             RequireEditor(editor);
 
             return (ApiEdit)editor.Clone();
+        }
+
+        private static TResult ExecuteWithCancellation<TResult>(
+            ApiEdit editor,
+            CancellationToken cancellationToken,
+            Func<TResult> operation)
+        {
+            RequireEditor(editor);
+
+            if (operation == null)
+                throw new ArgumentNullException("operation");
+
+            using (editor.BeginCancellationScope(cancellationToken))
+            {
+                return operation();
+            }
+        }
+
+        private static void ExecuteWithCancellation(
+            ApiEdit editor,
+            CancellationToken cancellationToken,
+            Action operation)
+        {
+            RequireEditor(editor);
+
+            if (operation == null)
+                throw new ArgumentNullException("operation");
+
+            using (editor.BeginCancellationScope(cancellationToken))
+            {
+                operation();
+            }
         }
 
         private static void RequireEditor(ApiEdit editor)

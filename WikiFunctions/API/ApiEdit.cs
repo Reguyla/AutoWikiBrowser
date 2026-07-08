@@ -192,7 +192,12 @@ namespace WikiFunctions.API
         public void Abort()
         {
             Aborting = true;
-            Request.Abort();
+
+            HttpWebRequest request = Request;
+
+            if (request != null)
+                request.Abort();
+
             Thread.Sleep(1);
             Aborting = false;
         }
@@ -435,6 +440,10 @@ namespace WikiFunctions.API
         private bool Aborting;
         private HttpWebRequest Request;
 
+        private readonly object CancellationSyncRoot = new object();
+        private bool CancellationScopeActive;
+        private CancellationToken ActiveCancellationToken;
+
         /// <summary>
         /// 
         /// </summary>
@@ -454,9 +463,9 @@ namespace WikiFunctions.API
                 };
 
                 CredentialCache myCache = new CredentialCache
-                {
-                    {new Uri(URL), "Basic", login}
-                };
+        {
+            {new Uri(URL), "Basic", login}
+        };
                 req.Credentials = myCache;
 
                 req = (HttpWebRequest)SetBasicAuthHeader(req, login.UserName, login.Password);
@@ -464,6 +473,8 @@ namespace WikiFunctions.API
 
             try
             {
+                using (IDisposable requestCancellation =
+                    RegisterRequestCancellation(req))
                 using (WebResponse resp = req.GetResponse())
                 {
                     // T357908: A custom wiki may redirect HTTP requests to HTTPS.
@@ -486,6 +497,8 @@ namespace WikiFunctions.API
             }
             catch (WebException ex)
             {
+                ThrowIfModernRequestCancellation(ex);
+
                 var resp = (HttpWebResponse)ex.Response;
                 if (resp == null) throw;
                 switch (resp.StatusCode)
@@ -497,19 +510,12 @@ namespace WikiFunctions.API
                         return ""; // emulate the behavior of Tools.HttpGet()
                 }
 
-                // just reclassifying
-                if (ex.Status == WebExceptionStatus.RequestCanceled)
-                {
-                    throw new AbortedException(this);
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             finally
             {
-                Request = null;
+                if (object.ReferenceEquals(Request, req))
+                    Request = null;
             }
         }
 
@@ -621,11 +627,30 @@ namespace WikiFunctions.API
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.ContentLength = postData.Length;
-            using (Stream rs = req.GetRequestStream())
+
+            Request = req;
+
+            try
             {
-                rs.Write(postData, 0, postData.Length);
+                using (IDisposable requestCancellation =
+                    RegisterRequestCancellation(req))
+                using (Stream rs = req.GetRequestStream())
+                {
+                    rs.Write(postData, 0, postData.Length);
+                }
+
+                return GetResponseString(req);
             }
-            return GetResponseString(req);
+            catch (WebException ex)
+            {
+                ThrowIfModernRequestCancellation(ex);
+                throw;
+            }
+            finally
+            {
+                if (object.ReferenceEquals(Request, req))
+                    Request = null;
+            }
         }
 
         /// <summary>
@@ -2008,6 +2033,123 @@ namespace WikiFunctions.API
             ThrowIfActionFailed(actionElement, action, xml);
 
             return CompleteSuccessfulResponseValidation(doc, action);
+        }
+
+        /// <summary>
+        /// Begins a scoped cancellation context for modern task-based ApiEdit callers.
+        ///
+        /// Existing synchronous callers do not enter this scope and therefore preserve
+        /// their current behavior. AsyncApiEditModern enters this scope through
+        /// ApiEditModernOperations so requests created during that operation can be
+        /// aborted when the operation token is canceled.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token for the current modern operation.
+        /// </param>
+        /// <returns>
+        /// An object that restores the previous cancellation scope when disposed.
+        /// </returns>
+        internal IDisposable BeginCancellationScope(
+            CancellationToken cancellationToken)
+        {
+            return new CancellationScope(this, cancellationToken);
+        }
+
+        private CancellationToken GetActiveCancellationToken()
+        {
+            lock (CancellationSyncRoot)
+            {
+                return CancellationScopeActive
+                    ? ActiveCancellationToken
+                    : CancellationToken.None;
+            }
+        }
+
+        private IDisposable RegisterRequestCancellation(HttpWebRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException("request");
+
+            CancellationToken cancellationToken = GetActiveCancellationToken();
+
+            if (!cancellationToken.CanBeCanceled)
+                return null;
+
+            if (cancellationToken.IsCancellationRequested)
+                throw new OperationCanceledException(cancellationToken);
+
+            return cancellationToken.Register(
+                delegate
+                {
+                    try
+                    {
+                        request.Abort();
+                    }
+                    catch (WebException)
+                    {
+                        // Request.Abort should not normally throw WebException, but keep
+                        // cancellation callbacks defensive so they never crash the caller.
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // The request may already have completed or been disposed.
+                    }
+                });
+        }
+
+        private void ThrowIfModernRequestCancellation(WebException ex)
+        {
+            if (ex == null || ex.Status != WebExceptionStatus.RequestCanceled)
+                return;
+
+            CancellationToken cancellationToken = GetActiveCancellationToken();
+
+            if (cancellationToken.IsCancellationRequested)
+                throw new OperationCanceledException(cancellationToken);
+
+            throw new AbortedException(this);
+        }
+
+        private sealed class CancellationScope : IDisposable
+        {
+            private ApiEdit Editor;
+            private readonly bool PreviousScopeActive;
+            private readonly CancellationToken PreviousCancellationToken;
+
+            public CancellationScope(
+                ApiEdit editor,
+                CancellationToken cancellationToken)
+            {
+                if (editor == null)
+                    throw new ArgumentNullException("editor");
+
+                Editor = editor;
+
+                lock (editor.CancellationSyncRoot)
+                {
+                    PreviousScopeActive = editor.CancellationScopeActive;
+                    PreviousCancellationToken = editor.ActiveCancellationToken;
+
+                    editor.CancellationScopeActive = true;
+                    editor.ActiveCancellationToken = cancellationToken;
+                }
+            }
+
+            public void Dispose()
+            {
+                ApiEdit editor = Editor;
+
+                if (editor == null)
+                    return;
+
+                lock (editor.CancellationSyncRoot)
+                {
+                    editor.CancellationScopeActive = PreviousScopeActive;
+                    editor.ActiveCancellationToken = PreviousCancellationToken;
+                }
+
+                Editor = null;
+            }
         }
 
         /// <summary>
