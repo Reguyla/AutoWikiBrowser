@@ -55,6 +55,65 @@ namespace UnitTests
         }
 
         [Test]
+        public void PreviewAsync_PassesLinkedCancellationTokenToOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                BlockPreview = true,
+                PreviewResult = "<p>Token propagation preview</p>"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            CancellationTokenSource cancellation =
+                new CancellationTokenSource();
+
+            Task<string> previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text for token propagation",
+                cancellation.Token);
+
+            try
+            {
+                Assert.That(
+                    operations.PreviewStarted.Wait(TimeSpan.FromSeconds(5)),
+                    Is.True,
+                    "The preview operation did not start within the test timeout.");
+
+                Assert.That(operations.PreviewCallCount, Is.EqualTo(1));
+
+                Assert.That(
+                    operations.PreviewCancellationToken.CanBeCanceled,
+                    Is.True);
+
+                Assert.That(
+                    operations.PreviewCancellationToken.IsCancellationRequested,
+                    Is.False);
+
+                cancellation.Cancel();
+
+                Assert.That(
+                    operations.PreviewCancellationToken.IsCancellationRequested,
+                    Is.True);
+            }
+            finally
+            {
+                operations.AllowPreviewToComplete.Set();
+            }
+
+            Assert.That(
+                previewTask.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "The preview operation did not complete within the test timeout.");
+
+            string result = previewTask.GetAwaiter().GetResult();
+
+            Assert.That(
+                result,
+                Is.EqualTo("<p>Token propagation preview</p>"));
+        }
+
+        [Test]
         public void ActivePreview_RejectsConcurrentOperationsResetAndClone()
         {
             FakeOperations operations = new FakeOperations
@@ -630,7 +689,7 @@ namespace UnitTests
         /// unexpected.
         /// </summary>
         private sealed class FakeOperations
-            : IAsyncApiEditModernOperations
+    : IAsyncApiEditModernOperations
         {
             public string PreviewResult { get; set; }
 
@@ -670,10 +729,15 @@ namespace UnitTests
 
             public string PreviewText { get; private set; }
 
+            // Stored now so the next test can verify that AsyncApiEditModern passes
+            // its operation token through the adapter boundary.
+            public CancellationToken PreviewCancellationToken { get; private set; }
+
             public PageInfo Open(
                 ApiEdit editor,
                 string title,
-                bool resolveRedirects)
+                bool resolveRedirects,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "Open was not configured for this test.");
@@ -682,12 +746,14 @@ namespace UnitTests
             public string Preview(
                 ApiEdit editor,
                 string title,
-                string text)
+                string text,
+                CancellationToken cancellationToken)
             {
                 PreviewCallCount++;
                 PreviewEditor = editor;
                 PreviewTitle = title;
                 PreviewText = text;
+                PreviewCancellationToken = cancellationToken;
 
                 if (PreviewExceptionFactory != null)
                 {
@@ -712,6 +778,7 @@ namespace UnitTests
                             "The test did not release the blocked preview operation.");
                     }
                 }
+
                 if (PreviewException != null)
                     throw PreviewException;
 
@@ -724,7 +791,8 @@ namespace UnitTests
                 string summary,
                 bool minor,
                 WatchOptions watch,
-                string contentModel)
+                string contentModel,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "Save was not configured for this test.");
@@ -733,13 +801,16 @@ namespace UnitTests
             public void Login(
                 ApiEdit editor,
                 string username,
-                string password)
+                string password,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "Login was not configured for this test.");
             }
 
-            public void Logout(ApiEdit editor)
+            public void Logout(
+                ApiEdit editor,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "Logout was not configured for this test.");
@@ -747,7 +818,8 @@ namespace UnitTests
 
             public void QueryApi(
                 ApiEdit editor,
-                string queryParameters)
+                string queryParameters,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "QueryApi was not configured for this test.");
@@ -755,13 +827,16 @@ namespace UnitTests
 
             public string ParseApi(
                 ApiEdit editor,
-                Dictionary<string, string> queryParameters)
+                Dictionary<string, string> queryParameters,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "ParseApi was not configured for this test.");
             }
 
-            public void RefreshUserInfo(ApiEdit editor)
+            public void RefreshUserInfo(
+                ApiEdit editor,
+                CancellationToken cancellationToken)
             {
                 throw new NotSupportedException(
                     "RefreshUserInfo was not configured for this test.");
@@ -779,6 +854,7 @@ namespace UnitTests
                     "Clone was not configured for this test.");
             }
         }
+
         /// <summary>
         /// Test synchronization context that queues posted callbacks until a test
         /// explicitly runs them. This lets tests verify that AsyncApiEditModern uses

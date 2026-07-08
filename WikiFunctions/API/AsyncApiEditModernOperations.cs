@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace WikiFunctions.API
 {
@@ -16,12 +17,14 @@ namespace WikiFunctions.API
         PageInfo Open(
             ApiEdit editor,
             string title,
-            bool resolveRedirects);
+            bool resolveRedirects,
+            CancellationToken cancellationToken);
 
         string Preview(
             ApiEdit editor,
             string title,
-            string text);
+            string text,
+            CancellationToken cancellationToken);
 
         SaveInfo Save(
             ApiEdit editor,
@@ -29,24 +32,32 @@ namespace WikiFunctions.API
             string summary,
             bool minor,
             WatchOptions watch,
-            string contentModel);
+            string contentModel,
+            CancellationToken cancellationToken);
 
         void Login(
             ApiEdit editor,
             string username,
-            string password);
+            string password,
+            CancellationToken cancellationToken);
 
-        void Logout(ApiEdit editor);
+        void Logout(
+            ApiEdit editor,
+            CancellationToken cancellationToken);
 
         void QueryApi(
             ApiEdit editor,
-            string queryParameters);
+            string queryParameters,
+            CancellationToken cancellationToken);
 
         string ParseApi(
             ApiEdit editor,
-            Dictionary<string, string> queryParameters);
+            Dictionary<string, string> queryParameters,
+            CancellationToken cancellationToken);
 
-        void RefreshUserInfo(ApiEdit editor);
+        void RefreshUserInfo(
+            ApiEdit editor,
+            CancellationToken cancellationToken);
 
         void Reset(ApiEdit editor);
 
@@ -58,6 +69,10 @@ namespace WikiFunctions.API
     ///
     /// This preserves the existing behavior by forwarding every operation
     /// directly to the supplied synchronous ApiEdit instance.
+    ///
+    /// The cancellation token is accepted here so AsyncApiEditModern can pass
+    /// one consistently through the operation boundary. ApiEdit transport-level
+    /// cancellation will be added in a later change.
     /// </summary>
     internal sealed class ApiEditModernOperations
         : IAsyncApiEditModernOperations
@@ -65,7 +80,8 @@ namespace WikiFunctions.API
         public PageInfo Open(
             ApiEdit editor,
             string title,
-            bool resolveRedirects)
+            bool resolveRedirects,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
@@ -76,7 +92,8 @@ namespace WikiFunctions.API
         public string Preview(
             ApiEdit editor,
             string title,
-            string text)
+            string text,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
@@ -89,7 +106,8 @@ namespace WikiFunctions.API
             string summary,
             bool minor,
             WatchOptions watch,
-            string contentModel)
+            string contentModel,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
@@ -104,14 +122,17 @@ namespace WikiFunctions.API
         public void Login(
             ApiEdit editor,
             string username,
-            string password)
+            string password,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
             editor.Login(username, password);
         }
 
-        public void Logout(ApiEdit editor)
+        public void Logout(
+            ApiEdit editor,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
@@ -120,7 +141,8 @@ namespace WikiFunctions.API
 
         public void QueryApi(
             ApiEdit editor,
-            string queryParameters)
+            string queryParameters,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
@@ -129,14 +151,17 @@ namespace WikiFunctions.API
 
         public string ParseApi(
             ApiEdit editor,
-            Dictionary<string, string> queryParameters)
+            Dictionary<string, string> queryParameters,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 
             return editor.ParseApi(queryParameters);
         }
 
-        public void RefreshUserInfo(ApiEdit editor)
+        public void RefreshUserInfo(
+            ApiEdit editor,
+            CancellationToken cancellationToken)
         {
             RequireEditor(editor);
 

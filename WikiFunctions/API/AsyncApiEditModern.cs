@@ -343,7 +343,7 @@ namespace WikiFunctions.API
                 "Open",
                 delegate (CancellationToken token)
                 {
-                    return ApiOperations.Open(SynchronousEditor, title, resolveRedirects);
+                    return ApiOperations.Open(SynchronousEditor, title, resolveRedirects, token);
                 },
                 cancellationToken);
         }
@@ -367,7 +367,7 @@ namespace WikiFunctions.API
                 "Preview",
                 delegate (CancellationToken token)
                 {
-                    return ApiOperations.Preview(SynchronousEditor, title, text);
+                    return ApiOperations.Preview(SynchronousEditor, title, text, token);
                 },
                 cancellationToken);
         }
@@ -405,7 +405,8 @@ namespace WikiFunctions.API
                         summary,
                         minor,
                         watch,
-                        contentModel);
+                        contentModel,
+                        token);
                 },
                 cancellationToken);
         }
@@ -429,7 +430,7 @@ namespace WikiFunctions.API
                 "Login",
                 delegate (CancellationToken token)
                 {
-                    ApiOperations.Login(SynchronousEditor, username, password);
+                    ApiOperations.Login(SynchronousEditor, username, password, token);
                 },
                 cancellationToken);
         }
@@ -445,7 +446,7 @@ namespace WikiFunctions.API
                 "Logout",
                 delegate (CancellationToken token)
                 {
-                    ApiOperations.Logout(SynchronousEditor);
+                    ApiOperations.Logout(SynchronousEditor, token);
                 },
                 cancellationToken);
         }
@@ -465,7 +466,7 @@ namespace WikiFunctions.API
                 "QueryApi",
                 delegate (CancellationToken token)
                 {
-                    ApiOperations.QueryApi(SynchronousEditor, queryParameters);
+                    ApiOperations.QueryApi(SynchronousEditor, queryParameters, token);
                 },
                 cancellationToken);
         }
@@ -488,9 +489,7 @@ namespace WikiFunctions.API
                 "ParseApi",
                 delegate (CancellationToken token)
                 {
-                    token.ThrowIfCancellationRequested();
-
-                    return ApiOperations.ParseApi(SynchronousEditor, queryParameters);
+                return ApiOperations.ParseApi(SynchronousEditor, queryParameters, token);
                 },
                 cancellationToken);
         }
@@ -507,7 +506,7 @@ namespace WikiFunctions.API
                 "RefreshUserInfo",
                 delegate (CancellationToken token)
                 {
-                    ApiOperations.RefreshUserInfo(SynchronousEditor);
+                    ApiOperations.RefreshUserInfo(SynchronousEditor, token);
                 },
                 cancellationToken);
         }
