@@ -451,6 +451,52 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
 
+        public Task WatchAsync(string title)
+        {
+            return WatchAsync(
+                title,
+                CancellationToken.None);
+        }
+
+        public Task WatchAsync(
+            string title,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation(
+                "Watch",
+                delegate (CancellationToken token)
+                {
+                    ApiOperations.Watch(
+                        SynchronousEditor,
+                        title,
+                        token);
+                },
+                cancellationToken);
+        }
+
+        public Task UnwatchAsync(string title)
+        {
+            return UnwatchAsync(
+                title,
+                CancellationToken.None);
+        }
+
+        public Task UnwatchAsync(
+            string title,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation(
+                "Unwatch",
+                delegate (CancellationToken token)
+                {
+                    ApiOperations.Unwatch(
+                        SynchronousEditor,
+                        title,
+                        token);
+                },
+                cancellationToken);
+        }
+
         public Task QueryApiAsync(string queryParameters)
         {
             return QueryApiAsync(

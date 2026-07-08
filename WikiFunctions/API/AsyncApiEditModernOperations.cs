@@ -45,6 +45,16 @@ namespace WikiFunctions.API
             ApiEdit editor,
             CancellationToken cancellationToken);
 
+        void Watch(
+            ApiEdit editor,
+            string title,
+            CancellationToken cancellationToken);
+
+        void Unwatch(
+            ApiEdit editor,
+            string title,
+            CancellationToken cancellationToken);
+
         void QueryApi(
             ApiEdit editor,
             string queryParameters,
@@ -155,6 +165,34 @@ namespace WikiFunctions.API
                 delegate
                 {
                     editor.Logout();
+                });
+        }
+
+        public void Watch(
+            ApiEdit editor,
+            string title,
+            CancellationToken cancellationToken)
+        {
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Watch(title);
+                });
+        }
+
+        public void Unwatch(
+            ApiEdit editor,
+            string title,
+            CancellationToken cancellationToken)
+        {
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Unwatch(title);
                 });
         }
 

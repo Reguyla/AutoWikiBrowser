@@ -719,6 +719,60 @@ namespace UnitTests
                 Is.EqualTo(AsyncApiEditModern.EditState.Aborted));
         }
 
+        [Test]
+        public void WatchAsync_CallsInjectedOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.WatchAsync("Sandbox").GetAwaiter().GetResult();
+
+            Assert.That(operations.WatchCallCount, Is.EqualTo(1));
+            Assert.That(operations.WatchTitle, Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.WatchEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.WatchCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
+        [Test]
+        public void UnwatchAsync_CallsInjectedOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.UnwatchAsync("Sandbox").GetAwaiter().GetResult();
+
+            Assert.That(operations.UnwatchCallCount, Is.EqualTo(1));
+            Assert.That(operations.UnwatchTitle, Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.UnwatchEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.UnwatchCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -791,6 +845,22 @@ namespace UnitTests
             public string PreviewTitle { get; private set; }
 
             public string PreviewText { get; private set; }
+
+            public int WatchCallCount { get; private set; }
+
+            public ApiEdit WatchEditor { get; private set; }
+
+            public string WatchTitle { get; private set; }
+
+            public CancellationToken WatchCancellationToken { get; private set; }
+
+            public int UnwatchCallCount { get; private set; }
+
+            public ApiEdit UnwatchEditor { get; private set; }
+
+            public string UnwatchTitle { get; private set; }
+
+            public CancellationToken UnwatchCancellationToken { get; private set; }
 
             // Stored now so the next test can verify that AsyncApiEditModern passes
             // its operation token through the adapter boundary.
@@ -882,6 +952,27 @@ namespace UnitTests
                     "Logout was not configured for this test.");
             }
 
+            public void Watch(
+                ApiEdit editor,
+                string title,
+                CancellationToken cancellationToken)
+            {
+                WatchCallCount++;
+                WatchEditor = editor;
+                WatchTitle = title;
+                WatchCancellationToken = cancellationToken;
+            }
+
+            public void Unwatch(
+                ApiEdit editor,
+                string title,
+                CancellationToken cancellationToken)
+            {
+                UnwatchCallCount++;
+                UnwatchEditor = editor;
+                UnwatchTitle = title;
+                UnwatchCancellationToken = cancellationToken;
+            }
             public void QueryApi(
                 ApiEdit editor,
                 string queryParameters,
