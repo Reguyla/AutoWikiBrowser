@@ -296,6 +296,7 @@ namespace AutoWikiBrowser
                                                };
 
             EnumeratePlugins(postvars, NewAWBPlugins, NewAWBBasePlugins, NewListMakerPlugins);
+
             bool userFieldIncluded = ProcessUsername(postvars);
 
             if (Program.AWB.NumberOfEdits > LastEditCount)
