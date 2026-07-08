@@ -660,6 +660,65 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void PreviewAsync_WhenOperationObservesCancellation_CompletesAsAborted()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                BlockPreview = true,
+                ThrowWhenCancellationRequested = true,
+                PreviewResult = "<p>This result should not be returned</p>"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            ManualResetEventSlim abortedRaised =
+                new ManualResetEventSlim(false);
+
+            editor.Aborted +=
+                delegate (object sender, EventArgs e)
+                {
+                    abortedRaised.Set();
+                };
+
+            Task<string> previewTask = editor.PreviewAsync(
+                "Sandbox",
+                "Text being previewed");
+
+            Assert.That(
+                operations.PreviewStarted.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "The preview operation did not start within the test timeout.");
+
+            Assert.That(editor.IsActive, Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Working));
+
+            Assert.That(editor.CancelCurrentOperation(), Is.True);
+
+            operations.AllowPreviewToComplete.Set();
+
+            Assert.That(
+                delegate
+                {
+                    previewTask.GetAwaiter().GetResult();
+                },
+                Throws.InstanceOf<OperationCanceledException>());
+
+            Assert.That(
+                abortedRaised.Wait(TimeSpan.FromSeconds(5)),
+                Is.True,
+                "Aborted was not raised within the test timeout.");
+
+            Assert.That(editor.IsActive, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Aborted));
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -708,6 +767,10 @@ namespace UnitTests
             {
                 get { return PreviewStartedSignal; }
             }
+
+            // When true, Preview(...) checks the supplied cancellation token
+            // before returning and throws if cancellation has been requested.
+            public bool ThrowWhenCancellationRequested { get; set; }
 
             // The test sets this signal to allow the blocked preview to finish.
             public ManualResetEventSlim AllowPreviewToComplete
@@ -781,6 +844,9 @@ namespace UnitTests
 
                 if (PreviewException != null)
                     throw PreviewException;
+
+                if (ThrowWhenCancellationRequested)
+                    cancellationToken.ThrowIfCancellationRequested();
 
                 return PreviewResult;
             }
