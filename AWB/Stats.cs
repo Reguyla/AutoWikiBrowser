@@ -251,7 +251,7 @@ namespace AutoWikiBrowser
             postvars.Add("Culture", System.Threading.Thread.CurrentThread.CurrentCulture.ToString());
 
             // Username:
-            ProcessUsername(postvars);
+            bool userFieldIncluded = ProcessUsername(postvars);
 
             // Other details:
             postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
@@ -274,6 +274,12 @@ namespace AutoWikiBrowser
             }
 
             ReadXML(response);
+
+            if (userFieldIncluded)
+            {
+                SentUserName = true;
+            }
+
             return true;
         }
 
@@ -290,7 +296,7 @@ namespace AutoWikiBrowser
                                                };
 
             EnumeratePlugins(postvars, NewAWBPlugins, NewAWBBasePlugins, NewListMakerPlugins);
-            ProcessUsername(postvars);
+            bool userFieldIncluded = ProcessUsername(postvars);
 
             if (Program.AWB.NumberOfEdits > LastEditCount)
                 postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
@@ -300,6 +306,11 @@ namespace AutoWikiBrowser
             if (!TryPostData(postvars, out response))
             {
                 return false;
+            }
+
+            if (userFieldIncluded)
+            {
+                SentUserName = true;
             }
 
             // Clear lists only after the update was successfully sent.
@@ -424,21 +435,33 @@ namespace AutoWikiBrowser
             }
         }
 
-        private static void ProcessUsername(NameValueCollection postvars)
+        /// <summary>
+        /// Adds the username or privacy marker to a pending statistics request when
+        /// it has not yet been successfully sent.
+        /// </summary>
+        /// <param name="postvars">The request values being prepared.</param>
+        /// <returns>
+        /// <c>true</c> when this request includes a User field that should be marked
+        /// as sent only after the request succeeds; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool ProcessUsername(NameValueCollection postvars)
         {
-            if (!SentUserName)
+            if (SentUserName)
+                return false;
+
+            if (Properties.Settings.Default.Privacy)
             {
-                if (Properties.Settings.Default.Privacy)
-                {
-                    postvars.Add("User", "<Withheld>");
-                    SentUserName = true;
-                }
-                else if (!string.IsNullOrEmpty(UserName))
-                {
-                    postvars.Add("User", UserName);
-                    SentUserName = true;
-                }
+                postvars.Add("User", "<Withheld>");
+                return true;
             }
+
+            if (!string.IsNullOrEmpty(UserName))
+            {
+                postvars.Add("User", UserName);
+                return true;
+            }
+
+            return false;
         }
 
         private static bool HaveUserNameToSend
