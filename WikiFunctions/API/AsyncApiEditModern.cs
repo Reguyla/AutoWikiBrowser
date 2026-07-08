@@ -497,6 +497,29 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
 
+        public Task<string> HttpGetAsync(string url)
+        {
+            return HttpGetAsync(
+                url,
+                CancellationToken.None);
+        }
+
+        public Task<string> HttpGetAsync(
+            string url,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation<string>(
+                "HttpGet",
+                delegate (CancellationToken token)
+                {
+                    return ApiOperations.HttpGet(
+                        SynchronousEditor,
+                        url,
+                        token);
+                },
+                cancellationToken);
+        }
+
         public Task QueryApiAsync(string queryParameters)
         {
             return QueryApiAsync(

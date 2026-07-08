@@ -773,6 +773,43 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void HttpGetAsync_ReturnsResultFromInjectedOperations()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                HttpGetResult = "Controlled HTTP result"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            string result = editor.HttpGetAsync(
+                "https://example.invalid/w/api.php?action=query")
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(result, Is.EqualTo("Controlled HTTP result"));
+            Assert.That(operations.HttpGetCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.HttpGetUrl,
+                Is.EqualTo("https://example.invalid/w/api.php?action=query"));
+
+            Assert.That(
+                operations.HttpGetEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.HttpGetCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -861,6 +898,16 @@ namespace UnitTests
             public string UnwatchTitle { get; private set; }
 
             public CancellationToken UnwatchCancellationToken { get; private set; }
+
+            public string HttpGetResult { get; set; }
+
+            public int HttpGetCallCount { get; private set; }
+
+            public ApiEdit HttpGetEditor { get; private set; }
+
+            public string HttpGetUrl { get; private set; }
+
+            public CancellationToken HttpGetCancellationToken { get; private set; }
 
             // Stored now so the next test can verify that AsyncApiEditModern passes
             // its operation token through the adapter boundary.
@@ -973,6 +1020,20 @@ namespace UnitTests
                 UnwatchTitle = title;
                 UnwatchCancellationToken = cancellationToken;
             }
+
+            public string HttpGet(
+                ApiEdit editor,
+                string url,
+                CancellationToken cancellationToken)
+            {
+                HttpGetCallCount++;
+                HttpGetEditor = editor;
+                HttpGetUrl = url;
+                HttpGetCancellationToken = cancellationToken;
+
+                return HttpGetResult;
+            }
+
             public void QueryApi(
                 ApiEdit editor,
                 string queryParameters,

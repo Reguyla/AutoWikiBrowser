@@ -55,6 +55,11 @@ namespace WikiFunctions.API
             string title,
             CancellationToken cancellationToken);
 
+        string HttpGet(
+            ApiEdit editor,
+            string url,
+            CancellationToken cancellationToken);
+
         void QueryApi(
             ApiEdit editor,
             string queryParameters,
@@ -193,6 +198,20 @@ namespace WikiFunctions.API
                 delegate
                 {
                     editor.Unwatch(title);
+                });
+        }
+
+        public string HttpGet(
+            ApiEdit editor,
+            string url,
+            CancellationToken cancellationToken)
+        {
+            return ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    return editor.HttpGet(url);
                 });
         }
 
