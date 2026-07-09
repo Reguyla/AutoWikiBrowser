@@ -661,6 +661,37 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
 
+        public Task DeleteAsync(
+            string title,
+            string reason)
+        {
+            return DeleteAsync(
+                title,
+                reason,
+                false,
+                CancellationToken.None);
+        }
+
+        public Task DeleteAsync(
+            string title,
+            string reason,
+            bool watch,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation(
+                "Delete",
+                delegate (CancellationToken token)
+                {
+                    ApiOperations.Delete(
+                        SynchronousEditor,
+                        title,
+                        reason,
+                        watch,
+                        token);
+                },
+                cancellationToken);
+        }
+
         public Task RefreshUserInfoAsync()
         {
             return RefreshUserInfoAsync(CancellationToken.None);

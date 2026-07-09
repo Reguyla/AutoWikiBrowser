@@ -980,6 +980,80 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void DeleteAsync_CallsInjectedOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.DeleteAsync(
+                "Sandbox",
+                "Testing modern delete wrapper",
+                true,
+                CancellationToken.None)
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.DeleteCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.DeleteTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.DeleteReason,
+                Is.EqualTo("Testing modern delete wrapper"));
+
+            Assert.That(operations.DeleteWatch, Is.True);
+
+            Assert.That(
+                operations.DeleteEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.DeleteCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
+        [Test]
+        public void DeleteAsync_ConvenienceOverload_UsesLegacyDefaults()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.DeleteAsync(
+                "Sandbox",
+                "Testing default delete wrapper")
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.DeleteCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.DeleteTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.DeleteReason,
+                Is.EqualTo("Testing default delete wrapper"));
+
+            Assert.That(operations.DeleteWatch, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -1053,6 +1127,10 @@ namespace UnitTests
 
             public string PreviewText { get; private set; }
 
+            // Stored now so the next test can verify that AsyncApiEditModern passes
+            // its operation token through the adapter boundary.
+            public CancellationToken PreviewCancellationToken { get; private set; }
+
             public int WatchCallCount { get; private set; }
 
             public ApiEdit WatchEditor { get; private set; }
@@ -1119,9 +1197,18 @@ namespace UnitTests
 
             public CancellationToken MoveCancellationToken { get; private set; }
 
-            // Stored now so the next test can verify that AsyncApiEditModern passes
-            // its operation token through the adapter boundary.
-            public CancellationToken PreviewCancellationToken { get; private set; }
+            public int DeleteCallCount { get; private set; }
+
+            public ApiEdit DeleteEditor { get; private set; }
+
+            public string DeleteTitle { get; private set; }
+
+            public string DeleteReason { get; private set; }
+
+            public bool DeleteWatch { get; private set; }
+
+            public CancellationToken DeleteCancellationToken { get; private set; }
+
 
             public PageInfo Open(
                 ApiEdit editor,
@@ -1276,6 +1363,21 @@ namespace UnitTests
                 MoveNoRedirect = noRedirect;
                 MoveWatch = watch;
                 MoveCancellationToken = cancellationToken;
+            }
+
+            public void Delete(
+                ApiEdit editor,
+                string title,
+                string reason,
+                bool watch,
+                CancellationToken cancellationToken)
+            {
+                DeleteCallCount++;
+                DeleteEditor = editor;
+                DeleteTitle = title;
+                DeleteReason = reason;
+                DeleteWatch = watch;
+                DeleteCancellationToken = cancellationToken;
             }
 
             public void QueryApi(
