@@ -273,8 +273,63 @@ namespace WikiFunctions.API
             }
         }
 
+        private delegate Task ModernActionFactory(
+            CancellationToken cancellationToken);
+
         private delegate Task<TResult> ModernOperationFactory<TResult>(
             CancellationToken cancellationToken);
+
+        private void InvokeModernAction(
+            string operation,
+            ModernActionFactory operationFactory)
+        {
+            if (operationFactory == null)
+                throw new ArgumentNullException("operationFactory");
+
+            InvokeModernFunction<object>(
+                operation,
+                delegate (CancellationToken cancellationToken)
+                {
+                    Task actionTask = operationFactory(cancellationToken);
+
+                    if (actionTask == null)
+                        throw new InvalidOperationException(
+                            "Modern operation did not return a task.");
+
+                    return ConvertModernActionTask(actionTask);
+                });
+        }
+
+        private static Task<object> ConvertModernActionTask(Task actionTask)
+        {
+            TaskCompletionSource<object> completion =
+                new TaskCompletionSource<object>();
+
+            actionTask.ContinueWith(
+                delegate (Task completedTask)
+                {
+                    if (completedTask.IsCanceled)
+                    {
+                        completion.TrySetCanceled();
+                        return;
+                    }
+
+                    if (completedTask.IsFaulted)
+                    {
+                        completion.TrySetException(
+                            completedTask.Exception.InnerExceptions);
+
+                        return;
+                    }
+
+                    completion.TrySetResult(null);
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
+            return completion.Task;
+        }
 
         private void InvokeModernFunction<TResult>(
             string operation,
@@ -630,12 +685,26 @@ namespace WikiFunctions.API
 
         public void Watch(string title)
         {
-            InvokeFunction("Watch", title);
+            InvokeModernAction(
+                "Watch",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.WatchAsync(
+                        title,
+                        cancellationToken);
+                });
         }
 
         public void Unwatch(string title)
         {
-            InvokeFunction("Unwatch", title);
+            InvokeModernAction(
+                "Unwatch",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.UnwatchAsync(
+                        title,
+                        cancellationToken);
+                });
         }
 
         public void Delete(string title, string reason)
