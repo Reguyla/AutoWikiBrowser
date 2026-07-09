@@ -7,10 +7,11 @@ Important:
 - This class intentionally exists alongside the legacy AsyncApiEdit class.
 - Do not replace existing callers yet.
 - This first version wraps the existing synchronous ApiEdit methods in Tasks.
-- Cancellation is cooperative and is checked before the synchronous ApiEdit
-  call begins. Once the underlying ApiEdit call has started, it cannot yet be
-  interrupted; true in-progress HTTP cancellation will be added later when
-  ApiEdit's HTTP layer accepts CancellationToken values.
+// Cancellation is cooperative and is checked before the synchronous ApiEdit
+// call begins. Modern operations also pass the operation token into ApiEdit's
+// scoped transport-cancellation path so in-progress HTTP requests can be
+// aborted when the request is still active. If an API response has already
+// completed successfully, the completed result is preserved.
 */
 
 using System;
@@ -521,8 +522,8 @@ namespace WikiFunctions.API
         }
 
         public Task<string> ExpandTemplatesAsync(
-    string title,
-    string text)
+            string title,
+            string text)
         {
             return ExpandTemplatesAsync(
                 title,
@@ -567,7 +568,7 @@ namespace WikiFunctions.API
                 },
                 cancellationToken);
         }
-                public Task<string> ParseApiAsync(
+        public Task<string> ParseApiAsync(
             Dictionary<string, string> queryParameters)
         {
             return ParseApiAsync(
@@ -586,7 +587,7 @@ namespace WikiFunctions.API
                 "ParseApi",
                 delegate (CancellationToken token)
                 {
-                return ApiOperations.ParseApi(SynchronousEditor, queryParameters, token);
+                  return ApiOperations.ParseApi(SynchronousEditor, queryParameters, token);
                 },
                 cancellationToken);
         }
@@ -657,10 +658,9 @@ namespace WikiFunctions.API
         /// <summary>
         /// Requests cooperative cancellation of the current operation.
         ///
-        /// Cancellation prevents work that has not yet started. It cannot currently
-        /// interrupt an underlying synchronous ApiEdit HTTP request once that request
-        /// is already running. A completed operation therefore still reports its
-        /// actual success or failure result.
+        /// Cancellation prevents work that has not yet started and requests cancellation
+        /// of any active ApiEdit transport work that participates in scoped cancellation.
+        /// A completed operation still reports its actual success or failure result.
         /// </summary>
         public bool CancelCurrentOperation()
         {
@@ -806,17 +806,13 @@ namespace WikiFunctions.API
 
                        // Do not check cancellation again here.
                        //
-                       // ApiEdit is still synchronous and cannot stop an HTTP request that
-                       // is already in progress. If cancellation was requested while Save,
-                       // Open, Preview, or another ApiEdit operation was running, the API
-                       // call may already have completed successfully.
+                       // ApiEdit operations now receive the operation token through the
+                       // operations adapter, and the transport layer can observe cancellation
+                       // while a request is still active.
                        //
-                       // Treating that completed result as canceled would be misleading,
-                       // especially for SaveAsync: the edit might already be live even
-                       // though the caller receives an aborted task.
-                       //
-                       // Genuine in-progress cancellation will be added later when the
-                       // underlying ApiEdit HTTP layer accepts CancellationToken values.
+                       // If the synchronous ApiEdit call returned successfully, preserve that
+                       // actual result. This is especially important for SaveAsync: the edit
+                       // might already be live even if cancellation was requested late.
                        return result;
                    },
                    linkedCancellation.Token,
