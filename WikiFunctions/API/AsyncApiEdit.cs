@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reflection;
 
@@ -41,6 +42,11 @@ namespace WikiFunctions.API
     {
         private Thread TheThread;
         private readonly Control ParentControl;
+        private readonly AsyncApiEditModern ModernEditor;
+        private readonly object ModernSyncRoot = new object();
+
+        private Task ActiveModernOperation;
+        private CancellationTokenSource ActiveModernCancellation;
         private bool InCrossThreadCall;
 
         public AsyncApiEdit(string url)
@@ -57,6 +63,7 @@ namespace WikiFunctions.API
         {
             SynchronousEditor = editor;
             ParentControl = parentControl;
+            ModernEditor = new AsyncApiEditModern(editor, null);
             State = EditState.Ready;
         }
 
@@ -131,6 +138,34 @@ namespace WikiFunctions.API
                 else
                 {
                     TheThread.Join();
+                }
+            }
+
+            Task modernOperation;
+
+            lock (ModernSyncRoot)
+            {
+                modernOperation = ActiveModernOperation;
+            }
+
+            if (modernOperation == null)
+                return;
+
+            if (ParentControl != null && !ParentControl.InvokeRequired)
+            {
+                while (IsModernOperationActive)
+                    Application.DoEvents();
+            }
+            else
+            {
+                try
+                {
+                    modernOperation.Wait();
+                }
+                catch (AggregateException)
+                {
+                    // Modern operation failures are reported through the existing
+                    // legacy completion/failure event path.
                 }
             }
         }
@@ -226,6 +261,212 @@ namespace WikiFunctions.API
             }
         }
 
+        private bool IsModernOperationActive
+        {
+            get
+            {
+                lock (ModernSyncRoot)
+                {
+                    return ActiveModernOperation != null &&
+                           !ActiveModernOperation.IsCompleted;
+                }
+            }
+        }
+
+        private delegate Task<TResult> ModernOperationFactory<TResult>(
+            CancellationToken cancellationToken);
+
+        private void InvokeModernFunction<TResult>(
+            string operation,
+            ModernOperationFactory<TResult> operationFactory)
+        {
+            if (operationFactory == null)
+                throw new ArgumentNullException("operationFactory");
+
+            if ((TheThread != null && TheThread.IsAlive) ||
+                IsModernOperationActive)
+            {
+                throw new InvocationException(
+                    "An asynchronous call is already being performed");
+            }
+
+            CancellationTokenSource cancellation =
+                new CancellationTokenSource();
+
+            State = EditState.Working;
+
+            Task<TResult> task;
+
+            try
+            {
+                task = operationFactory(cancellation.Token);
+
+                if (task == null)
+                    throw new InvalidOperationException(
+                        "Modern operation did not return a task.");
+            }
+            catch (Exception ex)
+            {
+                cancellation.Dispose();
+
+                SynchronousEditor.Reset();
+
+                State = EditState.Failed;
+                CallModernFailure(operation, ex);
+                return;
+            }
+
+            lock (ModernSyncRoot)
+            {
+                ActiveModernCancellation = cancellation;
+                ActiveModernOperation = task;
+            }
+
+            task.ContinueWith(
+                delegate (Task<TResult> completedTask)
+                {
+                    CompleteModernOperation(
+                        operation,
+                        completedTask,
+                        cancellation);
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+
+        private void CompleteModernOperation<TResult>(
+            string operation,
+            Task<TResult> completedTask,
+            CancellationTokenSource cancellation)
+        {
+            try
+            {
+                bool cancelled = completedTask.IsCanceled;
+                Exception failure = null;
+                TResult result = default(TResult);
+
+                if (!cancelled)
+                {
+                    if (completedTask.IsFaulted)
+                    {
+                        failure = GetModernTaskException(completedTask.Exception);
+
+                        if (failure is OperationCanceledException)
+                            cancelled = true;
+                    }
+                    else
+                    {
+                        result = completedTask.Result;
+                    }
+                }
+
+                ClearModernOperation(completedTask, cancellation);
+
+                if (cancelled)
+                {
+                    State = EditState.Aborted;
+
+                    if (Aborted != null)
+                        CallEvent(Aborted, this);
+
+                    return;
+                }
+
+                if (failure != null)
+                {
+                    SynchronousEditor.Reset();
+
+                    State = EditState.Failed;
+                    CallModernFailure(operation, failure);
+                    return;
+                }
+
+                State = EditState.Ready;
+
+                // No state changes past this point; the callback may launch another operation.
+                CallEvent(
+                    new OperationEndedInternal(OnOperationComplete),
+                    operation,
+                    result);
+            }
+            catch (Exception ex)
+            {
+                ClearModernOperation(completedTask, cancellation);
+
+                try
+                {
+                    SynchronousEditor.Reset();
+                }
+                catch
+                {
+                }
+
+                State = EditState.Failed;
+                CallModernFailure(operation, ex);
+            }
+        }
+
+        private void CallModernFailure(
+            string operation,
+            Exception exception)
+        {
+            if (operation != null && exception is ApiException)
+            {
+                CallEvent(
+                    new OperationFailedInternal(OnOperationFailed),
+                    operation,
+                    exception);
+            }
+            else
+            {
+                CallEvent(
+                    new ExceptionCaughtInternal(OnExceptionCaught),
+                    exception);
+            }
+        }
+
+        private void ClearModernOperation(
+            Task completedTask,
+            CancellationTokenSource cancellation)
+        {
+            lock (ModernSyncRoot)
+            {
+                if (object.ReferenceEquals(
+                    ActiveModernOperation,
+                    completedTask))
+                {
+                    ActiveModernOperation = null;
+                }
+
+                if (object.ReferenceEquals(
+                    ActiveModernCancellation,
+                    cancellation))
+                {
+                    ActiveModernCancellation = null;
+                }
+            }
+
+            try
+            {
+                cancellation.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+        }
+
+        private static Exception GetModernTaskException(
+            AggregateException aggregateException)
+        {
+            AggregateException flattened = aggregateException.Flatten();
+
+            if (flattened.InnerExceptions.Count == 1)
+                return flattened.InnerExceptions[0];
+
+            return flattened;
+        }
+
         private class InvokeArgs
         {
             public readonly string Function;
@@ -293,8 +534,12 @@ namespace WikiFunctions.API
 
         private void InvokeFunction(InvokeArgs args)
         {
-            if (TheThread != null && TheThread.IsAlive)
-                throw new InvocationException("An asynchronous call is already being performed");
+            if ((TheThread != null && TheThread.IsAlive) ||
+                IsModernOperationActive)
+            {
+                throw new InvocationException(
+                    "An asynchronous call is already being performed");
+            }
 
             State = EditState.Working;
             TheThread = new Thread(InvokerThread);
@@ -442,7 +687,15 @@ namespace WikiFunctions.API
 
         public void Preview(string title, string text)
         {
-            InvokeFunction("Preview", title, text);
+            InvokeModernFunction<string>(
+                "Preview",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.PreviewAsync(
+                        title,
+                        text,
+                        cancellationToken);
+                });
         }
 
         public void QueryApi(string queryParameters)
@@ -469,11 +722,33 @@ namespace WikiFunctions.API
         {
             if (InCrossThreadCall) return; // otherwise we'll deadlock
 
+            CancellationTokenSource modernCancellation;
+
+            lock (ModernSyncRoot)
+            {
+                modernCancellation = ActiveModernCancellation;
+            }
+
+            if (modernCancellation != null)
+            {
+                try
+                {
+                    modernCancellation.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                }
+
+                Wait();
+                return;
+            }
+
             if (TheThread != null)
                 TheThread.Abort();
 
             if (TheThread != null && TheThread.ThreadState != ThreadState.Unstarted)
                 TheThread.Join();
+
             TheThread = null; // the thread should reset this even if aborted, but let's be sure
 
             if (Aborted != null)
