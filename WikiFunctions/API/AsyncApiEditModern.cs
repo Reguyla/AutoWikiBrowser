@@ -520,6 +520,34 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
 
+        public Task<string> ExpandTemplatesAsync(
+    string title,
+    string text)
+        {
+            return ExpandTemplatesAsync(
+                title,
+                text,
+                CancellationToken.None);
+        }
+
+        public Task<string> ExpandTemplatesAsync(
+            string title,
+            string text,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation<string>(
+                "ExpandTemplates",
+                delegate (CancellationToken token)
+                {
+                    return ApiOperations.ExpandTemplates(
+                        SynchronousEditor,
+                        title,
+                        text,
+                        token);
+                },
+                cancellationToken);
+        }
+
         public Task QueryApiAsync(string queryParameters)
         {
             return QueryApiAsync(

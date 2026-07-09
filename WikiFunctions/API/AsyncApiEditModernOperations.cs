@@ -70,6 +70,12 @@ namespace WikiFunctions.API
             Dictionary<string, string> queryParameters,
             CancellationToken cancellationToken);
 
+        string ExpandTemplates(
+            ApiEdit editor,
+            string title,
+            string text,
+            CancellationToken cancellationToken);
+
         void RefreshUserInfo(
             ApiEdit editor,
             CancellationToken cancellationToken);
@@ -240,6 +246,21 @@ namespace WikiFunctions.API
                 delegate
                 {
                     return editor.ParseApi(queryParameters);
+                });
+        }
+
+        public string ExpandTemplates(
+            ApiEdit editor,
+            string title,
+            string text,
+            CancellationToken cancellationToken)
+        {
+            return ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    return editor.ExpandTemplates(title, text);
                 });
         }
 

@@ -810,6 +810,48 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void ExpandTemplatesAsync_ReturnsResultFromInjectedOperations()
+        {
+            FakeOperations operations = new FakeOperations
+            {
+                ExpandTemplatesResult = "Expanded template text"
+            };
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            string result = editor.ExpandTemplatesAsync(
+                "Sandbox",
+                "{{Test template}}")
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(result, Is.EqualTo("Expanded template text"));
+            Assert.That(operations.ExpandTemplatesCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.ExpandTemplatesTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.ExpandTemplatesText,
+                Is.EqualTo("{{Test template}}"));
+
+            Assert.That(
+                operations.ExpandTemplatesEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.ExpandTemplatesCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -908,6 +950,18 @@ namespace UnitTests
             public string HttpGetUrl { get; private set; }
 
             public CancellationToken HttpGetCancellationToken { get; private set; }
+
+            public string ExpandTemplatesResult { get; set; }
+
+            public int ExpandTemplatesCallCount { get; private set; }
+
+            public ApiEdit ExpandTemplatesEditor { get; private set; }
+
+            public string ExpandTemplatesTitle { get; private set; }
+
+            public string ExpandTemplatesText { get; private set; }
+
+            public CancellationToken ExpandTemplatesCancellationToken { get; private set; }
 
             // Stored now so the next test can verify that AsyncApiEditModern passes
             // its operation token through the adapter boundary.
@@ -1050,6 +1104,21 @@ namespace UnitTests
             {
                 throw new NotSupportedException(
                     "ParseApi was not configured for this test.");
+            }
+
+            public string ExpandTemplates(
+                ApiEdit editor,
+                string title,
+                string text,
+                CancellationToken cancellationToken)
+            {
+                ExpandTemplatesCallCount++;
+                ExpandTemplatesEditor = editor;
+                ExpandTemplatesTitle = title;
+                ExpandTemplatesText = text;
+                ExpandTemplatesCancellationToken = cancellationToken;
+
+                return ExpandTemplatesResult;
             }
 
             public void RefreshUserInfo(
