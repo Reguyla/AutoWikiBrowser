@@ -670,7 +670,12 @@ namespace WikiFunctions.API
 
         public void Logout()
         {
-            InvokeFunction("Logout");
+            InvokeModernAction(
+                "Logout",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.LogoutAsync(cancellationToken);
+                });
         }
 
         public void Open(string title, bool resolveRedirects)

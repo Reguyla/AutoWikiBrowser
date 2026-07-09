@@ -5920,6 +5920,11 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             TheSession.Editor.Logout();
 
+            // Logout runs asynchronously through AsyncApiEdit.
+            // Wait here so CheckStatus and UpdateStatusUI see the completed
+            // logged-out editor state instead of the previous logged-in state.
+            TheSession.Editor.Wait();
+
             CheckStatus(true);
 
             UpdateStatusUI();
