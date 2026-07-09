@@ -672,7 +672,15 @@ namespace WikiFunctions.API
 
         public void Login(string username, string password)
         {
-            InvokeFunction("Login", username, password);
+            InvokeModernAction(
+                "Login",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.LoginAsync(
+                        username,
+                        password,
+                        cancellationToken);
+                });
         }
 
         public void Logout()
