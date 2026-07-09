@@ -789,7 +789,14 @@ namespace WikiFunctions.API
 
         public void QueryApi(string queryParameters)
         {
-            InvokeFunction("QueryApi", queryParameters);
+            InvokeModernAction(
+                "QueryApi",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.QueryApiAsync(
+                        queryParameters,
+                        cancellationToken);
+                });
         }
 
         public void ParseApi(string queryParameters)
