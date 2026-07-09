@@ -811,7 +811,15 @@ namespace WikiFunctions.API
 
         public void ExpandTemplates(string title, string text)
         {
-            InvokeFunction("ExpandTemplates", title, text);
+            InvokeModernFunction<string>(
+                "ExpandTemplates",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.ExpandTemplatesAsync(
+                        title,
+                        text,
+                        cancellationToken);
+                });
         }
 
         public void Abort()
