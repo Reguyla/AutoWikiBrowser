@@ -98,8 +98,9 @@ namespace WikiFunctions.API
     /// directly to the supplied synchronous ApiEdit instance.
     ///
     /// The cancellation token is accepted here so AsyncApiEditModern can pass
-    /// one consistently through the operation boundary. ApiEdit transport-level
-    /// cancellation will be added in a later change.
+    /// one consistently through the operation boundary. Active operations enter
+    /// ApiEdit's scoped transport-cancellation path so in-progress HTTP requests
+    /// can observe cancellation.
     /// </summary>
     internal sealed class ApiEditModernOperations
         : IAsyncApiEditModernOperations
@@ -157,6 +158,7 @@ namespace WikiFunctions.API
                         contentModel);
                 });
         }
+
         public void Login(
             ApiEdit editor,
             string username,
@@ -227,6 +229,7 @@ namespace WikiFunctions.API
                     editor.Rollback(title, user);
                 });
         }
+
         public string HttpGet(
             ApiEdit editor,
             string url,
