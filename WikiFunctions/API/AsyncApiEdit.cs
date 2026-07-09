@@ -675,7 +675,15 @@ namespace WikiFunctions.API
 
         public void Open(string title, bool resolveRedirects)
         {
-            InvokeFunction("Open", title, resolveRedirects);
+            InvokeModernFunction<PageInfo>(
+                "Open",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.OpenAsync(
+                        title,
+                        resolveRedirects,
+                        cancellationToken);
+                });
         }
 
         public void Save(string pageText, string summary, bool minor, WatchOptions watch, string contentModel = "wikitext")
