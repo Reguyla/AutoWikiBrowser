@@ -850,9 +850,13 @@ namespace WikiFunctions.API
 
         public void RefreshUserInfo()
         {
-            InvokeFunction("RefreshUserInfo");
+            InvokeModernAction(
+                "RefreshUserInfo",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.RefreshUserInfoAsync(cancellationToken);
+                });
         }
-
         #endregion
     }
 }
