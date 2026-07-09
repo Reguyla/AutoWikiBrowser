@@ -620,6 +620,47 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
 
+        public Task MoveAsync(
+            string title,
+            string newTitle,
+            string reason)
+        {
+            return MoveAsync(
+                title,
+                newTitle,
+                reason,
+                true,
+                false,
+                false,
+                CancellationToken.None);
+        }
+
+        public Task MoveAsync(
+            string title,
+            string newTitle,
+            string reason,
+            bool moveTalk,
+            bool noRedirect,
+            bool watch,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation(
+                "Move",
+                delegate (CancellationToken token)
+                {
+                    ApiOperations.Move(
+                        SynchronousEditor,
+                        title,
+                        newTitle,
+                        reason,
+                        moveTalk,
+                        noRedirect,
+                        watch,
+                        token);
+                },
+                cancellationToken);
+        }
+
         public Task RefreshUserInfoAsync()
         {
             return RefreshUserInfoAsync(CancellationToken.None);

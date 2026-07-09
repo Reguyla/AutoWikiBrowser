@@ -890,6 +890,96 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void MoveAsync_CallsInjectedOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.MoveAsync(
+                "Sandbox",
+                "Sandbox moved",
+                "Testing modern move wrapper",
+                false,
+                true,
+                true,
+                CancellationToken.None)
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.MoveCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.MoveTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.MoveNewTitle,
+                Is.EqualTo("Sandbox moved"));
+
+            Assert.That(
+                operations.MoveReason,
+                Is.EqualTo("Testing modern move wrapper"));
+
+            Assert.That(operations.MoveTalk, Is.False);
+            Assert.That(operations.MoveNoRedirect, Is.True);
+            Assert.That(operations.MoveWatch, Is.True);
+
+            Assert.That(
+                operations.MoveEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.MoveCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
+        [Test]
+        public void MoveAsync_ConvenienceOverload_UsesLegacyDefaults()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.MoveAsync(
+                "Sandbox",
+                "Sandbox moved",
+                "Testing default move wrapper")
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.MoveCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.MoveTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.MoveNewTitle,
+                Is.EqualTo("Sandbox moved"));
+
+            Assert.That(
+                operations.MoveReason,
+                Is.EqualTo("Testing default move wrapper"));
+
+            Assert.That(operations.MoveTalk, Is.True);
+            Assert.That(operations.MoveNoRedirect, Is.False);
+            Assert.That(operations.MoveWatch, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -1010,6 +1100,24 @@ namespace UnitTests
             public string RollbackUser { get; private set; }
 
             public CancellationToken RollbackCancellationToken { get; private set; }
+
+            public int MoveCallCount { get; private set; }
+
+            public ApiEdit MoveEditor { get; private set; }
+
+            public string MoveTitle { get; private set; }
+
+            public string MoveNewTitle { get; private set; }
+
+            public string MoveReason { get; private set; }
+
+            public bool MoveTalk { get; private set; }
+
+            public bool MoveNoRedirect { get; private set; }
+
+            public bool MoveWatch { get; private set; }
+
+            public CancellationToken MoveCancellationToken { get; private set; }
 
             // Stored now so the next test can verify that AsyncApiEditModern passes
             // its operation token through the adapter boundary.
@@ -1147,6 +1255,27 @@ namespace UnitTests
                 RollbackTitle = title;
                 RollbackUser = user;
                 RollbackCancellationToken = cancellationToken;
+            }
+
+            public void Move(
+                ApiEdit editor,
+                string title,
+                string newTitle,
+                string reason,
+                bool moveTalk,
+                bool noRedirect,
+                bool watch,
+                CancellationToken cancellationToken)
+            {
+                MoveCallCount++;
+                MoveEditor = editor;
+                MoveTitle = title;
+                MoveNewTitle = newTitle;
+                MoveReason = reason;
+                MoveTalk = moveTalk;
+                MoveNoRedirect = noRedirect;
+                MoveWatch = watch;
+                MoveCancellationToken = cancellationToken;
             }
 
             public void QueryApi(

@@ -66,6 +66,16 @@ namespace WikiFunctions.API
             string url,
             CancellationToken cancellationToken);
 
+        void Move(
+            ApiEdit editor,
+            string title,
+            string newTitle,
+            string reason,
+            bool moveTalk,
+            bool noRedirect,
+            bool watch,
+            CancellationToken cancellationToken);
+
         void QueryApi(
             ApiEdit editor,
             string queryParameters,
@@ -241,6 +251,31 @@ namespace WikiFunctions.API
                 delegate
                 {
                     return editor.HttpGet(url);
+                });
+        }
+
+        public void Move(
+            ApiEdit editor,
+            string title,
+            string newTitle,
+            string reason,
+            bool moveTalk,
+            bool noRedirect,
+            bool watch,
+            CancellationToken cancellationToken)
+        {
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Move(
+                        title,
+                        newTitle,
+                        reason,
+                        moveTalk,
+                        noRedirect,
+                        watch);
                 });
         }
 
