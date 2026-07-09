@@ -852,6 +852,44 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void RollbackAsync_CallsInjectedOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.RollbackAsync(
+                "Sandbox",
+                "ExampleUser")
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.RollbackCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.RollbackTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.RollbackUser,
+                Is.EqualTo("ExampleUser"));
+
+            Assert.That(
+                operations.RollbackEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.RollbackCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -962,6 +1000,16 @@ namespace UnitTests
             public string ExpandTemplatesText { get; private set; }
 
             public CancellationToken ExpandTemplatesCancellationToken { get; private set; }
+
+            public int RollbackCallCount { get; private set; }
+
+            public ApiEdit RollbackEditor { get; private set; }
+
+            public string RollbackTitle { get; private set; }
+
+            public string RollbackUser { get; private set; }
+
+            public CancellationToken RollbackCancellationToken { get; private set; }
 
             // Stored now so the next test can verify that AsyncApiEditModern passes
             // its operation token through the adapter boundary.
@@ -1086,6 +1134,19 @@ namespace UnitTests
                 HttpGetCancellationToken = cancellationToken;
 
                 return HttpGetResult;
+            }
+
+            public void Rollback(
+                ApiEdit editor,
+                string title,
+                string user,
+                CancellationToken cancellationToken)
+            {
+                RollbackCallCount++;
+                RollbackEditor = editor;
+                RollbackTitle = title;
+                RollbackUser = user;
+                RollbackCancellationToken = cancellationToken;
             }
 
             public void QueryApi(

@@ -591,6 +591,34 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
 
+        public Task RollbackAsync(
+            string title,
+            string user)
+        {
+            return RollbackAsync(
+                title,
+                user,
+                CancellationToken.None);
+        }
+
+        public Task RollbackAsync(
+            string title,
+            string user,
+            CancellationToken cancellationToken)
+        {
+            return RunOperation(
+                "Rollback",
+                delegate (CancellationToken token)
+                {
+                    ApiOperations.Rollback(
+                        SynchronousEditor,
+                        title,
+                        user,
+                        token);
+                },
+                cancellationToken);
+        }
+
         public Task RefreshUserInfoAsync()
         {
             return RefreshUserInfoAsync(CancellationToken.None);

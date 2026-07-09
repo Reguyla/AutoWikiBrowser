@@ -55,6 +55,12 @@ namespace WikiFunctions.API
             string title,
             CancellationToken cancellationToken);
 
+        void Rollback(
+            ApiEdit editor,
+            string title,
+            string user,
+            CancellationToken cancellationToken);
+
         string HttpGet(
             ApiEdit editor,
             string url,
@@ -207,6 +213,20 @@ namespace WikiFunctions.API
                 });
         }
 
+        public void Rollback(
+            ApiEdit editor,
+            string title,
+            string user,
+            CancellationToken cancellationToken)
+        {
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Rollback(title, user);
+                });
+        }
         public string HttpGet(
             ApiEdit editor,
             string url,
