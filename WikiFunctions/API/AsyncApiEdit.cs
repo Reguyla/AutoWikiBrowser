@@ -660,7 +660,14 @@ namespace WikiFunctions.API
 
         public void HttpGet(string url)
         {
-            InvokeFunction("HttpGet", url);
+            InvokeModernFunction<string>(
+                "HttpGet",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.HttpGetAsync(
+                        url,
+                        cancellationToken);
+                });
         }
 
         public void Login(string username, string password)
