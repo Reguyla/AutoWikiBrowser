@@ -1054,6 +1054,113 @@ namespace UnitTests
             Assert.That(editor.IsActive, Is.False);
         }
 
+        [Test]
+        public void ProtectAsync_CallsInjectedOperationsAdapter()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.ProtectAsync(
+                "Sandbox",
+                "Testing modern protect wrapper",
+                "infinite",
+                "sysop",
+                "autoconfirmed",
+                true,
+                true,
+                CancellationToken.None)
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.ProtectCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.ProtectTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.ProtectReason,
+                Is.EqualTo("Testing modern protect wrapper"));
+
+            Assert.That(
+                operations.ProtectExpiry,
+                Is.EqualTo("infinite"));
+
+            Assert.That(
+                operations.ProtectEdit,
+                Is.EqualTo("sysop"));
+
+            Assert.That(
+                operations.ProtectMove,
+                Is.EqualTo("autoconfirmed"));
+
+            Assert.That(operations.ProtectCascade, Is.True);
+            Assert.That(operations.ProtectWatch, Is.True);
+
+            Assert.That(
+                operations.ProtectEditor,
+                Is.SameAs(editor.SynchronousEditor));
+
+            Assert.That(
+                operations.ProtectCancellationToken.CanBeCanceled,
+                Is.True);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
+        [Test]
+        public void ProtectAsync_ConvenienceOverload_UsesLegacyDefaults()
+        {
+            FakeOperations operations = new FakeOperations();
+
+            AsyncApiEditModern editor = CreateEditor(operations);
+
+            editor.ProtectAsync(
+                "Sandbox",
+                "Testing default protect wrapper",
+                "infinite",
+                "sysop",
+                "autoconfirmed")
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(operations.ProtectCallCount, Is.EqualTo(1));
+
+            Assert.That(
+                operations.ProtectTitle,
+                Is.EqualTo("Sandbox"));
+
+            Assert.That(
+                operations.ProtectReason,
+                Is.EqualTo("Testing default protect wrapper"));
+
+            Assert.That(
+                operations.ProtectExpiry,
+                Is.EqualTo("infinite"));
+
+            Assert.That(
+                operations.ProtectEdit,
+                Is.EqualTo("sysop"));
+
+            Assert.That(
+                operations.ProtectMove,
+                Is.EqualTo("autoconfirmed"));
+
+            Assert.That(operations.ProtectCascade, Is.False);
+            Assert.That(operations.ProtectWatch, Is.False);
+
+            Assert.That(
+                editor.State,
+                Is.EqualTo(AsyncApiEditModern.EditState.Ready));
+
+            Assert.That(editor.IsActive, Is.False);
+        }
+
         /// <summary>
         /// Creates an AsyncApiEditModern instance whose operations are handled
         /// entirely by the supplied fake. The ApiEdit instance is required by
@@ -1209,6 +1316,25 @@ namespace UnitTests
 
             public CancellationToken DeleteCancellationToken { get; private set; }
 
+            public int ProtectCallCount { get; private set; }
+
+            public ApiEdit ProtectEditor { get; private set; }
+
+            public string ProtectTitle { get; private set; }
+
+            public string ProtectReason { get; private set; }
+
+            public string ProtectExpiry { get; private set; }
+
+            public string ProtectEdit { get; private set; }
+
+            public string ProtectMove { get; private set; }
+
+            public bool ProtectCascade { get; private set; }
+
+            public bool ProtectWatch { get; private set; }
+
+            public CancellationToken ProtectCancellationToken { get; private set; }
 
             public PageInfo Open(
                 ApiEdit editor,
@@ -1378,6 +1504,29 @@ namespace UnitTests
                 DeleteReason = reason;
                 DeleteWatch = watch;
                 DeleteCancellationToken = cancellationToken;
+            }
+
+            public void Protect(
+                ApiEdit editor,
+                string title,
+                string reason,
+                string expiry,
+                string edit,
+                string move,
+                bool cascade,
+                bool watch,
+                CancellationToken cancellationToken)
+            {
+                ProtectCallCount++;
+                ProtectEditor = editor;
+                ProtectTitle = title;
+                ProtectReason = reason;
+                ProtectExpiry = expiry;
+                ProtectEdit = edit;
+                ProtectMove = move;
+                ProtectCascade = cascade;
+                ProtectWatch = watch;
+                ProtectCancellationToken = cancellationToken;
             }
 
             public void QueryApi(

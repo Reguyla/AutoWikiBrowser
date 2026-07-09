@@ -76,6 +76,16 @@ namespace WikiFunctions.API
             bool watch,
             CancellationToken cancellationToken);
 
+        void Protect(
+            ApiEdit editor,
+            string title,
+            string reason,
+            string expiry,
+            string edit,
+            string move,
+            bool cascade,
+            bool watch,
+            CancellationToken cancellationToken);
         void Delete(
             ApiEdit editor,
             string title,
@@ -305,7 +315,32 @@ namespace WikiFunctions.API
                 });
         }
 
-
+        public void Protect(
+            ApiEdit editor,
+            string title,
+            string reason,
+            string expiry,
+            string edit,
+            string move,
+            bool cascade,
+            bool watch,
+            CancellationToken cancellationToken)
+        {
+            ExecuteWithCancellation(
+                editor,
+                cancellationToken,
+                delegate
+                {
+                    editor.Protect(
+                        title,
+                        reason,
+                        expiry,
+                        edit,
+                        move,
+                        cascade,
+                        watch);
+                });
+        }
 
         public void QueryApi(
             ApiEdit editor,
