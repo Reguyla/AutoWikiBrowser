@@ -768,7 +768,20 @@ namespace WikiFunctions.API
         public void Protect(string title, string reason, string expiry, string edit, string move, bool cascade,
             bool watch)
         {
-            InvokeFunction("Protect", title, reason, expiry, edit, move, cascade, watch);
+            InvokeModernAction(
+                "Protect",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.ProtectAsync(
+                        title,
+                        reason,
+                        expiry,
+                        edit,
+                        move,
+                        cascade,
+                        watch,
+                        cancellationToken);
+                });
         }
 
         public void Protect(string title, string reason, TimeSpan expiry, string edit, string move, bool cascade,
