@@ -1743,9 +1743,22 @@ namespace WikiFunctions
                     && Name != dlgArticleAction.NewTitle)
                 {
                     _lastMove = dlgArticleAction.Summary;
-                    session.Editor.SynchronousEditor.Move(Name, dlgArticleAction.NewTitle,
-                                                          ArticleActionSummary(dlgArticleAction), dlgArticleAction.DealWithAssocTalkPage,
-                                                          dlgArticleAction.NoRedirect, dlgArticleAction.Watch);
+
+                    session.Editor.Move(
+                        Name,
+                        dlgArticleAction.NewTitle,
+                        ArticleActionSummary(dlgArticleAction),
+                        dlgArticleAction.DealWithAssocTalkPage,
+                        dlgArticleAction.NoRedirect,
+                        dlgArticleAction.Watch);
+
+                    session.Editor.Wait();
+
+                    if (session.Editor.State != AsyncApiEdit.EditState.Ready)
+                    {
+                        newTitle = "";
+                        return false;
+                    }
 
                     newTitle = dlgArticleAction.NewTitle;
 
@@ -1770,9 +1783,15 @@ namespace WikiFunctions
                 if (dlgArticleAction.ShowDialog() == DialogResult.OK)
                 {
                     _lastDelete = dlgArticleAction.Summary;
-                    session.Editor.SynchronousEditor.Delete(Name, ArticleActionSummary(dlgArticleAction), dlgArticleAction.Watch);
 
-                    return true;
+                    session.Editor.Delete(
+                        Name,
+                        ArticleActionSummary(dlgArticleAction),
+                        dlgArticleAction.Watch);
+
+                    session.Editor.Wait();
+
+                    return session.Editor.State == AsyncApiEdit.EditState.Ready;
                 }
 
                 return false;
@@ -1802,15 +1821,19 @@ namespace WikiFunctions
                 if (dlgArticleAction.ShowDialog() == DialogResult.OK)
                 {
                     _lastProtect = dlgArticleAction.Summary;
-                    session.Editor.SynchronousEditor.Protect(Name,
-                                                             ArticleActionSummary(dlgArticleAction),
-                                                             dlgArticleAction.ProtectExpiry,
-                                                             dlgArticleAction.EditProtectionLevel,
-                                                             dlgArticleAction.MoveProtectionLevel,
-                                                             dlgArticleAction.CascadingProtection,
-                                                             dlgArticleAction.Watch);
 
-                    return true;
+                    session.Editor.Protect(
+                        Name,
+                        ArticleActionSummary(dlgArticleAction),
+                        dlgArticleAction.ProtectExpiry,
+                        dlgArticleAction.EditProtectionLevel,
+                        dlgArticleAction.MoveProtectionLevel,
+                        dlgArticleAction.CascadingProtection,
+                        dlgArticleAction.Watch);
+
+                    session.Editor.Wait();
+
+                    return session.Editor.State == AsyncApiEdit.EditState.Ready;
                 }
 
                 return false;
