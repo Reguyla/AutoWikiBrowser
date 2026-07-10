@@ -139,10 +139,6 @@ Routine Git commits should be used for source-level history. This document captu
             return new CookieContainer();
         }
 
-
-
-
-
 ## 6.8. Major Architecture Decisions
 ### ARCH-001
 Date: 2026-07-03
@@ -195,7 +191,15 @@ The project contained numerous hard-coded paths.
 Recommendation:
 Centralize configuration before further modernization.
 
-## 6.12. Related Documents
+## 6.12. Public AWB Version Gate
+
+The public AWB version validation gate has been isolated behind a named fork-development bypass.
+
+This allows local Release builds of the fork/rebrand migration branch to continue through normal status, login, CheckPageJSON, configuration, and registration checks even when the upstream AWB version page marks the public AWB version as disabled.
+
+This does not bypass local wiki configuration, login state, CheckPageJSON, bad-name, registration, bot/user-mode, or project status checks.
+
+## 6.13. Related Documents
 Prerequisites
 -------------
 00 – Foundation, Discovery & Planning
