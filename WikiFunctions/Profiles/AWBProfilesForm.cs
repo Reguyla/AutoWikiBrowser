@@ -253,6 +253,9 @@ namespace WikiFunctions.Profiles
             bool needsUpdate = TheSession.User.IsLoggedIn;
             try
             {
+                // TODO: Review after AsyncApiEdit migration. This profile-login path remains
+                // synchronous because it depends on local login exception handling and the
+                // LoginDomain overload.
                 TheSession.Editor.SynchronousEditor.Login(username, password, Variables.LoginDomain);
                 needsUpdate = true;
             }
