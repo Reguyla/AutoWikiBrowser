@@ -511,8 +511,22 @@ Likely cause: environment/network dependency
 | Failed | 845 |
 | Primary Failure Cause | Tests appear to require Wikipedia/API connectivity or environment setup. |
 
+## 5.10 Async API Bridge Audit – Remaining SynchronousEditor Usage
 
-## 5.10. Initial Findings
+After completing the AsyncApiEdit bridge work, the legacy reflection/thread invocation path was removed and the primary editor operations now route through AsyncApiEditModern.
+
+A follow-up search for `SynchronousEditor.` confirmed that the previous Article.cs direct action bypasses for Move, Delete, and Protect were removed. Those actions now route through the AsyncApiEdit bridge.
+
+The remaining non-wrapper `SynchronousEditor` usages are intentionally deferred:
+
+- **Main.cs** still uses cloned synchronous editors for helper workflows such as redirect bypassing, AWB configuration/template page loading, and category existence validation. These use cloned editors or immediate-result helper reads and do not mutate the active editor state directly.
+- **Session.cs** still uses `Editor.SynchronousEditor` for `SiteInfo` construction and immediate-result `HttpGet(...)` reads for CheckPageJSON and Config JSON. These are part of the synchronous wiki status/project-loading pipeline and require returned data immediately.
+- **AWBProfilesForm.cs** still uses `SynchronousEditor.Login(username, password, Variables.LoginDomain)` for profile login. This is deferred because the flow depends on synchronous exception handling for login failures and uses the LoginDomain overload.
+- **AsyncApiEdit.cs / AsyncApiEditModern.cs** retain expected internal access to `SynchronousEditor` as bridge/wrapper implementation details.
+
+These remaining uses should be reviewed later as separate helper/result-returning API cleanup tasks, not as part of the initial AsyncApiEdit bridge migration.
+
+## 5.11. Initial Findings
 This section summarizes significant observations identified during the code health assessment.
 
 Initial findings will be updated as additional analysis is completed and may include:
