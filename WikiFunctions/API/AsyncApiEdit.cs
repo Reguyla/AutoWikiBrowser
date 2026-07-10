@@ -809,7 +809,14 @@ namespace WikiFunctions.API
 
         public void ParseApi(string queryParameters)
         {
-            InvokeFunction("ParseApi", queryParameters);
+            InvokeModernFunction<string>(
+                "ParseApi",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.ParseApiAsync(
+                        queryParameters,
+                        cancellationToken);
+                });
         }
 
         public void Rollback(string title, string user)

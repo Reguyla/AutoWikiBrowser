@@ -100,6 +100,11 @@ namespace WikiFunctions.API
 
         string ParseApi(
             ApiEdit editor,
+            string queryParameters,
+            CancellationToken cancellationToken);
+
+        string ParseApi(
+            ApiEdit editor,
             Dictionary<string, string> queryParameters,
             CancellationToken cancellationToken);
 
@@ -316,15 +321,15 @@ namespace WikiFunctions.API
         }
 
         public void Protect(
-            ApiEdit editor,
-            string title,
-            string reason,
-            string expiry,
-            string edit,
-            string move,
-            bool cascade,
-            bool watch,
-            CancellationToken cancellationToken)
+    ApiEdit editor,
+    string title,
+    string reason,
+    string expiry,
+    string edit,
+    string move,
+    bool cascade,
+    bool watch,
+    CancellationToken cancellationToken)
         {
             ExecuteWithCancellation(
                 editor,
@@ -354,6 +359,17 @@ namespace WikiFunctions.API
                 {
                     editor.QueryApi(queryParameters);
                 });
+        }
+
+        public string ParseApi(
+            ApiEdit editor,
+            string queryParameters,
+            CancellationToken cancellationToken)
+        {
+            return ParseApi(
+                editor,
+                ConvertQueryStringToDictionary(queryParameters),
+                cancellationToken);
         }
 
         public string ParseApi(
@@ -442,6 +458,52 @@ namespace WikiFunctions.API
             {
                 operation();
             }
+        }
+
+        private static Dictionary<string, string> ConvertQueryStringToDictionary(
+           string queryParameters)
+        {
+            if (string.IsNullOrEmpty(queryParameters))
+                throw new ArgumentException(
+                    "queryParameters cannot be null or empty.",
+                    "queryParameters");
+
+            Dictionary<string, string> result =
+                new Dictionary<string, string>();
+
+            string[] pairs = queryParameters.TrimStart('?').Split('&');
+
+            foreach (string pair in pairs)
+            {
+                if (string.IsNullOrEmpty(pair))
+                    continue;
+
+                int separatorIndex = pair.IndexOf('=');
+
+                string key;
+                string value;
+
+                if (separatorIndex < 0)
+                {
+                    key = pair;
+                    value = string.Empty;
+                }
+                else
+                {
+                    key = pair.Substring(0, separatorIndex);
+                    value = pair.Substring(separatorIndex + 1);
+                }
+
+                key = Uri.UnescapeDataString(key.Replace("+", " "));
+                value = Uri.UnescapeDataString(value.Replace("+", " "));
+
+                if (key.Length == 0)
+                    continue;
+
+                result[key] = value;
+            }
+
+            return result;
         }
 
         private static void RequireEditor(ApiEdit editor)

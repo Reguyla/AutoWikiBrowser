@@ -569,6 +569,35 @@ namespace WikiFunctions.API
                 cancellationToken);
         }
         public Task<string> ParseApiAsync(
+            string queryParameters)
+        {
+            return ParseApiAsync(
+                queryParameters,
+                CancellationToken.None);
+        }
+
+        public Task<string> ParseApiAsync(
+            string queryParameters,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(queryParameters))
+                throw new ArgumentException(
+                    "queryParameters cannot be null or empty.",
+                    "queryParameters");
+
+            return RunOperation<string>(
+                "ParseApi",
+                delegate (CancellationToken token)
+                {
+                    return ApiOperations.ParseApi(
+                        SynchronousEditor,
+                        queryParameters,
+                        token);
+                },
+                cancellationToken);
+        }
+
+        public Task<string> ParseApiAsync(
             Dictionary<string, string> queryParameters)
         {
             return ParseApiAsync(
@@ -587,7 +616,10 @@ namespace WikiFunctions.API
                 "ParseApi",
                 delegate (CancellationToken token)
                 {
-                  return ApiOperations.ParseApi(SynchronousEditor, queryParameters, token);
+                    return ApiOperations.ParseApi(
+                        SynchronousEditor,
+                        queryParameters,
+                        token);
                 },
                 cancellationToken);
         }

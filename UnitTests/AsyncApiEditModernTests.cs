@@ -1540,6 +1540,15 @@ namespace UnitTests
 
             public string ParseApi(
                 ApiEdit editor,
+                string queryParameters,
+                CancellationToken cancellationToken)
+            {
+                throw new NotSupportedException(
+                    "ParseApi string was not configured for this test.");
+            }
+
+            public string ParseApi(
+                ApiEdit editor,
                 Dictionary<string, string> queryParameters,
                 CancellationToken cancellationToken)
             {
