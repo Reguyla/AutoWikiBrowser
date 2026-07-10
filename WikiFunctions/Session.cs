@@ -188,6 +188,15 @@ namespace WikiFunctions
             }
         }
 
+        // Allows fork/rebrand development builds to continue through the normal
+        // CheckPageJSON, config, login, and registration checks even when the
+        // public AWB version page marks this AWB version as disabled.
+        //
+        // This bypass is intentionally narrow: it only bypasses the public AWB
+        // version gate. It does not bypass login, CheckPageJSON, local config,
+        // bad-name, registration, or bot/user-mode checks.
+        private const bool AllowForkReleaseVersionGateBypass = true;
+
         public bool UpdateProject(bool delayLoading)
         {
             // recreate only if project changed, to prevent losing login information
@@ -270,6 +279,24 @@ namespace WikiFunctions
             get { return Variables.URLIndex + "?title=Project:AutoWikiBrowser/Config&action=raw"; }
         }
 
+        private static bool IsPublicAwbVersionDisabled(
+           Updater.AWBEnabledStatus versionStatus)
+        {
+            return (versionStatus & Updater.AWBEnabledStatus.Disabled) ==
+                   Updater.AWBEnabledStatus.Disabled;
+        }
+
+        private static bool ShouldEnforcePublicAwbVersionGate()
+        {
+#if DEBUG
+    // Debug builds have historically been allowed to continue through the
+    // remaining status/config/user checks for regression testing.
+    return false;
+#else
+            return !AllowForkReleaseVersionGateBypass;
+#endif
+        }
+
         /// <summary>
         /// Checks log in status, registered and version.
         /// </summary>
@@ -304,15 +331,15 @@ namespace WikiFunctions
                 VersionCheckPage = Updater.GlobalVersionPage;
 
                 // See whether this public AWB version is enabled.
-                if ((versionStatus & Updater.AWBEnabledStatus.Disabled) == Updater.AWBEnabledStatus.Disabled)
+                //
+                // Fork/rebrand development builds still need to run the remaining status,
+                // account-registration, CheckPageJSON, and configuration checks in Release
+                // mode. Keep the public AWB version validation isolated so Release testing
+                // is not blocked by the upstream AWB version page.
+                if (IsPublicAwbVersionDisabled(versionStatus) &&
+                    ShouldEnforcePublicAwbVersionGate())
                 {
-                #if DEBUG
-                    // Allow local Debug builds to continue through the normal status,
-                    // account-registration, and configuration checks for regression testing.
-                    // Release builds retain the public version-validation requirement.
-                #else
                     return WikiStatusResult.OldVersion;
-                #endif
                 }
 
                 // Attempt to load the JSON CheckPage from the wiki
