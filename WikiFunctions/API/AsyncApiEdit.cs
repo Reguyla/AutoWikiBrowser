@@ -821,7 +821,15 @@ namespace WikiFunctions.API
 
         public void Rollback(string title, string user)
         {
-            InvokeFunction("Rollback", title, user);
+            InvokeModernAction(
+                "Rollback",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.RollbackAsync(
+                        title,
+                        user,
+                        cancellationToken);
+                });
         }
 
         public void ExpandTemplates(string title, string text)
