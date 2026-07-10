@@ -779,7 +779,19 @@ namespace WikiFunctions.API
 
         public void Move(string title, string newTitle, string reason, bool moveTalk, bool noRedirect, bool watch)
         {
-            InvokeFunction("Move", title, newTitle, reason, moveTalk, noRedirect, watch);
+            InvokeModernAction(
+                "Move",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.MoveAsync(
+                        title,
+                        newTitle,
+                        reason,
+                        moveTalk,
+                        noRedirect,
+                        watch,
+                        cancellationToken);
+                });
         }
 
         public void Preview(string title, string text)
