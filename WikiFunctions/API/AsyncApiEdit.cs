@@ -19,7 +19,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Reflection;
 
 namespace WikiFunctions.API
 {
@@ -40,7 +39,6 @@ namespace WikiFunctions.API
     /// </summary>
     public class AsyncApiEdit
     {
-        private Thread TheThread;
         private readonly Control ParentControl;
         private readonly AsyncApiEditModern ModernEditor;
         private readonly object ModernSyncRoot = new object();
@@ -128,19 +126,6 @@ namespace WikiFunctions.API
         /// </summary>
         public void Wait()
         {
-            if (TheThread != null)
-            {
-                if (ParentControl != null && !ParentControl.InvokeRequired)
-                {
-                    // simple Thread.Join() from UI thread would deadlock
-                    while (IsActive) Application.DoEvents();
-                }
-                else
-                {
-                    TheThread.Join();
-                }
-            }
-
             Task modernOperation;
 
             lock (ModernSyncRoot)
@@ -338,8 +323,7 @@ namespace WikiFunctions.API
             if (operationFactory == null)
                 throw new ArgumentNullException("operationFactory");
 
-            if ((TheThread != null && TheThread.IsAlive) ||
-                IsModernOperationActive)
+            if (IsModernOperationActive)
             {
                 throw new InvocationException(
                     "An asynchronous call is already being performed");
@@ -520,90 +504,6 @@ namespace WikiFunctions.API
                 return flattened.InnerExceptions[0];
 
             return flattened;
-        }
-
-        private class InvokeArgs
-        {
-            public readonly string Function;
-            public readonly object[] Arguments;
-
-            public InvokeArgs(string func, params object[] args)
-            {
-                Function = func;
-                Arguments = args;
-            }
-        }
-
-        private void InvokerThread(object genericArgs)
-        {
-            string operation = null;
-
-            try
-            {
-                InvokeArgs args = (InvokeArgs) genericArgs;
-                operation = args.Function;
-
-                Thread.CurrentThread.Name = string.Format("InvokerThread ({0})", args.Function);
-
-                Type t = SynchronousEditor.GetType();
-
-                object result = t.InvokeMember(
-                    args.Function, // name
-                    BindingFlags.InvokeMethod, // invokeAttr
-                    null, // binder
-                    SynchronousEditor, // target
-                    args.Arguments // args
-                    );
-
-                TheThread = null;
-                State = EditState.Ready;
-                // No state changes past this point, the callback may launch another operation
-                CallEvent(new OperationEndedInternal(OnOperationComplete), args.Function, result);
-            }
-            catch (ThreadAbortException)
-            {
-                SynchronousEditor.Reset();
-            }
-            catch (Exception ex)
-            {
-                TheThread = null;
-                SynchronousEditor.Reset();
-
-                if (ex is TargetInvocationException) ex = ex.InnerException;
-
-                State = EditState.Failed;
-                if (operation != null && ex is ApiException)
-                {
-                    CallEvent(new OperationFailedInternal(OnOperationFailed), operation, ex);
-                }
-                else
-                {
-                    CallEvent(new ExceptionCaughtInternal(OnExceptionCaught), ex);
-                }
-            }
-            finally
-            {
-                TheThread = null;
-            }
-        }
-
-        private void InvokeFunction(InvokeArgs args)
-        {
-            if ((TheThread != null && TheThread.IsAlive) ||
-                IsModernOperationActive)
-            {
-                throw new InvocationException(
-                    "An asynchronous call is already being performed");
-            }
-
-            State = EditState.Working;
-            TheThread = new Thread(InvokerThread);
-            TheThread.Start(args);
-        }
-
-        private void InvokeFunction(string name, params object[] args)
-        {
-            InvokeFunction(new InvokeArgs(name, args));
         }
 
         #endregion
@@ -914,14 +814,6 @@ namespace WikiFunctions.API
                 Wait();
                 return;
             }
-
-            if (TheThread != null)
-                TheThread.Abort();
-
-            if (TheThread != null && TheThread.ThreadState != ThreadState.Unstarted)
-                TheThread.Join();
-
-            TheThread = null; // the thread should reset this even if aborted, but let's be sure
 
             if (Aborted != null)
                 Aborted(this);
