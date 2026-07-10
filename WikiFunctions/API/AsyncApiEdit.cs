@@ -753,7 +753,16 @@ namespace WikiFunctions.API
 
         public void Delete(string title, string reason, bool watch)
         {
-            InvokeFunction("Delete", title, reason, watch);
+            InvokeModernAction(
+                "Delete",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.DeleteAsync(
+                        title,
+                        reason,
+                        watch,
+                        cancellationToken);
+                });
         }
 
         public void Protect(string title, string reason, string expiry, string edit, string move, bool cascade,
