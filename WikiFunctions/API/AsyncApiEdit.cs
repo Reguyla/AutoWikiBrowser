@@ -708,7 +708,18 @@ namespace WikiFunctions.API
 
         public void Save(string pageText, string summary, bool minor, WatchOptions watch, string contentModel = "wikitext")
         {
-            InvokeFunction("Save", pageText, summary, minor, watch, contentModel);
+            InvokeModernFunction<SaveInfo>(
+                "Save",
+                delegate (CancellationToken cancellationToken)
+                {
+                    return ModernEditor.SaveAsync(
+                        pageText,
+                        summary,
+                        minor,
+                        watch,
+                        contentModel,
+                        cancellationToken);
+                });
         }
 
         public void Watch(string title)
