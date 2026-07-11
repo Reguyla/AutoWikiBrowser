@@ -1987,17 +1987,26 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">E.</param>
-        private void Document_MouseMove(object sender, HtmlElementEventArgs e)
+        private void Document_MouseMove(
+            object sender,
+            HtmlElementEventArgs e)
         {
+            webBrowserMouseOverUrl = string.Empty;
+
             if (!(sender is HtmlDocument document))
             {
                 return;
             }
 
-            if (document.GetElementFromPoint(e.ClientMousePosition) is HtmlElement currentElement &&
-                currentElement.TagName == "A")
+            if (document.GetElementFromPoint(e.ClientMousePosition)
+                    is HtmlElement currentElement &&
+                string.Equals(
+                    currentElement.TagName,
+                    "A",
+                    StringComparison.OrdinalIgnoreCase))
             {
-                webBrowserMouseOverUrl = currentElement.GetAttribute("href");
+                webBrowserMouseOverUrl =
+                    currentElement.GetAttribute("href");
             }
         }
 
