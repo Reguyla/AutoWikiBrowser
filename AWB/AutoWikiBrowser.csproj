@@ -48,7 +48,6 @@
 		</Reference>
 
 		<Reference Include="System.Configuration" />
-		<Reference Include="System.Web" />
 	</ItemGroup>
   <ItemGroup>
     <Compile Update="AWBWebBrowser.cs">

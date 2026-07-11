@@ -27,7 +27,6 @@ using System.Reflection;
 using System.Text.Json;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Net;
-using System.Web;
 
 namespace AWBUpdater
 {
