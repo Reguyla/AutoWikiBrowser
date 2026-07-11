@@ -39,56 +39,84 @@ namespace AWBUpdater
 
         private static bool HandleKnownExceptions(Exception ex)
         {
+            string stackTrace = ex.StackTrace ?? string.Empty;
+
             if (ex is ArgumentException &&
-                (ex.StackTrace.Contains("System.Text.RegularExpressions") ||
-                 ex.ToString().StartsWith(@"System.ArgumentException: parsing")))
-            {
-                MessageBox.Show(ex.Message, "Invalid regular expression",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            //Unsupported Culture, possibly bn-BD
-            else if (ex is ArgumentException && Thrower(ex) == "CultureTableRecord.GetCultureTableRecord")
+                (stackTrace.Contains("System.Text.RegularExpressions") ||
+                 ex.ToString().StartsWith(
+                     "System.ArgumentException: parsing",
+                     StringComparison.Ordinal)))
             {
                 MessageBox.Show(
-                    "Microsoft unfortunately don't support your locale culture. Please try a more common one",
-                    "Unsupported culture");
+                    ex.Message,
+                    "Invalid regular expression",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-            // network access error
-            else if (ex is System.Net.WebException || ex.InnerException is System.Net.WebException)
+            // Unsupported culture, possibly bn-BD
+            else if (ex is ArgumentException &&
+                     Thrower(ex) == "CultureTableRecord.GetCultureTableRecord")
             {
-                // if AWB starts up offline we'll hit here, so provide clear network related message
-                string msg = ex.Message.StartsWith(@"The type initializer for") ? ex.InnerException.Message : ex.Message;
-
-                MessageBox.Show(msg, "Network access error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    "Microsoft unfortunately doesn't support your locale culture. " +
+                    "Please try a more common one.",
+                    "Unsupported culture",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-            // out of memory error
+            // Network access error
+            else if (ex is System.Net.WebException ||
+                     ex.InnerException is System.Net.WebException)
+            {
+                // If AWB starts offline, provide a clear network-related message.
+                string message =
+                    ex.Message.StartsWith(
+                        "The type initializer for",
+                        StringComparison.Ordinal) &&
+                    ex.InnerException != null
+                        ? ex.InnerException.Message
+                        : ex.Message;
+
+                MessageBox.Show(
+                    message,
+                    "Network access error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            // Out-of-memory error
             else if (ex is OutOfMemoryException)
             {
-                MessageBox.Show(ex.Message, "Out of Memory error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    ex.Message,
+                    "Out of Memory error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-            // disk writer error / full
+            // Disk write error or full disk
             else if (ex is System.IO.IOException ||
-                     ex is ConfigurationErrorsException && ex.InnerException != null &&
+                     ex is ConfigurationErrorsException &&
+                     ex.InnerException != null &&
                      ex.InnerException.InnerException is System.IO.IOException)
             {
-                MessageBox.Show(ex.Message, "I/O error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    ex.Message,
+                    "I/O error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-            // BackGroundRequest Abort called as user pressed stop, this is OK
+            // BackgroundRequest abort caused by the user pressing Stop
             else if (ex is ThreadAbortException &&
-                     (ex.StackTrace.Contains("AutoWikiBrowser.MainForm.ProcessPage") ||
-                      ex.StackTrace.Contains("Parsers.TagOrphans")))
+                     (stackTrace.Contains("AutoWikiBrowser.MainForm.ProcessPage") ||
+                      stackTrace.Contains("Parsers.TagOrphans")))
             {
                 return true;
             }
             else
             {
-                return false; // We didn't handle the exception
+                return false;
             }
 
-            return true; // We handled the exception
+            return true;
         }
 
         /// <summary>
