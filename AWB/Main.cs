@@ -4401,8 +4401,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             TheArticle.AWBChangeArticleText("Reparse", txtEdit.Text, false);
 
             RunReparseEditBoxBackground = new BackgroundRequest();
-            RunReparseEditBoxBackground.Execute(ReparseEditBoxBackground);
             RunReparseEditBoxBackground.Complete += ReparseEditBoxComplete;
+            RunReparseEditBoxBackground.Execute(ReparseEditBoxBackground);
+
         }
 
         /// <summary>
