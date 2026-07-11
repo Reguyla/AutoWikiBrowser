@@ -127,10 +127,34 @@ namespace AWBUpdater
         {
             if (ex == null || HandleKnownExceptions(ex)) return;
 
-            // TODO: suggest a bug report for other exceptions
-            ErrorHandler handler = new ErrorHandler { txtError = { Text = ex.Message } };
+            ErrorHandler handler = new ErrorHandler
+            {
+                txtError =
+                {
+                    Text =
+                        ex.Message +
+                        Environment.NewLine +
+                        Environment.NewLine +
+                        "This error was not recognized as a known condition. " +
+                        "Please review the details below and consider submitting a bug report."
+                }
+            };
 
-            var errorMessage = new BugReport(ex).PrintForPhabricator();
+            string errorMessage;
+
+            try
+            {
+                errorMessage = new BugReport(ex).PrintForPhabricator();
+            }
+            catch
+            {
+                errorMessage =
+                    "The formatted error report could not be generated." +
+                    Environment.NewLine +
+                    Environment.NewLine +
+                    ex;
+            }
+
             handler.txtDetails.Text = errorMessage;
 
             handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
@@ -202,6 +226,7 @@ namespace AWBUpdater
                     hostingApp.Version);
 
                 DotNetVersion = Environment.Version.ToString();
+            }
 
             /// <summary>
             /// Prints a wiki formatted bug report table
