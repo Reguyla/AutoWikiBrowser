@@ -443,11 +443,17 @@ namespace WikiFunctions
         /// <value>The default CSS style.</value>
         public static string DefaultStyles
         {
-            get { return @"
-/* suppress whitespace padding by C# WebBrowser, see
-http://stackoverflow.com/questions/15033023/white-space-padding-in-webbrowser-control */
-html , body {
- margin: 0;
+            get
+            {
+                return @"
+/*
+ * Remove the embedded browser's default document margins so the diff
+ * content aligns with the edges of the display area.
+ * Historical context:
+ * http://stackoverflow.com/questions/15033023/white-space-padding-in-webbrowser-control
+ */
+html, body {
+    margin: 0;
 }
 
 /*
@@ -455,9 +461,11 @@ html , body {
 */
 table.diff, td.diff-otitle, td.diff-ntitle {
     background-color: white;
-}
+}";
+            }
+        }
 
-td.diff-otitle,
+        td.diff-otitle,
 td.diff-ntitle {
     text-align: center;
 }
