@@ -483,17 +483,27 @@ namespace AWBUpdater
 
         private void btnCopy_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(txtDetails.Text))
+            {
+                return;
+            }
+
             try
             {
-                Clipboard.Clear();
-                Thread.Sleep(50); // give it some time to clear
                 Clipboard.SetText(txtDetails.Text);
             }
-            catch
+            catch (Exception ex)
             {
+                MessageBox.Show(
+                    "The error report could not be copied to the clipboard." +
+                    Environment.NewLine +
+                    Environment.NewLine +
+                    ex.Message,
+                    "Clipboard error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
             }
         }
-
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
