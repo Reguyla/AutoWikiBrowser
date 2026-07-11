@@ -1877,11 +1877,19 @@ namespace AutoWikiBrowser
             {
                 ErrorHandler.HandleException(ex);
 
-                // don't remove page over regex error – page itself is not at fault
-                if (!ex.StackTrace.Contains("System.Text.RegularExpressions"))
-                    theArticle.Trace.AWBSkipped("Exception:" + ex.Message);
+                string stackTrace = ex.StackTrace ?? string.Empty;
+
+                // Don't remove the page after a regular-expression error;
+                // the page itself is not responsible for the failure.
+                if (!stackTrace.Contains("System.Text.RegularExpressions"))
+                {
+                    theArticle.Trace.AWBSkipped("Exception: " + ex.Message);
+                }
                 else
+                {
                     Skippable = false;
+                }
+
                 Stop();
                 StopDelayedAutoSaveTimer();
             }
