@@ -1522,20 +1522,6 @@ namespace AutoWikiBrowser
             ClearBrowser();
             txtEdit.Text = "";
 
-            // TODO:Reinstate as needed
-            //try
-            //{
-            //    if (IsReadOnlyDB())
-            //    {
-            //        StartDelayedRestartTimer(null, null);
-            //        return;
-            //    }
-            //}
-            //catch (Exception)
-            //{
-            //    Start();
-            //}
-
             // lower restart delay
             if (_restartDelay > 5)
                 _restartDelay -= 1;
