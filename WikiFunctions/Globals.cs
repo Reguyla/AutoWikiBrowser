@@ -17,61 +17,87 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 using System;
+using System.IO;
 using System.Reflection;
 
 namespace WikiFunctions
 {
     /// <summary>
     /// Holds some deepest-level things to be initialized prior to most other static classes,
-    /// including Variables
+    /// including Variables.
     /// </summary>
     public static class Globals
     {
+        private static readonly bool mSHTMLAvailable;
+
+        private static readonly bool Windows =
+            Environment.OSVersion.VersionString.Contains("Windows");
+
+        private static readonly bool Linux =
+            File.Exists("/usr/bin/uname");
+
+        private static readonly bool Mono =
+            Type.GetType("Mono.Runtime") != null;
+
         static Globals()
         {
-            /* Assembly.Load determines whether assembly can be loaded OK.
-            * If AppDomain.CurrentDomain.GetAssemblies is used, this returns what assemblies are available,
-            * which is not what we want since assemblies may be 'available' but not loadable for use */
+            mSHTMLAvailable = IsMshtmlAvailable();
+        }
 
+        private static bool IsMshtmlAvailable()
+        {
             try
             {
-                Assembly.Load("Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-                mSHTMLAvailable = true;
+                Assembly.Load(new AssemblyName("Microsoft.mshtml"));
+                return true;
             }
-            catch
+            catch (FileNotFoundException)
             {
+                return false;
+            }
+            catch (FileLoadException)
+            {
+                return false;
+            }
+            catch (BadImageFormatException)
+            {
+                return false;
             }
         }
 
         /// <summary>
-        /// Whether we are running under Windows
+        /// Whether we are running under Windows.
         /// </summary>
         public static bool RunningOnWindows
-        { get { return Windows; } }
-
-        private static readonly bool Windows = Environment.OSVersion.VersionString.Contains("Windows");
+        {
+            get { return Windows; }
+        }
 
         public static bool UsingLinux
-        { get { return Linux; } }
+        {
+            get { return Linux; }
+        }
 
-        private static readonly bool Linux = System.IO.File.Exists("/usr/bin/uname");
-
-        private static readonly bool Mono = Type.GetType("Mono.Runtime") != null;
         /// <summary>
-        /// Returns whether we are using the Mono Runtime
+        /// Returns whether we are using the Mono Runtime.
         /// </summary>
         public static bool UsingMono
-        { get { return Mono; } }
+        {
+            get { return Mono; }
+        }
 
         /// <summary>
-        /// Returns the WikiFunctions assembly version
+        /// Returns the WikiFunctions assembly version.
         /// </summary>
         public static Version WikiFunctionsVersion
         {
-            get { return Assembly.GetAssembly(typeof(Variables)).GetName().Version; }
+            get
+            {
+                return Assembly.GetAssembly(typeof(Variables))
+                    .GetName()
+                    .Version;
+            }
         }
-
-        private static readonly bool mSHTMLAvailable;
 
         /// <summary>
         /// Gets whether the legacy Microsoft.mshtml interop assembly is available
@@ -85,21 +111,23 @@ namespace WikiFunctions
         public static bool MSHTMLAvailable => mSHTMLAvailable;
 
         #region Unit tests support
+
         /// <summary>
-        /// Set this to true in unit tests, to disable checkpage loading and other slow stuff.
-        /// This disables some functions, however.
+        /// Set this to true in unit tests to disable checkpage loading and other slow operations.
+        /// This disables some functions.
         /// </summary>
         public static bool UnitTestMode;
 
         /// <summary>
-        /// 
+        /// Unit-test integer value.
         /// </summary>
         public static int UnitTestIntValue;
 
         /// <summary>
-        /// 
+        /// Unit-test Boolean value.
         /// </summary>
         public static bool UnitTestBoolValue;
+
         #endregion
     }
 }
