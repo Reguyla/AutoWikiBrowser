@@ -1146,12 +1146,17 @@ namespace AutoWikiBrowser
         /// <param name="req"></param>
         private void AutomaticallyDoAnythingComplete(BackgroundRequest req)
         {
-            // must use Invoke so that SkipChecks and CompleteProcessPage are done on main GUI thread
-            if (InvokeRequired)
+            if (IsDisposed || Disposing)
             {
-                Invoke(new MethodInvoker(RunSkipChecks));
                 return;
             }
+
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(RunSkipChecks));
+                return;
+            }
+
             RunSkipChecks();
         }
 
