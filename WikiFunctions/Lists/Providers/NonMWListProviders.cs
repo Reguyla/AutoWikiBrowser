@@ -21,9 +21,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 using System.Windows.Forms;
 
 namespace WikiFunctions.Lists.Providers
@@ -158,7 +158,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string g in searchCriteria)
             {
                 int intStart = 0;
-                string google = HttpUtility.UrlEncode(g);
+                string google = WebUtility.UrlEncode(g);
 
                 do
                 {
