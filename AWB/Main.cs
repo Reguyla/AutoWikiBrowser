@@ -749,20 +749,33 @@ namespace AutoWikiBrowser
         /// </summary>
         private void Start()
         {
-            if (TheSession.Status != WikiStatusResult.Registered || TheSession.IsBusy)
+            if (TheSession.Status != WikiStatusResult.Registered ||
+                TheSession.IsBusy)
+            {
                 return;
+            }
+
             if (_inStart)
             {
                 _startAgain = true;
                 return;
             }
+
             _inStart = true;
-            do
+
+            try
             {
-                _startAgain = false;
-                StartArticleProcessing();
-            } while (_startAgain);
-            _inStart = false;
+                do
+                {
+                    _startAgain = false;
+                    StartArticleProcessing();
+                }
+                while (_startAgain);
+            }
+            finally
+            {
+                _inStart = false;
+            }
         }
 
         /// <summary>
