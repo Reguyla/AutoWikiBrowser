@@ -2352,22 +2352,39 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// <param name="destLine">the line number the caret should be moved to</param>
         private void GoTo(int destLine)
         {
-            // If some text is selected in the diff/preview, don't focus edit box else selected text will not be copyable by keyboard shortcuts
+            // If some text is selected in the diff/preview, don't focus the edit box;
+            // otherwise, selected text will not be copyable with keyboard shortcuts.
             if (webBrowser.TextSelected())
+            {
                 return;
+            }
 
             try
             {
                 EditBoxTab.SelectedTab = tpEdit;
                 txtEdit.Select();
-                if (destLine < 0) return;
 
-                MatchCollection mc = Regex.Matches(txtEdit.Text, "\r\n");
-                destLine = Math.Min(mc.Count, destLine);
+                if (destLine < 0)
+                {
+                    return;
+                }
 
-                if (destLine == 0) txtEdit.Select(0, 0);
+                MatchCollection matches =
+                    Regex.Matches(txtEdit.Text, "\r\n");
+
+                destLine = Math.Min(matches.Count, destLine);
+
+                if (destLine == 0)
+                {
+                    txtEdit.Select(0, 0);
+                }
                 else
-                    txtEdit.Select(mc[destLine - 1].Index + 2 - destLine, 0);
+                {
+                    txtEdit.Select(
+                        matches[destLine - 1].Index + 2 - destLine,
+                        0);
+                }
+
                 txtEdit.ScrollToCaret();
             }
             catch (Exception ex)
