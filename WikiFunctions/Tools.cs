@@ -1785,9 +1785,17 @@ Message: {2}
         /// <param name="title">Article title to encode</param>
         public static string WikiEncode(string title)
         {
-            return WebUtility.UrlEncode(title.Replace(' ', '_'))
-                .Replace("%2F", "/")
-                .Replace("%3A", ":");
+            string encodedTitle =
+                WebUtility.UrlEncode(title.Replace(' ', '_'));
+
+            encodedTitle = Regex.Replace(
+                encodedTitle,
+                "%[0-9A-F]{2}",
+                match => match.Value.ToLowerInvariant());
+
+            return encodedTitle
+                .Replace("%2f", "/")
+                .Replace("%3a", ":");
         }
 
         // Not Covered
