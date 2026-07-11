@@ -17,8 +17,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Collections.Generic;
+using System.Net;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace WikiFunctions.Lists.Providers
 {
@@ -68,9 +68,10 @@ namespace WikiFunctions.Lists.Providers
         /// <returns>List of pages</returns>
         public List<Article> GetListing(string category, int haveSoFar)
         {
-            string title = HttpUtility.UrlEncode(category);
-
-            string url = "&list=categorymembers&cmtitle=Category:" + title + "&cmlimit=max";
+            string url =
+                "&list=categorymembers&cmtitle=Category:" +
+                WebUtility.UrlEncode(category) +
+                "&cmlimit=max";
 
             return ApiMakeList(url, 0);
         }
