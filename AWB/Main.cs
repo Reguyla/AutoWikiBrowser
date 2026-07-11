@@ -1309,65 +1309,83 @@ namespace AutoWikiBrowser
             }
         }
 
+        /// <summary>
+        /// Adds error locations from the specified collection to the master
+        /// error list without overwriting existing entries.
+        ///
+        /// If multiple error categories report the same character position,
+        /// the first recorded error is preserved.
+        /// </summary>
+        /// <param name="source">
+        /// Collection of error positions keyed by character offset,
+        /// with the associated highlight length.
+        /// </param>
+        private void AddErrors(
+            IEnumerable<KeyValuePair<int, int>> source)
+        {
+            foreach (KeyValuePair<int, int> error in source)
+            {
+                if (!Errors.ContainsKey(error.Key))
+                {
+                    Errors.Add(error.Key, error.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Highlights the collected editor error locations.
+        ///
+        /// Applies highlighting for up to the first 100 error positions to
+        /// maintain editor responsiveness, then clears the active selection
+        /// so the final highlighted range is not left selected.
+        /// </summary>
+        /// <param name="errors">
+        /// Collection of editor error positions keyed by character offset,
+        /// with the associated highlight length.
+        /// </param>
+        private void HighlightEditorErrors(SortedDictionary<int, int> errors)
+        {
+            // performance: only highlight first 100 errors
+            int done = 0;
+            foreach (KeyValuePair<int, int> a in errors)
+            {
+                RedSelection(a.Key, a.Value);
+                done++;
+
+                if (done > 100)
+                    break;
+            }
+
+            // If any text highlighted, don't leave last text selected
+            if (done > 0)
+                txtEdit.Select(0, 0);
+        }
+
+        /// <summary>
+        /// Merges all detected editor error categories into a single collection
+        /// and highlights the resulting error locations in the edit box.
+        ///
+        /// Duplicate character positions are ignored so that each location is
+        /// highlighted only once.
+        /// </summary>
         private void HighlightErrors()
         {
-            foreach (KeyValuePair<int, int> kvp in unbalancedBracket.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in badCiteParameters.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in dupeBanerShellParameters.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in deadLinks.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in ambigCiteDates.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in unclosedTags.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in wikilinkedHeaders.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in targetlessLinks.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in doublepipeLinks.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in otherErrors.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<int, int> kvp in userSignature.Where(kvp => !Errors.ContainsKey(kvp.Key)))
-            {
-                Errors.Add(kvp.Key, kvp.Value);
-            }
+            AddErrors(unbalancedBracket);
+            AddErrors(badCiteParameters);
+            AddErrors(dupeBanerShellParameters);
+            AddErrors(deadLinks);
+            AddErrors(ambigCiteDates);
+            AddErrors(unclosedTags);
+            AddErrors(wikilinkedHeaders);
+            AddErrors(targetlessLinks);
+            AddErrors(doublepipeLinks);
+            AddErrors(otherErrors);
+            AddErrors(userSignature);
 
             if (Errors.Any())
-                HighlightErrors(Errors);
+            {
+                HighlightEditorErrors(Errors);
+            }
         }
 
         /// <summary>
@@ -5852,24 +5870,6 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         private void displayfalsePositivesButtonToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AddIgnoredToLogFile = displayfalsePositivesButtonToolStripMenuItem.Checked;
-        }
-
-        private void HighlightErrors(SortedDictionary<int, int> errors)
-        {
-            // performance: only highlight first 100 errors
-            int done = 0;
-            foreach (KeyValuePair<int, int> a in errors)
-            {
-                RedSelection(a.Key, a.Value);
-                done++;
-
-                if (done > 100)
-                    break;
-            }
-
-            // If any text highlighted, don't leave last text selected
-            if (done > 0)
-                txtEdit.Select(0, 0);
         }
 
         private void RedSelection(int index, int length)
