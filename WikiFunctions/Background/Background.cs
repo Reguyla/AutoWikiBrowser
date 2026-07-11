@@ -18,11 +18,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 using System;
 using System.Collections.Specialized;
+using System.Net;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using System.Web;
 using WikiFunctions.API;
 using WikiFunctions.Lists.Providers;
 
@@ -332,7 +332,7 @@ namespace WikiFunctions.Background
                         // test if redirect
                         if (Tools.IsRedirect(text))
                         {
-                            dest = HttpUtility.UrlDecode(Tools.RedirectTarget(text).Replace("_", " "));
+                            dest = WebUtility.UrlDecode(Tools.RedirectTarget(text).Replace("_", " "));
                             string directLink = "[[" + dest + "|" + linkText + "]]";
 
                             StrParam = StrParam.Replace(link, directLink);
