@@ -352,7 +352,9 @@ namespace AWBUpdater
 
         #region Static helper functions
 
-        private static readonly Regex StackTrace = new Regex(@"([a-zA-Z_0-9\.`]+)(?=\()", RegexOptions.Compiled);
+        private static readonly Regex StackTraceMethodRegex =
+            new Regex(@"([a-zA-Z_0-9\.`]+)(?=\()",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Returns names of functions in stack trace of an exception
@@ -361,13 +363,22 @@ namespace AWBUpdater
         /// <returns>List of fully qualified function names</returns>
         public static string[] MethodNames(string stackTrace)
         {
-            MatchCollection mc = StackTrace.Matches(stackTrace);
+            if (string.IsNullOrEmpty(stackTrace))
+            {
+                return new string[0];
+            }
 
-            string[] res = new string[mc.Count];
+            MatchCollection matches =
+                StackTraceMethodRegex.Matches(stackTrace);
 
-            for (int i = 0; i < res.Length; i++) res[i] = mc[i].Groups[1].Value;
+            string[] result = new string[matches.Count];
 
-            return res;
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = matches[i].Groups[1].Value;
+            }
+
+            return result;
         }
 
         /// <summary>
