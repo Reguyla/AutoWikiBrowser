@@ -39,8 +39,6 @@ namespace AWBUpdater
 
         private static bool HandleKnownExceptions(Exception ex)
         {
-            // Tools.WriteDebug("HandleKnownExceptions", ex.StackTrace);
-            // invalid regex - only ArgumentException, without subclasses
             if (ex is ArgumentException &&
                 (ex.StackTrace.Contains("System.Text.RegularExpressions") ||
                  ex.ToString().StartsWith(@"System.ArgumentException: parsing")))
@@ -109,7 +107,6 @@ namespace AWBUpdater
 
             handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
 
-           // Tools.WriteDebug("HandleException", errorMessage);
             handler.ShowDialog();
         }
 
@@ -130,7 +127,6 @@ namespace AWBUpdater
             /// <param name="ex"></param>
             public BugReport(Exception ex)
             {
-                //var apiException = ex as ApiException;
                 var thread = /*apiException != null ? apiException.ThrowingThread :*/ System.Threading.Thread.CurrentThread;
                 if (thread.Name != "Main thread")
                 {
@@ -140,11 +136,6 @@ namespace AWBUpdater
                 StringBuilder stackTrace = new StringBuilder();
                 FormatException(ex, stackTrace, ExceptionKind.TopLevel);
                 StackTrace = stackTrace.ToString();
-
-                //if (apiException != null)
-                //{
-                //    ApiExtra = apiException.GetExtraSpecificInformation();
-                //}
 
                 if (AppendToErrorHandler != null)
                 {
@@ -163,30 +154,6 @@ namespace AWBUpdater
                     hostingApp.Name, hostingApp.Version);
 
                 DotNetVersion = Environment.Version.ToString();
-
-                // suppress unhandled exception if Variables constructor says 'ouch'
-                //try
-                //{
-                //    Version += ", revision " + Variables.Revision;
-                //}
-                //catch
-                //{
-                //}
-
-                // TODO: Phab urls
-                //if (!string.IsNullOrEmpty(CurrentPage))
-                //{
-                //    // don't use Tools.WikiEncode here, to keep code portable to updater
-                //    // as it's not a pretty URL, we don't need to follow the MediaWiki encoding rules
-                //    string link = "[" + Variables.URLIndex + "?title=" + HttpUtility.UrlEncode(CurrentPage) + "&oldid=" +
-                //                  CurrentRevision + "]";
-
-                //    Duplicate = "[encountered while processing page ''" + link + "'']";
-                //}
-                //else if (!string.IsNullOrEmpty(ListMakerText))
-                //{
-                //    Duplicate = "'''ListMaker Text:''' " + ListMakerText;
-                //}
             }
 
             /// <summary>
@@ -239,11 +206,6 @@ namespace AWBUpdater
                 errorMessage.AppendLine(formatter.PrintLine("version", Version));
                 errorMessage.AppendLine(formatter.PrintLine("net", DotNetVersion));
                 errorMessage.AppendLine(formatter.PrintLine("duplicate", Duplicate));
-
-                //if (!string.IsNullOrEmpty(Variables.URL))
-                //{
-                //    errorMessage.AppendLine(formatter.PrintLine("site", Variables.URL));
-                //}
 
                 if (!string.IsNullOrEmpty(AppendedInfo))
                 {
