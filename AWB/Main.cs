@@ -3696,10 +3696,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         public event EventHandler Ticker;
         private void Timer_Tick(object sender, EventArgs e)
         {
-            if (Ticker != null)
-                Ticker(null, null);
+            Ticker?.Invoke(this, EventArgs.Empty);
 
             _seconds++;
+
             if (_seconds == 60)
             {
                 _seconds = 0;
