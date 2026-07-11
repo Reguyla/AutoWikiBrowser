@@ -2202,7 +2202,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         #region Diff
 
-        private enum DiffChangeMode { Deletion, Change, Addition };
+        private enum DiffChangeMode { Deletion, Change, Addition }
 
         /// <summary>
         /// This class serves as a proxy between the main window and WebBrowser, isolating the former
