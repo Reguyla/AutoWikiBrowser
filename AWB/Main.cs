@@ -2263,26 +2263,53 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// <param name="changeType"></param>
         /// <param name="left"></param>
         /// <param name="right"></param>
-        private void UndoChangeGeneric(DiffChangeMode changeType, int left, int right)
+        private void UndoChangeGeneric(
+            DiffChangeMode changeType,
+            int left,
+            int right)
         {
             if (!txtEdit.Enabled)
+            {
                 return;
+            }
 
             try
             {
+                HtmlDocument document = webBrowser.Document;
+
+                if (document == null)
+                {
+                    Tools.WriteDebug(
+                        "UndoChangeGeneric",
+                        "The browser document was unavailable.");
+
+                    return;
+                }
+
+                HtmlElementCollection htmlElements =
+                    document.GetElementsByTagName("HTML");
+
+                int webBrowserYScroll = 0;
+
+                if (htmlElements.Count > 0)
+                {
+                    webBrowserYScroll = htmlElements[0].ScrollTop;
+                }
+
                 int caretPosition = txtEdit.SelectionStart;
-                // see http://stackoverflow.com/questions/1277691/how-to-retrieve-the-scrollbar-position-of-the-webbrowser-control-in-net
-                int webBrowserYScroll = webBrowser.Document.GetElementsByTagName("HTML")[0].ScrollTop;
-                GetDiff(); // to pick up any manual changes from edit box
+
+                GetDiff();
 
                 switch (changeType)
                 {
                     case DiffChangeMode.Change:
                         txtEdit.Text = Diff.UndoChange(left, right);
                         break;
+
                     case DiffChangeMode.Deletion:
                         txtEdit.Text = Diff.UndoDeletion(left, right);
                         break;
+
                     case DiffChangeMode.Addition:
                         txtEdit.Text = Diff.UndoAddition(right);
                         break;
@@ -2291,14 +2318,26 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 GetDiff();
 
                 if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
+                {
                     HighlightSyntax();
+                }
 
-                // scroll back to where user was
-                object[] ob = { "window.scrollTo(0, " + webBrowserYScroll + @")" };
-                webBrowser.Document.InvokeScript("eval", ob);
+                HtmlDocument updatedDocument = webBrowser.Document;
 
-                // now put caret back where it was
-                txtEdit.Select(Math.Min(caretPosition, txtEdit.Text.Length), 0);
+                if (updatedDocument != null)
+                {
+                    object[] arguments =
+                    {
+                "window.scrollTo(0, " + webBrowserYScroll + ")"
+            };
+
+                    updatedDocument.InvokeScript("eval", arguments);
+                }
+
+                txtEdit.Select(
+                    Math.Min(caretPosition, txtEdit.Text.Length),
+                    0);
+
                 txtEdit.ScrollToCaret();
             }
             catch (Exception ex)
