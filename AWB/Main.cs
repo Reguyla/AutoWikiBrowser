@@ -202,37 +202,43 @@ namespace AutoWikiBrowser
         {
             try
             {
-                ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+                ConfigurationManager.OpenExeConfiguration(
+                    ConfigurationUserLevel.PerUserRoamingAndLocal);
             }
             catch (ConfigurationErrorsException ex)
             {
-                string filename = string.Empty;
-                if (!string.IsNullOrEmpty(ex.Filename))
+                string filename = ex.Filename;
+
+                if (string.IsNullOrEmpty(filename) &&
+                    ex.InnerException is ConfigurationErrorsException innerException)
                 {
-                    filename = ex.Filename;
-                }
-                else
-                {
-                    var innerEx = ex.InnerException as ConfigurationErrorsException;
-                    if (innerEx != null && !string.IsNullOrEmpty(innerEx.Filename))
-                    {
-                        filename = innerEx.Filename;
-                    }
+                    filename = innerException.Filename;
                 }
 
-                if (!string.IsNullOrEmpty(filename))
+                if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
                 {
+                    return;
+                }
+
+                FileInfo fileInfo = new FileInfo(filename);
+
+                if (fileInfo.Directory == null)
+                {
+                    return;
+                }
+
+                using (FileSystemWatcher watcher =
+                       new FileSystemWatcher(fileInfo.Directory.FullName, fileInfo.Name))
+                {
+                    Tools.WriteDebug(
+                        $"Deleting corrupt file {filename}",
+                        ex.Message);
+
+                    File.Delete(filename);
+
                     if (File.Exists(filename))
                     {
-                        var fileInfo = new FileInfo(filename);
-                        var watcher
-                             = new FileSystemWatcher(fileInfo.Directory.FullName, fileInfo.Name);
-                        Tools.WriteDebug(string.Format("Deleting corrupt file {0}", filename), ex.Message);
-                        File.Delete(filename);
-                        if (File.Exists(filename))
-                        {
-                            watcher.WaitForChanged(WatcherChangeTypes.Deleted);
-                        }
+                        watcher.WaitForChanged(WatcherChangeTypes.Deleted);
                     }
                 }
             }
