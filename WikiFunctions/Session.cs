@@ -298,7 +298,13 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Checks log in status, registered and version.
+        /// Refreshes the current wiki session state by loading site
+        /// information, validating the running AWB version, downloading
+        /// configuration pages, and determining the user's operational
+        /// status.
+        ///
+        /// Returns a <see cref="WikiStatusResult"/> describing whether
+        /// editing may proceed.
         /// </summary>
         private WikiStatusResult UpdateWikiStatus()
         {
@@ -356,7 +362,9 @@ namespace WikiFunctions
                 //    return WikiStatusResult.NoRights;
                 //}
 
-                // TODO: assess the impact on servers later
+                // TODO:
+                // Reassess Maxlag defaults after the .NET 8 networking migration.
+                // Current value disables Maxlag while API compatibility work is in progress.
                 Editor.Maxlag = /*User.IsBot ? 5 : 20*/ -1;
 
                 var versionJson = JObject.Parse(Updater.GlobalVersionPage);
