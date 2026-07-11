@@ -54,13 +54,17 @@ namespace AutoWikiBrowser
         }
 
         /// <summary>
-        /// Returns whether there is currently any text selected
-        /// Only works if Microsoft.mshtml.dll is available
-        /// Check of Globals property must be in separate method to the IHTMLDocument2 code
-        /// Further, on some systems even when Assembly can be loaded, it still doesn't work
-        /// so require additional try/catch
+        /// Returns whether text is currently selected in the embedded browser.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// Browser-specific selection access is delegated to
+        /// <see cref="BrowserSelectionProvider"/>. Some systems may report that
+        /// the legacy browser interop assembly is available even when selection
+        /// access still fails, so this method keeps a defensive try/catch.
+        /// </remarks>
+        /// <returns>
+        /// <c>true</c> if text is currently selected; otherwise, <c>false</c>.
+        /// </returns>
         public bool TextSelected()
         {
             if (!Globals.MSHTMLAvailable)
@@ -74,8 +78,10 @@ namespace AutoWikiBrowser
             }
             catch
             {
-                // So system reported that Assembly does load, but it still doesn't work
-                // See https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_23#Single_click_to_focus_the_edit_box_to_a_line_-_no_longer_works_with_SVN9282
+                // Some systems report that the legacy browser interop assembly
+                // is available even though selection access still fails at runtime.
+                // See:
+                // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_23#Single_click_to_focus_the_edit_box_to_a_line_-_no_longer_works_with_SVN9282
                 return false;
             }
         }
