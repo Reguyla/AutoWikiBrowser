@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Net;
 using Newtonsoft.Json.Linq;
 using WikiFunctions.API;
 
@@ -108,7 +108,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string prop in searchCriteria)
             {
                 string url = "list=pageswithprop&pwppropname="
-                             + HttpUtility.UrlEncode(prop) + "&pwplimit=max";
+                             + WebUtility.UrlEncode(prop) + "&pwplimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
