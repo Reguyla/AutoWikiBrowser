@@ -78,7 +78,7 @@ namespace AutoWikiBrowser
         private readonly WikiFunctions.ReplaceSpecial.ReplaceSpecial RplcSpecial =
             new WikiFunctions.ReplaceSpecial.ReplaceSpecial();
         private readonly Parsers Parser;
-        private readonly TimeSpan StartTime = new TimeSpan(DateTime.Now.Ticks);
+        private readonly DateTime _startTime = DateTime.Now;
         private readonly List<string> RecentList = new List<string>();
         private readonly CustomModule CModule = new CustomModule();
         private readonly ExternalProgram ExtProgram = new ExternalProgram();
@@ -2531,10 +2531,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             if (Properties.Settings.Default.AskForTerminate)
             {
-                TimeSpan time =
-                    new TimeSpan(DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second).Subtract
-                    (StartTime);
-                dlg = new ExitQuestion(time, NumberOfEdits, "");
+                TimeSpan elapsedTime =
+                    DateTime.Now - _startTime;
+                dlg = new ExitQuestion(elapsedTime, NumberOfEdits, "");
                 dlg.ShowDialog();
                 Properties.Settings.Default.AskForTerminate = !dlg.CheckBoxDontAskAgain;
             }
