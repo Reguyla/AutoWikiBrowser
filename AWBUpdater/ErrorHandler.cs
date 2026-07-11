@@ -179,10 +179,13 @@ namespace AWBUpdater
             /// <param name="ex"></param>
             public BugReport(Exception ex)
             {
-                var thread = /*apiException != null ? apiException.ThrowingThread :*/ System.Threading.Thread.CurrentThread;
-                if (thread.Name != "Main thread")
+                System.Threading.Thread currentThread =
+                    System.Threading.Thread.CurrentThread;
+
+                if (!string.IsNullOrEmpty(currentThread.Name) &&
+                    currentThread.Name != "Main thread")
                 {
-                    Thread = thread.Name;
+                    Thread = currentThread.Name;
                 }
 
                 StringBuilder stackTrace = new StringBuilder();
