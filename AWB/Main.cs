@@ -4468,12 +4468,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// <param name="req"></param>
         private void ReparseEditBoxComplete(BackgroundRequest req)
         {
-            // must use Invoke so that ReparseEditBoxPart2 is done on main GUI thread
-            if (InvokeRequired)
+            if (IsDisposed || Disposing)
             {
-                Invoke(new MethodInvoker(ReparseEditBoxPart2));
                 return;
             }
+
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(ReparseEditBoxPart2));
+                return;
+            }
+
             ReparseEditBoxPart2();
         }
 
