@@ -74,13 +74,15 @@ namespace WikiFunctions
         private static readonly bool mSHTMLAvailable;
 
         /// <summary>
-        /// Returns whether Microsoft.mshtml, Version=7.0.3300.0 is loaded.
-        /// So whether IHTMLDocument2 object in AWBWebBrowser can be used
+        /// Gets whether the legacy Microsoft.mshtml interop assembly is available
+        /// for browser-specific functionality.
         /// </summary>
-        public static bool MSHTMLAvailable
-        {
-            get { return mSHTMLAvailable; }
-        }
+        /// <remarks>
+        /// A value of <c>true</c> means the assembly could be loaded, but individual
+        /// browser interop operations may still fail at runtime and should remain
+        /// defensively guarded.
+        /// </remarks>
+        public static bool MSHTMLAvailable => mSHTMLAvailable;
 
         #region Unit tests support
         /// <summary>

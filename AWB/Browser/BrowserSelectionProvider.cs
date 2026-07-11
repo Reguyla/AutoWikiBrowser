@@ -7,7 +7,7 @@ namespace AutoWikiBrowser
     /// Provides access to the current text selection from the embedded browser.
     /// The current implementation uses the legacy Microsoft.mshtml DOM.
     /// </summary>
-    internal static class BrowserSelectionReader
+    internal static class BrowserSelectionProvider
     {
         /// <summary>
         /// Returns the currently selected browser text, or null when no text
