@@ -3232,19 +3232,31 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             toolStripTextBox2.Text = "";
         }
 
-        private void toolStripTextBox2_KeyPress(object sender, KeyPressEventArgs e)
+        private void toolStripTextBox2_KeyPress(
+           object sender,
+           KeyPressEventArgs e)
         {
-            if (!char.IsNumber(e.KeyChar) && e.KeyChar != 8)
-                e.Handled = true;
-
-            if (e.KeyChar == '\r' && toolStripTextBox2.Text.Length > 0)
+            if (!char.IsDigit(e.KeyChar) &&
+                e.KeyChar != '\b' &&
+                e.KeyChar != '\r')
             {
                 e.Handled = true;
-                txtEdit.GoToLine(int.Parse(toolStripTextBox2.Text));
-                mnuTextBox.Hide();
+                return;
+            }
+
+            if (e.KeyChar == '\r')
+            {
+                e.Handled = true;
+
+                if (int.TryParse(
+                        toolStripTextBox2.Text,
+                        out int lineNumber))
+                {
+                    txtEdit.GoToLine(lineNumber);
+                    mnuTextBox.Hide();
+                }
             }
         }
-
         [Conditional("DEBUG")]
         private void Debug()
         {
