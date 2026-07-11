@@ -4150,20 +4150,35 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         private void bypassAllRedirectsToolStripMenuItem_Click(object sender, EventArgs e)
         {
 #if !DEBUG
-            if (MessageBox.Show("Replacement of links to redirects with direct links is strongly discouraged, " +
-                                "however it could be useful in some circumstances. Are you sure you want to continue?",
-                                "Bypass redirects", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                return;
+    if (MessageBox.Show(
+            "Replacement of links to redirects with direct links is strongly discouraged, " +
+            "however it could be useful in some circumstances. Are you sure you want to continue?",
+            "Bypass redirects",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning) != DialogResult.Yes)
+    {
+        return;
+    }
 #endif
 
-            BackgroundRequest r = new BackgroundRequest();
+            BackgroundRequest request = new BackgroundRequest();
 
             Enabled = false;
-            r.BypassRedirects(txtEdit.Text, TheSession.Editor.SynchronousEditor.Clone());
-            r.Wait();
-            Enabled = true;
 
-            txtEdit.Text = (string)r.Result;
+            try
+            {
+                request.BypassRedirects(
+                    txtEdit.Text,
+                    TheSession.Editor.SynchronousEditor.Clone());
+
+                request.Wait();
+
+                txtEdit.Text = (string)request.Result;
+            }
+            finally
+            {
+                Enabled = true;
+            }
         }
 
         private void unicodifyToolStripMenuItem_Click(object sender, EventArgs e)
