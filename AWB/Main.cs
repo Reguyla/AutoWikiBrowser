@@ -486,7 +486,6 @@ namespace AutoWikiBrowser
                     lblStatusText.Text = Program.Name + " " + Program.VersionString;
                 else
                     lblStatusText.Text = value;
-                Application.DoEvents();
             }
         }
 
