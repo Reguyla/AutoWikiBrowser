@@ -25,25 +25,25 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Threading;
-using System.Text.RegularExpressions;
-using System.IO;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
-using System.Net;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.API;
-using WikiFunctions.Lists.Providers;
-using WikiFunctions.Plugin;
-using WikiFunctions.Parse;
-using WikiFunctions.Properties;
-using WikiFunctions.Controls;
 using WikiFunctions.Background;
+using WikiFunctions.Controls;
 using WikiFunctions.Controls.Lists;
+using WikiFunctions.Lists.Providers;
+using WikiFunctions.Parse;
+using WikiFunctions.Plugin;
+using WikiFunctions.Properties;
 using AutoWikiBrowser.Plugins;
 using ThreadState = System.Threading.ThreadState;
 
@@ -78,7 +78,7 @@ namespace AutoWikiBrowser
         private readonly WikiFunctions.ReplaceSpecial.ReplaceSpecial RplcSpecial =
             new WikiFunctions.ReplaceSpecial.ReplaceSpecial();
         private readonly Parsers Parser;
-        private readonly DateTime _startTime = DateTime.Now;
+        private readonly Stopwatch _sessionTimer = Stopwatch.StartNew();
         private readonly List<string> RecentList = new List<string>();
         private readonly CustomModule CModule = new CustomModule();
         private readonly ExternalProgram ExtProgram = new ExternalProgram();
@@ -2550,10 +2550,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             if (Properties.Settings.Default.AskForTerminate)
             {
-                TimeSpan elapsedTime =
-                    DateTime.Now - _startTime;
-                dlg = new ExitQuestion(elapsedTime, NumberOfEdits, "");
-                dlg.ShowDialog();
+                TimeSpan elapsedTime = _sessionTimer.Elapsed;
+                dlg = new ExitQuestion(elapsedTime, NumberOfEdits, string.Empty);
+                dlg.ShowDialog(this);
                 Properties.Settings.Default.AskForTerminate = !dlg.CheckBoxDontAskAgain;
             }
 
