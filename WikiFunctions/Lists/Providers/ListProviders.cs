@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System;
-using System.Web;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Xml;
@@ -169,8 +169,11 @@ namespace WikiFunctions.Lists.Providers
 
             foreach (string page in searchCriteria)
             {
-                string url = "prop=categories&cllimit=max&titles="
-                             + HttpUtility.UrlEncode(page) + "&clshow=" + clshow;
+                string url =
+                    "prop=categories&cllimit=max&titles=" +
+                    WebUtility.UrlEncode(page) +
+                    "&clshow=" +
+                    clshow;
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -261,7 +264,9 @@ namespace WikiFunctions.Lists.Providers
             return MakeList(Namespace.Article, searchCriteria);
         }
 
-        protected List<Article> MakeList(string Namespace, params string[] searchCriteria)
+        protected List<Article> MakeList(
+            string Namespace,
+            params string[] searchCriteria)
         {
             searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
@@ -269,8 +274,11 @@ namespace WikiFunctions.Lists.Providers
 
             foreach (string page in searchCriteria)
             {
-                string url = "list=backlinks&bltitle="
-                             + HttpUtility.UrlEncode(page) + "&blnamespace=" + Namespace;
+                string url =
+                    "list=backlinks&bltitle=" +
+                    WebUtility.UrlEncode(page) +
+                    "&blnamespace=" +
+                    Namespace;
 
                 if (!string.IsNullOrEmpty(ForceQueryLimit))
                 {
@@ -280,6 +288,7 @@ namespace WikiFunctions.Lists.Providers
                 {
                     url += "&bllimit=max";
                 }
+
                 if (IncludeWhatLinksToRedirects)
                 {
                     url += "&blredirect";
@@ -292,6 +301,7 @@ namespace WikiFunctions.Lists.Providers
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
+
             return list;
         }
 
@@ -491,14 +501,19 @@ namespace WikiFunctions.Lists.Providers
             return MakeList(Namespace.ToString(), searchCriteria);
         }
 
-        protected List<Article> MakeList(string Namespace, params string[] searchCriteria)
+        protected List<Article> MakeList(
+            string Namespace,
+            params string[] searchCriteria)
         {
             List<Article> list = new List<Article>();
 
             foreach (string page in searchCriteria)
             {
-                string url = "list=embeddedin&eititle="
-                             + HttpUtility.UrlEncode(page) + "&eilimit=max&einamespace=" + Namespace;
+                string url =
+                    "list=embeddedin&eititle=" +
+                    WebUtility.UrlEncode(page) +
+                    "&eilimit=max&einamespace=" +
+                    Namespace;
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -569,7 +584,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string page in searchCriteria)
             {
                 string url = "prop=links&titles="
-                             + HttpUtility.UrlEncode(page) + "&pllimit=max";
+                             + WebUtility.UrlEncode(page) + "&pllimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -624,7 +639,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string page in searchCriteria)
             {
                 string url = "generator=links&titles="
-                             + HttpUtility.UrlEncode(page) + "&gpllimit=max";
+                             + WebUtility.UrlEncode(page) + "&gpllimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -691,7 +706,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string page in searchCriteria)
             {
                 string url = "prop=images&titles="
-                             + HttpUtility.UrlEncode(page) + "&imlimit=max";
+                             + WebUtility.UrlEncode(page) + "&imlimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -740,7 +755,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string page in searchCriteria)
             {
                 string url = "prop=templates&titles="
-                             + HttpUtility.UrlEncode(page) + "&tllimit=max";
+                             + WebUtility.UrlEncode(page) + "&tllimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -897,7 +912,7 @@ namespace WikiFunctions.Lists.Providers
             {
                 string image = Regex.Replace(page, "^" + Variables.Namespaces[Namespace.File],
                                              "", RegexOptions.IgnoreCase);
-                image = HttpUtility.UrlEncode(image);
+                image = WebUtility.UrlEncode(image);
 
                 string url = "list=imageusage&iutitle=Image:"
                              + image + "&iulimit=max";
@@ -965,7 +980,7 @@ namespace WikiFunctions.Lists.Providers
                 {
                     url = string.Format("list=search&srwhat={0}&srnamespace=*&srsearch={1}&srlimit=max",
                         SearchType,
-                        HttpUtility.UrlEncode(page)
+                        WebUtility.UrlEncode(page)
                     );
                 }
                 else
@@ -974,7 +989,7 @@ namespace WikiFunctions.Lists.Providers
                         SearchType,
                         @namespace.ToString(),
                         SearchPrefix,
-                        HttpUtility.UrlEncode(page)
+                        WebUtility.UrlEncode(page)
                         );
                 }
                 list.AddRange(ApiMakeList(url, list.Count));
@@ -1236,7 +1251,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string page in searchCriteria)
             {
                 string url = "list=allpages&" + From + "=" +
-                             HttpUtility.UrlEncode(page) + "&apnamespace=" + Namespace + "&aplimit=max" + Extra;
+                             WebUtility.UrlEncode(page) + "&apnamespace=" + Namespace + "&aplimit=max" + Extra;
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -1441,7 +1456,7 @@ namespace WikiFunctions.Lists.Providers
 
             foreach (string page in searchCriteria)
             {
-                string url = "list=recentchanges&rctitles=" + HttpUtility.UrlEncode(page) + "&rcnamespace=" + Namespace + "&rclimit=max";
+                string url = "list=recentchanges&rctitles=" + WebUtility.UrlEncode(page) + "&rcnamespace=" + Namespace + "&rclimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
@@ -1638,7 +1653,7 @@ namespace WikiFunctions.Lists.Providers
 
 
                 string url = "list=exturlusage&euquery=" +
-                             HttpUtility.UrlEncode(urlEnd) + "&eunamespace=" + Namespace +
+                             WebUtility.UrlEncode(urlEnd) + "&eunamespace=" + Namespace +
                                "&euprotocol=" + protocol + "&eulimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
@@ -1775,7 +1790,7 @@ namespace WikiFunctions.Lists.Providers
             foreach (string prop in searchCriteria)
             {
                 string url = "list=pageswithprop&pwppropname="
-                             + HttpUtility.UrlEncode(prop) + "&pwplimit=max";
+                             + WebUtility.UrlEncode(prop) + "&pwplimit=max";
 
                 list.AddRange(ApiMakeList(url, list.Count));
             }
