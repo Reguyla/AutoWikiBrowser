@@ -26,7 +26,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using ICSharpCode.SharpZipLib.Zip;
-
 using System.Net;
 using System.Web;
 
@@ -368,17 +367,20 @@ namespace AWBUpdater
             {
                 TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
                 var unixTime = (int)t.TotalSeconds;
+
                 var url = string.Format(
                     "{0}?r={1}&ts={2}",
                     fileUrl,
-                    HttpUtility.UrlEncode(SOURCEFORGE_URL + $"/{fileWithoutExt}/"),
-                    unixTime
-                );
+                    WebUtility.UrlEncode(SOURCEFORGE_URL + $"/{fileWithoutExt}/"),
+                    unixTime);
+
                 client.DownloadFile(url, target);
             }
             catch (WebException webEx)
             {
-                UpdateUI(string.Format("Download of `{0}` failed: {1}", fileUrl, webEx.Message), true);
+                UpdateUI(
+                    string.Format("Download of `{0}` failed: {1}", fileUrl, webEx.Message),
+                    true);
             }
         }
 
