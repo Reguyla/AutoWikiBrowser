@@ -1042,11 +1042,15 @@ namespace AutoWikiBrowser
         /// </summary>
         private void ProcessPageBackground()
         {
-            StatusLabelText = (preParseModeToolStripMenuItem.Checked ? "Processing page (pre-parse mode)" : "Processing page");
-            Application.DoEvents();
+            StatusLabelText = preParseModeToolStripMenuItem.Checked
+                ? "Processing page (pre-parse mode)"
+                : "Processing page";
 
-            // FIXME: this position is imperfect, since above there is code that can explode, but this way
-            // at least we don't get bogus reports of unrelated pages
+            // FIXME:
+            // ErrorHandler.CurrentPage should ideally be assigned before any operation
+            // that may throw while processing this page. The current location avoids
+            // attributing unrelated initialization failures to the wrong article, but
+            // exceptions raised earlier will not include page context.
             ErrorHandler.CurrentPage = TheArticle.Name;
 
             ProcessPage(TheArticle, true);
