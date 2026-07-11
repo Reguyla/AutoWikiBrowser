@@ -259,7 +259,7 @@ namespace WikiFunctions.API
 
                 if (!string.IsNullOrEmpty(kvp.Value)) // empty string is a valid parameter value!
                 {
-                    sb.Append(HttpUtility.UrlEncode(kvp.Value));
+                    sb.Append(WebUtility.UrlEncode(kvp.Value));
                 }
             }
 
