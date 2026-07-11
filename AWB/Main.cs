@@ -3533,10 +3533,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void SetStartButton(bool enabled)
         {
-            /* Please don't remove the If statements; otherwise the EnabledChange event fires even if the button
-             * button was already named. The Kingbotk plugin attaches to that event. */
-            if (!btnStart.Enabled) btnStart.Enabled = enabled;
-            if (!btntsStart.Enabled) btntsStart.Enabled = enabled;
+            // Avoid raising EnabledChanged when the requested state is already set.
+            // Some plugins subscribe to this event.
+            if (btnStart.Enabled != enabled)
+            {
+                btnStart.Enabled = enabled;
+            }
+
+            if (btntsStart.Enabled != enabled)
+            {
+                btntsStart.Enabled = enabled;
+            }
         }
 
         private void DisableButtons()
