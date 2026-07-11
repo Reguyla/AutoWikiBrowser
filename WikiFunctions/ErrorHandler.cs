@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Configuration;
 using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+using System.Net;
 using System.Reflection;
-using System.Threading;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
+using System.Threading;
+using System.Windows.Forms;
 using WikiFunctions.API;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,9 +236,14 @@ namespace WikiFunctions
                     {
                         // Use a plain URL because this context is included in Phabricator reports.
                         // Do not use Tools.WikiEncode here, to keep this code portable to AWBUpdater.
-                        string pageUrl = Variables.URLIndex +
-                                         "?title=" + HttpUtility.UrlEncode(CurrentPage) +
-                                         "&oldid=" + CurrentRevision;
+                        string pageUrl =
+                            Variables.URLIndex +
+                            "?title=" + WebUtility.UrlEncode(CurrentPage);
+
+                        if (CurrentRevision > 0)
+                        {
+                            pageUrl += "&oldid=" + CurrentRevision;
+                        }
 
                         Duplicate = "Encountered while processing page: " + pageUrl;
                     }
