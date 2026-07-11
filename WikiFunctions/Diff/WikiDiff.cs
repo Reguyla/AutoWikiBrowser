@@ -16,8 +16,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
-using System.Web;
 using System.Collections;
 using System.IO;
 using System.Windows.Forms;
@@ -201,7 +201,7 @@ namespace WikiFunctions
                     if (open) res.Append("</span>");
                     open = false;
                 }
-                res.Append(HttpUtility.HtmlEncode(words[range.Start + i].ToString()));
+                res.Append(WebUtility.HtmlEncode(words[range.Start + i].ToString()));
             }
 
             if (open)
@@ -212,10 +212,10 @@ namespace WikiFunctions
 
         private static void WhitespaceDiff(StringBuilder res, Word left, Word right)
         {
-            if (left.Whitespace == right.Whitespace) res.Append(HttpUtility.HtmlEncode(right.ToString()));
+            if (left.Whitespace == right.Whitespace) res.Append(WebUtility.HtmlEncode(right.ToString()));
             else
             {
-                res.Append(HttpUtility.HtmlEncode(right.TheWord));
+                res.Append(WebUtility.HtmlEncode(right.TheWord));
                 char[] leftChars = left.Whitespace.ToCharArray();
                 char[] rightChars = right.Whitespace.ToCharArray();
 
@@ -246,7 +246,7 @@ namespace WikiFunctions
         /// <param name="line">Number of line in the RIGHT text</param>
         private void ContextLine(int line)
         {
-            string html = HttpUtility.HtmlEncode(RightLines[line]);
+            string html = WebUtility.HtmlEncode(RightLines[line]);
             Result.AppendFormat(@"<tr onclick='window.external.GoTo({0});'>
   <td class='diff-marker'> </td>
   <td class='diff-context'>", line);
@@ -270,7 +270,7 @@ namespace WikiFunctions
   <td class='diff-deletedline' onclick='window.external.GoTo({1})' ondblclick='window.external.UndoDeletion({0}, {1})'>",
                                     left, right);
 
-                Result.Append(HttpUtility.HtmlEncode(LeftLines[left]));
+                Result.Append(WebUtility.HtmlEncode(LeftLines[left]));
                 Result.Append(@"  </td>
 </tr>");
             }
@@ -282,7 +282,7 @@ namespace WikiFunctions
   <td class='diff-deletedline' onclick='window.external.GoTo({1})' ondblclick='window.external.UndoDeletion({0}, {1})'>",
                                     left, right);
 
-                Result.Append(HttpUtility.HtmlEncode(LeftLines[left]));
+                Result.Append(WebUtility.HtmlEncode(LeftLines[left]));
                 Result.Append(@"  </td>
   <td> </td>
   <td> </td>
@@ -299,7 +299,7 @@ namespace WikiFunctions
   <td>+</td>
   <td class='diff-addedline' onclick='window.external.GoTo({0})' ondblclick='window.external.UndoAddition({0})'>",
                                     line);
-                Result.Append(HttpUtility.HtmlEncode(RightLines[line]));
+                Result.Append(WebUtility.HtmlEncode(RightLines[line]));
 
                 Result.Append(@"  </td>
   <td> </td>
@@ -314,7 +314,7 @@ namespace WikiFunctions
   <td>+</td>
   <td class='diff-addedline' onclick='window.external.GoTo({0})' ondblclick='window.external.UndoAddition({0})'>",
                                     line);
-                Result.Append(HttpUtility.HtmlEncode(RightLines[line]));
+                Result.Append(WebUtility.HtmlEncode(RightLines[line]));
 
                 Result.Append(@"  </td>
 </tr>");
