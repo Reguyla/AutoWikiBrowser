@@ -235,11 +235,6 @@ namespace AWBUpdater
             /// Prints a wiki formatted bug report table
             /// </summary>
             /// <returns>String using {{AWB bug}} for reporting bugs</returns>
-            public string PrintForWiki()
-            {
-                return Print(new WikiBugFormatter());
-            }
-
             public string PrintForPhabricator()
             {
                 return Print(new PhabricatorBugFormatter());
@@ -249,10 +244,6 @@ namespace AWBUpdater
             {
                 StringBuilder errorMessage = new StringBuilder();
 
-                if (formatter.HasHeaderFooter())
-                {
-                    errorMessage.AppendLine(formatter.PrintHeader());
-                }
                 errorMessage.AppendLine(formatter.PrintLine("description", ""));
                 errorMessage.AppendLine(formatter.PrintLine("workaround", ""));
 
@@ -265,11 +256,6 @@ namespace AWBUpdater
                 if (!string.IsNullOrEmpty(ApiExtra))
                 {
                     errorMessage.AppendLine(ApiExtra);
-                }
-
-                if (formatter is WikiBugFormatter)
-                {
-                    errorMessage.AppendLine("~~~~");
                 }
 
                 if (!string.IsNullOrEmpty(Thread))
@@ -285,11 +271,6 @@ namespace AWBUpdater
                 if (!string.IsNullOrEmpty(AppendedInfo))
                 {
                     errorMessage.AppendLine(AppendedInfo);
-                }
-
-                if (formatter.HasHeaderFooter())
-                {
-                    errorMessage.AppendLine(formatter.PrintFooter());
                 }
 
                 return errorMessage.ToString();

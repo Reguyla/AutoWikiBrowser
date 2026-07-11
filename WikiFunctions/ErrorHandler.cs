@@ -282,10 +282,6 @@ namespace WikiFunctions
             {
                 StringBuilder errorMessage = new StringBuilder();
 
-                if (formatter.HasHeaderFooter())
-                {
-                    errorMessage.AppendLine(formatter.PrintHeader());
-                }
                 errorMessage.AppendLine(formatter.PrintLine("description", ""));
                 errorMessage.AppendLine(formatter.PrintLine("workaround", ""));
 
@@ -300,11 +296,6 @@ namespace WikiFunctions
                     errorMessage.AppendLine(ApiExtra);
                 }
 
-                if (formatter is WikiBugFormatter)
-                {
-                    errorMessage.AppendLine("~~~~");
-                }
-
                 if (!string.IsNullOrEmpty(Thread))
                 {
                     errorMessage.AppendLine(formatter.PrintLine("thread", Thread));
@@ -315,19 +306,9 @@ namespace WikiFunctions
                 errorMessage.AppendLine(formatter.PrintLine("net", DotNetVersion));
                 errorMessage.AppendLine(formatter.PrintLine("duplicate", Duplicate));
 
-                if (!string.IsNullOrEmpty(Site))
-                {
-                    errorMessage.AppendLine(formatter.PrintLine("site", Site));
-                }
-
                 if (!string.IsNullOrEmpty(AppendedInfo))
                 {
                     errorMessage.AppendLine(AppendedInfo);
-                }
-
-                if (formatter.HasHeaderFooter())
-                {
-                    errorMessage.AppendLine(formatter.PrintFooter());
                 }
 
                 return errorMessage.ToString();
