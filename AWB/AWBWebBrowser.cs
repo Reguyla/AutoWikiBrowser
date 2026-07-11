@@ -1,5 +1,4 @@
 ﻿using System.Windows.Forms;
-using mshtml;
 using WikiFunctions;
 
 namespace AutoWikiBrowser
@@ -83,9 +82,15 @@ namespace AutoWikiBrowser
 
         /// <summary>
         /// Returns whether there is currently any text selected
-        /// Only works if Microsoft.mshtml.dll is available
+        /// in the embedded browser.
         /// </summary>
-        /// <returns>Whether any text is currently selected</returns>
+        /// <remarks>
+        /// Browser-specific selection retrieval is delegated to
+        /// <see cref="BrowserSelectionProvider"/>.
+        /// </remarks>
+        /// <returns>
+        /// <c>true</c> if text is currently selected; otherwise, <c>false</c>.
+        /// </returns>
         private bool TextSelectedChecked()
         {
             return !string.IsNullOrEmpty(TextRange());
@@ -97,27 +102,9 @@ namespace AutoWikiBrowser
 
             return string.IsNullOrEmpty(range) ? "" : range;
         }
-
-        private string TextRange()
+                private string TextRange()
         {
-            if (Document == null)
-            {
-                return null;
-            }
-
-            if (!(Document.DomDocument is IHTMLDocument2 htmlDocument))
-            {
-                return null;
-            }
-
-            IHTMLSelectionObject currentSelection = htmlDocument.selection;
-
-            if (currentSelection == null || !(currentSelection.createRange() is IHTMLTxtRange range))
-            {
-                return null;
-            }
-
-            return range.text;
+            return BrowserSelectionProvider.GetSelectedText(Document);
         }
 
         public override void Refresh()
