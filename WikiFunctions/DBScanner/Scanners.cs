@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using WikiFunctions.Parse;
 
@@ -218,7 +219,7 @@ namespace WikiFunctions.DBScanner
     }
 
     /// <summary>
-    /// Returns whether the article has links that awb would improve/simplify
+    /// Returns whether the article has links that AWB would improve/simplify
     /// </summary>
     public class HasBadLinks : Scan
     {
@@ -226,10 +227,13 @@ namespace WikiFunctions.DBScanner
         {
             foreach (Match m in WikiRegexes.SimpleWikiLink.Matches(article.Text))
             {
-                string y = System.Web.HttpUtility.UrlDecode(m.Value.Replace("+", "%2B"));
+                string y = WebUtility.UrlDecode(
+                    m.Value.Replace("+", "%2B"));
 
                 if (m.Value != y)
+                {
                     return false;
+                }
             }
 
             return true;
