@@ -3143,6 +3143,13 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 // remove the duplicate link count added to the end above
                 strLink = Regex.Replace(strLink, @" \(\d+\)$", "");
 
+                if (string.IsNullOrEmpty(strLink))
+                {
+                    txtEdit.ResetFind();
+                    btnRemove.Enabled = false;
+                    return;
+                }
+
                 // perform case sensitive search, but make search on first character of link case insensitive
                 // as first character may have been converted to upper case
                 txtEdit.Find("\\[\\[(?i)" + Regex.Escape(strLink[0].ToString()) + @"(?-i)" + Regex.Escape(strLink.Remove(0, 1)) + "(\\|.*?)?\\]\\]", true, true, TheArticle.Name);
