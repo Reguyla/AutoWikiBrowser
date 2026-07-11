@@ -33,7 +33,6 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Diagnostics;
 using System.Globalization;
-using System.Web;
 using System.Net;
 using System.Linq;
 using WikiFunctions;
@@ -5224,7 +5223,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             {
                 if (EditBoxTab.SelectedTab == tpHistory && pageTitle != null)
                 {
-                    string name = HttpUtility.UrlEncode(pageTitle);
+                    string name = WebUtility.UrlEncode(pageTitle);
                     if (webBrowserHistory.Url != new Uri(Variables.URLIndex + "?title=" + name
                                                          + "&action=history&printable=yes") && !string.IsNullOrEmpty(pageTitle)
                        )
@@ -5255,7 +5254,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             {
                 if (EditBoxTab.SelectedTab == tpLinks && title != null)
                 {
-                    title = HttpUtility.UrlEncode(title);
+                    title = WebUtility.UrlEncode(title);
                     if (webBrowserLinks.Url !=
                         new Uri(Variables.URLIndex + "?title=Special:WhatLinksHere/" + title +
                                 "&printable=yes") && !string.IsNullOrEmpty(title))
