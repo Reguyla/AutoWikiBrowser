@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Web;
 using System.Xml;
 using System.IO;
 using WikiFunctions.API;
@@ -111,7 +110,7 @@ namespace WikiFunctions.Lists.Providers
                             if (!r.IsStartElement()) continue;
                             if (!r.MoveToFirstAttribute())
                                 throw new FormatException("Malformed element '" + r.Name + "' in <query-continue>");
-                            postfix += "&" + r.Name + "=" + HttpUtility.UrlEncode(r.Value);
+                            postfix += $"&{r.Name}={WebUtility.UrlEncode(r.Value)}";
                         }
                     }
                     else if (PageElements.Contains(xml.Name) && xml.IsStartElement())
