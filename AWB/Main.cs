@@ -3174,15 +3174,6 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             txtEdit.ResetFind();
 
-            if (sender is RichTextBox)
-            {
-                RichTextBox rtb = (RichTextBox)sender;
-
-                // disable TextChanged temporarily under Mono otherwise get infinite loop
-private void ResetFind(object sender, EventArgs e)
-        {
-            txtEdit.ResetFind();
-
             if (sender is RichTextBox richTextBox)
             {
                 bool detachTextChanged = Globals.UsingMono;
