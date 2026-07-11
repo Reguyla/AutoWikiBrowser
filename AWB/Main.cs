@@ -1376,12 +1376,16 @@ namespace AutoWikiBrowser
         /// <returns></returns>
         private void HighlightSyntax()
         {
-            // temporarily disable TextChanged firing to help performance of this function
             txtEdit.TextChanged -= txtEdit_TextChanged;
 
-            txtEdit.HighlightSyntax();
-
-            txtEdit.TextChanged += txtEdit_TextChanged;
+            try
+            {
+                txtEdit.HighlightSyntax();
+            }
+            finally
+            {
+                txtEdit.TextChanged += txtEdit_TextChanged;
+            }
         }
 
         /// <summary>
