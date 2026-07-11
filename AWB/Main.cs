@@ -2072,7 +2072,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         }
 
         /// <summary>
-        /// 
+        /// Restores the main UI after page processing completes.
         /// </summary>
         private void GuiUpdateAfterProcessing()
         {
@@ -2088,7 +2088,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         }
 
         /// <summary>
-        /// 
+        /// Validates the current page and begins the save operation.
         /// </summary>
         private void Save()
         {
@@ -2239,9 +2239,11 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             }
 
             /// <summary>
-            /// 
+            /// Reverses an added line in the displayed diff.
             /// </summary>
-            /// <param name="right"></param>
+            /// <param name="right">
+            /// The right-side diff line index to restore.
+            /// </param>
             public void UndoAddition(int right)
             {
                 _owner.UndoChangeGeneric(DiffChangeMode.Addition, 0, right);
