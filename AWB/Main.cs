@@ -4223,6 +4223,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
                 MatchCollection m = RegexDates.Matches(articleTextLocal);
 
+                if (m.Count == 0)
+                {
+                    MessageBox.Show(
+                        "No four-digit year was found in the article text.",
+                        "Birth and death categories",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+
+                    return;
+                }
+
                 //find first dates
                 string births = "", deaths = "";
 
