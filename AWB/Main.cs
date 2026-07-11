@@ -2208,10 +2208,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// This class serves as a proxy between the main window and WebBrowser, isolating the former
         /// from malicious site JS calls of window.external.
         /// </summary>
-        [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-        public class JsAdapter
+        [System.Runtime.InteropServices.ComVisible(true)]
+        public sealed class JsAdapter
         {
-            readonly MainForm _owner;
+            private readonly MainForm _owner;
 
             internal JsAdapter(MainForm owner)
             {
