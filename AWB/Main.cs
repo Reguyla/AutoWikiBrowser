@@ -1475,24 +1475,28 @@ namespace AutoWikiBrowser
                     SkipPage("Non-existent page");
                     return false;
                 }
+
                 if (TheSession.Editor.Page.Exists && radSkipExistent.Checked)
                 {
                     SkipPage("Existing page");
                     return false;
                 }
 
-                if (!preParseModeToolStripMenuItem.Checked && TheSession.User.HasMessages)
+                if (!preParseModeToolStripMenuItem.Checked &&
+                    TheSession.User.HasMessages)
                 {
                     WeHaveNewMessages();
                     return false;
                 }
+
+                NudgeTimer.Reset();
+                return true;
             }
             catch (Exception ex)
             {
                 ErrorHandler.HandleException(ex);
+                return false;
             }
-            NudgeTimer.Reset();
-            return true;
         }
 
         private void PageSaved(AsyncApiEdit sender, SaveInfo saveInfo)
