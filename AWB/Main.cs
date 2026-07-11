@@ -1937,16 +1937,22 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 {
                     Tools.WriteTextFile(diffHtml, "Diff.html", false);
                 }
-                else if (webBrowser.Document == null)
-                {
-                    Tools.WriteDebug("GetDiff", "GetDiff called but webBrowser.Document null");
-                    return;
-                }
                 else
                 {
-                    webBrowser.Document.OpenNew(false);
-                    webBrowser.Document.MouseMove -= Document_MouseMove;
-                    webBrowser.Document.Write(diffHtml);
+                    HtmlDocument document = webBrowser.Document;
+
+                    if (document == null)
+                    {
+                        Tools.WriteDebug(
+                            "GetDiff",
+                            "GetDiff called but webBrowser.Document was null.");
+
+                        return;
+                    }
+
+                    document.OpenNew(false);
+                    document.MouseMove -= Document_MouseMove;
+                    document.Write(diffHtml);
                 }
 
                 txtEdit.Focus();
