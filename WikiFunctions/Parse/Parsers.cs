@@ -20,8 +20,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace WikiFunctions.Parse
 {
@@ -64,7 +64,8 @@ namespace WikiFunctions.Parse
             RegexUnicode.Add(new Regex("&#((?:277|119|84|x1D|x100)[A-Z0-9a-z]{2,3});"), "&amp;#$1;");
             RegexUnicode.Add(new Regex("&#(x12[A-Za-z0-9]{3}|65536|769);"), "&amp;#$1;");
 
-            // Can't change 5-digit Hex strings, get broken by HttpUtility.HtmlDecode
+            // Preserve 5-digit hexadecimal entities because WebUtility.HtmlDecode
+            // does not handle them correctly for this normalization path.
             RegexUnicode.Add(new Regex("&#(x[A-Fa-f0-9]{5});"), "&amp;#$1;");
 
             //interfere with wiki syntax
@@ -648,7 +649,7 @@ namespace WikiFunctions.Parse
             string s = CanonicalizeTitleRaw(title);
             if (Variables.UnderscoredTitles.Contains(Tools.TurnFirstToUpper(s)))
             {
-                return HttpUtility.UrlDecode(title.Replace("+", "%2B")).Trim(new[] { '_' });
+                return WebUtility.UrlDecode(title.Replace("+", "%2B")).Trim(new[] { '_' });
             }
             return s;
         }
@@ -699,7 +700,7 @@ namespace WikiFunctions.Parse
         /// <param name="trim">whether whitespace should be trimmed</param>
         public static string CanonicalizeTitleRaw(string title, bool trim)
         {
-            title = HttpUtility.UrlDecode(title.Replace("+", "%2B").Replace('_', ' '));
+            title = WebUtility.UrlDecode(title.Replace("+", "%2B").Replace('_', ' '));
             return trim ? title.Trim() : title;
         }
 
@@ -1077,9 +1078,10 @@ namespace WikiFunctions.Parse
 
             articleText = RegexUnicode.Aggregate(articleText, (current, k) => k.Key.Replace(current, k.Value));
 
-            // this seems to support 5-character HTML hex entities e.g. U+FB17: ARMENIAN SMALL LIGATURE MEN XEH / &#xFB17; supported OK
-            // But 5-character e.g. &#x10A80; is not supported, gets broken as leading 1 removed
-            articleText = HttpUtility.HtmlDecode(articleText);
+            // This supports some 5-character HTML hex entities, such as
+            // U+FB17 ARMENIAN SMALL LIGATURE MEN XEH (&#xFB17;).
+            // Longer values such as &#x10A80; are not handled correctly by this path.
+            articleText = WebUtility.HtmlDecode(articleText);
 
             return articleText;
         }
@@ -1143,7 +1145,9 @@ namespace WikiFunctions.Parse
                         + Variables.NamespacesCaseInsensitive[Namespace.File], "", RegexOptions.IgnoreCase));
 
             // make image name first-letter case insensitive
-            image = Tools.FirstLetterCaseInsensitive(HttpUtility.UrlDecode(Regex.Escape(image).Replace("\\ ", "[ _]")));
+            image = Tools.FirstLetterCaseInsensitive(
+                WebUtility.UrlDecode(
+                    Regex.Escape(image).Replace("\\ ", "[ _]")));
 
             articleText = FixImages(articleText);
 
@@ -1715,14 +1719,22 @@ namespace WikiFunctions.Parse
         /// <returns></returns>
         public static Dictionary<string, string> ExtractCOinS(string text)
         {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            // match only the COinS section of the text
+            Dictionary<string, string> data =
+                new Dictionary<string, string>();
+
+            // Match only the COinS section of the text.
             text = coinsR.Match(text).Groups[1].Value;
 
-            foreach(Match m in coinsParam.Matches(text))
+            foreach (Match m in coinsParam.Matches(text))
             {
-                if (!data.ContainsKey(m.Groups[1].Value))
-                    data.Add(m.Groups[1].Value, HttpUtility.UrlDecode(m.Groups[2].Value));
+                string key = m.Groups[1].Value;
+
+                if (!data.ContainsKey(key))
+                {
+                    data.Add(
+                        key,
+                        WebUtility.UrlDecode(m.Groups[2].Value));
+                }
             }
 
             return data;
