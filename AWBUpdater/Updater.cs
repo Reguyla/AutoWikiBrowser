@@ -24,22 +24,21 @@ using System.IO;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using ICSharpCode.SharpZipLib.Zip;
 
 using System.Net;
 using System.Web;
-using System.Web.Script.Serialization;
 
 namespace AWBUpdater
 {
     internal sealed partial class Updater : Form
     {
+        private UpdateStatus _updateStatus = UpdateStatus.None;
         private readonly string _awbDirectory = "", _tempDirectory = "";
         private string _zipName = "";
 
         private IWebProxy _proxy;
-
-        private UpdateStatus _updateStatus = UpdateStatus.None;
 
         private const string VERSION_URL =
             "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSON&action=raw";
@@ -233,7 +232,7 @@ namespace AWBUpdater
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 |
                                                         SecurityProtocolType.Tls13;
 
-                HttpWebRequest rq = (HttpWebRequest) WebRequest.Create(VERSION_URL);
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(VERSION_URL);
 
                 rq.Proxy = _proxy;
 
@@ -241,7 +240,7 @@ namespace AWBUpdater
                     Assembly.GetExecutingAssembly().GetName().Version,
                     Environment.OSVersion.VersionString, Environment.Version);
 
-                HttpWebResponse response = (HttpWebResponse) rq.GetResponse();
+                HttpWebResponse response = (HttpWebResponse)rq.GetResponse();
 
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader sr = new StreamReader(stream, Encoding.UTF8))
@@ -264,8 +263,19 @@ namespace AWBUpdater
                 FileVersionInfo awbVersionInfo =
                     FileVersionInfo.GetVersionInfo(Path.Combine(_awbDirectory, "AutoWikiBrowser.exe"));
 
-                JavaScriptSerializer jss = new JavaScriptSerializer();
-                var updaterData = jss.Deserialize<RootObject>(json);
+                RootObject updaterData =
+                    System.Text.Json.JsonSerializer.Deserialize<RootObject>(
+                        json,
+                        new System.Text.Json.JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                if (updaterData == null)
+                {
+                    throw new InvalidDataException(
+                        "The version information response did not contain valid version data.");
+                }
 
                 string versionToUpdateAWBTo = "";
 
@@ -337,7 +347,7 @@ namespace AWBUpdater
         /// </summary>
         private void GetZipFromInternet()
         {
-            WebClient client = new WebClient {Proxy = _proxy};
+            WebClient client = new WebClient { Proxy = _proxy };
 
             if (!string.IsNullOrEmpty(_zipName))
             {
@@ -357,7 +367,7 @@ namespace AWBUpdater
             try
             {
                 TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                var unixTime = (int) t.TotalSeconds;
+                var unixTime = (int)t.TotalSeconds;
                 var url = string.Format(
                     "{0}?r={1}&ts={2}",
                     fileUrl,
@@ -663,7 +673,8 @@ namespace AWBUpdater
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            if ((_updateStatus & (UpdateStatus.OptionalUpdate | UpdateStatus.RequiredUpdate)) != 0)
+            if ((_updateStatus &
+                 (UpdateStatus.OptionalUpdate | UpdateStatus.RequiredUpdate)) != 0)
             {
                 StartAwb();
             }
@@ -673,7 +684,7 @@ namespace AWBUpdater
     }
 
     /// <summary>
-    /// This exception stops processing and prepared the updater for exit
+    /// This exception stops processing and prepares the updater for exit
     /// </summary>
     [Serializable]
     public class AbortException : Exception
@@ -687,12 +698,13 @@ namespace AWBUpdater
         {
         }
 
-        public AbortException(string message, Exception innerException) :
-            base(message, innerException)
+        public AbortException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 
-        protected AbortException(System.Runtime.Serialization.SerializationInfo info,
+        protected AbortException(
+            System.Runtime.Serialization.SerializationInfo info,
             System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         {

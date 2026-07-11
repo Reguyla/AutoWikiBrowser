@@ -11,10 +11,12 @@
   <ItemGroup>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
-	<Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="globe.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.6" />
   </ItemGroup>
 	<Target Name="CopyUpdaterToAwbOutput" AfterTargets="Build">
 		<PropertyGroup>
@@ -23,8 +25,6 @@
 
 		<MakeDir Directories="$(AwbOutputDirectory)" />
 
-		<Copy
-		  SourceFiles="$(TargetPath)"
-		  DestinationFolder="$(AwbOutputDirectory)" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AwbOutputDirectory)" />
 	</Target>
 </Project>
