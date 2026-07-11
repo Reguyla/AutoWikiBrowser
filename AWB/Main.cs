@@ -3426,19 +3426,20 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             }
             catch (WebException ex)
             {
-                // Check for HTTP 401 error.
-                var resp = (HttpWebResponse)ex.Response;
-                if (resp == null) throw;
-                switch (resp.StatusCode)
+                if (!(ex.Response is HttpWebResponse response) ||
+                    response.StatusCode != HttpStatusCode.Unauthorized)
                 {
-                    case HttpStatusCode.Unauthorized /*401*/:
-                        ShowLogin();
-
-                        // Reload project.
-                        Variables.SetProject(code, project, customProject, protocol);
-
-                        break;
+                    throw;
                 }
+
+                ShowLogin();
+
+                // Retry project loading after authentication.
+                Variables.SetProject(
+                    code,
+                    project,
+                    customProject,
+                    protocol);
             }
             catch (UriFormatException)
             {
