@@ -3611,17 +3611,27 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             btnFind.Enabled = txtFind.TextLength > 0;
 
             // if there are find matches, color the Find button yellow
-            if (btnFind.Enabled && txtEdit.FindAll(txtFind.Text, chkFindRegex.Checked, chkFindCaseSensitive.Checked, TheArticle.Name).Any())
+            if (btnFind.Enabled &&
+                TheArticle != null &&
+                txtEdit.FindAll(
+                    txtFind.Text,
+                    chkFindRegex.Checked,
+                    chkFindCaseSensitive.Checked,
+                    TheArticle.Name).Any())
+            {
                 btnFind.BackColor = Color.Yellow;
+            }
             else
+            {
                 btnFind.BackColor = SystemColors.ButtonFace;
+            }
         }
 
-        #endregion
+            #endregion
 
-        #region Timers
+            #region Timers
 
-        int _restartDelay = 5, _startInSeconds = 5;
+            int _restartDelay = 5, _startInSeconds = 5;
         private void DelayedRestart(object sender, EventArgs e)
         {
             StopDelayedAutoSaveTimer();
