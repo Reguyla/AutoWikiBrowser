@@ -28,7 +28,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using WikiFunctions.API;
@@ -1783,10 +1782,12 @@ Message: {2}
         /// <summary>
         /// Replaces spaces with underscores for article title names
         /// </summary>
-        /// <param name="title"></param>
+        /// <param name="title">Article title to encode</param>
         public static string WikiEncode(string title)
         {
-            return HttpUtility.UrlEncode(title.Replace(' ', '_')).Replace("%2f", "/").Replace("%3a", ":");
+            return WebUtility.UrlEncode(title.Replace(' ', '_'))
+                .Replace("%2F", "/")
+                .Replace("%3A", ":");
         }
 
         // Not Covered
@@ -1796,7 +1797,8 @@ Message: {2}
         /// <param name="title">Page title to decode</param>
         public static string WikiDecode(string title)
         {
-            return HttpUtility.UrlDecode(title.Replace("+", "%2B")).Replace('_', ' ');
+            return WebUtility.UrlDecode(title.Replace("+", "%2B"))
+                .Replace('_', ' ');
         }
 
         // Covered by ToolsTests.RemoveHashFromPageTitle()
@@ -1850,10 +1852,10 @@ Message: {2}
                     else
                     {
                         string expandUri = Variables.URLApi + "?action=expandtemplates&prop=wikitext&format=json&title=" +
-                            WikiEncode(articleTitle) + "&text=" + HttpUtility.UrlEncode(call);
+                            WikiEncode(articleTitle) + "&text=" + WebUtility.UrlEncode(call);
                         try
                         {
-                            result = HttpUtility.HtmlDecode(
+                            result = WebUtility.HtmlDecode(
                                 JObject.Parse(GetHTML(expandUri))["expandtemplates"]["wikitext"].ToString()
                             );
                         }
@@ -2214,12 +2216,19 @@ Message: {2}
         public static string BuildPostDataString(NameValueCollection postvars)
         {
             StringBuilder ret = new StringBuilder();
+
             for (int i = 0; i < postvars.Keys.Count; i++)
             {
                 if (i > 0)
+                {
                     ret.Append("&");
+                }
 
-                ret.Append(postvars.Keys[i] + "=" + HttpUtility.UrlEncode(postvars[postvars.Keys[i]]));
+                string key = postvars.Keys[i];
+
+                ret.Append(key);
+                ret.Append("=");
+                ret.Append(WebUtility.UrlEncode(postvars[key]));
             }
 
             return ret.ToString();
