@@ -138,8 +138,15 @@ namespace AutoWikiBrowser.Plugins
                 FailedPlugins.Add(name, version);
         }
 
-        private static readonly List<string> NotPlugins = new List<string>(new[]
-            {"DotNetWikiBot", "Diff", "WikiFunctions", "Newtonsoft.Json", "Microsoft.mshtml"});
+        private static readonly HashSet<string> NotPlugins =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "DotNetWikiBot",
+                "Diff",
+                "WikiFunctions",
+                "Newtonsoft.Json",
+                "Microsoft.mshtml"
+            };
 
         /// <summary>
         /// Loads all the plugins from the directory where AWB resides
