@@ -17,9 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -29,7 +31,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 using WikiFunctions.API;
 using WikiFunctions.Parse;
 using WikiFunctions.Plugin;
@@ -1679,44 +1680,75 @@ Message: {2}
         }
 
         private static string WineBrowserPath;
+
         /// <summary>
-        /// Error suppressed URL opener in default browser (Windows) or Firefox/Chromium/Konqueror for Wine
+        /// Opens a URL in the default browser on Windows, or in a detected
+        /// Firefox, Chromium, or Konqueror browser when running under Wine.
+        /// Any launch failure is logged and otherwise suppressed.
         /// </summary>
         public static void OpenURLInBrowser(string url)
         {
-            // For Wine use attempt to dynamically determine available browser, caching result
+            if (string.IsNullOrWhiteSpace(url) || Globals.UnitTestMode)
+            {
+                return;
+            }
+
+            // For Wine, attempt to determine an available browser and cache the result.
             if (WineBrowserPath == null)
             {
                 if (File.Exists(@"Z:\usr\bin\firefox"))
+                {
                     WineBrowserPath = @"Z:\usr\bin\firefox";
+                }
                 else if (File.Exists("/usr/bin/firefox"))
+                {
                     WineBrowserPath = "/usr/bin/firefox";
+                }
                 else if (File.Exists("/usr/bin/chromium-browser"))
+                {
                     WineBrowserPath = "/usr/bin/chromium-browser";
+                }
                 else if (File.Exists("/usr/bin/konqueror"))
+                {
                     WineBrowserPath = "/usr/bin/konqueror";
-                else WineBrowserPath = ""; // Windows, or Wine and none of these browsers available
+                }
+                else
+                {
+                    // Windows, or Wine without a supported browser.
+                    WineBrowserPath = string.Empty;
+                }
 
                 WriteDebug("WineBrowserPath", WineBrowserPath);
             }
+
             try
             {
-                if (!Globals.UnitTestMode)
+                if (WineBrowserPath.Length > 0)
                 {
-                    if (WineBrowserPath.Length > 0) // Wine
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                    Process.Start(
+                        new ProcessStartInfo
                         {
-                            UseShellExecute = true,
                             FileName = WineBrowserPath,
-                            Arguments = url
+                            Arguments = "\"" + url + "\"",
+                            UseShellExecute = true
                         });
-                    }
-                    else // Windows
-                        System.Diagnostics.Process.Start(url);
+                }
+                else
+                {
+                    Process.Start(
+                        new ProcessStartInfo
+                        {
+                            FileName = url,
+                            UseShellExecute = true
+                        });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                WriteDebug(
+                    "OpenURLInBrowser",
+                    "Unable to open URL: " + ex.Message);
+            }
         }
 
         /// <summary>
