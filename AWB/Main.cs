@@ -1947,14 +1947,15 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// <param name="e">E.</param>
         private void Document_MouseMove(object sender, HtmlElementEventArgs e)
         {
-            HtmlDocument thisDoc = (HtmlDocument)sender;
-            if (thisDoc != null)
+            if (!(sender is HtmlDocument document))
             {
-                HtmlElement curElement = thisDoc.GetElementFromPoint(e.ClientMousePosition);
-                if (curElement != null && curElement.TagName == "A")
-                {
-                    webBrowserMouseOverUrl = curElement.GetAttribute("href");
-                }
+                return;
+            }
+
+            if (document.GetElementFromPoint(e.ClientMousePosition) is HtmlElement currentElement &&
+                currentElement.TagName == "A")
+            {
+                webBrowserMouseOverUrl = currentElement.GetAttribute("href");
             }
         }
 
