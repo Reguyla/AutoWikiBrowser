@@ -2047,23 +2047,26 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         private void PreviewComplete(AsyncApiEdit sender, string result)
         {
             LastArticle = txtEdit.Text;
-
             Skippable = false;
 
-            if (webBrowser.Document != null)
-            {
-                webBrowser.Document.OpenNew(false);
-                webBrowser.Document.Write("<html><head>"
-                                          + sender.HtmlHeaders
-                                          + "</head><body style=\"background:white; margin:10px; text-align:left;\">"
-                                          + result
-                                          + "</body></html>"
-                                         );
+            HtmlDocument document = webBrowser.Document;
 
-                webBrowser.Document.MouseMove += Document_MouseMove;
+            if (document != null)
+            {
+                document.OpenNew(false);
+
+                document.Write(
+                    "<html><head>" +
+                    sender.HtmlHeaders +
+                    "</head><body style=\"background:white; margin:10px; text-align:left;\">" +
+                    result +
+                    "</body></html>");
+
+                document.MouseMove -= Document_MouseMove;
+                document.MouseMove += Document_MouseMove;
             }
 
-            StatusLabelText = "";
+            StatusLabelText = string.Empty;
 
             GuiUpdateAfterProcessing();
         }
