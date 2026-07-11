@@ -505,16 +505,37 @@ namespace AWBUpdater
             }
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private static void OpenUrl(string url)
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+        }
+
+        private void linkLabel1_LinkClicked(
+            object sender,
+            LinkLabelLinkClickedEventArgs e)
         {
             linkLabel1.LinkVisited = true;
+
             try
             {
-                System.Diagnostics.Process.Start(
+                OpenUrl(
                     "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
             }
-            catch
+            catch (Exception ex)
             {
+                MessageBox.Show(
+                    "The Phabricator page could not be opened." +
+                    Environment.NewLine +
+                    Environment.NewLine +
+                    ex.Message,
+                    "Unable to open browser",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
             }
         }
     }
