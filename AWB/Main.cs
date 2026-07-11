@@ -3179,19 +3179,38 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 RichTextBox rtb = (RichTextBox)sender;
 
                 // disable TextChanged temporarily under Mono otherwise get infinite loop
-                if (Globals.UsingMono)
+private void ResetFind(object sender, EventArgs e)
+        {
+            txtEdit.ResetFind();
+
+            if (sender is RichTextBox richTextBox)
+            {
+                bool detachTextChanged = Globals.UsingMono;
+
+                if (detachTextChanged)
+                {
                     txtFind.TextChanged -= ResetFind;
+                }
 
-                rtb.ResetFormatting();
-
-                if (Globals.UsingMono)
-                    txtFind.TextChanged += ResetFind;
+                try
+                {
+                    richTextBox.ResetFormatting();
+                }
+                finally
+                {
+                    if (detachTextChanged)
+                    {
+                        txtFind.TextChanged += ResetFind;
+                    }
+                }
             }
 
             btnFind.Enabled = txtFind.TextLength > 0;
 
             if (!btnFind.Enabled)
+            {
                 btnFind.BackColor = SystemColors.ButtonFace;
+            }
         }
 
         private void txtEdit_TextChanged(object sender, EventArgs e)
