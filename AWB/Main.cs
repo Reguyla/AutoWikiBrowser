@@ -2583,11 +2583,18 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void CloseDownAWB()
         {
+            if (ShuttingDown)
+            {
+                return;
+            }
+
             ShuttingDown = true;
 
             // TheSession can be null if AWB encounters network problems on startup
             if (TheSession != null)
+            {
                 TheSession.Editor.Abort();
+            }
 
             SaveRecentSettingsList();
             UsageStats.Do(true);
