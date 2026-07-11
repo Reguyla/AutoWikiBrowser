@@ -165,24 +165,43 @@ namespace AWBUpdater
                 FormatException(ex, stackTrace, ExceptionKind.TopLevel);
                 StackTrace = stackTrace.ToString();
 
-                if (AppendToErrorHandler != null)
+                ErrorHandlerAddition handlers = AppendToErrorHandler;
+
+                if (handlers != null)
                 {
                     StringBuilder append = new StringBuilder();
-                    foreach (Delegate d in AppendToErrorHandler.GetInvocationList())
+
+                    foreach (ErrorHandlerAddition handler in handlers.GetInvocationList())
                     {
-                        string retval = d.DynamicInvoke().ToString();
-                        if (!string.IsNullOrEmpty(retval))
-                            append.AppendLine(retval);
+                        try
+                        {
+                            string value = handler();
+
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                append.AppendLine(value);
+                            }
+                        }
+                        catch
+                        {
+                            // A diagnostic extension must not prevent the main
+                            // error report from being generated or displayed.
+                        }
                     }
+
                     AppendedInfo = append.ToString();
                 }
 
                 AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
-                Version = string.Format("{0} ({1}), {2} ({3})", Application.ProductName, Application.ProductVersion,
-                    hostingApp.Name, hostingApp.Version);
+
+                Version = string.Format(
+                    "{0} ({1}), {2} ({3})",
+                    Application.ProductName,
+                    Application.ProductVersion,
+                    hostingApp.Name,
+                    hostingApp.Version);
 
                 DotNetVersion = Environment.Version.ToString();
-            }
 
             /// <summary>
             /// Prints a wiki formatted bug report table
