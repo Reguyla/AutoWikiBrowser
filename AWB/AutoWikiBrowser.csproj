@@ -50,9 +50,7 @@
 		<Reference Include="System.Configuration" />
 	</ItemGroup>
   <ItemGroup>
-    <Compile Update="AWBWebBrowser.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="AWBWebBrowser.cs" />
     <Compile Update="NudgeTimer.cs">
       <SubType>Component</SubType>
     </Compile>
