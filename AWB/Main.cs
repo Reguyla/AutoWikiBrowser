@@ -3622,6 +3622,8 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         private void StartDelayedRestartTimer(int delay)
         {
             _startInSeconds = delay;
+
+            Ticker -= DelayedRestart;
             Ticker += DelayedRestart;
         }
 
@@ -3644,6 +3646,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void StartDelayedAutoSaveTimer()
         {
+            Ticker -= DelayedAutoSave;
             Ticker += DelayedAutoSave;
         }
 
