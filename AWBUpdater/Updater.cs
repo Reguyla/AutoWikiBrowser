@@ -687,8 +687,7 @@ namespace AWBUpdater
     /// <summary>
     /// This exception stops processing and prepares the updater for exit
     /// </summary>
-    [Serializable]
-    public class AbortException : Exception
+      public class AbortException : Exception
     {
         public AbortException()
         {
@@ -701,13 +700,6 @@ namespace AWBUpdater
 
         public AbortException(string message, Exception innerException)
             : base(message, innerException)
-        {
-        }
-
-        protected AbortException(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
-            : base(info, context)
         {
         }
     }
