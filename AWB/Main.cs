@@ -4706,24 +4706,44 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void RegexTyposComplete(BackgroundRequest req)
         {
-            if (InvokeRequired)
+            if (IsDisposed || Disposing)
             {
-                Invoke(new BackgroundRequestComplete(RegexTyposComplete), req);
                 return;
             }
 
-            chkRegExTypo.Checked = chkSkipIfNoRegexTypo.Enabled = RegexTypos.TyposLoaded;
+            if (InvokeRequired)
+            {
+                BeginInvoke(
+                    new BackgroundRequestComplete(RegexTyposComplete),
+                    req);
+
+                return;
+            }
+
+            chkRegExTypo.Checked =
+                chkSkipIfNoRegexTypo.Enabled =
+                    RegexTypos.TyposLoaded;
 
             if (RegexTypos.TyposLoaded)
             {
-                StatusLabelText = RegexTypos.TypoCount + " typos loaded";
-                if (!EditBoxTab.TabPages.Contains(tpTypos)) EditBoxTab.TabPages.Add(tpTypos);
+                StatusLabelText =
+                    RegexTypos.TypoCount + " typos loaded";
+
+                if (!EditBoxTab.TabPages.Contains(tpTypos))
+                {
+                    EditBoxTab.TabPages.Add(tpTypos);
+                }
+
                 ResetTypoStats();
             }
             else
             {
                 RegexTypos = null;
-                if (EditBoxTab.TabPages.Contains(tpTypos)) EditBoxTab.TabPages.Remove(tpTypos);
+
+                if (EditBoxTab.TabPages.Contains(tpTypos))
+                {
+                    EditBoxTab.TabPages.Remove(tpTypos);
+                }
             }
 
             _loadingTypos = false;
