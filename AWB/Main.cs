@@ -6361,13 +6361,25 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void HighlightAllFind()
         {
-            if (string.IsNullOrEmpty(txtFind.Text))
+            if (string.IsNullOrEmpty(txtFind.Text) ||
+                TheArticle == null)
+            {
                 return;
+            }
 
-            Dictionary<int, int> found = txtEdit.FindAll(txtFind.Text, chkFindRegex.Checked, chkFindCaseSensitive.Checked, TheArticle.Name);
+            Dictionary<int, int> found =
+                txtEdit.FindAll(
+                    txtFind.Text,
+                    chkFindRegex.Checked,
+                    chkFindCaseSensitive.Checked,
+                    TheArticle.Name);
 
-            foreach (KeyValuePair<int, int> a in found)
-                YellowSelection(a.Key, a.Value);
+            foreach (KeyValuePair<int, int> match in found)
+            {
+                YellowSelection(
+                    match.Key,
+                    match.Value);
+            }
 
             txtEdit.SetEditBoxSelection(0, 0);
             txtEdit.Select(0, 0);
