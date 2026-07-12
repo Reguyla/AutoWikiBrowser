@@ -5667,12 +5667,30 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private string ProcessHTMLForDisplay(string linksHtml)
         {
-            if (linksHtml.Contains(StartMark) && linksHtml.Contains(EndMark))
-                linksHtml = Tools.StringBetween(linksHtml, StartMark, EndMark);
+            if (linksHtml.Contains(StartMark) &&
+                linksHtml.Contains(EndMark))
+            {
+                linksHtml =
+                    Tools.StringBetween(
+                        linksHtml,
+                        StartMark,
+                        EndMark);
+            }
 
-            linksHtml = linksHtml.Replace("<A ", "<a target=\"_blank\" ");
-            linksHtml = linksHtml.Replace("<FORM ", "<form target=\"_blank\" ");
-            return "<h3>" + TheArticle.Name + "</h3>" + linksHtml;
+            linksHtml =
+                linksHtml.Replace(
+                    "<A ",
+                    "<a target=\"_blank\" ");
+
+            linksHtml =
+                linksHtml.Replace(
+                    "<FORM ",
+                    "<form target=\"_blank\" ");
+
+            string articleName =
+                TheArticle?.Name ?? string.Empty;
+
+            return "<h3>" + articleName + "</h3>" + linksHtml;
         }
 
         private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
