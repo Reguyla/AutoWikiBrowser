@@ -4929,14 +4929,26 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void txtImageReplace_Leave(object sender, EventArgs e)
         {
-            txtImageReplace.Text = Regex.Replace(txtImageReplace.Text, "^"
-                                                 + Variables.Namespaces[Namespace.File], "", RegexOptions.IgnoreCase);
+            string fileNamespace =
+                Regex.Escape(Variables.Namespaces[Namespace.File]);
+
+            txtImageReplace.Text = Regex.Replace(
+                txtImageReplace.Text,
+                "^" + fileNamespace,
+                string.Empty,
+                RegexOptions.IgnoreCase);
         }
 
         private void txtImageWith_Leave(object sender, EventArgs e)
         {
-            txtImageWith.Text = Regex.Replace(txtImageWith.Text, "^"
-                                              + Variables.Namespaces[Namespace.File], "", RegexOptions.IgnoreCase);
+            string fileNamespace =
+                Regex.Escape(Variables.Namespaces[Namespace.File]);
+
+            txtImageWith.Text = Regex.Replace(
+                txtImageWith.Text,
+                "^" + fileNamespace,
+                string.Empty,
+                RegexOptions.IgnoreCase);
         }
 
         private void SetProgressBar(object sender, EventArgs e)
