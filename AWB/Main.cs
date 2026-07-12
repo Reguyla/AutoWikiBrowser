@@ -4693,7 +4693,14 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 {
                     string s = Variables.RetfPath;
 
-                    if (!s.StartsWith("http"))
+                    bool isHttpUrl =
+                        s.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                        s.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+
+                    if (!isHttpUrl)
+                    {
+                        s = Variables.NonPrettifiedURL(s);
+                    }
                     {
                         // TODO: Try to use TheSession.Site.ArticleUrl for prettier URL
                         s = Variables.NonPrettifiedURL(s);
