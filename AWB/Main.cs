@@ -5567,24 +5567,43 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             try
             {
-                if (EditBoxTab.SelectedTab == tpHistory && pageTitle != null)
+                if (EditBoxTab.SelectedTab != tpHistory ||
+                    string.IsNullOrEmpty(pageTitle))
                 {
-                    string name = WebUtility.UrlEncode(pageTitle);
-                    if (webBrowserHistory.Url != new Uri(Variables.URLIndex + "?title=" + name
-                                                         + "&action=history&printable=yes") && !string.IsNullOrEmpty(pageTitle)
-                       )
-                        webBrowserHistory.Navigate(Variables.URLIndex + "?title=" + name
-                                                   + "&action=history&printable=yes");
-                }
-                else
                     webBrowserHistory.Navigate("about:blank");
+                    return;
+                }
+
+                string encodedTitle = WebUtility.UrlEncode(pageTitle);
+
+                string url =
+                    Variables.URLIndex +
+                    "?title=" +
+                    encodedTitle +
+                    "&action=history&printable=yes";
+
+                Uri targetUri = new Uri(url);
+
+                if (webBrowserHistory.Url != targetUri)
+                {
+                    webBrowserHistory.Navigate(url);
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                Tools.WriteDebug(
+                    "NewHistory",
+                    "Unable to load page history: " + ex.Message);
+
                 webBrowserHistory.Navigate("about:blank");
 
-                if (webBrowserHistory.Document != null)
-                    webBrowserHistory.Document.Write("<html><body><p>Unable to load history</p></body></html>");
+                HtmlDocument document = webBrowserHistory.Document;
+
+                if (document != null)
+                {
+                    document.Write(
+                        "<html><body><p>Unable to load history</p></body></html>");
+                }
             }
         }
 
@@ -5598,24 +5617,43 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             try
             {
-                if (EditBoxTab.SelectedTab == tpLinks && title != null)
+                if (EditBoxTab.SelectedTab != tpLinks ||
+                    string.IsNullOrEmpty(title))
                 {
-                    title = WebUtility.UrlEncode(title);
-                    if (webBrowserLinks.Url !=
-                        new Uri(Variables.URLIndex + "?title=Special:WhatLinksHere/" + title +
-                                "&printable=yes") && !string.IsNullOrEmpty(title))
-                        webBrowserLinks.Navigate(Variables.URLIndex + "?title=Special:WhatLinksHere/" +
-                                                 title + "&printable=yes");
-                }
-                else
                     webBrowserLinks.Navigate("about:blank");
+                    return;
+                }
+
+                string encodedTitle = WebUtility.UrlEncode(title);
+
+                string url =
+                    Variables.URLIndex +
+                    "?title=Special:WhatLinksHere/" +
+                    encodedTitle +
+                    "&printable=yes";
+
+                Uri targetUri = new Uri(url);
+
+                if (webBrowserLinks.Url != targetUri)
+                {
+                    webBrowserLinks.Navigate(url);
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                Tools.WriteDebug(
+                    "NewWhatLinksHere",
+                    "Unable to load What Links Here: " + ex.Message);
+
                 webBrowserLinks.Navigate("about:blank");
 
-                if (webBrowserLinks.Document != null)
-                    webBrowserLinks.Document.Write("<html><body><p>Unable to load What Links Here</p></body></html>");
+                HtmlDocument document = webBrowserLinks.Document;
+
+                if (document != null)
+                {
+                    document.Write(
+                        "<html><body><p>Unable to load What Links Here</p></body></html>");
+                }
             }
         }
 
