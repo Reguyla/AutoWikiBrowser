@@ -78,9 +78,10 @@ namespace ICSharpCode.SharpZipLib.Encryption {
 		/// <param name="blockSize">The encryption strength, in bytes eg 16 for 128 bits.</param>
 		/// <param name="writeMode">True when creating a zip, false when reading. For the AuthCode.</param>
 		///
-		public ZipAESTransform(string key, byte[] saltBytes, int blockSize, bool writeMode) {
+		public ZipAESTransform(string key, byte[] saltBytes, int blockSize, bool writeMode)
+		{
 
-			if (blockSize != 16 && blockSize != 32)	// 24 valid for AES but not supported by Winzip
+			if (blockSize != 16 && blockSize != 32) // 24 valid for AES but not supported by Winzip
 				throw new Exception("Invalid blocksize " + blockSize + ". Must be 16 or 32.");
 			if (saltBytes.Length != blockSize / 2)
 				throw new Exception("Invalid salt len. Must be " + blockSize / 2 + " for blocksize " + blockSize);
@@ -89,24 +90,36 @@ namespace ICSharpCode.SharpZipLib.Encryption {
 			_encryptBuffer = new byte[_blockSize];
 			_encrPos = ENCRYPT_BLOCK;
 
-			// Performs the equivalent of derive_key in Dr Brian Gladman's pwd2key.c
-			Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(key, saltBytes, KEY_ROUNDS);
-			RijndaelManaged rm = new RijndaelManaged();
-			rm.Mode = CipherMode.ECB;			// No feedback from cipher for CTR mode
+			// WinZip AES uses PBKDF2 with 1,000 iterations and SHA-1.
+			// These values must remain unchanged to preserve ZIP compatibility.
+			using Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(
+				key,
+				saltBytes,
+				KEY_ROUNDS,
+				HashAlgorithmName.SHA1);
+
+			// AES is used as the block cipher while this class implements
+			// counter mode manually.
+			using Aes aes = Aes.Create();
+			aes.Mode = CipherMode.ECB;
+			aes.Padding = PaddingMode.None;
+
 			_counterNonce = new byte[_blockSize];
+
 			byte[] byteKey1 = pdb.GetBytes(_blockSize);
 			byte[] byteKey2 = pdb.GetBytes(_blockSize);
-			_encryptor = rm.CreateEncryptor(byteKey1, byteKey2);
+
+			_encryptor = aes.CreateEncryptor(byteKey1, null);
 			_pwdVerifier = pdb.GetBytes(PWD_VER_LENGTH);
-			//
+
 			_hmacsha1 = new HMACSHA1(byteKey2);
 			_writeMode = writeMode;
 		}
 
-		/// <summary>
-		/// Implement the ICryptoTransform method.
-		/// </summary>
-		public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset) {
+        /// <summary>
+        /// Implement the ICryptoTransform method.
+        /// </summary>
+        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset) {
 
 			// Pass the data stream to the hash algorithm for generating the Auth Code.
 			// This does not change the inputBuffer. Do this before decryption for read mode.
