@@ -5180,26 +5180,27 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         {
             try
             {
-                string name = txtDabLink.Text.Trim();
-                if (name.Contains("|")) name = name.Substring(0, name.IndexOf('|') - 1);
+                string[] linkTitles = txtDabLink.Text.Split(
+                    new[] { '|' },
+                    StringSplitOptions.RemoveEmptyEntries);
 
-                txtDabVariants.Text = "";
+                txtDabVariants.Text = string.Empty;
 
                 StringBuilder builder = new StringBuilder();
-                foreach (
-                    Article a in
-                    new LinksOnPageListProvider().MakeList(
-                        txtDabLink.Text.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)))
+
+                foreach (Article article in
+                         new LinksOnPageListProvider().MakeList(linkTitles))
                 {
-                    uint i;
-                    // exclude years
-                    if (uint.TryParse(a.Name, out i) && (i < 2100))
+                    // Exclude years.
+                    if (uint.TryParse(article.Name, out uint year) &&
+                        year < 2100)
                     {
                         continue;
                     }
 
-                    builder.AppendLine(a.Name);
+                    builder.AppendLine(article.Name);
                 }
+
                 txtDabVariants.Text = builder.ToString();
             }
             catch (Exception ex)
