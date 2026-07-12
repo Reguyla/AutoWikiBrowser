@@ -18,15 +18,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Text.Json;
-using ICSharpCode.SharpZipLib.Zip;
 using System.Net;
+using System.Net.Http;
+using System.Reflection;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace AWBUpdater
 {
@@ -218,6 +217,40 @@ namespace AWBUpdater
         }
 
         /// <summary>
+        /// Downloads the current AWB version information.
+        /// </summary>
+        /// <returns>The version information JSON.</returns>
+        private string DownloadVersionJson()
+        {
+            using HttpClientHandler handler = new HttpClientHandler
+            {
+                Proxy = _proxy,
+                UseProxy = _proxy != null
+            };
+
+            using HttpClient client = new HttpClient(handler);
+
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                string.Format(
+                    "AWBUpdater/{0} ({1}; .NET {2})",
+                    Assembly.GetExecutingAssembly().GetName().Version,
+                    Environment.OSVersion.VersionString,
+                    Environment.Version));
+
+            using HttpResponseMessage response = client
+                .GetAsync(VERSION_URL)
+                .GetAwaiter()
+                .GetResult();
+
+            response.EnsureSuccessStatusCode();
+
+            return response.Content
+                .ReadAsStringAsync()
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
         /// Checks and compares the current AWB version with the version listed on the enwiki VersionJSON page
         /// </summary>
         private void AWBVersion()
@@ -225,30 +258,10 @@ namespace AWBUpdater
             string json;
 
             UpdateUI("   Retrieving current version...", true);
+
             try
             {
-                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 |
-                                                        SecurityProtocolType.Tls13;
-
-                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(VERSION_URL);
-
-                rq.Proxy = _proxy;
-
-                rq.UserAgent = string.Format("AWBUpdater/{0} ({1}; .NET CLR {2})",
-                    Assembly.GetExecutingAssembly().GetName().Version,
-                    Environment.OSVersion.VersionString, Environment.Version);
-
-                HttpWebResponse response = (HttpWebResponse)rq.GetResponse();
-
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader sr = new StreamReader(stream, Encoding.UTF8))
-                {
-                    json = sr.ReadToEnd();
-
-                    sr.Close();
-                    stream.Close();
-                    response.Close();
-                }
+                json = DownloadVersionJson();
             }
             catch
             {
@@ -259,7 +272,10 @@ namespace AWBUpdater
             try
             {
                 FileVersionInfo awbVersionInfo =
-                    FileVersionInfo.GetVersionInfo(Path.Combine(_awbDirectory, "AutoWikiBrowser.exe"));
+                    FileVersionInfo.GetVersionInfo(
+                        Path.Combine(_awbDirectory, "AutoWikiBrowser.exe"));
+
+                // Existing version comparison code continues here.
 
                 RootObject updaterData =
                     System.Text.Json.JsonSerializer.Deserialize<RootObject>(
