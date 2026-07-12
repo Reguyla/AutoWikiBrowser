@@ -4293,16 +4293,32 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void openPageInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (TheArticle == null)
+            {
+                return;
+            }
+
             TheSession.Site.OpenPageInBrowser(TheArticle.Name);
         }
 
         private void openTalkPageInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TheSession.Site.OpenPageInBrowser(Tools.ConvertToTalk(TheArticle));
+            if (TheArticle == null)
+            {
+                return;
+            }
+
+            TheSession.Site.OpenPageInBrowser(
+                Tools.ConvertToTalk(TheArticle));
         }
 
         private void openHistoryMenuItem_Click(object sender, EventArgs e)
         {
+            if (TheArticle == null)
+            {
+                return;
+            }
+
             TheSession.Site.OpenPageHistoryInBrowser(TheArticle.Name);
         }
 
