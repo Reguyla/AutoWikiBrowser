@@ -4524,10 +4524,11 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         #region PasteMore
         private void PasteMore_Click(object sender, EventArgs e)
         {
-            ToolStripMenuItem item = (sender as ToolStripMenuItem);
-
-            if (item != null)
-                txtEdit.SelectedText = (string)item.Tag;
+            if (sender is ToolStripMenuItem item &&
+                item.Tag is string text)
+            {
+                txtEdit.SelectedText = text;
+            }
 
             mnuTextBox.Hide();
         }
