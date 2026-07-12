@@ -79,7 +79,7 @@
     <Content Include="Resources\Bot Image.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SemanticVersion" Version="2.1.0" />
   </ItemGroup>
   <PropertyGroup>
