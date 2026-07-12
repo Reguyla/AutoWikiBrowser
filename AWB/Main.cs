@@ -6450,13 +6450,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 Tools.OpenArticleInBrowser("Special:Notifications");
         }
 
-        private void statusBar_MouseHover(object sender, EventArgs e)
+        private void statusBar_MouseHover(
+            object sender,
+            EventArgs e)
         {
-            AWBToolTip tt = new AWBToolTip();
+            if (!(sender is ToolStripStatusLabel item))
+            {
+                return;
+            }
 
-            ToolStripStatusLabel item = (sender as ToolStripStatusLabel);
-
-            string text = "";
+            AWBToolTip toolTip = new AWBToolTip();
+            string text = string.Empty;
 
             switch (item.Name)
             {
@@ -6471,7 +6475,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     break;
             }
 
-            tt.Show(text, item.Owner);
+            toolTip.Show(text, item.Owner);
         }
 
         private void editToolBar_MouseHover(object sender, EventArgs e)
