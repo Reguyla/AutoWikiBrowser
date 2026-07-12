@@ -123,23 +123,25 @@ namespace WikiFunctions.DBScanner
             StoppedEvent();
         }
 
+        private const int ThreadStopTimeoutMilliseconds = 5000;
+
+        /// <summary>
+        /// Requests that the scan and secondary worker threads stop gracefully.
+        /// </summary>
         public void Stop()
         {
             Run = false;
-            if (ScanThread == null) return;
 
-            ScanThread.Abort();
-            foreach (Thread thr in SecondaryThreads)
+            if (ScanThread != null &&
+                ScanThread.ManagedThreadId != Thread.CurrentThread.ManagedThreadId)
             {
-                thr.Abort();
+                ScanThread.Join(ThreadStopTimeoutMilliseconds);
             }
-            ScanThread.Join();
 
-            foreach (Thread thr in SecondaryThreads)
+            foreach (Thread thread in SecondaryThreads)
             {
-                // avoid deadlocks when calling from secondary thread
-                if (thr.ManagedThreadId != Thread.CurrentThread.ManagedThreadId)
-                    thr.Join();
+                if (thread.ManagedThreadId != Thread.CurrentThread.ManagedThreadId)
+                    thread.Join(ThreadStopTimeoutMilliseconds);
             }
         }
 
@@ -237,17 +239,23 @@ namespace WikiFunctions.DBScanner
 
                     if (MultiThreaded)
                     {
-                        while (PendingArticles.Count > 0)
+                        // During normal completion, allow queued articles to finish processing.
+                        // When cancellation has been requested, stop waiting because the
+                        // secondary threads are also exiting and will no longer drain the queue.
+                        while (Run && PendingArticles.Count > 0)
                             Thread.Sleep(10);
 
                         Run = false;
 
-                        foreach (Thread thr in SecondaryThreads)
-                            thr.Join();
+                        foreach (Thread thread in SecondaryThreads)
+                        {
+                            if (thread.ManagedThreadId != Thread.CurrentThread.ManagedThreadId)
+                                thread.Join(ThreadStopTimeoutMilliseconds);
+                        }
                     }
                 }
             }
-            catch (ThreadAbortException) { }
+
             catch (Exception ex)
             {
                 if (Message)
@@ -319,8 +327,7 @@ namespace WikiFunctions.DBScanner
                         Thread.Sleep(1);
                 }
             }
-            catch (ThreadAbortException)
-            { }
+
             catch (Exception ex)
             {
                 ErrorHandler.HandleException(ex);
