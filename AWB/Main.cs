@@ -5146,12 +5146,22 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void launchRegexTester(object sender, EventArgs e)
         {
-            RegexTester = new RegexTester();
+            if (RegexTester == null || RegexTester.IsDisposed)
+            {
+                RegexTester = new RegexTester();
+            }
 
-            if (txtEdit.SelectionLength > 0 && MessageBox.Show("Would you like to transfer the currently selected Article Text to the Regex Tester?", "Transfer Article Text?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (txtEdit.SelectionLength > 0 &&
+                MessageBox.Show(
+                    "Would you like to transfer the currently selected article text to the Regex Tester?",
+                    "Transfer Article Text?",
+                    MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
                 RegexTester.ArticleText = txtEdit.SelectedText;
+            }
 
             RegexTester.Show();
+            RegexTester.BringToFront();
         }
 
         private void chkLock_CheckedChanged(object sender, EventArgs e)
@@ -5410,21 +5420,29 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         /// </summary>
         private void LoadUserTalkWarnings()
         {
-            Regex userTalkTemplate = new Regex(@"# ?\[\["
-                                               + Variables.NamespacesCaseInsensitive[Namespace.Template] + @"(.*?)\]\]");
+            Regex userTalkTemplate = new Regex(
+                @"# ?\[\[" +
+                Variables.NamespacesCaseInsensitive[Namespace.Template] +
+                @"(.*?)\]\]");
+
             UserTalkTemplatesRegex = null;
-            UserTalkWarningsLoaded = true; // or it will retry on each page load
+
+            // Prevent repeated loading attempts on every page.
+            UserTalkWarningsLoaded = true;
 
             List<string> userTalkTemplates = new List<string>();
 
             try
             {
                 string text;
+
                 try
                 {
-                    text = TheSession.Editor.SynchronousEditor.Clone().Open(
-                        "Project:AutoWikiBrowser/User talk templates",
-                        true);
+                    text = TheSession.Editor.SynchronousEditor
+                        .Clone()
+                        .Open(
+                            "Project:AutoWikiBrowser/User talk templates",
+                            true);
                 }
                 catch (Exception ex)
                 {
@@ -5435,9 +5453,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     return;
                 }
 
-                foreach (Match m in userTalkTemplate.Matches(text))
+                foreach (Match match in userTalkTemplate.Matches(text))
                 {
-                    userTalkTemplates.Add(m.Groups[1].Value);
+                    userTalkTemplates.Add(match.Groups[1].Value);
                 }
             }
             catch (Exception ex)
@@ -5447,7 +5465,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             }
 
             if (userTalkTemplates.Any())
-                UserTalkTemplatesRegex = Tools.NestedTemplateRegex(userTalkTemplates);
+            {
+                UserTalkTemplatesRegex =
+                    Tools.NestedTemplateRegex(userTalkTemplates);
+            }
         }
 
         /// <summary>
