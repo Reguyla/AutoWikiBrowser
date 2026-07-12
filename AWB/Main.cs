@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #undef INSTASTATS // turn on here and in stats.cs to make AWB log (empty) stats at startup
 
+using AutoWikiBrowser;
+using AutoWikiBrowser.Plugins;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -44,7 +46,6 @@ using WikiFunctions.Lists.Providers;
 using WikiFunctions.Parse;
 using WikiFunctions.Plugin;
 using WikiFunctions.Properties;
-using AutoWikiBrowser.Plugins;
 using ThreadState = System.Threading.ThreadState;
 
 namespace AutoWikiBrowser
@@ -5826,24 +5827,39 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private bool CanShutdown
         {
-            get { return (chkShutdown.Checked && !listMaker.Any()); }
+            get
+            {
+                return chkShutdown.Checked && !listMaker.Any();
+            }
         }
 
         private void Shutdown()
         {
-            if (CanShutdown)
+            if (!CanShutdown)
             {
-                ShutdownTimer.Enabled = true;
-                ShutdownTimer.Start();
-                ShutdownNotification shut = new ShutdownNotification { ShutdownType = GetShutdownType() };
+                return;
+            }
 
-                switch (shut.ShowDialog(this))
+            ShutdownTimer.Enabled = true;
+            ShutdownTimer.Start();
+
+            using (ShutdownNotification shutdownNotification =
+                   new ShutdownNotification
+                   {
+                       ShutdownType = GetShutdownType()
+                   })
+            {
+                switch (shutdownNotification.ShowDialog(this))
                 {
                     case DialogResult.Cancel:
                         ShutdownTimer.Stop();
                         ShutdownTimer.Enabled = false;
-                        MessageBox.Show(GetShutdownType() + " aborted!");
+
+                        MessageBox.Show(
+                            GetShutdownType() + " aborted!");
+
                         return;
+
                     case DialogResult.OK:
                         ShutdownComputer();
                         break;
