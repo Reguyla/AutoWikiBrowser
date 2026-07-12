@@ -855,6 +855,7 @@ namespace WikiFunctions.Controls.Lists
         }
 
         private Thread _listerThread;
+        private volatile bool _stopRequested;
 
         /// <summary>
         /// Makes a list of pages from the currently selected item
@@ -876,6 +877,7 @@ namespace WikiFunctions.Controls.Lists
         /// <param name="sourceValues">An array of string values to create the list with, e.g. an array of categories. Use null if not appropriate</param>
         public void MakeList(IListProvider provider, string[] sourceValues)
         {
+            _stopRequested = false;
             btnStop.Visible = true;
 
             _providerToRun = provider;
@@ -896,11 +898,14 @@ namespace WikiFunctions.Controls.Lists
                 {
                     IsBackground = true
                 };
+
                 _listerThread.SetApartmentState(ApartmentState.STA);
                 _listerThread.Start();
             }
             else
+            {
                 MakeTheList();
+            }
         }
 
         private string[] _source;
@@ -1102,13 +1107,11 @@ namespace WikiFunctions.Controls.Lists
         }
 
         /// <summary>
-        /// Stops the processes
+        /// Requests that the current list-generation operation stop cooperatively.
         /// </summary>
         public void Stop()
         {
-            if (_listerThread != null)
-                _listerThread.Abort();
-
+            _stopRequested = true;
             StopProgressBar(-1);
         }
 
