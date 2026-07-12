@@ -4535,23 +4535,42 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void configureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ConfigurePasteMoreItems dlg = new ConfigurePasteMoreItems((string)PasteMore1.Tag,
-                                                                      (string)PasteMore2.Tag,
-                                                                      (string)PasteMore3.Tag,
-                                                                      (string)PasteMore4.Tag,
-                                                                      (string)PasteMore5.Tag,
-                                                                      (string)PasteMore6.Tag,
-                                                                      (string)PasteMore7.Tag,
-                                                                      (string)PasteMore8.Tag,
-                                                                      (string)PasteMore9.Tag,
-                                                                      (string)PasteMore10.Tag);
-            if (dlg.ShowDialog() == DialogResult.OK)
+            using (ConfigurePasteMoreItems dialog =
+                   new ConfigurePasteMoreItems(
+                       (string)PasteMore1.Tag,
+                       (string)PasteMore2.Tag,
+                       (string)PasteMore3.Tag,
+                       (string)PasteMore4.Tag,
+                       (string)PasteMore5.Tag,
+                       (string)PasteMore6.Tag,
+                       (string)PasteMore7.Tag,
+                       (string)PasteMore8.Tag,
+                       (string)PasteMore9.Tag,
+                       (string)PasteMore10.Tag))
             {
-                string[] dlgStrings = {
-                    dlg.String1, dlg.String2, dlg.String3, dlg.String4, dlg.String5, dlg.String6, dlg.String7, dlg.String8, dlg.String9, dlg.String10
-                };
-                for (int i = 0; i < 10; ++i)
-                    SetPasteMoreText(i, dlgStrings[i]);
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                string[] dialogStrings =
+                {
+                    dialog.String1,
+                    dialog.String2,
+                    dialog.String3,
+                    dialog.String4,
+                    dialog.String5,
+                    dialog.String6,
+                    dialog.String7,
+                    dialog.String8,
+                    dialog.String9,
+                    dialog.String10
+        };
+
+                for (int i = 0; i < dialogStrings.Length; i++)
+                {
+                    SetPasteMoreText(i, dialogStrings[i]);
+                }
             }
         }
         #endregion
