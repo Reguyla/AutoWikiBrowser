@@ -6268,9 +6268,14 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void StartProgressBar()
         {
+            if (IsDisposed || Disposing)
+            {
+                return;
+            }
+
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(StartProgressBar));
+                BeginInvoke(new MethodInvoker(StartProgressBar));
                 return;
             }
 
@@ -6280,9 +6285,14 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void StopProgressBar()
         {
+            if (IsDisposed || Disposing)
+            {
+                return;
+            }
+
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(StopProgressBar));
+                BeginInvoke(new MethodInvoker(StopProgressBar));
                 return;
             }
 
