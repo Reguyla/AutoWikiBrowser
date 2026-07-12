@@ -96,13 +96,12 @@ namespace WikiFunctions.Encryption
             // key. Specify the size of the key in bytes (instead of bits).
             byte[] keyBytes = password.GetBytes(keySize / 8);
 
-            // Create uninitialized Rijndael encryption object.
-            RijndaelManaged symmetricKey = new RijndaelManaged
-                                           {
-                                               // It is reasonable to set encryption mode to Cipher Block Chaining
-                                               // (CBC). Use default options for other symmetric key parameters.
-                                               Mode = CipherMode.CBC
-                                           };
+            // Create an AES encryption object configured to preserve the legacy
+            // Rijndael encryption format used by existing AWB settings.
+            using Aes symmetricKey = Aes.Create();
+            symmetricKey.Mode = CipherMode.CBC;
+            symmetricKey.Padding = PaddingMode.PKCS7;
+            symmetricKey.BlockSize = 128;
 
             // Generate encryptor from the existing key bytes and initialization 
             // vector. Key size will be defined based on the number of the key 
@@ -211,12 +210,12 @@ namespace WikiFunctions.Encryption
             // key. Specify the size of the key in bytes (instead of bits).
             byte[] keyBytes = password.GetBytes(keySize / 8);
 
-            // Create uninitialized Rijndael encryption object.
-            RijndaelManaged symmetricKey = new RijndaelManaged();
-
-            // It is reasonable to set encryption mode to Cipher Block Chaining
-            // (CBC). Use default options for other symmetric key parameters.
+            // Create an AES decryption object configured to read the legacy
+            // Rijndael encryption format used by existing AWB settings.
+            using Aes symmetricKey = Aes.Create();
             symmetricKey.Mode = CipherMode.CBC;
+            symmetricKey.Padding = PaddingMode.PKCS7;
+            symmetricKey.BlockSize = 128;
 
             // Generate decryptor from the existing key bytes and initialization 
             // vector. Key size will be defined based on the number of the key 
