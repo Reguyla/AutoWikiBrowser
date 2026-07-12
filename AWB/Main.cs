@@ -5297,16 +5297,42 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         }
 
         private void RunUpdater()
+private void RunUpdater()
         {
-            string file = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "AWBUpdater.exe");
+            string executableDirectory =
+                Path.GetDirectoryName(Application.ExecutablePath);
 
-            if (!File.Exists(file))
+            if (string.IsNullOrEmpty(executableDirectory))
             {
-                MessageBox.Show("Updater doesn't exist, therefore cannot be run");
+                MessageBox.Show(
+                    "Unable to determine the application directory.",
+                    "Updater error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
                 return;
             }
 
-            Process.Start(file);
+            string updaterPath =
+                Path.Combine(executableDirectory, "AWBUpdater.exe");
+
+            if (!File.Exists(updaterPath))
+            {
+                MessageBox.Show(
+                    "The updater does not exist and cannot be run.",
+                    "Updater unavailable",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            Process.Start(
+                new ProcessStartInfo
+                {
+                    FileName = updaterPath,
+                    UseShellExecute = true
+                });
         }
 
         private void btnResetNudges_Click(object sender, EventArgs e)
