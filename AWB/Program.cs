@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
 using System.Security;
+using System.Text;
 using System.Windows.Forms;
 using WikiFunctions;
 
@@ -33,6 +34,8 @@ namespace AutoWikiBrowser
         [STAThread]
         static void Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             try
             {        
                 System.Threading.Thread.CurrentThread.Name = "Main thread";
