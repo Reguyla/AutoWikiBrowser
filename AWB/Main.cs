@@ -4369,7 +4369,6 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             if (RunProcessPageBackground != null)
                 RunProcessPageBackground.Abort();
 
-            UpdateButtons(null, null);
             DisableButtons();
 
             if (_intTimer > 0)
@@ -4391,6 +4390,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
             StatusLabelText = "Stopped";
             ClearBrowser();
+            UpdateButtons(null, null);
         }
 
         private void helpToolStripMenuItem1_Click(object sender, EventArgs e)
