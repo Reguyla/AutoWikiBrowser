@@ -4895,36 +4895,24 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             switch (cmboImages.SelectedIndex)
             {
                 case 0:
-                    {
                         lblImageWith.Text = "";
-
                         txtImageReplace.Enabled = txtImageWith.Enabled = chkSkipNoImgChange.Enabled = false;
                         break;
-                    }
                 case 1:
-                    {
                         lblImageWith.Text = "&With " + Variables.Namespaces[Namespace.File];
-
                         txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
                         break;
-                    }
                 case 2:
-                    {
                         lblImageWith.Text = "";
-
                         txtImageWith.Enabled = false;
                         txtImageReplace.Enabled = true;
                         chkSkipNoImgChange.Enabled = true;
                         break;
-                    }
                 case 3:
-                    {
                         lblImageWith.Text = "Comment:";
-
                         txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
                         break;
-                    }
-            }
+             }
         }
 
         private void txtImageReplace_Leave(object sender, EventArgs e)
