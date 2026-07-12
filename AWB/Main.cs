@@ -5422,10 +5422,16 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                 string text;
                 try
                 {
-                    text = TheSession.Editor.SynchronousEditor.Clone().Open("Project:AutoWikiBrowser/User talk templates", true);
+                    text = TheSession.Editor.SynchronousEditor.Clone().Open(
+                        "Project:AutoWikiBrowser/User talk templates",
+                        true);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Tools.WriteDebug(
+                        "LoadUserTalkWarnings",
+                        "Unable to load user talk templates: " + ex.Message);
+
                     return;
                 }
 
@@ -5453,11 +5459,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             TemplateRedirectsLoaded = true;
             try
             {
-                text = TheSession.Editor.SynchronousEditor.Clone().Open("Project:AutoWikiBrowser/Template redirects", true);
+                text = TheSession.Editor.SynchronousEditor.Clone().Open(
+                    "Project:AutoWikiBrowser/Template redirects",
+                    true);
             }
-            catch
+            catch (Exception ex)
             {
-                text = "";
+                Tools.WriteDebug(
+                    "LoadTemplateRedirects",
+                    "Unable to load template redirects: " + ex.Message);
+
+                text = string.Empty;
             }
 
             // always make this call even if no text found (if changed project from one to another must make sure redirects are cleared)
@@ -5470,11 +5482,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             DatedTemplatesLoaded = true;
             try
             {
-                text = TheSession.Editor.SynchronousEditor.Clone().Open("Project:AutoWikiBrowser/Dated templates", true);
+                text = TheSession.Editor.SynchronousEditor.Clone().Open(
+                    "Project:AutoWikiBrowser/Dated templates",
+                    true);
             }
-            catch
+            catch (Exception ex)
             {
-                text = "";
+                Tools.WriteDebug(
+                    "LoadDatedTemplates",
+                    "Unable to load dated templates: " + ex.Message);
+
+                text = string.Empty;
             }
 
             if (text.Length > 0)
@@ -5487,11 +5505,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             RenamedTemplateParametersLoaded = true;
             try
             {
-                text = TheSession.Editor.SynchronousEditor.Clone().Open("Project:AutoWikiBrowser/Rename template parameters", true);
+                text = TheSession.Editor.SynchronousEditor.Clone().Open(
+                    "Project:AutoWikiBrowser/Rename template parameters",
+                    true);
             }
-            catch
+            catch (Exception ex)
             {
-                text = "";
+                Tools.WriteDebug(
+                    "LoadRenameTemplateParameters",
+                    "Unable to load renamed template parameters: " + ex.Message);
+
+                text = string.Empty;
             }
 
             if (text.Length > 0)
