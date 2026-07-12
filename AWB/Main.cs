@@ -5693,22 +5693,55 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             return "<h3>" + articleName + "</h3>" + linksHtml;
         }
 
-        private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+        private void openInBrowserToolStripMenuItem_Click(
+            object sender,
+            EventArgs e)
         {
-            Tools.OpenArticleHistoryInBrowser(TheArticle.Name);
+            if (TheArticle == null)
+            {
+                return;
+            }
+
+            Tools.OpenArticleHistoryInBrowser(
+                TheArticle.Name);
         }
 
-        private void refreshHistoryToolStripMenuItem_Click(object sender, EventArgs e)
+        private void refreshHistoryToolStripMenuItem_Click(
+            object sender,
+            EventArgs e)
         {
+            if (TheArticle == null)
+            {
+                return;
+            }
+
             try
             {
-                webBrowserHistory.Navigate(Variables.URLIndex + "?title=" + TheArticle.URLEncodedName + "&action=history&printable=yes");
+                string url =
+                    Variables.URLIndex +
+                    "?title=" +
+                    TheArticle.URLEncodedName +
+                    "&action=history&printable=yes";
+
+                webBrowserHistory.Navigate(url);
             }
-            catch
+            catch (Exception ex)
             {
+                Tools.WriteDebug(
+                    "RefreshHistory",
+                    "Unable to refresh page history: " +
+                    ex.Message);
+
                 webBrowserHistory.Navigate("about:blank");
-                if (webBrowserHistory.Document != null)
-                    webBrowserHistory.Document.Write("<html><body><p>Unable to load history</p></body></html>");
+
+                HtmlDocument document =
+                    webBrowserHistory.Document;
+
+                if (document != null)
+                {
+                    document.Write(
+                        "<html><body><p>Unable to load history</p></body></html>");
+                }
             }
         }
 
