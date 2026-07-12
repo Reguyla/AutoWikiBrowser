@@ -6172,9 +6172,15 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             PluginManager.LoadNewPlugin(this);
         }
 
-        private void managePluginsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void managePluginsToolStripMenuItem_Click(
+            object sender,
+            EventArgs e)
         {
-            new PluginManager(this).ShowDialog(this);
+            using (PluginManager pluginManager =
+                   new PluginManager(this))
+            {
+                pluginManager.ShowDialog(this);
+            }
         }
 
         private void menuitemMakeFromTextBoxUndo_Click(object sender, EventArgs e)
