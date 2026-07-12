@@ -5879,6 +5879,17 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             return radHibernate.Checked ? "Hibernate" : "";
         }
 
+        private void StartShutdownProcess(string arguments)
+        {
+            Process.Start(
+                new ProcessStartInfo
+                {
+                    FileName = "shutdown",
+                    Arguments = arguments,
+                    UseShellExecute = true
+                });
+        }
+
         private void ShutdownComputer()
         {
             if (!ShutdownTimer.Enabled)
@@ -5892,9 +5903,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             if (radHibernate.Checked)
                 Application.SetSuspendState(PowerState.Hibernate, true, true);
             else if (radRestart.Checked)
-                Process.Start("shutdown", "-r");
+                StartShutdownProcess("-r");
             else if (radShutdown.Checked)
-                Process.Start("shutdown", "-s");
+                StartShutdownProcess("-s");
             else if (radStandby.Checked)
                 Application.SetSuspendState(PowerState.Suspend, true, true);
         }
