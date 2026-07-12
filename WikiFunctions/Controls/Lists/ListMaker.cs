@@ -76,7 +76,7 @@ namespace WikiFunctions.Controls.Lists
         /// <summary>
         /// 
         /// </summary>
-        public static ListMakerProviderAdded ListProviderAdded;
+        public static event ListMakerProviderAdded ListProviderAdded;
 
         static ListMaker()
         {
