@@ -6102,9 +6102,11 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             set { btnWatch.Text = value ? "Unwatch" : "Watch"; }
         }
 
-        private static int CompareRegexPairs(KeyValuePair<int, string> x, KeyValuePair<int, string> y)
+        private static int CompareRegexPairs(
+            KeyValuePair<int, string> x,
+            KeyValuePair<int, string> y)
         {
-            return x.Key.CompareTo(y.Key) * -1;
+            return y.Key.CompareTo(x.Key);
         }
 
         private void profileTyposToolStripMenuItem_Click(object sender, EventArgs e)
