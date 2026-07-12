@@ -6313,12 +6313,43 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         private void RedSelection(int index, int length)
         {
             if (!txtEdit.Enabled)
+            {
                 return;
+            }
 
-            // numbers in articleText and txtEdit.Edit are offset by the number of newlines before the index of the text
-            int newlinesToIndex = WikiRegexes.Newline.Matches(txtEdit.Text.Substring(0, index)).Count;
-            int newlinesInSelection = WikiRegexes.Newline.Matches(txtEdit.Text.Substring(index, length)).Count;
-            txtEdit.SetEditBoxSelection(index - newlinesToIndex, length - newlinesInSelection, false);
+            string text = txtEdit.Text;
+
+            if (index < 0 ||
+                length < 0 ||
+                index > text.Length ||
+                length > text.Length - index)
+            {
+                Tools.WriteDebug(
+                    "RedSelection",
+                    "Ignored invalid highlight range. " +
+                    "Index: " + index +
+                    ", Length: " + length +
+                    ", Text length: " + text.Length);
+
+                return;
+            }
+
+            // Article-text indexes differ from RichTextBox indexes because
+            // line endings are represented differently. Adjust the selection
+            // by the number of newline matches before and within the range.
+            int newlinesToIndex =
+                WikiRegexes.Newline.Matches(
+                    text.Substring(0, index)).Count;
+
+            int newlinesInSelection =
+                WikiRegexes.Newline.Matches(
+                    text.Substring(index, length)).Count;
+
+            txtEdit.SetEditBoxSelection(
+                index - newlinesToIndex,
+                length - newlinesInSelection,
+                false);
+
             txtEdit.SelectionBackColor = Color.Tomato;
         }
 
