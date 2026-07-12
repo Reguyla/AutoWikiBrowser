@@ -4978,7 +4978,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     return;
                 }
 
-                string newTitle, msg;
+                string newTitle;
+                string msg;
+
                 bool succeed = TheArticle.Move(TheSession, out newTitle);
 
                 if (succeed)
@@ -4990,7 +4992,9 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                     listMaker.ReplaceArticle(TheArticle, replacementArticle);
                 }
                 else
+                {
                     msg = "Move of " + TheArticle.Name + " failed!";
+                }
 
                 articleActionLogControl1.LogArticleAction(TheArticle.Name, succeed, ArticleAction.Move, msg);
                 StatusLabelText = msg;
@@ -5018,16 +5022,15 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                         break;
                 }
             }
-            catch (ApiException ae)
+            catch (ApiException ex)
+                when (ex is InvalidTitleException ||
+                      ex is InterwikiException)
             {
-                if (ae is InvalidTitleException || ae is InterwikiException)
-                {
-                    MessageBox.Show(ae.Message, "Invalid Target page");
-                    return;
-                }
-                ErrorHandler.HandleException(ae);
+                MessageBox.Show(
+                    ex.Message,
+                    "Invalid target page");
             }
-            catch (Exception ex)
+            catch (ApiException ex)
             {
                 ErrorHandler.HandleException(ex);
             }
