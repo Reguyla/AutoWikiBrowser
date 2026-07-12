@@ -4673,10 +4673,16 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
                             Session.TypoLink(Tools.GetJObjectFromUrl(Session.ConfigUrl));
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // TODO: Should we be setting a default?
-                        // Variables.RetfPath = "Project:AutoWikiBrowser/Typos";
+                        Tools.WriteDebug(
+                            "LoadTypos",
+                            "Unable to load the configured typo-list location: " +
+                            ex.Message);
+
+                        // TODO:
+                        // Determine whether a failed custom typo-list lookup should explicitly
+                        // restore Project:AutoWikiBrowser/Typos as the fallback location.
                     }
 
                 }
