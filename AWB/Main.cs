@@ -5806,8 +5806,10 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
 
         private void ShowLogin()
         {
-            Login login = new Login();
-            login.ShowDialog(this);
+            using (Login login = new Login())
+            {
+                login.ShowDialog(this);
+            }
         }
 
         #region Shutdown
