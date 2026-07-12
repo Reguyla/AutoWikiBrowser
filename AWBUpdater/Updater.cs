@@ -357,44 +357,82 @@ namespace AWBUpdater
         }
 
         /// <summary>
-        /// Check the addresses for the files are valid (not null or empty), and downloads the files from the internet
+        /// Downloads the selected update package from the internet.
         /// </summary>
         private void GetZipFromInternet()
         {
-            WebClient client = new WebClient { Proxy = _proxy };
-
             if (!string.IsNullOrEmpty(_zipName))
             {
-                actuallyDownloadZip(client, _zipName, Path.Combine(_tempDirectory, _zipName));
+                DownloadZip(
+                    _zipName,
+                    Path.Combine(_tempDirectory, _zipName));
             }
-
-            client.Dispose();
 
             progressUpdate.Value = 50;
         }
 
-        private void actuallyDownloadZip(WebClient client, string file, string target)
+        /// <summary>
+        /// Downloads the specified update package to the target file.
+        /// </summary>
+        /// <param name="file">The update package filename.</param>
+        /// <param name="target">The local path where the package will be saved.</param>
+        private void DownloadZip(string file, string target)
         {
-            var fileWithoutExt = file.Replace(".zip", "");
-            var fileUrl = SOURCEFORGE_URL + $"/{fileWithoutExt}/{file}";
+            string fileWithoutExtension =
+                Path.GetFileNameWithoutExtension(file);
+
+            string fileUrl =
+                $"{SOURCEFORGE_URL}/{fileWithoutExtension}/{file}";
 
             try
             {
-                TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                var unixTime = (int)t.TotalSeconds;
+                long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-                var url = string.Format(
+                string url = string.Format(
                     "{0}?r={1}&ts={2}",
                     fileUrl,
-                    WebUtility.UrlEncode(SOURCEFORGE_URL + $"/{fileWithoutExt}/"),
+                    WebUtility.UrlEncode(
+                        $"{SOURCEFORGE_URL}/{fileWithoutExtension}/"),
                     unixTime);
 
-                client.DownloadFile(url, target);
+                using HttpClientHandler handler = new HttpClientHandler
+                {
+                    Proxy = _proxy,
+                    UseProxy = _proxy != null
+                };
+
+                using HttpClient client = new HttpClient(handler);
+
+                using HttpResponseMessage response = client
+                    .GetAsync(url)
+                    .GetAwaiter()
+                    .GetResult();
+
+                response.EnsureSuccessStatusCode();
+
+                using Stream sourceStream = response.Content
+                    .ReadAsStreamAsync()
+                    .GetAwaiter()
+                    .GetResult();
+
+                using FileStream targetStream = new FileStream(
+                    target,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None);
+
+                sourceStream.CopyTo(targetStream);
             }
-            catch (WebException webEx)
+            catch (HttpRequestException ex)
             {
                 UpdateUI(
-                    string.Format("Download of `{0}` failed: {1}", fileUrl, webEx.Message),
+                    $"Download of `{fileUrl}` failed: {ex.Message}",
+                    true);
+            }
+            catch (IOException ex)
+            {
+                UpdateUI(
+                    $"Unable to save `{file}`: {ex.Message}",
                     true);
             }
         }
