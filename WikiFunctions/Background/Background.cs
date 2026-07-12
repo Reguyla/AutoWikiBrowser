@@ -179,15 +179,21 @@ namespace WikiFunctions.Background
         }
 
         /// <summary>
-        /// aborts processing and terminates the thread
+        /// Requests that the background operation stop cooperatively.
         /// </summary>
+        /// <remarks>
+        /// Thread.Abort is unsupported on .NET 8. This method records the
+        /// cancellation request, closes any progress UI, and returns without
+        /// forcibly terminating or waiting for the worker thread.
+        /// </remarks>
         public void Abort()
         {
-            if (UI != null) UI.Close();
-            UI = null;
+            _cancellationRequested = true;
 
-            if (BgThread != null) BgThread.Abort();
-            Wait();
+            if (UI != null)
+                UI.Close();
+
+            UI = null;
             Result = null;
         }
 
