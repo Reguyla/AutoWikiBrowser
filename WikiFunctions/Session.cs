@@ -385,7 +385,6 @@ namespace WikiFunctions
 
                 string configJSONText = Editor.SynchronousEditor.HttpGet(ConfigUrl);
 
-                bool usingDefaultJSONText = false;
                 if (!string.IsNullOrEmpty(configJSONText))
                 {
                     ConfigJSONText = configJSONText;
@@ -395,7 +394,7 @@ namespace WikiFunctions
                     Tools.WriteDebug("UpdateWikiStatus",
                         "No JSON config page at " + ConfigUrl + "; falling back to default");
                     ConfigJSONText = DefaultWikiConfig;
-                    usingDefaultJSONText = true;
+
                 }
 
                 var configJson = JObject.Parse(ConfigJSONText);
