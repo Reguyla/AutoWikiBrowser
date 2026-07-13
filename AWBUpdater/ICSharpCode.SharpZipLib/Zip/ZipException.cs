@@ -38,10 +38,6 @@
 
 using System;
 
-#if !NETCF_1_0 && !NETCF_2_0
-using System.Runtime.Serialization;
-#endif
-
 namespace ICSharpCode.SharpZipLib.Zip 
 {
 	
@@ -53,17 +49,6 @@ namespace ICSharpCode.SharpZipLib.Zip
 #endif
 	public class ZipException : SharpZipBaseException
 	{
-#if !NETCF_1_0 && !NETCF_2_0
-		/// <summary>
-		/// Deserialization constructor 
-		/// </summary>
-		/// <param name="info"><see cref="SerializationInfo"/> for this constructor</param>
-		/// <param name="context"><see cref="StreamingContext"/> for this constructor</param>
-		protected ZipException(SerializationInfo info, StreamingContext context )
-			: base( info, context )
-		{
-		}
-#endif
 
 		/// <summary>
 		/// Initializes a new instance of the ZipException class.
