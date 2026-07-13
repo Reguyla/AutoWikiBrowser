@@ -167,11 +167,9 @@ namespace AWBUpdater
             private string Thread,
                 OS = Environment.OSVersion.ToString(),
                 StackTrace,
-                ApiExtra,
                 AppendedInfo,
                 Version,
-                DotNetVersion,
-                Duplicate;
+                DotNetVersion;
 
             /// <summary>
             /// 
@@ -253,11 +251,6 @@ namespace AWBUpdater
                 errorMessage.Append(StackTrace);
                 errorMessage.AppendLine("</table>");
 
-                if (!string.IsNullOrEmpty(ApiExtra))
-                {
-                    errorMessage.AppendLine(ApiExtra);
-                }
-
                 if (!string.IsNullOrEmpty(Thread))
                 {
                     errorMessage.AppendLine(formatter.PrintLine("thread", Thread));
@@ -266,7 +259,7 @@ namespace AWBUpdater
                 errorMessage.AppendLine(formatter.PrintLine("OS", OS));
                 errorMessage.AppendLine(formatter.PrintLine("version", Version));
                 errorMessage.AppendLine(formatter.PrintLine("net", DotNetVersion));
-                errorMessage.AppendLine(formatter.PrintLine("duplicate", Duplicate));
+                errorMessage.AppendLine(formatter.PrintLine("duplicate", ""));
 
                 if (!string.IsNullOrEmpty(AppendedInfo))
                 {
