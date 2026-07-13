@@ -356,12 +356,8 @@ namespace WikiFunctions
                     return WikiStatusResult.NotLoggedIn;
                 }
 
-                // TODO: T294397 removed writeapi userright. T202192 to add some version checking (because of MW LTS at least)
-                //if (!User.HasRight("writeapi"))
-                //{
-                //    return WikiStatusResult.NoRights;
-                //}
-
+                // MediaWiki no longer exposes the legacy "writeapi" user right.
+                // Editing permission is validated through normal API responses instead.
                 // TODO:
                 // Reassess Maxlag defaults after the .NET 8 networking migration.
                 // Current value disables Maxlag while API compatibility work is in progress.
