@@ -46,8 +46,6 @@
 			<EmbedInteropTypes>false</EmbedInteropTypes>
 			<Private>false</Private>
 		</Reference>
-
-		<Reference Include="System.Configuration" />
 	</ItemGroup>
   <ItemGroup>
     <Compile Update="AWBWebBrowser.cs" />
