@@ -110,8 +110,42 @@ namespace WikiFunctions.Networking
             NameValueCollection values,
             string url)
         {
-            throw new NotImplementedException(
-               "HTTP form POST migration has not been implemented yet.");
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentException(
+                    "A URL is required.",
+                    nameof(url));
+
+            if (Globals.UnitTestMode)
+            {
+                throw new InvalidOperationException(
+                    "You shouldn't access Wikipedia from unit tests.");
+            }
+
+            Tools.WriteDebug("AwbHttpClient::PostForm", url);
+
+            string postData = Tools.BuildPostDataString(values);
+
+            using HttpClient client = CreateClient(url);
+
+            using StringContent content = new StringContent(
+                postData,
+                Encoding.UTF8,
+                "application/x-www-form-urlencoded");
+
+            using HttpResponseMessage response = client
+                .PostAsync(url, content)
+                .GetAwaiter()
+                .GetResult();
+
+            response.EnsureSuccessStatusCode();
+
+            return response.Content
+                .ReadAsStringAsync()
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>

@@ -464,42 +464,20 @@ namespace WikiFunctions
         /// </summary>
         /// <param name="url">The URL of the webpage.</param>
         /// <param name="enc">The encoding to use.</param>
-        /// <param name="responseURL">The resolved URL of the webpage</param>
+        /// <param name="responseURL">The resolved URL of the webpage.</param>
+        /// <param name="awb">Optional AWB instance used for authenticated requests.</param>
         /// <returns>The HTML.</returns>
-        public static string GetHTML(string url, Encoding enc, out string responseURL, IAutoWikiBrowser awb)
+        public static string GetHTML(
+            string url,
+            Encoding enc,
+            out string responseURL,
+            IAutoWikiBrowser awb)
         {
-            WriteDebug("Tools::GetHTML", url);
-
-            if (Globals.UnitTestMode)
-                throw new Exception("You shouldn't access Wikipedia from unit tests");
-
-            while (true)
-            {
-                HttpWebRequest rq = Variables.PrepareWebRequest(url);
-
-                Tools.ConfigureRequest(rq, url, awb);
-
-                try
-                {
-                    using (HttpWebResponse response = (HttpWebResponse)rq.GetResponse())
-                    {
-                        responseURL = response.ResponseUri.ToString();
-
-                        using (Stream stream = response.GetResponseStream())
-                        {
-                            using (StreamReader sr = new StreamReader(stream, enc))
-                            {
-                                return sr.ReadToEnd();
-                            }
-                        }
-                    }
-                }
-                catch (WebException ex)
-                {
-                    if (!HandleHttpRetry(ex))
-                        throw;
-                }
-            }
+            return AwbHttpClient.GetString(
+                url,
+                enc,
+                out responseURL,
+                awb);
         }
 
         /// <summary>
@@ -2225,28 +2203,11 @@ Message: {2}
         /// <param name="postvars"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static string PostData(NameValueCollection postvars, string url)
+        public static string PostData(
+            NameValueCollection postvars,
+            string url)
         {
-            //echo scripts which just print out the POST vars, handy for early stages of testing:
-            //const string url = "http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi";
-            //const string url = "http://www.tipjar.com/cgi-bin/test";
-
-            if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
-
-            HttpWebRequest rq = Variables.PrepareWebRequest(url);
-            rq.Method = "POST";
-            rq.ContentType = "application/x-www-form-urlencoded";
-
-            Stream requestStream = rq.GetRequestStream();
-            byte[] data = Encoding.UTF8.GetBytes(BuildPostDataString(postvars));
-            requestStream.Write(data, 0, data.Length);
-            requestStream.Close();
-
-            HttpWebResponse rs = (HttpWebResponse)rq.GetResponse();
-            if (rs.StatusCode == HttpStatusCode.OK)
-                return new StreamReader(rs.GetResponseStream()).ReadToEnd();
-
-            throw new WebException(rs.StatusDescription, WebExceptionStatus.UnknownError);
+            return AwbHttpClient.PostForm(postvars, url);
         }
 
         /// <summary>
