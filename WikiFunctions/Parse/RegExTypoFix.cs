@@ -693,7 +693,6 @@ namespace WikiFunctions.Parse
         #endregion
     }
 
-    [Serializable]
     public class TypoException : ApplicationException
     {
         public TypoException() { }
