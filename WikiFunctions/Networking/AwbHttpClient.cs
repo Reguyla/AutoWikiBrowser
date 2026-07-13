@@ -38,7 +38,8 @@ namespace WikiFunctions.Networking
             out string responseUrl,
             IAutoWikiBrowser awb = null)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(
+                "HTTP GET migration has not been implemented yet.");
         }
 
         /// <summary>
@@ -52,26 +53,37 @@ namespace WikiFunctions.Networking
             NameValueCollection values,
             string url)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(
+               "HTTP form POST migration has not been implemented yet.");
         }
 
         /// <summary>
-        /// Refreshes the cached system proxy configuration.
+        /// Refreshes the cached system proxy used by outgoing HTTP requests.
+        /// The proxy is disabled when the current wiki URL bypasses it.
         /// </summary>
         public static void RefreshProxy()
         {
-            throw new NotImplementedException();
+            IWebProxy proxy = HttpClient.DefaultProxy;
+
+            if (proxy == null ||
+                proxy.IsBypassed(new Uri(Variables.URL)))
+            {
+                _systemProxy = null;
+                return;
+            }
+
+            proxy.Credentials = CredentialCache.DefaultCredentials;
+            _systemProxy = proxy;
         }
 
         /// <summary>
-        /// Creates a configured <see cref="HttpClient"/> instance using the
-        /// current proxy settings, automatic decompression, default credentials,
-        /// and the standard AutoWikiBrowser user agent.
+        /// Creates a configured <see cref="HttpClient"/> using AWB's current
+        /// proxy, decompression, credential, timeout, and user-agent settings.
         /// </summary>
         /// <param name="userAgent">
-        /// Optional user-agent string. If omitted, the default AWB user agent is used.
+        /// Optional user-agent value. The standard AWB user agent is used when omitted.
         /// </param>
-        /// <returns>A configured <see cref="HttpClient"/>.</returns>
+        /// <returns>A configured HTTP client.</returns>
         private static HttpClient CreateClient(string userAgent = null)
         {
             HttpClientHandler handler = new HttpClientHandler
@@ -80,15 +92,11 @@ namespace WikiFunctions.Networking
                     DecompressionMethods.GZip |
                     DecompressionMethods.Deflate,
 
-                UseDefaultCredentials = true
-            };
+                UseDefaultCredentials = true,
 
-            if (_systemProxy != null)
-            {
-                _systemProxy.Credentials = CredentialCache.DefaultCredentials;
-                handler.Proxy = _systemProxy;
-                handler.UseProxy = true;
-            }
+                Proxy = _systemProxy,
+                UseProxy = _systemProxy != null
+            };
 
             HttpClient client = new HttpClient(handler)
             {

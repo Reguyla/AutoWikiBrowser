@@ -542,21 +542,13 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Refreshs the system proxy.
+        /// Refreshes the HTTP proxy used by AWB networking operations.
         /// </summary>
         public static void RefreshProxy()
         {
-            // no Internet Explorer available on Linux, so GetSystemWebProxy doesn't work, so disable to avoid 60-second timeouts when offline (unit tests etc.)
-            if(Globals.UsingLinux)
-                return;
-
-            SystemProxy = WebRequest.GetSystemWebProxy();
-            if (SystemProxy.IsBypassed(new Uri(URL)))
-            {
-                SystemProxy = null;
-            }
+            Networking.AwbHttpClient.RefreshProxy();
         }
-         
+
         #endregion
 
         // for logging, these will probably need internationalizing
