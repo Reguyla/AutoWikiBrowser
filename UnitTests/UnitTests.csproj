@@ -5,6 +5,7 @@
   <UseWindowsForms>true</UseWindowsForms>
   <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  <IsTestProject>true</IsTestProject>
 
   <AppConfig>App.config</AppConfig>
   <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -28,6 +29,7 @@
     <Analyzer Include="..\packages\NUnit.Analyzers.4.6.0\analyzers\dotnet\cs\nunit.analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="NUnit" Version="4.3.2" />
     <PackageReference Include="NUnit.Analyzers" Version="4.6.0" />
     <PackageReference Include="NUnit.Console" Version="3.22.0" />
