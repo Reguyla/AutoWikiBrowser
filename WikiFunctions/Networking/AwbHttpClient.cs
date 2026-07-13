@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using WikiFunctions.Plugin;
 
 namespace WikiFunctions.Networking
@@ -38,8 +40,63 @@ namespace WikiFunctions.Networking
             out string responseUrl,
             IAutoWikiBrowser awb = null)
         {
-            throw new NotImplementedException(
-                "HTTP GET migration has not been implemented yet.");
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentException(
+                    "A URL is required.",
+                    nameof(url));
+
+            if (encoding == null)
+                throw new ArgumentNullException(nameof(encoding));
+
+            if (Globals.UnitTestMode)
+            {
+                throw new InvalidOperationException(
+                    "You shouldn't access Wikipedia from unit tests.");
+            }
+
+            Tools.WriteDebug("AwbHttpClient::GetString", url);
+
+            using HttpClient client = CreateClient(url, awb);
+
+            while (true)
+            {
+                using HttpRequestMessage request =
+                    new HttpRequestMessage(HttpMethod.Get, url);
+
+                using HttpResponseMessage response = client.Send(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead);
+
+                int retrySeconds = ParseRetry(response);
+
+                if (retrySeconds >= 0)
+                {
+                    if (retrySeconds > 0)
+                    {
+                        Tools.WriteDebug(
+                            "AwbHttpClient::GetString",
+                            $"HTTP {(int)response.StatusCode} and Retry-After " +
+                            $"{retrySeconds}; pausing to allow retry");
+
+                        Thread.Sleep(retrySeconds * 1000);
+                    }
+
+                    continue;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                responseUrl =
+                    response.RequestMessage?.RequestUri?.ToString() ?? url;
+
+                using Stream responseStream =
+                    response.Content.ReadAsStream();
+
+                using StreamReader reader =
+                    new StreamReader(responseStream, encoding);
+
+                return reader.ReadToEnd();
+            }
         }
 
         /// <summary>
@@ -78,14 +135,27 @@ namespace WikiFunctions.Networking
 
         /// <summary>
         /// Creates a configured <see cref="HttpClient"/> using AWB's current
-        /// proxy, decompression, credential, timeout, and user-agent settings.
+        /// proxy, cookies, decompression, credentials, timeout, and user-agent
+        /// settings.
         /// </summary>
+        /// <param name="url">
+        /// The destination URL used to select the appropriate session cookies.
+        /// </param>
+        /// <param name="awb">
+        /// Optional AutoWikiBrowser instance containing the current session.
+        /// </param>
         /// <param name="userAgent">
-        /// Optional user-agent value. The standard AWB user agent is used when omitted.
+        /// Optional explicit user-agent. When omitted, the appropriate AWB
+        /// user-agent is selected from the supplied session.
         /// </param>
         /// <returns>A configured HTTP client.</returns>
-        private static HttpClient CreateClient(string userAgent = null)
+        private static HttpClient CreateClient(
+            string url,
+            IAutoWikiBrowser awb = null,
+            string userAgent = null)
         {
+            CookieContainer cookies = Tools.GetCookieContainer(url, awb);
+
             HttpClientHandler handler = new HttpClientHandler
             {
                 AutomaticDecompression =
@@ -95,7 +165,10 @@ namespace WikiFunctions.Networking
                 UseDefaultCredentials = true,
 
                 Proxy = _systemProxy,
-                UseProxy = _systemProxy != null
+                UseProxy = _systemProxy != null,
+
+                UseCookies = true,
+                CookieContainer = cookies
             };
 
             HttpClient client = new HttpClient(handler)
@@ -103,12 +176,54 @@ namespace WikiFunctions.Networking
                 Timeout = TimeSpan.FromSeconds(15)
             };
 
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(
-                string.IsNullOrEmpty(userAgent)
-                    ? Tools.DefaultUserAgentString
-                    : userAgent);
+            string requestUserAgent = string.IsNullOrEmpty(userAgent)
+                ? Tools.GetRequestUserAgent(awb)
+                : userAgent;
+
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(requestUserAgent);
 
             return client;
+        }
+
+        /// <summary>
+        /// Determines whether an HTTP response requests a retry.
+        /// </summary>
+        /// <param name="response">The HTTP response to inspect.</param>
+        /// <returns>
+        /// The number of seconds to wait, zero for an immediate retry,
+        /// or -1 when no retry is requested.
+        /// </returns>
+        private static int ParseRetry(HttpResponseMessage response)
+        {
+            int statusCode = (int)response.StatusCode;
+            var retryAfter = response.Headers.RetryAfter;
+
+            if (statusCode != 429 &&
+                statusCode != 503 &&
+                retryAfter == null)
+            {
+                return -1;
+            }
+
+            int retrySeconds;
+
+            if (retryAfter?.Delta != null)
+            {
+                retrySeconds = Convert.ToInt32(
+                    Math.Ceiling(retryAfter.Delta.Value.TotalSeconds));
+            }
+            else if (retryAfter?.Date != null)
+            {
+                retrySeconds = Convert.ToInt32(
+                    (retryAfter.Date.Value.UtcDateTime - DateTime.UtcNow)
+                    .TotalSeconds);
+            }
+            else
+            {
+                retrySeconds = statusCode == 503 ? 60 : 5;
+            }
+
+            return Math.Max(retrySeconds, 0);
         }
     }
 }

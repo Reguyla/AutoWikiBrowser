@@ -3622,28 +3622,49 @@ Message: {2}
         }
 
         /// <summary>
-        /// Applies an authenticated AWB user-agent when a logged-in user is available.
+        /// Gets the appropriate user-agent string for the supplied AWB session.
         /// </summary>
-        public static void ApplyAuthenticatedUserAgent(HttpWebRequest request, IAutoWikiBrowser awb)
+        /// <param name="awb">
+        /// Optional AutoWikiBrowser instance containing the current session.
+        /// </param>
+        /// <returns>
+        /// The authenticated user-agent when a logged-in user is available;
+        /// otherwise, the standard AWB user-agent.
+        /// </returns>
+        public static string GetRequestUserAgent(IAutoWikiBrowser awb)
         {
-            if (request == null || awb == null || awb.TheSession == null)
-                return;
+            if (awb == null || awb.TheSession == null)
+                return DefaultUserAgentString;
 
             UserInfo user = awb.TheSession.User;
 
-            if (user == null || !user.IsLoggedIn)
-                return;
+            if (user == null ||
+                !user.IsLoggedIn ||
+                string.IsNullOrEmpty(user.Name))
+            {
+                return DefaultUserAgentString;
+            }
 
-            string username = user.Name;
-
-            if (string.IsNullOrEmpty(username))
-                return;
-
-            request.UserAgent = AuthUserAgentString.Replace("###",
-                string.Format("{0}:{1}; User:{2}",
+            return AuthUserAgentString.Replace(
+                "###",
+                string.Format(
+                    "{0}:{1}; User:{2}",
                     Variables.Project,
                     Variables.LangCode,
-                    username));
+                    user.Name));
+        }
+
+        /// <summary>
+        /// Applies the appropriate AWB user-agent to a legacy web request.
+        /// </summary>
+        public static void ApplyAuthenticatedUserAgent(
+            HttpWebRequest request,
+            IAutoWikiBrowser awb)
+        {
+            if (request == null)
+                return;
+
+            request.UserAgent = GetRequestUserAgent(awb);
         }
 
         /// <summary>
