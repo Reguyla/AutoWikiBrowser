@@ -702,8 +702,5 @@ namespace WikiFunctions.Parse
 
         public TypoException(string message, Exception inner)
             : base(message, inner) { }
-
-        protected TypoException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
     }
 }
