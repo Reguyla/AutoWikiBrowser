@@ -926,11 +926,18 @@ namespace WikiFunctions.Controls.Lists
 
             try
             {
-                articles = _providerToRun.MakeList(_providerToRun.UserInputTextBoxEnabled ? _source : new string[0]);
+                if (_stopRequested)
+                    return;
+
+                articles = _providerToRun.MakeList(
+                    _providerToRun.UserInputTextBoxEnabled
+                        ? _source
+                        : Array.Empty<string>());
+
+                if (_stopRequested)
+                    return;
+
                 Add(articles);
-            }
-            catch (ThreadAbortException)
-            {
             }
             catch (FeatureDisabledException fde)
             {
@@ -968,11 +975,20 @@ namespace WikiFunctions.Controls.Lists
             }
             finally
             {
-                if (FilterNonMainAuto)
-                    FilterNonMainArticles();
-                if (FilterDuplicates)
-                    RemoveListDuplicates();
-                StopProgressBar((articles != null) ? articles.Count : 0);
+                if (_stopRequested)
+                {
+                    StopProgressBar(-1);
+                }
+                else
+                {
+                    if (FilterNonMainAuto)
+                        FilterNonMainArticles();
+
+                    if (FilterDuplicates)
+                        RemoveListDuplicates();
+
+                    StopProgressBar(articles?.Count ?? 0);
+                }
             }
         }
 
