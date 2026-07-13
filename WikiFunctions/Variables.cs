@@ -541,11 +541,21 @@ namespace WikiFunctions
             return PrepareWebRequest(url, "");
         }
 
-        /// <summary>
-        /// Refreshes the HTTP proxy used by AWB networking operations.
-        /// </summary>
         public static void RefreshProxy()
         {
+            // no Internet Explorer available on Linux, so GetSystemWebProxy doesn't work,
+            // so disable to avoid long timeouts when offline
+            if (Globals.UsingLinux)
+                return;
+
+            SystemProxy = WebRequest.GetSystemWebProxy();
+
+            if (SystemProxy.IsBypassed(new Uri(URL)))
+            {
+                SystemProxy = null;
+            }
+
+            // Keep the new networking layer synchronized during the migration.
             Networking.AwbHttpClient.RefreshProxy();
         }
 
