@@ -351,6 +351,8 @@ namespace AWBUpdater
             {
                 _updateStatus = UpdateStatus.Error;
                 UpdateUI("   Unable to find AutoWikiBrowser.exe to query its version", true);
+
+                throw new AbortException();
             }
 
             progressUpdate.Value = 35;
@@ -428,12 +430,16 @@ namespace AWBUpdater
                 UpdateUI(
                     $"Download of `{fileUrl}` failed: {ex.Message}",
                     true);
+
+                throw new AbortException("The update package could not be downloaded.", ex);
             }
             catch (IOException ex)
             {
                 UpdateUI(
                     $"Unable to save `{file}`: {ex.Message}",
                     true);
+
+                throw new AbortException("The downloaded update package could not be saved.", ex);
             }
         }
 
