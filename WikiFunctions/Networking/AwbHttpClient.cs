@@ -122,8 +122,14 @@ namespace WikiFunctions.Networking
         {
             IWebProxy proxy = HttpClient.DefaultProxy;
 
-            if (proxy == null ||
-                proxy.IsBypassed(new Uri(Variables.URL)))
+            if (proxy == null)
+            {
+                _systemProxy = null;
+                return;
+            }
+
+            if (Uri.TryCreate(Variables.URL, UriKind.Absolute, out Uri wikiUri) &&
+                proxy.IsBypassed(wikiUri))
             {
                 _systemProxy = null;
                 return;

@@ -32,6 +32,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using WikiFunctions.API;
+using WikiFunctions.Networking;
 using WikiFunctions.Parse;
 using WikiFunctions.Plugin;
 
