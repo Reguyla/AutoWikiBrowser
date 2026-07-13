@@ -18,11 +18,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace WikiFunctions.Controls
 {
@@ -39,7 +40,7 @@ namespace WikiFunctions.Controls
         }
 
         public RegexTester(bool ask)
-            :this()
+            : this()
         {
             AskToApply = ask;
         }
@@ -47,6 +48,7 @@ namespace WikiFunctions.Controls
         public static void Test(Form parent, TextBox find, TextBox replace,
                                 CheckBox multiline, CheckBox singleline, CheckBox caseSensitive)
         {
+
             using (RegexTester t = new RegexTester(true))
             {
                 t.Find = find.Text;
@@ -73,14 +75,14 @@ namespace WikiFunctions.Controls
 
         public string ArticleText
         {
-            set 
+            set
             {
-                 /* Performance: simple "txtInput.Text = value" has poor performance (due to having WrapText=true), using append text improves performance by 2x
-                 For example if find box is a long wiki page .Text= takes 16 seconds, .AppendText only 7 */
-                 txtInput.Text = "";
-                 txtInput.AppendText(value);
-                 txtInput.Select(0, 0);
-                 txtInput.ScrollToCaret();
+                /* Performance: simple "txtInput.Text = value" has poor performance (due to having WrapText=true), using append text improves performance by 2x
+                For example if find box is a long wiki page .Text= takes 16 seconds, .AppendText only 7 */
+                txtInput.Text = "";
+                txtInput.AppendText(value);
+                txtInput.Select(0, 0);
+                txtInput.ScrollToCaret();
             }
         }
 
@@ -175,7 +177,7 @@ namespace WikiFunctions.Controls
             bool enabled = (!string.IsNullOrEmpty(txtFind.Text) && !string.IsNullOrEmpty(txtInput.Text));
             ReplaceBtn.Enabled = FindBtn.Enabled = enabled;
         }
-        
+
         private void KeyPressHandler(object sender, KeyPressEventArgs e)
         {
             switch (e.KeyChar)
@@ -375,7 +377,7 @@ namespace WikiFunctions.Controls
                     Status.Text = "1 replacement performed";
 
                 Status.Text += " in " + sender.GetExecutionTime() + " ms";
-                
+
                 Captures.Visible = false;
                 ResultText.Visible = true;
 
@@ -414,8 +416,9 @@ namespace WikiFunctions.Controls
         public Exception Error;
 
         // private
-        readonly Thread Thr;
-        readonly RegexTester Parent;
+        private readonly Thread Thr;
+        private readonly RegexTester Parent;
+        private volatile bool _cancellationRequested;
 
         private long ExecutionTime;
 
@@ -426,27 +429,40 @@ namespace WikiFunctions.Controls
 
         public RegexRunner(RegexTester parent, string input, Regex regex)
             : this(parent, input, null, regex)
-        { }
+        {
+        }
 
-        public RegexRunner(RegexTester parent, string input, string replace, Regex regex)
+        public RegexRunner(
+            RegexTester parent,
+            string input,
+            string replace,
+            Regex regex)
         {
             Parent = parent;
             Input = input;
             Replace = replace;
-            _Regex = regex;
+
+            _Regex = new Regex(
+                regex.ToString(),
+                regex.Options,
+                TimeSpan.FromSeconds(10));
 
             Thr = new Thread(ThreadFunc)
             {
+                IsBackground = true,
                 Priority = ThreadPriority.BelowNormal,
                 Name = "RegexRunner"
             };
+
             Thr.Start();
         }
 
+        /// <summary>
+        /// Requests cancellation of the regex operation.
+        /// </summary>
         public void Abort()
         {
-            if (Thr != null)
-                Thr.Abort();
+            _cancellationRequested = true;
         }
 
         private void ThreadFunc()
@@ -455,20 +471,27 @@ namespace WikiFunctions.Controls
             {
                 Stopwatch sw = Stopwatch.StartNew();
 
-                // search based on \n for newline
-                Matches = _Regex.Matches(Regex.Replace(Input, "\r\n", "\n"));
+                if (_cancellationRequested)
+                    return;
 
-                System.Collections.Generic.List<Match> UnneededList = new System.Collections.Generic.List<Match>();
-                // force matches to actually run
-                foreach (Match m in Matches)
-                {
-                    UnneededList.Add(m);
-                }
+                Matches = _Regex.Matches(
+                    Regex.Replace(Input, "\r\n", "\n"));
+
+                // Force lazy match evaluation so execution time includes
+                // all regex matching work.
+                _ = Matches.Count;
+
+                if (_cancellationRequested)
+                    return;
 
                 if (Replace != null)
                     Result = _Regex.Replace(Input, Replace);
 
                 ExecutionTime = sw.ElapsedMilliseconds;
+            }
+            catch (RegexMatchTimeoutException ex)
+            {
+                Error = ex;
             }
             catch (Exception ex)
             {
@@ -476,38 +499,16 @@ namespace WikiFunctions.Controls
             }
             finally
             {
-                if (Error == null || !(Error is ThreadAbortException))
-                    Parent.Invoke(new RegexRunnerFinishedDelegate(Parent.RegexRunnerFinished), this);
+                if (!_cancellationRequested &&
+                    !Parent.IsDisposed &&
+                    Parent.IsHandleCreated)
+                {
+                    Parent.BeginInvoke(
+                        new RegexRunnerFinishedDelegate(
+                            Parent.RegexRunnerFinished),
+                        this);
+                }
             }
         }
     }
 }
-
-/*
- * To test regex hangup:
-
- * Check IgnoreCase, Singleline and ExplicitCapture
-
- * Find:
-
-\{\{\s*(?<tl>template *:)?\s*(?<tlname>WikiProject ?Banner ?Shell|WPBS)\b\s*(?<start>\|[^1]*=.*)*\s*\|\s*1\s*=\s*(?<body>.*}}[^{]*?)\s*(?<end>\|[^{]*)?\s*}}
-
- * Input:
-
-{{WikiProjectBannerShell |blp=yes |1=
-{{WikiProject Illinois |class=Start |nested=yes |importance=Low}}
-{{ChicagoWikiProject |class=Start |importance=Low |nested=yes}}
-{{Baseball-WikiProject |class=start |nested=yes}}
-{{WikiProject Boston Red Sox
- |class=Start
- |importance=Low
- |needs-infobox=No
- |needs-photo=Yes
- |attention=
- |auto=
- |nested=yes
-}}
-{{WPBiography|living=no|class=Start|priority=|sports-work-group=yes|listas=Magadan, Dave|nested=yes|activepol=yes|non-bio=yes|politician-work-group=yes}}
-{{WikiProject Texas |class=Start |importance=Low |nested=yes}}
-}}
- */
