@@ -17,17 +17,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
 using System.Windows.Forms;
-using System.Threading;
 
 namespace WikiFunctions.Background
 {
     public partial class PleaseWait : Form
     {
+        /// <summary>
+        /// Occurs when the user requests cancellation of the background operation.
+        /// </summary>
+        public event EventHandler CancelRequested;
+
         delegate void SetTextCallback(string text);
 
         delegate void SetProgressCallback(int completed, int total);
-
-        public Thread Worker;
 
         public PleaseWait()
         {
@@ -36,7 +38,7 @@ namespace WikiFunctions.Background
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            Worker.Abort();
+            CancelRequested?.Invoke(this, EventArgs.Empty);
             Close();
         }
 

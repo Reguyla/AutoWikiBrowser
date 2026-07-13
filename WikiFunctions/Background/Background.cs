@@ -58,6 +58,14 @@ namespace WikiFunctions.Background
     public class BackgroundRequest
     {
         /// <summary>
+        /// Handles cancellation requested through the progress dialog.
+        /// </summary>
+        private void PleaseWaitCancelRequested(object sender, EventArgs e)
+        {
+            Abort();
+        }
+
+        /// <summary>
         /// Gets or sets the result produced by the background operation.
         /// </summary>
         public object Result;
@@ -174,7 +182,7 @@ namespace WikiFunctions.Background
         {
             if (BgThread != null)
                 return BgThread.ThreadState;
-            
+
             return ThreadState.Unstarted;
         }
 
@@ -328,6 +336,7 @@ namespace WikiFunctions.Background
             if (HasUI)
             {
                 UI = new PleaseWait();
+                UI.CancelRequested += PleaseWaitCancelRequested;
                 UI.Show(Variables.MainForm as Form);
             }
 
@@ -341,8 +350,6 @@ namespace WikiFunctions.Background
         {
             // checks links to make them bypass redirects and (TODO) disambigs
             Dictionary<string, string> knownLinks = new Dictionary<string, string>();
-
-            if (HasUI) UI.Worker = Thread.CurrentThread;
 
             IApiEdit editor = ObjParam1 as IApiEdit;
 
@@ -370,7 +377,7 @@ namespace WikiFunctions.Background
                 foreach (Match m in links)
                 {
                     string link = m.Value;
-                    string article = m.Groups[1].Value.TrimStart(new[] {':'});
+                    string article = m.Groups[1].Value.TrimStart(new[] { ':' });
 
                     // if the link is unpiped, use the target as the new link's pipe text
                     string linkText = (!string.IsNullOrEmpty(m.Groups[2].Value)) ? m.Groups[2].Value : article;
@@ -435,8 +442,12 @@ namespace WikiFunctions.Background
             ObjParam1 = what;
             ObjParam2 = params1;
 
-            if (HasUI) UI = new PleaseWait();
-            if (HasUI) UI.Show(Variables.MainForm as Form);
+            if (HasUI)
+            {
+                UI = new PleaseWait();
+                UI.CancelRequested += PleaseWaitCancelRequested;
+                UI.Show(Variables.MainForm as Form);
+            }
             InitThread(GetListFunc);
         }
 
@@ -453,14 +464,19 @@ namespace WikiFunctions.Background
         {
             if (HasUI)
             {
-                UI.Worker = Thread.CurrentThread;
-
                 UI.Status = "Getting list of pages";
             }
 
             try
             {
+                if (_cancellationRequested)
+                    return;
+
                 Result = ((IListProvider)ObjParam1).MakeList((string[])ObjParam2);
+
+                if (_cancellationRequested)
+                    return;
+
                 InvokeOnComplete();
             }
             catch (Exception e)
