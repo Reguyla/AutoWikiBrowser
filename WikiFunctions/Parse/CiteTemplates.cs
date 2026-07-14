@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -67,7 +64,7 @@ namespace WikiFunctions.Parse
 
         private static readonly Regex UnspacedCommaPageRange = new Regex(@"((?:[ ,–]|^)[0-9]+),([0-9]+(?:[ ,–]|$))");
 
-        private static readonly List<string> ParametersToDequote = new List<string>(new[] {"title", "trans_title"});
+        private static readonly List<string> ParametersToDequote = new List<string>(new[] { "title", "trans_title" });
         private static readonly Regex rpTemplate = Tools.NestedTemplateRegex("rp");
         private static readonly char[] TemplateNameEndChars = "}|".ToCharArray();
 
@@ -130,7 +127,7 @@ namespace WikiFunctions.Parse
                         // rp can be simple {{rp|1-7}} or {{rp|pp=1-7}} so handle both formats
                         Dictionary<string, string> Params = Tools.GetTemplateParameterValues(m.Value);
 
-                        if(Params.Any())
+                        if (Params.Any())
                             return FixPageRanges(m.Value, Params);
                         else
                         {
@@ -291,7 +288,7 @@ namespace WikiFunctions.Parse
             }
 
             // newlines to spaces in all parameters
-            foreach(KeyValuePair<string, string> newlines in paramsFound.Where(p => p.Value.Contains("\r\n")))
+            foreach (KeyValuePair<string, string> newlines in paramsFound.Where(p => p.Value.Contains("\r\n")))
             {
                 newValue = Tools.UpdateTemplateParameterValue(newValue, newlines.Key, newlines.Value.Replace("\r\n", " "));
             }
@@ -322,7 +319,7 @@ namespace WikiFunctions.Parse
 
                     // trim stray quotes (but don't change title in quotes as this may be a title that is itself a quote)
                     // don't change if contains hidetext marker - we can't say what quote marks are or aren't in the hidden text
-                    if(!quotetitle.Trim('"').Contains(@"""") &&!quotetitle.Contains("⌊⌊⌊⌊"))
+                    if (!quotetitle.Trim('"').Contains(@"""") && !quotetitle.Contains("⌊⌊⌊⌊"))
                     {
                         if (quotetitle.StartsWith(@"""") && !quotetitle.EndsWith(@""""))
                             quotetitle = quotetitle.TrimStart('"');
@@ -421,7 +418,7 @@ namespace WikiFunctions.Parse
             // correct volume=vol 7... and issue=no. 8 for {{cite journal}} only
             if (templatename.Equals("cite journal", StringComparison.OrdinalIgnoreCase))
             {
-                if(TheVolume.Length > 0)
+                if (TheVolume.Length > 0)
                     newValue = CiteTemplatesJournalVolume.Replace(newValue, "");
                 if (TheIssue.Length > 0)
                     newValue = CiteTemplatesJournalIssue.Replace(newValue, "");
@@ -433,13 +430,13 @@ namespace WikiFunctions.Parse
                 newValue = Tools.RenameTemplate(newValue, templatename, "Cite book");
 
             // remove leading zero in day of month
-            if(paramsFound.Any(p => p.Key.Contains("date") && Regex.IsMatch(p.Value, @"\b0[1-9]")))
+            if (paramsFound.Any(p => p.Key.Contains("date") && Regex.IsMatch(p.Value, @"\b0[1-9]")))
             {
                 newValue = DateLeadingZero.Replace(newValue, @"$1$2$3$4$5");
                 newValue = DateLeadingZero.Replace(newValue, @"$1$2$3$4$5");
                 TheDate = Tools.GetTemplateParameterValue(newValue, "date");
                 accessdate = Tools.GetTemplateParameterValue(newValue, "accessdate");
-                if(accessdate.Length == 0)
+                if (accessdate.Length == 0)
                     accessdate = Tools.GetTemplateParameterValue(newValue, "access-date");
             }
 
@@ -512,7 +509,7 @@ namespace WikiFunctions.Parse
                 }
             }
             // catch after any other fixes
-            if(!IncorrectCommaAmericanDates.IsMatch(theURLoriginal))
+            if (!IncorrectCommaAmericanDates.IsMatch(theURLoriginal))
                 newValue = IncorrectCommaAmericanDates.Replace(newValue, @"$1 $2, $3");
 
             // URL starting www needs http://
@@ -564,7 +561,7 @@ namespace WikiFunctions.Parse
                 newValue += (" " + deadLink);
             }
 
-            if(id.Length > 0)
+            if (id.Length > 0)
             {
                 // get id param name, id or ID
                 string idParamName = paramsFound.FirstOrDefault(p => p.Key == "ID" || p.Key == "id").Key;
@@ -594,12 +591,12 @@ namespace WikiFunctions.Parse
             }
 
             // format ISSN: 1234-5678 with hyphen
-            if(ISSN.Length > 0)
+            if (ISSN.Length > 0)
             {
-                string newISSN = Regex.Replace (ISSN, @"^([0-9]{4}) *[- –]* *([0-9]{3}[0-9X])$", "$1-$2");
+                string newISSN = Regex.Replace(ISSN, @"^([0-9]{4}) *[- –]* *([0-9]{3}[0-9X])$", "$1-$2");
 
-                if (!newISSN.Equals (ISSN))
-                    newValue = Tools.UpdateTemplateParameterValue (newValue, paramsFound.FirstOrDefault (p => p.Key == "ISSN" || p.Key == "issn").Key, newISSN);
+                if (!newISSN.Equals(ISSN))
+                    newValue = Tools.UpdateTemplateParameterValue(newValue, paramsFound.FirstOrDefault(p => p.Key == "ISSN" || p.Key == "issn").Key, newISSN);
             }
 
             if (ISBN.Length > 0)
@@ -642,7 +639,7 @@ namespace WikiFunctions.Parse
 
         #region PageRanges
 
-        private static readonly List<string> PageFields = new List<string>(new[] {"page", "pages", "p", "pp"});
+        private static readonly List<string> PageFields = new List<string>(new[] { "page", "pages", "p", "pp" });
         private static readonly Regex PageRange = new Regex(@"\b([0-9]{1,8})\s*[-—]+\s*([0-9]{1,8})");
         private static readonly Regex SpacedPageRange = new Regex(@"(\d+) +(–|&ndash;) +(\d)");
         private static readonly Regex HiddenRegex = new Regex("⌊⌊⌊⌊(\\d*)⌋⌋⌋⌋");
@@ -656,7 +653,7 @@ namespace WikiFunctions.Parse
         /// <returns>The updated template call</returns>
         private static string FixPageRanges(string templateCall, Dictionary<string, string> Params)
         {
-            foreach(KeyValuePair<string, string> kvp in Params.Where(x => PageFields.Contains(x.Key) && x.Value.Length > 0
+            foreach (KeyValuePair<string, string> kvp in Params.Where(x => PageFields.Contains(x.Key) && x.Value.Length > 0
                 && !HiddenRegex.IsMatch(x.Value) && !x.Value.Contains("[")))
             {
                 string res = FixPageRangesValue(kvp.Value);
@@ -718,13 +715,13 @@ namespace WikiFunctions.Parse
         #region CitationPublisherToWork
 
         private static readonly Regex CiteWebOrNews =
-            Tools.NestedTemplateRegex(new[] {"cite web", "citeweb", "cite news", "citenews"});
+            Tools.NestedTemplateRegex(new[] { "cite web", "citeweb", "cite news", "citenews" });
 
         private static readonly Regex PressPublishers = new Regex(@"(Associated Press|United Press International)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly List<string> WorkParameterAndAliases =
-            new List<string>(new[] {"work", "newspaper", "journal", "periodical", "magazine"});
+            new List<string>(new[] { "work", "newspaper", "journal", "periodical", "magazine" });
 
         /// <summary>
         /// Where the publisher field is used incorrectly instead of the work field in a {{cite web}} or {{cite news}} citation
@@ -956,7 +953,7 @@ namespace WikiFunctions.Parse
             if (!paramsFound.TryGetValue("journal", out journal))
                 journal = "";
 
-            List<string> dates = new List<string> {accessdate, archivedate, date, date2, airdate};
+            List<string> dates = new List<string> { accessdate, archivedate, date, date2, airdate };
 
             if (CiteTemplateMEParameterToProcess(dates))
             {
@@ -1056,7 +1053,7 @@ namespace WikiFunctions.Parse
 
         #endregion
 
-        private static readonly Regex CiteArXiv = Tools.NestedTemplateRegex(new[] {"cite arxiv", "cite arXiv"});
+        private static readonly Regex CiteArXiv = Tools.NestedTemplateRegex(new[] { "cite arxiv", "cite arXiv" });
         private static readonly Regex CitationPopulatedParameter = new Regex(@"\|\s*([\w_\d- ']+)\s*=\s*([^\|}]+)");
 
         private static readonly Regex citeWebParameters =

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace WikiFunctions.Controls
 {
@@ -22,12 +21,12 @@ namespace WikiFunctions.Controls
         private void txtContains_TextChanged(object sender, EventArgs e)
         {
             // disable TextChanged temporarily under Mono otherwise get infinite loop
-            if(Globals.UsingMono)
+            if (Globals.UsingMono)
                 txtContains.TextChanged -= txtContains_TextChanged;
 
             txtContains.ResetFormatting();
 
-            if(Globals.UsingMono)
+            if (Globals.UsingMono)
                 txtContains.TextChanged += txtContains_TextChanged;
         }
 
@@ -76,7 +75,7 @@ namespace WikiFunctions.Controls
         public bool After
         {
             get { return chkAfterProcessing.Checked; }
-            set { chkAfterProcessing.Checked = value;  }
+            set { chkAfterProcessing.Checked = value; }
         }
 
         /// <summary>

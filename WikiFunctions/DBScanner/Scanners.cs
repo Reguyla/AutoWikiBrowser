@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using WikiFunctions.Parse;
@@ -47,7 +44,7 @@ namespace WikiFunctions.DBScanner
             return (!Tools.IsRedirect(article.Text));
         }
     }
-    
+
     //TODO:Update TextContains etc to use Inheritors of IArticleComparer
 
     /// <summary>
@@ -141,7 +138,7 @@ namespace WikiFunctions.DBScanner
                 return (Actual > Test);
             if (M == MoreLessThan.LessThan)
                 return (Actual < Test);
-            
+
             return (Actual == Test);
         }
     }
@@ -271,7 +268,7 @@ namespace WikiFunctions.DBScanner
             return !Skip;
         }
     }
-    
+
     /// <summary>
     /// Returns whether ReorderReferences fixed something in the article
     /// </summary>
@@ -300,7 +297,7 @@ namespace WikiFunctions.DBScanner
             return !Skip;
         }
     }
-    
+
     /// <summary>
     /// Returns whether the article has unbalanced brackets
     /// </summary>

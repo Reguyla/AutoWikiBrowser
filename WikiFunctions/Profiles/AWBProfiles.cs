@@ -17,11 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Win32;
 using System.Windows.Forms;
 using WikiFunctions.Encryption;
-using Microsoft.Win32;
 
 namespace WikiFunctions.Profiles
 {
@@ -52,7 +50,7 @@ namespace WikiFunctions.Profiles
         /// <returns>Specified <see cref="AWBProfile"/></returns>
         public static AWBProfile GetProfile(int id)
         {
-            AWBProfile prof = new AWBProfile {ID = id};
+            AWBProfile prof = new AWBProfile { ID = id };
 
             try { prof.Username = RegistryGetAndDecryptValue(id + "\\User", ""); }
             catch

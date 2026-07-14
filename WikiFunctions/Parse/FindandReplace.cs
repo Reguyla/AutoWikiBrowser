@@ -17,10 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
+using System.Windows.Forms;
 using WikiFunctions.Controls;
 
 namespace WikiFunctions.Parse
@@ -73,12 +71,12 @@ namespace WikiFunctions.Parse
         private static Replacement RowToReplacement(DataGridViewRow dataGridRow)
         {
             Replacement rep = new Replacement
-                                  {
-                                      Enabled = ((bool)dataGridRow.Cells["enabled"].FormattedValue),
-                                      Minor = ((bool)dataGridRow.Cells["minor"].FormattedValue),
-                                      IsRegex = ((bool)dataGridRow.Cells["regex"].FormattedValue),
-                                      BeforeOrAfter = ((bool)dataGridRow.Cells["BeforeOrAfter"].FormattedValue)
-                                  };
+            {
+                Enabled = ((bool)dataGridRow.Cells["enabled"].FormattedValue),
+                Minor = ((bool)dataGridRow.Cells["minor"].FormattedValue),
+                IsRegex = ((bool)dataGridRow.Cells["regex"].FormattedValue),
+                BeforeOrAfter = ((bool)dataGridRow.Cells["BeforeOrAfter"].FormattedValue)
+            };
 
             if (dataGridRow.Cells["replace"].Value == null)
                 dataGridRow.Cells["replace"].Value = "";
@@ -91,7 +89,7 @@ namespace WikiFunctions.Parse
             {
                 bool newlines = f.Contains("\\n");
                 f = Regex.Escape(f);
-                
+
                 if (newlines)
                     f = f.Replace(@"\\n", "\n");
             }
@@ -118,7 +116,7 @@ namespace WikiFunctions.Parse
         /// </summary>
         public void MakeList()
         {
-            dataGridView1.EndEdit();_replacementList.Clear();
+            dataGridView1.EndEdit(); _replacementList.Clear();
 
             foreach (DataGridViewRow dataGridRow in dataGridView1.Rows)
             {
@@ -158,7 +156,7 @@ namespace WikiFunctions.Parse
                 return HasProcessingReplacements(true);
             }
         }
-        
+
         /// <summary>
         /// Returns whether any of the enabled find & replace entries are specified to be run at before/after as input
         /// </summary>
@@ -241,7 +239,7 @@ namespace WikiFunctions.Parse
                     else if (Variables.LangCode.Equals("eo"))
                         editSummary = "anstataŭigis: " + ReplacedSummary.Trim();
                     else if (Variables.LangCode.Equals("fa"))
-                                                editSummary = "جایگزین شد: " + ReplacedSummary.Trim();
+                        editSummary = "جایگزین شد: " + ReplacedSummary.Trim();
                     else if (Variables.LangCode.Equals("fr"))
                         editSummary = "remplacement: " + ReplacedSummary.Trim();
                     else if (Variables.LangCode.Equals("hy"))
@@ -258,9 +256,9 @@ namespace WikiFunctions.Parse
                     if (!string.IsNullOrEmpty(editSummary))
                     {
                         if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
-                        editSummary += "، ";
+                            editSummary += "، ";
                         else
-                        editSummary += ", ";
+                            editSummary += ", ";
                     }
 
                     if (Variables.LangCode.Equals("ar"))
@@ -274,7 +272,7 @@ namespace WikiFunctions.Parse
                     else if (Variables.LangCode.Equals("eo"))
                         editSummary += "forigis: " + RemovedSummary.Trim();
                     else if (Variables.LangCode.Equals("fa"))
-                                                editSummary += "حذف شده: " + RemovedSummary.Trim();
+                        editSummary += "حذف شده: " + RemovedSummary.Trim();
                     else if (Variables.LangCode.Equals("fr"))
                         editSummary += "retrait: " + RemovedSummary.Trim();
                     else if (Variables.LangCode.Equals("hy"))
@@ -320,37 +318,38 @@ namespace WikiFunctions.Parse
             int Repcount = 0, Remcount = 0;
 
             // use first replace that changes article text to generate edit summary
-            string res = findRegex.Replace(articleText, m =>  {
-                                               string mres = m.Result(replaceWith);
+            string res = findRegex.Replace(articleText, m =>
+            {
+                string mres = m.Result(replaceWith);
 
-                                               if (!m.Value.Equals(mres))
-                                               {
-                                                   if (!string.IsNullOrEmpty(mres))
-                                                   {
-                                                       if (Repcount == 0)
-                                                       {
-                                                           if (!string.IsNullOrEmpty(ReplacedSummary)) //Add comma before next replaced
-                                                               ReplacedSummary += comma;
+                if (!m.Value.Equals(mres))
+                {
+                    if (!string.IsNullOrEmpty(mres))
+                    {
+                        if (Repcount == 0)
+                        {
+                            if (!string.IsNullOrEmpty(ReplacedSummary)) //Add comma before next replaced
+                                ReplacedSummary += comma;
 
-                                                           ReplacedSummary += m.Value + Arrow + mres;
-                                                       }
-                                                       Repcount++;
-                                                   }
-                                                   else
-                                                   {
-                                                       if (Remcount == 0)
-                                                       {
-                                                           if (!string.IsNullOrEmpty(RemovedSummary)) //Add comma before next removed
-                                                               RemovedSummary += comma;
+                            ReplacedSummary += m.Value + Arrow + mres;
+                        }
+                        Repcount++;
+                    }
+                    else
+                    {
+                        if (Remcount == 0)
+                        {
+                            if (!string.IsNullOrEmpty(RemovedSummary)) //Add comma before next removed
+                                RemovedSummary += comma;
 
-                                                           RemovedSummary += m.Value;
-                                                       }
-                                                       Remcount++;
-                                                   }
-                                               }
-                                               
-                                               return mres;
-                                           } );
+                            RemovedSummary += m.Value;
+                        }
+                        Remcount++;
+                    }
+                }
+
+                return mres;
+            });
 
             // update summaries with count of changes
             if (Repcount > 1)
@@ -439,13 +438,13 @@ namespace WikiFunctions.Parse
             bool multiline = (r.RegularExpressionOptions & RegexOptions.Multiline) == RegexOptions.Multiline;
             bool singleLine = (r.RegularExpressionOptions & RegexOptions.Singleline) == RegexOptions.Singleline;
 
-            if(decodeRequired)
+            if (decodeRequired)
                 dataGridView1.Rows.Add(r.IsRegex ? Decode(r.Find) : Regex.Unescape(Decode(r.Find)), Decode(r.Replace),
                                    caseSens, r.IsRegex, multiline, singleLine, r.Minor, r.BeforeOrAfter, r.Enabled, r.Comment);
             else
                 dataGridView1.Rows.Add(r.IsRegex ? r.Find : Regex.Unescape(r.Find), r.Replace,
                     caseSens, r.IsRegex, multiline, singleLine, r.Minor, r.BeforeOrAfter, r.Enabled, r.Comment);
-            
+
             _replacementList.Add(r);
         }
 
@@ -668,7 +667,7 @@ namespace WikiFunctions.Parse
                 chkIgnoreLinks.Enabled = false;
             }
             else
-                 chkIgnoreLinks.Enabled = true;
+                chkIgnoreLinks.Enabled = true;
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
@@ -681,7 +680,7 @@ namespace WikiFunctions.Parse
         {
             // row index of currently highlighted cell (if any)
             int currentRowIndex = dataGridView1.CurrentCell == null
-                ? -1 
+                ? -1
                 : dataGridView1.CurrentCell.RowIndex;
 
             // get list of all cells with text match
@@ -762,7 +761,7 @@ namespace WikiFunctions.Parse
                     ApplyDefaultFormatting = false;
                     dataGridView1.Rows.Insert(index - 1, tmp);
                     ApplyDefaultFormatting = true;
-                    SelectRowAndFocusColumn(index-1);
+                    SelectRowAndFocusColumn(index - 1);
                 }
             }
         }
@@ -780,7 +779,7 @@ namespace WikiFunctions.Parse
                     ApplyDefaultFormatting = false;
                     dataGridView1.Rows.Insert(index + 1, tmp);
                     ApplyDefaultFormatting = true;
-                    SelectRowAndFocusColumn(index+1);
+                    SelectRowAndFocusColumn(index + 1);
                 }
             }
         }
@@ -814,7 +813,7 @@ namespace WikiFunctions.Parse
                     ApplyDefaultFormatting = false;
                     dataGridView1.Rows.Add(tmp);
                     ApplyDefaultFormatting = true;
-                    SelectRowAndFocusColumn(dataGridView1.Rows.Count-2); // zero based row and always one blank at end
+                    SelectRowAndFocusColumn(dataGridView1.Rows.Count - 2); // zero based row and always one blank at end
                 }
             }
         }

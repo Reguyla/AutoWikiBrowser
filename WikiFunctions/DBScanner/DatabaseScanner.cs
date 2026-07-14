@@ -17,18 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using System.Xml;
 using System.Text.RegularExpressions;
 using System.Threading;
-using WikiFunctions.Lists;
-using WikiFunctions.Controls.Lists;
+using System.Windows.Forms;
+using System.Xml;
 using WikiFunctions.Background;
+using WikiFunctions.Controls.Lists;
+using WikiFunctions.Lists;
 
 namespace WikiFunctions.DBScanner
 {
@@ -246,7 +242,7 @@ namespace WikiFunctions.DBScanner
 
             if (chkCiteTemplateDates.Checked)
                 s.Add(new CiteTemplateDates());
-            
+
             if (chkReorderReferences.Checked)
                 s.Add(new ReorderReferences());
 
@@ -275,9 +271,9 @@ namespace WikiFunctions.DBScanner
                 s.Add(new MissingDefaultsort());
 
             Main = new MainProcess(s, FileName, Priority, chkIgnoreComments.Checked, txtStartFrom.Text)
-                       {
-                           OutputQueue = Queue
-                       };
+            {
+                OutputQueue = Queue
+            };
 
             progressBar.Value = 0;
             Main.StoppedEvent += Stopped;
@@ -622,7 +618,7 @@ namespace WikiFunctions.DBScanner
         private void btnPause_Click(object sender, EventArgs e)
         {
         }
-        
+
         private void StopButton()
         {
             StopButton(true);
@@ -636,7 +632,7 @@ namespace WikiFunctions.DBScanner
                 Main.Stop();
                 Main = null;
             }
-            
+
             if (showMatchesMessage)
             {
                 TimeSpan endTime = new TimeSpan(DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
@@ -844,7 +840,7 @@ namespace WikiFunctions.DBScanner
 
             // show progress bar to nearest %, and detailed percentage to 3 dp
             progressBar.Value = ((int)newValue < progressBar.Maximum) ? (int)newValue : progressBar.Maximum;
-            lblPercentageComplete.Text = string.Format("{0:f3}", newValue/2) + "%"; // show percentage progress to 3 dp
+            lblPercentageComplete.Text = string.Format("{0:f3}", newValue / 2) + "%"; // show percentage progress to 3 dp
 
             // estimate an ETC. based on elapsed time and scan progress so far
             if (completion > 0.001)
@@ -867,7 +863,7 @@ namespace WikiFunctions.DBScanner
                 {
                     var fileName = openXMLDialog.FileName;
                     var extension = Path.GetExtension(fileName);
-                    
+
                     if (extension != null && extension.ToLower() != ".xml")
                     {
                         MessageBox.Show("The Database Scanner works with XML dump files. Please extract any compressed files (gz, bz2, 7z) and try again using the XML file from archive", "Wrong extension");
@@ -968,7 +964,7 @@ namespace WikiFunctions.DBScanner
 
         private void lnkWikiPage_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser/Database_Scanner",false);
+            Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser/Database_Scanner", false);
         }
 
         private void chkSearchDates_CheckedChanged(object sender, EventArgs e)

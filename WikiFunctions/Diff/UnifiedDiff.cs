@@ -2,9 +2,7 @@
  * A utility class for writing unified diffs.
  */
 
-using System;
 using System.Collections;
-using System.IO;
 
 namespace WikiFunctions
 {
@@ -42,7 +40,7 @@ namespace WikiFunctions
                     lines.Add(s);
                 }
             }
-            return (string[]) lines.ToArray(typeof(string));
+            return (string[])lines.ToArray(typeof(string));
         }
 
         public static void WriteUnifiedDiff(Diff diff, TextWriter writer)
@@ -64,7 +62,7 @@ namespace WikiFunctions
                 Diff.Hunk lasthunk = null;
                 if (hunkset.Count > 0)
                 {
-                    lasthunk = (Diff.Hunk) hunkset[hunkset.Count - 1];
+                    lasthunk = (Diff.Hunk)hunkset[hunkset.Count - 1];
                 }
 
                 if (hunk.Same)
@@ -81,7 +79,7 @@ namespace WikiFunctions
                     else
                     {
                         // Small enough context that this unified diff range will not stop.
-                        if (hunk.Left.Count <= context*2)
+                        if (hunk.Left.Count <= context * 2)
                         {
                             hunkset.Add(hunk);
 
@@ -108,7 +106,7 @@ namespace WikiFunctions
                 }
             }
 
-            if (hunkset.Count > 0 && !(hunkset.Count == 1 && ((Diff.Hunk) hunkset[0]).Same))
+            if (hunkset.Count > 0 && !(hunkset.Count == 1 && ((Diff.Hunk)hunkset[0]).Same))
             {
                 WriteUnifiedDiffSection(writer, hunkset);
             }
@@ -116,8 +114,8 @@ namespace WikiFunctions
 
         private static void WriteUnifiedDiffSection(TextWriter writer, ArrayList hunks)
         {
-            Diff.Hunk first = (Diff.Hunk) hunks[0];
-            Diff.Hunk last = (Diff.Hunk) hunks[hunks.Count - 1];
+            Diff.Hunk first = (Diff.Hunk)hunks[0];
+            Diff.Hunk last = (Diff.Hunk)hunks[hunks.Count - 1];
 
             writer.Write("@@ -");
             writer.Write(first.Left.Start + 1);

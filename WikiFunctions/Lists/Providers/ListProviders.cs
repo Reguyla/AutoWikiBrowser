@@ -17,10 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using System.Xml;
 using WikiFunctions.Controls.Lists;
 
@@ -1393,7 +1391,7 @@ namespace WikiFunctions.Lists.Providers
         public override string UserInputTextBoxText
         { get { return "Pages:"; } }
     }
-    
+
     /// <summary>
     /// Returns a list of pages without language links, with no redirects
     /// </summary>
@@ -1779,7 +1777,7 @@ namespace WikiFunctions.Lists.Providers
 
         protected override ICollection<string> Actions
         {
-            get { return new[] {"pageswithprop"}; }
+            get { return new[] { "pageswithprop" }; }
         }
         #endregion
 

@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System.Collections.Generic;
 using System.Xml;
 
 namespace WikiFunctions.Parse
@@ -123,14 +122,14 @@ namespace WikiFunctions.Parse
             {
                 Specials.Add(spec.Attributes["url"].Value.Replace("http://", ""));
             }
-            
+
             foreach (XmlNode lang in matrix.GetElementsByTagName("language"))
             {
                 string langCode = lang.Attributes["code"].Value;
                 string langName;
 
                 // handle exceptional case that be-x-old uses different site name to language code
-                if(langCode.Equals ("be-x-old"))
+                if (langCode.Equals("be-x-old"))
                     langCode = "be-tarask";
 
                 // handle case of wiki not having a name value in sitematrix data
@@ -252,7 +251,7 @@ namespace WikiFunctions.Parse
                 output = new List<string>();
 
             // remove unneeded languages from order
-            for (int i = 0; i < order.Count; )
+            for (int i = 0; i < order.Count;)
             {
                 if (languages.Contains(order[i])) i++;
                 else order.RemoveAt(i);

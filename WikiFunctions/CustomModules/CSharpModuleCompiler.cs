@@ -1,5 +1,4 @@
 ﻿using Microsoft.CSharp;
-using System.Collections.Generic;
 
 namespace WikiFunctions.CustomModules
 {
@@ -8,7 +7,7 @@ namespace WikiFunctions.CustomModules
     {
         public CSharpCustomModule()
         {
-            Compiler = new CSharpCodeProvider(new Dictionary<string, string> {{"CompilerVersion", "v4.0"}});
+            Compiler = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
         }
 
         public override string Name

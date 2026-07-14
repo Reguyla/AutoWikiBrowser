@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -76,10 +72,10 @@ namespace WikiFunctions.Parse
 
             articleText = sb.ToString();
         }
-        
+
         private static readonly Regex CiteTitleYear = new Regex(@"(?<=\|\s*(?:trans_)?title\s*=\s*)[^\|{}<>]*[12][0-9]{3}\b", RegexOptions.Compiled);
         private static readonly Regex CiteTitleYearQ = new Regex(@"(?<=\|\s*(?:trans_)?title\s*=\s*"")[^\|{}<>""]*[12][0-9]{3}\b", RegexOptions.Compiled);
-        private static readonly Regex MathCodeTypoTemplates = Tools.NestedTemplateRegex(new [] { "math", "code", "As written", "Notatypo", "Not a typo", "Proper name", "Typo" });
+        private static readonly Regex MathCodeTypoTemplates = Tools.NestedTemplateRegex(new[] { "math", "code", "As written", "Notatypo", "Not a typo", "Proper name", "Typo" });
         private static readonly Regex RetainBraces = new Regex(@"(?<=\[\[).+(?=\]\])", RegexOptions.Singleline);
         private static readonly Regex RetainStartBraces = new Regex(@"(?<=\[\[).+", RegexOptions.Singleline);
         private static readonly Regex RetainEndBraces = new Regex(@".+(?=\]\])", RegexOptions.Singleline);
@@ -99,7 +95,7 @@ namespace WikiFunctions.Parse
 
             // performance: get all tags in format <tag...> in article, apply Replace only if needed
             List<string> AnyTagList = (from Match m in AnyTag.Matches(articleText)
-                select m.Groups[1].Value.Trim().ToLower()).ToList();
+                                       select m.Groups[1].Value.Trim().ToLower()).ToList();
 
             if (AnyTagList.Any(t => t.Equals("tt") || t.StartsWith("syntaxhighlight") || t.Equals("code") || t.StartsWith("source")))
                 Replace(WikiRegexes.SourceCode.Matches(articleText), ref articleText);
@@ -112,7 +108,7 @@ namespace WikiFunctions.Parse
                 string res = m.Value;
                 if (!LeaveMetaHeadings || !NoWikiIgnoreRegex.IsMatch(m.Value))
                 {
-                    if(WikiCommentsLookAround.IsMatch(res))
+                    if (WikiCommentsLookAround.IsMatch(res))
                         Replace(WikiCommentsLookAround.Matches(res), ref res);
                     else
                         Replace(WikiRegexes.UnformattedText.Matches(res), ref res);
@@ -128,15 +124,16 @@ namespace WikiFunctions.Parse
                 List<Match> matches2 = (from Match m in WikiRegexes.PossibleInterwikis.Matches(articleText) where SiteMatrix.Languages.Contains(m.Groups[1].Value.ToLower()) select m).ToList();
                 Replace(matches2, ref articleText);
             }
-            
+
             if (HideImages)
             {
                 // hide all image links but retain any braces at either end
-                articleText = WikiRegexes.Images.Replace(articleText, m => {
+                articleText = WikiRegexes.Images.Replace(articleText, m =>
+                {
                     string res = m.Value;
 
                     // don't hide URL parameter starting www as FixCitationTemplates will fix these
-                    if(res.TrimStart().StartsWith("www.", StringComparison.OrdinalIgnoreCase))
+                    if (res.TrimStart().StartsWith("www.", StringComparison.OrdinalIgnoreCase))
                         return res;
 
                     if (res.StartsWith("[["))
@@ -150,7 +147,8 @@ namespace WikiFunctions.Parse
                         Replace(RetainEndBraces.Matches(res), ref res);
                     else
                         Replace(All.Matches(res), ref res);
-                    return res;});
+                    return res;
+                });
 
                 if (AnyTagList.Any(t => t.Contains("imagemap")))
                     Replace(WikiRegexes.ImageMap.Matches(articleText), ref articleText);
@@ -161,10 +159,12 @@ namespace WikiFunctions.Parse
 
                 // gallery tag does not require Image: namespace link before image in gallery, so hide anything before pipe
                 if (AnyTagList.Any(t => t.Contains("gallery")))
-                    articleText = WikiRegexes.GalleryTag.Replace(articleText, m => {
+                    articleText = WikiRegexes.GalleryTag.Replace(articleText, m =>
+                    {
                         string res = m.Value;
                         Replace(ImageToBar.Matches(res), ref res);
-                        return res;});
+                        return res;
+                    });
             }
 
             cachedArticleTextAfterHide = articleText;
@@ -223,7 +223,7 @@ namespace WikiFunctions.Parse
         public string HideUnformatted(string articleText)
         {
             HiddenUnformattedText.Clear();
-            
+
             Replace(WikiRegexes.UnformattedText.Matches(articleText), ref articleText, HiddenUnformattedText);
 
             return articleText;
@@ -290,7 +290,7 @@ namespace WikiFunctions.Parse
         {
             return HideMore(articleText, hideOnlyTargetOfWikilink, true, true);
         }
-        
+
         /// <summary>
         /// Hides images, external links, templates, headings and italics
         /// </summary>
@@ -305,7 +305,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex AnyTag = new Regex(@"<([^<>]+)>");
         private static readonly Regex ImageToBar = new Regex(@"^.+?\.[a-zA-Z]{3,4}\s*(?=\||\r\n)", RegexOptions.Multiline);
         private static readonly Regex SimpleRef = new Regex(@"<ref>[^<>]+</ref>");
-        private static readonly Regex TemplatesWithContentExemptFromHideMore = Tools.NestedTemplateRegex(new[] {"Short description"});
+        private static readonly Regex TemplatesWithContentExemptFromHideMore = Tools.NestedTemplateRegex(new[] { "Short description" });
 
         /// <summary>
         /// Hides images, external links, templates, headings
@@ -320,7 +320,8 @@ namespace WikiFunctions.Parse
             MoreHide.Clear();
             cachedOriginalArticleTextBeforeHideMore = articleText;
 
-            articleText = WikiRegexes.NestedTemplates.Replace(articleText, m => {
+            articleText = WikiRegexes.NestedTemplates.Replace(articleText, m =>
+            {
                 string res = m.Value;
 
                 // if template is one of these listed then we only need to hide the template name e.g. so that Typo fixing enabled on content of {{Short description}}
@@ -331,7 +332,8 @@ namespace WikiFunctions.Parse
                 }
                 else
                     ReplaceMore(WikiRegexes.NestedTemplates.Matches(res), ref res);
-                return res;});
+                return res;
+            });
 
             ReplaceMore(WikiRegexes.AllTags.Matches(articleText), ref articleText);
 
@@ -344,7 +346,7 @@ namespace WikiFunctions.Parse
                 ReplaceMore(WikiRegexes.ExternalLinksHTTPOnly.Matches(articleText), ref articleText);
 
                 if (articleText.Contains("//"))
-                    ReplaceMore(WikiRegexes.ExternalLinks.Matches(articleText), ref articleText);                    
+                    ReplaceMore(WikiRegexes.ExternalLinks.Matches(articleText), ref articleText);
             }
 
             ReplaceMore(WikiRegexes.Headings.Matches(articleText), ref articleText);
@@ -372,14 +374,16 @@ namespace WikiFunctions.Parse
 
             // performance: get all remaining tags in format <tag...> in article, apply ReplaceMore only if needed
             List<string> AnyTagList = (from Match m in AnyTag.Matches(articleText)
-                select m.Groups[1].Value.Trim().ToLower()).ToList();
+                                       select m.Groups[1].Value.Trim().ToLower()).ToList();
 
             // gallery tag does not require Image: namespace link before image in gallery, so hide anything before pipe
             if (AnyTagList.Any(t => t.Contains("gallery")))
-                articleText = WikiRegexes.GalleryTag.Replace(articleText, m => {
+                articleText = WikiRegexes.GalleryTag.Replace(articleText, m =>
+                {
                     string res = m.Value;
                     ReplaceMore(ImageToBar.Matches(res), ref res);
-                    return res;});
+                    return res;
+                });
 
             // this hides only the target of a link, leaving the pipe exposed
             if (hideWikiLinks)

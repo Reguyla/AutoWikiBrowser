@@ -17,7 +17,6 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WikiFunctions.Parse;
@@ -64,7 +63,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         public override Control CreateControl(IRuleControlOwner owner, Control.ControlCollection collection, System.Drawing.Point pos)
         {
-            RuleControl rc = new RuleControl(owner) {Location = pos};
+            RuleControl rc = new RuleControl(owner) { Location = pos };
             rc.RestoreFromRule(this);
             DisposeControl();
             ruleControl_ = rc;
@@ -125,7 +124,7 @@ namespace WikiFunctions.ReplaceSpecial
 
             if (r.ruletype_ == T.OnWholePage)
                 return ApplyOn(tn, text, title);
-            
+
             return (r.ruletype_ == T.InsideTemplate) ? ApplyInsideTemplate(tn, text, title) : text;
         }
 
@@ -158,9 +157,9 @@ namespace WikiFunctions.ReplaceSpecial
         /// <returns></returns>
         private static bool CheckIf(TreeNode tn, string text)
         {
-            Rule r = (Rule) tn.Tag;
+            Rule r = (Rule)tn.Tag;
 
-            StringComparison sc = (((int) r.ifRegexOptions_ & (int) RegexOptions.IgnoreCase) != 0)
+            StringComparison sc = (((int)r.ifRegexOptions_ & (int)RegexOptions.IgnoreCase) != 0)
                                       ? StringComparison.OrdinalIgnoreCase
                                       : StringComparison.Ordinal;
 

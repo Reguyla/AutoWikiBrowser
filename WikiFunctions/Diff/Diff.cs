@@ -25,9 +25,7 @@
  * as Perl itself" on CPAN it has been deduced that we could use it as Perl is currently
  * multi-licensed under Artistic and GPL.
  */
-using System;
 using System.Collections;
-using System.Text;
 
 using IntList = System.Collections.Generic.List<int>;
 //using TrioList = System.Collections.Generic.List<Algorithm.Diff.Trio>;
@@ -347,7 +345,7 @@ namespace WikiFunctions
             }
 
 
-            return new Patch((Patch.Hunk[]) hunks.ToArray(typeof(Patch.Hunk)));
+            return new Patch((Patch.Hunk[])hunks.ToArray(typeof(Patch.Hunk)));
         }
 
         /*
@@ -374,12 +372,12 @@ namespace WikiFunctions
                 object element = aCollection[index];
                 if (d.ContainsKey(element))
                 {
-                    IntList list = (IntList) d[element];
+                    IntList list = (IntList)d[element];
                     list.Add(index);
                 }
                 else
                 {
-                    IntList list = new IntList {index};
+                    IntList list = new IntList { index };
                     d[element] = list;
                 }
             }
@@ -420,7 +418,7 @@ namespace WikiFunctions
             int low = 0;
             while (low <= high)
             {
-                int index = (high + low)/2;
+                int index = (high + low) / 2;
 
                 int found = array[index];
 
@@ -504,7 +502,7 @@ namespace WikiFunctions
 
             for (int i = aStart; i <= aFinish; i++)
             {
-                IntList aimatches = (IntList) bMatches[a[i]];
+                IntList aimatches = (IntList)bMatches[a[i]];
                 if (aimatches != null)
                 {
                     int k = 0;
@@ -519,7 +517,7 @@ namespace WikiFunctions
                         // oddly, it's faster to always test this (CPU cache?).
                         if (k != -1)
                         {
-                            Trio t = new Trio((Trio) (k > 0 ? links[k - 1] : null), i, j);
+                            Trio t = new Trio((Trio)(k > 0 ? links[k - 1] : null), i, j);
                             if (k == links.Count)
                                 links.Add(t);
                             else
@@ -531,7 +529,7 @@ namespace WikiFunctions
 
             if (thresh.Count > 0)
             {
-                for (Trio link = (Trio) links[thresh.Count - 1]; link != null; link = link.a)
+                for (Trio link = (Trio)links[thresh.Count - 1]; link != null; link = link.a)
                     matchVector[link.b] = link.c;
             }
 
@@ -606,7 +604,7 @@ namespace WikiFunctions
                 cdif.RemoveAt(0);
             }
 
-            _End = (1 + cdif.Count)/2;
+            _End = (1 + cdif.Count) / 2;
         }
 
         private class Enumerator : IEnumerator
@@ -651,7 +649,7 @@ namespace WikiFunctions
             {
                 if (pos < 0 || diff._End <= pos) pos = -1;
                 _Pos = pos;
-                _Off = 2*pos - 1;
+                _Off = 2 * pos - 1;
             }
 
             private bool next()

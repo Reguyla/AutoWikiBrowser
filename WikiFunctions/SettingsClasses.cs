@@ -26,14 +26,9 @@ How to enable a new setting:
  * Add code to read the deserialised value in UserSettings.cs:LoadPrefs
 */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Serialization;
-using System.Windows.Forms;
-
-using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace WikiFunctions.AWBSettings
 {
@@ -344,7 +339,7 @@ namespace WikiFunctions.AWBSettings
         public string FindText = "";
         public bool FindRegex = false;
         public bool FindCaseSensitive = false;
-        
+
         public bool WordWrap = true;
         public bool ToolBarEnabled = false;
         public bool BypassRedirect = true;
@@ -490,7 +485,7 @@ namespace WikiFunctions.AWBSettings
     public class PrefsKeyPair
     {
         public string Name = "";
-        public object Setting = null; 
+        public object Setting = null;
 
         internal PrefsKeyPair() { }
 

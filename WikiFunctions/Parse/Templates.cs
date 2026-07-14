@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -67,7 +64,7 @@ namespace WikiFunctions.Parse
 
             return TRs;
         }
-        
+
         /// <summary>
         /// Sets the WikiRegexes .AllTemplateRedirects HashSet
         /// </summary>
@@ -142,7 +139,7 @@ namespace WikiFunctions.Parse
                     string valBefore = "";
 
                     // inner loop to handle nested templates
-                    while(res != valBefore)
+                    while (res != valBefore)
                     {
                         valBefore = res;
                         foreach (KeyValuePair<Regex, string> kvp in TemplateRedirects)
@@ -201,7 +198,7 @@ namespace WikiFunctions.Parse
         /// <returns></returns>
         private static List<string> GetAllTemplatesNew(string articleText)
         {
-            lock(GetAllTemplatesNewQueueLock)
+            lock (GetAllTemplatesNewQueueLock)
             {
                 // For performance, use cached result if available: articletext plus List of template names
                 List<string> found = GetAllTemplatesNewQueue.FirstOrDefault(q => q.Key.Equals(articleText)).Value;
@@ -217,7 +214,7 @@ namespace WikiFunctions.Parse
             HashSet<string> innerTemplateContents = new HashSet<string>();
             string originalarticleText = articleText;
 
-            for(;;)
+            for (; ; )
             {
                 List<Match> nt = (from Match m in NestedTemplates.Matches(articleText) select m).ToList();
 
@@ -238,7 +235,7 @@ namespace WikiFunctions.Parse
             TemplateNames = new HashSet<string>(TemplateNames.Select(s => Tools.TurnFirstToUpper(Tools.GetTemplateName(@"{{" + s + @"}}"))));
             List<string> FinalTemplateNames = TemplateNames.ToList();
 
-            lock(GetAllTemplatesNewQueueLock)
+            lock (GetAllTemplatesNewQueueLock)
             {
                 // cache new results, then dequeue oldest if cache full
                 GetAllTemplatesNewQueue.Enqueue(new KeyValuePair<string, List<string>>(originalarticleText, FinalTemplateNames));
@@ -246,7 +243,7 @@ namespace WikiFunctions.Parse
                     GetAllTemplatesNewQueue.Dequeue();
             }
 
-            lock(GetAllTemplatesDetailNewQueueLock)
+            lock (GetAllTemplatesDetailNewQueueLock)
             {
                 GetAllTemplatesDetailNewQueue.Enqueue(new KeyValuePair<string, List<string>>(originalarticleText, TemplateDetail.ToList()));
                 if (GetAllTemplatesDetailNewQueue.Count > 10)
@@ -267,7 +264,7 @@ namespace WikiFunctions.Parse
 
             List<string> found = new List<string>();
 
-            lock(GetAllTemplatesDetailNewQueueLock)
+            lock (GetAllTemplatesDetailNewQueueLock)
             {
                 found = GetAllTemplatesDetailNewQueue.FirstOrDefault(q => q.Key.Equals(articleText)).Value ??
                         new List<string>();
@@ -307,11 +304,11 @@ namespace WikiFunctions.Parse
             Regex r = Tools.NestedTemplateRegex(templatesToProcess);
 
             // Now process distinct templates used in articles using GetAllTemplateDetail
-            foreach(string s in GetAllTemplateDetail(articleText))
+            foreach (string s in GetAllTemplateDetail(articleText))
             {
                 Match m = r.Match(s);
                 // Performance: don't need to process nested templates as GetAllTemplateDetail includes these separately
-                if(m.Success && m.Index == 0)
+                if (m.Success && m.Index == 0)
                 {
                     string res = m.Value;
 
@@ -393,7 +390,7 @@ namespace WikiFunctions.Parse
             {
                 if (n.Index == m.Index)
                 {
-                    res= theTemplate.Match(articleText).Value;
+                    res = theTemplate.Match(articleText).Value;
                     break;
                 }
             }

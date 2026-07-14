@@ -16,9 +16,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using WikiFunctions.Controls;
 
 namespace WikiFunctions.ReplaceSpecial
@@ -145,7 +144,7 @@ namespace WikiFunctions.ReplaceSpecial
         }
 
         private void NameTextbox_KeyDown(object sender, KeyEventArgs e)
-        {            
+        {
             if (e.Modifiers == Keys.Control)
             {
                 if (e.KeyCode == Keys.A)

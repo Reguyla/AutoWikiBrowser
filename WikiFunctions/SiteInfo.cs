@@ -16,15 +16,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
+using System.Net;
 using System.Xml;
 using System.Xml.Serialization;
-using System.Net;
-using Newtonsoft.Json.Linq;
 using WikiFunctions.API;
-using System.Globalization;
 
 namespace WikiFunctions
 {
@@ -63,7 +60,7 @@ namespace WikiFunctions
                 if (!LoadSiteInfo())
                 {
                     var ret = ParseErrorFromSiteInfoOutput();
-                    if (ret is bool && !(bool) ret)
+                    if (ret is bool && !(bool)ret)
                     {
                         throw new WikiUrlException();
                     }
@@ -243,7 +240,7 @@ namespace WikiFunctions
         /// </summary>
         private void LoadAWBTag()
         {
-            var awbTagDefined = (bool?) ObjectCache.Global.Get<bool>("AWBTagDefined:" + scriptPath);
+            var awbTagDefined = (bool?)ObjectCache.Global.Get<bool>("AWBTagDefined:" + scriptPath);
 
             // If it's false, we should look again incase it's been defined...
             if (awbTagDefined == null || awbTagDefined == false)
@@ -263,7 +260,7 @@ namespace WikiFunctions
                     return;
                 }
 
-                awbTagDefined = obj["query"]["tags"].Any(t => (string) t["name"] == "AWB" && t["active"] != null);
+                awbTagDefined = obj["query"]["tags"].Any(t => (string)t["name"] == "AWB" && t["active"] != null);
 
                 ObjectCache.Global.Set("AWBTagDefined:" + scriptPath, awbTagDefined);
             }

@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -1018,7 +1015,8 @@ namespace WikiFunctions.Parse
                 articleText = PossiblyBadRefTags.Replace(articleText, FixReferenceTagsME);
 
                 // remove double quotes inside a ref name in double quotes, ignore group refs
-                articleText = NamedRefExcessQuotes.Replace(articleText, m => {
+                articleText = NamedRefExcessQuotes.Replace(articleText, m =>
+                {
                     if (WikiRegexes.RefsGrouped.IsMatch(m.Groups[3].Value.Contains("/") ? m.Value : m.Value + "a</ref>"))
                         return m.Value;
 

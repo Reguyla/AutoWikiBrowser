@@ -14,10 +14,7 @@ Important:
 // completed successfully, the completed result is preserved.
 */
 
-using System;
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace WikiFunctions.API
 {

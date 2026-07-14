@@ -17,11 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WikiFunctions
 {
@@ -84,7 +81,7 @@ namespace WikiFunctions
         private void RefreshRegexes()
         {
             Regexes.Clear();
-            
+
             // derive optional template namespace prefixes to allow
             string templ = Variables.NamespacesCaseInsensitive[Namespace.Template];
             if (templ[0] == '(')
@@ -94,9 +91,9 @@ namespace WikiFunctions
 
             foreach (string s in TemplateList)
             {
-                if (string.IsNullOrEmpty(s.Trim())) 
+                if (string.IsNullOrEmpty(s.Trim()))
                     continue;
-                
+
                 Regexes.Add(new Regex(@"\{\{\s*" + templ + Tools.FirstLetterCaseInsensitive(Regex.Escape(s)) + @"\s*(\|[^\}]*|)}}",
                     RegexOptions.Singleline), @"{{subst:" + s + "$1}}");
             }
@@ -136,7 +133,7 @@ namespace WikiFunctions
         /// <returns></returns>
         public string SubstituteTemplates(string articleText, string articleTitle)
         {
-            if (!HasSubstitutions) 
+            if (!HasSubstitutions)
                 return articleText; // nothing to substitute
 
             if (chkIgnoreUnformatted.Checked)

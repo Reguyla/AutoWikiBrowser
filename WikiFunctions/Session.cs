@@ -16,15 +16,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 using WikiFunctions.API;
 
 namespace WikiFunctions
@@ -244,7 +241,7 @@ namespace WikiFunctions
                 return false;
             }
             catch (Exception)
-            {                
+            {
                 Editor = CreateEditor("https://en.wikipedia.org/w/");
                 return false;
             }
@@ -289,9 +286,9 @@ namespace WikiFunctions
         private static bool ShouldEnforcePublicAwbVersionGate()
         {
 #if DEBUG
-    // Debug builds have historically been allowed to continue through the
-    // remaining status/config/user checks for regression testing.
-    return false;
+            // Debug builds have historically been allowed to continue through the
+            // remaining status/config/user checks for regression testing.
+            return false;
 #else
             return !AllowForkReleaseVersionGateBypass;
 #endif
@@ -413,7 +410,7 @@ namespace WikiFunctions
 
                 // don't require approval if CheckPage does not exist
                 // Or it has the special config option...
-                if (CheckPageJSONText.Length < 1 || (bool) configJson["allusersenabled"])
+                if (CheckPageJSONText.Length < 1 || (bool)configJson["allusersenabled"])
                 {
                     IsBot = true;
                     return WikiStatusResult.Registered;
@@ -432,7 +429,7 @@ namespace WikiFunctions
                 bool isBotEnabled = enabledBots.Contains(User.Name, usernameComparer);
 
                 if (
-                    (bool) configJson["allusersenabledusermode"] ||
+                    (bool)configJson["allusersenabledusermode"] ||
                     (IsSysop && Variables.Project != ProjectEnum.wikia) ||
                     isBotEnabled ||
                     enabledUsers.Contains(User.Name, usernameComparer)
@@ -517,7 +514,7 @@ namespace WikiFunctions
                 return;
             }
 
-            if (message["enabled"] != null && !(bool) message["enabled"])
+            if (message["enabled"] != null && !(bool)message["enabled"])
             {
                 return;
             }

@@ -17,14 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using WikiFunctions.Controls.Lists;
 using WikiFunctions.Lists.Providers;
-using System.Linq;
 
 namespace WikiFunctions.Lists
 {
@@ -162,7 +159,7 @@ namespace WikiFunctions.Lists
         {
             FilterListNew();
         }
-        
+
         private void FilterListNew()
         {
             List<Article> remove = new List<Article>(lbRemove);
@@ -281,7 +278,7 @@ namespace WikiFunctions.Lists
                 cbOpType.SelectedIndex = _prefs.opType;
 
                 lbRemove.Items.Clear();
-                lbRemove.Items.AddRange(_prefs.remove.Select(s => new Article(s)).ToArray()); 
+                lbRemove.Items.AddRange(_prefs.remove.Select(s => new Article(s)).ToArray());
             }
         }
     }

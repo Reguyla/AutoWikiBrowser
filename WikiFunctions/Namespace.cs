@@ -15,11 +15,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace WikiFunctions
 {
@@ -70,10 +67,10 @@ namespace WikiFunctions
         /// </summary>
         public static ReadOnlyCollection<int> StandardNamespaces
         { get; private set; }
-        
+
         static Namespace()
         {
-            var ns = new List<int> {Media, Special};
+            var ns = new List<int> { Media, Special };
             for (int i = Talk; i <= CategoryTalk; i++)
                 ns.Add(i);
 
@@ -82,10 +79,10 @@ namespace WikiFunctions
 
             StandardNamespaces = new ReadOnlyCollection<int>(ns);
         }
-        
+
         private static readonly Regex SpacingModifierLetters = new Regex(@"\p{IsSpacingModifierLetters}", RegexOptions.Compiled);
         private static readonly Regex ColonSpace = new Regex(@"\s*:\s*", RegexOptions.Compiled);
-        
+
         // Covered by: NamespaceTests.Determine
         /// <summary>
         /// Deduces the namespace number from the input article title.
@@ -93,11 +90,11 @@ namespace WikiFunctions
         public static int Determine(string articleTitle)
         {
             articleTitle = ColonSpace.Replace(articleTitle.Replace("%3A", ":"), ":");
-            
+
             /* if there is a spacing modifying character at the start of the articletitle it will mean the article full name will never contain "Namespace:"
              * as the colon and modifier will combine to some other Unicode character, so remove any such modifier characters to allow correct derivation */
             articleTitle = SpacingModifierLetters.Replace(articleTitle, @"'");
-            
+
             if (!articleTitle.Contains(":"))
                 return 0;
 

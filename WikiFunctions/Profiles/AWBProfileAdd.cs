@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
 using System.Windows.Forms;
 
 
@@ -89,17 +88,17 @@ namespace WikiFunctions.Profiles
                 // warn user if profile for entered user ID already exists
                 if (Editid == -1 && AWBProfiles.GetProfile(txtUsername.Text) != null)
                 {
-                    if (MessageBox.Show("Username \"" +txtUsername.Text + "\" is already used in another profile. Are you sure you want to use this username again?", 
+                    if (MessageBox.Show("Username \"" + txtUsername.Text + "\" is already used in another profile. Are you sure you want to use this username again?",
                                         "Username already used in another profile", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
-                    return;
+                        return;
                 }
 
-                AWBProfile profile = new AWBProfile {Username = txtUsername.Text};
+                AWBProfile profile = new AWBProfile { Username = txtUsername.Text };
 
                 if (chkSavePassword.Checked && !string.IsNullOrEmpty(txtPassword.Text))
                     profile.Password = txtPassword.Text;
                 else
-                     profile.Password ="";
+                    profile.Password = "";
 
                 profile.DefaultSettings = txtPath.Text;
                 profile.Notes = txtNotes.Text;

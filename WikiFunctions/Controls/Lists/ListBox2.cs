@@ -18,12 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Collections;
-using System.Text;
 using System.Windows.Forms;
-using System.Linq;
 
 namespace WikiFunctions.Controls.Lists
 {
@@ -38,12 +34,12 @@ namespace WikiFunctions.Controls.Lists
         static ListBox2()
         {
             SaveListDialog = new SaveFileDialog
-                                 {
-                                     DefaultExt = "txt",
-                                     Filter =
+            {
+                DefaultExt = "txt",
+                Filter =
                                          "Text file with wiki markup|*.txt|Plaintext list|*.txt|CSV (Comma Separated Values)|*.txt|CSV with Wikitext|*.txt",
-                                     Title = "Save article list"
-                                 };
+                Title = "Save article list"
+            };
         }
 
 
@@ -74,9 +70,9 @@ namespace WikiFunctions.Controls.Lists
                 return article1.CompareTo(article2);
             }
         }
-        
+
         private static readonly ForwardComparer ArticleForwardComparer = new ForwardComparer();
-        
+
         /// <summary>
         /// Sorts the article list in alphabetical order, Unicode code point order per https://www.mediawiki.org/wiki/Help:Sorting#Sort_order
         /// </summary>
@@ -103,7 +99,7 @@ namespace WikiFunctions.Controls.Lists
             SortByDirection(false);
         }
 
-        private void SortByDirection (bool forward)
+        private void SortByDirection(bool forward)
         {
             BeginUpdate();
 
@@ -145,7 +141,7 @@ namespace WikiFunctions.Controls.Lists
         public void RemoveSelected(bool filterDuplicates)
         {
             int i = SelectedIndex;
-            
+
             // check something selected
             if (i >= 0)
             {

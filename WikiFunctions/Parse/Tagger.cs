@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using WikiFunctions.Lists.Providers;
 
@@ -68,7 +65,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex Unreferenced = Tools.NestedTemplateRegex("unreferenced");
 
         private static readonly Regex Drugbox =
-            Tools.NestedTemplateRegex(new[] {"Drugbox", "Chembox", "PBB", "PBB Summary"});
+            Tools.NestedTemplateRegex(new[] { "Drugbox", "Chembox", "PBB", "PBB Summary" });
 
         private static readonly Regex MinorPlanetListFooter = Tools.NestedTemplateRegex("MinorPlanetListFooter");
         private static readonly Regex BulletedText = new Regex(@"\r\n[\*#: ].*");
@@ -182,7 +179,7 @@ namespace WikiFunctions.Parse
                 lengthtext = WikiRegexes.ReferenceList.Replace(lengthtext, "");
 
             int length = lengthtext.Length + 1;
-            int linkLimit = (int) (0.0025 * length) + 1;
+            int linkLimit = (int)(0.0025 * length) + 1;
             int wikiLinkCount = Tools.LinkCount(forLinkCount, linkLimit);
             bool underlinked = (wikiLinkCount < 0.0025 * length);
 
@@ -203,7 +200,7 @@ namespace WikiFunctions.Parse
 
                 // templates may add categories to page that are not [[Category...]] links, so use API call for accurate Category count
                 if (totalCategories == 0)
-                    totalCategories = RegularCategories(CategoryProv.MakeList(new[] {articleTitle})).Count;
+                    totalCategories = RegularCategories(CategoryProv.MakeList(new[] { articleTitle })).Count;
             }
 
             // remove dead end if > 0 explicit wikilinks on page (don't count any links transcluded from templates)
@@ -697,7 +694,7 @@ namespace WikiFunctions.Parse
             // allow for ar-wiki 104
             if (Variables.LangCode.Equals("ar") && Namespace.Determine(articleTitle) == 104 && !WikiRegexes.CEHar.IsMatch(articleText))
                 return true;
-            if (!Namespace.IsMainSpace(articleTitle) || Tools.IsRedirectOrSoftRedirect(articleText) || WikiRegexes.Wi.IsMatch(articleText) || articleTitle=="Main Page")
+            if (!Namespace.IsMainSpace(articleTitle) || Tools.IsRedirectOrSoftRedirect(articleText) || WikiRegexes.Wi.IsMatch(articleText) || articleTitle == "Main Page")
                 return false;
 
             return true;
@@ -735,15 +732,15 @@ namespace WikiFunctions.Parse
         public static List<Article> RegularCategories(List<Article> AllCategories)
         {
             return (from a in AllCategories
-                let name = a.NamespacelessName
-                where
-                    !name.EndsWith(" stubs") &&
-                    !a.Name.EndsWith(":Stubs") &&
-                    !name.StartsWith("Proposed deletion") &&
-                    !name.Contains("proposed for deletion") &&
-                    !name.Contains("proposed deletions") &&
-                    !name.Equals("Articles created via the Article Wizard")
-                select a).ToList();
+                    let name = a.NamespacelessName
+                    where
+                        !name.EndsWith(" stubs") &&
+                        !a.Name.EndsWith(":Stubs") &&
+                        !name.StartsWith("Proposed deletion") &&
+                        !name.Contains("proposed for deletion") &&
+                        !name.Contains("proposed deletions") &&
+                        !name.Equals("Articles created via the Article Wizard")
+                    select a).ToList();
         }
 
         /// <summary>

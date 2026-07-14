@@ -6,9 +6,6 @@
 // 
 // Copyright (C) 2002 Obviex(TM). All rights reserved.
 // 
-using System;
-using System.IO;
-using System.Text;
 using System.Security.Cryptography;
 
 namespace WikiFunctions.Encryption
@@ -92,7 +89,7 @@ namespace WikiFunctions.Encryption
                                                             hashAlgorithm,
                                                             passwordIterations);
 
-           // Use the password to generate pseudo-random bytes for the encryption
+            // Use the password to generate pseudo-random bytes for the encryption
             // key. Specify the size of the key in bytes (instead of bits).
             byte[] keyBytes = password.GetBytes(keySize / 8);
 

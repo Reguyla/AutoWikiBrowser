@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -67,13 +64,13 @@ namespace WikiFunctions.Parse
                 // performance: better to loop through all instances of dates and apply regexes to those than
                 // to apply regexes to whole article text
                 // Secondly: filter down only to those portions that could be changed
-                List<Match> monthsm = (from Match m in MonthsRegex.Matches(articleText) select m).Where(m => 
-                    FixDateOrdinalsAndOfQuick.IsMatch(articleText.Substring(m.Index-Math.Min(25, m.Index), Math.Min(25, m.Index)+m.Length))).ToList();
+                List<Match> monthsm = (from Match m in MonthsRegex.Matches(articleText) select m).Where(m =>
+                    FixDateOrdinalsAndOfQuick.IsMatch(articleText.Substring(m.Index - Math.Min(25, m.Index), Math.Min(25, m.Index) + m.Length))).ToList();
 
-                foreach(Match m in monthsm)
+                foreach (Match m in monthsm)
                 {
                     // take up to 25 characters before match, unless match within first 25 characters of article
-                    string before = articleText.Substring(m.Index-Math.Min(25, m.Index), Math.Min(25, m.Index)+m.Length);
+                    string before = articleText.Substring(m.Index - Math.Min(25, m.Index), Math.Min(25, m.Index) + m.Length);
 
                     if (MonthsAct.IsMatch(before))
                         continue;
@@ -96,10 +93,10 @@ namespace WikiFunctions.Parse
                 if (!reparse)
                     break;
             }
-            
+
             return articleText;
         }
-        
+
         private string FixDateOrdinalsAndOfLocal(string textPortion, bool monthsInTitle)
         {
             textPortion = OfBetweenMonthAndYear.Replace(textPortion, "$1 $2");
@@ -164,10 +161,10 @@ namespace WikiFunctions.Parse
              * Secondly: faster to apply regexes to each date found than to apply regexes to whole article text
              */
             bool changes = false;
-            foreach(Match m in MonthsRegexNoSecondBreak.Matches(articleText))
+            foreach (Match m in MonthsRegexNoSecondBreak.Matches(articleText))
             {
                 // take up to 25 characters before match, unless match within first 25 characters of article
-                string before = articleText.Substring(m.Index-Math.Min(25, m.Index), Math.Min(25, m.Index)+m.Length);
+                string before = articleText.Substring(m.Index - Math.Min(25, m.Index), Math.Min(25, m.Index) + m.Length);
 
                 string after = FixDatesAInternal(before);
 
@@ -214,18 +211,18 @@ namespace WikiFunctions.Parse
                 textPortion = EnMonthRange.Replace(textPortion, @"$1–$2");
 
             // don't make changes to any link targets e.g. [[July 29 1966, P.N.E. Garden Aud., Vancouver Canada]]
-            if(!originaltextPortion.Equals(textPortion) && originaltextPortion.Contains("[["))
+            if (!originaltextPortion.Equals(textPortion) && originaltextPortion.Contains("[["))
             {
                 List<string> wikiLinkTargetsBefore = new List<string>(from Match m in WikiRegexes.WikiLinksOnlyPossiblePipe.Matches(textPortion) select m.Groups[1].Value);
                 List<string> wikiLinkTargetsAfter = new List<string>(from Match m in WikiRegexes.WikiLinksOnlyPossiblePipe.Matches(originaltextPortion) select m.Groups[1].Value);
 
-                if(!wikiLinkTargetsBefore.SequenceEqual(wikiLinkTargetsAfter))
+                if (!wikiLinkTargetsBefore.SequenceEqual(wikiLinkTargetsAfter))
                     return originaltextPortion;
             }
-        
+
             return textPortion;
         }
-        
+
         private static readonly Regex YearRange = new Regex(@"\b[12][0-9]{3}.{0,25}");
 
         /// <summary>
@@ -246,11 +243,11 @@ namespace WikiFunctions.Parse
                  * than to apply regexes to whole article text
                  */
                 bool reparse = false;
-                foreach(Match m in YearRange.Matches(articleText))
+                foreach (Match m in YearRange.Matches(articleText))
                 {
                     // take up to 25 characters before match, unless match within first 25 characters of article
-                    string before = articleText.Substring(m.Index-Math.Min(25, m.Index), Math.Min(25, m.Index)+m.Length);
-                    
+                    string before = articleText.Substring(m.Index - Math.Min(25, m.Index), Math.Min(25, m.Index) + m.Length);
+
                     string after = FixDatesBInternal(before, CircaLink);
 
                     if (!after.Equals(before))

@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -517,7 +514,7 @@ namespace WikiFunctions.Parse
             // to avoid running 2K regexps on them
             Match m = RemoveTail.Match(articleText);
             string tail = m.Value;
-            if (!string.IsNullOrEmpty(tail)) 
+            if (!string.IsNullOrEmpty(tail))
                 articleText = articleText.Remove(m.Index);
 
             string originalText = articleText;
@@ -535,7 +532,7 @@ namespace WikiFunctions.Parse
             {
                 array[i] =
                     new Thread(
-                        delegate()
+                        delegate ()
                         {
                             tg.FixTypos2(articleText, strSummary, articleTitle, originalArticleText);
                         });
@@ -589,19 +586,19 @@ namespace WikiFunctions.Parse
             string originalArticleText = articleText;
             if (TypoCount == 0 || IgnoreRegex.IsMatch(articleText))
                 return false;
-            
+
             HideText removeText = new HideText(true, false, true);
-            
+
             articleText = removeText.HideMore(articleText, true);
-            
+
             // remove newlines, whitespace and hide tokens from bottom
             // to avoid running 2K regexps on them
             Match m = RemoveTail.Match(articleText);
-            if (m.Success) 
+            if (m.Success)
                 articleText = articleText.Remove(m.Index);
 
             string strSummary = "";
-            
+
             foreach (TypoGroup grp in Groups)
             {
                 grp.FixTypos(ref articleText, ref strSummary, articleTitle, originalArticleText);

@@ -18,12 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -1558,8 +1555,8 @@ namespace WikiFunctions.Controls.Lists
             foreach (Article ar in lbArticles.Items)
             {
                 if (ar.Name.Length > longestName.Length)
-                longestName = ar.Name;
-             }
+                    longestName = ar.Name;
+            }
             lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestName, e.Font).Width;
 
             e.DrawFocusRectangle();

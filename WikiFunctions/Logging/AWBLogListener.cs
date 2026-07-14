@@ -16,7 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
 using System.Globalization;
 using System.Windows.Forms;
 
@@ -40,7 +39,7 @@ namespace WikiFunctions.Logging
                      StringUserSkipped = "Clicked skip",
                      StringPlugin = "Plugin",
                      StringPluginSkipped = "Plugin sent skip event";
-        
+
         public static string AWBLoggingEditSummary
         { get { return "(" + Variables.WPAWB + " Logging) "; } }
 
@@ -92,7 +91,7 @@ namespace WikiFunctions.Logging
 
         public void AddAndDateStamp(ListView listView)
         {
-            var dateStamp = new ListViewSubItem {Text = DateTime.Now.ToString(CultureInfo.InvariantCulture)};
+            var dateStamp = new ListViewSubItem { Text = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
 
             base.SubItems.Insert(1, dateStamp);
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WikiFunctions
+﻿namespace WikiFunctions
 {
     class UriChangedException : Exception
     {

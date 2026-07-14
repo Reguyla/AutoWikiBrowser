@@ -16,11 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Text;
-using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Globalization;
+using System.Windows.Forms;
 using WikiFunctions.Controls;
 using WikiFunctions.Controls.Lists;
 
@@ -45,7 +42,7 @@ namespace WikiFunctions.Logging
 
         public void LogArticleAction(string page, bool succeeded, ArticleAction action, string message)
         {
-            ListViewItem item  = new ListViewItem(page);
+            ListViewItem item = new ListViewItem(page);
             item.SubItems.Add(action.ToString());
             item.SubItems.Add(DateTime.Now.ToString(CultureInfo.InvariantCulture));
             item.SubItems.Add(message);
@@ -75,7 +72,7 @@ namespace WikiFunctions.Logging
 
             if (sender is ContextMenuStrip)
                 return ((ListView)((ContextMenuStrip)sender).SourceControl);
-            
+
             if (sender is ToolStripMenuItem)
                 return (ListView)(((ContextMenuStrip)((ToolStripMenuItem)sender).Owner).SourceControl);
             throw new ArgumentException("Object of unknown type passed to LogControl.MenuItemOwner()", "sender");

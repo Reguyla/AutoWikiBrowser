@@ -16,13 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-using System;
 using System.Collections.Specialized;
 using System.Net;
-using System.Threading;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using WikiFunctions.API;
 using WikiFunctions.Lists.Providers;
 

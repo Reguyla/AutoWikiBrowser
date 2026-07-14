@@ -17,10 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Linq;
 
 namespace WikiFunctions.Controls.Lists
 {
@@ -44,8 +41,8 @@ namespace WikiFunctions.Controls.Lists
 
             listMaker1.MakeListEnabled = true;
             listMaker2.MakeListEnabled = true;
-            listMaker1.NoOfArticlesChanged +=UpdateButtons;
-            listMaker2.NoOfArticlesChanged +=UpdateButtons;
+            listMaker1.NoOfArticlesChanged += UpdateButtons;
+            listMaker2.NoOfArticlesChanged += UpdateButtons;
 
             // ensure button enablement of Remove, Filter correct in list maker when opened with no articles in
             listMaker1.UpdateNumberOfArticles();
@@ -91,7 +88,7 @@ namespace WikiFunctions.Controls.Lists
         {
             CompareListsNew(list1, list2, lb1, lb2, lb3);
         }
-        
+
         private static void CompareListsNew(IList<Article> list1, List<Article> list2, ListBox lb1, ListBox lb2, ListBox lb3)
         {
             lb1.BeginUpdate();
@@ -231,12 +228,12 @@ namespace WikiFunctions.Controls.Lists
             if (selectedListBox != null)
             {
                 selectedListBox.BeginUpdate();
-    
+
                 // workaround for Wine issue: use of {HOME} then +{END} leads to 100% CPU and locked application
                 // so use slower SetSelected if on Linux
                 if (Globals.UsingLinux)
                 {
-                    for(int i = 0; i < selectedListBox.Items.Count; i++)
+                    for (int i = 0; i < selectedListBox.Items.Count; i++)
                         selectedListBox.SetSelected(i, true);
                 }
                 else
@@ -244,7 +241,7 @@ namespace WikiFunctions.Controls.Lists
                     SendKeys.SendWait("{HOME}");
                     SendKeys.SendWait("+{END}");
                 }
-    
+
                 selectedListBox.EndUpdate();
             }
         }
@@ -255,8 +252,8 @@ namespace WikiFunctions.Controls.Lists
 
             if (selectedListBox != null)
             {
-                transferToListMaker1ToolStripMenuItem.Enabled = transferToListMaker2ToolStripMenuItem.Enabled = openInBrowserToolStripMenuItem.Enabled 
-                = copyToolStripMenuItem.Enabled =  removeSelectedToolStripMenuItem.Enabled =  selectAllToolStripMenuItem.Enabled = selectedListBox.Items.Count > 0;
+                transferToListMaker1ToolStripMenuItem.Enabled = transferToListMaker2ToolStripMenuItem.Enabled = openInBrowserToolStripMenuItem.Enabled
+                = copyToolStripMenuItem.Enabled = removeSelectedToolStripMenuItem.Enabled = selectAllToolStripMenuItem.Enabled = selectedListBox.Items.Count > 0;
             }
         }
 

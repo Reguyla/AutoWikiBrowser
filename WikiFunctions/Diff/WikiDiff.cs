@@ -14,12 +14,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Collections;
-using System.IO;
+using System.Net;
 using System.Windows.Forms;
 
 namespace WikiFunctions
@@ -45,8 +41,8 @@ namespace WikiFunctions
         public string GetDiff(string leftText, string rightText, int contextLines)
         {
             Result = new StringBuilder(500000);
-            LeftLines = leftText.Split(new[] {"\r\n"}, StringSplitOptions.None);
-            RightLines = rightText.Split(new[] {"\r\n"}, StringSplitOptions.None);
+            LeftLines = leftText.Split(new[] { "\r\n" }, StringSplitOptions.None);
+            RightLines = rightText.Split(new[] { "\r\n" }, StringSplitOptions.None);
             ContextLines = contextLines;
 
             diff = new Diff(LeftLines, RightLines, true, true);
@@ -107,7 +103,7 @@ namespace WikiFunctions
 
             int toDisplay = Math.Min(right.Count - displayed, ContextLines);
             if ((left.End < LeftLines.Length - 1 || right.End < RightLines.Length - 1) && toDisplay > 0)
-                // not the last hunk, adding context for next change
+            // not the last hunk, adding context for next change
             {
                 if (right.Count > displayed + toDisplay)
                 {
@@ -699,7 +695,7 @@ table.diff td div {
 
         public override bool Equals(object obj)
         {
-            return TheWord.Equals(((Word) obj).TheWord);
+            return TheWord.Equals(((Word)obj).TheWord);
         }
 
         public override int GetHashCode()

@@ -16,9 +16,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WikiFunctions.ReplaceSpecial
 {
@@ -52,7 +51,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         public override Control CreateControl(IRuleControlOwner owner, Control.ControlCollection collection, System.Drawing.Point pos)
         {
-            TemplateParamRuleControl rc = new TemplateParamRuleControl(owner) {Location = pos};
+            TemplateParamRuleControl rc = new TemplateParamRuleControl(owner) { Location = pos };
             rc.RestoreFromRule(this);
             DisposeControl();
             ruleControl_ = rc;

@@ -18,10 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Collections;
 
 namespace WikiFunctions.Controls
 {
@@ -249,8 +248,8 @@ namespace WikiFunctions.Controls
             {
                 int returnVal;
 
-                string sx = ((ListViewItem) x).SubItems[Col].Text;
-                string sy = ((ListViewItem) y).SubItems[Col].Text;
+                string sx = ((ListViewItem)x).SubItems[Col].Text;
+                string sy = ((ListViewItem)y).SubItems[Col].Text;
 
                 DateTime firstDate, secondDate;
                 double dblX, dblY;
@@ -263,16 +262,16 @@ namespace WikiFunctions.Controls
                 else
                     // Determine whether the type being compared is a DateTime type
                     if (DateTime.TryParse(sx, out firstDate) && DateTime.TryParse(sy, out secondDate))
-                    {
-                        // Compare the two dates.
-                        returnVal = DateTime.Compare(firstDate, secondDate);
-                    }
-                    else
-                    {
-                        // If neither compared object has a valid int or date format, compare
-                        // as a string.
-                        returnVal = String.CompareOrdinal(sx, sy);
-                    }
+                {
+                    // Compare the two dates.
+                    returnVal = DateTime.Compare(firstDate, secondDate);
+                }
+                else
+                {
+                    // If neither compared object has a valid int or date format, compare
+                    // as a string.
+                    returnVal = String.CompareOrdinal(sx, sy);
+                }
 
                 // Determine whether the sort order is descending.
                 if (Order == SortOrder.Descending)

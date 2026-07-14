@@ -17,11 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.IO;
 using System.Threading;
+using System.Xml;
 using WikiFunctions.Background;
 
 namespace WikiFunctions.DBScanner
@@ -150,21 +147,21 @@ namespace WikiFunctions.DBScanner
             Context = SynchronizationContext.Current;
 
             ScanThread = new Thread(Process)
-                             {
-                                 Name = "DB Scanner thread", 
-                                 IsBackground = true, 
-                                 Priority = mPriority
-                             };
+            {
+                Name = "DB Scanner thread",
+                IsBackground = true,
+                Priority = mPriority
+            };
             ScanThread.Start();
 
             for (int i = 0; i < ProcessorCount - 1; i++)
             {
                 Thread thr = new Thread(SecondaryThread)
-                                 {
-                                     Name = "DB Scanner thread #" + (i + 2),
-                                     IsBackground = true,
-                                     Priority = mPriority
-                                 };
+                {
+                    Name = "DB Scanner thread #" + (i + 2),
+                    IsBackground = true,
+                    Priority = mPriority
+                };
                 SecondaryThreads.Add(thr);
                 thr.Start();
             }
@@ -274,7 +271,7 @@ namespace WikiFunctions.DBScanner
         /// </summary>
         private ArticleInfo ReadArticle(XmlReader reader)
         {
-            do 
+            do
                 if (!reader.ReadToFollowing("page")) return null;
             while (!reader.IsStartElement());
 

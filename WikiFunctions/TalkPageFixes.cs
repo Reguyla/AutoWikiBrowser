@@ -18,10 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /* Some of this is currently only suitable for enwiki. */
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 //TODO: Investigate moving this to a plugin or module. Unique to Wikipedia
 
@@ -108,7 +105,7 @@ namespace WikiFunctions.TalkPages
             {
                 articleText = WikiRegexes.WikiProjectBannerShellTemplate.Replace(articleText, m => m.Value.Replace("\r\n\r\n", "\r\n"));
             }
- 
+
             articleText = WikiProjectBannerShell(articleText);
 
             articleText = MoveTalkTemplate(articleText, WikiRegexes.WikiProjectBannerShellTemplate);
@@ -145,7 +142,7 @@ namespace WikiFunctions.TalkPages
             }
 
             articleText = AddMissingFirstCommentHeader(articleText);
-            
+
             articleText = WPBiography(articleText);
 
             articleText = WPSongs(articleText);
@@ -158,12 +155,12 @@ namespace WikiFunctions.TalkPages
             if (zerothSection.Length > 0)
             {
                 // have we only added whitespace? then reset articletext
-                if (zerothSection.Length > zerothSectionOriginal.Length && 
+                if (zerothSection.Length > zerothSectionOriginal.Length &&
                    WikiRegexes.WhiteSpace.Replace(zerothSection, "").Equals(WikiRegexes.WhiteSpace.Replace(zerothSectionOriginal, "")))
                 {
                     articleText = articleTextOriginal;
                 }
-                else 
+                else
                 {
                     string zerothbefore = zerothSection;
                     // clean excess blank lines at end of zeroth section, leave only one newline
@@ -237,7 +234,7 @@ namespace WikiFunctions.TalkPages
             articleText = "{{" + name + "}}\r\n" + articleText;
         }
 
-        private static readonly Regex GANomineeTemplate = Tools.NestedTemplateRegex(new [] { "GA nominee", "GAnominee", "GA" });
+        private static readonly Regex GANomineeTemplate = Tools.NestedTemplateRegex(new[] { "GA nominee", "GAnominee", "GA" });
         private static readonly Regex TalkWarningTemplates = Tools.NestedTemplateRegex(new[] { "Community article probation", "Censor", "Controversial", "BLP others", "COI editnotice", "Notice", "warning", "Austrian economics sanctions" });
         private static readonly Regex TalkGuidelineTemplates = Tools.NestedTemplateRegex(new[] { "Not a forum", "Recurring themes", "FAQ", "Round in circles", "Calm", "Pbneutral" });
 
@@ -410,7 +407,7 @@ namespace WikiFunctions.TalkPages
                 string newValue = m.Value;
                 newValue = Tools.RemoveExcessTemplatePipes(newValue);
                 bool shellTemplate = Tools.GetTemplateName(newValue).ToLower().EndsWith("shell");
-                
+
                 // remove duplicate parameters
                 newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
 
@@ -420,11 +417,11 @@ namespace WikiFunctions.TalkPages
                     if (Tools.GetTemplateParameterValue(newValue, theNo).Equals("no"))
                         newValue = Tools.RemoveTemplateParameter(newValue, theNo);
                 }
-                
+
                 string collapsedParam = Tools.GetTemplateParameterValue(newValue, "collapsed");
                 if (shellTemplate && collapsedParam.Equals("no"))
                     newValue = Tools.RemoveTemplateParameter(newValue, "collapsed");
-                else  if (!shellTemplate && collapsedParam.Equals("yes"))
+                else if (!shellTemplate && collapsedParam.Equals("yes"))
                     newValue = Tools.RemoveTemplateParameter(newValue, "collapsed");
 
                 // If {{blpo}} then add blpo=yes to WPBS and remove {{blpo}}
@@ -442,17 +439,17 @@ namespace WikiFunctions.TalkPages
                     newValue = Tools.SetTemplateParameterValue(newValue, "blp", "yes");
                     articletext = articletext.Replace(blpm.Value, "");
                 }
-                                
+
                 // merge changes to article text
                 if (!newValue.Equals(m.Value))
                     articletext = articletext.Replace(m.Value, newValue);
             }
-            
+
             // Move WikiProjects into WPBS
             if (WikiRegexes.WikiProjectBannerShellTemplate.Matches(articletext).Count == 1)
             {
                 string WPBS = WikiRegexes.WikiProjectBannerShellTemplate.Match(articletext).Value, newParams = "";
-                
+
                 foreach (Match m in WikiRegexes.NestedTemplates.Matches(articletext))
                 {
                     string templateName = Tools.TurnFirstToUpper(Tools.GetTemplateName(m.Value));
@@ -466,19 +463,19 @@ namespace WikiFunctions.TalkPages
                 if (newParams.Length > 0)
                 {
                     // use old-style 1= if already there
-                    if(Tools.GetTemplateParameterValue(WPBS, "1").Length > 0)
+                    if (Tools.GetTemplateParameterValue(WPBS, "1").Length > 0)
                         articletext = articletext.Replace(WPBS, Tools.SetTemplateParameterValue(WPBS, "1", Tools.GetTemplateParameterValue(WPBS, "1") + newParams)).TrimStart();
                     else
                     {
                         // new-style, don't create 1=, will require | if no existing templates inside
-                        if(!WikiRegexes.NestedTemplates.IsMatch(WPBS.Substring(2)))
+                        if (!WikiRegexes.NestedTemplates.IsMatch(WPBS.Substring(2)))
                             newParams = "|" + newParams;
 
                         articletext = articletext.Replace(WPBS, WPBS.Substring(0, WPBS.Length - 2) + newParams + "}}").TrimStart();
                     }
                 }
             }
-            
+
             // check living, blpo flags against WPBiography
             foreach (Match m in WikiRegexes.WikiProjectBannerShellTemplate.Matches(articletext))
             {
@@ -501,7 +498,7 @@ namespace WikiFunctions.TalkPages
                     if (Tools.GetTemplateParameterValue(WPBiographyCall, "blpo").Equals("yes"))
                         newValue = Tools.SetTemplateParameterValue(newValue, "blpo", "yes");
                 }
-                                
+
                 // merge changes to article text
                 if (!newValue.Equals(m.Value))
                     articletext = articletext.Replace(m.Value, newValue);
@@ -509,7 +506,7 @@ namespace WikiFunctions.TalkPages
 
             return articletext;
         }
-        
+
         /// <summary>
         /// Moves WPBiography with living=yes above any WikiProject templates per Wikipedia:TPL#Talk_page_layout
         /// Does various fixes to WPBiography
@@ -521,13 +518,13 @@ namespace WikiFunctions.TalkPages
         {
             if (!Variables.LangCode.Equals("en"))
                 return articletext;
-            
-            Match m = WPBiographyR.Match(articletext);            
-            
+
+            Match m = WPBiographyR.Match(articletext);
+
             if (m.Success)
             {
                 string newvalue = m.Value;
-                
+
                 // If {{BLP}} then add living=yes to WPBiography and remove {{BLP}}
                 Match blpm = BLPRegex.Match(articletext);
                 if (blpm.Success & !Tools.GetTemplateParameterValue(newvalue, "living").ToLower().StartsWith("n"))
@@ -535,20 +532,20 @@ namespace WikiFunctions.TalkPages
                     newvalue = Tools.SetTemplateParameterValue(newvalue, "living", "yes");
                     articletext = BLPRegex.Replace(articletext, "");
                 }
-                
+
                 if (newvalue.Length > 0 && !m.Value.Equals(newvalue))
                     articletext = articletext.Replace(m.Value, newvalue);
             }
 
             // refresh
             m = WPBiographyR.Match(articletext);
-            
+
             if (!m.Success || !Tools.GetTemplateParameterValue(m.Value, "living").ToLower().StartsWith("y"))
                 return articletext;
-            
+
             // remove {{blp}} if {{WPBiography|living=yes}}
             articletext = BLPRegex.Replace(articletext, "");
-            
+
             // move above any other WikiProject
             if (!WikiRegexes.WikiProjectBannerShellTemplate.IsMatch(articletext))
             {
@@ -562,12 +559,12 @@ namespace WikiFunctions.TalkPages
                     }
                 }
             }
-            
+
             return articletext;
         }
-        
-        
-         /// <summary>
+
+
+        /// <summary>
         /// Does various fixes to WPSongs
         /// en-wiki only
         /// </summary>
@@ -577,13 +574,13 @@ namespace WikiFunctions.TalkPages
         {
             if (!Variables.LangCode.Equals("en"))
                 return articletext;
-            
+
             Match m = WPSongsR.Match(articletext);
-            
+
             if (m.Success)
             {
                 string newvalue = m.Value;
-                   
+
                 // Remove needs-infobox=no
                 if (Tools.GetTemplateParameterValue(newvalue, "needs-infobox").Equals("no"))
                     newvalue = Tools.RemoveTemplateParameter(newvalue, "needs-infobox");
@@ -600,7 +597,7 @@ namespace WikiFunctions.TalkPages
                     articletext = articletext.Replace(m.Value, newvalue);
                     articletext = SirRegex.Replace(articletext, "");
                 }
-                
+
             }
 
             return articletext;
@@ -648,13 +645,13 @@ namespace WikiFunctions.TalkPages
 
             return articletext;
         }
-        
+
         private const int WikiProjectsWPBS = 2;
         /// <summary>
         /// Regex to match WikiProject templates: WikiProject, Wikiproject, wiki project, wiki Project etc.
         /// </summary>
         private static readonly Regex WikiProject = new Regex(@"^[Ww]iki ?[Pp]roject ");
-        
+
         /// <summary>
         /// Adds WikiProject banner shell when needed (>= 3 WikiProject templates and no WikiProject banner shell)
         /// </summary>
@@ -664,19 +661,19 @@ namespace WikiFunctions.TalkPages
         {
             int wikiProjectTemplates = 0;
             string WPBS1 = "", articletextLocal = articletext;
-            
+
             if (!WikiRegexes.WikiProjectBannerShellTemplate.IsMatch(articletextLocal))
             {
                 foreach (Match m in WikiRegexes.NestedTemplates.Matches(articletextLocal))
                 {
                     if (!WikiProject.IsMatch(Tools.GetTemplateName(m.Value)))
                         continue;
-                    
+
                     wikiProjectTemplates++;
                     WPBS1 += Tools.Newline(m.Value);
                     articletextLocal = articletextLocal.Replace(m.Value, "");
                 }
-                
+
                 if (wikiProjectTemplates > WikiProjectsWPBS)
                 {
                     // add a WikiProject banner shell
@@ -692,7 +689,7 @@ namespace WikiFunctions.TalkPages
                     articletext = zerothSection + restOfArticle;
                 }
             }
-            
+
             return articletext;
         }
     }

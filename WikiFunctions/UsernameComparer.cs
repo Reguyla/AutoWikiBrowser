@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace WikiFunctions
+﻿namespace WikiFunctions
 {
     /// <summary>
     /// First letter case insensitive comparison; used for username equality checks

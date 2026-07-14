@@ -16,11 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using Newtonsoft.Json.Linq;
+using System.Net;
 using WikiFunctions.API;
 
 namespace WikiFunctions.Lists.Providers
@@ -35,7 +32,7 @@ namespace WikiFunctions.Lists.Providers
         /// <summary>
         /// Upper limit for number of pages returned, could be a bit exceeded by number of pages in the last request
         /// </summary>
-        public int Limit  { get; set; }
+        public int Limit { get; set; }
 
         protected string WantedAttribute = "title";
 

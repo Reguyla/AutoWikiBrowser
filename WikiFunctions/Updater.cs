@@ -15,15 +15,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using System.IO;
 using System.Windows.Forms;
 using WikiFunctions.Background;
-using System.Linq;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 
 namespace WikiFunctions
 {
@@ -91,9 +87,9 @@ namespace WikiFunctions
 
                 Result = AWBEnabledStatus.Disabled; // Disabled till proven enabled
 
-                var definition = new {version = "", releasedate = "", dotnetversion = "", dev = false, released = false};
+                var definition = new { version = "", releasedate = "", dotnetversion = "", dev = false, released = false };
                 var enabledVersions = (from v in json["enabledversions"]
-                    select JsonConvert.DeserializeAnonymousType(v.ToString(), definition)).ToList();
+                                       select JsonConvert.DeserializeAnonymousType(v.ToString(), definition)).ToList();
 
                 string updaterVersion = json["updaterversion"].ToString();
 

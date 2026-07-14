@@ -17,10 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -40,7 +36,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex Tags = new Regex(@"\<((?>[^\<\>]+|\<(?<DEPTH>)|\>(?<-DEPTH>))*(?(DEPTH)(?!))\>)", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
         private static readonly Regex HideNestedBrackets = new Regex(@"&#9[13];");
         private static readonly Regex AmountComparison = new Regex(@"[<>]\s*\d", RegexOptions.Compiled);
-        private static readonly Regex TemplatesWithUnbalancedBrackets = Tools.NestedTemplateRegex(new [] {"LSJ", ")!", "!(", "C sharp", "Lisp2"});
+        private static readonly Regex TemplatesWithUnbalancedBrackets = Tools.NestedTemplateRegex(new[] { "LSJ", ")!", "!(", "C sharp", "Lisp2" });
 
         /// <summary>
         /// Checks the article text for unbalanced brackets, either square or curly
@@ -60,7 +56,7 @@ namespace WikiFunctions.Parse
             // remove all <math>, <code> stuff etc. where curly brackets are used in singles and pairs
             articleText = Tools.ReplaceWithSpaces(articleText, WikiRegexes.MathPreSourceCodeComments);
             // some templates deliberately use unbalanced brackets within their parameters
-            if(templWithUB)
+            if (templWithUB)
                 articleText = Tools.ReplaceWithSpaces(articleText, TemplatesWithUnbalancedBrackets);
 
             bracketLength = 2;
@@ -76,32 +72,32 @@ namespace WikiFunctions.Parse
             bracketLength = 1;
 
             // Performance: check through whole text counting single brackets, only run detailed checks if find unbalanced brackets
-            int square=0, curly=0, round=0, chevron=0;
+            int square = 0, curly = 0, round = 0, chevron = 0;
             bool hasUnbalanced = false;
-            
-            foreach(char c in articleText.ToCharArray())
+
+            foreach (char c in articleText.ToCharArray())
             {
                 // if more closing that opening then have found unbalanced brackets
 
-                if(c == '[')
+                if (c == '[')
                     square++;
-                else if(c == ']')
+                else if (c == ']')
                 {
                     square--;
 
-                    if(square < 0)
+                    if (square < 0)
                     {
                         hasUnbalanced = true;
                         break;
                     }
-                } 
-                else if(c == '{')
+                }
+                else if (c == '{')
                     curly++;
-                else if(c == '}')
+                else if (c == '}')
                 {
                     curly--;
 
-                    if(curly < 0)
+                    if (curly < 0)
                     {
                         hasUnbalanced = true;
                         break;
@@ -113,7 +109,7 @@ namespace WikiFunctions.Parse
                 {
                     round--;
 
-                    if(round < 0)
+                    if (round < 0)
                     {
                         hasUnbalanced = true;
                         break;
@@ -125,7 +121,7 @@ namespace WikiFunctions.Parse
                 {
                     chevron--;
 
-                    if(chevron < 0)
+                    if (chevron < 0)
                     {
                         hasUnbalanced = true;
                         break;
@@ -207,7 +203,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex ExtraBracketOnWikilinkOpening2 = new Regex(@"(?<=\[\[){(?=[^{}\[\]<>]+\]\])", RegexOptions.Compiled);
         private static readonly Regex ExternalLinkMissingClosing = new Regex(@"(^ *\* *\[ *(?:ht|f)tps?://[^<>{}\[\]\r\n\s]+[^\[\]\r\n]*)(\s$)", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex ExternalLinkMissingOpening = new Regex(@"(?<=^ *\*) *(?=(?:ht|f)tps?://[^<>{}\[\]\r\n\s]+[^\[\]\r\n]*\]\s$)", RegexOptions.Compiled | RegexOptions.Multiline);
-        private static readonly Regex CiteTemplateIncorrectBar = new Regex(@"({{(?:[Cc]it|[Vv]cit)[^{}]+)(?:{|})(\s*[A-Za-z0-9_-]+\s*=)");        
+        private static readonly Regex CiteTemplateIncorrectBar = new Regex(@"({{(?:[Cc]it|[Vv]cit)[^{}]+)(?:{|})(\s*[A-Za-z0-9_-]+\s*=)");
         private static readonly Regex TemplateIncorrectClosingBraces = new Regex(@"(?<={{[^{}<>]{1,400}[^{}<>\|\]])(?:\]}|}\]?|\)\))(?=[^{}]|$)", RegexOptions.Compiled);
         private static readonly Regex TemplateMissingOpeningBrace = new Regex(@"(?<=[^{}<>\|]|^){(?=\s*\w[^{}<>]{1,400}}})", RegexOptions.Compiled);
         private static readonly Regex TemplateOpening = new Regex(@"\(\((\s*\w+\s*}})");
@@ -220,7 +216,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex RefClosingOpeningBracket = new Regex(@"\[(\s*</ref>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex CategoryCurlyBrackets = new Regex(@"{{ *(" + Variables.Namespaces[Namespace.Category] + @"[^{}\[\]]+?)(?:}}|\]\])", RegexOptions.Compiled);
         private static readonly Regex CategoryCurlyBracketsEnd = new Regex(@"\[\[ *(" + Variables.Namespaces[Namespace.Category] + @"[^{}\[\]]+?)(?:}})", RegexOptions.Compiled);
-        private static readonly Regex FileImageCurlyBrackets = new Regex(@"{{\s*("+Variables.NamespacesCaseInsensitive[Namespace.File]+@"\s*)", RegexOptions.Compiled);
+        private static readonly Regex FileImageCurlyBrackets = new Regex(@"{{\s*(" + Variables.NamespacesCaseInsensitive[Namespace.File] + @"\s*)", RegexOptions.Compiled);
         private static readonly Regex CiteRefEndsTripleClosingBrace = new Regex(@"([^}])\}(\}\}\s*</ref>)", RegexOptions.Compiled);
         private static readonly Regex CiteRefEndsTripleOpeningBrace = new Regex(@"(>\s*)\{\{\{+(\s*[Cc]ite)", RegexOptions.Compiled);
         private static readonly Regex CiteRefStartsSingleOpeningBrace = new Regex(@"(>\s*\{)([^<>{}\r\n]+\}\})", RegexOptions.Compiled);
@@ -237,7 +233,7 @@ namespace WikiFunctions.Parse
             string[] sections = Tools.SplitToSections(articleText);
             StringBuilder articleTextReturned = new StringBuilder();
 
-            foreach(string s in sections)
+            foreach (string s in sections)
             {
                 articleTextReturned.Append(FixUnbalancedBracketsSection(s));
             }
@@ -368,7 +364,7 @@ namespace WikiFunctions.Parse
 
                     // could be {{cite web{last=foo...}} so try replacing single { or } with |
                     articleTextTemp = CiteTemplateIncorrectBar.Replace(articleTextTemp, @"$1|$2");
-                    
+
                     // if it's on double curly brackets, see if one is missing e.g. {{foo} or {{foo]}
                     articleTextTemp = TemplateIncorrectClosingBraces.Replace(articleTextTemp, "}}");
 
@@ -379,7 +375,7 @@ namespace WikiFunctions.Parse
                     articleTextTemp = TemplateMissingOpeningBrace.Replace(articleTextTemp, "{{");
 
                     string unbalancedStartBrackets = articleTextTemp.Substring(unbalancedBracket, Math.Min(4, articleTextTemp.Length - unbalancedBracket));
-                    string unbalancedEndBrackets = articleTextTemp.Substring(Math.Max(0, unbalancedBracket - 2), Math.Min(4, articleTextTemp.Length - unbalancedBracket+2));
+                    string unbalancedEndBrackets = articleTextTemp.Substring(Math.Max(0, unbalancedBracket - 2), Math.Min(4, articleTextTemp.Length - unbalancedBracket + 2));
                     // might be [[[[link]] or [[link]]]] so see if removing the two found square brackets makes it all balance
                     if (unbalancedStartBrackets.Equals("[[[[") || unbalancedEndBrackets.Equals("]]]]"))
                     {
@@ -390,9 +386,9 @@ namespace WikiFunctions.Parse
                     articleTextTemp = WikiLinkOpeningClosing.Replace(articleTextTemp, @"[[$1");
 
                     articleTextTemp = QuadrupleCurlyBrackets.Replace(articleTextTemp, "$1");
-                    
+
                     // wikilink like [[foo[[
-                    if(WikiLinkDoubleOpening.Matches(articleTextTemp).Cast<Match>().Any(m => m.Index == unbalancedBracket))
+                    if (WikiLinkDoubleOpening.Matches(articleTextTemp).Cast<Match>().Any(m => m.Index == unbalancedBracket))
                         articleTextTemp = WikiLinkDoubleOpening.Replace(articleTextTemp, @"$1]]");
 
                     // unclosed cat/interwiki
@@ -439,7 +435,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex SubTag = new Regex(@"<\s*sub\s*>((?>(?!<\s*/?\s*sub\s*>).|<\s*sub\s*>(?<DEPTH>)|<\s*/\s*sub\s*>(?<-DEPTH>))*(?(DEPTH)(?!)))<\s*/\s*sub\s*>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
         private static readonly Regex AnyTag = new Regex(@"<\s*([A-Za-z/][^<>]+)>");
         private static readonly Regex SimpleTagPair = new Regex(@"<([^<>]+)>[^<>]+</\1>");
-        private static readonly List<string> MathSourceCodeNowikiPreTagList = new List<string>(new [] {"math", "source", "ref", "gallery", "code", "nowiki", "pre", "small", "center", "sup", "sub"});
+        private static readonly List<string> MathSourceCodeNowikiPreTagList = new List<string>(new[] { "math", "source", "ref", "gallery", "code", "nowiki", "pre", "small", "center", "sup", "sub" });
         private static readonly Regex UnclosedNestedComments = new Regex(@"<!--(.*?)(?<!<!--.*<!--.*)-->|<!--([^<]*)-->");
 
         /// <summary>
@@ -457,7 +453,7 @@ namespace WikiFunctions.Parse
             // get all tags in format <tag...> in article
             MatchCollection anyTagMatchCollection = AnyTag.Matches(articleText);
             List<string> AnyTagList = (from Match m in anyTagMatchCollection
-                select m.Groups[1].Value.Trim().ToLower()).ToList();
+                                       select m.Groups[1].Value.Trim().ToLower()).ToList();
 
             // discard self-closing tags in <tag/> format, discard wiki comments
             AnyTagList = AnyTagList.FindAll(s => !s.EndsWith("/") && !s.StartsWith("!--"));
@@ -471,7 +467,7 @@ namespace WikiFunctions.Parse
             // Count the tag names in use, determine if unmatched tags by comparing count of opening and closing tags
             bool unmatched = false;
             Dictionary<string, int> tagCounts = AnyTagList.GroupBy(x => x).ToDictionary(x => x.Key, y => y.Count());
-            foreach(KeyValuePair<string, int> kvp in tagCounts)
+            foreach (KeyValuePair<string, int> kvp in tagCounts)
             {
                 int matchedCount;
                 string othertag = kvp.Key.StartsWith("/") ? kvp.Key.TrimStart('/') : "/" + kvp.Key;
@@ -483,13 +479,13 @@ namespace WikiFunctions.Parse
             }
 
             // check for any unmatched tags or unclosed part tag
-            if(!unmatched)
+            if (!unmatched)
             {
                 // now check for unclosed part tag
                 string noTags = Tools.ReplaceWithSpaces(articleText, anyTagMatchCollection);
                 int tagOpen = noTags.IndexOf('<');
 
-                if(tagOpen == -1 || (tagOpen > 0 && noTags.Substring(tagOpen).Contains('>')))
+                if (tagOpen == -1 || (tagOpen > 0 && noTags.Substring(tagOpen).Contains('>')))
                     return back;
             }
 
@@ -507,9 +503,9 @@ namespace WikiFunctions.Parse
             // Workaround constraint: we might incorrectly report some valid tags with < or > in them as unclosed
             if (AnyTagList.Count(s => !s.StartsWith("/")) > (AnyTagList.Count(s => s.StartsWith("/")) + 10))
             {
-                while(SimpleTagPair.IsMatch(articleText))
+                while (SimpleTagPair.IsMatch(articleText))
                     articleText = Tools.ReplaceWithSpaces(articleText, SimpleTagPair);
-            } 
+            }
             else
             {
                 articleText = Tools.ReplaceWithSpaces(articleText, new Regex(WikiRegexes.SourceCode.ToString(), RegexOptions.Singleline));

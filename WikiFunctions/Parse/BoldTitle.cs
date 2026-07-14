@@ -17,8 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -79,7 +77,7 @@ namespace WikiFunctions.Parse
 
             // 1) clean up bolded self links first, provided no noinclude use in article
             string afterSelfLinks = BoldedSelfLinks(articleTitle, articleText);
-            
+
             if (!afterSelfLinks.Equals(articleText) && !WikiRegexes.IncludeonlyNoinclude.IsMatch(articleText))
                 articleText = afterSelfLinks;
 
@@ -124,7 +122,7 @@ namespace WikiFunctions.Parse
             // ignore any bold in infoboxes
             if (BoldTitleAlready4.IsMatch(Tools.ReplaceWithSpaces(zerothSection, WikiRegexes.InfoBox.Matches(zerothSection))) || DfnTag.IsMatch(zerothSection))
                 return articleTextAtStart;
-            
+
             string articleTextNoInfobox = Tools.ReplaceWithSpaces(articleText, WikiRegexes.InfoBox.Matches(articleText));
             if (boldTitleAlready1.IsMatch(articleTextNoInfobox) || boldTitleAlready2.IsMatch(articleTextNoInfobox)
                 || BoldTitleAlready3.IsMatch(articleTextNoInfobox))
@@ -148,7 +146,7 @@ namespace WikiFunctions.Parse
             zerothSectionHidden = regexBoldNoBrackets.Replace(zerothSectionHidden, "$1'''$2'''$3", 1);
 
             zerothSection = Hider3.AddBackMore(zerothSectionHidden);
-            
+
             articleText = zerothSection + restOfArticle;
 
             // check that the bold added is the first bit in bold in the main body of the article
@@ -160,16 +158,16 @@ namespace WikiFunctions.Parse
 
             return articleTextAtStart;
         }
-        
+
         private static string SelfLinks(string zerothSection, string articleTitle)
         {
             string zerothSectionOriginal = zerothSection, escTitle = Regex.Escape(articleTitle);
-            
+
             if (!zerothSection.Contains("'''" + articleTitle + "'''"))
             {
                 Regex r1 = new Regex(@"\[\[\s*" + escTitle + @"\s*\]\]");
                 Regex r3 = new Regex(@"\[\[\s*" + escTitle + @"\s*\|\s*([^\[\]]+?)\s*\]\]");
-                
+
                 zerothSection = r1.Replace(zerothSection, "'''" + articleTitle + @"'''");
                 zerothSection = r3.Replace(zerothSection, "'''$1'''");
             }
@@ -178,11 +176,11 @@ namespace WikiFunctions.Parse
             {
                 Regex r2 = new Regex(@"\[\[\s*" + Tools.TurnFirstToLower(escTitle) + @"\s*\]\]");
                 Regex r4 = new Regex(@"\[\[\s*" + Tools.TurnFirstToLower(escTitle) + @"\s*\|\s*([^\[\]]+?)\s*\]\]");
-                
+
                 zerothSection = r2.Replace(zerothSection, "'''" + Tools.TurnFirstToLower(articleTitle) + @"'''");
                 zerothSection = r4.Replace(zerothSection, "'''$1'''");
             }
-            
+
             return zerothSection;
         }
 

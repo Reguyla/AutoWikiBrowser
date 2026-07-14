@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 
 namespace WikiFunctions
 {
@@ -28,7 +26,7 @@ namespace WikiFunctions
 
         public static bool IsIn<T>(this T @this, params T[] possibles)
         {
-            return ((IList) possibles).Contains(@this);
+            return ((IList)possibles).Contains(@this);
         }
 
         /// <summary>

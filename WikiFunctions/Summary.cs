@@ -14,8 +14,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions
@@ -35,7 +33,7 @@ namespace WikiFunctions
         /// <returns></returns>
         public static string ModifiedSection(string originalText, string articleText)
         {
-            string[] sectionsBefore = Tools.SplitToSections(originalText), 
+            string[] sectionsBefore = Tools.SplitToSections(originalText),
             sectionsAfter = Tools.SplitToSections(articleText);
 
             // if number of sections has changed, can't provide section edit summary
@@ -57,7 +55,7 @@ namespace WikiFunctions
                     return "";
             }
 
-            if(sectionsChanged == 0)
+            if (sectionsChanged == 0)
                 return "";
 
             // so SectionsChanged == 1, get heading name from regex, or return "top" if zeroth section

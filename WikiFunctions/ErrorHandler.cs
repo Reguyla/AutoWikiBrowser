@@ -1,9 +1,6 @@
-﻿using System;
-using System.Configuration;
-using System.Linq;
+﻿using System.Configuration;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -337,7 +334,7 @@ namespace WikiFunctions
                 }
                 if (ex is ReflectionTypeLoadException)
                 {
-                    foreach (Exception e in ((ReflectionTypeLoadException) ex).LoaderExceptions)
+                    foreach (Exception e in ((ReflectionTypeLoadException)ex).LoaderExceptions)
                     {
                         FormatException(e, sb, ExceptionKind.LoaderException);
                     }

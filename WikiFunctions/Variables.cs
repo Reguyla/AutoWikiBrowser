@@ -16,13 +16,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
+using WikiFunctions.Background;
 using WikiFunctions.Lists.Providers;
 using WikiFunctions.Plugin;
-using WikiFunctions.Background;
-using System.Threading;
 
 namespace WikiFunctions
 {
@@ -381,7 +379,7 @@ namespace WikiFunctions
                     // If we're applying an Edit Tag, don't append "using AWB" to the Edit Summary
                     return "";
                 }
-                
+
                 string text = " " + mSummaryTag + " " + WPAWB;
 #if DEBUG
                 text += " (" + RevisionNumber + ")";
@@ -469,7 +467,7 @@ namespace WikiFunctions
                 return;
             }
 
-            BackgroundRequest r = new BackgroundRequest(UnderscoresLoaded) {HasUI = false};
+            BackgroundRequest r = new BackgroundRequest(UnderscoresLoaded) { HasUI = false };
             lock (DelayedRequests)
             {
                 DelayedRequests.Add(r);
@@ -483,7 +481,7 @@ namespace WikiFunctions
             {
                 DelayedRequests.Remove(req);
                 UnderscoredTitles.Clear();
-                foreach (Article a in (List<Article>) req.Result)
+                foreach (Article a in (List<Article>)req.Result)
                 {
                     UnderscoredTitles.Add(a.Name);
                 }
@@ -691,12 +689,12 @@ namespace WikiFunctions
                 {
                     TryLoadingAgainAfterLogin = true;
                     ReloadProjectSettings = new ProjectHoldArea
-                                                {
-                                                    projectName = projectName,
-                                                    customProject = customProject,
-                                                    langCode = langCode,
-                                                    protocol = Protocol
-                                                };
+                    {
+                        projectName = projectName,
+                        customProject = customProject,
+                        langCode = langCode,
+                        protocol = Protocol
+                    };
                     return;
                 }
             }
@@ -782,7 +780,7 @@ namespace WikiFunctions
         private static void SetLanguageSpecificValues(string langCode, ProjectEnum projectName)
         {
             UntitledHeading = "Untitled";
-            
+
             switch (langCode)
             {
                 case "en":

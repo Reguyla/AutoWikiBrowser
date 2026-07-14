@@ -15,8 +15,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WikiFunctions.Controls;
@@ -68,7 +66,7 @@ namespace WikiFunctions.Lists.Providers
         private static string ModifyArticleName(string title)
         {
             title = Regex.Replace(title, @"&#0?39;|&#146;|&amp;#0?39;|&amp;#146;|[`’]", "'");
-            
+
             title = title.Replace(@"&amp;", "&");
             title = title.Replace(@"&quot;", @"""");
             return title.Replace("<br />", "");

@@ -17,12 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.IO;
 
 using WikiFunctions.AWBSettings;
 
@@ -103,16 +99,16 @@ namespace WikiFunctions.Controls.Lists
             {
                 int noA = listMaker1.Count;
 
-                int roundlimit = Convert.ToInt32(numSplitAmount.Value/2);
+                int roundlimit = Convert.ToInt32(numSplitAmount.Value / 2);
 
-                if ((noA%numSplitAmount.Value) <= roundlimit)
+                if ((noA % numSplitAmount.Value) <= roundlimit)
                     noA += roundlimit;
 
                 int noGroups =
-                    Convert.ToInt32(Math.Round(noA/numSplitAmount.Value));
+                    Convert.ToInt32(Math.Round(noA / numSplitAmount.Value));
 
                 int baseIndex = 0;
-                int splitValue = (int) numSplitAmount.Value;
+                int splitValue = (int)numSplitAmount.Value;
                 var articles = listMaker1.GetArticleList();
                 int minValueCount = Math.Min(splitValue, articles.Count);
                 if (xml)
@@ -133,7 +129,7 @@ namespace WikiFunctions.Controls.Lists
                     for (int i = 1; i <= noGroups; i++)
                     {
                         StringBuilder strList = new StringBuilder();
-                        foreach (Article a in articles.GetRange(baseIndex, Math.Min(articles.Count-baseIndex, minValueCount)))
+                        foreach (Article a in articles.GetRange(baseIndex, Math.Min(articles.Count - baseIndex, minValueCount)))
                         {
                             strList.AppendLine(a.ToString());
                         }

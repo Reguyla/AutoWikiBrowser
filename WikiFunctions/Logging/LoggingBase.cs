@@ -66,8 +66,8 @@ namespace WikiFunctions.Logging
             WriteArticleActionLine(line, pluginName);
         }
 
-        public abstract bool Uploadable {get;}
-#endregion
+        public abstract bool Uploadable { get; }
+        #endregion
 
         // Protected and public members:
         public static string GetArticleTemplate(string articleFullTitle, int ns)
@@ -85,7 +85,7 @@ namespace WikiFunctions.Logging
 
                     string templ = ns % 2 == 1 ? "lnt" : "ln";
 
-                    return "#{{subst:" + templ + "|" + strnamespace + "|" + 
+                    return "#{{subst:" + templ + "|" + strnamespace + "|" +
                         Tools.RemoveNamespaceString(articleFullTitle).Trim() + "}}";
             }
         }

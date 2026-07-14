@@ -18,8 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #if DEBUG
-using System.Text;
-using System.IO;
 #endif
 using System.Diagnostics;
 using System.Threading;

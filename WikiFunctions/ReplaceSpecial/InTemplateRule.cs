@@ -16,8 +16,6 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -57,7 +55,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         public override Control CreateControl(IRuleControlOwner owner, Control.ControlCollection collection, System.Drawing.Point pos)
         {
-            InTemplateRuleControl rc = new InTemplateRuleControl(owner) {Location = pos};
+            InTemplateRuleControl rc = new InTemplateRuleControl(owner) { Location = pos };
             rc.RestoreFromRule(this);
             DisposeControl();
             ruleControl_ = rc;
@@ -128,7 +126,8 @@ namespace WikiFunctions.ReplaceSpecial
                 // only need to process template calls that match the input template name
                 allT.RemoveAll(t => Tools.TurnFirstToUpperNoProjectCheck(Tools.GetTemplateName(t)) != Tools.TurnFirstToUpperNoProjectCheck(template_));
 
-                allT.ForEach(t => {
+                allT.ForEach(t =>
+                {
                     string res = ReplaceOn(template_, tn, t, title_);
                     text_ = text_.Replace(t, res);
                 });

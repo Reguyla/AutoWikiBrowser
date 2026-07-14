@@ -17,8 +17,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -41,13 +39,14 @@ namespace WikiFunctions.Controls
 
         public override string Text
         {
-            get {
-                    if (Globals.UsingMono)
-                        return base.Text;
+            get
+            {
+                if (Globals.UsingMono)
+                    return base.Text;
 
-                    // Windows richtextbox uses \n, so convert to \r\n
-                    return base.Text.Replace("\n", "\r\n");
-                }
+                // Windows richtextbox uses \n, so convert to \r\n
+                return base.Text.Replace("\n", "\r\n");
+            }
             set
             {
                 Locked = true;
@@ -55,7 +54,7 @@ namespace WikiFunctions.Controls
                 Locked = false;
             }
         }
-        
+
         public override string SelectedText
         {
             get { return base.SelectedText.Replace("\n", "\r\n"); }
@@ -248,7 +247,7 @@ namespace WikiFunctions.Controls
             // reset background color to avoid issues on re-parse
             SetEditBoxSelection(0, RawText.Length);
             SelectionBackColor = Color.White;
-                        
+
             Font currentFont = SelectionFont;
             Font boldFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Bold);
             Font italicFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Italic);

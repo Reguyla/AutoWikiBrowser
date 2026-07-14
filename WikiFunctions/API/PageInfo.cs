@@ -17,7 +17,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Xml;
-using System;
 namespace WikiFunctions.API
 {
     /// <summary>
@@ -73,7 +72,7 @@ namespace WikiFunctions.API
             }
 
             string curtimestamp = "";
-            if(xr.ReadToFollowing("api"))
+            if (xr.ReadToFollowing("api"))
                 curtimestamp = xr.GetAttribute("curtimestamp");
 
             if (!xr.ReadToFollowing("page"))
@@ -135,7 +134,7 @@ namespace WikiFunctions.API
 
             // if UseInToken = false then won't be given starttimestamp, so use curtimestamp instead
             TokenTimestamp = xr.GetAttribute("starttimestamp");
-            if(string.IsNullOrEmpty(TokenTimestamp))
+            if (string.IsNullOrEmpty(TokenTimestamp))
                 TokenTimestamp = curtimestamp;
 
             long revId;
@@ -164,7 +163,7 @@ namespace WikiFunctions.API
                     }
                 }
             }
-       
+
             xr.ReadToFollowing("revisions");
 
             xr.ReadToDescendant("rev");
@@ -195,7 +194,7 @@ namespace WikiFunctions.API
         /// <summary>
         /// Why OriginalTitle differs from Title
         /// </summary>
-        public PageTitleStatus TitleChangedStatus 
+        public PageTitleStatus TitleChangedStatus
         { get; private set; }
 
         /// <summary>
@@ -281,7 +280,7 @@ namespace WikiFunctions.API
         /// </summary>
         public string MoveProtection
         { get; private set; }
-        
+
         /// <summary>
         /// String of any create protection applied to the page
         /// </summary>

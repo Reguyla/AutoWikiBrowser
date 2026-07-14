@@ -16,12 +16,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WikiFunctions.Disambiguation
 {
@@ -89,7 +86,7 @@ namespace WikiFunctions.Disambiguation
 
             if (dabLink.Contains("|"))
             {
-                string sum = dabLink.Split(new[] {'|'})
+                string sum = dabLink.Split(new[] { '|' })
                     .Where(s => s.Trim().Length != 0)
                     .Aggregate("", (current, s) => current + ("|" + Tools.FirstLetterCaseInsensitive(Regex.Escape(s.Trim()))));
                 if (sum.Length > 0 && sum[0] == '|')

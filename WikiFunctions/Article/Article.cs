@@ -18,20 +18,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Text;
-using System.Xml.Serialization;
-using WikiFunctions.Logging;
 using System.Text.RegularExpressions;
-using WikiFunctions.Plugin;
+using System.Windows.Forms;
+using System.Xml.Serialization;
+using WikiFunctions.API;
+using WikiFunctions.Controls;
+using WikiFunctions.Logging;
 using WikiFunctions.Options;
 using WikiFunctions.Parse;
-using WikiFunctions.Controls;
-using System.Windows.Forms;
-using WikiFunctions.API;
-using System.Collections.Generic;
+using WikiFunctions.Plugin;
 using WikiFunctions.TalkPages;
-using System.Linq;
 
 namespace WikiFunctions
 {

@@ -17,12 +17,9 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
-using System.Xml;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace WikiFunctions.ReplaceSpecial
 {
@@ -307,7 +304,7 @@ namespace WikiFunctions.ReplaceSpecial
                 IRule rule = (IRule)parent.Tag;
                 if (rule.Children != null)
                 {
-                    rule.Children.Remove((IRule) st.Tag);
+                    rule.Children.Remove((IRule)st.Tag);
                 }
             }
 
@@ -474,7 +471,7 @@ namespace WikiFunctions.ReplaceSpecial
             SaveCurrentRule();
             History.Save();
 
-            TreeNode n = new TreeNode(r.Name) {Tag = r};
+            TreeNode n = new TreeNode(r.Name) { Tag = r };
 
             TreeNode s = RulesTreeView.SelectedNode;
             if (s != null)
@@ -507,7 +504,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         private void AddNewRule(IRule r, TreeNode tn)
         {
-            TreeNode n = new TreeNode(r.Name) {Tag = r};
+            TreeNode n = new TreeNode(r.Name) { Tag = r };
 
             tn.Nodes.Add(n);
 
@@ -529,7 +526,7 @@ namespace WikiFunctions.ReplaceSpecial
         /// <param name="r"></param>
         private void AppendRule(IRule r)
         {
-            TreeNode n = new TreeNode(r.Name) {Tag = r};
+            TreeNode n = new TreeNode(r.Name) { Tag = r };
 
             RulesTreeView.Nodes.Add(n);
 
@@ -562,7 +559,7 @@ namespace WikiFunctions.ReplaceSpecial
 
             History.Save();
 
-            TreeNode n = new TreeNode(r.Name) {Tag = r};
+            TreeNode n = new TreeNode(r.Name) { Tag = r };
 
             s.Nodes.Add(n);
             RulesTreeView.SelectedNode = n;

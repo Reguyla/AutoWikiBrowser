@@ -15,13 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
@@ -792,7 +788,7 @@ namespace WikiFunctions.API
                 ? null
                 : tokenNode.Attributes["logintoken"] == null
                     ? null
-                    : tokenNode.Attributes["logintoken"].Value; 
+                    : tokenNode.Attributes["logintoken"].Value;
 
             // If not a bot, use the clientlogin API, which gives an opportunity to supply a OTC
             if (!username.Contains("@") && !string.IsNullOrEmpty(token))
@@ -1500,7 +1496,7 @@ namespace WikiFunctions.API
                 }
             }
 
-                if (Aborting) throw new AbortedException(this);
+            if (Aborting) throw new AbortedException(this);
 
             // if page does not exist, protection (i.e. salting) requires create protection only
             string protections;

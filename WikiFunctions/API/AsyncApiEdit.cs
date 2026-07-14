@@ -15,9 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-using System;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WikiFunctions.API
@@ -67,7 +65,7 @@ namespace WikiFunctions.API
 
         public AsyncApiEdit Clone()
         {
-            return new AsyncApiEdit((ApiEdit) SynchronousEditor.Clone(), ParentControl);
+            return new AsyncApiEdit((ApiEdit)SynchronousEditor.Clone(), ParentControl);
         }
 
         /// <summary>
@@ -187,10 +185,10 @@ namespace WikiFunctions.API
                     if (OpenComplete != null) OpenComplete(this, Page);
                     break;
                 case "Save":
-                    if (SaveComplete != null) SaveComplete(this, (SaveInfo) result);
+                    if (SaveComplete != null) SaveComplete(this, (SaveInfo)result);
                     break;
                 case "Preview":
-                    if (PreviewComplete != null) PreviewComplete(this, (string) result);
+                    if (PreviewComplete != null) PreviewComplete(this, (string)result);
                     break;
             }
         }
@@ -201,7 +199,7 @@ namespace WikiFunctions.API
 
             if (ex is MaxlagException)
             {
-                var exm = (MaxlagException) ex;
+                var exm = (MaxlagException)ex;
                 if (MaxlagExceeded != null) MaxlagExceeded(this, exm.Maxlag, exm.RetryAfter);
             }
             else if (ex is LoggedOffException)

@@ -17,8 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -51,7 +49,7 @@ namespace WikiFunctions.Parse
 
         private static readonly Regex RegexHeadingColonAtEnd = new Regex(@"^(=+)(\s*[^=\s].*?)\:(\s*\1\s*)$");
         private static readonly Regex RegexHeadingWithBold = new Regex(@"(?<====+.*?)(?:'''|<[Bb]>)(.*?)(?:'''|</[Bb]>)(?=.*?===+)");
-        private static readonly List<string> BadHeadings = new List<string>(new [] {"career", "track listing", " members", "further reading", "related ", " life", "source", " links", "weblink", "external", "also", "reff", "refer", "refr", "<", "\t", "'''", ":"});
+        private static readonly List<string> BadHeadings = new List<string>(new[] { "career", "track listing", " members", "further reading", "related ", " life", "source", " links", "weblink", "external", "also", "reff", "refer", "refr", "<", "\t", "'''", ":" });
 
         /// <summary>
         /// Fix ==See also== and similar section common errors.
@@ -70,7 +68,7 @@ namespace WikiFunctions.Parse
         }
 
         private static readonly Regex ListOf = new Regex(@"^Lists? of", RegexOptions.Compiled);
-        
+
         private static readonly Regex Anchor2NewlineHeader = new Regex(Tools.NestedTemplateRegex(new[] { "Anchor", "Anchors", "Anchor for redirect", "ANCHOR", "Anc" }) + "\r\n(\r\n)+==", RegexOptions.Multiline);
         private static readonly Regex HeadingsIncorrectWhitespaceBefore = new Regex(@"(?<=\S *(?:(\r\n){3,}|\r\n|\s*< *[Bb][Rr] *\/? *>\s*) *)=");
 
@@ -105,21 +103,21 @@ namespace WikiFunctions.Parse
                     // list of headings that have a comment on the line before: these are correct as is
                     List<string> commentBeforeHeadings = CommentThenHeading.Matches(articleText).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
-                    articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(articleText, m => 
+                    articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(articleText, m =>
                         {
                             // avoid special case of indented text that may be code with lots of == that matches a heading
-                            if(m.Groups[2].Value.Contains("=="))
+                            if (m.Groups[2].Value.Contains("=="))
                                 return m.Value;
 
                             // if a sub-heading directly after a heading don't add blank line
-                            foreach(Match x in HeadingSubHeading.Matches(articleText))
+                            foreach (Match x in HeadingSubHeading.Matches(articleText))
                             {
-                                if(x.Groups[3].Value.Contains(m.Groups[1].Value))
+                                if (x.Groups[3].Value.Contains(m.Groups[1].Value))
                                     return m.Value;
                             }
 
                             // if comment on the line before heading then it's correct as is
-                            if(commentBeforeHeadings.Any(c => c.Equals(m.Groups[2].Value)))
+                            if (commentBeforeHeadings.Any(c => c.Equals(m.Groups[2].Value)))
                                 return m.Value;
 
                             return "\r\n\r\n" + m.Groups[1].Value;
@@ -158,14 +156,14 @@ namespace WikiFunctions.Parse
                     articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleTextLocal, "");
 
                     string originalarticleText = "";
-                    while(!originalarticleText.Equals(articleText))
+                    while (!originalarticleText.Equals(articleText))
                     {
                         originalarticleText = articleText;
                         if (!WikiRegexes.HeadingLevelTwo.IsMatch(articleTextLocal))
                         {
                             // get index of last level 3+ heading
                             int upone = 0;
-                            foreach(Match m in RegexHeadingUpOneLevel.Matches(articleText))
+                            foreach (Match m in RegexHeadingUpOneLevel.Matches(articleText))
                             {
                                 if (m.Index > upone)
                                     upone = m.Index;
@@ -180,7 +178,7 @@ namespace WikiFunctions.Parse
                 }
 
                 // level 1 headings to level 2 on mainspace
-                if(Namespace.IsMainSpace(articleTitle) && customHeadings.Any(s => HeadingLevelOne.IsMatch(s)))
+                if (Namespace.IsMainSpace(articleTitle) && customHeadings.Any(s => HeadingLevelOne.IsMatch(s)))
                     articleText = HeadingLevelOne.Replace(articleText, "==$1==");
             }
 
@@ -199,7 +197,7 @@ namespace WikiFunctions.Parse
 
             // clean whitespace
             hAfter = hAfter.Replace("\t", " ");
-            while(SpaceNewLineEnd.IsMatch(hAfter))
+            while (SpaceNewLineEnd.IsMatch(hAfter))
                 hAfter = SpaceNewLineEnd.Replace(hAfter, "$1");
 
             // Removes bold from heading - CHECKWIKI error 44
@@ -219,8 +217,8 @@ namespace WikiFunctions.Parse
             hAfter = RegexHeadingsSeeAlso.Replace(hAfter, "$1See also$2");
 
             // Plural per [[WP:FNNR]]
-            hAfter = RegexHeadingsReferencess.Replace(hAfter, m2=> m2.Groups[1].Value + "References" + m2.Groups[2].Value);
-            hAfter = RegexHeadingsSources.Replace(hAfter, m2=> m2.Groups[1].Value + "Sources" + m2.Groups[2].Value);
+            hAfter = RegexHeadingsReferencess.Replace(hAfter, m2 => m2.Groups[1].Value + "References" + m2.Groups[2].Value);
+            hAfter = RegexHeadingsSources.Replace(hAfter, m2 => m2.Groups[1].Value + "Sources" + m2.Groups[2].Value);
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Bold_text_in_headers
             // Removes bold from level 3 headers and below, as it makes no visible difference

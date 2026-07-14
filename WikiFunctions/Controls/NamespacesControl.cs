@@ -15,8 +15,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace WikiFunctions.Controls
@@ -67,7 +65,7 @@ namespace WikiFunctions.Controls
             checkedLBTalk.Items.Clear();
             checkedLBContent.Items.Clear();
 
-            checkedLBContent.Items.Add(new NSItem(new KeyValuePair<int,string>(0, "Main/Article")));
+            checkedLBContent.Items.Add(new NSItem(new KeyValuePair<int, string>(0, "Main/Article")));
 
             foreach (KeyValuePair<int, string> kvp in Variables.Namespaces)
             {
@@ -113,7 +111,7 @@ namespace WikiFunctions.Controls
             for (int i = 0; i < clb.Items.Count; i++)
             {
                 if (clb.GetItemChecked(i))
-                    ret.Add(((NSItem) clb.Items[i]).Key);
+                    ret.Add(((NSItem)clb.Items[i]).Key);
             }
 
             return ret;
@@ -138,7 +136,7 @@ namespace WikiFunctions.Controls
         {
             for (int i = 0; i < clb.Items.Count; i++)
             {
-                clb.SetItemChecked(i, tags.Contains(((NSItem) clb.Items[i]).Key));
+                clb.SetItemChecked(i, tags.Contains(((NSItem)clb.Items[i]).Key));
             }
         }
     }

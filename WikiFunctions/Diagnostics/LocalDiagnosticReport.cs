@@ -1,12 +1,9 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Runtime.Versioning;
 
 namespace WikiFunctions
 {
@@ -87,7 +84,7 @@ namespace WikiFunctions
                     "AutoWikiBrowser",
                     "Diagnostics");
 
-                    Directory.CreateDirectory(directory);
+                Directory.CreateDirectory(directory);
 
                 string fileName = string.Format(
                     "error-{0:yyyyMMdd-HHmmss}-{1}-{2}.txt",
@@ -95,7 +92,7 @@ namespace WikiFunctions
                     Process.GetCurrentProcess().Id,
                     Guid.NewGuid().ToString("N").Substring(0, 8));
 
-                    string reportPath = Path.Combine(directory, fileName);
+                string reportPath = Path.Combine(directory, fileName);
 
                 File.WriteAllText(
                     reportPath,

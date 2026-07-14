@@ -17,10 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -73,7 +69,7 @@ namespace WikiFunctions.Parse
             // return if {{portal}} within {{stack}}
             List<string> stacks = Parsers.GetAllTemplateDetail(articleText).Where(t => StackTemplate.IsMatch(t)).ToList();
 
-            if(stacks.Any(s => WikiRegexes.PortalTemplate.IsMatch(s)))
+            if (stacks.Any(s => WikiRegexes.PortalTemplate.IsMatch(s)))
                 return articleText;
 
             string originalArticleText = articleText;
@@ -87,9 +83,9 @@ namespace WikiFunctions.Parse
                 string thePortalCall = m.Value;
 
                 // Do not process portal templates with named arguments
-                if(!Tools.GetTemplateParameterValues(thePortalCall).Any())
+                if (!Tools.GetTemplateParameterValues(thePortalCall).Any())
                 {
-                    for(int i = 1; i <= Tools.GetTemplateArgumentCount(thePortalCall); i++)
+                    for (int i = 1; i <= Tools.GetTemplateArgumentCount(thePortalCall); i++)
                         Portals.Add(Tools.GetTemplateArgument(thePortalCall, i).Trim());
 
                     articleText = Regex.Replace(articleText, Regex.Escape(thePortalCall) + @"\s*(?:\r\n)?", "");
@@ -170,7 +166,7 @@ namespace WikiFunctions.Parse
                             // argument 2 length > 0
                             if (Tools.GetTemplateArgument(m.Value, 2).Length > 0 && Tools.GetTemplateArgument(m2.Value, 2).Length > 0)
                             {
-                                articleText = articleText.Replace(m.Value, m.Value.TrimEnd('}') + @"|" + Tools.GetTemplateArgument(m2.Value, 2) + @"|" + Tools.GetTemplateArgument(m2.Value, 3) + 
+                                articleText = articleText.Replace(m.Value, m.Value.TrimEnd('}') + @"|" + Tools.GetTemplateArgument(m2.Value, 2) + @"|" + Tools.GetTemplateArgument(m2.Value, 3) +
                                                                   (Tools.GetTemplateArgument(m2.Value, 4).Length > 0 ? @"|" + Tools.GetTemplateArgument(m2.Value, 4) + @"|" + Tools.GetTemplateArgument(m2.Value, 5) : "") + @"}}");
                                 doneAboutMerge = true;
                             }
@@ -224,7 +220,7 @@ namespace WikiFunctions.Parse
                 foreach (Match m in Tools.NestedTemplateRegex("for").Matches(articleText))
                 {
                     string about = Tools.NestedTemplateRegex("about").Match(articleText).Value;
-                    
+
                     // about supports up to 9 arguments
                     if (Tools.GetTemplateArgument(about, 9).Length > 0)
                         continue;
@@ -239,12 +235,12 @@ namespace WikiFunctions.Parse
                     // append {{for}} value to the {{about}}
                     if (Tools.GetTemplateArgument(m.Value, 3).Length == 0)
                         articleText = articleText.Replace(about, about.TrimEnd('}') + extra + m.Groups[3].Value);
-                    else if  (Tools.GetTemplateArgument(m.Value, 4).Length == 0) // where for has 3 arguments need extra and
+                    else if (Tools.GetTemplateArgument(m.Value, 4).Length == 0) // where for has 3 arguments need extra and
                         articleText = articleText.Replace(about, about.TrimEnd('}') + extra + m.Groups[3].Value.Insert(m.Groups[3].Value.LastIndexOf('|') + 1, "and|"));
-    
+
                     // if there are 4 arguments do nothing
                     // remove the old {{for}}
-                    if  (Tools.GetTemplateArgument(m.Value, 4).Length == 0)
+                    if (Tools.GetTemplateArgument(m.Value, 4).Length == 0)
                         articleText = articleText.Replace(m.Value, "");
                 }
 
@@ -361,10 +357,10 @@ namespace WikiFunctions.Parse
 
             int merged = 0;
 
-            while(TemplateToMerge.IsMatch(sectionText))
+            while (TemplateToMerge.IsMatch(sectionText))
             {
                 Match m = TemplateToMerge.Match(sectionText);
-                
+
                 // only take templates at very start of section (after heading)
                 if (m.Index > 0)
                     break;
@@ -375,7 +371,7 @@ namespace WikiFunctions.Parse
                 else
                 {
                     // named parameters in second template can't be handled e.g. could be l1 in {{main}} that would refer to wrong template arg if merged
-                    if(Tools.GetTemplateParameterValues(m.Value).Any())
+                    if (Tools.GetTemplateParameterValues(m.Value).Any())
                         break;
                     mergedTemplates = Regex.Replace(mergedTemplates, @"}}$", m.Groups[3].Value);
                     merged++;

@@ -71,7 +71,7 @@ namespace WikiFunctions.API
         {
             ResponseXml = doc;
 
-            try 
+            try
             {
                 var edit = doc["api"]["edit"];
 

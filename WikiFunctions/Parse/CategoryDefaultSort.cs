@@ -17,8 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace WikiFunctions.Parse
@@ -416,7 +414,7 @@ namespace WikiFunctions.Parse
 
             return articleText;
         }
-        
+
         /// <summary>
         /// Returns whether human name defaultsort cleanup required: contains apostrophe or unspaced comma
         /// </summary>
@@ -483,7 +481,7 @@ namespace WikiFunctions.Parse
 
         private static readonly Regex PersonYearOfBirth = new Regex(@"(?<='''.{0,100}?)\( *[Bb]orn[^\)\.;]{1,150}?(?<!.*(?:[Dd]ied|&[nm]dash;|—).*)([12]?\d{3}(?: BC)?)\b[^\)]{0,200}");
         private static readonly Regex PersonYearOfDeath = new Regex(@"(?<='''.{0,100}?)\([^\(\)]*?[Dd]ied[^\)\.;]+?([12]?\d{3}(?: BC)?)\b");
-        private static readonly Regex PersonYearOfBirthAndDeath = new Regex(@"^.{0,100}?'''\s*\([^\)\r\n]*?(?<![Dd]ied)\b([12]?\d{3})\b[^\)\r\n]*?(-|–|—|&[nm]dash;)[^\)\r\n]*?([12]?\d{3})\b[^\)]{0,200}", RegexOptions.Singleline );
+        private static readonly Regex PersonYearOfBirthAndDeath = new Regex(@"^.{0,100}?'''\s*\([^\)\r\n]*?(?<![Dd]ied)\b([12]?\d{3})\b[^\)\r\n]*?(-|–|—|&[nm]dash;)[^\)\r\n]*?([12]?\d{3})\b[^\)]{0,200}", RegexOptions.Singleline);
 
         /// <summary>
         /// Adds [[Category:XXXX births]], [[Category:XXXX deaths]] to articles about people where available, for en-wiki only
@@ -526,7 +524,7 @@ namespace WikiFunctions.Parse
         private static readonly Regex DiedOrBaptised = new Regex(@"(^.*?)((?:&[nm]dash;|—|–|;|[Dd](?:ied|\.)|baptised|transitioned).*)");
         private static readonly Regex NotCircaTemplate = new Regex(@"{{(?!(?:[Cc]irca|[Ff]l\.?))[^{]*?}}");
         private static readonly Regex AsOfText = new Regex(@"\bas of\b");
-        private static readonly Regex FloruitTemplate = Tools.NestedTemplateRegex(new [] {"fl", "fl.", "floruit"});
+        private static readonly Regex FloruitTemplate = Tools.NestedTemplateRegex(new[] { "fl", "fl.", "floruit" });
         private static readonly Regex BirthDateBasedOnAgeAtDeath = Tools.NestedTemplateRegex(new[] { "Birth date based on age at death", "Birth based on age at death" });
         private static readonly Regex FootnoteTemplates = Tools.NestedTemplateRegex(new[] { "Efn", "Efn-ua", "Efn-lr", "Sfn", "Shortened footnote", "Shortened footnote template", "Sfnb", "Sfnp", "Sfnm", "SfnRef" });
 
@@ -578,12 +576,12 @@ namespace WikiFunctions.Parse
             // remove references and long wikilinks (but allow an ISO date) that may contain false positives of birth/death date
             zerothSection = WikiRegexes.Refs.Replace(zerothSection, " ");
             zerothSection = FootnoteTemplates.Replace(zerothSection, " ");
-            while(LongWikilink.IsMatch(zerothSection))
+            while (LongWikilink.IsMatch(zerothSection))
                 zerothSection = LongWikilink.Replace(zerothSection, " ");
 
             // ignore dates containing years from dated maintenance tags etc.
-            zerothSection = WikiRegexes.NestedTemplates.Replace(zerothSection, m2=> ThreeOrFourDigitNumber.IsMatch(Tools.GetTemplateParameterValue(m2.Value, "date")) ? "" : m2.Value);
-            zerothSection = WikiRegexes.TemplateMultiline.Replace(zerothSection, m2=> ThreeOrFourDigitNumber.IsMatch(Tools.GetTemplateParameterValue(m2.Value, "date")) ? "" : m2.Value);
+            zerothSection = WikiRegexes.NestedTemplates.Replace(zerothSection, m2 => ThreeOrFourDigitNumber.IsMatch(Tools.GetTemplateParameterValue(m2.Value, "date")) ? "" : m2.Value);
+            zerothSection = WikiRegexes.TemplateMultiline.Replace(zerothSection, m2 => ThreeOrFourDigitNumber.IsMatch(Tools.GetTemplateParameterValue(m2.Value, "date")) ? "" : m2.Value);
 
             string StartCategory = Tools.Newline(@"[[" + (Namespace.IsMainSpace(articleTitle) ? "" : ":") + @"Category:");
             string yearstring, yearFromInfoBox = "", sort = GetCategorySort(articleText);
@@ -644,7 +642,7 @@ namespace WikiFunctions.Parse
                         }
                         else // after removing dashes, birthpart must still contain year and not a year range
                             if (!birthpart.Contains(@"?") && Regex.IsMatch(birthpart, @"\d{3,4}") && !Regex.IsMatch(m.Value, @"[12]\d\d\d.[12]\d\d\d"))
-                                yearstring = m.Groups[1].Value;
+                            yearstring = m.Groups[1].Value;
                     }
                 }
 
@@ -719,7 +717,7 @@ namespace WikiFunctions.Parse
                             articleText += StartCategory + birthyear + @" births" + CatEnd(sort);
                         else
                             if (UncertainWordings.IsMatch(birthpart) && !CategoryMatch(articleText, YearOfBirthMissingLivingPeople) && !CategoryMatch(articleText, YearOfBirthUncertain))
-                                articleText += StartCategory + YearOfBirthUncertain + CatEnd(sort);
+                            articleText += StartCategory + YearOfBirthUncertain + CatEnd(sort);
                     }
 
                     if (!UncertainWordings.IsMatch(deathpart) && !ReignedRuledUnsure.IsMatch(m.Value) && !Regex.IsMatch(deathpart, @"[Bb](?:orn|\.)") && !Regex.IsMatch(birthpart, @"[Dd](?:ied|\.)")
@@ -780,7 +778,7 @@ namespace WikiFunctions.Parse
                 articleText = RemoveCategory(YearofDeathMissing, articleText);
 
             // if full DOB in {{birth date and age}} remove Date of birth missing/Date of birth missing (living people) category
-            if(cats.IndexOf(@"Date of birth missing", StringComparison.OrdinalIgnoreCase) > 0 && Regex.IsMatch(WikiRegexes.DateBirthAndAge.Match(articleText).Value, @"(\|\s*[0-9]+\s*){3}"))
+            if (cats.IndexOf(@"Date of birth missing", StringComparison.OrdinalIgnoreCase) > 0 && Regex.IsMatch(WikiRegexes.DateBirthAndAge.Match(articleText).Value, @"(\|\s*[0-9]+\s*){3}"))
             {
                 articleText = RemoveCategory(@"Date of birth missing", articleText);
                 articleText = RemoveCategory(@"Date of birth missing (living people)", articleText);
@@ -805,7 +803,7 @@ namespace WikiFunctions.Parse
             if (cq.Success)
             {
                 // Allow some characters before category start in case of excess opening braces
-                int cutoff = Math.Max(0, cq.Index-2);
+                int cutoff = Math.Max(0, cq.Index - 2);
                 string cats = articleText.Substring(cutoff);
                 string catsOriginal = cats;
 
@@ -822,7 +820,7 @@ namespace WikiFunctions.Parse
 
                 articleText = articleText.Substring(0, cutoff) + cats;
             }
-            
+
             return articleText;
         }
 

@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
 using System.Windows.Forms;
 using WikiFunctions.API;
 
@@ -423,7 +422,7 @@ namespace WikiFunctions.Profiles
                     return;
                 }
 
-                var profile = new AWBProfile {Username = user};
+                var profile = new AWBProfile { Username = user };
                 if (chkSavePassword.Checked)
                 {
                     profile.Password = password;

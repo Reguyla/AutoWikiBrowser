@@ -16,13 +16,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
-using System.Text;
 using System.Windows.Forms;
-using System.Linq;
 
 using WikiFunctions.Controls;
 using WikiFunctions.Controls.Lists;
@@ -62,7 +58,7 @@ namespace WikiFunctions.Logging
             if (skipped)
             {
                 logListener.AddAndDateStamp(lvIgnored);
-                
+
                 // sort descending (newest first) unless user has clicked columns to create custom sort order
                 if (lvIgnored.Sorting == SortOrder.None)
                 {
@@ -73,8 +69,8 @@ namespace WikiFunctions.Logging
             else
             {
                 logListener.AddAndDateStamp(lvSaved);
-                
-                 // sort descending (newest first) unless user has clicked columns to create custom sort order
+
+                // sort descending (newest first) unless user has clicked columns to create custom sort order
                 if (lvSaved.Sorting == SortOrder.None)
                 {
                     lvSaved.ListViewItemSorter = new ListViewItemComparer();
@@ -104,7 +100,7 @@ namespace WikiFunctions.Logging
 
             if (sender is ContextMenuStrip)
                 return ((ListView)((ContextMenuStrip)sender).SourceControl);
-            
+
             if (sender is ToolStripMenuItem)
                 return (ListView)(((ContextMenuStrip)((ToolStripMenuItem)sender).Owner).SourceControl);
             throw new ArgumentException("Object of unknown type passed to LogControl.MenuItemOwner()", "sender");
@@ -162,12 +158,12 @@ namespace WikiFunctions.Logging
 
             addSelectedToArticleListToolStripMenuItem.Enabled = cutToolStripMenuItem.Enabled = copyToolStripMenuItem.Enabled
                 = removeToolStripMenuItem.Enabled = openInBrowserToolStripMenuItem.Enabled = openHistoryInBrowserToolStripMenuItem.Enabled
-                = filterShowOnlySelectedToolStripMenuItem.Enabled = filterExcludeToolStripMenuItem.Enabled = 
+                = filterShowOnlySelectedToolStripMenuItem.Enabled = filterExcludeToolStripMenuItem.Enabled =
                 MenuItemOwner(sender).SelectedItems.Count > 0;
 
             selectAllToolStripMenuItem.Enabled = selectNoneToolStripMenuItem.Enabled = clearToolStripMenuItem.Enabled =
                 MenuItemOwner(sender).Items.Count > 0;
-            
+
             // diff option for saved pages only
             openDiffInBrowserToolStripMenuItem.Enabled = MenuItemOwner(sender) == lvSaved && MenuItemOwner(sender).SelectedItems.Count > 0;
         }
@@ -193,7 +189,7 @@ namespace WikiFunctions.Logging
         private void LogLists_MouseMove(object sender, MouseEventArgs e)
         {
             // Wine workaround: ToolTipText for ListViewItem doesn't work under Wine, use MouseMove event to show tooltip instead
-            if(!Globals.UsingLinux)
+            if (!Globals.UsingLinux)
                 return;
 
             // find list view item under mouse, if any
@@ -211,7 +207,7 @@ namespace WikiFunctions.Logging
         // further to LogLists_MouseMove workaround, ensure tooltip is closed again when mouse leaves control
         private void LogLists_MouseLeave(object sender, EventArgs e)
         {
-            if(Globals.UsingLinux)
+            if (Globals.UsingLinux)
                 tooltip.Hide((ListView)sender);
         }
 
@@ -351,8 +347,8 @@ namespace WikiFunctions.Logging
             lvIgnored.BeginUpdate();
             foreach (AWBLogListener item in lvIgnored.Items)
             {
-                if ((compareMatch && String.Compare(item.SkipReason, filterBy, StringComparison.OrdinalIgnoreCase) == 0 ) // match
-                    || ( !compareMatch && String.Compare(item.SkipReason, filterBy, StringComparison.OrdinalIgnoreCase) != 0 ) ) // no match
+                if ((compareMatch && String.Compare(item.SkipReason, filterBy, StringComparison.OrdinalIgnoreCase) == 0) // match
+                    || (!compareMatch && String.Compare(item.SkipReason, filterBy, StringComparison.OrdinalIgnoreCase) != 0)) // no match
                 {
                     FilteredItems.Add(item);
                     item.Remove();

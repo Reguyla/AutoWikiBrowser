@@ -16,7 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -25,7 +24,7 @@ namespace WikiFunctions.Lists.Providers
     public abstract class CategoryProviderBase : ApiListProviderBase
     {
         #region Overrides: <categorymembers>/<cm>
-        readonly List<string> pe = new List<string>(new [] { "cm" });
+        readonly List<string> pe = new List<string>(new[] { "cm" });
         protected override ICollection<string> PageElements
         {
             get { return pe; }

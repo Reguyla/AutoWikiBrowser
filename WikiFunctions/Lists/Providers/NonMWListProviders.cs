@@ -17,12 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -170,10 +165,10 @@ namespace WikiFunctions.Lists.Providers
                     foreach (Match m in RegexGoogle.Matches(googleText))
                     {
                         string searchres = m.Groups["title"].Value;
-                        
+
                         if (searchres.Contains(@"&amp;"))
                             searchres = searchres.Substring(0, searchres.IndexOf(@"&amp;", StringComparison.Ordinal));
-                        
+
                         string title = Tools.GetTitleFromURL(searchres);
 
                         // some google results are double encoded, so WikiDecode again
@@ -258,7 +253,7 @@ namespace WikiFunctions.Lists.Providers
                     switch (OpenListDialog.FilterIndex)
                     {
                         case 2:
-                            list.AddRange(pageText.Split(new[] {"\r\n", "\n"}, StringSplitOptions.RemoveEmptyEntries).Select(s => new Article(Tools.RemoveSyntax(Tools.TurnFirstToUpper(s.Trim())))));
+                            list.AddRange(pageText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(s => new Article(Tools.RemoveSyntax(Tools.TurnFirstToUpper(s.Trim())))));
                             break;
                         default:
                             if (LoadWikiLink.IsMatch(pageText))
@@ -267,7 +262,7 @@ namespace WikiFunctions.Lists.Providers
                             }
                             else
                             {
-                                list.AddRange(from s in pageText.Split(new[] {"\r\n", "\n"}, StringSplitOptions.RemoveEmptyEntries) where s.Trim().Length != 0 && Tools.IsValidTitle(s) select new Article(Tools.RemoveSyntax(Tools.TurnFirstToUpper(s.Trim()))));
+                                list.AddRange(from s in pageText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries) where s.Trim().Length != 0 && Tools.IsValidTitle(s) select new Article(Tools.RemoveSyntax(Tools.TurnFirstToUpper(s.Trim()))));
                             }
                             break;
                     }

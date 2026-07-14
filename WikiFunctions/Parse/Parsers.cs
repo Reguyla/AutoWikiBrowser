@@ -17,9 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -179,7 +176,7 @@ namespace WikiFunctions.Parse
             // Check for performance
             if (SyntaxRemoveBrQuick.IsMatch(articleText))
                 articleText = SyntaxRemoveBr.Replace(articleText, "\r\n\r\n");
-            
+
             articleText = SyntaxRemoveParagraphs.Replace(articleText, "\r\n\r\n");
             return SyntaxRegexListRowBrTagStart.Replace(articleText, "$1");
         }
@@ -200,7 +197,7 @@ namespace WikiFunctions.Parse
             new Regex(
                 @"(?<![\*#].*)('''(?:[^']+|.*?[^'])'''\s*\()(\[*(?:" + WikiRegexes.MonthsNoGroup + @"\s+0?([1-3]?\d)|0?([1-3]?\d)\s*" +
                 WikiRegexes.MonthsNoGroup + @")?\]*\s*\[*[12]?\d{3}\]*)\s*(?:\-|–|&ndash;)\s*\)", RegexOptions.IgnoreCase);
-        
+
         private static readonly Regex DOBRegexDashQuick = new Regex(@"(?<=(?:\-|–|&ndash;)\s*)\)");
 
         private static readonly Regex BornDeathRegex =
@@ -221,14 +218,14 @@ namespace WikiFunctions.Parse
         {
             // Three born/died regexes wrapped like this for performance
             if (Regex.IsMatch(articleText, @"'''\s*\([BbDd]"))
-                articleText = BoldToBracket.Replace(articleText, m=>
+                articleText = BoldToBracket.Replace(articleText, m =>
                                                     {
                                                         string newvalue = m.Groups[2].Value;
 
                                                         newvalue = DiedDateRegex.Replace(newvalue, "died $1"); // date of death
                                                         newvalue = DOBRegex.Replace(newvalue, "born $1"); // date of birth
                                                         newvalue = BornDeathRegex.Replace(newvalue, "$1 – $3"); // birth and death
-                                                        return  m.Groups[1].Value + newvalue;
+                                                        return m.Groups[1].Value + newvalue;
                                                     });
 
             if (DOBRegexDashQuick.IsMatch(articleText) && !DOBRegexDash.IsMatch(WikiRegexes.InfoBox.Match(articleText).Value))
@@ -351,7 +348,7 @@ namespace WikiFunctions.Parse
             const int backlength = 12;
             // performance: faster to pick out end of ranges and substring than run each regex in turn
             List<string> dashed = (from Match m in Regex.Matches(articleText, @"(?:—|-|&#8212;|&mdash;)+\s*[0-9].{0,12}")
-                select (m.Index > backlength ? articleText.Substring(m.Index-backlength, m.Length+backlength) : articleText.Substring(0, m.Length+m.Index))).ToList();
+                                   select (m.Index > backlength ? articleText.Substring(m.Index - backlength, m.Length + backlength) : articleText.Substring(0, m.Length + m.Index))).ToList();
 
             dashed = Tools.DeduplicateList(dashed);
 
@@ -389,7 +386,7 @@ namespace WikiFunctions.Parse
                 articleText = SentenceClauseIncorrectMdash.Replace(articleText, m => m.Groups[1].Value + ((Regex.IsMatch(m.Groups[1].Value, @"^\d+$") && Regex.IsMatch(m.Groups[2].Value, @"^\d+$")) ? @"–" : @"—") + m.Groups[2].Value);
 
             // T337532 MOS:ELLIPSIS replace Unicode ellipsis … with 3 dots
-            if(Variables.IsWikipediaEN)
+            if (Variables.IsWikipediaEN)
             {
                 articleText = articleText.Replace("…", "...");
             }
@@ -433,11 +430,11 @@ namespace WikiFunctions.Parse
             //Remove <br /> if followed by double newline, NOT in blockquotes
             if (BrTwoNewlines.IsMatch(articleText) && !WikiRegexes.Blockquote.IsMatch(articleText))
             {
-                while(BrTwoNewlines.IsMatch(articleText))
+                while (BrTwoNewlines.IsMatch(articleText))
                     articleText = BrTwoNewlines.Replace(articleText.Trim(), "\r\n\r\n");
             }
 
-            while(SpacesThenTwoNewline.IsMatch(articleText))
+            while (SpacesThenTwoNewline.IsMatch(articleText))
                 articleText = SpacesThenTwoNewline.Replace(articleText, "\r\n\r\n");
 
             // remove excessive newlines
@@ -451,7 +448,7 @@ namespace WikiFunctions.Parse
 
                 if (p > -1)
                 {
-                    foreach(Match m in WikiRegexes.Poem.Matches(articleText.Substring(Math.Max(p-50,0))))
+                    foreach (Match m in WikiRegexes.Poem.Matches(articleText.Substring(Math.Max(p - 50, 0))))
                     {
                         if (m.Value.Contains("\r\n\r\n"))
                         {
@@ -473,7 +470,7 @@ namespace WikiFunctions.Parse
             articleText = NewlinesBelowExternalLinks.Replace(articleText, "==External links==\r\n*");
             // For bulleted vertical lists, do not separate items by leaving blank lines between them (or lines with just spaces).
             // WP:LISTGAP
-            while(NewlinesWithinLists.IsMatch(articleText))
+            while (NewlinesWithinLists.IsMatch(articleText))
                 articleText = NewlinesWithinLists.Replace(articleText, "$1\r\n*");
 
             articleText = HorizontalRule.Replace(articleText.Trim(), "");
@@ -590,14 +587,14 @@ namespace WikiFunctions.Parse
 
             if (Variables.LangCode.Equals("en") && DatesT.Length > 0)
                 switch (DatesT)
-            {
-                case "dmy":
-                    return DateLocale.International;
-                case "mdy":
-                    return DateLocale.American;
-                case "ymd":
-                    return DateLocale.ISO;
-            }
+                {
+                    case "dmy":
+                        return DateLocale.International;
+                    case "mdy":
+                        return DateLocale.American;
+                    case "ymd":
+                        return DateLocale.ISO;
+                }
 
             if (explicitonly)
                 return DateLocale.Undetermined;
@@ -626,7 +623,7 @@ namespace WikiFunctions.Parse
             if (Tools.GetTemplateParameterValue(BirthDate.Match(articleText).Value, "df").StartsWith("y")
                 || Tools.GetTemplateParameterValue(DeathDate.Match(articleText).Value, "df").StartsWith("y"))
                 return DateLocale.International;
-            
+
             if (Tools.GetTemplateParameterValue(BirthDate.Match(articleText).Value, "mf").StartsWith("y")
                 || Tools.GetTemplateParameterValue(DeathDate.Match(articleText).Value, "mf").StartsWith("y"))
                 return DateLocale.American;
@@ -749,11 +746,11 @@ namespace WikiFunctions.Parse
         {
             if (Tools.DeduplicateList(GetAllWikiLinks(articleText)).Any(link => WikiRegexes.EmptyLink.IsMatch(link)))
             {
-                while(WikiRegexes.EmptyLink.IsMatch(articleText))
+                while (WikiRegexes.EmptyLink.IsMatch(articleText))
                     articleText = WikiRegexes.EmptyLink.Replace(articleText, "");
             }
 
-                articleText = WikiRegexes.EmptyTemplate.Replace(articleText, "");
+            articleText = WikiRegexes.EmptyTemplate.Replace(articleText, "");
 
             return articleText;
         }
@@ -769,7 +766,7 @@ namespace WikiFunctions.Parse
         public static List<string> DeduplicateMaintenanceTags(List<string> tags)
         {
             // Performance: only have work to do if have some duplicate tags
-            if(Tools.DeduplicateList(tags.Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t))).ToList()).Count == tags.Count)
+            if (Tools.DeduplicateList(tags.Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t))).ToList()).Count == tags.Count)
                 return tags;
 
             List<string> newtags = new List<string>();
@@ -779,7 +776,7 @@ namespace WikiFunctions.Parse
             if (tags.Any(t => TemplateArg.IsMatch(t)))
                 tags = tags.OrderByDescending(s => (s.Contains("=") ? s.Substring(0, s.IndexOf("=", StringComparison.Ordinal)).Length : s.Length)).ToList();
 
-            foreach(string t in tags)
+            foreach (string t in tags)
             {
                 string existingTag = newtags.FirstOrDefault(nt => Tools.TurnFirstToLower(Tools.GetTemplateName(nt)) == Tools.TurnFirstToLower(Tools.GetTemplateName(t)));
 
@@ -791,11 +788,11 @@ namespace WikiFunctions.Parse
 
                     if (tParam.Length > 0 && eParam.Length > 0 && eParam != tParam)
                         return originalTags;
-                    
+
                     string existingTagOriginal = existingTag;
                     Dictionary<string, string> tparams = Tools.GetTemplateParameterValues(t);
 
-                    foreach(KeyValuePair<string, string> kvp in tparams)
+                    foreach (KeyValuePair<string, string> kvp in tparams)
                     {
                         if (kvp.Value.Length == 0)
                             continue;
@@ -803,7 +800,7 @@ namespace WikiFunctions.Parse
                         string existingParamValue = Tools.GetTemplateParameterValue(existingTag, kvp.Key);
 
                         // positional argument and non-date named parameter, we cannot handle these, return
-                        if(eParam.Length > 0 && kvp.Key != "date")
+                        if (eParam.Length > 0 && kvp.Key != "date")
                             return originalTags;
 
                         if (existingParamValue.Length == 0)
@@ -873,8 +870,8 @@ namespace WikiFunctions.Parse
         {
             // Performance: get all headings, filter to any external link ones
             List<Match> h = (from Match m in HeadingQuick.Matches(articleText)
-                where m.Value.ToLower().Contains("external") && ExternalLinksSection.IsMatch(m.Value)
-                                      select m).ToList();
+                             where m.Value.ToLower().Contains("external") && ExternalLinksSection.IsMatch(m.Value)
+                             select m).ToList();
 
             if (h.Any())
             {
@@ -891,7 +888,7 @@ namespace WikiFunctions.Parse
                     return articleText + BulletExternalHider.AddBackMore(articleTextSubstring);
                 }
             }
-            
+
             return articleText;
         }
 
@@ -1028,7 +1025,7 @@ namespace WikiFunctions.Parse
             // Browsers are blacklisting it because of the potential for phishing.
             articleText = LineSeparatorZeroWidthSpaceStartOfLine.Replace(articleText, "");
             return articleText.Replace('\x2028', ' ');
-            
+
             //MOS:NBSP states that "A literal hard space, such as one of the Unicode non-breaking space characters, should not be used"
             //In an ideal situation we should remove unicode nbsp with space and then re-add html nbsp using FixSyntax where really needed
             //return articleText.Replace('\x00a0', ' ');
@@ -1199,13 +1196,13 @@ namespace WikiFunctions.Parse
             return IsArticleAboutAPerson(articleText, articleTitle, false);
         }
 
-        private static readonly Regex BLPUnsourced = Tools.NestedTemplateRegex(new [] { "BLP unsourced", "BLP unreferenced" });
-        private static readonly Regex BLPUnsourcedSection = Tools.NestedTemplateRegex(new [] { "BLP unsourced section","BLP sources section", "BLP unreferenced section" });
+        private static readonly Regex BLPUnsourced = Tools.NestedTemplateRegex(new[] { "BLP unsourced", "BLP unreferenced" });
+        private static readonly Regex BLPUnsourcedSection = Tools.NestedTemplateRegex(new[] { "BLP unsourced section", "BLP sources section", "BLP unreferenced section" });
         private static readonly Regex NotPersonArticles = new Regex(@"(^(((?:First )?(?:Premiership|Presidency|Governor|Mayoralty)|Murder|Atlanta murders|Disappearance|Suicide|Adoption) of|Deaths|The |Second |Brothers |Attack on|[12]\d{3}\b|\d{2,} )|Assembly of|(Birth|Death) rates|(discography|(?:film|bibli)ography| deaths| rebellion| haunting| native| children| campaign(?:, \d+)?| groups| (?:families|boom|case|syndrome|family|murders|people|sisters|brothers|quartet|team|twins|martyrs|mystery|center|\((?:artists|publisher|\w* ?(team|family))\)))(?: \(|$)|[^\(]*\w+,? (and|&|from) \w+|.* (in |Service))", RegexOptions.IgnoreCase);
         private static readonly MetaDataSorter MDS = new MetaDataSorter();
         private static readonly Regex NobleFamilies = new Regex(@"\[\[Category:[^\[\]\|]*(([nN]oble|[Rr]oyal) families| families(\||\]\]))");
         private static readonly Regex NotAboutAPersonCategories = new Regex(@"\[\[Category:(\d{4} (establishments|animal|introductions)|.*(?:Animation|Business|Comedy|Criminal|Entertainer|Filmmaking|Tribes|Screenwriting|Sibling|Sibling musical|Sports|Writing) (duos|trios)|Articles about multiple people|Positions |Groups |Married couples|Fictional|Presidencies|Companies|Military careers|Parables of|[^\[\]\|\r\n]*(?:[Mm]usic(?:al)? groups| bands| gods| groups| troupes| nicknames| given names| pageants| teams and stables| magazines| titles| populated places)|Internet memes|[^\[\]\|\r\n]*Diaspora|Performing groups|Military animals|Collective pseudonyms|Sibling filmmakers|Surnames|Baronies)", RegexOptions.IgnoreCase);
-        private static readonly Regex NotPersonInfoboxes = Tools.NestedTemplateRegex(new [] { "Infobox cricketer tour biography", "Infobox political party", "Infobox settlement", "italic title", "Infobox animal", "Infobox racehorse", "Infobox named horse" } );
+        private static readonly Regex NotPersonInfoboxes = Tools.NestedTemplateRegex(new[] { "Infobox cricketer tour biography", "Infobox political party", "Infobox settlement", "italic title", "Infobox animal", "Infobox racehorse", "Infobox named horse" });
 
         /// <summary>
         /// determines whether the article is about a person by looking for birth death categories, bio stub etc. for en wiki only
@@ -1360,7 +1357,7 @@ namespace WikiFunctions.Parse
                 Regex.IsMatch(articleText, BornDeathRegex.ToString().Replace("^", @"('''(?:[^']+|.*?[^'])'''\s*\()"))
                 || Regex.IsMatch(articleText, DiedDateRegex.ToString().Replace("^", @"('''(?:[^']+|.*?[^'])'''\s*\()")))
                 return articleText;
-            
+
             string birthCat = m.Value;
             int birthYear = 0;
 
@@ -1440,7 +1437,7 @@ namespace WikiFunctions.Parse
         /// <returns>Page text</returns>
         public static string InterwikiConversions(string articleText)
         {
-            if(!Variables.IsWikimediaProject)
+            if (!Variables.IsWikimediaProject)
                 return articleText;
 
             List<string> possibleInterwiki = Tools.DeduplicateList(GetAllWikiLinks(articleText)).FindAll(l => l.Contains(":"));
@@ -1472,7 +1469,7 @@ namespace WikiFunctions.Parse
         }
 
         private static readonly Regex NoFootnotes = Tools.NestedTemplateRegex("no footnotes");
-        private static readonly Regex ConversionsCnCommons = Tools.NestedTemplateRegex( new [] {"citation needed", "commons", "commons cat", "commons category" });
+        private static readonly Regex ConversionsCnCommons = Tools.NestedTemplateRegex(new[] { "citation needed", "commons", "commons cat", "commons category" });
         private const string CategoryLivingPeople = @"[[Category:Living people";
         private static readonly Regex CommonsCategory = new Regex(@"\{\{\s*[Cc]ommons\s?\|\s*[Cc]ategory:\s*([^{}]+?)\s*\}\}");
 
@@ -1491,7 +1488,7 @@ namespace WikiFunctions.Parse
             if (TemplateExists(alltemplates, ConversionsCnCommons))
             {
                 // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#.7B.7Bcommons.7CCategory:XXX.7D.7D_.3E_.7B.7Bcommonscat.7CXXX.7D.7D
-                if(Variables.IsWikimediaProject)
+                if (Variables.IsWikimediaProject)
                     articleText = CommonsCategory.Replace(articleText, @"{{Commons category|$1}}");
 
                 foreach (KeyValuePair<Regex, string> k in RegexConversion)
@@ -1529,7 +1526,7 @@ namespace WikiFunctions.Parse
             // fixes if article has [[Category:Living people]]
             if (Variables.IsWikipediaEN && CategoryMatch(articleText, "Living people"))
             {
-                if(alltemplates.Contains("Unreferenced"))
+                if (alltemplates.Contains("Unreferenced"))
                 {
                     // {{unreferenced}} --> {{BLP unreferenced}} if article has [[Category:Living people]], and no free-text first argument to {{unref}}
                     MatchCollection unrefm = Tools.NestedTemplateRegex("unreferenced").Matches(articleText);
@@ -1551,9 +1548,9 @@ namespace WikiFunctions.Parse
                     }
                 }
 
-                if(alltemplates.Contains("Unreferenced section"))
+                if (alltemplates.Contains("Unreferenced section"))
                     articleText = Tools.RenameTemplate(articleText, "unreferenced section", "BLP unreferenced section", false);
-                if(alltemplates.Contains("Primary sources"))
+                if (alltemplates.Contains("Primary sources"))
                     articleText = Tools.RenameTemplate(articleText, "primary sources", "BLP primary sources", false);
                 if (alltemplates.Contains("One source"))
                     articleText = Tools.RenameTemplate(articleText, "one source", "BLP one source", false);
@@ -1586,7 +1583,7 @@ namespace WikiFunctions.Parse
                     }
                 }
 
-                if(alltemplates.Contains("More citations needed section"))
+                if (alltemplates.Contains("More citations needed section"))
                     articleText = Tools.RenameTemplate(articleText, "More citations needed section", "BLP sources section", false);
             }
 
@@ -1778,7 +1775,7 @@ namespace WikiFunctions.Parse
             return WikiRegexes.InUse.IsMatch(WikiRegexes.UnformattedText.Replace(articleText, ""));
         }
 
-        private static readonly Regex SicTypo = Tools.NestedTemplateRegex(new[] {"Sic", "Typo"});
+        private static readonly Regex SicTypo = Tools.NestedTemplateRegex(new[] { "Sic", "Typo" });
         private static readonly Regex SicTag = new Regex(@"[\(\[{]\s*[Ss]ic!?\s*[\)\]}]");
 
         /// <summary>
@@ -1838,7 +1835,7 @@ namespace WikiFunctions.Parse
         public static Dictionary<int, int> UserSignature(string articleText)
         {
             // check for performance
-            if(GetAllWikiLinks(articleText).Any(l => WikiRegexes.UserSignature.IsMatch(l)))
+            if (GetAllWikiLinks(articleText).Any(l => WikiRegexes.UserSignature.IsMatch(l)))
                 return DictionaryOfMatches(articleText, WikiRegexes.UserSignature);
 
             return new Dictionary<int, int>();
@@ -1872,12 +1869,12 @@ namespace WikiFunctions.Parse
 
             // Performance: as {{reflist}} normally at end of page, process page in batches of last 1000 characters
             // Should be that last 1000 or 2000 will contain {{reflist}} and no <ref> so we can avoid processing rest of article
-            for(int i = maxlen; i <= articleTextoriginal.Length; i += maxlen)
+            for (int i = maxlen; i <= articleTextoriginal.Length; i += maxlen)
             {
                 articleText = articleTextoriginal.Substring(articleTextoriginal.Length - i, i);
-                foreach(Match m in WikiRegexes.ReferencesTemplate.Matches(articleText))
+                foreach (Match m in WikiRegexes.ReferencesTemplate.Matches(articleText))
                 {
-                    if(refstemplateindex > 0)
+                    if (refstemplateindex > 0)
                         return false; // multiple {{reflist}} etc. in page, not supported for check
 
                     refstemplateindex = m.Index;
@@ -1886,7 +1883,7 @@ namespace WikiFunctions.Parse
                 articleText = articleText.Substring(refstemplateindex + reflength);
                 articleText = WikiRegexes.Comments.Replace(articleText, "");
 
-                if(refstemplateindex > 0)
+                if (refstemplateindex > 0)
                     return Regex.IsMatch(articleText, WikiRegexes.ReferenceEnd);
             }
 

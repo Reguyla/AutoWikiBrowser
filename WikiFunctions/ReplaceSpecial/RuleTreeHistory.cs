@@ -15,8 +15,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace WikiFunctions.ReplaceSpecial
@@ -117,7 +115,7 @@ namespace WikiFunctions.ReplaceSpecial
 
         private static List<TreeNode> Copy(TreeNodeCollection col)
         {
-            return (from TreeNode t in col select (TreeNode) t.Clone()).ToList();
+            return (from TreeNode t in col select (TreeNode)t.Clone()).ToList();
         }
     }
 }

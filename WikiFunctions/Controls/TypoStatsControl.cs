@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using WikiFunctions.Parse;
@@ -35,7 +33,7 @@ namespace WikiFunctions.Controls
             {
                 if (SelectedItems.Count == 0) return null;
 
-                return (TypoStatsListViewItem) SelectedItems[0];
+                return (TypoStatsListViewItem)SelectedItems[0];
             }
         }
 
@@ -47,7 +45,7 @@ namespace WikiFunctions.Controls
             {
                 double fixes = TotalTypos - SelfMatches - FalsePositives;
                 // fixed 2 decimal places http://www.csharp-examples.net/string-format-double/
-                return string.Format("{0:0.00}", fixes/Saves);
+                return string.Format("{0:0.00}", fixes / Saves);
             }
         }
 
@@ -185,7 +183,7 @@ namespace WikiFunctions.Controls
         private bool IsYellow;
 
         public TypoStatsListViewItem(TypoStat stat)
-            : base(new[] {stat.Find, stat.Replace, "", ""})
+            : base(new[] { stat.Find, stat.Replace, "", "" })
         {
             Typo = stat;
             Typo.ListViewItem = this;
