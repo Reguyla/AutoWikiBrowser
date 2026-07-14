@@ -16,9 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
 using System.Windows.Forms;
-using System.IO;
 using WikiFunctions;
 
 namespace AutoWikiBrowser
@@ -80,7 +78,7 @@ namespace AutoWikiBrowser
             try
             {
                 // under Wine WaitForExit() does not work and need to use absolute file paths. So under Linux use StandardOutput.ReadToEnd instead
-                if(Globals.UsingLinux)
+                if (Globals.UsingLinux)
                 {
                     using (System.Diagnostics.Process p = new System.Diagnostics.Process())
                     {
@@ -107,12 +105,12 @@ namespace AutoWikiBrowser
                 else
                 {
                     System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
-                                                                  {
-                                                                      WorkingDirectory = Path.GetDirectoryName(txtProgram.Text),
-                                                                      FileName = Path.GetFileName(txtProgram.Text),
-                                                                      Arguments = Tools.ApplyKeyWords(articleTitle, txtParameters.Text.Replace("%%file%%", txtFile.Text))
-                                                                  };
-    
+                    {
+                        WorkingDirectory = Path.GetDirectoryName(txtProgram.Text),
+                        FileName = Path.GetFileName(txtProgram.Text),
+                        Arguments = Tools.ApplyKeyWords(articleTitle, txtParameters.Text.Replace("%%file%%", txtFile.Text))
+                    };
+
                     if (radFile.Checked)
                     {
                         if (txtFile.Text.Contains("\\"))
@@ -122,9 +120,9 @@ namespace AutoWikiBrowser
                     }
                     else
                         psi.Arguments = psi.Arguments.Replace("%%articletext%%", articleText);
-    
+
                     System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
-    
+
                     p.WaitForExit();
                 }
 

@@ -20,15 +20,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using System.Reflection;
-using System.IO;
-using System.Linq;
-using WikiFunctions.Plugin;
+using System.Windows.Forms;
 using WikiFunctions;
+using WikiFunctions.Plugin;
 
 namespace AutoWikiBrowser.Plugins
 {
@@ -204,7 +199,7 @@ namespace AutoWikiBrowser.Plugins
                             if (t.GetInterface("IAWBPlugin") != null)
                             {
                                 IAWBPlugin awbPlugin =
-                                    (IAWBPlugin) Activator.CreateInstance(t);
+                                    (IAWBPlugin)Activator.CreateInstance(t);
 
                                 if (AWBPlugins.ContainsKey(awbPlugin.Name))
                                 {
@@ -225,9 +220,9 @@ namespace AutoWikiBrowser.Plugins
                                 }
                             }
                             else if (t.GetInterface("IAWBBasePlugin") != null)
-                                //IAWBBasePlugin needs to be checked after IAWBPlugin, as IAWBPlugin extends IAWBBasePlugin
+                            //IAWBBasePlugin needs to be checked after IAWBPlugin, as IAWBPlugin extends IAWBBasePlugin
                             {
-                                IAWBBasePlugin awbBasePlugin = (IAWBBasePlugin) Activator.CreateInstance(t);
+                                IAWBBasePlugin awbBasePlugin = (IAWBBasePlugin)Activator.CreateInstance(t);
 
                                 if (AWBBasePlugins.ContainsKey(awbBasePlugin.Name))
                                 {
@@ -250,7 +245,7 @@ namespace AutoWikiBrowser.Plugins
                             else if (t.GetInterface("IListMakerPlugin") != null)
                             {
                                 IListMakerPlugin listMakerPlugin =
-                                    (IListMakerPlugin) Activator.CreateInstance(t);
+                                    (IListMakerPlugin)Activator.CreateInstance(t);
 
                                 if (ListMakerPlugins.ContainsKey(listMakerPlugin.Name))
                                 {

@@ -16,8 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace AutoWikiBrowser
@@ -32,7 +30,7 @@ namespace AutoWikiBrowser
         private void btnSort_Click(object sender, EventArgs e)
         {
             List<string> list =
-                new List<string>(Summaries.Text.Split(new[] {"\r\n", "\n"}, StringSplitOptions.RemoveEmptyEntries));
+                new List<string>(Summaries.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries));
             list.Sort();
 
             Summaries.Clear();

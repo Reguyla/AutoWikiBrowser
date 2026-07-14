@@ -18,9 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // From the Kingbotk plugin. Converted from VB to C#
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using WikiFunctions.Logging;
 
@@ -96,7 +93,7 @@ namespace AutoWikiBrowser.Logging
         {
             foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
             {
-                ((IAWBTraceListener) listener.Value).AWBSkipped(reason);
+                ((IAWBTraceListener)listener.Value).AWBSkipped(reason);
             }
         }
 
@@ -104,7 +101,7 @@ namespace AutoWikiBrowser.Logging
         {
             foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
             {
-                ((IAWBTraceListener) listener.Value).PluginSkipped();
+                ((IAWBTraceListener)listener.Value).PluginSkipped();
             }
         }
 
@@ -112,7 +109,7 @@ namespace AutoWikiBrowser.Logging
         {
             foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
             {
-                ((IAWBTraceListener) listener.Value).UserSkipped();
+                ((IAWBTraceListener)listener.Value).UserSkipped();
             }
         }
         #endregion

@@ -18,11 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -88,7 +84,7 @@ namespace AutoWikiBrowser
 
         public ProjectEnum Project
         {
-            get { return (ProjectEnum) Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString()); }
+            get { return (ProjectEnum)Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString()); }
         }
 
         public string CustomProject
@@ -225,7 +221,7 @@ namespace AutoWikiBrowser
 
         private void cmboCustomProjectChanged(object sender, EventArgs e)
         {
-            ProjectEnum prj = (ProjectEnum) Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString());
+            ProjectEnum prj = (ProjectEnum)Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString());
             if (prj.Equals(ProjectEnum.custom) || prj.Equals(ProjectEnum.wikia) || prj.Equals(ProjectEnum.fandom))
                 btnOK.Enabled = !string.IsNullOrEmpty(cmboCustomProject.Text);
             else
@@ -254,7 +250,7 @@ namespace AutoWikiBrowser
             set
             {
                 txtDomain.Text = value;
-                ProjectEnum prj = (ProjectEnum) Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString());
+                ProjectEnum prj = (ProjectEnum)Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString());
                 DomainEnabled = !string.IsNullOrEmpty(value) && prj.Equals(ProjectEnum.custom);
             }
         }
@@ -341,7 +337,7 @@ namespace AutoWikiBrowser
         {
             get
             {
-                List<String> temp = new List<String> {cmboCustomProject.Text};
+                List<String> temp = new List<String> { cmboCustomProject.Text };
                 temp.AddRange(from object a in cmboCustomProject.Items select a.ToString());
                 return temp;
             }
@@ -425,7 +421,7 @@ namespace AutoWikiBrowser
                 {
                     if (alertListBox.GetItemChecked(i) || !anyChecked)
                     {
-                        CheckedBoxItem cbi = (CheckedBoxItem) alertListBox.Items[i];
+                        CheckedBoxItem cbi = (CheckedBoxItem)alertListBox.Items[i];
                         alerts.Add(cbi.ID);
                     }
                 }
@@ -483,8 +479,8 @@ namespace AutoWikiBrowser
 
             StringBuilder customs = new StringBuilder();
             foreach (string s in from string s in cmboCustomProject.Items
-                     where !string.IsNullOrEmpty(s.Trim())
-                     select s)
+                                 where !string.IsNullOrEmpty(s.Trim())
+                                 select s)
             {
                 customs.Append(s + "|");
             }

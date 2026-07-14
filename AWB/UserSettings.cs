@@ -18,11 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Windows.Forms;
 using AutoWikiBrowser.Plugins;
+using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.AWBSettings;
 using WikiFunctions.Plugin;
@@ -270,78 +267,78 @@ namespace AutoWikiBrowser
             return new UserPrefs(
 
                 new FaRPrefs(FindAndReplace, RplcSpecial, SubstTemplates)
-                    {
-                        Enabled = chkFindandReplace.Checked,
-                    },
+                {
+                    Enabled = chkFindandReplace.Checked,
+                },
 
                 new EditPrefs
-                    {
-                        GeneralFixes = chkGeneralFixes.Checked,
-                        Tagger = chkAutoTagger.Checked,
-                        Unicodify = chkUnicodifyWhole.Checked,
-                        Recategorisation = cmboCategorise.SelectedIndex,
-                        NewCategory = txtNewCategory.Text,
-                        NewCategory2 = txtNewCategory2.Text,
-                        ReImage = cmboImages.SelectedIndex,
-                        ImageFind = txtImageReplace.Text,
-                        Replace = txtImageWith.Text,
-                        SkipIfNoCatChange = chkSkipNoCatChange.Checked,
-                        RemoveSortKey = chkRemoveSortKey.Checked,
-                        SkipIfNoImgChange = chkSkipNoImgChange.Checked,
-                        AppendText = chkAppend.Checked,
-                        AppendTextMetaDataSort = chkAppendMetaDataSort.Checked,
-                        Append = !rdoPrepend.Checked,
-                        Text = txtAppendMessage.Text,
-                        Newlines = (int) udNewlineChars.Value,
-                        AutoDelay = (int) nudBotSpeed.Value,
-                        BotMaxEdits = (int) botEditsStop.Value,
-                        SupressTag = chkSuppressTag.Checked,
-                        RegexTypoFix = chkRegExTypo.Checked
-                    },
+                {
+                    GeneralFixes = chkGeneralFixes.Checked,
+                    Tagger = chkAutoTagger.Checked,
+                    Unicodify = chkUnicodifyWhole.Checked,
+                    Recategorisation = cmboCategorise.SelectedIndex,
+                    NewCategory = txtNewCategory.Text,
+                    NewCategory2 = txtNewCategory2.Text,
+                    ReImage = cmboImages.SelectedIndex,
+                    ImageFind = txtImageReplace.Text,
+                    Replace = txtImageWith.Text,
+                    SkipIfNoCatChange = chkSkipNoCatChange.Checked,
+                    RemoveSortKey = chkRemoveSortKey.Checked,
+                    SkipIfNoImgChange = chkSkipNoImgChange.Checked,
+                    AppendText = chkAppend.Checked,
+                    AppendTextMetaDataSort = chkAppendMetaDataSort.Checked,
+                    Append = !rdoPrepend.Checked,
+                    Text = txtAppendMessage.Text,
+                    Newlines = (int)udNewlineChars.Value,
+                    AutoDelay = (int)nudBotSpeed.Value,
+                    BotMaxEdits = (int)botEditsStop.Value,
+                    SupressTag = chkSuppressTag.Checked,
+                    RegexTypoFix = chkRegExTypo.Checked
+                },
 
                 new ListPrefs(listMaker, _saveArticleList),
 
                 new SkipPrefs
-                    {
-                        SkipNonexistent = radSkipNonExistent.Checked,
-                        Skipexistent = radSkipExistent.Checked,
-                        SkipDontCare = radSkipNone.Checked,
-                        SkipWhenNoChanges = chkSkipNoChanges.Checked,
-                        SkipSpamFilterBlocked = chkSkipSpamFilter.Checked,
-                        SkipInuse = chkSkipIfInuse.Checked,
-                        SkipDoes = skipIfContains.CheckEnabled,
-                        SkipDoesText = skipIfContains.CheckText,
-                        SkipDoesRegex = skipIfContains.IsRegex,
-                        SkipDoesCaseSensitive = skipIfContains.IsCaseSensitive,
-                        SkipDoesAfterProcessing = skipIfContains.After,
-                        SkipDoesNot = skipIfNotContains.CheckEnabled,
-                        SkipDoesNotText = skipIfNotContains.CheckText,
-                        SkipDoesNotRegex = skipIfNotContains.IsRegex,
-                        SkipDoesNotCaseSensitive = skipIfNotContains.IsCaseSensitive,
-                        SkipDoesNotAfterProcessing = skipIfNotContains.After,
-                        SkipNoFindAndReplace = chkSkipWhenNoFAR.Checked,
-                        SkipMinorFindAndReplace = chkSkipOnlyMinorFaR.Checked,
-                        SkipNoRegexTypoFix = chkSkipIfNoRegexTypo.Checked,
-                        SkipNoDisambiguation = chkSkipNoDab.Checked,
-                        GeneralSkipList = Skip.SelectedItems,
-                        SkipWhenOnlyWhitespaceChanged = chkSkipWhitespace.Checked,
-                        SkipOnlyCasingChanged = chkSkipCasing.Checked,
-                        SkipOnlyGeneralFixChanges = chkSkipGeneralFixes.Checked,
-                        SkipOnlyMinorGeneralFixChanges = chkSkipMinorGeneralFixes.Checked,
-                        SkipOnlyCosmetic = chkSkipCosmetic.Checked,
-                        SkipNoLinksOnPage = chkSkipNoPageLinks.Checked,
-                        SkipIfRedirect = chkSkipIfRedirect.Checked,
-                        SkipIfNoAlerts = chkSkipIfNoAlerts.Checked
-                    },
+                {
+                    SkipNonexistent = radSkipNonExistent.Checked,
+                    Skipexistent = radSkipExistent.Checked,
+                    SkipDontCare = radSkipNone.Checked,
+                    SkipWhenNoChanges = chkSkipNoChanges.Checked,
+                    SkipSpamFilterBlocked = chkSkipSpamFilter.Checked,
+                    SkipInuse = chkSkipIfInuse.Checked,
+                    SkipDoes = skipIfContains.CheckEnabled,
+                    SkipDoesText = skipIfContains.CheckText,
+                    SkipDoesRegex = skipIfContains.IsRegex,
+                    SkipDoesCaseSensitive = skipIfContains.IsCaseSensitive,
+                    SkipDoesAfterProcessing = skipIfContains.After,
+                    SkipDoesNot = skipIfNotContains.CheckEnabled,
+                    SkipDoesNotText = skipIfNotContains.CheckText,
+                    SkipDoesNotRegex = skipIfNotContains.IsRegex,
+                    SkipDoesNotCaseSensitive = skipIfNotContains.IsCaseSensitive,
+                    SkipDoesNotAfterProcessing = skipIfNotContains.After,
+                    SkipNoFindAndReplace = chkSkipWhenNoFAR.Checked,
+                    SkipMinorFindAndReplace = chkSkipOnlyMinorFaR.Checked,
+                    SkipNoRegexTypoFix = chkSkipIfNoRegexTypo.Checked,
+                    SkipNoDisambiguation = chkSkipNoDab.Checked,
+                    GeneralSkipList = Skip.SelectedItems,
+                    SkipWhenOnlyWhitespaceChanged = chkSkipWhitespace.Checked,
+                    SkipOnlyCasingChanged = chkSkipCasing.Checked,
+                    SkipOnlyGeneralFixChanges = chkSkipGeneralFixes.Checked,
+                    SkipOnlyMinorGeneralFixChanges = chkSkipMinorGeneralFixes.Checked,
+                    SkipOnlyCosmetic = chkSkipCosmetic.Checked,
+                    SkipNoLinksOnPage = chkSkipNoPageLinks.Checked,
+                    SkipIfRedirect = chkSkipIfRedirect.Checked,
+                    SkipIfNoAlerts = chkSkipIfNoAlerts.Checked
+                },
 
                 new GeneralPrefs(cmboEditSummary.Items)
-                    {
-                        SaveArticleList = _saveArticleList,
-                        IgnoreNoBots = IgnoreNoBots,
-                        ClearPageListOnProjectChange = ClearPageListOnProjectChange,
-                        SelectedSummary = cmboEditSummary.Text,
+                {
+                    SaveArticleList = _saveArticleList,
+                    IgnoreNoBots = IgnoreNoBots,
+                    ClearPageListOnProjectChange = ClearPageListOnProjectChange,
+                    SelectedSummary = cmboEditSummary.Text,
 
-                        PasteMore = new[]
+                    PasteMore = new[]
                                         {
                                             (string) PasteMore1.Tag,
                                             (string) PasteMore2.Tag,
@@ -354,85 +351,85 @@ namespace AutoWikiBrowser
                                             (string) PasteMore9.Tag,
                                             (string) PasteMore10.Tag
                                         },
-                        FindText = txtFind.Text,
-                        FindRegex = chkFindRegex.Checked,
-                        FindCaseSensitive = chkFindCaseSensitive.Checked,
-                        WordWrap = wordWrapToolStripMenuItem1.Checked,
-                        ToolBarEnabled = EnableToolBar,
-                        BypassRedirect = followRedirectsToolStripMenuItem.Checked,
-                        AutoSaveSettings = autoSaveSettingsToolStripMenuItem.Checked,
-                        PreParseMode = preParseModeToolStripMenuItem.Checked,
-                        noSectionEditSummary = noSectionEditSummaryToolStripMenuItem.Checked,
-                        restrictDefaultsortAddition = restrictDefaultsortChangesToolStripMenuItem.Checked,
-                        restrictOrphanTagging = restrictOrphanTaggingToolStripMenuItem.Checked,
-                        noMOSComplianceFixes = noMOSComplianceFixesToolStripMenuItem.Checked,
-                        syntaxHighlightEditBox = syntaxHighlightEditBoxToolStripMenuItem.Checked,
-                        highlightAllFind = highlightAllFindToolStripMenuItem.Checked,
-                        NoAutoChanges = !automaticallyDoAnythingToolStripMenuItem.Checked,
-                        OnLoadAction = actionOnLoad,
-                        DiffInBotMode = doDiffInBotMode,
-                        Minor = chkMinor.Checked,
-                        AddToWatchlist = addToWatchList.SelectedIndex,
-                        TimerEnabled = ShowMovingAverageTimer,
-                        SortListAlphabetically = sortAlphabeticallyToolStripMenuItem.Checked,
-                        AddIgnoredToLog = Article.AddUsingAWBOnArticleAction,
-                        TextBoxSize = (int) txtEdit.Font.Size,
-                        TextBoxFont = txtEdit.Font.Name,
-                        LowThreadPriority = LowThreadPriority,
-                        Beep = _beep,
-                        Flash = _flash,
-                        Minimize = _minimize,
-                        AutoSaveEdit = new EditBoxAutoSavePrefs
-                                           {
-                                               Enabled = _autoSaveEditBoxEnabled,
-                                               SavePeriod = AutoSaveEditBoxPeriod,
-                                               SaveFile = _autoSaveEditBoxFile
-                                           },
-                        LockSummary = chkLock.Checked,
-                        EditToolbarEnabled = EditToolBarVisible,
-                        SuppressUsingAWB = _suppressUsingAWB,
-                        AddUsingAWBToActionSummaries = Article.AddUsingAWBOnArticleAction,
-                        filterNonMainSpace = filterOutNonMainSpaceToolStripMenuItem.Checked,
-                        AutoFilterDuplicates = removeDuplicatesToolStripMenuItem.Checked,
-                        FocusAtEndOfEditBox = focusAtEndOfEditTextBoxToolStripMenuItem.Checked,
-                        scrollToUnbalancedBrackets = scrollToAlertsToolStripMenuItem.Checked,
-
-                        SortInterWikiOrder = alphaSortInterwikiLinksToolStripMenuItem.Checked,
-                        ReplaceReferenceTags = replaceReferenceTagsToolStripMenuItem.Checked,
-                        LoggingEnabled = loggingEnabled,
-                        AlertPreferences = alertPreferences
+                    FindText = txtFind.Text,
+                    FindRegex = chkFindRegex.Checked,
+                    FindCaseSensitive = chkFindCaseSensitive.Checked,
+                    WordWrap = wordWrapToolStripMenuItem1.Checked,
+                    ToolBarEnabled = EnableToolBar,
+                    BypassRedirect = followRedirectsToolStripMenuItem.Checked,
+                    AutoSaveSettings = autoSaveSettingsToolStripMenuItem.Checked,
+                    PreParseMode = preParseModeToolStripMenuItem.Checked,
+                    noSectionEditSummary = noSectionEditSummaryToolStripMenuItem.Checked,
+                    restrictDefaultsortAddition = restrictDefaultsortChangesToolStripMenuItem.Checked,
+                    restrictOrphanTagging = restrictOrphanTaggingToolStripMenuItem.Checked,
+                    noMOSComplianceFixes = noMOSComplianceFixesToolStripMenuItem.Checked,
+                    syntaxHighlightEditBox = syntaxHighlightEditBoxToolStripMenuItem.Checked,
+                    highlightAllFind = highlightAllFindToolStripMenuItem.Checked,
+                    NoAutoChanges = !automaticallyDoAnythingToolStripMenuItem.Checked,
+                    OnLoadAction = actionOnLoad,
+                    DiffInBotMode = doDiffInBotMode,
+                    Minor = chkMinor.Checked,
+                    AddToWatchlist = addToWatchList.SelectedIndex,
+                    TimerEnabled = ShowMovingAverageTimer,
+                    SortListAlphabetically = sortAlphabeticallyToolStripMenuItem.Checked,
+                    AddIgnoredToLog = Article.AddUsingAWBOnArticleAction,
+                    TextBoxSize = (int)txtEdit.Font.Size,
+                    TextBoxFont = txtEdit.Font.Name,
+                    LowThreadPriority = LowThreadPriority,
+                    Beep = _beep,
+                    Flash = _flash,
+                    Minimize = _minimize,
+                    AutoSaveEdit = new EditBoxAutoSavePrefs
+                    {
+                        Enabled = _autoSaveEditBoxEnabled,
+                        SavePeriod = AutoSaveEditBoxPeriod,
+                        SaveFile = _autoSaveEditBoxFile
                     },
+                    LockSummary = chkLock.Checked,
+                    EditToolbarEnabled = EditToolBarVisible,
+                    SuppressUsingAWB = _suppressUsingAWB,
+                    AddUsingAWBToActionSummaries = Article.AddUsingAWBOnArticleAction,
+                    filterNonMainSpace = filterOutNonMainSpaceToolStripMenuItem.Checked,
+                    AutoFilterDuplicates = removeDuplicatesToolStripMenuItem.Checked,
+                    FocusAtEndOfEditBox = focusAtEndOfEditTextBoxToolStripMenuItem.Checked,
+                    scrollToUnbalancedBrackets = scrollToAlertsToolStripMenuItem.Checked,
+
+                    SortInterWikiOrder = alphaSortInterwikiLinksToolStripMenuItem.Checked,
+                    ReplaceReferenceTags = replaceReferenceTagsToolStripMenuItem.Checked,
+                    LoggingEnabled = loggingEnabled,
+                    AlertPreferences = alertPreferences
+                },
 
                 new DabPrefs
-                    {
-                        Enabled = chkEnableDab.Checked,
-                        Link = txtDabLink.Text,
-                        Variants = txtDabVariants.Lines,
-                        ContextChars = (int) udContextChars.Value
-                    },
+                {
+                    Enabled = chkEnableDab.Checked,
+                    Link = txtDabLink.Text,
+                    Variants = txtDabVariants.Lines,
+                    ContextChars = (int)udContextChars.Value
+                },
 
                 new ModulePrefs
-                    {
-                        Enabled = CModule.ModuleEnabled,
-                        Language = CModule.Language,
-                        Code = CModule.Code
-                    },
+                {
+                    Enabled = CModule.ModuleEnabled,
+                    Language = CModule.Language,
+                    Code = CModule.Code
+                },
 
                 ExtProgram.Settings,
                 listMaker.SpecialFilterSettings,
 
                 new ToolsPrefs
-                    {
-                        ListComparerUseCurrentArticleList = _listComparerUseCurrentArticleList,
-                        ListSplitterUseCurrentArticleList = _listSplitterUseCurrentArticleList,
-                        DatabaseScannerUseCurrentArticleList = _dbScannerUseCurrentArticleList
-                    },
+                {
+                    ListComparerUseCurrentArticleList = _listComparerUseCurrentArticleList,
+                    ListSplitterUseCurrentArticleList = _listSplitterUseCurrentArticleList,
+                    DatabaseScannerUseCurrentArticleList = _dbScannerUseCurrentArticleList
+                },
 
                 Plugin.AWBPlugins
                 )
-                       {
-                           LoginDomain = Variables.LoginDomain
-                       };
+            {
+                LoginDomain = Variables.LoginDomain
+            };
         }
 
         /// <summary>
@@ -446,12 +443,12 @@ namespace AutoWikiBrowser
                 LoadPrefs(SettingsFile);
             else
                 if (File.Exists(AwbDirs.DefaultSettings))
-                    LoadPrefs(AwbDirs.DefaultSettings);
-                else
-                {
-                    LoadPrefs(new UserPrefs());
-                    SettingsFile = "";
-                }
+                LoadPrefs(AwbDirs.DefaultSettings);
+            else
+            {
+                LoadPrefs(new UserPrefs());
+                SettingsFile = "";
+            }
 
             SplashScreen.SetProgress(59);
         }

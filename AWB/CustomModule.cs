@@ -18,15 +18,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.CodeDom.Compiler;
-using WikiFunctions.Plugin;
+using System.Drawing;
+using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.CustomModules;
+using WikiFunctions.Plugin;
 
 namespace AutoWikiBrowser
 {
@@ -77,7 +74,7 @@ namespace AutoWikiBrowser
         /// </summary>
         public CustomModuleCompiler Compiler
         {
-            get { return (CustomModuleCompiler) cmboLang.SelectedItem; }
+            get { return (CustomModuleCompiler)cmboLang.SelectedItem; }
         }
 
         /// <summary>
@@ -196,7 +193,7 @@ namespace AutoWikiBrowser
 
                 foreach (Type t in results.CompiledAssembly.GetTypes().Where(t => t.GetInterface("IModule") != null))
                 {
-                    Module = (IModule) Activator.CreateInstance(t, Program.AWB);
+                    Module = (IModule)Activator.CreateInstance(t, Program.AWB);
                 }
             }
             catch (Exception ex)

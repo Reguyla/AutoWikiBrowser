@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace AutoWikiBrowser
 {
@@ -15,7 +14,8 @@ namespace AutoWikiBrowser
 
         public string ShutdownType
         {
-            set {
+            set
+            {
                 SType = value;
                 txtPrompt.Text = string.Format(txtPrompt.Text, value);
                 SetShutdownLabel(Counter);

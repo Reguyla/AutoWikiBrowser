@@ -21,21 +21,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #undef INSTASTATS // turn on here and in stats.cs to make AWB log (empty) stats at startup
 
-using AutoWikiBrowser;
 using AutoWikiBrowser.Plugins;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.API;
@@ -3628,11 +3621,11 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             }
         }
 
-            #endregion
+        #endregion
 
-            #region Timers
+        #region Timers
 
-            int _restartDelay = 5, _startInSeconds = 5;
+        int _restartDelay = 5, _startInSeconds = 5;
         private void DelayedRestart(object sender, EventArgs e)
         {
             StopDelayedAutoSaveTimer();
@@ -4896,24 +4889,24 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
             switch (cmboImages.SelectedIndex)
             {
                 case 0:
-                        lblImageWith.Text = "";
-                        txtImageReplace.Enabled = txtImageWith.Enabled = chkSkipNoImgChange.Enabled = false;
-                        break;
+                    lblImageWith.Text = "";
+                    txtImageReplace.Enabled = txtImageWith.Enabled = chkSkipNoImgChange.Enabled = false;
+                    break;
                 case 1:
-                        lblImageWith.Text = "&With " + Variables.Namespaces[Namespace.File];
-                        txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
-                        break;
+                    lblImageWith.Text = "&With " + Variables.Namespaces[Namespace.File];
+                    txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
+                    break;
                 case 2:
-                        lblImageWith.Text = "";
-                        txtImageWith.Enabled = false;
-                        txtImageReplace.Enabled = true;
-                        chkSkipNoImgChange.Enabled = true;
-                        break;
+                    lblImageWith.Text = "";
+                    txtImageWith.Enabled = false;
+                    txtImageReplace.Enabled = true;
+                    chkSkipNoImgChange.Enabled = true;
+                    break;
                 case 3:
-                        lblImageWith.Text = "Comment:";
-                        txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
-                        break;
-             }
+                    lblImageWith.Text = "Comment:";
+                    txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
+                    break;
+            }
         }
 
         private void txtImageReplace_Leave(object sender, EventArgs e)

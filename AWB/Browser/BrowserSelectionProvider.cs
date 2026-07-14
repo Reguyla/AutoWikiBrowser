@@ -1,5 +1,5 @@
-﻿using System.Windows.Forms;
-using mshtml;
+﻿using mshtml;
+using System.Windows.Forms;
 
 namespace AutoWikiBrowser
 {

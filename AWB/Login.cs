@@ -1,4 +1,3 @@
-using System;
 using System.Windows.Forms;
 using WikiFunctions;
 
@@ -13,7 +12,8 @@ namespace AutoWikiBrowser
 
         private void FormOnKeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) {
+            if (e.KeyCode == Keys.Enter)
+            {
                 CloseForm();
             }
         }
@@ -23,7 +23,8 @@ namespace AutoWikiBrowser
             CloseForm();
         }
 
-        private void CloseForm() {
+        private void CloseForm()
+        {
             Variables.HttpAuthUsername = txtUsername.Text;
             Variables.HttpAuthPassword = txtPassword.Text;
             Close();

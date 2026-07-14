@@ -20,11 +20,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #undef INSTASTATS // turn on here and in Main.cs to make AWB log (empty) stats at startup (The scope of a symbol created by using #define is the file in which it was defined)
 
-using System;
 using System.Collections.Specialized;
-using System.Collections.Generic;
 using System.Net;
-using System.IO;
 using System.Xml;
 using WikiFunctions;
 using WikiFunctions.Plugin;
@@ -93,7 +90,7 @@ namespace AutoWikiBrowser
                 lblPagesPerMin.Text = "Pages/min: " + value;
             }
         }
-        
+
         /// <summary>
         /// Holds the number of pages parsed when AWB is in pre-parse mode
         /// </summary>
@@ -112,9 +109,9 @@ namespace AutoWikiBrowser
         // TODO: Add other stuff we'd like to track
 
         private const string StatsURL = "https://awb.toolforge.org/stats/";
-        
+
         private static int RecordId,
-            SecretNumber, 
+            SecretNumber,
             LastEditCount;
 
         private static bool SentUserName;
@@ -137,9 +134,9 @@ namespace AutoWikiBrowser
         internal static void Do(bool appexit)
         {
             // no stats to send if no edits
-            if (Program.AWB.NumberOfEdits == 0 && Program.AWB.NumberOfNewPages == 0) 
+            if (Program.AWB.NumberOfEdits == 0 && Program.AWB.NumberOfNewPages == 0)
                 return;
-            
+
             try
             {
                 bool statsSent;
@@ -431,7 +428,7 @@ namespace AutoWikiBrowser
             {
                 if (ex is XmlException)
                     throw;
-                
+
                 throw new XmlException("Error parsing XML returned from UsageStats server", ex);
             }
         }

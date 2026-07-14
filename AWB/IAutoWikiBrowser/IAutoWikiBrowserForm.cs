@@ -16,8 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using WikiFunctions.Plugin;
 using System.Windows.Forms;
+using WikiFunctions.Plugin;
 
 namespace AutoWikiBrowser
 {
@@ -38,7 +38,7 @@ namespace AutoWikiBrowser
         CheckBox IAutoWikiBrowserForm.ApplyGeneralFixesCheckBox { get { return chkGeneralFixes; } }
         CheckBox IAutoWikiBrowserForm.AutoTagCheckBox { get { return chkAutoTagger; } }
         CheckBox IAutoWikiBrowserForm.RegexTypoFix { get { return chkRegExTypo; } }
-        bool IAutoWikiBrowserForm.PreParseMode { get { return preParseModeToolStripMenuItem.Checked; }}
+        bool IAutoWikiBrowserForm.PreParseMode { get { return preParseModeToolStripMenuItem.Checked; } }
         WikiFunctions.Controls.ArticleTextBox IAutoWikiBrowserForm.EditBox { get { return txtEdit; } }
         Form IAutoWikiBrowserForm.Form { get { return this; } }
         ToolStripMenuItem IAutoWikiBrowserForm.HelpToolStripMenuItem { get { return helpToolStripMenuItem; } }

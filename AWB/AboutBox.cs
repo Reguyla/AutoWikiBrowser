@@ -25,7 +25,7 @@ namespace AutoWikiBrowser
     using System.Windows.Forms;
     using WikiFunctions;
 
-internal sealed partial class AboutBox : Form
+    internal sealed partial class AboutBox : Form
     {
         public AboutBox(string ieVersion)
         {
@@ -54,7 +54,7 @@ Windows version: {2}",
             Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser", false);
         }
 
-       private void UsageStatsLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void UsageStatsLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             UsageStatsLabel.LinkVisited = true;
             UsageStats.OpenUsageStatsURL();
