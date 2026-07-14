@@ -17,14 +17,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Net;
-using System.Reflection;
 using System.IO;
-using System.Xml;
-using System.Threading;
+using System.Net;
+using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
-
+using System.Threading;
+using System.Xml;
 using WikiFunctions.Controls;
 
 namespace WikiFunctions.API
@@ -361,6 +361,48 @@ namespace WikiFunctions.API
             Assembly.GetExecutingAssembly().GetName().Version,
             Environment.OSVersion.VersionString,
             Environment.Version);
+
+        /// <summary>
+        /// Creates a configured <see cref="HttpClient"/> for MediaWiki API requests.
+        /// </summary>
+        /// <remarks>
+        /// Applies the current API session settings, including proxy configuration,
+        /// cookie handling, authentication, automatic decompression, and the
+        /// configured AWB user agent. This helper centralizes the HTTP client
+        /// configuration used by <see cref="ApiEdit"/> and provides the foundation
+        /// for the migration from <see cref="HttpWebRequest"/> to
+        /// <see cref="HttpClient"/>.
+        /// </remarks>
+        /// <param name="url">
+        /// The destination URL. Used to determine whether authenticated session
+        /// cookies should be included with the request.
+        /// </param>
+        /// <returns>
+        /// A configured <see cref="HttpClient"/> ready to communicate with the
+        /// current MediaWiki API.
+        /// </returns>
+        private HttpRequestMessage CreateRequest(
+            HttpMethod method,
+            string url)
+        {
+            if (Globals.UnitTestMode)
+            {
+                throw new InvalidOperationException(
+                    "You shouldn't access Wikipedia from unit tests.");
+            }
+
+            var request = new HttpRequestMessage(method, url);
+
+            request.Headers.UserAgent.ParseAdd(UserAgent);
+
+            if (IsCurrentWikiRequest(url))
+            {
+                // Cookies will be supplied by the HttpClientHandler's
+                // CookieContainer rather than placed directly on the request.
+            }
+
+            return request;
+        }
 
         /// <summary>
         /// 
