@@ -22,7 +22,6 @@ using System.Text.RegularExpressions;
 using WikiFunctions.Lists.Providers;
 using WikiFunctions.Plugin;
 using WikiFunctions.Background;
-using System.Net;
 using System.Threading;
 
 namespace WikiFunctions
