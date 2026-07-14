@@ -99,12 +99,13 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Text.Json" Version="8.0.6" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Stats.resx" />
+    <None Include="Stats.resx">
+    <DependentUpon>Stats.cs</DependentUpon>
+    </None>
+  </ItemGroup>
    <ItemGroup>
-	  <EmbeddedResource Update="Main.resx">
-		  <DependentUpon>Main.cs</DependentUpon>
-		  <LogicalName>AutoWikiBrowser.MainForm.resources</LogicalName>
-	  </EmbeddedResource>
-
 	  <EmbeddedResource Update="Preferences.resx">
 		  <DependentUpon>Preferences.cs</DependentUpon>
 		  <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
