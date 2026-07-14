@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AWBUpdater
+﻿namespace AWBUpdater
 {
     public class Enabledversion
     {

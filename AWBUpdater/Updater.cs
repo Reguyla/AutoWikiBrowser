@@ -17,15 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System;
-using System.Windows.Forms;
-using System.IO;
+using ICSharpCode.SharpZipLib.Zip;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using ICSharpCode.SharpZipLib.Zip;
+using System.Windows.Forms;
 
 namespace AWBUpdater
 {
@@ -747,7 +744,7 @@ namespace AWBUpdater
     /// <summary>
     /// This exception stops processing and prepares the updater for exit
     /// </summary>
-      public class AbortException : Exception
+    public class AbortException : Exception
     {
         public AbortException()
         {

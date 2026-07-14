@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace AWBUpdater
 {
@@ -11,7 +10,7 @@ namespace AWBUpdater
 
             foreach (Enabledversion v in versions)
             {
-                listView1.Items.Add(new ListViewItem(new[] {v.version, v.releasedate, v.dotnetversion}));
+                listView1.Items.Add(new ListViewItem(new[] { v.version, v.releasedate, v.dotnetversion }));
             }
             listView1.Items[0].Selected = true;
             listView1.Select();

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Configuration;
 using System.Reflection;
-using System.Threading;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 /* Don't use anything WikiFunctions-specific here, for source-compatibility with Updater  */
