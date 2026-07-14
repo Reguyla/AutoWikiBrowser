@@ -495,67 +495,11 @@ namespace WikiFunctions
 
         #region Proxy support
 
-        private static IWebProxy SystemProxy;
-
         /// <summary>
-        /// Creates an HTTP web request. Timeout set to 15 seconds
+        /// Refreshes the HTTP proxy used by AWB networking operations.
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="userAgent"></param>
-        /// <returns></returns>
-        public static HttpWebRequest PrepareWebRequest(string url, string userAgent)
-        {
-            ServicePointManager.Expect100Continue = false;
-            ServicePointManager.SecurityProtocol |=
-                SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
-
-            HttpWebRequest req = (HttpWebRequest) WebRequest.Create(url);
-            req.KeepAlive = true;
-            req.ServicePoint.Expect100Continue = false;
-            req.Expect = "";
-
-            if (SystemProxy != null) req.Proxy = SystemProxy;
-
-            req.UserAgent = string.IsNullOrEmpty(userAgent) ? Tools.DefaultUserAgentString : userAgent;
-
-            req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-
-            req.Proxy.Credentials = CredentialCache.DefaultCredentials;
-            req.UseDefaultCredentials = true;
-            req.Timeout = 15000; // override default timeout of 300,000 (= 5 minutes) down to 15 seconds
-
-            return req;
-        }
-
-        /// <summary>
-        /// Creates an HTTP web request. Timeout set to 15 seconds
-        /// </summary>
-        /// <returns>
-        /// The web request.
-        /// </returns>
-        /// <param name='url'>
-        /// URL.
-        /// </param>
-        public static HttpWebRequest PrepareWebRequest(string url)
-        {
-            return PrepareWebRequest(url, "");
-        }
-
         public static void RefreshProxy()
         {
-            // no Internet Explorer available on Linux, so GetSystemWebProxy doesn't work,
-            // so disable to avoid long timeouts when offline
-            if (Globals.UsingLinux)
-                return;
-
-            SystemProxy = WebRequest.GetSystemWebProxy();
-
-            if (SystemProxy.IsBypassed(new Uri(URL)))
-            {
-                SystemProxy = null;
-            }
-
-            // Keep the new networking layer synchronized during the migration.
             Networking.AwbHttpClient.RefreshProxy();
         }
 
