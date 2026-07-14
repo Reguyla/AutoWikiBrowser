@@ -100,11 +100,10 @@ namespace WikiFunctions.Networking
         }
 
         /// <summary>
-        /// Sends an HTTP POST request using
-        /// application/x-www-form-urlencoded data.
+        /// Sends an HTTP POST request using form URL-encoded data.
         /// </summary>
-        /// <param name="values">Form values to send.</param>
-        /// <param name="url">Destination URL.</param>
+        /// <param name="values">The form values to submit.</param>
+        /// <param name="url">The destination URL.</param>
         /// <returns>The response body.</returns>
         public static string PostForm(
             NameValueCollection values,
