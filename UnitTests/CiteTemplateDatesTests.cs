@@ -22,7 +22,6 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using WikiFunctions;
@@ -33,7 +32,7 @@ namespace UnitTests
     [TestFixture]
     public class CiteTemplateDatesTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void TestCiteTemplateDates()

@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 using WikiFunctions.Controls.Lists;
 using WikiFunctions.Parse;
@@ -131,7 +130,7 @@ namespace UnitTests
         {
             Assert.That(HideMore("[[foo|bar]]", true), Does.Contain("bar"));
         }
-        
+
         [Test]
         public void HideItalics()
         {
@@ -217,7 +216,7 @@ File:Blogs002.jpeg|Description
             HideText h = new HideText(true, false, false);
             ClassicAssert.IsTrue(h.HideMore(@"[[Category:Foo|abc]]", false, false).Contains("abc"), "Category sort key kept if keeping wikilinks");
         }
-        
+
         [Test]
         public void HideImagesLimits()
         {
@@ -239,7 +238,7 @@ image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|map = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
             ClassicAssert.IsTrue(Regex.IsMatch(Hide(@"|AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
         }
-        
+
         [Test]
         public void HideCiteTitles()
         {
@@ -248,7 +247,7 @@ image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
             ClassicAssert.IsTrue(Tools.GetTemplateParameterValue(Hide(@"{{cite web| title = September 20 - September 26, 2010 | date = May 2011"), "title").Length > 0, "title parameter has length if hidden");
 
             ClassicAssert.IsTrue(Hide(@"{{cite web| title = [Now September 20 - September 26, 2010] was | date = May 2011").Contains(@"]"), "title hiding, bracket handling");
-            
+
             ClassicAssert.IsTrue(Hide(@"{{cite web| trans_title = foo | date = May 2011").Contains(@"foo"), "trans_title not hidden if no year");
             ClassicAssert.IsFalse(Hide(@"{{cite web| trans_title = Now September 20 - September 26, 2010 was | date = May 2011").Contains(@"September"), "trans_title hidden when contains year");
             ClassicAssert.IsTrue(Tools.GetTemplateParameterValue(Hide(@"{{cite web| trans_title = September 20 - September 26, 2010 | date = May 2011"), "trans_title").Length > 0, "trans_title parameter has length if hidden");
@@ -258,7 +257,7 @@ image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
             ClassicAssert.IsFalse(Hide(@"{{cite web| trans_title = Now September 2009 - September 26, 2010 was | date = May 2011").Contains(@"2010"), "2 years");
             ClassicAssert.IsTrue(Hide(@"{{cite web| trans_title = September 26, 2010 was (in three volumes} | date = May 2011").Contains(@"(in three volumes}"), "Don't hide beyond year");
         }
-        
+
         [Test]
         public void HideNotATypo()
         {
@@ -291,7 +290,7 @@ image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
             ClassicAssert.IsTrue(Hide(@"[[Image:some_image_name.png]] Normal words in text").EndsWith(@" Normal words in text"));
             ClassicAssert.IsTrue(Hide(Caption4 + Field1).EndsWith(Field1));
         }
-        
+
         [Test]
         public void HideImagesMisc()
         {
@@ -300,7 +299,7 @@ image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
    | image=Chlorothiazide.svg
    | image2=Chlorothiazide-from-xtal-3D-balls.png
    | CAS_number=58-94-6}}").Contains("=Chlorothiazide"));
-            
+
             AssertAllHidden(@"{{ gallery
 |title=Lamu images
 |width=150
@@ -354,7 +353,7 @@ image = AmorMexicanaThalia.jpg |"), Hidden + @" \|"));
    | image=Chlorothiazide.svg
    | image2=Chlorothiazide-from-xtal-3D-balls.png
    | CAS_number=58-94-6}}").Contains("=Chlorothiazide"));
-            
+
             AssertAllHiddenMore(@"<imagemap>
 File:Blogs001.jpeg|Description
 File:Blogs002.jpeg|Description
@@ -450,16 +449,16 @@ quux.JPEG|text
         {
             AssertAllHiddenMore("[http://foo]", true, "External link no text");
             AssertAllHiddenMore("[http://foo bar]", true, "External link with text");
-            AssertAllHiddenMore("[//foo.com bar]", true, "External link Protocol-relative URL"); 
+            AssertAllHiddenMore("[//foo.com bar]", true, "External link Protocol-relative URL");
             AssertAllHiddenMore("[http://foo [bar]", true, "External link unbalanced bracket");
             AssertAllHiddenMore("[[ru:Link]]", true, "Possible interwiki, hidemore");
             ClassicAssert.IsFalse(Hide(@"[[ru:Link]]", true, true, true).Contains("Link"), "Possible interwiki, hide");
-            
+
             ClassicAssert.IsTrue(Hide(@"date=April 2010|url=http://w/010111a.html}}", true, true, true).Contains(@"date=April 2010|url="), "cite template URL");
             ClassicAssert.IsTrue(Hide(@"date=April 2010|url=//w/010111a.html}}", true, true, true).Contains(@"date=April 2010|url="), "Protocol-relative URL");
             ClassicAssert.IsTrue(Hide(@"date=April 2010|url=http://w/010111a.html}}", true, true, true).Contains(@"}}"), "Cite template URL, }} retention");
         }
-        
+
         [Test]
         public void HidePlainExternalLinks()
         {
@@ -475,7 +474,7 @@ quux.JPEG|text
             AssertAllHiddenMore("worldwind://www.foo.com/asdfasdf/asdf.htm", true);
             AssertAllHiddenMore("news://www.foo.com/asdfasdf/asdf.htm", true);
             AssertAllHiddenMore("svn://www.foo.com/asdfasdf/asdf.htm", true);
-            
+
             ClassicAssert.IsFalse(HideMore(@"http://foo.com/asdfasdf/asdf.htm", true, false, false).Contains("asdf"));
             ClassicAssert.IsTrue(HideMore(@"http://foo.com/asdfasdf/asdf.htm", false, false, false).Contains("asdf"));
         }
@@ -553,11 +552,11 @@ quux.JPEG|text
             Assert.That(a.URLEncodedName, Is.EqualTo("A"));
             Assert.That(a.DisplayTitle, Is.EqualTo(null));
         }
-        
+
         [Test]
         public void AutoTag()
         {
-            #if DEBUG
+#if DEBUG
             const string LongText =
             @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse dictum ultrices augue. Fusce sem diam, vestibulum sit amet, vehicula id, congue a, nisl. Phasellus pulvinar posuere purus. Donec elementum justo mattis nulla. Sed a purus dictum lacus pharetra adipiscing. Nam non dui non ante viverra iaculis. Fusce euismod lacus id nulla vulputate gravida. Suspendisse lectus pede, tempus sed, tristique id, pharetra eget, urna. Integer mattis libero vel quam accumsan suscipit. Vivamus molestie dapibus est. Quisque quis metus eget nisl accumsan aliquet. Donec tempus pellentesque tellus. Aliquam lacinia gravida justo. Aliquam erat volutpat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Mauris ultricies suscipit urna. Ut mollis tempor leo. Pellentesque fringilla mattis enim. Proin sapien enim, congue non, aliquet et, sollicitudin nec, mauris. Sed porta.
 
@@ -581,7 +580,7 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
             Globals.UnitTestBoolValue = false;
             a.AutoTag(p, true, true);
             ClassicAssert.IsTrue(a.NoArticleTextChanged);
-            #endif
+#endif
         }
 
         [Test]
@@ -590,16 +589,16 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
             Article a = new Article("A", "{{dead link}}");
             Assert.That(a.DeadLinks().Count, Is.EqualTo(1));
             ClassicAssert.IsTrue(a.HasDeadLinks);
-            
+
             a = new Article("A", "<small>");
             Assert.That(a.UnclosedTags().Count, Is.EqualTo(1));
-            
+
             a = new Article("A", "==[[A]]==");
             Assert.That(a.WikiLinkedHeaders().Count, Is.EqualTo(1));
-            
+
             a = new Article("A", "{{multiple issues|foo=bar}}");
             Assert.That(a.UnknownMultipleIssuesParameters().Count, Is.EqualTo(1));
-            
+
             a = new Article("Talk:A", "{{WikiProject banner shell|foo=bar}}");
             Assert.That(a.UnknownWikiProjectBannerShellParameters().Count, Is.EqualTo(1));
 
@@ -611,22 +610,22 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
 
             a = new Article("A", "{{multiple issues|section=bar|collapsed=yes}}");
             Assert.That(a.UnknownMultipleIssuesParameters().Count, Is.EqualTo(0));
-            
+
             a = new Article("A", "[[A|B|C]]");
             Assert.That(a.DoublepipeLinks().Count, Is.EqualTo(1));
 
             a = new Article("A", "[[A||BC]]");
             Assert.That(a.DoublepipeLinks().Count, Is.EqualTo(1));
-            
+
             a = new Article("A", "[[|A]]");
             Assert.That(a.TargetlessLinks().Count, Is.EqualTo(1));
-            
+
             a = new Article("A", "{{cite web|sajksdfa=a}}");
             Assert.That(a.BadCiteParameters().Count, Is.EqualTo(1));
-            
+
             a = new Article("A", "{{cite web|date=5-4-10}}");
             Assert.That(a.AmbiguousCiteTemplateDates().Count, Is.EqualTo(1));
-            
+
             a = new Article("A", "[[User talk:Noobie]]");
             Assert.That(a.UserSignature().Count, Is.EqualTo(1));
 
@@ -639,15 +638,15 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
         {
             Article a = new Article("A", "ABC");
             ClassicAssert.IsFalse(a.ArticleIsAboutAPerson);
-            
+
             a = new Article("A");
             ClassicAssert.IsFalse(a.HasDiacriticsInTitle);
-            
+
             a = new Article("Aé");
             ClassicAssert.IsTrue(a.HasDiacriticsInTitle);
-            
+
             ClassicAssert.IsTrue(a.IsStub);
-            
+
             a = new Article("A", "ABC");
             ClassicAssert.IsFalse(a.HasStubTemplate);
             ClassicAssert.IsFalse(a.HasInfoBox);
@@ -667,13 +666,13 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
             ClassicAssert.IsFalse(a.IsMissingReferencesDisplay);
             ClassicAssert.IsFalse(a.IsRedirect);
         }
-        
+
         [Test]
         public void CanDoGeneralFixes()
         {
             Article a = new Article("A", "ABC");
             ClassicAssert.IsTrue(a.CanDoGeneralFixes);
-            
+
             ClassicAssert.IsFalse(a.CanDoTalkGeneralFixes);
             a = new Article("Talk:A", "ABC");
             ClassicAssert.IsTrue(a.CanDoTalkGeneralFixes);
@@ -749,30 +748,30 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
             // Assert.AreEqual("", new Article("Category:").NamespacelessName);
             // Assert.AreEqual("", new Article("Category: ").NamespacelessName);
         }
-        
+
         [Test]
         public void UnbalancedBrackets()
         {
             Dictionary<int, int> UnB = new Dictionary<int, int>();
-            
+
             Article a = new Article("TestArticle", "This is the text (here.");
             UnB = a.UnbalancedBrackets();
             Assert.That(UnB.Count, Is.EqualTo(1), "One unbalanced bracket in mainspace article");
-            
+
             // UnB.Clear();
             a = new Article("TestArticle", @"This is the text here.
 == Section ==
 There [was.");
             UnB = a.UnbalancedBrackets();
             Assert.That(UnB.Count, Is.EqualTo(1), "Unbalanced bracket in mainspace article later sections found");
-            
+
             // UnB.Clear();
             a = new Article("Talk:TestArticle", @"This is the text (here.
 == Section ==
 There [was.");
             UnB = a.UnbalancedBrackets();
             Assert.That(UnB.Count, Is.EqualTo(1), "One unbalanced bracket in zeroth section of talk article");
-            
+
             // UnB.Clear();
             a = new Article("Talk:TestArticle", @"This is the text here.
 == Section ==
@@ -795,11 +794,11 @@ There [was.");
                                                                                  false,
                                                                                  false, // singleline
                                                                                  false); // multiline
-            
+
             Article a = new Article("A", "Now foo\nbar");
             ClassicAssert.IsTrue(notContainsComparer.Matches(a), "does not contain comparer");
             ClassicAssert.IsTrue(containsComparer.Matches(a), "it contains comparer");
-            
+
             a = new Article("A", @"Now foo-bar");
             ClassicAssert.IsFalse(notContainsComparer.Matches(a), "not contains is false");
             ClassicAssert.IsFalse(containsComparer.Matches(a), "contains is false");
@@ -852,12 +851,12 @@ There [was.");
 {{DEFAULTSORT:Hello test}}
 [[Category:Test pages]]
 "), "Text unicodified, hidemore used");
-            
+
             a = new Article("a", @"ABC");
             a.Unicodify(true, Parser, RemoveText);
             Assert.That(a.ArticleText, Is.EqualTo(@"ABC"), "No change");
         }
-        
+
         [Test]
         public void BulletExternalLinks()
         {
@@ -868,15 +867,15 @@ http://www.site.com
 [[Category:A]]");
             a.BulletExternalLinks(false);
             ClassicAssert.IsTrue(a.ArticleText.Contains("* http://www.site.com"));
-            
-             a = new Article("a", @"A
+
+            a = new Article("a", @"A
 ==External links==
 http://www.site.com
 
 [[Category:A]]");
             a.BulletExternalLinks(true);
             ClassicAssert.IsTrue(a.ArticleText.Contains("* http://www.site.com"));
-            
+
             a = new Article("a", @"A
 ==External links==
 * http://www.site.com
@@ -885,27 +884,27 @@ http://www.site.com
             a.BulletExternalLinks(true);
             ClassicAssert.IsTrue(a.ArticleText.Contains("* http://www.site.com"));
         }
-        
+
         [Test]
         public void FixLinks()
         {
             Article a = new Article("a", @"A [[_B ]]");
             a.FixLinks(false);
             ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
-            
+
             a = new Article("a", @"A [[ B_]]");
             a.FixLinks(true);
             ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
-            
+
             a = new Article("a", @"A [[B]]");
             a.FixLinks(true);
             ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
-            
+
             a = new Article("a", @"A [[B]]");
             a.FixLinks(false);
             ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
         }
-        
+
         [Test]
         public void CiteTemplateDates()
         {
@@ -914,7 +913,7 @@ http://www.site.com
             a.CiteTemplateDates(Parser, true);
             ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
         }
-        
+
         [Test]
         public void EmboldenTitles()
         {
@@ -973,17 +972,17 @@ http://www.site.com
             Assert.That(Namespace.Determine("user_talk:foo"), Is.EqualTo(Namespace.UserTalk));
             Assert.That(Namespace.Determine("user%20talk:foo"), Is.EqualTo(Namespace.UserTalk));
         }
-        
+
         [Test]
         public void OtherLanguages()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("fr");
             Variables.Namespaces[1] = "Discussion:";
             Assert.That(Namespace.Determine(@"Discussion:foo"), Is.EqualTo(Namespace.Talk));
             Variables.SetProjectLangCode("en");
             Variables.Namespaces[1] = "Talk:";
-            #endif
+#endif
         }
 
         [Test]
@@ -1099,14 +1098,14 @@ http://www.site.com
             ClassicAssert.IsTrue(Namespace.VerifyNamespaces(Variables.CanonicalNamespaces));
 
             var ns = new Dictionary<int, string>(Variables.CanonicalNamespaces);
-            
+
             ns[0] = "";
             ClassicAssert.IsFalse(Namespace.VerifyNamespaces(ns));
 
             ns.Remove(0);
             ns[1] = "Talk";
             ClassicAssert.IsFalse(Namespace.VerifyNamespaces(ns));
-            
+
             ns.Remove(1);
             ClassicAssert.IsFalse(Namespace.VerifyNamespaces(ns));
         }
@@ -1132,7 +1131,7 @@ http://www.site.com
 
         }
     }
-    
+
     [TestFixture]
     public class TalkHeaderTests : RequiresInitialization
     {
@@ -1282,8 +1281,8 @@ http://www.site.com
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(articleText2), "no changes if everything is in place; contains 2 Wikiprojects");
         }
-        
-         [Test]
+
+        [Test]
         public void MoveBannersAndWikiProjects()
         {
             string a = @"{{Skip to talk}}", b = @"{{Talk header}}", c = @"{{GA nominee}}", d = @"{{Controversial}}", e = @"{{Not a forum}}", f = @"{{British English}}", g = @"{{FailedGA}}", h = @"{{WikiProject Greece|class=}}", i = @"{{Image requested}}", j = @"{{Connected contributor|John Doe}}";
@@ -1343,7 +1342,7 @@ http://www.site.com
             string articleText2 = articleText;
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with header");
-            
+
             articleText = @"{{afd-merged-from|George Piggins Medal|George Piggins Medal|10 June 2012}}
 
 {{User:WildBot/m04|sect={{User:WildBot/m03|1|History of rugby league#Professional rugby begins in Australia|schism}}|m04}}
@@ -1492,11 +1491,11 @@ Some text";
             string talkheader = @"{{talk header|noarchive=no|search=no|arpol=no|wp=no|disclaimer=no|shortcut1|shortcut2}}", talkrest = @"==hello==
 hello talk";
             string articleText = talkrest + "\r\n" + talkheader;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
 
             Assert.That(articleText, Is.EqualTo(talkheader.Replace("{{talk", @"{{Talk") + "\r\n" + talkrest + "\r\n"), "move talk header");
-            
+
             // handles {{talk header}} on same line as other template
             string WPBS = @"{{WikiProject banner shell|blp=yes|1=
 {{OH-Project|class=B|importance=Low|nested=yes}}
@@ -1505,20 +1504,20 @@ hello talk";
 }}", rest = "\r\n\r\n" + @"==Song Jessie by Joshua Kadison==
 In the article it says that above mentioned";
             articleText = WPBS + @"{{Talkheader}}" + rest;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
 
             Assert.That(articleText, Is.EqualTo(@"{{Talk header}}" + "\r\n" + WPBS + rest), "talk header on same line as other template");
-            
+
             // no change if already at top
             articleText = talkheader + "\r\n" + talkrest;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(talkheader + "\r\n" + talkrest), "talk header already on top");
-            
+
             // no change if no talk header
             articleText = talkrest;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(talkrest), "no talk header");
 
@@ -1531,106 +1530,106 @@ hello talk";
 
             Assert.That(articleText, Is.EqualTo("{{GA nominee}}\r\n" + talkheader + "\r\n" + talkrest + "\r\n"), "GA nominee involved");
         }
-        
+
         [Test]
         public void RenameTalkHeader()
         {
             string talkheader = @"{{talkheader|noarchive=no}}", talkrest = @"==hello==
 hello talk";
             string articleText = talkrest + "\r\n" + talkheader;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
 
             Assert.That(articleText, Is.EqualTo(@"{{Talk header|noarchive=no}}" + "\r\n" + talkrest + "\r\n"), "renamed to upper case with space");
         }
-        
+
         [Test]
         public void TalkHeaderDefaultsortChange()
         {
             string start = @"
 ==Foo==
 bar", df = @"{{DEFAULTSORT:Bert}}";
-            
+
             string articleText = start + "\r\n" + df;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.MoveToBottom);
             Assert.That(articleText, Is.EqualTo(start + "\r\n" + "\r\n" + df), "removes second newline");
-            
+
             articleText = start + df;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.MoveToTop);
             Assert.That(articleText, Is.EqualTo(df + "\r\n" + start), "moves df after text");
-            
+
             articleText = start + df;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(start + df), "no changes");
-            
+
             string df2 = @"{{DEFAULTSORT:}}";
-            
+
             articleText = start + df2;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.MoveToBottom);
             Assert.That(articleText, Is.EqualTo(start), "defaultsort with no key removed");
-            
+
             articleText = start + df2;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.MoveToTop);
             Assert.That(articleText, Is.EqualTo(start), "defaultsort with no key removed");
         }
-        
+
         [Test]
         public void SkipToTalk()
         {
             string articleText = @"{{Skiptotoc}}", stt = @"{{Skip to talk}}";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(stt + "\r\n"));
-            
+
             articleText = @"{{skiptotoctalk}}";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
             Assert.That(articleText, Is.EqualTo(stt + "\r\n"));
         }
-        
+
         [Test]
         public void AddMissingFirstCommentHeader()
         {
             const string comment = @"
 Hello world comment.";
             string articleTextIn = articleTextHeader + comment;
-            
+
             // plain comment
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + "\r\n" + @"
 ==Untitled==
 Hello world comment."));
-            
+
             // idented comment2
             articleTextIn = articleTextHeader + @"
 *Hello world comment2.";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + "\r\n" + @"
 ==Untitled==
 *Hello world comment2."));
-            
+
             // idented comment3
             articleTextIn = articleTextHeader + @"
 :Hello world comment3.";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + "\r\n" + @"
 ==Untitled==
 :Hello world comment3."));
-            
+
             // quoted comment
             articleTextIn = articleTextHeader + @"
 ""Hello world comment4"".";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + "\r\n" + @"
@@ -1649,12 +1648,12 @@ Hello world comment."));
             // heading level 1 changed to level 2
             articleTextIn = articleTextHeader + "\r\n" + @"=Foo bar=
 *Hello world comment2.";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
-            
+
             ClassicAssert.IsTrue(articleTextIn.Contains(@"==Foo bar=="));
             ClassicAssert.IsFalse(articleTextIn.Contains(@"==Untitled=="));
-            
+
             articleTextIn = comment;
 
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
@@ -1662,7 +1661,7 @@ Hello world comment."));
             Assert.That(articleTextIn, Is.EqualTo(@"==Untitled==
 Hello world comment."), "don't add blank line when header is on the top");
 
-            articleTextIn = @"{{Football}}" +"\r\n" + comment;
+            articleTextIn = @"{{Football}}" + "\r\n" + comment;
 
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
@@ -1701,20 +1700,20 @@ Hello world comment."));
             string articleTextIn = articleTextHeader + @"
 ==Question==
 :Hello world comment3.";
-            
-            
+
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + @"
 ==Question==
 :Hello world comment3."));
-            
+
             // no change – already header at top
             articleTextIn = @"
 {{Some template}}
 ==Question==
 :Hello world comment3.";
-            
+
 
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
@@ -1722,86 +1721,86 @@ Hello world comment."));
 {{Some template}}
 ==Question==
 :Hello world comment3."));
-            
+
             // no change – already header at top 2
             articleTextIn = @"
 ==Question==
 {{Some template}}
 :Hello world comment3.";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(@"
 ==Question==
 {{Some template}}
 :Hello world comment3."));
-            
+
             // no change – no comments
             articleTextIn = @"
 ==Question==
 {{Some template}}";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(@"
 ==Question==
 {{Some template}}"));
-            
+
             // no change – only text in template
             articleTextIn = @"
 {{foo|
 bar|
 end}}";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(@"
 {{foo|
 bar|
 end}}"));
-            
+
             // no change – only comments
             articleTextIn = @"
 <!--
 foo
 -->";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(@"
 <!--
 foo
 -->"));
-            
+
             // no change – only TOC
             articleTextIn = @"
 __TOC__";
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(@"
 __TOC__"));
-            
+
             // no change -- only in template
             const string allInTemplate = @"{{archive box|
 *[[/Archive: GA review|Good Article review]]}}
 
 == Explanation of Wright's work in ''Certaine Errors'' ==";
-            
+
             articleTextIn = allInTemplate;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(allInTemplate));
-            
+
             // no change -- only after template on same line
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_15#Section_header_added_in_wrong_position
             const string allAfterTemplate = @"{{archive box|words}} extra foo
 
 {{another one}}";
-            
+
             articleTextIn = allAfterTemplate;
-            
+
             TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
             Assert.That(articleTextIn, Is.EqualTo(allAfterTemplate));
@@ -1836,7 +1835,7 @@ bar
 bar
 |}"));
         }
-        
+
         [Test]
         public void WikiProjectBannerShellRedirects()
         {
@@ -1852,18 +1851,18 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(red4), Is.EqualTo(WikiProjectBannerShell));
             Assert.That(TalkPageFixes.WikiProjectBannerShell(WikiProjectBanners), Is.EqualTo(WikiProjectBannerShell));
         }
-        
+
         [Test]
         public void WikiProjectBannerShellEnOnly()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("fr");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=yes|blp=yes}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=yes|blp=yes}}"));
             Variables.SetProjectLangCode("en");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=yes|blp=yes}}"), Is.EqualTo(@"{{WikiProject banner shell|blp=yes}}"));
-            #endif
+#endif
         }
-        
+
         [Test]
         public void WikiProjectBannerShellDupeParameters()
         {
@@ -1872,7 +1871,7 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|collapsed=yes|collapsed=yes|collapsed=yes}}"), Is.EqualTo(@"{{WikiProject banner shell|collapsed=yes}}"));
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell||collapsed=yes}}"), Is.EqualTo(@"{{WikiProject banner shell|collapsed=yes}}"), "excess pipes cleaned");
         }
-        
+
         [Test]
         public void WikiProjectBannerShellUnneededParams()
         {
@@ -1881,7 +1880,7 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProjectBanners|collapsed=no|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell}}"));
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProjectBanners|collapsed=yes|blpo=no}}"), Is.EqualTo(@"{{WikiProject banner shell|collapsed=yes}}"));
         }
-        
+
         [Test]
         public void WikiProjectBannerShellWPBiography()
         {
@@ -1894,7 +1893,7 @@ bar
 
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|blp=yes|1={{WPBiography|foo=bar|living=no}}}}"), Is.EqualTo(@"{{WikiProject banner shell|1={{WPBiography|foo=bar|living=no}}}}"));
         }
-        
+
         [Test]
         public void WikiProjectBannerShellAddingWikiProjects()
         {
@@ -1954,18 +1953,18 @@ bar
 
 "), "WikiProjects pulled into WPBS - new style WPBS with class, no existing WPB");
         }
-        
+
         [Test]
         public void WikiProjectBannerShellUnnamedParam()
         {
             Assert.That(TalkPageFixes.WikiProjectBannerShell(@"{{WikiProject banner shell|
 {{WPBiography|foo=bar}}}}"), Is.EqualTo(@"{{WikiProject banner shell|
 {{WPBiography|foo=bar}}}}"));
-            
+
             const string otherUnnamed = @"{{WikiProject banner shell|random}}";
             Assert.That(TalkPageFixes.WikiProjectBannerShell(otherUnnamed), Is.EqualTo(otherUnnamed), "other unknown parameter not named 1=");
         }
-        
+
         [Test]
         public void WikiProjectBannerShellBLP()
         {
@@ -1975,7 +1974,7 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a.Replace("blp=yes", "blp=") + "{{Blp}}"), Is.EqualTo(a), "empty parameter in WPBS");
             Assert.That(TalkPageFixes.WikiProjectBannerShell("{{Blp}}"), Is.EqualTo("{{Blp}}"));
         }
-        
+
         [Test]
         public void WikiProjectBannerShellBLPO()
         {
@@ -1987,7 +1986,7 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a.Replace("blpo=yes", "blpo=") + "{{Blpo}}"), Is.EqualTo(a), "empty parameter in WPBS");
             Assert.That(TalkPageFixes.WikiProjectBannerShell("{{Blpo}}"), Is.EqualTo("{{Blpo}}"));
         }
-        
+
         [Test]
         public void WikiProjectBannerShellMisc()
         {
@@ -2003,7 +2002,7 @@ bar
 }}";
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a), Is.EqualTo(b));
         }
-        
+
         [Test]
         public void AddWikiProjectBannerShell()
         {
@@ -2012,7 +2011,7 @@ bar
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a + b), Is.EqualTo(a + b));
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a + b + c), Is.EqualTo(@"{{WikiProject banner shell|1=" + "\r\n" + a + "\r\n" + b + "\r\n" + c + "\r\n" + @"}}"), "banner shell added for 3 or more wikiproject links");
             Assert.That(TalkPageFixes.WikiProjectBannerShell(a + b + c + d), Is.EqualTo(@"{{WikiProject banner shell|1=" + "\r\n" + a + "\r\n" + b + "\r\n" + c + "\r\n" + d + "\r\n" + @"}}"));
-            
+
             const string e = @"{{talk header}}
 {{WikiProject Biography|listas=Bar, F|living=yes|class=Start|priority=mid|sports-work-group=yes}}
 {{WikiProject F|class=Start|importance=mid|italy=y}}
@@ -2029,29 +2028,29 @@ bar
 
             Assert.That(TalkPageFixes.WikiProjectBannerShell(e), Is.EqualTo(f), "adds WPBS, ignores non-wikiproject templates");
         }
-        
+
         [Test]
         public void RemoveTemplateNamespace()
         {
             string T1 = @"{{Template:Foo}}", T2 = @"{{Template:Foo}}
 ==Section==
 {{Template:Bar}}";
-            
+
             ClassicAssert.IsFalse(TalkPageFixes.ProcessTalkPage(ref T1, DEFAULTSORT.NoChange));
             Assert.That(T1, Is.EqualTo("{{Foo}}"), "template namespace removed");
-            
+
             ClassicAssert.IsFalse(TalkPageFixes.ProcessTalkPage(ref T2, DEFAULTSORT.NoChange));
             Assert.That(T2, Is.EqualTo(@"{{Foo}}
 ==Section==
 {{Template:Bar}}"), "changes only made in zeroth section");
         }
-        
+
         [Test]
         public void WPBiographyTopBilling()
         {
             string a = @"{{WPBiography|foo=yes|living=yes}}
 {{WikiProject London}}
-",  b = @"{{WikiProject banner shell|banner collapsed=no|1=
+", b = @"{{WikiProject banner shell|banner collapsed=no|1=
 {{WPBiography|living=yes|class=Start|priority=|listas=Hill, A}}
 {{WikiProject Gender Studies}}
 {{WikiProject Oklahoma}}
@@ -2112,7 +2111,7 @@ bar
             Assert.That(TalkPageFixes.WPJazz(b.Replace(@"}}", "|needs-infobox=no}}")), Is.EqualTo(b), "Remove needs-infobox=no");
         }
     }
-    
+
     [TestFixture]
     public class InTemplateRuleTests
     {
@@ -2124,7 +2123,7 @@ bar
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"bert}} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("bert", @"Bert}} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("bert", @"bert}} was great"));
-            
+
             // spacing
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"Bert }} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @" Bert}} was great"));
@@ -2135,21 +2134,21 @@ bar
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @" Bert|fo=yes}} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"
     Bert|fo=yes}} was great"));
-            
+
             // comments
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"Bert|fo=yes}} was <!--great-->"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"<!--thing--> Bert }} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"Bert<!--thing-->}} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert", @"Bert<!--thing-->|foo=bar}} was great"));
-            
+
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("", @"Bert}} was great"));
-            
+
             // underscores
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert Li", @"Bert Li}} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert Li", @"Bert   Li}} was great"));
             ClassicAssert.IsTrue(InTemplateRule.TemplateUsedInText("Bert Li", @"Bert_Li}} was great"));
         }
-        
+
         [Test]
         public void TemplateUsedInTextNoMatches()
         {
@@ -2159,11 +2158,11 @@ bar
             ClassicAssert.IsFalse(InTemplateRule.TemplateUsedInText("Bert", @"Tim}} was great"));
             ClassicAssert.IsFalse(InTemplateRule.TemplateUsedInText("Bert", @"BERT}} was great"));
             ClassicAssert.IsFalse(InTemplateRule.TemplateUsedInText("Bert Li", @"BertLi}} was great"));
-            
+
             ClassicAssert.IsFalse(InTemplateRule.TemplateUsedInText("Bert", @"<!--Bert}}--> was great"));
         }
     }
-    
+
     [TestFixture]
     public class ListMakerTests : RequiresInitialization
     {
@@ -2208,7 +2207,7 @@ bar
             ListMaker LMaker = new ListMaker();
             Assert.That(LMaker.NormalizeTitle(@"https://en.wikipedia.org/w/index.php?title=Foo&diff=3&oldid=4"), Is.EqualTo("Foo"));
         }
-        
+
         [Test]
         public void RemoveListDuplicatesSimple()
         {
@@ -2217,7 +2216,7 @@ bar
             LMakerRLD.Add(new Article("B"));
             LMakerRLD.Add(new Article("C"));
             LMakerRLD.Add(new Article("A"));
-            
+
             LMakerRLD.RemoveListDuplicates();
 
             Assert.That(LMakerRLD.Count, Is.EqualTo(3), "Duplicate removed");
@@ -2227,7 +2226,7 @@ bar
                 break;
             }
         }
-        
+
         [Test]
         public void RemoveListDuplicates10K()
         {
@@ -2236,11 +2235,11 @@ bar
             LMakerLarge.Clear();
             for (int i = 1; i < big; i++)
                 LMakerLarge.Add(new Article(i.ToString()));
-            
+
             LMakerLarge.Add(new Article("1"));
 
             Assert.That(LMakerLarge.Count, Is.EqualTo(big));
-            
+
             LMakerLarge.RemoveListDuplicates();
 
             Assert.That(LMakerLarge.Count, Is.EqualTo(big - 1), "Duplicate removed");
@@ -2328,7 +2327,7 @@ bar
             Assert.That(LMaker.GetArticleList().Count, Is.EqualTo(2));
         }
     }
-    
+
     [TestFixture]
     public class ListComparerTests : RequiresInitialization
     {
@@ -2343,14 +2342,14 @@ bar
             System.Windows.Forms.ListBox lb1 = new System.Windows.Forms.ListBox();
             System.Windows.Forms.ListBox lb2 = new System.Windows.Forms.ListBox();
             System.Windows.Forms.ListBox lb3 = new System.Windows.Forms.ListBox();
-            
+
             List<Article> articles = new List<Article>();
             articles.Add(new Article("A"));
             articles.Add(new Article("D"));
             articles.Add(new Article("E"));
-            
+
             ListComparer.CompareLists(LMaker, articles, lb1, lb2, lb3);
-            
+
             // unique in 1
             ClassicAssert.IsTrue(lb1.Items.Contains("B"));
             ClassicAssert.IsTrue(lb1.Items.Contains("C"));
@@ -2367,7 +2366,7 @@ bar
             ClassicAssert.IsTrue(lb3.Items.Contains("A"));
             Assert.That(lb3.Items.Count, Is.EqualTo(1));
         }
-        
+
         [Test]
         public void ListComparer10K()
         {
@@ -2383,30 +2382,30 @@ bar
             System.Windows.Forms.ListBox lb1 = new System.Windows.Forms.ListBox();
             System.Windows.Forms.ListBox lb2 = new System.Windows.Forms.ListBox();
             System.Windows.Forms.ListBox lb3 = new System.Windows.Forms.ListBox();
-            
+
             List<Article> articlesC = new List<Article>();
             for (int i = 0; i < big; i++)
                 articlesC.Add(new Article(i.ToString()));
-            
+
             articlesC.Add(new Article("C"));
             articlesC.Add(new Article("D"));
-            
+
             ListComparer.CompareLists(LMakerC10K, articlesC, lb1, lb2, lb3);
-            
+
             // unique in 1
             ClassicAssert.IsTrue(lb1.Items.Contains("A"));
             ClassicAssert.IsTrue(lb1.Items.Contains("B"));
-            
+
             // unique in 2
             ClassicAssert.IsTrue(lb2.Items.Contains("C"));
             ClassicAssert.IsTrue(lb2.Items.Contains("D"));
-            
+
             // common to both
             ClassicAssert.IsTrue(lb3.Items.Contains("1"));
             Assert.That(lb3.Items.Count, Is.EqualTo(big));
         }
     }
-    
+
     [TestFixture]
     public class ListBoxArticleTests : RequiresInitialization
     {
@@ -2420,10 +2419,10 @@ bar
             // sequential block deletion performance
             for (int i = 0; i < big; i++)
                 lbArticles.Items.Add(new Article(i.ToString()));
-            
+
             for (int j = sel; j > 0; j--)
-                lbArticles.SetSelected(big-j, true);
-            
+                lbArticles.SetSelected(big - j, true);
+
             lbArticles.RemoveSelected(true);
 
             if (Globals.UsingMono) // Mono implementation of SetSelected does not seem to honour second input to multi-select
@@ -2433,9 +2432,9 @@ bar
 
             // single selected item deletion performance
             lbArticles.Items.Clear();
-            for (int i = 0; i < big*3; i++)
+            for (int i = 0; i < big * 3; i++)
                 lbArticles.Items.Add(new Article(i.ToString()));
-            lbArticles.SetSelected((int)big/2, true);
+            lbArticles.SetSelected((int)big / 2, true);
             lbArticles.RemoveSelected(true);
             Assert.That(lbArticles.Items.Count, Is.EqualTo(big * 3 - 1));
 
@@ -2490,7 +2489,7 @@ bar
 
             // under mono list count is still 2 now, appears it implements RemoveSelected as for one item only not all selected
             // so set and remove to get down to count of zero under Mono too
-            if(Globals.UsingMono)
+            if (Globals.UsingMono)
             {
                 lbArticles.SetSelected(0, true);
                 lbArticles.RemoveSelected(false);
@@ -2500,7 +2499,7 @@ bar
             Assert.That(lbArticles.Items.Count, Is.EqualTo(0), "List cleared if all items selected and removed");
         }
     }
-    
+
     [TestFixture]
     public class FindAndReplaceTests
     {
@@ -2508,9 +2507,9 @@ bar
         public void FindAndReplace()
         {
             Replacement r = new Replacement("foo", "bar", true, true, true, true, RegexOptions.None, "");
-            
+
             FindandReplace fr = new FindandReplace();
-            
+
             bool changemade = false;
 
             Assert.That(fr.PerformFindAndReplace(r, "the was", "Test", out changemade), Is.EqualTo("the was"));
@@ -2520,19 +2519,19 @@ bar
             Assert.That(fr.PerformFindAndReplace(r, "the foo was", "Test", out changemade), Is.EqualTo("the bar was"));
             ClassicAssert.IsTrue(changemade);
             Assert.That(fr.ReplacedSummary, Is.EqualTo("foo" + FindandReplace.Arrow + "bar"), "One match: a to b");
-            
+
             fr = new FindandReplace();
             changemade = false;
 
             Assert.That(fr.PerformFindAndReplace(r, "the foo was or foo was", "Test", out changemade), Is.EqualTo("the bar was or bar was"));
             Assert.That(fr.ReplacedSummary, Is.EqualTo("foo" + FindandReplace.Arrow + "bar (2)"), "Match count shown");
-            
+
             fr = new FindandReplace();
             changemade = false;
 
             Assert.That(fr.PerformFindAndReplace(r, "the foo was or foo was foo", "Test", out changemade), Is.EqualTo("the bar was or bar was bar"));
             Assert.That(fr.ReplacedSummary, Is.EqualTo("foo" + FindandReplace.Arrow + "bar (3)"), "Match count shown, 3");
-            
+
             r = new Replacement("foot?", "bar", true, true, true, true, RegexOptions.None, "");
             fr = new FindandReplace();
             changemade = false;
@@ -2540,14 +2539,14 @@ bar
             Assert.That(fr.PerformFindAndReplace(r, "the foot was or foo was", "Test", out changemade), Is.EqualTo("the bar was or bar was"));
             ClassicAssert.IsTrue(changemade);
             Assert.That(fr.ReplacedSummary, Is.EqualTo("foot" + FindandReplace.Arrow + "bar (2)"), "Different matches, match text of first used");
-            
+
             r = new Replacement("fooo?", "foo", true, true, true, true, RegexOptions.None, "");
             fr = new FindandReplace();
             changemade = false;
             Assert.That(fr.PerformFindAndReplace(r, "the foo was a fooo it", "Test", out changemade), Is.EqualTo("the foo was a foo it"));
             ClassicAssert.IsTrue(changemade);
             Assert.That(fr.ReplacedSummary, Is.EqualTo("fooo" + FindandReplace.Arrow + "foo"), "No-change match ignored");
-            
+
             fr = new FindandReplace();
             changemade = false;
             Assert.That(fr.PerformFindAndReplace(r, "the foo was", "Test", out changemade), Is.EqualTo("the foo was"));
@@ -2565,20 +2564,20 @@ bar
 
             Assert.That(fr.PerformFindAndReplace(r, "the foo\nwas", "Test", out changemade), Is.EqualTo("the bar was"));
             ClassicAssert.IsTrue(changemade);
-            
+
             // not regex
             r = new Replacement("foo\n", "bar ", false, true, true, true, RegexOptions.None, "");
             Assert.That(fr.PerformFindAndReplace(r, "the foo\nwas", "Test", out changemade), Is.EqualTo("the bar was"));
             ClassicAssert.IsTrue(changemade);
         }
-        
+
         [Test]
         public void FindAndReplaceRemove()
         {
             Replacement r = new Replacement("foo", "", true, true, true, true, RegexOptions.None, "");
-            
+
             FindandReplace fr = new FindandReplace();
-            
+
             bool changemade = false;
 
             Assert.That(fr.PerformFindAndReplace(r, "the was", "Test", out changemade), Is.EqualTo("the was"));
@@ -2589,7 +2588,7 @@ bar
             Assert.That(fr.PerformFindAndReplace(r, "the foo was", "Test", out changemade), Is.EqualTo("the  was"));
             ClassicAssert.IsTrue(changemade);
             Assert.That(fr.RemovedSummary, Is.EqualTo("foo"), "One match: removed a");
-            
+
             fr = new FindandReplace();
             changemade = false;
 
@@ -2604,7 +2603,7 @@ bar
             ClassicAssert.IsTrue(changemade);
             Assert.That(fr.RemovedSummary, Is.EqualTo("foot (2)"), "Different matches, match text of first used");
         }
-        
+
         [Test]
         public void FindAndReplaceProperties()
         {
@@ -2645,7 +2644,7 @@ bar
             Assert.That(l, Is.EqualTo(fr.GetList()));
         }
     }
-    
+
     [TestFixture]
     public class SubstTemplates
     {
@@ -2657,7 +2656,7 @@ bar
 
             Assert.That(st.SubstituteTemplates("Now {{foo}}", "test"), Is.EqualTo("Now {{foo}}"), "no change when no templates in list");
 
-            st.TemplateList = new[] {"foo", "bar"};
+            st.TemplateList = new[] { "foo", "bar" };
 
             Assert.That(st.NoOfRegexes, Is.EqualTo(2));
 
@@ -2677,7 +2676,7 @@ bar
             Assert.That(st.SubstituteTemplates("Now {{Msg:foo}}", "test"), Is.EqualTo("Now {{subst:foo}}"), "Msg prefix");
             Assert.That(st.SubstituteTemplates("Now {{msg :foo}}", "test"), Is.EqualTo("Now {{subst:foo}}"), "Msg prefix spacing");
 
-            st.TemplateList = new[] {"foo (bar)"};
+            st.TemplateList = new[] { "foo (bar)" };
             Assert.That(st.NoOfRegexes, Is.EqualTo(1));
 
             Assert.That(st.SubstituteTemplates("Now {{foo (bar)}}", "test"), Is.EqualTo("Now {{subst:foo (bar)}}"), "template name is escaped");

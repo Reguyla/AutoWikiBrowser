@@ -22,9 +22,6 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System;
-using System.IO;
-using System.Threading;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using WikiFunctions;

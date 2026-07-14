@@ -22,10 +22,9 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 using WikiFunctions.Parse;
 
@@ -93,7 +92,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
             ClassicAssert.IsTrue(Tools.NestedTemplateRegex("uncat").IsMatch(text));
             ClassicAssert.IsFalse(Tools.NestedTemplateRegex("uncategorized stub").IsMatch(text));
-            
+
             // stub already marked uncat but with "Lists of..." in pagetitle. It should not tag as stub
             text = parser.Tagger(ShortText + @"{{uncat}}", "Lists of Tests", false, out noChange, ref summary);
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
@@ -292,7 +291,7 @@ namespace UnitTests
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "page is orphan");
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(text), "page is not dead end");
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text), "page is not stub");
- 
+
             text = parser.Tagger(ShortText + Stub + Uncat + Wikify + Orphan + Deadend, "Test", false, out noChange, ref summary);
             // Tagged article, dupe tags shouldn't be added
             Assert.That(Tools.RegexMatchCount(Regex.Escape(Stub), text), Is.EqualTo(1));
@@ -458,7 +457,7 @@ namespace UnitTests
             string text = parser.Tagger(t1, "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text));
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
-            
+
             t1 = @"{{infobox something
 |param1=text long text
 |param2=text long text
@@ -562,13 +561,13 @@ namespace UnitTests
             Globals.UnitTestIntValue = 0;
             Globals.UnitTestBoolValue = true;
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
 
             string text = parser.Tagger(ShortText, "Test", false, out noChange, ref summary);
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text), "page is deadend");
-            ClassicAssert.IsTrue(text.StartsWith("{{نهاية مسدودة|تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n{{يتيمة|تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\nLorem ipsum"), 
+            ClassicAssert.IsTrue(text.StartsWith("{{نهاية مسدودة|تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n{{يتيمة|تاريخ={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\nLorem ipsum"),
                           "no blank line between dead end and orphan");
 
             // وصلات قليلة = wikify
@@ -580,7 +579,7 @@ namespace UnitTests
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -589,14 +588,14 @@ namespace UnitTests
             Globals.UnitTestIntValue = 0;
             Globals.UnitTestBoolValue = true;
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
 
             string text = parser.Tagger(ShortText, "Test", false, out noChange, ref summary);
             // Stub, no existing stub tag. Needs all tags
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(text), "orphan");
-            ClassicAssert.IsFalse(text.Contains("{{وصلات قليلة|" +WikiRegexes.DateYearMonthParameter + @"}}"), "wikify in Arabic");
+            ClassicAssert.IsFalse(text.Contains("{{وصلات قليلة|" + WikiRegexes.DateYearMonthParameter + @"}}"), "wikify in Arabic");
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text), "wikify");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text), "dead end");
             ClassicAssert.IsTrue(Tools.NestedTemplateRegex("بذرة غير مصنفة").IsMatch(text), "Uncategorized stub");
@@ -616,7 +615,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(text), "wikify");
             ClassicAssert.IsFalse(text.Contains("{{وصلات قليلة|" + WikiRegexes.DateYearMonthParameter + @"}}"), "wikify");
             // ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(text),"deadend");
-            
+
             text = parser.Tagger(ShortText.Replace("consectetur", "[[consectetur]]"), "Test", false, out noChange, ref summary);
             // Non Deadend stub
             ClassicAssert.IsTrue(WikiRegexes.Stub.IsMatch(text));
@@ -652,7 +651,7 @@ namespace UnitTests
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -661,7 +660,7 @@ namespace UnitTests
             Globals.UnitTestIntValue = 0;
             Globals.UnitTestBoolValue = true;
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -687,7 +686,7 @@ namespace UnitTests
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -729,7 +728,7 @@ namespace UnitTests
         [Test]
         public void AddTagsWikia()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikia);
             Globals.UnitTestBoolValue = true;
             string text = parser.Tagger(@"{{Infobox foo bar|great=yes}}" + ShortText, "Test", false, out noChange, ref summary);
@@ -740,7 +739,7 @@ namespace UnitTests
             ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(text), "uncat");
             Globals.UnitTestBoolValue = false;
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            #endif
+#endif
         }
 
         [Test]
@@ -749,7 +748,7 @@ namespace UnitTests
             Globals.UnitTestIntValue = 0;
             Globals.UnitTestBoolValue = true;
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ru");
 
             const string textIn = @"Foo bar {{rq|wikify|style}} here", textIn2 = @"Foo bar";
@@ -890,7 +889,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             string text = parser.Tagger("{{orphan}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
-            
+
             // Test if orphan tag is removed properly. Use wikilink and List of to prevent tagging for wikify, deadend and stub
             text = parser.Tagger(@"{{orphan}}
 
@@ -926,7 +925,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             string text = parser.Tagger("{{orphan}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
-            
+
             text = parser.Tagger("{{يتيمة}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
 
@@ -934,7 +933,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             text = parser.Tagger("{{orphan}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             Assert.That(text, Is.EqualTo("{{orphan}}[[foo]]{{disambig}}"));
-            
+
             text = parser.Tagger("{{يتيمة}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             Assert.That(text, Is.EqualTo("[[foo]]{{disambig}}"));
@@ -956,7 +955,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             string text = parser.Tagger("{{orphan}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
-            
+
             text = parser.Tagger("{{يتيمه}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
 
@@ -964,7 +963,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             text = parser.Tagger("{{orphan}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             Assert.That(text, Is.EqualTo("{{orphan}}[[foo]]{{disambig}}"));
-            
+
             text = parser.Tagger("{{يتيمه}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             Assert.That(text, Is.EqualTo("[[foo]]{{disambig}}"));
@@ -985,7 +984,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             string text = parser.Tagger("{{orphan}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
-            
+
             text = parser.Tagger("{{Föräldralös}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
 
@@ -993,7 +992,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             text = parser.Tagger("{{orphan}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             Assert.That(text, Is.EqualTo("{{orphan}}[[foo]]{{disambig}}"));
-            
+
             text = parser.Tagger("{{Föräldralös}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
             Assert.That(text, Is.EqualTo("[[foo]]{{disambig}}"));
@@ -1021,7 +1020,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             text = parser.Tagger(LongText + @"{{بذرة}}", "Test", false, out noChange, ref summary);
             // stub tag removed
             ClassicAssert.IsFalse(WikiRegexes.Stub.IsMatch(text));
-            
+
             text = parser.Tagger("{{وصلات قليلة}}" + Regex.Replace(LongText, @"(\w+)", "[[$1]]"), "Test", false, out noChange, ref summary);
             string text1 = parser.Tagger(Regex.Replace(LongText, @"(\w+)", "[[$1]]"), "Test", false, out noChange, ref summary);
             string text2 = parser.Tagger(Regex.Replace(LongText, @"(\w+)", "[[$1]]") + @"{{بذرة}}", "Test", false, out noChange, ref summary);
@@ -1034,7 +1033,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             WikiRegexes.MakeLangSpecificRegexes();
 #endif
         }
-        
+
         [Test]
         public void RemoveArz()
         {
@@ -1116,7 +1115,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
         [Test]
         public void RemoveDeadEndAr()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1128,7 +1127,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -1288,7 +1287,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
         [Test]
         public void TagUpdaterLocalizeDate()
         {
-            #if DEBUG
+#if DEBUG
             WikiRegexes.DatedTemplates = Parsers.LoadDatedTemplates(@"{{tl|wikify}}");
 
             Variables.SetProjectLangCode("ar");
@@ -1300,7 +1299,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             WikiRegexes.MakeLangSpecificRegexes();
 
             Assert.That(Parsers.TagUpdater(@"{{wikify|date=May 2010}}"), Is.EqualTo(@"{{wikify|date=May 2010}}"), "");
-            #endif
+#endif
         }
 
         [Test]
@@ -1338,7 +1337,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             ClassicAssert.IsFalse(Parsers.TaggerPermitted("#REDIRECT [[A]]", "ABC"));
             ClassicAssert.IsFalse(Parsers.TaggerPermitted("{{soft redirect}}", "ABC"));
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             ClassicAssert.IsFalse(Parsers.TaggerPermitted("A", "Talk:A"));
 
@@ -1346,7 +1345,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
             ClassicAssert.IsTrue(Parsers.TaggerPermitted("A", "Special104:A"));
             Variables.Namespaces.Remove(104);
             Variables.SetProjectLangCode("en");
-            #endif
+#endif
         }
 
         [Test]
@@ -1378,7 +1377,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 
             Assert.That(Parsers.Conversions(bug2), Is.EqualTo(bug2));
 
-            const string ManyInSection  = @"==Section==
+            const string ManyInSection = @"==Section==
 {{multiple issues |
 {{orphan}}
 }}
@@ -1388,7 +1387,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
 }}";
             Assert.That(parser.MultipleIssues(ManyInSection), Is.EqualTo(ManyInSection));
 
-            const string dupe  = @"{{unreferenced}}
+            const string dupe = @"{{unreferenced}}
 {{unreferenced}}";
             Assert.That(parser.MultipleIssues(dupe), Is.EqualTo(dupe));
 
@@ -1600,7 +1599,7 @@ foo
 </pre>"), "test", false, ref summary);
             ClassicAssert.IsFalse(returned.Contains(@"{{Empty section|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
         }
-        
+
         [Test]
         public void RegularCategories()
         {

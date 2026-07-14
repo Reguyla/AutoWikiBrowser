@@ -32,7 +32,7 @@ namespace UnitTests
     [TestFixture]
     public class FixSyntaxTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void FixISBNFormat()
@@ -117,7 +117,7 @@ namespace UnitTests
 
             Variables.SetProjectLangCode("en");
             Assert.That(Parsers.FixSyntax(@"PMID: 1245781549"), Is.EqualTo(@"PMID 1245781549"), "removes colon after PMID");
-            #endif
+#endif
         }
 
         [Test]
@@ -418,7 +418,7 @@ bar|val=one}} {{
 
             Assert.That(Parsers.FixSyntax("[https:http://test.com]"), Is.EqualTo("[https://test.com]"), "https and http");
         }
- 
+
         [Test]
         public void TestFixSyntaxDisambigCat()
         {
@@ -604,7 +604,7 @@ Foo}}"), Is.EqualTo(@"{{DEFAULTSORT:Foo}}"));
             Assert.That(Parsers.FixSyntax(@"{{DEFAULTSORT:Jones,Andy}}"), Is.EqualTo(@"{{DEFAULTSORT:Jones, Andy}}"), "Add space after comma");
             Assert.That(Parsers.FixSyntax(@"{{DEFAULTSORT:Jones,}}"), Is.EqualTo(@"{{DEFAULTSORT:Jones,}}"), "No change: comma at end");
         }
-        
+
         [Test]
         public void FixSyntaxFontTags()
         {
@@ -617,8 +617,8 @@ world"));
             // only changing font tags without properties
             Assert.That(Parsers.FixSyntax(@"<font name=ab>hello</font>"), Is.EqualTo(@"<font name=ab>hello</font>"));
         }
-        
-       [Test]
+
+        [Test]
         public void FixSyntaxHTTPFormat()
         {
             Assert.That(Parsers.FixSyntax(@"<ref>http//www.site.com</ref>"), Is.EqualTo("<ref>http://www.site.com</ref>"), "missing colon");
@@ -695,7 +695,7 @@ world"));
         [Test]
         public void FixUnbalancedBracketsChineseBrackets()
         {
-            #if DEBUG
+#if DEBUG
             const string CB = @"now （there) was";
 
             Variables.SetProjectLangCode("fr");
@@ -706,7 +706,7 @@ world"));
 
             const string CB2 = @"now （there） was";
             Assert.That(Parsers.FixSyntax(CB2), Is.EqualTo(CB2), "No change when brackets are balanced");
-            #endif
+#endif
         }
 
         [Test]
@@ -856,7 +856,7 @@ Image:X.JPG|Japanese classification systemJapanese classification systemJapanese
             Assert.That(Parsers.FixSyntax(Unfixable1), Is.EqualTo(Unfixable1));
 
             Assert.That(Parsers.FixSyntax(@"{{DEFAULTSORT:Foo))"), Is.EqualTo(@"{{DEFAULTSORT:Foo}}"), "fixes Template )) ending");
-             const string Unfixable2 = @"Ruth [[File:One.JPEG|A [http://www.site.com/a]]]
+            const string Unfixable2 = @"Ruth [[File:One.JPEG|A [http://www.site.com/a]]]
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -1251,7 +1251,7 @@ now"));
             Assert.That(Parsers.FixSyntax(@"Now.<ref<foo</ref>"), Is.EqualTo(@"Now.<ref>foo</ref>"), "Simple case <ref<");
             Assert.That(Parsers.FixSyntax(@"Now.<ref>{{foo}}/ref>"), Is.EqualTo(@"Now.<ref>{{foo}}</ref>"), "Simple case missing final <");
         }
- 
+
         [Test]
         public void TestFixSyntaxExternalLinkSpacing()
         {
@@ -1287,7 +1287,7 @@ now"));
             Assert.That(Parsers.FixSyntax(@"their new[http://www.site.com site]"), Is.EqualTo(@"their new[http://www.site.com site]"));
             Assert.That(Parsers.FixSyntax(@"their new [http://www.site.com site]was"), Is.EqualTo(@"their new [http://www.site.com site]was"));
             Assert.That(Parsers.FixSyntax(@"their new[http://www.site.com site]was"), Is.EqualTo(@"their new[http://www.site.com site]was"));
-            
+
             Variables.SetProjectLangCode("en");
             Assert.That(Parsers.FixSyntax(@"their new[http://www.site.com site]"), Is.EqualTo(@"their new [http://www.site.com site]"));
 #endif

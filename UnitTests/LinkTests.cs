@@ -22,7 +22,6 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using WikiFunctions;
@@ -33,7 +32,7 @@ namespace UnitTests
     [TestFixture]
     public class LinkTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void TestStickyLinks()
@@ -78,7 +77,7 @@ namespace UnitTests
             Assert.That(Parsers.SimplifyLinks("[[Dog|dog.]]"), Is.EqualTo("[[dog]]."), "point inside wikilink");
             Assert.That(Parsers.SimplifyLinks("[[Dog|dog,]]"), Is.EqualTo("[[dog]],"), "comma inside wikilink");
             Assert.That(Parsers.SimplifyLinks("[[dog|dog,]]"), Is.EqualTo("[[dog]],"), "comma inside wikilink");
-            
+
             Assert.That(Parsers.SimplifyLinks("([[dog|dogs)]]"), Is.EqualTo("([[dog]]s)"), "Bracket half inside wikilink");
 
             Assert.That(Parsers.SimplifyLinks("[[dog|(dog)]]"), Is.EqualTo("([[dog]])"), "brackets inside wikilink");
@@ -206,12 +205,12 @@ namespace UnitTests
 '''A''' (1 December 1920 &ndash; 28 May, 2013)"), Is.EqualTo(@"#####
 '''A''' (1 December 1920 &ndash; 28 May 2013)"));
         }
-        
+
 
         [Test]
         public void FixDatesEnOnly()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("fr");
             Assert.That(parser.FixDatesA(@"Retrieved on April, 14, 2009 was"), Is.EqualTo(@"Retrieved on April, 14, 2009 was"));
             Assert.That(parser.FixDatesB(@"from (1900-1933) there", false, false), Is.EqualTo(@"from (1900-1933) there"));
@@ -221,7 +220,7 @@ namespace UnitTests
             Assert.That(parser.FixDatesA(@"Retrieved on April, 14, 2009 was"), Is.EqualTo(correct1));
             const string correct = @"from (1900–1933) there";
             Assert.That(parser.FixDatesB(@"from (1900-1933) there", false, false), Is.EqualTo(correct));
-            #endif
+#endif
         }
 
         [Test]
@@ -460,7 +459,7 @@ Foo was happy";
 
 ==Time==
 Foo was happy", LinkedFloruit); // lowercase
-             genFixes.AssertChange(@"'''Foo''' (fl 550) was a peasant.
+            genFixes.AssertChange(@"'''Foo''' (fl 550) was a peasant.
 
 ==Time==
 Foo was happy", LinkedFloruit); // no dot
@@ -476,7 +475,7 @@ Foo was happy", LinkedFloruit); // title case
             const string Floruit550 = @"'''Foo''' ([[floruit|fl.]] 550) was a peasant.
 Foo was happy
 Other (fl. 1645) was also";
-            
+
             genFixes.AssertNotChanged(Floruit550); // No change when first floruit already linked
 
             genFixes.AssertChange(@"'''Foo''' (fl. 550) was a peasant.
@@ -628,7 +627,7 @@ was [[foo|bar]] too"));
             const string doubleApos = @"[[Image:foo%27%27s.jpg|thumb|200px|Bar]]";
             Assert.That(Parsers.FixLinks(doubleApos, "a", out nochange), Is.EqualTo(doubleApos));
 
-            Variables.AddUnderscoredTitles(new List<string>(new[] {"Size t", "Mod perl", "Mod mono" }));
+            Variables.AddUnderscoredTitles(new List<string>(new[] { "Size t", "Mod perl", "Mod mono" }));
 
             Assert.That(Parsers.FixLinks(@"[[size_t]]", "a", out nochange), Is.EqualTo(@"[[size_t]]"));
             ClassicAssert.IsTrue(nochange);
@@ -725,14 +724,14 @@ was [[foo|bar]] too"));
             Assert.That(Parsers.FixLinks(FrIW, "Bar", out nochange), Is.EqualTo(FrIW));
             ClassicAssert.IsTrue(parser.SortInterwikis);
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.commons);
             const string EnInterwiki = @"[[en:Foo]]";
             Assert.That(Parsers.FixLinks(EnInterwiki, "Test", out nochange), Is.EqualTo(EnInterwiki), "en interwiki not changed on commons");
-            
+
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
             Assert.That(Parsers.FixLinks(EnInterwiki, "Test", out nochange), Is.EqualTo("[[Foo]]"), "self-interwiki converted on en-wiki");
-            #endif
+#endif
         }
 
         [Test]
@@ -939,7 +938,7 @@ http://example.com }}");
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_2#Incorrect_bulleting
             Assert.That(s, Does.Contain("\r\nhttp://example.com }}"));
-            
+
             string NoChange = @"==External links==
 * http://example.com/foo";
             Assert.That(Parsers.BulletExternalLinks(NoChange), Is.EqualTo(NoChange));

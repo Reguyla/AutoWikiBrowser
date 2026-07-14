@@ -31,7 +31,7 @@ namespace UnitTests
     [TestFixture]
     public class FixCitationTemplatesTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void FixCitationTemplatesNewlineInParamValue()
@@ -200,7 +200,7 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
             Assert.That(Parsers.FixCitationTemplates(@"{{cite book|title=a |url=http://books.google.com/foo | date=2009 | year=2009 }}"), Is.EqualTo(@"{{cite book|title=a |url=http://books.google.com/foo | year=2009 }}"),
                             "Date removed if date is YYYY and year same");
         }
-        
+
 
         [Test]
         public void FixCitationTemplatesMonthWithinDate()

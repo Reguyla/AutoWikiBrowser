@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 
 namespace UnitTests
@@ -38,7 +38,7 @@ namespace UnitTests
             Assert.That(WikiRegexes.Category.Match("[[Category: Test now ]]").Groups[2].Value, Is.Empty, "Group 2 is optional sort key");
             Assert.That(WikiRegexes.Category.Match("[[Category: Test now|Bar]]").Groups[2].Value, Is.EqualTo("Bar"), "Group 2 is sort key");
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("sv");
             Variables.NamespacesCaseInsensitive.Remove(Namespace.Category);
             Variables.NamespacesCaseInsensitive.Add(Namespace.Category, "[Kk]ategori:");
@@ -60,9 +60,9 @@ namespace UnitTests
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Category, "[[Category:Test]]");
             RegexAssert.IsMatch(WikiRegexes.CategoryQuick, "[[Category:Test]]");
-            #endif
+#endif
         }
-        
+
         [Test]
         public void LooseCategoryTests()
         {
@@ -96,14 +96,14 @@ namespace UnitTests
             RegexAssert.IsMatch(WikiRegexes.Images, @"[[Image:Test here.png|right|200px|Some description [[here]] or there
  over lines]]");
             RegexAssert.IsMatch(WikiRegexes.Images, "[[File:Test.JPG");
-            
+
             RegexAssert.NoMatch(WikiRegexes.Images, "[[File Test.JPG]]");
 
             string bef = @"[[File:Miguel.jpg|thumb|[[Miguel (privateer)|Miguel]]]] [[File:Demetrio.jpg|thumb|[[Demetrio]]]]";
 
             Assert.That(WikiRegexes.Images.Replace(bef, "_"), Is.EqualTo(@"_thumb|[[Miguel (privateer)|Miguel]]]] _thumb|[[Demetrio]]]]"), "Image on same line handling");
         }
-        
+
         [Test]
         public void ImageTestsInfoboxes()
         {
@@ -145,17 +145,17 @@ image = [[File:Test.JPG]]
             RegexAssert.IsMatch(WikiRegexes.Images, @"{{Infobox foo|
   bar = a| map = [[File:Test.JPG]]
   | there=here}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.Images, @"{{Infobox foo|
   bar = a|
   strangename = Test.JPEG
   | there=here}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.Images, @"{{Infobox foo|
 bar = a|
 picture = Test.JPG
 | there=here}}");
-            
+
             RegexAssert.Matches(WikiRegexes.Images, @"{{Infobox foo|
   bar = a|
   picture = Test.JPG
@@ -170,7 +170,7 @@ picture = Test.JPG
 |right|
 Bob D.jpg|120|Florence.jpg|120|Mmm}}");
         }
-        
+
         [Test]
         public void ImageTestsGalleryTag()
         {
@@ -195,10 +195,10 @@ File:Foo.png|description<br>text
             RegexAssert.Matches(WikiRegexes.Images, @"< gallery >
 File:Foo.png
 < /gallery >", "File:Foo.png");
-             RegexAssert.Matches(WikiRegexes.Images, @"< gallery >
+            RegexAssert.Matches(WikiRegexes.Images, @"< gallery >
 File:9th of May_street, Bacău.jpg
 < /gallery >", "File:9th of May_street, Bacău.jpg");
-            
+
             MatchCollection mc = WikiRegexes.Images.Matches(@"<gallery>
 Image:Foo.png|description
 Image:Foo2.png|description2
@@ -206,14 +206,14 @@ Image:Foo2.png|description2
 
             Assert.That(mc[0].Value, Is.EqualTo("Image:Foo.png|"));
             Assert.That(mc[1].Value, Is.EqualTo("Image:Foo2.png|"));
-            
+
             RegexAssert.IsMatch(WikiRegexes.Images, @"File:Foo.png|description");
             RegexAssert.NoMatch(WikiRegexes.Images, @"<gallery>
 
 </gallery>
 Image here");
         }
-        
+
         [Test]
         public void ImageTestsGalleryTemplate()
         {
@@ -234,7 +234,7 @@ Image here");
 |Image:04 Donkey Hospital (June 30 2001).jpg|Donkey Sanctuary
 }}");
         }
-        
+
         [Test]
         public void ImagesCountOnlyTestsStandard()
         {
@@ -248,10 +248,10 @@ Image here");
             RegexAssert.IsMatch(WikiRegexes.ImagesCountOnly, @"[[Image:Test here.png|right|200px|Some description [[here]] or there
  over lines]]");
             RegexAssert.IsMatch(WikiRegexes.ImagesCountOnly, "[[File:Test.JPG");
-            
+
             RegexAssert.NoMatch(WikiRegexes.ImagesCountOnly, "[[File Test.JPG]]");
         }
-        
+
         [Test]
         public void ImagesCountOnlyTestsInfoboxes()
         {
@@ -289,17 +289,17 @@ image = [[File:Test.JPG]]
             RegexAssert.IsMatch(WikiRegexes.ImagesCountOnly, @"{{Infobox foo|
   bar = a| map = [[File:Test.JPG]]
   | there=here}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.ImagesCountOnly, @"{{Infobox foo|
   bar = a|
   strangename = Test.JPEG
   | there=here}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.ImagesCountOnly, @"{{Infobox foo|
 bar = a|
 picture = Test.JPG
 | there=here}}");
-            
+
             // here's the difference between Images and ImagesCountOnly
             RegexAssert.Matches(WikiRegexes.ImagesCountOnly, @"{{Infobox foo|
   bar = a|
@@ -312,7 +312,7 @@ picture = Test.JPG
   url = http://apageof.com/a.html
   | there=here}}");
         }
-        
+
         [Test]
         public void ImagesCountOnlyTestsGalleryTag()
         {
@@ -337,10 +337,10 @@ File:Foo.png|description<br>text
             RegexAssert.Matches(WikiRegexes.ImagesCountOnly, @"< gallery >
 File:Foo.png
 < /gallery >", "File:Foo.png");
-             RegexAssert.Matches(WikiRegexes.ImagesCountOnly, @"< gallery >
+            RegexAssert.Matches(WikiRegexes.ImagesCountOnly, @"< gallery >
 File:9th of May_street, Bacău.jpg
 < /gallery >", "File:9th of May_street, Bacău.jpg");
-            
+
             MatchCollection mc = WikiRegexes.ImagesCountOnly.Matches(@"<gallery>
 Image:Foo.png|description
 Image:Foo2.png|description2
@@ -348,14 +348,14 @@ Image:Foo2.png|description2
 
             Assert.That(mc[0].Value, Is.EqualTo("Image:Foo.png|"));
             Assert.That(mc[1].Value, Is.EqualTo("Image:Foo2.png|"));
-            
+
             RegexAssert.IsMatch(WikiRegexes.ImagesCountOnly, @"File:Foo.png|description");
             RegexAssert.NoMatch(WikiRegexes.ImagesCountOnly, @"<gallery>
 
 </gallery>
 Image here");
         }
-        
+
         [Test]
         public void ImagesCountOnlyTestsGalleryTemplate()
         {
@@ -376,7 +376,7 @@ Image here");
 |Image:04 Donkey Hospital (June 30 2001).jpg|Donkey Sanctuary
 }}");
         }
-        
+
         [Test]
         public void ImagesNotTemplatesTestsStandard()
         {
@@ -390,11 +390,11 @@ Image here");
             RegexAssert.IsMatch(WikiRegexes.ImagesNotTemplates, @"[[Image:Test here.png|right|200px|Some description [[here]] or there
  over lines]]");
             RegexAssert.IsMatch(WikiRegexes.ImagesNotTemplates, "[[File:Test.JPG");
-            
+
             RegexAssert.NoMatch(WikiRegexes.ImagesNotTemplates, "[[File Test.JPG]]");
             RegexAssert.Matches(WikiRegexes.ImagesNotTemplates, "[[Image:Shane Bernagh’s Chair. 28th may 2007 -2.jpg]]", "[[Image:Shane Bernagh’s Chair. 28th may 2007 -2.jpg]]");
         }
-        
+
         [Test]
         public void ImagesNotTemplatesTestsInfoboxes()
         {
@@ -425,7 +425,7 @@ image = [[File:Test.JPG]]
             RegexAssert.IsMatch(WikiRegexes.ImagesNotTemplates, @"{{Infobox foo|
   bar = a| map = [[File:Test.JPG]]
   | there=here}}");
-            
+
             // no match on parameter links without File:/Image: namespace
             RegexAssert.NoMatch(WikiRegexes.ImagesNotTemplates, @"{{Infobox foo|
   bar = a|
@@ -445,7 +445,7 @@ image = [[File:Test.JPG]]
   bar = a|
   strangename = Test.JPEG
   | there=here}}");
-            
+
             RegexAssert.NoMatch(WikiRegexes.ImagesNotTemplates, @"{{Infobox foo|
 bar = a|
 picture = Test.JPG
@@ -456,7 +456,7 @@ picture = Test.JPG
   | there=here}}", @"|
   picture = Test.JPG");
         }
-        
+
         [Test]
         public void ImagesNotTemplatesTestsGalleryTag()
         {
@@ -481,10 +481,10 @@ File:Foo.png|description<br>text
             RegexAssert.Matches(WikiRegexes.ImagesNotTemplates, @"< gallery >
 File:Foo.png
 < /gallery >", "File:Foo.png");
-             RegexAssert.Matches(WikiRegexes.ImagesNotTemplates, @"< gallery >
+            RegexAssert.Matches(WikiRegexes.ImagesNotTemplates, @"< gallery >
 File:9th of May_street, Bacău.jpg
 < /gallery >", "File:9th of May_street, Bacău.jpg");
-            
+
             MatchCollection mc = WikiRegexes.ImagesNotTemplates.Matches(@"<gallery>
 Image:Foo.png|description
 Image:Foo2.png|description2
@@ -492,14 +492,14 @@ Image:Foo2.png|description2
 
             Assert.That(mc[0].Value, Is.EqualTo("Image:Foo.png|"));
             Assert.That(mc[1].Value, Is.EqualTo("Image:Foo2.png|"));
-            
+
             RegexAssert.IsMatch(WikiRegexes.ImagesNotTemplates, @"File:Foo.png|description");
             RegexAssert.NoMatch(WikiRegexes.ImagesNotTemplates, @"<gallery>
 
 </gallery>
 Image here");
         }
-        
+
         [Test]
         public void ImagesNotTemplatesTestsGalleryTemplate()
         {
@@ -520,7 +520,7 @@ Image here");
 |Image:04 Donkey Hospital (June 30 2001).jpg|Donkey Sanctuary
 }}");
         }
-        
+
         [Test]
         public void LooseImageTests()
         {
@@ -537,7 +537,7 @@ Image here");
  over lines]]");
             RegexAssert.NoMatch(WikiRegexes.LooseImage, "[[File:Test.JPG");
         }
-        
+
         [Test]
         public void FileNamespaceLinkTests()
         {
@@ -551,7 +551,7 @@ Image here");
             RegexAssert.IsMatch(WikiRegexes.FileNamespaceLink, "[[Image:Test here.png|right|200px|Some description [[here]] or there]]");
             RegexAssert.IsMatch(WikiRegexes.FileNamespaceLink, @"[[Image:Test here.png|right|200px|Some description [[here]] or there
  over lines]]");
-            
+
             RegexAssert.NoMatch(WikiRegexes.FileNamespaceLink, "[[File:Test.JPG");
             RegexAssert.NoMatch(WikiRegexes.FileNamespaceLink, "[[File Test.JPG]]");
 
@@ -592,10 +592,10 @@ Image here");
             RegexAssert.NoMatch(WikiRegexes.Stub, @"{{foo|stub}}");
             RegexAssert.NoMatch(WikiRegexes.Stub, @":{{main|stub (electronics)#Short circuited stub|l1=stub}}");
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             RegexAssert.IsMatch(WikiRegexes.Stub, @"{{بذرة}}");
             RegexAssert.IsMatch(WikiRegexes.Stub, @"{{stub}}");
             RegexAssert.IsMatch(WikiRegexes.Stub, @"{{قالب:بذرة أعلام البرتغال}}"); // Portugal-bio-stub
@@ -604,7 +604,7 @@ Image here");
 
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             RegexAssert.IsMatch(WikiRegexes.Stub, @"{{بذرة}}");
             RegexAssert.IsMatch(WikiRegexes.Stub, @"{{تقاوى}}");
             RegexAssert.IsMatch(WikiRegexes.Stub, @"{{stub}}");
@@ -640,7 +640,7 @@ Image here");
 
             Variables.SetProject("en", ProjectEnum.wikipedia);
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -672,7 +672,7 @@ now stubborn}}");
             RegexAssert.IsMatch(WikiRegexes.TemplateCall, @"{{now stubborn|abc|derf=gh|ijk}}");
             RegexAssert.IsMatch(WikiRegexes.TemplateCall, @"{{Template:now stubborn}}");
             RegexAssert.IsMatch(WikiRegexes.TemplateCall, @"{{template:now stubborn}}");
-            
+
             RegexAssert.NoMatch(WikiRegexes.TemplateCall, "[[Test]]");
             RegexAssert.NoMatch(WikiRegexes.TemplateCall, "Test");
             RegexAssert.NoMatch(WikiRegexes.TemplateCall, "[[Image:Test.jpg]]");
@@ -689,7 +689,7 @@ now stubborn}}");
             RegexAssert.IsMatch(WikiRegexes.Dates, @"01 May");
             RegexAssert.IsMatch(WikiRegexes.Dates, @"11 May");
             RegexAssert.IsMatch(WikiRegexes.Dates, @"31 May");
-            
+
             RegexAssert.NoMatch(WikiRegexes.Dates, @"33 May");
             RegexAssert.NoMatch(WikiRegexes.Dates, @"May 13");
             RegexAssert.NoMatch(WikiRegexes.Dates, @"3 Maybe");
@@ -704,7 +704,7 @@ now stubborn}}");
             RegexAssert.IsMatch(WikiRegexes.Dates2, @"May 01");
             RegexAssert.IsMatch(WikiRegexes.Dates2, @"May 11");
             RegexAssert.IsMatch(WikiRegexes.Dates2, @"May 31");
-            
+
             RegexAssert.NoMatch(WikiRegexes.Dates2, @"May 33");
             RegexAssert.NoMatch(WikiRegexes.Dates2, @"13 May");
             RegexAssert.NoMatch(WikiRegexes.Dates2, @"MigMay 3");
@@ -729,10 +729,10 @@ now stubborn}}");
             RegexAssert.IsMatch(WikiRegexes.Redirect, @"#REDIRECT = [[Foo bar#best]]");
 
             RegexAssert.IsMatch(WikiRegexes.Redirect, @"#REDIRECT[[Foo]] {{R from move}}");
-            
+
             RegexAssert.NoMatch(WikiRegexes.Redirect, @"#  REDIRECT:[[Foo]]");
         }
-        
+
         [Test]
         public void OrphanTests()
         {
@@ -742,15 +742,15 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{Orphan| date = May 2008}}"));
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{Orphan | date = May 2008}}"));
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{orphan|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
-            
+
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(@"{{orphanblahblah}}"));
-            
-            #if DEBUG
+
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(@"{{orphan}}"));
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{يتيمة}}"));
-            
+
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(@"{{orphan}}"));
@@ -772,7 +772,7 @@ now stubborn}}");
             ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(@"{{orphan}}"));
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{föräldralös}}"));
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{Föräldralös}}"));
-            
+
             Variables.SetProjectLangCode("zh");
             WikiRegexes.MakeLangSpecificRegexes();
             ClassicAssert.IsTrue(WikiRegexes.Orphan.IsMatch(@"{{orphan}}"));
@@ -785,9 +785,9 @@ now stubborn}}");
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
-        
+
         [Test]
         public void WikifyTests()
         {
@@ -800,14 +800,14 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{wikify|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
 
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(@"{{wikifyworldblah}}"));
-            
-            #if DEBUG
+
+#if DEBUG
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(@"{{wikify}}"));
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{ickewiki}}"));
-            
+
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -822,13 +822,13 @@ now stubborn}}");
 
             Variables.SetProjectLangCode("hy");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsFalse(WikiRegexes.Wikify.IsMatch(@"{{wikify}}"));
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{Վիքիֆիկացում}}"));
 
             Variables.SetProjectLangCode("ru");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{wikify}}"));
             ClassicAssert.IsTrue(WikiRegexes.Wikify.IsMatch(@"{{underlinked}}"));
 
@@ -841,9 +841,9 @@ now stubborn}}");
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
-        
+
         [Test]
         public void DeadEndTests()
         {
@@ -857,24 +857,24 @@ now stubborn}}");
 
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{Dead end|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{dead end}}"), "ar dead end");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{internal links}}"), "ar dead end");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{نهاية مسدودة}}"), "ar dead end");
-            
+
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{dead end}}"), "arz dead end");
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(@"{{internal links}}"), "arz dead end");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{نهايه مسدوده}}"), "arz dead end");
 
             Variables.SetProjectLangCode("hy");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{dead end}}"), "hy dead end");
             ClassicAssert.IsFalse(WikiRegexes.DeadEnd.IsMatch(@"{{internal links}}"), "hy dead end");
             ClassicAssert.IsTrue(WikiRegexes.DeadEnd.IsMatch(@"{{Փակ}}"), "hy dead end");
@@ -888,7 +888,7 @@ now stubborn}}");
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -905,29 +905,29 @@ now stubborn}}");
 #if DEBUG
             Variables.SetProjectLangCode("el");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(WikiRegexes.InUse.IsMatch(@"{{σε χρήση}}"), "σε χρήση");
             ClassicAssert.IsTrue(WikiRegexes.InUse.IsMatch(@"{{inuse}}"));
-            ClassicAssert.IsFalse(WikiRegexes.InUse.IsMatch(@"{{goceinuse}}"), "goceinuse is en-only");            
+            ClassicAssert.IsFalse(WikiRegexes.InUse.IsMatch(@"{{goceinuse}}"), "goceinuse is en-only");
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
         public void DateYearMonthParameterTests()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("fr");
             WikiRegexes.MakeLangSpecificRegexes();
 
             Assert.That(WikiRegexes.DateYearMonthParameter, Is.EqualTo(@"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}"));
-            
+
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
 
             Assert.That(WikiRegexes.DateYearMonthParameter, Is.EqualTo(@"datum={{subst:CURRENTYEAR}}-{{subst:CURRENTMONTH}}"));
-            
+
             Variables.SetProjectLangCode("zh");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -937,9 +937,9 @@ now stubborn}}");
             WikiRegexes.MakeLangSpecificRegexes();
 
             Assert.That(WikiRegexes.DateYearMonthParameter, Is.EqualTo(@"date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}"));
-            #endif
+#endif
         }
-        
+
         [Test]
         public void UncatTests()
         {
@@ -949,7 +949,7 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorisedstub|date=May 2008}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorisedstub|date = May 2008}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorised|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}"));
-            
+
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.Match(@"{{Uncat}}").Groups[2].Value.Equals("Uncat"));
 
             // all the other redirects
@@ -995,20 +995,20 @@ now stubborn}}");
             ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized other template|foo=bar}}"));
 
             // language variation
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("el");
             WikiRegexes.MakeLangSpecificRegexes();
 
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{ακατηγοριοποίητο}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Ακατηγοριοποίητο}}"));
-            
+
             Variables.SetProjectLangCode("hy");
             WikiRegexes.MakeLangSpecificRegexes();
 
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Կատեգորիա չկա}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Կչ}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
-            
+
             Variables.SetProjectLangCode("ru");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1017,7 +1017,7 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized stub}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Nocat}}"));
-            
+
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1029,7 +1029,7 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{uncategorized stub}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorised}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
-            
+
             Variables.SetProjectLangCode("sq");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1055,7 +1055,7 @@ now stubborn}}");
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{تقاوى مش متصنفه}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized}}"));
             ClassicAssert.IsTrue(WikiRegexes.Uncategorized.IsMatch(@"{{Uncategorized stub}}"));
-            
+
             Variables.SetProjectLangCode("ckb");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1063,7 +1063,7 @@ now stubborn}}");
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -1142,7 +1142,7 @@ ABC");
             RegexAssert.IsMatch(WikiRegexes.DisambigsCleanup, @"{{Disambiguation cleanup}} <!-- page needs cleanup-->");
 
             // language variation
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("sv");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1165,7 +1165,7 @@ ABC");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Efternamn}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Förnamn}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Robotskapad förgrening}}");
-            
+
             Variables.SetProjectLangCode("de");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{Begriffsklärung}}");
@@ -1195,20 +1195,20 @@ ABC");
             Variables.SetProjectLangCode("pl");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Disambigs, @"{{disambig}}");
-            
+
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{Disambig}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{توضيح}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{صفحة توضيح}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{أسمياء}}");
-            
+
             Variables.SetProjectLangCode("arz");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{Disambig}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{صفحة توضيح}}");
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{توضيح}}");
-            
+
             Variables.SetProjectLangCode("fa");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.Disambigs, "{{ابهام‌زدایی}}");
@@ -1283,7 +1283,7 @@ ABC");
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -1308,7 +1308,7 @@ ABC");
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{Animal common name}}");
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{Fungus common name}}");
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{Plant common name}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{surname}}");
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{surnames}}");
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{Nickname}}");
@@ -1321,14 +1321,14 @@ ABC");
 
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{set index article|param}}");
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
             RegexAssert.IsMatch(WikiRegexes.SIAs, @"{{الاسم الشائع للحيوان}}");
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]
@@ -1341,7 +1341,7 @@ ABC");
             RegexAssert.IsMatch(WikiRegexes.Wi, @"{{Moved to Wiktionary}}");
             RegexAssert.IsMatch(WikiRegexes.Wi, @"{{RedirecttoWiktionary}}");
             RegexAssert.IsMatch(WikiRegexes.Wi, @"{{Seewiktionary}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.Wi, @"{{Wikiquote redirect}}");
             RegexAssert.IsMatch(WikiRegexes.Wi, @"{{Wikivoyage redirect}}");
         }
@@ -1356,7 +1356,7 @@ ABC");
             Assert.That(WikiRegexes.ExtractTitle.Match(@"https://en.wikipedia.org/w/index.php?title=Foo").Groups[1].Value, Is.EqualTo("Foo"));
             Assert.That(WikiRegexes.ExtractTitle.Match(@"https://en.wikipedia.org/w/index.php/Foo").Groups[1].Value, Is.EqualTo("Foo"));
             Assert.That(WikiRegexes.ExtractTitle.Match(@"https://en.wikipedia.org/w/index.php/Foo bar here").Groups[1].Value, Is.EqualTo("Foo bar here"));
-            
+
             RegexAssert.NoMatch(WikiRegexes.ExtractTitle, @"https://random.org/wiki/Foo");
             RegexAssert.NoMatch(WikiRegexes.ExtractTitle, @"https://en.wikipedia.org/wikirandom/Foo");
         }
@@ -1420,10 +1420,10 @@ ABC");
             RegexAssert.NoMatch(WikiRegexes.Defaultsort, @"{{DEFAULTSORT:foo");
             RegexAssert.IsMatch(WikiRegexes.Defaultsort, @"{{DEFAULTSORT:}}");
             Assert.That(WikiRegexes.Defaultsort.Match(@"{{DEFAULTSORT:}}").Groups["key"].Value, Is.Empty);
-            
+
             RegexAssert.IsMatch(WikiRegexes.Defaultsort, @"{{DEFAULTSORT:
 Wangchuck, Tshering Pem}}");
-            
+
             RegexAssert.IsMatch(WikiRegexes.Defaultsort, @"{{DEFAULTSORT:
 Wangchuck, Tshering Pem
 }}");
@@ -1451,7 +1451,7 @@ pp
 }}").Value, Is.EqualTo(@"{{DEFAULTSORT:foo
 }}"));
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("en");
             System.Collections.Generic.List<string> ds = new System.Collections.Generic.List<string>(new[] { "DEFAULTSORT", "dsort" });
             Variables.MagicWords.Add("defaultsort", ds);
@@ -1469,9 +1469,9 @@ pp
 
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
-        
+
         [Test]
         public void InternationalDates()
         {
@@ -1479,11 +1479,11 @@ pp
             RegexAssert.IsMatch(WikiRegexes.InternationalDates, @"On 11 July  2009");
             RegexAssert.IsMatch(WikiRegexes.InternationalDates, @"On 1 July 1809");
             RegexAssert.IsMatch(WikiRegexes.InternationalDates, @"On 11&nbsp;July 2009");
-            
+
             RegexAssert.NoMatch(WikiRegexes.InternationalDates, @"On 11 July 44");
             RegexAssert.NoMatch(WikiRegexes.InternationalDates, @"On July 11, 2009 a");
         }
-        
+
         [Test]
         public void AmericanDates()
         {
@@ -1491,11 +1491,11 @@ pp
             RegexAssert.IsMatch(WikiRegexes.AmericanDates, @"On July 11 2009 a");
             RegexAssert.IsMatch(WikiRegexes.AmericanDates, @"On July 11,  1809 a");
             RegexAssert.IsMatch(WikiRegexes.AmericanDates, @"On July&nbsp;11, 2009 a");
-            
+
             RegexAssert.NoMatch(WikiRegexes.AmericanDates, @"On July 11, 29 a");
             RegexAssert.NoMatch(WikiRegexes.AmericanDates, @"On 11 July 2009");
         }
-        
+
         [Test]
         public void MonthDay()
         {
@@ -1504,11 +1504,11 @@ pp
             RegexAssert.IsMatch(WikiRegexes.MonthDay, @"On July&nbsp;11 a");
             RegexAssert.IsMatch(WikiRegexes.MonthDay, @"On July 11–12 a");
             RegexAssert.IsMatch(WikiRegexes.MonthDay, @"On July 11,  1809 a");
-            
+
             RegexAssert.NoMatch(WikiRegexes.MonthDay, @"In July 07, a");
             RegexAssert.NoMatch(WikiRegexes.MonthDay, @"In July 2007, a");
         }
-        
+
         [Test]
         public void DayMonth()
         {
@@ -1518,11 +1518,11 @@ pp
             RegexAssert.IsMatch(WikiRegexes.DayMonth, @"On 11&nbsp;July a");
             RegexAssert.IsMatch(WikiRegexes.DayMonth, @"On 11–12 July a");
             RegexAssert.IsMatch(WikiRegexes.DayMonth, @"On 11 July,  1809 a");
-            
+
             RegexAssert.NoMatch(WikiRegexes.DayMonth, @"In 07 July, a");
             RegexAssert.NoMatch(WikiRegexes.DayMonth, @"In July 27, a");
         }
-        
+
         [Test]
         public void MonthDayRangeSpan()
         {
@@ -1532,13 +1532,13 @@ pp
             RegexAssert.IsMatch(WikiRegexes.MonthDayRangeSpan, @"On July 11&ndash;12 a");
             RegexAssert.IsMatch(WikiRegexes.MonthDayRangeSpan, @"On July 11{{ndash}}12 a");
             RegexAssert.IsMatch(WikiRegexes.MonthDayRangeSpan, @"On July 11/12 a");
-            
+
             RegexAssert.NoMatch(WikiRegexes.MonthDayRangeSpan, @"On July 11-12 a");
             RegexAssert.NoMatch(WikiRegexes.MonthDayRangeSpan, @"On July 1112 a");
             RegexAssert.NoMatch(WikiRegexes.MonthDayRangeSpan, @"On July 11 12 a");
             RegexAssert.NoMatch(WikiRegexes.MonthDayRangeSpan, @"On 11–12 July a");
         }
-        
+
         [Test]
         public void DayMonthRangeSpan()
         {
@@ -1547,13 +1547,13 @@ pp
             RegexAssert.IsMatch(WikiRegexes.DayMonthRangeSpan, @"On 11&ndash;12 July a");
             RegexAssert.IsMatch(WikiRegexes.DayMonthRangeSpan, @"On 11{{ndash}}12 July a");
             RegexAssert.IsMatch(WikiRegexes.DayMonthRangeSpan, @"On 11/12 July a");
-            
+
             RegexAssert.NoMatch(WikiRegexes.DayMonthRangeSpan, @"On 11-12 July a");
             RegexAssert.NoMatch(WikiRegexes.DayMonthRangeSpan, @"On 1112 July a");
             RegexAssert.NoMatch(WikiRegexes.DayMonthRangeSpan, @"On  11 12 July a");
             RegexAssert.NoMatch(WikiRegexes.DayMonthRangeSpan, @"On July 11–12 a");
         }
-        
+
         [Test]
         public void LinkFGAs()
         {

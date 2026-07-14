@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 using WikiFunctions.Parse;
 
@@ -767,7 +764,7 @@ en.wikipedia.org"));
 
             ClassicAssert.IsFalse(Tools.IsWikimediaProject(ProjectEnum.custom));
             ClassicAssert.IsFalse(Tools.IsWikimediaProject(ProjectEnum.wikia));
-            
+
         }
 
         [Test]
@@ -1035,7 +1032,7 @@ John", "*"), Is.EqualTo(@"* Fred
 
             Assert.That(Tools.DatesCount("2015-01-01 and 11 January 2010 and March 5, 2011"), Is.EqualTo(results), "each date type reported");
             Assert.That(Tools.DatesCount("2015-01-01 and| 11 January 2010 and| March 5, 2011"), Is.EqualTo(results), "each date type reported when split");
-        
+
             results.Clear();
             results.Add(Parsers.DateLocale.ISO, 2);
             results.Add(Parsers.DateLocale.International, 1);
@@ -1302,8 +1299,8 @@ John", "*"), Is.EqualTo(@"* Fred
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param 1=here}}", "param 1"), Is.EqualTo("here"));
             Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param other=here}}", "param other"), Is.EqualTo("here"));
         }
-        
-        
+
+
         [Test]
         public void GetTemplateParameterValues()
         {
@@ -1335,7 +1332,7 @@ John", "*"), Is.EqualTo(@"* Fred
 There");
             Assert.That(Tools.GetTemplateParameterValues(@"{{cite web|url=http://www.site.com/abc|title=Hello | author = | accessdate = 2012-05-15 | format={{PDF|test}} |last1=Jones|trans_title=Here 
 There}}"), Is.EqualTo(Back), "handles parameters with newlines");
-            
+
             Back.Clear();
             Back.Add("ONE", "somevalue");
             Assert.That(Tools.GetTemplateParameterValues(@"{{test|ONE=somevalue}}"), Is.EqualTo(Back), "handles uppercase parameters");
@@ -1358,7 +1355,7 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
             Back.Add("name", "X [http://site.com A | B]");
             Back.Add("other", "Y");
             Assert.That(Tools.GetTemplateParameterValues(@"{{test|name = X [http://site.com A | B]|other=Y}}"), Is.EqualTo(Back), "handles parameters including external link with pipe");
-            
+
             Back.Clear();
             Back.Add("name", "X");
             Back.Add("other1/2", "Y");
@@ -1759,7 +1756,7 @@ def
             Assert.That(Tools.RemoveDuplicateTemplateParameters(@"{{foo|first=abc|second=dex|second=dex|second=defg}}"), Is.EqualTo(@"{{foo|first=abc|second=dex|second=defg}}"), "non-duplicates not removed");
 
             Assert.That(Tools.RemoveDuplicateTemplateParameters(@"{{foo|first=abc|second={{def|bar}}|second={{def|bar}}}}"), Is.EqualTo(@"{{foo|first=abc|second={{def|bar}}}}"));
-        
+
             Dictionary<string, string> Params = new Dictionary<string, string>();
             Tools.RemoveDuplicateTemplateParameters(@"{{foo|first=abc|second=def|second=def}}", Params);
             Assert.That(Params.Count, Is.EqualTo(2));
@@ -2020,7 +2017,7 @@ title={{abc|fdkjdsfjk=fdaskjlfds
 
             FooTemplate = Tools.NestedTemplateRegex("", true);
             Assert.That(FooTemplate, Is.EqualTo(null));
-            
+
             Variables.NamespacesCaseInsensitive.Remove(Namespace.Template);
             FooTemplate = Tools.NestedTemplateRegex("Foo", true);
             ClassicAssert.IsTrue(FooTemplate.IsMatch(@"{{Template:foo}}"));
@@ -2202,7 +2199,7 @@ foo<!--comm-->|title=abc
             // <meta data-react-helmet="true" name="citation_doi" content="10.1016/0022-0000(78)90043-0"/
             Assert.That(Tools.GetMetaContentValue(@"<meta ng-attr-content=""{{meta.title}}"" property=""og:title"" content=""Air wasn't x""/>", "og:title"), Is.EqualTo(@"Air wasn't x"));
         }
-        
+
         [Test]
         public void UnescapeXML()
         {
@@ -2266,7 +2263,7 @@ Start date and age
             Assert.That(Tools.ReAddDiacritics(@"Véry Greatère", @"Greatere, Very der Very"), Is.EqualTo(@"Greatère, Very der Very"), "when multiple matches for same word without, that word not changed");
             Assert.That(Tools.ReAddDiacritics(@"Véry de Vèry Greatère", @"Greatere, Very der Very"), Is.EqualTo(@"Greatère, Very der Very"), "when multiple matches for same word without, that word not changed");
         }
-        
+
         [Test]
         public void IsIP()
         {
@@ -2326,7 +2323,7 @@ Start date and age
             Assert.That(Tools.TemplateToMagicWord(@"{{BASEPAGENAME|Foo}}"), Is.EqualTo(@"{{BASEPAGENAME:Foo}}"));
             Assert.That(Tools.TemplateToMagicWord(@"{{FULLPAGENAME}}"), Is.EqualTo(@"{{FULLPAGENAME}}"));
         }
-        
+
         [Test]
         public void IsSectionOrReasonTemplate()
         {
@@ -2335,12 +2332,12 @@ Start date and age
             ClassicAssert.IsTrue(Tools.IsSectionOrReasonTemplate(@"{{wikify|section|date=May 2012}}"));
             ClassicAssert.IsTrue(Tools.IsSectionOrReasonTemplate(@"{{wikify|section|date=May 2012}}", ""));
             ClassicAssert.IsTrue(Tools.IsSectionOrReasonTemplate(@"{{foo}}", @"{{multiple issues|section=y|POV=May 2012}}"));
-            
+
             ClassicAssert.IsFalse(Tools.IsSectionOrReasonTemplate(@"{{abc|param1=foo}}"));
             ClassicAssert.IsFalse(Tools.IsSectionOrReasonTemplate(@"{{abc|section=foo}}"));
             ClassicAssert.IsFalse(Tools.IsSectionOrReasonTemplate(@"{{abc}}"));
         }
-        
+
         [Test]
         public void HowMuchStartsWithTests()
         {
@@ -2641,7 +2638,7 @@ hello", Tools.NestedTemplateRegex("foo"), true), Is.EqualTo(0));
             Assert.That(Tools.RemoveDiacritics(@"ŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ"), Is.EqualTo(@"SsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzs"), "extended Latin-A part 2");
             Assert.That(Tools.RemoveDiacritics(@"ǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǤǥǦǧǨǩǪǫǬǭǸǹǺǻǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚț"), Is.EqualTo(@"AaIiOoUuUuUuUuUueAaAaGgGgKkOoOoNnAaOoAaAaEeEeIiIiOoOoRrRrUuUuSsTt"), "extended Latin-B");
             Assert.That(Tools.RemoveDiacritics(@"ḀḁḂḃḄḅḆḇḈḉḊḋḌḍḎḏḐḑḒḓḔḕḖḗḘḙḚḛḜḝḞḟḠḡḢḣḤḥḦḧḨḩḪḫḬḭḮḯḰḱḲḳḴḵḶḷḸḹḺḻḼḽḾḿṀṁṂṃṄṅṆṇṈṉṊṋ"), Is.EqualTo(@"AaBbBbBbCcDdDdDdDdDdEeEeEeEeEeFfGgHhHhHhHhHhIiIiKkKkKkLlLlLlLlMmMmMmNnNnNnNn"), "Latin Extended Additional A-N");
-            }
+        }
 
         [Test]
         public void CleanSortKey()
@@ -2744,7 +2741,7 @@ hello", Tools.NestedTemplateRegex("foo"), true), Is.EqualTo(0));
             Variables.SetProjectLangCode("ru");
             Variables.UnicodeCategoryCollation = true;
             Assert.That(Tools.FixupDefaultSort("Hellõ"), Is.EqualTo("Hellõ"), "no diacritic removal for defaultsort key on ru-wiki");
-            
+
             Variables.SetProjectLangCode("en");
             Variables.UnicodeCategoryCollation = false;
             Assert.That(Tools.FixupDefaultSort("Hellõ"), Is.EqualTo("Hello"));

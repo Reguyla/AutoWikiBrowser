@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using WikiFunctions.Parse;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using WikiFunctions.Parse;
 
 namespace UnitTests
 {
@@ -101,7 +99,7 @@ namespace UnitTests
             AssertFix("the bars are cute", FixTypos("the foos are cute"));
             AssertFix("the bars are cute bars", FixTypos("the foos are cute foos"));
         }
-        
+
         [Test]
         public void NoTypos()
         {
@@ -137,7 +135,7 @@ namespace UnitTests
             AssertNoFix("BOZ");
             AssertFix("furbag", "FuBaRbag");
         }
-        
+
         [Test]
         public void DontChangeURLs()
         {
@@ -171,8 +169,8 @@ namespace UnitTests
 
             AssertFix("foo foo", "foo fO0");
             ClassicAssert.IsFalse(Summary.Contains("foo → foo"));
-            ClassicAssert.IsFalse(Summary.Contains("2"));            
-            
+            ClassicAssert.IsFalse(Summary.Contains("2"));
+
             AssertFix("ten BAR", "ten bar");
             ClassicAssert.IsTrue(Summary.Contains(@"bar → BAR"), "regex with lookbehind such that regex does not match its own match value still generates edit summary based on match value");
             ClassicAssert.IsFalse(Summary.Contains("ten"), "for regex with lookbehind, edit summary based on match value without groups outside match value");

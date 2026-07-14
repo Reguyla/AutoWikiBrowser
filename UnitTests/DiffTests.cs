@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using WikiFunctions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Text.RegularExpressions;
+using WikiFunctions;
 
 namespace UnitTests
 {
@@ -71,14 +70,14 @@ namespace UnitTests
 
             lst = Word.SplitString("foo|bar");
             AssertWords(lst, "foo", "|", "bar");
-            
+
             lst = Word.SplitString("foé bar");
             AssertWords(lst, "foé ", "bar");
-            
+
             // Chinese – each character is defined as a word
             lst = Word.SplitString("汉语");
             AssertWords(lst, "汉", "语");
-            
+
             // Thai – each character is defined as a word
             lst = Word.SplitString("ภา");
             AssertWords(lst, "ภ", "า");
@@ -98,7 +97,7 @@ A2", 2);
 A1
 A2"), "Undo of delete first blank line");
 
-d = new WikiDiff();
+            d = new WikiDiff();
 
             d.GetDiff(@"A1
 A2

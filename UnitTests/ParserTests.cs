@@ -22,10 +22,9 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 using WikiFunctions.Parse;
 
@@ -58,8 +57,8 @@ namespace UnitTests
     [TestFixture]
     public class MOSTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
-        
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
+
         [Test]
         public void TestFixDateMonthOfYear()
         {
@@ -695,7 +694,7 @@ While remaining upright may be the primary goal of beginning riders
 ==sec== [[2009 Indian Premier League|2009]]<br>", "2009 Indian Premier League", out noChangeBack), "2009 Indian Premier League", out noChangeBack), Is.EqualTo(@"The '''2009 Indian Premier League''' While remaining upright may be the primary goal of beginning riders
 While remaining upright may be the primary goal of beginning riders
 ==sec== 2009<br>"));
-            
+
             const string OutsideZerothSection = @"Text here.
 ==Bio==
 John Smith was great.";
@@ -1178,7 +1177,7 @@ words";
 
             Assert.That(Parsers.Dablinks(for1 + forBefore), Is.EqualTo(about1));
 
-           const string singleAbout = @"{{about|foo}}";
+            const string singleAbout = @"{{about|foo}}";
 
             Assert.That(Parsers.Dablinks(singleAbout + forBefore), Is.EqualTo(singleAbout + forBefore), "no merge if {{about}} has <2 arguments");
 
@@ -1196,8 +1195,8 @@ words";
             Assert.That(Parsers.Dablinks(For3 + for1), Is.EqualTo(@"{{about||a|b|c|d|and|e}}"), "merge for with 1 and 3 arguments");
 
             Assert.That(Parsers.Dablinks(@"{{for|a|b}}{{for|c|d}}{{for|e|f|g|h}}"), Is.EqualTo(@"{{about||a|b|c|d}}{{for|e|f|g|h}}"), "do not merge for with 4 arguments");
-            Assert.That(Parsers.Dablinks(@"{{for|a|b|c|d}}{{for|e|f|g|h}}"), Is.EqualTo(@"{{for|a|b|c|d}}{{for|e|f|g|h}}"), "do not merge for with 4 arguments"); 
-            
+            Assert.That(Parsers.Dablinks(@"{{for|a|b|c|d}}{{for|e|f|g|h}}"), Is.EqualTo(@"{{for|a|b|c|d}}{{for|e|f|g|h}}"), "do not merge for with 4 arguments");
+
             const string ForTwoCats = @"{{for|the city in California|Category:Lancaster, California}}{{for|the city in Pennsylvania|Category:Lancaster, Pennsylvania}}";
 
             Assert.That(Parsers.Dablinks(ForTwoCats), Is.EqualTo(@"{{about||the city in California|:Category:Lancaster, California|the city in Pennsylvania|:Category:Lancaster, Pennsylvania}}"));
@@ -1310,8 +1309,8 @@ words";
 ==Two==
 {{see also|B}}";
             Assert.That(Parsers.MergeTemplatesBySection(SeparateSections), Is.EqualTo(SeparateSections), "does not merge templates in different sections");
-            
-             const string NotStartOfSection = @"==One==
+
+            const string NotStartOfSection = @"==One==
 {{see also|A}}
 Text
 {{see also|B}}";
@@ -1321,11 +1320,11 @@ Text
 {{see also|B}}"), Is.EqualTo(@"==One==
 {{see also|A|B}}"), "does not merge templates not at top of section");
         }
-        
+
         [Test]
         public void MergeTemplatesBySectionEnOnly()
         {
-            #if DEBUG
+#if DEBUG
             string AB = @"{{See also|a|b}}", ABSeparate = @"{{See also|a}}{{See also|b}}";
 
             Variables.SetProjectLangCode("fr");
@@ -1333,7 +1332,7 @@ Text
 
             Variables.SetProjectLangCode("en");
             Assert.That(Parsers.MergeTemplatesBySection(ABSeparate), Is.EqualTo(AB), "merges when single argument");
-            #endif
+#endif
         }
 
         [Test]
@@ -1534,13 +1533,13 @@ Text";
             Assert.That(parser.Unicodify("<math chem>&laquo;</math>"), Is.EqualTo("<math chem>&laquo;</math>"));
             Assert.That(parser.Unicodify("<chem>&laquo;</chem>"), Is.EqualTo("<chem>&laquo;</chem>"));
         }
-        
+
         [Test]
         public void Casing()
         {
             Assert.That(parser.Unicodify("A&dagger; B&Dagger;"), Is.EqualTo("A† B‡"), "supports lowercase and first-upper HTML characters");
         }
-        
+
         [Test]
         public void Templates()
         {
@@ -1795,11 +1794,11 @@ Text";
             Assert.That(Parsers.Conversions(@"{{commons cat|Gander International Airport|Gander International Airport}}"), Is.EqualTo(@"{{commons cat|Gander International Airport}}"));
             Assert.That(Parsers.Conversions(@"{{Commons cat|Gander International Airport|Gander International Airport}}"), Is.EqualTo(@"{{Commons cat|Gander International Airport}}"));
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikia);
             Assert.That(Parsers.Conversions(@"{{commons|Category:Backgammon|Backgammon}}"), Is.EqualTo(@"{{commons|Category:Backgammon|Backgammon}}"), "{{Commons category}} not used on Wikia");
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            #endif
+#endif
         }
 
         [Test]
@@ -2072,7 +2071,7 @@ Text";
         [Test]
         public void ConversionTestsInterwikiMigration()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikia);
             Assert.That(Parsers.InterwikiConversions(@"[[zh-tw:foo]]"), Is.EqualTo(@"[[zh-tw:foo]]"));
 
@@ -2081,7 +2080,7 @@ Text";
             Assert.That(Parsers.InterwikiConversions(@"[[zh-tw:foo]]"), Is.EqualTo(@"[[zh:foo]]"));
             Assert.That(Parsers.InterwikiConversions(@"[[nb:foo]]"), Is.EqualTo(@"[[no:foo]]"));
             Assert.That(Parsers.InterwikiConversions(@"[[dk:foo]]"), Is.EqualTo(@"[[da:foo]]"));
-            #endif
+#endif
         }
         [Test]
         public void PageNameTests()
@@ -2271,7 +2270,7 @@ Article starts.
 
 ==hello=="), "Tag trailing whitespace handling");
         }
-        
+
         [Test]
         public void MultipleIssuesNewZerothTagParameters()
         {
@@ -2293,7 +2292,7 @@ Article starts.
 
 ==hello=="), "takes tags with extra parameters");
         }
-        
+
         [Test]
         public void MultipleIssuesNewTagZeroth()
         {
@@ -2320,7 +2319,7 @@ Text
 Text
 
 ==hello=="), "takes tags from anywhere in zeroth section: all after");
-            
+
         }
 
         [Test]
@@ -2444,7 +2443,7 @@ Foo"), "merge multiple MI, only dupe tags, convert to standalone tag");
 Foo";
             Assert.That(parser.MultipleIssues(NoChange), Is.EqualTo(NoChange), "no change when one MI is a section one");
         }
-        
+
         [Test]
         public void MultipleIssuesNewZerothExistingMINotChanged()
         {
@@ -2463,9 +2462,9 @@ Text
 
 ==hello==";
             Assert.That(parser.MultipleIssues(ThreeTagNew), Is.EqualTo(ThreeTagNew), "no change to existing 3-tag MI new style");
-            Assert.That(parser.MultipleIssues(TwoTagNew), Is.EqualTo(TwoTagNew), "no change to existing 2-tag MI new style");            
+            Assert.That(parser.MultipleIssues(TwoTagNew), Is.EqualTo(TwoTagNew), "no change to existing 2-tag MI new style");
         }
-        
+
         [Test]
         public void MultipleIssuesNewZerothExistingMIMoreTags()
         {
@@ -2551,9 +2550,9 @@ Text
 
 
 ==hello=="), "duplicate tags not added");
-            
+
         }
-        
+
         [Test]
         public void MultipleIssuesNewZerothSingleTag()
         {
@@ -2607,7 +2606,7 @@ A
 A
 ==hello=="), "takes tags from separate lines, takes tags without dates");
         }
-        
+
         [Test]
         public void MultipleIssuesNewSectionTagParameters()
         {
@@ -2635,7 +2634,7 @@ A
 A
 ==hello=="), "takes tags with extra parameters");
         }
-        
+
         [Test]
         public void MultipleIssuesNewTagSection()
         {
@@ -2660,7 +2659,7 @@ Text
 {{unreferenced section}}
 ==hello=="), "takes tags before tag in section");
         }
-        
+
         [Test]
         public void MultipleIssuesNewSectionExistingMINotChanged()
         {
@@ -2681,9 +2680,9 @@ Text
 
 ==hello==";
             Assert.That(parser.MultipleIssues(ThreeTagNew), Is.EqualTo(ThreeTagNew), "no change to existing 3-tag MI new style");
-            Assert.That(parser.MultipleIssues(TwoTagNew), Is.EqualTo(TwoTagNew), "no change to existing 2-tag MI new style");            
+            Assert.That(parser.MultipleIssues(TwoTagNew), Is.EqualTo(TwoTagNew), "no change to existing 2-tag MI new style");
         }
-        
+
         [Test]
         public void MultipleIssuesNewSectionExistingMIMoreTags()
         {
@@ -2768,7 +2767,7 @@ Text
 }}
 ==hello=="), "duplicate tags not added");
         }
-        
+
         [Test]
         public void MultipleIssuesNewSectionSingleTag()
         {

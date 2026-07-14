@@ -22,7 +22,6 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using WikiFunctions;
@@ -97,7 +96,7 @@ namespace UnitTests
             Assert.That(Parsers.FixReferenceListTags("<div class=\"references-small\"><references/>\r\n</div>"), Is.EqualTo("{{Reflist}}"));
 #endif
         }
-        
+
         [Test]
         public void TestFixReferenceTags()
         {
@@ -1146,7 +1145,7 @@ r</ref> The next"), "ref moved after punctuation when majority are after");
 The next";
             Assert.That(Parsers.RefsAfterPunctuation(AllAfter + R1), Is.EqualTo(AllAfter + @"Foo.<ref>bar</ref>
 The next"), "doesn't eat newlines after ref punctuation");
-            
+
 
             string RandomTable = @"{|
 !title

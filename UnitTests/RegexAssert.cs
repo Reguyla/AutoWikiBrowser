@@ -23,10 +23,9 @@
  *    distribution.
  */
 
-using System;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 
 namespace UnitTests
 {

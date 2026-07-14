@@ -32,7 +32,7 @@ namespace UnitTests
     [TestFixture]
     public class CategoryTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void TestYearRangesCategories()
@@ -40,7 +40,7 @@ namespace UnitTests
             genFixes.AssertNotChanged(@"now foo
 
 [[Category:Abc (2004-present)]]");
-            
+
             genFixes.AssertChange(@"now abc (2004-present) was
 now foo
 
@@ -683,7 +683,7 @@ died 2002
             Assert.That(Parsers.FixPeopleCategories(infob1Date, "foo"), Is.EqualTo(infob1Date + @"
 [[Category:1835 births]]
 [[Category:1935 deaths]]"), "Can use template with date param when date doesn't contain year");
-        
+
             // don't take death year out of ref
             const string infob5 = @"{{Infobox Officeholder
 |honorific-prefix   =
@@ -704,7 +704,7 @@ died 2002
 }}
 [[Category:2005 births]]";
             Assert.That(Parsers.FixPeopleCategories(infob6, "foo"), Is.EqualTo(infob6), "ignore ref for death year");
-        
+
         }
 
         [Test]
@@ -899,7 +899,7 @@ died 2002
 
             Variables.SetProjectSimple("en", ProjectEnum.commons);
             Assert.That(Parsers.LivingPeople(Before, "A"), Is.EqualTo(Before), "no changes in Commons");
-            
+
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
             Assert.That(Parsers.LivingPeople(Before, "A"), Is.EqualTo(Before + @"[[Category:Living people|Smith, Fred]]"));
 #endif
@@ -960,7 +960,7 @@ died 2002
 #if DEBUG
             Variables.SetProjectLangCode("ru");
             Assert.That(Parsers.FixCategories(@"[[Category:World Scout Committee members|Lainé, Juan]]"), Is.EqualTo(@"[[Category:World Scout Committee members|Lainé, Juan]]"), "no diacritic removal for sort key on ru-wiki");
-            
+
             Variables.SetProjectLangCode("en");
             Assert.That(Parsers.FixCategories(@"[[Category:World Scout Committee members|Lainé, Juan]]"), Is.EqualTo(@"[[Category:World Scout Committee members|Laine, Juan]]"));
 #endif

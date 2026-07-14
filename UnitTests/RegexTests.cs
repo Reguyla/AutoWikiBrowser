@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using WikiFunctions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
+using WikiFunctions;
 
 namespace UnitTests
 {
@@ -524,7 +524,7 @@ Shul, p. 726    </ref>").Groups[2].Value, Is.EqualTo(@"Shul726"), "ref value doe
         public void Persondata()
         {
             ClassicAssert.IsTrue(WikiRegexes.Persondata.IsMatch(@"{{Persondata}}"));
-            
+
 #if DEBUG
             Variables.SetProjectLangCode("de");
             WikiRegexes.MakeLangSpecificRegexes();

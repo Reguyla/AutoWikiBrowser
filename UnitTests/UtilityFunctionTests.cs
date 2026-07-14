@@ -23,11 +23,10 @@ Copyright © 2000-2002 Philip A. Craig
  */
 
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 using WikiFunctions.Parse;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using NUnit.Framework.Legacy;
 
 namespace UnitTests
 {
@@ -465,10 +464,10 @@ foo {{Infobox biography}}
             ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{England-bio-stub}}", "foo"));
             ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{Switzerland-politician-stub}}", "foo"));
             ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"Some words {{death date and age|1960|01|9}}", "foo"));
-            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{RefimproveBLP}}", "foo"),"BLP template");
-            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP sources|foo=bar}}", "foo"),"BLP sources template");
-            ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP sources|foo=bar}}", "16 and pregnant"),"BLP sources template");
-            ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP unsourced section|foo=bar}}", "foo"),"BLP unsourced template");
+            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{RefimproveBLP}}", "foo"), "BLP template");
+            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP sources|foo=bar}}", "foo"), "BLP sources template");
+            ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP sources|foo=bar}}", "16 and pregnant"), "BLP sources template");
+            ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP unsourced section|foo=bar}}", "foo"), "BLP unsourced template");
 
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"Foo {{Infobox actor|name=smith}}", "Category:foo"));
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{BLP sources|foo=bar}}", "List of foo"));
@@ -559,7 +558,7 @@ foo {{Infobox biography}}
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"Foo {{infobox television|bye=a}} {{refimproveBLP}}", "foo"));
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"'''Foo''' {{England-bio-stub}} {{sia}}", "Foo"));
 
-            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"Foo [[Category:Afrikaner people]] {{foo-bio-stub}}", "foo"),"category about people");
+            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"Foo [[Category:Afrikaner people]] {{foo-bio-stub}}", "foo"), "category about people");
 
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"Foo {{Infobox settlement}} {{foo-bio-stub}}", "foo"));
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"Foo {{italic title}} {{foo-bio-stub}}", "foo"));
@@ -610,8 +609,8 @@ foo {{Infobox biography}}
             ClassicAssert.IsFalse(Parsers.IsArticleAboutAPerson(@"foo [[Category:227 characters]] {{infoxbox actor}}", "foo"));
 
             ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(@"'''Margaret Sidney''' was the [[pseudonym]] of American author '''Harriett Mulford Stone''' (June 22, 1844–August 2, 1924).
-[[Category:1844 births]]", "foo"),"births category");
-            
+[[Category:1844 births]]", "foo"), "births category");
+
             string AR = @"{{Infobox rugby biography
 | birth_name = Opeti Fonua
 | birth_date ={{birth date and age|df=yes|1986|05|26}}
@@ -635,8 +634,8 @@ foo {{Infobox biography}}
 ==References==
 {{Reflist}}
 ";
-            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(AR, "Opeti Fonua"),"Infobox about a person");
-            
+            ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(AR, "Opeti Fonua"), "Infobox about a person");
+
         }
 
         [Test]
@@ -806,13 +805,13 @@ foo {{Infobox biography}}
 [[vo:Tatamy]]";
             ClassicAssert.IsFalse(Parsers.HasRefAfterReflist(bug1));
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("fr");
 
             ClassicAssert.IsFalse(Parsers.HasRefAfterReflist(@"blah <ref>a</ref>
 ==references== {{reflist}} <ref>b</ref>"));
             Variables.SetProjectLangCode("en");
-            #endif
+#endif
 
             ClassicAssert.IsFalse(Parsers.HasRefAfterReflist(@""));
         }
@@ -843,7 +842,7 @@ foo {{Infobox biography}}
 #if DEBUG
             Variables.SetProjectLangCode("el");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(Parsers.IsInUse("{{Σε χρήση}} Hello world"), "σε χρήση");
             ClassicAssert.IsTrue(Parsers.IsInUse("{{inuse}} Hello world"), "inuse");
             ClassicAssert.IsFalse(Parsers.IsInUse("{{goceinuse}} Hello world"), "goceinuse is en-only");
@@ -941,10 +940,10 @@ fish | name = Bert }} ''Bert'' is a good fish."));
 #if DEBUG
             Variables.SetProjectLangCode("ar");
             WikiRegexes.MakeLangSpecificRegexes();
-            
+
             ClassicAssert.IsTrue(Parsers.HasStubTemplate(@"foo {{بذرة ممثل}}"), "actor stub");
             ClassicAssert.IsTrue(Parsers.HasStubTemplate(@"foo {{بذرة ألمانيا}}"), "germany stub");
-            
+
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
 #endif

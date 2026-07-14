@@ -31,7 +31,7 @@ namespace UnitTests
     [TestFixture]
     public class FixNonBreakingSpacesTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void TestFixPercent()

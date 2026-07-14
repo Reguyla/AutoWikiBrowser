@@ -1,7 +1,7 @@
-﻿using WikiFunctions;
-using WikiFunctions.Parse;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using WikiFunctions;
+using WikiFunctions.Parse;
 
 namespace UnitTests
 {
@@ -1135,7 +1135,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            
+
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another");
 
             textBefore = @"{{short description|Text}}
@@ -1148,7 +1148,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            
+
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another, start of line");
 
             textBefore = @"{{short description|Text}}
@@ -1161,7 +1161,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            
+
             textAfter = @"{{short description|Text}}
 {{Infobox something|
 loc={{coord|2}}
@@ -1173,7 +1173,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            
+
             Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "One a lone and one nested in another");
 
             string notzeroth = @"{{short description|Text}}
@@ -1683,7 +1683,7 @@ text
 {{DEFAULTSORT:Candinho}}
 [[Category:1945 births]]
 [[Category:Living people]]";
-            
+
             ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref longComment, "test").Contains(@"[[Category:Pages where template include size is exceeded]]"), "Don't pull out of long comment section");
 
             string sameCatInComment =
@@ -1879,7 +1879,7 @@ text
         [Test]
         public void CategoryDupeRemovalWikis()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.species);
 
             string cats = @"[[Category:One]]
@@ -1901,7 +1901,7 @@ text
 "), "Duplicate category removed, no sortkey");
 
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            #endif
+#endif
         }
 
         [Test]
@@ -1924,7 +1924,7 @@ text
             Assert.That(parser2.Sorter.RemoveCats(ref b, "test"), Is.EqualTo("[[Category:One]]\r\n[[Category:Two]]\r\n"));
             Assert.That(b, Is.EqualTo("Text\r\n\r\n==References==\r\n{{reflist}}\r\n"), "Blank newline before heading retained");
 
-b = @"A
+            b = @"A
 ==Text==
 {{foo}}[[Category:One]]
 {| class=table |}
@@ -2061,7 +2061,7 @@ b = @"A
         [Test]
         public void RemoveCatsSlWikiLifetime()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("sl");
 
             string c = @"[[Category:Hampshire]]", l = @"{{Lifetime|1899|LIVING|Surname, Name}}", waffle = @"waffle here
@@ -2081,7 +2081,7 @@ b = @"A
             Variables.SetProjectLangCode("en");
             articleText = waffle + c + "\r\n" + l;
             Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(c + "\r\n"), "lifetime/NF is just another template on en-wiki");
-            #endif
+#endif
         }
 
         [Test]
@@ -2101,7 +2101,7 @@ b = @"A
             Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + " <!--foo -->\r\n" + b + "\r\n"), "Retain comment on same line as defaultsort");
 
             g = c + "\r\n" + c;
-            Assert.That(parser2.Sorter.RemoveCats(ref g, "test"),Is.EqualTo(c + "\r\n"), "Exact dupe DEFAULTSORT removed");
+            Assert.That(parser2.Sorter.RemoveCats(ref g, "test"), Is.EqualTo(c + "\r\n"), "Exact dupe DEFAULTSORT removed");
         }
 
         [Test]
@@ -2235,7 +2235,7 @@ second comment <!-- [[it:CN]] -->";
 [[jbo:canadian National]]
 [[fr:Canadien National]]";
 
-             Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(@"[[de:Canadian National Railway]]
+            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(@"[[de:Canadian National Railway]]
 [[jbo:canadian National]]
 [[fr:Canadien National]]
 "), "first letter casing retained for jbo-wiki links");
@@ -2265,7 +2265,7 @@ second comment <!-- [[it:CN]] -->";
             b = a;
 
             Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
-    }
+        }
 
         [Test]
         public void InterwikiSorting()
@@ -2298,7 +2298,7 @@ second comment <!-- [[it:CN]] -->";
 [[sq:Foo]]";
             Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "alphabetical order with en firsth");
 
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("de");
             parser2.InterWikiOrder = InterWikiOrderEnum.AlphabeticalEnFirst;
             a = @"[[ar:Bar]]
@@ -2319,7 +2319,7 @@ second comment <!-- [[it:CN]] -->";
             Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
 
             Variables.SetProjectLangCode("en");
-            #endif
+#endif
 
             parser2.SortInterwikis = false;
         }
@@ -2343,7 +2343,7 @@ second comment <!-- [[it:CN]] -->";
         {
             Assert.That(parser2.SortMetaData(@"<!-- [[en:Foo]]-->", "Test"), Is.Empty, "Commented out en interwikis removed");
 
-            #if DEBUG
+#if DEBUG
             const string EnInterwiki = @"[[en:Foo]]";
 
             Variables.SetProjectSimple("en", ProjectEnum.commons);
@@ -2354,7 +2354,7 @@ second comment <!-- [[it:CN]] -->";
 
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
             Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.Empty, "en interwiki removed on en-wiki");
-            #endif
+#endif
         }
 
         [Test]
@@ -2406,7 +2406,7 @@ __FORCETOC__";
         [Test]
         public void SortOtherLanguages()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectLangCode("ru");
             WikiRegexes.MakeLangSpecificRegexes();
 
@@ -2534,7 +2534,7 @@ Andy
 
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
             WikiRegexes.MakeLangSpecificRegexes();
-            #endif
+#endif
         }
 
         [Test]

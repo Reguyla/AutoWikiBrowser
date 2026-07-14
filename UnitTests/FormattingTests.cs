@@ -22,10 +22,9 @@ Copyright © 2000-2002 Philip A. Craig
 
  */
 
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System.Text.RegularExpressions;
 using WikiFunctions;
 using WikiFunctions.Parse;
 
@@ -34,7 +33,7 @@ namespace UnitTests
     [TestFixture]
     public class FormattingTests : RequiresParser
     {
-        public GenfixesTestsBase genFixes  = new GenfixesTestsBase();
+        public GenfixesTestsBase genFixes = new GenfixesTestsBase();
 
         [Test]
         public void TestBrConverter()
@@ -834,7 +833,7 @@ Text."));
 }}";
 
             Assert.That(Parsers.RemoveWhiteSpace(TrackList), Is.EqualTo(TrackList));
-            
+
             const string BlockQuote = @"<blockquote>
 Friendship betrayal<br />
 They require <br />
@@ -844,7 +843,7 @@ Why miserable patient<br />
 
             Assert.That(Parsers.RemoveWhiteSpace(BlockQuote), Is.EqualTo(BlockQuote), "no changes to <br> tags within blockquotes");
 
-             const string Poem = @"<poem>
+            const string Poem = @"<poem>
 Friendship betrayal
 They require
 
@@ -1114,7 +1113,8 @@ was"));
             Assert.That(Parsers.FixSyntax(@"4<sup>th</sup> day at school"), Is.EqualTo("4th day at school"), "4th");
 
             Assert.That(Parsers.FixSyntax(@"1<sup>st </sup> day at school"), Is.EqualTo("1st day at school"), "1st with whitespace");
-            Assert.That(Parsers.FixSyntax(@"1<sup> st </sup> day at school"), Is.EqualTo("1st day at school"), "1st with whitespace");        }
+            Assert.That(Parsers.FixSyntax(@"1<sup> st </sup> day at school"), Is.EqualTo("1st day at school"), "1st with whitespace");
+        }
 
 
         [Test]
@@ -1136,8 +1136,8 @@ was"));
 
             const string unclosedTag = @"<ref><small>foo</small></ref> now <small>";
             Assert.That(Parsers.FixSyntax(unclosedTag), Is.EqualTo(unclosedTag));
-            
-             const string unclosedTag2 = @"<small>
+
+            const string unclosedTag2 = @"<small>
 {|
 ...<small><ref>foo</ref></small>...
 |}</small>";
@@ -1235,7 +1235,7 @@ was"));
             TemplateRedirs = Parsers.LoadTemplateRedirects("{{tl|Cn}}, {{tl|fact}} → {{tl|citation needed}}");
             Assert.That(Parsers.TemplateRedirects("now {{cn}} was", TemplateRedirs), Is.EqualTo("now {{citation needed}} was"), "follows case of new template name");
             Assert.That(Parsers.TemplateRedirects("now {{Cn}} was", TemplateRedirs), Is.EqualTo("now {{Citation needed}} was"), "follows case of new template name");
-            
+
             TemplateRedirs = Parsers.LoadTemplateRedirects(@"{{tl|Cn}}, {{tl|fact}} → {{tl|citation needed}}
 {{tl|foo}} → {{tl|bar}}");
             Assert.That(Parsers.TemplateRedirects("now {{cn}} was", TemplateRedirs), Is.EqualTo("now {{citation needed}} was"), "follows case of new template name");
@@ -1263,7 +1263,7 @@ was"));
 }}";
 
             Assert.That(Parsers.TemplateRedirects(A, TemplateRedirs), Is.EqualTo(A.Replace(@"{{Cn", @"{{Citation needed")));
-            
+
             string B = @"{{ONE | {{TWO | {{THREE | {{Cn}} }} }} }}";
 
             Assert.That(Parsers.TemplateRedirects(B, TemplateRedirs), Is.EqualTo(B.Replace(@"{{Cn", @"{{Citation needed")));

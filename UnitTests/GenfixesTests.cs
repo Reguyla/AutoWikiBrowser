@@ -61,9 +61,9 @@ namespace UnitTests
         public GenfixesTestsBase()
         {
             A.InitialiseLogListener();
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            #endif
+#endif
         }
 
         public string ArticleText
@@ -213,7 +213,7 @@ In 2007 May 22 team has won gold medals.");
 
             AssertChange("[[foo|bar]] a<br><br>b", "[[foo|bar]] a\r\n\r\nb");
             AssertChange("foo! a<br><br>b", "foo! a\r\n\r\nb");
-            
+
             AssertChange("{{Orphan|date=September 2015}}<br>", "{{Orphan|date=September 2015}}");
 
             AssertChange(@"* {{Polish2|Krzepice (województwo dolnośląskie)|[[24 November]] [[2007]]}}<br><br>  a", @"* {{Polish2|Krzepice (województwo dolnośląskie)|[[24 November]] [[2007]]}}
@@ -261,8 +261,8 @@ a");
                          @"{{cite web | url = http://www.census.gov/popest/geographic/boundary_changes/index.html |title = Boundary Changes | date = 2010-01-01 }}");
 
             AssertChange(@"Over March 4th - March 10th, 2012 then.", @"Over March 4–10, 2012 then.");
-            
-            AssertChange(@"{{cite web| url=http://www.site.com/f | title=A | date= June 29th, 2012 08:44}}", 
+
+            AssertChange(@"{{cite web| url=http://www.site.com/f | title=A | date= June 29th, 2012 08:44}}",
                          @"{{cite web| url=http://www.site.com/f | title=A | date= June 29, 2012<!-- 08:44-->}}");
             AssertChange(@"{{cite web| url=http://www.site.com/f | title=A | date= 29 June, 2012| year=2012}}",
                          @"{{cite web| url=http://www.site.com/f | title=A | date= 29 June 2012}}");
@@ -273,14 +273,14 @@ a");
         {
             AssertChange(@"{{cite news|work=''[[foo|foo]]''}}", @"{{cite news|work=[[foo]]}}");
         }
-        
+
         [Test]
         public void UnbalancedBracketRenameTemplateParameter()
         {
             WikiRegexes.RenamedTemplateParameters.Clear();
             WikiRegexes.RenamedTemplateParameters = Parsers.LoadRenamedTemplateParameters(@"{{AWB rename template parameter|cite web|acccessdate|accessdate}}");
-            
-            AssertChange(@"A.<ref>{{cite web| url=http://www.site.com | title = ABC | acccessdate = 20 May 2012</ref> {{reflist}}", 
+
+            AssertChange(@"A.<ref>{{cite web| url=http://www.site.com | title = ABC | acccessdate = 20 May 2012</ref> {{reflist}}",
                          @"A.<ref>{{cite web| url=http://www.site.com | title = ABC | accessdate = 20 May 2012}}</ref> {{reflist}}");
         }
 
@@ -332,7 +332,7 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
         [Test]
         public void Wikia()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikia);
 
             AssertNotChanged(@"{{BLP sources|date=May 2010}}
@@ -356,8 +356,8 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 
 {{Norway-band-stub}}", "no multiple issues added");
 
-        Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-        #endif
+            Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
+#endif
         }
 
         [Test]
@@ -443,13 +443,13 @@ Minor bug";
 * Emperor";
 
             AssertChange(foo, foo2);
-            
+
             const string HeadingWithOptionalSpace = @"x
 
 == Events ==
 y";
             AssertNotChanged(HeadingWithOptionalSpace);
-            
+
             const string HeadingWithoutOptionalSpace = @"x
 
 ==Events==
@@ -463,7 +463,7 @@ y";
 y";
             AssertNotChanged(CommentThenHeading);
         }
-        
+
         [Test]
         public void EmboldenBorn()
         {
@@ -487,11 +487,11 @@ y";
             AssertNotChanged(@"{{cite news|title=""Herald"" Week-End Magazine The wreek of the malabar, Easter 1931.|url=http://trove.nla.gov.au/newspaper/|date=29 March 1947}}");
             AssertNotChanged(@"{{cite web |author=I|date=17 February 2017 |title=Solar Impulse: ""1000 solutions pour un monde durable"" |url=http://www.a.com}}");
         }
-        
+
         [Test]
         public void RefsPunctuationReorder()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikisource); // as require en and don't run for en-wp
             ArticleText = @"* Andrew influences.<ref name=HerdFly>{{cite book |last=Herd |first=Andrew Dr |title=The Fly }}</ref>
 
@@ -514,7 +514,7 @@ y";
 {{reflist}}"));
 
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            #endif
+#endif
         }
 
         [Test]
@@ -530,14 +530,14 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
             GenFixes("Test");
             ClassicAssert.IsTrue(ArticleText.Contains(@"<ref name=""XXL Mag"">") && ArticleText.Contains(@"<ref name=""XXL Mag""/>"), "Fix the ref quote errors, then merge them");
         }
-        
+
         [Test]
         public void RefPunctuationSpacing()
         {
             ArticleText = @"Targ<ref>[http://www.site.com] Lubawskiego</ref>.It adopted {{reflist}}";
-            
+
             GenFixes("Test");
-            
+
             string correct = @"Targ.<ref>[http://www.site.com] Lubawskiego</ref> It adopted {{reflist}}";
 
             Assert.That(ArticleText, Is.EqualTo(correct));
@@ -546,7 +546,7 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
         [Test]
         public void ReorderPunctuation()
         {
-            #if DEBUG
+#if DEBUG
             Variables.SetProjectSimple("en", ProjectEnum.wikisource);  // as require en and don't run for en-wp
             string correct = @"FOOBAR decreases.<ref name=""G"">{{cite journal | author = M| title = R by p53: s}}</ref><ref name=""Bensaad""/> It catalyses the removal of a phosphate group from fructose (F-2,6-BP):<ref name=""G""/><ref name=""B""/>
 
@@ -557,7 +557,7 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
 
 ==References==
 {{Reflist}}";
-            
+
             GenFixes("Test");
 
             Assert.That(ArticleText, Is.EqualTo(correct), "References section exists");
@@ -569,7 +569,7 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
             Assert.That(ArticleText, Is.EqualTo(correct), "References section does not exist");
 
             Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            #endif
+#endif
         }
 
         [Test]
@@ -646,18 +646,18 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
 Foo.(here) is a bar While remaining upright may be the primary goal of beginning riders";
             GenFixes("Foo.(here)");
             Assert.That(ArticleText, Is.EqualTo("'''Foo.(here)''' is a bar While remaining upright may be the primary goal of beginning riders"));
-            
+
             ArticleText = @"{{Short description|Japanese video game developer}}
 
 {{nihongo foot|'''Treasure Co., Ltd.'''|株式会社トレジャー|''Kabushiki-gaisha Torejā''||lead=yes|group=lower-alpha}} is a Japanese
 Treasure grew a [[cult following]].";
-            for (int x =0; x <100; x++)
+            for (int x = 0; x < 100; x++)
             {
                 ArticleText += "Some long test to make article long enough so 5 percent rule is relevant.";
             }
 
             string originalArticleText = ArticleText;
-            
+
             GenFixes("Treasure (company)");
             Assert.That(ArticleText, Is.EqualTo(originalArticleText));
         }
@@ -689,9 +689,9 @@ Treasure grew a [[cult following]].";
         {
             ArticleText = @"{{infobox person}}
 '''John Smith''' (born 11 April 1990) is great.";
-            
+
             GenFixes("John Smith");
-            
+
             ClassicAssert.IsTrue(ArticleText.Contains(@"[[Category:1990 births]]"), "birth category");
             ClassicAssert.IsTrue(ArticleText.Contains(@"[[Category:Living people]]"), "living people");
             ClassicAssert.IsTrue(ArticleText.Contains(@"{{DEFAULTSORT:Smith, John}}"), "human name defaultsort");
@@ -702,9 +702,9 @@ Treasure grew a [[cult following]].";
         {
             ArticleText = @"{{infobox person}}
 '''Cecilia Uddén''' (born 11 April 1990) is great.";
-            
+
             GenFixes("Cecilia Uddén");
-            
+
             ClassicAssert.IsTrue(ArticleText.Contains(@"[[Category:1990 births]]"), "birth category");
             ClassicAssert.IsTrue(ArticleText.Contains(@"[[Category:Living people]]"), "living people");
             ClassicAssert.IsTrue(ArticleText.Contains(@"{{DEFAULTSORT:Udden, Cecilia}}"), "human name defaultsort without special characters");
@@ -729,7 +729,7 @@ God.<ref name=""S63"" />
 ==References==
 {{reflist|2}}";
 
-             GenFixes();
+            GenFixes();
 
             Assert.That(ArticleText, Is.EqualTo(@"Z<ref name = ""Smith63"">Smith (2004), p.&nbsp;63</ref> in all probability.<ref name=""Smith63""/> For.<ref name=""Smith63""/>
 
@@ -881,7 +881,7 @@ End of.
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
 
-            
+
             Variables.SetProjectLangCode("ru");
             WikiRegexes.MakeLangSpecificRegexes();
             t = @"'''Article''' is great.<ref name = ""Fred1"">So says Fred</ref>
@@ -892,9 +892,9 @@ End of.
 {{Reflist}}";
             ArticleText = t;
             GenFixes();
-            
+
             Assert.That(ArticleText, Is.EqualTo(t), "No change: ReorderReferences not applied within ru-wp genfixes");
-            
+
             Variables.SetProjectLangCode("en");
             WikiRegexes.MakeLangSpecificRegexes();
 #endif
@@ -998,7 +998,7 @@ End of.
             TalkGenFixes();
             Assert.That(ArticleText, Is.EqualTo(a), "Adds WikiProject banner shell when 3 wikiproject links, cleans whitespace");
 
-             ArticleText = @"{{WikiProject Biography|living=yes}}
+            ArticleText = @"{{WikiProject Biography|living=yes}}
 {{WikiProject a |text}}
 {{WikiProject b|text}}
 {{WikiProject c|text}}
