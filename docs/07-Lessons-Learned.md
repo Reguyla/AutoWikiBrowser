@@ -32,7 +32,10 @@ Recommendations:
 Recommendation:
 Treat the initial incident counts as a baseline only. Re-run the Upgrade Assistant after project conversion to obtain a more accurate assessment of true migration issues.
 
-## 7.3. Related Documents
+## 7.5 Empty WinForms
+Empty WinForms .resx files associated with different partial class files can produce duplicate manifest resource names (MSB3577) after SDK-style conversion. If the .resx contains no resources, exclude it from EmbeddedResource rather than compiling it.
+
+## 7.6. Related Documents
 Prerequisites
 -------------
 00 – Foundation, Discovery & Planning
