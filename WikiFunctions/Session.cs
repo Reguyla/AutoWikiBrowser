@@ -195,12 +195,17 @@ namespace WikiFunctions;
         }
         catch (UriChangedException ex)
         {
-            // TODO: We should offer to try changing the protocol to the response Uri scheme and attempt to load again
+            // TODO:
+            // If the server redirects to a different URI scheme (for example,
+            // HTTP -> HTTPS), offer to update the configured wiki URL,
+            // recreate the editor using the redirected URI, and retry
+            // project initialization before reporting a failure.
             MessageBox.Show(
+                this.parentControl,
                 ex.Message,
                 ex.Header,
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Error
+                MessageBoxIcon.Error);
             );
             return false;
         }
