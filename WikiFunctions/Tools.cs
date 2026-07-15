@@ -3692,15 +3692,32 @@ Message: {2}
     }
 
     /// <summary>
-    /// Applies AWB-specific HTTP request settings such as cookies and authenticated user-agent.
+    /// Applies AWB-specific HTTP request settings such as cookies and the
+    /// authenticated user agent.
     /// </summary>
-    public static void ConfigureRequest(HttpWebRequest request, string url, IAutoWikiBrowser awb)
+    /// <param name="request">
+    /// The HTTP request to configure. If <c>null</c>, no action is taken.
+    /// </param>
+    /// <param name="url">
+    /// The target URL used to determine the appropriate cookie container.
+    /// </param>
+    /// <param name="awb">
+    /// The current AWB instance providing authentication context.
+    /// </param>
+    public static void ConfigureRequest(
+        HttpWebRequest request,
+        string url,
+        IAutoWikiBrowser awb)
     {
-        if (request == null)
+        if (request is null)
             return;
 
-        request.CookieContainer = GetCookieContainer(url, awb);
-        ApplyAuthenticatedUserAgent(request, awb);
+        request.CookieContainer =
+            GetCookieContainer(url, awb);
+
+        ApplyAuthenticatedUserAgent(
+            request,
+            awb);
     }
 
     /// <summary>
