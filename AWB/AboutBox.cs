@@ -18,52 +18,51 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+using System;
+using System.Reflection;
+using System.Windows.Forms;
+using WikiFunctions;
+
+internal sealed partial class AboutBox : Form
 {
-    using System;
-    using System.Reflection;
-    using System.Windows.Forms;
-    using WikiFunctions;
-
-    internal sealed partial class AboutBox : Form
+    public AboutBox(string ieVersion)
     {
-        public AboutBox(string ieVersion)
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            lblAWBVersion.Text = "Version " + Program.VersionString;
-            lblRevision.Text = "SVN " + Variables.Revision;
-            txtWarning.Text = WikiFunctions.Controls.AboutBox.GetDetailedMessage(Assembly.GetExecutingAssembly());
+        lblAWBVersion.Text = "Version " + Program.VersionString;
+        lblRevision.Text = "SVN " + Variables.Revision;
+        txtWarning.Text = WikiFunctions.Controls.AboutBox.GetDetailedMessage(Assembly.GetExecutingAssembly());
 
-            txtVersions.Text = string.Format(@"Internet Explorer version: {0}
+        txtVersions.Text = string.Format(@"Internet Explorer version: {0}
 .NET version: {1}
 Windows version: {2}",
-                     ieVersion,
-                     Environment.Version,
-                     Environment.OSVersion.Version.Major + "." + Environment.OSVersion.Version.Minor);
-        }
+                 ieVersion,
+                 Environment.Version,
+                 Environment.OSVersion.Version.Major + "." + Environment.OSVersion.Version.Minor);
+    }
 
-        private void OkButton_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+    private void OkButton_Click(object sender, EventArgs e)
+    {
+        Close();
+    }
 
-        private void LinkAWBPage_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            linkAWBPage.LinkVisited = true;
-            Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser", false);
-        }
+    private void LinkAWBPage_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        linkAWBPage.LinkVisited = true;
+        Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser", false);
+    }
 
-        private void UsageStatsLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            UsageStatsLabel.LinkVisited = true;
-            UsageStats.OpenUsageStatsURL();
-        }
+    private void UsageStatsLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        UsageStatsLabel.LinkVisited = true;
+        UsageStats.OpenUsageStatsURL();
+    }
 
-        private void linkPhabricator_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            linkPhabricator.LinkVisited = true;
-            Tools.OpenURLInBrowser("https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
-        }
+    private void linkPhabricator_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        linkPhabricator.LinkVisited = true;
+        Tools.OpenURLInBrowser("https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
     }
 }

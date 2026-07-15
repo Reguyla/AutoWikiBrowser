@@ -19,13 +19,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+internal sealed partial class TalkMessage : Form
 {
-    internal sealed partial class TalkMessage : Form
+    public TalkMessage()
     {
-        public TalkMessage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

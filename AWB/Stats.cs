@@ -26,454 +26,453 @@ using System.Xml;
 using WikiFunctions;
 using WikiFunctions.Plugin;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+partial class MainForm
 {
-    partial class MainForm
+    // Unfortunately, NotifyIcon is sealed, otherwise I would inherit from that and do tooltiptext/stats management there
+    // Even more unfortunately, it seems it's tooltip is limited to 64 chars. Stinking great, Microsoft!
+    // T-O-D-O: Maybe an alternative approach using mouse events? - doesn't seem to be a reliable way of doing even that! see e.g. http://64.233.183.104/search?q=cache:34QVls9xRoUJ:www.experts-exchange.com/Programming/Languages/.NET/Visual_Basic.NET/Q_21161863.html+notifyicon+mouseover&hl=en&ct=clnk&cd=1&gl=uk&lr=lang_en
+    private int NoEdits;
+    public int NumberOfEdits
     {
-        // Unfortunately, NotifyIcon is sealed, otherwise I would inherit from that and do tooltiptext/stats management there
-        // Even more unfortunately, it seems it's tooltip is limited to 64 chars. Stinking great, Microsoft!
-        // T-O-D-O: Maybe an alternative approach using mouse events? - doesn't seem to be a reliable way of doing even that! see e.g. http://64.233.183.104/search?q=cache:34QVls9xRoUJ:www.experts-exchange.com/Programming/Languages/.NET/Visual_Basic.NET/Q_21161863.html+notifyicon+mouseover&hl=en&ct=clnk&cd=1&gl=uk&lr=lang_en
-        private int NoEdits;
-        public int NumberOfEdits
+        get { return NoEdits; }
+        private set
         {
-            get { return NoEdits; }
-            private set
-            {
-                NoEdits = value;
-                lblEditCount.Text = "Edits: " + value;
-                // UpdateNotifyIconTooltip();
-                if (value == 100 || (value > 0 && value % 1000 == 0)) // we'll first report to remote db when we have 100 saves or app is exiting, whichever comes first; we'll also update db at 1000 and each 1000 thereafter
-                    UsageStats.Do(false);
-            }
+            NoEdits = value;
+            lblEditCount.Text = "Edits: " + value;
+            // UpdateNotifyIconTooltip();
+            if (value == 100 || (value > 0 && value % 1000 == 0)) // we'll first report to remote db when we have 100 saves or app is exiting, whichever comes first; we'll also update db at 1000 and each 1000 thereafter
+                UsageStats.Do(false);
         }
+    }
 
-        private int NoNewPages;
-        public int NumberOfNewPages
+    private int NoNewPages;
+    public int NumberOfNewPages
+    {
+        get { return NoNewPages; }
+        private set
         {
-            get { return NoNewPages; }
-            private set
-            {
-                NoNewPages = value;
-                lblNewArticles.Text = "New: " + value;
-            }
+            NoNewPages = value;
+            lblNewArticles.Text = "New: " + value;
         }
+    }
 
-        private int NoIgnoredEdits;
-        public int NumberOfIgnoredEdits
+    private int NoIgnoredEdits;
+    public int NumberOfIgnoredEdits
+    {
+        get { return NoIgnoredEdits; }
+        private set
         {
-            get { return NoIgnoredEdits; }
-            private set
-            {
-                NoIgnoredEdits = value;
-                lblIgnoredArticles.Text = "Skipped: " + value;
-            }
+            NoIgnoredEdits = value;
+            lblIgnoredArticles.Text = "Skipped: " + value;
         }
+    }
 
-        private int NoEditsPerMin;
-        public int NumberOfEditsPerMinute
+    private int NoEditsPerMin;
+    public int NumberOfEditsPerMinute
+    {
+        get { return NoEditsPerMin; }
+        private set
         {
-            get { return NoEditsPerMin; }
-            private set
-            {
-                NoEditsPerMin = value;
-                lblEditsPerMin.Text = "Edits/min: " + value;
-            }
+            NoEditsPerMin = value;
+            lblEditsPerMin.Text = "Edits/min: " + value;
         }
+    }
 
-        private int NoPagesPerMin;
-        public int NumberOfPagesPerMinute
+    private int NoPagesPerMin;
+    public int NumberOfPagesPerMinute
+    {
+        get { return NoPagesPerMin; }
+        private set
         {
-            get { return NoPagesPerMin; }
-            private set
-            {
-                NoPagesPerMin = value;
-                lblPagesPerMin.Text = "Pages/min: " + value;
-            }
+            NoPagesPerMin = value;
+            lblPagesPerMin.Text = "Pages/min: " + value;
         }
-
-        /// <summary>
-        /// Holds the number of pages parsed when AWB is in pre-parse mode
-        /// </summary>
-        public int NumberOfPagesParsed;
     }
 
     /// <summary>
-    /// A class to collect and submit some non-invasive usage stats, to help AWB developers track usage and plan development
+    /// Holds the number of pages parsed when AWB is in pre-parse mode
     /// </summary>
-    /// <remarks>
-    /// Stats can be viewed at https://awb.toolforge.org/stats/
-    /// Tool Labs access is needed to access files/database
-    /// </remarks>
-    internal static class UsageStats
+    public int NumberOfPagesParsed;
+}
+
+/// <summary>
+/// A class to collect and submit some non-invasive usage stats, to help AWB developers track usage and plan development
+/// </summary>
+/// <remarks>
+/// Stats can be viewed at https://awb.toolforge.org/stats/
+/// Tool Labs access is needed to access files/database
+/// </remarks>
+internal static class UsageStats
+{
+    // TODO: Add other stuff we'd like to track
+
+    private const string StatsURL = "https://awb.toolforge.org/stats/";
+
+    private static int RecordId,
+        SecretNumber,
+        LastEditCount;
+
+    private static bool SentUserName;
+
+    private static readonly List<IAWBPlugin> NewAWBPlugins = new List<IAWBPlugin>();
+    private static readonly List<IAWBBasePlugin> NewAWBBasePlugins = new List<IAWBBasePlugin>();
+    private static readonly List<IListMakerPlugin> NewListMakerPlugins = new List<IListMakerPlugin>();
+
+    private static string UserName
     {
-        // TODO: Add other stuff we'd like to track
+        get { return Variables.MainForm.TheSession.User.Name; }
+    }
 
-        private const string StatsURL = "https://awb.toolforge.org/stats/";
+    #region Public
 
-        private static int RecordId,
-            SecretNumber,
-            LastEditCount;
+    /// <summary>
+    /// Call this when it's time to consider submitting some data
+    /// Don't try to send stats if no edits/new pages
+    /// </summary>
+    internal static void Do(bool appexit)
+    {
+        // no stats to send if no edits
+        if (Program.AWB.NumberOfEdits == 0 && Program.AWB.NumberOfNewPages == 0)
+            return;
 
-        private static bool SentUserName;
-
-        private static readonly List<IAWBPlugin> NewAWBPlugins = new List<IAWBPlugin>();
-        private static readonly List<IAWBBasePlugin> NewAWBBasePlugins = new List<IAWBBasePlugin>();
-        private static readonly List<IListMakerPlugin> NewListMakerPlugins = new List<IListMakerPlugin>();
-
-        private static string UserName
+        try
         {
-            get { return Variables.MainForm.TheSession.User.Name; }
-        }
+            bool statsSent;
 
-        #region Public
-
-        /// <summary>
-        /// Call this when it's time to consider submitting some data
-        /// Don't try to send stats if no edits/new pages
-        /// </summary>
-        internal static void Do(bool appexit)
-        {
-            // no stats to send if no edits
-            if (Program.AWB.NumberOfEdits == 0 && Program.AWB.NumberOfNewPages == 0)
-                return;
-
-            try
+            if (EstablishedContact)
             {
-                bool statsSent;
-
-                if (EstablishedContact)
+                if (Program.AWB.NumberOfEdits > LastEditCount ||
+                    NewPluginsAdded ||
+                    HaveUserNameToSend)
                 {
-                    if (Program.AWB.NumberOfEdits > LastEditCount ||
-                        NewPluginsAdded ||
-                        HaveUserNameToSend)
-                    {
-                        statsSent = SubsequentContact();
-                    }
-                    else
-                    {
-                        statsSent = true;
-                    }
+                    statsSent = SubsequentContact();
                 }
                 else
                 {
-                    statsSent = FirstContact();
-                }
-
-                if (statsSent)
-                {
-                    LastEditCount = Program.AWB.NumberOfEdits;
+                    statsSent = true;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                if (appexit) ErrorHandler.HandleException(ex); // else try again later
+                statsSent = FirstContact();
+            }
+
+            if (statsSent)
+            {
+                LastEditCount = Program.AWB.NumberOfEdits;
             }
         }
-
-        static bool NewPluginsAdded
+        catch (Exception ex)
         {
-            get
-            {
-                return NewAWBPlugins.Count > 0 || NewAWBBasePlugins.Count > 0
-                       || NewListMakerPlugins.Count > 0;
-            }
+            if (appexit) ErrorHandler.HandleException(ex); // else try again later
         }
+    }
 
-        /// <summary>
-        /// Call when a plugin was added *after* application startup
-        /// </summary>
-        internal static void AddedPlugin(IAWBPlugin plugin)
+    static bool NewPluginsAdded
+    {
+        get
         {
-            // if we've already written to the remote database, we'll need to add details of this plugin when we next contact it, otherwise do nothing
-            if (EstablishedContact) NewAWBPlugins.Add(plugin);
+            return NewAWBPlugins.Count > 0 || NewAWBBasePlugins.Count > 0
+                   || NewListMakerPlugins.Count > 0;
         }
+    }
 
-        /// <summary>
-        /// Call when a plugin was added *after* application startup
-        /// </summary>
-        internal static void AddedPlugin(IAWBBasePlugin plugin)
-        {
-            if (EstablishedContact) NewAWBBasePlugins.Add(plugin);
-        }
+    /// <summary>
+    /// Call when a plugin was added *after* application startup
+    /// </summary>
+    internal static void AddedPlugin(IAWBPlugin plugin)
+    {
+        // if we've already written to the remote database, we'll need to add details of this plugin when we next contact it, otherwise do nothing
+        if (EstablishedContact) NewAWBPlugins.Add(plugin);
+    }
 
-        /// <summary>
-        /// Call when a plugin was added *after* application startup
-        /// </summary>
-        internal static void AddedPlugin(IListMakerPlugin plugin)
-        {
-            if (EstablishedContact) NewListMakerPlugins.Add(plugin);
-        }
-        #endregion
+    /// <summary>
+    /// Call when a plugin was added *after* application startup
+    /// </summary>
+    internal static void AddedPlugin(IAWBBasePlugin plugin)
+    {
+        if (EstablishedContact) NewAWBBasePlugins.Add(plugin);
+    }
 
-        #region Server Contact
-        /// <summary>
-        /// Send usage stats to server
-        /// </summary>
-        private static bool FirstContact()
-        {
+    /// <summary>
+    /// Call when a plugin was added *after* application startup
+    /// </summary>
+    internal static void AddedPlugin(IListMakerPlugin plugin)
+    {
+        if (EstablishedContact) NewListMakerPlugins.Add(plugin);
+    }
+    #endregion
+
+    #region Server Contact
+    /// <summary>
+    /// Send usage stats to server
+    /// </summary>
+    private static bool FirstContact()
+    {
 #if !DEBUG && !INSTASTATS
-            if (Program.AWB.NumberOfEdits == 0) return false;
+        if (Program.AWB.NumberOfEdits == 0) return false;
 #endif
-            NameValueCollection postvars = new NameValueCollection
-                                               {
-                                                   {"Action", "Hello"},
-                                                   {"Version", Program.VersionString}
-                                               };
+        NameValueCollection postvars = new NameValueCollection
+                                           {
+                                               {"Action", "Hello"},
+                                               {"Version", Program.VersionString}
+                                           };
 
-            // Greetings and AWB version:
+        // Greetings and AWB version:
 
-            // Site/project name:
-            // TODO: Here or in PHP: tl.wikipedia.org      CUS: Translate to site name/lang code any Wikimedia site set up as custom
-            if (Variables.IsCustomProject || Variables.IsWikia)
-                postvars.Add("Wiki", Variables.Host);
-            else
-                postvars.Add("Wiki", Variables.Project.ToString());
-            // This returns a short string such as "Wikipedia"; may want to convert to int and then to string so we store less in the db
+        // Site/project name:
+        // TODO: Here or in PHP: tl.wikipedia.org      CUS: Translate to site name/lang code any Wikimedia site set up as custom
+        if (Variables.IsCustomProject || Variables.IsWikia)
+            postvars.Add("Wiki", Variables.Host);
+        else
+            postvars.Add("Wiki", Variables.Project.ToString());
+        // This returns a short string such as "Wikipedia"; may want to convert to int and then to string so we store less in the db
 
-            // Language code:
-            if (Variables.IsWikia)
-            {
-                postvars.Add("Language", "WIK");
-            }
-            else if (Variables.IsCustomProject || Variables.IsWikimediaMonolingualProject)
-            {
-                postvars.Add("Language", "CUS");
-            }
-            else
-            {
-                postvars.Add("Language", Variables.LangCode);
-            }
+        // Language code:
+        if (Variables.IsWikia)
+        {
+            postvars.Add("Language", "WIK");
+        }
+        else if (Variables.IsCustomProject || Variables.IsWikimediaMonolingualProject)
+        {
+            postvars.Add("Language", "CUS");
+        }
+        else
+        {
+            postvars.Add("Language", Variables.LangCode);
+        }
 
-            // UI culture:
-            postvars.Add("Culture", System.Threading.Thread.CurrentThread.CurrentCulture.ToString());
+        // UI culture:
+        postvars.Add("Culture", System.Threading.Thread.CurrentThread.CurrentCulture.ToString());
 
-            // Username:
-            bool userFieldIncluded = ProcessUsername(postvars);
+        // Username:
+        bool userFieldIncluded = ProcessUsername(postvars);
 
-            // Other details:
-            postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
-            postvars.Add("OS", Environment.OSVersion.VersionString);
+        // Other details:
+        postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
+        postvars.Add("OS", Environment.OSVersion.VersionString);
 #if DEBUG
-            postvars.Add("Debug", "Y");
+        postvars.Add("Debug", "Y");
 #else
-            postvars.Add("Debug", "N");
+        postvars.Add("Debug", "N");
 #endif
-            EnumeratePlugins(postvars,
-                             Plugins.Plugin.AWBPlugins.Values,
-                             Plugins.Plugin.AWBBasePlugins.Values,
-                             Plugins.Plugin.ListMakerPlugins.Values);
+        EnumeratePlugins(postvars,
+                         Plugins.Plugin.AWBPlugins.Values,
+                         Plugins.Plugin.AWBBasePlugins.Values,
+                         Plugins.Plugin.ListMakerPlugins.Values);
 
-            string response;
+        string response;
 
-            if (!TryPostData(postvars, out response))
-            {
-                return false;
-            }
-
-            ReadXML(response);
-
-            if (userFieldIncluded)
-            {
-                SentUserName = true;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Send updated usage stats to server
-        /// </summary>
-        private static bool SubsequentContact()
+        if (!TryPostData(postvars, out response))
         {
-            NameValueCollection postvars = new NameValueCollection
-                                               {
-                                                   {"Action", "Update"},
-                                                   {"RecordID", RecordId.ToString()},
-                                                   {"Verify", SecretNumber.ToString()}
-                                               };
-
-            EnumeratePlugins(postvars, NewAWBPlugins, NewAWBBasePlugins, NewListMakerPlugins);
-
-            bool userFieldIncluded = ProcessUsername(postvars);
-
-            if (Program.AWB.NumberOfEdits > LastEditCount)
-                postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
-
-            string response;
-
-            if (!TryPostData(postvars, out response))
-            {
-                return false;
-            }
-
-            if (userFieldIncluded)
-            {
-                SentUserName = true;
-            }
-
-            // Clear lists only after the update was successfully sent.
-            NewAWBPlugins.Clear();
-            NewAWBBasePlugins.Clear();
-            NewListMakerPlugins.Clear();
-
-            return true;
-        }
-
-        /// <summary>
-        /// Returns true if we've sent initial stats to server
-        /// </summary>
-        private static bool EstablishedContact
-        { get { return (RecordId > 0); } }
-
-        /// <summary>
-        /// Attempts to post usage statistics to the server.
-        /// </summary>
-        /// <param name="postvars">The values to send.</param>
-        /// <param name="response">The server response when the request succeeds.</param>
-        /// <returns>
-        /// <c>true</c> when the server returned HTTP 200; otherwise, <c>false</c>.
-        /// </returns>
-        private static bool TryPostData(
-            NameValueCollection postvars,
-            out string response)
-        {
-            response = null;
-
-            try
-            {
-                Program.AWB.StartProgressBar();
-                StatusLabelText = "Contacting stats server...";
-                Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.WaitCursor;
-
-                response = Tools.PostData(postvars, StatsURL);
-                return true;
-            }
-            catch (WebException ex)
-            {
-                Tools.WriteDebug("UsageStats", ex.Message);
-                return false;
-            }
-            catch (IOException ex)
-            {
-                Tools.WriteDebug("UsageStats", ex.Message);
-                return false;
-            }
-            finally
-            {
-                Program.AWB.StopProgressBar();
-                StatusLabelText = "";
-                Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.Default;
-            }
-        }
-        #endregion
-
-        #region Helper routines
-        private static string StatusLabelText { set { Program.AWB.StatusLabelText = value; } }
-
-        private static void EnumeratePlugins(NameValueCollection postvars, ICollection<IAWBPlugin> awbPlugins, ICollection<IAWBBasePlugin> awbBasePlugins, ICollection<IListMakerPlugin> listMakerPlugins)
-        {
-            int i = 0;
-
-            postvars.Add("PluginCount", (awbPlugins.Count + awbBasePlugins.Count + listMakerPlugins.Count).ToString());
-
-            foreach (IAWBPlugin plugin in awbPlugins)
-            {
-                i++;
-                string p = "P" + i;
-                postvars.Add(p + "N", plugin.Name);
-                postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
-                postvars.Add(p + "T", "0");
-            }
-
-            foreach (IListMakerPlugin plugin in listMakerPlugins)
-            {
-                i++;
-                string p = "P" + i;
-                postvars.Add(p + "N", plugin.Name);
-                postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
-                postvars.Add(p + "T", "1");
-            }
-
-            foreach (IAWBBasePlugin plugin in awbBasePlugins)
-            {
-                i++;
-                string p = "P" + i;
-                postvars.Add(p + "N", plugin.Name);
-                postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
-                postvars.Add(p + "T", "2");
-            }
-        }
-
-        private static void ReadXML(string xml)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(xml)) return; // handle network errors
-
-                // we don't *need* these IDs if we're exiting, but I think it does no harm to check we received a valid response
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(xml);
-                XmlNodeList nodes = doc.GetElementsByTagName("DB");
-                if (nodes.Count == 1 && nodes[0].Attributes != null && nodes[0].Attributes.Count == 2)
-                {
-                    RecordId = int.Parse(nodes[0].Attributes["Record"].Value);
-                    SecretNumber = int.Parse(nodes[0].Attributes["Verify"].Value);
-                }
-                else
-                {
-                    throw new XmlException("Error parsing XML returned from UsageStats server");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (ex is XmlException)
-                    throw;
-
-                throw new XmlException("Error parsing XML returned from UsageStats server", ex);
-            }
-        }
-
-        /// <summary>
-        /// Adds the username or privacy marker to a pending statistics request when
-        /// it has not yet been successfully sent.
-        /// </summary>
-        /// <param name="postvars">The request values being prepared.</param>
-        /// <returns>
-        /// <c>true</c> when this request includes a User field that should be marked
-        /// as sent only after the request succeeds; otherwise, <c>false</c>.
-        /// </returns>
-        private static bool ProcessUsername(NameValueCollection postvars)
-        {
-            if (SentUserName)
-                return false;
-
-            if (Properties.Settings.Default.Privacy)
-            {
-                postvars.Add("User", "<Withheld>");
-                return true;
-            }
-
-            if (!string.IsNullOrEmpty(UserName))
-            {
-                postvars.Add("User", UserName);
-                return true;
-            }
-
             return false;
         }
 
-        private static bool HaveUserNameToSend
+        ReadXML(response);
+
+        if (userFieldIncluded)
         {
-            get
-            {
-                return (!SentUserName &&
-                    (Properties.Settings.Default.Privacy || !string.IsNullOrEmpty(UserName)));
-            }
+            SentUserName = true;
         }
 
-        #endregion
-
-        internal static void OpenUsageStatsURL()
-        { Tools.OpenURLInBrowser(StatsURL); }
+        return true;
     }
+
+    /// <summary>
+    /// Send updated usage stats to server
+    /// </summary>
+    private static bool SubsequentContact()
+    {
+        NameValueCollection postvars = new NameValueCollection
+                                           {
+                                               {"Action", "Update"},
+                                               {"RecordID", RecordId.ToString()},
+                                               {"Verify", SecretNumber.ToString()}
+                                           };
+
+        EnumeratePlugins(postvars, NewAWBPlugins, NewAWBBasePlugins, NewListMakerPlugins);
+
+        bool userFieldIncluded = ProcessUsername(postvars);
+
+        if (Program.AWB.NumberOfEdits > LastEditCount)
+            postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
+
+        string response;
+
+        if (!TryPostData(postvars, out response))
+        {
+            return false;
+        }
+
+        if (userFieldIncluded)
+        {
+            SentUserName = true;
+        }
+
+        // Clear lists only after the update was successfully sent.
+        NewAWBPlugins.Clear();
+        NewAWBBasePlugins.Clear();
+        NewListMakerPlugins.Clear();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Returns true if we've sent initial stats to server
+    /// </summary>
+    private static bool EstablishedContact
+    { get { return (RecordId > 0); } }
+
+    /// <summary>
+    /// Attempts to post usage statistics to the server.
+    /// </summary>
+    /// <param name="postvars">The values to send.</param>
+    /// <param name="response">The server response when the request succeeds.</param>
+    /// <returns>
+    /// <c>true</c> when the server returned HTTP 200; otherwise, <c>false</c>.
+    /// </returns>
+    private static bool TryPostData(
+        NameValueCollection postvars,
+        out string response)
+    {
+        response = null;
+
+        try
+        {
+            Program.AWB.StartProgressBar();
+            StatusLabelText = "Contacting stats server...";
+            Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.WaitCursor;
+
+            response = Tools.PostData(postvars, StatsURL);
+            return true;
+        }
+        catch (WebException ex)
+        {
+            Tools.WriteDebug("UsageStats", ex.Message);
+            return false;
+        }
+        catch (IOException ex)
+        {
+            Tools.WriteDebug("UsageStats", ex.Message);
+            return false;
+        }
+        finally
+        {
+            Program.AWB.StopProgressBar();
+            StatusLabelText = "";
+            Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.Default;
+        }
+    }
+    #endregion
+
+    #region Helper routines
+    private static string StatusLabelText { set { Program.AWB.StatusLabelText = value; } }
+
+    private static void EnumeratePlugins(NameValueCollection postvars, ICollection<IAWBPlugin> awbPlugins, ICollection<IAWBBasePlugin> awbBasePlugins, ICollection<IListMakerPlugin> listMakerPlugins)
+    {
+        int i = 0;
+
+        postvars.Add("PluginCount", (awbPlugins.Count + awbBasePlugins.Count + listMakerPlugins.Count).ToString());
+
+        foreach (IAWBPlugin plugin in awbPlugins)
+        {
+            i++;
+            string p = "P" + i;
+            postvars.Add(p + "N", plugin.Name);
+            postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
+            postvars.Add(p + "T", "0");
+        }
+
+        foreach (IListMakerPlugin plugin in listMakerPlugins)
+        {
+            i++;
+            string p = "P" + i;
+            postvars.Add(p + "N", plugin.Name);
+            postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
+            postvars.Add(p + "T", "1");
+        }
+
+        foreach (IAWBBasePlugin plugin in awbBasePlugins)
+        {
+            i++;
+            string p = "P" + i;
+            postvars.Add(p + "N", plugin.Name);
+            postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
+            postvars.Add(p + "T", "2");
+        }
+    }
+
+    private static void ReadXML(string xml)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(xml)) return; // handle network errors
+
+            // we don't *need* these IDs if we're exiting, but I think it does no harm to check we received a valid response
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            XmlNodeList nodes = doc.GetElementsByTagName("DB");
+            if (nodes.Count == 1 && nodes[0].Attributes != null && nodes[0].Attributes.Count == 2)
+            {
+                RecordId = int.Parse(nodes[0].Attributes["Record"].Value);
+                SecretNumber = int.Parse(nodes[0].Attributes["Verify"].Value);
+            }
+            else
+            {
+                throw new XmlException("Error parsing XML returned from UsageStats server");
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is XmlException)
+                throw;
+
+            throw new XmlException("Error parsing XML returned from UsageStats server", ex);
+        }
+    }
+
+    /// <summary>
+    /// Adds the username or privacy marker to a pending statistics request when
+    /// it has not yet been successfully sent.
+    /// </summary>
+    /// <param name="postvars">The request values being prepared.</param>
+    /// <returns>
+    /// <c>true</c> when this request includes a User field that should be marked
+    /// as sent only after the request succeeds; otherwise, <c>false</c>.
+    /// </returns>
+    private static bool ProcessUsername(NameValueCollection postvars)
+    {
+        if (SentUserName)
+            return false;
+
+        if (Properties.Settings.Default.Privacy)
+        {
+            postvars.Add("User", "<Withheld>");
+            return true;
+        }
+
+        if (!string.IsNullOrEmpty(UserName))
+        {
+            postvars.Add("User", UserName);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool HaveUserNameToSend
+    {
+        get
+        {
+            return (!SentUserName &&
+                (Properties.Settings.Default.Privacy || !string.IsNullOrEmpty(UserName)));
+        }
+    }
+
+    #endregion
+
+    internal static void OpenUsageStatsURL()
+    { Tools.OpenURLInBrowser(StatsURL); }
 }

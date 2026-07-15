@@ -25,140 +25,139 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using WikiFunctions.Plugin;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+internal sealed partial class PluginManager : Form
 {
-    internal sealed partial class PluginManager : Form
+    private readonly IAutoWikiBrowser _awb;
+
+    private static string _lastPluginLoadedLocation;
+
+    public PluginManager(IAutoWikiBrowser awb)
     {
-        private readonly IAutoWikiBrowser _awb;
+        InitializeComponent();
+        _awb = awb;
+    }
 
-        private static string _lastPluginLoadedLocation;
+    public static void LoadNewPlugin(IAutoWikiBrowser awb)
+    {
+        OpenFileDialog pluginOpen = new OpenFileDialog();
+        if (string.IsNullOrEmpty(_lastPluginLoadedLocation))
+            LoadLastPluginLoadedLocation();
 
-        public PluginManager(IAutoWikiBrowser awb)
+        pluginOpen.InitialDirectory = string.IsNullOrEmpty(_lastPluginLoadedLocation) ? Application.StartupPath : _lastPluginLoadedLocation;
+
+        pluginOpen.DefaultExt = "dll";
+        pluginOpen.Filter = "DLL files|*.dll";
+        pluginOpen.CheckFileExists = pluginOpen.Multiselect = true;
+
+        pluginOpen.ShowDialog();
+
+        if (!string.IsNullOrEmpty(pluginOpen.FileName))
         {
-            InitializeComponent();
-            _awb = awb;
-        }
-
-        public static void LoadNewPlugin(IAutoWikiBrowser awb)
-        {
-            OpenFileDialog pluginOpen = new OpenFileDialog();
-            if (string.IsNullOrEmpty(_lastPluginLoadedLocation))
-                LoadLastPluginLoadedLocation();
-
-            pluginOpen.InitialDirectory = string.IsNullOrEmpty(_lastPluginLoadedLocation) ? Application.StartupPath : _lastPluginLoadedLocation;
-
-            pluginOpen.DefaultExt = "dll";
-            pluginOpen.Filter = "DLL files|*.dll";
-            pluginOpen.CheckFileExists = pluginOpen.Multiselect = true;
-
-            pluginOpen.ShowDialog();
-
-            if (!string.IsNullOrEmpty(pluginOpen.FileName))
+            string newPath = Path.GetDirectoryName(pluginOpen.FileName);
+            if (_lastPluginLoadedLocation != newPath)
             {
-                string newPath = Path.GetDirectoryName(pluginOpen.FileName);
-                if (_lastPluginLoadedLocation != newPath)
-                {
-                    _lastPluginLoadedLocation = newPath;
-                    SaveLastPluginLoadedLocation();
-                }
-            }
-
-            Plugin.LoadPlugins(awb, pluginOpen.FileNames, true);
-        }
-
-        //TODO:Use Utils
-        static void LoadLastPluginLoadedLocation()
-        {
-            try
-            {
-                Microsoft.Win32.RegistryKey reg = Microsoft.Win32.Registry.CurrentUser.
-                    OpenSubKey("Software\\AutoWikiBrowser");
-
-                if (reg != null)
-                    _lastPluginLoadedLocation = reg.GetValue("RecentPluginLoadedLocation", "").ToString();
-            }
-            catch
-            {
+                _lastPluginLoadedLocation = newPath;
+                SaveLastPluginLoadedLocation();
             }
         }
 
-        static void SaveLastPluginLoadedLocation()
-        {
-            try
-            {
-                Microsoft.Win32.RegistryKey reg = Microsoft.Win32.Registry.CurrentUser.
-                    CreateSubKey("Software\\AutoWikiBrowser");
+        Plugin.LoadPlugins(awb, pluginOpen.FileNames, true);
+    }
 
-                if (reg != null)
-                    reg.SetValue("RecentPluginLoadedLocation", _lastPluginLoadedLocation);
-            }
-            catch
-            {
-            }
+    //TODO:Use Utils
+    static void LoadLastPluginLoadedLocation()
+    {
+        try
+        {
+            Microsoft.Win32.RegistryKey reg = Microsoft.Win32.Registry.CurrentUser.
+                OpenSubKey("Software\\AutoWikiBrowser");
+
+            if (reg != null)
+                _lastPluginLoadedLocation = reg.GetValue("RecentPluginLoadedLocation", "").ToString();
+        }
+        catch
+        {
+        }
+    }
+
+    static void SaveLastPluginLoadedLocation()
+    {
+        try
+        {
+            Microsoft.Win32.RegistryKey reg = Microsoft.Win32.Registry.CurrentUser.
+                CreateSubKey("Software\\AutoWikiBrowser");
+
+            if (reg != null)
+                reg.SetValue("RecentPluginLoadedLocation", _lastPluginLoadedLocation);
+        }
+        catch
+        {
+        }
+    }
+
+    private void PluginManager_Load(object sender, EventArgs e)
+    {
+        LoadLoadedPluginList();
+    }
+
+    private void loadNewPluginsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        LoadNewPlugin(_awb);
+        lvPlugin.Items.Clear();
+        LoadLoadedPluginList();
+    }
+
+    private void LoadLoadedPluginList()
+    {
+        foreach (string pluginName in Plugin.GetAWBPluginList())
+        {
+            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupAWBLoaded"] });
         }
 
-        private void PluginManager_Load(object sender, EventArgs e)
+        foreach (string pluginName in Plugin.GetBasePluginList())
         {
-            LoadLoadedPluginList();
+            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupBaseLoaded"] });
         }
 
-        private void loadNewPluginsToolStripMenuItem_Click(object sender, EventArgs e)
+        foreach (string pluginName in Plugin.GetListMakerPluginList())
         {
-            LoadNewPlugin(_awb);
-            lvPlugin.Items.Clear();
-            LoadLoadedPluginList();
+            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupLMLoaded"] });
         }
 
-        private void LoadLoadedPluginList()
+        foreach (string pluginName in Plugin.FailedPlugins.Keys)
         {
-            foreach (string pluginName in Plugin.GetAWBPluginList())
-            {
-                lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupAWBLoaded"] });
-            }
-
-            foreach (string pluginName in Plugin.GetBasePluginList())
-            {
-                lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupBaseLoaded"] });
-            }
-
-            foreach (string pluginName in Plugin.GetListMakerPluginList())
-            {
-                lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupLMLoaded"] });
-            }
-
-            foreach (string pluginName in Plugin.FailedPlugins.Keys)
-            {
-                lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupObsolete"] });
-            }
-
-            foreach (string assemblyName in Plugin.FailedAssemblies)
-            {
-                lvPlugin.Items.Add(new ListViewItem(assemblyName) { Group = lvPlugin.Groups["groupFailed"] });
-            }
-
-            UpdatePluginCount();
+            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupObsolete"] });
         }
 
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        foreach (string assemblyName in Plugin.FailedAssemblies)
         {
-            loadPluginToolStripMenuItem.Enabled = false;
+            lvPlugin.Items.Add(new ListViewItem(assemblyName) { Group = lvPlugin.Groups["groupFailed"] });
         }
 
-        private void loadPluginToolStripMenuItem_Click(object sender, EventArgs e)
+        UpdatePluginCount();
+    }
+
+    private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+    {
+        loadPluginToolStripMenuItem.Enabled = false;
+    }
+
+    private void loadPluginToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        string[] plugins = new string[lvPlugin.SelectedItems.Count];
+
+        for (int i = 0; i < lvPlugin.SelectedItems.Count; i++)
         {
-            string[] plugins = new string[lvPlugin.SelectedItems.Count];
-
-            for (int i = 0; i < lvPlugin.SelectedItems.Count; i++)
-            {
-                plugins[i] = lvPlugin.Items[lvPlugin.SelectedIndices[i]].Text;
-            }
-
-            Plugin.LoadPlugins(_awb, plugins, true);
+            plugins[i] = lvPlugin.Items[lvPlugin.SelectedIndices[i]].Text;
         }
 
-        private void UpdatePluginCount()
-        {
-            lblPluginCount.Text = lvPlugin.Items.Count.ToString();
-        }
+        Plugin.LoadPlugins(_awb, plugins, true);
+    }
+
+    private void UpdatePluginCount()
+    {
+        lblPluginCount.Text = lvPlugin.Items.Count.ToString();
     }
 }

@@ -18,31 +18,30 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+internal sealed partial class Splash : Form
 {
-    internal sealed partial class Splash : Form
+    public Splash()
     {
-        public Splash()
-        {
-            InitializeComponent();
-            lblVersion.Text = "Version " + Program.VersionString;
-            SetProgress(0);
-        }
+        InitializeComponent();
+        lblVersion.Text = "Version " + Program.VersionString;
+        SetProgress(0);
+    }
 
-        private void ClickHandler(object sender, EventArgs e)
-        {
-            Close();
-        }
+    private void ClickHandler(object sender, EventArgs e)
+    {
+        Close();
+    }
 
-        public void SetProgress(int percent)
+    public void SetProgress(int percent)
+    {
+        System.Reflection.MethodBase method = new System.Diagnostics.StackFrame(1).GetMethod();
+        if (method.DeclaringType != null)
         {
-            System.Reflection.MethodBase method = new System.Diagnostics.StackFrame(1).GetMethod();
-            if (method.DeclaringType != null)
-            {
-                MethodLabel.Text = method.DeclaringType.Name + "::" + method.Name + "()";
-            }
-            progressBar.Value = percent;
-            Application.DoEvents();
+            MethodLabel.Text = method.DeclaringType.Name + "::" + method.Name + "()";
         }
+        progressBar.Value = percent;
+        Application.DoEvents();
     }
 }

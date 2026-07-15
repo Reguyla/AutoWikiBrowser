@@ -18,25 +18,24 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+internal sealed partial class SummaryEditor : Form
 {
-    internal sealed partial class SummaryEditor : Form
+    public SummaryEditor()
     {
-        public SummaryEditor()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        private void btnSort_Click(object sender, EventArgs e)
-        {
-            List<string> list =
-                new List<string>(Summaries.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries));
-            list.Sort();
+    private void btnSort_Click(object sender, EventArgs e)
+    {
+        List<string> list =
+            new List<string>(Summaries.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+        list.Sort();
 
-            Summaries.Clear();
+        Summaries.Clear();
 
-            foreach (string s in list)
-                Summaries.Text += s + "\r\n";
-        }
+        foreach (string s in list)
+            Summaries.Text += s + "\r\n";
     }
 }

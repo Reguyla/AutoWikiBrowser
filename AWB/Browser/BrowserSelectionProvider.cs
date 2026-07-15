@@ -1,43 +1,42 @@
 ﻿using mshtml;
 using System.Windows.Forms;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+/// <summary>
+/// Provides access to the current text selection from the embedded browser.
+/// The current implementation uses the legacy Microsoft.mshtml DOM.
+/// </summary>
+internal static class BrowserSelectionProvider
 {
     /// <summary>
-    /// Provides access to the current text selection from the embedded browser.
-    /// The current implementation uses the legacy Microsoft.mshtml DOM.
+    /// Returns the currently selected browser text, or null when no text
+    /// selection is available.
     /// </summary>
-    internal static class BrowserSelectionProvider
+    internal static string GetSelectedText(HtmlDocument document)
     {
-        /// <summary>
-        /// Returns the currently selected browser text, or null when no text
-        /// selection is available.
-        /// </summary>
-        internal static string GetSelectedText(HtmlDocument document)
+        if (document == null)
         {
-            if (document == null)
-            {
-                return null;
-            }
-
-            if (!(document.DomDocument is IHTMLDocument2 htmlDocument))
-            {
-                return null;
-            }
-
-            IHTMLSelectionObject selection = htmlDocument.selection;
-
-            if (selection == null)
-            {
-                return null;
-            }
-
-            if (!(selection.createRange() is IHTMLTxtRange textRange))
-            {
-                return null;
-            }
-
-            return textRange.text;
+            return null;
         }
+
+        if (!(document.DomDocument is IHTMLDocument2 htmlDocument))
+        {
+            return null;
+        }
+
+        IHTMLSelectionObject selection = htmlDocument.selection;
+
+        if (selection == null)
+        {
+            return null;
+        }
+
+        if (!(selection.createRange() is IHTMLTxtRange textRange))
+        {
+            return null;
+        }
+
+        return textRange.text;
     }
 }

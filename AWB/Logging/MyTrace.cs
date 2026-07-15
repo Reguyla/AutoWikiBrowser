@@ -21,102 +21,101 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Windows.Forms;
 using WikiFunctions.Logging;
 
-namespace AutoWikiBrowser.Logging
+namespace AutoWikiBrowser.Logging;
+
+/// <summary>
+/// Logging manager
+/// </summary>
+internal sealed class MyTrace : TraceManager, IAWBTraceListener
 {
-    /// <summary>
-    /// Logging manager
-    /// </summary>
-    internal sealed class MyTrace : TraceManager, IAWBTraceListener
+    // The most important stuff:
+    internal void Initialise()
     {
-        // The most important stuff:
-        internal void Initialise()
-        {
-            try
-            {
-                foreach (KeyValuePair<string, IMyTraceListener> t in Listeners)
-                {
-                    if (t.Key != "AWB")
-                        t.Value.WriteBulletedLine(AWBLogListener.LoggingStartButtonClicked, true, false, true);
-                }
-            }
-            catch (Exception ex)
-            {
-                ConfigError(ex);
-            }
-        }
-
-        internal void ConfigError(Exception ex)
-        {
-            MessageBox.Show(ex.Message);
-            Program.AWB.Stop("AutoWikiBrowser");
-        }
-
-        // State:
-        internal bool HaveOpenFile
-        {
-            get { return Listeners.Any(t => t.Key != "AWB"); }
-        }
-
-        // Overrides:
-        public override void AddListener(string key, IMyTraceListener listener)
-        {
-            if (ContainsKey(key))
-            {
-                base.RemoveListener(key);
-            }
-
-            base.AddListener(key, listener);
-        }
-
-        public override void RemoveListener(string key)
-        {
-            IMyTraceListener listener;
-            if (!Listeners.TryGetValue(key, out listener))
-                return;
-
-            base.RemoveListener(key);
-        }
-
-        public override void Close()
+        try
         {
             foreach (KeyValuePair<string, IMyTraceListener> t in Listeners)
             {
-                t.Value.WriteCommentAndNewLine("closing all logs");
-                t.Value.Close();
-            }
-            Listeners.Clear();
-        }
-
-        #region Generic overrides
-
-        public void AWBSkipped(string reason)
-        {
-            foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
-            {
-                ((IAWBTraceListener)listener.Value).AWBSkipped(reason);
+                if (t.Key != "AWB")
+                    t.Value.WriteBulletedLine(AWBLogListener.LoggingStartButtonClicked, true, false, true);
             }
         }
-
-        public void PluginSkipped()
+        catch (Exception ex)
         {
-            foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
-            {
-                ((IAWBTraceListener)listener.Value).PluginSkipped();
-            }
+            ConfigError(ex);
+        }
+    }
+
+    internal void ConfigError(Exception ex)
+    {
+        MessageBox.Show(ex.Message);
+        Program.AWB.Stop("AutoWikiBrowser");
+    }
+
+    // State:
+    internal bool HaveOpenFile
+    {
+        get { return Listeners.Any(t => t.Key != "AWB"); }
+    }
+
+    // Overrides:
+    public override void AddListener(string key, IMyTraceListener listener)
+    {
+        if (ContainsKey(key))
+        {
+            base.RemoveListener(key);
         }
 
-        public void UserSkipped()
-        {
-            foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
-            {
-                ((IAWBTraceListener)listener.Value).UserSkipped();
-            }
-        }
-        #endregion
+        base.AddListener(key, listener);
+    }
 
-        protected override string ApplicationName
+    public override void RemoveListener(string key)
+    {
+        IMyTraceListener listener;
+        if (!Listeners.TryGetValue(key, out listener))
+            return;
+
+        base.RemoveListener(key);
+    }
+
+    public override void Close()
+    {
+        foreach (KeyValuePair<string, IMyTraceListener> t in Listeners)
         {
-            get { return "AutoWikiBrowser logging manager"; }
+            t.Value.WriteCommentAndNewLine("closing all logs");
+            t.Value.Close();
         }
+        Listeners.Clear();
+    }
+
+    #region Generic overrides
+
+    public void AWBSkipped(string reason)
+    {
+        foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
+        {
+            ((IAWBTraceListener)listener.Value).AWBSkipped(reason);
+        }
+    }
+
+    public void PluginSkipped()
+    {
+        foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
+        {
+            ((IAWBTraceListener)listener.Value).PluginSkipped();
+        }
+    }
+
+    public void UserSkipped()
+    {
+        foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
+        {
+            ((IAWBTraceListener)listener.Value).UserSkipped();
+        }
+    }
+    #endregion
+
+    protected override string ApplicationName
+    {
+        get { return "AutoWikiBrowser logging manager"; }
     }
 }

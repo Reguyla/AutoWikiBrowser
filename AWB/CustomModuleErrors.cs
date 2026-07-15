@@ -1,22 +1,21 @@
 ﻿using System.Windows.Forms;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+public partial class CustomModuleErrors : Form
 {
-    public partial class CustomModuleErrors : Form
+    public CustomModuleErrors()
     {
-        public CustomModuleErrors()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        public string ErrorText
-        {
-            set { textBox1.Text = value; }
-        }
+    public string ErrorText
+    {
+        set { textBox1.Text = value; }
+    }
 
-        private void button1_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
+    private void button1_Click(object sender, System.EventArgs e)
+    {
+        Close();
     }
 }

@@ -25,301 +25,300 @@ using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.Plugin;
 
-namespace AutoWikiBrowser.Plugins
+namespace AutoWikiBrowser.Plugins;
+
+internal static class Plugin
 {
-    internal static class Plugin
+    static Plugin()
     {
-        static Plugin()
+        ErrorHandler.AppendToErrorHandler += ErrorHandlerAppendToErrorHandler;
+    }
+
+    static string ErrorHandlerAppendToErrorHandler()
+    {
+        if (!AWBPlugins.Any() && !AWBBasePlugins.Any() && !ListMakerPlugins.Any())
+            return "";
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.AppendLine("```");
+
+        builder.AppendLine("AWBPlugins");
+        foreach (var p in AWBPlugins)
         {
-            ErrorHandler.AppendToErrorHandler += ErrorHandlerAppendToErrorHandler;
+            builder.AppendLine("- " + p.Key);
         }
 
-        static string ErrorHandlerAppendToErrorHandler()
+        builder.AppendLine();
+
+        builder.AppendLine("AWBBasePlugins");
+        foreach (var p in AWBBasePlugins)
         {
-            if (!AWBPlugins.Any() && !AWBBasePlugins.Any() && !ListMakerPlugins.Any())
-                return "";
+            builder.AppendLine("- " + p.Key);
+        }
 
-            StringBuilder builder = new StringBuilder();
+        builder.AppendLine();
 
-            builder.AppendLine("```");
+        builder.AppendLine("ListMakerPlugins");
+        foreach (var p in ListMakerPlugins)
+        {
+            builder.AppendLine("- " + p.Key);
+        }
 
-            builder.AppendLine("AWBPlugins");
-            foreach (var p in AWBPlugins)
+        builder.AppendLine("```");
+
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// Dictionary of Plugins, name, and reference to AWB Plugin
+    /// </summary>
+    internal static readonly Dictionary<string, IAWBPlugin> AWBPlugins = new Dictionary<string, IAWBPlugin>();
+
+    internal static readonly Dictionary<string, IAWBBasePlugin> AWBBasePlugins =
+        new Dictionary<string, IAWBBasePlugin>();
+
+    internal static readonly Dictionary<string, IListMakerPlugin> ListMakerPlugins =
+        new Dictionary<string, IListMakerPlugin>();
+
+    public static readonly Dictionary<string, string> FailedPlugins = new Dictionary<string, string>();
+
+    public static readonly List<string> FailedAssemblies = new List<string>();
+
+    /// <summary>
+    /// Gets a List of all the plugin names currently loaded
+    /// </summary>
+    /// <returns>List of Plugin Names</returns>
+    internal static List<string> GetAWBPluginList()
+    {
+        return AWBPlugins.Select(a => a.Key).ToList();
+    }
+
+    /// <summary>
+    /// Gets a List of all the plugin names currently loaded
+    /// </summary>
+    /// <returns>List of Plugin Names</returns>
+    internal static List<string> GetBasePluginList()
+    {
+        return AWBBasePlugins.Select(a => a.Key).ToList();
+    }
+
+    /// <summary>
+    /// Gets a list of all the List Maker Plugins currently loaded
+    /// </summary>
+    /// <returns>List of Plugin Names</returns>
+    internal static List<string> GetListMakerPluginList()
+    {
+        return ListMakerPlugins.Select(a => a.Key).ToList();
+    }
+
+    /// <summary>
+    /// Loads the plugin at startup, and updates the splash screen
+    /// </summary>
+    /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
+    /// <param name="splash">Splash Screen instance</param>
+    internal static void LoadPluginsStartup(IAutoWikiBrowser awb, Splash splash)
+    {
+        splash.SetProgress(25);
+        string path = Application.StartupPath;
+        string[] pluginFiles = Directory.GetFiles(path, "*.DLL");
+
+        LoadPlugins(awb, pluginFiles, false);
+        splash.SetProgress(50);
+    }
+
+    static void PluginObsolete(string name, string version)
+    {
+        if (!FailedPlugins.ContainsKey(name))
+            FailedPlugins.Add(name, version);
+    }
+
+    private static readonly HashSet<string> NotPlugins =
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "DotNetWikiBot",
+            "Diff",
+            "WikiFunctions",
+            "Newtonsoft.Json",
+            "Microsoft.mshtml"
+        };
+
+    /// <summary>
+    /// Loads all the plugins from the directory where AWB resides
+    /// </summary>
+    /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
+    /// <param name="plugins">Array of Plugin Names</param>
+    /// <param name="afterStartup">Whether the plugin(s) are being loaded post-startup</param>
+    internal static void LoadPlugins(IAutoWikiBrowser awb, string[] plugins, bool afterStartup)
+    {
+        try
+        {
+            // ignore known DLL files that aren't plugins such as WikiFunctions.dll
+            plugins = plugins.Where(p => !NotPlugins.Any(n => p.EndsWith(n + ".dll"))).ToArray();
+
+            foreach (string plugin in plugins)
             {
-                builder.AppendLine("- " + p.Key);
-            }
-
-            builder.AppendLine();
-
-            builder.AppendLine("AWBBasePlugins");
-            foreach (var p in AWBBasePlugins)
-            {
-                builder.AppendLine("- " + p.Key);
-            }
-
-            builder.AppendLine();
-
-            builder.AppendLine("ListMakerPlugins");
-            foreach (var p in ListMakerPlugins)
-            {
-                builder.AppendLine("- " + p.Key);
-            }
-
-            builder.AppendLine("```");
-
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// Dictionary of Plugins, name, and reference to AWB Plugin
-        /// </summary>
-        internal static readonly Dictionary<string, IAWBPlugin> AWBPlugins = new Dictionary<string, IAWBPlugin>();
-
-        internal static readonly Dictionary<string, IAWBBasePlugin> AWBBasePlugins =
-            new Dictionary<string, IAWBBasePlugin>();
-
-        internal static readonly Dictionary<string, IListMakerPlugin> ListMakerPlugins =
-            new Dictionary<string, IListMakerPlugin>();
-
-        public static readonly Dictionary<string, string> FailedPlugins = new Dictionary<string, string>();
-
-        public static readonly List<string> FailedAssemblies = new List<string>();
-
-        /// <summary>
-        /// Gets a List of all the plugin names currently loaded
-        /// </summary>
-        /// <returns>List of Plugin Names</returns>
-        internal static List<string> GetAWBPluginList()
-        {
-            return AWBPlugins.Select(a => a.Key).ToList();
-        }
-
-        /// <summary>
-        /// Gets a List of all the plugin names currently loaded
-        /// </summary>
-        /// <returns>List of Plugin Names</returns>
-        internal static List<string> GetBasePluginList()
-        {
-            return AWBBasePlugins.Select(a => a.Key).ToList();
-        }
-
-        /// <summary>
-        /// Gets a list of all the List Maker Plugins currently loaded
-        /// </summary>
-        /// <returns>List of Plugin Names</returns>
-        internal static List<string> GetListMakerPluginList()
-        {
-            return ListMakerPlugins.Select(a => a.Key).ToList();
-        }
-
-        /// <summary>
-        /// Loads the plugin at startup, and updates the splash screen
-        /// </summary>
-        /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
-        /// <param name="splash">Splash Screen instance</param>
-        internal static void LoadPluginsStartup(IAutoWikiBrowser awb, Splash splash)
-        {
-            splash.SetProgress(25);
-            string path = Application.StartupPath;
-            string[] pluginFiles = Directory.GetFiles(path, "*.DLL");
-
-            LoadPlugins(awb, pluginFiles, false);
-            splash.SetProgress(50);
-        }
-
-        static void PluginObsolete(string name, string version)
-        {
-            if (!FailedPlugins.ContainsKey(name))
-                FailedPlugins.Add(name, version);
-        }
-
-        private static readonly HashSet<string> NotPlugins =
-            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "DotNetWikiBot",
-                "Diff",
-                "WikiFunctions",
-                "Newtonsoft.Json",
-                "Microsoft.mshtml"
-            };
-
-        /// <summary>
-        /// Loads all the plugins from the directory where AWB resides
-        /// </summary>
-        /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
-        /// <param name="plugins">Array of Plugin Names</param>
-        /// <param name="afterStartup">Whether the plugin(s) are being loaded post-startup</param>
-        internal static void LoadPlugins(IAutoWikiBrowser awb, string[] plugins, bool afterStartup)
-        {
-            try
-            {
-                // ignore known DLL files that aren't plugins such as WikiFunctions.dll
-                plugins = plugins.Where(p => !NotPlugins.Any(n => p.EndsWith(n + ".dll"))).ToArray();
-
-                foreach (string plugin in plugins)
+                Assembly asm;
+                try
                 {
-                    Assembly asm;
-                    try
-                    {
-                        asm = Assembly.LoadFile(plugin);
-                    }
-                    catch (NotSupportedException)
-                    {
-                        // https://phabricator.wikimedia.org/T208787
-                        // Windows is probably blocking loading of the plugin for "Security" reasons
-                        // NotSupportedException
-                        // On the file, right click, properties, unblock (check or press button), apply, ok.
-                        // Maybe we want to try https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/dd409252(v=vs.100)
+                    asm = Assembly.LoadFile(plugin);
+                }
+                catch (NotSupportedException)
+                {
+                    // https://phabricator.wikimedia.org/T208787
+                    // Windows is probably blocking loading of the plugin for "Security" reasons
+                    // NotSupportedException
+                    // On the file, right click, properties, unblock (check or press button), apply, ok.
+                    // Maybe we want to try https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/dd409252(v=vs.100)
 
-                        FailedAssemblies.Add(plugin);
-                        continue;
-                    }
+                    FailedAssemblies.Add(plugin);
+                    continue;
+                }
 #if DEBUG
-                    catch (Exception ex)
+                catch (Exception ex)
+                {
+                    Tools.WriteDebug(plugin, ex.ToString());
+                    continue;
+                }
+#else
+                    catch (Exception)
                     {
-                        Tools.WriteDebug(plugin, ex.ToString());
                         continue;
                     }
-#else
-                        catch (Exception)
-                        {
-                            continue;
-                        }
 #endif
 
-                    if (asm == null)
-                    {
-                        continue;
-                    }
+                if (asm == null)
+                {
+                    continue;
+                }
 
-                    try
+                try
+                {
+                    foreach (Type t in asm.GetTypes())
                     {
-                        foreach (Type t in asm.GetTypes())
+                        if (t.GetInterface("IAWBPlugin") != null)
                         {
-                            if (t.GetInterface("IAWBPlugin") != null)
+                            IAWBPlugin awbPlugin =
+                                (IAWBPlugin)Activator.CreateInstance(t);
+
+                            if (AWBPlugins.ContainsKey(awbPlugin.Name))
                             {
-                                IAWBPlugin awbPlugin =
-                                    (IAWBPlugin)Activator.CreateInstance(t);
-
-                                if (AWBPlugins.ContainsKey(awbPlugin.Name))
-                                {
-                                    MessageBox.Show(
-                                        "A plugin with the name \"" + awbPlugin.Name +
-                                        "\", has already been added.\r\nPlease remove old duplicates from your AutoWikiBrowser Directory, and restart AWB.\r\nThis was loaded from the plugin file \"" +
-                                        plugin + "\".", "Duplicate AWB Plugin");
-                                    break;
-                                }
-
-                                InitialisePlugin(awbPlugin, awb);
-
-                                AWBPlugins.Add(awbPlugin.Name, awbPlugin);
-
-                                if (afterStartup)
-                                {
-                                    UsageStats.AddedPlugin(awbPlugin);
-                                }
+                                MessageBox.Show(
+                                    "A plugin with the name \"" + awbPlugin.Name +
+                                    "\", has already been added.\r\nPlease remove old duplicates from your AutoWikiBrowser Directory, and restart AWB.\r\nThis was loaded from the plugin file \"" +
+                                    plugin + "\".", "Duplicate AWB Plugin");
+                                break;
                             }
-                            else if (t.GetInterface("IAWBBasePlugin") != null)
-                            //IAWBBasePlugin needs to be checked after IAWBPlugin, as IAWBPlugin extends IAWBBasePlugin
+
+                            InitialisePlugin(awbPlugin, awb);
+
+                            AWBPlugins.Add(awbPlugin.Name, awbPlugin);
+
+                            if (afterStartup)
                             {
-                                IAWBBasePlugin awbBasePlugin = (IAWBBasePlugin)Activator.CreateInstance(t);
-
-                                if (AWBBasePlugins.ContainsKey(awbBasePlugin.Name))
-                                {
-                                    MessageBox.Show(
-                                        "A plugin with the name \"" + awbBasePlugin.Name +
-                                        "\", has already been added.\r\nPlease remove old duplicates from your AutoWikiBrowser Directory, and restart AWB.\r\nThis was loaded from the plugin file \"" +
-                                        plugin + "\".", "Duplicate AWB Base Plugin");
-                                    break;
-                                }
-
-                                InitialisePlugin(awbBasePlugin, awb);
-
-                                AWBBasePlugins.Add(awbBasePlugin.Name, awbBasePlugin);
-
-                                if (afterStartup)
-                                {
-                                    UsageStats.AddedPlugin(awbBasePlugin);
-                                }
-                            }
-                            else if (t.GetInterface("IListMakerPlugin") != null)
-                            {
-                                IListMakerPlugin listMakerPlugin =
-                                    (IListMakerPlugin)Activator.CreateInstance(t);
-
-                                if (ListMakerPlugins.ContainsKey(listMakerPlugin.Name))
-                                {
-                                    MessageBox.Show(
-                                        "A plugin with the name \"" + listMakerPlugin.Name +
-                                        "\", has already been added.\r\nPlease remove old duplicates from your AutoWikiBrowser Directory, and restart AWB.\r\nThis was loaded from the plugin file \"" +
-                                        plugin + "\".", "Duplicate AWB ListMaker Plugin");
-                                    break;
-                                }
-
-                                WikiFunctions.Controls.Lists.ListMaker.AddProvider(listMakerPlugin);
-
-                                ListMakerPlugins.Add(listMakerPlugin.Name, listMakerPlugin);
-
-                                if (afterStartup)
-                                {
-                                    UsageStats.AddedPlugin(listMakerPlugin);
-                                }
+                                UsageStats.AddedPlugin(awbPlugin);
                             }
                         }
-                    }
-                    catch (ReflectionTypeLoadException)
-                    {
-                        PluginObsolete(plugin, asm.GetName().Version.ToString());
-                    }
-                    catch (MissingMemberException)
-                    {
-                        PluginObsolete(plugin, asm.GetName().Version.ToString());
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorHandler.HandleException(ex);
+                        else if (t.GetInterface("IAWBBasePlugin") != null)
+                        //IAWBBasePlugin needs to be checked after IAWBPlugin, as IAWBPlugin extends IAWBBasePlugin
+                        {
+                            IAWBBasePlugin awbBasePlugin = (IAWBBasePlugin)Activator.CreateInstance(t);
+
+                            if (AWBBasePlugins.ContainsKey(awbBasePlugin.Name))
+                            {
+                                MessageBox.Show(
+                                    "A plugin with the name \"" + awbBasePlugin.Name +
+                                    "\", has already been added.\r\nPlease remove old duplicates from your AutoWikiBrowser Directory, and restart AWB.\r\nThis was loaded from the plugin file \"" +
+                                    plugin + "\".", "Duplicate AWB Base Plugin");
+                                break;
+                            }
+
+                            InitialisePlugin(awbBasePlugin, awb);
+
+                            AWBBasePlugins.Add(awbBasePlugin.Name, awbBasePlugin);
+
+                            if (afterStartup)
+                            {
+                                UsageStats.AddedPlugin(awbBasePlugin);
+                            }
+                        }
+                        else if (t.GetInterface("IListMakerPlugin") != null)
+                        {
+                            IListMakerPlugin listMakerPlugin =
+                                (IListMakerPlugin)Activator.CreateInstance(t);
+
+                            if (ListMakerPlugins.ContainsKey(listMakerPlugin.Name))
+                            {
+                                MessageBox.Show(
+                                    "A plugin with the name \"" + listMakerPlugin.Name +
+                                    "\", has already been added.\r\nPlease remove old duplicates from your AutoWikiBrowser Directory, and restart AWB.\r\nThis was loaded from the plugin file \"" +
+                                    plugin + "\".", "Duplicate AWB ListMaker Plugin");
+                                break;
+                            }
+
+                            WikiFunctions.Controls.Lists.ListMaker.AddProvider(listMakerPlugin);
+
+                            ListMakerPlugins.Add(listMakerPlugin.Name, listMakerPlugin);
+
+                            if (afterStartup)
+                            {
+                                UsageStats.AddedPlugin(listMakerPlugin);
+                            }
+                        }
                     }
                 }
+                catch (ReflectionTypeLoadException)
+                {
+                    PluginObsolete(plugin, asm.GetName().Version.ToString());
+                }
+                catch (MissingMemberException)
+                {
+                    PluginObsolete(plugin, asm.GetName().Version.ToString());
+                }
+                catch (Exception ex)
+                {
+                    ErrorHandler.HandleException(ex);
+                }
             }
-            catch (Exception ex)
-            {
+        }
+        catch (Exception ex)
+        {
 #if DEBUG
-                ErrorHandler.HandleException(ex);
+            ErrorHandler.HandleException(ex);
 #else
-                    MessageBox.Show(ex.Message, "Problem loading plugins");
+                MessageBox.Show(ex.Message, "Problem loading plugins");
 #endif
-            }
-
         }
 
-        /// <summary>
-        /// Passes a reference of the main form to the plugin for initialization
-        /// </summary>
-        /// <param name="plugin">IAWBBasePlugin (Or IAWBPlugin) to initialize</param>
-        /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
-        private static void InitialisePlugin(IAWBBasePlugin plugin, IAutoWikiBrowser awb)
-        {
-            plugin.Initialise(awb);
-        }
+    }
 
-        /// <summary>
-        /// Gets the Version string of a IAWBBasePlugin
-        /// </summary>
-        /// <param name="plugin">IAWBBasePlugin to get Version of</param>
-        /// <returns>Version String</returns>
-        internal static string GetPluginVersionString(IAWBBasePlugin plugin)
-        {
-            return Assembly.GetAssembly(plugin.GetType()).GetName().Version.ToString();
-        }
+    /// <summary>
+    /// Passes a reference of the main form to the plugin for initialization
+    /// </summary>
+    /// <param name="plugin">IAWBBasePlugin (Or IAWBPlugin) to initialize</param>
+    /// <param name="awb">IAutoWikiBrowser instance of AWB</param>
+    private static void InitialisePlugin(IAWBBasePlugin plugin, IAutoWikiBrowser awb)
+    {
+        plugin.Initialise(awb);
+    }
 
-        /// <summary>
-        /// Gets the Version string of a IListMakerPlugin
-        /// </summary>
-        /// <param name="plugin">IListMakerPlugin to get Version of</param>
-        /// <returns>Version String</returns>
-        internal static string GetPluginVersionString(IListMakerPlugin plugin)
-        {
-            return Assembly.GetAssembly(plugin.GetType()).GetName().Version.ToString();
-        }
+    /// <summary>
+    /// Gets the Version string of a IAWBBasePlugin
+    /// </summary>
+    /// <param name="plugin">IAWBBasePlugin to get Version of</param>
+    /// <returns>Version String</returns>
+    internal static string GetPluginVersionString(IAWBBasePlugin plugin)
+    {
+        return Assembly.GetAssembly(plugin.GetType()).GetName().Version.ToString();
+    }
+
+    /// <summary>
+    /// Gets the Version string of a IListMakerPlugin
+    /// </summary>
+    /// <param name="plugin">IListMakerPlugin to get Version of</param>
+    /// <returns>Version String</returns>
+    internal static string GetPluginVersionString(IListMakerPlugin plugin)
+    {
+        return Assembly.GetAssembly(plugin.GetType()).GetName().Version.ToString();
     }
 }

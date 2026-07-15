@@ -19,38 +19,37 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Windows.Forms;
 using WikiFunctions;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+public partial class CategoryNameForm : Form
 {
-    public partial class CategoryNameForm : Form
+    public CategoryNameForm()
     {
-        public CategoryNameForm()
+        InitializeComponent();
+    }
+
+    public string CategoryName
+    {
+        get
         {
-            InitializeComponent();
+            if (!string.IsNullOrEmpty(txtCategory.Text.Trim()))
+                return lblCategory.Text + txtCategory.Text;
+
+            return "";
         }
+    }
 
-        public string CategoryName
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(txtCategory.Text.Trim()))
-                    return lblCategory.Text + txtCategory.Text;
+    private void frmCategoryName_Load(object sender, EventArgs e)
+    {
+        lblCategory.Text = Variables.Namespaces[Namespace.Category];
+        btnOk.DialogResult = DialogResult.OK;
 
-                return "";
-            }
-        }
+        if (!string.IsNullOrEmpty(txtCategory.Text))
+            txtCategory.SelectAll();
+    }
 
-        private void frmCategoryName_Load(object sender, EventArgs e)
-        {
-            lblCategory.Text = Variables.Namespaces[Namespace.Category];
-            btnOk.DialogResult = DialogResult.OK;
-
-            if (!string.IsNullOrEmpty(txtCategory.Text))
-                txtCategory.SelectAll();
-        }
-
-        private void btnOk_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+    private void btnOk_Click(object sender, EventArgs e)
+    {
+        Close();
     }
 }

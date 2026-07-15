@@ -1,42 +1,41 @@
 ﻿using System.Windows.Forms;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+public partial class ShutdownNotification : Form
 {
-    public partial class ShutdownNotification : Form
+    int Counter = 120;  // 2 minutes
+    string SType;
+
+    public ShutdownNotification()
     {
-        int Counter = 120;  // 2 minutes
-        string SType;
+        InitializeComponent();
+    }
 
-        public ShutdownNotification()
+    public string ShutdownType
+    {
+        set
         {
-            InitializeComponent();
+            SType = value;
+            txtPrompt.Text = string.Format(txtPrompt.Text, value);
+            SetShutdownLabel(Counter);
         }
+    }
 
-        public string ShutdownType
-        {
-            set
-            {
-                SType = value;
-                txtPrompt.Text = string.Format(txtPrompt.Text, value);
-                SetShutdownLabel(Counter);
-            }
-        }
+    private void SetShutdownLabel(int time)
+    {
+        lblTimer.Text = "Time until " + SType + ": " + time;
+    }
 
-        private void SetShutdownLabel(int time)
+    private void CountdownTimer_Tick(object sender, EventArgs e)
+    {
+        Counter--;
+        if (Counter != 0)
         {
-            lblTimer.Text = "Time until " + SType + ": " + time;
+            SetShutdownLabel(Counter);
+            Application.DoEvents();
         }
-
-        private void CountdownTimer_Tick(object sender, EventArgs e)
-        {
-            Counter--;
-            if (Counter != 0)
-            {
-                SetShutdownLabel(Counter);
-                Application.DoEvents();
-            }
-            else
-                Close();
-        }
+        else
+            Close();
     }
 }

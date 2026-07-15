@@ -19,69 +19,68 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.ComponentModel;
 
-namespace AutoWikiBrowser
+namespace AutoWikiBrowser;
+
+internal sealed partial class NudgeTimer : System.Windows.Forms.Timer
 {
-    internal sealed partial class NudgeTimer : System.Windows.Forms.Timer
+    // Events
+    public new event TickEventHandler Tick;
+    public delegate void TickEventHandler(object sender, NudgeTimerEventArgs eventArgs);
+
+    // Methods
+    public NudgeTimer(IContainer container)
+        : base(container)
     {
-        // Events
-        public new event TickEventHandler Tick;
-        public delegate void TickEventHandler(object sender, NudgeTimerEventArgs eventArgs);
+        base.Tick += NudgeTimerTick;
+    }
 
-        // Methods
-        public NudgeTimer(IContainer container)
-            : base(container)
+    public void StartMe()
+    {
+        Start();
+    }
+
+    public void Reset()
+    {
+        Interval = 120000;
+    }
+
+    private void NudgeTimerTick(object sender, EventArgs eventArgs)
+    {
+        NudgeTimerEventArgs myEventArgs = new NudgeTimerEventArgs();
+        Tick(this, myEventArgs);
+        if (!myEventArgs.Cancel)
         {
-            base.Tick += NudgeTimerTick;
+            switch (Interval)
+            {
+                case 120000:
+                    Interval = 240000;
+                    break;
+
+                case 240000:
+                    Interval = 360000;
+                    break;
+
+                case 360000:
+                    Interval = 600000;
+                    break;
+            }
         }
+    }
 
-        public void StartMe()
+    // Properties
+    public override bool Enabled
+    {
+        get { return base.Enabled; }
+        set
         {
-            Start();
-        }
-
-        public void Reset()
-        {
+            base.Enabled = value;
             Interval = 120000;
         }
+    }
 
-        private void NudgeTimerTick(object sender, EventArgs eventArgs)
-        {
-            NudgeTimerEventArgs myEventArgs = new NudgeTimerEventArgs();
-            Tick(this, myEventArgs);
-            if (!myEventArgs.Cancel)
-            {
-                switch (Interval)
-                {
-                    case 120000:
-                        Interval = 240000;
-                        break;
-
-                    case 240000:
-                        Interval = 360000;
-                        break;
-
-                    case 360000:
-                        Interval = 600000;
-                        break;
-                }
-            }
-        }
-
-        // Properties
-        public override bool Enabled
-        {
-            get { return base.Enabled; }
-            set
-            {
-                base.Enabled = value;
-                Interval = 120000;
-            }
-        }
-
-        // Nested Types
-        internal sealed class NudgeTimerEventArgs : EventArgs
-        {
-            public bool Cancel { get; set; }
-        }
+    // Nested Types
+    internal sealed class NudgeTimerEventArgs : EventArgs
+    {
+        public bool Cancel { get; set; }
     }
 }
