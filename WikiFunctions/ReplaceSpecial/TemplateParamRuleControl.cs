@@ -18,56 +18,55 @@
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial
+namespace WikiFunctions.ReplaceSpecial;
+
+public partial class TemplateParamRuleControl : UserControl
 {
-    public partial class TemplateParamRuleControl : UserControl
+    readonly IRuleControlOwner owner_;
+
+    public TemplateParamRuleControl(IRuleControlOwner owner)
     {
-        readonly IRuleControlOwner owner_;
+        InitializeComponent();
+        owner_ = owner;
+        Anchor =
+          AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+    }
 
-        public TemplateParamRuleControl(IRuleControlOwner owner)
-        {
-            InitializeComponent();
-            owner_ = owner;
-            Anchor =
-              AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-        }
+    public void SetName(string name)
+    {
+        NameTextbox.Text = name;
+    }
 
-        public void SetName(string name)
-        {
-            NameTextbox.Text = name;
-        }
+    public void SelectName()
+    {
+        NameTextbox.Select();
+        NameTextbox.SelectAll();
+    }
 
-        public void SelectName()
-        {
-            NameTextbox.Select();
-            NameTextbox.SelectAll();
-        }
+    public void SaveToRule(TemplateParamRule rule)
+    {
+        if (rule == null)
+            return;
 
-        public void SaveToRule(TemplateParamRule rule)
-        {
-            if (rule == null)
-                return;
+        rule.enabled_ = RuleEnabledCheckBox.Checked;
+        rule.Name = NameTextbox.Text.Trim();
+        rule.ParamName = ParamNameTextBox.Text.Trim();
+        rule.NewParamName = ChangeNameToTextBox.Text.Trim();
+    }
 
-            rule.enabled_ = RuleEnabledCheckBox.Checked;
-            rule.Name = NameTextbox.Text.Trim();
-            rule.ParamName = ParamNameTextBox.Text.Trim();
-            rule.NewParamName = ChangeNameToTextBox.Text.Trim();
-        }
+    public void RestoreFromRule(TemplateParamRule rule)
+    {
+        if (rule == null)
+            return;
 
-        public void RestoreFromRule(TemplateParamRule rule)
-        {
-            if (rule == null)
-                return;
+        RuleEnabledCheckBox.Checked = rule.enabled_;
+        NameTextbox.Text = rule.Name;
+        ParamNameTextBox.Text = rule.ParamName;
+        ChangeNameToTextBox.Text = rule.NewParamName;
+    }
 
-            RuleEnabledCheckBox.Checked = rule.enabled_;
-            NameTextbox.Text = rule.Name;
-            ParamNameTextBox.Text = rule.ParamName;
-            ChangeNameToTextBox.Text = rule.NewParamName;
-        }
-
-        private void NameTextbox_TextChanged(object sender, EventArgs e)
-        {
-            owner_.NameChanged(this, NameTextbox.Text.Trim());
-        }
+    private void NameTextbox_TextChanged(object sender, EventArgs e)
+    {
+        owner_.NameChanged(this, NameTextbox.Text.Trim());
     }
 }

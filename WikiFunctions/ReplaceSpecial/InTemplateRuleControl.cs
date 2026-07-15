@@ -19,127 +19,126 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial
+namespace WikiFunctions.ReplaceSpecial;
+
+public partial class InTemplateRuleControl : UserControl
 {
-    public partial class InTemplateRuleControl : UserControl
+    readonly IRuleControlOwner Owner;
+
+    public InTemplateRuleControl(IRuleControlOwner owner)
     {
-        readonly IRuleControlOwner Owner;
+        InitializeComponent();
 
-        public InTemplateRuleControl(IRuleControlOwner owner)
-        {
-            InitializeComponent();
+        Owner = owner;
+        Anchor =
+          AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
 
-            Owner = owner;
-            Anchor =
-              AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-
-            UpdateEndabledStates();
-        }
-
-        public void SetName(string name)
-        {
-            NameTextbox.Text = name;
-        }
-
-        public void SelectName()
-        {
-            NameTextbox.Select();
-            NameTextbox.SelectAll();
-        }
-
-        public void SaveToRule(InTemplateRule rule)
-        {
-            if (rule == null)
-                return;
-
-            rule.enabled_ = RuleEnabledCheckBox.Checked;
-            rule.Name = NameTextbox.Text.Trim();
-            rule.ReplaceWith_ = ReplaceWithTextBox.Text.Trim();
-            rule.DoReplace_ = ReplaceCheckBox.Checked;
-
-            rule.TemplateNames_.Clear();
-            foreach (string s in AliasesListBox.Items)
-            {
-                rule.TemplateNames_.Add(s);
-            }
-        }
-
-        public void RestoreFromRule(InTemplateRule rule)
-        {
-            NameTextbox.Text = rule.Name;
-            RuleEnabledCheckBox.Checked = rule.enabled_;
-            ReplaceWithTextBox.Text = rule.ReplaceWith_;
-            ReplaceCheckBox.Checked = rule.DoReplace_;
-
-            AliasesListBox.BeginUpdate();
-            AliasesListBox.Items.Clear();
-            foreach (string s in rule.TemplateNames_)
-            {
-                AliasesListBox.Items.Add(s);
-            }
-            AliasesListBox.EndUpdate();
-
-            UpdateEndabledStates();
-        }
-
-        private void NameTextbox_TextChanged(object sender, EventArgs e)
-        {
-            Owner.NameChanged(this, NameTextbox.Text.Trim());
-        }
-
-        private void NameTextbox_DoubleClick(object sender, EventArgs e)
-        {
-            NameTextbox.SelectAll();
-        }
-
-        private void ReplaceCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            UpdateEndabledStates();
-        }
-
-        void UpdateEndabledStates()
-        {
-            ReplaceWithTextBox.Enabled = ReplaceCheckBox.Checked;
-            DeleteButton.Enabled = AliasesListBox.SelectedItem != null;
-        }
-
-        private void AddButton_Click(object sender, EventArgs e)
-        {
-            string alias = AliasTextBox.Text;
-            if (string.IsNullOrEmpty(alias))
-                return;
-            if (!AliasesListBox.Items.Contains(alias))
-            {
-                AliasesListBox.Items.Add(alias);
-            }
-            AliasTextBox.Text = "";
-            AliasTextBox.Select();
-            UpdateEndabledStates();
-        }
-
-        private void DeleteButton_Click(object sender, EventArgs e)
-        {
-            if (AliasesListBox.SelectedItem == null)
-                return;
-
-            int i = AliasesListBox.SelectedIndex;
-
-            AliasesListBox.Items.Remove(AliasesListBox.SelectedItem);
-
-            int count = AliasesListBox.Items.Count;
-            if (count != 0)
-            {
-                if (i > count - 1)
-                    i = count - 1;
-                AliasesListBox.SelectedIndex = i;
-            }
-            UpdateEndabledStates();
-        }
-
-        private void AliasesListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateEndabledStates();
-        }
-
+        UpdateEndabledStates();
     }
+
+    public void SetName(string name)
+    {
+        NameTextbox.Text = name;
+    }
+
+    public void SelectName()
+    {
+        NameTextbox.Select();
+        NameTextbox.SelectAll();
+    }
+
+    public void SaveToRule(InTemplateRule rule)
+    {
+        if (rule == null)
+            return;
+
+        rule.enabled_ = RuleEnabledCheckBox.Checked;
+        rule.Name = NameTextbox.Text.Trim();
+        rule.ReplaceWith_ = ReplaceWithTextBox.Text.Trim();
+        rule.DoReplace_ = ReplaceCheckBox.Checked;
+
+        rule.TemplateNames_.Clear();
+        foreach (string s in AliasesListBox.Items)
+        {
+            rule.TemplateNames_.Add(s);
+        }
+    }
+
+    public void RestoreFromRule(InTemplateRule rule)
+    {
+        NameTextbox.Text = rule.Name;
+        RuleEnabledCheckBox.Checked = rule.enabled_;
+        ReplaceWithTextBox.Text = rule.ReplaceWith_;
+        ReplaceCheckBox.Checked = rule.DoReplace_;
+
+        AliasesListBox.BeginUpdate();
+        AliasesListBox.Items.Clear();
+        foreach (string s in rule.TemplateNames_)
+        {
+            AliasesListBox.Items.Add(s);
+        }
+        AliasesListBox.EndUpdate();
+
+        UpdateEndabledStates();
+    }
+
+    private void NameTextbox_TextChanged(object sender, EventArgs e)
+    {
+        Owner.NameChanged(this, NameTextbox.Text.Trim());
+    }
+
+    private void NameTextbox_DoubleClick(object sender, EventArgs e)
+    {
+        NameTextbox.SelectAll();
+    }
+
+    private void ReplaceCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+        UpdateEndabledStates();
+    }
+
+    void UpdateEndabledStates()
+    {
+        ReplaceWithTextBox.Enabled = ReplaceCheckBox.Checked;
+        DeleteButton.Enabled = AliasesListBox.SelectedItem != null;
+    }
+
+    private void AddButton_Click(object sender, EventArgs e)
+    {
+        string alias = AliasTextBox.Text;
+        if (string.IsNullOrEmpty(alias))
+            return;
+        if (!AliasesListBox.Items.Contains(alias))
+        {
+            AliasesListBox.Items.Add(alias);
+        }
+        AliasTextBox.Text = "";
+        AliasTextBox.Select();
+        UpdateEndabledStates();
+    }
+
+    private void DeleteButton_Click(object sender, EventArgs e)
+    {
+        if (AliasesListBox.SelectedItem == null)
+            return;
+
+        int i = AliasesListBox.SelectedIndex;
+
+        AliasesListBox.Items.Remove(AliasesListBox.SelectedItem);
+
+        int count = AliasesListBox.Items.Count;
+        if (count != 0)
+        {
+            if (i > count - 1)
+                i = count - 1;
+            AliasesListBox.SelectedIndex = i;
+        }
+        UpdateEndabledStates();
+    }
+
+    private void AliasesListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        UpdateEndabledStates();
+    }
+
 }

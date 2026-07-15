@@ -16,23 +16,22 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.ReplaceSpecial
+namespace WikiFunctions.ReplaceSpecial;
+
+static class RuleFactory
 {
-    static class RuleFactory
+    public static Rule CreateRule()
     {
-        public static Rule CreateRule()
-        {
-            return new Rule();
-        }
+        return new Rule();
+    }
 
-        public static InTemplateRule CreateInTemplateRule()
-        {
-            return new InTemplateRule();
-        }
+    public static InTemplateRule CreateInTemplateRule()
+    {
+        return new InTemplateRule();
+    }
 
-        public static TemplateParamRule CreateTemplateParamRule()
-        {
-            return new TemplateParamRule();
-        }
+    public static TemplateParamRule CreateTemplateParamRule()
+    {
+        return new TemplateParamRule();
     }
 }

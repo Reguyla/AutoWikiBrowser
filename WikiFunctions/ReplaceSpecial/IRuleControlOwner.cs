@@ -18,10 +18,9 @@
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial
+namespace WikiFunctions.ReplaceSpecial;
+
+public interface IRuleControlOwner
 {
-    public interface IRuleControlOwner
-    {
-        void NameChanged(Control rc, string name);
-    }
+    void NameChanged(Control rc, string name);
 }

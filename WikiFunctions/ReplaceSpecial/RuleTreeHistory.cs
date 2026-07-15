@@ -17,105 +17,104 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial
+namespace WikiFunctions.ReplaceSpecial;
+
+public class RuleTreeHistory
 {
-    public class RuleTreeHistory
+    readonly List<List<TreeNode>> History = new List<List<TreeNode>>();
+    int index_ = -1;
+
+    readonly TreeView treeView_;
+
+    public RuleTreeHistory(TreeView tv)
     {
-        readonly List<List<TreeNode>> History = new List<List<TreeNode>>();
-        int index_ = -1;
+        treeView_ = tv;
+    }
 
-        readonly TreeView treeView_;
+    public void Clear()
+    {
+        History.Clear();
+        index_ = -1;
+    }
 
-        public RuleTreeHistory(TreeView tv)
+    public void Save()
+    {
+        if (index_ != -1)
         {
-            treeView_ = tv;
-        }
-
-        public void Clear()
-        {
-            History.Clear();
+            Clear();
             index_ = -1;
         }
+        InternalSave();
+    }
 
-        public void Save()
+    private void InternalSave()
+    {
+        List<TreeNode> cp = Copy(treeView_.Nodes);
+        History.Insert(0, cp);
+    }
+
+    public bool CanUndo
+    {
+        get
         {
-            if (index_ != -1)
-            {
-                Clear();
-                index_ = -1;
-            }
+            return (History.Count > 0) && (index_ == -1 || index_ + 1 < History.Count);
+        }
+    }
+
+    public void Undo()
+    {
+        if (!CanUndo)
+            return;
+
+        if (index_ == -1)
+        {
             InternalSave();
+            index_ = 1;
         }
-
-        private void InternalSave()
+        else
         {
-            List<TreeNode> cp = Copy(treeView_.Nodes);
-            History.Insert(0, cp);
+            ++index_;
         }
 
-        public bool CanUndo
+        Restore();
+    }
+
+    public bool CanRedo { get { return (History.Count > 0) && (index_ > 0); } }
+
+    public void Redo()
+    {
+        if (!CanRedo)
+            return;
+        --index_;
+        Restore();
+    }
+
+    private void Restore()
+    {
+        treeView_.Nodes.Clear();
+
+        List<TreeNode> hcol = History[index_];
+
+        foreach (TreeNode t in hcol)
         {
-            get
-            {
-                return (History.Count > 0) && (index_ == -1 || index_ + 1 < History.Count);
-            }
+            TreeNode copy = (TreeNode)t.Clone();
+            treeView_.Nodes.Add(copy);
+            UpdateNames(copy);
         }
+    }
 
-        public void Undo()
-        {
-            if (!CanUndo)
-                return;
+    private static void UpdateNames(TreeNode t)
+    {
+        if (t == null)
+            return;
+        IRule r = (IRule)t.Tag;
+        t.Text = r.Name;
+        foreach (TreeNode sub in t.Nodes)
+            UpdateNames(sub);
+    }
 
-            if (index_ == -1)
-            {
-                InternalSave();
-                index_ = 1;
-            }
-            else
-            {
-                ++index_;
-            }
-
-            Restore();
-        }
-
-        public bool CanRedo { get { return (History.Count > 0) && (index_ > 0); } }
-
-        public void Redo()
-        {
-            if (!CanRedo)
-                return;
-            --index_;
-            Restore();
-        }
-
-        private void Restore()
-        {
-            treeView_.Nodes.Clear();
-
-            List<TreeNode> hcol = History[index_];
-
-            foreach (TreeNode t in hcol)
-            {
-                TreeNode copy = (TreeNode)t.Clone();
-                treeView_.Nodes.Add(copy);
-                UpdateNames(copy);
-            }
-        }
-
-        private static void UpdateNames(TreeNode t)
-        {
-            if (t == null)
-                return;
-            IRule r = (IRule)t.Tag;
-            t.Text = r.Name;
-            foreach (TreeNode sub in t.Nodes)
-                UpdateNames(sub);
-        }
-
-        private static List<TreeNode> Copy(TreeNodeCollection col)
-        {
-            return (from TreeNode t in col select (TreeNode)t.Clone()).ToList();
-        }
+    private static List<TreeNode> Copy(TreeNodeCollection col)
+    {
+        return (from TreeNode t in col select (TreeNode)t.Clone()).ToList();
     }
 }
