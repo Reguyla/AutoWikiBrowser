@@ -399,40 +399,26 @@ namespace WikiFunctions;
             // Editing permission is validated through normal API responses instead.
             //
             // TODO:
-            // Reassess Maxlag defaults after the .NET 8 networking migration.
-            // Current value disables Maxlag while API compatibility work is in progress.
+            // Reassess the default Maxlag value after the .NET 8 networking
+            // migration is complete. Maxlag is currently disabled while API
+            // compatibility work is being validated.
             Editor.Maxlag = /* User.IsBot ? 5 : 20 */ -1;
 
-            if (string.IsNullOrWhiteSpace(Updater.GlobalVersionPage))
+            // Validate the downloaded global version metadata before using it to
+            // evaluate account restrictions or display global status messages.
+            if (!TryParseJsonObject(
+                    Updater.GlobalVersionPage,
+                    "The global version page",
+                    out JObject versionJson))
             {
-                Tools.WriteDebug(
-                    nameof(UpdateWikiStatus),
-                    "The global version page returned no JSON content.");
-
                 return WikiStatusResult.Error;
             }
 
-            JObject versionJson = JObject.Parse(Updater.GlobalVersionPage);
-
-            // TODO:
-            // Evaluate externally supplied regular expressions with a timeout to
-            // prevent pathological patterns from blocking the UI.
-            if (versionJson["badnames"] is JArray badNames)
+            // The global version page may define usernames that are prevented
+            // from editing. Evaluate the downloaded patterns before continuing.
+            if (IsGloballyBlockedUsername(versionJson))
             {
-                foreach (JToken badNameToken in badNames)
-                {
-                    string badName = badNameToken.ToString();
-
-                    if (!string.IsNullOrEmpty(User.Name) &&
-                        Regex.IsMatch(
-                            User.Name,
-                            badName,
-                            RegexOptions.IgnoreCase |
-                            RegexOptions.Multiline))
-                    {
-                        return WikiStatusResult.NotRegistered;
-                    }
-                }
+                return WikiStatusResult.NotRegistered;
             }
 
             // See if there's any global messages on the enwiki json version page
