@@ -398,32 +398,110 @@ namespace WikiFunctions
         public bool IsAWBTagDefined { get; private set; }
 
         /// <summary>
-        /// 
+        /// Retrieves localized MediaWiki system messages for the current wiki.
+        ///
+        /// This method is only used when the wiki language is not English.
         /// </summary>
-        /// <param name="names"></param>
-        /// <returns></returns>
-        /// <remarks>Only called if language != en</remarks>
+        /// <param name="names">
+        /// The names of the MediaWiki messages to retrieve.
+        /// </param>
+        /// <returns>
+        /// A dictionary keyed by message name containing the localized
+        /// message text.
+        /// </returns>
+        /// <remarks>
+        /// Only called when the wiki language is not English.
+        /// </remarks>
         public Dictionary<string, string> GetMessages(params string[] names)
         {
-            var json = JObject.Parse(
-                Editor.HttpGet(ApiPath + "?format=json&action=query&meta=allmessages&continue=&ammessages=" +
-                    string.Join("|", names)));
+            string response = Editor.HttpGet(
+                ApiPath +
+                "?format=json&action=query&meta=allmessages&continue=&ammessages=" +
+                string.Join("|", names));
 
-            if (json["error"] != null)
+            if (!TryParseJsonObject(
+                    response,
+                    "The allmessages API response",
+                    out JObject json))
             {
-                // We probably got "code": "readapidenied", due to a "private" wiki
-                //if (obj["error"]["code"].ToString() == "readapidenied")
-                //{
-                //    Variables.TryLoadingAgainAfterLogin ???
-                //    throw new ReadApiDeniedException();
-                //}
-                // HACK
                 return new Dictionary<string, string>();
             }
 
-            return json["query"]["allmessages"].ToDictionary(
-                    k => k.Value<string>("name"),
-                    v => v.Value<string>("*"));
+            if (json["error"] != null)
+            {
+                // Localized messages are optional during project initialization.
+                // If the API denies access or returns another error, continue with
+                // the default English month names rather than failing the session.
+                return new Dictionary<string, string>();
+            }
+
+            if (json["query"]?["allmessages"] is not JArray messages)
+            {
+                return new Dictionary<string, string>();
+            }
+
+            return messages
+                .OfType<JObject>()
+                .Where(message =>
+                    message["name"]?.Type == JTokenType.String &&
+                    message["*"]?.Type == JTokenType.String)
+                .ToDictionary(
+                    message => message.Value<string>("name"),
+                    message => message.Value<string>("*"));
+        }
+
+        /// <summary>
+        /// Attempts to parse a JSON object using bounded reader settings.
+        /// </summary>
+        /// <param name="jsonText">The JSON text to parse.</param>
+        /// <param name="sourceName">
+        /// A descriptive name for the JSON source used in debug output.
+        /// </param>
+        /// <param name="json">
+        /// Contains the parsed object when parsing succeeds; otherwise
+        /// <c>null</c>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> when parsing succeeds; otherwise <c>false</c>.
+        /// </returns>
+        private static bool TryParseJsonObject(
+            string jsonText,
+            string sourceName,
+            out JObject json)
+        {
+            json = null;
+
+            if (string.IsNullOrWhiteSpace(jsonText))
+            {
+                Tools.WriteDebug(
+                    nameof(GetMessages),
+                    sourceName + " returned no JSON content.");
+
+                return false;
+            }
+
+            try
+            {
+                using (var stringReader = new StringReader(jsonText))
+                using (var jsonReader = new JsonTextReader(stringReader)
+                {
+                    MaxDepth = 32,
+                    DateParseHandling = DateParseHandling.None
+                })
+                {
+                    json = JObject.Load(jsonReader);
+                }
+
+                return true;
+            }
+            catch (JsonException ex)
+            {
+                Tools.WriteDebug(
+                    nameof(GetMessages),
+                    sourceName + " contained invalid JSON: " + ex.Message);
+
+                return false;
+            }
         }
 
         #region Helpers
