@@ -1902,12 +1902,48 @@ Message: {2}
                             WikiEncode(articleTitle) + "&text=" + WebUtility.UrlEncode(call);
                         try
                         {
+                            JObject responseJson = GetJObjectFromUrl(expandUri);
+
+                            JToken wikitextToken =
+                                responseJson["expandtemplates"]?["wikitext"];
+
+                            if (wikitextToken?.Type != JTokenType.String)
+                            {
+                                Tools.WriteDebug(
+                                    nameof(ExpandTemplate),
+                                    "The expandtemplates API response did not contain a valid wikitext value.");
+
+                                continue;
+                            }
+
                             result = WebUtility.HtmlDecode(
-                                JObject.Parse(GetHTML(expandUri))["expandtemplates"]["wikitext"].ToString()
-                            );
+                                wikitextToken.Value<string>());
                         }
-                        catch
+                        catch (JsonException ex)
                         {
+                            Tools.WriteDebug(
+                                nameof(ExpandTemplate),
+                                "The expandtemplates API returned invalid JSON: " +
+                                ex.Message);
+
+                            continue;
+                        }
+                        catch (WebException ex)
+                        {
+                            Tools.WriteDebug(
+                                nameof(ExpandTemplate),
+                                "The expandtemplates API request failed: " +
+                                ex.Message);
+
+                            continue;
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            Tools.WriteDebug(
+                                nameof(ExpandTemplate),
+                                "The expandtemplates API returned no usable JSON content: " +
+                                ex.Message);
+
                             continue;
                         }
                     }
