@@ -25,7 +25,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WikiFunctions.API;
 
-namespace WikiFunctions;
+    namespace WikiFunctions;
 
     /// <summary>
     /// This class controls editing process in one wiki
@@ -495,10 +495,14 @@ namespace WikiFunctions;
                 .ToArray());
 
         NoGenfixes =
-            configJson["nogenfixes"].DistinctList();
+            ReadStringArray(
+                configJson,
+                "nogenfixes");
 
         NoRETF =
-            configJson["noregextypofix"].DistinctList();
+            ReadStringArray(
+                configJson,
+                "noregextypofix");
 
         return true;
     }
@@ -583,6 +587,14 @@ namespace WikiFunctions;
     /// Returns a <see cref="WikiStatusResult"/> describing whether
     /// editing may proceed.
     /// </summary>
+    /// <summary>
+    /// Refreshes the current wiki session state and determines whether
+    /// editing may proceed.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="WikiStatusResult"/> describing the current session
+    /// and registration status.
+    /// </returns>
     private WikiStatusResult UpdateWikiStatus()
     {
         try
@@ -590,31 +602,27 @@ namespace WikiFunctions;
             IsBot = false;
 
             Site = new SiteInfo(Editor.SynchronousEditor);
+            ApplySiteInformation();
 
-            // load version check page if no status set
             if (Updater.Result == Updater.AWBEnabledStatus.None)
             {
                 Updater.CheckForUpdates();
             }
 
             Updater.WaitForCompletion();
+
             Updater.AWBEnabledStatus versionStatus = Updater.Result;
             VersionCheckPage = Updater.GlobalVersionPage;
 
-            // See whether this public AWB version is enabled.
-            //
-            // Fork/rebrand development builds still need to run the remaining status,
-            // account-registration, CheckPageJSON, and configuration checks in Release
-            // mode. Keep the public AWB version validation isolated so Release testing
-            // is not blocked by the upstream AWB version page.
             if (IsPublicAwbVersionDisabled(versionStatus) &&
                 ShouldEnforcePublicAwbVersionGate())
             {
                 return WikiStatusResult.OldVersion;
             }
 
-            // Attempt to load the JSON CheckPage from the wiki
-            CheckPageJSONText = Editor.SynchronousEditor.HttpGet(Variables.URLIndex + "?title=Project:AutoWikiBrowser/CheckPageJSON&action=raw");
+            CheckPageJSONText = Editor.SynchronousEditor.HttpGet(
+                Variables.URLIndex +
+                "?title=Project:AutoWikiBrowser/CheckPageJSON&action=raw");
 
             if (!User.IsLoggedIn)
             {
@@ -622,124 +630,40 @@ namespace WikiFunctions;
             }
 
             // MediaWiki no longer exposes the legacy "writeapi" user right.
-            // Editing permission is validated through normal API responses instead.
+            // Editing permission is validated through normal API responses.
             //
             // TODO:
             // Reassess the default Maxlag value after the .NET 8 networking
-            // migration is complete. Maxlag is currently disabled while API
-            // compatibility work is being validated.
-            Editor.Maxlag = /* User.IsBot ? 5 : 20 */ -1;
+            // migration is complete.
+            Editor.Maxlag = -1;
 
-            // Validate the downloaded global version metadata before using it to
-            // evaluate account restrictions or display global status messages.
-            if (!TryParseJsonObject(
-                    Updater.GlobalVersionPage,
-                    "The global version page",
-                    out JObject versionJson))
+            if (!TryLoadGlobalVersionJson(out JObject versionJson))
             {
                 return WikiStatusResult.Error;
             }
 
-            // The global version page may define usernames that are prevented
-            // from editing. Evaluate the downloaded patterns before continuing.
             if (IsGloballyBlockedUsername(versionJson))
             {
                 return WikiStatusResult.NotRegistered;
             }
 
-            // See if there's any global messages on the enwiki json version page
             JSONMessages(versionJson["messages"]);
 
-            string configJSONText = Editor.SynchronousEditor.HttpGet(ConfigUrl);
-
-            if (!string.IsNullOrEmpty(configJSONText))
+            if (!TryLoadWikiConfiguration(out JObject configJson))
             {
-                ConfigJSONText = configJSONText;
-            }
-            else
-            {
-                Tools.WriteDebug("UpdateWikiStatus",
-                    "No JSON config page at " + ConfigUrl + "; falling back to default");
-                ConfigJSONText = DefaultWikiConfig;
-
+                return WikiStatusResult.Error;
             }
 
-            var configJson = JObject.Parse(ConfigJSONText);
-
-            // See if there's any messages on the local wikis config page
-            JSONMessages(configJson["messages"]);
-
-            TypoLink(configJson);
-
-            Variables.LoadUnderscores(
-                configJson["underscoretitles"]
-                    .Select(underscore => underscore.ToString().Trim())
-                    .Where(trimmed => !string.IsNullOrEmpty(trimmed))
-                    .ToArray()
-            );
-
-            NoGenfixes = configJson["nogenfixes"].DistinctList();
-
-            NoRETF = configJson["noregextypofix"].DistinctList();
-
-            // Don't require approval if CheckPage does not exist
-            // or the configuration explicitly enables all users.
-            if (CheckPageJSONText.Length < 1 ||
-                ReadBoolean(configJson, "allusersenabled"))
-            {
-                IsBot = true;
-                return WikiStatusResult.Registered;
-            }
-
-            var checkPageJson = JObject.Parse(CheckPageJSONText);
-
-            List<string> enabledUsers =
-                ReadStringArray(
-                    checkPageJson,
-                    "enabledusers");
-
-            List<string> enabledBots =
-                ReadStringArray(
-                    checkPageJson,
-                    "enabledbots");
-
-            // CheckPage option: 'allusersenabledusermode' enables all users
-            // in user mode, while bot mode still requires membership in
-            // the 'enabledbots' section.
-            var usernameComparer = new UsernameComparer();
-
-            // Optimization: avoid running the same comparison multiple times.
-            bool isBotEnabled =
-                enabledBots.Contains(User.Name, usernameComparer);
-
-            if (ReadBoolean(configJson, "allusersenabledusermode") ||
-                (IsSysop && Variables.Project != ProjectEnum.wikia) ||
-                isBotEnabled ||
-                enabledUsers.Contains(User.Name, usernameComparer))
-            {
-                // Enable bot mode only when the user is in the bot list.
-                IsBot = isBotEnabled;
-
-                return WikiStatusResult.Registered;
-            }
-
-            foreach (string globalUser in
-                ReadStringArray(
-                    versionJson,
-                    "globalusers"))
-            {
-                if (User.Name == globalUser)
-                {
-                    return WikiStatusResult.Registered;
-                }
-            }
-
-            return WikiStatusResult.NotRegistered;
+            return DetermineRegistrationStatus(
+                versionJson,
+                configJson);
         }
         catch (Exception ex)
         {
-            Tools.WriteDebug(ToString(), ex.Message);
-            Tools.WriteDebug(ToString(), ex.StackTrace);
+            Tools.WriteDebug(
+                nameof(UpdateWikiStatus),
+                ex.ToString());
+
             IsBot = false;
             return WikiStatusResult.Error;
         }
@@ -832,21 +756,27 @@ namespace WikiFunctions;
 
     private static void JSONMessages(JToken json)
     {
-        foreach (var message in json)
-        {
-            var version = message["version"];
+        if (json is not JArray messages)
+            return;
 
-            // One message could apply to many versions
-            if (version is JArray)
+        foreach (JToken message in messages)
+        {
+            JToken version = message["version"];
+
+            if (version is JArray versions)
             {
-                foreach (var v in version)
+                foreach (JToken item in versions)
                 {
-                    JSONMessage(v.ToString(), message);
+                    JSONMessage(
+                        item.ToString(),
+                        message);
                 }
             }
-            else
+            else if (version != null)
             {
-                JSONMessage(version.ToString(), message);
+                JSONMessage(
+                    version.ToString(),
+                    message);
             }
         }
     }
