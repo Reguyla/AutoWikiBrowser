@@ -206,15 +206,12 @@ namespace WikiFunctions;
         }
         catch (WebException ex)
         {
-            // Check for HTTP 401 error.                
-            var resp = (HttpWebResponse)ex.Response;
-            if (resp == null) throw;
-            switch (resp.StatusCode)
-            {
-                // 401
-                case HttpStatusCode.Unauthorized:
-                    throw;
-            }
+            if (ex.Response is not HttpWebResponse response)
+                throw;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                throw;
+
             return false;
         }
         catch (Exception)
