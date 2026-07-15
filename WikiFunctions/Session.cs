@@ -587,30 +587,63 @@ namespace WikiFunctions;
         }
         catch (Exception ex)
         {
-            // TODO: Classify project-loading failures more precisely so invalid URLs,
-            // connection/TLS failures, malformed project configuration, and unexpected
-            // exceptions receive accurate user-facing messages and diagnostics.
+            string message;
+            string guidance;
 
-            string message = string.Empty;
+            switch (ex)
+            {
+                case WikiUrlException:
+                    message = ex.InnerException?.Message ?? ex.Message;
+                    guidance =
+                        "The wiki URL or project configuration could not be recognized. " +
+                        "Enter the URL in the format \"en.wikipedia.org/w/\", including " +
+                        "the path containing index.php and api.php.";
+                    break;
 
-            if (ex is WikiUrlException)
-            {
-                if (ex.InnerException != null)
-                {
-                    message = ex.InnerException.Message;
-                }
+                case UriFormatException:
+                    message = ex.Message;
+                    guidance =
+                        "The wiki URL is not valid. Check the protocol, host name, " +
+                        "and path, then try again.";
+                    break;
+
+                case AuthenticationException:
+                    message = ex.Message;
+                    guidance =
+                        "A secure connection could not be established. Check the site's " +
+                        "TLS certificate and confirm that the wiki supports a compatible " +
+                        "HTTPS configuration.";
+                    break;
+
+                case Newtonsoft.Json.JsonException:
+                    message = ex.Message;
+                    guidance =
+                        "The wiki returned malformed or unexpected JSON while loading " +
+                        "project configuration.";
+                    break;
+
+                case FormatException:
+                    message = ex.Message;
+                    guidance =
+                        "The wiki returned project information in an unexpected format.";
+                    break;
+
+                default:
+                    message = ex.Message;
+                    guidance =
+                        "An unexpected error occurred while loading project information.";
+                    break;
             }
-            else
-            {
-                message = ex.Message;
-            }
+
+            Tools.WriteDebug(
+                nameof(LoadProjectOptions),
+                ex.ToString());
 
             MessageBox.Show(
-                "An error occurred while connecting to the server or loading project information from it. " +
-                "Please make sure that your internet connection works and such combination of project/language exist." +
-                "\r\nEnter the URL in the format \"en.wikipedia.org/w/\" (including path where index.php and api.php reside)." +
-                "\r\nError description: " + message,
-                "Error connecting to wiki", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                $"{guidance}\r\n\r\nError description: {message}",
+                "Error connecting to wiki",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
 
             throw;
         }
