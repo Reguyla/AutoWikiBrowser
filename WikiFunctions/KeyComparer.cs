@@ -1,5 +1,5 @@
-﻿namespace WikiFunctions
-{
+﻿    namespace WikiFunctions;
+
     /// <summary>
     /// Code from https://medium.com/wehkamp-techblog/sorting-a-dictionary-on-a-list-of-keys-68ecadb421a5
     /// </summary>
@@ -51,4 +51,3 @@
             return BOTTOM;
         }
     }
-}

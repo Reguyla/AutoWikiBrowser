@@ -1,5 +1,5 @@
-﻿namespace WikiFunctions
-{
+﻿    namespace WikiFunctions;
+
     public class CheckedBoxItem
     {
         public int ID;
@@ -9,4 +9,3 @@
             return Description;
         }
     }
-}

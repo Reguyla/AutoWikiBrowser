@@ -22,112 +22,111 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Diagnostics;
 using System.Threading;
 
-namespace WikiFunctions
+    namespace WikiFunctions;
+
+/// <summary>
+/// Provides basic performance profiling
+/// </summary>
+public class Profiler
 {
-    /// <summary>
-    /// Provides basic performance profiling
-    /// </summary>
-    public class Profiler
-    {
 
 #if DEBUG
-        private Stopwatch Watch = new Stopwatch(); // fail-safe in case Start() wasn't called for some reason
-        private TextWriter log;
-        private readonly string FileName = "";
-        private readonly bool Append = true;
+    private Stopwatch Watch = new Stopwatch(); // fail-safe in case Start() wasn't called for some reason
+    private TextWriter log;
+    private readonly string FileName = "";
+    private readonly bool Append = true;
 
-        private static readonly Semaphore ProfilerSemaphore = new Semaphore(1, 1, "AWBProfilerSemaphore");
+    private static readonly Semaphore ProfilerSemaphore = new Semaphore(1, 1, "AWBProfilerSemaphore");
 
-        /// <summary>
-        /// Creates a profiler object
-        /// </summary>
-        /// <param name="filename">Name of file to save profiling log to</param>
-        /// <param name="append">True if the file should not be overwritten</param>
-        public Profiler(string filename, bool append)
+    /// <summary>
+    /// Creates a profiler object
+    /// </summary>
+    /// <param name="filename">Name of file to save profiling log to</param>
+    /// <param name="append">True if the file should not be overwritten</param>
+    public Profiler(string filename, bool append)
+    {
+        // done to make sure file path is writeable – each time logging used new streamwriter opened & closed to prevent file locking for entire AWB session
+        using (log = new StreamWriter(filename, append, Encoding.Unicode))
         {
-            // done to make sure file path is writeable – each time logging used new streamwriter opened & closed to prevent file locking for entire AWB session
-            using (log = new StreamWriter(filename, append, Encoding.Unicode))
-            {
-                log.Close();
-            }
-
-            FileName = filename;
-            Append = append;
+            log.Close();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Profiler()
-        {
-        }
-
-        /// <summary>
-        /// Starts measuring time
-        /// </summary>
-        /// <param name="message">a message to associate with these measure</param>
-        public void Start(string message)
-        {
-            AddLog("--------------------------------------");
-            Watch = Stopwatch.StartNew();
-            AddLog("Started profiling: " + message + " at " + System.DateTime.Now);
-        }
-
-        /// <summary>
-        /// Outputs time difference between previous time mark and now to the profiling log
-        /// </summary>
-        /// <param name="message">description of the time interval</param>
-        public void Profile(string message)
-        {
-            AddLog("\t" + message + "\t" + Watch.ElapsedMilliseconds);
-            Watch = Stopwatch.StartNew();
-        }
-
-        /// <summary>
-        /// Adds a line to the log
-        /// </summary>
-        /// <param name="s"></param>
-        public void AddLog(string s)
-        {
-            if (log == null) return;
-
-            ProfilerSemaphore.WaitOne();
-
-            using (log = new StreamWriter(FileName, Append, Encoding.Unicode))
-            {
-                log.WriteLine(s);
-            }
-            ProfilerSemaphore.Release();
-        }
-
-        /// <summary>
-        /// Flushes profiling log on disk
-        /// </summary>
-        public void Flush()
-        {
-            ProfilerSemaphore.WaitOne();
-
-            using (log = new StreamWriter(FileName, Append, Encoding.Unicode))
-            {
-                log.Flush();
-            }
-
-            ProfilerSemaphore.Release();
-        }
-#else
-        /* unfortunately it seems that code within [Conditional] blocks still gets analysed by the compiler; having the class level
-         * vars in #if's and all the methods inside these Conditional attribute blocks didn't work. So, I've used #if statements to
-         * get a clean compile, and the attribute to then have the calls totally compiled out in release mode. */
-
-        [Conditional("DEBUG")]
-        public void Profile(string message)
-        {
-        }
-
-        [Conditional("DEBUG")]
-        public void Flush()
-        {
-        }
-#endif
+        FileName = filename;
+        Append = append;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public Profiler()
+    {
+    }
+
+    /// <summary>
+    /// Starts measuring time
+    /// </summary>
+    /// <param name="message">a message to associate with these measure</param>
+    public void Start(string message)
+    {
+        AddLog("--------------------------------------");
+        Watch = Stopwatch.StartNew();
+        AddLog("Started profiling: " + message + " at " + System.DateTime.Now);
+    }
+
+    /// <summary>
+    /// Outputs time difference between previous time mark and now to the profiling log
+    /// </summary>
+    /// <param name="message">description of the time interval</param>
+    public void Profile(string message)
+    {
+        AddLog("\t" + message + "\t" + Watch.ElapsedMilliseconds);
+        Watch = Stopwatch.StartNew();
+    }
+
+    /// <summary>
+    /// Adds a line to the log
+    /// </summary>
+    /// <param name="s"></param>
+    public void AddLog(string s)
+    {
+        if (log == null) return;
+
+        ProfilerSemaphore.WaitOne();
+
+        using (log = new StreamWriter(FileName, Append, Encoding.Unicode))
+        {
+            log.WriteLine(s);
+        }
+        ProfilerSemaphore.Release();
+    }
+
+    /// <summary>
+    /// Flushes profiling log on disk
+    /// </summary>
+    public void Flush()
+    {
+        ProfilerSemaphore.WaitOne();
+
+        using (log = new StreamWriter(FileName, Append, Encoding.Unicode))
+        {
+            log.Flush();
+        }
+
+        ProfilerSemaphore.Release();
+    }
+#else
+    /* unfortunately it seems that code within [Conditional] blocks still gets analysed by the compiler; having the class level
+     * vars in #if's and all the methods inside these Conditional attribute blocks didn't work. So, I've used #if statements to
+     * get a clean compile, and the attribute to then have the calls totally compiled out in release mode. */
+
+    [Conditional("DEBUG")]
+    public void Profile(string message)
+    {
+    }
+
+    [Conditional("DEBUG")]
+    public void Flush()
+    {
+    }
+#endif
 }

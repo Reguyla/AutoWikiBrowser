@@ -8,10 +8,9 @@
 // path_to_SubWCRev.exe_on_your_system %1 %2 %3 %4 %5 %6 %7 %8 %9
 // Otherwise, create a Directory Junction/similar - http://www.howtogeek.com/howto/windows-vista/using-symlinks-in-windows-vista/
 //////////////////////////////////////////////////////////////////////////////////////////////////
-namespace WikiFunctions
+namespace WikiFunctions;
+
+public static partial class Variables
 {
-    public static partial class Variables
-    {
-        private const string m_Revision = "$WCREV$ ($WCDATE$)";
-    }
+    private const string m_Revision = "$WCREV$ ($WCDATE$)";
 }

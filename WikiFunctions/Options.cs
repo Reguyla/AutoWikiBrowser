@@ -17,15 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Options
-{
-    public enum ImageReplaceOptions
-    {
-        NoAction, Replace, Remove, Comment
-    }
+    namespace WikiFunctions.Options;
 
-    public enum CategorisationOptions
-    {
-        NoAction, ReCat, AddCat, RemoveCat
-    }
+public enum ImageReplaceOptions
+{
+    NoAction, Replace, Remove, Comment
+}
+
+public enum CategorisationOptions
+{
+    NoAction, ReCat, AddCat, RemoveCat
 }

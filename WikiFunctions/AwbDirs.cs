@@ -16,8 +16,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
  */
 
-namespace WikiFunctions
-{
+    namespace WikiFunctions;
+
     using System;
     using System.IO;
     using System.Windows.Forms;
@@ -117,4 +117,3 @@ namespace WikiFunctions
             }
         }
     }
-}
