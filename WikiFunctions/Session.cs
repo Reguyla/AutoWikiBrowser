@@ -480,21 +480,70 @@ namespace WikiFunctions;
         }
     }
 
-    private static void JSONMessage(string versionString, JToken message)
+    /// <summary>
+    /// Determines whether an automated JSON message applies to the
+    /// currently running AWB version.
+    /// </summary>
+    /// <param name="versionString">
+    /// The version identifier from the JSON configuration. Supports
+    /// "*" to match all versions and numeric AWB version strings.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the message should be shown for the current
+    /// AWB version; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// Uses numeric <see cref="Version"/> comparison instead of string
+    /// equality so equivalent version formats, such as 6.5 and 6.5.0.0,
+    /// are treated as the same release.
+    /// </remarks>
+    private static bool MessageAppliesToVersion(string versionString)
     {
-        // TODO: Proper semver version checking
-        if ((versionString != "*" && versionString != AWBVersion) || message["text"] == null)
+        if (versionString == "*")
+            return true;
+
+        if (!Version.TryParse(versionString, out Version messageVersion) ||
+            !Version.TryParse(AWBVersion, out Version currentVersion))
+        {
+            return string.Equals(
+                versionString,
+                AWBVersion,
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        return messageVersion.Major == currentVersion.Major &&
+               messageVersion.Minor == currentVersion.Minor &&
+               NormalizeVersionPart(messageVersion.Build) ==
+                   NormalizeVersionPart(currentVersion.Build) &&
+               NormalizeVersionPart(messageVersion.Revision) ==
+                   NormalizeVersionPart(currentVersion.Revision);
+    }
+
+    private static int NormalizeVersionPart(int versionPart) =>
+        versionPart < 0 ? 0 : versionPart;
+
+    private static void JSONMessage(
+        string versionString,
+        JToken message)
+    {
+        if (!MessageAppliesToVersion(versionString) ||
+            message["text"] == null)
         {
             return;
         }
 
-        if (message["enabled"] != null && !(bool)message["enabled"])
+        if (message["enabled"] != null &&
+            !(bool)message["enabled"])
         {
             return;
         }
 
-        // TODO: Stop this depending on MessageBox.Show() add an event/delegate and handle in Main.cs
-        MessageBox.Show(message["text"].ToString().Trim(), "Automated message", MessageBoxButtons.OK,
+        // TODO: Replace the direct MessageBox dependency with a Session
+        // event handled by the application UI.
+        MessageBox.Show(
+            message["text"].ToString().Trim(),
+            "Automated message",
+            MessageBoxButtons.OK,
             MessageBoxIcon.Information);
     }
 
