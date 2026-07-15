@@ -1,21 +1,20 @@
 ﻿using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
-{
-    public class RichTextBoxInvoke : RichTextBox
-    {
-        public override string Text
-        {
-            get
-            {
-                if (!InvokeRequired)
-                {
-                    return base.Text;
-                }
+namespace WikiFunctions.Controls;
 
-                return (string)Invoke(new Func<string>(() => Text));
+public class RichTextBoxInvoke : RichTextBox
+{
+    public override string Text
+    {
+        get
+        {
+            if (!InvokeRequired)
+            {
+                return base.Text;
             }
-            set { base.Text = value; }
+
+            return (string)Invoke(new Func<string>(() => Text));
         }
+        set { base.Text = value; }
     }
 }

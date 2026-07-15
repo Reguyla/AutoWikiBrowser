@@ -22,489 +22,488 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
+namespace WikiFunctions.Controls;
+
+public sealed partial class RegexTester : Form
 {
-    public sealed partial class RegexTester : Form
+    private readonly Regex NewLineRegex = new Regex("\n", RegexOptions.Compiled);
+    private readonly Regex CRNewLineRegex = new Regex("\r\n", RegexOptions.Compiled);
+
+    RegexRunner Runner;
+
+    public RegexTester()
     {
-        private readonly Regex NewLineRegex = new Regex("\n", RegexOptions.Compiled);
-        private readonly Regex CRNewLineRegex = new Regex("\r\n", RegexOptions.Compiled);
+        InitializeComponent();
+    }
 
-        RegexRunner Runner;
+    public RegexTester(bool ask)
+        : this()
+    {
+        AskToApply = ask;
+    }
 
-        public RegexTester()
+    public static void Test(Form parent, TextBox find, TextBox replace,
+                            CheckBox multiline, CheckBox singleline, CheckBox caseSensitive)
+    {
+
+        using (RegexTester t = new RegexTester(true))
         {
-            InitializeComponent();
-        }
+            t.Find = find.Text;
+            if (replace != null) t.Replace = replace.Text;
+            t.Multiline = multiline.Checked;
+            t.Singleline = singleline.Checked;
+            t.IgnoreCase = !caseSensitive.Checked;
 
-        public RegexTester(bool ask)
-            : this()
-        {
-            AskToApply = ask;
-        }
+            if (Variables.MainForm != null && Variables.MainForm.EditBox.Enabled)
+                t.ArticleText = Variables.MainForm.EditBox.Text;
 
-        public static void Test(Form parent, TextBox find, TextBox replace,
-                                CheckBox multiline, CheckBox singleline, CheckBox caseSensitive)
-        {
-
-            using (RegexTester t = new RegexTester(true))
+            if (t.ShowDialog(parent) == DialogResult.OK)
             {
-                t.Find = find.Text;
-                if (replace != null) t.Replace = replace.Text;
-                t.Multiline = multiline.Checked;
-                t.Singleline = singleline.Checked;
-                t.IgnoreCase = !caseSensitive.Checked;
-
-                if (Variables.MainForm != null && Variables.MainForm.EditBox.Enabled)
-                    t.ArticleText = Variables.MainForm.EditBox.Text;
-
-                if (t.ShowDialog(parent) == DialogResult.OK)
-                {
-                    find.Text = t.Find;
-                    if (replace != null) replace.Text = t.Replace;
-                    multiline.Checked = t.Multiline;
-                    singleline.Checked = t.Singleline;
-                    caseSensitive.Checked = !t.IgnoreCase;
-                }
+                find.Text = t.Find;
+                if (replace != null) replace.Text = t.Replace;
+                multiline.Checked = t.Multiline;
+                singleline.Checked = t.Singleline;
+                caseSensitive.Checked = !t.IgnoreCase;
             }
-        }
-
-        #region Properties for external access
-
-        public string ArticleText
-        {
-            set
-            {
-                /* Performance: simple "txtInput.Text = value" has poor performance (due to having WrapText=true), using append text improves performance by 2x
-                For example if find box is a long wiki page .Text= takes 16 seconds, .AppendText only 7 */
-                txtInput.Text = "";
-                txtInput.AppendText(value);
-                txtInput.Select(0, 0);
-                txtInput.ScrollToCaret();
-            }
-        }
-
-        public string Find
-        {
-            get { return txtFind.Text; }
-            set { txtFind.Text = value; }
-        }
-
-        public string Replace
-        {
-            get { return txtReplace.Text; }
-            set { txtReplace.Text = value; }
-        }
-
-        public RegexOptions RegexOptions
-        {
-            get
-            {
-                RegexOptions res = RegexOptions.None;
-                if (chkMultiline.Checked) res |= RegexOptions.Multiline;
-                if (chkSingleline.Checked) res |= RegexOptions.Singleline;
-                if (chkIgnoreCase.Checked) res |= RegexOptions.IgnoreCase;
-                if (chkExplicitCapture.Checked) res |= RegexOptions.ExplicitCapture;
-
-                return res;
-            }
-
-            set
-            {
-                chkMultiline.Checked = (value & RegexOptions.Multiline) != 0;
-                chkSingleline.Checked = (value & RegexOptions.Singleline) != 0;
-                chkIgnoreCase.Checked = (value & RegexOptions.IgnoreCase) != 0;
-                chkExplicitCapture.Checked = (value & RegexOptions.ExplicitCapture) != 0;
-            }
-        }
-
-        public bool Multiline
-        {
-            get { return chkMultiline.Checked; }
-            set { chkMultiline.Checked = value; }
-        }
-
-        public bool Singleline
-        {
-            get { return chkSingleline.Checked; }
-            set { chkSingleline.Checked = value; }
-        }
-
-        public bool IgnoreCase
-        {
-            get { return chkIgnoreCase.Checked; }
-            set { chkIgnoreCase.Checked = value; }
-        }
-
-        public bool ExplicitCapture
-        {
-            get { return chkExplicitCapture.Checked; }
-            set { chkExplicitCapture.Checked = value; }
-        }
-
-        public readonly bool AskToApply;
-        #endregion
-
-        bool Busy
-        {
-            get
-            {
-                return progressBar.Style == ProgressBarStyle.Marquee;
-            }
-            set
-            {
-                if (value)
-                {
-                    progressBar.Style = ProgressBarStyle.Marquee;
-                    progressBar.MarqueeAnimationSpeed = 100;
-                    Status.Text = "Processing (ESC to cancel)";
-                    FindBtn.Enabled = ReplaceBtn.Enabled = false;
-                }
-                else
-                {
-                    progressBar.Style = ProgressBarStyle.Blocks;
-                    progressBar.MarqueeAnimationSpeed = 0;
-                    Status.Text = "";
-                    ConditionsChanged(null, null); // update buttons
-                }
-            }
-        }
-
-        private void ConditionsChanged(object sender, EventArgs e)
-        {
-            bool enabled = (!string.IsNullOrEmpty(txtFind.Text) && !string.IsNullOrEmpty(txtInput.Text));
-            ReplaceBtn.Enabled = FindBtn.Enabled = enabled;
-        }
-
-        private void KeyPressHandler(object sender, KeyPressEventArgs e)
-        {
-            switch (e.KeyChar)
-            {
-                case (char)1: // CTRL+A
-                    {
-                        TextBox text = (sender as TextBox);
-
-                        if (text != null)
-                            text.SelectAll();
-                        break;
-                    }
-                case (char)27:
-                    AbortProcessing();
-                    break;
-            }
-        }
-
-        private RegexOptions Options
-        {
-            get
-            {
-                RegexOptions res = RegexOptions.None;
-                if (chkMultiline.Checked) res |= RegexOptions.Multiline;
-                if (chkSingleline.Checked) res |= RegexOptions.Singleline;
-                if (chkIgnoreCase.Checked) res |= RegexOptions.IgnoreCase;
-                if (chkExplicitCapture.Checked) res |= RegexOptions.ExplicitCapture;
-
-                return res;
-            }
-        }
-
-        private void Replace_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Captures.Nodes.Clear();
-                ResultText.Text = "";
-                Status.Text = "";
-                txtInput.Text = CRNewLineRegex.Replace(txtInput.Text, "\n");
-                Busy = true;
-
-                // do ApplyKeyWords if editor has a page open, so that %%pagename%% etc. from a rule being tested work as expected
-                string txtReplace_Text = txtReplace.Text;
-                if (Variables.MainForm.TheSession.Editor.Page != null)
-                    txtReplace_Text = Tools.ApplyKeyWords(Variables.MainForm.TheSession.Editor.Page.Title, txtReplace_Text);
-
-                Regex r = new Regex(txtFind.Text, Options);
-
-                Runner = new RegexRunner(this, txtInput.Text, CRNewLineRegex.Replace(txtReplace_Text, "\n"), r);
-            }
-            catch (Exception ex)
-            {
-                ErrorHandler(ex);
-                Busy = false;
-            }
-        }
-
-        private void RegexTester_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == 27) // Escape key
-            {
-                e.Handled = true;
-
-                if (Busy) AbortProcessing();
-                else Close();
-            }
-        }
-
-        private void FindBtn_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Captures.Nodes.Clear();
-                Captures.Visible = true;
-                ResultText.Text = "";
-                ResultText.Visible = false;
-                Status.Text = "";
-                Busy = true;
-
-                Regex r = new Regex(txtFind.Text, Options);
-
-                Runner = new RegexRunner(this, txtInput.Text, r);
-            }
-            catch (Exception ex)
-            {
-                ErrorHandler(ex);
-                Busy = false;
-            }
-        }
-
-        private string ReplaceNewLines(string str)
-        {
-            // Display line breaks as \n in the results tree so that they're clear
-            return NewLineRegex.Replace(str, "\\n");
-        }
-
-        private static void ErrorHandler(Exception ex)
-        {
-            MessageBox.Show(ex.Message, "Whoops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void RegexTester_HelpButtonClicked(object sender, CancelEventArgs e)
-        {
-            e.Cancel = true;
-            RegexTesterHelpRequested();
-        }
-
-        private static void RegexTesterHelpRequested()
-        {
-            Tools.OpenURLInBrowser("https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference");
-        }
-
-        private void RegexTester_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            AbortProcessing();
-            if (e.CloseReason != CloseReason.UserClosing || !AskToApply) return;
-
-            switch (MessageBox.Show(this, "Do you want to apply your changes?", Text, MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question))
-            {
-                case DialogResult.Yes:
-                    DialogResult = DialogResult.OK;
-                    break;
-                case DialogResult.No:
-                    DialogResult = DialogResult.Cancel;
-                    break;
-                case DialogResult.Cancel:
-                    e.Cancel = true;
-                    break;
-            }
-        }
-
-        internal void RegexRunnerFinished(RegexRunner sender)
-        {
-            Busy = false;
-            Runner = null;
-
-            if (sender.Error != null)
-            {
-                Status.Text = "Error encountered during processing";
-                MessageBox.Show(this, sender.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // replace may be with nothing (zero length string), so find mode is when replace is null
-            if (sender.Replace == null) // find
-            {
-                Captures.BeginUpdate();
-                int i = 0;
-                foreach (Match m in sender.Matches)
-                {
-                    i++;
-                    TreeNode n = Captures.Nodes.Add("{" + ReplaceNewLines(m.Value) + "}");
-                    foreach (Group g in m.Groups)
-                    {
-                        if (g.Captures.Count > 1)
-                        {
-                            TreeNode nn = n.Nodes.Add("...");
-                            foreach (Capture c in g.Captures)
-                                nn.Nodes.Add("{" + ReplaceNewLines(c.Value) + "}");
-                        }
-                        else if (g.Captures.Count == 1)
-                            n.Nodes.Add(ReplaceNewLines("{" + g.Captures[0].Value) + "}");
-                    }
-                    // For performance limit tree view to first 500 results
-                    if (i > 499)
-                        break;
-                }
-                switch (sender.Matches.Count)
-                {
-                    case 0:
-                        Status.Text = "No matches";
-                        break;
-                    case 1:
-                        Status.Text = "1 match found";
-                        break;
-                    default:
-                        if (sender.Matches.Count > 500)
-                            Status.Text = sender.Matches.Count + " matches found (showing first 500)";
-                        else
-                            Status.Text = sender.Matches.Count + " matches found";
-                        break;
-                }
-
-                Status.Text += " in " + sender.GetExecutionTime() + " ms";
-
-                Captures.ExpandAll();
-                Captures.EndUpdate();
-            }
-            else // replace
-            {
-                ResultText.Text = sender.Result;
-                if (sender.Matches.Count != 1)
-                    Status.Text = sender.Matches.Count + " replacements performed";
-                else
-                    Status.Text = "1 replacement performed";
-
-                Status.Text += " in " + sender.GetExecutionTime() + " ms";
-
-                Captures.Visible = false;
-                ResultText.Visible = true;
-
-                txtInput.Text = NewLineRegex.Replace(txtInput.Text, "\r\n");
-
-                // make user-inserted \n show as a genuine newline
-                ResultText.Text = ResultText.Text.Replace("\\n", "\r\n");
-                // make any existing newlines in replace text display as newlines
-                ResultText.Text = NewLineRegex.Replace(ResultText.Text, "\r\n");
-            }
-        }
-
-        private void AbortProcessing()
-        {
-            Busy = false;
-            if (Runner == null) return;
-
-            Runner.Abort();
-            Runner = null;
-            Status.Text = "Processing aborted";
         }
     }
 
-    internal delegate void RegexRunnerFinishedDelegate(RegexRunner sender);
+    #region Properties for external access
 
-    internal class RegexRunner
+    public string ArticleText
     {
-        // in
-        public readonly string Input;
-        public readonly string Replace;
-        public readonly Regex _Regex;
-
-        // out
-        public string Result;
-        public MatchCollection Matches;
-        public Exception Error;
-
-        // private
-        private readonly Thread Thr;
-        private readonly RegexTester Parent;
-        private volatile bool _cancellationRequested;
-
-        private long ExecutionTime;
-
-        public long GetExecutionTime()
+        set
         {
-            return ExecutionTime;
+            /* Performance: simple "txtInput.Text = value" has poor performance (due to having WrapText=true), using append text improves performance by 2x
+            For example if find box is a long wiki page .Text= takes 16 seconds, .AppendText only 7 */
+            txtInput.Text = "";
+            txtInput.AppendText(value);
+            txtInput.Select(0, 0);
+            txtInput.ScrollToCaret();
+        }
+    }
+
+    public string Find
+    {
+        get { return txtFind.Text; }
+        set { txtFind.Text = value; }
+    }
+
+    public string Replace
+    {
+        get { return txtReplace.Text; }
+        set { txtReplace.Text = value; }
+    }
+
+    public RegexOptions RegexOptions
+    {
+        get
+        {
+            RegexOptions res = RegexOptions.None;
+            if (chkMultiline.Checked) res |= RegexOptions.Multiline;
+            if (chkSingleline.Checked) res |= RegexOptions.Singleline;
+            if (chkIgnoreCase.Checked) res |= RegexOptions.IgnoreCase;
+            if (chkExplicitCapture.Checked) res |= RegexOptions.ExplicitCapture;
+
+            return res;
         }
 
-        public RegexRunner(RegexTester parent, string input, Regex regex)
-            : this(parent, input, null, regex)
+        set
         {
+            chkMultiline.Checked = (value & RegexOptions.Multiline) != 0;
+            chkSingleline.Checked = (value & RegexOptions.Singleline) != 0;
+            chkIgnoreCase.Checked = (value & RegexOptions.IgnoreCase) != 0;
+            chkExplicitCapture.Checked = (value & RegexOptions.ExplicitCapture) != 0;
         }
+    }
 
-        public RegexRunner(
-            RegexTester parent,
-            string input,
-            string replace,
-            Regex regex)
+    public bool Multiline
+    {
+        get { return chkMultiline.Checked; }
+        set { chkMultiline.Checked = value; }
+    }
+
+    public bool Singleline
+    {
+        get { return chkSingleline.Checked; }
+        set { chkSingleline.Checked = value; }
+    }
+
+    public bool IgnoreCase
+    {
+        get { return chkIgnoreCase.Checked; }
+        set { chkIgnoreCase.Checked = value; }
+    }
+
+    public bool ExplicitCapture
+    {
+        get { return chkExplicitCapture.Checked; }
+        set { chkExplicitCapture.Checked = value; }
+    }
+
+    public readonly bool AskToApply;
+    #endregion
+
+    bool Busy
+    {
+        get
         {
-            Parent = parent;
-            Input = input;
-            Replace = replace;
-
-            _Regex = new Regex(
-                regex.ToString(),
-                regex.Options,
-                TimeSpan.FromSeconds(10));
-
-            Thr = new Thread(ThreadFunc)
+            return progressBar.Style == ProgressBarStyle.Marquee;
+        }
+        set
+        {
+            if (value)
             {
-                IsBackground = true,
-                Priority = ThreadPriority.BelowNormal,
-                Name = "RegexRunner"
-            };
-
-            Thr.Start();
-        }
-
-        /// <summary>
-        /// Requests cancellation of the regex operation.
-        /// </summary>
-        public void Abort()
-        {
-            _cancellationRequested = true;
-        }
-
-        private void ThreadFunc()
-        {
-            try
-            {
-                Stopwatch sw = Stopwatch.StartNew();
-
-                if (_cancellationRequested)
-                    return;
-
-                Matches = _Regex.Matches(
-                    Regex.Replace(Input, "\r\n", "\n"));
-
-                // Force lazy match evaluation so execution time includes
-                // all regex matching work.
-                _ = Matches.Count;
-
-                if (_cancellationRequested)
-                    return;
-
-                if (Replace != null)
-                    Result = _Regex.Replace(Input, Replace);
-
-                ExecutionTime = sw.ElapsedMilliseconds;
+                progressBar.Style = ProgressBarStyle.Marquee;
+                progressBar.MarqueeAnimationSpeed = 100;
+                Status.Text = "Processing (ESC to cancel)";
+                FindBtn.Enabled = ReplaceBtn.Enabled = false;
             }
-            catch (RegexMatchTimeoutException ex)
+            else
             {
-                Error = ex;
+                progressBar.Style = ProgressBarStyle.Blocks;
+                progressBar.MarqueeAnimationSpeed = 0;
+                Status.Text = "";
+                ConditionsChanged(null, null); // update buttons
             }
-            catch (Exception ex)
-            {
-                Error = ex;
-            }
-            finally
-            {
-                if (!_cancellationRequested &&
-                    !Parent.IsDisposed &&
-                    Parent.IsHandleCreated)
+        }
+    }
+
+    private void ConditionsChanged(object sender, EventArgs e)
+    {
+        bool enabled = (!string.IsNullOrEmpty(txtFind.Text) && !string.IsNullOrEmpty(txtInput.Text));
+        ReplaceBtn.Enabled = FindBtn.Enabled = enabled;
+    }
+
+    private void KeyPressHandler(object sender, KeyPressEventArgs e)
+    {
+        switch (e.KeyChar)
+        {
+            case (char)1: // CTRL+A
                 {
-                    Parent.BeginInvoke(
-                        new RegexRunnerFinishedDelegate(
-                            Parent.RegexRunnerFinished),
-                        this);
+                    TextBox text = (sender as TextBox);
+
+                    if (text != null)
+                        text.SelectAll();
+                    break;
                 }
+            case (char)27:
+                AbortProcessing();
+                break;
+        }
+    }
+
+    private RegexOptions Options
+    {
+        get
+        {
+            RegexOptions res = RegexOptions.None;
+            if (chkMultiline.Checked) res |= RegexOptions.Multiline;
+            if (chkSingleline.Checked) res |= RegexOptions.Singleline;
+            if (chkIgnoreCase.Checked) res |= RegexOptions.IgnoreCase;
+            if (chkExplicitCapture.Checked) res |= RegexOptions.ExplicitCapture;
+
+            return res;
+        }
+    }
+
+    private void Replace_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            Captures.Nodes.Clear();
+            ResultText.Text = "";
+            Status.Text = "";
+            txtInput.Text = CRNewLineRegex.Replace(txtInput.Text, "\n");
+            Busy = true;
+
+            // do ApplyKeyWords if editor has a page open, so that %%pagename%% etc. from a rule being tested work as expected
+            string txtReplace_Text = txtReplace.Text;
+            if (Variables.MainForm.TheSession.Editor.Page != null)
+                txtReplace_Text = Tools.ApplyKeyWords(Variables.MainForm.TheSession.Editor.Page.Title, txtReplace_Text);
+
+            Regex r = new Regex(txtFind.Text, Options);
+
+            Runner = new RegexRunner(this, txtInput.Text, CRNewLineRegex.Replace(txtReplace_Text, "\n"), r);
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler(ex);
+            Busy = false;
+        }
+    }
+
+    private void RegexTester_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (e.KeyChar == 27) // Escape key
+        {
+            e.Handled = true;
+
+            if (Busy) AbortProcessing();
+            else Close();
+        }
+    }
+
+    private void FindBtn_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            Captures.Nodes.Clear();
+            Captures.Visible = true;
+            ResultText.Text = "";
+            ResultText.Visible = false;
+            Status.Text = "";
+            Busy = true;
+
+            Regex r = new Regex(txtFind.Text, Options);
+
+            Runner = new RegexRunner(this, txtInput.Text, r);
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler(ex);
+            Busy = false;
+        }
+    }
+
+    private string ReplaceNewLines(string str)
+    {
+        // Display line breaks as \n in the results tree so that they're clear
+        return NewLineRegex.Replace(str, "\\n");
+    }
+
+    private static void ErrorHandler(Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Whoops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+
+    private void RegexTester_HelpButtonClicked(object sender, CancelEventArgs e)
+    {
+        e.Cancel = true;
+        RegexTesterHelpRequested();
+    }
+
+    private static void RegexTesterHelpRequested()
+    {
+        Tools.OpenURLInBrowser("https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference");
+    }
+
+    private void RegexTester_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        AbortProcessing();
+        if (e.CloseReason != CloseReason.UserClosing || !AskToApply) return;
+
+        switch (MessageBox.Show(this, "Do you want to apply your changes?", Text, MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question))
+        {
+            case DialogResult.Yes:
+                DialogResult = DialogResult.OK;
+                break;
+            case DialogResult.No:
+                DialogResult = DialogResult.Cancel;
+                break;
+            case DialogResult.Cancel:
+                e.Cancel = true;
+                break;
+        }
+    }
+
+    internal void RegexRunnerFinished(RegexRunner sender)
+    {
+        Busy = false;
+        Runner = null;
+
+        if (sender.Error != null)
+        {
+            Status.Text = "Error encountered during processing";
+            MessageBox.Show(this, sender.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        // replace may be with nothing (zero length string), so find mode is when replace is null
+        if (sender.Replace == null) // find
+        {
+            Captures.BeginUpdate();
+            int i = 0;
+            foreach (Match m in sender.Matches)
+            {
+                i++;
+                TreeNode n = Captures.Nodes.Add("{" + ReplaceNewLines(m.Value) + "}");
+                foreach (Group g in m.Groups)
+                {
+                    if (g.Captures.Count > 1)
+                    {
+                        TreeNode nn = n.Nodes.Add("...");
+                        foreach (Capture c in g.Captures)
+                            nn.Nodes.Add("{" + ReplaceNewLines(c.Value) + "}");
+                    }
+                    else if (g.Captures.Count == 1)
+                        n.Nodes.Add(ReplaceNewLines("{" + g.Captures[0].Value) + "}");
+                }
+                // For performance limit tree view to first 500 results
+                if (i > 499)
+                    break;
+            }
+            switch (sender.Matches.Count)
+            {
+                case 0:
+                    Status.Text = "No matches";
+                    break;
+                case 1:
+                    Status.Text = "1 match found";
+                    break;
+                default:
+                    if (sender.Matches.Count > 500)
+                        Status.Text = sender.Matches.Count + " matches found (showing first 500)";
+                    else
+                        Status.Text = sender.Matches.Count + " matches found";
+                    break;
+            }
+
+            Status.Text += " in " + sender.GetExecutionTime() + " ms";
+
+            Captures.ExpandAll();
+            Captures.EndUpdate();
+        }
+        else // replace
+        {
+            ResultText.Text = sender.Result;
+            if (sender.Matches.Count != 1)
+                Status.Text = sender.Matches.Count + " replacements performed";
+            else
+                Status.Text = "1 replacement performed";
+
+            Status.Text += " in " + sender.GetExecutionTime() + " ms";
+
+            Captures.Visible = false;
+            ResultText.Visible = true;
+
+            txtInput.Text = NewLineRegex.Replace(txtInput.Text, "\r\n");
+
+            // make user-inserted \n show as a genuine newline
+            ResultText.Text = ResultText.Text.Replace("\\n", "\r\n");
+            // make any existing newlines in replace text display as newlines
+            ResultText.Text = NewLineRegex.Replace(ResultText.Text, "\r\n");
+        }
+    }
+
+    private void AbortProcessing()
+    {
+        Busy = false;
+        if (Runner == null) return;
+
+        Runner.Abort();
+        Runner = null;
+        Status.Text = "Processing aborted";
+    }
+}
+
+internal delegate void RegexRunnerFinishedDelegate(RegexRunner sender);
+
+internal class RegexRunner
+{
+    // in
+    public readonly string Input;
+    public readonly string Replace;
+    public readonly Regex _Regex;
+
+    // out
+    public string Result;
+    public MatchCollection Matches;
+    public Exception Error;
+
+    // private
+    private readonly Thread Thr;
+    private readonly RegexTester Parent;
+    private volatile bool _cancellationRequested;
+
+    private long ExecutionTime;
+
+    public long GetExecutionTime()
+    {
+        return ExecutionTime;
+    }
+
+    public RegexRunner(RegexTester parent, string input, Regex regex)
+        : this(parent, input, null, regex)
+    {
+    }
+
+    public RegexRunner(
+        RegexTester parent,
+        string input,
+        string replace,
+        Regex regex)
+    {
+        Parent = parent;
+        Input = input;
+        Replace = replace;
+
+        _Regex = new Regex(
+            regex.ToString(),
+            regex.Options,
+            TimeSpan.FromSeconds(10));
+
+        Thr = new Thread(ThreadFunc)
+        {
+            IsBackground = true,
+            Priority = ThreadPriority.BelowNormal,
+            Name = "RegexRunner"
+        };
+
+        Thr.Start();
+    }
+
+    /// <summary>
+    /// Requests cancellation of the regex operation.
+    /// </summary>
+    public void Abort()
+    {
+        _cancellationRequested = true;
+    }
+
+    private void ThreadFunc()
+    {
+        try
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            if (_cancellationRequested)
+                return;
+
+            Matches = _Regex.Matches(
+                Regex.Replace(Input, "\r\n", "\n"));
+
+            // Force lazy match evaluation so execution time includes
+            // all regex matching work.
+            _ = Matches.Count;
+
+            if (_cancellationRequested)
+                return;
+
+            if (Replace != null)
+                Result = _Regex.Replace(Input, Replace);
+
+            ExecutionTime = sw.ElapsedMilliseconds;
+        }
+        catch (RegexMatchTimeoutException ex)
+        {
+            Error = ex;
+        }
+        catch (Exception ex)
+        {
+            Error = ex;
+        }
+        finally
+        {
+            if (!_cancellationRequested &&
+                !Parent.IsDisposed &&
+                Parent.IsHandleCreated)
+            {
+                Parent.BeginInvoke(
+                    new RegexRunnerFinishedDelegate(
+                        Parent.RegexRunnerFinished),
+                    this);
             }
         }
     }

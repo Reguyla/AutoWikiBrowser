@@ -1,21 +1,20 @@
 ﻿using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
-{
-    public class ComboBoxInvoke : ComboBox
-    {
-        public override int SelectedIndex
-        {
-            get
-            {
-                if (!InvokeRequired)
-                {
-                    return base.SelectedIndex;
-                }
+namespace WikiFunctions.Controls;
 
-                return (int)Invoke(new Func<int>(() => SelectedIndex));
+public class ComboBoxInvoke : ComboBox
+{
+    public override int SelectedIndex
+    {
+        get
+        {
+            if (!InvokeRequired)
+            {
+                return base.SelectedIndex;
             }
-            set { base.SelectedIndex = value; }
+
+            return (int)Invoke(new Func<int>(() => SelectedIndex));
         }
+        set { base.SelectedIndex = value; }
     }
 }

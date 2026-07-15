@@ -20,379 +20,378 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
+namespace WikiFunctions.Controls;
+
+/// <summary>
+/// Wrapped EditBox to conveniently manage the automatic summary reset conditions
+/// </summary>
+public class ArticleTextBox : RichTextBox
 {
-    /// <summary>
-    /// Wrapped EditBox to conveniently manage the automatic summary reset conditions
-    /// </summary>
-    public class ArticleTextBox : RichTextBox
+    public ArticleTextBox()
     {
-        public ArticleTextBox()
+        LanguageOption = RichTextBoxLanguageOptions.DualFont;
+        EnableAutoDragDrop = true;
+        InitializeComponent();
+    }
+
+    bool Locked;
+
+    public override string Text
+    {
+        get
         {
-            LanguageOption = RichTextBoxLanguageOptions.DualFont;
-            EnableAutoDragDrop = true;
-            InitializeComponent();
+            if (Globals.UsingMono)
+                return base.Text;
+
+            // Windows richtextbox uses \n, so convert to \r\n
+            return base.Text.Replace("\n", "\r\n");
+        }
+        set
+        {
+            Locked = true;
+            base.Text = value;
+            Locked = false;
+        }
+    }
+
+    public override string SelectedText
+    {
+        get { return base.SelectedText.Replace("\n", "\r\n"); }
+        set
+        {
+            Locked = true;
+            base.SelectedText = value;
+            Locked = false;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string RawText { get { return base.Text; } }
+
+    protected override void OnTextChanged(EventArgs e)
+    {
+        // Prohibits triggering the TextChanged event if the text is changed programmatically
+        if (!Locked) base.OnTextChanged(e);
+    }
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        // Bug fix for AutoWordSelection - http://msdn.microsoft.com/en-us/library/system.windows.forms.richtextbox.autowordselection.aspx
+        if (!AutoWordSelection)
+        {
+            AutoWordSelection = true;
+            AutoWordSelection = false;
+        }
+    }
+
+    bool AutoKeyboardDisabled;
+
+    protected override void OnEnter(EventArgs e)
+    {
+        // A hack for the annoying bug with this option being mysteriously enabled to switch
+        // user's kb layout for no good reason. Probably, there is a better place for doing this, 
+        // but can't figure out where.
+        if (!AutoKeyboardDisabled)
+        {
+            LanguageOption &= ~RichTextBoxLanguageOptions.AutoKeyboard;
+            AutoKeyboardDisabled = true;
         }
 
-        bool Locked;
+        base.OnEnter(e);
+    }
 
-        public override string Text
+    private Regex RegexObj;
+    private Match MatchObj;
+
+    /// <summary>
+    /// Resets the Find Objects
+    /// </summary>
+    public void ResetFind()
+    {
+        RegexObj = null;
+        MatchObj = null;
+    }
+
+    /// <summary>
+    /// Finds the next match of the search regex in the page text
+    /// Applies article keywords prior to search
+    /// </summary>
+    /// <param name="strRegex">Search string</param>
+    /// <param name="isRegex">Whether search string is a regex</param>
+    /// <param name="caseSensitive">Whether search string is to be case sensitive</param>
+    /// <param name="articleName">Wiki page name</param>
+    public void Find(string strRegex, bool isRegex, bool caseSensitive, string articleName)
+    {
+        string articleText = Tools.ConvertFromLocalLineEndings(RawText);
+
+        RegexOptions regOptions = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+
+        strRegex = FormatRegex(strRegex, articleName, isRegex);
+
+        if (MatchObj == null || RegexObj == null)
         {
-            get
+            int findStart = SelectionStart;
+
+            RegexObj = new Regex(strRegex, regOptions);
+            MatchObj = RegexObj.Match(articleText, findStart);
+            SelectionStart = MatchObj.Index;
+            SelectionLength = MatchObj.Length;
+        }
+        else
+        {
+            if (MatchObj.NextMatch().Success)
             {
-                if (Globals.UsingMono)
-                    return base.Text;
-
-                // Windows richtextbox uses \n, so convert to \r\n
-                return base.Text.Replace("\n", "\r\n");
-            }
-            set
-            {
-                Locked = true;
-                base.Text = value;
-                Locked = false;
-            }
-        }
-
-        public override string SelectedText
-        {
-            get { return base.SelectedText.Replace("\n", "\r\n"); }
-            set
-            {
-                Locked = true;
-                base.SelectedText = value;
-                Locked = false;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string RawText { get { return base.Text; } }
-
-        protected override void OnTextChanged(EventArgs e)
-        {
-            // Prohibits triggering the TextChanged event if the text is changed programmatically
-            if (!Locked) base.OnTextChanged(e);
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-            // Bug fix for AutoWordSelection - http://msdn.microsoft.com/en-us/library/system.windows.forms.richtextbox.autowordselection.aspx
-            if (!AutoWordSelection)
-            {
-                AutoWordSelection = true;
-                AutoWordSelection = false;
-            }
-        }
-
-        bool AutoKeyboardDisabled;
-
-        protected override void OnEnter(EventArgs e)
-        {
-            // A hack for the annoying bug with this option being mysteriously enabled to switch
-            // user's kb layout for no good reason. Probably, there is a better place for doing this, 
-            // but can't figure out where.
-            if (!AutoKeyboardDisabled)
-            {
-                LanguageOption &= ~RichTextBoxLanguageOptions.AutoKeyboard;
-                AutoKeyboardDisabled = true;
-            }
-
-            base.OnEnter(e);
-        }
-
-        private Regex RegexObj;
-        private Match MatchObj;
-
-        /// <summary>
-        /// Resets the Find Objects
-        /// </summary>
-        public void ResetFind()
-        {
-            RegexObj = null;
-            MatchObj = null;
-        }
-
-        /// <summary>
-        /// Finds the next match of the search regex in the page text
-        /// Applies article keywords prior to search
-        /// </summary>
-        /// <param name="strRegex">Search string</param>
-        /// <param name="isRegex">Whether search string is a regex</param>
-        /// <param name="caseSensitive">Whether search string is to be case sensitive</param>
-        /// <param name="articleName">Wiki page name</param>
-        public void Find(string strRegex, bool isRegex, bool caseSensitive, string articleName)
-        {
-            string articleText = Tools.ConvertFromLocalLineEndings(RawText);
-
-            RegexOptions regOptions = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
-
-            strRegex = FormatRegex(strRegex, articleName, isRegex);
-
-            if (MatchObj == null || RegexObj == null)
-            {
-                int findStart = SelectionStart;
-
-                RegexObj = new Regex(strRegex, regOptions);
-                MatchObj = RegexObj.Match(articleText, findStart);
+                MatchObj = MatchObj.NextMatch();
                 SelectionStart = MatchObj.Index;
                 SelectionLength = MatchObj.Length;
             }
             else
             {
-                if (MatchObj.NextMatch().Success)
-                {
-                    MatchObj = MatchObj.NextMatch();
-                    SelectionStart = MatchObj.Index;
-                    SelectionLength = MatchObj.Length;
-                }
-                else
-                {
-                    SelectionStart = 0;
-                    SelectionLength = 0;
-                    ResetFind();
-                }
+                SelectionStart = 0;
+                SelectionLength = 0;
+                ResetFind();
             }
-            Focus();
-            ScrollToCaret();
         }
+        Focus();
+        ScrollToCaret();
+    }
 
-        /// <summary>
-        /// Finds all the matches of the search regex in the page text
-        /// Applies article keywords prior to search
-        /// </summary>
-        /// <param name="strRegex">Search string</param>
-        /// <param name="isRegex">Whether search string is a regex</param>
-        /// <param name="caseSensitive">Whether search string is to be case sensitive</param>
-        /// <param name="articleName">Wiki page name</param>
-        public Dictionary<int, int> FindAll(string strRegex, bool isRegex, bool caseSensitive, string articleName)
-        {
-            Dictionary<int, int> found = new Dictionary<int, int>();
+    /// <summary>
+    /// Finds all the matches of the search regex in the page text
+    /// Applies article keywords prior to search
+    /// </summary>
+    /// <param name="strRegex">Search string</param>
+    /// <param name="isRegex">Whether search string is a regex</param>
+    /// <param name="caseSensitive">Whether search string is to be case sensitive</param>
+    /// <param name="articleName">Wiki page name</param>
+    public Dictionary<int, int> FindAll(string strRegex, bool isRegex, bool caseSensitive, string articleName)
+    {
+        Dictionary<int, int> found = new Dictionary<int, int>();
 
-            if (string.IsNullOrEmpty(strRegex))
-                return found;
-
-            string articleText = Tools.ConvertFromLocalLineEndings(RawText);
-
-            strRegex = FormatRegex(strRegex, articleName, isRegex);
-
-            RegexObj = new Regex(strRegex, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
-            foreach (Match m in RegexObj.Matches(articleText))
-            {
-                if (m.Length > 0)
-                    found.Add(m.Index, m.Length);
-            }
-
+        if (string.IsNullOrEmpty(strRegex))
             return found;
+
+        string articleText = Tools.ConvertFromLocalLineEndings(RawText);
+
+        strRegex = FormatRegex(strRegex, articleName, isRegex);
+
+        RegexObj = new Regex(strRegex, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+        foreach (Match m in RegexObj.Matches(articleText))
+        {
+            if (m.Length > 0)
+                found.Add(m.Index, m.Length);
         }
 
-        /// <summary>
-        /// Applies keywords to search text, formats newlines to support \n as newline
-        /// </summary>
-        /// <returns></returns>
-        string FormatRegex(string strRegex, string articleName, bool isRegex)
+        return found;
+    }
+
+    /// <summary>
+    /// Applies keywords to search text, formats newlines to support \n as newline
+    /// </summary>
+    /// <returns></returns>
+    string FormatRegex(string strRegex, string articleName, bool isRegex)
+    {
+        strRegex = Tools.ApplyKeyWords(articleName, strRegex);
+        // in Find newline matching is on \n, so if not a regex ensure this isn't escaped
+        if (!isRegex)
         {
-            strRegex = Tools.ApplyKeyWords(articleName, strRegex);
-            // in Find newline matching is on \n, so if not a regex ensure this isn't escaped
-            if (!isRegex)
-            {
-                bool newlines = strRegex.Contains("\\n");
-                strRegex = Regex.Escape(strRegex);
+            bool newlines = strRegex.Contains("\\n");
+            strRegex = Regex.Escape(strRegex);
 
-                if (newlines)
-                    strRegex = strRegex.Replace(@"\\n", "\n");
-            }
-
-            return strRegex;
+            if (newlines)
+                strRegex = strRegex.Replace(@"\\n", "\n");
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputIndex"></param>
-        /// <param name="inputLength"></param>
-        /// <param name="scrollToCaret"></param>
-        public void SetEditBoxSelection(int inputIndex, int inputLength, bool scrollToCaret)
+        return strRegex;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="inputIndex"></param>
+    /// <param name="inputLength"></param>
+    /// <param name="scrollToCaret"></param>
+    public void SetEditBoxSelection(int inputIndex, int inputLength, bool scrollToCaret)
+    {
+        if (inputIndex >= 0 && inputLength > 0 && (inputIndex + inputLength) <= TextLength)
         {
-            if (inputIndex >= 0 && inputLength > 0 && (inputIndex + inputLength) <= TextLength)
-            {
-                SelectionStart = inputIndex;
-                SelectionLength = inputLength;
-            }
-            if (scrollToCaret)
-                ScrollToCaret();
+            SelectionStart = inputIndex;
+            SelectionLength = inputLength;
+        }
+        if (scrollToCaret)
+            ScrollToCaret();
+    }
+
+    public void SetEditBoxSelection(int inputIndex, int inputLength)
+    {
+        SetEditBoxSelection(inputIndex, inputLength, false);
+    }
+
+    private void InitializeComponent()
+    {
+        SuspendLayout();
+        DetectUrls = false;
+        ResumeLayout(false);
+    }
+
+    /// <summary>
+    /// Applies syntax highlighting to the input ArticleTextBox 
+    /// </summary>
+    /// <returns></returns>
+    public void HighlightSyntax()
+    {
+        // reset background color to avoid issues on re-parse
+        SetEditBoxSelection(0, RawText.Length);
+        SelectionBackColor = Color.White;
+
+        Font currentFont = SelectionFont;
+        Font boldFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Bold);
+        Font italicFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Italic);
+        Font boldItalicFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Bold | FontStyle.Italic);
+
+        // headings text in bold
+        foreach (Match m in WikiRegexes.Headings.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionFont = boldFont;
         }
 
-        public void SetEditBoxSelection(int inputIndex, int inputLength)
+        // templates grey background
+        foreach (Match m in WikiRegexes.NestedTemplates.Matches(RawText))
         {
-            SetEditBoxSelection(inputIndex, inputLength, false);
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.LightGray;
         }
 
-        private void InitializeComponent()
+        // * items grey background
+        foreach (Match m in WikiRegexes.StarRows.Matches(RawText))
         {
-            SuspendLayout();
-            DetectUrls = false;
-            ResumeLayout(false);
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.LightGray;
+
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionFont = boldFont;
         }
 
-        /// <summary>
-        /// Applies syntax highlighting to the input ArticleTextBox 
-        /// </summary>
-        /// <returns></returns>
-        public void HighlightSyntax()
+        // template names dark blue font
+        foreach (Match m in WikiRegexes.TemplateName.Matches(RawText))
         {
-            // reset background color to avoid issues on re-parse
-            SetEditBoxSelection(0, RawText.Length);
-            SelectionBackColor = Color.White;
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionColor = Color.DarkBlue;
+        }
 
-            Font currentFont = SelectionFont;
-            Font boldFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Bold);
-            Font italicFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Italic);
-            Font boldItalicFont = new Font(currentFont.FontFamily, currentFont.Size, FontStyle.Bold | FontStyle.Italic);
+        // refs grey background
+        foreach (Match m in WikiRegexes.Refs.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.LightGray;
+        }
 
-            // headings text in bold
-            foreach (Match m in WikiRegexes.Headings.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionFont = boldFont;
-            }
+        // external links grey background, blue bold
+        foreach (Match m in WikiRegexes.ExternalLinks.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionColor = Color.Blue;
+            SelectionFont = boldFont;
+        }
 
-            // templates grey background
-            foreach (Match m in WikiRegexes.NestedTemplates.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.LightGray;
-            }
+        // Image/file links green background
+        foreach (Match m in WikiRegexes.FileNamespaceLink.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.LightGreen;
+        }
 
-            // * items grey background
-            foreach (Match m in WikiRegexes.StarRows.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.LightGray;
+        // italics
+        foreach (Match m in WikiRegexes.Italics.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionFont = italicFont;
+        }
 
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionFont = boldFont;
-            }
+        // bold  
+        foreach (Match m in WikiRegexes.Bold.Matches(RawText))
+        {
+            // reset anything incorrectly done by italics earlier
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionFont = currentFont;
 
-            // template names dark blue font
-            foreach (Match m in WikiRegexes.TemplateName.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionColor = Color.DarkBlue;
-            }
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionFont = boldFont;
+        }
 
-            // refs grey background
-            foreach (Match m in WikiRegexes.Refs.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.LightGray;
-            }
+        // bold italics 
+        foreach (Match m in WikiRegexes.BoldItalics.Matches(RawText))
+        {
+            // reset anything incorrectly done by italics/bold earlier
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionFont = currentFont;
 
-            // external links grey background, blue bold
-            foreach (Match m in WikiRegexes.ExternalLinks.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionColor = Color.Blue;
-                SelectionFont = boldFont;
-            }
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionFont = boldItalicFont;
+        }
 
-            // Image/file links green background
-            foreach (Match m in WikiRegexes.FileNamespaceLink.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.LightGreen;
-            }
+        // piped wikilink text in blue, piped part in bold
+        foreach (Match m in WikiRegexes.PipedWikiLink.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Groups[2].Index, m.Groups[2].Length);
+            SelectionColor = Color.Blue;
+            SelectionFont = boldFont;
 
-            // italics
-            foreach (Match m in WikiRegexes.Italics.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionFont = italicFont;
-            }
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionColor = Color.Blue;
+        }
 
-            // bold  
-            foreach (Match m in WikiRegexes.Bold.Matches(RawText))
-            {
-                // reset anything incorrectly done by italics earlier
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionFont = currentFont;
+        // unpiped wikilinks in blue and bold
+        foreach (Match m in WikiRegexes.UnPipedWikiLink.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionColor = Color.Blue;
+            SelectionFont = boldFont;
+        }
 
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionFont = boldFont;
-            }
+        // pipe trick: in blue bold too
+        foreach (Match m in WikiRegexes.WikiLinksOnlyPlusWord.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionColor = Color.Blue;
+            SelectionFont = boldFont;
+        }
 
-            // bold italics 
-            foreach (Match m in WikiRegexes.BoldItalics.Matches(RawText))
-            {
-                // reset anything incorrectly done by italics/bold earlier
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionFont = currentFont;
+        // cats grey background
+        foreach (Match m in WikiRegexes.Category.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.LightGray;
+            SelectionFont = currentFont;
+            SelectionColor = Color.Black;
 
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionFont = boldItalicFont;
-            }
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionColor = Color.Blue;
+        }
 
-            // piped wikilink text in blue, piped part in bold
-            foreach (Match m in WikiRegexes.PipedWikiLink.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Groups[2].Index, m.Groups[2].Length);
-                SelectionColor = Color.Blue;
-                SelectionFont = boldFont;
+        // interwikis dark grey background
+        foreach (Match m in WikiRegexes.PossibleInterwikis.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.Gray;
+            SelectionFont = currentFont;
 
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionColor = Color.Blue;
-            }
+            SetEditBoxSelection(m.Groups[2].Index, m.Groups[2].Length);
+            SelectionColor = Color.Blue;
 
-            // unpiped wikilinks in blue and bold
-            foreach (Match m in WikiRegexes.UnPipedWikiLink.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionColor = Color.Blue;
-                SelectionFont = boldFont;
-            }
+            SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
+            SelectionColor = Color.Black;
+        }
 
-            // pipe trick: in blue bold too
-            foreach (Match m in WikiRegexes.WikiLinksOnlyPlusWord.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionColor = Color.Blue;
-                SelectionFont = boldFont;
-            }
-
-            // cats grey background
-            foreach (Match m in WikiRegexes.Category.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.LightGray;
-                SelectionFont = currentFont;
-                SelectionColor = Color.Black;
-
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionColor = Color.Blue;
-            }
-
-            // interwikis dark grey background
-            foreach (Match m in WikiRegexes.PossibleInterwikis.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.Gray;
-                SelectionFont = currentFont;
-
-                SetEditBoxSelection(m.Groups[2].Index, m.Groups[2].Length);
-                SelectionColor = Color.Blue;
-
-                SetEditBoxSelection(m.Groups[1].Index, m.Groups[1].Length);
-                SelectionColor = Color.Black;
-            }
-
-            // comments dark orange background
-            foreach (Match m in WikiRegexes.Comments.Matches(RawText))
-            {
-                SetEditBoxSelection(m.Index, m.Length);
-                SelectionBackColor = Color.PaleGoldenrod;
-            }
+        // comments dark orange background
+        foreach (Match m in WikiRegexes.Comments.Matches(RawText))
+        {
+            SetEditBoxSelection(m.Index, m.Length);
+            SelectionBackColor = Color.PaleGoldenrod;
         }
     }
 }

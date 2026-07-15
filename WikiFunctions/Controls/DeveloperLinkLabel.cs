@@ -21,42 +21,41 @@ using System.ComponentModel;
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
+namespace WikiFunctions.Controls;
+
+public enum Developers { Bluemoose, Ligulem, Magioladitis, Reedy, Rjwilmsi, MaxSem, Kingboyk }
+public class DeveloperLinkLabel : LinkLabel
 {
-    public enum Developers { Bluemoose, Ligulem, Magioladitis, Reedy, Rjwilmsi, MaxSem, Kingboyk }
-    public class DeveloperLinkLabel : LinkLabel
+    public DeveloperLinkLabel()
     {
-        public DeveloperLinkLabel()
-        {
-            LinkClicked += DeveloperLinkLabel_LinkClicked;
-            WhichDeveloper = dev;
-        }
+        LinkClicked += DeveloperLinkLabel_LinkClicked;
+        WhichDeveloper = dev;
+    }
 
-        private void DeveloperLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            LinkVisited = true;
-            Tools.OpenENArticleInBrowser(Text, true);
-        }
+    private void DeveloperLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        LinkVisited = true;
+        Tools.OpenENArticleInBrowser(Text, true);
+    }
 
-        Developers dev = Developers.Bluemoose;
+    Developers dev = Developers.Bluemoose;
 
-        [DefaultValue(Developers.Bluemoose), Category("Appearance")]
-        [Browsable(true)]
-        public Developers WhichDeveloper
+    [DefaultValue(Developers.Bluemoose), Category("Appearance")]
+    [Browsable(true)]
+    public Developers WhichDeveloper
+    {
+        get { return dev; }
+        set
         {
-            get { return dev; }
-            set
-            {
-                dev = value;
-                Text = dev.ToString();
-            }
+            dev = value;
+            Text = dev.ToString();
         }
+    }
 
-        [Browsable(false)]
-        public override string Text
-        {
-            get { return base.Text; }
-            set { base.Text = value; }
-        }
+    [Browsable(false)]
+    public override string Text
+    {
+        get { return base.Text; }
+        set { base.Text = value; }
     }
 }

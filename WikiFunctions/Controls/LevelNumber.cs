@@ -1,27 +1,26 @@
 ﻿using System.Windows.Forms;
 using WikiFunctions.Lists.Providers;
 
-namespace WikiFunctions.Controls
+namespace WikiFunctions.Controls;
+
+public partial class LevelNumber : Form
 {
-    public partial class LevelNumber : Form
+    public LevelNumber(bool edits, int max)
     {
-        public LevelNumber(bool edits, int max)
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            if (edits)
-            {
-                label1.Text = "Number of contribs:";
-                numLevels.Minimum = 1;
-                numLevels.Maximum = max;
-            }
-            else
-                numLevels.Maximum = CategoryRecursiveListProvider.MaxDepth;
-        }
-
-        public int Levels
+        if (edits)
         {
-            get { return (int)numLevels.Value; }
+            label1.Text = "Number of contribs:";
+            numLevels.Minimum = 1;
+            numLevels.Maximum = max;
         }
+        else
+            numLevels.Maximum = CategoryRecursiveListProvider.MaxDepth;
+    }
+
+    public int Levels
+    {
+        get { return (int)numLevels.Value; }
     }
 }

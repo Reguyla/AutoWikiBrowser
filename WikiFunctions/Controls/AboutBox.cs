@@ -21,69 +21,68 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
+namespace WikiFunctions.Controls;
+
+public partial class AboutBox : Form
 {
-    public partial class AboutBox : Form
+    public AboutBox()
     {
-        public AboutBox()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        /// <summary>
-        /// The AboutBox form is being initialized. Override this if you are inheriting and recycling the form.
-        /// </summary>
-        protected virtual void Initialise()
-        {
-            lblVersion.Text = "Version " + Tools.VersionString;
-            textBoxDescription.Text = GPLNotice;
-        }
+    /// <summary>
+    /// The AboutBox form is being initialized. Override this if you are inheriting and recycling the form.
+    /// </summary>
+    protected virtual void Initialise()
+    {
+        lblVersion.Text = "Version " + Tools.VersionString;
+        textBoxDescription.Text = GPLNotice;
+    }
 
-        protected virtual void okButton_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+    protected virtual void okButton_Click(object sender, EventArgs e)
+    {
+        Close();
+    }
 
-        protected virtual void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            linkLabel1.LinkVisited = true;
-            Tools.OpenENArticleInBrowser("WP:AWB", false);
-        }
+    protected virtual void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        linkLabel1.LinkVisited = true;
+        Tools.OpenENArticleInBrowser("WP:AWB", false);
+    }
 
-        #region Shared
-        /// <summary>
-        /// Returns a GFDL authors and copyright notice for use within AWB projects
-        /// </summary>
-        public static string GPLNotice
-        { get { return Properties.Resources.GPL; } }
+    #region Shared
+    /// <summary>
+    /// Returns a GFDL authors and copyright notice for use within AWB projects
+    /// </summary>
+    public static string GPLNotice
+    { get { return Properties.Resources.GPL; } }
 
-        /// <summary>
-        /// Extracts an assembly description (usually created by Visual Studio?)
-        /// </summary>
-        /// <returns></returns>
-        public static string AssemblyDescription(Assembly ass)
-        {
-            // Get all Description attributes on this assembly
-            object[] attributes = ass.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
-            // If there aren't any Description attributes, return an empty string. If there is a Description attribute, return its value.
-            return (attributes.Length == 0) ? "" : ((AssemblyDescriptionAttribute)attributes[0]).Description;
-        }
+    /// <summary>
+    /// Extracts an assembly description (usually created by Visual Studio?)
+    /// </summary>
+    /// <returns></returns>
+    public static string AssemblyDescription(Assembly ass)
+    {
+        // Get all Description attributes on this assembly
+        object[] attributes = ass.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
+        // If there aren't any Description attributes, return an empty string. If there is a Description attribute, return its value.
+        return (attributes.Length == 0) ? "" : ((AssemblyDescriptionAttribute)attributes[0]).Description;
+    }
 
-        public static string AssemblyCopyright(Assembly ass)
-        {
-            // Get all Copyright attributes on this assembly
-            object[] attributes = ass.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-            // If there aren't any Copyright attributes, return an empty string. If there is a Copyright attribute, return its value.
-            return (attributes.Length == 0) ? "" : ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
-        }
+    public static string AssemblyCopyright(Assembly ass)
+    {
+        // Get all Copyright attributes on this assembly
+        object[] attributes = ass.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
+        // If there aren't any Copyright attributes, return an empty string. If there is a Copyright attribute, return its value.
+        return (attributes.Length == 0) ? "" : ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
+    }
 
-        public static string GetDetailedMessage(Assembly ass)
-        { return AssemblyDescription(ass) + Environment.NewLine + Environment.NewLine + GPLNotice; }
-        #endregion
+    public static string GetDetailedMessage(Assembly ass)
+    { return AssemblyDescription(ass) + Environment.NewLine + Environment.NewLine + GPLNotice; }
+    #endregion
 
-        private void AboutBox_Load(object sender, EventArgs e)
-        {
-            Initialise();
-        }
+    private void AboutBox_Load(object sender, EventArgs e)
+    {
+        Initialise();
     }
 }
