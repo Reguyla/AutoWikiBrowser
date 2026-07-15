@@ -334,21 +334,38 @@ namespace WikiFunctions;
 
             // MediaWiki no longer exposes the legacy "writeapi" user right.
             // Editing permission is validated through normal API responses instead.
+            //
             // TODO:
             // Reassess Maxlag defaults after the .NET 8 networking migration.
             // Current value disables Maxlag while API compatibility work is in progress.
-            Editor.Maxlag = /*User.IsBot ? 5 : 20*/ -1;
+            Editor.Maxlag = /* User.IsBot ? 5 : 20 */ -1;
 
-            var versionJson = JObject.Parse(Updater.GlobalVersionPage);
-
-            // check if username is listed globally as a badname, based on the enwiki version page
-            foreach (string badName in versionJson["badnames"])
+            if (string.IsNullOrWhiteSpace(Updater.GlobalVersionPage))
             {
-                if (!string.IsNullOrEmpty(User.Name) &&
-                    Regex.IsMatch(User.Name, badName,
-                                  RegexOptions.IgnoreCase | RegexOptions.Multiline))
+                Tools.WriteDebug(
+                    nameof(UpdateWikiStatus),
+                    "The global version page returned no JSON content.");
+
+                return WikiStatusResult.Error;
+            }
+
+            JObject versionJson = JObject.Parse(Updater.GlobalVersionPage);
+
+            if (versionJson["badnames"] is JArray badNames)
+            {
+                foreach (JToken badNameToken in badNames)
                 {
-                    return WikiStatusResult.NotRegistered;
+                    string badName = badNameToken.ToString();
+
+                    if (!string.IsNullOrEmpty(User.Name) &&
+                        Regex.IsMatch(
+                            User.Name,
+                            badName,
+                            RegexOptions.IgnoreCase |
+                            RegexOptions.Multiline))
+                    {
+                        return WikiStatusResult.NotRegistered;
+                    }
                 }
             }
 
