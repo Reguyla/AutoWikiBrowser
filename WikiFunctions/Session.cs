@@ -32,20 +32,17 @@ namespace WikiFunctions;
     public class Session
 {
     #region Properties
-    public AsyncApiEdit Editor
-    { get; private set; }
+    public AsyncApiEdit Editor { get; private set; }
 
     public UserInfo User => Editor.User;
 
     public PageInfo Page => Editor.Page;
 
-    public SiteInfo Site
-    { get; private set; }
+    public SiteInfo Site { get; private set; }
 
     public bool IsBusy => Editor.IsActive;
 
-    public bool IsBot
-    { get; private set; }
+    public bool IsBot { get; private set; }
 
     public bool IsSysop => Editor.User.IsSysop;
 
@@ -53,8 +50,7 @@ namespace WikiFunctions;
     /// Gets the check page JSON Text.
     /// </summary>
     /// <value>The check page JSON Text.</value>
-    public string CheckPageJSONText
-    { get; private set; }
+    public string CheckPageJSONText { get; private set; }
 
     /// <summary>
     /// Config Page JSON text
@@ -65,8 +61,7 @@ namespace WikiFunctions;
     /// Gets the JSON of version check page.
     /// </summary>
     /// <value>The JSON of version check page.</value>
-    public string VersionCheckPage
-    { get; private set; }
+    public string VersionCheckPage { get; private set; }
 
     #endregion
 
@@ -154,6 +149,7 @@ namespace WikiFunctions;
     private const string DefaultWikiConfig = "{ 'typolink': '', 'allusersenabled': true, 'allusersenabledusermode': true, 'messages': [], 'underscoretitles': [], 'nogenfixes': [], 'noregextypofix': [] }";
 
     private WikiStatusResult _status;
+
     public WikiStatusResult Status
     {
         get
@@ -163,10 +159,7 @@ namespace WikiFunctions;
 
             return _status;
         }
-        private set
-        {
-            _status = value;
-        }
+        private set => _status = value;
     }
 
     // Allows fork/rebrand development builds to continue through the normal
