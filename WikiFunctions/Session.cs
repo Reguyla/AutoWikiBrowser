@@ -401,6 +401,180 @@ namespace WikiFunctions;
     }
 
     /// <summary>
+    /// Applies the loaded site metadata to the shared project settings.
+    /// </summary>
+    private void ApplySiteInformation()
+    {
+        Variables.RTL = Site.IsRightToLeft;
+        Variables.CapitalizeFirstLetter =
+            Site.CapitalizeFirstLetter;
+
+        Variables.UnicodeCategoryCollation =
+            !Variables.IsCustomProject &&
+            Regex.IsMatch(
+                Site.CategoryCollation,
+                "[a-z-]*uca-");
+
+        if (Variables.IsCustomProject ||
+            Variables.IsWikia)
+        {
+            Variables.LangCode = Site.Language;
+        }
+
+        Variables.TagEdits = Site.IsAWBTagDefined;
+    }
+
+    /// <summary>
+    /// Validates and parses the downloaded global version metadata.
+    /// </summary>
+    /// <param name="versionJson">
+    /// Contains the parsed version metadata when successful.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> when the metadata was parsed successfully; otherwise
+    /// <c>false</c>.
+    /// </returns>
+    private static bool TryLoadGlobalVersionJson(
+        out JObject versionJson)
+    {
+        return TryParseJsonObject(
+            Updater.GlobalVersionPage,
+            "The global version page",
+            out versionJson);
+    }
+
+    /// <summary>
+    /// Loads the local wiki configuration, falling back to the built-in
+    /// default when the remote configuration page is unavailable.
+    /// </summary>
+    /// <param name="configJson">
+    /// Contains the parsed configuration when successful.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> when a valid configuration was loaded; otherwise
+    /// <c>false</c>.
+    /// </returns>
+    private bool TryLoadWikiConfiguration(
+        out JObject configJson)
+    {
+        string downloadedConfig =
+            Editor.SynchronousEditor.HttpGet(ConfigUrl);
+
+        if (!string.IsNullOrWhiteSpace(downloadedConfig))
+        {
+            ConfigJSONText = downloadedConfig;
+        }
+        else
+        {
+            Tools.WriteDebug(
+                nameof(UpdateWikiStatus),
+                "No JSON config page at " +
+                ConfigUrl +
+                "; falling back to default.");
+
+            ConfigJSONText = DefaultWikiConfig;
+        }
+
+        if (!TryParseJsonObject(
+                ConfigJSONText,
+                "The wiki configuration page",
+                out configJson))
+        {
+            return false;
+        }
+
+        JSONMessages(configJson["messages"]);
+
+        TypoLink(configJson);
+
+        Variables.LoadUnderscores(
+            ReadStringArray(
+                    configJson,
+                    "underscoretitles")
+                .Select(value => value.Trim())
+                .ToArray());
+
+        NoGenfixes =
+            configJson["nogenfixes"].DistinctList();
+
+        NoRETF =
+            configJson["noregextypofix"].DistinctList();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Determines whether the current user is permitted to operate on
+    /// the wiki and whether bot mode should be enabled.
+    /// </summary>
+    private WikiStatusResult DetermineRegistrationStatus(
+        JObject versionJson,
+        JObject configJson)
+    {
+        if (string.IsNullOrEmpty(CheckPageJSONText) ||
+            ReadBoolean(
+                configJson,
+                "allusersenabled"))
+        {
+            IsBot = true;
+            return WikiStatusResult.Registered;
+        }
+
+        if (!TryParseJsonObject(
+                CheckPageJSONText,
+                "The CheckPageJSON page",
+                out JObject checkPageJson))
+        {
+            return WikiStatusResult.Error;
+        }
+
+        List<string> enabledUsers =
+            ReadStringArray(
+                checkPageJson,
+                "enabledusers");
+
+        List<string> enabledBots =
+            ReadStringArray(
+                checkPageJson,
+                "enabledbots");
+
+        var usernameComparer =
+            new UsernameComparer();
+
+        bool isBotEnabled =
+            enabledBots.Contains(
+                User.Name,
+                usernameComparer);
+
+        if (ReadBoolean(
+                configJson,
+                "allusersenabledusermode") ||
+            (IsSysop &&
+             Variables.Project != ProjectEnum.wikia) ||
+            isBotEnabled ||
+            enabledUsers.Contains(
+                User.Name,
+                usernameComparer))
+        {
+            IsBot = isBotEnabled;
+            return WikiStatusResult.Registered;
+        }
+
+        foreach (string globalUser in
+            ReadStringArray(
+                versionJson,
+                "globalusers"))
+        {
+            if (User.Name == globalUser)
+            {
+                return WikiStatusResult.Registered;
+            }
+        }
+
+        return WikiStatusResult.NotRegistered;
+    }
+
+    /// <summary>
     /// Refreshes the current wiki session state by loading site
     /// information, validating the running AWB version, downloading
     /// configuration pages, and determining the user's operational
@@ -422,18 +596,6 @@ namespace WikiFunctions;
             {
                 Updater.CheckForUpdates();
             }
-
-            Variables.RTL = Site.IsRightToLeft;
-            Variables.CapitalizeFirstLetter = Site.CapitalizeFirstLetter;
-
-            Variables.UnicodeCategoryCollation = !Variables.IsCustomProject && Regex.IsMatch(Site.CategoryCollation, "[a-z-]*uca-");
-
-            if (Variables.IsCustomProject || Variables.IsWikia)
-            {
-                Variables.LangCode = Site.Language;
-            }
-
-            Variables.TagEdits = Site.IsAWBTagDefined;
 
             Updater.WaitForCompletion();
             Updater.AWBEnabledStatus versionStatus = Updater.Result;
