@@ -35,30 +35,19 @@ namespace WikiFunctions;
     public AsyncApiEdit Editor
     { get; private set; }
 
-    public UserInfo User
-    { get { return Editor.User; } }
+    public UserInfo User => Editor.User;
 
-    public PageInfo Page
-    { get { return Editor.Page; } }
+    public PageInfo Page => Editor.Page;
 
     public SiteInfo Site
     { get; private set; }
 
-    public bool IsBusy
-    {
-        get
-        {
-            return Editor.IsActive;
-        }
-    }
+    public bool IsBusy => Editor.IsActive;
 
     public bool IsBot
     { get; private set; }
 
-    public bool IsSysop
-    {
-        get { return Editor.User.IsSysop; }
-    }
+    public bool IsSysop => Editor.User.IsSysop;
 
     /// <summary>
     /// Gets the check page JSON Text.
@@ -81,17 +70,17 @@ namespace WikiFunctions;
 
     #endregion
 
-    readonly Control parentControl;
+    private readonly Control _parentControl;
 
     public Session(Control parent)
     {
-        parentControl = parent;
+        _parentControl = parent;
         UpdateProject(true);
     }
 
     private AsyncApiEdit CreateEditor(string url)
     {
-        AsyncApiEdit edit = new AsyncApiEdit(url, parentControl)
+        AsyncApiEdit edit = new(url, _parentControl)
         {
             NewMessageThrows = false
         };
@@ -122,45 +111,40 @@ namespace WikiFunctions;
 
     public event AsyncEventHandler Aborted;
 
-    void OnOpenComplete(AsyncApiEdit sender, PageInfo pageInfo)
-    {
-        if (OpenComplete != null) OpenComplete(sender, pageInfo);
-    }
+    private void OnOpenComplete(
+        AsyncApiEdit sender,
+        PageInfo pageInfo) =>
+        OpenComplete?.Invoke(sender, pageInfo);
 
-    void OnSaveComplete(AsyncApiEdit sender, SaveInfo saveInfo)
-    {
-        if (SaveComplete != null) SaveComplete(sender, saveInfo);
-    }
+    private void OnSaveComplete(
+        AsyncApiEdit sender,
+        SaveInfo saveInfo) =>
+        SaveComplete?.Invoke(sender, saveInfo);
 
-    void OnPreviewComplete(AsyncApiEdit sender, string result)
-    {
-        if (PreviewComplete != null) PreviewComplete(sender, result);
-    }
+    private void OnPreviewComplete(
+        AsyncApiEdit sender,
+        string result) =>
+        PreviewComplete?.Invoke(sender, result);
 
-    void OnExceptionCaught(AsyncApiEdit sender, Exception ex)
-    {
-        if (ExceptionCaught != null) ExceptionCaught(sender, ex);
-    }
+    private void OnExceptionCaught(
+        AsyncApiEdit sender,
+        Exception exception) =>
+        ExceptionCaught?.Invoke(sender, exception);
 
-    void OnMaxlagExceeded(AsyncApiEdit sender, double maxlag, int retryAfter)
-    {
-        if (MaxlagExceeded != null) MaxlagExceeded(sender, maxlag, retryAfter);
-    }
+    private void OnMaxlagExceeded(
+        AsyncApiEdit sender,
+        double maxlag,
+        int retryAfter) =>
+        MaxlagExceeded?.Invoke(sender, maxlag, retryAfter);
 
-    void OnLoggedOff(AsyncApiEdit sender)
-    {
-        if (LoggedOff != null) LoggedOff(sender);
-    }
+    private void OnLoggedOff(AsyncApiEdit sender) =>
+        LoggedOff?.Invoke(sender);
 
-    void OnStateChanged(AsyncApiEdit sender)
-    {
-        if (StateChanged != null) StateChanged(sender);
-    }
+    private void OnStateChanged(AsyncApiEdit sender) =>
+        StateChanged?.Invoke(sender);
 
-    void OnAborted(AsyncApiEdit sender)
-    {
-        if (Aborted != null) Aborted(sender);
-    }
+    private void OnAborted(AsyncApiEdit sender) =>
+        Aborted?.Invoke(sender);
 
     #endregion
 
@@ -169,19 +153,19 @@ namespace WikiFunctions;
     /// </summary>
     private const string DefaultWikiConfig = "{ 'typolink': '', 'allusersenabled': true, 'allusersenabledusermode': true, 'messages': [], 'underscoretitles': [], 'nogenfixes': [], 'noregextypofix': [] }";
 
-    WikiStatusResult status;
+    private WikiStatusResult _status;
     public WikiStatusResult Status
     {
         get
         {
-            if (status == WikiStatusResult.PendingUpdate)
+            if (_status == WikiStatusResult.PendingUpdate)
                 Update();
 
-            return status;
+            return _status;
         }
         private set
         {
-            status = value;
+            _status = value;
         }
     }
 
@@ -252,7 +236,7 @@ namespace WikiFunctions;
     /// </summary>
     public void RequireUpdate()
     {
-        status = WikiStatusResult.PendingUpdate;
+        _status = WikiStatusResult.PendingUpdate;
     }
 
     /// <summary>
