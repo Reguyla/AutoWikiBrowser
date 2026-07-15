@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Reflection;
@@ -274,6 +275,68 @@ namespace WikiFunctions;
     }
 
     /// <summary>
+    /// Attempts to parse a JSON object using bounded reader settings and
+    /// reports malformed or missing content through the debug log.
+    ///
+    /// This helper centralizes JSON parsing for remotely downloaded
+    /// configuration documents so callers receive consistent validation
+    /// and error handling.
+    /// </summary>
+    /// <param name="jsonText">
+    /// The JSON text to parse.
+    /// </param>
+    /// <param name="sourceName">
+    /// A descriptive name for the JSON source used in debug output.
+    /// </param>
+    /// <param name="json">
+    /// When this method returns, contains the parsed JSON object if
+    /// parsing succeeded; otherwise <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the JSON was successfully parsed; otherwise
+    /// <c>false</c>.
+    /// </returns>
+    private static bool TryParseJsonObject(
+    string jsonText,
+    string sourceName,
+    out JObject json)
+    {
+        json = null;
+
+        if (string.IsNullOrWhiteSpace(jsonText))
+        {
+            Tools.WriteDebug(
+                nameof(UpdateWikiStatus),
+                sourceName + " returned no JSON content.");
+
+            return false;
+        }
+
+        try
+        {
+            using (var stringReader = new StringReader(jsonText))
+            using (var jsonReader = new JsonTextReader(stringReader)
+            {
+                MaxDepth = 32,
+                DateParseHandling = DateParseHandling.None
+            })
+            {
+                json = JObject.Load(jsonReader);
+            }
+
+            return true;
+        }
+        catch (JsonException ex)
+        {
+            Tools.WriteDebug(
+                nameof(UpdateWikiStatus),
+                sourceName + " contained invalid JSON: " + ex.Message);
+
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Refreshes the current wiki session state by loading site
     /// information, validating the running AWB version, downloading
     /// configuration pages, and determining the user's operational
@@ -459,6 +522,68 @@ namespace WikiFunctions;
             IsBot = false;
             return WikiStatusResult.Error;
         }
+    }
+
+    /// <summary>
+    /// Determines whether the current username matches any of the
+    /// globally configured bad-name regular expressions.
+    ///
+    /// The expressions are supplied by the remote global version page,
+    /// so each match is evaluated with a timeout and invalid expressions
+    /// are ignored after being written to the debug log.
+    /// </summary>
+    /// <param name="versionJson">
+    /// The parsed JSON object from the global version page.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the current username matches a configured bad-name
+    /// expression; otherwise <c>false</c>.
+    /// </returns>
+    private bool IsGloballyBlockedUsername(JObject versionJson)
+    {
+        if (string.IsNullOrEmpty(User.Name))
+            return false;
+
+        if (versionJson["badnames"] is not JArray badNames)
+            return false;
+
+        foreach (JToken badNameToken in badNames)
+        {
+            if (badNameToken.Type != JTokenType.String)
+                continue;
+
+            string badName = badNameToken.Value<string>();
+
+            if (string.IsNullOrWhiteSpace(badName))
+                continue;
+
+            try
+            {
+                if (Regex.IsMatch(
+                        User.Name,
+                        badName,
+                        RegexOptions.IgnoreCase |
+                        RegexOptions.Multiline,
+                        TimeSpan.FromSeconds(1)))
+                {
+                    return true;
+                }
+            }
+            catch (RegexMatchTimeoutException)
+            {
+                Tools.WriteDebug(
+                    nameof(IsGloballyBlockedUsername),
+                    "A global bad-name regular expression exceeded the timeout.");
+            }
+            catch (ArgumentException)
+            {
+                Tools.WriteDebug(
+                    nameof(IsGloballyBlockedUsername),
+                    "The global version page contained an invalid bad-name regular expression.");
+            }
+        }
+
+        return false;
     }
 
     public static void TypoLink(JObject configJson)
