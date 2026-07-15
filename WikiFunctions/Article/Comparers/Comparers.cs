@@ -19,77 +19,179 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 namespace WikiFunctions;
 
 /// <summary>
-/// 
+/// Determines whether an article contains an exact, case-sensitive
+/// text value.
 /// </summary>
-public class CaseSensitiveArticleComparer : IArticleComparer
+public sealed class CaseSensitiveArticleComparer : IArticleComparer
 {
+    private readonly string _comparator;
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="CaseSensitiveArticleComparer"/> class.
+    /// </summary>
+    /// <param name="comparator">
+    /// The text to locate in the article content.
+    /// </param>
     public CaseSensitiveArticleComparer(string comparator)
     {
-        Comparator = comparator;
+        ArgumentNullException.ThrowIfNull(comparator);
+        _comparator = comparator;
     }
 
+    /// <summary>
+    /// Determines whether the article text contains the configured
+    /// comparison value using case-sensitive matching.
+    /// </summary>
+    /// <param name="article">The article to examine.</param>
+    /// <returns>
+    /// <c>true</c> if the article contains the comparison value;
+    /// otherwise, <c>false</c>.
+    /// </returns>
     public bool Matches(Article article)
     {
-        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-        return text.Contains(Comparator);
-    }
+        ArgumentNullException.ThrowIfNull(article);
 
-    private readonly string Comparator;
+        string text =
+            Tools.ConvertFromLocalLineEndings(article.ArticleText);
+
+        return text.Contains(_comparator, StringComparison.Ordinal);
+    }
 }
 
 /// <summary>
-/// 
+/// Determines whether an article contains a text value without
+/// regard to letter casing.
 /// </summary>
-public class CaseInsensitiveArticleComparer : IArticleComparer
+public sealed class CaseInsensitiveArticleComparer : IArticleComparer
 {
+    private readonly string _comparator;
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="CaseInsensitiveArticleComparer"/> class.
+    /// </summary>
+    /// <param name="comparator">
+    /// The text to locate in the article content.
+    /// </param>
     public CaseInsensitiveArticleComparer(string comparator)
     {
-        Comparator = comparator;
+        ArgumentNullException.ThrowIfNull(comparator);
+        _comparator = comparator;
     }
 
+    /// <summary>
+    /// Determines whether the article text contains the configured
+    /// comparison value using case-insensitive matching.
+    /// </summary>
+    /// <param name="article">The article to examine.</param>
+    /// <returns>
+    /// <c>true</c> if the article contains the comparison value;
+    /// otherwise, <c>false</c>.
+    /// </returns>
     public bool Matches(Article article)
     {
-        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-        return text.IndexOf(Comparator, StringComparison.CurrentCultureIgnoreCase) >= 0;
-    }
+        ArgumentNullException.ThrowIfNull(article);
 
-    private readonly string Comparator;
+        string text =
+            Tools.ConvertFromLocalLineEndings(article.ArticleText);
+
+        return text.Contains(
+            _comparator,
+            StringComparison.CurrentCultureIgnoreCase);
+    }
 }
 
 /// <summary>
-/// 
+/// Determines whether an article contains a case-sensitive comparison
+/// value after AWB keywords have been expanded for that article.
 /// </summary>
-public class CaseSensitiveArticleComparerWithKeywords : IArticleComparer
+public sealed class CaseSensitiveArticleComparerWithKeywords
+    : IArticleComparer
 {
+    private readonly string _comparator;
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="CaseSensitiveArticleComparerWithKeywords"/> class.
+    /// </summary>
+    /// <param name="comparator">
+    /// The text template to evaluate after applying AWB keywords.
+    /// </param>
     public CaseSensitiveArticleComparerWithKeywords(string comparator)
     {
-        Comparator = comparator;
+        ArgumentNullException.ThrowIfNull(comparator);
+        _comparator = comparator;
     }
 
+    /// <summary>
+    /// Determines whether the article text contains the keyword-expanded
+    /// comparison value using case-sensitive matching.
+    /// </summary>
+    /// <param name="article">The article to examine.</param>
+    /// <returns>
+    /// <c>true</c> if the article contains the expanded comparison value;
+    /// otherwise, <c>false</c>.
+    /// </returns>
     public bool Matches(Article article)
     {
-        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-        return text.Contains(Tools.ApplyKeyWords(article.Name, Comparator));
-    }
+        ArgumentNullException.ThrowIfNull(article);
 
-    private readonly string Comparator;
+        string text =
+            Tools.ConvertFromLocalLineEndings(article.ArticleText);
+
+        string comparator =
+            Tools.ApplyKeyWords(article.Name, _comparator);
+
+        return text.Contains(
+            comparator,
+            StringComparison.Ordinal);
+    }
 }
 
 /// <summary>
-/// 
+/// Determines whether an article contains a case-insensitive comparison
+/// value after AWB keywords have been expanded for that article.
 /// </summary>
-public class CaseInsensitiveArticleComparerWithKeywords : IArticleComparer
+public sealed class CaseInsensitiveArticleComparerWithKeywords
+    : IArticleComparer
 {
+    private readonly string _comparator;
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="CaseInsensitiveArticleComparerWithKeywords"/> class.
+    /// </summary>
+    /// <param name="comparator">
+    /// The text template to evaluate after applying AWB keywords.
+    /// </param>
     public CaseInsensitiveArticleComparerWithKeywords(string comparator)
     {
-        Comparator = comparator;
+        ArgumentNullException.ThrowIfNull(comparator);
+        _comparator = comparator;
     }
 
+    /// <summary>
+    /// Determines whether the article text contains the keyword-expanded
+    /// comparison value using case-insensitive matching.
+    /// </summary>
+    /// <param name="article">The article to examine.</param>
+    /// <returns>
+    /// <c>true</c> if the article contains the expanded comparison value;
+    /// otherwise, <c>false</c>.
+    /// </returns>
     public bool Matches(Article article)
     {
-        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-        return text.IndexOf(Tools.ApplyKeyWords(article.Name, Comparator), StringComparison.CurrentCultureIgnoreCase) >= 0;
-    }
+        ArgumentNullException.ThrowIfNull(article);
 
-    private readonly string Comparator;
+        string text =
+            Tools.ConvertFromLocalLineEndings(article.ArticleText);
+
+        string comparator =
+            Tools.ApplyKeyWords(article.Name, _comparator);
+
+        return text.Contains(
+            comparator,
+            StringComparison.CurrentCultureIgnoreCase);
+    }
 }
