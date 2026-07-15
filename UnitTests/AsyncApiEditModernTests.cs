@@ -141,27 +141,27 @@ namespace UnitTests
 
                 // A second operation must be rejected while the first one owns
                 // the shared-operation gate.
+                Action startSecondOperation = delegate
+                {
+                    editor.PreviewAsync("Other page", "Other text");
+                };
+
                 Assert.That(
-                    delegate
-                    {
-                        editor.PreviewAsync("Other page", "Other text");
-                    },
+                    startSecondOperation,
                     Throws.TypeOf<InvocationException>());
 
                 // Reset must not touch the shared ApiEdit while preview is active.
+                Action resetWhileActive = () => editor.Reset();
+
                 Assert.That(
-                    delegate
-                    {
-                        editor.Reset();
-                    },
+                    resetWhileActive,
                     Throws.TypeOf<InvocationException>());
 
                 // Clone must not clone the shared ApiEdit while preview is active.
+                Action cloneWhileActive = () => editor.Clone();
+
                 Assert.That(
-                    delegate
-                    {
-                        editor.Clone();
-                    },
+                    cloneWhileActive,
                     Throws.TypeOf<InvocationException>());
             }
             finally
@@ -332,11 +332,13 @@ namespace UnitTests
                 "Sandbox",
                 "Text that triggers a normal failure");
 
+            Action waitForPreview = () =>
+            {
+                previewTask.GetAwaiter().GetResult();
+            };
+
             Assert.That(
-                delegate
-                {
-                    previewTask.GetAwaiter().GetResult();
-                },
+                waitForPreview,
                 Throws.TypeOf<InvalidOperationException>());
 
             Assert.That(
@@ -352,13 +354,17 @@ namespace UnitTests
                 reportedException,
                 Is.SameAs(expectedException));
 
-            Assert.That(operations.PreviewCallCount, Is.EqualTo(1));
+            Assert.That(
+                operations.PreviewCallCount,
+                Is.EqualTo(1));
 
             Assert.That(
                 editor.State,
                 Is.EqualTo(AsyncApiEditModern.EditState.Failed));
 
-            Assert.That(editor.IsActive, Is.False);
+            Assert.That(
+                editor.IsActive,
+                Is.False);
         }
 
         [Test]
@@ -397,11 +403,13 @@ namespace UnitTests
                 "Sandbox",
                 "Text that triggers a logged-off failure");
 
+            Action waitForPreview = () =>
+            {
+                previewTask.GetAwaiter().GetResult();
+            };
+
             Assert.That(
-                delegate
-                {
-                    previewTask.GetAwaiter().GetResult();
-                },
+                waitForPreview,
                 Throws.TypeOf<LoggedOffException>());
 
             Assert.That(
@@ -470,11 +478,13 @@ namespace UnitTests
                 "Sandbox",
                 "Text that triggers maxlag");
 
+            Action waitForPreview = () =>
+            {
+                previewTask.GetAwaiter().GetResult();
+            };
+
             Assert.That(
-                delegate
-                {
-                    previewTask.GetAwaiter().GetResult();
-                },
+                waitForPreview,
                 Throws.TypeOf<MaxlagException>());
 
             Assert.That(
@@ -622,11 +632,13 @@ namespace UnitTests
 
             Assert.That(previewTask.IsCompleted, Is.True);
 
+            Action waitForPreview = () =>
+            {
+                previewTask.GetAwaiter().GetResult();
+            };
+
             Assert.That(
-                delegate
-                {
-                    previewTask.GetAwaiter().GetResult();
-                },
+                waitForPreview,
                 Throws.TypeOf<InvalidOperationException>());
 
             // The callback context queues notifications, so the event handler must
@@ -696,11 +708,13 @@ namespace UnitTests
 
             operations.AllowPreviewToComplete.Set();
 
+            Action waitForPreview = () =>
+            {
+                previewTask.GetAwaiter().GetResult();
+            };
+
             Assert.That(
-                delegate
-                {
-                    previewTask.GetAwaiter().GetResult();
-                },
+                waitForPreview,
                 Throws.InstanceOf<OperationCanceledException>());
 
             Assert.That(
