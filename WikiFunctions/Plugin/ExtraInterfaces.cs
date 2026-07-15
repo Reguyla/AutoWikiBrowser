@@ -17,89 +17,88 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Plugin
+namespace WikiFunctions.Plugin;
+
+/// <summary>
+/// 
+/// </summary>
+public interface IModule
+{
+    /// <summary>
+    /// Runs custom module code against the current page
+    /// </summary>
+    /// <param name="articleText">The wiki text of the page</param>
+    /// <param name="articleTitle">Title of the page</param>
+    /// <param name="namespace">Namespace key of page</param>
+    /// <param name="summary">Edit summary to use</param>
+    /// <param name="skip">Whether to skip the page</param>
+    /// <returns>The updated page text</returns>
+    string ProcessArticle(string articleText, string articleTitle, int @namespace, out string summary,
+        out bool skip);
+}
+
+/// <summary>
+/// 
+/// </summary>
+public interface ISkipOptions
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface IModule
-    {
-        /// <summary>
-        /// Runs custom module code against the current page
-        /// </summary>
-        /// <param name="articleText">The wiki text of the page</param>
-        /// <param name="articleTitle">Title of the page</param>
-        /// <param name="namespace">Namespace key of page</param>
-        /// <param name="summary">Edit summary to use</param>
-        /// <param name="skip">Whether to skip the page</param>
-        /// <returns>The updated page text</returns>
-        string ProcessArticle(string articleText, string articleTitle, int @namespace, out string summary,
-            out bool skip);
-    }
+    bool SkipNoUnicode
+    { get; }
 
     /// <summary>
     /// 
     /// </summary>
-    public interface ISkipOptions
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoUnicode
-        { get; }
+    bool SkipNoTag
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoTag
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoHeaderError
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoHeaderError
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoBoldTitle
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoBoldTitle
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoBulletedLink
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoBulletedLink
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoBadLink
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoBadLink
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoDefaultSortAdded
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoDefaultSortAdded
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoUserTalkTemplatesSubstd
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoUserTalkTemplatesSubstd
-        { get; }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoCiteTemplateDatesFixed
+    { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoCiteTemplateDatesFixed
-        { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SkipNoPeopleCategoriesFixed
-        { get; }
-    }
+    /// <summary>
+    /// 
+    /// </summary>
+    bool SkipNoPeopleCategoriesFixed
+    { get; }
 }

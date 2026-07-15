@@ -17,13 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Profiles
-{
-    public class AWBProfile
-    {
-        public int ID = -1;
-        public string DefaultSettings, Notes;
+namespace WikiFunctions.Profiles;
 
-        public string Username, Password;
-    }
+public class AWBProfile
+{
+    public int ID = -1;
+    public string DefaultSettings, Notes;
+
+    public string Username, Password;
 }

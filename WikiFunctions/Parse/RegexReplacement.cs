@@ -17,30 +17,29 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-namespace WikiFunctions.Parse
+namespace WikiFunctions.Parse;
+
+struct RegexReplacement
 {
-    struct RegexReplacement
+    public RegexReplacement(Regex regex, string replacement)
     {
-        public RegexReplacement(Regex regex, string replacement)
-        {
-            Regex = regex;
-            Replacement = replacement;
-        }
-
-        public RegexReplacement(string pattern, RegexOptions options, string replacement)
-            : this(new Regex(pattern, options), replacement)
-        {
-        }
-
-        // Making a compiled regex by default will only improve overall performance if regex will be used thousands 
-        // of times, otherwise instantiation penalty is much greater than any performance gain in use
-        public RegexReplacement(string pattern, string replacement)
-            : this(pattern, RegexOptions.None, replacement)
-        {
-        }
-
-        public readonly Regex Regex;
-        public readonly string Replacement;
-        // This could get extended to be a class with some of the Regex methods, such as IsMatch, Replace, etc, but there's little point
+        Regex = regex;
+        Replacement = replacement;
     }
+
+    public RegexReplacement(string pattern, RegexOptions options, string replacement)
+        : this(new Regex(pattern, options), replacement)
+    {
+    }
+
+    // Making a compiled regex by default will only improve overall performance if regex will be used thousands 
+    // of times, otherwise instantiation penalty is much greater than any performance gain in use
+    public RegexReplacement(string pattern, string replacement)
+        : this(pattern, RegexOptions.None, replacement)
+    {
+    }
+
+    public readonly Regex Regex;
+    public readonly string Replacement;
+    // This could get extended to be a class with some of the Regex methods, such as IsMatch, Replace, etc, but there's little point
 }
