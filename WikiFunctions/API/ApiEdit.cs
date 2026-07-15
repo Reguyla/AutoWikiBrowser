@@ -577,8 +577,7 @@ namespace WikiFunctions.API
         private static Dictionary<string, string> CreateSafeDiagnosticCopy(
             IDictionary<string, string> parameters)
         {
-            Dictionary<string, string> safeCopy =
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> safeCopy = new(StringComparer.OrdinalIgnoreCase);
 
             if (parameters == null)
                 return safeCopy;
@@ -854,7 +853,7 @@ namespace WikiFunctions.API
                     result = HttpPost(
                         new Dictionary<string, string>
                         {
-            {"action", "login"}
+                           {"action", "login"}
                         },
                         post
                     );
@@ -1179,11 +1178,12 @@ namespace WikiFunctions.API
             Reset();
             User = new UserInfo();
 
-            string result = HttpPost(new Dictionary<string, string> { { "action", "query" } },
-                new Dictionary<string, string>
+            string result = HttpPost(
+                new() { { "action", "query" } },
+                new()
                 {
-                    {"meta", "userinfo"},
-                    {"uiprop", "blockinfo|hasmsg|groups|rights"}
+                    { "meta", "userinfo" },
+                    { "uiprop", "blockinfo|hasmsg|groups|rights" }
                 });
 
             var xml = CheckForErrors(result, "userinfo");
@@ -1193,8 +1193,9 @@ namespace WikiFunctions.API
 
         public void ClearNewMessages()
         {
-            HttpPost(new Dictionary<string, string> { { "action", "clearhasmsg" } },
-                     new Dictionary<string, string>());
+            HttpPost(
+                new() { { "action", "clearhasmsg" } },
+                new());
         }
         #endregion
 
@@ -1769,17 +1770,17 @@ namespace WikiFunctions.API
             EnsureHtmlHeadersLoaded();
 
             string result = HttpPost(
-                new Dictionary<string, string>
+                new()
                 {
-                    {"action", "parse"},
-                    {"prop", "text|parsewarnings"}
+                    { "action", "parse" },
+                    { "prop", "text|parsewarnings" }
                 },
-                new Dictionary<string, string>
+                new()
                 {
-                    {"title", title},
-                    {"text", text},
-                    {"pst", null},
-                    {"disablelimitreport", null}
+                    { "title", title },
+                    { "text", text },
+                    { "pst", null },
+                    { "disablelimitreport", null }
                 });
 
             XmlDocument document = CheckForErrors(result, "parse");
@@ -1870,16 +1871,16 @@ namespace WikiFunctions.API
             }
 
             var result2 = HttpPost(
-                new Dictionary<string, string>
+                new()
                 {
-                    {"action", "rollback"}
+                    { "action", "rollback" }
                 },
-             new Dictionary<string, string>
+                new()
                 {
-                    {"title", title},
-                    {"user", user},
-                    {"token", Page.RollbackToken}
-             });
+                    { "title", title },
+                    { "user", user },
+                    { "token", Page.RollbackToken }
+                });
 
             CheckForErrors(result2, "rollback");
         }
@@ -1887,15 +1888,15 @@ namespace WikiFunctions.API
         public string ExpandTemplates(string title, string text)
         {
             string result = HttpPost(
-                new Dictionary<string, string>
+                new()
                 {
-            {"action", "expandtemplates"},
-            {"prop", "wikitext"}
+                    { "action", "expandtemplates" },
+                    { "prop", "wikitext" }
                 },
-                new Dictionary<string, string>
+                new()
                 {
-            {"title", title},
-            {"text", text}
+                    { "title", title },
+                    { "text", text }
                 });
 
             XmlDocument document = CheckForErrors(result, "expandtemplates");
