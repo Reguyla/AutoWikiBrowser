@@ -540,14 +540,14 @@ namespace WikiFunctions;
         }
         catch (WebException ex)
         {
-            string message = "";
+            string message = string.Empty;
 
             if (ex.InnerException != null)
             {
                 if (ex.InnerException is AuthenticationException)
                 {
 
-                    if (message.Equals(""))
+                    if (string.IsNullOrEmpty(message))
                     {
                         message = ex.Message;
                     }
@@ -557,7 +557,7 @@ namespace WikiFunctions;
                     }
                 }
 
-                if (message.Equals(""))
+                if (string.IsNullOrEmpty(message))
                 {
                     message = ex.InnerException.Message;
                 }
@@ -591,7 +591,7 @@ namespace WikiFunctions;
             // connection/TLS failures, malformed project configuration, and unexpected
             // exceptions receive accurate user-facing messages and diagnostics.
 
-            string message = "";
+            string message = string.Empty;
 
             if (ex is WikiUrlException)
             {
