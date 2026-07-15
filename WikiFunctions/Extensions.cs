@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace WikiFunctions

@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Versioning;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace WikiFunctions

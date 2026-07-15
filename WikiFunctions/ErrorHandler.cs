@@ -1,7 +1,5 @@
 ﻿using System.Configuration;
-using System.Net;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using WikiFunctions.API;

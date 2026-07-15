@@ -26,7 +26,6 @@ How to enable a new setting:
  * Add code to read the deserialised value in UserSettings.cs:LoadPrefs
 */
 
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 

@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net;
 using WikiFunctions.API;
 
 namespace WikiFunctions.Lists.Providers

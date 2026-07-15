@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.ComponentModel;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WikiFunctions.Controls.Lists;
 using WikiFunctions.Lists.Providers;

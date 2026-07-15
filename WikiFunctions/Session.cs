@@ -18,19 +18,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net;
 using System.Reflection;
 using System.Security.Authentication;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WikiFunctions.API;
 
-    namespace WikiFunctions;
+namespace WikiFunctions;
 
-    /// <summary>
-    /// This class controls editing process in one wiki
-    /// </summary>
-    public class Session
+/// <summary>
+/// This class controls editing process in one wiki
+/// </summary>
+public class Session
 {
     #region Properties
     public AsyncApiEdit Editor { get; private set; }
