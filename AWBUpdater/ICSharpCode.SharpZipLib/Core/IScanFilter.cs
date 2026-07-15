@@ -33,18 +33,17 @@
 // obligated to do so.  If you do not wish to do so, delete this
 // exception statement from your version.
 
-namespace ICSharpCode.SharpZipLib.Core
+namespace ICSharpCode.SharpZipLib.Core;
+
+/// <summary>
+/// Scanning filters support filtering of names.
+/// </summary>
+public interface IScanFilter
 {
     /// <summary>
-    /// Scanning filters support filtering of names.
+    /// Test a name to see if it 'matches' the filter.
     /// </summary>
-    public interface IScanFilter
-    {
-        /// <summary>
-        /// Test a name to see if it 'matches' the filter.
-        /// </summary>
-        /// <param name="name">The name to test.</param>
-        /// <returns>Returns true if the name matches the filter, false if it does not match.</returns>
-        bool IsMatch(string name);
-    }
+    /// <param name="name">The name to test.</param>
+    /// <returns>Returns true if the name matches the filter, false if it does not match.</returns>
+    bool IsMatch(string name);
 }
