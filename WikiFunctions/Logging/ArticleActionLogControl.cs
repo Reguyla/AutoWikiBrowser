@@ -21,226 +21,225 @@ using System.Windows.Forms;
 using WikiFunctions.Controls;
 using WikiFunctions.Controls.Lists;
 
-namespace WikiFunctions.Logging
+namespace WikiFunctions.Logging;
+
+public partial class ArticleActionLogControl : UserControl
 {
-    public partial class ArticleActionLogControl : UserControl
+    private ListMaker _listMaker;
+
+    #region Public
+    public ArticleActionLogControl()
     {
-        private ListMaker _listMaker;
+        InitializeComponent();
+    }
 
-        #region Public
-        public ArticleActionLogControl()
-        {
-            InitializeComponent();
-        }
+    public void Initialise(ListMaker rlistMaker)
+    {
+        _listMaker = rlistMaker;
+        ResizeListView(lvFailed);
+        ResizeListView(lvSuccessful);
+    }
 
-        public void Initialise(ListMaker rlistMaker)
+    public void LogArticleAction(string page, bool succeeded, ArticleAction action, string message)
+    {
+        ListViewItem item = new ListViewItem(page);
+        item.SubItems.Add(action.ToString());
+        item.SubItems.Add(DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        item.SubItems.Add(message);
+
+        if (!succeeded)
         {
-            _listMaker = rlistMaker;
+            lvFailed.Items.Add(item);
             ResizeListView(lvFailed);
+        }
+        else
+        {
+            lvSuccessful.Items.Add(item);
             ResizeListView(lvSuccessful);
         }
+    }
+    #endregion
 
-        public void LogArticleAction(string page, bool succeeded, ArticleAction action, string message)
+    #region Private/Protected
+    /// <summary>
+    /// Returns the ListView object from which the menu item was clicked
+    /// </summary>
+    /// 
+    private static ListView MenuItemOwner(object sender)
+    {
+        /* we seem to sometimes be receiving a ToolStripMenuItem, and sometimes a ContextMenuStrip...
+         * I've no idea why, but in the meantime this version of the function handles both. */
+
+        if (sender is ContextMenuStrip)
+            return ((ListView)((ContextMenuStrip)sender).SourceControl);
+
+        if (sender is ToolStripMenuItem)
+            return (ListView)(((ContextMenuStrip)((ToolStripMenuItem)sender).Owner).SourceControl);
+        throw new ArgumentException("Object of unknown type passed to LogControl.MenuItemOwner()", "sender");
+    }
+
+    private LogFileType GetFilePrefs()
+    {
+        if (saveListDialog.ShowDialog() != DialogResult.OK)
+            return 0;
+        return (LogFileType)saveListDialog.FilterIndex;
+    }
+    #endregion
+
+    #region Event Handlers
+
+    private void addSelectedToArticleListToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        List<Article> list = new List<Article>();
+        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
         {
-            ListViewItem item = new ListViewItem(page);
-            item.SubItems.Add(action.ToString());
-            item.SubItems.Add(DateTime.Now.ToString(CultureInfo.InvariantCulture));
-            item.SubItems.Add(message);
+            list.Add(new Article(item.Text));
+        }
+        _listMaker.Add(list);
+    }
 
-            if (!succeeded)
+    private void AddToListMaker(ListView.ListViewItemCollection sic)
+    {
+        List<Article> list = new List<Article>();
+        foreach (ListViewItem item in sic)
+        {
+            list.Add(new Article(item.Text));
+        }
+        _listMaker.Add(list);
+    }
+
+    private void LogLists_DoubleClick(object sender, EventArgs e)
+    {
+        try
+        {
+            ((AWBLogListener)((ListView)sender).FocusedItem).OpenInBrowser();
+        }
+        catch { }
+    }
+
+    private static void ResizeListView(NoFlickerExtendedListView lstView)
+    {
+        lstView.ResizeColumns(true);
+    }
+
+    private void SaveListView(ListView listview)
+    {
+        LogFileType logFileType = GetFilePrefs();
+        if (logFileType != 0)
+        {
+            StringBuilder strList = new StringBuilder();
+
+            foreach (ListViewItem lvi in listview.Items)
             {
-                lvFailed.Items.Add(item);
-                ResizeListView(lvFailed);
+                strList.AppendLine(lvi.Text);
             }
-            else
-            {
-                lvSuccessful.Items.Add(item);
-                ResizeListView(lvSuccessful);
-            }
+            Tools.WriteTextFileAbsolutePath(strList.ToString(), saveListDialog.FileName, false);
         }
-        #endregion
+    }
 
-        #region Private/Protected
-        /// <summary>
-        /// Returns the ListView object from which the menu item was clicked
-        /// </summary>
-        /// 
-        private static ListView MenuItemOwner(object sender)
+    private void btnAddToList_Click(object sender, EventArgs e)
+    {
+        AddToListMaker(lvFailed.Items);
+    }
+
+    private void btnSaveSaved_Click(object sender, EventArgs e)
+    {
+        SaveListView(lvSuccessful);
+    }
+
+    private void btnSaveIgnored_Click(object sender, EventArgs e)
+    {
+        SaveListView(lvFailed);
+    }
+
+    private void btnClearSaved_Click(object sender, EventArgs e)
+    {
+        lvSuccessful.Items.Clear();
+    }
+
+    private void btnClearIgnored_Click(object sender, EventArgs e)
+    {
+        lvFailed.Items.Clear();
+    }
+
+    private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Tools.Copy(MenuItemOwner(sender));
+        RemoveSelected(sender);
+    }
+
+    private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Tools.Copy(MenuItemOwner(sender));
+    }
+
+    private static void RemoveSelected(object sender)
+    {
+        foreach (ListViewItem a in MenuItemOwner(sender).SelectedItems)
         {
-            /* we seem to sometimes be receiving a ToolStripMenuItem, and sometimes a ContextMenuStrip...
-             * I've no idea why, but in the meantime this version of the function handles both. */
-
-            if (sender is ContextMenuStrip)
-                return ((ListView)((ContextMenuStrip)sender).SourceControl);
-
-            if (sender is ToolStripMenuItem)
-                return (ListView)(((ContextMenuStrip)((ToolStripMenuItem)sender).Owner).SourceControl);
-            throw new ArgumentException("Object of unknown type passed to LogControl.MenuItemOwner()", "sender");
+            a.Remove();
         }
+    }
 
-        private LogFileType GetFilePrefs()
-        {
-            if (saveListDialog.ShowDialog() != DialogResult.OK)
-                return 0;
-            return (LogFileType)saveListDialog.FilterIndex;
-        }
-        #endregion
+    private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        foreach (ListViewItem item in MenuItemOwner(sender).Items)
+        { item.Selected = true; }
+    }
 
-        #region Event Handlers
+    private void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        foreach (ListViewItem item in MenuItemOwner(sender).Items)
+        { item.Selected = false; }
+    }
 
-        private void addSelectedToArticleListToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            List<Article> list = new List<Article>();
-            foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-            {
-                list.Add(new Article(item.Text));
-            }
-            _listMaker.Add(list);
-        }
+    private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
+            Tools.OpenArticleInBrowser(item.Text);
+    }
 
-        private void AddToListMaker(ListView.ListViewItemCollection sic)
-        {
-            List<Article> list = new List<Article>();
-            foreach (ListViewItem item in sic)
-            {
-                list.Add(new Article(item.Text));
-            }
-            _listMaker.Add(list);
-        }
+    private void openHistoryInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
+            Tools.OpenArticleHistoryInBrowser(item.Text);
+    }
 
-        private void LogLists_DoubleClick(object sender, EventArgs e)
-        {
-            try
-            {
-                ((AWBLogListener)((ListView)sender).FocusedItem).OpenInBrowser();
-            }
-            catch { }
-        }
+    private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        RemoveSelected(sender);
+    }
 
-        private static void ResizeListView(NoFlickerExtendedListView lstView)
-        {
-            lstView.ResizeColumns(true);
-        }
-
-        private void SaveListView(ListView listview)
-        {
-            LogFileType logFileType = GetFilePrefs();
-            if (logFileType != 0)
-            {
-                StringBuilder strList = new StringBuilder();
-
-                foreach (ListViewItem lvi in listview.Items)
-                {
-                    strList.AppendLine(lvi.Text);
-                }
-                Tools.WriteTextFileAbsolutePath(strList.ToString(), saveListDialog.FileName, false);
-            }
-        }
-
-        private void btnAddToList_Click(object sender, EventArgs e)
-        {
-            AddToListMaker(lvFailed.Items);
-        }
-
-        private void btnSaveSaved_Click(object sender, EventArgs e)
-        {
-            SaveListView(lvSuccessful);
-        }
-
-        private void btnSaveIgnored_Click(object sender, EventArgs e)
-        {
-            SaveListView(lvFailed);
-        }
-
-        private void btnClearSaved_Click(object sender, EventArgs e)
-        {
-            lvSuccessful.Items.Clear();
-        }
-
-        private void btnClearIgnored_Click(object sender, EventArgs e)
+    private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (MenuItemOwner(sender) == lvFailed)
         {
             lvFailed.Items.Clear();
         }
-
-        private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+        else
         {
-            Tools.Copy(MenuItemOwner(sender));
-            RemoveSelected(sender);
+            lvSuccessful.Items.Clear();
         }
+    }
 
-        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Tools.Copy(MenuItemOwner(sender));
-        }
+    private void mnuListView_Opening(object sender, EventArgs e)
+    {
+        addSelectedToArticleListToolStripMenuItem.Enabled = cutToolStripMenuItem.Enabled =
+            copyToolStripMenuItem.Enabled = removeToolStripMenuItem.Enabled = openInBrowserToolStripMenuItem.Enabled = openHistoryInBrowserToolStripMenuItem.Enabled
+            = clearToolStripMenuItem.Enabled = MenuItemOwner(sender).SelectedItems.Count > 0;
 
-        private static void RemoveSelected(object sender)
-        {
-            foreach (ListViewItem a in MenuItemOwner(sender).SelectedItems)
-            {
-                a.Remove();
-            }
-        }
+        selectAllToolStripMenuItem.Enabled = selectNoneToolStripMenuItem.Enabled = MenuItemOwner(sender).Items.Count > 0;
+    }
+    #endregion
 
-        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (ListViewItem item in MenuItemOwner(sender).Items)
-            { item.Selected = true; }
-        }
+    private void openLogInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
+            Tools.OpenArticleLogInBrowser(item.Text);
+    }
 
-        private void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (ListViewItem item in MenuItemOwner(sender).Items)
-            { item.Selected = false; }
-        }
-
-        private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-                Tools.OpenArticleInBrowser(item.Text);
-        }
-
-        private void openHistoryInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-                Tools.OpenArticleHistoryInBrowser(item.Text);
-        }
-
-        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RemoveSelected(sender);
-        }
-
-        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (MenuItemOwner(sender) == lvFailed)
-            {
-                lvFailed.Items.Clear();
-            }
-            else
-            {
-                lvSuccessful.Items.Clear();
-            }
-        }
-
-        private void mnuListView_Opening(object sender, EventArgs e)
-        {
-            addSelectedToArticleListToolStripMenuItem.Enabled = cutToolStripMenuItem.Enabled =
-                copyToolStripMenuItem.Enabled = removeToolStripMenuItem.Enabled = openInBrowserToolStripMenuItem.Enabled = openHistoryInBrowserToolStripMenuItem.Enabled
-                = clearToolStripMenuItem.Enabled = MenuItemOwner(sender).SelectedItems.Count > 0;
-
-            selectAllToolStripMenuItem.Enabled = selectNoneToolStripMenuItem.Enabled = MenuItemOwner(sender).Items.Count > 0;
-        }
-        #endregion
-
-        private void openLogInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-                Tools.OpenArticleLogInBrowser(item.Text);
-        }
-
-        private void btnAddSucessfulToList_Click(object sender, EventArgs e)
-        {
-            AddToListMaker(lvSuccessful.Items);
-        }
+    private void btnAddSucessfulToList_Click(object sender, EventArgs e)
+    {
+        AddToListMaker(lvSuccessful.Items);
     }
 }

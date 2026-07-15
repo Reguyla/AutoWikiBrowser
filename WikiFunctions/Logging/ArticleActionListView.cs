@@ -1,10 +1,9 @@
-﻿namespace WikiFunctions.Logging
+﻿namespace WikiFunctions.Logging;
+
+public partial class ArticleActionListView : Controls.NoFlickerExtendedListView
 {
-    public partial class ArticleActionListView : Controls.NoFlickerExtendedListView
+    public ArticleActionListView()
     {
-        public ArticleActionListView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

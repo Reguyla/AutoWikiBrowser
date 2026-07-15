@@ -21,122 +21,121 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Lists.Providers
+namespace WikiFunctions.Lists.Providers;
+
+/// <summary>
+/// Gets the list of pages on the Named Special Pages
+/// </summary>
+public partial class SpecialPageListProvider : Form, IListProvider
 {
-    /// <summary>
-    /// Gets the list of pages on the Named Special Pages
-    /// </summary>
-    public partial class SpecialPageListProvider : Form, IListProvider
+    private static readonly BindingList<IListProvider> ListItems = new BindingList<IListProvider>();
+
+    public SpecialPageListProvider()
     {
-        private static readonly BindingList<IListProvider> ListItems = new BindingList<IListProvider>();
+        InitializeComponent();
 
-        public SpecialPageListProvider()
+        if (ListItems.Count == 0)
         {
-            InitializeComponent();
-
-            if (ListItems.Count == 0)
-            {
-                ListItems.Add(new PrefixIndexSpecialPageProvider());
-                ListItems.Add(new AllPagesSpecialPageProvider());
-                ListItems.Add(new AllPagesNoRedirectsSpecialPageProvider());
-                ListItems.Add(new AllCategoriesSpecialPageProvider());
-                ListItems.Add(new AllFilesSpecialPageProvider());
-                ListItems.Add(new AllRedirectsSpecialPageProvider());
-                ListItems.Add(new RecentChangesSpecialPageProvider());
-                ListItems.Add(new LinkSearchSpecialPageProvider());
-                ListItems.Add(new RandomRedirectsSpecialPageProvider());
-                ListItems.Add(new PagesWithoutLanguageLinksSpecialPageProvider());
-                ListItems.Add(new PagesWithoutLanguageLinksNoRedirectsSpecialPageProvider());
-                ListItems.Add(new ProtectedPagesSpecialPageProvider());
-                ListItems.Add(new GalleryNewFilesSpecialPageProvider());
-                ListItems.Add(new DisambiguationPagesSpecialPageProvider());
-                ListItems.Add(new AllUsersSpecialPageProvider());
-            }
-
-            cmboSourceSelect.DataSource = ListItems;
-            cmboSourceSelect.DisplayMember = "DisplayText";
-            cmboSourceSelect.ValueMember = "DisplayText";
+            ListItems.Add(new PrefixIndexSpecialPageProvider());
+            ListItems.Add(new AllPagesSpecialPageProvider());
+            ListItems.Add(new AllPagesNoRedirectsSpecialPageProvider());
+            ListItems.Add(new AllCategoriesSpecialPageProvider());
+            ListItems.Add(new AllFilesSpecialPageProvider());
+            ListItems.Add(new AllRedirectsSpecialPageProvider());
+            ListItems.Add(new RecentChangesSpecialPageProvider());
+            ListItems.Add(new LinkSearchSpecialPageProvider());
+            ListItems.Add(new RandomRedirectsSpecialPageProvider());
+            ListItems.Add(new PagesWithoutLanguageLinksSpecialPageProvider());
+            ListItems.Add(new PagesWithoutLanguageLinksNoRedirectsSpecialPageProvider());
+            ListItems.Add(new ProtectedPagesSpecialPageProvider());
+            ListItems.Add(new GalleryNewFilesSpecialPageProvider());
+            ListItems.Add(new DisambiguationPagesSpecialPageProvider());
+            ListItems.Add(new AllUsersSpecialPageProvider());
         }
 
-        public SpecialPageListProvider(params IListProvider[] providers)
-            : this()
+        cmboSourceSelect.DataSource = ListItems;
+        cmboSourceSelect.DisplayMember = "DisplayText";
+        cmboSourceSelect.ValueMember = "DisplayText";
+    }
+
+    public SpecialPageListProvider(params IListProvider[] providers)
+        : this()
+    {
+        if (!Globals.UsingMono)
         {
-            if (!Globals.UsingMono)
+            foreach (IListProvider prov in providers)
             {
-                foreach (IListProvider prov in providers)
-                {
-                    if (prov is ISpecialPageProvider)
-                        ListItems.Add(prov);
-                }
+                if (prov is ISpecialPageProvider)
+                    ListItems.Add(prov);
             }
         }
+    }
 
-        // ReSharper disable once RedundantAssignment
-        public List<Article> MakeList(params string[] searchCriteria)
+    // ReSharper disable once RedundantAssignment
+    public List<Article> MakeList(params string[] searchCriteria)
+    {
+        if (Visible)
+            return null;
+
+        txtPages.Text = "";
+
+        List<Article> list = new List<Article>();
+
+        if (ShowDialog() == DialogResult.OK)
         {
-            if (Visible)
-                return null;
+            searchCriteria = txtPages.Text.Split('|');
 
-            txtPages.Text = "";
+            ISpecialPageProvider item = (ISpecialPageProvider)cmboSourceSelect.SelectedItem;
 
-            List<Article> list = new List<Article>();
-
-            if (ShowDialog() == DialogResult.OK)
-            {
-                searchCriteria = txtPages.Text.Split('|');
-
-                ISpecialPageProvider item = (ISpecialPageProvider)cmboSourceSelect.SelectedItem;
-
-                if (!string.IsNullOrEmpty(txtPages.Text))
-                    list = item.MakeList(Namespace.Determine(cboNamespace.Text), searchCriteria);
-                else if (item.PagesNeeded)
-                    MessageBox.Show("Pages needed!");
-                else
-                    list = item.MakeList(Namespace.Determine(cboNamespace.Text), "");
-            }
-
-            Hide();
-
-            return list;
+            if (!string.IsNullOrEmpty(txtPages.Text))
+                list = item.MakeList(Namespace.Determine(cboNamespace.Text), searchCriteria);
+            else if (item.PagesNeeded)
+                MessageBox.Show("Pages needed!");
+            else
+                list = item.MakeList(Namespace.Determine(cboNamespace.Text), "");
         }
 
-        public string DisplayText
-        { get { return "Special page"; } }
+        Hide();
 
-        public string UserInputTextBoxText
-        { get { return ""; } }
+        return list;
+    }
 
-        public bool UserInputTextBoxEnabled
-        { get { return false; } }
+    public string DisplayText
+    { get { return "Special page"; } }
 
-        public void Selected() { }
+    public string UserInputTextBoxText
+    { get { return ""; } }
 
-        public bool RunOnSeparateThread
-        { get { return true; } }
+    public bool UserInputTextBoxEnabled
+    { get { return false; } }
 
-        public virtual bool StripUrl
-        { get { return false; } }
+    public void Selected() { }
 
-        private void SpecialPageListProvider_Load(object sender, EventArgs e)
+    public bool RunOnSeparateThread
+    { get { return true; } }
+
+    public virtual bool StripUrl
+    { get { return false; } }
+
+    private void SpecialPageListProvider_Load(object sender, EventArgs e)
+    {
+        int currentSelected = cboNamespace.SelectedIndex;
+        cboNamespace.Items.Clear();
+        cboNamespace.Items.Add("Main:");
+        foreach (string name in Variables.Namespaces.Values)
         {
-            int currentSelected = cboNamespace.SelectedIndex;
-            cboNamespace.Items.Clear();
-            cboNamespace.Items.Add("Main:");
-            foreach (string name in Variables.Namespaces.Values)
-            {
-                cboNamespace.Items.Add(name);
-            }
-            cboNamespace.SelectedIndex = currentSelected;
+            cboNamespace.Items.Add(name);
         }
+        cboNamespace.SelectedIndex = currentSelected;
+    }
 
-        private void cmboSourceSelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (DesignMode) return;
+    private void cmboSourceSelect_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (DesignMode) return;
 
-            ISpecialPageProvider prov = (ISpecialPageProvider)cmboSourceSelect.SelectedItem;
+        ISpecialPageProvider prov = (ISpecialPageProvider)cmboSourceSelect.SelectedItem;
 
-            txtPages.Enabled = prov.UserInputTextBoxEnabled;
-            cboNamespace.Enabled = prov.NamespacesEnabled;
-        }
+        txtPages.Enabled = prov.UserInputTextBoxEnabled;
+        cboNamespace.Enabled = prov.NamespacesEnabled;
     }
 }

@@ -20,154 +20,153 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WikiFunctions.API;
 
-namespace WikiFunctions.Lists.Providers
+namespace WikiFunctions.Lists.Providers;
+
+public abstract class ApiJsonListProviderBase : IListProvider
 {
-    public abstract class ApiJsonListProviderBase : IListProvider
+    protected ApiJsonListProviderBase()
     {
-        protected ApiJsonListProviderBase()
-        {
-            Limit = 1000;
-        }
-
-        /// <summary>
-        /// Upper limit for number of pages returned, could be a bit exceeded by number of pages in the last request
-        /// </summary>
-        public int Limit { get; set; }
-
-        protected string WantedAttribute = "title";
-
-        /// <summary>
-        /// Main function that retrieves the list from API, including paging
-        /// </summary>
-        /// <param name="url">URL of API request</param>
-        /// <param name="haveSoFar">Number of pages already retrieved, for upper limit control</param>
-        /// <returns>List of pages</returns>
-        public List<Article> ApiMakeList(string url, int haveSoFar)
-        {
-            if (Globals.UnitTestMode)
-            {
-                throw new InvalidOperationException(
-                    "Wikipedia should not be accessed during unit tests.");
-            }
-
-            ApiEdit editor =
-                Variables.MainForm.TheSession.Editor.SynchronousEditor;
-
-            string responseJson = editor.QueryApiJson(url);
-
-            if (string.IsNullOrWhiteSpace(responseJson))
-                return new List<Article>();
-
-            JObject json;
-
-            try
-            {
-                using var stringReader = new StringReader(responseJson);
-                using var jsonReader = new JsonTextReader(stringReader)
-                {
-                    MaxDepth = 64,
-                    DateParseHandling = DateParseHandling.None
-                };
-
-                json = JObject.Load(jsonReader);
-            }
-            catch (JsonReaderException)
-            {
-                return new List<Article>();
-            }
-
-            if (json["query"]?["pageswithprop"] is not JArray pages)
-                return new List<Article>();
-
-            return pages
-                .OfType<JObject>()
-                .Select(page => page["title"])
-                .Where(title => title?.Type == JTokenType.String)
-                .Select(title => title!.Value<string>())
-                .Where(title => !string.IsNullOrWhiteSpace(title))
-                .Select(title => new Article(title!))
-                .ToList();
-        }
-
-        public virtual bool StripUrl
-        {
-            get { return false; }
-        }
-
-        #region To be overridden
-
-        public abstract List<Article> MakeList(params string[] searchCriteria);
-
-        public abstract string DisplayText { get; }
-
-        public abstract string UserInputTextBoxText { get; }
-
-        public abstract bool UserInputTextBoxEnabled { get; }
-
-        public abstract void Selected();
-
-        public virtual bool RunOnSeparateThread
-        { get { return true; } }
-
-        #endregion
+        Limit = 1000;
     }
 
     /// <summary>
-    /// 
+    /// Upper limit for number of pages returned, could be a bit exceeded by number of pages in the last request
     /// </summary>
-    /// <remarks>
-    /// Temporary, for debugging
-    /// </remarks>
-    public class PagesWithPropJsonListProvider : ApiJsonListProviderBase
+    public int Limit { get; set; }
+
+    protected string WantedAttribute = "title";
+
+    /// <summary>
+    /// Main function that retrieves the list from API, including paging
+    /// </summary>
+    /// <param name="url">URL of API request</param>
+    /// <param name="haveSoFar">Number of pages already retrieved, for upper limit control</param>
+    /// <returns>List of pages</returns>
+    public List<Article> ApiMakeList(string url, int haveSoFar)
     {
-        #region Tags: <pageswithprop>/<page>
-        //protected override ICollection<string> PageElements
-        //{
-        //    get { return new[] { "page" }; }
-        //}
-
-        //protected override ICollection<string> Actions
-        //{
-        //    get { return new[] { "pageswithprop" }; }
-        //}
-        #endregion
-
-        public override List<Article> MakeList(params string[] searchCriteria)
+        if (Globals.UnitTestMode)
         {
-            List<Article> list = new List<Article>();
+            throw new InvalidOperationException(
+                "Wikipedia should not be accessed during unit tests.");
+        }
 
-            foreach (string prop in searchCriteria)
+        ApiEdit editor =
+            Variables.MainForm.TheSession.Editor.SynchronousEditor;
+
+        string responseJson = editor.QueryApiJson(url);
+
+        if (string.IsNullOrWhiteSpace(responseJson))
+            return new List<Article>();
+
+        JObject json;
+
+        try
+        {
+            using var stringReader = new StringReader(responseJson);
+            using var jsonReader = new JsonTextReader(stringReader)
             {
-                string url = "list=pageswithprop&pwppropname="
-                             + WebUtility.UrlEncode(prop) + "&pwplimit=max";
+                MaxDepth = 64,
+                DateParseHandling = DateParseHandling.None
+            };
 
-                list.AddRange(ApiMakeList(url, list.Count));
-            }
-            return list;
+            json = JObject.Load(jsonReader);
         }
-
-        public List<Article> MakeList(int @namespace, params string[] searchCriteria)
+        catch (JsonReaderException)
         {
-            return MakeList(searchCriteria);
+            return new List<Article>();
         }
 
-        #region ListMaker properties
-        public override string DisplayText
-        {
-            get { return "(JSON)Pages with a page property"; }
-        }
+        if (json["query"]?["pageswithprop"] is not JArray pages)
+            return new List<Article>();
 
-        public override string UserInputTextBoxText
-        {
-            get { return "Property name:"; }
-        }
-
-        public override bool UserInputTextBoxEnabled
-        {
-            get { return true; }
-        }
-
-        public override void Selected() { }
-        #endregion
+        return pages
+            .OfType<JObject>()
+            .Select(page => page["title"])
+            .Where(title => title?.Type == JTokenType.String)
+            .Select(title => title!.Value<string>())
+            .Where(title => !string.IsNullOrWhiteSpace(title))
+            .Select(title => new Article(title!))
+            .ToList();
     }
+
+    public virtual bool StripUrl
+    {
+        get { return false; }
+    }
+
+    #region To be overridden
+
+    public abstract List<Article> MakeList(params string[] searchCriteria);
+
+    public abstract string DisplayText { get; }
+
+    public abstract string UserInputTextBoxText { get; }
+
+    public abstract bool UserInputTextBoxEnabled { get; }
+
+    public abstract void Selected();
+
+    public virtual bool RunOnSeparateThread
+    { get { return true; } }
+
+    #endregion
+}
+
+/// <summary>
+/// 
+/// </summary>
+/// <remarks>
+/// Temporary, for debugging
+/// </remarks>
+public class PagesWithPropJsonListProvider : ApiJsonListProviderBase
+{
+    #region Tags: <pageswithprop>/<page>
+    //protected override ICollection<string> PageElements
+    //{
+    //    get { return new[] { "page" }; }
+    //}
+
+    //protected override ICollection<string> Actions
+    //{
+    //    get { return new[] { "pageswithprop" }; }
+    //}
+    #endregion
+
+    public override List<Article> MakeList(params string[] searchCriteria)
+    {
+        List<Article> list = new List<Article>();
+
+        foreach (string prop in searchCriteria)
+        {
+            string url = "list=pageswithprop&pwppropname="
+                         + WebUtility.UrlEncode(prop) + "&pwplimit=max";
+
+            list.AddRange(ApiMakeList(url, list.Count));
+        }
+        return list;
+    }
+
+    public List<Article> MakeList(int @namespace, params string[] searchCriteria)
+    {
+        return MakeList(searchCriteria);
+    }
+
+    #region ListMaker properties
+    public override string DisplayText
+    {
+        get { return "(JSON)Pages with a page property"; }
+    }
+
+    public override string UserInputTextBoxText
+    {
+        get { return "Property name:"; }
+    }
+
+    public override bool UserInputTextBoxEnabled
+    {
+        get { return true; }
+    }
+
+    public override void Selected() { }
+    #endregion
 }

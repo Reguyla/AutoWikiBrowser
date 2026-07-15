@@ -20,29 +20,28 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.Logging
+namespace WikiFunctions.Logging;
+
+/// <summary>
+/// A form for displaying when the application is busy uploading
+/// </summary>
+public partial class UploadingPleaseWaitForm : Form
 {
-    /// <summary>
-    /// A form for displaying when the application is busy uploading
-    /// </summary>
-    public partial class UploadingPleaseWaitForm : Form
+    Cursor OldCursor;
+
+    public UploadingPleaseWaitForm()
     {
-        Cursor OldCursor;
+        InitializeComponent();
+    }
 
-        public UploadingPleaseWaitForm()
-        {
-            InitializeComponent();
-        }
+    private void Form_Closing(object sender, FormClosingEventArgs e)
+    {
+        Cursor = OldCursor;
+    }
 
-        private void Form_Closing(object sender, FormClosingEventArgs e)
-        {
-            Cursor = OldCursor;
-        }
-
-        private void Form_Shown(object sender, EventArgs e)
-        {
-            OldCursor = Cursor;
-            Cursor = Cursors.WaitCursor;
-        }
+    private void Form_Shown(object sender, EventArgs e)
+    {
+        OldCursor = Cursor;
+        Cursor = Cursors.WaitCursor;
     }
 }

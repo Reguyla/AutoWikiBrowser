@@ -16,70 +16,69 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-namespace WikiFunctions.Lists.Providers
+namespace WikiFunctions.Lists.Providers;
+
+/// <summary>
+/// An interface implemented by objects which attach to the WikiFunctions' ListMaker combo box and return lists of pages
+/// </summary>
+public interface IListProvider
 {
     /// <summary>
-    /// An interface implemented by objects which attach to the WikiFunctions' ListMaker combo box and return lists of pages
+    /// Process the user input (if any) and return a list of pages
     /// </summary>
-    public interface IListProvider
-    {
-        /// <summary>
-        /// Process the user input (if any) and return a list of pages
-        /// </summary>
-        /// <param name="searchCriteria">User Input/Pages</param>
-        List<Article> MakeList(params string[] searchCriteria);
-
-        /// <summary>
-        /// The text to display as the combobox list item
-        /// </summary>
-        string DisplayText { get; }
-
-        /// <summary>
-        /// The text to display inside the Select Source text box
-        /// </summary>
-        string UserInputTextBoxText { get; }
-
-        /// <summary>
-        /// Indicates whether the Select Source text box should be enabled
-        /// </summary>
-        bool UserInputTextBoxEnabled { get; }
-
-        /// <summary>
-        /// Called when the ListMaker Provider has been selected in the ComboBox
-        /// </summary>
-        void Selected();
-
-        /// <summary>
-        /// True if the object expects to be started on a separate thread
-        /// </summary>
-        bool RunOnSeparateThread { get; }
-
-        /// <summary>
-        /// Whether to strip the URL of the current site from the input
-        /// </summary>
-        bool StripUrl { get; }
-    }
+    /// <param name="searchCriteria">User Input/Pages</param>
+    List<Article> MakeList(params string[] searchCriteria);
 
     /// <summary>
-    /// Extension of IListProvider to provide some extra functionality needed for options on Special Pages
+    /// The text to display as the combobox list item
     /// </summary>
-    interface ISpecialPageProvider : IListProvider
-    {
-        /// <summary>
-        /// Process the user input (if any) and return a list of pages
-        /// </summary>
-        /// <param name="namespace">Namespace to enumerate</param>
-        /// <param name="searchCriteria">User Input/Pages</param>
-        List<Article> MakeList(int @namespace, params string[] searchCriteria);
+    string DisplayText { get; }
 
-        /// <summary>
-        /// Whether something must be entered in the text box
-        /// </summary>
-        bool PagesNeeded { get; }
+    /// <summary>
+    /// The text to display inside the Select Source text box
+    /// </summary>
+    string UserInputTextBoxText { get; }
 
-        /// <summary>
-        /// Whether Namespace box should be enabled, therefore whether namespace can be used to filter results
-        /// </summary>
-        bool NamespacesEnabled { get; }
-    }
+    /// <summary>
+    /// Indicates whether the Select Source text box should be enabled
+    /// </summary>
+    bool UserInputTextBoxEnabled { get; }
+
+    /// <summary>
+    /// Called when the ListMaker Provider has been selected in the ComboBox
+    /// </summary>
+    void Selected();
+
+    /// <summary>
+    /// True if the object expects to be started on a separate thread
+    /// </summary>
+    bool RunOnSeparateThread { get; }
+
+    /// <summary>
+    /// Whether to strip the URL of the current site from the input
+    /// </summary>
+    bool StripUrl { get; }
+}
+
+/// <summary>
+/// Extension of IListProvider to provide some extra functionality needed for options on Special Pages
+/// </summary>
+interface ISpecialPageProvider : IListProvider
+{
+    /// <summary>
+    /// Process the user input (if any) and return a list of pages
+    /// </summary>
+    /// <param name="namespace">Namespace to enumerate</param>
+    /// <param name="searchCriteria">User Input/Pages</param>
+    List<Article> MakeList(int @namespace, params string[] searchCriteria);
+
+    /// <summary>
+    /// Whether something must be entered in the text box
+    /// </summary>
+    bool PagesNeeded { get; }
+
+    /// <summary>
+    /// Whether Namespace box should be enabled, therefore whether namespace can be used to filter results
+    /// </summary>
+    bool NamespacesEnabled { get; }
 }

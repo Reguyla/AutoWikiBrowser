@@ -1,25 +1,25 @@
 ﻿using Microsoft.CSharp;
 
-namespace WikiFunctions.CustomModules
+namespace WikiFunctions.CustomModules;
+
+
+public class CSharpCustomModule : CustomModuleCompiler
 {
-
-    public class CSharpCustomModule : CustomModuleCompiler
+    public CSharpCustomModule()
     {
-        public CSharpCustomModule()
-        {
-            Compiler = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
-        }
+        Compiler = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
+    }
 
-        public override string Name
-        {
-            get { return "C# 4.0"; }
-        }
+    public override string Name
+    {
+        get { return "C# 4.0"; }
+    }
 
-        public override string CodeStart
+    public override string CodeStart
+    {
+        get
         {
-            get
-            {
-                return @"using System;
+            return @"using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -37,21 +37,21 @@ namespace AutoWikiBrowser.CustomModules
            awb =  _awb;
         }
 ";
-            }
         }
+    }
 
-        public override string CodeEnd
-        {
-            get { return @"    }
+    public override string CodeEnd
+    {
+        get { return @"    }
 }"; }
-        }
+    }
 
-        public override string CodeExample
+    public override string CodeExample
+    {
+        get
         {
-            get
-            {
-                return
-                    @"        public string ProcessArticle(string ArticleText, string ArticleTitle, int wikiNamespace, out string Summary, out bool Skip)
+            return
+                @"        public string ProcessArticle(string ArticleText, string ArticleTitle, int wikiNamespace, out string Summary, out bool Skip)
         {
             Skip = false;
             Summary = ""test"";
@@ -60,7 +60,6 @@ namespace AutoWikiBrowser.CustomModules
 
             return ArticleText;
         }";
-            }
         }
     }
 }
