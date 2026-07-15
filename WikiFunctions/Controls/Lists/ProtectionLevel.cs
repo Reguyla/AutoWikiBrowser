@@ -1,55 +1,54 @@
 ﻿using System.Windows.Forms;
 
-namespace WikiFunctions.Controls.Lists
+namespace WikiFunctions.Controls.Lists;
+
+public partial class ProtectionLevel : Form
 {
-    public partial class ProtectionLevel : Form
+    public ProtectionLevel()
     {
-        public ProtectionLevel()
-        {
-            InitializeComponent();
-            lbType.SelectedIndex = 0;
-            lbLevel.SelectedIndex = 0;
-        }
+        InitializeComponent();
+        lbType.SelectedIndex = 0;
+        lbLevel.SelectedIndex = 0;
+    }
 
-        public string Type
+    public string Type
+    {
+        get
         {
-            get
+            switch (lbType.SelectedIndex)
             {
-                switch (lbType.SelectedIndex)
-                {
-                    case 0:
-                        return "edit";
-                    case 1:
-                        return "move";
-                    case 2:
-                        return "edit|move";
-                    default:
-                        return "";
-                }
+                case 0:
+                    return "edit";
+                case 1:
+                    return "move";
+                case 2:
+                    return "edit|move";
+                default:
+                    return "";
             }
         }
+    }
 
-        public string Level
+    public string Level
+    {
+        get
         {
-            get
+            switch (lbLevel.SelectedIndex)
             {
-                switch (lbLevel.SelectedIndex)
-                {
-                    case 0:
-                        return "autoconfirmed";
-                    case 1:
-                        return "sysop";
-                    case 2:
-                        return "autoconfirmed|sysop";
-                    default:
-                        return "";
-                }
+                case 0:
+                    return "autoconfirmed";
+                case 1:
+                    return "sysop";
+                case 2:
+                    return "autoconfirmed|sysop";
+                default:
+                    return "";
             }
         }
+    }
 
-        private void btnOk_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
+    private void btnOk_Click(object sender, System.EventArgs e)
+    {
+        Close();
     }
 }

@@ -18,218 +18,217 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Xml;
 
-namespace WikiFunctions.API
+namespace WikiFunctions.API;
+
+/// <summary>
+/// Information about a user
+/// </summary>
+public sealed class UserInfo
 {
     /// <summary>
-    /// Information about a user
+    /// Username
     /// </summary>
-    public sealed class UserInfo
+    public string Name
+    { get; private set; }
+
+    /// <summary>
+    /// Database ID
+    /// </summary>
+    public int Id
+    { get; private set; }
+
+    /// <summary>
+    /// Whether we are logged in
+    /// </summary>
+    public bool IsLoggedIn
+    { get { return Id != 0; } }
+
+    /// <summary>
+    /// Whether the current user is an administrator
+    /// </summary>
+    public bool IsSysop
+    { get { return IsInGroup("sysop"); } }
+
+    /// <summary>
+    /// Whether the current user is a flagged bot
+    /// </summary>
+    public bool IsBot
+    { get { return IsInGroup("bot") || HasRight("bot"); } }
+
+    /// <summary>
+    /// Whether the user has the apihighlimits right
+    /// </summary>
+    public bool HasApiHighLimit
+    { get { return HasRight("apihighlimits"); } }
+
+    /// <summary>
+    /// Whether the current user is blocked from editing
+    /// </summary>
+    public bool IsBlocked
+    { get; private set; }
+
+    /// <summary>
+    /// Whether the user has an unread user talk message
+    /// </summary>
+    public bool HasMessages
+    { get; internal set; }
+
+    /// <summary>
+    /// The number of unread notifications for the user
+    /// </summary>
+    public int Notifications
+    { get; internal set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="group"></param>
+    /// <returns></returns>
+    public bool IsInGroup(string group)
     {
-        /// <summary>
-        /// Username
-        /// </summary>
-        public string Name
-        { get; private set; }
-
-        /// <summary>
-        /// Database ID
-        /// </summary>
-        public int Id
-        { get; private set; }
-
-        /// <summary>
-        /// Whether we are logged in
-        /// </summary>
-        public bool IsLoggedIn
-        { get { return Id != 0; } }
-
-        /// <summary>
-        /// Whether the current user is an administrator
-        /// </summary>
-        public bool IsSysop
-        { get { return IsInGroup("sysop"); } }
-
-        /// <summary>
-        /// Whether the current user is a flagged bot
-        /// </summary>
-        public bool IsBot
-        { get { return IsInGroup("bot") || HasRight("bot"); } }
-
-        /// <summary>
-        /// Whether the user has the apihighlimits right
-        /// </summary>
-        public bool HasApiHighLimit
-        { get { return HasRight("apihighlimits"); } }
-
-        /// <summary>
-        /// Whether the current user is blocked from editing
-        /// </summary>
-        public bool IsBlocked
-        { get; private set; }
-
-        /// <summary>
-        /// Whether the user has an unread user talk message
-        /// </summary>
-        public bool HasMessages
-        { get; internal set; }
-
-        /// <summary>
-        /// The number of unread notifications for the user
-        /// </summary>
-        public int Notifications
-        { get; internal set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        public bool IsInGroup(string group)
-        {
-            return string.IsNullOrEmpty(group) || Groups.Contains(group);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public bool HasRight(string right)
-        {
-            return string.IsNullOrEmpty(right) || Rights.Contains(right);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        public bool CanEditPage(PageInfo page)
-        {
-            return (IsInGroup(page.EditProtection) || HasRight(page.EditProtection))
-                && !(page.NamespaceID == Namespace.MediaWiki && !HasRight("editinterface"));
-        }
-
-        /// <summary>
-        /// Returns whether the user can delete the page based on group/edit rights
-        /// Examples: sysop, eliminator groups should be able to delete pages
-        /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        public bool CanDeletePage(PageInfo page)
-        {
-            return HasRight("delete");
-        }
-
-        /// <summary>
-        /// Returns whether the user can create the page based on group/edit rights
-        /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        public bool CanCreatePage(PageInfo page)
-        {
-            return IsInGroup(page.CreateProtection) || HasRight(page.CreateProtection);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        public bool CanMovePage(PageInfo page)
-        {
-            return page.NamespaceID != Namespace.MediaWiki
-                && (IsInGroup(page.MoveProtection) || HasRight(page.MoveProtection));
-        }
-
-        /// <summary>
-        /// Returns whether a user can protect the page (based on whether they have the protect right; slightly naive)
-        /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        public bool CanProtectPage(PageInfo page)
-        {
-            return HasRight("protect");
-        }
-
-        /// <summary>
-        /// Returns whether the user can read notifications, which by default bot accounts don't
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReadNotificationsRight()
-        {
-            return HasRight("echo-read-notifications");
-        }
-
-        /// <summary>
-        /// Creates a UserInfo class from an meta=userinfo XML
-        /// </summary>
-        /// <param name="xml">XML document to process. Must be already checked for error status by 
-        /// ApiEdit.CheckForErrors()</param>
-        internal UserInfo(XmlDocument xml)
-        {
-            var users = xml.GetElementsByTagName("userinfo");
-            if (users.Count == 0) throw new BrokenXmlException(null, "XML with <userinfo> element expected");
-            var user = users[0];
-
-            Name = user.Attributes["name"].Value;
-            Id = int.Parse(user.Attributes["id"].Value);
-
-            var groups = user["groups"];
-            if (groups != null)
-            {
-                foreach (XmlNode g in groups.GetElementsByTagName("g"))
-                {
-                    Groups.Add(g.InnerText);
-                }
-            }
-
-            var rights = user["rights"];
-            if (rights != null)
-            {
-                foreach (XmlNode r in rights.GetElementsByTagName("r"))
-                {
-                    Rights.Add(r.InnerText);
-                }
-            }
-
-            Update(xml);
-        }
-
-        /// <summary>
-        /// Updates the information about the current user
-        /// </summary>
-        /// <param name="xml">XML to process</param>
-        internal void Update(XmlDocument xml)
-        {
-            var users = xml.GetElementsByTagName("userinfo");
-            if (users.Count > 0)
-            {
-                HasMessages = users[0].Attributes["messages"] != null;
-                IsBlocked = users[0].Attributes["blockedby"] != null;
-            }
-
-            var notifications = xml.GetElementsByTagName("notifications");
-            if (notifications.Count > 0 &&
-                notifications[0].Attributes != null &&
-                notifications[0].Attributes["rawcount"] != null)
-            {
-                Notifications = int.Parse(notifications[0].Attributes["rawcount"].Value);
-            }
-            else
-            {
-                Notifications = 0;
-            }
-        }
-
-        /// <summary>
-        /// Creates a UserInfo object for an unregistered user
-        /// </summary>
-        internal UserInfo()
-        {
-        }
-
-        private readonly List<string> Groups = new List<string>();
-        private readonly List<string> Rights = new List<string>();
+        return string.IsNullOrEmpty(group) || Groups.Contains(group);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="right"></param>
+    /// <returns></returns>
+    public bool HasRight(string right)
+    {
+        return string.IsNullOrEmpty(right) || Rights.Contains(right);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
+    public bool CanEditPage(PageInfo page)
+    {
+        return (IsInGroup(page.EditProtection) || HasRight(page.EditProtection))
+            && !(page.NamespaceID == Namespace.MediaWiki && !HasRight("editinterface"));
+    }
+
+    /// <summary>
+    /// Returns whether the user can delete the page based on group/edit rights
+    /// Examples: sysop, eliminator groups should be able to delete pages
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
+    public bool CanDeletePage(PageInfo page)
+    {
+        return HasRight("delete");
+    }
+
+    /// <summary>
+    /// Returns whether the user can create the page based on group/edit rights
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
+    public bool CanCreatePage(PageInfo page)
+    {
+        return IsInGroup(page.CreateProtection) || HasRight(page.CreateProtection);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
+    public bool CanMovePage(PageInfo page)
+    {
+        return page.NamespaceID != Namespace.MediaWiki
+            && (IsInGroup(page.MoveProtection) || HasRight(page.MoveProtection));
+    }
+
+    /// <summary>
+    /// Returns whether a user can protect the page (based on whether they have the protect right; slightly naive)
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
+    public bool CanProtectPage(PageInfo page)
+    {
+        return HasRight("protect");
+    }
+
+    /// <summary>
+    /// Returns whether the user can read notifications, which by default bot accounts don't
+    /// </summary>
+    /// <returns></returns>
+    public bool HasReadNotificationsRight()
+    {
+        return HasRight("echo-read-notifications");
+    }
+
+    /// <summary>
+    /// Creates a UserInfo class from an meta=userinfo XML
+    /// </summary>
+    /// <param name="xml">XML document to process. Must be already checked for error status by 
+    /// ApiEdit.CheckForErrors()</param>
+    internal UserInfo(XmlDocument xml)
+    {
+        var users = xml.GetElementsByTagName("userinfo");
+        if (users.Count == 0) throw new BrokenXmlException(null, "XML with <userinfo> element expected");
+        var user = users[0];
+
+        Name = user.Attributes["name"].Value;
+        Id = int.Parse(user.Attributes["id"].Value);
+
+        var groups = user["groups"];
+        if (groups != null)
+        {
+            foreach (XmlNode g in groups.GetElementsByTagName("g"))
+            {
+                Groups.Add(g.InnerText);
+            }
+        }
+
+        var rights = user["rights"];
+        if (rights != null)
+        {
+            foreach (XmlNode r in rights.GetElementsByTagName("r"))
+            {
+                Rights.Add(r.InnerText);
+            }
+        }
+
+        Update(xml);
+    }
+
+    /// <summary>
+    /// Updates the information about the current user
+    /// </summary>
+    /// <param name="xml">XML to process</param>
+    internal void Update(XmlDocument xml)
+    {
+        var users = xml.GetElementsByTagName("userinfo");
+        if (users.Count > 0)
+        {
+            HasMessages = users[0].Attributes["messages"] != null;
+            IsBlocked = users[0].Attributes["blockedby"] != null;
+        }
+
+        var notifications = xml.GetElementsByTagName("notifications");
+        if (notifications.Count > 0 &&
+            notifications[0].Attributes != null &&
+            notifications[0].Attributes["rawcount"] != null)
+        {
+            Notifications = int.Parse(notifications[0].Attributes["rawcount"].Value);
+        }
+        else
+        {
+            Notifications = 0;
+        }
+    }
+
+    /// <summary>
+    /// Creates a UserInfo object for an unregistered user
+    /// </summary>
+    internal UserInfo()
+    {
+    }
+
+    private readonly List<string> Groups = new List<string>();
+    private readonly List<string> Rights = new List<string>();
 }

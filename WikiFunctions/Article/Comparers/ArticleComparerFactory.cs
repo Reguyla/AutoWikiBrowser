@@ -19,77 +19,76 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace WikiFunctions
+namespace WikiFunctions;
+
+/// <summary>
+/// Factory class for making instances of IArticleComparer
+/// </summary>
+public static class ArticleComparerFactory
 {
     /// <summary>
-    /// Factory class for making instances of IArticleComparer
+    /// 
     /// </summary>
-    public static class ArticleComparerFactory
+    /// <param name="comparator">The test string</param>
+    /// <param name="isCaseSensitive">Whether the comparison should be case sensitive</param>
+    /// <param name="isRegex">Whether to employ regular expression matching when comparing the test string</param>
+    /// <param name="isSingleLine">Whether to apply the regular expression Single Line option</param>
+    /// <param name="isMultiLine">Whether to apply the regular expression Multi Line option</param>
+    /// <returns>An instance of IArticleComparer which can carry out the specified comparison</returns>
+    public static IArticleComparer Create(string comparator, bool isCaseSensitive, bool isRegex, bool isSingleLine, bool isMultiLine)
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="comparator">The test string</param>
-        /// <param name="isCaseSensitive">Whether the comparison should be case sensitive</param>
-        /// <param name="isRegex">Whether to employ regular expression matching when comparing the test string</param>
-        /// <param name="isSingleLine">Whether to apply the regular expression Single Line option</param>
-        /// <param name="isMultiLine">Whether to apply the regular expression Multi Line option</param>
-        /// <returns>An instance of IArticleComparer which can carry out the specified comparison</returns>
-        public static IArticleComparer Create(string comparator, bool isCaseSensitive, bool isRegex, bool isSingleLine, bool isMultiLine)
+        if (comparator == null)
+            throw new ArgumentNullException("comparator");
+
+        if (isRegex)
         {
-            if (comparator == null)
-                throw new ArgumentNullException("comparator");
-
-            if (isRegex)
+            try
             {
-                try
-                {
-                    RegexOptions opts = RegexOptions.None;
-                    if (!isCaseSensitive)
-                        opts |= RegexOptions.IgnoreCase;
+                RegexOptions opts = RegexOptions.None;
+                if (!isCaseSensitive)
+                    opts |= RegexOptions.IgnoreCase;
 
-                    if (isSingleLine)
-                        opts |= RegexOptions.Singleline;
+                if (isSingleLine)
+                    opts |= RegexOptions.Singleline;
 
-                    if (isMultiLine)
-                        opts |= RegexOptions.Multiline;
+                if (isMultiLine)
+                    opts |= RegexOptions.Multiline;
 
-                    return comparator.Contains("%%")
-                               ? (IArticleComparer)new DynamicRegexArticleComparer(comparator, opts)
-                               : new RegexArticleComparer(new Regex(comparator, opts | RegexOptions.Compiled));
-                }
-                catch (ArgumentException ex)
-                {
-                    // TODO: handle things like "bad regex" here
-                    // For now, tell the user then let normal exception handling process it as well
-                    MessageBox.Show(ex.Message, "Bad Regex");
-                    throw;
-                }
+                return comparator.Contains("%%")
+                           ? (IArticleComparer)new DynamicRegexArticleComparer(comparator, opts)
+                           : new RegexArticleComparer(new Regex(comparator, opts | RegexOptions.Compiled));
             }
-
-            // Allow \n to match newline
-            comparator = comparator.Replace(@"\n", "\n");
-            if (comparator.Contains("%%"))
-                return isCaseSensitive
-                    ? (IArticleComparer)new CaseSensitiveArticleComparerWithKeywords(comparator)
-                    : new CaseInsensitiveArticleComparerWithKeywords(comparator);
-
-            return isCaseSensitive
-                       ? (IArticleComparer)new CaseSensitiveArticleComparer(comparator)
-                       : new CaseInsensitiveArticleComparer(comparator);
+            catch (ArgumentException ex)
+            {
+                // TODO: handle things like "bad regex" here
+                // For now, tell the user then let normal exception handling process it as well
+                MessageBox.Show(ex.Message, "Bad Regex");
+                throw;
+            }
         }
-    }
 
-    /// <summary>
-    /// Class for scanning an article for content
-    /// </summary>
-    public interface IArticleComparer
-    {
-        /// <summary>
-        /// Compares the article text against the criteria provided 
-        /// </summary>
-        /// <param name="article">An article to check</param>
-        /// <returns>Whether the article's text matches the criteria</returns>
-        bool Matches(Article article);
+        // Allow \n to match newline
+        comparator = comparator.Replace(@"\n", "\n");
+        if (comparator.Contains("%%"))
+            return isCaseSensitive
+                ? (IArticleComparer)new CaseSensitiveArticleComparerWithKeywords(comparator)
+                : new CaseInsensitiveArticleComparerWithKeywords(comparator);
+
+        return isCaseSensitive
+                   ? (IArticleComparer)new CaseSensitiveArticleComparer(comparator)
+                   : new CaseInsensitiveArticleComparer(comparator);
     }
+}
+
+/// <summary>
+/// Class for scanning an article for content
+/// </summary>
+public interface IArticleComparer
+{
+    /// <summary>
+    /// Compares the article text against the criteria provided 
+    /// </summary>
+    /// <param name="article">An article to check</param>
+    /// <returns>Whether the article's text matches the criteria</returns>
+    bool Matches(Article article);
 }

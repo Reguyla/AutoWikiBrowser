@@ -21,137 +21,136 @@ using System.Windows.Forms;
 
 using WikiFunctions.AWBSettings;
 
-namespace WikiFunctions.Controls.Lists
+namespace WikiFunctions.Controls.Lists;
+
+public partial class ListSplitter : Form
 {
-    public partial class ListSplitter : Form
+    private readonly UserPrefs _p;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="prefs"></param>
+    public ListSplitter(UserPrefs prefs)
     {
-        private readonly UserPrefs _p;
+        InitializeComponent();
+        _p = prefs;
+        listMaker1.NoOfArticlesChanged += UpdateButtons;
+    }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="prefs"></param>
-        public ListSplitter(UserPrefs prefs)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="prefs"></param>
+    /// <param name="list"></param>
+    public ListSplitter(UserPrefs prefs, List<Article> list)
+        : this(prefs)
+    {
+        listMaker1.Add(list);
+    }
+
+    private void ListSplitter_Load(object sender, EventArgs e)
+    {
+        listMaker1.MakeListEnabled = true;
+    }
+
+    private readonly Regex _badCharacters = new Regex(@"[""/:*?<>|.]",
+                                                           RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private void UpdateButtons(object sender, EventArgs e)
+    {
+        btnSave.Enabled = btnXMLSave.Enabled = listMaker1.Count > 0;
+    }
+
+    private void btnSave_Click(object sender, EventArgs e)
+    {
+        SaveDialog(saveTXT, false);
+    }
+
+    private void btnXMLSave_Click(object sender, EventArgs e)
+    {
+        SaveDialog(saveXML, true);
+    }
+
+    private void SaveDialog(SaveFileDialog sfd, bool xml)
+    {
+        sfd.FileName = RemoveBadChars();
+
+        if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrEmpty(sfd.FileName))
+            Save(sfd.FileName, xml);
+    }
+
+    private string RemoveBadChars()
+    {
+        string text = listMaker1.SourceText;
+        foreach (Match m in _badCharacters.Matches(listMaker1.SourceText))
         {
-            InitializeComponent();
-            _p = prefs;
-            listMaker1.NoOfArticlesChanged += UpdateButtons;
+            text = text.Replace(m.Value, "");
         }
+        return text;
+    }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="prefs"></param>
-        /// <param name="list"></param>
-        public ListSplitter(UserPrefs prefs, List<Article> list)
-            : this(prefs)
+    private void Save(string path, bool xml)
+    {
+        listMaker1.AlphaSortList();
+        listMaker1.BeginUpdate();
+        try
         {
-            listMaker1.Add(list);
-        }
+            int noA = listMaker1.Count;
 
-        private void ListSplitter_Load(object sender, EventArgs e)
-        {
-            listMaker1.MakeListEnabled = true;
-        }
+            int roundlimit = Convert.ToInt32(numSplitAmount.Value / 2);
 
-        private readonly Regex _badCharacters = new Regex(@"[""/:*?<>|.]",
-                                                               RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if ((noA % numSplitAmount.Value) <= roundlimit)
+                noA += roundlimit;
 
-        private void UpdateButtons(object sender, EventArgs e)
-        {
-            btnSave.Enabled = btnXMLSave.Enabled = listMaker1.Count > 0;
-        }
+            int noGroups =
+                Convert.ToInt32(Math.Round(noA / numSplitAmount.Value));
 
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            SaveDialog(saveTXT, false);
-        }
-
-        private void btnXMLSave_Click(object sender, EventArgs e)
-        {
-            SaveDialog(saveXML, true);
-        }
-
-        private void SaveDialog(SaveFileDialog sfd, bool xml)
-        {
-            sfd.FileName = RemoveBadChars();
-
-            if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrEmpty(sfd.FileName))
-                Save(sfd.FileName, xml);
-        }
-
-        private string RemoveBadChars()
-        {
-            string text = listMaker1.SourceText;
-            foreach (Match m in _badCharacters.Matches(listMaker1.SourceText))
+            int baseIndex = 0;
+            int splitValue = (int)numSplitAmount.Value;
+            var articles = listMaker1.GetArticleList();
+            int minValueCount = Math.Min(splitValue, articles.Count);
+            if (xml)
             {
-                text = text.Replace(m.Value, "");
-            }
-            return text;
-        }
+                string pathPrefix = path.Replace(".xml", " {0}.xml");
 
-        private void Save(string path, bool xml)
-        {
-            listMaker1.AlphaSortList();
-            listMaker1.BeginUpdate();
-            try
-            {
-                int noA = listMaker1.Count;
-
-                int roundlimit = Convert.ToInt32(numSplitAmount.Value / 2);
-
-                if ((noA % numSplitAmount.Value) <= roundlimit)
-                    noA += roundlimit;
-
-                int noGroups =
-                    Convert.ToInt32(Math.Round(noA / numSplitAmount.Value));
-
-                int baseIndex = 0;
-                int splitValue = (int)numSplitAmount.Value;
-                var articles = listMaker1.GetArticleList();
-                int minValueCount = Math.Min(splitValue, articles.Count);
-                if (xml)
+                for (int i = 1; i <= noGroups; i++)
                 {
-                    string pathPrefix = path.Replace(".xml", " {0}.xml");
-
-                    for (int i = 1; i <= noGroups; i++)
-                    {
-                        _p.List.ArticleList = articles.GetRange(baseIndex, minValueCount);
-                        baseIndex += splitValue;
-                        UserPrefs.SavePrefs(_p, string.Format(pathPrefix, i));
-                    }
-                    MessageBox.Show("Lists Saved to AWB Settings Files");
+                    _p.List.ArticleList = articles.GetRange(baseIndex, minValueCount);
+                    baseIndex += splitValue;
+                    UserPrefs.SavePrefs(_p, string.Format(pathPrefix, i));
                 }
-                else
+                MessageBox.Show("Lists Saved to AWB Settings Files");
+            }
+            else
+            {
+                string pathPrefix = path.Replace(".txt", " {0}.txt");
+                for (int i = 1; i <= noGroups; i++)
                 {
-                    string pathPrefix = path.Replace(".txt", " {0}.txt");
-                    for (int i = 1; i <= noGroups; i++)
+                    StringBuilder strList = new StringBuilder();
+                    foreach (Article a in articles.GetRange(baseIndex, Math.Min(articles.Count - baseIndex, minValueCount)))
                     {
-                        StringBuilder strList = new StringBuilder();
-                        foreach (Article a in articles.GetRange(baseIndex, Math.Min(articles.Count - baseIndex, minValueCount)))
-                        {
-                            strList.AppendLine(a.ToString());
-                        }
-                        Tools.WriteTextFileAbsolutePath(strList.ToString().TrimEnd(), string.Format(pathPrefix, i),
-                                                        false);
-                        baseIndex += splitValue;
+                        strList.AppendLine(a.ToString());
                     }
-                    MessageBox.Show("Lists saved to text files");
+                    Tools.WriteTextFileAbsolutePath(strList.ToString().TrimEnd(), string.Format(pathPrefix, i),
+                                                    false);
+                    baseIndex += splitValue;
                 }
-
-                listMaker1.Clear();
-            }
-            catch (IOException ex)
-            {
-                MessageBox.Show(ex.Message, "Save error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                ErrorHandler.HandleException(ex);
+                MessageBox.Show("Lists saved to text files");
             }
 
-
-            listMaker1.EndUpdate();
+            listMaker1.Clear();
         }
+        catch (IOException ex)
+        {
+            MessageBox.Show(ex.Message, "Save error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
+
+
+        listMaker1.EndUpdate();
     }
 }

@@ -17,47 +17,46 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions
+namespace WikiFunctions;
+
+/// <summary>
+/// 
+/// </summary>
+public class RegexArticleComparer : IArticleComparer
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class RegexArticleComparer : IArticleComparer
+    public RegexArticleComparer(Regex comparator)
     {
-        public RegexArticleComparer(Regex comparator)
-        {
-            Comparator = comparator;
-        }
-
-        public bool Matches(Article article)
-        {
-            string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-            return Comparator.IsMatch(text);
-        }
-
-        private readonly Regex Comparator;
+        Comparator = comparator;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class DynamicRegexArticleComparer : IArticleComparer
+    public bool Matches(Article article)
     {
-        public DynamicRegexArticleComparer(string comparator, RegexOptions options)
-        {
-            Comparator = comparator;
-            Options = (options & ~RegexOptions.Compiled);
-            // Create a regex to try it out. Throws an exception if there's a regex error
-            new Regex(Tools.ApplyKeyWords("a", comparator), options);
-        }
-
-        public bool Matches(Article article)
-        {
-            string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-            return Regex.IsMatch(text, Tools.ApplyKeyWords(article.Name, Comparator), Options);
-        }
-
-        private readonly string Comparator;
-        private readonly RegexOptions Options;
+        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
+        return Comparator.IsMatch(text);
     }
+
+    private readonly Regex Comparator;
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class DynamicRegexArticleComparer : IArticleComparer
+{
+    public DynamicRegexArticleComparer(string comparator, RegexOptions options)
+    {
+        Comparator = comparator;
+        Options = (options & ~RegexOptions.Compiled);
+        // Create a regex to try it out. Throws an exception if there's a regex error
+        new Regex(Tools.ApplyKeyWords("a", comparator), options);
+    }
+
+    public bool Matches(Article article)
+    {
+        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
+        return Regex.IsMatch(text, Tools.ApplyKeyWords(article.Name, Comparator), Options);
+    }
+
+    private readonly string Comparator;
+    private readonly RegexOptions Options;
 }

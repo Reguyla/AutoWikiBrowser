@@ -16,81 +16,80 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions
+namespace WikiFunctions;
+
+/// <summary>
+/// 
+/// </summary>
+public class CaseSensitiveArticleComparer : IArticleComparer
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class CaseSensitiveArticleComparer : IArticleComparer
+    public CaseSensitiveArticleComparer(string comparator)
     {
-        public CaseSensitiveArticleComparer(string comparator)
-        {
-            Comparator = comparator;
-        }
-
-        public bool Matches(Article article)
-        {
-            string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-            return text.Contains(Comparator);
-        }
-
-        private readonly string Comparator;
+        Comparator = comparator;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class CaseInsensitiveArticleComparer : IArticleComparer
+    public bool Matches(Article article)
     {
-        public CaseInsensitiveArticleComparer(string comparator)
-        {
-            Comparator = comparator;
-        }
-
-        public bool Matches(Article article)
-        {
-            string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-            return text.IndexOf(Comparator, StringComparison.CurrentCultureIgnoreCase) >= 0;
-        }
-
-        private readonly string Comparator;
+        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
+        return text.Contains(Comparator);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class CaseSensitiveArticleComparerWithKeywords : IArticleComparer
+    private readonly string Comparator;
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class CaseInsensitiveArticleComparer : IArticleComparer
+{
+    public CaseInsensitiveArticleComparer(string comparator)
     {
-        public CaseSensitiveArticleComparerWithKeywords(string comparator)
-        {
-            Comparator = comparator;
-        }
-
-        public bool Matches(Article article)
-        {
-            string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-            return text.Contains(Tools.ApplyKeyWords(article.Name, Comparator));
-        }
-
-        private readonly string Comparator;
+        Comparator = comparator;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class CaseInsensitiveArticleComparerWithKeywords : IArticleComparer
+    public bool Matches(Article article)
     {
-        public CaseInsensitiveArticleComparerWithKeywords(string comparator)
-        {
-            Comparator = comparator;
-        }
-
-        public bool Matches(Article article)
-        {
-            string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
-            return text.IndexOf(Tools.ApplyKeyWords(article.Name, Comparator), StringComparison.CurrentCultureIgnoreCase) >= 0;
-        }
-
-        private readonly string Comparator;
+        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
+        return text.IndexOf(Comparator, StringComparison.CurrentCultureIgnoreCase) >= 0;
     }
+
+    private readonly string Comparator;
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class CaseSensitiveArticleComparerWithKeywords : IArticleComparer
+{
+    public CaseSensitiveArticleComparerWithKeywords(string comparator)
+    {
+        Comparator = comparator;
+    }
+
+    public bool Matches(Article article)
+    {
+        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
+        return text.Contains(Tools.ApplyKeyWords(article.Name, Comparator));
+    }
+
+    private readonly string Comparator;
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class CaseInsensitiveArticleComparerWithKeywords : IArticleComparer
+{
+    public CaseInsensitiveArticleComparerWithKeywords(string comparator)
+    {
+        Comparator = comparator;
+    }
+
+    public bool Matches(Article article)
+    {
+        string text = Tools.ConvertFromLocalLineEndings(article.ArticleText);
+        return text.IndexOf(Tools.ApplyKeyWords(article.Name, Comparator), StringComparison.CurrentCultureIgnoreCase) >= 0;
+    }
+
+    private readonly string Comparator;
 }

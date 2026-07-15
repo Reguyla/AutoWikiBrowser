@@ -18,79 +18,78 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Xml;
 
-namespace WikiFunctions.API
+namespace WikiFunctions.API;
+
+/// <summary>
+/// Provides information about a successfully completed page editing operation
+/// </summary>
+public sealed class SaveInfo
 {
     /// <summary>
-    /// Provides information about a successfully completed page editing operation
+    /// Title of the edited page
     /// </summary>
-    public sealed class SaveInfo
+    public string Title
+    { get; private set; }
+
+    /// <summary>
+    /// Database ID of the page
+    /// </summary>
+    public int PageId
+    { get; private set; }
+
+    /// <summary>
+    /// Database ID of page's revision before editing
+    /// </summary>
+    public int OldId
+    { get; private set; }
+
+    /// <summary>
+    /// Database ID of page's revision after editing
+    /// </summary>
+    public int NewId
+    { get; private set; }
+
+    /// <summary>
+    /// Whether the save operation actually didn't change anything
+    /// </summary>
+    public bool NoChange
+    { get; private set; }
+
+    /// <summary>
+    /// true if we've just created a page
+    /// </summary>
+    public bool IsNewPage
+    { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public XmlDocument ResponseXml
+    { get; private set; }
+
+    internal SaveInfo(XmlDocument doc)
     {
-        /// <summary>
-        /// Title of the edited page
-        /// </summary>
-        public string Title
-        { get; private set; }
+        ResponseXml = doc;
 
-        /// <summary>
-        /// Database ID of the page
-        /// </summary>
-        public int PageId
-        { get; private set; }
-
-        /// <summary>
-        /// Database ID of page's revision before editing
-        /// </summary>
-        public int OldId
-        { get; private set; }
-
-        /// <summary>
-        /// Database ID of page's revision after editing
-        /// </summary>
-        public int NewId
-        { get; private set; }
-
-        /// <summary>
-        /// Whether the save operation actually didn't change anything
-        /// </summary>
-        public bool NoChange
-        { get; private set; }
-
-        /// <summary>
-        /// true if we've just created a page
-        /// </summary>
-        public bool IsNewPage
-        { get; private set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public XmlDocument ResponseXml
-        { get; private set; }
-
-        internal SaveInfo(XmlDocument doc)
+        try
         {
-            ResponseXml = doc;
+            var edit = doc["api"]["edit"];
 
-            try
+            if (edit != null)
             {
-                var edit = doc["api"]["edit"];
+                NoChange = edit.HasAttribute("nochange");
+                IsNewPage = edit.HasAttribute("new");
+                Title = edit.GetAttribute("title");
+                PageId = int.Parse(edit.GetAttribute("pageid"));
 
-                if (edit != null)
-                {
-                    NoChange = edit.HasAttribute("nochange");
-                    IsNewPage = edit.HasAttribute("new");
-                    Title = edit.GetAttribute("title");
-                    PageId = int.Parse(edit.GetAttribute("pageid"));
-
-                    int rev;
-                    int.TryParse(edit.GetAttribute("newrevid"), out rev); // will be absent on null edits
-                    NewId = rev;
-                    int.TryParse(edit.GetAttribute("oldrevid"), out rev); // will be absent on page creation too
-                    OldId = rev;
-                }
+                int rev;
+                int.TryParse(edit.GetAttribute("newrevid"), out rev); // will be absent on null edits
+                NewId = rev;
+                int.TryParse(edit.GetAttribute("oldrevid"), out rev); // will be absent on page creation too
+                OldId = rev;
             }
-            catch
-            { }
         }
+        catch
+        { }
     }
 }
