@@ -1,14 +1,13 @@
 ﻿using NUnit.Framework;
 
-namespace UnitTests
+namespace UnitTests;
+
+[SetUpFixture]
+public sealed class TestAssemblySetup
 {
-    [SetUpFixture]
-    public sealed class TestAssemblySetup
+    [OneTimeSetUp]
+    public void RegisterEncodingProvider()
     {
-        [OneTimeSetUp]
-        public void RegisterEncodingProvider()
-        {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        }
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 }

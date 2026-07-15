@@ -26,147 +26,146 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using WikiFunctions;
 
-namespace UnitTests
+namespace UnitTests;
+
+[TestFixture]
+public class CacheTests : RequiresInitialization
 {
-    [TestFixture]
-    public class CacheTests : RequiresInitialization
+    private ObjectCache Cache;
+
+    [SetUp]
+    public void SetUp()
     {
-        private ObjectCache Cache;
+        Cache = new ObjectCache();
+    }
 
-        [SetUp]
-        public void SetUp()
-        {
-            Cache = new ObjectCache();
-        }
+    [TearDown]
+    public void TearDown()
+    {
+        Cache.Dispose();
+    }
 
-        [TearDown]
-        public void TearDown()
-        {
-            Cache.Dispose();
-        }
+    public void Reload()
+    {
+        MemoryStream ms = new MemoryStream();
 
-        public void Reload()
-        {
-            MemoryStream ms = new MemoryStream();
+        Cache.Save(ms);
+        ms.Position = 0;
 
-            Cache.Save(ms);
-            ms.Position = 0;
+        Cache = new ObjectCache();
+        Cache.Load(ms);
+    }
 
-            Cache = new ObjectCache();
-            Cache.Load(ms);
-        }
+    [Test]
+    public void GetAndSet()
+    {
+        ClassicAssert.IsNull(Cache.Get<int>("foo"));
 
-        [Test]
-        public void GetAndSet()
-        {
-            ClassicAssert.IsNull(Cache.Get<int>("foo"));
+        Cache.Set("foo", "bar");
+        Assert.That(Cache.Get<string>("foo"), Is.EqualTo("bar"));
+    }
 
-            Cache.Set("foo", "bar");
-            Assert.That(Cache.Get<string>("foo"), Is.EqualTo("bar"));
-        }
+    [Test]
+    public void DontMixTypes()
+    {
+        Cache.Set("foo", "bar");
+        Cache.AddType(typeof(int), new TimeSpan(5, 0, 0, 0));
+        Cache.Set("foo", 42);
 
-        [Test]
-        public void DontMixTypes()
-        {
-            Cache.Set("foo", "bar");
-            Cache.AddType(typeof(int), new TimeSpan(5, 0, 0, 0));
-            Cache.Set("foo", 42);
+        Assert.That(Cache.Get<string>("foo"), Is.EqualTo("bar"));
+        Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
+    }
 
-            Assert.That(Cache.Get<string>("foo"), Is.EqualTo("bar"));
-            Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
-        }
+    [Test]
+    public void Expiry()
+    {
+        var expiresSoon = new TimeSpan(0, 0, 0, 0, 20);
+        Cache.AddType(typeof(int), expiresSoon);
 
-        [Test]
-        public void Expiry()
-        {
-            var expiresSoon = new TimeSpan(0, 0, 0, 0, 20);
-            Cache.AddType(typeof(int), expiresSoon);
+        // using default expiry time
+        Cache.Set("foo", 42);
+        Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
+        Thread.Sleep(60);
+        ClassicAssert.IsNull(Cache.Get<int>("foo"));
 
-            // using default expiry time
-            Cache.Set("foo", 42);
-            Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
-            Thread.Sleep(60);
-            ClassicAssert.IsNull(Cache.Get<int>("foo"));
+        // using explicitly set time, absolute
+        Cache.Set("foo", 42, DateTime.Now + expiresSoon);
+        Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
+        Thread.Sleep(60);
+        ClassicAssert.IsNull(Cache.Get<int>("foo"));
 
-            // using explicitly set time, absolute
-            Cache.Set("foo", 42, DateTime.Now + expiresSoon);
-            Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
-            Thread.Sleep(60);
-            ClassicAssert.IsNull(Cache.Get<int>("foo"));
+        // ...and relative
+        Cache.Set("foo", 42, expiresSoon);
+        Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
+        Thread.Sleep(60);
+        ClassicAssert.IsNull(Cache.Get<int>("foo"));
 
-            // ...and relative
-            Cache.Set("foo", 42, expiresSoon);
-            Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
-            Thread.Sleep(60);
-            ClassicAssert.IsNull(Cache.Get<int>("foo"));
+        // also after save/load
+        Cache.Set("foo", 42, expiresSoon);
+        Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
+        MemoryStream ms = new MemoryStream();
+        Cache.Save(ms);
+        ms.Position = 0;
+        Thread.Sleep(60);
+        Cache.Load(ms);
+        ClassicAssert.IsNull(Cache.Get<int>("foo"));
+    }
 
-            // also after save/load
-            Cache.Set("foo", 42, expiresSoon);
-            Assert.That(Cache.Get<int>("foo"), Is.EqualTo(42));
-            MemoryStream ms = new MemoryStream();
-            Cache.Save(ms);
-            ms.Position = 0;
-            Thread.Sleep(60);
-            Cache.Load(ms);
-            ClassicAssert.IsNull(Cache.Get<int>("foo"));
-        }
+    [Test]
+    public void Persistence()
+    {
+        Cache.Set("foo", "bar");
+        Reload();
+        Assert.That(Cache.Get<string>("foo"), Is.EqualTo("bar"));
+    }
 
-        [Test]
-        public void Persistence()
-        {
-            Cache.Set("foo", "bar");
-            Reload();
-            Assert.That(Cache.Get<string>("foo"), Is.EqualTo("bar"));
-        }
+    [Test]
+    public void LoadingErasesStorage()
+    {
+        Cache.Set("foo", "bar");
 
-        [Test]
-        public void LoadingErasesStorage()
-        {
-            Cache.Set("foo", "bar");
+        MemoryStream ms = new MemoryStream();
+        Cache.Save(ms);
+        ms.Position = 0;
 
-            MemoryStream ms = new MemoryStream();
-            Cache.Save(ms);
-            ms.Position = 0;
+        Cache.Set("boz", "quux");
 
-            Cache.Set("boz", "quux");
+        Cache.Load(ms);
+        ClassicAssert.IsNull(Cache.Get<string>("boz"));
+    }
 
-            Cache.Load(ms);
-            ClassicAssert.IsNull(Cache.Get<string>("boz"));
-        }
+    [Test]
+    public void DontStoreUnknownTypes()
+    {
+        Action setInvalidValue = () => Cache.Set("foo", 3);
 
-        [Test]
-        public void DontStoreUnknownTypes()
-        {
-            Action setInvalidValue = () => Cache.Set("foo", 3);
+        Assert.Throws<ArgumentException>(setInvalidValue);
+    }
 
-            Assert.Throws<ArgumentException>(setInvalidValue);
-        }
+    [Test]
+    public void DisallowNullKeys()
+    {
+        Assert.Throws<ArgumentNullException>(
+            (Action)(() => Cache.Set(null, "foo")));
+    }
 
-        [Test]
-        public void DisallowNullKeys()
-        {
-            Assert.Throws<ArgumentNullException>(
-                (Action)(() => Cache.Set(null, "foo")));
-        }
+    [Test]
+    public void DisallowEmptyKeys()
+    {
+        Assert.Throws<ArgumentNullException>(
+            (Action)(() => Cache.Set("", "foo")));
+    }
 
-        [Test]
-        public void DisallowEmptyKeys()
-        {
-            Assert.Throws<ArgumentNullException>(
-                (Action)(() => Cache.Set("", "foo")));
-        }
+    [Test]
+    public void DontStoreNull()
+    {
+        Assert.Throws<ArgumentNullException>(
+            (Action)(() => Cache.Set("foo", null)));
+    }
 
-        [Test]
-        public void DontStoreNull()
-        {
-            Assert.Throws<ArgumentNullException>(
-                (Action)(() => Cache.Set("foo", null)));
-        }
-
-        [Test]
-        public void PresetCachesCreated()
-        {
-            ClassicAssert.IsNotNull(ObjectCache.Global);
-        }
+    [Test]
+    public void PresetCachesCreated()
+    {
+        ClassicAssert.IsNotNull(ObjectCache.Global);
     }
 }

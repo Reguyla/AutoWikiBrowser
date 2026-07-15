@@ -3,102 +3,102 @@ using NUnit.Framework.Legacy;
 using WikiFunctions;
 using WikiFunctions.Parse;
 
-namespace UnitTests
+namespace UnitTests;
+
+public class RequiresParser2 : RequiresInitialization
 {
-    public class RequiresParser2 : RequiresInitialization
-    {
-        protected Parsers parser2;
+    protected Parsers parser2;
 
-        public RequiresParser2()
-        {
-            parser2 = new Parsers();
-        }
+    public RequiresParser2()
+    {
+        parser2 = new Parsers();
     }
+}
 
-    [TestFixture]
-    public class SorterTests : RequiresParser2
+[TestFixture]
+public class SorterTests : RequiresParser2
+{
+    [Test]
+    public void RemoveStubs()
     {
-        [Test]
-        public void RemoveStubs()
-        {
-            // shouldn't break anything
-            string s = "==foo==\r\nbar<ref name=\"123\"/>{{boz}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty);
-            Assert.That(s, Is.EqualTo("==foo==\r\nbar<ref name=\"123\"/>{{boz}}"));
+        // shouldn't break anything
+        string s = "==foo==\r\nbar<ref name=\"123\"/>{{boz}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty);
+        Assert.That(s, Is.EqualTo("==foo==\r\nbar<ref name=\"123\"/>{{boz}}"));
 
-            // should remove stubs, but not section stubs
-            s = "{{foo}}{{some-stub}}{{foo-stub}}bar{{sect-stub}}{{not a|stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{some-stub}}\r\n{{foo-stub}}\r\n"));
-            Assert.That(s, Is.EqualTo("{{foo}}bar{{sect-stub}}{{not a|stub}}"));
+        // should remove stubs, but not section stubs
+        s = "{{foo}}{{some-stub}}{{foo-stub}}bar{{sect-stub}}{{not a|stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{some-stub}}\r\n{{foo-stub}}\r\n"));
+        Assert.That(s, Is.EqualTo("{{foo}}bar{{sect-stub}}{{not a|stub}}"));
 
-            // handle stubs with extra parameters e.g. date=
-            s = "{{foo}}{{my-stub}}{{foo-stub|date=May 2012}}bar{{sect-stub}}{{not a|stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{my-stub}}\r\n{{foo-stub|date=May 2012}}\r\n"));
+        // handle stubs with extra parameters e.g. date=
+        s = "{{foo}}{{my-stub}}{{foo-stub|date=May 2012}}bar{{sect-stub}}{{not a|stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{my-stub}}\r\n{{foo-stub|date=May 2012}}\r\n"));
 
-            // shouldn't fail
-            s = "";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty);
-            Assert.That(s, Is.Empty);
-            s = "{{stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{stub}}\r\n"));
-            Assert.That(s, Is.Empty);
+        // shouldn't fail
+        s = "";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty);
+        Assert.That(s, Is.Empty);
+        s = "{{stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{stub}}\r\n"));
+        Assert.That(s, Is.Empty);
 
-            // remove duplicate stubs
-            s = "{{foo}}{{stub}}{{stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{stub}}\r\n"), "deduplication, same case");
-            s = "{{foo}}{{Stub}}{{stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{Stub}}\r\n"), "deduplication, different case");
+        // remove duplicate stubs
+        s = "{{foo}}{{stub}}{{stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{stub}}\r\n"), "deduplication, same case");
+        s = "{{foo}}{{Stub}}{{stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{Stub}}\r\n"), "deduplication, different case");
 
-            s = @"<!-- {{stub}} -->";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo(@"<!-- {{stub}} -->" + "\r\n"), "Extract commented out stubs");
-            s = @"#REDIRECT [[X]]
+        s = @"<!-- {{stub}} -->";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo(@"<!-- {{stub}} -->" + "\r\n"), "Extract commented out stubs");
+        s = @"#REDIRECT [[X]]
 <!--
 '''X''' is a x in the [[x]] of [[x]] in [[x]]. It lies to the east of [[x]].
 {{stub}}
 -->";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty, "Don't pull stubs out of comments");
-        }
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty, "Don't pull stubs out of comments");
+    }
 
-        [Test]
-        public void RemoveDupelicateStubs()
-        {
-            string stub = @"{{foo stub}}", articleTextBack = "", articletext = stub + " " + stub;
-            articleTextBack = parser2.SortMetaData(articletext, "test");
+    [Test]
+    public void RemoveDupelicateStubs()
+    {
+        string stub = @"{{foo stub}}", articleTextBack = "", articletext = stub + " " + stub;
+        articleTextBack = parser2.SortMetaData(articletext, "test");
 
-            ClassicAssert.IsTrue(WikiRegexes.Stub.Matches(articleTextBack).Count == 1);
+        ClassicAssert.IsTrue(WikiRegexes.Stub.Matches(articleTextBack).Count == 1);
 
-            // don't remove if different capitalisation
-            articletext = stub + " " + @"{{fOO stub}}";
-            articleTextBack = parser2.SortMetaData(articletext, "test");
+        // don't remove if different capitalisation
+        articletext = stub + " " + @"{{fOO stub}}";
+        articleTextBack = parser2.SortMetaData(articletext, "test");
 
-            ClassicAssert.IsTrue(WikiRegexes.Stub.Matches(articleTextBack).Count == 2);
+        ClassicAssert.IsTrue(WikiRegexes.Stub.Matches(articleTextBack).Count == 2);
 
-            // ignore stubs in comments
-            articletext = stub + " " + @"<!--{{foo stub}}-->";
-            articleTextBack = parser2.SortMetaData(articletext, "test");
+        // ignore stubs in comments
+        articletext = stub + " " + @"<!--{{foo stub}}-->";
+        articleTextBack = parser2.SortMetaData(articletext, "test");
 
-            ClassicAssert.IsTrue(WikiRegexes.Stub.Matches(articleTextBack).Count == 2);
+        ClassicAssert.IsTrue(WikiRegexes.Stub.Matches(articleTextBack).Count == 2);
 
-            // remove {{stub}} if more detailed stub
-            string s = "{{foo}}{{stub}}{{foo-stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{foo-stub}}\r\n"), "removes {{stub}} if more detailed stub");
-            s = "{{foo}}{{ Stub }}{{foo-stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{foo-stub}}\r\n"), "removes {{stub}} if more detailed stub");
-            s = "{{foo}}{{-stub}}{{foo-stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{foo-stub}}\r\n"), "removes {{-stub}} if more detailed stub");
-            s = "{{foo}}{{-stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{-stub}}\r\n"), "retain {{-stub}} if only stub tag");
-            s = "{{foo}}{{uncategorized stub}}{{stub}}";
-            Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{uncategorized stub}}\r\n{{stub}}\r\n"), "retain {{stub}} if other tag is {{uncategorized stub}}");
-        }
+        // remove {{stub}} if more detailed stub
+        string s = "{{foo}}{{stub}}{{foo-stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{foo-stub}}\r\n"), "removes {{stub}} if more detailed stub");
+        s = "{{foo}}{{ Stub }}{{foo-stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{foo-stub}}\r\n"), "removes {{stub}} if more detailed stub");
+        s = "{{foo}}{{-stub}}{{foo-stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{foo-stub}}\r\n"), "removes {{-stub}} if more detailed stub");
+        s = "{{foo}}{{-stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{-stub}}\r\n"), "retain {{-stub}} if only stub tag");
+        s = "{{foo}}{{uncategorized stub}}{{stub}}";
+        Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{uncategorized stub}}\r\n{{stub}}\r\n"), "retain {{stub}} if other tag is {{uncategorized stub}}");
+    }
 
-        [Test]
-        public void InterwikiSpacing()
-        {
-            parser2.SortInterwikis = false;
-            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br" };
+    [Test]
+    public void InterwikiSpacing()
+    {
+        parser2.SortInterwikis = false;
+        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br" };
 
-            const string correct = @"
+        const string correct = @"
 
 [[Category:Pub chains in the United Kingdom]]
 [[Category:Companies established in 1997]]
@@ -106,8 +106,8 @@ namespace UnitTests
 [[es:Punch Taverns]]
 [[fr:Punch Taverns]]";
 
-            Assert.That(parser2.SortMetaData(correct, "no change"), Is.EqualTo(correct));
-            Assert.That(parser2.SortMetaData(@"
+        Assert.That(parser2.SortMetaData(correct, "no change"), Is.EqualTo(correct));
+        Assert.That(parser2.SortMetaData(@"
 
 [[Category:Pub chains in the United Kingdom]]
 [[Category:Companies established in 1997]]
@@ -117,7 +117,7 @@ namespace UnitTests
 [[es:Punch Taverns]]
 [[fr:Punch Taverns]]", "two newlines before interwikis"), Is.EqualTo(correct));
 
-            Assert.That(parser2.SortMetaData(@"
+        Assert.That(parser2.SortMetaData(@"
 
 [[Category:Pub chains in the United Kingdom]]
 [[Category:Companies established in 1997]]
@@ -125,12 +125,12 @@ namespace UnitTests
 
 [[fr:Punch Taverns]]
 ", "an interwiki immediatelly after categories"), Is.EqualTo(correct));
-        }
+    }
 
-        [Test]
-        public void MovePersonDataTests()
-        {
-            string b1 = @"{{Persondata
+    [Test]
+    public void MovePersonDataTests()
+    {
+        string b1 = @"{{Persondata
 |NAME= Hodgson, Jane Elizabeth
 |ALTERNATIVE NAMES=
 |SHORT DESCRIPTION= [[Physician]], [[obstetrician]], [[gynecologist]]
@@ -140,7 +140,7 @@ namespace UnitTests
 |PLACE OF DEATH= [[Rochester, Minnesota]]
 }}";
 
-            const string b2 = @"{{Persondata
+        const string b2 = @"{{Persondata
 |NAME= Hodgson, Jane Elizabeth
 |ALTERNATIVE NAMES=
 |SHORT DESCRIPTION= [[Physician]], [[obstetrician]], [[gynecologist]]
@@ -150,16 +150,16 @@ namespace UnitTests
 |PLACE OF DEATH= [[Rochester, Minnesota]]
 }}";
 
-            string c1 = b1, c2 = b2;
+        string c1 = b1, c2 = b2;
 
-            MetaDataSorter.RemovePersonData(ref c1);
-            Assert.That(c1, Is.EqualTo(""));
-            MetaDataSorter.RemovePersonData(ref c2);
-            Assert.That(c2, Is.EqualTo(""));
-            MetaDataSorter.RemovePersonData(ref b1);
-            Assert.That(b1, Is.EqualTo(""));
+        MetaDataSorter.RemovePersonData(ref c1);
+        Assert.That(c1, Is.EqualTo(""));
+        MetaDataSorter.RemovePersonData(ref c2);
+        Assert.That(c2, Is.EqualTo(""));
+        MetaDataSorter.RemovePersonData(ref b1);
+        Assert.That(b1, Is.EqualTo(""));
 
-            const string d1 = @"{{Persondata
+        const string d1 = @"{{Persondata
 |NAME= Becker, Gary
 |ALTERNATIVE NAMES=
 |SHORT DESCRIPTION= [[Economics|Economist]]
@@ -168,91 +168,91 @@ namespace UnitTests
 |DATE OF DEATH=
 |PLACE OF DEATH=
 }}";
-            const string d2 = @"{{Winners of the National Medal of Science|behav-social}}
+        const string d2 = @"{{Winners of the National Medal of Science|behav-social}}
 ";
-            const string d3 = @"
+        const string d3 = @"
 [[Category:Members of the National Academy of Sciences]]";
 
-            string e = d2 + d1 + d3;
-            string f = MetaDataSorter.RemovePersonData(ref e);
+        string e = d2 + d1 + d3;
+        string f = MetaDataSorter.RemovePersonData(ref e);
 
-            Assert.That(f, Is.EqualTo(d1));
-            Assert.That(e, Is.EqualTo(d2 + d3));
+        Assert.That(f, Is.EqualTo(d1));
+        Assert.That(e, Is.EqualTo(d2 + d3));
 
-            e = d2 + d1 + d1.Replace("[[December 2]]", "") + d3;
+        e = d2 + d1 + d1.Replace("[[December 2]]", "") + d3;
 
-            f = MetaDataSorter.RemovePersonData(ref e);
+        f = MetaDataSorter.RemovePersonData(ref e);
 
-            Assert.That(f, Is.EqualTo(d1 + "\r\n" + d1.Replace("[[December 2]]", "")), "duplicate persondata: order not changed");
+        Assert.That(f, Is.EqualTo(d1 + "\r\n" + d1.Replace("[[December 2]]", "")), "duplicate persondata: order not changed");
 
-            string commented = @"<!--{{Persondata}}-->";
-            Assert.That(MetaDataSorter.RemovePersonData(ref commented), Is.Empty, "commented out persondata not extracted");
-        }
+        string commented = @"<!--{{Persondata}}-->";
+        Assert.That(MetaDataSorter.RemovePersonData(ref commented), Is.Empty, "commented out persondata not extracted");
+    }
 
-        [Test]
-        public void MoveDablinksTests()
-        {
-            const string d = @"Fred is a doctor.
+    [Test]
+    public void MoveDablinksTests()
+    {
+        const string d = @"Fred is a doctor.
 Fred has a dog.
 [[Category:Dog owners]]
 {{some template}}
 ", e0 = @"{{redirect|foo|bar}}";
 
-            string e = @"{{other people|Fred the dancer|Fred Smith (dancer)}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d));
+        string e = @"{{other people|Fred the dancer|Fred Smith (dancer)}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d));
 
-            Assert.That(MetaDataSorter.MoveTemplate(d + e + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "Deduplication of identical tags");
+        Assert.That(MetaDataSorter.MoveTemplate(d + e + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "Deduplication of identical tags");
 
-            e = @"{{For|Fred the dancer|Fred Smith (dancer)}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "odering plus add newline");
+        e = @"{{For|Fred the dancer|Fred Smith (dancer)}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "odering plus add newline");
 
-            Assert.That(MetaDataSorter.MoveTemplate(e + " " + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "whitepsace handling");
+        Assert.That(MetaDataSorter.MoveTemplate(e + " " + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "whitepsace handling");
 
-            e = @"{{redirect2|Fred the dancer|Fred Smith (dancer)}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "odering plus add newline, redirect2");
+        e = @"{{redirect2|Fred the dancer|Fred Smith (dancer)}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "odering plus add newline, redirect2");
 
-            e = @"{{redirect2|Fred the {{dancer}}|Fred Smith (dancer)}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "odering plus add newline, redirect2, nested");
+        e = @"{{redirect2|Fred the {{dancer}}|Fred Smith (dancer)}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d), "odering plus add newline, redirect2, nested");
 
-            e = @"{{redirect2|Fred the {{dancer}}|Fred Smith (dancer)}}
+        e = @"{{redirect2|Fred the {{dancer}}|Fred Smith (dancer)}}
 ";
-            Assert.That(MetaDataSorter.MoveTemplate(d + ":" + e, WikiRegexes.Dablinks), Is.EqualTo(e + d), "colons before dablinks removed");
+        Assert.That(MetaDataSorter.MoveTemplate(d + ":" + e, WikiRegexes.Dablinks), Is.EqualTo(e + d), "colons before dablinks removed");
 
-            // don't move dablinks in a section
-            const string f = @"Article words
+        // don't move dablinks in a section
+        const string f = @"Article words
 == heading ==
 {{redirect2|Fred the dancer|Fred Smith (dancer)}}
 words";
-            Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.Dablinks), Is.EqualTo(f));
+        Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.Dablinks), Is.EqualTo(f));
 
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#String_cannot_be_of_zero_length._Parameter_name:_oldValue_.2F_ArgumentException_in_MetaDataSorter.MoveDablinks
-            Assert.That(MetaDataSorter.MoveTemplate(@"[[Category:Confederate Navy officers|Captains]]", WikiRegexes.Dablinks), Is.EqualTo(@"[[Category:Confederate Navy officers|Captains]]"));
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#String_cannot_be_of_zero_length._Parameter_name:_oldValue_.2F_ArgumentException_in_MetaDataSorter.MoveDablinks
+        Assert.That(MetaDataSorter.MoveTemplate(@"[[Category:Confederate Navy officers|Captains]]", WikiRegexes.Dablinks), Is.EqualTo(@"[[Category:Confederate Navy officers|Captains]]"));
 
-            const string g = @"Some words";
-            const string h = @"==heading==
+        const string g = @"Some words";
+        const string h = @"==heading==
 more words
 [[Category:Foo]]";
-            e = @"{{redirect2|Fred the {{dancer}}|Fred Smith (dancer)}}";
+        e = @"{{redirect2|Fred the {{dancer}}|Fred Smith (dancer)}}";
 
-            Assert.That(MetaDataSorter.MoveTemplate(g + "\r\n" + e + "\r\n" + h, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + g + "\r\n" + h));
+        Assert.That(MetaDataSorter.MoveTemplate(g + "\r\n" + e + "\r\n" + h, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + g + "\r\n" + h));
 
-            Assert.That(MetaDataSorter.MoveTemplate(d + e + e0, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n" + d), "multi tag ordering");
-            Assert.That(MetaDataSorter.MoveTemplate(e + e0 + "\r\n\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n\r\n" + d), "Don't affect whitespace after tags");
+        Assert.That(MetaDataSorter.MoveTemplate(d + e + e0, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n" + d), "multi tag ordering");
+        Assert.That(MetaDataSorter.MoveTemplate(e + e0 + "\r\n\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n\r\n" + d), "Don't affect whitespace after tags");
 
-            // check spacing
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d));
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n" + d));
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + "\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n" + d));
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + "\r\n\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n\r\n" + d));
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + e0 + "\r\n\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n\r\n" + d), "Dupe tag removal");
+        // check spacing
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + d));
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n" + d));
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + "\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n" + d));
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + "\r\n\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n\r\n" + d));
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + e0 + e0 + "\r\n\r\n" + d, WikiRegexes.Dablinks), Is.EqualTo(e + "\r\n" + e0 + "\r\n\r\n" + d), "Dupe tag removal");
 
-            // short description above dablink per MOS:ORDER
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + @"{{short description|foo}}" + "\r\n" + d, WikiRegexes.ShortDescriptionTemplate), Is.EqualTo(@"{{short description|foo}}" + "\r\n" + e + "\r\n" + d));
-            const string shortDescNone = @"{{Short description|none}} <!-- ""none"" is preferred when the title is sufficiently descriptive; see [[WP:SDNONE]] -->";
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + shortDescNone + "\r\n" + d, WikiRegexes.ShortDescriptionTemplate), Is.EqualTo(shortDescNone + "\r\n" + e + "\r\n" + d));
+        // short description above dablink per MOS:ORDER
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + @"{{short description|foo}}" + "\r\n" + d, WikiRegexes.ShortDescriptionTemplate), Is.EqualTo(@"{{short description|foo}}" + "\r\n" + e + "\r\n" + d));
+        const string shortDescNone = @"{{Short description|none}} <!-- ""none"" is preferred when the title is sufficiently descriptive; see [[WP:SDNONE]] -->";
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\n" + shortDescNone + "\r\n" + d, WikiRegexes.ShortDescriptionTemplate), Is.EqualTo(shortDescNone + "\r\n" + e + "\r\n" + d));
 
-            // don't pull dablinks out of {{hatnote group}}
-            const string i = @"{{Short description|American character encoding standard}}
+        // don't pull dablinks out of {{hatnote group}}
+        const string i = @"{{Short description|American character encoding standard}}
 {{hatnote group|
 {{other uses}}
 {{Distinguish|text=MS [[Windows-1252]] or other types of [[Extended ASCII]]}}
@@ -260,13 +260,13 @@ more words
 {{Use mdy dates|date=June 2013|cs1-dates=y}}
 Article";
 
-            Assert.That(parser2.SortMetaData(i, "Don't pull hatnotes out of hatnote group"), Is.EqualTo(i));
-        }
+        Assert.That(parser2.SortMetaData(i, "Don't pull hatnotes out of hatnote group"), Is.EqualTo(i));
+    }
 
-        [Test]
-        public void ZerothSectionSorting()
-        {
-            const string correct = @"{{Short description|American character}}
+    [Test]
+    public void ZerothSectionSorting()
+    {
+        const string correct = @"{{Short description|American character}}
 {{other uses}}
 {{featured article}}
 {{Prod blp}}
@@ -276,9 +276,9 @@ Article";
 {{Japanese script needed}}
 Hello";
 
-            Assert.That(parser2.SortMetaData(correct, "Title"), Is.EqualTo(correct), "Use mdy dates - already correctly ordered");
+        Assert.That(parser2.SortMetaData(correct, "Title"), Is.EqualTo(correct), "Use mdy dates - already correctly ordered");
 
-            Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
+        Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
 {{Short description|American character}}
 {{other uses}}
 {{featured article}}
@@ -288,7 +288,7 @@ Hello";
 {{Japanese script needed}}
 Hello", "Title"), Is.EqualTo(correct), "Use mdy dates starting at top");
 
-            Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
+        Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
 {{Use American English}}
 {{Short description|American character}}
 {{other uses}}
@@ -298,7 +298,7 @@ Hello", "Title"), Is.EqualTo(correct), "Use mdy dates starting at top");
 {{Japanese script needed}}
 Hello", "Title"), Is.EqualTo(correct), "Use mdy dates and American English starting at top");
 
-            Assert.That(parser2.SortMetaData(@"{{featured article}}
+        Assert.That(parser2.SortMetaData(@"{{featured article}}
 {{Short description|American character}}
 {{other uses}}
 {{Use mdy dates}}
@@ -308,7 +308,7 @@ Hello", "Title"), Is.EqualTo(correct), "Use mdy dates and American English start
 {{Japanese script needed}}
 Hello", "Title"), Is.EqualTo(correct), "featured article starting at top");
 
-            const string correct2 = @"{{Short description|American character}}
+        const string correct2 = @"{{Short description|American character}}
 {{other uses}}
 {{featured article}}
 {{Prod blp}}
@@ -322,9 +322,9 @@ Hello", "Title"), Is.EqualTo(correct), "featured article starting at top");
 {{Japanese script needed}}
 Hello";
 
-            Assert.That(parser2.SortMetaData(correct2, "Title"), Is.EqualTo(correct2), "Already correctly ordered with use mdy, use American and MI");
+        Assert.That(parser2.SortMetaData(correct2, "Title"), Is.EqualTo(correct2), "Already correctly ordered with use mdy, use American and MI");
 
-            const string correct3 = @"{{Short description|American character with section word}}
+        const string correct3 = @"{{Short description|American character with section word}}
 {{other uses}}
 {{featured article}}
 {{Prod blp}}
@@ -334,9 +334,9 @@ Hello";
 {{Infobox actor}}
 Hello";
 
-            Assert.That(parser2.SortMetaData(correct3, "Title"), Is.EqualTo(correct3), "Already correctly ordered with use mdy, use American and single maintenance template");
+        Assert.That(parser2.SortMetaData(correct3, "Title"), Is.EqualTo(correct3), "Already correctly ordered with use mdy, use American and single maintenance template");
 
-            const string correct4 = @"{{Short description|American character with section word}}
+        const string correct4 = @"{{Short description|American character with section word}}
 {{other uses}}
 {{featured article}}
 {{Prod blp}}
@@ -347,9 +347,9 @@ Hello";
 {{lowercase title}}
 Hello";
 
-            Assert.That(parser2.SortMetaData(correct4, "Title"), Is.EqualTo(correct4), "Already correct - {{lowercase title}} after infobox");
+        Assert.That(parser2.SortMetaData(correct4, "Title"), Is.EqualTo(correct4), "Already correct - {{lowercase title}} after infobox");
 
-            const string correct5 = @"{{Short description|American character with section word}}
+        const string correct5 = @"{{Short description|American character with section word}}
 {{other uses}}
 {{featured article}}
 {{Prod blp}}
@@ -360,9 +360,9 @@ Hello";
 {{Infobox actor|doesn't fiddle with articletitle}}
 Hello";
 
-            Assert.That(parser2.SortMetaData(correct5, "Title"), Is.EqualTo(correct5), "Already correct - {{lowercase title}} just before infobox");
+        Assert.That(parser2.SortMetaData(correct5, "Title"), Is.EqualTo(correct5), "Already correct - {{lowercase title}} just before infobox");
 
-            const string correct6 = @"{{Short description|Operating system for Apple computers}}
+        const string correct6 = @"{{Short description|Operating system for Apple computers}}
 {{Lowercase title}}
 {{Redirect2|OSX|OS X}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
@@ -376,9 +376,9 @@ Hello";
 
 '''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct6, "MacOS"), Is.EqualTo(correct6), "Already correct - {{lowercase title}} after {{short description}}");
+        Assert.That(parser2.SortMetaData(correct6, "MacOS"), Is.EqualTo(correct6), "Already correct - {{lowercase title}} after {{short description}}");
 
-            Assert.That(parser2.SortMetaData(@"{{Short description|Operating system for Apple computers}}
+        Assert.That(parser2.SortMetaData(@"{{Short description|Operating system for Apple computers}}
 {{Redirect2|OSX|OS X}}
 {{Lowercase title}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
@@ -392,7 +392,7 @@ Hello";
 
 '''macOS''', originally.", "MacOS"), Is.EqualTo(correct6), "Move {{lowercase title}} - incorrectly placed, not attached to infobox");
 
-            const string correct7 = @"{{Short description|Operating system for Apple computers}}
+        const string correct7 = @"{{Short description|Operating system for Apple computers}}
 {{Redirect2|OSX|OS X}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
 {{pp-semi-indef}}
@@ -406,9 +406,9 @@ Hello";
 
 '''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct7, "MacOS"), Is.EqualTo(correct7), "Already correct - {{lowercase title}} just before infobox");
+        Assert.That(parser2.SortMetaData(correct7, "MacOS"), Is.EqualTo(correct7), "Already correct - {{lowercase title}} just before infobox");
 
-            const string correct8 = @"{{Short description|Operating system for Apple computers}}
+        const string correct8 = @"{{Short description|Operating system for Apple computers}}
 {{Redirect2|OSX|OS X}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
 {{pp-semi-indef}}
@@ -422,9 +422,9 @@ Hello";
 
 '''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct8, "MacOS"), Is.EqualTo(correct8), "Already correct - {{lowercase title}} after infobox");
+        Assert.That(parser2.SortMetaData(correct8, "MacOS"), Is.EqualTo(correct8), "Already correct - {{lowercase title}} after infobox");
 
-            const string correct9 = @"{{Short description|Operating system for Apple computers}}
+        const string correct9 = @"{{Short description|Operating system for Apple computers}}
 {{Redirect2|OSX|OS X}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
 {{pp-semi-indef}}
@@ -441,9 +441,9 @@ Hello";
 
 '''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9), "Already correct - {{bots}} and {{in use}}");
+        Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9), "Already correct - {{bots}} and {{in use}}");
 
-            const string correct10 = @"{{Oscars short description|Operating}}
+        const string correct10 = @"{{Oscars short description|Operating}}
 {{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
 {{Excessive citations}}
 {{Use mdy dates|date=August 2019}} <!--comm-->
@@ -456,9 +456,9 @@ Hello";
 
 '''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct10, "MacOS"), Is.EqualTo(correct10), "Handles {{oscars short description}}");
+        Assert.That(parser2.SortMetaData(correct10, "MacOS"), Is.EqualTo(correct10), "Handles {{oscars short description}}");
 
-            const string correct11 = @"{{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
+        const string correct11 = @"{{About|macOS version 10.0 and later|Mac OS 9 and earlier}}
 {{Excessive citations}}
 <!--comm re mdy-->
 {{Use mdy dates|date=August 2019}}
@@ -471,13 +471,13 @@ Hello";
 
 '''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct11, "MacOS"), Is.EqualTo(correct11), "Handles comment before use mdy dates");
+        Assert.That(parser2.SortMetaData(correct11, "MacOS"), Is.EqualTo(correct11), "Handles comment before use mdy dates");
 
-            const string noinclude = @"
+        const string noinclude = @"
 ==Heading==
 <noinclude>something</noinclude>
 Text";
-            Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
+        Assert.That(parser2.SortMetaData(@"{{Use mdy dates}}
 {{Use American English}}
 {{Short description|American character}}
 {{other uses}}
@@ -487,7 +487,7 @@ Text";
 {{Japanese script needed}}
 Hello" + noinclude, "Title"), Is.EqualTo(correct + noinclude), "Zeroth section still sorted OK if later section has noinclude");
 
-            const string zerothWithNoInclude = @"{{Use mdy dates}}
+        const string zerothWithNoInclude = @"{{Use mdy dates}}
 {{Use American English}}
 {{Short description|American character}}
 {{other uses}}
@@ -497,9 +497,9 @@ Hello" + noinclude, "Title"), Is.EqualTo(correct + noinclude), "Zeroth section s
 {{Japanese script needed}}
 <noinclude>something</noinclude>
 Hello";
-            Assert.That(parser2.SortMetaData(zerothWithNoInclude, "Title"), Is.EqualTo(zerothWithNoInclude), "Zeroth section NOT sorted if has noinclude");
+        Assert.That(parser2.SortMetaData(zerothWithNoInclude, "Title"), Is.EqualTo(zerothWithNoInclude), "Zeroth section NOT sorted if has noinclude");
 
-            const string infoboxWithComment = @"{{Short description|American character}}
+        const string infoboxWithComment = @"{{Short description|American character}}
 {{other uses}}
 {{featured article}}
 {{Use mdy dates}}
@@ -507,9 +507,9 @@ Hello";
 <!-- comment before infobox -->{{Infobox actor}}
 {{Japanese script needed}}
 Hello";
-            Assert.That(parser2.SortMetaData(infoboxWithComment, "Title"), Is.EqualTo(infoboxWithComment), "Handles infobox with comment first");
+        Assert.That(parser2.SortMetaData(infoboxWithComment, "Title"), Is.EqualTo(infoboxWithComment), "Handles infobox with comment first");
 
-            const string shortDescWithComment = @"{{Short description|American character}}<!--a comment-->
+        const string shortDescWithComment = @"{{Short description|American character}}<!--a comment-->
 {{other uses}}
 {{featured article}}
 {{Use mdy dates}}
@@ -517,15 +517,15 @@ Hello";
 {{Infobox actor}}
 {{Japanese script needed}}
 Hello";
-            Assert.That(parser2.SortMetaData(shortDescWithComment, "Title"), Is.EqualTo(shortDescWithComment), "Handles short description with comment after");
+        Assert.That(parser2.SortMetaData(shortDescWithComment, "Title"), Is.EqualTo(shortDescWithComment), "Handles short description with comment after");
 
-            const string shortDescWithComment2 = @"{{Short description|American character}} <!-- ""none"" is preferred when the title is sufficiently descriptive; see [[WP:SDNONE]] -->
+        const string shortDescWithComment2 = @"{{Short description|American character}} <!-- ""none"" is preferred when the title is sufficiently descriptive; see [[WP:SDNONE]] -->
 {{Infobox actor}}
 {{Japanese script needed}}
 Hello";
-            Assert.That(parser2.SortMetaData(shortDescWithComment2, "Title"), Is.EqualTo(shortDescWithComment2), "Handles short description with comment after, then infobox");
+        Assert.That(parser2.SortMetaData(shortDescWithComment2, "Title"), Is.EqualTo(shortDescWithComment2), "Handles short description with comment after, then infobox");
 
-            const string templateWithCommentMultiLine = @"{{Short description|American character}}<!--
+        const string templateWithCommentMultiLine = @"{{Short description|American character}}<!--
 a comment
 over multiple lines
 -->
@@ -536,9 +536,9 @@ over multiple lines
 {{Infobox actor}}
 {{Japanese script needed}}
 Hello";
-            Assert.That(parser2.SortMetaData(templateWithCommentMultiLine, "Title"), Is.EqualTo(templateWithCommentMultiLine), "Handles template with comment after, multiline comment");
+        Assert.That(parser2.SortMetaData(templateWithCommentMultiLine, "Title"), Is.EqualTo(templateWithCommentMultiLine), "Handles template with comment after, multiline comment");
 
-            const string multipleInfoxbox = @"{|{{Infobox ship begin|infobox caption=PTF-3}}
+        const string multipleInfoxbox = @"{|{{Infobox ship begin|infobox caption=PTF-3}}
 {{Infobox ship image
 }}
 {{Infobox ship career
@@ -546,20 +546,20 @@ Hello";
 {{Infobox ship characteristics
 }}
 |}";
-            Assert.That(parser2.SortMetaData(multipleInfoxbox, "Title"), Is.EqualTo(multipleInfoxbox), "Don't sort when wikitable");
-            const string hatnoteGroupHatnote = @"{{Short description|Band}}
+        Assert.That(parser2.SortMetaData(multipleInfoxbox, "Title"), Is.EqualTo(multipleInfoxbox), "Don't sort when wikitable");
+        const string hatnoteGroupHatnote = @"{{Short description|Band}}
 {{hatnote group|{{redirect|Jo1||JO1 (disambiguation)}}{{distinguish|jol (disambiguation){{!}}jol|joi (disambiguation){{!}}JOI}}}}
 {{Western name order}}
 {{Use mdy dates|date=October 2020}}
 {{Infobox musical artist}}
 Hello";
-            Assert.That(parser2.SortMetaData(hatnoteGroupHatnote, "Title"), Is.EqualTo(hatnoteGroupHatnote), "Handles hatnote group and hatnote");
-        }
+        Assert.That(parser2.SortMetaData(hatnoteGroupHatnote, "Title"), Is.EqualTo(hatnoteGroupHatnote), "Handles hatnote group and hatnote");
+    }
 
-        [Test]
-        public void ZerothSectionSortingErrors()
-        {
-            const string unbalancedMultiInfobox = @"{{Short description|A}}
+    [Test]
+    public void ZerothSectionSortingErrors()
+    {
+        const string unbalancedMultiInfobox = @"{{Short description|A}}
 {{pp-blp|small=yes}}
 {{Use American English|date=September 2020}}
 {{Use mdy dates|date=August 2023}}
@@ -573,9 +573,9 @@ Hello";
 | embed              = yes
 }}
 }}";
-            Assert.That(parser2.SortMetaData(unbalancedMultiInfobox, "Title"), Is.EqualTo(unbalancedMultiInfobox), "Handle unbalanced brackets in comments");
+        Assert.That(parser2.SortMetaData(unbalancedMultiInfobox, "Title"), Is.EqualTo(unbalancedMultiInfobox), "Handle unbalanced brackets in comments");
 
-            string stackTemplate = @"{{Short description|A}}
+        string stackTemplate = @"{{Short description|A}}
 {{pp-blp|small=yes}}
 {{Use American English|date=September 2020}}
 {{Use mdy dates|date=August 2023}}
@@ -584,9 +584,9 @@ Hello";
 | name               = A
 | module             = }}
 {{stack end}}";
-            Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when stack begin/stack end present");
+        Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when stack begin/stack end present");
 
-            stackTemplate = @"{{Short description|A}}
+        stackTemplate = @"{{Short description|A}}
 {{pp-blp|small=yes}}
 {{Use American English|date=September 2020}}
 {{Use mdy dates|date=August 2023}}
@@ -595,9 +595,9 @@ Hello";
     | name               = A
     | module             = }}
 }}";
-            Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when stack present");
+        Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when stack present");
 
-            stackTemplate = @"{{Short description|A}}
+        stackTemplate = @"{{Short description|A}}
 {{pp-blp|small=yes}}
 {{Use American English|date=September 2020}}
 {{Use mdy dates|date=August 2023}}
@@ -606,17 +606,17 @@ Hello";
 | name               = A
 | module             = }}
 {{Collapsed infobox section end}}";
-            Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when Collapsed infobox section begin/end present");
+        Assert.That(parser2.SortMetaData(stackTemplate, "Title"), Is.EqualTo(stackTemplate), "Don't sort when Collapsed infobox section begin/end present");
 
-            const string correct9 = @"{{Short description|Operating system for Apple computers}}
+        const string correct9 = @"{{Short description|Operating system for Apple computers}}
 {{Infobox OS
 | name = macOS
 | support_status = Supported
 }}" + "\t\r\n\r\n" + @"'''macOS''', originally.";
 
-            Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9.Replace("\t", "")), "Stray tab whitespace handled");
+        Assert.That(parser2.SortMetaData(correct9, "MacOS"), Is.EqualTo(correct9.Replace("\t", "")), "Stray tab whitespace handled");
 
-            const string ub = @"{{Short description|A}}
+        const string ub = @"{{Short description|A}}
 {{BLP sources|date=June 2012}}
 
 {{Infobox person
@@ -627,9 +627,9 @@ Hello";
 | birth_place        = A
 }}";
 
-            Assert.That(parser2.SortMetaData(ub, "A"), Is.EqualTo(ub), "No sort if zeroth section has unbalanced brackets");
+        Assert.That(parser2.SortMetaData(ub, "A"), Is.EqualTo(ub), "No sort if zeroth section has unbalanced brackets");
 
-            const string magicWord = @"{{Short description|A}}
+        const string magicWord = @"{{Short description|A}}
 {{BLP sources|date=June 2012}}
 __FORCETOC__
 {{Infobox person
@@ -639,9 +639,9 @@ __FORCETOC__
 | birth_place        = A
 }}";
 
-            Assert.That(parser2.SortMetaData(magicWord, "A"), Is.EqualTo(magicWord), "No sort if zeroth section contains magic word behaviour switch");
+        Assert.That(parser2.SortMetaData(magicWord, "A"), Is.EqualTo(magicWord), "No sort if zeroth section contains magic word behaviour switch");
 
-            const string manyComments = @"{{unreferenced|date=June 2018}}
+        const string manyComments = @"{{unreferenced|date=June 2018}}
 {{Infobox rugby union season
 | name             = 2018
 | image            =
@@ -684,9 +684,9 @@ __FORCETOC__
 
 The 2018 competition";
 
-            Assert.That(parser2.SortMetaData(manyComments, "A"), Is.EqualTo(manyComments), "Handle many comments in zeroth section");
+        Assert.That(parser2.SortMetaData(manyComments, "A"), Is.EqualTo(manyComments), "Handle many comments in zeroth section");
 
-            const string foldedInfoboxes = @"{{Short description|Category 4 Pacific hurricane}}
+        const string foldedInfoboxes = @"{{Short description|Category 4 Pacific hurricane}}
 {{Infobox weather event
 | name = Hurricane Rosa
 | formed = September 25, 2018
@@ -702,9 +702,9 @@ The 2018 competition";
 }}
 
 '''Hurricane Rosa''' was";
-            Assert.That(parser2.SortMetaData(foldedInfoboxes, "A"), Is.EqualTo(foldedInfoboxes), "Handle folded infoboxes in zeroth section");
+        Assert.That(parser2.SortMetaData(foldedInfoboxes, "A"), Is.EqualTo(foldedInfoboxes), "Handle folded infoboxes in zeroth section");
 
-            const string commentBeforeOpeningSentence = @"{{Short description|English naturalist and biologist (1809–1882)}}
+        const string commentBeforeOpeningSentence = @"{{Short description|English naturalist and biologist (1809–1882)}}
 {{Other people}}
 {{Featured article}}
 {{pp-move}}
@@ -716,13 +716,13 @@ The 2018 competition";
 <!--Please consider discussing changes on the talk page...-->
 
 '''Charles Robert Darwin'''";
-            Assert.That(parser2.SortMetaData(commentBeforeOpeningSentence, "A"), Is.EqualTo(commentBeforeOpeningSentence), "Handle comment before opening sentence in zeroth section");
-        }
+        Assert.That(parser2.SortMetaData(commentBeforeOpeningSentence, "A"), Is.EqualTo(commentBeforeOpeningSentence), "Handle comment before opening sentence in zeroth section");
+    }
 
-        [Test]
-        public void ZerothSectionSortingExtras()
-        {
-            const string otherMaintenanceTemplates = @"{{Short description|Sculpture Chicago}}
+    [Test]
+    public void ZerothSectionSortingExtras()
+    {
+        const string otherMaintenanceTemplates = @"{{Short description|Sculpture Chicago}}
 {{Featured article}}
 {{pp-move}}
 {{Alt text missing|Featured}}
@@ -733,127 +733,127 @@ The 2018 competition";
  | image_size = 400px
 }}
 The text";
-            Assert.That(parser2.SortMetaData(otherMaintenanceTemplates, "A"), Is.EqualTo(otherMaintenanceTemplates), "Handle other maintenance templates in zeroth section");
-        }
+        Assert.That(parser2.SortMetaData(otherMaintenanceTemplates, "A"), Is.EqualTo(otherMaintenanceTemplates), "Handle other maintenance templates in zeroth section");
+    }
 
-        [Test]
-        public void MoveDablinksCommentsTests()
-        {
-            const string d = @"Fred is a doctor.
+    [Test]
+    public void MoveDablinksCommentsTests()
+    {
+        const string d = @"Fred is a doctor.
 Fred has a dog.
 [[Category:Dog owners]]
 {{some template}}
 ", e = @"<!-- {{otheruses}} this allows users with [[WP:POPUPS|popups]] to disambiguate links.-->";
 
-            // don't pull dabs out of comments
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(d + e));
+        // don't pull dabs out of comments
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.Dablinks), Is.EqualTo(d + e));
 
-            const string f = @"{{for|the book by René Descartes|The World (Descartes)}}
+        const string f = @"{{for|the book by René Descartes|The World (Descartes)}}
 <!--
 Might eventually be relevant on a disambig page?  But these are a redirect and a not direct reference, so they're pretty irrelevant for now.
 {{For|the song by the [[Thievery Corporation]]|Le Monde (song)}}
 {{For|the drum & bass dj [[Lemon D]]| Lemon D}}
 -->";
 
-            Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.Dablinks), Is.EqualTo(f));
-        }
+        Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.Dablinks), Is.EqualTo(f));
+    }
 
-        [Test]
-        public void RemoveDisambig()
-        {
-            const string dab = @"{{dab}}", foo = @"foo";
+    [Test]
+    public void RemoveDisambig()
+    {
+        const string dab = @"{{dab}}", foo = @"foo";
 
-            string a = dab + "\r\n" + foo;
+        string a = dab + "\r\n" + foo;
 
-            Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.EqualTo(dab));
-            Assert.That(a, Is.EqualTo("\r\n" + foo));
+        Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.EqualTo(dab));
+        Assert.That(a, Is.EqualTo("\r\n" + foo));
 
-            // no dabs to take out – no change
-            a = foo;
-            Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.Empty);
-            Assert.That(a, Is.EqualTo(foo));
+        // no dabs to take out – no change
+        a = foo;
+        Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.Empty);
+        Assert.That(a, Is.EqualTo(foo));
 
-            // don't pull out of comments
-            a = @"<!--" + dab + @"-->" + "\r\n" + foo;
-            Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.Empty);
-            Assert.That(a, Is.EqualTo(@"<!--" + dab + @"-->" + "\r\n" + foo));
+        // don't pull out of comments
+        a = @"<!--" + dab + @"-->" + "\r\n" + foo;
+        Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.Empty);
+        Assert.That(a, Is.EqualTo(@"<!--" + dab + @"-->" + "\r\n" + foo));
 
-            a = dab + "<!--comm-->\r\n" + foo;
-            Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.EqualTo(dab + "<!--comm-->"), "Handles disambig template with comment after");
-            Assert.That(a, Is.EqualTo("\r\n" + foo));
-        }
+        a = dab + "<!--comm-->\r\n" + foo;
+        Assert.That(MetaDataSorter.RemoveDisambig(ref a), Is.EqualTo(dab + "<!--comm-->"), "Handles disambig template with comment after");
+        Assert.That(a, Is.EqualTo("\r\n" + foo));
+    }
 
-        [Test]
-        public void MoveMaintenanceTagsTests()
-        {
-            const string d = @"Fred is a doctor.
+    [Test]
+    public void MoveMaintenanceTagsTests()
+    {
+        const string d = @"Fred is a doctor.
 Fred has a dog.
 [[Category:Dog owners]]
 {{some template}}
 ";
 
-            string e = @"{{Underlinked|date=May 2008}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
+        string e = @"{{Underlinked|date=May 2008}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
 
-            e = @"{{underlinked|date=May 2008}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
+        e = @"{{underlinked|date=May 2008}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
 
-            e = @"{{underlinked|date=May 2008}} <!-- some comment to keep here-->";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
+        e = @"{{underlinked|date=May 2008}} <!-- some comment to keep here-->";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d));
 
-            e = @"{{cleanup|date=May 2008}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d), "template moved when not a section one");
+        e = @"{{cleanup|date=May 2008}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + d), "template moved when not a section one");
 
-            e = @"{{cleanup|section|date=May 2008}}";
-            Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(d + e), "section templates not moved");
+        e = @"{{cleanup|section|date=May 2008}}";
+        Assert.That(MetaDataSorter.MoveTemplate(d + e, WikiRegexes.MaintenanceTemplates), Is.EqualTo(d + e), "section templates not moved");
 
-            // don't move above other maintenance templates
-            string f = @"{{cleanup|date=June 2009}}
+        // don't move above other maintenance templates
+        string f = @"{{cleanup|date=June 2009}}
 " + e + d;
-            Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.MaintenanceTemplates), Is.EqualTo(f));
+        Assert.That(MetaDataSorter.MoveTemplate(f, WikiRegexes.MaintenanceTemplates), Is.EqualTo(f));
 
-            string g = @"{{BLP unreferenced|date=August 2009|bot=yes}}
+        string g = @"{{BLP unreferenced|date=August 2009|bot=yes}}
 {{Underlinked|date=February 2008}}
 '''Charles M. McKim'''";
 
-            Assert.That(MetaDataSorter.MoveTemplate(g, WikiRegexes.MaintenanceTemplates), Is.EqualTo(g));
+        Assert.That(MetaDataSorter.MoveTemplate(g, WikiRegexes.MaintenanceTemplates), Is.EqualTo(g));
 
-            // do move above infoboxes
-            string h1 = @"{{Infobox foo| sdajklfsdjk | dDJfsdjkl }}", h2 = @"{{Underlinked|date=February 2008}}", h3 = @"'''Charles M. McKim'''";
+        // do move above infoboxes
+        string h1 = @"{{Infobox foo| sdajklfsdjk | dDJfsdjkl }}", h2 = @"{{Underlinked|date=February 2008}}", h3 = @"'''Charles M. McKim'''";
 
-            Assert.That(MetaDataSorter.MoveTemplate(h2 + "\r\n" + h1 + "\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n" + h3));
-            Assert.That(MetaDataSorter.MoveTemplate(h1 + "\r\n" + h2 + "\r\n\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n\r\n" + h3));
+        Assert.That(MetaDataSorter.MoveTemplate(h2 + "\r\n" + h1 + "\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n" + h3));
+        Assert.That(MetaDataSorter.MoveTemplate(h1 + "\r\n" + h2 + "\r\n\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n\r\n" + h3));
 
-            // do move above infoboxes
-            h2 = @"{{Notability|Web|date=February 2008}}";
+        // do move above infoboxes
+        h2 = @"{{Notability|Web|date=February 2008}}";
 
-            Assert.That(MetaDataSorter.MoveTemplate(h2 + "\r\n" + h1 + "\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n" + h3));
-            Assert.That(MetaDataSorter.MoveTemplate(h1 + "\r\n" + h2 + "\r\n\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n\r\n" + h3));
+        Assert.That(MetaDataSorter.MoveTemplate(h2 + "\r\n" + h1 + "\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n" + h3));
+        Assert.That(MetaDataSorter.MoveTemplate(h1 + "\r\n" + h2 + "\r\n\r\n" + h3, WikiRegexes.MaintenanceTemplates), Is.EqualTo(h2 + "\r\n" + h1 + "\r\n\r\n" + h3));
 
-            string i1 = @"{{cleanup|date=June 2009}}";
-            e = @"{{underlinked|date=May 2008}}";
+        string i1 = @"{{cleanup|date=June 2009}}";
+        e = @"{{underlinked|date=May 2008}}";
 
-            // move when tags not all at top
-            Assert.That(MetaDataSorter.MoveTemplate(e + "\r\nfoo\r\n" + i1, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + i1 + "\r\nfoo\r\n"));
+        // move when tags not all at top
+        Assert.That(MetaDataSorter.MoveTemplate(e + "\r\nfoo\r\n" + i1, WikiRegexes.MaintenanceTemplates), Is.EqualTo(e + "\r\n" + i1 + "\r\nfoo\r\n"));
 
-            const string CommentedOut = @"<!---sufficient-?---{{Cleanup|date=January 2010}}--{{Wikify|date=January 2010}}---?--->";
-            Assert.That(MetaDataSorter.MoveTemplate(CommentedOut, WikiRegexes.MaintenanceTemplates), Is.EqualTo(CommentedOut), "no change to commented out tags");
+        const string CommentedOut = @"<!---sufficient-?---{{Cleanup|date=January 2010}}--{{Wikify|date=January 2010}}---?--->";
+        Assert.That(MetaDataSorter.MoveTemplate(CommentedOut, WikiRegexes.MaintenanceTemplates), Is.EqualTo(CommentedOut), "no change to commented out tags");
 
-            const string NewMultipleIssues = @"{{multiple issues|{{Cleanup|date=January 2010}}}}";
-            Assert.That(parser2.SortMetaData(NewMultipleIssues, "A"), Is.EqualTo(NewMultipleIssues), "don't pull tags from new-style {{multiple issues}}");
+        const string NewMultipleIssues = @"{{multiple issues|{{Cleanup|date=January 2010}}}}";
+        Assert.That(parser2.SortMetaData(NewMultipleIssues, "A"), Is.EqualTo(NewMultipleIssues), "don't pull tags from new-style {{multiple issues}}");
 
-            // zeroth section only
-            const string LaterSection = @"hello
+        // zeroth section only
+        const string LaterSection = @"hello
 ==Sec==
 {{cleanup|date=May 2012}}
 End";
-            Assert.That(parser2.SortMetaData(LaterSection, "A"), Is.EqualTo(LaterSection), "maintenance tags outside of zeroth section not moved");
-        }
+        Assert.That(parser2.SortMetaData(LaterSection, "A"), Is.EqualTo(LaterSection), "maintenance tags outside of zeroth section not moved");
+    }
 
-        [Test]
-        public void MoveMultipleIssues()
-        {
-            const string correct = @"{{multiple issues|
+    [Test]
+    public void MoveMultipleIssues()
+    {
+        const string correct = @"{{multiple issues|
 {{orphan}}
 {{cleanup}}
 }}
@@ -862,7 +862,7 @@ End";
 Fred has a dog.
 [[Category:Dog owners]]";
 
-            Assert.That(MetaDataSorter.MoveMultipleIssues(@"{{infobox foo}}
+        Assert.That(MetaDataSorter.MoveMultipleIssues(@"{{infobox foo}}
 {{multiple issues|
 {{orphan}}
 {{cleanup}}
@@ -870,40 +870,40 @@ Fred has a dog.
 Fred has a dog.
 [[Category:Dog owners]]"), Is.EqualTo(correct), "mi moved above infobox");
 
-            Assert.That(MetaDataSorter.MoveMultipleIssues(correct), Is.EqualTo(correct), "no change when already correct");
+        Assert.That(MetaDataSorter.MoveMultipleIssues(correct), Is.EqualTo(correct), "no change when already correct");
 
-            const string commented = @"{{infobox foo}}
+        const string commented = @"{{infobox foo}}
 <!--{{multiple issues|
 {{orphan}}
 {{cleanup}}
 }}-->
 Fred has a dog.
 [[Category:Dog owners]]";
-            Assert.That(MetaDataSorter.MoveMultipleIssues(commented), Is.EqualTo(commented), "commented out infobox so nothing to do");
+        Assert.That(MetaDataSorter.MoveMultipleIssues(commented), Is.EqualTo(commented), "commented out infobox so nothing to do");
 
-            const string noinfobox = @"{{foo}}
+        const string noinfobox = @"{{foo}}
 {{multiple issues|
 {{orphan}}
 {{cleanup}}
 }}
 Fred has a dog.
 [[Category:Dog owners]]";
-            Assert.That(MetaDataSorter.MoveMultipleIssues(noinfobox), Is.EqualTo(noinfobox), "nothing to move if no infobox");
+        Assert.That(MetaDataSorter.MoveMultipleIssues(noinfobox), Is.EqualTo(noinfobox), "nothing to move if no infobox");
 
-            const string noMI = @"{{infobox foo}}
+        const string noMI = @"{{infobox foo}}
 {{something|
 {{one}}
 {{two}}
 }}
 Fred has a dog.
 [[Category:Dog owners]]";
-            Assert.That(MetaDataSorter.MoveMultipleIssues(noMI), Is.EqualTo(noMI), "nothing to move if no MultipleIssues");
-        }
+        Assert.That(MetaDataSorter.MoveMultipleIssues(noMI), Is.EqualTo(noMI), "nothing to move if no MultipleIssues");
+    }
 
-        [Test]
-        public void MovePortalTemplatesTests()
-        {
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+    [Test]
+    public void MovePortalTemplatesTests()
+    {
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
 text here2
 == see also ==
@@ -913,7 +913,7 @@ text here2
 {{Portal|Football}}
 some words"), "example 1");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here {{Portal|Football}}
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here {{Portal|Football}}
 text here2
 == see also ==
 some words"), Is.EqualTo(@"text here 
@@ -922,7 +922,7 @@ text here2
 {{Portal|Football}}
 some words"), "example 2");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
 text here2
 == see also ==
@@ -932,7 +932,7 @@ text here2
 {{Portal|Football}}
 some words"), "whitespace at end of line after portal template");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Sport}}
 {{Portal|Football}}
 text here2
@@ -944,7 +944,7 @@ text here2
 {{Portal|Sport}}
 some words"), "example 3");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"{{Portal|Football}}
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"{{Portal|Football}}
 text here
 text here2
 == see also ==
@@ -954,7 +954,7 @@ text here2
 {{Portal|Football}}
 some words"), "example 4");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|abc}}
 text here2
 == see also==
@@ -964,7 +964,7 @@ text here2
 {{Portal|abc}}
 * Fred"), "example 4");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
 text here2
 == see also ==
@@ -978,7 +978,7 @@ text here2
 == hello ==
 some words"), "example 5");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
 text here2
 == see also ==
@@ -992,7 +992,7 @@ text here2
 === hello ===
 some words"), "example 6");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 text here2
 == see also ==
 {{Portal|Football}}
@@ -1002,7 +1002,7 @@ text here2
 {{Portal|Football}}
 some words"), "if portal is already in 'see also', don't move it");
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 text here2
 == see also ==
 * Fred
@@ -1014,7 +1014,7 @@ text here2
 {{Portal|Football}}
 some words"));
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 text here2
 == see also ==
 * Fred
@@ -1027,22 +1027,22 @@ text here2
 === portals ===
 {{Portal|Football}}
 some words"));
-        }
+    }
 
-        [Test]
-        public void MoveTemplateToSeeAlsoSection()
-        {
-            const string Commented = @"A
+    [Test]
+    public void MoveTemplateToSeeAlsoSection()
+    {
+        const string Commented = @"A
 <!-- {{ext}} -->
 == See also==
 * [[Other]]";
-            Assert.That(MetaDataSorter.MoveTemplateToSeeAlsoSection(Commented, Tools.NestedTemplateRegex("ext")), Is.EqualTo(Commented));
-        }
+        Assert.That(MetaDataSorter.MoveTemplateToSeeAlsoSection(Commented, Tools.NestedTemplateRegex("ext")), Is.EqualTo(Commented));
+    }
 
-        [Test]
-        public void MoveTemplateToEndOfArticle()
-        {
-            string textBefore = @"{{short description|Text}}
+    [Test]
+    public void MoveTemplateToEndOfArticle()
+    {
+        string textBefore = @"{{short description|Text}}
 {{coord}}
 
 Text.
@@ -1050,7 +1050,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            string textAfter = @"{{short description|Text}}
+        string textAfter = @"{{short description|Text}}
 
 Text.
 ==Last section==
@@ -1059,32 +1059,32 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section above DEFAULTSORT/cats");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section above DEFAULTSORT/cats");
 
-            Assert.That(parser2.SortMetaData(textAfter, "A"), Is.EqualTo(textAfter), "No change when template already in last section");
+        Assert.That(parser2.SortMetaData(textAfter, "A"), Is.EqualTo(textAfter), "No change when template already in last section");
 
-            textBefore = @"{{short description|Text}}
-{{coord}}
-{{coord|2}}
-
-Text.
-==Last section==
-
-{{DEFAULTSORT:Something}}
-[[Category:One]]";
-            textAfter = @"{{short description|Text}}
-
-Text.
-==Last section==
-
+        textBefore = @"{{short description|Text}}
 {{coord}}
 {{coord|2}}
 
+Text.
+==Last section==
+
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - 2 templates");
+        textAfter = @"{{short description|Text}}
 
-            textBefore = @"{{short description|Text}}
+Text.
+==Last section==
+
+{{coord}}
+{{coord|2}}
+
+{{DEFAULTSORT:Something}}
+[[Category:One]]";
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - 2 templates");
+
+        textBefore = @"{{short description|Text}}
 {{coord}}
 
 Text.
@@ -1093,7 +1093,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            textAfter = @"{{short description|Text}}
+        textAfter = @"{{short description|Text}}
 
 Text.
 ==Last section==
@@ -1103,9 +1103,9 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - another template in last section");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord to last section - another template in last section");
 
-            textBefore = @"{{short description|Text}}
+        textBefore = @"{{short description|Text}}
 {{coord missing}}
 
 Text.
@@ -1114,7 +1114,7 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            textAfter = @"{{short description|Text}}
+        textAfter = @"{{short description|Text}}
 
 Text.
 ==Last section==
@@ -1124,9 +1124,9 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord missing to last section");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Move coord missing to last section");
 
-            textBefore = @"{{short description|Text}}
+        textBefore = @"{{short description|Text}}
 {{Infobox something|
 loc={{coord}}
 param=a}}
@@ -1136,9 +1136,9 @@ Text.
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
 
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another");
 
-            textBefore = @"{{short description|Text}}
+        textBefore = @"{{short description|Text}}
 {{Infobox something|
 loc=
 {{coord}}
@@ -1149,9 +1149,9 @@ Text.
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
 
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another, start of line");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textBefore), "Template not moved - nested in another, start of line");
 
-            textBefore = @"{{short description|Text}}
+        textBefore = @"{{short description|Text}}
 {{coord}}
 {{Infobox something|
 loc={{coord|2}}
@@ -1162,7 +1162,7 @@ Text.
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
 
-            textAfter = @"{{short description|Text}}
+        textAfter = @"{{short description|Text}}
 {{Infobox something|
 loc={{coord|2}}
 param=a}}
@@ -1174,9 +1174,9 @@ Text.
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
 
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "One a lone and one nested in another");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "One a lone and one nested in another");
 
-            string notzeroth = @"{{short description|Text}}
+        string notzeroth = @"{{short description|Text}}
 Text.
 ==First section==
 {{coord}}
@@ -1184,9 +1184,9 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(notzeroth, "A"), Is.EqualTo(notzeroth), "Templates not moved beyond zeroth section");
+        Assert.That(parser2.SortMetaData(notzeroth, "A"), Is.EqualTo(notzeroth), "Templates not moved beyond zeroth section");
 
-            textBefore = @"{{short description|Text}}
+        textBefore = @"{{short description|Text}}
 {{coord}}
 
 ==A section==
@@ -1197,7 +1197,7 @@ Text.
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
 
-            textAfter = @"{{short description|Text}}
+        textAfter = @"{{short description|Text}}
 
 ==A section==
 {{coord|2}}
@@ -1209,17 +1209,17 @@ Text.
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
 
-            Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates only taken from zeroth section");
+        Assert.That(parser2.SortMetaData(textBefore, "A"), Is.EqualTo(textAfter), "Templates only taken from zeroth section");
 
-            string commentedOut = @"{{short description|Text}}
+        string commentedOut = @"{{short description|Text}}
 Text.
 <!--{{coord}}-->
 ==First section==
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(commentedOut, "A"), Is.EqualTo(commentedOut), "Templates not moved out of comments");
-            commentedOut = @"{{short description|Text}}
+        Assert.That(parser2.SortMetaData(commentedOut, "A"), Is.EqualTo(commentedOut), "Templates not moved out of comments");
+        commentedOut = @"{{short description|Text}}
 Text.
 <!--
 {{coord}}-->
@@ -1227,15 +1227,15 @@ Text.
 
 {{DEFAULTSORT:Something}}
 [[Category:One]]";
-            Assert.That(parser2.SortMetaData(commentedOut, "A"), Is.EqualTo(commentedOut), "Templates not moved out of comments, 2");
-        }
+        Assert.That(parser2.SortMetaData(commentedOut, "A"), Is.EqualTo(commentedOut), "Templates not moved out of comments, 2");
+    }
 
-        [Test]
-        public void MovePortalTemplatesTestsDuplicates()
-        {
+    [Test]
+    public void MovePortalTemplatesTestsDuplicates()
+    {
 
-            // remove duplicate portals
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        // remove duplicate portals
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
 {{Portal|Football}}
 text here2
@@ -1246,7 +1246,7 @@ text here2
 {{Portal|Football}}
 some words"));
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
 text here2
 == see also ==
@@ -1260,7 +1260,7 @@ some words
 ==other==
 "));
 
-            Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
+        Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 text here2
 == see also ==
 {{Portal|Football}}
@@ -1273,18 +1273,18 @@ text here2
 some words
 ==other==
 "));
-        }
+    }
 
-        [Test]
-        public void MoveSisterLinksTest()
-        {
-            const string WiktInExtLinks = @"text here
+    [Test]
+    public void MoveSisterLinksTest()
+    {
+        const string WiktInExtLinks = @"text here
 text here2
 == External links ==
 {{wiktionary}}
 * Fred";
 
-            Assert.That(MetaDataSorter.MoveSisterlinks(@"text here
+        Assert.That(MetaDataSorter.MoveSisterlinks(@"text here
 {{wiktionary}}
 text here2
 == External links ==
@@ -1298,7 +1298,7 @@ text here2
 == other ==
 x"), "another section at end");
 
-            Assert.That(MetaDataSorter.MoveSisterlinks(@"text here
+        Assert.That(MetaDataSorter.MoveSisterlinks(@"text here
 {{Sister project links|Programming languages|wikt=programming language|b=Computer Programming|s=How to Think Like a Computer Scientist|commons=Category:Programming languages}}
 text here2
 == External links ==
@@ -1312,39 +1312,39 @@ text here2
 == other ==
 x"), "sister project links may contain many parameters");
 
-            Assert.That(MetaDataSorter.MoveSisterlinks(@"text here
+        Assert.That(MetaDataSorter.MoveSisterlinks(@"text here
 {{wiktionary}}
 text here2
 == External links ==
 * Fred"), Is.EqualTo(WiktInExtLinks), "ext links is last section");
 
-            Assert.That(MetaDataSorter.MoveSisterlinks(WiktInExtLinks), Is.EqualTo(WiktInExtLinks), "wikt already in ext links");
-            const string CommentedOut = @"text here
+        Assert.That(MetaDataSorter.MoveSisterlinks(WiktInExtLinks), Is.EqualTo(WiktInExtLinks), "wikt already in ext links");
+        const string CommentedOut = @"text here
 <!--{{wiktionary}}-->
 text here2
 == External links ==
 * Fred
 == other ==
 x";
-            Assert.That(MetaDataSorter.MoveSisterlinks(CommentedOut), Is.EqualTo(CommentedOut), "no change if commented out");
+        Assert.That(MetaDataSorter.MoveSisterlinks(CommentedOut), Is.EqualTo(CommentedOut), "no change if commented out");
 
-            const string NoExtLinks = @"text here
+        const string NoExtLinks = @"text here
 {{wiktionary}}
 text here2
 == other ==
 x";
-            Assert.That(MetaDataSorter.MoveSisterlinks(NoExtLinks), Is.EqualTo(NoExtLinks), "no ext links sections");
-        }
+        Assert.That(MetaDataSorter.MoveSisterlinks(NoExtLinks), Is.EqualTo(NoExtLinks), "no ext links sections");
+    }
 
-        [Test]
-        public void MoveMoreNoFootnotesTests()
-        {
-            const string a = @"{{nofootnotes}}", a2 = @"{{Morefootnotes}}", b = @"
+    [Test]
+    public void MoveMoreNoFootnotesTests()
+    {
+        const string a = @"{{nofootnotes}}", a2 = @"{{Morefootnotes}}", b = @"
 '''Article''' words.
 == section ==
 words.
 ";
-            const string c = @"== References ==
+        const string c = @"== References ==
 ", d = @"== Notes ==
 ", e = @"== Footnotes ==
 ", f = @"'''Article''' words.
@@ -1352,30 +1352,30 @@ words.
 {{nofootnotes}}
 words.
 ";
-            const string g = @"words";
+        const string g = @"words";
 
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiFunctions.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + c + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiFunctions.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + d + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a + "\r\n"));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a2 + b + e, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a2 + "\r\n"));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a2 + b + e, WikiRegexes.MoreNoFootnotes, false), Is.EqualTo(b + e + a2 + "\r\n"));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiFunctions.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + c + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiFunctions.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + d + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a + "\r\n"));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a2 + b + e, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a2 + "\r\n"));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a2 + b + e, WikiRegexes.MoreNoFootnotes, false), Is.EqualTo(b + e + a2 + "\r\n"));
 
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d.Replace("Notes", "Notes and references") + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + d.Replace("Notes", "Notes and references") + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d.Replace("Notes", "Notes and references") + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + d.Replace("Notes", "Notes and references") + a + "\r\n" + g));
 
-            // not moved if outside zeroth section
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + c + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(f + c + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + d + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(f + d + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + e + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(f + e + g));
+        // not moved if outside zeroth section
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + c + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(f + c + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + d + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(f + d + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + e + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(f + e + g));
 
-            // if duplicate sections, don't duplicate template
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + c + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + c + a + "\r\n" + c + g));
-        }
+        // if duplicate sections, don't duplicate template
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + c + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + c + a + "\r\n" + c + g));
+    }
 
-        [Test]
-        public void MoveIbidTests()
-        {
-            string a = @"{{Ibid|date=May 2009}}", b = @"
+    [Test]
+    public void MoveIbidTests()
+    {
+        string a = @"{{Ibid|date=May 2009}}", b = @"
 '''Article''' words<ref>ibid</ref>.
 == section ==
 words.
@@ -1387,126 +1387,126 @@ words.
 {{Ibid|date=May 2009}}
 words.
 ";
-            const string g = @"more words";
+        const string g = @"more words";
 
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiRegexes.Ibid, true), Is.EqualTo(b + c + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiRegexes.Ibid, true), Is.EqualTo(b + d + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.Ibid, true), Is.EqualTo(b + e + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.Ibid, true), Is.EqualTo(b + e + a + "\r\n"));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiRegexes.Ibid, true), Is.EqualTo(b + c + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiRegexes.Ibid, true), Is.EqualTo(b + d + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.Ibid, true), Is.EqualTo(b + e + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.Ibid, true), Is.EqualTo(b + e + a + "\r\n"));
 
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiRegexes.Ibid, false), Is.EqualTo(b + c + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiRegexes.Ibid, false), Is.EqualTo(b + d + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.Ibid), Is.EqualTo(b + e + a + "\r\n" + g));
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.Ibid), Is.EqualTo(b + e + a + "\r\n"));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiRegexes.Ibid, false), Is.EqualTo(b + c + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiRegexes.Ibid, false), Is.EqualTo(b + d + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.Ibid), Is.EqualTo(b + e + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.Ibid), Is.EqualTo(b + e + a + "\r\n"));
 
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + d + g, WikiRegexes.Ibid, false), Is.EqualTo(b + c + d + a + "\r\n" + g), "move to Notes ahead of References");
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(b + d + a + "\r\n" + c + g, WikiRegexes.Ibid), Is.EqualTo(b + d + a + "\r\n" + c + g), "No change: ibid already in notes section");
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + d + g, WikiRegexes.Ibid, false), Is.EqualTo(b + c + d + a + "\r\n" + g), "move to Notes ahead of References");
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(b + d + a + "\r\n" + c + g, WikiRegexes.Ibid), Is.EqualTo(b + d + a + "\r\n" + c + g), "No change: ibid already in notes section");
 
-            // outside zeroth section – okay
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + c + g, WikiRegexes.Ibid, false), Is.EqualTo(@"'''Article''' words.
+        // outside zeroth section – okay
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(f + c + g, WikiRegexes.Ibid, false), Is.EqualTo(@"'''Article''' words.
 == section ==
 
 words.
 " + c + a + "\r\n" + g));
 
-            e = @"== Sources ==
+        e = @"== Sources ==
 ";
-            Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.Ibid), Is.EqualTo(b + e + a + "\r\n"));
-        }
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.Ibid), Is.EqualTo(b + e + a + "\r\n"));
+    }
 
-        [Test]
-        public void MoveExternalLinksTests()
-        {
-            const string a = @"'''article'''
+    [Test]
+    public void MoveExternalLinksTests()
+    {
+        const string a = @"'''article'''
 == blah ==
 words<ref>abc</ref>";
-            const string b = @"== external links ==
+        const string b = @"== external links ==
 * [http://www.site.com a site]";
-            const string c = @"== References ==
+        const string c = @"== References ==
 {{reflist}}";
-            const string d = @"=== another section ===
+        const string d = @"=== another section ===
 blah";
-            const string e = @"[[Category:Foos]]";
+        const string e = @"[[Category:Foos]]";
 
-            const string f = @"{{some footer thing}}";
+        const string f = @"{{some footer thing}}";
 
-            const string g = @"== another section ==
+        const string g = @"== another section ==
 blah";
-            const string h = @"{{DEFAULTSORT:Foo, bar}}";
+        const string h = @"{{DEFAULTSORT:Foo, bar}}";
 
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + e), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + e));
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + h), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + h));
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + g), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + e), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + e));
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + h), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + h));
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + g), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + g));
 
-            // no change if already correct
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + c + "\r\n" + b), Is.EqualTo(a + "\r\n" + c + "\r\n" + b));
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + c + "\r\n" + b + "\r\n" + g), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + g));
+        // no change if already correct
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + c + "\r\n" + b), Is.EqualTo(a + "\r\n" + c + "\r\n" + b));
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + c + "\r\n" + b + "\r\n" + g), Is.EqualTo(a + "\r\n" + c + "\r\n" + b + "\r\n" + g));
 
-            // no change if end of references section is unclear
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + f), Is.EqualTo(a + "\r\n" + b + "\r\n" + c + "\r\n" + f));
+        // no change if end of references section is unclear
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + f), Is.EqualTo(a + "\r\n" + b + "\r\n" + c + "\r\n" + f));
 
-            // only matching level two headings following references
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n" + c + "\r\n" + d));
+        // only matching level two headings following references
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n" + c + "\r\n" + d));
 
-            // don't' move external links if would create ref after reflist
-            string ExtLinkRef = a + "\r\n" + b + "<ref>foo</ref>\r\n" + c + "\r\n" + e;
-            Assert.That(MetaDataSorter.MoveExternalLinks(ExtLinkRef), Is.EqualTo(ExtLinkRef));
+        // don't' move external links if would create ref after reflist
+        string ExtLinkRef = a + "\r\n" + b + "<ref>foo</ref>\r\n" + c + "\r\n" + e;
+        Assert.That(MetaDataSorter.MoveExternalLinks(ExtLinkRef), Is.EqualTo(ExtLinkRef));
 
-            // Notes not References
-            Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c.Replace("References", "Notes") + "\r\n" + e), Is.EqualTo(a + "\r\n" + c.Replace("References", "Notes") + "\r\n" + b + "\r\n" + e), "Notes");
-        }
+        // Notes not References
+        Assert.That(MetaDataSorter.MoveExternalLinks(a + "\r\n" + b + "\r\n" + c.Replace("References", "Notes") + "\r\n" + e), Is.EqualTo(a + "\r\n" + c.Replace("References", "Notes") + "\r\n" + b + "\r\n" + e), "Notes");
+    }
 
-        [Test]
-        public void MoveSeeAlso()
-        {
-            const string a = @"'''article'''
+    [Test]
+    public void MoveSeeAlso()
+    {
+        const string a = @"'''article'''
 == blah ==
 words<ref>abc</ref>";
 
-            const string b = @"== See also ==
+        const string b = @"== See also ==
 * [http://www.site.com a site]";
 
-            const string c = @"== References ==
+        const string c = @"== References ==
 {{reflist}}";
-            const string d = @"== another section ==
+        const string d = @"== another section ==
 blah";
 
-            Assert.That(MetaDataSorter.MoveSeeAlso(a + "\r\n" + c + "\r\n" + b + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n\r\n" + c + "\r\n" + d), "reorder");
+        Assert.That(MetaDataSorter.MoveSeeAlso(a + "\r\n" + c + "\r\n" + b + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n\r\n" + c + "\r\n" + d), "reorder");
 
-            // no change when already correct
-            Assert.That(MetaDataSorter.MoveSeeAlso(a + "\r\n" + b + "\r\n" + c + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n" + c + "\r\n" + d), "no change when already correct");
+        // no change when already correct
+        Assert.That(MetaDataSorter.MoveSeeAlso(a + "\r\n" + b + "\r\n" + c + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n" + c + "\r\n" + d), "no change when already correct");
 
-            const string TwoReferencesSection = a + "\r\n" + c + "\r\n" + b + "\r\n" + c + "\r\n" + d;
-            Assert.That(MetaDataSorter.MoveSeeAlso(TwoReferencesSection), Is.EqualTo(TwoReferencesSection), "no change when two references sections");
+        const string TwoReferencesSection = a + "\r\n" + c + "\r\n" + b + "\r\n" + c + "\r\n" + d;
+        Assert.That(MetaDataSorter.MoveSeeAlso(TwoReferencesSection), Is.EqualTo(TwoReferencesSection), "no change when two references sections");
 
-            Assert.That(MetaDataSorter.MoveSeeAlso(a + "\r\n" + c.Replace("References", "Notes") + "\r\n" + b + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n\r\n" + c.Replace("References", "Notes") + "\r\n" + d), "reorder, Notes");
-        }
+        Assert.That(MetaDataSorter.MoveSeeAlso(a + "\r\n" + c.Replace("References", "Notes") + "\r\n" + b + "\r\n" + d), Is.EqualTo(a + "\r\n" + b + "\r\n\r\n" + c.Replace("References", "Notes") + "\r\n" + d), "reorder, Notes");
+    }
 
-        [Test]
-        public void CategoriesForDeletion()
-        {
-            const string a = @"[[Category:Railway companies established in 1851]]";
-            const string b1 = @"[[Category:Pages for deletion]]", b2 = @"[[Category:Categories for deletion]]", b3 = @"[[Category:Articles for deletion]]";
+    [Test]
+    public void CategoriesForDeletion()
+    {
+        const string a = @"[[Category:Railway companies established in 1851]]";
+        const string b1 = @"[[Category:Pages for deletion]]", b2 = @"[[Category:Categories for deletion]]", b3 = @"[[Category:Articles for deletion]]";
 
-            string k = a + "\r\n" + b1;
-            Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(a + "\r\n"), "Pages for deletion cat not kept");
+        string k = a + "\r\n" + b1;
+        Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(a + "\r\n"), "Pages for deletion cat not kept");
 
-            k = a + "\r\n" + b2;
-            Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(a + "\r\n"), "Categories for deletion cat not kept");
+        k = a + "\r\n" + b2;
+        Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(a + "\r\n"), "Categories for deletion cat not kept");
 
-            k = a + "\r\n" + b3;
-            Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(a + "\r\n"), "Articles for deletion cat not kept");
-        }
+        k = a + "\r\n" + b3;
+        Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(a + "\r\n"), "Articles for deletion cat not kept");
+    }
 
-        [Test]
-        public void CategoryAndCommentTests()
-        {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Comments_get_removed_from_between_categories
-            // allow comments on newline between categories, and keep them in the same place
-            const string i = @"#REDIRECT [[Ohio and Mississippi Railway]]
+    [Test]
+    public void CategoryAndCommentTests()
+    {
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Comments_get_removed_from_between_categories
+        // allow comments on newline between categories, and keep them in the same place
+        const string i = @"#REDIRECT [[Ohio and Mississippi Railway]]
 
 ";
-            const string j = @"[[Category:Predecessors of the Baltimore and Ohio Railroad]]
+        const string j = @"[[Category:Predecessors of the Baltimore and Ohio Railroad]]
 <!--Illinois company:-->
 [[Category:Railway companies established in 1851]]
 [[Category:Railway companies disestablished in 1862]]
@@ -1517,17 +1517,17 @@ blah";
 [[Category:Defunct Indiana railroads]]
 [[Category:Defunct Ohio railroads]]";
 
-            string k = i + j;
+        string k = i + j;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(j + "\r\n"), "comments between cats");
+        Assert.That(parser2.Sorter.RemoveCats(ref k, "test"), Is.EqualTo(j + "\r\n"), "comments between cats");
 
-            // but don't grab any comment just after the last category
-            string l = i + j + @"
+        // but don't grab any comment just after the last category
+        string l = i + j + @"
 <!--foo-->";
-            Assert.That(parser2.Sorter.RemoveCats(ref l, "test"), Is.EqualTo(j + "\r\n"), "comment after cat");
-            ClassicAssert.IsTrue(l.Contains("\r\n" + @"<!--foo-->"), "comment after cat 2");
+        Assert.That(parser2.Sorter.RemoveCats(ref l, "test"), Is.EqualTo(j + "\r\n"), "comment after cat");
+        ClassicAssert.IsTrue(l.Contains("\r\n" + @"<!--foo-->"), "comment after cat 2");
 
-            const string m = @"[[Category:American women writers]]
+        const string m = @"[[Category:American women writers]]
 [[Category:Autism activists]]
 <!--LBGT categories are not to be used on bios of living people unless they self-identify with the label and it is relevant to their public lives[[Category:Bisexual actors]]
 [[Category:LGBT models]]
@@ -1535,41 +1535,41 @@ blah";
 [[Category:LGBT television personalities]]-->
 [[Category:Parents of people on the autistic spectrum]]";
 
-            string n = m;
+        string n = m;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref n, "test"), Is.EqualTo(m + "\r\n"), "cats not pulled out of comments");
+        Assert.That(parser2.Sorter.RemoveCats(ref n, "test"), Is.EqualTo(m + "\r\n"), "cats not pulled out of comments");
 
-            // comments on same line of category
-            const string o = @"[[Category:Canadian Aviation Hall of Fame inductees]]
+        // comments on same line of category
+        const string o = @"[[Category:Canadian Aviation Hall of Fame inductees]]
 [[Category:Canadian World War I pilots]] <!-- If he was a Flying Ace, use the Canadian subcategory -->
 [[Category:Canadian World War II pilots]] <!-- If he was a Flying Ace, use the subcategory -->
 [[Category:Foo]]";
 
-            string p = o;
+        string p = o;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref p, "test"), Is.EqualTo(o + "\r\n"), "comments on line");
+        Assert.That(parser2.Sorter.RemoveCats(ref p, "test"), Is.EqualTo(o + "\r\n"), "comments on line");
 
-            // comments beside a category are not moved
-            string q = @"#REDIRECT [[Alton Railroad]]
+        // comments beside a category are not moved
+        string q = @"#REDIRECT [[Alton Railroad]]
 
 ";
-            string r = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}
+        string r = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}
 [[Category:Predecessors of the Alton Railroad]]
 [[Category:Railway companies established in 1855]]
 [[Category:Railway companies disestablished in 1950]]<!--http://bulk.resource.org/courts.gov/c/F2/264/264.F2d.445.12430_1.html-->
 [[Category:Defunct Illinois railroads]]";
-            string s = q + r;
-            Assert.That(parser2.Sorter.RemoveCats(ref s, "test"), Is.EqualTo(r + "\r\n"), "comments on line end");
+        string s = q + r;
+        Assert.That(parser2.Sorter.RemoveCats(ref s, "test"), Is.EqualTo(r + "\r\n"), "comments on line end");
 
-            string r2 = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}
+        string r2 = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}
 [[Category:Predecessors of the Alton Railroad]]
 [[Category:Railway companies established in 1855]]
 [[Category:Railway companies disestablished in 1950]]
 [[Category:Defunct Illinois railroads]]  <!--comm-->";
-            s = q + r2;
-            Assert.That(parser2.Sorter.RemoveCats(ref s, "test"), Is.EqualTo(r2 + "\r\n"), "comment after last cat on same line not moved");
+        s = q + r2;
+        Assert.That(parser2.Sorter.RemoveCats(ref s, "test"), Is.EqualTo(r2 + "\r\n"), "comment after last cat on same line not moved");
 
-            string bug1a = @"[[Category:Emory University]]
+        string bug1a = @"[[Category:Emory University]]
 [[Category:Law schools in Georgia (U.S. state)]]
 <!-- A work in progress to incorporate into nav
 [[Category:Southern Law Schools]]
@@ -1578,25 +1578,25 @@ blah";
 
 {{lawschool-stub}}";
 
-            string t = bug1a + bug1b;
+        string t = bug1a + bug1b;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug1a + "\r\n"), "commented out cats");
+        Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug1a + "\r\n"), "commented out cats");
 
-            string bug1c = @"<!-- foo bar-->
+        string bug1c = @"<!-- foo bar-->
 {{info}}
 text
 ";
-            t = bug1c + bug1a + bug1b;
+        t = bug1c + bug1a + bug1b;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug1a + "\r\n"), "commented out plus comments");
+        Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug1a + "\r\n"), "commented out plus comments");
 
-            string bug2 = @"{{DEFAULTSORT:A}}
+        string bug2 = @"{{DEFAULTSORT:A}}
 <!--The 1951 birth date has been upheld in court, please do not add this category.[[Category:1941 births]]-->
 [[Category:Living People]]";
-            t = bug2;
-            Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug2 + "\r\n"), "commented out and not");
+        t = bug2;
+        Assert.That(parser2.Sorter.RemoveCats(ref t, "test"), Is.EqualTo(bug2 + "\r\n"), "commented out and not");
 
-            string nw = @"Hello
+        string nw = @"Hello
 <nowiki>[[Category:LGBT people from the United States]]
 [[Category:LGBT television personalities]]</nowiki>
 
@@ -1604,47 +1604,47 @@ text
 [[Category:Autism activists]]
 [[Category:Parents of people on the autistic spectrum]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref nw, "test"), Is.EqualTo(@"[[Category:American women writers]]
+        Assert.That(parser2.Sorter.RemoveCats(ref nw, "test"), Is.EqualTo(@"[[Category:American women writers]]
 [[Category:Autism activists]]
 [[Category:Parents of people on the autistic spectrum]]
 "), "Don't pull cats from nowiki");
-            nw = @"Hello
+        nw = @"Hello
 <nowiki>[[Category:LGBT people from the United States]]
 [[Category:LGBT television personalities]]</nowiki>
 
 [[Category:American women writers]]
 [[Category:Autism activists]]
 [[Category:Parents of people on the autistic spectrum]]";
-            ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref nw, "test").Contains(@"[[Category:LGBT people from the United States]]"), "Don't pull cats from nowiki 2");
+        ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref nw, "test").Contains(@"[[Category:LGBT people from the United States]]"), "Don't pull cats from nowiki 2");
 
-            string iw1 = @"[[Category:Hampshire|  ]]
+        string iw1 = @"[[Category:Hampshire|  ]]
 [[Category:Articles including recorded pronunciations (UK English)]]
 [[Category:Non-metropolitan counties]]", iw2 = @"
 
 <!--interwiki-->
 [[af:Hampshire]]";
-            string iwall = iw1 + iw2;
+        string iwall = iw1 + iw2;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref iwall, "test"), Is.EqualTo(iw1 + "\r\n"), "don't pull the interwiki comment");
-            ClassicAssert.IsTrue(iwall.Contains(@"<!--interwiki-->"), "don't pull the interwiki comment");
+        Assert.That(parser2.Sorter.RemoveCats(ref iwall, "test"), Is.EqualTo(iw1 + "\r\n"), "don't pull the interwiki comment");
+        ClassicAssert.IsTrue(iwall.Contains(@"<!--interwiki-->"), "don't pull the interwiki comment");
 
-            string writers = @"[[Category:Writers from Alabama]]
+        string writers = @"[[Category:Writers from Alabama]]
 [[Category:Writers from North Carolina]]
 [[Category:Writers from North Carolina]]
 
 <!-- novelists tree -->
 [[Category:20th-century American novelists]]";
-            Assert.That(parser2.Sorter.RemoveCats(ref writers, "test"),
-            Is.EqualTo(@"[[Category:Writers from Alabama]]
+        Assert.That(parser2.Sorter.RemoveCats(ref writers, "test"),
+        Is.EqualTo(@"[[Category:Writers from Alabama]]
 [[Category:Writers from North Carolina]]
 
 <!-- novelists tree -->
 [[Category:20th-century American novelists]]" + "\r\n"), "Dupe cat removed if second has comment");
 
-            string comm = @"<!--[[Category:foo]]-->" + "\r\n";
-            Assert.That(parser2.Sorter.RemoveCats(ref comm, "test"), Is.Empty, "Don't move commented out cats");
+        string comm = @"<!--[[Category:foo]]-->" + "\r\n";
+        Assert.That(parser2.Sorter.RemoveCats(ref comm, "test"), Is.Empty, "Don't move commented out cats");
 
-            comm = @"#REDIRECT [[X]]
+        comm = @"#REDIRECT [[X]]
 <!-- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
  XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
  XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
@@ -1655,9 +1655,9 @@ text
 [[Category:Foo]]
 [[Category:Foo2]]
  -->";
-            Assert.That(parser2.Sorter.RemoveCats(ref comm, "test"), Is.Empty, "Don't move commented out cats, large comment");
+        Assert.That(parser2.Sorter.RemoveCats(ref comm, "test"), Is.Empty, "Don't move commented out cats, large comment");
 
-            string longComment = @"Hello
+        string longComment = @"Hello
 <!--{{Navboxes
 |title=Candinho managerial positions
 |list1=
@@ -1684,41 +1684,41 @@ text
 [[Category:1945 births]]
 [[Category:Living people]]";
 
-            ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref longComment, "test").Contains(@"[[Category:Pages where template include size is exceeded]]"), "Don't pull out of long comment section");
+        ClassicAssert.IsFalse(parser2.Sorter.RemoveCats(ref longComment, "test").Contains(@"[[Category:Pages where template include size is exceeded]]"), "Don't pull out of long comment section");
 
-            string sameCatInComment =
-                @"<!-- [[Category:1980s cars]] Not needed because [[Category:Cars introduced in 1985]] parent cat overrules it. See [[WP:SUBCAT]] -->
+        string sameCatInComment =
+            @"<!-- [[Category:1980s cars]] Not needed because [[Category:Cars introduced in 1985]] parent cat overrules it. See [[WP:SUBCAT]] -->
 [[Category:1990s cars]]
 [[Category:Cars introduced in 1985]]
 [[Category:Honda vehicles|Today]]
 [[Category:Kei cars]]
 [[Category:Cars discontinued in 1998]]";
-            string sameCatInComment2 = sameCatInComment;
-            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(sameCatInComment2 + "\r\n"), "Handle a cat that is also in a comment");
-        }
+        string sameCatInComment2 = sameCatInComment;
+        Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(sameCatInComment2 + "\r\n"), "Handle a cat that is also in a comment");
+    }
 
-        [Test]
-        public void CategoryAndCommentTests2()
-        {
-            const string correct = @"{{DEFAULTSORT:2024-25 Turkish Basketball Super League}}
+    [Test]
+    public void CategoryAndCommentTests2()
+    {
+        const string correct = @"{{DEFAULTSORT:2024-25 Turkish Basketball Super League}}
 [[Category:Basketbol Süper Ligi seasons]]
 [[Category:2024–25 in European basketball leagues|Turkish]]
 [[Category:2024–25 in Turkish basketball|1]]
 [[Category:Current basketball seasons|Turkey]]
 <!-- [[Category:Current basketball seasons|Turkey]] -->";
-            string sameCatInComment = correct;
-            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct + "\r\n"), "Handle a cat that is also in a comment - comment after");
+        string sameCatInComment = correct;
+        Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct + "\r\n"), "Handle a cat that is also in a comment - comment after");
 
-            const string correct2 = @"[[Category:1985 x in the United Kingdom]] <!-- Text... a parent of [[Category:1985 y in the United Kingdom]] -->
+        const string correct2 = @"[[Category:1985 x in the United Kingdom]] <!-- Text... a parent of [[Category:1985 y in the United Kingdom]] -->
 [[Category:1985 in London]]
 [[Category:1985 y in the United Kingdom]]
 [[Category:1980s c in London]] <!-- Text... a parent of [[Category:1980s z in London]] -->
 [[Category:1980s z in London]]
 [[Category:20th century in a]]";
-            sameCatInComment = correct2;
-            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct2 + "\r\n"), "Handle a cat that is also in a comment - comment before");
+        sameCatInComment = correct2;
+        Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct2 + "\r\n"), "Handle a cat that is also in a comment - comment before");
 
-            const string correct3 = @"{{DEFAULTSORT:Juba, Master}}
+        const string correct3 = @"{{DEFAULTSORT:Juba, Master}}
 [[Category:1820s births]]
 [[Category:1850s deaths]]
 [[Category:19th-century American dancers]]
@@ -1731,200 +1731,200 @@ text
 [[Category:African-American male actors]]
 [[Category:American male actors]]
 [[Category:African-American male dancers]] -->";
-            sameCatInComment = correct3;
-            Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct3 + "\r\n"), "Handle a cat that is also in a comment - comment block after");
-        }
+        sameCatInComment = correct3;
+        Assert.That(parser2.Sorter.RemoveCats(ref sameCatInComment, "Test"), Is.EqualTo(correct3 + "\r\n"), "Handle a cat that is also in a comment - comment block after");
+    }
 
-        [Test]
-        public void CategoryDupeRemoval()
-        {
-            string cats = @"[[Category:One]]
+    [Test]
+    public void CategoryDupeRemoval()
+    {
+        string cats = @"[[Category:One]]
 [[Category:Two]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
 [[Category:Two]]
 "), "Duplicate category removed, no sortkey");
 
-            cats = @"[[Category:One]]
+        cats = @"[[Category:One]]
 [[Category:Two]]
 [[Category:One]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
 [[Category:Two]]
 "), "Duplicate categories removed, no sortkey");
 
-            cats = @"[[Category:One|A]]
+        cats = @"[[Category:One|A]]
 [[Category:Two]]
 [[Category:One|A]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
 [[Category:Two]]
 "), "Duplicate category removed, same sortkey");
 
-            cats = @"[[Category:One]] <!--comm-->
+        cats = @"[[Category:One]] <!--comm-->
 [[Category:Two]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]] <!--comm-->
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]] <!--comm-->
 [[Category:Two]]
 "), "Duplicate category removed, first with comment");
 
-            cats = @"[[Category:One|A]]
+        cats = @"[[Category:One|A]]
 [[Category:Two]]
 [[Category:One|B]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
 [[Category:Two]]
 [[Category:One|B]]
 "), "Duplicate category NOT removed, conflicting sortkey");
 
-            cats = @"[[Category:One]] <!--comm-->
+        cats = @"[[Category:One]] <!--comm-->
 [[Category:Two]]
 [[Category:One]] <!--comm2-->";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]] <!--comm-->
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]] <!--comm-->
 [[Category:Two]]
 [[Category:One]] <!--comm2-->
 "), "Duplicate category NOT removed, conflicting comments");
-            cats = @"[[Category:One|A]]
+        cats = @"[[Category:One|A]]
 [[Category:Two]]
 [[Category:One]]";
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
 [[Category:Two]]
 "), "Duplicate category removed, one without sortkey");
 
-            cats = @"[[Category:One|A]]
+        cats = @"[[Category:One|A]]
 [[Category:Two]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "A"), Is.EqualTo(@"[[Category:One|A]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "A"), Is.EqualTo(@"[[Category:One|A]]
 [[Category:Two]]
 "), "Duplicate category removed, one without sortkey");
 
-            cats = @"[[Category:One|A]]
+        cats = @"[[Category:One|A]]
 [[Category:Two]]
 [[Category:One|a]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|A]]
 [[Category:Two]]
 "), "Duplicate category removed, same sortkey ignoring first letter case");
 
-            cats = @"[[Category:One|foo]]
+        cats = @"[[Category:One|foo]]
 [[Category:Two]]
 [[Category:One|foo]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|foo]]
 [[Category:Two]]
 "), "Duplicate category removed, lowercase sortkey");
 
-            cats = @"[[Category:One|Foo]]
+        cats = @"[[Category:One|Foo]]
 [[Category:Two]]
 [[Category:One|Foo]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|Foo]]
 [[Category:Two]]
 "), "Duplicate category removed, uppercase sortkey");
 
-            cats = @"[[Category:One|Foo Bar]]
+        cats = @"[[Category:One|Foo Bar]]
 [[Category:Two]]
 [[Category:One|Foo]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|Foo Bar]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One|Foo Bar]]
 [[Category:Two]]
 "), "Duplicate category removed, one sortkey substring of another");
 
-            cats = @"[[Category:One|Foo]]
+        cats = @"[[Category:One|Foo]]
 [[Category:Two]]
 [[Category:One|Foo Bar]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:Two]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:Two]]
 [[Category:One|Foo Bar]]
 "), "Duplicate category removed, one sortkey substring of another, longer second");
 
-            cats = @"[[Category:One Foo]]
+        cats = @"[[Category:One Foo]]
 [[Category:Two]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One Foo]]
 [[Category:Two]]
 [[Category:One]]
 "), "No change, cat substring rule only applies to sortkeys, longer first");
 
-            cats = @"[[Category:One]]
+        cats = @"[[Category:One]]
 [[Category:Two]]
 [[Category:One Foo]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
 [[Category:Two]]
 [[Category:One Foo]]
 "), "No change, cat substring rule only applies to sortkeys, longer second");
-        }
+    }
 
-        [Test]
-        public void CategoryDupeUncatTagRemoval()
-        {
-            // dupe uncat tags
-            string cats = @"[[Category:One]]
+    [Test]
+    public void CategoryDupeUncatTagRemoval()
+    {
+        // dupe uncat tags
+        string cats = @"[[Category:One]]
 {{uncat|date=August 2014}}
 {{uncat|date=August 2014}}
 ";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
 {{uncat|date=August 2014}}
 "), "Duplicate uncat tags removed");
-        }
+    }
 
-        [Test]
-        public void CategoryDupeRemovalWikis()
-        {
+    [Test]
+    public void CategoryDupeRemovalWikis()
+    {
 #if DEBUG
-            Variables.SetProjectSimple("en", ProjectEnum.species);
+        Variables.SetProjectSimple("en", ProjectEnum.species);
 
-            string cats = @"[[Category:One]]
+        string cats = @"[[Category:One]]
 [[Category:Two]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
 [[Category:Two]]
 "), "Duplicate category removed, no sortkey");
 
-            Variables.SetProjectSimple("en", ProjectEnum.commons);
+        Variables.SetProjectSimple("en", ProjectEnum.commons);
 
-            cats = @"[[Category:One]]
+        cats = @"[[Category:One]]
 [[Category:Two]]
 [[Category:One]]";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "test"), Is.EqualTo(@"[[Category:One]]
 [[Category:Two]]
 "), "Duplicate category removed, no sortkey");
 
-            Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
+        Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
 #endif
-        }
+    }
 
-        [Test]
-        public void CategoryCommentTests()
-        {
-            const string cats = @"[[Category:Hampshire|  ]]
+    [Test]
+    public void CategoryCommentTests()
+    {
+        const string cats = @"[[Category:Hampshire|  ]]
 [[Category:Articles including recorded pronunciations (UK English)]]
 [[Category:Non-metropolitan counties]]", comm = @"<!-- cat -->";
 
-            string a = cats + "\r\n" + comm;
+        string a = cats + "\r\n" + comm;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(comm + "\r\n" + cats + "\r\n"));
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(comm + "\r\n" + cats + "\r\n"));
 
-            string b = @"Text
+        string b = @"Text
 [[Category:One]]
 
 ==References==
 {{reflist}}
 [[Category:Two]]";
-            Assert.That(parser2.Sorter.RemoveCats(ref b, "test"), Is.EqualTo("[[Category:One]]\r\n[[Category:Two]]\r\n"));
-            Assert.That(b, Is.EqualTo("Text\r\n\r\n==References==\r\n{{reflist}}\r\n"), "Blank newline before heading retained");
+        Assert.That(parser2.Sorter.RemoveCats(ref b, "test"), Is.EqualTo("[[Category:One]]\r\n[[Category:Two]]\r\n"));
+        Assert.That(b, Is.EqualTo("Text\r\n\r\n==References==\r\n{{reflist}}\r\n"), "Blank newline before heading retained");
 
-            b = @"A
+        b = @"A
 ==Text==
 {{foo}}[[Category:One]]
 {| class=table |}
@@ -1932,231 +1932,231 @@ text
 ==References==
 {{reflist}}
 [[Category:Two]]";
-            Assert.That(parser2.Sorter.RemoveCats(ref b, "test"), Is.EqualTo("[[Category:One]]\r\n[[Category:Two]]\r\n"));
-            Assert.That(b, Is.EqualTo("A\r\n==Text==\r\n{{foo}}\r\n{| class=table |}\r\n\r\n==References==\r\n{{reflist}}\r\n"), "Newline retained when category not on own line");
-        }
+        Assert.That(parser2.Sorter.RemoveCats(ref b, "test"), Is.EqualTo("[[Category:One]]\r\n[[Category:Two]]\r\n"));
+        Assert.That(b, Is.EqualTo("A\r\n==Text==\r\n{{foo}}\r\n{| class=table |}\r\n\r\n==References==\r\n{{reflist}}\r\n"), "Newline retained when category not on own line");
+    }
 
-        [Test]
-        public void CategoryRedirects()
-        {
-            const string redirect = @"#REDIRECT [[Category:Foo]]";
-            string a = redirect;
+    [Test]
+    public void CategoryRedirects()
+    {
+        const string redirect = @"#REDIRECT [[Category:Foo]]";
+        string a = redirect;
 
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.Empty);
-            Assert.That(a, Is.EqualTo(redirect), "cats not pulled from redirect target");
-        }
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.Empty);
+        Assert.That(a, Is.EqualTo(redirect), "cats not pulled from redirect target");
+    }
 
-        [Test]
-        public void CategoryUncatImproveCat()
-        {
-            string a = @"[[Category:Foo]]
+    [Test]
+    public void CategoryUncatImproveCat()
+    {
+        string a = @"[[Category:Foo]]
 {{improve categories}}
 ";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
-{{improve categories}}
-"));
-
-            a = @"{{improve categories}}
-[[Category:Foo]]
-";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 {{improve categories}}
 "));
 
-            a = @"{{uncategorized}}
+        a = @"{{improve categories}}
 [[Category:Foo]]
 ";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+{{improve categories}}
+"));
+
+        a = @"{{uncategorized}}
+[[Category:Foo]]
+";
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 {{uncategorized}}
 "));
-            a = @"{{multiple issues|{{uncategorized}}}}
+        a = @"{{multiple issues|{{uncategorized}}}}
 [[Category:Foo]]
 ";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 {{uncategorized}}
 "));
-            Assert.That(a.Trim(), Is.EqualTo(""), "Clean up {{multiple issues}} after {{uncategorized}} move");
+        Assert.That(a.Trim(), Is.EqualTo(""), "Clean up {{multiple issues}} after {{uncategorized}} move");
 
-            a = @"{{uncategorized}}
+        a = @"{{uncategorized}}
 == Section ==
 [[Category:Foo]]
 ";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 "), "Don't pull uncat out of zeroth section");
 
-            a = @"A
+        a = @"A
 == Section ==
 {{improve categories}}
 == Section 2 ==
 [[Category:Foo]]
 ";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 "), "Don't pull {{improve categories}} out of earlier section");
 
-            a = @"A
+        a = @"A
 == Section ==
 <!--{{improve categories}}-->
 [[Category:Foo]]
 ";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 "), "Don't pull commented out template");
 
-            a = @"A
+        a = @"A
 == Section ==
 {{improve categories}}
 == Section 2 ==
 {{improve categories}}
 [[Category:Foo]]
 ";
-            Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
+        Assert.That(parser2.Sorter.RemoveCats(ref a, "test"), Is.EqualTo(@"[[Category:Foo]]
 "), "Don't pull improve categories if in earlier and last section");
-        }
+    }
 
-        [Test]
-        public void RemoveCatsKey()
-        {
-            string cats = @"[[Category:1980 births]]
+    [Test]
+    public void RemoveCatsKey()
+    {
+        string cats = @"[[Category:1980 births]]
 [[Category:Local people]]", cats2 = @"[[Category:1980 births|Jones, Andrew]]
 [[Category:Local people|Jones, Andrew]]";
 
-            parser2.Sorter.AddCatKey = true;
-            Assert.That(parser2.Sorter.RemoveCats(ref cats, "Andrew Jones"), Is.EqualTo(cats2 + "\r\n"));
-            parser2.Sorter.AddCatKey = false;
+        parser2.Sorter.AddCatKey = true;
+        Assert.That(parser2.Sorter.RemoveCats(ref cats, "Andrew Jones"), Is.EqualTo(cats2 + "\r\n"));
+        parser2.Sorter.AddCatKey = false;
 
-            // Extract {{Uncategorized}}
-            string at = @"Text.
+        // Extract {{Uncategorized}}
+        string at = @"Text.
 
 == References ==
 {{reflist}}
 {{Uncategorized}}";
-            Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.EqualTo(@"{{Uncategorized}}" + "\r\n"), "uncat moved");
-            ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(at));
-            at = @"Text.
+        Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.EqualTo(@"{{Uncategorized}}" + "\r\n"), "uncat moved");
+        ClassicAssert.IsFalse(WikiRegexes.Uncategorized.IsMatch(at));
+        at = @"Text.
 
 <!--{{Uncategorized}}-->
 == References ==
 {{reflist}}";
-            Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.Empty, "commented out uncat not moved");
-            at = @"Text.
+        Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.Empty, "commented out uncat not moved");
+        at = @"Text.
 
 == References ==
 {{reflist}}
 {{Uncategorized stub}}";
-            Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.EqualTo(@"{{Uncategorized stub}}" + "\r\n"), "uncat stub moved - redirect to uncat");
-            at = @"{{multiple issues|
+        Assert.That(parser2.Sorter.RemoveCats(ref at, "Andrew Jones"), Is.EqualTo(@"{{Uncategorized stub}}" + "\r\n"), "uncat stub moved - redirect to uncat");
+        at = @"{{multiple issues|
 {{a}}
 {{Uncategorized}}
 {{b}}
 }}
 == References ==
 {{reflist}}";
-            ClassicAssert.IsTrue(parser2.SortMetaData(at, "Andrew Jones").Contains(@"{{multiple issues|
+        ClassicAssert.IsTrue(parser2.SortMetaData(at, "Andrew Jones").Contains(@"{{multiple issues|
 {{a}}
 {{Uncategorized}}
 {{b}}
 }}"), "no blank line left in MI");
-        }
+    }
 
-        [Test]
-        public void RemoveCatsSlWikiLifetime()
-        {
+    [Test]
+    public void RemoveCatsSlWikiLifetime()
+    {
 #if DEBUG
-            Variables.SetProjectLangCode("sl");
+        Variables.SetProjectLangCode("sl");
 
-            string c = @"[[Category:Hampshire]]", l = @"{{Lifetime|1899|LIVING|Surname, Name}}", waffle = @"waffle here
+        string c = @"[[Category:Hampshire]]", l = @"{{Lifetime|1899|LIVING|Surname, Name}}", waffle = @"waffle here
 ";
-            string articleText = waffle + c + "\r\n" + l;
+        string articleText = waffle + c + "\r\n" + l;
 
-            // http://sl.wikipedia.org/wiki/Predloga:Lifetime
-            Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(l + "\r\n" + c + "\r\n"), "lifetime treated like DEFAULTSORT on sl-wiki");
+        // http://sl.wikipedia.org/wiki/Predloga:Lifetime
+        Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(l + "\r\n" + c + "\r\n"), "lifetime treated like DEFAULTSORT on sl-wiki");
 
-            Variables.SetProjectLangCode("es");
-            l = @"{{NF|1980||Nieto, Pablo}}";
-            articleText = waffle + c + "\r\n" + l;
+        Variables.SetProjectLangCode("es");
+        l = @"{{NF|1980||Nieto, Pablo}}";
+        articleText = waffle + c + "\r\n" + l;
 
-            // https://es.wikipedia.org/wiki/Plantilla:NF#Ubicaci%C3%B3n%20en%20los%20art%C3%ADculos
-            Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(l + "\r\n" + c + "\r\n"), "NF treated like DEFAULTSORT on es-wiki");
+        // https://es.wikipedia.org/wiki/Plantilla:NF#Ubicaci%C3%B3n%20en%20los%20art%C3%ADculos
+        Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(l + "\r\n" + c + "\r\n"), "NF treated like DEFAULTSORT on es-wiki");
 
-            Variables.SetProjectLangCode("en");
-            articleText = waffle + c + "\r\n" + l;
-            Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(c + "\r\n"), "lifetime/NF is just another template on en-wiki");
+        Variables.SetProjectLangCode("en");
+        articleText = waffle + c + "\r\n" + l;
+        Assert.That(parser2.Sorter.RemoveCats(ref articleText, "test"), Is.EqualTo(c + "\r\n"), "lifetime/NF is just another template on en-wiki");
 #endif
-        }
+    }
 
-        [Test]
-        public void DefaultSortAndCommentTests()
-        {
-            string a = @"Foo", b = @"[[Category:Predecessors of the Alton Railroad]]",
-            c = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}", e = @"<!--{{DEFAULTSORT:Joliet Chicago  Railroad}}-->",
-            d = a + "\r\n" + b + "\r\n" + c,
-            f = a + "\r\n" + b + "\r\n" + e,
-            g = c + "\r\n" + @"{{DEFAULTSORT:Joliet Chicago  Railroad 2nd different}}";
+    [Test]
+    public void DefaultSortAndCommentTests()
+    {
+        string a = @"Foo", b = @"[[Category:Predecessors of the Alton Railroad]]",
+        c = @"{{DEFAULTSORT:Joliet Chicago  Railroad}}", e = @"<!--{{DEFAULTSORT:Joliet Chicago  Railroad}}-->",
+        d = a + "\r\n" + b + "\r\n" + c,
+        f = a + "\r\n" + b + "\r\n" + e,
+        g = c + "\r\n" + @"{{DEFAULTSORT:Joliet Chicago  Railroad 2nd different}}";
 
-            Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + "\r\n" + b + "\r\n"), "standard case, return defaultsort then category");
-            Assert.That(parser2.Sorter.RemoveCats(ref f, "test"), Is.EqualTo(b + "\r\n"), "Don't return commented out defaultsort");
-            Assert.That(parser2.Sorter.RemoveCats(ref g, "test"), Is.Empty, "does not modify page with multiple defaultsorts");
+        Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + "\r\n" + b + "\r\n"), "standard case, return defaultsort then category");
+        Assert.That(parser2.Sorter.RemoveCats(ref f, "test"), Is.EqualTo(b + "\r\n"), "Don't return commented out defaultsort");
+        Assert.That(parser2.Sorter.RemoveCats(ref g, "test"), Is.Empty, "does not modify page with multiple defaultsorts");
 
-            d = a + "\r\n" + b + "\r\n" + c + " <!--foo -->";
-            Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + " <!--foo -->\r\n" + b + "\r\n"), "Retain comment on same line as defaultsort");
+        d = a + "\r\n" + b + "\r\n" + c + " <!--foo -->";
+        Assert.That(parser2.Sorter.RemoveCats(ref d, "test"), Is.EqualTo(c + " <!--foo -->\r\n" + b + "\r\n"), "Retain comment on same line as defaultsort");
 
-            g = c + "\r\n" + c;
-            Assert.That(parser2.Sorter.RemoveCats(ref g, "test"), Is.EqualTo(c + "\r\n"), "Exact dupe DEFAULTSORT removed");
-        }
+        g = c + "\r\n" + c;
+        Assert.That(parser2.Sorter.RemoveCats(ref g, "test"), Is.EqualTo(c + "\r\n"), "Exact dupe DEFAULTSORT removed");
+    }
 
-        [Test]
-        public void InterWikiTests()
-        {
-            parser2.SortInterwikis = false;
+    [Test]
+    public void InterWikiTests()
+    {
+        parser2.SortInterwikis = false;
 
-            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br", "en", "jbo" };
+        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br", "en", "jbo" };
 
-            string a = @"[[de:Canadian National Railway]]
+        string a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]";
-            string b = a;
+        string b = a;
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "no changes");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "no changes");
 
-            // comment handling
-            string comm = @"<!-- other languages -->";
-            a = @"[[de:Canadian National Railway]]
+        // comment handling
+        string comm = @"<!-- other languages -->";
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]" + comm;
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
 
-            comm = @"<!--Interwikis-->";
-            a = @"[[de:Canadian National Railway]]
+        comm = @"<!--Interwikis-->";
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]" + comm;
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
 
-            comm = @"<!--Other wikis-->";
-            a = @"[[de:Canadian National Railway]]
+        comm = @"<!--Other wikis-->";
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]" + comm;
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
 
-            comm = @"<!-- interwiki links to this article in other languages, below -->";
-            a = @"[[de:Canadian National Railway]]
+        comm = @"<!-- interwiki links to this article in other languages, below -->";
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]" + comm;
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(comm + "\r\n" + b + "\r\n"));
 
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_12#Interwiki_links_moved_out_of_comment
-            string c = @"{{Canadianmetros}}
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_12#Interwiki_links_moved_out_of_comment
+        string c = @"{{Canadianmetros}}
 
 <!--
 The following links are here to prevent the interwiki bot from adding them to the list above.  The links below point to disambiguation pages and not to a translated article about Canadian National Railway.
 [[it:CN]]
 [[sv:CN]]
 -->";
-            Assert.That(parser2.Sorter.Interwikis(ref c), Is.Empty, "interwikis not taken out of wiki comments");
+        Assert.That(parser2.Sorter.Interwikis(ref c), Is.Empty, "interwikis not taken out of wiki comments");
 
-            string c2 = c + @"[[sv:CN]]";
-            Assert.That(parser2.Sorter.Interwikis(ref c2), Is.EqualTo(@"[[sv:CN]]" + "\r\n"), "interwiki returned even if the same one exists commented out elsewhere");
+        string c2 = c + @"[[sv:CN]]";
+        Assert.That(parser2.Sorter.Interwikis(ref c2), Is.EqualTo(@"[[sv:CN]]" + "\r\n"), "interwiki returned even if the same one exists commented out elsewhere");
 
-            c = @"{{Canadianmetros}}
+        c = @"{{Canadianmetros}}
 
 <!--
 The following links are here to prevent the interwiki bot from adding them to the list above.  The links below point to disambiguation pages and not to a translated article about Canadian National Railway.
@@ -2164,17 +2164,17 @@ The following links are here to prevent the interwiki bot from adding them to th
 [[sv:CN]]
 -->
 second comment <!-- [[it:CN]] -->";
-            Assert.That(parser2.Sorter.Interwikis(ref c), Is.Empty, "interwikis not taken out of wiki comments");
+        Assert.That(parser2.Sorter.Interwikis(ref c), Is.Empty, "interwikis not taken out of wiki comments");
 
-            // deduplication
-            string d = @"[[de:Canadian National Railway]]
+        // deduplication
+        string d = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[es:Canadian National]]
 [[fr:Canadien National]]";
 
-            Assert.That(parser2.Sorter.Interwikis(ref d), Is.EqualTo(b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref d), Is.EqualTo(b + "\r\n"));
 
-            string e1 = @"{{DEFAULTSORT:Boleyn, Anne}}
+        string e1 = @"{{DEFAULTSORT:Boleyn, Anne}}
 
 ", e2 = @"{{Link FA|bs}}
 {{Link FA|no}}
@@ -2183,237 +2183,237 @@ second comment <!-- [[it:CN]] -->";
 [[bs:Anne Boleyn]]
 [[br:Anne Boleyn]]";
 
-            string f = e2, g = e1 + e2;
+        string f = e2, g = e1 + e2;
 
-            Assert.That(parser2.Sorter.Interwikis(ref g), Is.EqualTo(f + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref g), Is.EqualTo(f + "\r\n"));
 
-            string h = @"[[de:Canadian National Railway]]
+        string h = @"[[de:Canadian National Railway]]
 [[en:Canadian National]]
 [[fr:Canadien National]]";
 
-            Assert.That(parser2.Sorter.Interwikis(ref h), Is.EqualTo(@"[[de:Canadian National Railway]]
+        Assert.That(parser2.Sorter.Interwikis(ref h), Is.EqualTo(@"[[de:Canadian National Railway]]
 [[fr:Canadien National]]" + "\r\n"), "interwikis to own wiki are removed");
 
-            a = @"[[de:Canadian National Railway]]
+        a = @"[[de:Canadian National Railway]]
 [[es::Canadian National]]
 [[fr:Canadien National]]";
-            b = a.Replace("::", ":");
+        b = a.Replace("::", ":");
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "double colon in interwiki removed");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "double colon in interwiki removed");
 
-            a = @"[[de:Canadian National Railway]]
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[es:canadian National]]
 [[fr:Canadien National]]";
-            b = @"[[de:Canadian National Railway]]
+        b = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]";
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "duplicate interwiki removed, variation in first letter casing only");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "duplicate interwiki removed, variation in first letter casing only");
 
-            a = @"[[de:Canadian National Railway]]
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[es:Canadian National]]<!-- comm-->
 [[fr:Canadien National]]";
-            b = @"[[de:Canadian National Railway]]
+        b = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]
 [[fr:Canadien National]]";
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "duplicate interwiki removed, inline comment second");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "duplicate interwiki removed, inline comment second");
 
-            a = @"[[de:Canadian National Railway]]
+        a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]<!-- comm-->
 [[es:Canadian National]]
 [[fr:Canadien National]]";
-            b = @"[[de:Canadian National Railway]]
+        b = @"[[de:Canadian National Railway]]
 [[es:Canadian National]]<!-- comm-->
 [[fr:Canadien National]]";
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "duplicate interwiki removed, inline comment first");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "duplicate interwiki removed, inline comment first");
 
-            a = @"[[de:Canadian National Railway]]
+        a = @"[[de:Canadian National Railway]]
 [[jbo:canadian National]]
 [[fr:Canadien National]]";
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(@"[[de:Canadian National Railway]]
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(@"[[de:Canadian National Railway]]
 [[jbo:canadian National]]
 [[fr:Canadien National]]
 "), "first letter casing retained for jbo-wiki links");
 
-            string i = @"{{Canadianmetros|
+        string i = @"{{Canadianmetros|
 [[it:CN]]
 [[sv:CN]]
 }}";
-            Assert.That(parser2.Sorter.Interwikis(ref i), Is.Empty, "interwikis not taken out of templates");
-        }
+        Assert.That(parser2.Sorter.Interwikis(ref i), Is.Empty, "interwikis not taken out of templates");
+    }
 
-        [Test]
-        public void InterWikiTestsMultiple()
-        {
-            parser2.SortInterwikis = false;
-            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br", "en" };
+    [Test]
+    public void InterWikiTestsMultiple()
+    {
+        parser2.SortInterwikis = false;
+        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br", "en" };
 
-            string a = @"[[de:Canadian National Railway]]
+        string a = @"[[de:Canadian National Railway]]
 [[fr:Canadian National (foo)]]
 [[fr:Canadien National]]";
-            string b = a;
+        string b = a;
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
 
-            a = @"[[fr:Sénatus-consultes sous Napoléon III]]
+        a = @"[[fr:Sénatus-consultes sous Napoléon III]]
 [[fr:Sénatus-consulte]]";
-            b = a;
+        b = a;
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
-        }
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
+    }
 
-        [Test]
-        public void InterwikiSorting()
-        {
-            parser2.SortInterwikis = true;
-            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "ar", "de", "en", "ru", "sq" };
+    [Test]
+    public void InterwikiSorting()
+    {
+        parser2.SortInterwikis = true;
+        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "ar", "de", "en", "ru", "sq" };
 
-            string a = @"[[sq:Foo]]
+        string a = @"[[sq:Foo]]
 [[ru:Bar]]";
-            string b = @"[[ru:Bar]]
+        string b = @"[[ru:Bar]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "reorder if neccessary");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "reorder if neccessary");
 
-            a = @"[[ru:Bar]]
+        a = @"[[ru:Bar]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "no change Diff everything is sorted");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "no change Diff everything is sorted");
 
-            parser2.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
-            a = @"[[ru:Bar]]
+        parser2.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
+        a = @"[[ru:Bar]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "alphabetical order");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "alphabetical order");
 
-            parser2.InterWikiOrder = InterWikiOrderEnum.LocalLanguageFirstWord;
-            a = @"[[ru:Bar]]
+        parser2.InterWikiOrder = InterWikiOrderEnum.LocalLanguageFirstWord;
+        a = @"[[ru:Bar]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "local language");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "local language");
 
-            parser2.InterWikiOrder = InterWikiOrderEnum.AlphabeticalEnFirst;
-            a = @"[[ru:Bar]]
+        parser2.InterWikiOrder = InterWikiOrderEnum.AlphabeticalEnFirst;
+        a = @"[[ru:Bar]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "alphabetical order with en firsth");
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "alphabetical order with en firsth");
 
 #if DEBUG
-            Variables.SetProjectLangCode("de");
-            parser2.InterWikiOrder = InterWikiOrderEnum.AlphabeticalEnFirst;
-            a = @"[[ar:Bar]]
+        Variables.SetProjectLangCode("de");
+        parser2.InterWikiOrder = InterWikiOrderEnum.AlphabeticalEnFirst;
+        a = @"[[ar:Bar]]
 [[en:Hello]]
 [[sq:Foo]]";
-            b = @"[[en:Hello]]
+        b = @"[[en:Hello]]
 [[ar:Bar]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
 
-            parser2.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
-            a = @"[[ar:Bar]]
+        parser2.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
+        a = @"[[ar:Bar]]
 [[en:Hello]]
 [[sq:Foo]]";
-            b = @"[[ar:Bar]]
+        b = @"[[ar:Bar]]
 [[en:Hello]]
 [[sq:Foo]]";
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"));
 
-            Variables.SetProjectLangCode("en");
+        Variables.SetProjectLangCode("en");
 #endif
 
-            parser2.SortInterwikis = false;
-        }
+        parser2.SortInterwikis = false;
+    }
 
-        [Test]
-        public void InterWikiTestsInlineComments()
-        {
-            parser2.SortInterwikis = false;
-            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br", "en" };
+    [Test]
+    public void InterWikiTestsInlineComments()
+    {
+        parser2.SortInterwikis = false;
+        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "de", "es", "fr", "it", "sv", "ar", "bs", "br", "en" };
 
-            string a = @"[[de:Canadian National Railway]]
+        string a = @"[[de:Canadian National Railway]]
 [[es:Canadian National]] <!--comm-->
 [[fr:Canadien National]] <!--comm2 -->";
-            string b = a;
+        string b = a;
 
-            Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "inline comment kept with interwiki");
-        }
+        Assert.That(parser2.Sorter.Interwikis(ref a), Is.EqualTo(b + "\r\n"), "inline comment kept with interwiki");
+    }
 
-        [Test]
-        public void SelfInterwikisEn()
-        {
-            Assert.That(parser2.SortMetaData(@"<!-- [[en:Foo]]-->", "Test"), Is.Empty, "Commented out en interwikis removed");
+    [Test]
+    public void SelfInterwikisEn()
+    {
+        Assert.That(parser2.SortMetaData(@"<!-- [[en:Foo]]-->", "Test"), Is.Empty, "Commented out en interwikis removed");
 
 #if DEBUG
-            const string EnInterwiki = @"[[en:Foo]]";
+        const string EnInterwiki = @"[[en:Foo]]";
 
-            Variables.SetProjectSimple("en", ProjectEnum.commons);
-            Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.EqualTo("\r\n\r\n" + EnInterwiki), "en interwiki not removed on commons");
+        Variables.SetProjectSimple("en", ProjectEnum.commons);
+        Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.EqualTo("\r\n\r\n" + EnInterwiki), "en interwiki not removed on commons");
 
-            Variables.SetProjectSimple("en", ProjectEnum.species);
-            Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.EqualTo("\r\n\r\n" + EnInterwiki), "en interwiki not removed on species");
+        Variables.SetProjectSimple("en", ProjectEnum.species);
+        Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.EqualTo("\r\n\r\n" + EnInterwiki), "en interwiki not removed on species");
 
-            Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.Empty, "en interwiki removed on en-wiki");
+        Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
+        Assert.That(parser2.SortMetaData(EnInterwiki, "Test"), Is.Empty, "en interwiki removed on en-wiki");
 #endif
-        }
+    }
 
-        [Test]
-        public void SorterNamespaceTests()
-        {
-            const string cat = @"[[Category:Foo]]";
+    [Test]
+    public void SorterNamespaceTests()
+    {
+        const string cat = @"[[Category:Foo]]";
 
-            Assert.That(parser2.SortMetaData(cat, "Category:Bar"), Is.EqualTo(cat), "Full trim on category namespace");
-            Assert.That(parser2.SortMetaData(cat, "Template:Bar"), Is.EqualTo(cat), "no sorting on template namespace");
-            Assert.That(parser2.SortMetaData(cat, "Module:Bar"), Is.EqualTo(cat), "no sorting on Module namespace");
-            Assert.That(parser2.SortMetaData(cat, "Bar"), Is.EqualTo("\r\n\r\n" + cat), "sorting applied on mainspace");
+        Assert.That(parser2.SortMetaData(cat, "Category:Bar"), Is.EqualTo(cat), "Full trim on category namespace");
+        Assert.That(parser2.SortMetaData(cat, "Template:Bar"), Is.EqualTo(cat), "no sorting on template namespace");
+        Assert.That(parser2.SortMetaData(cat, "Module:Bar"), Is.EqualTo(cat), "no sorting on Module namespace");
+        Assert.That(parser2.SortMetaData(cat, "Bar"), Is.EqualTo("\r\n\r\n" + cat), "sorting applied on mainspace");
 
-            const string CatPopStub = @"Text
+        const string CatPopStub = @"Text
 {{popstub}}
 Text";
-            Assert.That(parser2.SortMetaData(CatPopStub, "Category:Foo"), Is.EqualTo(CatPopStub), "no stub sorting on Category namespace");
-        }
+        Assert.That(parser2.SortMetaData(CatPopStub, "Category:Foo"), Is.EqualTo(CatPopStub), "no stub sorting on Category namespace");
+    }
 
-        [Test]
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Substituted_templates
-        public void NoIncludeIncludeOnlyTests()
-        {
-            const string a = @"<noinclude>", b = @"[[ar:قالب:بذرة موسيقي]]
+    [Test]
+    // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Substituted_templates
+    public void NoIncludeIncludeOnlyTests()
+    {
+        const string a = @"<noinclude>", b = @"[[ar:قالب:بذرة موسيقي]]
 [[bg:Шаблон:Музика-мъниче]]
 [[ca:Plantilla:Esborrany de música]]
 [[cs:Šablona:Hudební pahýl]]
 [[cs:Šablona:Hudební pahýl]]
 [[vi:Tiêu bản:Music-stub]]", c = @"</noinclude>";
 
-            Assert.That(parser2.SortMetaData(a + b + c, "foo"), Is.EqualTo(a + b + c));
+        Assert.That(parser2.SortMetaData(a + b + c, "foo"), Is.EqualTo(a + b + c));
 
-            Assert.That(parser2.SortMetaData(b, "foo"), Is.Not.EqualTo(b));
+        Assert.That(parser2.SortMetaData(b, "foo"), Is.Not.EqualTo(b));
 
-            const string d = @"[[Category:Foo]]", e = @"[[Category:More foo]]", f = @"<includeonly>blah[[Category:Foo]]</includeonly>";
+        const string d = @"[[Category:Foo]]", e = @"[[Category:More foo]]", f = @"<includeonly>blah[[Category:Foo]]</includeonly>";
 
-            Assert.That(parser2.SortMetaData(a + d + c + e, "foo"), Is.EqualTo(a + d + c + e));
-            Assert.That(parser2.SortMetaData(d + e, "foo"), Is.Not.EqualTo(d + "\r\n" + e));
-            Assert.That(parser2.SortMetaData(f + d, "foo"), Is.EqualTo(f + d));
+        Assert.That(parser2.SortMetaData(a + d + c + e, "foo"), Is.EqualTo(a + d + c + e));
+        Assert.That(parser2.SortMetaData(d + e, "foo"), Is.Not.EqualTo(d + "\r\n" + e));
+        Assert.That(parser2.SortMetaData(f + d, "foo"), Is.EqualTo(f + d));
 
-            string magicWord = @"__FORCETOC__
+        string magicWord = @"__FORCETOC__
 
 [[Category:Foo]]";
-            Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word above cats");
-            magicWord = @"[[Category:Foo]]
+        Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word above cats");
+        magicWord = @"[[Category:Foo]]
 __FORCETOC__";
-            Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word below cats");
-        }
+        Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word below cats");
+    }
 
-        [Test]
-        public void SortOtherLanguages()
-        {
+    [Test]
+    public void SortOtherLanguages()
+    {
 #if DEBUG
-            Variables.SetProjectLangCode("ru");
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectLangCode("ru");
+        WikiRegexes.MakeLangSpecificRegexes();
 
-            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "en", "zh" };
-            parser2.Sorter.SortInterwikis = false;
+        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "en", "zh" };
+        parser2.Sorter.SortInterwikis = false;
 
-            const string before = @"== Литература ==
+        const string before = @"== Литература ==
 * Taylor, Peter. (1989).
 {{ref-en}}
 
@@ -2441,12 +2441,12 @@ __FORCETOC__";
 [[en:Utricularia pobeguinii]]
 [[zh:波贝甘狸藻]]";
 
-            Assert.That(parser2.SortMetaData(before, "a"), Is.EqualTo(after), "Even if RemoveStubs not run on ru-wiki, no excess whitespace left from meta data sorting");
+        Assert.That(parser2.SortMetaData(before, "a"), Is.EqualTo(after), "Even if RemoveStubs not run on ru-wiki, no excess whitespace left from meta data sorting");
 
-            Variables.SetProjectLangCode("uk");
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectLangCode("uk");
+        WikiRegexes.MakeLangSpecificRegexes();
 
-            string beforeUK = @"Andy
+        string beforeUK = @"Andy
 {{botanist-stub}}
 [[Category:ABC]]", afterUK = @"Andy
 
@@ -2454,12 +2454,12 @@ __FORCETOC__";
 {{botanist-stub}}
 
 [[Category:ABC]]";
-            Assert.That(parser2.SortMetaData(beforeUK, "a"), Is.EqualTo(afterUK), "uk sort order: stubs NOT below categories");
+        Assert.That(parser2.SortMetaData(beforeUK, "a"), Is.EqualTo(afterUK), "uk sort order: stubs NOT below categories");
 
-            Variables.SetProjectLangCode("uk");
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectLangCode("uk");
+        WikiRegexes.MakeLangSpecificRegexes();
 
-            string beforeDK = @"Andy
+        string beforeDK = @"Andy
 {{botanist-dk-stub}}
 [[Category:ABC]]", afterDK = @"Andy
 
@@ -2467,12 +2467,12 @@ __FORCETOC__";
 {{botanist-dk-stub}}
 
 [[Category:ABC]]";
-            Assert.That(parser2.SortMetaData(beforeDK, "a"), Is.EqualTo(afterDK), "dk sort order: stubs NOT below categories");
+        Assert.That(parser2.SortMetaData(beforeDK, "a"), Is.EqualTo(afterDK), "dk sort order: stubs NOT below categories");
 
-            Variables.SetProjectLangCode("sl");
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectLangCode("sl");
+        WikiRegexes.MakeLangSpecificRegexes();
 
-            string beforeSl = @"Andy
+        string beforeSl = @"Andy
 {{botanist-stub}}
 {{Persondata}}
 [[Category:ABC]]", afterSl = @"Andy
@@ -2482,12 +2482,12 @@ __FORCETOC__";
 [[Category:ABC]]
 
 {{Persondata}}";
-            Assert.That(parser2.SortMetaData(beforeSl, "a"), Is.EqualTo(afterSl), "Sl sort order");
+        Assert.That(parser2.SortMetaData(beforeSl, "a"), Is.EqualTo(afterSl), "Sl sort order");
 
-            Variables.SetProjectLangCode("de");
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectLangCode("de");
+        WikiRegexes.MakeLangSpecificRegexes();
 
-            string beforeDe = @"Andy
+        string beforeDe = @"Andy
 {{botanist-stub}}
 {{Personendaten}}
 [[Category:ABC]]
@@ -2501,12 +2501,12 @@ __FORCETOC__";
 {{Personendaten}}
 
 [[en:Test]]";
-            Assert.That(parser2.SortMetaData(beforeDe, "a"), Is.EqualTo(afterDe), "De sort order");
+        Assert.That(parser2.SortMetaData(beforeDe, "a"), Is.EqualTo(afterDe), "De sort order");
 
-            Variables.SetProjectLangCode("it");
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectLangCode("it");
+        WikiRegexes.MakeLangSpecificRegexes();
 
-            string beforeIt = @"{{S|foo}}
+        string beforeIt = @"{{S|foo}}
 
 Andy
 {{Persondata}}
@@ -2519,10 +2519,10 @@ Andy
 [[Category:ABC]]
 
 [[en:Test]]";
-            Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt), "It sort order");
+        Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt), "It sort order");
 
-            Variables.SetProjectSimple("it", ProjectEnum.wikiquote);
-            string afterIt2 = @"{{S|foo}}
+        Variables.SetProjectSimple("it", ProjectEnum.wikiquote);
+        string afterIt2 = @"{{S|foo}}
 
 Andy
 
@@ -2530,17 +2530,17 @@ Andy
 [[Category:ABC]]
 
 [[en:Test]]";
-            Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt2), "It wikiquote sort order");
+        Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt2), "It wikiquote sort order");
 
-            Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-            WikiRegexes.MakeLangSpecificRegexes();
+        Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
+        WikiRegexes.MakeLangSpecificRegexes();
 #endif
-        }
+    }
 
-        [Test]
-        public void CommentedReferences()
-        {
-            const string CommentedRef = @"'''George May''' (3 May 1876 - 1955) was.
+    [Test]
+    public void CommentedReferences()
+    {
+        const string CommentedRef = @"'''George May''' (3 May 1876 - 1955) was.
 
 <!--
 ==References==
@@ -2563,13 +2563,13 @@ Andy
 [[Category:1876 births]]
 [[Category:1955 deaths]]";
 
-            Assert.That(parser2.SortMetaData(CommentedRef, "George May"), Is.EqualTo(CommentedRef));
-        }
+        Assert.That(parser2.SortMetaData(CommentedRef, "George May"), Is.EqualTo(CommentedRef));
+    }
 
-        [Test]
-        public void ShortPagesMonitor()
-        {
-            const string A = @"'''Seyyed Ahmadi''' ({{lang-fa|سيداحمدي‎}}) may refer to:
+    [Test]
+    public void ShortPagesMonitor()
+    {
+        const string A = @"'''Seyyed Ahmadi''' ({{lang-fa|سيداحمدي‎}}) may refer to:
 * [[Seyyed Ahmadi, Fars]]
 * [[Seyyed Ahmadi, Hormozgan]]
 
@@ -2577,28 +2577,27 @@ Andy
 
 {{Short pages monitor}}<!-- This long comment was added to the page to prevent it from being listed on Special:Shortpages. It and the accompanying monitoring template were generated via Template:Long comment. Please do not remove the monitor template without removing the comment as well.-->";
 
-            Assert.That(parser2.SortMetaData(A, "Test"), Is.EqualTo(A), "{{Short pages monitor}} kept at end of article text: template before");
+        Assert.That(parser2.SortMetaData(A, "Test"), Is.EqualTo(A), "{{Short pages monitor}} kept at end of article text: template before");
 
-            string B = @"'''Seyyed Ahmadi''' ({{lang-fa|سيداحمدي‎}}) may refer to:
+        string B = @"'''Seyyed Ahmadi''' ({{lang-fa|سيداحمدي‎}}) may refer to:
 * [[Seyyed Ahmadi, Fars]]
 * [[Seyyed Ahmadi, Hormozgan]]
 
 [[de:Foo]]
 
 {{Short pages monitor}}<!-- This long comment -->";
-            Assert.That(parser2.SortMetaData(B, "Test"), Is.EqualTo(B), "{{Short pages monitor}} kept at end of article text: interwiki before");
-            B = B.Replace("\r\n{{Short page", "{{Short page");
-            Assert.That(parser2.SortMetaData(B, "Test"), Is.EqualTo(B), "Number of newlines before spm preserved");
-            Assert.That(parser2.SortMetaData(B.Replace("-->", "-->\r\n"), "Test"), Is.EqualTo(B), "Page trim still done when spm present");
-        }
+        Assert.That(parser2.SortMetaData(B, "Test"), Is.EqualTo(B), "{{Short pages monitor}} kept at end of article text: interwiki before");
+        B = B.Replace("\r\n{{Short page", "{{Short page");
+        Assert.That(parser2.SortMetaData(B, "Test"), Is.EqualTo(B), "Number of newlines before spm preserved");
+        Assert.That(parser2.SortMetaData(B.Replace("-->", "-->\r\n"), "Test"), Is.EqualTo(B), "Page trim still done when spm present");
+    }
 
-        [Test]
-        public void RedirectsDablinks()
-        {
-            string x = @"#REDIRECT [[Foo]]
+    [Test]
+    public void RedirectsDablinks()
+    {
+        string x = @"#REDIRECT [[Foo]]
 
 {{distinguish|A}}";
-            Assert.That(parser2.SortMetaData(x, "Test"), Is.EqualTo(x), "No sorting of zeroth section templates for redirects");
-        }
+        Assert.That(parser2.SortMetaData(x, "Test"), Is.EqualTo(x), "No sorting of zeroth section templates for redirects");
     }
 }
