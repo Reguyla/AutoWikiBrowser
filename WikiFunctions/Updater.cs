@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.Net;
 using System.Windows.Forms;
 using WikiFunctions.Background;
 
@@ -73,59 +74,147 @@ namespace WikiFunctions
         private const string CHECKPAGE_URL_TEST =
             "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSONTest&action=raw";
 
+        private sealed class VersionPage
+        {
+            [JsonProperty("enabledversions")]
+            public List<EnabledVersion> EnabledVersions { get; set; } = new();
+
+            [JsonProperty("updaterversion")]
+            public string UpdaterVersion { get; set; } = string.Empty;
+        }
+
+        private sealed class EnabledVersion
+        {
+            [JsonProperty("version")]
+            public string Version { get; set; } = string.Empty;
+
+            [JsonProperty("releasedate")]
+            public string ReleaseDate { get; set; } = string.Empty;
+
+            [JsonProperty("dotnetversion")]
+            public string DotNetVersion { get; set; } = string.Empty;
+
+            [JsonProperty("dev")]
+            public bool Dev { get; set; }
+
+            [JsonProperty("released")]
+            public bool Released { get; set; }
+        }
+
         /// <summary>
         /// Do the actual checking for enabledness etc
         /// </summary>
         private static void UpdateFunc()
         {
+            Result = AWBEnabledStatus.Error;
+
             try
             {
                 string text = Tools.GetHTML(CHECKPAGE_URL);
+
+                if (string.IsNullOrWhiteSpace(text))
+                    return;
+
+                VersionPage versionPage;
+
+                using (var stringReader = new StringReader(text))
+                using (var jsonReader = new JsonTextReader(stringReader)
+                {
+                    MaxDepth = 32,
+                    DateParseHandling = DateParseHandling.None
+                })
+                {
+                    var serializer = JsonSerializer.CreateDefault();
+
+                    versionPage = serializer.Deserialize<VersionPage>(jsonReader);
+                }
+
+                if (versionPage == null ||
+                    versionPage.EnabledVersions == null ||
+                    !Version.TryParse(versionPage.UpdaterVersion, out Version updaterVersion))
+                {
+                    return;
+                }
+
+                // Only expose the downloaded JSON after it has been
+                // successfully parsed and validated.
                 GlobalVersionPage = text;
 
-                var json = JObject.Parse(text);
+                Result = AWBEnabledStatus.Disabled;
 
-                Result = AWBEnabledStatus.Disabled; // Disabled till proven enabled
+                string awbPath =
+                    Path.Combine(AWBDirectory, "AutoWikiBrowser.exe");
 
-                var definition = new { version = "", releasedate = "", dotnetversion = "", dev = false, released = false };
-                var enabledVersions = (from v in json["enabledversions"]
-                                       select JsonConvert.DeserializeAnonymousType(v.ToString(), definition)).ToList();
+                string updaterPath =
+                    Path.Combine(AWBDirectory, "AWBUpdater.exe");
 
-                string updaterVersion = json["updaterversion"].ToString();
+                string awbFileVersion =
+                    FileVersionInfo.GetVersionInfo(awbPath).FileVersion;
 
-                FileVersionInfo awbVersionInfo =
-                    FileVersionInfo.GetVersionInfo(AWBDirectory + "AutoWikiBrowser.exe");
+                string updaterFileVersion =
+                    FileVersionInfo.GetVersionInfo(updaterPath).FileVersion;
 
-                if (enabledVersions.Any(v => v.version == awbVersionInfo.FileVersion))
+                if (!Version.TryParse(awbFileVersion, out Version currentAwbVersion) ||
+                    !Version.TryParse(updaterFileVersion, out Version currentUpdaterVersion))
+                {
+                    Result = AWBEnabledStatus.Error;
+                    return;
+                }
+
+                var validEnabledVersions = versionPage.EnabledVersions
+                    .Where(item =>
+                        item != null &&
+                        Version.TryParse(item.Version, out _))
+                    .ToList();
+
+                if (validEnabledVersions.Any(item =>
+                        string.Equals(
+                            item.Version,
+                            awbFileVersion,
+                            StringComparison.OrdinalIgnoreCase)))
                 {
                     Result = AWBEnabledStatus.Enabled;
                 }
 
-                string updaterFileVersion = FileVersionInfo.GetVersionInfo(AWBDirectory + "AWBUpdater.exe").FileVersion;
-
-                if (Version.Parse(updaterFileVersion) < Version.Parse(updaterVersion))
+                if (currentUpdaterVersion < updaterVersion)
                 {
                     Result |= AWBEnabledStatus.UpdaterUpdate;
                 }
 
-                if ((Result & AWBEnabledStatus.Disabled) == AWBEnabledStatus.Disabled)
+                if ((Result & AWBEnabledStatus.Disabled) ==
+                    AWBEnabledStatus.Disabled)
                 {
-                    // If it's disabled, updates aren't optional!
                     return;
                 }
 
-                var awbVersionParsed = Version.Parse(awbVersionInfo.FileVersion);
+                var newerVersions = validEnabledVersions
+                    .Where(item =>
+                        !item.Dev &&
+                        Version.TryParse(item.Version, out Version candidateVersion) &&
+                        candidateVersion > currentAwbVersion)
+                    .Select(item => item.Version)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
-                var newerVersions = enabledVersions.Where(v => !v.dev && (Version.Parse(v.version) > awbVersionParsed))
-                    .Select(v => v.version);
-                // Dev versions aren't optional updates
-                if (newerVersions.Any())
+                if (newerVersions.Count > 0)
                 {
-                    NewerVersions.AddRange(newerVersions.ToArray());
+                    NewerVersions.AddRange(newerVersions);
                     Result |= AWBEnabledStatus.OptionalUpdate;
                 }
             }
-            catch
+            catch (JsonException)
+            {
+                Result = AWBEnabledStatus.Error;
+            }
+            catch (IOException)
+            {
+                Result = AWBEnabledStatus.Error;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Result = AWBEnabledStatus.Error;
+            }
+            catch (WebException)
             {
                 Result = AWBEnabledStatus.Error;
             }
