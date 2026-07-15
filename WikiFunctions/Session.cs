@@ -337,6 +337,70 @@ namespace WikiFunctions;
     }
 
     /// <summary>
+    /// Reads a Boolean property from a JSON object.
+    ///
+    /// Returns the supplied default value when the property is missing
+    /// or is not a Boolean.
+    /// </summary>
+    /// <param name="json">
+    /// The JSON object containing the property.
+    /// </param>
+    /// <param name="propertyName">
+    /// The name of the Boolean property to read.
+    /// </param>
+    /// <param name="defaultValue">
+    /// The value to return when the property is missing or invalid.
+    /// </param>
+    /// <returns>
+    /// The Boolean property value, or <paramref name="defaultValue"/>
+    /// if the property is unavailable.
+    /// </returns>
+    private static bool ReadBoolean(
+        JObject json,
+        string propertyName,
+        bool defaultValue = false)
+    {
+        if (json == null)
+            return defaultValue;
+
+        JToken token = json[propertyName];
+
+        return token?.Type == JTokenType.Boolean
+            ? token.Value<bool>()
+            : defaultValue;
+    }
+
+    /// <summary>
+    /// Reads an array of strings from a JSON object.
+    ///
+    /// Non-string values, empty strings, and missing properties are
+    /// ignored.
+    /// </summary>
+    /// <param name="json">
+    /// The JSON object containing the array.
+    /// </param>
+    /// <param name="propertyName">
+    /// The name of the array property to read.
+    /// </param>
+    /// <returns>
+    /// A list containing the string values in the array. If the property
+    /// is missing or is not an array, an empty list is returned.
+    /// </returns>
+    private static List<string> ReadStringArray(
+        JObject json,
+        string propertyName)
+    {
+        if (json?[propertyName] is not JArray values)
+            return new List<string>();
+
+        return values
+            .Where(token => token.Type == JTokenType.String)
+            .Select(token => token.Value<string>())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .ToList();
+    }
+
+    /// <summary>
     /// Refreshes the current wiki session state by loading site
     /// information, validating the running AWB version, downloading
     /// configuration pages, and determining the user's operational
@@ -456,9 +520,10 @@ namespace WikiFunctions;
 
             NoRETF = configJson["noregextypofix"].DistinctList();
 
-            // don't require approval if CheckPage does not exist
-            // Or it has the special config option...
-            if (CheckPageJSONText.Length < 1 || (bool)configJson["allusersenabled"])
+            // Don't require approval if CheckPage does not exist
+            // or the configuration explicitly enables all users.
+            if (CheckPageJSONText.Length < 1 ||
+                ReadBoolean(configJson, "allusersenabled"))
             {
                 IsBot = true;
                 return WikiStatusResult.Registered;
@@ -466,39 +531,47 @@ namespace WikiFunctions;
 
             var checkPageJson = JObject.Parse(CheckPageJSONText);
 
-            var enabledUsers = checkPageJson["enabledusers"].Select(u => u.ToString()).ToList();
-            var enabledBots = checkPageJson["enabledbots"].Select(u => u.ToString()).ToList();
+            List<string> enabledUsers =
+                ReadStringArray(
+                    checkPageJson,
+                    "enabledusers");
 
-            // CheckPage option: 'allusersenabledusermode' will enable all users for user mode,
-            // and enable bots only when in 'enabledbots' section
+            List<string> enabledBots =
+                ReadStringArray(
+                    checkPageJson,
+                    "enabledbots");
 
+            // CheckPage option: 'allusersenabledusermode' enables all users
+            // in user mode, while bot mode still requires membership in
+            // the 'enabledbots' section.
             var usernameComparer = new UsernameComparer();
-            // Optimization, saves running the check multiple times
-            bool isBotEnabled = enabledBots.Contains(User.Name, usernameComparer);
 
-            if (
-                (bool)configJson["allusersenabledusermode"] ||
+            // Optimization: avoid running the same comparison multiple times.
+            bool isBotEnabled =
+                enabledBots.Contains(User.Name, usernameComparer);
+
+            if (ReadBoolean(configJson, "allusersenabledusermode") ||
                 (IsSysop && Variables.Project != ProjectEnum.wikia) ||
                 isBotEnabled ||
-                enabledUsers.Contains(User.Name, usernameComparer)
-            )
+                enabledUsers.Contains(User.Name, usernameComparer))
             {
-                // enable bot mode if in bots section
+                // Enable bot mode only when the user is in the bot list.
                 IsBot = isBotEnabled;
 
                 return WikiStatusResult.Registered;
             }
 
-            if (Variables.Project != ProjectEnum.custom)
+            foreach (string globalUser in
+                ReadStringArray(
+                    versionJson,
+                    "globalusers"))
             {
-                foreach (string s in versionJson["globalusers"])
+                if (User.Name == globalUser)
                 {
-                    if (User.Name == s)
-                    {
-                        return WikiStatusResult.Registered;
-                    }
+                    return WikiStatusResult.Registered;
                 }
             }
+
             return WikiStatusResult.NotRegistered;
         }
         catch (Exception ex)
