@@ -30,7 +30,8 @@ namespace WikiFunctions
         /// </summary>
         private static void MakeNamespaceSpecificRegexes()
         {
-            NamespacesCaseInsensitive = new Dictionary<int, Regex>();
+            NamespacesCaseInsensitive = new();
+
             foreach (var p in Variables.NamespacesCaseInsensitive)
             {
                 NamespacesCaseInsensitive.Add(p.Key, new Regex(p.Value));
@@ -441,7 +442,7 @@ namespace WikiFunctions
         /// <summary>
         /// Dictionary of template redirects (as a nested template regex) and the actual template name
         /// </summary>
-        public static Dictionary<Regex, string> TemplateRedirects = new Dictionary<Regex, string>();
+        public static Dictionary<Regex, string> TemplateRedirects = new();
 
         /// <summary>
         /// Nested template regex to match all loaded template redirects from [[WP:AWB/TR]]
