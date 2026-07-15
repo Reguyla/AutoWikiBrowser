@@ -22,118 +22,168 @@ using WikiFunctions.Controls.Lists;
 
 namespace WikiFunctions.Lists.Providers;
 
-//TODO: normalize usage of FirstToUpperAndRemoveHashOnArray() and alikes
+// TODO: Consolidate category-name normalization helpers so list providers use
+// one consistent implementation for decoding titles, removing fragments,
+// adjusting capitalization, and stripping namespace prefixes.
 
 /// <summary>
-/// Gets a list of pages in Named Categories for the ListMaker (Non-Recursive)
+/// Retrieves pages contained directly in one or more named categories.
+/// Subcategories are not traversed.
 /// </summary>
 public class CategoryListProvider : CategoryProviderBase
 {
-    public override List<Article> MakeList(params string[] searchCriteria)
+    /// <inheritdoc />
+    public override List<Article> MakeList(
+        params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
-        foreach (string page in PrepareCategories(searchCriteria))
+        foreach (string category in PrepareCategories(searchCriteria))
         {
-            list.AddRange(GetListing(page, list.Count));
+            list.AddRange(
+                GetListing(category, list.Count));
         }
 
         return list;
     }
 
-    public override string DisplayText
-    { get { return "Category"; } }
+    /// <inheritdoc />
+    public override string DisplayText => "Category";
 }
 
 /// <summary>
-/// Gets a list of pages in Named Categories for the ListMaker (Recursive - Will visit ALL subcategories)
+/// Retrieves pages from one or more named categories and recursively
+/// traverses their subcategories.
 /// </summary>
 public class CategoryRecursiveListProvider : CategoryProviderBase
 {
-    #region Internals
+    /// <summary>
+    /// The maximum supported category recursion depth.
+    /// </summary>
     public const int MaxDepth = 30;
 
-    int depth = MaxDepth;
+    private int _depth = MaxDepth;
+
     /// <summary>
-    /// Maximum recursion depth during category scan
+    /// Gets or sets the maximum number of subcategory levels traversed
+    /// during a category scan.
     /// </summary>
     public int Depth
     {
-        get { return depth; }
-        set { depth = Math.Min(value, MaxDepth); }
+        get => _depth;
+        set => _depth = Math.Clamp(value, 0, MaxDepth);
     }
-    #endregion
 
+    /// <summary>
+    /// Initializes a provider using the maximum recursion depth.
+    /// </summary>
     public CategoryRecursiveListProvider()
         : this(MaxDepth)
-    { }
+    {
+    }
 
+    /// <summary>
+    /// Initializes a provider using the specified recursion depth.
+    /// </summary>
+    /// <param name="depth">
+    /// The number of subcategory levels to traverse.
+    /// </param>
     public CategoryRecursiveListProvider(int depth)
     {
         Depth = depth;
         Limit = 200000;
     }
 
-    public override List<Article> MakeList(params string[] searchCriteria)
+    /// <inheritdoc />
+    public override List<Article> MakeList(
+        params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         lock (Visited)
         {
             Visited.Clear();
-            foreach (string page in PrepareCategories(searchCriteria))
+
+            try
             {
-                list.AddRange(RecurseCategory(page, list.Count, Depth));
+                foreach (string category in
+                         PrepareCategories(searchCriteria))
+                {
+                    list.AddRange(
+                        RecurseCategory(
+                            category,
+                            list.Count,
+                            Depth));
+                }
             }
-            Visited.Clear();
+            finally
+            {
+                Visited.Clear();
+            }
         }
 
         return list;
     }
 
-    public override string DisplayText
-    { get { return "Category (recursive)"; } }
+    /// <inheritdoc />
+    public override string DisplayText =>
+        "Category (recursive)";
 }
 
 /// <summary>
-/// Gets a list of pages in Named Categories for the ListMaker (Recursive - Will visit 1 level of subcategories)
+/// Retrieves pages from named categories and traverses one level of
+/// subcategories.
 /// </summary>
-public class CategoryRecursiveOneLevelListProvider : CategoryRecursiveListProvider
+public class CategoryRecursiveOneLevelListProvider
+    : CategoryRecursiveListProvider
 {
+    /// <summary>
+    /// Initializes a provider configured to traverse one subcategory level.
+    /// </summary>
     public CategoryRecursiveOneLevelListProvider()
         : base(1)
-    { }
-
-    public override string DisplayText
     {
-        get { return "Category (recurse 1 level)"; }
     }
+
+    /// <inheritdoc />
+    public override string DisplayText =>
+        "Category (recurse 1 level)";
 }
 
 /// <summary>
-/// Gets a list of pages in Named Categories for the ListMaker (Recursive - Will visit the specified number of levels of subcategories)
+/// Retrieves pages from named categories using a recursion depth selected
+/// by the user.
 /// </summary>
-public class CategoryRecursiveUserDefinedLevelListProvider : CategoryRecursiveListProvider
+public class CategoryRecursiveUserDefinedLevelListProvider
+    : CategoryRecursiveListProvider
 {
+    /// <summary>
+    /// Initializes a provider whose recursion depth is selected when the
+    /// list is generated.
+    /// </summary>
     public CategoryRecursiveUserDefinedLevelListProvider()
         : base(0)
-    { }
-
-    public override List<Article> MakeList(params string[] searchCriteria)
     {
-        int userDepth = Tools.GetNumberFromUser(false, 1000);
+    }
+
+    /// <inheritdoc />
+    public override List<Article> MakeList(
+        params string[] searchCriteria)
+    {
+        int userDepth =
+            Tools.GetNumberFromUser(false, MaxDepth);
+
         if (userDepth < 0)
-            return new List<Article>();
+            return new();
 
         Depth = userDepth;
 
         return base.MakeList(searchCriteria);
     }
 
-    public override string DisplayText
-    {
-        get { return "Category (recurse user defined level)"; }
-    }
+    /// <inheritdoc />
+    public override string DisplayText =>
+        "Category (recurse user defined level)";
 }
 
 /// <summary>
