@@ -22,146 +22,210 @@ using WikiFunctions.API;
 namespace WikiFunctions.Lists.Providers;
 
 /// <summary>
-/// Parent abstract class for all API-based providers
-/// currently simultaneous call of more than one API generator is not fully supported
+/// Provides the shared implementation for MediaWiki API list providers
+/// that process XML responses.
 /// </summary>
+/// <remarks>
+/// Simultaneous use of more than one API generator is not fully supported.
+/// </remarks>
 public abstract class ApiListProviderBase : IListProvider
 {
-    #region Internals
-    protected ApiListProviderBase()
-    {
-        Limit = 25000;
-    }
-
-    #endregion
-
     /// <summary>
-    /// Gets the list of XML elements that represent pages,
-    /// e.g. &lt;p>, &lt;cm>, &lt;bl> etc
+    /// Gets the XML element names that represent pages, such as
+    /// <c>p</c>, <c>cm</c>, or <c>bl</c>.
     /// </summary>
     protected abstract ICollection<string> PageElements { get; }
 
     /// <summary>
-    /// 
+    /// Gets the API action names supported by this provider.
     /// </summary>
     protected abstract ICollection<string> Actions { get; }
 
     /// <summary>
-    /// Upper limit for number of pages returned, could be a bit exceeded by number of pages in the last request
+    /// Gets or sets the approximate maximum number of pages returned.
+    /// The final API response may cause this value to be exceeded slightly.
     /// </summary>
-    public int Limit { get; set; }
+    public int Limit { get; set; } = 25000;
 
+    /// <summary>
+    /// Identifies the XML attribute containing the value used as the
+    /// article title.
+    /// </summary>
     protected string WantedAttribute = "title";
 
     /// <summary>
-    /// Main function that retrieves the list from API, including paging
+    /// Retrieves pages from the MediaWiki API, following continuation
+    /// responses until the configured limit is reached.
     /// </summary>
-    /// <param name="url">URL of API request</param>
-    /// <param name="haveSoFar">Number of pages already retrieved, for upper limit control</param>
-    /// <returns>List of pages</returns>
-    public List<Article> ApiMakeList(string url, int haveSoFar)
+    /// <param name="url">The API request query string.</param>
+    /// <param name="haveSoFar">
+    /// The number of pages already retrieved by the current list operation.
+    /// </param>
+    /// <returns>The pages returned by the API.</returns>
+    public List<Article> ApiMakeList(
+        string url,
+        int haveSoFar)
     {
-        if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
+        if (Globals.UnitTestMode)
+        {
+            throw new InvalidOperationException(
+                "Wikipedia should not be accessed during unit tests.");
+        }
 
-        // TODO: error handling
-        List<Article> list = new List<Article>();
-        string postfix = "";
+        List<Article> list = new();
+        string postfix = string.Empty;
 
-        string newUrl = url;
-
-        ApiEdit editor = Variables.MainForm.TheSession.Editor.SynchronousEditor;
+        ApiEdit editor =
+            Variables.MainForm.TheSession.Editor.SynchronousEditor;
 
         while (list.Count + haveSoFar < Limit)
         {
             string text;
+
             try
             {
-                // API continuation needs updating https://phabricator.wikimedia.org/T104684
-                text = editor.QueryApi(newUrl + "&rawcontinue=1" + postfix); // HACK: Hacky hack hack
+                // TODO:
+                // Replace legacy rawcontinue/query-continue handling with
+                // MediaWiki's modern continuation format while preserving
+                // provider paging and limit behavior.
+                text = editor.QueryApi(
+                    url + "&rawcontinue=1" + postfix);
             }
-            catch (WebException webex)
+            catch (WebException ex)
             {
-                if (Tools.HandleHttpException(webex))
-                {
+                if (Tools.HandleHttpException(ex))
                     continue;
-                }
-                throw;  // Or let it bubble up to a generic handler 
+
+                throw;
             }
 
+            using XmlTextReader xml =
+                new(new StringReader(text))
+                {
+                    DtdProcessing = DtdProcessing.Prohibit,
+                    XmlResolver = null
+                };
 
-            XmlTextReader xml = new XmlTextReader(new StringReader(text));
             xml.MoveToContent();
-            postfix = "";
+            postfix = string.Empty;
 
             while (xml.Read())
             {
                 if (xml.Name == "query-continue")
                 {
-                    XmlReader r = xml.ReadSubtree();
+                    using XmlReader continuationReader =
+                        xml.ReadSubtree();
 
-                    r.Read();
+                    continuationReader.Read();
 
-                    while (r.Read())
+                    while (continuationReader.Read())
                     {
-                        if (!r.IsStartElement()) continue;
-                        if (!r.MoveToFirstAttribute())
-                            throw new FormatException("Malformed element '" + r.Name + "' in <query-continue>");
-                        postfix += $"&{r.Name}={WebUtility.UrlEncode(r.Value)}";
+                        if (!continuationReader.IsStartElement())
+                            continue;
+
+                        if (!continuationReader.MoveToFirstAttribute())
+                        {
+                            throw new FormatException(
+                                $"Malformed element " +
+                                $"'{continuationReader.Name}' " +
+                                "in <query-continue>.");
+                        }
+
+                        postfix +=
+                            $"&{continuationReader.Name}=" +
+                            WebUtility.UrlEncode(
+                                continuationReader.Value);
                     }
                 }
-                else if (PageElements.Contains(xml.Name) && xml.IsStartElement())
+                else if (PageElements.Contains(xml.Name) &&
+                         xml.IsStartElement())
                 {
                     if (!EvaluateXmlElement(xml))
                         continue;
 
-                    int ns;
-                    bool nsvalid = int.TryParse(xml.GetAttribute("ns"), out ns);
-                    string name = xml.GetAttribute(WantedAttribute);
+                    bool namespaceIsValid =
+                        int.TryParse(
+                            xml.GetAttribute("ns"),
+                            out int namespaceId);
+
+                    string name =
+                        xml.GetAttribute(WantedAttribute);
 
                     if (string.IsNullOrEmpty(name))
                     {
-                        System.Windows.Forms.MessageBox.Show(xml.ReadInnerXml());
+                        Tools.WriteDebug(
+                            nameof(ApiMakeList),
+                            $"An API page element did not contain the " +
+                            $"required '{WantedAttribute}' attribute.");
+
                         break;
                     }
 
-                    list.Add(nsvalid && ns >= 0 ? new Article(name, ns) : new Article(name));
+                    list.Add(
+                        namespaceIsValid && namespaceId >= 0
+                            ? new Article(name, namespaceId)
+                            : new Article(name));
                 }
             }
-            if (string.IsNullOrEmpty(postfix)) break;
+
+            if (string.IsNullOrEmpty(postfix))
+                break;
         }
 
         return list;
     }
 
     /// <summary>
-    /// Allows for customized evaluation of the Xml element, as it is ok to add this element to the article list
+    /// Determines whether the current XML element may be added to the
+    /// article list.
     /// </summary>
-    /// <param name="xml">XmlTextReader at which the current element is to be evaluated</param>
-    /// <returns>Whether this element can be added</returns>
-    protected virtual bool EvaluateXmlElement(XmlTextReader xml)
-    {
-        return true;
-    }
+    /// <param name="xml">
+    /// The XML reader positioned on the element to evaluate.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the element may be added; otherwise, <c>false</c>.
+    /// </returns>
+    protected virtual bool EvaluateXmlElement(
+        XmlTextReader xml) =>
+        true;
 
-    public virtual bool StripUrl
-    {
-        get { return false; }
-    }
+    /// <summary>
+    /// Gets whether URL information should be removed from returned values.
+    /// </summary>
+    public virtual bool StripUrl => false;
 
-    #region To be overridden
+    /// <summary>
+    /// Creates an article list using the supplied search criteria.
+    /// </summary>
+    /// <param name="searchCriteria">
+    /// The provider-specific search criteria.
+    /// </param>
+    /// <returns>The matching articles.</returns>
+    public abstract List<Article> MakeList(
+        params string[] searchCriteria);
 
-    public abstract List<Article> MakeList(params string[] searchCriteria);
-
+    /// <summary>
+    /// Gets the text displayed for this provider in the list-source UI.
+    /// </summary>
     public abstract string DisplayText { get; }
 
+    /// <summary>
+    /// Gets the text displayed beside the provider input field.
+    /// </summary>
     public abstract string UserInputTextBoxText { get; }
 
+    /// <summary>
+    /// Gets whether the provider input field is enabled.
+    /// </summary>
     public abstract bool UserInputTextBoxEnabled { get; }
 
+    /// <summary>
+    /// Performs any provider-specific action required when it is selected.
+    /// </summary>
     public abstract void Selected();
 
-    public virtual bool RunOnSeparateThread
-    { get { return true; } }
-
-    #endregion
+    /// <summary>
+    /// Gets whether list generation should run on a separate thread.
+    /// </summary>
+    public virtual bool RunOnSeparateThread => true;
 }
