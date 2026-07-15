@@ -351,6 +351,9 @@ namespace WikiFunctions;
 
             JObject versionJson = JObject.Parse(Updater.GlobalVersionPage);
 
+            // TODO:
+            // Evaluate externally supplied regular expressions with a timeout to
+            // prevent pathological patterns from blocking the UI.
             if (versionJson["badnames"] is JArray badNames)
             {
                 foreach (JToken badNameToken in badNames)
