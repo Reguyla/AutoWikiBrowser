@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -536,23 +537,55 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Downloads and parses a JSON object from the specified URL.
         /// </summary>
-        /// <param name="url">The URL of the webpage.</param>
-        /// <returns></returns>
+        /// <param name="url">
+        /// The URL to retrieve.
+        /// </param>
+        /// <returns>
+        /// The parsed JSON object.
+        /// </returns>
+        /// <exception cref="JsonException">
+        /// The response did not contain valid JSON.
+        /// </exception>
         public static JObject GetJObjectFromUrl(string url)
         {
-            return JObject.Parse(GetHTML(url));
+            return GetJObjectFromText(GetHTML(url));
         }
 
         /// <summary>
-        /// 
+        /// Parses a JSON object using bounded reader settings.
         /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
+        /// <param name="text">
+        /// The JSON text to parse.
+        /// </param>
+        /// <returns>
+        /// The parsed JSON object.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// The supplied text is empty.
+        /// </exception>
+        /// <exception cref="JsonException">
+        /// The supplied text is not valid JSON.
+        /// </exception>
         public static JObject GetJObjectFromText(string text)
         {
-            return JObject.Parse(text);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                throw new ArgumentException(
+                    "JSON text cannot be empty.",
+                    nameof(text));
+            }
+
+            using var stringReader = new StringReader(text);
+
+            using var jsonReader = new JsonTextReader(stringReader)
+            {
+                MaxDepth = 32,
+                DateParseHandling = DateParseHandling.None
+            };
+
+            return JObject.Load(jsonReader);
         }
 
 #if !MONO
