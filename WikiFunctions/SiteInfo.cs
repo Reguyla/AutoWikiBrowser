@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.Net;
@@ -245,22 +246,50 @@ namespace WikiFunctions
             // If it's false, we should look again incase it's been defined...
             if (awbTagDefined == null || awbTagDefined == false)
             {
-                var obj = JObject.Parse(
-                    Editor.HttpGet(ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max")
-                );
+                string response = Editor.HttpGet(
+    ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
 
-                if (obj["error"] != null)
+                if (string.IsNullOrWhiteSpace(response))
+                    return;
+
+                JObject obj;
+
+                try
                 {
-                    // We probably got "code": "readapidenied", due to a "private" wiki
-                    //if (obj["error"]["code"].ToString() == "readapidenied")
-                    //{
-                    //    Variables.TryLoadingAgainAfterLogin ???
-                    //    throw new ReadApiDeniedException();
-                    //}
+                    using (var stringReader = new StringReader(response))
+                    using (var jsonReader = new JsonTextReader(stringReader)
+                    {
+                        MaxDepth = 32,
+                        DateParseHandling = DateParseHandling.None
+                    })
+                    {
+                        obj = JObject.Load(jsonReader);
+                    }
+                }
+                catch (JsonException)
+                {
                     return;
                 }
 
-                awbTagDefined = obj["query"]["tags"].Any(t => (string)t["name"] == "AWB" && t["active"] != null);
+                if (obj["error"] != null)
+                {
+                    return;
+                }
+
+                if (obj["query"]?["tags"] is not JArray tags)
+                {
+                    return;
+                }
+
+                awbTagDefined = tags
+                    .OfType<JObject>()
+                    .Any(tag =>
+                        tag["name"]?.Type == JTokenType.String &&
+                        string.Equals(
+                            tag.Value<string>("name"),
+                            "AWB",
+                            StringComparison.Ordinal) &&
+                        tag["active"] != null);
 
                 ObjectCache.Global.Set("AWBTagDefined:" + scriptPath, awbTagDefined);
             }
