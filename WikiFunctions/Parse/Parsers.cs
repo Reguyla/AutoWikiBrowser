@@ -44,38 +44,75 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// 
+    /// Initializes the regular expressions used to preserve problematic
+    /// Unicode entities, normalize wiki markup, and process selected HTML tags.
     /// </summary>
     static Parsers()
     {
-        //look bad if changed
-        RegexUnicode.Add(new Regex("&(apos|ndash|mdash|minus|times|lt|gt|nbsp|thinsp|zwnj|shy|lrm|rlm|[Pp]rime|ensp|emsp|#x2011|#820[13]|#8239);"), "&amp;$1;");
-        //IE6 does like these
-        RegexUnicode.Add(new Regex("&#(705|803|596|620|699|700|8652|9408|9848|12288|160|61|x27|39);"), "&amp;#$1;");
+        // Preserve entities whose decoded characters may display or behave
+        // incorrectly when changed.
+        RegexUnicode.Add(
+            new("&(apos|ndash|mdash|minus|times|lt|gt|nbsp|thinsp|zwnj|shy|lrm|rlm|[Pp]rime|ensp|emsp|#x2011|#820[13]|#8239);"),
+            "&amp;$1;");
 
-        //Decoder doesn't like these
-        RegexUnicode.Add(new Regex("&#(x109[0-9A-Z]{2});"), "&amp;#$1;");
-        RegexUnicode.Add(new Regex("&#((?:277|119|84|x1D|x100)[A-Z0-9a-z]{2,3});"), "&amp;#$1;");
-        RegexUnicode.Add(new Regex("&#(x12[A-Za-z0-9]{3}|65536|769);"), "&amp;#$1;");
+        // Preserve entities that legacy Internet Explorer versions do not
+        // handle correctly.
+        RegexUnicode.Add(
+            new("&#(705|803|596|620|699|700|8652|9408|9848|12288|160|61|x27|39);"),
+            "&amp;#$1;");
 
-        // Preserve 5-digit hexadecimal entities because WebUtility.HtmlDecode
-        // does not handle them correctly for this normalization path.
-        RegexUnicode.Add(new Regex("&#(x[A-Fa-f0-9]{5});"), "&amp;#$1;");
+        // Preserve entities that the decoder does not handle correctly.
+        RegexUnicode.Add(
+            new("&#(x109[0-9A-Z]{2});"),
+            "&amp;#$1;");
 
-        //interfere with wiki syntax
-        RegexUnicode.Add(new Regex("&#(0?13|126|x5[BD]|x7[bcd]|0?9[13]|0?12[345]|0?0?3[92]);", RegexOptions.IgnoreCase), "&amp;#$1;");
+        RegexUnicode.Add(
+            new("&#((?:277|119|84|x1D|x100)[A-Z0-9a-z]{2,3});"),
+            "&amp;#$1;");
 
-        // get badmd5 error from API on save due to WebRequest::normalizeUnicode (https://svn.wikimedia.org/doc/classWebRequest.html#ac1b762873fc2f0fe661499cfc116a9da) in API code
-        RegexUnicode.Add(new Regex("&#(x232[A9]);"), "&amp;#$1;");
+        RegexUnicode.Add(
+            new("&#(x12[A-Za-z0-9]{3}|65536|769);"),
+            "&amp;#$1;");
 
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Greedy_regex_for_unicode_characters
-        // .NET doesn't seem to like the Unicode versions of these – deleted from edit box
-        RegexUnicode.Add(new Regex("&#(x2[0-9AB][0-9A-Fa-f]{3});"), "&amp;#$1;");
+        // Preserve five-digit hexadecimal entities because
+        // WebUtility.HtmlDecode does not handle them correctly in this
+        // normalization path.
+        RegexUnicode.Add(
+            new("&#(x[A-Fa-f0-9]{5});"),
+            "&amp;#$1;");
 
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Commons_category
-        RegexConversion.Add(new Regex(@"({{[Cc]ommons cat(?:egory)?\|\s*)([^{}\|]+?)\s*\|\s*\2\s*}}"), @"$1$2}}");
+        // Preserve entities whose decoded characters could interfere with
+        // wiki syntax.
+        RegexUnicode.Add(
+            new(
+                "&#(0?13|126|x5[BD]|x7[bcd]|0?9[13]|0?12[345]|0?0?3[92]);",
+                RegexOptions.IgnoreCase),
+            "&amp;#$1;");
 
-        RegexConversion.Add(new Regex(@"({{\s*[Cc]itation needed\s*\|)\s*(?:[Dd]ate:)?([A-Z][a-z]+ 20\d\d)\s*\|\s*(date\s*=\s*\2\s*}})", RegexOptions.IgnoreCase), @"$1$3");
+        // Preserve characters that can cause a badmd5 API error after
+        // MediaWiki WebRequest Unicode normalization.
+        RegexUnicode.Add(
+            new("&#(x232[A9]);"),
+            "&amp;#$1;");
+
+        // Preserve Unicode characters that .NET may remove from the edit box.
+        // See: https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Greedy_regex_for_unicode_characters
+        RegexUnicode.Add(
+            new("&#(x2[0-9AB][0-9A-Fa-f]{3});"),
+            "&amp;#$1;");
+
+        // Remove a duplicated Commons category parameter.
+        // See: https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Commons_category
+        RegexConversion.Add(
+            new(@"({{[Cc]ommons cat(?:egory)?\|\s*)([^{}\|]+?)\s*\|\s*\2\s*}}"),
+            @"$1$2}}");
+
+        // Remove a duplicated date parameter from citation-needed templates.
+        RegexConversion.Add(
+            new(
+                @"({{\s*[Cc]itation needed\s*\|)\s*(?:[Dd]ate:)?([A-Z][a-z]+ 20\d\d)\s*\|\s*(date\s*=\s*\2\s*}})",
+                RegexOptions.IgnoreCase),
+            @"$1$3");
 
         SmallTagRegexes.Add(WikiRegexes.SupSub);
         SmallTagRegexes.Add(WikiRegexes.FileNamespaceLink);
