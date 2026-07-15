@@ -1162,6 +1162,9 @@ namespace WikiFunctions.Controls.Lists
             List<Article> list = GetArticleList();
             lbArticles.Items.Clear();
             Add(Tools.ConvertToTalk(list));
+
+            if (lbArticles.Items.Count == 0)
+                lbArticles.HorizontalExtent = 0;
         }
 
         /// <summary>
