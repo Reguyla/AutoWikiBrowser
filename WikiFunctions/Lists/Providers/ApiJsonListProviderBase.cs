@@ -44,15 +44,30 @@ namespace WikiFunctions.Lists.Providers
         /// <returns>List of pages</returns>
         public List<Article> ApiMakeList(string url, int haveSoFar)
         {
-            if (Globals.UnitTestMode) throw new Exception("You shouldn't access Wikipedia from unit tests");
+            if (Globals.UnitTestMode)
+            {
+                throw new InvalidOperationException(
+                    "Wikipedia should not be accessed during unit tests.");
+            }
 
-            ApiEdit editor = Variables.MainForm.TheSession.Editor.SynchronousEditor;
+            ApiEdit editor =
+                Variables.MainForm.TheSession.Editor.SynchronousEditor;
 
-            var json = JObject.Parse(editor.QueryApiJson(url));
+            string responseJson = editor.QueryApiJson(url);
 
-            var titles = from t in json["query"]["pageswithprop"] select (string)t["title"];
+            if (string.IsNullOrWhiteSpace(responseJson))
+                return new List<Article>();
 
-            return titles.Select(title => new Article(title)).ToList();
+            JObject json = JObject.Parse(responseJson);
+
+            if (json["query"]?["pageswithprop"] is not JArray pages)
+                return new List<Article>();
+
+            return pages
+                .Select(page => page["title"]?.ToString())
+                .Where(title => !string.IsNullOrWhiteSpace(title))
+                .Select(title => new Article(title))
+                .ToList();
         }
 
         public virtual bool StripUrl
