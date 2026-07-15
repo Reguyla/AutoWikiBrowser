@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using WikiFunctions.API;
@@ -58,15 +59,34 @@ namespace WikiFunctions.Lists.Providers
             if (string.IsNullOrWhiteSpace(responseJson))
                 return new List<Article>();
 
-            JObject json = JObject.Parse(responseJson);
+            JObject json;
+
+            try
+            {
+                using var stringReader = new StringReader(responseJson);
+                using var jsonReader = new JsonTextReader(stringReader)
+                {
+                    MaxDepth = 64,
+                    DateParseHandling = DateParseHandling.None
+                };
+
+                json = JObject.Load(jsonReader);
+            }
+            catch (JsonReaderException)
+            {
+                return new List<Article>();
+            }
 
             if (json["query"]?["pageswithprop"] is not JArray pages)
                 return new List<Article>();
 
             return pages
-                .Select(page => page["title"]?.ToString())
+                .OfType<JObject>()
+                .Select(page => page["title"])
+                .Where(title => title?.Type == JTokenType.String)
+                .Select(title => title!.Value<string>())
                 .Where(title => !string.IsNullOrWhiteSpace(title))
-                .Select(title => new Article(title))
+                .Select(title => new Article(title!))
                 .ToList();
         }
 
