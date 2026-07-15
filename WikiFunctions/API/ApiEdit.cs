@@ -58,36 +58,48 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ApiEdit" /> class.
+    /// Initializes a new instance of the <see cref="ApiEdit"/> class.
     /// </summary>
-    /// <param name="url">Path to scripts on server</param>
-    /// <param name="usePHP5">Whether a .php5 extension is to be used</param>
+    /// <param name="url">The absolute path to the wiki scripts directory.</param>
+    /// <param name="usePHP5">
+    /// Whether API script requests should use the legacy <c>.php5</c>
+    /// extension.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="url"/> is empty, whitespace, or not a valid absolute URI.
+    /// </exception>
     public ApiEdit(string url, bool usePHP5)
         : this()
     {
-        if (string.IsNullOrEmpty(url)) throw new ArgumentException("Invalid URL specified", "url");
-        //if (!url.StartsWith("http://")) throw new NotSupportedException("Only editing via HTTP is currently supported");
+        ArgumentException.ThrowIfNullOrWhiteSpace(url);
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri projectUri))
+        {
+            throw new ArgumentException(
+                "A valid absolute wiki URL is required.",
+                nameof(url));
+        }
 
         URL = url;
         PHP5 = usePHP5;
         ApiURL = URL + "api.php" + (PHP5 ? "5" : "");
         Maxlag = 5;
 
-        IWebProxy proxy;
-        if (ProxyCache.TryGetValue(url, out proxy))
+        if (ProxyCache.TryGetValue(url, out IWebProxy proxy))
         {
             ProxySettings = proxy;
         }
-        // GetSystemWebProxy doesn't work under Linux (no IE settings to find) and can cause 60-second timeout, so skip proxy lookup under Linux
+        // System proxy discovery can cause a long timeout on Linux because
+        // Windows Internet Options are not available there.
         else if (!Globals.UsingLinux)
         {
-            ProxySettings = WebRequest.GetSystemWebProxy();
+            IWebProxy systemProxy = WebRequest.GetSystemWebProxy();
 
-            if (ProxySettings.IsBypassed(new Uri(url)))
-            {
-                ProxySettings = null;
-            }
-            ProxyCache.Add(url, ProxySettings);
+            ProxySettings = systemProxy.IsBypassed(projectUri)
+                ? null
+                : systemProxy;
+
+            ProxyCache[url] = ProxySettings;
         }
     }
 
