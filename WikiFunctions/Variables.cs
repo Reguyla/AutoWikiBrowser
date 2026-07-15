@@ -149,7 +149,7 @@ namespace WikiFunctions
         /// <summary>
         /// Provides access to the en namespace keys e.g. Category:
         /// </summary>
-        public static readonly Dictionary<int, string> CanonicalNamespaces = new Dictionary<int, string>(20);
+        public static readonly Dictionary<int, string> CanonicalNamespaces = new(20);
 
         /// <summary>
         /// Canonical namespace aliases
@@ -159,7 +159,7 @@ namespace WikiFunctions
         /// <summary>
         /// Provides access to the namespace keys e.g. Category:
         /// </summary>
-        public static Dictionary<int, string> Namespaces = new Dictionary<int, string>(40);
+        public static Dictionary<int, string> Namespaces = new(40);
 
         /// <summary>
         /// Aliases for current namespaces
@@ -169,12 +169,12 @@ namespace WikiFunctions
         /// <summary>
         /// Provides access to the namespace keys in a form so the first letter is case insensitive e.g. [Ww]ikipedia:
         /// </summary>
-        public static readonly Dictionary<int, string> NamespacesCaseInsensitive = new Dictionary<int, string>(24);
+        public static readonly Dictionary<int, string> NamespacesCaseInsensitive = new(24);
 
         /// <summary>
         /// 
         /// </summary>
-        public static Dictionary<string, List<string>> MagicWords = new Dictionary<string, List<string>>();
+        public static Dictionary<string, List<string>> MagicWords = new();
 
         /// <summary>
         /// Gets a URL of the site, e.g. "https://en.wikipedia.org/w/"
@@ -392,7 +392,7 @@ namespace WikiFunctions
 
         internal static Dictionary<int, List<string>> PrepareAliases(Dictionary<int, string> namespaces)
         {
-            Dictionary<int, List<string>> ret = new Dictionary<int, List<string>>(namespaces.Count);
+            Dictionary<int, List<string>> ret = new(namespaces.Count);
 
             // fill aliases with empty lists, to avoid KeyNotFoundException
             foreach (int n in namespaces.Keys)
