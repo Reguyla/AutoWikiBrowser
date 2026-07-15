@@ -18,118 +18,191 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace WikiFunctions.Lists.Providers;
 
+/// <summary>
+/// Provides shared MediaWiki category-listing and recursive category
+/// traversal behavior for category-based list providers.
+/// </summary>
 public abstract class CategoryProviderBase : ApiListProviderBase
 {
-    #region Overrides: <categorymembers>/<cm>
-    readonly List<string> pe = new List<string>(new[] { "cm" });
-    protected override ICollection<string> PageElements
-    {
-        get { return pe; }
-    }
+    private readonly List<string> _pageElements = new() { "cm" };
+    private readonly List<string> _actions = new() { "categorymembers" };
 
-    readonly List<string> ac = new List<string>(new[] { "categorymembers" });
-    protected override ICollection<string> Actions
-    {
-        get { return ac; }
-    }
+    /// <summary>
+    /// Gets the XML element names that represent category members.
+    /// </summary>
+    protected override ICollection<string> PageElements =>
+        _pageElements;
 
+    /// <summary>
+    /// Gets the MediaWiki API list action used to retrieve category members.
+    /// </summary>
+    protected override ICollection<string> Actions =>
+        _actions;
+
+    /// <inheritdoc />
     public override string UserInputTextBoxText
     {
         get
         {
-            string value;
-            if (Variables.Namespaces.TryGetValue(Namespace.Category, out value))
+            if (Variables.Namespaces.TryGetValue(
+                Namespace.Category,
+                out string value))
             {
                 return value;
             }
-            else
-            {
-                return Variables.CanonicalNamespaces[Namespace.Category];
-            }
+
+            return Variables.CanonicalNamespaces[Namespace.Category];
         }
     }
 
-    public override void Selected() { }
+    /// <inheritdoc />
+    public override void Selected()
+    {
+    }
 
-    public override bool UserInputTextBoxEnabled
-    { get { return true; } }
-
-    #endregion
+    /// <inheritdoc />
+    public override bool UserInputTextBoxEnabled => true;
 
     /// <summary>
-    /// Gets the content of the given categor(y/ies)
+    /// Gets the pages and subcategories contained in the specified category.
     /// </summary>
-    /// <param name="category">Category name. Must be WITHOUT the Category: prefix</param>
-    /// <param name="haveSoFar">Number of pages already retrieved, for upper limit control</param>
-    /// <returns>List of pages</returns>
-    public List<Article> GetListing(string category, int haveSoFar)
+    /// <param name="category">
+    /// The category name without the <c>Category:</c> prefix.
+    /// </param>
+    /// <param name="haveSoFar">
+    /// The number of pages already retrieved by the current list operation.
+    /// </param>
+    /// <returns>The category members returned by the MediaWiki API.</returns>
+    public List<Article> GetListing(
+        string category,
+        int haveSoFar)
     {
         string url =
-            "&list=categorymembers&cmtitle=Category:" +
-            WebUtility.UrlEncode(category) +
-            "&cmlimit=max";
+            $"&list=categorymembers&cmtitle=Category:" +
+            $"{WebUtility.UrlEncode(category)}&cmlimit=max";
 
-        return ApiMakeList(url, 0);
+        return ApiMakeList(url, haveSoFar);
     }
 
-    public List<Article> GetListing(string category)
+    /// <summary>
+    /// Gets the pages and subcategories contained in the specified category.
+    /// </summary>
+    /// <param name="category">
+    /// The category name without the <c>Category:</c> prefix.
+    /// </param>
+    /// <returns>The category members returned by the MediaWiki API.</returns>
+    public List<Article> GetListing(string category) =>
+        GetListing(category, 0);
+
+    /// <summary>
+    /// Tracks normalized category names already visited during recursive
+    /// category traversal.
+    /// </summary>
+    protected readonly List<string> Visited = new();
+
+    /// <summary>
+    /// Recursively retrieves pages from a category and its subcategories.
+    /// </summary>
+    /// <param name="category">
+    /// The category name without the <c>Category:</c> prefix.
+    /// </param>
+    /// <param name="haveSoFar">
+    /// The number of pages already retrieved by the current list operation.
+    /// </param>
+    /// <param name="depth">
+    /// The maximum number of subcategory levels to traverse.
+    /// </param>
+    /// <returns>The pages retrieved from the category tree.</returns>
+    public List<Article> RecurseCategory(
+        string category,
+        int haveSoFar,
+        int depth)
     {
-        return GetListing(category, 0);
-    }
+        if (haveSoFar >= Limit || depth < 0)
+            return new();
 
-    protected readonly List<string> Visited = new List<string>();
+        category =
+            Tools.TurnFirstToUpper(
+                Tools.WikiDecode(category));
 
-    public List<Article> RecurseCategory(string category, int haveSoFar, int depth)
-    {
-        if (haveSoFar > Limit || depth < 0) return new List<Article>();
+        if (Visited.Contains(category))
+            return new();
 
-        // normalise category name
-        category = Tools.TurnFirstToUpper(Tools.WikiDecode(category));
-        if (!Visited.Contains(category))
-            Visited.Add(category);
-        else
-            return new List<Article>();
+        Visited.Add(category);
 
-        List<Article> list = GetListing(category, haveSoFar);
+        List<Article> list =
+            GetListing(category, haveSoFar);
 
-        List<Article> fromSubcats = null;
-        if (depth > 0 && haveSoFar + list.Count < Limit)
+        if (depth == 0 ||
+            haveSoFar + list.Count >= Limit)
         {
-            foreach (Article pg in list)
-            {
-                if (haveSoFar + list.Count > Limit) break;
-
-                if (pg.NameSpaceKey == Namespace.Category && !Visited.Contains(pg.Name))
-                {
-                    if (fromSubcats == null) fromSubcats = new List<Article>();
-                    fromSubcats.AddRange(RecurseCategory(pg.NamespacelessName, haveSoFar + list.Count, depth - 1));
-                }
-            }
+            return list;
         }
-        if (fromSubcats != null && fromSubcats.Count > 0) list.AddRange(fromSubcats);
+
+        List<Article> fromSubcategories = new();
+
+        foreach (Article page in list)
+        {
+            if (haveSoFar + list.Count +
+                fromSubcategories.Count >= Limit)
+            {
+                break;
+            }
+
+            if (page.NameSpaceKey != Namespace.Category ||
+                Visited.Contains(page.Name))
+            {
+                continue;
+            }
+
+            fromSubcategories.AddRange(
+                RecurseCategory(
+                    page.NamespacelessName,
+                    haveSoFar +
+                    list.Count +
+                    fromSubcategories.Count,
+                    depth - 1));
+        }
+
+        list.AddRange(fromSubcategories);
 
         return list;
     }
 
     /// <summary>
-    /// Normalizes category names, removes Category: prefix
+    /// Normalizes category names and removes the localized
+    /// <c>Category:</c> prefix.
     /// </summary>
-    /// <param name="source">List of category names</param>
-    public static IEnumerable<string> PrepareCategories(IEnumerable<string> source)
+    /// <param name="source">The category names to normalize.</param>
+    /// <returns>The normalized category names.</returns>
+    public static IEnumerable<string> PrepareCategories(
+        IEnumerable<string> source)
     {
-        List<string> cats = new List<string>();
+        ArgumentNullException.ThrowIfNull(source);
 
-        foreach (string cat in source)
+        List<string> categories = new();
+
+        foreach (string category in source)
         {
-            cats.Add(Regex.Replace(Tools.RemoveHashFromPageTitle(Tools.WikiDecode(cat)).Trim(),
-                                   "^" + Variables.NamespacesCaseInsensitive[Namespace.Category], "").Trim());
+            string normalizedCategory =
+                Tools.RemoveHashFromPageTitle(
+                    Tools.WikiDecode(category))
+                .Trim();
+
+            normalizedCategory = Regex.Replace(
+                    normalizedCategory,
+                    "^" +
+                    Variables.NamespacesCaseInsensitive[
+                        Namespace.Category],
+                    string.Empty)
+                .Trim();
+
+            categories.Add(normalizedCategory);
         }
 
-        return cats;
+        return categories;
     }
 
-    public override bool StripUrl
-    {
-        get { return true; }
-    }
+    /// <inheritdoc />
+    public override bool StripUrl => true;
 }
