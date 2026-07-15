@@ -201,12 +201,11 @@ namespace WikiFunctions;
             // recreate the editor using the redirected URI, and retry
             // project initialization before reporting a failure.
             MessageBox.Show(
-                this.parentControl,
+                _parentControl,
                 ex.Message,
                 ex.Header,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
-            );
             return false;
         }
         catch (WebException ex)
@@ -225,6 +224,7 @@ namespace WikiFunctions;
             return false;
         }
     }
+
 
     /// <summary>
     /// 
