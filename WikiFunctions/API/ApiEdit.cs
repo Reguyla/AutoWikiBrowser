@@ -2106,8 +2106,7 @@ namespace WikiFunctions.API
 
         private IDisposable RegisterRequestCancellation(HttpWebRequest request)
         {
-            if (request == null)
-                throw new ArgumentNullException("request");
+            ArgumentNullException.ThrowIfNull(request);
 
             CancellationToken cancellationToken = GetActiveCancellationToken();
 
