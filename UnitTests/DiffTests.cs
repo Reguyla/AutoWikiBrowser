@@ -123,7 +123,7 @@ A2", 2);
 
         diffResult = d.GetDiff(@"A1
 A2", @"A1X
-A2", 2).Replace(System.Environment.NewLine, " ");
+A2", 2).Replace(Environment.NewLine, " ");
 
         diffResult = Regex.Replace(diffResult, @"\s+", " ");
 
@@ -131,14 +131,14 @@ A2", 2).Replace(System.Environment.NewLine, " ");
 
         diffResult = d.GetDiff(@"A1
 A2", @"A1X
-A2X", 2).Replace(System.Environment.NewLine, " ");
+A2X", 2).Replace(Environment.NewLine, " ");
 
         diffResult = Regex.Replace(diffResult, @"\s+", " ");
 
         Assert.That(diffResult, Is.EqualTo(@"<tr onclick='window.external.GoTo(0)'> <td colspan='2' class='diff-lineno'>Line 1:</td> <td colspan='2' class='diff-lineno'>Line 1:</td> </tr><tr onclick='window.external.GoTo(0)' ondblclick='window.external.UndoChange(0,0)'> <td>-</td> <td class='diff-deletedline'><span class='diffchange'>A1</span> </td> <td>+</td> <td class='diff-addedline'><span class='diffchange'>A1X</span> </td> </tr><tr onclick='window.external.GoTo(1)' ondblclick='window.external.UndoChange(1,1)'> <td>-</td> <td class='diff-deletedline'><span class='diffchange'>A2</span> </td> <td>+</td> <td class='diff-addedline'><span class='diffchange'>A2X</span> </td> </tr>"), "Standard case: two lines changed");
 
         diffResult = d.GetDiff(@"A1
-A2", @"A1", 2).Replace(System.Environment.NewLine, " ");
+A2", @"A1", 2).Replace(Environment.NewLine, " ");
 
         diffResult = Regex.Replace(diffResult, @"\s+", " ");
 
