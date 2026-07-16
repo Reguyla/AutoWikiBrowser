@@ -2013,20 +2013,68 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
     }
 
     /// <summary>
-    /// WebBrowser NewWindow event (preview): open URL in default browser
+    /// Validates a URL before it is opened outside the embedded browser.
     /// </summary>
-    /// <param name="sender">Sender.</param>
-    /// <param name="e">E.</param>
-    private void webBrowser_NewWindow(System.Object sender, System.ComponentModel.CancelEventArgs e)
+    /// <param name="url">The candidate URL.</param>
+    /// <param name="allowedUrl">
+    /// Contains the normalized URL when validation succeeds.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> when the URL is an absolute HTTP or HTTPS address;
+    /// otherwise <c>false</c>.
+    /// </returns>
+    private static bool TryGetAllowedExternalUrl(
+        string url,
+        out string allowedUrl)
+    {
+        allowedUrl = null;
+
+        if (!Uri.TryCreate(
+                url,
+                UriKind.Absolute,
+                out Uri uri))
+        {
+            return false;
+        }
+
+        if (uri.Scheme != Uri.UriSchemeHttp &&
+            uri.Scheme != Uri.UriSchemeHttps)
+        {
+            return false;
+        }
+
+        allowedUrl = uri.AbsoluteUri;
+        return true;
+    }
+
+    /// <summary>
+    /// Cancels popup navigation in the embedded preview browser and opens
+    /// permitted web links in the user's default browser.
+    /// </summary>
+    /// <param name="sender">The event source.</param>
+    /// <param name="e">The event arguments.</param>
+    private void webBrowser_NewWindow(
+        object sender,
+        CancelEventArgs e)
     {
         e.Cancel = true;
-        if (!string.IsNullOrEmpty(webBrowserMouseOverUrl))
+
+        if (!TryGetAllowedExternalUrl(
+                webBrowserMouseOverUrl,
+                out string externalUrl))
         {
-            Tools.WriteDebug("webBrowser_NewWindow", webBrowserMouseOverUrl);
-            Tools.OpenURLInBrowser(webBrowserMouseOverUrl);
+            Tools.WriteDebug(
+                nameof(webBrowser_NewWindow),
+                "The preview attempted to open an invalid or unsupported URL.");
+
+            return;
         }
-        else
-            Tools.WriteDebug("webBrowser_NewWindow", "webBrowserMouseOverUrl length zero");
+
+        Tools.WriteDebug(
+            nameof(webBrowser_NewWindow),
+            externalUrl);
+
+        Tools.OpenURLInBrowser(externalUrl);
     }
 
     private void GetPreview()
