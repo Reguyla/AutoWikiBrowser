@@ -288,6 +288,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     string _profileToLoad = "";
 
+    /// <summary>
+    /// Initializes the embedded diff browser and its scripting bridge.
+    /// </summary>
+    private void InitializeDiffBrowser()
+    {
+        webBrowser.Navigate("about:blank");
+        webBrowser.ObjectForScripting = DiffScriptingAdapter;
+    }
+
     private void MainForm_Load(object sender, EventArgs e)
     {
         EditBoxTab.TabPages.Remove(tpTypos);
@@ -301,8 +310,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         try
         {
-            webBrowser.Navigate("about:blank");
-            webBrowser.ObjectForScripting = DiffScriptingAdapter;
+            InitializeDiffBrowser();
 
             SplashScreen.SetProgress(25);
 
