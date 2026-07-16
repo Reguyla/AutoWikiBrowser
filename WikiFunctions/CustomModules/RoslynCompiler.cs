@@ -1,8 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using System.Reflection;
+using System.CodeDom.Compiler;
 using System.Collections.Specialized;
+using System.Reflection;
+using System.Runtime.Loader;
 
 namespace WikiFunctions.CustomModules;
 
@@ -30,6 +32,11 @@ internal static class RoslynCompiler
             CreateMetadataReferences(
                 parameters.ReferencedAssemblies);
 
+        int warningLevel =
+            parameters.WarningLevel is >= 0 and <= 4
+                ? parameters.WarningLevel
+                : 4;
+
         CSharpCompilation compilation =
             CSharpCompilation.Create(
                 $"AWBCustomModule_{Guid.NewGuid():N}",
@@ -41,7 +48,7 @@ internal static class RoslynCompiler
                         parameters.IncludeDebugInformation
                             ? OptimizationLevel.Debug
                             : OptimizationLevel.Release,
-                    warningLevel: parameters.WarningLevel,
+                    warningLevel: warningLevel,
                     generalDiagnosticOption:
                         parameters.TreatWarningsAsErrors
                             ? ReportDiagnostic.Error
@@ -52,7 +59,29 @@ internal static class RoslynCompiler
         EmitResult emitResult =
             compilation.Emit(assemblyStream);
 
-        foreach (Diagnostic diagnostic in emitResult.Diagnostics)
+        AddDiagnostics(
+            results,
+            emitResult.Diagnostics);
+
+        if (!emitResult.Success)
+        {
+            return results;
+        }
+
+        assemblyStream.Position = 0;
+
+        results.CompiledAssembly =
+            AssemblyLoadContext.Default.LoadFromStream(
+                assemblyStream);
+
+        return results;
+    }
+
+    private static void AddDiagnostics(
+        CompilerResults results,
+        IEnumerable<Diagnostic> diagnostics)
+    {
+        foreach (Diagnostic diagnostic in diagnostics)
         {
             if (diagnostic.Severity is not
                 DiagnosticSeverity.Warning and not
@@ -78,19 +107,6 @@ internal static class RoslynCompiler
 
             results.Errors.Add(error);
         }
-
-        if (!emitResult.Success)
-        {
-            return results;
-        }
-
-        assemblyStream.Position = 0;
-
-        results.CompiledAssembly =
-            Assembly.Load(
-                assemblyStream.ToArray());
-
-        return results;
     }
 
     private static List<MetadataReference>
@@ -100,12 +116,12 @@ internal static class RoslynCompiler
         HashSet<string> paths =
             new(StringComparer.OrdinalIgnoreCase);
 
-        string trustedPlatformAssemblies =
+        string? trustedPlatformAssemblies =
             AppContext.GetData(
                 "TRUSTED_PLATFORM_ASSEMBLIES")
             as string;
 
-        if (!string.IsNullOrEmpty(
+        if (!string.IsNullOrWhiteSpace(
                 trustedPlatformAssemblies))
         {
             foreach (string path in
@@ -119,10 +135,10 @@ internal static class RoslynCompiler
 
         foreach (string reference in referencedAssemblies)
         {
-            string resolvedPath =
+            string? resolvedPath =
                 ResolveReferencePath(reference);
 
-            if (!string.IsNullOrEmpty(resolvedPath))
+            if (resolvedPath is not null)
             {
                 paths.Add(resolvedPath);
             }
@@ -130,52 +146,73 @@ internal static class RoslynCompiler
 
         return paths
             .Where(File.Exists)
-            .Select(path =>
-                (MetadataReference)MetadataReference.CreateFromFile(path))
+            .Select(
+                path =>
+                    (MetadataReference)
+                    MetadataReference.CreateFromFile(path))
             .ToList();
     }
 
-    private static string ResolveReferencePath(
+    private static string? ResolveReferencePath(
         string reference)
     {
         if (string.IsNullOrWhiteSpace(reference))
         {
-            return string.Empty;
+            return null;
         }
 
         if (Path.IsPathFullyQualified(reference) &&
             File.Exists(reference))
         {
-            return reference;
+            return Path.GetFullPath(reference);
         }
 
         string fileName =
             Path.GetFileName(reference);
-
-        Assembly loadedAssembly =
-            AppDomain.CurrentDomain
-                .GetAssemblies()
-                .FirstOrDefault(
-                    assembly =>
-                        !assembly.IsDynamic &&
-                        string.Equals(
-                            Path.GetFileName(
-                                assembly.Location),
-                            fileName,
-                            StringComparison.OrdinalIgnoreCase));
-
-        if (loadedAssembly != null)
-        {
-            return loadedAssembly.Location;
-        }
 
         string applicationPath =
             Path.Combine(
                 AppContext.BaseDirectory,
                 fileName);
 
-        return File.Exists(applicationPath)
-            ? applicationPath
-            : string.Empty;
+        if (File.Exists(applicationPath))
+        {
+            return applicationPath;
+        }
+
+        foreach (Assembly assembly in
+                 AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (assembly.IsDynamic)
+            {
+                continue;
+            }
+
+            string location;
+
+            try
+            {
+                location = assembly.Location;
+            }
+            catch (NotSupportedException)
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                continue;
+            }
+
+            if (string.Equals(
+                    Path.GetFileName(location),
+                    fileName,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return location;
+            }
+        }
+
+        return null;
     }
 }
