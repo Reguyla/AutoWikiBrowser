@@ -66,19 +66,41 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// 
+    /// Gets the underlying unformatted text stored by the base
+    /// <see cref="RichTextBox"/> without applying any AWB-specific
+    /// processing or formatting.
     /// </summary>
-    public string RawText { get { return base.Text; } }
+    public string RawText
+    {
+        get { return base.Text; }
+    }
 
+    /// <summary>
+    /// Raises the <see cref="TextChanged"/> event when the user edits the
+    /// article. Programmatic updates performed while the control is locked
+    /// do not raise the event, preventing recursive processing and
+    /// unnecessary UI updates.
+    /// </summary>
+    /// <param name="e">
+    /// Event data associated with the text change.
+    /// </param>
     protected override void OnTextChanged(EventArgs e)
     {
-        // Prohibits triggering the TextChanged event if the text is changed programmatically
-        if (!Locked) base.OnTextChanged(e);
+        // Suppress TextChanged notifications while the control is being
+        // updated programmatically. This prevents edit-processing logic
+        // from running during internal text changes.
+        if (!Locked)
+        {
+            base.OnTextChanged(e);
+        }
     }
 
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
+
+        // Work around the RichTextBox AutoWordSelection initialization bug
+        // by toggling the property after the native control handle is created.
         // Bug fix for AutoWordSelection - http://msdn.microsoft.com/en-us/library/system.windows.forms.richtextbox.autowordselection.aspx
         if (!AutoWordSelection)
         {
@@ -209,31 +231,62 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// 
+    /// Selects a range of text within the edit box and optionally scrolls
+    /// the selection into view.
     /// </summary>
-    /// <param name="inputIndex"></param>
-    /// <param name="inputLength"></param>
-    /// <param name="scrollToCaret"></param>
+    /// <param name="inputIndex">
+    /// The zero-based index of the first character to select.
+    /// </param>
+    /// <param name="inputLength">
+    /// The number of characters to include in the selection.
+    /// </param>
+    /// <param name="scrollToCaret">
+    /// <c>true</c> to scroll the selected text into view after updating the
+    /// selection; otherwise, <c>false</c>.
+    /// </param>
     public void SetEditBoxSelection(int inputIndex, int inputLength, bool scrollToCaret)
     {
-        if (inputIndex >= 0 && inputLength > 0 && (inputIndex + inputLength) <= TextLength)
+        if (inputIndex >= 0 &&
+            inputLength > 0 &&
+            (inputIndex + inputLength) <= TextLength)
         {
             SelectionStart = inputIndex;
             SelectionLength = inputLength;
         }
+
         if (scrollToCaret)
+        {
             ScrollToCaret();
+        }
     }
 
+    /// <summary>
+    /// Selects a range of text within the edit box without changing the
+    /// current scroll position.
+    /// </summary>
+    /// <param name="inputIndex">
+    /// The zero-based index of the first character to select.
+    /// </param>
+    /// <param name="inputLength">
+    /// The number of characters to include in the selection.
+    /// </param>
     public void SetEditBoxSelection(int inputIndex, int inputLength)
     {
         SetEditBoxSelection(inputIndex, inputLength, false);
     }
 
+    /// <summary>
+    /// Initializes the control's designer-managed components and applies
+    /// the default RichTextBox settings used by AWB.
+    /// </summary>
     private void InitializeComponent()
     {
         SuspendLayout();
+
+        // URLs are detected by AWB itself. Disable the RichTextBox's built-in
+        // URL detection to avoid automatic formatting and event handling.
         DetectUrls = false;
+
         ResumeLayout(false);
     }
 
