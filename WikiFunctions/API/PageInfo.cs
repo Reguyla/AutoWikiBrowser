@@ -37,12 +37,11 @@ public sealed class PageInfo
 
     internal PageInfo(XmlDocument doc)
     {
-        if (doc == null)
-            throw new ArgumentNullException("doc");
+        ArgumentNullException.ThrowIfNull(doc);
 
-        XmlReader xr = new XmlNodeReader(doc);
+        using XmlReader reader = new XmlNodeReader(doc);
 
-        string normalisedFrom = null, redirectFrom = null;
+        string normalizedFrom = null, redirectFrom = null;
 
         var redirects = doc.GetElementsByTagName("r");
 
@@ -72,11 +71,11 @@ public sealed class PageInfo
             TitleChangedStatus = PageTitleStatus.NoChange;
         }
 
-        string curtimestamp = "";
-        if (xr.ReadToFollowing("api"))
-            curtimestamp = xr.GetAttribute("curtimestamp");
+        string currentTimestamp = "";
+        if (reader.ReadToFollowing("api"))
+            currentTimestamp = reader.GetAttribute("currentTimestamp");
 
-        if (!xr.ReadToFollowing("page"))
+        if (!reader.ReadToFollowing("page"))
         {
             if (redirects.Count > 0)
             {
@@ -88,11 +87,11 @@ public sealed class PageInfo
         }
 
         // Normalised before redirect, so would be root. Could still be multiple redirects, or looped
-        var normalised = doc.GetElementsByTagName("n");
+        var normalized = doc.GetElementsByTagName("n");
 
-        if (normalised.Count > 0 && normalised[0].Attributes != null)
+        if (normalized.Count > 0 && normalized[0].Attributes != null)
         {
-            normalisedFrom = normalised[0].Attributes["from"].Value;
+            normalizedFrom = normalized[0].Attributes["from"].Value;
 
             if (TitleChangedStatus == PageTitleStatus.NoChange)
                 TitleChangedStatus = PageTitleStatus.Normalised;
@@ -101,27 +100,27 @@ public sealed class PageInfo
         }
 
         // Normalization occurs before redirection, so if that exists, that is the title passed to the API
-        if (!string.IsNullOrEmpty(normalisedFrom))
+        if (!string.IsNullOrEmpty(normalizedFrom))
         {
-            OriginalTitle = normalisedFrom;
+            OriginalTitle = normalizedFrom;
         }
         else if (!string.IsNullOrEmpty(redirectFrom))
         {
             OriginalTitle = redirectFrom;
         }
 
-        Exists = (xr.GetAttribute("missing") == null); //if null, page exists
-        IsWatched = (xr.GetAttribute("watched") != null);
+        Exists = (reader.GetAttribute("missing") == null); //if null, page exists
+        IsWatched = (reader.GetAttribute("watched") != null);
 
         var tokens = doc.GetElementsByTagName("tokens");
         if (tokens.Count == 0)
         {
             // Token support for < 1.24
-            EditToken = xr.GetAttribute("edittoken");
-            ProtectToken = xr.GetAttribute("protecttoken");
-            DeleteToken = xr.GetAttribute("deletetoken");
-            MoveToken = xr.GetAttribute("movetoken");
-            WatchToken = xr.GetAttribute("watchtoken");
+            EditToken = reader.GetAttribute("edittoken");
+            ProtectToken = reader.GetAttribute("protecttoken");
+            DeleteToken = reader.GetAttribute("deletetoken");
+            MoveToken = reader.GetAttribute("movetoken");
+            WatchToken = reader.GetAttribute("watchtoken");
         }
         else if (tokens[0].Attributes != null)
         {
@@ -133,45 +132,45 @@ public sealed class PageInfo
             RollbackToken = tokens[0].Attributes["rollbacktoken"].Value;
         }
 
-        // if UseInToken = false then won't be given starttimestamp, so use curtimestamp instead
-        TokenTimestamp = xr.GetAttribute("starttimestamp");
+        // if UseInToken = false then won't be given starttimestamp, so use currentTimestamp instead
+        TokenTimestamp = reader.GetAttribute("starttimestamp");
         if (string.IsNullOrEmpty(TokenTimestamp))
-            TokenTimestamp = curtimestamp;
+            TokenTimestamp = currentTimestamp;
 
-        long revId;
-        RevisionID = long.TryParse(xr.GetAttribute("lastrevid"), out revId) ? revId : -1;
+        long revisionId;
+        RevisionID = long.TryParse(reader.GetAttribute("lastrevisionId"), out revisionId) ? revisionId : -1;
 
-        Title = xr.GetAttribute("title");
-        DisplayTitle = xr.GetAttribute("displaytitle");
-        var ns = xr.GetAttribute("ns");
+        Title = reader.GetAttribute("title");
+        DisplayTitle = reader.GetAttribute("displaytitle");
+        var ns = reader.GetAttribute("ns");
         NamespaceID = ns != null ? int.Parse(ns) : 0;
 
-        if (xr.ReadToDescendant("protection") && !xr.IsEmptyElement)
+        if (reader.ReadToDescendant("protection") && !reader.IsEmptyElement)
         {
-            foreach (XmlNode xn in doc.GetElementsByTagName("pr"))
+            foreach (XmlNode protectionNode in doc.GetElementsByTagName("pr"))
             {
-                switch (xn.Attributes["type"].Value)
+                switch (protectionNode.Attributes["type"].Value)
                 {
                     case "edit":
-                        EditProtection = xn.Attributes["level"].Value;
+                        EditProtection = protectionNode.Attributes["level"].Value;
                         break;
                     case "move":
-                        MoveProtection = xn.Attributes["level"].Value;
+                        MoveProtection = protectionNode.Attributes["level"].Value;
                         break;
                     case "create":
-                        CreateProtection = xn.Attributes["level"].Value;
+                        CreateProtection = protectionNode.Attributes["level"].Value;
                         break;
                 }
             }
         }
 
-        xr.ReadToFollowing("revisions");
+        reader.ReadToFollowing("revisions");
 
-        xr.ReadToDescendant("rev");
-        Timestamp = xr.GetAttribute("timestamp");
+        reader.ReadToDescendant("rev");
+        Timestamp = reader.GetAttribute("timestamp");
 
         // API returns \n line endings, we have standardized on \r\n (including under Mono)
-        Text = xr.ReadString().Replace("\n", "\r\n");
+        Text = reader.ReadString().Replace("\n", "\r\n");
     }
 
     /// <summary>
