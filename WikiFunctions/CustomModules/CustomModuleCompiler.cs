@@ -4,66 +4,107 @@ using System.Reflection;
 namespace WikiFunctions.CustomModules;
 
 /// <summary>
-/// 
+/// Defines the shared behavior for custom-module language compilers.
 /// </summary>
 public abstract class CustomModuleCompiler
 {
+    private static readonly object ResolvablePathsLock = new();
+
+    private static readonly Dictionary<string, string> ResolvablePaths =
+        new(StringComparer.OrdinalIgnoreCase);
+
     static CustomModuleCompiler()
     {
-        AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
+        AppDomain.CurrentDomain.AssemblyResolve +=
+            ResolveAssembly;
     }
-    /// <summary>
-    /// Human-readable language name
-    /// </summary>
-    public abstract string Name
-    { get; }
 
     /// <summary>
-    /// Code to be prepended to module's source text
+    /// Gets the human-readable language name.
     /// </summary>
-    public abstract string CodeStart
-    { get; }
+    public abstract string Name { get; }
 
     /// <summary>
-    /// Code to be appended to module's source text
+    /// Gets the code prepended to the module source.
     /// </summary>
-    public abstract string CodeEnd
-    { get; }
+    public abstract string CodeStart { get; }
 
     /// <summary>
-    /// Text to be used as default content for code input box
+    /// Gets the code appended to the module source.
     /// </summary>
-    public abstract string CodeExample
-    { get; }
+    public abstract string CodeEnd { get; }
 
     /// <summary>
-    /// This function checks if the current compiler can compile sources in a given language.
-    /// By default, the language should match the current compiler's language name exactly,
-    /// but descendants can override it so that, for example, C# 4.0 compiler could accept
-    /// C# 2.0 cources.
+    /// Gets the default content displayed in the code input box.
     /// </summary>
-    /// <param name="language">Language name to check</param>
-    public virtual bool CanHandleLanguage(string language)
+    public abstract string CodeExample { get; }
+
+    /// <summary>
+    /// Gets or sets the CodeDOM provider used by legacy compiler
+    /// implementations.
+    /// </summary>
+    /// <remarks>
+    /// C# compilation overrides <see cref="Compile"/> and uses Roslyn.
+    /// This property remains temporarily for other language compilers.
+    /// </remarks>
+    protected CodeDomProvider? Compiler { get; set; }
+
+    /// <summary>
+    /// Determines whether this compiler can compile the specified language.
+    /// </summary>
+    /// <param name="language">The language name to check.</param>
+    /// <returns>
+    /// <see langword="true"/> when the language is supported; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    public virtual bool CanHandleLanguage(
+        string language)
     {
-        return Name == language;
+        return string.Equals(
+            Name,
+            language,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// Compiles given source code
+    /// Compiles the supplied custom-module source code.
     /// </summary>
-    /// <param name="sourceCode">Source code to compile. It will be automatically wrapped between
-    /// CodeStart and CodeEnd.</param>
-    /// <param name="parameters">Compilation options.</param>
-    /// <returns></returns>
-    public virtual CompilerResults Compile(string sourceCode, CompilerParameters parameters)
+    /// <param name="sourceCode">
+    /// Source code that will be wrapped between
+    /// <see cref="CodeStart"/> and <see cref="CodeEnd"/>.
+    /// </param>
+    /// <param name="parameters">
+    /// Compilation options and referenced assemblies.
+    /// </param>
+    /// <returns>The compiler results.</returns>
+    /// <remarks>
+    /// This base implementation remains for legacy non-C# language
+    /// compilers. C# implementations must override this method and use
+    /// <see cref="RoslynCompiler"/>.
+    /// </remarks>
+    public virtual CompilerResults Compile(
+        string sourceCode,
+        CompilerParameters parameters)
     {
-        var src = CodeStart + sourceCode + "\r\n" + CodeEnd;
+        ArgumentNullException.ThrowIfNull(sourceCode);
+        ArgumentNullException.ThrowIfNull(parameters);
 
-        return Compiler.CompileAssemblyFromSource(parameters, src);
+        if (Compiler is null)
+        {
+            throw new InvalidOperationException(
+                $"No compiler has been configured for '{Name}'.");
+        }
+
+        string wrappedSource =
+            BuildWrappedSource(sourceCode);
+
+        return Compiler.CompileAssemblyFromSource(
+            parameters,
+            wrappedSource);
     }
 
     /// <summary>
-    /// Enforces that every class derived from this one will be properly displayed in a combo box.
+    /// Returns the compiler's human-readable language name.
     /// </summary>
     public override string ToString()
     {
@@ -71,71 +112,186 @@ public abstract class CustomModuleCompiler
     }
 
     /// <summary>
-    /// To be assigned in descendant class' constructor
-    /// </summary>
-    protected CodeDomProvider Compiler;
-
-    /// <summary>
-    /// Returns the list of currently available compiler modules
+    /// Returns the currently available custom-module compilers.
     /// </summary>
     public static CustomModuleCompiler[] GetList()
     {
-        // for compatibility and user experience reason, we should maintain this order
-        var modules = new List<CustomModuleCompiler>
-                      {
-                          new CSharpCustomModule()
-                      };
+        // Preserve the historic order for compatibility and user experience.
+        List<CustomModuleCompiler> modules =
+        [
+            new CSharpCustomModule()
+        ];
 
+        AddToList(
+            modules,
+            typeof(VbModuleCompiler));
 
-        AddToList(modules, typeof(VbModuleCompiler));
         return modules.ToArray();
+    }
+
+    /// <summary>
+    /// Wraps user-provided source with the compiler-specific beginning
+    /// and ending code.
+    /// </summary>
+    protected string BuildWrappedSource(
+        string sourceCode)
+    {
+        ArgumentNullException.ThrowIfNull(sourceCode);
+
+        return string.Concat(
+            CodeStart,
+            sourceCode,
+            Environment.NewLine,
+            CodeEnd);
     }
 
     #region Helpers
 
-    private static void AddToList(List<CustomModuleCompiler> modules, Type type)
+    private static void AddToList(
+        ICollection<CustomModuleCompiler> modules,
+        Type compilerType)
     {
-        // If an exception is thrown, the language is unavailable - ignore silently
+        ArgumentNullException.ThrowIfNull(modules);
+        ArgumentNullException.ThrowIfNull(compilerType);
+
         try
         {
-            modules.Add((CustomModuleCompiler)Instantiate(type));
+            modules.Add(
+                Instantiate<CustomModuleCompiler>(
+                    compilerType));
         }
-        catch { }
-    }
-
-    protected static object Instantiate(Type type)
-    {
-        return type.GetConstructor(new Type[] { }).Invoke(new Type[] { });
-    }
-
-    protected static object Instantiate(Assembly asm, string typeName)
-    {
-        return asm.CreateInstance(typeName);
-    }
-
-    static readonly Dictionary<string, string> ResolvablePaths = new Dictionary<string, string>();
-
-    protected static Assembly LoadAssembly(string path, string dependantAssembliesPrefix)
-    {
-        var dir = Path.GetDirectoryName(path);
-
-        // Let the dumb CLR know where the other needed assemblies are
-        ResolvablePaths[dependantAssembliesPrefix] = dir;
-
-        var asm = Assembly.LoadFile(path);
-        if (asm == null) throw new FileNotFoundException("Can't find assembly", path);
-
-        return asm;
-    }
-
-    static Assembly ResolveAssembly(Object sender, ResolveEventArgs args)
-    {
-        var name = new AssemblyName(args.Name);
-
-        foreach (var p in ResolvablePaths)
+        catch (
+            Exception ex) when (
+                ex is MissingMethodException or
+                MemberAccessException or
+                TargetInvocationException or
+                TypeLoadException)
         {
-            if (name.Name.StartsWith(p.Key))
-                return Assembly.LoadFile(Path.Combine(p.Value, name.Name + ".dll"));
+            // The optional language compiler is unavailable.
+        }
+    }
+
+    protected static T Instantiate<T>(
+        Type type)
+        where T : class
+    {
+        ArgumentNullException.ThrowIfNull(type);
+
+        if (!typeof(T).IsAssignableFrom(type))
+        {
+            throw new ArgumentException(
+                $"Type '{type.FullName}' is not assignable to " +
+                $"'{typeof(T).FullName}'.",
+                nameof(type));
+        }
+
+        ConstructorInfo constructor =
+            type.GetConstructor(Type.EmptyTypes)
+            ?? throw new MissingMethodException(
+                type.FullName,
+                ".ctor()");
+
+        return constructor.Invoke(null) as T
+            ?? throw new InvalidOperationException(
+                $"Type '{type.FullName}' could not be instantiated.");
+    }
+
+    protected static object Instantiate(
+        Assembly assembly,
+        string typeName)
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
+        ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
+
+        Type type =
+            assembly.GetType(
+                typeName,
+                throwOnError: true)
+            ?? throw new TypeLoadException(
+                $"Type '{typeName}' could not be loaded.");
+
+        return Activator.CreateInstance(type)
+            ?? throw new InvalidOperationException(
+                $"Type '{typeName}' could not be instantiated.");
+    }
+
+    protected static Assembly LoadAssembly(
+        string path,
+        string dependentAssembliesPrefix)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            dependentAssembliesPrefix);
+
+        string fullPath =
+            Path.GetFullPath(path);
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException(
+                "The requested assembly could not be found.",
+                fullPath);
+        }
+
+        string directory =
+            Path.GetDirectoryName(fullPath)
+            ?? throw new InvalidOperationException(
+                $"The directory for '{fullPath}' could not be determined.");
+
+        lock (ResolvablePathsLock)
+        {
+            ResolvablePaths[dependentAssembliesPrefix] =
+                directory;
+        }
+
+        return Assembly.LoadFile(fullPath);
+    }
+
+    private static Assembly? ResolveAssembly(
+        object? sender,
+        ResolveEventArgs args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+
+        AssemblyName requestedAssembly =
+            new(args.Name);
+
+        string? requestedName =
+            requestedAssembly.Name;
+
+        if (string.IsNullOrWhiteSpace(requestedName))
+        {
+            return null;
+        }
+
+        KeyValuePair<string, string>[] paths;
+
+        lock (ResolvablePathsLock)
+        {
+            paths =
+                ResolvablePaths.ToArray();
+        }
+
+        foreach (
+            KeyValuePair<string, string> entry in paths)
+        {
+            if (!requestedName.StartsWith(
+                    entry.Key,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string assemblyPath =
+                Path.Combine(
+                    entry.Value,
+                    requestedName + ".dll");
+
+            if (File.Exists(assemblyPath))
+            {
+                return Assembly.LoadFile(
+                    assemblyPath);
+            }
         }
 
         return null;
