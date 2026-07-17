@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #undef INSTASTATS // turn on here and in stats.cs to make AWB log (empty) stats at startup
 
 using AutoWikiBrowser.Plugins;
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
@@ -29,6 +31,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.API;
@@ -126,6 +129,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         SplashScreen.SetProgress(1);
 
         InitializeComponent();
+
+        CreateWebView2DiffBrowser();
 
         SplashScreen.SetProgress(5);
         try
@@ -1406,6 +1411,56 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             txtEdit.TextChanged += txtEdit_TextChanged;
         }
+    }
+
+    private WebView2 _diffWebView;
+
+    /// <summary>
+    /// Creates the experimental WebView2 diff control in the same container
+    /// as the existing diff browser.
+    /// </summary>
+    private void CreateWebView2DiffBrowser()
+    {
+        _diffWebView = new WebView2
+        {
+            Dock = DockStyle.Fill,
+            Visible = false
+        };
+
+        Control parent = webBrowser.Parent;
+
+        if (parent == null)
+            throw new InvalidOperationException(
+                "The existing diff browser does not have a parent container.");
+
+        parent.Controls.Add(_diffWebView);
+        _diffWebView.BringToFront();
+    }
+
+    /// <summary>
+    /// Initializes the experimental WebView2 diff renderer.
+    /// </summary>
+    private async Task InitializeWebView2DiffBrowserAsync()
+    {
+        await _diffWebView.EnsureCoreWebView2Async();
+
+        CoreWebView2 core = _diffWebView.CoreWebView2;
+
+        core.Settings.AreDefaultContextMenusEnabled = false;
+        core.Settings.AreDevToolsEnabled = false;
+        core.Settings.AreBrowserAcceleratorKeysEnabled = false;
+        core.Settings.IsStatusBarEnabled = false;
+        core.Settings.IsZoomControlEnabled = false;
+
+        _diffWebView.NavigateToString(
+            "<!doctype html>" +
+            "<html><body>" +
+            "<h2>WebView2 diff renderer test</h2>" +
+            "<p>WebView2 initialized successfully.</p>" +
+            "</body></html>");
+
+        _diffWebView.Visible = true;
+        webBrowser.Visible = false;
     }
 
     /// <summary>
