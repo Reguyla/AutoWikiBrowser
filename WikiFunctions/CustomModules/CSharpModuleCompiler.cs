@@ -1,57 +1,62 @@
-﻿using Microsoft.CSharp;
+﻿namespace WikiFunctions.CustomModules;
 
-namespace WikiFunctions.CustomModules;
-
-
-public class CSharpCustomModule : CustomModuleCompiler
+/// <summary>
+/// Provides C# custom-module templates and compiles custom modules
+/// using the Roslyn C# compiler.
+/// </summary>
+public sealed class CSharpCustomModule : CustomModuleCompiler
 {
-    public CSharpCustomModule()
+    /// <inheritdoc />
+    public override string Name =>
+        "C# 10.0";
+
+    /// <inheritdoc />
+    public override bool CanHandleLanguage(string language)
     {
-        Compiler = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
+        return string.Equals(
+                   language,
+                   Name,
+                   StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                   language,
+                   "C# 4.0",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
-    public override string Name
-    {
-        get { return "C# 4.0"; }
-    }
-
-    public override string CodeStart
-    {
-        get
-        {
-            return @"using System;
+    /// <inheritdoc />
+    public override string CodeStart =>
+        @"using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using WikiFunctions;
-using System.Linq;
 
 namespace AutoWikiBrowser.CustomModules
 {
-    class CustomModule : WikiFunctions.Plugin.IModule
+    public class CustomModule : WikiFunctions.Plugin.IModule
     {
-        WikiFunctions.Plugin.IAutoWikiBrowser awb;
+        private readonly WikiFunctions.Plugin.IAutoWikiBrowser awb;
 
-        public CustomModule(WikiFunctions.Plugin.IAutoWikiBrowser _awb)
+        public CustomModule(WikiFunctions.Plugin.IAutoWikiBrowser awb)
         {
-           awb =  _awb;
+            this.awb = awb;
         }
 ";
-        }
-    }
 
-    public override string CodeEnd
-    {
-        get { return @"    }
-}"; }
-    }
+    /// <inheritdoc />
+    public override string CodeEnd =>
+        @"    }
+}";
 
-    public override string CodeExample
-    {
-        get
-        {
-            return
-                @"        public string ProcessArticle(string ArticleText, string ArticleTitle, int wikiNamespace, out string Summary, out bool Skip)
+    /// <inheritdoc />
+    public override string CodeExample =>
+        @"        public string ProcessArticle(
+            string ArticleText,
+            string ArticleTitle,
+            int wikiNamespace,
+            out string Summary,
+            out bool Skip)
         {
             Skip = false;
             Summary = ""test"";
@@ -60,6 +65,17 @@ namespace AutoWikiBrowser.CustomModules
 
             return ArticleText;
         }";
-        }
+
+    /// <inheritdoc />
+    public override CompilerResults Compile(
+        string sourceCode,
+        CompilerParameters parameters)
+    {
+        ArgumentNullException.ThrowIfNull(sourceCode);
+        ArgumentNullException.ThrowIfNull(parameters);
+
+        return RoslynCompiler.Compile(
+            BuildWrappedSource(sourceCode),
+            parameters);
     }
 }

@@ -70,38 +70,15 @@ public abstract class CustomModuleCompiler
     /// Compiles the supplied custom-module source code.
     /// </summary>
     /// <param name="sourceCode">
-    /// Source code that will be wrapped between
-    /// <see cref="CodeStart"/> and <see cref="CodeEnd"/>.
+    /// The user-provided source code, excluding the compiler-specific wrapper.
     /// </param>
     /// <param name="parameters">
-    /// Compilation options and referenced assemblies.
+    /// The compilation settings and assembly references.
     /// </param>
-    /// <returns>The compiler results.</returns>
-    /// <remarks>
-    /// This base implementation remains for legacy non-C# language
-    /// compilers. C# implementations must override this method and use
-    /// <see cref="RoslynCompiler"/>.
-    /// </remarks>
-    public virtual CompilerResults Compile(
+    /// <returns>The results of the compilation.</returns>
+    public abstract CompilerResults Compile(
         string sourceCode,
-        CompilerParameters parameters)
-    {
-        ArgumentNullException.ThrowIfNull(sourceCode);
-        ArgumentNullException.ThrowIfNull(parameters);
-
-        if (Compiler is null)
-        {
-            throw new InvalidOperationException(
-                $"No compiler has been configured for '{Name}'.");
-        }
-
-        string wrappedSource =
-            BuildWrappedSource(sourceCode);
-
-        return Compiler.CompileAssemblyFromSource(
-            parameters,
-            wrappedSource);
-    }
+        CompilerParameters parameters);
 
     /// <summary>
     /// Returns the compiler's human-readable language name.
