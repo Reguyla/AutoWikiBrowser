@@ -294,15 +294,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     string _profileToLoad = "";
 
     /// <summary>
-    /// Initializes the embedded diff browser and its scripting bridge.
+    /// Completes startup initialization after the main form has loaded.
     /// </summary>
-    private void InitializeDiffBrowser()
-    {
-        webBrowser.Navigate("about:blank");
-        webBrowser.ObjectForScripting = DiffScriptingAdapter;
-    }
-
-    private void MainForm_Load(object sender, EventArgs e)
+    private async void MainForm_Load(object sender, EventArgs e)
     {
         EditBoxTab.TabPages.Remove(tpTypos);
 
@@ -315,7 +309,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         try
         {
-            InitializeDiffBrowser();
+            await TryInitializeWebView2DiffBrowserAsync();
 
             SplashScreen.SetProgress(25);
 
@@ -323,22 +317,26 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             articleActionLogControl1.Initialise(listMaker);
 
             Location = Properties.Settings.Default.WindowLocation;
-
             Size = Properties.Settings.Default.WindowSize;
 
-            // T99305: No vertical scroll bar in diff window: don't restore AWB Minimized as we lose scrollbars
-            WindowState = (Properties.Settings.Default.WindowState == FormWindowState.Minimized ? FormWindowState.Normal : Properties.Settings.Default.WindowState);
+            // T99305: Do not restore AWB as minimized because the diff
+            // window may lose its vertical scroll bar.
+            WindowState =
+                Properties.Settings.Default.WindowState == FormWindowState.Minimized
+                    ? FormWindowState.Normal
+                    : Properties.Settings.Default.WindowState;
 
-            Plugin.LoadPluginsStartup(this, SplashScreen); // progress 25-50 in LoadPlugins()
-            LoadPrefs(); // progress 50-59 in LoadPrefs()
+            Plugin.LoadPluginsStartup(this, SplashScreen); // Progress 25-50.
+            LoadPrefs(); // Progress 50-59.
 
             Debug();
             Release();
 
             SplashScreen.SetProgress(60);
             UpdateButtons(null, null);
+
             SplashScreen.SetProgress(62);
-            LoadRecentSettingsList(); // progress 63-66 in LoadRecentSettingsList()
+            LoadRecentSettingsList(); // Progress 63-66.
 
             Updater.WaitForCompletion();
 
@@ -346,36 +344,48 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             SplashScreen.SetProgress(80);
 
-            if ((Updater.Result & Updater.AWBEnabledStatus.Disabled) == Updater.AWBEnabledStatus.Disabled)
+            if ((Updater.Result & Updater.AWBEnabledStatus.Disabled) ==
+                Updater.AWBEnabledStatus.Disabled)
             {
                 OldVersion();
                 SplashScreen.Close();
                 return;
             }
 
-            bool optUpdate = (Updater.Result & Updater.AWBEnabledStatus.OptionalUpdate) ==
-                              Updater.AWBEnabledStatus.OptionalUpdate,
-            updaterUpdate = (Updater.Result & Updater.AWBEnabledStatus.UpdaterUpdate) ==
-                             Updater.AWBEnabledStatus.UpdaterUpdate;
+            bool optionalUpdate =
+                (Updater.Result & Updater.AWBEnabledStatus.OptionalUpdate) ==
+                Updater.AWBEnabledStatus.OptionalUpdate;
 
-            if (optUpdate || updaterUpdate)
+            bool updaterUpdate =
+                (Updater.Result & Updater.AWBEnabledStatus.UpdaterUpdate) ==
+                Updater.AWBEnabledStatus.UpdaterUpdate;
+
+            if (optionalUpdate || updaterUpdate)
             {
                 bool runUpdater = false;
 
                 if (updaterUpdate)
                 {
-                    MessageBox.Show("There is an update to the AWB updater. Updating Now", "Updater update");
+                    MessageBox.Show(
+                        "There is an update to the AWB updater. Updating now.",
+                        "Updater update");
+
                     runUpdater = true;
                 }
 
                 if (!runUpdater &&
                     MessageBox.Show(
                         string.Format(
-                            "This version has been superseded by new versions of AWB: {0}.\r\n\r\nYou may continue to use this version or update to the newest version.\r\n\r\nWould you like to automatically upgrade to the newest version?",
-                            string.Join(", ", Updater.NewerVersions)
-                           ),
-                        "Upgrade?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            CultureInfo.CurrentCulture,
+                            "This version has been superseded by new versions of AWB: {0}.\r\n\r\n" +
+                            "You may continue to use this version or update to the newest version.\r\n\r\n" +
+                            "Would you like to automatically upgrade to the newest version?",
+                            string.Join(", ", Updater.NewerVersions)),
+                        "Upgrade?",
+                        MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
                     runUpdater = true;
+                }
 
                 if (runUpdater)
                 {
@@ -386,13 +396,18 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-            if ((Updater.Result & Updater.AWBEnabledStatus.Error) == Updater.AWBEnabledStatus.Error)
+            if ((Updater.Result & Updater.AWBEnabledStatus.Error) ==
+                Updater.AWBEnabledStatus.Error)
             {
                 lblUserName.BackColor = Color.Red;
-                MessageBox.Show(this,
-                                "Cannot load version check page from Wikipedia. Please verify that you're connected to Internet.",
-                                "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                MessageBox.Show(
+                    this,
+                    "Cannot load version check page from Wikipedia. " +
+                    "Please verify that you're connected to the Internet.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
 
             SplashScreen.SetProgress(90);
@@ -406,12 +421,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ErrorHandler.HandleException(ex);
         }
 
-        StatusLabelText = "";
+        StatusLabelText = string.Empty;
         SplashScreen.SetProgress(100);
         SplashScreen.Close();
 
 #if DEBUG && INSTASTATS
-        UsageStats.Do(false);
+    UsageStats.Do(false);
 #endif
     }
 
@@ -1442,9 +1457,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private async Task InitializeWebView2DiffBrowserAsync()
     {
+        if (_diffWebView == null)
+        {
+            throw new InvalidOperationException(
+                "The WebView2 diff control has not been created.");
+        }
+
         await _diffWebView.EnsureCoreWebView2Async();
 
-        CoreWebView2 core = _diffWebView.CoreWebView2;
+        var core = _diffWebView.CoreWebView2
+            ?? throw new InvalidOperationException(
+                "WebView2 initialization completed without creating CoreWebView2.");
 
         core.Settings.AreDefaultContextMenusEnabled = false;
         core.Settings.AreDevToolsEnabled = false;
@@ -1452,15 +1475,27 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.IsZoomControlEnabled = false;
 
-        _diffWebView.NavigateToString(
-            "<!doctype html>" +
-            "<html><body>" +
-            "<h2>WebView2 diff renderer test</h2>" +
-            "<p>WebView2 initialized successfully.</p>" +
-            "</body></html>");
+        Tools.WriteDebug(
+            nameof(InitializeWebView2DiffBrowserAsync),
+            "WebView2 initialized.");
+    }
 
-        _diffWebView.Visible = true;
-        webBrowser.Visible = false;
+    /// <summary>
+    /// Attempts to initialize the WebView2 diff renderer without preventing
+    /// AWB from starting if WebView2 initialization fails.
+    /// </summary>
+    private async Task TryInitializeWebView2DiffBrowserAsync()
+    {
+        try
+        {
+            await InitializeWebView2DiffBrowserAsync();
+        }
+        catch (Exception ex)
+        {
+            Tools.WriteDebug(
+                nameof(TryInitializeWebView2DiffBrowserAsync),
+                ex.ToString());
+        }
     }
 
     /// <summary>
