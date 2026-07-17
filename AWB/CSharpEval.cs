@@ -1,98 +1,280 @@
-﻿using Microsoft.CSharp;
-using System.CodeDom.Compiler;
+﻿using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Windows.Forms;
+using WikiFunctions;
+using WikiFunctions.CustomModules;
 
 namespace AutoWikiBrowser;
 
 public partial class CSharpEval : Form
 {
+    private const string EvaluatorTypeName =
+        "CSharpEvaluator.CSharpEval";
+
     public CSharpEval()
     {
         InitializeComponent();
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    private void button1_Click(
+        object sender,
+        EventArgs e)
     {
         textBox2.Clear();
-        string code = @"using System;
+
+        try
+        {
+            string code = BuildEvaluatorSource();
+
+            CompilerParameters parameters = new()
+            {
+                GenerateExecutable = false,
+                GenerateInMemory = true,
+                IncludeDebugInformation = false,
+                TreatWarningsAsErrors = false,
+                WarningLevel = 4
+            };
+
+            AddLoadedAssemblyReferences(parameters);
+
+            CompilerResults results =
+                RoslynCompiler.Compile(
+                    code,
+                    parameters);
+
+            if (!DisplayCompilerDiagnostics(results))
+            {
+                return;
+            }
+
+            InvokeEvaluator(
+                results.CompiledAssembly);
+        }
+        catch (Exception ex)
+        {
+            ShowEvaluationError(ex);
+        }
+    }
+
+    private string BuildEvaluatorSource()
+    {
+        return @"using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using WikiFunctions;
-using System.Linq;
 
-namespace CSharpEvaluator {
-    class CSharpEval {
-        public object EvalCode() {
+namespace CSharpEvaluator
+{
+    internal sealed class CSharpEval
+    {
+        public object EvalCode()
+        {
             return " + textBox1.Text + @";
         }
     }
 }
 ";
+    }
 
-        CSharpCodeProvider c = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
+    private static void AddLoadedAssemblyReferences(
+        CompilerParameters parameters)
+    {
+        HashSet<string> referencePaths =
+            new(StringComparer.OrdinalIgnoreCase);
 
-        CompilerParameters cp = new CompilerParameters
+        AddAssemblyReference(
+            referencePaths,
+            typeof(CSharpEval).Assembly);
+
+        AddAssemblyReference(
+            referencePaths,
+            typeof(Tools).Assembly);
+
+        foreach (Assembly assembly in
+                 AppDomain.CurrentDomain.GetAssemblies())
         {
-            GenerateExecutable = false,
-            IncludeDebugInformation = false
-        };
+            if (assembly.IsDynamic)
+            {
+                continue;
+            }
 
-        // Microsoft.GeneratedCode check is for Mono compatibility
-        foreach (
-            var path in
-                AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(
-                        asm =>
-                            !asm.FullName.Contains("Microsoft.GeneratedCode") &&
-                            !asm.Location.Contains("mscorlib") &&
-                            !string.IsNullOrEmpty(asm.Location))
-                    .Select(asm => asm.Location))
-        {
-            cp.ReferencedAssemblies.Add(path);
+            if (assembly.FullName?.Contains(
+                    "Microsoft.GeneratedCode",
+                    StringComparison.OrdinalIgnoreCase) == true)
+            {
+                continue;
+            }
+
+            AddAssemblyReference(
+                referencePaths,
+                assembly);
         }
 
-        CompilerResults results = c.CompileAssemblyFromSource(cp, code);
-
-        if (results.Errors.Count > 0)
+        foreach (string referencePath in
+                 referencePaths)
         {
-            bool hasErrors = false;
-            StringBuilder builder = new StringBuilder(); // "Compilation messages:\r\n");
-            foreach (CompilerError err in results.Errors)
-            {
-                hasErrors |= !err.IsWarning;
+            parameters.ReferencedAssemblies.Add(
+                referencePath);
+        }
+    }
 
-                if (err.Line > 0)
-                    builder.AppendFormat("Line {0}, col {1}: ", err.Line, err.Column);
-
-                if (!string.IsNullOrEmpty(err.ErrorNumber))
-                    builder.AppendFormat("[{0}] ", err.ErrorNumber);
-
-                builder.Append(err.ErrorText);
-                builder.Append("\r\n");
-            }
-
-            using (CustomModuleErrors error = new CustomModuleErrors())
-            {
-                error.ErrorText = builder.ToString();
-                error.Text = "Compilation " + (hasErrors ? "errors" : "warnings");
-                error.ShowDialog(this);
-            }
-
-            if (hasErrors)
-            {
-                return;
-            }
+    private static void AddAssemblyReference(
+        ISet<string> referencePaths,
+        Assembly assembly)
+    {
+        if (assembly.IsDynamic)
+        {
+            return;
         }
 
-        Assembly a = results.CompiledAssembly;
-        object o = a.CreateInstance("CSharpEvaluator.CSharpEval");
+        string location;
 
-        Type t = o.GetType();
-        MethodInfo mi = t.GetMethod("EvalCode");
+        try
+        {
+            location = assembly.Location;
+        }
+        catch (NotSupportedException)
+        {
+            return;
+        }
 
-        object s = mi.Invoke(o, null);
-        textBox2.Text = s.ToString();
+        if (string.IsNullOrWhiteSpace(location))
+        {
+            return;
+        }
+
+        if (string.Equals(
+                Path.GetFileName(location),
+                "mscorlib.dll",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (File.Exists(location))
+        {
+            referencePaths.Add(location);
+        }
+    }
+
+    private bool DisplayCompilerDiagnostics(
+        CompilerResults results)
+    {
+        if (results.Errors.Count == 0)
+        {
+            return true;
+        }
+
+        bool hasErrors = false;
+        StringBuilder builder = new();
+
+        foreach (CompilerError error in
+                 results.Errors)
+        {
+            hasErrors |= !error.IsWarning;
+
+            if (error.Line > 0)
+            {
+                builder.AppendFormat(
+                    "Line {0}, col {1}: ",
+                    error.Line,
+                    error.Column);
+            }
+
+            if (!string.IsNullOrEmpty(
+                    error.ErrorNumber))
+            {
+                builder.AppendFormat(
+                    "[{0}] ",
+                    error.ErrorNumber);
+            }
+
+            builder.Append(error.ErrorText);
+            builder.AppendLine();
+        }
+
+        using CustomModuleErrors errorDialog =
+            new();
+
+        errorDialog.ErrorText =
+            builder.ToString();
+
+        errorDialog.Text =
+            "Compilation " +
+            (hasErrors
+                ? "errors"
+                : "warnings");
+
+        errorDialog.ShowDialog(this);
+
+        return !hasErrors;
+    }
+
+    private void InvokeEvaluator(
+        Assembly? assembly)
+    {
+        if (assembly is null)
+        {
+            throw new InvalidOperationException(
+                "Compilation succeeded, but no assembly was returned.");
+        }
+
+        Type evaluatorType =
+            assembly.GetType(
+                EvaluatorTypeName,
+                throwOnError: true)
+            ?? throw new TypeLoadException(
+                $"The evaluator type '{EvaluatorTypeName}' could not be loaded.");
+
+        object evaluator =
+            Activator.CreateInstance(
+                evaluatorType)
+            ?? throw new InvalidOperationException(
+                "The C# evaluator could not be created.");
+
+        MethodInfo evalMethod =
+            evaluatorType.GetMethod(
+                "EvalCode",
+                BindingFlags.Instance |
+                BindingFlags.Public)
+            ?? throw new MissingMethodException(
+                evaluatorType.FullName,
+                "EvalCode");
+
+        try
+        {
+            object? result =
+                evalMethod.Invoke(
+                    evaluator,
+                    null);
+
+            textBox2.Text =
+                result?.ToString() ??
+                string.Empty;
+        }
+        catch (TargetInvocationException ex)
+            when (ex.InnerException is not null)
+        {
+            throw new InvalidOperationException(
+                "The evaluated C# expression threw an exception.",
+                ex.InnerException);
+        }
+    }
+
+    private void ShowEvaluationError(
+        Exception exception)
+    {
+        Exception displayedException =
+            exception.InnerException ??
+            exception;
+
+        MessageBox.Show(
+            this,
+            displayedException.ToString(),
+            "C# evaluation error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
     }
 }

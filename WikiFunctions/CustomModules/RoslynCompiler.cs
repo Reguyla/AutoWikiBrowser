@@ -8,9 +8,9 @@ using System.Runtime.Loader;
 
 namespace WikiFunctions.CustomModules;
 
-internal static class RoslynCompiler
+public static class RoslynCompiler
 {
-    internal static CompilerResults Compile(
+    public static CompilerResults Compile(
         string sourceCode,
         CompilerParameters parameters)
     {
