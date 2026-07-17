@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.CodeDom.Compiler;
 using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.CustomModules;
@@ -39,7 +40,8 @@ internal sealed partial class CustomModule : Form
     }
 
     /// <summary>
-    /// 
+    /// Gets or sets the custom module source code entered by the user.
+    /// Blank lines are normalized when the code is assigned.
     /// </summary>
     public string Code
     {
@@ -48,7 +50,9 @@ internal sealed partial class CustomModule : Form
     }
 
     /// <summary>
-    /// 
+    /// Gets or sets the programming language used for the custom module.
+    /// When loading older settings that do not specify a language name,
+    /// C# is selected as the default for backward compatibility.
     /// </summary>
     public string Language
     {
@@ -70,7 +74,8 @@ internal sealed partial class CustomModule : Form
     }
 
     /// <summary>
-    /// 
+    /// Gets the compiler responsible for compiling the currently
+    /// selected custom module language.
     /// </summary>
     public CustomModuleCompiler Compiler
     {
@@ -78,7 +83,8 @@ internal sealed partial class CustomModule : Form
     }
 
     /// <summary>
-    /// 
+    /// Gets or sets a value indicating whether the custom module is enabled.
+    /// Enabling the module automatically attempts to compile and load it.
     /// </summary>
     public bool ModuleEnabled
     {
@@ -92,7 +98,8 @@ internal sealed partial class CustomModule : Form
     }
 
     /// <summary>
-    /// 
+    /// Gets a value indicating whether the custom module is enabled
+    /// and has been successfully compiled and loaded.
     /// </summary>
     public bool ModuleUsable
     {
@@ -104,7 +111,8 @@ internal sealed partial class CustomModule : Form
     private IModule _m;
 
     /// <summary>
-    /// 
+    /// The currently loaded custom module instance, or <see langword="null"/>
+    /// if no module has been successfully compiled.
     /// </summary>
     public IModule Module
     {
@@ -131,76 +139,175 @@ internal sealed partial class CustomModule : Form
     private string _codeStart = "", _codeEnd = "", _codeExample = @"";
 
     /// <summary>
-    /// 
+    /// Provides the user interface for creating, compiling, and managing
+    /// AutoWikiBrowser custom modules.
     /// </summary>
     public void MakeModule()
     {
         try
         {
-            CompilerParameters cp = new CompilerParameters
-            {
-                GenerateExecutable = false,
-                IncludeDebugInformation = false
-            };
+            CompilerParameters parameters =
+                new()
+                {
+                    GenerateExecutable = false,
+                    IncludeDebugInformation = false
+                };
 
-            // Microsoft.GeneratedCode check is for Mono compatibility
-            foreach (
-                var path in
-                    AppDomain.CurrentDomain.GetAssemblies()
-                        .Where(
-                            asm =>
-                                !asm.FullName.Contains("Microsoft.GeneratedCode") &&
-                                !asm.Location.Contains("mscorlib") &&
-                                !string.IsNullOrEmpty(asm.Location))
-                        .Select(asm => asm.Location))
+            AddLoadedAssemblyReferences(parameters);
+
+            CompilerResults results =
+                Compiler.Compile(
+                    txtCode.Text,
+                    parameters);
+
+            if (!ShowCompilationMessages(results))
             {
-                cp.ReferencedAssemblies.Add(path);
+                Module = null;
+                return;
             }
 
-            CompilerResults results = Compiler.Compile(txtCode.Text, cp);
+            Assembly compiledAssembly =
+                results.CompiledAssembly
+                ?? throw new InvalidOperationException(
+                    "The compiler did not return a compiled assembly.");
 
-            bool hasErrors = false;
-            if (results.Errors.Count > 0)
-            {
-                StringBuilder builder = new StringBuilder(); // "Compilation messages:\r\n");
-                foreach (CompilerError err in results.Errors)
-                {
-                    hasErrors |= !err.IsWarning;
+            Type moduleType =
+                compiledAssembly
+                    .GetTypes()
+                    .FirstOrDefault(
+                        type =>
+                            !type.IsAbstract &&
+                            typeof(IModule).IsAssignableFrom(type))
+                ?? throw new InvalidOperationException(
+                    "The compiled assembly does not contain an IModule implementation.");
 
-                    if (err.Line > 0)
-                        builder.AppendFormat("Line {0}, col {1}: ", err.Line, err.Column);
-
-                    if (!string.IsNullOrEmpty(err.ErrorNumber))
-                        builder.AppendFormat("[{0}] ", err.ErrorNumber);
-
-                    builder.Append(err.ErrorText);
-                    builder.Append("\r\n");
-                }
-
-                using (CustomModuleErrors error = new CustomModuleErrors())
-                {
-                    error.ErrorText = builder.ToString();
-                    error.Text = "Compilation " + (hasErrors ? "errors" : "warnings");
-                    error.ShowDialog(this);
-                }
-
-                if (hasErrors)
-                {
-                    Module = null;
-                    return;
-                }
-            }
-
-            foreach (Type t in results.CompiledAssembly.GetTypes().Where(t => t.GetInterface("IModule") != null))
-            {
-                Module = (IModule)Activator.CreateInstance(t, Program.AWB);
-            }
+            Module =
+                Activator.CreateInstance(
+                    moduleType,
+                    Program.AWB) as IModule
+                ?? throw new InvalidOperationException(
+                    $"Unable to instantiate custom module type '{moduleType.FullName}'.");
         }
         catch (Exception ex)
         {
             Module = null;
             ErrorHandler.HandleException(ex);
         }
+    }
+
+    /// <summary>
+    /// Adds references for assemblies currently loaded by the application
+    /// so custom modules can use AWB and framework types during compilation.
+    /// </summary>
+    /// <param name="parameters">
+    /// The compiler parameters that receive the assembly references.
+    /// </param>
+    private static void AddLoadedAssemblyReferences(
+        CompilerParameters parameters)
+    {
+        ArgumentNullException.ThrowIfNull(parameters);
+
+        HashSet<string> referencePaths =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        foreach (Assembly assembly in
+                 AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (assembly.IsDynamic)
+            {
+                continue;
+            }
+
+            if (assembly.FullName?.Contains(
+                    "Microsoft.GeneratedCode",
+                    StringComparison.OrdinalIgnoreCase) == true)
+            {
+                continue;
+            }
+
+            string location;
+
+            try
+            {
+                location = assembly.Location;
+            }
+            catch (NotSupportedException)
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(location) ||
+                !File.Exists(location))
+            {
+                continue;
+            }
+
+            if (referencePaths.Add(location))
+            {
+                parameters.ReferencedAssemblies.Add(location);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Displays compiler warnings and errors returned while building
+    /// a custom module.
+    /// </summary>
+    /// <param name="results">
+    /// The results returned by the selected custom module compiler.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when compilation may continue; otherwise,
+    /// <see langword="false"/> when one or more errors prevent the module
+    /// from being loaded.
+    /// </returns>
+    private bool ShowCompilationMessages(
+        CompilerResults results)
+    {
+        ArgumentNullException.ThrowIfNull(results);
+
+        if (results.Errors.Count == 0)
+        {
+            return true;
+        }
+
+        bool hasErrors = false;
+        StringBuilder builder = new();
+
+        foreach (CompilerError error in results.Errors)
+        {
+            hasErrors |= !error.IsWarning;
+
+            if (error.Line > 0)
+            {
+                builder.AppendFormat(
+                    "Line {0}, col {1}: ",
+                    error.Line,
+                    error.Column);
+            }
+
+            if (!string.IsNullOrEmpty(error.ErrorNumber))
+            {
+                builder.AppendFormat(
+                    "[{0}] ",
+                    error.ErrorNumber);
+            }
+
+            builder.AppendLine(error.ErrorText);
+        }
+
+        using CustomModuleErrors errorDialog =
+            new()
+            {
+                ErrorText = builder.ToString(),
+                Text = hasErrors
+                    ? "Compilation errors"
+                    : "Compilation warnings"
+            };
+
+        errorDialog.ShowDialog(this);
+
+        return !hasErrors;
     }
 
     public void SetModuleNotBuilt()
