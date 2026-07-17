@@ -37,7 +37,8 @@ internal static class VisualBasicRoslynCompiler
             new(parameters.TempFiles);
 
         VisualBasicParseOptions parseOptions =
-            VisualBasicParseOptions.Default;
+            new VisualBasicParseOptions(
+                languageVersion: LanguageVersion.VisualBasic17_13);
 
         SyntaxTree syntaxTree =
             VisualBasicSyntaxTree.ParseText(
