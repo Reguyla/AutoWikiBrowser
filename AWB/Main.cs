@@ -906,12 +906,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Changing this value updates the stop-button layout and controls the
     /// visibility of the false-positive actions.
     /// </remarks>
-    /// TODO (.NET 8 Modernization):
-    /// Replace this write-only property with a clearly named method such as
-    /// UpdateIgnoredArticleControls(bool). The current implementation performs
-    /// UI layout changes rather than representing state, so a method would
-    /// better communicate its behavior. This requires updating all callers and
-    /// should be done as a dedicated refactoring to avoid changing behavior.
+    // TODO (.NET 8 Modernization):
+    // Replace this write-only property with a clearly named method such as
+    // UpdateIgnoredArticleControls(bool). The current implementation performs
+    // UI layout changes rather than representing state, so a method would
+    // better communicate its behavior. This requires updating all callers and
+    // should be done as a dedicated refactoring to avoid changing behavior.
     private bool AddIgnoredToLogFile
     {
         set
@@ -956,26 +956,34 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     #region MainProcess
 
     /// <summary>
-    /// checks if we are still logged in
-    /// asks to relogin if needed
+    /// Verifies that the current session is still logged in.
     /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the user remains logged in; otherwise,
+    /// <see langword="false"/> after the logged-off state has been handled.
+    /// </returns>
     private bool CheckLoginStatus()
     {
-        if (!TheSession.User.IsLoggedIn)
-        {
-            HandleLogoff();
-            return false;
-        }
-        return true;
+        if (TheSession.User.IsLoggedIn)
+            return true;
+
+        HandleLogoff();
+        return false;
     }
 
     /// <summary>
-    /// Displays You've been logged off message, opens profiles screen if not already open
+    /// Stops processing, informs the user that the session has been lost,
+    /// and opens the profiles dialog when it is not already visible.
     /// </summary>
     private void HandleLogoff()
     {
-        MessageBox.Show("You've been logged off, probably due to loss of session data.\r\nPlease relogin.",
-                        "Logged off", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        MessageBox.Show(
+            "You've been logged off, probably due to loss of session data.\r\n" +
+            "Please relogin.",
+            "Logged off",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Exclamation);
+
         Stop();
 
         if (!Profiles.Visible)
@@ -983,8 +991,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// 
+    /// Connects the session editor events to their corresponding
+    /// main-form event handlers.
     /// </summary>
+    // TODO (.NET 8 Modernization):
+    // Rename CreateEditor() to SubscribeToSessionEvents() because the method
+    // does not create an editor; it attaches MainForm handlers to session events.
+    // Before renaming, verify that the method is called only once per session.
+    // Repeated calls could register duplicate handlers and cause events to be
+    // processed more than once.
     private void CreateEditor()
     {
         TheSession.PreviewComplete += PreviewComplete;
@@ -995,30 +1010,56 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         TheSession.LoggedOff += LoggedOff;
     }
 
+    /// <summary>
+    /// Handles notification that the active editing session has been logged off.
+    /// </summary>
+    /// <param name="sender">The editor that raised the event.</param>
     private void LoggedOff(AsyncApiEdit sender)
     {
         DisableButtons();
     }
 
+    /// <summary>
+    /// Handles completion of an article-open operation.
+    /// </summary>
+    /// <param name="editor">The editor that completed the operation.</param>
+    /// <param name="page">Information about the loaded page.</param>
     private void OpenComplete(AsyncApiEdit editor, PageInfo page)
     {
         PageLoaded(page);
     }
 
-    private void MaxlagExceeded(AsyncApiEdit sender, double maxlag, int retryAfter)
+    /// <summary>
+    /// Handles a server maxlag response and schedules another attempt when the
+    /// configured retry limit has not been reached.
+    /// </summary>
+    /// <param name="sender">The editor that reported the maxlag condition.</param>
+    /// <param name="maxlag">The maxlag value reported by the server.</param>
+    /// <param name="retryAfter">
+    /// The number of seconds to wait before attempting to restart processing.
+    /// </param>
+    private void MaxlagExceeded(
+        AsyncApiEdit sender,
+        double maxlag,
+        int retryAfter)
     {
         Retries++;
 
         if (Retries < MaxRetries)
         {
             StartDelayedRestartTimer(retryAfter);
+            return;
         }
-        else
-        {
-            Stop();
-            MessageBox.Show(this, "Maxlag exceeded " + MaxRetries + " times in a row. Processing stopped, please try later when the server is under a less load.", "Stopped", MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-        }
+
+        Stop();
+
+        MessageBox.Show(
+            this,
+            $"Maxlag was exceeded {MaxRetries} times in a row. " +
+            "Processing has stopped. Please try again later when the server is under less load.",
+            "Stopped",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
     }
 
     private void ApiEditExceptionCaught(AsyncApiEdit sender, Exception ex)
