@@ -208,15 +208,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 ErrorHandler.HandleException(ex);
             }
 
-            addToWatchList.SelectedIndex = 3;
-            cmboCategorise.SelectedIndex = 0;
-            cmboImages.SelectedIndex = 0;
-
-            listMaker.UserInputTextBox.ContextMenuStrip = mnuMakeFromTextBox;
-            listMaker.BusyStateChanged += SetProgressBar;
-            listMaker.NoOfArticlesChanged += UpdateButtons;
-            listMaker.StatusTextChanged += UpdateListStatus;
-            listMaker.cmboSourceSelect.SelectedIndexChanged += ListMakerSourceSelectHandler;
+            InitializeControls();
 
             TheSession = new Session(this);
             CreateEditor();
@@ -255,6 +247,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         btntsFalsePositive.Image = Resources.RollBack;
         btntsStart.Image = Resources.Run;
         btntsDelete.Image = Resources.Vista_trashcan_empty;
+    }
+
+    private void InitializeControls()
+    {
+        addToWatchList.SelectedIndex = 3;
+        cmboCategorise.SelectedIndex = 0;
+        cmboImages.SelectedIndex = 0;
+
+        listMaker.UserInputTextBox.ContextMenuStrip = mnuMakeFromTextBox;
+        listMaker.BusyStateChanged += SetProgressBar;
+        listMaker.NoOfArticlesChanged += UpdateButtons;
+        listMaker.StatusTextChanged += UpdateListStatus;
+        listMaker.cmboSourceSelect.SelectedIndexChanged +=
+            ListMakerSourceSelectHandler;
     }
 
     /// <summary>
