@@ -1929,7 +1929,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return false;
     }
 
-
+    // TODO (.NET 8 Modernization):
+    // Re-evaluate this check after replacing the legacy editor. This skip exists
+    // because the current RichTextBox-based editor cannot reliably preserve
+    // Unicode Private Use Area (PUA) characters. If the new editor fully supports
+    // these characters, remove or relax this restriction and update the user
+    // warning accordingly.
     /// <summary>
     /// Detects Unicode Private Use Area characters that cannot safely be edited
     /// in the current editor.
@@ -2011,7 +2016,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Runs ProcessPage background thread
+    /// Updates the processing status, establishes the current page context, and
+    /// runs automatic page processing on the background worker.
     /// </summary>
     private void ProcessPageBackground()
     {
@@ -2019,11 +2025,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ? "Processing page (pre-parse mode)"
             : "Processing page";
 
-        // FIXME:
-        // ErrorHandler.CurrentPage should ideally be assigned before any operation
-        // that may throw while processing this page. The current location avoids
-        // attributing unrelated initialization failures to the wrong article, but
-        // exceptions raised earlier will not include page context.
+        // TODO (.NET 8 Modernization):
+        // Replace the global CurrentPage assignment with a scoped, thread-safe page
+        // context that is established immediately around page processing and restored
+        // afterward. Consider AsyncLocal or explicit context passing so concurrent or
+        // unrelated failures are not attributed to the wrong article.
         ErrorHandler.CurrentPage = TheArticle.Name;
 
         ProcessPage(TheArticle, true);
