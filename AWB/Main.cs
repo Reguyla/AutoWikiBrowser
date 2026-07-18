@@ -216,7 +216,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             SplashScreen.SetProgress(15);
 
-            _pasteMoreItems = InitializeDialogs();
+            _pasteMoreItems = InitializePasteMoreItems();
+            InitializeFileDialogs();
         }
         catch (Exception ex)
         {
@@ -304,18 +305,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Initializes paste-menu items and file-dialog default locations.
+    /// Creates the ordered collection of additional paste menu items.
     /// </summary>
     /// <returns>
     /// The ordered collection of additional paste menu items.
     /// </returns>
-    /// <remarks>
-    /// File dialogs default to the user's Documents folder to avoid saving
-    /// settings files under the application data directory.
-    /// </remarks>
-    private ToolStripMenuItem[] InitializeDialogs()
+    private ToolStripMenuItem[] InitializePasteMoreItems()
     {
-        ToolStripMenuItem[] pasteMoreItems =
+        return new[]
         {
         PasteMore1,
         PasteMore2,
@@ -328,15 +325,23 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         PasteMore9,
         PasteMore10
     };
-
-        string documentsFolder =
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-        saveXML.InitialDirectory = documentsFolder;
-        openXML.InitialDirectory = documentsFolder;
-
-        return pasteMoreItems;
     }
+
+    /// <summary>
+    /// Initializes the default locations used by the settings file dialogs.
+    /// </summary>
+    /// <remarks>
+    /// File dialogs default to the user's Documents folder to avoid saving
+    /// settings files under the application data directory.
+    /// </remarks>
+    private void InitializeFileDialogs()
+        {
+            string documentsFolder =
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            saveXML.InitialDirectory = documentsFolder;
+            openXML.InitialDirectory = documentsFolder;
+        }
 
     /// <summary>
     /// 
