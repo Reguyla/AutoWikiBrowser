@@ -568,7 +568,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         try
         {
-            await TryInitializeWebView2DiffBrowserAsync();
+            await InitializeWebView2DiffBrowserAsync();
 
             SplashScreen.SetProgress(25);
 
@@ -2692,71 +2692,117 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private WebView2 _diffWebView;
 
     /// <summary>
-    /// Creates the experimental WebView2 diff control in the same container
-    /// as the existing diff browser.
+    /// Creates the WebView2 diff control in the existing diff-browser container.
     /// </summary>
     private void CreateWebView2DiffBrowser()
     {
+        if (_diffWebView != null)
+        {
+            return;
+        }
+
+        Control parent = webBrowser.Parent
+            ?? throw new InvalidOperationException(
+                "The existing diff browser does not have a parent container.");
+
         _diffWebView = new WebView2
         {
             Dock = DockStyle.Fill,
             Visible = false
         };
 
-        Control parent = webBrowser.Parent;
-
-        if (parent == null)
-            throw new InvalidOperationException(
-                "The existing diff browser does not have a parent container.");
-
         parent.Controls.Add(_diffWebView);
         _diffWebView.BringToFront();
     }
 
     /// <summary>
-    /// Initializes the experimental WebView2 diff renderer.
+    /// Initializes and configures the WebView2 diff renderer.
     /// </summary>
     private async Task InitializeWebView2DiffBrowserAsync()
     {
-        if (_diffWebView == null)
-        {
-            throw new InvalidOperationException(
+        WebView2 diffWebView = _diffWebView
+            ?? throw new InvalidOperationException(
                 "The WebView2 diff control has not been created.");
+
+        if (diffWebView.IsDisposed)
+        {
+            throw new ObjectDisposedException(
+                nameof(_diffWebView));
         }
 
-        await _diffWebView.EnsureCoreWebView2Async();
+        // TODO (.NET 8 Modernization):
+        // Verify that WebView2 creation, initialization, rendering, visibility
+        // changes, and disposal always occur on the WinForms UI thread.
+        await diffWebView.EnsureCoreWebView2Async();
 
-        var core = _diffWebView.CoreWebView2
+        CoreWebView2 core = diffWebView.CoreWebView2
             ?? throw new InvalidOperationException(
                 "WebView2 initialization completed without creating CoreWebView2.");
 
-        core.Settings.AreDefaultContextMenusEnabled = false;
-        core.Settings.AreDevToolsEnabled = false;
-        core.Settings.AreBrowserAcceleratorKeysEnabled = false;
-        core.Settings.IsStatusBarEnabled = false;
-        core.Settings.IsZoomControlEnabled = false;
+        ConfigureWebView2DiffBrowser(core);
 
         Tools.WriteDebug(
             nameof(InitializeWebView2DiffBrowserAsync),
             "WebView2 initialized.");
     }
 
-    /// <summary>
-    /// Attempts to initialize the WebView2 diff renderer without preventing
-    /// AWB from starting if WebView2 initialization fails.
-    /// </summary>
-    private async Task TryInitializeWebView2DiffBrowserAsync()
+    private static void ConfigureWebView2DiffBrowser(
+    CoreWebView2 core)
     {
+        core.Settings.AreDefaultContextMenusEnabled = false;
+        core.Settings.AreDevToolsEnabled = false;
+        core.Settings.AreBrowserAcceleratorKeysEnabled = false;
+        core.Settings.IsStatusBarEnabled = false;
+        core.Settings.IsZoomControlEnabled = false;
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Harden the WebView2 diff renderer as a non-browsing display surface.
+    // Disable unused script, host-object, and web-message capabilities, and
+    // explicitly handle link navigation and new-window requests so generated
+    // diff content cannot navigate the embedded control unexpectedly.
+    //
+    // TODO (.NET 8 Modernization):
+    // Replace NavigateToString() or provide a fallback for generated diff HTML
+    // approaching WebView2's 2 MB input limit. Large articles may generate diff
+    // documents that exceed the supported size.
+    /// <summary>
+    /// Attempts to render generated diff HTML in the WebView2 diff control.
+    /// </summary>
+    /// <param name="html">The complete diff HTML document.</param>
+    /// <returns>
+    /// <see langword="true"/> when rendering was started; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool TryRenderWebView2Diff(string html)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+
+        WebView2? diffWebView = _diffWebView;
+
+        if (diffWebView == null
+            || diffWebView.IsDisposed
+            || diffWebView.CoreWebView2 == null)
+        {
+            Tools.WriteDebug(
+                nameof(TryRenderWebView2Diff),
+                "WebView2 was unavailable when the diff was rendered.");
+
+            return false;
+        }
+
         try
         {
-            await InitializeWebView2DiffBrowserAsync();
-
+            diffWebView.NavigateToString(html);
+            return true;
         }
         catch (Exception ex)
         {
             Tools.WriteDebug(
-                nameof(TryInitializeWebView2DiffBrowserAsync),
+                nameof(TryRenderWebView2Diff),
                 ex.ToString());
+
+            return false;
         }
     }
 
