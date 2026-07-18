@@ -51,7 +51,13 @@ namespace AutoWikiBrowser;
 // TODO:Move any code that doesn't need to be directly behind the form to WF or other code files (Preferably WF)
 // TODO:Move Regexes declared in method bodies (if not dynamic based on article title, etc), into class body
 // TODO:Move any Regexes to WikiRegexes as required
-// TODO:Invesitigate splitting this into smaller, more manageable modules instead of a 6000+ line monolith
+// TODO (.NET 8 Modernization):
+// Review MainForm responsibilities after behavior-preserving cleanup is
+// complete. Move article-processing rules, API error classification, retry
+// decisions, title preparation, and workflow state into testable services.
+// Keep direct WinForms control updates, dialogs, and event wiring in MainForm,
+// using thin UI methods to apply decisions returned by those services.
+
 
 public sealed partial class MainForm : Form, IAutoWikiBrowser
 { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
@@ -1638,21 +1644,28 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         OpenPage(title);
     }
 
-    private Dictionary<int, int> unbalancedBracket = new Dictionary<int, int>();
-    private Dictionary<int, int> badCiteParameters = new Dictionary<int, int>();
-    private Dictionary<int, int> dupeBanerShellParameters = new Dictionary<int, int>();
-    private Dictionary<int, int> unclosedTags = new Dictionary<int, int>();
-    private Dictionary<int, int> wikilinkedHeaders = new Dictionary<int, int>();
-    private Dictionary<int, int> deadLinks = new Dictionary<int, int>();
-    private Dictionary<int, int> ambigCiteDates = new Dictionary<int, int>();
-    private Dictionary<int, int> targetlessLinks = new Dictionary<int, int>();
-    private Dictionary<int, int> doublepipeLinks = new Dictionary<int, int>();
-    private Dictionary<int, int> otherErrors = new Dictionary<int, int>();
-    private Dictionary<int, int> userSignature = new Dictionary<int, int>();
-    private List<string> UnknownWikiProjectBannerShellParameters = new List<string>();
-    private List<string> UnknownMultipleIssuesParameters = new List<string>();
+    // TODO (.NET 8 Modernization):
+    // Review these error-tracking collections after the MainForm cleanup is
+    // complete. Determine whether they should remain cached fields, become
+    // method-local variables, or be replaced with a single strongly typed error
+    // reporting model. Also evaluate whether these dictionaries duplicate state
+    // already owned by Article and can be eliminated entirely.
+    private Dictionary<int, int> _unbalancedBrackets = new();
+    private Dictionary<int, int> _badCiteParameters = new();
+    private Dictionary<int, int> _duplicateBannerShellParameters = new();
+    private Dictionary<int, int> _unclosedTags = new();
+    private Dictionary<int, int> _wikilinkedHeaders = new();
+    private Dictionary<int, int> _deadLinks = new();
+    private Dictionary<int, int> _ambiguousCiteDates = new();
+    private Dictionary<int, int> _targetlessLinks = new();
+    private Dictionary<int, int> _doublePipeLinks = new();
+    private Dictionary<int, int> _otherErrors = new();
+    private Dictionary<int, int> _userSignatures = new();
 
-    private readonly SortedDictionary<int, int> Errors = new SortedDictionary<int, int>();
+    private List<string> _unknownWikiProjectBannerShellParameters = new();
+    private List<string> _unknownMultipleIssuesParameters = new();
+
+    private readonly SortedDictionary<int, int> _errors = new();
 
     private void SkipRedirect(string reason)
     {
@@ -2038,7 +2051,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 HighlightAllFind();
 
             // always clear errors in case highlight errors was previously enabled and now turned off by user
-            Errors.Clear();
+            _errors.Clear();
 
             if (scrollToAlertsToolStripMenuItem.Checked)
             {
@@ -2085,9 +2098,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         foreach (KeyValuePair<int, int> error in source)
         {
-            if (!Errors.ContainsKey(error.Key))
+            if (!_errors.ContainsKey(error.Key))
             {
-                Errors.Add(error.Key, error.Value);
+                _errors.Add(error.Key, error.Value);
             }
         }
     }
@@ -2130,21 +2143,21 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private void HighlightErrors()
     {
-        AddErrors(unbalancedBracket);
-        AddErrors(badCiteParameters);
-        AddErrors(dupeBanerShellParameters);
-        AddErrors(deadLinks);
-        AddErrors(ambigCiteDates);
-        AddErrors(unclosedTags);
-        AddErrors(wikilinkedHeaders);
-        AddErrors(targetlessLinks);
-        AddErrors(doublepipeLinks);
-        AddErrors(otherErrors);
-        AddErrors(userSignature);
+        AddErrors(_unbalancedBrackets);
+        AddErrors(_badCiteParameters);
+        AddErrors(_duplicateBannerShellParameters);
+        AddErrors(_deadLinks);
+        AddErrors(_ambiguousCiteDates);
+        AddErrors(_unclosedTags);
+        AddErrors(_wikilinkedHeaders);
+        AddErrors(_targetlessLinks);
+        AddErrors(_doublePipeLinks);
+        AddErrors(_otherErrors);
+        AddErrors(_userSignatures);
 
-        if (Errors.Any())
+        if (_errors.Count > 0)
         {
-            HighlightEditorErrors(Errors);
+            HighlightEditorErrors(_errors);
         }
     }
 
@@ -3804,21 +3817,22 @@ font-size: 150%;'>No changes</h2>
     {
         lbDuplicateWikilinks.Items.Clear();
         lbAlerts.Items.Clear();
-        ambigCiteDates.Clear();
-        badCiteParameters.Clear();
-        deadLinks.Clear();
-        doublepipeLinks.Clear();
-        dupeBanerShellParameters.Clear();
-        targetlessLinks.Clear();
-        unclosedTags.Clear();
-        wikilinkedHeaders.Clear();
-        unbalancedBracket.Clear();
-        otherErrors.Clear();
-        userSignature.Clear();
+
+        _ambiguousCiteDates.Clear();
+        _badCiteParameters.Clear();
+        _deadLinks.Clear();
+        _doublePipeLinks.Clear();
+        _duplicateBannerShellParameters.Clear();
+        _targetlessLinks.Clear();
+        _unclosedTags.Clear();
+        _wikilinkedHeaders.Clear();
+        _unbalancedBrackets.Clear();
+        _otherErrors.Clear();
+        _userSignatures.Clear();
 
         if (reset)
         {
-            //Resets all the alerts.
+            // Restore the default article information labels.
             lblWords.Text = Words;
             lblCats.Text = Cats;
             lblImages.Text = Imgs;
@@ -3867,114 +3881,172 @@ font-size: 150%;'>No changes</h2>
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Some_additional_edits
             if (hasAlertsOn || alertPreferences.Contains(4))
             {
-                deadLinks = TheArticle.DeadLinks();
-                if (deadLinks.Any())
-                    lbAlerts.Items.Add("Dead links" + " (" + deadLinks.Count + ")");
+                _deadLinks = TheArticle.DeadLinks();
+                if (_deadLinks.Any())
+                    lbAlerts.Items.Add("Dead links" + " (" + _deadLinks.Count + ")");
             }
 
             if (hasAlertsOn || alertPreferences.Contains(1))
             {
-                ambigCiteDates = TheArticle.AmbiguousCiteTemplateDates();
-                if (ambigCiteDates.Any())
-                    lbAlerts.Items.Add("Ambiguous citation dates" + " (" + ambigCiteDates.Count + ")");
+                _ambiguousCiteDates = TheArticle.AmbiguousCiteTemplateDates();
+
+                if (_ambiguousCiteDates.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Ambiguous citation dates ({_ambiguousCiteDates.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(17))
             {
-                unbalancedBracket = TheArticle.UnbalancedBrackets();
-                if (unbalancedBracket.Any())
-                    lbAlerts.Items.Add("Unbalanced brackets" + " (" + unbalancedBracket.Count + ")");
+                _unbalancedBrackets = TheArticle.UnbalancedBrackets();
+
+                if (_unbalancedBrackets.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Unbalanced brackets ({_unbalancedBrackets.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(9))
             {
-                badCiteParameters = TheArticle.BadCiteParameters();
-                if (badCiteParameters.Any())
-                    lbAlerts.Items.Add("Invalid citation parameter(s)" + " (" + badCiteParameters.Count + ")");
+                _badCiteParameters = TheArticle.BadCiteParameters();
+
+                if (_badCiteParameters.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Invalid citation parameter(s) ({_badCiteParameters.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(11))
             {
-                targetlessLinks = TheArticle.TargetlessLinks();
-                if (targetlessLinks.Any())
-                    lbAlerts.Items.Add("Links with no target" + " (" + targetlessLinks.Count + ")");
+                _targetlessLinks = TheArticle.TargetlessLinks();
+
+                if (_targetlessLinks.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Links with no target ({_targetlessLinks.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(10))
             {
-                doublepipeLinks = TheArticle.DoublepipeLinks();
-                if (doublepipeLinks.Any())
-                    lbAlerts.Items.Add("Links with double pipes" + " (" + doublepipeLinks.Count + ")");
+                _doublePipeLinks = TheArticle.DoublepipeLinks();
+
+                if (_doublePipeLinks.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Links with double pipes ({_doublePipeLinks.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(5))
             {
-                dupeBanerShellParameters = TheArticle.DuplicateWikiProjectBannerShellParameters();
-                if (dupeBanerShellParameters.Any())
-                    lbAlerts.Items.Add("Duplicate parameter(s) in WPBannerShell" + " (" + dupeBanerShellParameters.Count + ")");
+                _duplicateBannerShellParameters =
+                    TheArticle.DuplicateWikiProjectBannerShellParameters();
+
+                if (_duplicateBannerShellParameters.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Duplicate parameter(s) in WPBannerShell ({_duplicateBannerShellParameters.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(21))
             {
-                UnknownWikiProjectBannerShellParameters = TheArticle.UnknownWikiProjectBannerShellParameters();
-                if (UnknownWikiProjectBannerShellParameters.Any())
+                _unknownWikiProjectBannerShellParameters =
+                    TheArticle.UnknownWikiProjectBannerShellParameters();
+
+                if (_unknownWikiProjectBannerShellParameters.Count > 0)
                 {
-                    string warn = "Unknown parameters in WikiProject banner shell: " + " (" +
-                        UnknownWikiProjectBannerShellParameters.Count + ") "
-                        + string.Join(",", UnknownWikiProjectBannerShellParameters.ToArray());
-                    lbAlerts.Items.Add(warn);
+                    string warning =
+                        $"Unknown parameters in WikiProject banner shell ({_unknownWikiProjectBannerShellParameters.Count}): " +
+                        string.Join(", ", _unknownWikiProjectBannerShellParameters);
+
+                    lbAlerts.Items.Add(warning);
                 }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(20))
             {
-                UnknownMultipleIssuesParameters = TheArticle.UnknownMultipleIssuesParameters();
-                if (UnknownMultipleIssuesParameters.Any())
+                _unknownMultipleIssuesParameters =
+                    TheArticle.UnknownMultipleIssuesParameters();
+
+                if (_unknownMultipleIssuesParameters.Count > 0)
                 {
-                    string warn = "Unknown parameters in Multiple issues: " + " (" +
-                        UnknownMultipleIssuesParameters.Count + ") "
-                        + string.Join(", ", UnknownMultipleIssuesParameters.ToArray());
-                    lbAlerts.Items.Add(warn);
+                    string warning =
+                        $"Unknown parameters in Multiple issues ({_unknownMultipleIssuesParameters.Count}): " +
+                        string.Join(", ", _unknownMultipleIssuesParameters);
+
+                    lbAlerts.Items.Add(warning);
                 }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(8))
             {
-                wikilinkedHeaders = TheArticle.WikiLinkedHeaders();
-                if (wikilinkedHeaders.Any())
-                    lbAlerts.Items.Add("Header(s) with wikilinks" + " (" + wikilinkedHeaders.Count + ")");
+                _wikilinkedHeaders = TheArticle.WikiLinkedHeaders();
+
+                if (_wikilinkedHeaders.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Header(s) with wikilinks ({_wikilinkedHeaders.Count})");
+                }
             }
 
             if (hasAlertsOn || alertPreferences.Contains(18))
             {
-                unclosedTags = TheArticle.UnclosedTags();
-                if (unclosedTags.Any())
-                    lbAlerts.Items.Add("Unclosed tag(s)" + " (" + unclosedTags.Count + ")");
+                _unclosedTags = TheArticle.UnclosedTags();
+
+                if (_unclosedTags.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Unclosed tag(s) ({_unclosedTags.Count})");
+                }
             }
 
-            if ((hasAlertsOn || alertPreferences.Contains(15)) && TheArticle.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
+            if ((hasAlertsOn || alertPreferences.Contains(15))
+                && TheArticle.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
             {
                 lbAlerts.Items.Add("See also section out of place");
 
-                // Performance: faster to fetch all headings and filter than apply WikiRegexes.SeeAlso directly
-                Match m = (from Match h in WikiRegexes.Headings.Matches(articleText)
-                           where WikiRegexes.SeeAlso.IsMatch(h.Value)
-                           select h).FirstOrDefault();
+                // Performance: fetching all headings and filtering them is faster than
+                // applying WikiRegexes.SeeAlso directly to the entire article.
+                Match seeAlsoHeading = WikiRegexes.Headings
+                    .Matches(articleText)
+                    .OfType<Match>()
+                    .FirstOrDefault(
+                        heading => WikiRegexes.SeeAlso.IsMatch(heading.Value));
 
-                if (m != null && !otherErrors.ContainsKey(m.Index))
-                    otherErrors.Add(m.Index, m.Length);
+                if (seeAlsoHeading != null
+                    && !_otherErrors.ContainsKey(seeAlsoHeading.Index))
+                {
+                    _otherErrors.Add(
+                        seeAlsoHeading.Index,
+                        seeAlsoHeading.Length);
+                }
             }
 
-            // check for {{sic}} tags etc. when doing typo fixes
-            if ((hasAlertsOn || alertPreferences.Contains(2) || chkRegExTypo.Checked) && TheArticle.HasSicTag)
-                lbAlerts.Items.Add(@"Contains 'sic' tag");
-
-            // check for [[User: or [[[User talk:
-            if ((hasAlertsOn || alertPreferences.Contains(22)) && TheArticle.NameSpaceKey == Namespace.Article)
+            // Check for {{sic}} tags and similar markup when performing typo fixes.
+            if ((hasAlertsOn
+                 || alertPreferences.Contains(2)
+                 || chkRegExTypo.Checked)
+                && TheArticle.HasSicTag)
             {
-                userSignature = TheArticle.UserSignature();
-                if (userSignature.Any())
-                    lbAlerts.Items.Add("Editor's signature or link to user space" + " (" + userSignature.Count + ")");
+                lbAlerts.Items.Add("Contains 'sic' tag");
+            }
+
+            // Check for links to user or user-talk namespaces in article content.
+            if ((hasAlertsOn || alertPreferences.Contains(22))
+                && TheArticle.NameSpaceKey == Namespace.Article)
+            {
+                _userSignatures = TheArticle.UserSignature();
+
+                if (_userSignatures.Count > 0)
+                {
+                    lbAlerts.Items.Add(
+                        $"Editor's signature or link to user space ({_userSignatures.Count})");
+                }
             }
 
             MatchCollection imagesMC = WikiRegexes.ImagesCountOnly.Matches(articleText);
@@ -4008,7 +4080,7 @@ font-size: 150%;'>No changes</h2>
         int b = WikiRegexes.Newline.Matches(a).Count;
         bool done = false;
 
-        foreach (KeyValuePair<int, int> kvp in Errors)
+        foreach (KeyValuePair<int, int> kvp in _errors)
         {
             int current = txtEdit.SelectionStart + b; // offset by number of newlines up to it
             if (kvp.Key > current && kvp.Key < txtEdit.Text.Length)
@@ -4025,7 +4097,7 @@ font-size: 150%;'>No changes</h2>
         {
             txtEdit.SelectionStart = 0;
 
-            foreach (KeyValuePair<int, int> kvp in Errors)
+            foreach (KeyValuePair<int, int> kvp in _errors)
             {
                 if (kvp.Key > txtEdit.SelectionStart && kvp.Key < txtEdit.Text.Length)
                 {
@@ -5369,7 +5441,7 @@ if (MessageBox.Show(
         if (highlightAllFindToolStripMenuItem.Checked)
             HighlightAllFind();
 
-        Errors.Clear();
+        _errors.Clear();
 
         if (scrollToAlertsToolStripMenuItem.Checked)
             HighlightErrors();
