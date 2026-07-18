@@ -1062,6 +1062,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             MessageBoxIcon.Error);
     }
 
+    /// <summary>
+    /// Handles exceptions raised during asynchronous API editing operations.
+    /// </summary>
+    /// <param name="sender">
+    /// The editor that raised the exception.
+    /// </param>
+    /// <param name="ex">
+    /// The exception raised by the editing operation.
+    /// </param>
+    /// <remarks>
+    /// Routes known exception types to their specialized handlers and performs
+    /// the appropriate recovery action, such as retrying, skipping, stopping,
+    /// or reporting unexpected errors.
+    /// </remarks>
     private void ApiEditExceptionCaught(AsyncApiEdit sender, Exception ex)
     {
         if (ex is InterwikiException)
