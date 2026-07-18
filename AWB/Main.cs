@@ -1084,71 +1084,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
             SkipPage(message);
         }
-        else if (ex is ApiErrorException)
+        else if (ex is ApiErrorException apiError)
         {
-            switch ((ex as ApiErrorException).ErrorCode)
-            {
-                case "editconflict":
-                    // TODO: must be a less crude way
-                    MessageBox.Show(this,
-                        "There has been an edit conflict. AWB will now re-apply its changes on the updated page.\r\nPlease re-review the changes before saving. Any Custom edits will be lost, and have to be re-added manually.",
-                        "Edit conflict");
-                    NudgeTimer.Stop();
-                    Start();
-                    break;
-
-                case "writeapidenied":
-                    NoWriteApiRight();
-                    break;
-
-                case "customcssprotected":
-                    SkipPage("You're not allowed to edit custom CSS pages");
-                    break;
-
-                case "customjsprotected":
-                    SkipPage("You're not allowed to edit custom JavaScript pages");
-                    break;
-
-                case "badmd5":
-                    SkipPage(
-                        "API MD5 hash error: The page you are editing may contain an unsupported or invalid Unicode character");
-                    break;
-
-                case "assertuserfailed":
-                    HandleLogoff();
-                    break;
-
-                case "badtoken":
-                    // likely session timeout forced by mediawiki, so just reprocess page
-                    Tools.WriteDebug("ApiExceptionCaught/badtoken", ex.Message);
-                    StartDelayedRestartTimer();
-                    break;
-
-                case "blocked":
-                    MessageBox.Show("API reports this user is blocked from editing.",
-                        "User blocked", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    Stop();
-                    break;
-
-                case "readonly":
-                    MessageBox.Show(((ApiErrorException)ex).ApiErrorMessage,
-                        "Wiki read-only", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    StartDelayedRestartTimer();
-                    break;
-
-                case "tpt-target-page":
-                    SkipPage("Translation pages cannot currently be edited");
-                    break;
-
-                case "titleblacklist-forbidden-edit":
-                    SkipPage("TitleBlacklist prevents this title from being created");
-                    break;
-
-                default:
-                    Tools.WriteDebug("ApiExceptionCaught", ex.Message);
-                    StartDelayedRestartTimer();
-                    break;
-            }
+            HandleApiError(apiError);
         }
         else if (ex is ApiBlankException)
         {
@@ -1165,7 +1103,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
         else if (ex is CaptchaException)
         {
-            MessageBox.Show("Captcha required, is the user account autoconfirmed etc?", "Captcha Required");
+            MessageBox.Show(
+                "Captcha required, is the user account autoconfirmed etc?",
+                "Captcha Required");
+
             Stop();
         }
         else if (ex is InvalidTitleException)
@@ -1213,6 +1154,100 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             Stop();
             ErrorHandler.HandleException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Handles an error returned by the MediaWiki API.
+    /// </summary>
+    /// <param name="exception">
+    /// The API exception containing the error code and associated message.
+    /// </param>
+    private void HandleApiError(ApiErrorException exception)
+    {
+        switch (exception.ErrorCode)
+        {
+            case "editconflict":
+                // TODO: must be a less crude way
+                MessageBox.Show(
+                    this,
+                    "There has been an edit conflict. AWB will now re-apply its " +
+                    "changes on the updated page.\r\nPlease re-review the changes " +
+                    "before saving. Any custom edits will be lost and must be " +
+                    "re-added manually.",
+                    "Edit conflict");
+
+                NudgeTimer.Stop();
+                Start();
+                break;
+
+            case "writeapidenied":
+                NoWriteApiRight();
+                break;
+
+            case "customcssprotected":
+                SkipPage("You're not allowed to edit custom CSS pages");
+                break;
+
+            case "customjsprotected":
+                SkipPage("You're not allowed to edit custom JavaScript pages");
+                break;
+
+            case "badmd5":
+                SkipPage(
+                    "API MD5 hash error: The page you are editing may contain " +
+                    "an unsupported or invalid Unicode character");
+                break;
+
+            case "assertuserfailed":
+                HandleLogoff();
+                break;
+
+            case "badtoken":
+                // Likely a session timeout forced by MediaWiki, so reprocess the page.
+                Tools.WriteDebug(
+                    "ApiExceptionCaught/badtoken",
+                    exception.Message);
+
+                StartDelayedRestartTimer();
+                break;
+
+            case "blocked":
+                MessageBox.Show(
+                    "API reports this user is blocked from editing.",
+                    "User blocked",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+
+                Stop();
+                break;
+
+            case "readonly":
+                MessageBox.Show(
+                    exception.ApiErrorMessage,
+                    "Wiki read-only",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+
+                StartDelayedRestartTimer();
+                break;
+
+            case "tpt-target-page":
+                SkipPage("Translation pages cannot currently be edited");
+                break;
+
+            case "titleblacklist-forbidden-edit":
+                SkipPage(
+                    "TitleBlacklist prevents this title from being created");
+                break;
+
+            default:
+                Tools.WriteDebug(
+                    "ApiExceptionCaught",
+                    exception.Message);
+
+                StartDelayedRestartTimer();
+                break;
         }
     }
 
