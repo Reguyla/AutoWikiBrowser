@@ -1355,22 +1355,37 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         StartDelayedRestartTimer();
     }
 
+    /// <summary>
+    /// Opens the specified article in the editor.
+    /// </summary>
+    /// <param name="title">The title of the article to open.</param>
     private void OpenPage(string title)
     {
         StatusLabelText = "Loading...";
-        // if "skip if redirect" is on, don't bypass redirects even if "bypass redirects" is on too
-        TheSession.Editor.Open(title, followRedirectsToolStripMenuItem.Checked && !chkSkipIfRedirect.Checked);
+
+        bool followRedirects =
+            followRedirectsToolStripMenuItem.Checked
+            && !chkSkipIfRedirect.Checked;
+
+        TheSession.Editor.Open(title, followRedirects);
     }
 
-    private bool _stopProcessing, _inStart, _startAgain;
+    private bool _stopProcessing;
+    private bool _inStart;
+    private bool _startAgain;
 
     /// <summary>
-    /// 
+    /// Starts article processing when the session is registered and idle.
     /// </summary>
+    /// <remarks>
+    /// Prevents recursive entry into the start sequence. If another start request
+    /// occurs while processing is being started, one additional pass is requested
+    /// and performed after the current pass completes.
+    /// </remarks>
     private void Start()
     {
-        if (TheSession.Status != WikiStatusResult.Registered ||
-            TheSession.IsBusy)
+        if (TheSession.Status != WikiStatusResult.Registered
+            || TheSession.IsBusy)
         {
             return;
         }
