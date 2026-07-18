@@ -572,16 +572,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             SplashScreen.SetProgress(25);
 
-            logControl.Initialise(listMaker);
-            articleActionLogControl1.Initialise(listMaker);
+            InitializeLogging();
 
             RestoreWindowState();
 
             Plugin.LoadPluginsStartup(this, SplashScreen); // Progress 25-50.
             LoadPrefs(); // Progress 50-59.
 
-            Debug();
-            Release();
+            InitializeBuildConfiguration();
 
             SplashScreen.SetProgress(60);
             UpdateButtons(null, null);
@@ -708,6 +706,21 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         WindowState = savedWindowState == FormWindowState.Minimized
             ? FormWindowState.Normal
             : savedWindowState;
+    }
+
+    /// <summary>
+    /// Initializes the application logging controls.
+    /// </summary>
+    private void InitializeLogging()
+    {
+        logControl.Initialise(listMaker);
+        articleActionLogControl1.Initialise(listMaker);
+    }
+
+    private void InitializeBuildConfiguration()
+    {
+        Debug();
+        Release();
     }
     #endregion
 
