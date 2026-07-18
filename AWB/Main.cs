@@ -2563,31 +2563,103 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         StopProgressBar();
     }
 
-
-
     /// <summary>
-    /// Adds error locations from the specified collection to the master
-    /// error list without overwriting existing entries.
-    ///
-    /// If multiple error categories report the same character position,
-    /// the first recorded error is preserved.
+    /// Adds error locations from the specified collection to the master error
+    /// list without replacing previously recorded locations.
     /// </summary>
     /// <param name="source">
-    /// Collection of error positions keyed by character offset,
-    /// with the associated highlight length.
+    /// Error positions keyed by character offset, with the associated highlight
+    /// length.
     /// </param>
     private void AddErrors(
         IEnumerable<KeyValuePair<int, int>> source)
     {
         foreach (KeyValuePair<int, int> error in source)
         {
-            if (!_errors.ContainsKey(error.Key))
-            {
-                _errors.Add(error.Key, error.Value);
-            }
+            _errors.TryAdd(error.Key, error.Value);
         }
     }
 
+    /// <summary>
+    /// Highlights up to the configured maximum number of collected editor errors,
+    /// then clears the active selection.
+    /// </summary>
+    /// <param name="errors">
+    /// Error positions keyed by character offset, with the associated highlight
+    /// length.
+    /// </param>
+    private void HighlightEditorErrors(
+        IEnumerable<KeyValuePair<int, int>> errors)
+    {
+        const int maximumHighlightedErrors = 100;
+
+        int highlightedCount = 0;
+
+        foreach (KeyValuePair<int, int> error in errors)
+        {
+            if (highlightedCount >= maximumHighlightedErrors)
+            {
+                break;
+            }
+
+            // TODO (.NET 8 Modernization):
+            // Verify that error highlight offsets and lengths are validated before they
+            // are applied. Detection results may become stale if the editor content
+            // changes after analysis, potentially producing an invalid selection range.
+            RedSelection(error.Key, error.Value);
+            highlightedCount++;
+        }
+
+        if (highlightedCount > 0)
+        {
+            txtEdit.Select(0, 0);
+        }
+    }
+
+    /// <summary>
+    /// Merges detected editor errors in category-priority order and highlights
+    /// the resulting locations.
+    /// </summary>
+    private void HighlightErrors()
+    {
+        // Categories are added in priority order. The first error recorded at a
+        // given character position determines the highlight length.
+        AddErrors(_unbalancedBrackets);
+        AddErrors(_badCiteParameters);
+        AddErrors(_duplicateBannerShellParameters);
+        AddErrors(_deadLinks);
+        AddErrors(_ambiguousCiteDates);
+        AddErrors(_unclosedTags);
+        AddErrors(_wikilinkedHeaders);
+        AddErrors(_targetlessLinks);
+        AddErrors(_doublePipeLinks);
+        AddErrors(_otherErrors);
+        AddErrors(_userSignatures);
+
+        HighlightEditorErrors(_errors);
+    }
+
+    /// <summary>
+    /// Applies syntax highlighting to the edit box while suppressing text-change
+    /// handling caused by the highlighting operation.
+    /// </summary>
+    private void HighlightSyntax()
+    {
+        txtEdit.TextChanged -= txtEdit_TextChanged;
+
+        try
+        {
+            txtEdit.HighlightSyntax();
+        }
+        finally
+        {
+            txtEdit.TextChanged += txtEdit_TextChanged;
+        }
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Error categories are added in priority order. When multiple categories
+    // identify the same character position, the first category is retained.
     /// <summary>
     /// Highlights the collected editor error locations.
     ///
@@ -2615,51 +2687,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         // If any text highlighted, don't leave last text selected
         if (done > 0)
             txtEdit.Select(0, 0);
-    }
-
-    /// <summary>
-    /// Merges all detected editor error categories into a single collection
-    /// and highlights the resulting error locations in the edit box.
-    ///
-    /// Duplicate character positions are ignored so that each location is
-    /// highlighted only once.
-    /// </summary>
-    private void HighlightErrors()
-    {
-        AddErrors(_unbalancedBrackets);
-        AddErrors(_badCiteParameters);
-        AddErrors(_duplicateBannerShellParameters);
-        AddErrors(_deadLinks);
-        AddErrors(_ambiguousCiteDates);
-        AddErrors(_unclosedTags);
-        AddErrors(_wikilinkedHeaders);
-        AddErrors(_targetlessLinks);
-        AddErrors(_doublePipeLinks);
-        AddErrors(_otherErrors);
-        AddErrors(_userSignatures);
-
-        if (_errors.Count > 0)
-        {
-            HighlightEditorErrors(_errors);
-        }
-    }
-
-    /// <summary>
-    /// Applies syntax highlighting to the Edit Text Box
-    /// </summary>
-    /// <returns></returns>
-    private void HighlightSyntax()
-    {
-        txtEdit.TextChanged -= txtEdit_TextChanged;
-
-        try
-        {
-            txtEdit.HighlightSyntax();
-        }
-        finally
-        {
-            txtEdit.TextChanged += txtEdit_TextChanged;
-        }
     }
 
     private WebView2 _diffWebView;
