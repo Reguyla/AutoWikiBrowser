@@ -2951,38 +2951,71 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return false;
     }
 
+    // TODO (.NET 8 Modernization):
+    // Remove this legacy WebBrowser-specific document reset when the remaining
+    // browser functionality is migrated to WebView2.
+    /// <summary>
+    /// Clears the contents of the embedded browser document.
+    /// </summary>
     private void ClearBrowser()
     {
-        if (webBrowser.Document != null)
+        webBrowser.Document?.OpenNew(true);
+    }
+
+    /// <summary>
+    /// Alerts the user by flashing the application window and optionally playing
+    /// a notification sound when the application does not currently have focus.
+    /// </summary>
+    private void BleepFlash()
+    {
+        if (ContainsFocus)
         {
-            webBrowser.Document.OpenNew(true);
+            return;
+        }
+
+#if !MONO
+        if (_flash)
+        {
+            Tools.FlashWindow(this);
+        }
+#endif
+
+        if (_beep)
+        {
+            Tools.Beep();
         }
     }
 
-    private void Bleepflash()
-    {
-        if (ContainsFocus) return;
-#if !MONO
-        if (_flash) Tools.FlashWindow(this);
-#endif
-        if (_beep) Tools.Beep();
-    }
-
+    // TODO (.NET 8 Modernization):
+    // Confirm that the reusable talk-message dialog is disposed with MainForm.
     private readonly TalkMessage _dlgTalk = new TalkMessage();
 
+    /// <summary>
+    /// Stops processing and prompts the user when new talk-page messages are
+    /// detected.
+    /// </summary>
     private void WeHaveNewMessages()
     {
         Stop();
         Focus();
         TheSession.RequireUpdate();
 
-        if (_dlgTalk.Visible) return; // we are already displaying it
-        if (_dlgTalk.ShowDialog() == DialogResult.Yes)
+        // Do not display a second instance while the reusable dialog is visible.
+        if (_dlgTalk.Visible)
         {
-            Tools.OpenUserTalkInBrowser(TheSession.User.Name);
-            // In case the browser is logged in as a different user
-            TheSession.Editor.SynchronousEditor.ClearNewMessages();
+            return;
         }
+
+        if (_dlgTalk.ShowDialog(this) != DialogResult.Yes)
+        {
+            return;
+        }
+
+        Tools.OpenUserTalkInBrowser(TheSession.User.Name);
+
+        // The external browser may be logged in as a different user, so clear the
+        // notification explicitly rather than relying on the talk page visit.
+        TheSession.Editor.SynchronousEditor.ClearNewMessages();
     }
 
     private void NoWriteApiRight()
@@ -3647,7 +3680,7 @@ font-size: 150%;'>No changes</h2>
             Stop();
         else
         {
-            Bleepflash();
+            BleepFlash();
             Focus();
             EnableButtons();
             btnSave.Select();
