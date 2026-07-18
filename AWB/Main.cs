@@ -593,71 +593,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             SplashScreen.SetProgress(80);
 
-            if ((Updater.Result & Updater.AWBEnabledStatus.Disabled) ==
-                Updater.AWBEnabledStatus.Disabled)
-            {
-                OldVersion();
-                SplashScreen.Close();
+            if (!HandleUpdaterResult())
                 return;
-            }
-
-            bool optionalUpdate =
-                (Updater.Result & Updater.AWBEnabledStatus.OptionalUpdate) ==
-                Updater.AWBEnabledStatus.OptionalUpdate;
-
-            bool updaterUpdate =
-                (Updater.Result & Updater.AWBEnabledStatus.UpdaterUpdate) ==
-                Updater.AWBEnabledStatus.UpdaterUpdate;
-
-            if (optionalUpdate || updaterUpdate)
-            {
-                bool runUpdater = false;
-
-                if (updaterUpdate)
-                {
-                    MessageBox.Show(
-                        "There is an update to the AWB updater. Updating now.",
-                        "Updater update");
-
-                    runUpdater = true;
-                }
-
-                if (!runUpdater &&
-                    MessageBox.Show(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            "This version has been superseded by new versions of AWB: {0}.\r\n\r\n" +
-                            "You may continue to use this version or update to the newest version.\r\n\r\n" +
-                            "Would you like to automatically upgrade to the newest version?",
-                            string.Join(", ", Updater.NewerVersions)),
-                        "Upgrade?",
-                        MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    runUpdater = true;
-                }
-
-                if (runUpdater)
-                {
-                    Updater.RunUpdater();
-                    SplashScreen.Close();
-                    CloseAWB();
-                    return;
-                }
-            }
-
-            if ((Updater.Result & Updater.AWBEnabledStatus.Error) ==
-                Updater.AWBEnabledStatus.Error)
-            {
-                lblUserName.BackColor = Color.Red;
-
-                MessageBox.Show(
-                    this,
-                    "Cannot load version check page from Wikipedia. " +
-                    "Please verify that you're connected to the Internet.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
 
             SplashScreen.SetProgress(90);
 
@@ -721,6 +658,84 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         Debug();
         Release();
+    }
+
+    /// <summary>
+    /// Handles the result of the startup version and updater checks.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when startup should continue; otherwise,
+    /// <see langword="false"/> when AWB has been closed or disabled.
+    /// </returns>
+    private bool HandleUpdaterResult()
+    {
+        if ((Updater.Result & Updater.AWBEnabledStatus.Disabled) ==
+            Updater.AWBEnabledStatus.Disabled)
+        {
+            OldVersion();
+            SplashScreen.Close();
+            return false;
+        }
+
+        bool optionalUpdate =
+            (Updater.Result & Updater.AWBEnabledStatus.OptionalUpdate) ==
+            Updater.AWBEnabledStatus.OptionalUpdate;
+
+        bool updaterUpdate =
+            (Updater.Result & Updater.AWBEnabledStatus.UpdaterUpdate) ==
+            Updater.AWBEnabledStatus.UpdaterUpdate;
+
+        if (optionalUpdate || updaterUpdate)
+        {
+            bool runUpdater = false;
+
+            if (updaterUpdate)
+            {
+                MessageBox.Show(
+                    "There is an update to the AWB updater. Updating now.",
+                    "Updater update");
+
+                runUpdater = true;
+            }
+
+            if (!runUpdater &&
+                MessageBox.Show(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        "This version has been superseded by new versions of AWB: {0}.\r\n\r\n" +
+                        "You may continue to use this version or update to the newest version.\r\n\r\n" +
+                        "Would you like to automatically upgrade to the newest version?",
+                        string.Join(", ", Updater.NewerVersions)),
+                    "Upgrade?",
+                    MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                runUpdater = true;
+            }
+
+            if (runUpdater)
+            {
+                Updater.RunUpdater();
+                SplashScreen.Close();
+                CloseAWB();
+                return false;
+            }
+        }
+
+        if ((Updater.Result & Updater.AWBEnabledStatus.Error) ==
+            Updater.AWBEnabledStatus.Error)
+        {
+            lblUserName.BackColor = Color.Red;
+
+            MessageBox.Show(
+                this,
+                "Cannot load version check page from Wikipedia. " +
+                "Please verify that you're connected to the Internet.",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+
+        return true;
     }
     #endregion
 
