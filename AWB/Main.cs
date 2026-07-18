@@ -702,73 +702,150 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool HandleUpdaterResult()
     {
-        if ((Updater.Result & Updater.AWBEnabledStatus.Disabled) ==
-            Updater.AWBEnabledStatus.Disabled)
+        if (HandleDisabledVersion())
         {
-            OldVersion();
-            SplashScreen.Close();
             return false;
         }
 
-        bool optionalUpdate =
-            (Updater.Result & Updater.AWBEnabledStatus.OptionalUpdate) ==
-            Updater.AWBEnabledStatus.OptionalUpdate;
-
-        bool updaterUpdate =
-            (Updater.Result & Updater.AWBEnabledStatus.UpdaterUpdate) ==
-            Updater.AWBEnabledStatus.UpdaterUpdate;
-
-        if (optionalUpdate || updaterUpdate)
+        if (HandleAvailableUpdate())
         {
-            bool runUpdater = false;
-
-            if (updaterUpdate)
-            {
-                MessageBox.Show(
-                    "There is an update to the AWB updater. Updating now.",
-                    "Updater update");
-
-                runUpdater = true;
-            }
-
-            if (!runUpdater &&
-                MessageBox.Show(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        "This version has been superseded by new versions of AWB: {0}.\r\n\r\n" +
-                        "You may continue to use this version or update to the newest version.\r\n\r\n" +
-                        "Would you like to automatically upgrade to the newest version?",
-                        string.Join(", ", Updater.NewerVersions)),
-                    "Upgrade?",
-                    MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                runUpdater = true;
-            }
-
-            if (runUpdater)
-            {
-                Updater.RunUpdater();
-                SplashScreen.Close();
-                CloseAWB();
-                return false;
-            }
+            return false;
         }
 
-        if ((Updater.Result & Updater.AWBEnabledStatus.Error) ==
-            Updater.AWBEnabledStatus.Error)
-        {
-            lblUserName.BackColor = Color.Red;
-
-            MessageBox.Show(
-                this,
-                "Cannot load version check page from Wikipedia. " +
-                "Please verify that you're connected to the Internet.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
+        HandleUpdaterCheckError();
 
         return true;
+    }
+
+    /// <summary>
+    /// Closes AWB when the current version has been disabled.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the disabled-version result was handled;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool HandleDisabledVersion()
+    {
+        if (!HasUpdaterStatus(
+            Updater.AWBEnabledStatus.Disabled))
+        {
+            return false;
+        }
+
+        OldVersion();
+        SplashScreen.Close();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Prompts for or automatically applies an available AWB or updater update.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the updater was launched and AWB was closed;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool HandleAvailableUpdate()
+    {
+        bool optionalUpdate =
+            HasUpdaterStatus(
+                Updater.AWBEnabledStatus.OptionalUpdate);
+
+        bool updaterUpdate =
+            HasUpdaterStatus(
+                Updater.AWBEnabledStatus.UpdaterUpdate);
+
+        if (!optionalUpdate && !updaterUpdate)
+        {
+            return false;
+        }
+
+        bool runUpdater = updaterUpdate
+            || PromptForOptionalUpdate();
+
+        if (updaterUpdate)
+        {
+            MessageBox.Show(
+                "There is an update to the AWB updater. Updating now.",
+                "Updater update",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        if (!runUpdater)
+        {
+            return false;
+        }
+
+        Updater.RunUpdater();
+        SplashScreen.Close();
+        CloseAWB();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Prompts the user to install an optional AWB update.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the user chooses to update; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool PromptForOptionalUpdate()
+    {
+        string newerVersions =
+            string.Join(", ", Updater.NewerVersions);
+
+        string message = string.Format(
+            CultureInfo.CurrentCulture,
+            "This version has been superseded by new versions of AWB: {0}."
+            + "\r\n\r\n"
+            + "You may continue to use this version or update to the newest version."
+            + "\r\n\r\n"
+            + "Would you like to automatically upgrade to the newest version?",
+            newerVersions);
+
+        return MessageBox.Show(
+            message,
+            "Upgrade?",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question)
+            == DialogResult.Yes;
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Report the actual updater failure category when available. A version-check
+    // error may be caused by connectivity, HTTP, parsing, proxy, or service
+    // failures rather than only a missing Internet connection.
+    /// <summary>
+    /// Reports a failure to retrieve the startup version-check information.
+    /// </summary>
+    private void HandleUpdaterCheckError()
+    {
+        if (!HasUpdaterStatus(
+            Updater.AWBEnabledStatus.Error))
+        {
+            return;
+        }
+
+        lblUserName.BackColor = Color.Red;
+
+        MessageBox.Show(
+            this,
+            "Cannot load version check page from Wikipedia. "
+            + "Please verify that you're connected to the Internet.",
+            "Error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
+    }
+
+    /// <summary>
+    /// Determines whether the updater result contains the specified status flag.
+    /// </summary>
+    private static bool HasUpdaterStatus(
+        Updater.AWBEnabledStatus status)
+    {
+        return (Updater.Result & status) == status;
     }
 
     /// <summary>
