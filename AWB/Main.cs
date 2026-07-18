@@ -1489,7 +1489,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         try
         {
             await InitializeWebView2DiffBrowserAsync();
-            ShowWebView2TestPage();
+
         }
         catch (Exception ex)
         {
@@ -1500,36 +1500,22 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Renders a temporary test page in the WebView2 diff control.
+    /// Renders generated diff HTML in the WebView2 diff control.
     /// </summary>
-    private void RenderWebView2TestPage()
+    private void RenderWebView2Diff(string html)
     {
-        const string html =
-            "<!DOCTYPE html>" +
-            "<html>" +
-            "<head>" +
-            "<meta charset=\"utf-8\">" +
-            "<title>WebView2 Test</title>" +
-            "</head>" +
-            "<body>" +
-            "<h2>WebView2 is working</h2>" +
-            "<p>This is the experimental AWB diff renderer.</p>" +
-            "</body>" +
-            "</html>";
+        if (_diffWebView == null ||
+            _diffWebView.IsDisposed ||
+            _diffWebView.CoreWebView2 == null)
+        {
+            Tools.WriteDebug(
+                nameof(RenderWebView2Diff),
+                "WebView2 was unavailable when the diff was rendered.");
+
+            return;
+        }
 
         _diffWebView.NavigateToString(html);
-    }
-
-    /// <summary>
-    /// Temporarily displays WebView2 instead of the legacy diff browser.
-    /// </summary>
-    private void ShowWebView2TestPage()
-    {
-        RenderWebView2TestPage();
-
-        webBrowser.Visible = false;
-        _diffWebView.Visible = true;
-        _diffWebView.BringToFront();
     }
 
     /// <summary>
@@ -2026,6 +2012,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     bool _diffAccessViolationSeen;
 
+    /// <summary>
+    /// Generates the HTML diff between the article's original text and the
+    /// current editor contents, then displays it in the WebView2 diff viewer
+    /// or writes it to a file when running under Mono.
+    /// </summary>
+    /// <remarks>
+    /// When no changes are present, a message is displayed instead of a diff.
+    /// After rendering, the method restores focus to the editor, clears any
+    /// selection, resets the diff error state, and updates the surrounding UI.
+    /// </remarks>
     private void GetDiff()
     {
         if (TheArticle == null)
@@ -2036,49 +2032,61 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         try
         {
-            string diffHtml = "";
+            string diffHtml;
+
             if (TheArticle.OriginalArticleText.Equals(txtEdit.Text))
             {
-                diffHtml = @"<h2 style='padding-top: .5em;
+                diffHtml =
+                    @"<!DOCTYPE html>
+<html>
+<head>
+<meta charset=""utf-8"">
+<title>AWB Diff</title>
+</head>
+<body>
+<h2 style='padding-top: .5em;
 padding-bottom: .17em;
 border-bottom: 1px solid #aaa;
-font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to the next page.</p>";
-
+font-size: 150%;'>No changes</h2>
+<p>Press the ""Skip"" button below to skip to the next page.</p>
+</body>
+</html>";
             }
             else
             {
-                // when less than 10 edits show user help info on double click to undo etc.
-                diffHtml = "<!DOCTYPE HTML PUBLIC \" -//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
-                           + "<html><head>" +
-                           WikiDiff.DiffHead() + @"</head><body>" +
-                           ((NumberOfEdits < 10)
-                               ? WikiDiff.TableHeader
-                               : WikiDiff.TableHeaderNoMessages) +
-                           Diff.GetDiff(TheArticle.OriginalArticleText, txtEdit.Text, 2) +
-                           "</table></body></html>";
+                // When fewer than 10 edits exist, show user help information
+                // explaining that double-clicking can undo a change.
+                diffHtml =
+                    "<!DOCTYPE html>" +
+                    "<html>" +
+                    "<head>" +
+                    "<meta charset=\"utf-8\">" +
+                    WikiDiff.DiffHead() +
+                    "</head>" +
+                    "<body>" +
+                    (NumberOfEdits < 10
+                        ? WikiDiff.TableHeader
+                        : WikiDiff.TableHeaderNoMessages) +
+                    Diff.GetDiff(
+                        TheArticle.OriginalArticleText,
+                        txtEdit.Text,
+                        2) +
+                    "</table>" +
+                    "</body>" +
+                    "</html>";
             }
 
-            // no webbrowser available under Mono so write diff to file instead
+            // WebView2 is unavailable under Mono, so write the diff to a file.
             if (Globals.UsingMono)
             {
-                Tools.WriteTextFile(diffHtml, "Diff.html", false);
+                Tools.WriteTextFile(
+                    diffHtml,
+                    "Diff.html",
+                    false);
             }
             else
             {
-                HtmlDocument document = webBrowser.Document;
-
-                if (document == null)
-                {
-                    Tools.WriteDebug(
-                        "GetDiff",
-                        "GetDiff called but webBrowser.Document was null.");
-
-                    return;
-                }
-
-                document.OpenNew(false);
-                document.MouseMove -= Document_MouseMove;
-                document.Write(diffHtml);
+                RenderWebView2Diff(diffHtml);
             }
 
             txtEdit.Focus();
@@ -2089,20 +2097,7 @@ font-size: 150%;'>No changes</h2><p>Press the ""Skip"" button below to skip to t
         }
         catch (Exception ex)
         {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_22#AccessViolationException_in_MainForm.GetDiff
-            // catch this and use Refresh x2 to get around it
-            // but only try once (diffAccessViolationSeen = false) so we don't get stuck in a loop
-            if (ex is AccessViolationException && !_diffAccessViolationSeen)
-            {
-                _diffAccessViolationSeen = true;
-                Tools.WriteDebug("GetDiff", "AccessViolationException seen");
-
-                webBrowser.Refresh();
-                webBrowser.Refresh();
-                GetDiff();
-            }
-            else
-                ErrorHandler.HandleException(ex);
+            ErrorHandler.HandleException(ex);
         }
     }
 
