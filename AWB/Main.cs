@@ -2036,87 +2036,120 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Carries out skip checks following ProcessPage
-    /// Calls CompleteProcessPage if page not skipped
+    /// Performs skip checks after page processing and completes processing when
+    /// the article is not skipped or aborted.
     /// </summary>
     private void RunSkipChecks()
     {
-        ErrorHandler.CurrentPage = "";
+        // TODO (.NET 8 Modernization):
+        // Replace the global CurrentPage value with scoped page-processing context.
+        // The context is currently cleared before typo statistics and post-processing,
+        // so failures in those operations may lack useful page information.
+        ErrorHandler.CurrentPage = string.Empty;
 
         UpdateCurrentTypoStats();
 
-        if (!Abort)
+        if (Abort)
         {
-            if (TheArticle.SkipArticle)
-            {
-                SkipPageReasonAlreadyProvided(); // Don't send a reason; ProcessPage() should already have logged one
-                return;
-            }
-
-            if (Skippable)
-            {
-                if ((chkSkipNoChanges.Checked || BotMode) && TheArticle.NoArticleTextChanged)
-                {
-                    SkipPage("No change");
-                    return;
-                }
-
-                if (chkSkipWhitespace.Checked && chkSkipCasing.Checked && TheArticle.OnlyWhiteSpaceAndCasingChanged)
-                {
-                    SkipPage("Only whitespace/casing changed");
-                    return;
-                }
-
-                if (chkSkipWhitespace.Checked && TheArticle.OnlyWhiteSpaceChanged)
-                {
-                    SkipPage("Only whitespace changed");
-                    return;
-                }
-
-                if (chkSkipCasing.Checked && TheArticle.OnlyCasingChanged)
-                {
-                    SkipPage("Only casing changed");
-                    return;
-                }
-
-                if (chkSkipMinorGeneralFixes.Checked && chkGeneralFixes.Checked && TheArticle.OnlyMinorGeneralFixesChanged)
-                {
-                    SkipPage("Only minor general fix changes");
-                    return;
-                }
-
-                if (chkSkipGeneralFixes.Checked && chkGeneralFixes.Checked && TheArticle.OnlyGeneralFixesChanged)
-                {
-                    SkipPage("Only general fix changes");
-                    return;
-                }
-
-                if (chkSkipNoPageLinks.Checked
-                    && (WikiRegexes.WikiLinksOnly.Matches(TheArticle.ArticleText).Count == 0))
-                {
-                    SkipPage("Page contains no links");
-                    return;
-                }
-
-                if (chkSkipCosmetic.Checked
-                    && (TheArticle.NoArticleTextChanged || TheArticle.OnlyCosmeticChanged))
-                {
-                    SkipPage("Only cosmetic changes made");
-                    return;
-                }
-
-            }
-
-            Variables.Profiler.Profile("Skip checks");
-
-            // post-processing
-            if (SkipChecks(skipIfContains.After, skipIfNotContains.After))
-            {
-                return;
-            }
-
-            CompleteProcessPage();
+            return;
         }
+
+        if (TheArticle.SkipArticle)
+        {
+            // ProcessPage() should already have logged the skip reason.
+            SkipPageReasonAlreadyProvided();
+            return;
+        }
+
+        if (Skippable && TrySkipBasedOnArticleChanges())
+        {
+            return;
+        }
+
+        Variables.Profiler.Profile("Skip checks");
+
+        if (SkipChecks(
+            skipIfContains.After,
+            skipIfNotContains.After))
+        {
+            return;
+        }
+
+        CompleteProcessPage();
+    }
+
+    /// <summary>
+    /// Applies skip rules based on the kinds of changes made to the current
+    /// article.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the article was skipped; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool TrySkipBasedOnArticleChanges()
+    {
+        if ((chkSkipNoChanges.Checked || BotMode)
+            && TheArticle.NoArticleTextChanged)
+        {
+            SkipPage("No change");
+            return true;
+        }
+
+        if (chkSkipWhitespace.Checked
+            && chkSkipCasing.Checked
+            && TheArticle.OnlyWhiteSpaceAndCasingChanged)
+        {
+            SkipPage("Only whitespace/casing changed");
+            return true;
+        }
+
+        if (chkSkipWhitespace.Checked
+            && TheArticle.OnlyWhiteSpaceChanged)
+        {
+            SkipPage("Only whitespace changed");
+            return true;
+        }
+
+        if (chkSkipCasing.Checked
+            && TheArticle.OnlyCasingChanged)
+        {
+            SkipPage("Only casing changed");
+            return true;
+        }
+
+        if (chkSkipMinorGeneralFixes.Checked
+            && chkGeneralFixes.Checked
+            && TheArticle.OnlyMinorGeneralFixesChanged)
+        {
+            SkipPage("Only minor general fix changes");
+            return true;
+        }
+
+        if (chkSkipGeneralFixes.Checked
+            && chkGeneralFixes.Checked
+            && TheArticle.OnlyGeneralFixesChanged)
+        {
+            SkipPage("Only general fix changes");
+            return true;
+        }
+
+        if (chkSkipNoPageLinks.Checked
+            && !WikiRegexes.WikiLinksOnly.IsMatch(
+                TheArticle.ArticleText))
+        {
+            SkipPage("Page contains no links");
+            return true;
+        }
+
+        if (chkSkipCosmetic.Checked
+            && (TheArticle.NoArticleTextChanged
+                || TheArticle.OnlyCosmeticChanged))
+        {
+            SkipPage("Only cosmetic changes made");
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
