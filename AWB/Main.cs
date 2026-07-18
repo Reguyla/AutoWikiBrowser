@@ -1158,22 +1158,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="exception">
     /// The API exception containing the error code and associated message.
     /// </param>
+    // TODO (.NET 8 Modernization):
+    // Inventory exception types, MediaWiki API error-code literals, and repeated
+    // recovery behavior throughout the solution. Centralize stable MediaWiki
+    // protocol values in a focused MediaWikiApiErrorCodes class, organize custom
+    // exceptions by subsystem, and extract repeated retry, skip, stop, logging,
+    // and user-notification behavior into reusable handlers where appropriate.
+    // Avoid creating a single global error manager coupled to MainForm or other
+    // UI components.
     private void HandleApiError(ApiErrorException exception)
     {
         switch (exception.ErrorCode)
         {
             case "editconflict":
-                // TODO: must be a less crude way
-                MessageBox.Show(
-                    this,
-                    "There has been an edit conflict. AWB will now re-apply its " +
-                    "changes on the updated page.\r\nPlease re-review the changes " +
-                    "before saving. Any custom edits will be lost and must be " +
-                    "re-added manually.",
-                    "Edit conflict");
-
-                NudgeTimer.Stop();
-                Start();
+                HandleEditConflict();
                 break;
 
             case "writeapidenied":
@@ -1246,6 +1244,33 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    /// <summary>
+    /// Handles an edit conflict by reloading the current article and reapplying
+    /// AWB's automated changes.
+    /// </summary>
+    /// <remarks>
+    /// Manual edits made in the editor cannot currently be merged with the latest
+    /// revision and will be lost when processing restarts.
+    /// </remarks>
+    // TODO (.NET 8 Modernization):
+    // Preserve manual editor changes during edit-conflict recovery by comparing
+    // the original article text, the current editor text, and the latest server
+    // revision, then presenting or applying a three-way merge before retrying.
+    private void HandleEditConflict()
+    {
+        MessageBox.Show(
+            this,
+            "There has been an edit conflict. AWB will now re-apply its " +
+            "changes on the updated page.\r\nPlease re-review the changes " +
+            "before saving. Any custom edits will be lost and must be " +
+            "re-added manually.",
+            "Edit Conflict",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
+
+        NudgeTimer.Stop();
+        Start();
+    }
 
     /// <summary>
     /// Determines whether an exception represents a retryable network failure.
