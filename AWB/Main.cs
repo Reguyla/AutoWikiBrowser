@@ -2173,153 +2173,397 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Runs after ProcessPage to set edit box text, set alerts, call diff/preview, highlight errors, highlight syntax, 
-    /// enable buttons
+    /// Completes processing of the current article by updating the editor,
+    /// calculating alerts, displaying the configured result, applying
+    /// highlighting, and restoring the user interface.
     /// </summary>
     private void CompleteProcessPage()
     {
-        Tools.WriteDebug("PageLoaded", "TheArticle.ArticleText length is " + TheArticle.ArticleText.Length);
+        WriteProcessedArticleToEditor();
 
-        // For some reason can get very poor performance setting txtEdit.Text (up to 30 seconds on longest en-wiki articles) after processing a few pages
-        // Toggling word wrap seems to solve this, not sure why
+        if (TrySkipArticleWithoutAlerts())
+        {
+            return;
+        }
+
+        if (HandlePreParseCompletion())
+        {
+            return;
+        }
+
+        PrepareEditorForHighlighting();
+
+        if (Abort)
+        {
+            RestoreInterfaceAfterAbort();
+            return;
+        }
+
+        CompleteInteractiveProcessing();
+    }
+
+    /// <summary>
+    /// Copies the processed article text into the editor and updates article
+    /// statistics and alerts.
+    /// </summary>
+    private void WriteProcessedArticleToEditor()
+    {
+        Tools.WriteDebug(
+            "PageLoaded",
+            $"TheArticle.ArticleText length is {TheArticle.ArticleText.Length}");
+
+        // Toggling word wrapping avoids severe RichTextBox performance degradation
+        // when assigning very large article text after processing several pages.
         txtEdit.WordWrap = !txtEdit.WordWrap;
         txtEdit.WordWrap = !txtEdit.WordWrap;
+
         txtEdit.Text = TheArticle.ArticleText;
 
         Variables.Profiler.Profile("Set edit box text");
 
-        // Update statistics and alerts
         if (!BotMode)
+        {
             ArticleInfo(false);
+        }
+    }
 
-        if (chkSkipIfNoAlerts.Checked && lbAlerts.Items.Count == 0)
+    /// <summary>
+    /// Skips the current page when alert-based skipping is enabled and no alerts
+    /// were produced.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the page was skipped; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool TrySkipArticleWithoutAlerts()
+    {
+        if (chkSkipIfNoAlerts.Checked
+            && lbAlerts.Items.Count == 0)
         {
             SkipPage("Page has no alerts");
-            return;
+            return true;
         }
 
         Variables.Profiler.Profile("Alerts");
 
-        if (preParseModeToolStripMenuItem.Checked)
+        return false;
+    }
+
+    /// <summary>
+    /// Completes processing for pre-parse mode and advances to the next article.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when pre-parse processing was handled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HandlePreParseCompletion()
+    {
+        if (!preParseModeToolStripMenuItem.Checked)
         {
-            // if we reach here the article has valid changes, so move on to next article
-
-            // if user has loaded a settings file, save it every 10 ignored edits
-            if (autoSaveSettingsToolStripMenuItem.Checked && !string.IsNullOrEmpty(SettingsFile) && (NumberOfIgnoredEdits > 5) && (NumberOfIgnoredEdits % 10 == 0))
-                SavePrefs(SettingsFile);
-
-            // request list maker to focus next article in list; if there is a next article process it, otherwise pre-parsing has finished, save settings
-            // but don't save when settings have just been saved by logic above
-            if (listMaker.NextArticle())
-                Start();
-            else
-            {
-                Stop();
-                if (autoSaveSettingsToolStripMenuItem.Checked && (NumberOfIgnoredEdits % 10 != 0) && !string.IsNullOrEmpty(SettingsFile))
-                    SavePrefs(SettingsFile);
-            }
-
-            NumberOfPagesParsed++;
-            return;
+            return false;
         }
 
-        if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
-            txtEdit.Visible = false;
+        SavePreParseSettingsIfDue();
 
-        if (!Abort)
+        if (listMaker.NextArticle())
         {
-            UpdateUserNotifications();
-            bool diffInBotMode = (BotMode && doDiffInBotMode);
-            if (BotMode)
-            {
-                // if user pressed Stop while background thread was running, don't overwrite status or go into bot loop
-                if (StatusLabelText != "Stopped")
-                {
-                    StatusLabelText = "Ready to save";
-                    StartDelayedAutoSaveTimer();
-                }
-
-                if (!diffInBotMode)
-                {
-                    txtReviewEditSummary.Text = MakeDefaultEditSummary();
-                    return;
-                }
-            }
-            else lblBotTimer.Text = ""; // remove for situation where bot mode used then turned off
-
-            switch (actionOnLoad)
-            {
-                case 0:
-                    GetDiff();
-                    break;
-                case 1:
-                    GetPreview();
-                    break;
-                case 2:
-                    GuiUpdateAfterProcessing();
-
-                    txtEdit.Focus();
-                    txtEdit.SelectionLength = 0;
-                    break;
-            }
-
-            PageWatched = TheSession.Page.IsWatched;
-
-            Variables.Profiler.Profile("ActionOnLoad");
-
-            txtReviewEditSummary.Text = MakeDefaultEditSummary();
-
-            Variables.Profiler.Profile("Make Edit summary");
-
-            txtEdit.Visible = false;
-            // syntax highlighting of edit box based on m:extension:wikEd standards
-            if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
-            {
-                HighlightSyntax();
-                Variables.Profiler.Profile("Syntax highlighting");
-
-                if (!focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
-                {
-                    txtEdit.SetEditBoxSelection(0, 0);
-                    txtEdit.Select(0, 0);
-                    txtEdit.ScrollToCaret();
-                }
-            }
-
-            if (highlightAllFindToolStripMenuItem.Checked)
-                HighlightAllFind();
-
-            // always clear errors in case highlight errors was previously enabled and now turned off by user
-            _errors.Clear();
-
-            if (scrollToAlertsToolStripMenuItem.Checked)
-            {
-                EditBoxTab.SelectedTab = tpEdit;
-                HighlightErrors();
-            }
-            // performance: only make text visible once highlighting complete
-            txtEdit.Visible = true;
-            Variables.Profiler.Profile("Find/alert highlighting");
-
-            if (focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
-            {
-                txtEdit.Select(txtEdit.Text.Length, 0);
-                txtEdit.ScrollToCaret();
-            }
-
-            btnSave.Select();
-
-            // if user pressed Stop while background thread was running, don't overwrite status here
-            if (StatusLabelText != "Stopped")
-                StatusLabelText = "Ready to save";
-            StopProgressBar();
+            Start();
         }
         else
         {
-            EnableButtons();
-            Abort = false;
+            Stop();
+            SaveFinalPreParseSettings();
+        }
+
+        NumberOfPagesParsed++;
+
+        return true;
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Review whether the NumberOfIgnoredEdits > 5 condition is still necessary.
+    // Combined with NumberOfIgnoredEdits % 10 == 0, the first possible save occurs
+    // at 10 ignored edits, so the greater-than-five check currently appears
+    // redundant. Verify the original intent and persisted settings behavior before
+    // removing it.
+    /// <summary>
+    /// Saves the current settings after each group of ten ignored edits when
+    /// automatic settings saving is enabled.
+    /// </summary>
+    private void SavePreParseSettingsIfDue()
+    {
+        if (!autoSaveSettingsToolStripMenuItem.Checked
+            || string.IsNullOrEmpty(SettingsFile)
+            || NumberOfIgnoredEdits <= 5
+            || NumberOfIgnoredEdits % 10 != 0)
+        {
+            return;
+        }
+
+        SavePrefs(SettingsFile);
+    }
+
+    /// <summary>
+    /// Saves settings when pre-parsing finishes unless they were saved during the
+    /// current ten-edit interval.
+    /// </summary>
+    private void SaveFinalPreParseSettings()
+    {
+        if (!autoSaveSettingsToolStripMenuItem.Checked
+            || string.IsNullOrEmpty(SettingsFile)
+            || NumberOfIgnoredEdits % 10 == 0)
+        {
+            return;
+        }
+
+        SavePrefs(SettingsFile);
+    }
+
+    /// <summary>
+    /// Hides the editor while syntax highlighting is prepared, preventing
+    /// intermediate rendering from being displayed.
+    /// </summary>
+    private void PrepareEditorForHighlighting()
+    {
+        if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
+        {
+            txtEdit.Visible = false;
         }
     }
+
+    // TODO (.NET 8 Modernization):
+    // Verify editor visibility when processing is aborted after the edit control
+    // has been hidden for highlighting. The abort path currently enables buttons
+    // but does not explicitly restore txtEdit.Visible.
+    /// <summary>
+    /// Restores the interface after page processing was aborted.
+    /// </summary>
+    private void RestoreInterfaceAfterAbort()
+    {
+        EnableButtons();
+        Abort = false;
+    }
+
+    /// <summary>
+    /// Completes normal interactive or bot-mode processing for the current page.
+    /// </summary>
+    private void CompleteInteractiveProcessing()
+    {
+        UpdateUserNotifications();
+
+        bool showDiffInBotMode =
+            BotMode && doDiffInBotMode;
+
+        if (HandleBotModeCompletion(showDiffInBotMode))
+        {
+            return;
+        }
+
+        DisplayConfiguredPageResult();
+
+        PageWatched = TheSession.Page.IsWatched;
+
+        Variables.Profiler.Profile("ActionOnLoad");
+
+        UpdateDefaultEditSummary();
+        ApplyEditorHighlighting();
+        FinalizeProcessedPageInterface();
+    }
+
+    /// <summary>
+    /// Handles bot-mode completion before the normal interactive display and
+    /// highlighting workflow.
+    /// </summary>
+    /// <param name="showDiffInBotMode">
+    /// Whether a diff should still be generated in bot mode.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when no further interactive processing is required;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool HandleBotModeCompletion(
+        bool showDiffInBotMode)
+    {
+        if (!BotMode)
+        {
+            // Clear a timer label left behind after bot mode is disabled.
+            lblBotTimer.Text = string.Empty;
+            return false;
+        }
+
+        // Do not overwrite the stopped status or restart the bot loop when the
+        // user pressed Stop while background processing was running.
+        if (StatusLabelText != "Stopped")
+        {
+            StatusLabelText = "Ready to save";
+            StartDelayedAutoSaveTimer();
+        }
+
+        if (showDiffInBotMode)
+        {
+            return false;
+        }
+
+        txtReviewEditSummary.Text =
+            MakeDefaultEditSummary();
+
+        return true;
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Replace the numeric actionOnLoad values with a named enum after verifying
+    // compatibility with persisted settings.
+    /// <summary>
+    /// Displays the configured result after page processing.
+    /// </summary>
+    private void DisplayConfiguredPageResult()
+    {
+        switch (actionOnLoad)
+        {
+            case 0:
+                GetDiff();
+                break;
+
+            case 1:
+                GetPreview();
+                break;
+
+            case 2:
+                GuiUpdateAfterProcessing();
+
+                txtEdit.Focus();
+                txtEdit.SelectionLength = 0;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Generates and displays the default edit summary.
+    /// </summary>
+    private void UpdateDefaultEditSummary()
+    {
+        txtReviewEditSummary.Text =
+            MakeDefaultEditSummary();
+
+        Variables.Profiler.Profile(
+            "Make Edit summary");
+    }
+
+    /// <summary>
+    /// Applies syntax, find-result, and alert highlighting to the processed
+    /// article.
+    /// </summary>
+    private void ApplyEditorHighlighting()
+    {
+        // Keep the editor hidden until all highlighting is complete.
+        txtEdit.Visible = false;
+
+        ApplySyntaxHighlighting();
+        ApplyFindHighlighting();
+        ApplyAlertHighlighting();
+
+        txtEdit.Visible = true;
+
+        Variables.Profiler.Profile(
+            "Find/alert highlighting");
+    }
+
+    /// <summary>
+    /// Applies syntax highlighting and restores the initial editor position when
+    /// focus-at-end is disabled.
+    /// </summary>
+    private void ApplySyntaxHighlighting()
+    {
+        if (!syntaxHighlightEditBoxToolStripMenuItem.Checked)
+        {
+            return;
+        }
+
+        HighlightSyntax();
+
+        Variables.Profiler.Profile(
+            "Syntax highlighting");
+
+        if (focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
+        {
+            return;
+        }
+
+        txtEdit.SetEditBoxSelection(0, 0);
+        txtEdit.Select(0, 0);
+        txtEdit.ScrollToCaret();
+    }
+
+    /// <summary>
+    /// Highlights all current find matches when enabled.
+    /// </summary>
+    private void ApplyFindHighlighting()
+    {
+        if (highlightAllFindToolStripMenuItem.Checked)
+        {
+            HighlightAllFind();
+        }
+    }
+
+    /// <summary>
+    /// Clears previous error information and highlights current alerts when
+    /// configured.
+    /// </summary>
+    private void ApplyAlertHighlighting()
+    {
+        // Always clear stale errors when alert highlighting has been disabled.
+        _errors.Clear();
+
+        if (!scrollToAlertsToolStripMenuItem.Checked)
+        {
+            return;
+        }
+
+        EditBoxTab.SelectedTab = tpEdit;
+        HighlightErrors();
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Restore editor visibility with try/finally so highlighting failures cannot
+    // leave the edit control hidden.
+    //
+    // TODO (.NET 8 Modernization):
+    // Review the completion workflow for robustness and exception safety.
+    // Specifically verify that:
+    // - the editor is always made visible again if processing is aborted or an
+    //   exception occurs after it has been hidden for highlighting;
+    // - the progress bar and status indicators are restored correctly on every
+    //   exit path, including bot-mode early returns;
+    // - UI cleanup is consolidated so partially completed processing cannot leave
+    //   the interface in an inconsistent state.
+    /// <summary>
+    /// Restores the final editor position, selects the Save button, updates the
+    /// status, and stops the progress indicator.
+    /// </summary>
+    private void FinalizeProcessedPageInterface()
+    {
+        if (focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
+        {
+            txtEdit.Select(
+                txtEdit.Text.Length,
+                0);
+
+            txtEdit.ScrollToCaret();
+        }
+
+        btnSave.Select();
+
+        // Do not overwrite the stopped status when Stop was pressed while the
+        // background worker was still running.
+        if (StatusLabelText != "Stopped")
+        {
+            StatusLabelText = "Ready to save";
+        }
+
+        StopProgressBar();
+    }
+
+
 
     /// <summary>
     /// Adds error locations from the specified collection to the master
