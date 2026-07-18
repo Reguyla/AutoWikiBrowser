@@ -848,8 +848,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return (Updater.Result & status) == status;
     }
 
+    // TODO (.NET 8 Modernization):
+    // Review startup completion responsibilities after the startup workflow has
+    // been moved out of MainForm. Splash screen management and status updates may
+    // belong in a dedicated startup coordinator or UI service.
     /// <summary>
-    /// Completes the normal startup sequence and closes the splash screen.
+    /// Finalizes application startup by clearing the status message, completing
+    /// the splash screen progress indicator, and closing the splash screen.
     /// </summary>
     private void CompleteStartup()
     {
