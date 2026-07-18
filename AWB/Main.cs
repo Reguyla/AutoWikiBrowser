@@ -575,15 +575,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             logControl.Initialise(listMaker);
             articleActionLogControl1.Initialise(listMaker);
 
-            Location = Properties.Settings.Default.WindowLocation;
-            Size = Properties.Settings.Default.WindowSize;
-
-            // T99305: Do not restore AWB as minimized because the diff
-            // window may lose its vertical scroll bar.
-            WindowState =
-                Properties.Settings.Default.WindowState == FormWindowState.Minimized
-                    ? FormWindowState.Normal
-                    : Properties.Settings.Default.WindowState;
+            RestoreWindowState();
 
             Plugin.LoadPluginsStartup(this, SplashScreen); // Progress 25-50.
             LoadPrefs(); // Progress 50-59.
@@ -688,7 +680,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     UsageStats.Do(false);
 #endif
     }
-
     private void MainForm_Resize(object sender, EventArgs e)
     {
         if (WindowState == FormWindowState.Minimized)
@@ -697,6 +688,26 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
         else
             LastState = WindowState; // remember if maximized or normal so can restore same when dbl click tray icon
+    }
+
+    /// <summary>
+    /// Restores the main window's saved location, size, and state.
+    /// </summary>
+    /// <remarks>
+    /// A minimized state is restored as normal because restoring AWB minimized
+    /// may cause the diff display to lose its vertical scroll bar.
+    /// </remarks>
+    private void RestoreWindowState()
+    {
+        Location = Properties.Settings.Default.WindowLocation;
+        Size = Properties.Settings.Default.WindowSize;
+
+        FormWindowState savedWindowState =
+            Properties.Settings.Default.WindowState;
+
+        WindowState = savedWindowState == FormWindowState.Minimized
+            ? FormWindowState.Normal
+            : savedWindowState;
     }
     #endregion
 
