@@ -25,6 +25,7 @@ using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Diff;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
+using System;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
@@ -1069,8 +1070,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <summary>
     /// Handles exceptions raised during asynchronous API editing operations.
     /// </summary>
-    /// <param name="sender">
-    /// The editor that raised the exception.
+    /// <param name="_sender">
+    /// The editor that raised the exception. This parameter is required by the
+    /// event signature but is not currently used.
     /// </param>
     /// <param name="ex">
     /// The exception raised by the editing operation.
@@ -1080,27 +1082,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// the appropriate recovery action, such as retrying, skipping, stopping,
     /// or reporting unexpected errors.
     /// </remarks>
-    private void ApiEditExceptionCaught(AsyncApiEdit sender, Exception ex)
+    private void ApiEditExceptionCaught(
+        AsyncApiEdit _sender,
+        Exception ex)
     {
         if (ex is InterwikiException)
         {
             SkipPage(ex.Message);
         }
-        else if (ex is SpamlistException)
+        else if (ex is SpamlistException spamlistException)
         {
-            string message = (ex as SpamlistException).URL;
-
-            if (!BotMode)
-            {
-                if (!chkSkipSpamFilter.Checked
-                    && MessageBox.Show(message + ".\r\nTry and edit again?",
-                                       "Spam Blacklist", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-                {
-                    Start();
-                    return;
-                }
-            }
-            SkipPage(message);
+            HandleSpamlistException(spamlistException);
         }
         else if (ex is ApiErrorException apiError)
         {
@@ -1135,37 +1127,22 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             SkipPage("Page is a redirect to a special page");
         }
-        else if (ex is WebException || (ex is IOException && ex.Message.Contains("0x2746")))
+        else if (IsRetryableNetworkException(ex))
         {
-            // Some HTTP error, often retryable, or:
-            // "Unable to write data to the transport connection: Unknown error (0x2746)"
-            StatusLabelText = ex.Message;
-            if (Tools.WriteDebugEnabled)
-                Tools.WriteTextFile(ex.Message, "Log.txt", true);
-            // Sometimes there will be a specific delay requested.
-            // RFC 2616 and 6585 say it could be 429 (Too Many Requests), 503 (Service Unavailable) or 3xx.
-            // CURRENTLY mediawiki uses 429 and 503, and seconds not HTTP-date.
-            // Retry success is still not guaranteed after waiting the specified time.
-            if (ex is WebException webex && webex.Response is HttpWebResponse resp)
-
-            {
-                int restart = Tools.ParseRetry(resp);
-                if (restart >= 0)
-                    StartDelayedRestartTimer(restart);
-
-                else
-                    StartDelayedRestartTimer();
-            }
-            else
-                StartDelayedRestartTimer();
+            HandleNetworkException(ex);
         }
         else if (ex is SharedRepoException)
         {
-            MessageBox.Show("Cannot move this file to the specified target, as it exists in a shared repo (such as commons).", "Target file exists in shared repo");
+            MessageBox.Show(
+                "Cannot move this file to the specified target, as it exists in a shared repo (such as commons).",
+                "Target file exists in shared repo");
         }
         else if (ex is MediaWikiSaysNoException)
         {
-            MessageBox.Show("MediaWiki prevented you from making that edit. Chances are it's spam or abuse filter related", "MediaWiki says no");
+            MessageBox.Show(
+                "MediaWiki prevented you from making that edit. Chances are it's spam or abuse filter related",
+                "MediaWiki says no");
+
             SkipPage("Edit blocked by spam/abuse filter");
         }
         else
@@ -1267,6 +1244,90 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 StartDelayedRestartTimer();
                 break;
         }
+    }
+
+
+    /// <summary>
+    /// Determines whether an exception represents a retryable network failure.
+    /// </summary>
+    /// <param name="exception">The exception to classify.</param>
+    /// <returns>
+    /// <see langword="true"/> when processing should be retried; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool IsRetryableNetworkException(
+        Exception exception)
+    {
+        return exception is WebException
+            || exception is IOException
+            && exception.Message.Contains(
+                "0x2746",
+                StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Handles an edit rejected by the spam blacklist.
+    /// </summary>
+    /// <param name="exception">
+    /// The exception containing the URL rejected by the spam blacklist.
+    /// </param>
+    private void HandleSpamlistException(
+        SpamlistException exception)
+    {
+        string message = exception.URL;
+
+        if (!BotMode
+            && !chkSkipSpamFilter.Checked
+            && MessageBox.Show(
+                $"{message}.\r\nTry and edit again?",
+                "Spam Blacklist",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning) == DialogResult.Yes)
+        {
+            Start();
+            return;
+        }
+
+        SkipPage(message);
+    }
+
+    /// <summary>
+    /// Handles a retryable network exception and schedules processing to restart.
+    /// </summary>
+    /// <param name="exception">
+    /// The network exception that interrupted processing.
+    /// </param>
+    private void HandleNetworkException(
+        Exception exception)
+    {
+        StatusLabelText = exception.Message;
+
+        if (Tools.WriteDebugEnabled)
+        {
+            Tools.WriteTextFile(
+                exception.Message,
+                "Log.txt",
+                true);
+        }
+
+        // Some HTTP responses specify a delay before another request should be
+        // attempted. MediaWiki currently uses 429 and 503 responses with a delay
+        // expressed in seconds.
+        if (exception is WebException
+            {
+                Response: HttpWebResponse response
+            })
+        {
+            int restartDelay = Tools.ParseRetry(response);
+
+            if (restartDelay >= 0)
+            {
+                StartDelayedRestartTimer(restartDelay);
+                return;
+            }
+        }
+
+        StartDelayedRestartTimer();
     }
 
     private void OpenPage(string title)
