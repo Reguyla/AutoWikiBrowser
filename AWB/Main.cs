@@ -654,7 +654,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Initializes the application logging controls.
+    /// Initializes the application logging and article action log controls.
     /// </summary>
     private void InitializeLogging()
     {
@@ -662,6 +662,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         articleActionLogControl1.Initialise(listMaker);
     }
 
+    /// <summary>
+    /// Applies build configuration initialization that is common to both Debug
+    /// and Release builds.
+    /// </summary>
+    /// <remarks>
+    /// Calls the Debug and Release initialization routines. Each routine is
+    /// conditionally compiled and performs work only when its corresponding
+    /// build configuration is active.
+    /// </remarks>
     private void InitializeBuildConfiguration()
     {
         Debug();
