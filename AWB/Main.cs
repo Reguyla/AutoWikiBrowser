@@ -89,7 +89,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool ShuttingDown;
 
     private string LastArticle = "";
-    private string mSettingsFile = "";
+    private string _settingsFile = string.Empty;
+    private string _settingsFileDisplay = string.Empty;
 
     private const int MaxRetries = 10;
 
@@ -170,11 +171,27 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly DiffGenerationService _diffGenerationService = new();
 
     #endregion
-  
+
+    /// <summary>
+    /// Gets the active wiki session for the main application window.
+    /// </summary>
+    /// <remarks>
+    /// The session manages authentication, API communication, site information,
+    /// and other shared state used throughout the application.
+    /// </remarks>
     public Session TheSession
     { get; private set; }
 
     #region Constructor and MainForm load/resize
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainForm"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Performs application startup initialization, including loading application
+    /// settings, creating the user interface, initializing the editing session,
+    /// configuring application services, and preparing the main window for use.
+    /// Long-running startup tasks continue during <see cref="MainForm_Load"/> after
+    /// the form has
     public MainForm()
     {
         CheckSettings();
@@ -344,10 +361,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
     /// <summary>
-    /// 
+    /// Checks whether the current per-user application configuration can be opened
+    /// and deletes the configuration file when it is found to be corrupt.
     /// </summary>
     /// <remarks>
-    /// From https://stackoverflow.com/questions/2269489/c-sharp-user-settings-broken
+    /// A corrupt user configuration file can prevent AWB from starting. When a
+    /// <see cref="ConfigurationErrorsException"/> identifies an existing settings
+    /// file, the file is deleted so that .NET can recreate it with default values.
     /// </remarks>
     public static void CheckSettings()
     {
@@ -358,89 +378,176 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
         catch (ConfigurationErrorsException ex)
         {
-            string filename = ex.Filename;
+            string settingsFilePath = ex.Filename;
 
-            if (string.IsNullOrEmpty(filename) &&
+            if (string.IsNullOrEmpty(settingsFilePath) &&
                 ex.InnerException is ConfigurationErrorsException innerException)
             {
-                filename = innerException.Filename;
+                settingsFilePath = innerException.Filename;
             }
 
-            if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
+            if (string.IsNullOrEmpty(settingsFilePath) ||
+                !File.Exists(settingsFilePath))
             {
                 return;
             }
 
-            FileInfo fileInfo = new FileInfo(filename);
+            FileInfo settingsFile = new FileInfo(settingsFilePath);
 
-            if (fileInfo.Directory == null)
+            if (settingsFile.Directory == null)
             {
                 return;
             }
 
-            using (FileSystemWatcher watcher =
-                   new FileSystemWatcher(fileInfo.Directory.FullName, fileInfo.Name))
+            using FileSystemWatcher watcher = new(
+                settingsFile.Directory.FullName,
+                settingsFile.Name);
+
+            Tools.WriteDebug(
+                $"Deleting corrupt settings file {settingsFilePath}",
+                ex.Message);
+
+            File.Delete(settingsFilePath);
+
+            if (File.Exists(settingsFilePath))
             {
-                Tools.WriteDebug(
-                    $"Deleting corrupt file {filename}",
-                    ex.Message);
-
-                File.Delete(filename);
-
-                if (File.Exists(filename))
-                {
-                    watcher.WaitForChanged(WatcherChangeTypes.Deleted);
-                }
+                watcher.WaitForChanged(WatcherChangeTypes.Deleted);
             }
         }
     }
 
+    /// <summary>
+    /// Parses supported command-line arguments and applies the requested startup options.
+    /// </summary>
+    /// <param name="args">
+    /// The command-line arguments supplied to the application.
+    /// </param>
+    /// <remarks>
+    /// Supported options are:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// <c>/s &lt;file&gt;</c> loads the specified settings file. An <c>.xml</c>
+    /// extension is added when no extension is supplied and the original path
+    /// does not exist.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// <c>/u &lt;profile&gt;</c> selects the profile to load after startup.
+    /// </description>
+    /// </item>
+    /// </list>
+    /// Unsupported arguments, missing values, and settings files that cannot be
+    /// found are ignored.
+    /// </remarks>
     public void ParseCommandLine(string[] args)
     {
+        ArgumentNullException.ThrowIfNull(args);
+
         for (int i = 0; i < args.Length; i++)
         {
-            switch (args[i])
+            string argument = args[i];
+
+            if (argument is not ("/s" or "/u") || i + 1 >= args.Length)
+            {
+                continue;
+            }
+
+            string value = args[++i];
+
+            switch (argument)
             {
                 case "/s":
-                    if ((i + 1) < args.Length)
+                    string settingsFile = value;
+
+                    if (string.IsNullOrEmpty(Path.GetExtension(settingsFile)) &&
+                        !File.Exists(settingsFile))
                     {
-                        string fileName = args[i + 1];
-
-                        if (string.IsNullOrEmpty(Path.GetExtension(fileName)) && !File.Exists(fileName))
-                            fileName += ".xml";
-
-                        if (File.Exists(fileName))
-                            SettingsFile = fileName;
+                        settingsFile += ".xml";
                     }
+
+                    if (File.Exists(settingsFile))
+                    {
+                        SettingsFile = settingsFile;
+                    }
+
                     break;
+
                 case "/u":
-                    if ((i + 1) < args.Length)
-                        _profileToLoad = args[i + 1];
+                    _profileToLoad = value;
                     break;
             }
         }
     }
 
-    private string _settingsFileDisplay;
-    string SettingsFile
+    /// <summary>
+    /// Gets or sets the path of the settings file currently associated with the application.
+    /// </summary>
+    /// <remarks>
+    /// Updating the value also refreshes the main window title and notification-area
+    /// tooltip to show the application name, revision number in debug builds, and
+    /// the selected settings file name.
+    /// </remarks>
+    private string SettingsFile
     {
+        get => _settingsFile;
+
         set
         {
-            mSettingsFile = value;
-            _settingsFileDisplay = Program.Name;
+            _settingsFile = value;
+
+            string displayText = BuildSettingsFileDisplayText(value);
+
+            Text = displayText;
+            ntfyTray.Text = GetTrayTooltipText(displayText);
+        }
+    }
+
+    /// <summary>
+    /// Builds the display text used for the main window title and notification-area tooltip.
+    /// </summary>
+    /// <param name="settingsFile">
+    /// The path of the current settings file, or an empty value when no settings file is loaded.
+    /// </param>
+    /// <returns>
+    /// The application display text, including the debug revision number and settings file name
+    /// when available.
+    /// </returns>
+    private static string BuildSettingsFileDisplayText(string settingsFile)
+    {
+        string displayText = Program.Name;
 
 #if DEBUG
-            if (Variables.RevisionNumber > 0)
-                _settingsFileDisplay += " rev " + Variables.RevisionNumber;
+        if (Variables.RevisionNumber > 0)
+        {
+            displayText += $" rev {Variables.RevisionNumber}";
+        }
 #endif
 
-            if (!string.IsNullOrEmpty(value))
-                _settingsFileDisplay += " – " + Path.GetFileName(value);
-            Text = _settingsFileDisplay;
-
-            ntfyTray.Text = (_settingsFileDisplay.Length >= 64) ? _settingsFileDisplay.Substring(0, 62) : _settingsFileDisplay;
+        if (!string.IsNullOrEmpty(settingsFile))
+        {
+            displayText += $" – {Path.GetFileName(settingsFile)}";
         }
-        get { return mSettingsFile; }
+
+        return displayText;
+    }
+
+    /// <summary>
+    /// Limits display text to the maximum length supported by the notification-area tooltip.
+    /// </summary>
+    /// <param name="displayText">The text to display.</param>
+    /// <returns>
+    /// The original text when it fits, otherwise a truncated version.
+    /// </returns>
+    private static string GetTrayTooltipText(string displayText)
+    {
+        const int MaximumTrayTextLength = 63;
+        const int TruncatedTrayTextLength = 62;
+
+        return displayText.Length > MaximumTrayTextLength
+            ? displayText[..TruncatedTrayTextLength]
+            : displayText;
     }
 
     string _profileToLoad = "";
