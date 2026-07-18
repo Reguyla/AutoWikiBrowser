@@ -210,8 +210,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             InitializeControls();
 
-            TheSession = new Session(this);
-            CreateEditor();
+            InitializeSession();
 
             Profiles = new WikiFunctions.Profiles.AWBProfilesForm(TheSession);
             Profiles.LoggedIn += ProfileLoggedIn;
@@ -261,6 +260,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         listMaker.StatusTextChanged += UpdateListStatus;
         listMaker.cmboSourceSelect.SelectedIndexChanged +=
             ListMakerSourceSelectHandler;
+    }
+
+    private void InitializeSession()
+    {
+        TheSession = new Session(this);
+        CreateEditor();
     }
 
     /// <summary>
