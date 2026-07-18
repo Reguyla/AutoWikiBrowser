@@ -16,6 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
@@ -25,6 +27,7 @@ internal sealed partial class Splash : Form
     public Splash()
     {
         InitializeComponent();
+
         lblVersion.Text = "Version " + Program.VersionString;
         SetProgress(0);
     }
@@ -36,12 +39,40 @@ internal sealed partial class Splash : Form
 
     public void SetProgress(int percent)
     {
-        System.Reflection.MethodBase method = new System.Diagnostics.StackFrame(1).GetMethod();
-        if (method.DeclaringType != null)
+        MethodBase method = new StackFrame(1).GetMethod();
+
+        string methodText = method?.DeclaringType == null
+            ? string.Empty
+            : method.DeclaringType.Name + "::" + method.Name + "()";
+
+        SetProgressCore(percent, methodText);
+    }
+
+    private void SetProgressCore(int percent, string methodText)
+    {
+        if (IsDisposed || Disposing)
         {
-            MethodLabel.Text = method.DeclaringType.Name + "::" + method.Name + "()";
+            return;
         }
-        progressBar.Value = percent;
-        Application.DoEvents();
+
+        if (InvokeRequired)
+        {
+            BeginInvoke(
+                new Action<int, string>(SetProgressCore),
+                percent,
+                methodText);
+
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(methodText))
+        {
+            MethodLabel.Text = methodText;
+        }
+
+        progressBar.Value = Math.Clamp(
+            percent,
+            progressBar.Minimum,
+            progressBar.Maximum);
     }
 }
