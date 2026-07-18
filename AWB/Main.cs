@@ -874,44 +874,81 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    /// <summary>
+    /// Gets or sets the text displayed in the main status label.
+    /// </summary>
+    /// <remarks>
+    /// Updates are marshaled to the UI thread when necessary. Assigning
+    /// <see langword="null"/> or an empty string restores the default
+    /// application name and version text.
+    /// </remarks>
     private string StatusLabelText
     {
-        get { return lblStatusText.Text; }
+        get => lblStatusText.Text;
         set
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => { StatusLabelText = value; }));
+                Invoke(new Action(() => StatusLabelText = value));
                 return;
             }
 
-            if (string.IsNullOrEmpty(value))
-                lblStatusText.Text = Program.Name + " " + Program.VersionString;
-            else
-                lblStatusText.Text = value;
+            lblStatusText.Text = string.IsNullOrEmpty(value)
+                ? $"{Program.Name} {Program.VersionString}"
+                : value;
         }
     }
 
+    /// <summary>
+    /// Gets or sets whether ignored articles are added to the log file.
+    /// </summary>
+    /// <remarks>
+    /// Changing this value updates the stop-button layout and controls the
+    /// visibility of the false-positive actions.
+    /// </remarks>
+    /// TODO (.NET 8 Modernization):
+    /// Replace this write-only property with a clearly named method such as
+    /// UpdateIgnoredArticleControls(bool). The current implementation performs
+    /// UI layout changes rather than representing state, so a method would
+    /// better communicate its behavior. This requires updating all callers and
+    /// should be done as a dedicated refactoring to avoid changing behavior.
     private bool AddIgnoredToLogFile
     {
         set
         {
-            btnStop.Location = value ? new Point(220, 62) : new Point(156, 62);
-            btnStop.Size = value ? new Size(51, 23) : new Size(117, 23);
+            btnStop.Location = value
+                ? new Point(220, 62)
+                : new Point(156, 62);
 
-            btnFalsePositive.Visible = btntsFalsePositive.Visible = value;
+            btnStop.Size = value
+                ? new Size(51, 23)
+                : new Size(117, 23);
+
+            btnFalsePositive.Visible = value;
+            btntsFalsePositive.Visible = value;
         }
     }
 
-    bool _timerShown = true;
+    /// <summary>
+    /// Indicates whether the moving-average timer is currently shown.
+    /// </summary>
+    private bool _timerShown = true;
+
+    /// <summary>
+    /// Gets or sets whether the moving-average timer is displayed.
+    /// </summary>
+    /// <remarks>
+    /// Changing this value immediately refreshes the timer display.
+    /// </remarks>
     private bool ShowMovingAverageTimer
     {
+        get => _timerShown;
+
         set
         {
             _timerShown = value;
             ShowTimer();
         }
-        get { return _timerShown; }
     }
 
     #endregion
