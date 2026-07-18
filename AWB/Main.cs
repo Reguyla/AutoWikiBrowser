@@ -768,31 +768,47 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     #region Properties
 
+    /// <summary>
+    /// Gets the article currently being processed or displayed.
+    /// </summary>
     internal Article TheArticle { get; private set; }
 
     /// <summary>
-    /// Is AWB running in Bot Mode
+    /// Gets or sets whether AWB is running in bot mode.
     /// </summary>
     private bool BotMode
     {
-        get { return chkAutoMode.Checked; }
-        set { chkAutoMode.Checked = value; }
+        get => chkAutoMode.Checked;
+        set => chkAutoMode.Checked = value;
     }
 
     private bool _lowThreadPriority;
+    /// <summary>
+    /// Gets or sets whether the current thread uses the lowest priority.
+    /// </summary>
+    /// <remarks>
+    /// Changing this value immediately updates the priority of the current thread.
+    /// </remarks>
     private bool LowThreadPriority
     {
-        get { return _lowThreadPriority; }
+        get => _lowThreadPriority;
+
         set
         {
             _lowThreadPriority = value;
-            Thread.CurrentThread.Priority = value ? ThreadPriority.Lowest : ThreadPriority.Normal;
+
+            Thread.CurrentThread.Priority = value
+                ? ThreadPriority.Lowest
+                : ThreadPriority.Normal;
         }
     }
 
-    private int _listComparerUseCurrentArticleList, _listSplitterUseCurrentArticleList, _dbScannerUseCurrentArticleList;
+    private int _listComparerUseCurrentArticleList;
+    private int _listSplitterUseCurrentArticleList;
+    private int _dbScannerUseCurrentArticleList;
 
-    private bool _flash, _beep;
+    private bool _flash;
+    private bool _beep;
 
     /// <summary>
     /// True if user has been warned in AWB session that articles with characters in Unicode private use area can't be saved
