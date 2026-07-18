@@ -1414,103 +1414,228 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
+    /// Prepares the next article in the list and begins loading it for processing.
     /// </summary>
-    /// <returns>true if it is ok to call again, or false if processing should now stop</returns>
+    /// <remarks>
+    /// Stops immediately when processing has been cancelled, the edit summary is
+    /// invalid, the article list is empty, or the selected title is invalid.
+    /// Unexpected failures schedule processing to restart.
+    /// </remarks>
+    // TODO (.NET 8 Modernization):
+    // Classify failures from article startup so transient network/session errors
+    // can be retried while unexpected programming or UI errors are reported and
+    // processing is stopped instead of entering a restart loop.
     private void StartArticleProcessing()
     {
         if (_stopProcessing)
+        {
             return;
+        }
 
         try
         {
             Tools.WriteDebug(Name, "Starting");
 
             Shutdown();
+            PrepareArticleProcessingUi();
 
-            // Check edit summary
-            txtEdit.Enabled = txtReviewEditSummary.Enabled = true;
-            SetEditToolBarEnabled(true);
-
-            if (Variables.Project != ProjectEnum.custom && string.IsNullOrEmpty(cmboEditSummary.Text) &&
-                !Plugin.AWBPlugins.Any())
+            if (!ValidateEditSummary())
             {
-                MessageBox.Show("Please enter an edit summary.", "Edit summary", MessageBoxButtons.OK,
-                                MessageBoxIcon.Exclamation);
-                Stop();
                 return;
             }
 
-            if (!string.IsNullOrEmpty(cmboEditSummary.Text) && !cmboEditSummary.Items.Contains(cmboEditSummary.Text))
-                cmboEditSummary.Items.Add(cmboEditSummary.Text);
+            PrepareArticleProcessingState();
 
-            txtReviewEditSummary.Text = "";
-
-            StopDelayedRestartTimer();
-            DisableButtons();
-
-            Skippable = true;
-            txtEdit.Clear();
-
-            ArticleInfo(true);
-
-            if (listMaker.NumberOfArticles < 1)
+            if (!TryGetSelectedArticleTitle(out string title))
             {
-                StopSaveInterval();
-                lblTimer.Text = "";
-                StopProgressBar();
-                StatusLabelText = "No articles in list, you need to use the Make list";
-                Text = _settingsFileDisplay;
-                listMaker.MakeListEnabled = true;
                 return;
             }
 
-            string title = listMaker.SelectedArticle().Name;
+            title = NormalizeSelectedArticleTitle(title);
 
-            if (!Tools.IsValidTitle(title))
-            {
-                // create TheArticle else skip won't work
-                TheArticle = new Article(title, "");
-                SkipPage("Invalid page title");
-                return;
-            }
-
-            string fixedTitle = Parsers.CanonicalizeTitleAggressively(title);
-            if (fixedTitle != title)
-            {
-                listMaker.ReplaceArticle(listMaker.SelectedArticle(), new Article(fixedTitle));
-                title = fixedTitle;
-            }
-
-            if (BotMode)
-                NudgeTimer.StartMe();
-
-            // reset last article text if now processing a different article
-            if (TheArticle != null && !TheArticle.Name.Equals(title))
-                LastArticle = "";
-
-            TheArticle = new Article(title, "");
-
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_12#.27Find.27_sometimes_fails_to_use_the_search_key
-            txtEdit.ResetFind();
-
-            NewHistory(title);
-            NewWhatLinksHere(title);
-
-            EditBoxSaveTimer.Enabled = _autoSaveEditBoxEnabled;
-
-            // if (dlg != null && dlg.AutoProtectAll)
-            //    TheArticle.Protect(TheSession);
-
-            StartProgressBar();
-
-            // Navigate to edit page
-            OpenPage(title);
+            PrepareCurrentArticle(title);
+            BeginArticleLoading(title);
         }
         catch (Exception ex)
         {
-            Tools.WriteDebug(Name, "Start() error: " + ex.Message);
+            Tools.WriteDebug(
+                Name,
+                $"StartArticleProcessing() error: {ex.Message}");
+
             StartDelayedRestartTimer();
         }
+    }
+
+    /// <summary>
+    /// Prepares the editing controls for a new article-processing cycle.
+    /// </summary>
+    private void PrepareArticleProcessingUi()
+    {
+        txtEdit.Enabled = true;
+        txtReviewEditSummary.Enabled = true;
+        SetEditToolBarEnabled(true);
+
+        txtReviewEditSummary.Clear();
+
+        DisableButtons();
+
+        Skippable = true;
+        txtEdit.Clear();
+
+        ArticleInfo(true);
+    }
+
+    /// <summary>
+    /// Validates the current edit summary and adds it to the history when needed.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool ValidateEditSummary()
+    {
+        bool editSummaryRequired =
+            Variables.Project != ProjectEnum.custom
+            && !Plugin.AWBPlugins.Any();
+
+        if (editSummaryRequired
+            && string.IsNullOrEmpty(cmboEditSummary.Text))
+        {
+            MessageBox.Show(
+                "Please enter an edit summary.",
+                "Edit Summary",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+
+            Stop();
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(cmboEditSummary.Text)
+            && !cmboEditSummary.Items.Contains(cmboEditSummary.Text))
+        {
+            cmboEditSummary.Items.Add(cmboEditSummary.Text);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Resets timers and state used by the previous processing cycle.
+    /// </summary>
+    private void PrepareArticleProcessingState()
+    {
+        StopDelayedRestartTimer();
+    }
+
+    /// <summary>
+    /// Retrieves the title of the currently selected article.
+    /// </summary>
+    /// <param name="title">
+    /// When successful, receives the selected article title.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when an article is available; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool TryGetSelectedArticleTitle(out string title)
+    {
+        if (listMaker.NumberOfArticles < 1)
+        {
+            StopSaveInterval();
+            lblTimer.Text = string.Empty;
+            StopProgressBar();
+
+            StatusLabelText =
+                "No articles in list; use Make list to add articles.";
+
+            Text = _settingsFileDisplay;
+            listMaker.MakeListEnabled = true;
+
+            title = string.Empty;
+            return false;
+        }
+
+        title = listMaker.SelectedArticle().Name;
+
+        if (Tools.IsValidTitle(title))
+        {
+            return true;
+        }
+
+        // TheArticle must exist before SkipPage() can process the invalid entry.
+        TheArticle = new Article(title, string.Empty);
+        SkipPage("Invalid page title");
+
+        title = string.Empty;
+        return false;
+    }
+
+    /// <summary>
+    /// Canonicalizes the selected title and updates the article list when it
+    /// changes.
+    /// </summary>
+    /// <param name="title">The selected article title.</param>
+    /// <returns>The canonicalized article title.</returns>
+    private string NormalizeSelectedArticleTitle(string title)
+    {
+        string canonicalTitle =
+            Parsers.CanonicalizeTitleAggressively(title);
+
+        if (string.Equals(
+            canonicalTitle,
+            title,
+            StringComparison.Ordinal))
+        {
+            return title;
+        }
+
+        listMaker.ReplaceArticle(
+            listMaker.SelectedArticle(),
+            new Article(canonicalTitle));
+
+        return canonicalTitle;
+    }
+
+    /// <summary>
+    /// Creates and initializes the article state for the selected title.
+    /// </summary>
+    /// <param name="title">The title being processed.</param>
+    private void PrepareCurrentArticle(string title)
+    {
+        if (BotMode)
+        {
+            NudgeTimer.StartMe();
+        }
+
+        if (TheArticle != null
+            && !string.Equals(
+                TheArticle.Name,
+                title,
+                StringComparison.Ordinal))
+        {
+            LastArticle = string.Empty;
+        }
+
+        TheArticle = new Article(title, string.Empty);
+
+        // Ensure the editor's Find operation uses the current search text.
+        txtEdit.ResetFind();
+
+        NewHistory(title);
+        NewWhatLinksHere(title);
+
+        EditBoxSaveTimer.Enabled = _autoSaveEditBoxEnabled;
+    }
+
+    /// <summary>
+    /// Starts progress reporting and opens the selected article.
+    /// </summary>
+    /// <param name="title">The title to load.</param>
+    private void BeginArticleLoading(string title)
+    {
+        StartProgressBar();
+        OpenPage(title);
     }
 
     private Dictionary<int, int> unbalancedBracket = new Dictionary<int, int>();
