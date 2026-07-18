@@ -1014,7 +1014,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Handles notification that the active editing session has been logged off.
     /// </summary>
     /// <param name="sender">The editor that raised the event.</param>
-    private void LoggedOff(AsyncApiEdit sender)
+    private void LoggedOff(AsyncApiEdit _sender)
     {
         DisableButtons();
     }
@@ -1030,17 +1030,21 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Handles a server maxlag response and schedules another attempt when the
-    /// configured retry limit has not been reached.
+    /// Handles a server maxlag response by incrementing the consecutive retry
+    /// count and scheduling another attempt until the retry limit is reached.
     /// </summary>
-    /// <param name="sender">The editor that reported the maxlag condition.</param>
-    /// <param name="maxlag">The maxlag value reported by the server.</param>
+    /// <param name="sender">
+    /// The editor that reported the maxlag condition.
+    /// </param>
+    /// <param name="maxlag">
+    /// The maxlag value reported by the server.
+    /// </param>
     /// <param name="retryAfter">
     /// The number of seconds to wait before attempting to restart processing.
     /// </param>
     private void MaxlagExceeded(
-        AsyncApiEdit sender,
-        double maxlag,
+        AsyncApiEdit _sender,
+        double _maxlag,
         int retryAfter)
     {
         Retries++;
