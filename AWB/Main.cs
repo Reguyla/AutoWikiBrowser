@@ -1696,136 +1696,318 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private BackgroundRequest _runProcessPageBackground;
 
     /// <summary>
-    /// Invoked on successful page load, performs skip checks and calls main page processing
+    /// Handles a successfully loaded page, performs applicable skip checks, and
+    /// begins the main page-processing workflow.
     /// </summary>
-    /// <param name="page"></param>
+    /// <param name="page">Information and content for the loaded page.</param>
     private void PageLoaded(PageInfo page)
     {
         if (!LoadSuccessApi())
+        {
             return;
+        }
 
         Retries = 0;
 
         if (_stopProcessing)
+        {
             return;
+        }
 
+        if (!InitializeLoadedArticle(page))
+        {
+            return;
+        }
+
+        InitializeArticleTrace(page.Title);
+
+        if (HandleRedirect(page))
+        {
+            return;
+        }
+
+        HandleNormalizedTitle(page);
+
+        ErrorHandler.CurrentRevision = page.RevisionID;
+
+        if (HandlePageReload())
+        {
+            return;
+        }
+
+        if (SkipChecks(
+            !skipIfContains.After,
+            !skipIfNotContains.After))
+        {
+            return;
+        }
+
+        if (HandlePageInUse())
+        {
+            return;
+        }
+
+        if (HandleUnicodePrivateUseCharacter(page.Text))
+        {
+            return;
+        }
+
+        BeginPageProcessing();
+    }
+
+    /// <summary>
+    /// Creates the current article and verifies that processing may continue.
+    /// </summary>
+    /// <param name="page">The loaded page.</param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool InitializeLoadedArticle(PageInfo page)
+    {
         if (Namespace.IsSpecial(Namespace.Determine(page.Title)))
         {
             SkipPage("Page is a special page");
+
+            // Preserve or remove this return based on the intended legacy behavior.
+            return false;
         }
 
         TheArticle = new Article(page);
 
-        if (!preParseModeToolStripMenuItem.Checked && !CheckLoginStatus())
-            return;
+        return preParseModeToolStripMenuItem.Checked
+            || CheckLoginStatus();
+    }
 
+    /// <summary>
+    /// Initializes tracing and updates the window title for the loaded article.
+    /// </summary>
+    /// <param name="title">The loaded article title.</param>
+    private void InitializeArticleTrace(string title)
+    {
         if (Program.MyTrace.HaveOpenFile)
-            Program.MyTrace.WriteBulletedLine("AWB started processing", true, true, true);
+        {
+            Program.MyTrace.WriteBulletedLine(
+                "AWB started processing",
+                true,
+                true,
+                true);
+        }
         else
+        {
             Program.MyTrace.Initialise();
+        }
 
-        Text = _settingsFileDisplay + " – " + page.Title;
+        Text = $"{_settingsFileDisplay} – {title}";
+    }
 
-        bool pageIsRedirect = PageInfo.WasRedirected(page);
+    // TODO (.NET 8 Modernization):
+    // Move redirect decisions, skip-rule evaluation, article validation, and
+    // Unicode content checks out of MainForm into testable page-processing
+    // components. Keep only workflow coordination and direct UI updates in the
+    // form.
 
-        // check for redirects when 'follow redirects' is off
-        if (chkSkipIfRedirect.Checked && Tools.IsRedirect(page.Text))
+    /// <summary>
+    /// Handles redirect skipping, redirect loops, namespace filtering, and list
+    /// replacement for redirected pages.
+    /// </summary>
+    /// <param name="page">The loaded page.</param>
+    /// <returns>
+    /// <see langword="true"/> when page processing has been stopped; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HandleRedirect(PageInfo page)
+    {
+        if (chkSkipIfRedirect.Checked
+            && Tools.IsRedirect(page.Text))
         {
             SkipPage("Page is a redirect");
-            return;
+            return true;
         }
 
-        // check for redirect
-        if (followRedirectsToolStripMenuItem.Checked && pageIsRedirect && !PageReload)
+        bool wasRedirected = PageInfo.WasRedirected(page);
+
+        if (!followRedirectsToolStripMenuItem.Checked
+            || !wasRedirected
+            || PageReload)
         {
-            if ((page.TitleChangedStatus & PageTitleStatus.RedirectLoop) == PageTitleStatus.RedirectLoop)
-            {
-                // ignore recursive redirects
-                SkipRedirect("Recursive redirect");
-                return;
-            }
-
-            // No double redirects, API should've resolved it
-
-            if (filterOutNonMainSpaceToolStripMenuItem.Checked
-                && (Namespace.Determine(page.Title) != Namespace.Article))
-            {
-                SkipRedirect("Page redirects to non-mainspace");
-                return;
-            }
-
-            if (ArticleWasRedirected != null)
-                ArticleWasRedirected(page.OriginalTitle, page.Title);
-
-            listMaker.ReplaceArticle(new Article(page.OriginalTitle), TheArticle);
+            return false;
         }
 
-        /* check for normalized page: since we canonicalize title before API read is requested,
-         this shouldn't normally be the case: will be the case for female user page normalization
-         example https://de.wikipedia.org/w/api.php?action=query&prop=info|revisions&titles=Benutzer%20Diskussion:MarianneBirkholz&rvprop=timestamp|user|comment|content
-         see the <normalized> block */
-        if (page.TitleChangedStatus == PageTitleStatus.Normalised)
+        if (page.TitleChangedStatus.HasFlag(
+            PageTitleStatus.RedirectLoop))
         {
-            listMaker.ReplaceArticle(new Article(page.OriginalTitle), TheArticle);
+            SkipRedirect("Recursive redirect");
+            return true;
         }
 
-        ErrorHandler.CurrentRevision = page.RevisionID;
-
-        if (PageReload)
+        if (filterOutNonMainSpaceToolStripMenuItem.Checked
+            && Namespace.Determine(page.Title) != Namespace.Article)
         {
-            PageReload = false;
-            GetDiff();
-            return;
+            SkipRedirect("Page redirects to non-mainspace");
+            return true;
         }
 
-        // pre-processing of article
-        if (SkipChecks(!skipIfContains.After, !skipIfNotContains.After))
+        ArticleWasRedirected?.Invoke(
+            page.OriginalTitle,
+            page.Title);
+
+        listMaker.ReplaceArticle(
+            new Article(page.OriginalTitle),
+            TheArticle);
+
+        return false;
+    }
+
+    /// <summary>
+    /// Replaces the original list entry when the API normalized the requested
+    /// page title.
+    /// </summary>
+    /// <param name="page">The loaded page.</param>
+    private void HandleNormalizedTitle(PageInfo page)
+    {
+        if (page.TitleChangedStatus != PageTitleStatus.Normalised)
         {
             return;
         }
 
-        // check not in use
-        if (TheArticle.IsInUse)
+        listMaker.ReplaceArticle(
+            new Article(page.OriginalTitle),
+            TheArticle);
+    }
+
+    /// <summary>
+    /// Completes processing for a page that was reloaded for diff generation.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the reload was handled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HandlePageReload()
+    {
+        if (!PageReload)
         {
-            if (chkSkipIfInuse.Checked)
-            {
-                SkipPage("Page contains {{inuse}}");
-                return;
-            }
-            if (!BotMode && !preParseModeToolStripMenuItem.Checked)
-            {
-                MessageBox.Show("This page has the \"Inuse\" tag, consider skipping it");
-            }
+            return false;
         }
 
-        /* skip pages containing any Unicode character in Private Use Area as RichTextBox seems to break these
-         * not exactly wrong as PUA characters won't be found in standard text, but not exactly right to break them either
-         * Reference: [[Unicode#Character General Category]] PUA is U+E000 to U+F8FF */
-        Match uPUA = _unicodePrivateUseRegex.Match(page.Text);
-        if (uPUA.Success)
-        {
-            if (!_userWarnedAboutUnicodePUA && !preParseModeToolStripMenuItem.Checked && !BotMode)
-            {
-                // provide text around PUA character so user can find it
-                string uPUAText = page.Text.Substring(uPUA.Index - Math.Min(25, uPUA.Index), Math.Min(25, uPUA.Index) + Math.Min(25, page.Text.Length - uPUA.Index));
-                MessageBox.Show("This page has character(s) in the Unicode Private Use Area so unfortunately can't be edited with AWB. The page will now be skipped. Surrounding text of first PUA character is: " + uPUAText);
-                _userWarnedAboutUnicodePUA = true;
-            }
+        PageReload = false;
+        GetDiff();
 
-            SkipPage("Page has character in Unicode Private Use Area");
+        return true;
+    }
+
+    /// <summary>
+    /// Handles pages containing an in-use template.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the page was skipped; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HandlePageInUse()
+    {
+        if (!TheArticle.IsInUse)
+        {
+            return false;
+        }
+
+        if (chkSkipIfInuse.Checked)
+        {
+            SkipPage("Page contains {{inuse}}");
+            return true;
+        }
+
+        if (!BotMode
+            && !preParseModeToolStripMenuItem.Checked)
+        {
+            MessageBox.Show(
+                "This page has the \"Inuse\" tag; consider skipping it.",
+                "Page in use",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Detects Unicode Private Use Area characters that cannot safely be edited
+    /// in the current editor.
+    /// </summary>
+    /// <param name="articleText">The loaded article text.</param>
+    /// <returns>
+    /// <see langword="true"/> when the page was skipped; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HandleUnicodePrivateUseCharacter(
+        string articleText)
+    {
+        Match privateUseMatch =
+            _unicodePrivateUseRegex.Match(articleText);
+
+        if (!privateUseMatch.Success)
+        {
+            return false;
+        }
+
+        if (!_userWarnedAboutUnicodePUA
+            && !preParseModeToolStripMenuItem.Checked
+            && !BotMode)
+        {
+            string surroundingText =
+                GetSurroundingText(
+                    articleText,
+                    privateUseMatch.Index,
+                    25);
+
+            MessageBox.Show(
+                "This page contains character(s) in the Unicode Private Use Area "
+                + "and cannot safely be edited with AWB. The page will now be "
+                + "skipped. Surrounding text of the first character is: "
+                + surroundingText);
+
+            _userWarnedAboutUnicodePUA = true;
+        }
+
+        SkipPage(
+            "Page has character in Unicode Private Use Area");
+
+        return true;
+    }
+
+    /// <summary>
+    /// Returns text surrounding a character position.
+    /// </summary>
+    private static string GetSurroundingText(
+        string text,
+        int index,
+        int radius)
+    {
+        int start = Math.Max(0, index - radius);
+        int end = Math.Min(text.Length, index + radius);
+        int length = end - start;
+
+        return text.Substring(start, length);
+    }
+
+    /// <summary>
+    /// Starts automatic processing in the background or completes processing
+    /// synchronously when automatic actions are disabled.
+    /// </summary>
+    private void BeginPageProcessing()
+    {
+        if (!automaticallyDoAnythingToolStripMenuItem.Checked)
+        {
+            CompleteProcessPage();
             return;
         }
 
-        // run process page in a background thread
-        // use .Complete event to do rest of processing (skip checks, alerts etc.) once thread finished
-        if (automaticallyDoAnythingToolStripMenuItem.Checked)
-        {
-            _runProcessPageBackground = new BackgroundRequest();
-            _runProcessPageBackground.Execute(ProcessPageBackground);
-            _runProcessPageBackground.Complete += AutomaticallyDoAnythingComplete;
-            return;
-        }
-        CompleteProcessPage();
+        _runProcessPageBackground = new BackgroundRequest();
+        _runProcessPageBackground.Complete +=
+            AutomaticallyDoAnythingComplete;
+
+        _runProcessPageBackground.Execute(
+            ProcessPageBackground);
     }
 
     /// <summary>
