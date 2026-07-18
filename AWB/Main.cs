@@ -1667,15 +1667,33 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly SortedDictionary<int, int> _errors = new();
 
+    /// <summary>
+    /// Skips the current redirect while preserving the redirect-specific logging
+    /// context.
+    /// </summary>
+    /// <param name="reason">
+    /// The reason the redirect is being skipped.
+    /// </param>
+    /// <remarks>
+    /// Redirect processing uses a different trace listener than the primary
+    /// article. This wrapper ensures the skip is recorded against the redirect
+    /// before control returns to the main article processing workflow.
+    /// </remarks>
     private void SkipRedirect(string reason)
     {
-        // if we didn't do this, we were writing the SkipPage info to the AWBLogListener belonging to the object redirect
-        // and resident in the MyTrace collection, but then attempting to add TheArticle's log listener to the logging tab
         SkipPage(reason);
     }
 
-    private static readonly Regex UnicodePUA = new Regex(@"\p{IsPrivateUse}", RegexOptions.Compiled);
-    private BackgroundRequest RunProcessPageBackground;
+    /// <summary>
+    /// Matches Unicode characters in the Private Use Area (PUA).
+    /// </summary>
+    private static readonly Regex _unicodePrivateUseRegex =
+        new(@"\p{IsPrivateUse}", RegexOptions.Compiled);
+
+    // TODO (.NET 8 Modernization):
+    // Replace the remaining BackgroundRequest-based processing with the modern
+    // task-based infrastructure used elsewhere in the application.
+    private BackgroundRequest _runProcessPageBackground;
 
     /// <summary>
     /// Invoked on successful page load, performs skip checks and calls main page processing
@@ -1783,7 +1801,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         /* skip pages containing any Unicode character in Private Use Area as RichTextBox seems to break these
          * not exactly wrong as PUA characters won't be found in standard text, but not exactly right to break them either
          * Reference: [[Unicode#Character General Category]] PUA is U+E000 to U+F8FF */
-        Match uPUA = UnicodePUA.Match(page.Text);
+        Match uPUA = _unicodePrivateUseRegex.Match(page.Text);
         if (uPUA.Success)
         {
             if (!_userWarnedAboutUnicodePUA && !preParseModeToolStripMenuItem.Checked && !BotMode)
@@ -1802,9 +1820,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         // use .Complete event to do rest of processing (skip checks, alerts etc.) once thread finished
         if (automaticallyDoAnythingToolStripMenuItem.Checked)
         {
-            RunProcessPageBackground = new BackgroundRequest();
-            RunProcessPageBackground.Execute(ProcessPageBackground);
-            RunProcessPageBackground.Complete += AutomaticallyDoAnythingComplete;
+            _runProcessPageBackground = new BackgroundRequest();
+            _runProcessPageBackground.Execute(ProcessPageBackground);
+            _runProcessPageBackground.Complete += AutomaticallyDoAnythingComplete;
             return;
         }
         CompleteProcessPage();
@@ -4783,10 +4801,10 @@ font-size: 150%;'>No changes</h2>
             if (!TheSession.User.IsLoggedIn) return;
         }
         else if (
-            (RunProcessPageBackground != null &&
-             RunProcessPageBackground.ThreadStatus().IsIn(ThreadState.Running, ThreadState.Background)) ||
-            (RunReparseEditBoxBackground != null &&
-             RunReparseEditBoxBackground.ThreadStatus().IsIn(ThreadState.Running, ThreadState.Background))
+            (_runProcessPageBackground != null &&
+             _runProcessPageBackground.ThreadStatus().IsIn(ThreadState.Running, ThreadState.Background)) ||
+            (_runProcessPageBackground != null &&
+             _runProcessPageBackground.ThreadStatus().IsIn(ThreadState.Running, ThreadState.Background))
             )
         {
             StatusLabelText = "Background process running";
@@ -5341,11 +5359,11 @@ if (MessageBox.Show(
         NudgeTimer.Stop();
 
         // abort any background thread if running
-        if (RunReparseEditBoxBackground != null)
-            RunReparseEditBoxBackground.Abort();
+        if (_runProcessPageBackground != null)
+            _runProcessPageBackground.Abort();
 
-        if (RunProcessPageBackground != null)
-            RunProcessPageBackground.Abort();
+        if (_runProcessPageBackground != null)
+            _runProcessPageBackground.Abort();
 
         DisableButtons();
 
@@ -5391,10 +5409,10 @@ if (MessageBox.Show(
         if (TheArticle == null)
             return;
 
-        if ((RunProcessPageBackground != null && (RunProcessPageBackground.ThreadStatus() == ThreadState.Running
-        || RunProcessPageBackground.ThreadStatus() == ThreadState.Background)) ||
-        (RunReparseEditBoxBackground != null && (RunReparseEditBoxBackground.ThreadStatus() == ThreadState.Running
-        || RunReparseEditBoxBackground.ThreadStatus() == ThreadState.Background)))
+        if ((_runProcessPageBackground != null && (_runProcessPageBackground.ThreadStatus() == ThreadState.Running
+        || _runProcessPageBackground.ThreadStatus() == ThreadState.Background)) ||
+        (_runProcessPageBackground != null && (_runProcessPageBackground.ThreadStatus() == ThreadState.Running
+        || _runProcessPageBackground.ThreadStatus() == ThreadState.Background)))
         {
             StatusLabelText = "Background process running";
             return;
@@ -5406,9 +5424,9 @@ if (MessageBox.Show(
         // refresh text from text box to pick up user changes
         TheArticle.AWBChangeArticleText("Reparse", txtEdit.Text, false);
 
-        RunReparseEditBoxBackground = new BackgroundRequest();
-        RunReparseEditBoxBackground.Complete += ReparseEditBoxComplete;
-        RunReparseEditBoxBackground.Execute(ReparseEditBoxBackground);
+        _runProcessPageBackground = new BackgroundRequest();
+        _runProcessPageBackground.Complete += ReparseEditBoxComplete;
+        _runProcessPageBackground.Execute(ReparseEditBoxBackground);
 
     }
 
