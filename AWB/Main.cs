@@ -55,8 +55,7 @@ namespace AutoWikiBrowser;
 public sealed partial class MainForm : Form, IAutoWikiBrowser
 { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
     #region Fields
-    #region Fields
-
+  
     // --------------------------------------------------------------------
     // UI
     // --------------------------------------------------------------------
@@ -171,8 +170,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly DiffGenerationService _diffGenerationService = new();
 
     #endregion
-    #endregion
-
+  
     public Session TheSession
     { get; private set; }
 
@@ -198,17 +196,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         SplashScreen.SetProgress(5);
         try
         {
-            btntsShowHide.Image = Resources.Showhide;
-            btntsShowHideParameters.Image = Resources.Showhideparameters;
-            btntsSave.Image = Resources.Save;
-
-            btntsIgnore.Image = Resources.RightArrow;
-            btntsStop.Image = Resources.Stop;
-            btntsPreview.Image = Resources.preview;
-            btntsChanges.Image = Resources.changes;
-            btntsFalsePositive.Image = Resources.RollBack;
-            btntsStart.Image = Resources.Run;
-            btntsDelete.Image = Resources.Vista_trashcan_empty;
+            InitializeToolbarImages();
 
             SplashScreen.SetProgress(10);
             try
@@ -252,6 +240,21 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             ErrorHandler.HandleException(ex);
         }
+    }
+
+    private void InitializeToolbarImages()
+    {
+        btntsShowHide.Image = Resources.Showhide;
+        btntsShowHideParameters.Image = Resources.Showhideparameters;
+        btntsSave.Image = Resources.Save;
+
+        btntsIgnore.Image = Resources.RightArrow;
+        btntsStop.Image = Resources.Stop;
+        btntsPreview.Image = Resources.preview;
+        btntsChanges.Image = Resources.changes;
+        btntsFalsePositive.Image = Resources.RollBack;
+        btntsStart.Image = Resources.Run;
+        btntsDelete.Image = Resources.Vista_trashcan_empty;
     }
 
     /// <summary>
