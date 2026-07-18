@@ -838,18 +838,40 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private bool _minimize;
 
+    /// <summary>
+    /// Indicates whether the current article list should be saved when AWB exits.
+    /// </summary>
     private bool _saveArticleList = true;
+
+    /// <summary>
+    /// Indicates whether automatic saving of the edit box contents is enabled.
+    /// </summary>
     private bool _autoSaveEditBoxEnabled;
 
-    private string _autoSaveEditBoxFile = Path.Combine(Application.StartupPath, "Edit Box.txt");
+    /// <summary>
+    /// The file used to store automatic backups of the edit box contents.
+    /// </summary>
+    private string _autoSaveEditBoxFile =
+        Path.Combine(Application.StartupPath, "Edit Box.txt");
 
+    /// <summary>
+    /// Indicates whether the "using AWB" edit summary tag should be suppressed.
+    /// </summary>
     private bool _suppressUsingAWB;
 
     private decimal _asEditPeriod = 60;
+    /// <summary>
+    /// Gets or sets the interval, in seconds, between automatic saves of the edit box.
+    /// </summary>
     private decimal AutoSaveEditBoxPeriod
     {
-        get { return _asEditPeriod; }
-        set { _asEditPeriod = value; EditBoxSaveTimer.Interval = int.Parse((value * 1000).ToString(CultureInfo.InvariantCulture)); }
+        get => _asEditPeriod;
+
+        set
+        {
+            _asEditPeriod = value;
+            EditBoxSaveTimer.Interval = (int)(value * 1000m);
+        }
     }
 
     private string StatusLabelText
