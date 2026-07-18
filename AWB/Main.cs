@@ -550,21 +550,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             : displayText;
     }
 
-    string _profileToLoad = "";
+    private string _profileToLoad = string.Empty;
 
     /// <summary>
     /// Completes startup initialization after the main form has loaded.
     /// </summary>
     private async void MainForm_Load(object sender, EventArgs e)
     {
-        EditBoxTab.TabPages.Remove(tpTypos);
-
-        StatusLabelText = "Initialising...";
-        SplashScreen.SetProgress(20);
-        Variables.MainForm = this;
-        lblOnlyBots.BringToFront();
-
-        SplashScreen.SetProgress(22);
+        PrepareStartupUi();
 
         try
         {
@@ -668,6 +661,22 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         Debug();
         Release();
+    }
+
+    /// <summary>
+    /// Prepares the main form and splash screen for startup initialization.
+    /// </summary>
+    private void PrepareStartupUi()
+    {
+        EditBoxTab.TabPages.Remove(tpTypos);
+
+        StatusLabelText = "Initialising...";
+        SplashScreen.SetProgress(20);
+
+        Variables.MainForm = this;
+        lblOnlyBots.BringToFront();
+
+        SplashScreen.SetProgress(22);
     }
 
     /// <summary>
