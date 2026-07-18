@@ -216,14 +216,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             SplashScreen.SetProgress(15);
 
-            _pasteMoreItems = new[]
-            {
-                PasteMore1, PasteMore2, PasteMore3, PasteMore4, PasteMore5, PasteMore6, PasteMore7, PasteMore8, PasteMore9, PasteMore10
-            };
-
-            // to avoid saving to app data
-            saveXML.InitialDirectory = openXML.InitialDirectory =
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            _pasteMoreItems = InitializeDialogs();
         }
         catch (Exception ex)
         {
@@ -308,6 +301,41 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             UserDefaultSettingsLoadRequired;
 
         return profiles;
+    }
+
+    /// <summary>
+    /// Initializes paste-menu items and file-dialog default locations.
+    /// </summary>
+    /// <returns>
+    /// The ordered collection of additional paste menu items.
+    /// </returns>
+    /// <remarks>
+    /// File dialogs default to the user's Documents folder to avoid saving
+    /// settings files under the application data directory.
+    /// </remarks>
+    private ToolStripMenuItem[] InitializeDialogs()
+    {
+        ToolStripMenuItem[] pasteMoreItems =
+        {
+        PasteMore1,
+        PasteMore2,
+        PasteMore3,
+        PasteMore4,
+        PasteMore5,
+        PasteMore6,
+        PasteMore7,
+        PasteMore8,
+        PasteMore9,
+        PasteMore10
+    };
+
+        string documentsFolder =
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        saveXML.InitialDirectory = documentsFolder;
+        openXML.InitialDirectory = documentsFolder;
+
+        return pasteMoreItems;
     }
 
     /// <summary>
