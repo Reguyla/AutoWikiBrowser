@@ -152,7 +152,7 @@ public class WikiDiff
 
         if (Variables.RTL)
         {
-            Result.AppendFormat(@"<tr onclick='window.external.GoTo({1})' ondblclick='window.external.UndoChange({0},{1})'>
+            Result.AppendFormat(@"<tr onclick='goTo({1})'ondblclick='undoChange({0},{1})'>
   <td>+</td>
   <td class='diff-addedline'>", rightLine, leftLine);
             Result.Append(right);
@@ -165,7 +165,7 @@ public class WikiDiff
         }
         else
         {
-            Result.AppendFormat(@"<tr onclick='window.external.GoTo({1})' ondblclick='window.external.UndoChange({0},{1})'>
+            Result.AppendFormat(@"<tr onclick='goTo({1})'ondblclick='undoChange({0},{1})'>
   <td>-</td>
   <td class='diff-deletedline'>", leftLine, rightLine);
             Result.Append(left);
@@ -242,14 +242,21 @@ public class WikiDiff
     private void ContextLine(int line)
     {
         string html = WebUtility.HtmlEncode(RightLines[line]);
-        Result.AppendFormat(@"<tr onclick='window.external.GoTo({0});'>
+
+        Result.AppendFormat(
+            @"<tr onclick='goTo({0});'>
   <td class='diff-marker'> </td>
-  <td class='diff-context'>", line);
+  <td class='diff-context'>",
+            line);
+
         Result.Append(html);
+
         Result.Append(@"</td>
   <td class='diff-marker'> </td>
   <td class='diff-context'>");
+
         Result.Append(html);
+
         Result.Append(@"</td>
 </tr>");
     }
@@ -262,7 +269,7 @@ public class WikiDiff
   <td> </td>
   <td> </td>
   <td>-</td>
-  <td class='diff-deletedline' onclick='window.external.GoTo({1})' ondblclick='window.external.UndoDeletion({0}, {1})'>",
+  <td class='diff-deletedline' onclick='goTo({1})' ondblclick='undoDeletion({0}, {1})'>",
                                 left, right);
 
             Result.Append(WebUtility.HtmlEncode(LeftLines[left]));
@@ -274,7 +281,7 @@ public class WikiDiff
         {
             Result.AppendFormat(@"<tr>
   <td>-</td>
-  <td class='diff-deletedline' onclick='window.external.GoTo({1})' ondblclick='window.external.UndoDeletion({0}, {1})'>",
+  <td class='diff-deletedline' onclick='goTo({1})' ondblclick='undoDeletion({0}, {1})'>",
                                 left, right);
 
             Result.Append(WebUtility.HtmlEncode(LeftLines[left]));
@@ -292,7 +299,7 @@ public class WikiDiff
         {
             Result.AppendFormat(@"<tr>
   <td>+</td>
-  <td class='diff-addedline' onclick='window.external.GoTo({0})' ondblclick='window.external.UndoAddition({0})'>",
+  <td class='diff-addedline' onclick='goTo({0})' ondblclick='undoAddition({0})'>",
                                 line);
             Result.Append(WebUtility.HtmlEncode(RightLines[line]));
 
@@ -307,7 +314,7 @@ public class WikiDiff
   <td> </td>
   <td> </td>
   <td>+</td>
-  <td class='diff-addedline' onclick='window.external.GoTo({0})' ondblclick='window.external.UndoAddition({0})'>",
+  <td class='diff-addedline' onclick='goTo({0})' ondblclick='undoAddition({0})'>",
                                 line);
             Result.Append(WebUtility.HtmlEncode(RightLines[line]));
 
@@ -318,10 +325,14 @@ public class WikiDiff
 
     private void ContextHeader(int left, int right)
     {
-        Result.AppendFormat(@"<tr onclick='window.external.GoTo({2})'>
+        Result.AppendFormat(
+            @"<tr onclick='goTo({2})'>
   <td colspan='2' class='diff-lineno'>Line {0}:</td>
   <td colspan='2' class='diff-lineno'>Line {1}:</td>
-</tr>", left + 1, right + 1, right);
+</tr>",
+            left + 1,
+            right + 1,
+            right);
     }
 
     #endregion
@@ -390,6 +401,33 @@ public class WikiDiff
     #endregion
 
     #region Static methods
+
+    private const string WebView2Script = @"
+<script>
+function postDiffMessage(action, leftLine, rightLine) {
+    window.chrome.webview.postMessage({
+        action: action,
+        leftLine: leftLine,
+        rightLine: rightLine
+    });
+}
+
+function goTo(rightLine) {
+    postDiffMessage('GoTo', null, rightLine);
+}
+
+function undoChange(leftLine, rightLine) {
+    postDiffMessage('UndoChange', leftLine, rightLine);
+}
+
+function undoAddition(rightLine) {
+    postDiffMessage('UndoAddition', null, rightLine);
+}
+
+function undoDeletion(leftLine, rightLine) {
+    postDiffMessage('UndoDeletion', leftLine, rightLine);
+}
+</script>";
 
     private const string DiffColumnClasses = @"<table id='wikiDiff' class='diff'>
 <col class='diff-marker' />
@@ -582,7 +620,7 @@ table.diff td div {
             }
         }
 
-        return "<style type='text/css'>" + styles + "</style>";
+        return "<style type='text/css'>" + styles + "</style>" + WebView2Script;
     }
 
     public static void ResetCustomStyles()

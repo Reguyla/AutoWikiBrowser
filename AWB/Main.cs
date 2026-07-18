@@ -1489,6 +1489,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         try
         {
             await InitializeWebView2DiffBrowserAsync();
+            ShowWebView2TestPage();
         }
         catch (Exception ex)
         {
@@ -1496,6 +1497,39 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 nameof(TryInitializeWebView2DiffBrowserAsync),
                 ex.ToString());
         }
+    }
+
+    /// <summary>
+    /// Renders a temporary test page in the WebView2 diff control.
+    /// </summary>
+    private void RenderWebView2TestPage()
+    {
+        const string html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "<meta charset=\"utf-8\">" +
+            "<title>WebView2 Test</title>" +
+            "</head>" +
+            "<body>" +
+            "<h2>WebView2 is working</h2>" +
+            "<p>This is the experimental AWB diff renderer.</p>" +
+            "</body>" +
+            "</html>";
+
+        _diffWebView.NavigateToString(html);
+    }
+
+    /// <summary>
+    /// Temporarily displays WebView2 instead of the legacy diff browser.
+    /// </summary>
+    private void ShowWebView2TestPage()
+    {
+        RenderWebView2TestPage();
+
+        webBrowser.Visible = false;
+        _diffWebView.Visible = true;
+        _diffWebView.BringToFront();
     }
 
     /// <summary>
