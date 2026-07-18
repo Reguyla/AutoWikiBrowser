@@ -803,11 +803,29 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    /// <summary>
+    /// Tracks whether the list comparer should use the current article list.
+    /// </summary>
     private int _listComparerUseCurrentArticleList;
+
+    /// <summary>
+    /// Tracks whether the list splitter should use the current article list.
+    /// </summary>
     private int _listSplitterUseCurrentArticleList;
+
+    /// <summary>
+    /// Tracks whether the database scanner should use the current article list.
+    /// </summary>
     private int _dbScannerUseCurrentArticleList;
 
+    /// <summary>
+    /// Indicates whether the user should be alerted by flashing the window.
+    /// </summary>
     private bool _flash;
+
+    /// <summary>
+    /// Indicates whether the user should be alerted with an audible beep.
+    /// </summary>
     private bool _beep;
 
     /// <summary>
