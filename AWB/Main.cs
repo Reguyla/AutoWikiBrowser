@@ -615,6 +615,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     UsageStats.Do(false);
 #endif
     }
+
+    /// <summary>
+    /// Handles changes to the main window's size and state.
+    /// </summary>
+    /// <remarks>
+    /// Hides the main window when it is minimized to the notification area,
+    /// if that behavior is enabled. Otherwise, records the last non-minimized
+    /// window state so it can be restored when the user reopens the window
+    /// from the notification area.
+    /// </remarks>
     private void MainForm_Resize(object sender, EventArgs e)
     {
         if (WindowState == FormWindowState.Minimized)
