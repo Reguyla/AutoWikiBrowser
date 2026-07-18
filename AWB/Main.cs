@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #undef INSTASTATS // turn on here and in stats.cs to make AWB log (empty) stats at startup
 
 using AutoWikiBrowser.Plugins;
+using AutoWikiBrowser.Services.Diff;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.ComponentModel;
@@ -96,8 +97,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private List<TypoStat> TypoStats;
 
+    // Diff services
     private readonly WikiDiff Diff = new WikiDiff();
     private readonly JsAdapter DiffScriptingAdapter;
+    private readonly DiffGenerationService _diffGenerationService = new();
 
     /// <summary>
     /// Whether AWB is currently shutting down
