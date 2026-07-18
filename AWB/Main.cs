@@ -600,9 +600,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ErrorHandler.HandleException(ex);
         }
 
-        StatusLabelText = string.Empty;
-        SplashScreen.SetProgress(100);
-        SplashScreen.Close();
+        CompleteStartup();
 
 #if DEBUG && INSTASTATS
     UsageStats.Do(false);
@@ -755,6 +753,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Completes the normal startup sequence and closes the splash screen.
+    /// </summary>
+    private void CompleteStartup()
+    {
+        StatusLabelText = string.Empty;
+        SplashScreen.SetProgress(100);
+        SplashScreen.Close();
     }
     #endregion
 
