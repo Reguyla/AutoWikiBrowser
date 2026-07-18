@@ -55,62 +55,122 @@ namespace AutoWikiBrowser;
 public sealed partial class MainForm : Form, IAutoWikiBrowser
 { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
     #region Fields
-    private readonly Splash SplashScreen = new Splash();
+    #region Fields
+
+    // --------------------------------------------------------------------
+    // UI
+    // --------------------------------------------------------------------
+
+    private readonly Splash SplashScreen = new();
     private readonly WikiFunctions.Profiles.AWBProfilesForm Profiles;
 
-    private bool Abort, IgnoreNoBots, ClearPageListOnProjectChange, PageReload, doDiffInBotMode, loggingEnabled;
+    private FormWindowState LastState = FormWindowState.Normal;
 
-    private string LastArticle = "", mSettingsFile = "";
+    // doesn't look like we can use RestoreBounds for this - any other built in way?
+    private readonly ToolStripMenuItem[] _pasteMoreItems;
+
+    private readonly string[] _pasteMoreItemsPrefixes =
+    {
+    "&1. ", "&2. ", "&3. ", "&4. ", "&5. ",
+    "&6. ", "&7. ", "&8. ", "&9. ", "1&0. "
+};
+
+    // --------------------------------------------------------------------
+    // Workflow State
+    // --------------------------------------------------------------------
+
+    private bool Abort;
+    private bool IgnoreNoBots;
+    private bool ClearPageListOnProjectChange;
+    private bool PageReload;
+    private bool doDiffInBotMode;
+    private bool loggingEnabled;
+
+    private bool Skippable = true;
+    private bool ShuttingDown;
+
+    private string LastArticle = "";
+    private string mSettingsFile = "";
 
     private const int MaxRetries = 10;
 
-    private int OldSelection, Retries, SameArticleNudges, actionOnLoad;
+    private int OldSelection;
+    private int Retries;
+    private int SameArticleNudges;
+    private int actionOnLoad;
 
-    private readonly HideText RemoveText = new HideText(false, true, true);
-    private readonly List<string> NoParse = new List<string>();
-    private readonly List<string> NoRetf = new List<string>();
-    private readonly FindandReplace FindAndReplace = new FindandReplace();
-    private readonly SubstTemplates SubstTemplates = new SubstTemplates();
+    private ArticleRedirected ArticleWasRedirected;
+
+    // --------------------------------------------------------------------
+    // Text Processing
+    // --------------------------------------------------------------------
+
+    private readonly HideText RemoveText = new(false, true, true);
+
+    private readonly List<string> NoParse = new();
+    private readonly List<string> NoRetf = new();
+
+    private readonly FindandReplace FindAndReplace = new();
+    private readonly SubstTemplates SubstTemplates = new();
+
     private RegExTypoFix RegexTypos;
-    private readonly SkipOptions Skip = new SkipOptions();
+
+    private readonly SkipOptions Skip = new();
+
     private readonly WikiFunctions.ReplaceSpecial.ReplaceSpecial RplcSpecial =
-        new WikiFunctions.ReplaceSpecial.ReplaceSpecial();
+        new();
+
     private readonly Parsers Parser;
-    private readonly Stopwatch _sessionTimer = Stopwatch.StartNew();
-    private readonly List<string> RecentList = new List<string>();
-    private readonly CustomModule CModule = new CustomModule();
-    private readonly ExternalProgram ExtProgram = new ExternalProgram();
-    private RegexTester RegexTester;
+
+    // --------------------------------------------------------------------
+    // Feature State
+    // --------------------------------------------------------------------
+
     private bool UserTalkWarningsLoaded;
     private bool TemplateRedirectsLoaded;
     private bool DatedTemplatesLoaded;
     private bool RenamedTemplateParametersLoaded;
-    private Regex UserTalkTemplatesRegex;
-    private bool Skippable = true;
-    private FormWindowState LastState = FormWindowState.Normal; // doesn't look like we can use RestoreBounds for this - any other built in way?
 
-    private ArticleRedirected ArticleWasRedirected;
+    private Regex UserTalkTemplatesRegex;
+
+    // --------------------------------------------------------------------
+    // External Components
+    // --------------------------------------------------------------------
+
+    private readonly CustomModule CModule = new();
+    private readonly ExternalProgram ExtProgram = new();
+
+    private RegexTester RegexTester;
+
+    // --------------------------------------------------------------------
+    // List Processing
+    // --------------------------------------------------------------------
 
     private ListComparer Comparer;
     private ListSplitter Splitter;
     private WikiFunctions.DBScanner.DatabaseScanner DBScanner;
 
+    // --------------------------------------------------------------------
+    // Statistics
+    // --------------------------------------------------------------------
+
+    private readonly Stopwatch _sessionTimer = Stopwatch.StartNew();
+
+    private readonly List<string> RecentList = new();
+
     private List<TypoStat> TypoStats;
 
-    // Diff services
-    private readonly WikiDiff Diff = new WikiDiff();
+    // --------------------------------------------------------------------
+    // Diff
+    // --------------------------------------------------------------------
+
+    private readonly WikiDiff Diff = new();
+
     private readonly JsAdapter DiffScriptingAdapter;
+
     private readonly DiffGenerationService _diffGenerationService = new();
 
-    /// <summary>
-    /// Whether AWB is currently shutting down
-    /// </summary>
-    private bool ShuttingDown { get; set; }
-
-    private readonly ToolStripMenuItem[] _pasteMoreItems;
-    private readonly string[] _pasteMoreItemsPrefixes = {
-        "&1. ", "&2. ", "&3. ", "&4. ", "&5. ", "&6. ", "&7. ", "&8. ", "&9. ", "1&0. "
-    };
+    #endregion
     #endregion
 
     public Session TheSession
