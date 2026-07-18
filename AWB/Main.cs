@@ -212,9 +212,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             InitializeSession();
 
-            Profiles = new WikiFunctions.Profiles.AWBProfilesForm(TheSession);
-            Profiles.LoggedIn += ProfileLoggedIn;
-            Profiles.UserDefaultSettingsLoadRequired += UserDefaultSettingsLoadRequired;
+            Profiles = InitializeProfiles();
 
             SplashScreen.SetProgress(15);
 
@@ -233,6 +231,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    /// <summary>
+    /// Initializes the toolbar button images from the application's embedded resources.
+    /// </summary>
+    /// <remarks>
+    /// Called during application startup after the form controls have been created.
+    /// </remarks>
     private void InitializeToolbarImages()
     {
         btntsShowHide.Image = Resources.Showhide;
@@ -248,6 +252,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         btntsDelete.Image = Resources.Vista_trashcan_empty;
     }
 
+    /// <summary>
+    /// Initializes control default values and registers control event handlers.
+    /// </summary>
+    /// <remarks>
+    /// Configures the initial state of user interface controls and wires the
+    /// ListMaker events used to update the main window during list generation.
+    /// </remarks>
     private void InitializeControls()
     {
         addToWatchList.SelectedIndex = 3;
@@ -262,10 +273,41 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ListMakerSourceSelectHandler;
     }
 
+    /// <summary>
+    /// Creates the editing session and initializes the editor.
+    /// </summary>
+    /// <remarks>
+    /// The session must be created before any components that depend on it,
+    /// including the profile manager and editor-related services.
+    /// </remarks>
     private void InitializeSession()
     {
         TheSession = new Session(this);
         CreateEditor();
+    }
+
+    /// <summary>
+    /// Creates and configures the profile manager.
+    /// </summary>
+    /// <returns>
+    /// A fully initialized <see cref="WikiFunctions.Profiles.AWBProfilesForm"/>
+    /// instance with its event handlers registered.
+    /// </returns>
+    /// <remarks>
+    /// Returning the configured instance allows the constructor to assign the
+    /// readonly <c>Profiles</c> field while keeping the initialization logic
+    /// encapsulated in this helper method.
+    /// </remarks>
+    private WikiFunctions.Profiles.AWBProfilesForm InitializeProfiles()
+    {
+        WikiFunctions.Profiles.AWBProfilesForm profiles =
+            new WikiFunctions.Profiles.AWBProfilesForm(TheSession);
+
+        profiles.LoggedIn += ProfileLoggedIn;
+        profiles.UserDefaultSettingsLoadRequired +=
+            UserDefaultSettingsLoadRequired;
+
+        return profiles;
     }
 
     /// <summary>
