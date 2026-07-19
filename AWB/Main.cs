@@ -5433,60 +5433,177 @@ font-size: 150%;'>No changes</h2>
             replacingCategory;
     }
 
+    // TODO (Platform Modernization):
+    // Re-test bot-tab updates on the currently supported runtimes and remove the
+    // Mono-specific branch if Mono support is no longer required.
+    /// <summary>
+    /// Updates the controls and tab availability that depend on the current
+    /// session's bot status.
+    /// </summary>
+    /// <remarks>
+    /// Bot-only controls are enabled only for bot accounts. On supported
+    /// platforms, the Bots tab is added or removed to match the current status.
+    /// The bot timer is refreshed after the UI state changes.
+    /// </remarks>
     private void UpdateBotStatus()
     {
-        bool bot = TheSession.IsBot;
-        chkAutoMode.Enabled = chkSuppressTag.Enabled = bot;
+        bool isBot = TheSession.IsBot;
 
-        lblOnlyBots.Visible = !bot;
+        chkAutoMode.Enabled = isBot;
+        chkSuppressTag.Enabled = isBot;
+        lblOnlyBots.Visible = !isBot;
 
-        if (!Globals.UsingMono) // fails unexplainably under Mono
+        if (!Globals.UsingMono)
         {
-            if (bot)
-            {
-                if (!MainTab.TabPages.Contains(tpBots))
-                    MainTab.TabPages.Insert(MainTab.TabPages.IndexOf(tpStart), tpBots);
-            }
-            else
-            {
-                BotMode = false;
-                if (MainTab.TabPages.Contains(tpBots))
-                    MainTab.Controls.Remove(tpBots);
-            }
+            UpdateBotTabVisibility(isBot);
         }
 
         UpdateBotTimer();
     }
 
-    private void UpdateAdminStatus()
+    /// <summary>
+    /// Adds or removes the Bots tab to match the current bot status.
+    /// </summary>
+    /// <param name="isBot">
+    /// <see langword="true"/> when the current session is using a bot account;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    private void UpdateBotTabVisibility(bool isBot)
     {
-        // allow protection of non-existent page (salting)
-        btnProtect.Enabled = TheSession.User.CanProtectPage(TheSession.Page) && btnSave.Enabled && (TheArticle != null);
-        btnMove.Enabled = btnProtect.Enabled && TheSession.Page.Exists;
-        btnDelete.Enabled = btntsDelete.Enabled = TheSession.User.CanDeletePage(TheSession.Page) && btnSave.Enabled && (TheArticle != null) && TheSession.Page.Exists;
-        bypassAllRedirectsToolStripMenuItem.Enabled = TheSession.User.IsSysop;
+        bool botTabVisible =
+            MainTab.TabPages.Contains(tpBots);
+
+        if (isBot)
+        {
+            if (!botTabVisible)
+            {
+                int startTabIndex =
+                    MainTab.TabPages.IndexOf(tpStart);
+
+                MainTab.TabPages.Insert(
+                    startTabIndex,
+                    tpBots);
+            }
+
+            return;
+        }
+
+        BotMode = false;
+
+        if (botTabVisible)
+        {
+            MainTab.TabPages.Remove(tpBots);
+        }
     }
 
-    private void chkAutoMode_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Updates page-management controls according to the current user's
+    /// permissions and the state of the active page.
+    /// </summary>
+    /// <remarks>
+    /// Page protection may be available for a page that does not yet exist,
+    /// allowing administrators to create a protection entry for a future page.
+    /// Move and delete operations additionally require the page to exist.
+    /// </remarks>
+    private void UpdateAdminStatus()
     {
-        if (BotMode)
-        {
-            SetBotModeEnabled(true);
-            chkNudge.Checked = true;
-            chkNudgeSkip.Checked = false;
+        bool articleAvailable =
+            TheArticle != null;
 
-            // typo fixing not permitted on Wikimedia projects per [[WP:SPELLBOT]]
-            if (chkRegExTypo.Checked && !Variables.IsCustomProject)
-            {
-                MessageBox.Show("Sorry, bot mode cannot be used with RegExTypoFix.\r\nRegExTypoFix will now be turned off", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                chkRegExTypo.Checked = false;
-            }
-        }
-        else
+        bool saveAvailable =
+            btnSave.Enabled;
+
+        bool pageExists =
+            TheSession.Page.Exists;
+
+        bool canProtect =
+            articleAvailable &&
+            saveAvailable &&
+            TheSession.User.CanProtectPage(
+                TheSession.Page);
+
+        bool canDelete =
+            articleAvailable &&
+            saveAvailable &&
+            pageExists &&
+            TheSession.User.CanDeletePage(
+                TheSession.Page);
+
+        btnProtect.Enabled = canProtect;
+        btnMove.Enabled = canProtect && pageExists;
+
+        btnDelete.Enabled = canDelete;
+        btntsDelete.Enabled = canDelete;
+
+        bypassAllRedirectsToolStripMenuItem.Enabled =
+            TheSession.User.IsSysop;
+    }
+
+    // TODO (Architecture):
+    // Move bot-mode eligibility rules and page-action permission calculations out
+    // of MainForm and into dedicated policy helpers when UI state is separated
+    // from session and authorization logic.
+    //
+    // TODO (UI Maintainability):
+    // Verify whether BotMode should always be cleared when the bot tab is removed,
+    // or whether account-status changes should be handled through a single
+    // centralized bot-mode state transition.
+    /// <summary>
+    /// Applies the UI and processing changes required when automatic bot mode is
+    /// enabled or disabled.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the checked-state change.
+    /// </param>
+    /// <remarks>
+    /// Enabling bot mode also enables nudging and disables RegExTypoFix on
+    /// Wikimedia projects, where automated typo fixing is not permitted by the
+    /// current workflow. Disabling bot mode stops any pending delayed auto-save.
+    /// </remarks>
+    private void chkAutoMode_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        if (!BotMode)
         {
             SetBotModeEnabled(false);
             StopDelayedAutoSaveTimer();
+            return;
         }
+
+        SetBotModeEnabled(true);
+
+        chkNudge.Checked = true;
+        chkNudgeSkip.Checked = false;
+
+        DisableRegexTypoFixForBotMode();
+    }
+
+    // TODO (Localization):
+    // Move the bot-mode RegExTypoFix warning text and caption into application
+    // resources instead of embedding English strings in the event handler.
+    /// <summary>
+    /// Disables RegExTypoFix when bot mode is used on a non-custom project.
+    /// </summary>
+    private void DisableRegexTypoFixForBotMode()
+    {
+        if (!chkRegExTypo.Checked ||
+            Variables.IsCustomProject)
+        {
+            return;
+        }
+
+        MessageBox.Show(
+            "Sorry, bot mode cannot be used with RegExTypoFix.\r\n" +
+            "RegExTypoFix will now be turned off.",
+            "Warning",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Exclamation);
+
+        chkRegExTypo.Checked = false;
     }
 
     private void SetBotModeEnabled(bool enabled)
