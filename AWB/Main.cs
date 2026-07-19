@@ -4975,27 +4975,45 @@ font-size: 150%;'>No changes</h2>
         UpdateTypoCount();
     }
 
+    /// <summary>
+    /// Updates the displayed overall typo statistics.
+    /// </summary>
+    /// <remarks>
+    /// When at least one article has been saved, the method displays the total
+    /// typo count, self-match count, and average typos per save. Otherwise, the
+    /// displayed typo ratio is reset to zero.
+    /// </remarks>
     private void UpdateTypoCount()
     {
-        if (OverallTypoStats.Saves > 0)
+        if (OverallTypoStats.Saves <= 0)
         {
-            //work around CS1690 warning
-            int total = OverallTypoStats.TotalTypos;
-            lblOverallTypos.Text = total.ToString();
-
-            int selfMatches = OverallTypoStats.SelfMatches;
-            lblNoChange.Text = selfMatches.ToString();
-
-            lblTypoRatio.Text = OverallTypoStats.TyposPerSave;
-        }
-        else
             lblTypoRatio.Text = "0";
+            return;
+        }
+
+        // TODO (UI Consistency):
+        // Verify whether lblOverallTypos and lblNoChange should also be reset when
+        // no saves have been recorded. The current behavior only resets the typo
+        // ratio and may leave previous totals visible.
+        // Copy the values to locals to avoid CS1690 when accessing members of
+        // the statistics value through its containing field.
+        int totalTypos = OverallTypoStats.TotalTypos;
+        int selfMatches = OverallTypoStats.SelfMatches;
+
+        lblOverallTypos.Text = totalTypos.ToString();
+        lblNoChange.Text = selfMatches.ToString();
+        lblTypoRatio.Text = OverallTypoStats.TyposPerSave;
     }
 
+    /// <summary>
+    /// Clears the current and overall typo statistics and refreshes the displayed
+    /// totals.
+    /// </summary>
     private void ResetTypoStats()
     {
         CurrentTypoStats.ClearStats();
         OverallTypoStats.ClearStats();
+
         UpdateTypoCount();
     }
 
