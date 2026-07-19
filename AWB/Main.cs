@@ -3687,61 +3687,136 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO (.NET 8 Modernization):
+    // Verify that SkipPage() always restores buttons, progress indicators, and
+    // status text when the user declines to save a blank page. The save workflow
+    // enters its busy UI state before displaying the confirmation dialog.
     /// <summary>
     /// Validates the current page and begins the save operation.
     /// </summary>
     private void Save()
     {
-        // Fail-safe against http://es.wikipedia.org/w/index.php?diff=28114575
-        if (TheArticle == null || TheArticle.Name != TheSession.Page.Title)
+        ValidateArticleForSave();
+
+        if (!PrepareEditorForSave())
         {
-            DisableButtons();
-            string extext = "Attempted to save a wrong page";
-
-            if (TheArticle != null)
-                extext += " (Article name: '" + TheArticle.Name + "', session page title: '" + TheSession.Page.Title +
-                    "')";
-            else
-                extext += " (the article was null)";
-
-            throw new Exception(extext);
-        }
-
-        if (!TheSession.Editor.IsActive)
-            StatusLabelText = "Saving...";
-        else
-        {
-            StatusLabelText = "Editor busy";
             return;
         }
 
-#if DEBUG
-        string extext2 = @"Extra validation for debug builds (don't use a debug build if you want to save blank pages): ";
-        // further attempts to track down blank page saving issue
+        ValidateSaveContentForDebugBuild();
+
+        DisableButtons();
+        StartProgressBar();
+
+        if (CanSaveCurrentText())
+        {
+            SaveArticle();
+            return;
+        }
+
+        SkipPage("Nothing to save - blank page");
+    }
+
+    /// <summary>
+    /// Verifies that the loaded article matches the page held by the current
+    /// session.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when no article is loaded or the article does not match the current
+    /// session page.
+    /// </exception>
+    private void ValidateArticleForSave()
+    {
+        if (TheArticle != null &&
+            TheArticle.Name == TheSession.Page.Title)
+        {
+            return;
+        }
+
+        DisableButtons();
+
+        string details = TheArticle == null
+            ? "the article was null"
+            : $"Article name: '{TheArticle.Name}', " +
+              $"session page title: '{TheSession.Page.Title}'";
+
+        throw new InvalidOperationException(
+            $"Attempted to save a wrong page ({details})");
+    }
+
+    /// <summary>
+    /// Verifies that the editor is available and updates the save status.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when saving may continue; otherwise,
+    /// <see langword="false"/> when the editor is busy.
+    /// </returns>
+    private bool PrepareEditorForSave()
+    {
+        if (TheSession.Editor.IsActive)
+        {
+            StatusLabelText = "Editor busy";
+            return false;
+        }
+
+        StatusLabelText = "Saving...";
+        return true;
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Define and enforce the nullability contract for TheSession.Page. Save
+    // validation currently assumes that a session page always exists and may
+    // otherwise fail before producing the intended diagnostic information.
+    /// <summary>
+    /// Determines whether the current editor contents may be saved.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the editor contains text or the user confirms
+    /// saving a blank existing page; otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool CanSaveCurrentText()
+    {
+        if (!string.IsNullOrEmpty(txtEdit.Text))
+        {
+            return true;
+        }
+
+        if (TheArticle.Exists != Exists.Yes)
+        {
+            return false;
+        }
+
+        return MessageBox.Show(
+            this,
+            "Do you really want to save a blank page?",
+            "Save?",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question) == DialogResult.Yes;
+    }
+
+    /// <summary>
+    /// Performs additional save validation in debug builds.
+    /// </summary>
+    [Conditional("DEBUG")]
+    private void ValidateSaveContentForDebugBuild()
+    {
+        const string messagePrefix =
+            "Extra validation for debug builds " +
+            "(don't use a debug build if you want to save blank pages): ";
+
         if (string.IsNullOrEmpty(TheArticle.ArticleText))
         {
-            extext2 += @"Attempted to save page with zero length ArticleText";
-            throw new Exception(extext2);
+            throw new InvalidOperationException(
+                messagePrefix +
+                "Attempted to save page with zero length ArticleText");
         }
 
         if (string.IsNullOrEmpty(txtEdit.Text))
         {
-            extext2 += @"Attempted to save page with zero length txtEditText";
-            throw new Exception(extext2);
+            throw new InvalidOperationException(
+                messagePrefix +
+                "Attempted to save page with zero length txtEditText");
         }
-#endif
-
-        DisableButtons();
-        StartProgressBar();
-        if (!string.IsNullOrEmpty(txtEdit.Text) ||
-            (TheArticle.Exists == Exists.Yes && MessageBox.Show("Do you really want to save a blank page?", "Save?",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
-                DialogResult.Yes))
-        {
-            SaveArticle();
-        }
-        else
-            SkipPage("Nothing to save - blank page");
     }
 
     private void SaveArticle()
