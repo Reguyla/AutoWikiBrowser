@@ -5157,51 +5157,122 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Sets the edit summary for the current edit. Returns a section edit summary if edit is to a single section and the section edit summary option is enabled
+    /// Builds the default edit summary for the current article.
     /// </summary>
-    /// <returns>The completed edit summary</returns>
+    /// <returns>
+    /// The completed edit summary, including the configured default summary,
+    /// article-specific summary, and optional section prefix.
+    /// </returns>
+    /// <remarks>
+    /// When section edit summaries are enabled and the edit modifies a single
+    /// level-2 section, the returned summary is prefixed with the corresponding
+    /// section marker.
+    /// </remarks>
     private string MakeDefaultEditSummary()
     {
-        if (TheArticle == null)
-            return "";
+        Article article = TheArticle;
 
-        string summary = string.IsNullOrEmpty(cmboEditSummary.Text.Trim()) ? "" : cmboEditSummary.Text.Trim();
-
-        if (!string.IsNullOrEmpty(TheArticle.EditSummary))
+        if (article == null)
         {
-            switch (Variables.LangCode)
-            {
-                case "ar":
-                case "arz":
-                case "fa":
-                    summary += (string.IsNullOrEmpty(summary) ? "" : "، ") + TheArticle.EditSummary;
-                    break;
-                default:
-                    summary += (string.IsNullOrEmpty(summary) ? "" : ", ") + TheArticle.EditSummary;
-                    break;
-            }
+            return string.Empty;
         }
 
-        // check to see if we have only edited one level-2 section
+        string summary = GetConfiguredEditSummary();
+
+        summary = AppendArticleEditSummary(
+            summary,
+            article.EditSummary);
+
         if (!noSectionEditSummaryToolStripMenuItem.Checked)
         {
-            string sectionEditText = Summary.ModifiedSection(TheArticle.OriginalArticleText, txtEdit.Text);
-
-            if (!string.IsNullOrEmpty(sectionEditText))
-            {
-                summary = @"/* " + sectionEditText + @" */ " + summary.TrimStart();
-            }
+            summary = AddSectionEditSummary(
+                summary,
+                article);
         }
 
 #if DEBUG
-        if (!Summary.IsCorrect(summary))
-        {
-            Tools.WriteDebug("edit summary not correct", summary);
-        }
+        ValidateEditSummary(summary);
 #endif
 
         return summary;
     }
+
+    /// <summary>
+    /// Gets the trimmed edit summary entered by the user.
+    /// </summary>
+    private string GetConfiguredEditSummary()
+    {
+        return string.IsNullOrWhiteSpace(cmboEditSummary.Text)
+            ? string.Empty
+            : cmboEditSummary.Text.Trim();
+    }
+
+    // TODO (Internationalization):
+    // Review whether edit-summary separators should be determined from
+    // localization data instead of maintaining a hard-coded language list.
+    /// <summary>
+    /// Appends the article-specific edit summary using the punctuation
+    /// appropriate for the current wiki language.
+    /// </summary>
+    private static string AppendArticleEditSummary(
+        string summary,
+        string articleSummary)
+    {
+        if (string.IsNullOrEmpty(articleSummary))
+        {
+            return summary;
+        }
+
+        string separator =
+            Variables.LangCode switch
+            {
+                "ar" or "arz" or "fa" => "، ",
+                _ => ", "
+            };
+
+        return summary +
+               (string.IsNullOrEmpty(summary)
+                   ? string.Empty
+                   : separator) +
+               articleSummary;
+    }
+
+    /// <summary>
+    /// Adds a section-edit prefix when the edit modifies a single level-2 section.
+    /// </summary>
+    private string AddSectionEditSummary(
+        string summary,
+        Article article)
+    {
+        string sectionEditText =
+            Summary.ModifiedSection(
+                article.OriginalArticleText,
+                txtEdit.Text);
+
+        if (string.IsNullOrEmpty(sectionEditText))
+        {
+            return summary;
+        }
+
+        return $"/* {sectionEditText} */ {summary.TrimStart()}";
+    }
+
+#if DEBUG
+    /// <summary>
+    /// Writes a diagnostic message when the generated edit summary is invalid.
+    /// </summary>
+    private static void ValidateEditSummary(string summary)
+    {
+        if (!Summary.IsCorrect(summary))
+        {
+            Tools.WriteDebug(
+                "edit summary not correct",
+                summary);
+        }
+    }
+#endif
+
+
 
     /// <summary>
     /// Appends (translation of) "using AWB" wikilinked summary tag to edit summary
