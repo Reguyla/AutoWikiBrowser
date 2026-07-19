@@ -5606,49 +5606,117 @@ font-size: 150%;'>No changes</h2>
         chkRegExTypo.Checked = false;
     }
 
+    // TODO (UI State Management):
+    // Review whether SetBotModeEnabled() should also modify chkNudge.Checked.
+    // Consider separating control availability from default bot-mode option
+    // selection so the method name accurately reflects its behavior.
+    /// <summary>
+    /// Enables or disables the controls used to configure and monitor bot mode.
+    /// </summary>
+    /// <param name="enabled">
+    /// <see langword="true"/> to enable bot-mode controls; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <remarks>
+    /// The nudge option is also checked or cleared to match the enabled state,
+    /// preserving the existing behavior.
+    /// </remarks>
     private void SetBotModeEnabled(bool enabled)
     {
-        label2.Enabled = nudBotSpeed.Enabled = botEditsStop.Enabled
-            = lblAutoDelay.Enabled = lblbotEditsStop.Enabled = btnResetNudges.Enabled = lblNudges.Enabled = chkNudge.Enabled
-            = chkNudgeSkip.Enabled = chkNudge.Checked = chkShutdown.Enabled = enabled;
+        label2.Enabled = enabled;
+        nudBotSpeed.Enabled = enabled;
+        botEditsStop.Enabled = enabled;
+        lblAutoDelay.Enabled = enabled;
+        lblbotEditsStop.Enabled = enabled;
+        btnResetNudges.Enabled = enabled;
+        lblNudges.Enabled = enabled;
+        chkNudge.Enabled = enabled;
+        chkNudgeSkip.Enabled = enabled;
+        chkShutdown.Enabled = enabled;
+
+        chkNudge.Checked = enabled;
     }
 
-    private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+    // TODO (UI Modernization):
+    // Review whether the About window should be modal or limited to a single
+    // modeless instance, and ensure repeated menu selections cannot create
+    // unnecessary duplicate windows.
+    /// <summary>
+    /// Opens the application About dialog.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu selection.
+    /// </param>
+    private void aboutToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        new AboutBox(webBrowserHistory.Version.ToString()).Show();
+        AboutBox aboutBox =
+            new AboutBox(
+                webBrowserHistory.Version.ToString());
+
+        aboutBox.Show(this);
     }
 
+    // TODO (UI Architecture):
+    // Separate wiki-status evaluation from message boxes, dialog display, browser
+    // navigation, and control updates so status checks can be tested without UI
+    // side effects.
+    //
+    // TODO (Event Handler Modernization):
+    // Replace UpdateButtons(null, null) with a parameterless UI refresh helper and
+    // keep the event handler as a thin adapter.
+    //
+    // TODO (Localization):
+    // Move status messages, captions, and the registered-user status text into
+    // application resources.
+    //
+    // TODO (Navigation Modernization):
+    // Replace the hard-coded AWB check-page title with a centralized URI or
+    // project-page constant.
+    /// <summary>
+    /// Checks the current wiki, software, and user status and updates the
+    /// surrounding interface.
+    /// </summary>
+    /// <param name="login">
+    /// <see langword="true"/> when the status check is being performed as part of
+    /// an active login workflow; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the current user and software are registered
+    /// and enabled; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// The method may display status-specific messages, open the profile dialog,
+    /// or open the AWB check page in the user's browser. It also refreshes
+    /// right-to-left layout state and the surrounding status controls.
+    /// </remarks>
     public bool CheckStatus(bool login)
     {
-        StatusLabelText = "Loading page to check if we are logged in.";
+        StatusLabelText =
+            "Loading page to check if we are logged in.";
 
-        bool status = false;
-        string label = "Software disabled";
+        WikiStatusResult result =
+            TheSession.Update();
 
-        switch (TheSession.Update())
+        bool isRegistered = false;
+        string statusText = "Software disabled";
+
+        switch (result)
         {
             case WikiStatusResult.Error:
-                MessageBox.Show(
-                    "Check page failed to load.\r\n\r\nCheck your Internet is working and that the Wiki is online.",
-                    "User check problem", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowStatusCheckError();
                 break;
 
             case WikiStatusResult.NotLoggedIn:
-                if (!login)
-                {
-                    MessageBox.Show(
-                        "You are not logged in. The profile screen will now load, enter your name and password, click \"Log in\", wait for it to complete, then start the process again.",
-                        "Not logged in", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    Profiles.ShowDialog();
-                }
-
+                HandleNotLoggedIn(login);
                 break;
 
             case WikiStatusResult.NotRegistered:
-                MessageBox.Show(TheSession.User.Name + " is not enabled to use this.", "Not enabled",
-                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                Tools.OpenURLInBrowser(Variables.URLIndex + "?title=Project:AutoWikiBrowser/CheckPageJSON");
-
+                HandleNotRegistered();
                 break;
 
             case WikiStatusResult.OldVersion:
@@ -5660,29 +5728,118 @@ font-size: 150%;'>No changes</h2>
                 break;
 
             case WikiStatusResult.Registered:
-                NoParse.Clear();
-                NoRetf.Clear();
-                status = true;
-                label = string.Format("Logged in, user and software enabled. Bot = {0}, Admin = {1}",
-                    TheSession.User.IsBot, TheSession.User.IsSysop);
+                PrepareRegisteredSession();
 
-                NoParse.AddRangeIfNotNull(TheSession.NoGenfixes);
-                NoRetf.AddRangeIfNotNull(TheSession.NoRETF);
-
+                isRegistered = true;
+                statusText = BuildRegisteredStatusText();
                 break;
 
             default:
-                throw new Exception("Unknown WikiStatusResult value.");
+                throw new InvalidOperationException(
+                    $"Unsupported wiki status result: {result}.");
         }
 
-        // detect writing system
-        RightToLeft = Variables.RTL ? RightToLeft.Yes : RightToLeft.No;
+        UpdateRightToLeftState();
 
-        StatusLabelText = label;
+        StatusLabelText = statusText;
+
         UpdateStatusUI();
         UpdateButtons(null, null);
 
-        return status;
+        return isRegistered;
+    }
+
+    /// <summary>
+    /// Displays an error when the wiki status page cannot be loaded.
+    /// </summary>
+    private static void ShowStatusCheckError()
+    {
+        MessageBox.Show(
+            "Check page failed to load.\r\n\r\n" +
+            "Check your Internet is working and that the Wiki is online.",
+            "User check problem",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
+    }
+
+    /// <summary>
+    /// Handles a status result indicating that the user is not logged in.
+    /// </summary>
+    /// <param name="login">
+    /// <see langword="true"/> when an active login workflow is already underway;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    private void HandleNotLoggedIn(bool login)
+    {
+        if (login)
+        {
+            return;
+        }
+
+        MessageBox.Show(
+            "You are not logged in. The profile screen will now load, " +
+            "enter your name and password, click \"Log in\", wait for it " +
+            "to complete, then start the process again.",
+            "Not logged in",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+
+        Profiles.ShowDialog();
+    }
+
+    /// <summary>
+    /// Handles a status result indicating that the current user is not enabled
+    /// to use AWB.
+    /// </summary>
+    private void HandleNotRegistered()
+    {
+        MessageBox.Show(
+            $"{TheSession.User.Name} is not enabled to use this.",
+            "Not enabled",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Exclamation);
+
+        Tools.OpenURLInBrowser(
+            Variables.URLIndex +
+            "?title=Project:AutoWikiBrowser/CheckPageJSON");
+    }
+
+    /// <summary>
+    /// Refreshes the exclusion lists used by general fixes and RegExTypoFix for a
+    /// registered session.
+    /// </summary>
+    private void PrepareRegisteredSession()
+    {
+        NoParse.Clear();
+        NoRetf.Clear();
+
+        NoParse.AddRangeIfNotNull(
+            TheSession.NoGenfixes);
+
+        NoRetf.AddRangeIfNotNull(
+            TheSession.NoRETF);
+    }
+
+    /// <summary>
+    /// Builds the status message displayed for a registered user.
+    /// </summary>
+    private string BuildRegisteredStatusText()
+    {
+        return string.Format(
+            "Logged in, user and software enabled. Bot = {0}, Admin = {1}",
+            TheSession.User.IsBot,
+            TheSession.User.IsSysop);
+    }
+
+    /// <summary>
+    /// Updates the form's writing direction to match the current wiki.
+    /// </summary>
+    private void UpdateRightToLeftState()
+    {
+        RightToLeft =
+            Variables.RTL
+                ? RightToLeft.Yes
+                : RightToLeft.No;
     }
 
     private void OldVersion()
