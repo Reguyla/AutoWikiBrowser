@@ -3462,13 +3462,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ApplyAppendOrPrependText(theArticle);
             Variables.Profiler.Profile("Append Text");
 
-            // replace/remove/comment out images/files
-            if (cmboImages.SelectedIndex != 0)
+            if (!ApplyImageChanges(theArticle))
             {
-                theArticle.UpdateImages((WikiFunctions.Options.ImageReplaceOptions)cmboImages.SelectedIndex,
-                                        txtImageReplace.Text, txtImageWith.Text, chkSkipNoImgChange.Checked);
-                if (theArticle.SkipArticle)
-                    return;
+                return;
             }
 
             Variables.Profiler.Profile("Files");
@@ -3638,6 +3634,33 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             article.PerformMetaDataSort(Parser);
         }
+    }
+
+    /// <summary>
+    /// Applies the configured image or file replacement operation to the supplied
+    /// article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to update.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when the operation skips the article.
+    /// </returns>
+    private bool ApplyImageChanges(Article article)
+    {
+        if (cmboImages.SelectedIndex == 0)
+        {
+            return true;
+        }
+
+        article.UpdateImages(
+            (WikiFunctions.Options.ImageReplaceOptions)cmboImages.SelectedIndex,
+            txtImageReplace.Text,
+            txtImageWith.Text,
+            chkSkipNoImgChange.Checked);
+
+        return !article.SkipArticle;
     }
 
     bool _diffAccessViolationSeen;
