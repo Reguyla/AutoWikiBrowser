@@ -4625,14 +4625,24 @@ font-size: 150%;'>No changes</h2>
         txtEdit.ScrollToCaret();
     }
 
+    // TODO (Editor Modernization):
+    // Verify why the target line number is subtracted from the CRLF match
+    // position. Preserve the calculation until line-navigation behavior has
+    // been tested with empty lines, the final line, and multiline content.
     /// <summary>
-    /// Moves the caret to the input line within the article text box
+    /// Moves the caret to the specified line in the article editor.
     /// </summary>
-    /// <param name="destLine">the line number the caret should be moved to</param>
+    /// <param name="destLine">
+    /// The zero-based line number to which the caret should be moved.
+    /// </param>
+    /// <remarks>
+    /// The editor is not focused when text is selected in the diff or preview
+    /// browser, allowing the selected browser text to remain available for
+    /// keyboard copy operations.
+    /// </remarks>
     private void GoTo(int destLine)
     {
-        // If some text is selected in the diff/preview, don't focus the edit box;
-        // otherwise, selected text will not be copyable with keyboard shortcuts.
+        // Preserve browser selection so it can be copied with keyboard shortcuts.
         if (webBrowser.TextSelected())
         {
             return;
@@ -4648,21 +4658,24 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            MatchCollection matches =
-                Regex.Matches(txtEdit.Text, "\r\n");
+            MatchCollection lineBreaks =
+                Regex.Matches(
+                    txtEdit.Text,
+                    "\r\n");
 
-            destLine = Math.Min(matches.Count, destLine);
+            int targetLine =
+                Math.Min(
+                    destLine,
+                    lineBreaks.Count);
 
-            if (destLine == 0)
-            {
-                txtEdit.Select(0, 0);
-            }
-            else
-            {
-                txtEdit.Select(
-                    matches[destLine - 1].Index + 2 - destLine,
-                    0);
-            }
+            int caretPosition =
+                GetCaretPositionForLine(
+                    targetLine,
+                    lineBreaks);
+
+            txtEdit.Select(
+                caretPosition,
+                0);
 
             txtEdit.ScrollToCaret();
         }
@@ -4671,6 +4684,36 @@ font-size: 150%;'>No changes</h2>
             ErrorHandler.HandleException(ex);
         }
     }
+
+    /// <summary>
+    /// Calculates the editor character position corresponding to a line number.
+    /// </summary>
+    /// <param name="targetLine">
+    /// The zero-based line number, constrained to the available line count.
+    /// </param>
+    /// <param name="lineBreaks">
+    /// The CRLF matches found in the editor text.
+    /// </param>
+    /// <returns>
+    /// The character position at which the caret should be placed.
+    /// </returns>
+    private static int GetCaretPositionForLine(
+        int targetLine,
+        MatchCollection lineBreaks)
+    {
+        const int CarriageReturnLineFeedLength = 2;
+
+        if (targetLine == 0)
+        {
+            return 0;
+        }
+
+        return lineBreaks[targetLine - 1].Index +
+               CarriageReturnLineFeedLength -
+               targetLine;
+    }
+
+
     #endregion
 
     private void PanelShowHide()
