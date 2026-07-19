@@ -4437,11 +4437,23 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Reverses the change, addition or deletion of a line of text in the page
+    /// Reverses a selected change, addition, or deletion in the current article
+    /// text and refreshes the displayed diff.
     /// </summary>
-    /// <param name="changeType"></param>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
+    /// <param name="changeType">
+    /// The type of diff operation to reverse.
+    /// </param>
+    /// <param name="left">
+    /// The position of the affected content in the original text.
+    /// </param>
+    /// <param name="right">
+    /// The position of the affected content in the modified text.
+    /// </param>
+    /// <remarks>
+    /// The method preserves the current browser scroll position and editor caret
+    /// position while rebuilding the diff. Any exception raised while processing
+    /// the undo operation is passed to the application's central error handler.
+    /// </remarks>
     private void UndoChangeGeneric(
         DiffChangeMode changeType,
         int left,
@@ -4459,41 +4471,26 @@ font-size: 150%;'>No changes</h2>
             if (document == null)
             {
                 Tools.WriteDebug(
-                    "UndoChangeGeneric",
+                    nameof(UndoChangeGeneric),
                     "The browser document was unavailable.");
 
                 return;
             }
 
-            HtmlElementCollection htmlElements =
-                document.GetElementsByTagName("HTML");
-
-            int webBrowserYScroll = 0;
-
-            if (htmlElements.Count > 0)
-            {
-                webBrowserYScroll = htmlElements[0].ScrollTop;
-            }
+            int browserScrollPosition =
+                GetBrowserVerticalScrollPosition(document);
 
             int caretPosition = txtEdit.SelectionStart;
 
+            // Rebuild the diff so the undo operation uses the current editor text.
             GetDiff();
 
-            switch (changeType)
-            {
-                case DiffChangeMode.Change:
-                    txtEdit.Text = Diff.UndoChange(left, right);
-                    break;
+            ApplyDiffUndo(
+                changeType,
+                left,
+                right);
 
-                case DiffChangeMode.Deletion:
-                    txtEdit.Text = Diff.UndoDeletion(left, right);
-                    break;
-
-                case DiffChangeMode.Addition:
-                    txtEdit.Text = Diff.UndoAddition(right);
-                    break;
-            }
-
+            // Refresh the displayed diff after modifying the editor contents.
             GetDiff();
 
             if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
@@ -4501,28 +4498,131 @@ font-size: 150%;'>No changes</h2>
                 HighlightSyntax();
             }
 
-            HtmlDocument updatedDocument = webBrowser.Document;
+            RestoreBrowserVerticalScrollPosition(
+                browserScrollPosition);
 
-            if (updatedDocument != null)
-            {
-                object[] arguments =
-                {
-            "window.scrollTo(0, " + webBrowserYScroll + ")"
-        };
-
-                updatedDocument.InvokeScript("eval", arguments);
-            }
-
-            txtEdit.Select(
-                Math.Min(caretPosition, txtEdit.Text.Length),
-                0);
-
-            txtEdit.ScrollToCaret();
+            RestoreEditorCaretPosition(
+                caretPosition);
         }
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
         }
+    }
+
+    /// <summary>
+    /// Gets the current vertical scroll position of the browser document.
+    /// </summary>
+    /// <param name="document">
+    /// The browser document whose scroll position should be read.
+    /// </param>
+    /// <returns>
+    /// The document's vertical scroll position, or zero when its root HTML element
+    /// is unavailable.
+    /// </returns>
+    private static int GetBrowserVerticalScrollPosition(
+        HtmlDocument document)
+    {
+        HtmlElementCollection htmlElements =
+            document.GetElementsByTagName("HTML");
+
+        return htmlElements.Count > 0
+            ? htmlElements[0].ScrollTop
+            : 0;
+    }
+
+    // TODO (Browser Modernization):
+    // Replace the legacy WebBrowser script invocation with the equivalent WebView2
+    // scrolling API when the diff viewer migration is completed.
+    /// <summary>
+    /// Applies the requested undo operation to the current editor contents.
+    /// </summary>
+    /// <param name="changeType">
+    /// The type of diff operation to reverse.
+    /// </param>
+    /// <param name="left">
+    /// The position of the affected content in the original text.
+    /// </param>
+    /// <param name="right">
+    /// The position of the affected content in the modified text.
+    /// </param>
+    private void ApplyDiffUndo(
+        DiffChangeMode changeType,
+        int left,
+        int right)
+    {
+        switch (changeType)
+        {
+            case DiffChangeMode.Change:
+                txtEdit.Text =
+                    Diff.UndoChange(
+                        left,
+                        right);
+
+                break;
+
+            case DiffChangeMode.Deletion:
+                txtEdit.Text =
+                    Diff.UndoDeletion(
+                        left,
+                        right);
+
+                break;
+
+            case DiffChangeMode.Addition:
+                txtEdit.Text =
+                    Diff.UndoAddition(right);
+
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Restores the vertical scroll position of the current browser document.
+    /// </summary>
+    /// <param name="scrollPosition">
+    /// The vertical position to restore.
+    /// </param>
+    private void RestoreBrowserVerticalScrollPosition(
+        int scrollPosition)
+    {
+        HtmlDocument document = webBrowser.Document;
+
+        if (document == null)
+        {
+            return;
+        }
+
+        object[] arguments =
+        {
+        "window.scrollTo(0, " + scrollPosition + ")"
+    };
+
+        document.InvokeScript(
+            "eval",
+            arguments);
+    }
+
+    /// <summary>
+    /// Restores the editor caret to its previous position, constrained to the
+    /// current text length, and scrolls the editor to make it visible.
+    /// </summary>
+    /// <param name="caretPosition">
+    /// The requested caret position.
+    /// </param>
+    private void RestoreEditorCaretPosition(
+        int caretPosition)
+    {
+        int restoredPosition =
+            Math.Min(
+                caretPosition,
+                txtEdit.Text.Length);
+
+        txtEdit.Select(
+            restoredPosition,
+            0);
+
+        txtEdit.ScrollToCaret();
     }
 
     /// <summary>
