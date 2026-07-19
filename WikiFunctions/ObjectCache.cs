@@ -50,28 +50,31 @@ namespace WikiFunctions
             Global.AddType(typeof(SiteInfo), DefaultLifespan);
         }
 
-        ~ObjectCache()
-        {
-            Dispose();
-        }
 
         /// <summary>
-        /// 
+        /// Saves the current cache and releases this instance.
         /// </summary>
         public void Dispose()
         {
-            if (FileName == null) return;
+            if (_disposed)
+                return;
+
+            _disposed = true;
 
             try
             {
-                Save();
+                if (!string.IsNullOrEmpty(FileName))
+                    Save();
             }
             catch (Exception ex)
             {
                 ReportException(ex);
             }
-            FileName = null;
-            GC.SuppressFinalize(this);
+            finally
+            {
+                FileName = null;
+                GC.SuppressFinalize(this);
+            }
         }
 
         /// <summary>
@@ -209,6 +212,7 @@ namespace WikiFunctions
         }
 
         private XmlSerializer serializer;
+        private bool _disposed;
         private XmlSerializer Serializer
         {
             get
