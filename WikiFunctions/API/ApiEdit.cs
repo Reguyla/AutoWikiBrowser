@@ -369,43 +369,20 @@ public class ApiEdit : IApiEdit
         Environment.Version);
 
     /// <summary>
-    /// Creates a configured <see cref="HttpClient"/> for MediaWiki API requests.
+    /// Creates a configured HTTP request message.
     /// </summary>
-    /// <remarks>
-    /// Applies the current API session settings, including proxy configuration,
-    /// cookie handling, authentication, automatic decompression, and the
-    /// configured AWB user agent. This helper centralizes the HTTP client
-    /// configuration used by <see cref="ApiEdit"/> and provides the foundation
-    /// for the migration from <see cref="HttpWebRequest"/> to
-    /// <see cref="HttpClient"/>.
-    /// </remarks>
-    /// <param name="url">
-    /// The destination URL. Used to determine whether authenticated session
-    /// cookies should be included with the request.
-    /// </param>
-    /// <returns>
-    /// A configured <see cref="HttpClient"/> ready to communicate with the
-    /// current MediaWiki API.
-    /// </returns>
+    /// <param name="method">The HTTP method used for the request.</param>
+    /// <param name="url">The destination URL.</param>
+    /// <returns>A configured HTTP request message.</returns>
     private HttpRequestMessage CreateRequest(
         HttpMethod method,
         string url)
     {
-        if (Globals.UnitTestMode)
-        {
-            throw new InvalidOperationException(
-                "You shouldn't access Wikipedia from unit tests.");
-        }
+        EnsureNetworkAccessAllowed();
 
         var request = new HttpRequestMessage(method, url);
 
-        request.Headers.UserAgent.ParseAdd(UserAgent);
-
-        if (IsCurrentWikiRequest(url))
-        {
-            // Cookies will be supplied by the HttpClientHandler's
-            // CookieContainer rather than placed directly on the request.
-        }
+        ConfigureBasicAuthentication(request);
 
         return request;
     }
@@ -818,6 +795,79 @@ public class ApiEdit : IApiEdit
         }
 
     }
+
+    /// <summary>
+    /// Creates an HTTP client configured with the current ApiEdit session's proxy,
+    /// cookies, decompression, credentials, and user-agent settings.
+    /// </summary>
+    /// <param name="url">
+    /// The destination URL. Session cookies are included only when the destination
+    /// targets the currently configured wiki.
+    /// </param>
+    /// <returns>A configured HTTP client.</returns>
+    private HttpClient CreateHttpClient(string url)
+    {
+        EnsureNetworkAccessAllowed();
+
+        bool useProxy = ProxySettings != null;
+
+        var handler = new HttpClientHandler
+        {
+            AutomaticDecompression =
+                DecompressionMethods.Deflate |
+                DecompressionMethods.GZip,
+
+            Proxy = ProxySettings,
+            UseProxy = useProxy,
+
+            // Preserve the behavior of the legacy request configuration.
+            UseDefaultCredentials = useProxy,
+
+            UseCookies = true,
+            CookieContainer = IsCurrentWikiRequest(url)
+                ? Cookies
+                : new CookieContainer()
+        };
+
+        var client = new HttpClient(handler);
+
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+
+        return client;
+    }
+
+    /// <summary>
+    /// Adds the configured HTTP Basic authentication header to a request when
+    /// credentials have been supplied.
+    /// </summary>
+    /// <param name="request">The request to configure.</param>
+    private static void ConfigureBasicAuthentication(
+        HttpRequestMessage request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (string.IsNullOrEmpty(Variables.HttpAuthUsername) ||
+            string.IsNullOrEmpty(Variables.HttpAuthPassword))
+        {
+            return;
+        }
+
+        string authenticationText =
+            Variables.HttpAuthUsername +
+            ":" +
+            Variables.HttpAuthPassword;
+
+        string encodedCredentials =
+            Convert.ToBase64String(
+                Encoding.Default.GetBytes(authenticationText));
+
+        request.Headers.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue(
+                "Basic",
+                encodedCredentials);
+    }
+
+
 
     #endregion
 
