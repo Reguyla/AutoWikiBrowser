@@ -3331,12 +3331,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 return;
             }
 
-            // unicodify whole article
-            if (process && chkUnicodifyWhole.Checked)
-            {
-                theArticle.Unicodify(Skip.SkipNoUnicode, Parser, RemoveText);
-                Variables.Profiler.Profile("Unicodify");
-            }
+            ApplyWholeArticleUnicodify(theArticle, process);
 
             // find and replace before general fixes
             // Do not apply skip checks when reparsing
@@ -3694,6 +3689,35 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Applies whole-article Unicode conversion when standard processing and the
+    /// corresponding user option are enabled.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="applyStandardProcessing">
+    /// <see langword="true"/> when the article is eligible for standard parsing
+    /// operations; otherwise, <see langword="false"/>.
+    /// </param>
+    private void ApplyWholeArticleUnicodify(
+        Article article,
+        bool applyStandardProcessing)
+    {
+        if (!applyStandardProcessing ||
+            !chkUnicodifyWhole.Checked)
+        {
+            return;
+        }
+
+        article.Unicodify(
+            Skip.SkipNoUnicode,
+            Parser,
+            RemoveText);
+
+        Variables.Profiler.Profile("Unicodify");
     }
 
     bool _diffAccessViolationSeen;
