@@ -5666,6 +5666,13 @@ font-size: 150%;'>No changes</h2>
     // navigation, and control updates so status checks can be tested without UI
     // side effects.
     //
+    // TODO (Authentication Architecture):
+    // Consolidate client compatibility, authentication, account eligibility,
+    // AWB approval, block status, and MediaWiki capability discovery into a
+    // single structured session-validation workflow. Introduce explicit disabled,
+    // read-only, review-only, and full-editing modes, and enforce write
+    // authorization below the UI layer.
+    //
     // TODO (Event Handler Modernization):
     // Replace UpdateButtons(null, null) with a parameterless UI refresh helper and
     // keep the event handler as a thin adapter.
