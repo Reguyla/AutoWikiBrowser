@@ -6554,56 +6554,43 @@ font-size: 150%;'>No changes</h2>
         return false;
     }
 
-
-
-
+    /// <summary>
+    /// Finds the selected duplicate wikilink in the editor, refreshes the article
+    /// analysis, and restores the duplicate-link selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void lbDuplicateWikilinks_Click(object sender, EventArgs e)
     {
         EditBoxTab.SelectedTab = tpEdit;
-        int selection = lbDuplicateWikilinks.SelectedIndex;
-        if (selection != OldSelection)
-            txtEdit.ResetFind();
-        if (lbDuplicateWikilinks.SelectedIndex != -1)
-        {
-            string strLink = lbDuplicateWikilinks.SelectedItem.ToString();
 
-            // remove the duplicate link count added to the end above
-            strLink = Regex.Replace(strLink, @" \(\d+\)$", "");
+        int selectedIndex = lbDuplicateWikilinks.SelectedIndex;
 
-            if (string.IsNullOrEmpty(strLink))
-            {
-                txtEdit.ResetFind();
-                btnRemove.Enabled = false;
-                return;
-            }
-
-            // perform case sensitive search, but make search on first character of link case insensitive
-            // as first character may have been converted to upper case
-            txtEdit.Find("\\[\\[(?i)" + Regex.Escape(strLink[0].ToString()) + @"(?-i)" + Regex.Escape(strLink.Remove(0, 1)) + "(\\|.*?)?\\]\\]", true, true, TheArticle.Name);
-            btnRemove.Enabled = true;
-        }
-        else
-        {
-            txtEdit.ResetFind();
-            btnRemove.Enabled = false;
-        }
+        UpdateDuplicateWikilinkSearch(selectedIndex);
 
         ArticleInfo(false);
-        try
-        {
-            if (lbDuplicateWikilinks.Items.Count != selection + 2)
-                lbDuplicateWikilinks.SelectedIndex = selection + 2;
-            else
-                lbDuplicateWikilinks.SelectedIndex = selection + 1;
-            lbDuplicateWikilinks.SelectedIndex = selection;
-        }
-        catch
-        {
-            lbDuplicateWikilinks.SelectedIndex = lbDuplicateWikilinks.Items.Count - 1;
-        }
-        OldSelection = selection;
+
+        RestoreDuplicateWikilinkSelection(selectedIndex);
+
+        OldSelection = selectedIndex;
     }
 
+    /// <summary>
+    /// Clears the current search results, resets any search highlighting in the
+    /// editor, and updates the Find button state.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that initiated the reset. When the sender is a
+    /// <see cref="RichTextBox"/>, its formatting is restored.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the reset operation.
+    /// </param>
+    /// <remarks>
+    /// Under Mono, resetting the editor formatting can trigger the search text
+    /// change handler recursively. The handler is temporarily detached to prevent
+    /// unnecessary re-entrant processing before being restored.
+    /// </remarks>
     private void ResetFind(object sender, EventArgs e)
     {
         txtEdit.ResetFind();
@@ -6637,6 +6624,117 @@ font-size: 150%;'>No changes</h2>
             btnFind.BackColor = SystemColors.ButtonFace;
         }
     }
+
+    /// <summary>
+    /// Updates the editor search for the currently selected duplicate wikilink.
+    /// </summary>
+    /// <param name="selectedIndex">
+    /// The selected duplicate-wikilink list index, or <c>-1</c> when no item is
+    /// selected.
+    /// </param>
+    private void UpdateDuplicateWikilinkSearch(int selectedIndex)
+    {
+        if (selectedIndex != OldSelection)
+        {
+            txtEdit.ResetFind();
+        }
+
+        if (selectedIndex < 0)
+        {
+            ClearDuplicateWikilinkSearch();
+            return;
+        }
+
+        string selectedItem =
+            lbDuplicateWikilinks.SelectedItem?.ToString() ?? string.Empty;
+
+        // Remove the duplicate count appended to the displayed link.
+        string link =
+            Regex.Replace(selectedItem, @" \(\d+\)$", string.Empty);
+
+        if (string.IsNullOrEmpty(link))
+        {
+            ClearDuplicateWikilinkSearch();
+            return;
+        }
+
+        string searchPattern = BuildDuplicateWikilinkSearchPattern(link);
+
+        txtEdit.Find(
+            searchPattern,
+            true,
+            true,
+            TheArticle.Name);
+
+        btnRemove.Enabled = true;
+    }
+
+    /// <summary>
+    /// Clears the duplicate-wikilink search and disables link removal.
+    /// </summary>
+    private void ClearDuplicateWikilinkSearch()
+    {
+        txtEdit.ResetFind();
+        btnRemove.Enabled = false;
+    }
+
+    /// <summary>
+    /// Builds the regular expression used to locate a duplicate wikilink while
+    /// allowing the first character of the link target to differ by case.
+    /// </summary>
+    /// <param name="link">The wikilink target to locate.</param>
+    /// <returns>A regular expression matching the corresponding wikilink.</returns>
+    private static string BuildDuplicateWikilinkSearchPattern(string link)
+    {
+        string firstCharacter =
+            Regex.Escape(link[0].ToString());
+
+        string remainingCharacters =
+            Regex.Escape(link[1..]);
+
+        return
+            "\\[\\[(?i)" +
+            firstCharacter +
+            "(?-i)" +
+            remainingCharacters +
+            "(\\|.*?)?\\]\\]";
+    }
+
+    /// <summary>
+    /// Restores the duplicate-wikilink list selection after article analysis
+    /// rebuilds the list contents.
+    /// </summary>
+    /// <param name="selectedIndex">
+    /// The list index selected before the article analysis was refreshed.
+    /// </param>
+    private void RestoreDuplicateWikilinkSelection(int selectedIndex)
+    {
+        if (lbDuplicateWikilinks.Items.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            if (lbDuplicateWikilinks.Items.Count != selectedIndex + 2)
+            {
+                lbDuplicateWikilinks.SelectedIndex = selectedIndex + 2;
+            }
+            else
+            {
+                lbDuplicateWikilinks.SelectedIndex = selectedIndex + 1;
+            }
+
+            lbDuplicateWikilinks.SelectedIndex = selectedIndex;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            lbDuplicateWikilinks.SelectedIndex =
+                lbDuplicateWikilinks.Items.Count - 1;
+        }
+    }
+
+
 
     private void txtEdit_TextChanged(object sender, EventArgs e)
     {
