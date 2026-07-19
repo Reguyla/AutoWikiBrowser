@@ -6015,30 +6015,11 @@ font-size: 150%;'>No changes</h2>
 
     private void ArticleInfo(bool reset)
     {
-        lbDuplicateWikilinks.Items.Clear();
-        lbAlerts.Items.Clear();
-
-        _ambiguousCiteDates.Clear();
-        _badCiteParameters.Clear();
-        _deadLinks.Clear();
-        _doublePipeLinks.Clear();
-        _duplicateBannerShellParameters.Clear();
-        _targetlessLinks.Clear();
-        _unclosedTags.Clear();
-        _wikilinkedHeaders.Clear();
-        _unbalancedBrackets.Clear();
-        _otherErrors.Clear();
-        _userSignatures.Clear();
+        ClearArticleInfoResults();
 
         if (reset)
         {
-            // Restore the default article information labels.
-            lblWords.Text = Words;
-            lblCats.Text = Cats;
-            lblImages.Text = Imgs;
-            lblLinks.Text = Links;
-            lblInterLinks.Text = IWLinks;
-            lblDates.Text = Dates;
+            ResetArticleInfoLabels();
         }
         else
         {
@@ -6262,12 +6243,79 @@ font-size: 150%;'>No changes</h2>
 
             lblDates.Text = Dates + results[Parsers.DateLocale.ISO] + "/" + results[Parsers.DateLocale.International] + "/" + results[Parsers.DateLocale.American];
 
-            // Find multiple wikilinks
-            //get all the links, ignore commented out text etc.
-            lbDuplicateWikilinks.Items.AddRange(Tools.DuplicateWikiLinks(articleText).ToArray());
+            UpdateDuplicateWikilinks(articleText);
         }
-        lblDuplicateWikilinks.Visible = lbDuplicateWikilinks.Visible = btnRemove.Visible = (lbDuplicateWikilinks.Items.Count > 0);
+        UpdateDuplicateWikilinkVisibility();
     }
+
+    /// <summary>
+    /// Clears article-analysis results left by the previous article or editor
+    /// contents.
+    /// </summary>
+    private void ClearArticleInfoResults()
+    {
+        lbDuplicateWikilinks.Items.Clear();
+        lbAlerts.Items.Clear();
+
+        _ambiguousCiteDates.Clear();
+        _badCiteParameters.Clear();
+        _deadLinks.Clear();
+        _doublePipeLinks.Clear();
+        _duplicateBannerShellParameters.Clear();
+        _targetlessLinks.Clear();
+        _unclosedTags.Clear();
+        _wikilinkedHeaders.Clear();
+        _unbalancedBrackets.Clear();
+        _otherErrors.Clear();
+        _userSignatures.Clear();
+    }
+
+    /// <summary>
+    /// Restores the default article-information label text.
+    /// </summary>
+    private void ResetArticleInfoLabels()
+    {
+        lblWords.Text = Words;
+        lblCats.Text = Cats;
+        lblImages.Text = Imgs;
+        lblLinks.Text = Links;
+        lblInterLinks.Text = IWLinks;
+        lblDates.Text = Dates;
+    }
+
+    /// <summary>
+    /// Shows duplicate-wikilink controls when duplicate links were found.
+    /// </summary>
+    private void UpdateDuplicateWikilinkVisibility()
+    {
+        bool hasDuplicateWikilinks =
+            lbDuplicateWikilinks.Items.Count > 0;
+
+        lblDuplicateWikilinks.Visible =
+            hasDuplicateWikilinks;
+
+        lbDuplicateWikilinks.Visible =
+            hasDuplicateWikilinks;
+
+        btnRemove.Visible =
+            hasDuplicateWikilinks;
+    }
+
+    /// <summary>
+    /// Finds duplicate wikilinks in the current article and displays them.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to analyze.
+    /// </param>
+    private void UpdateDuplicateWikilinks(string articleText)
+    {
+        // Find multiple wikilinks.
+        // Get all the links, ignoring commented-out text and similar markup.
+        lbDuplicateWikilinks.Items.AddRange(
+            Tools.DuplicateWikiLinks(articleText).ToArray());
+    }
+
+
 
     /// <summary>
     /// Focuses the edit box on the next alert after the caret
