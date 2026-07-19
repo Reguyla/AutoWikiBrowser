@@ -411,46 +411,108 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// 
+    /// Creates and configures a legacy HTTP request using AWB networking settings.
     /// </summary>
-    /// <param name="url"></param>
-    /// <returns></returns>
+    /// <param name="url">The absolute URL to request.</param>
+    /// <returns>A configured HTTP request.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when network access is attempted during unit tests.
+    /// </exception>
     protected HttpWebRequest CreateRequest(string url)
     {
-        if (Globals.UnitTestMode)
-            throw new Exception("You shouldn't access Wikipedia from unit tests");
+        EnsureNetworkAccessAllowed();
 
+        ConfigureLegacyTransportSecurity();
+
+        HttpWebRequest request =
+            (HttpWebRequest)WebRequest.Create(url);
+
+        ConfigureConnectionSettings(request);
+        ConfigureProxy(request);
+        ConfigureRequestHeaders(request);
+        ConfigureCookies(request, url);
+
+        return request;
+    }
+
+    /// <summary>
+    /// Prevents live network access while unit tests are running.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when network access is attempted during unit tests.
+    /// </exception>
+    private static void EnsureNetworkAccessAllowed()
+    {
+        if (Globals.UnitTestMode)
+        {
+            throw new InvalidOperationException(
+                "Wikipedia must not be accessed during unit tests.");
+        }
+    }
+
+    /// <summary>
+    /// Applies the transport settings required by the legacy request pipeline.
+    /// </summary>
+    private static void ConfigureLegacyTransportSecurity()
+    {
         ServicePointManager.Expect100Continue = false;
+
         ServicePointManager.SecurityProtocol |=
             SecurityProtocolType.Tls11 |
             SecurityProtocolType.Tls12 |
             SecurityProtocolType.Tls13;
+    }
 
-        HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-        req.KeepAlive = true;
-        req.ServicePoint.Expect100Continue = false;
-        req.Expect = "";
+    /// <summary>
+    /// Configures connection reuse and disables the Expect: 100-continue behavior.
+    /// </summary>
+    private static void ConfigureConnectionSettings(
+        HttpWebRequest request)
+    {
+        request.KeepAlive = true;
+        request.ServicePoint.Expect100Continue = false;
+        request.Expect = string.Empty;
+    }
 
-        if (ProxySettings != null)
+    /// <summary>
+    /// Applies the configured proxy settings to the request.
+    /// </summary>
+    private void ConfigureProxy(HttpWebRequest request)
+    {
+        if (ProxySettings == null)
         {
-            req.Proxy = ProxySettings;
-            req.UseDefaultCredentials = true;
-        }
-        else
-        {
-            req.Proxy = null;
+            request.Proxy = null;
+            return;
         }
 
-        req.UserAgent = UserAgent;
-        req.AutomaticDecompression =
+        request.Proxy = ProxySettings;
+        request.UseDefaultCredentials = true;
+    }
+
+    /// <summary>
+    /// Applies the AWB user agent and supported response decompression methods.
+    /// </summary>
+    private void ConfigureRequestHeaders(HttpWebRequest request)
+    {
+        request.UserAgent = UserAgent;
+
+        request.AutomaticDecompression =
             DecompressionMethods.Deflate |
             DecompressionMethods.GZip;
+    }
 
-        // SECURITY: don't send cookies to third-party sites
+    /// <summary>
+    /// Attaches the session cookie container only to requests targeting the
+    /// current wiki, preventing cookies from being sent to third-party sites.
+    /// </summary>
+    private void ConfigureCookies(
+        HttpWebRequest request,
+        string url)
+    {
         if (IsCurrentWikiRequest(url))
-            req.CookieContainer = Cookies;
-
-        return req;
+        {
+            request.CookieContainer = Cookies;
+        }
     }
 
     /// <summary>
