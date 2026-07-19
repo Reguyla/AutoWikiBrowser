@@ -234,17 +234,44 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Saves the cache to the specified file using a temporary file so an
+        /// interrupted write does not corrupt the existing cache.
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="fileName">The cache file to write.</param>
         public void Save(string fileName)
         {
             ArgumentException.ThrowIfNullOrEmpty(fileName);
 
-            FileName = fileName;
+            string? directory = Path.GetDirectoryName(fileName);
 
-            using FileStream stream = File.Create(fileName);
-            Save(stream);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            string temporaryFileName = fileName + ".tmp";
+
+            try
+            {
+                using (FileStream stream = new(
+                           temporaryFileName,
+                           FileMode.Create,
+                           FileAccess.Write,
+                           FileShare.None))
+                {
+                    Save(stream);
+                }
+
+                File.Move(
+                    temporaryFileName,
+                    fileName,
+                    overwrite: true);
+
+                FileName = fileName;
+            }
+            finally
+            {
+                if (File.Exists(temporaryFileName))
+                    File.Delete(temporaryFileName);
+            }
         }
 
         /// <summary>
