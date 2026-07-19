@@ -6491,47 +6491,71 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
-
-
+    // TODO (Editor Architecture):
+    // Centralize conversion between editor selection positions and article-text
+    // offsets so newline normalization does not require local compensation.
     /// <summary>
-    /// Focuses the edit box on the next alert after the caret
+    /// Moves the editor selection to the next recorded alert after the current
+    /// caret position, wrapping to the first alert when no later alert exists.
     /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void lbAlerts_Click(object sender, EventArgs e)
     {
         EditBoxTab.SelectedTab = tpEdit;
 
-        string a = txtEdit.Text.Substring(0, txtEdit.SelectionStart);
-        int b = WikiRegexes.Newline.Matches(a).Count;
-        bool done = false;
+        int caretPosition = txtEdit.SelectionStart;
+        string textBeforeCaret = txtEdit.Text[..caretPosition];
 
-        foreach (KeyValuePair<int, int> kvp in _errors)
+        // Alert positions account for newline characters that are normalized by
+        // the editor control.
+        int newlineOffset =
+            WikiRegexes.Newline.Matches(textBeforeCaret).Count;
+
+        int adjustedCaretPosition =
+            caretPosition + newlineOffset;
+
+        if (TrySelectNextAlert(adjustedCaretPosition))
         {
-            int current = txtEdit.SelectionStart + b; // offset by number of newlines up to it
-            if (kvp.Key > current && kvp.Key < txtEdit.Text.Length)
-            {
-                RedSelection(kvp.Key, kvp.Value);
-                txtEdit.ScrollToCaret();
-                done = true;
-                break;
-            }
+            return;
         }
 
-        // if no more alerts after caret, start at beginning
-        if (!done)
-        {
-            txtEdit.SelectionStart = 0;
-
-            foreach (KeyValuePair<int, int> kvp in _errors)
-            {
-                if (kvp.Key > txtEdit.SelectionStart && kvp.Key < txtEdit.Text.Length)
-                {
-                    RedSelection(kvp.Key, kvp.Value);
-                    txtEdit.ScrollToCaret();
-                    break;
-                }
-            }
-        }
+        // No alert remains after the caret, so wrap to the first alert.
+        TrySelectNextAlert(0);
     }
+
+    /// <summary>
+    /// Selects the first recorded alert occurring after the specified position.
+    /// </summary>
+    /// <param name="position">
+    /// The article-text position after which to find an alert.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when an alert was selected; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool TrySelectNextAlert(int position)
+    {
+        foreach (KeyValuePair<int, int> error in
+                 _errors.OrderBy(error => error.Key))
+        {
+            if (error.Key <= position ||
+                error.Key >= txtEdit.Text.Length)
+            {
+                continue;
+            }
+
+            RedSelection(error.Key, error.Value);
+            txtEdit.ScrollToCaret();
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+
 
     private void lbDuplicateWikilinks_Click(object sender, EventArgs e)
     {
