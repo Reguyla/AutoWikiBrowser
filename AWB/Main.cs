@@ -4259,56 +4259,118 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Saves the current article text using the selected edit and watch-list
+    /// options.
+    /// </summary>
+    /// <remarks>
+    /// The method preserves the current editor text, updates save timing,
+    /// corrects section edit summaries when necessary, tracks newly created
+    /// pages, and starts the asynchronous save operation. If the editor is
+    /// already busy, the save is not started and the surrounding controls are
+    /// re-enabled.
+    /// </remarks>
     private void SaveArticle()
     {
-        //remember article text in case it is lost, this is set to "" again when the article title is removed
         LastArticle = txtEdit.Text;
 
-        if (ShowMovingAverageTimer)
-        {
-            StopSaveInterval();
-            Ticker += SaveInterval;
-        }
-        WatchOptions opt;
+        UpdateSaveIntervalTracking();
 
-        switch (addToWatchList.SelectedIndex)
-        {
-            case 0:
-                opt = WatchOptions.Watch;
-                break;
-            case 1:
-                opt = WatchOptions.Unwatch;
-                break;
-            case 3:
-                opt = WatchOptions.UsePreferences;
-                break;
-            default:
-                opt = WatchOptions.NoChange;
-                break;
-        }
-
-        if (!TheSession.Editor.IsActive)
-        {
-            if (!TheSession.Page.Exists)
-                NumberOfNewPages++;
-
-            // if section edit summary, check only this section has been edited
-            if (txtReviewEditSummary.Text.StartsWith(@"/*"))
-            {
-                string sectionEditText = Summary.ModifiedSection(TheArticle.OriginalArticleText, txtEdit.Text);
-
-                if (sectionEditText.Length == 0 || !txtReviewEditSummary.Text.Contains(@"/* " + sectionEditText + @" */"))
-                    txtReviewEditSummary.Text = txtReviewEditSummary.Text.Substring(txtReviewEditSummary.Text.IndexOf(@"*/", StringComparison.Ordinal) + 2);
-            }
-
-            TheSession.Editor.Save(txtEdit.Text, AppendUsingAWBSummary(txtReviewEditSummary.Text), markAllAsMinorToolStripMenuItem.Checked,
-                                   opt);
-        }
-        else
+        if (TheSession.Editor.IsActive)
         {
             StatusLabelText = "Editor busy";
             EnableButtons();
+            return;
         }
+
+        if (!TheSession.Page.Exists)
+        {
+            NumberOfNewPages++;
+        }
+
+        CorrectSectionEditSummary();
+
+        WatchOptions watchOption =
+            GetSelectedWatchOption();
+
+        TheSession.Editor.Save(
+            txtEdit.Text,
+            AppendUsingAWBSummary(txtReviewEditSummary.Text),
+            markAllAsMinorToolStripMenuItem.Checked,
+            watchOption);
+    }
+
+    /// <summary>
+    /// Updates the moving-average save interval when save timing is enabled.
+    /// </summary>
+    private void UpdateSaveIntervalTracking()
+    {
+        if (!ShowMovingAverageTimer)
+        {
+            return;
+        }
+
+        StopSaveInterval();
+        Ticker += SaveInterval;
+    }
+
+    /// <summary>
+    /// Gets the watch-list option selected in the save controls.
+    /// </summary>
+    /// <returns>
+    /// The corresponding <see cref="WatchOptions"/> value.
+    /// </returns>
+    private WatchOptions GetSelectedWatchOption()
+    {
+        return addToWatchList.SelectedIndex switch
+        {
+            0 => WatchOptions.Watch,
+            1 => WatchOptions.Unwatch,
+            3 => WatchOptions.UsePreferences,
+            _ => WatchOptions.NoChange
+        };
+    }
+
+    // TODO (Defensive Validation):
+    // Handle malformed section edit summaries that begin with "/*" but do not
+    // contain a closing "*/" marker before attempting to remove the prefix.
+    /// <summary>
+    /// Removes an invalid section prefix from the edit summary when the edited
+    /// section no longer matches the section named in the summary.
+    /// </summary>
+    private void CorrectSectionEditSummary()
+    {
+        if (!txtReviewEditSummary.Text.StartsWith(
+                "/*",
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        string sectionEditText =
+            Summary.ModifiedSection(
+                TheArticle.OriginalArticleText,
+                txtEdit.Text);
+
+        string expectedSectionSummary =
+            "/* " + sectionEditText + " */";
+
+        if (sectionEditText.Length > 0 &&
+            txtReviewEditSummary.Text.Contains(
+                expectedSectionSummary,
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        int sectionMarkerEnd =
+            txtReviewEditSummary.Text.IndexOf(
+                "*/",
+                StringComparison.Ordinal);
+
+        txtReviewEditSummary.Text =
+            txtReviewEditSummary.Text.Substring(
+                sectionMarkerEnd + 2);
     }
 
     #endregion
