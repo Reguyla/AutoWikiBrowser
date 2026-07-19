@@ -3781,14 +3781,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     bool _diffAccessViolationSeen;
 
     /// <summary>
-    /// Generates the HTML diff between the article's original text and the
-    /// current editor contents, then displays it in the WebView2 diff viewer
-    /// or writes it to a file when running under Mono.
+    /// Generates and displays the diff between the article's original text and
+    /// the current editor contents.
     /// </summary>
     /// <remarks>
     /// When no changes are present, a message is displayed instead of a diff.
-    /// After rendering, the method restores focus to the editor, clears any
-    /// selection, resets the diff error state, and updates the surrounding UI.
+    /// After rendering, the editor and surrounding UI are restored to their
+    /// normal post-processing state.
     /// </remarks>
     private void GetDiff()
     {
@@ -3800,12 +3799,45 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         try
         {
-            string diffHtml;
+            string diffHtml =
+                BuildDiffHtml(TheArticle);
 
-            if (TheArticle.OriginalArticleText.Equals(txtEdit.Text))
-            {
-                diffHtml =
-                    @"<!DOCTYPE html>
+            DisplayDiffHtml(diffHtml);
+            CompleteDiffDisplay();
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Builds the HTML document used to display the article diff.
+    /// </summary>
+    /// <param name="article">
+    /// The article whose original text is compared with the current editor text.
+    /// </param>
+    /// <returns>
+    /// A complete HTML document containing either the generated diff or a
+    /// no-changes message.
+    /// </returns>
+    private string BuildDiffHtml(Article article)
+    {
+        if (string.Equals(article.OriginalArticleText, txtEdit.Text, StringComparison.Ordinal))
+        {
+            return BuildNoChangesDiffHtml();
+        }
+
+        return BuildArticleDiffHtml(article);
+    }
+
+    /// <summary>
+    /// Builds the HTML displayed when the article text has not changed.
+    /// </summary>
+    private static string BuildNoChangesDiffHtml()
+    {
+        return
+            @"<!DOCTYPE html>
 <html>
 <head>
 <meta charset=""utf-8"">
@@ -3819,54 +3851,75 @@ font-size: 150%;'>No changes</h2>
 <p>Press the ""Skip"" button below to skip to the next page.</p>
 </body>
 </html>";
-            }
-            else
-            {
-                // When fewer than 10 edits exist, show user help information
-                // explaining that double-clicking can undo a change.
-                diffHtml =
-                    "<!DOCTYPE html>" +
-                    "<html>" +
-                    "<head>" +
-                    "<meta charset=\"utf-8\">" +
-                    WikiDiff.DiffHead() +
-                    "</head>" +
-                    "<body>" +
-                    (NumberOfEdits < 10
-                        ? WikiDiff.TableHeader
-                        : WikiDiff.TableHeaderNoMessages) +
-                    Diff.GetDiff(
-                        TheArticle.OriginalArticleText,
-                        txtEdit.Text,
-                        2) +
-                    "</table>" +
-                    "</body>" +
-                    "</html>";
-            }
+    }
 
-            // WebView2 is unavailable under Mono, so write the diff to a file.
-            if (Globals.UsingMono)
-            {
-                Tools.WriteTextFile(
-                    diffHtml,
-                    "Diff.html",
-                    false);
-            }
-            else
-            {
-                RenderWebView2Diff(diffHtml);
-            }
+    /// <summary>
+    /// Builds the HTML document containing the generated article diff.
+    /// </summary>
+    /// <param name="article">
+    /// The article whose original text is compared with the editor text.
+    /// </param>
+    private string BuildArticleDiffHtml(Article article)
+    {
+        string tableHeader =
+            NumberOfEdits < 10
+                ? WikiDiff.TableHeader
+                : WikiDiff.TableHeaderNoMessages;
 
-            txtEdit.Focus();
-            txtEdit.SelectionLength = 0;
-            _diffAccessViolationSeen = false;
+        return
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "<meta charset=\"utf-8\">" +
+            WikiDiff.DiffHead() +
+            "</head>" +
+            "<body>" +
+            tableHeader +
+            Diff.GetDiff(
+                article.OriginalArticleText,
+                txtEdit.Text,
+                2) +
+            "</table>" +
+            "</body>" +
+            "</html>";
+    }
 
-            GuiUpdateAfterProcessing();
-        }
-        catch (Exception ex)
+    /// <summary>
+    /// Displays the generated diff using the available platform-specific viewer.
+    /// </summary>
+    /// <param name="diffHtml">
+    /// The complete HTML diff document to display.
+    /// </param>
+    private void DisplayDiffHtml(string diffHtml)
+    {
+        // WebView2 is unavailable under Mono, so write the diff to a file.
+        // TODO (Platform Modernization):
+        // Re-evaluate the Mono diff fallback. Determine whether writing the diff to a
+        // temporary HTML file is still required, or whether Mono support should be
+        // retired in favor of a supported cross-platform rendering solution.
+        if (Globals.UsingMono)
         {
-            ErrorHandler.HandleException(ex);
+            Tools.WriteTextFile(
+                diffHtml,
+                "Diff.html",
+                false);
+
+            return;
         }
+
+        RenderWebView2Diff(diffHtml);
+    }
+
+    /// <summary>
+    /// Restores the editor and surrounding UI after the diff has been displayed.
+    /// </summary>
+    private void CompleteDiffDisplay()
+    {
+        txtEdit.Focus();
+        txtEdit.SelectionLength = 0;
+        _diffAccessViolationSeen = false;
+
+        GuiUpdateAfterProcessing();
     }
 
     private string webBrowserMouseOverUrl = "";
