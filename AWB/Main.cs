@@ -3459,24 +3459,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 if (theArticle.SkipArticle) return;
             }
 
-            // append/prepend text
-            if (chkAppend.Checked)
-            {
-                // customized number of newlines
-                string newlines =
-                    new string('\n', (int)udNewlineChars.Value);
-
-                if (rdoAppend.Checked)
-                    theArticle.AWBChangeArticleText("Appended your message",
-                                                    theArticle.ArticleText + newlines + Tools.ApplyKeyWords(theArticle.Name, txtAppendMessage.Text), false);
-                else
-                    theArticle.AWBChangeArticleText("Prepended your message",
-                                                    Tools.ApplyKeyWords(theArticle.Name, txtAppendMessage.Text) + newlines + theArticle.ArticleText, false);
-
-                if (chkAppendMetaDataSort.Checked)
-                    theArticle.PerformMetaDataSort(Parser);
-            }
-
+            ApplyAppendOrPrependText(theArticle);
             Variables.Profiler.Profile("Append Text");
 
             // replace/remove/comment out images/files
@@ -3611,6 +3594,49 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             LoadRenameTemplateParameters();
             Variables.Profiler.Profile("LoadRenameTemplateParameters");
+        }
+    }
+
+    /// <summary>
+    /// Appends or prepends the configured text to the supplied article and
+    /// optionally sorts the resulting metadata.
+    /// </summary>
+    /// <param name="article">
+    /// The article to update.
+    /// </param>
+    private void ApplyAppendOrPrependText(Article article)
+    {
+        if (!chkAppend.Checked)
+        {
+            return;
+        }
+
+        string newlines =
+            new('\n', (int)udNewlineChars.Value);
+
+        string message =
+            Tools.ApplyKeyWords(
+                article.Name,
+                txtAppendMessage.Text);
+
+        if (rdoAppend.Checked)
+        {
+            article.AWBChangeArticleText(
+                "Appended your message",
+                article.ArticleText + newlines + message,
+                false);
+        }
+        else
+        {
+            article.AWBChangeArticleText(
+                "Prepended your message",
+                message + newlines + article.ArticleText,
+                false);
+        }
+
+        if (chkAppendMetaDataSort.Checked)
+        {
+            article.PerformMetaDataSort(Parser);
         }
     }
 
