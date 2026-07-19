@@ -3376,13 +3376,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
                     Variables.Profiler.Profile("Mainspace Genfixes");
 
-                    // auto tag
-                    if (chkAutoTagger.Checked)
+                    if (!ApplyAutoTagging(
+                        theArticle,
+                        mainProcess))
                     {
-                        theArticle.AutoTag(Parser, Skip.SkipNoTag, restrictOrphanTaggingToolStripMenuItem.Checked);
-
-                        if (mainProcess && theArticle.SkipArticle)
-                            return;
+                        return;
                     }
 
                     Variables.Profiler.Profile("Auto-tagger");
@@ -3718,6 +3716,40 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             RemoveText);
 
         Variables.Profiler.Profile("Unicodify");
+    }
+
+    /// <summary>
+    /// Applies automatic maintenance tagging to the supplied article when the
+    /// feature is enabled.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when processing as part of the normal save workflow;
+    /// otherwise, <see langword="false"/> for operations such as reparsing, where
+    /// automatic tagging should not terminate processing.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when automatic tagging skips the article during the
+    /// main processing workflow.
+    /// </returns>
+    private bool ApplyAutoTagging(
+    Article article,
+    bool mainProcess)
+    {
+        if (!chkAutoTagger.Checked)
+        {
+            return true;
+        }
+
+        article.AutoTag(
+            Parser,
+            Skip.SkipNoTag,
+            restrictOrphanTaggingToolStripMenuItem.Checked);
+
+        return !(mainProcess && article.SkipArticle);
     }
 
     bool _diffAccessViolationSeen;
