@@ -33,58 +33,126 @@ using TrioList = System.Collections.ArrayList;
 
 namespace WikiFunctions;
 
+/// <summary>
+/// Represents the input sequences used by the diff algorithm.
+/// </summary>
 public interface IDiff : IEnumerable
 {
     IList Left { get; }
     IList Right { get; }
 }
 
+/// <summary>
+/// Represents a contiguous section of matching or differing elements
+/// produced by the diff algorithm.
+/// </summary>
+/// <remarks>
+/// A hunk contains the ranges from the original sequence and one or more
+/// modified sequences that correspond to the same region of the diff.
+/// </remarks>
 public abstract class Hunk
 {
+    /// <summary>
+    /// Prevents external construction of <see cref="Hunk"/> instances.
+    /// </summary>
     internal Hunk()
     {
     }
 
+    /// <summary>
+    /// Gets the number of modified sequences represented by this hunk.
+    /// </summary>
     public abstract int ChangedLists { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether this hunk contains identical content
+    /// in the original and modified sequences.
+    /// </summary>
     public abstract bool Same { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether this hunk represents a merge conflict.
+    /// </summary>
     public abstract bool Conflict { get; }
 
+    /// <summary>
+    /// Determines whether the specified modified sequence is identical to the
+    /// original sequence for this hunk.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based index of the modified sequence.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the specified sequence matches the original;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
     public abstract bool IsSame(int index);
 
+    /// <summary>
+    /// Gets the range from the original sequence represented by this hunk.
+    /// </summary>
     public abstract Range Original();
+
+    /// <summary>
+    /// Gets the range from the specified modified sequence represented by this hunk.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based index of the modified sequence.
+    /// </param>
+    /// <returns>
+    /// The corresponding range from the modified sequence.
+    /// </returns>
     public abstract Range Changes(int index);
 
+    /// <summary>
+    /// Gets the largest number of elements contained in any range represented
+    /// by this hunk.
+    /// </summary>
+    /// <returns>
+    /// The maximum number of elements in either the original range or any
+    /// modified range.
+    /// </returns>
     public int MaxLines()
     {
         int m = Original().Count;
         for (int i = 0; i < ChangedLists; i++)
+        {
             if (Changes(i).Count > m)
+            {
                 m = Changes(i).Count;
+            }
+        }
+
         return m;
     }
 }
 
+/// <summary>
+/// Computes the differences between two sequences using the
+/// Algorithm::Diff implementation adapted for AutoWikiBrowser.
+/// </summary>
 public class Diff : IDiff
 {
     internal IList left, right;
     private readonly IEqualityComparer comparer;
 
-    public IList Left
-    {
-        get { return left; }
-    }
+    public IList Left => left;
 
-    public IList Right
-    {
-        get { return right; }
-    }
+    public IList Right => right;
 
     private class Trio
     {
         public readonly Trio a;
         public readonly int b, c;
 
+        /// <summary>
+        /// Represents a node in the internal search structure used while
+        /// constructing the longest common subsequence.
+        /// </summary>
+        /// <remarks>
+        /// This is an implementation detail of the diff algorithm and is not
+        /// intended for use outside the <see cref="Diff"/> class.
+        /// </remarks>
         public Trio(Trio a, int b, int c)
         {
             this.a = a;
@@ -93,12 +161,45 @@ public class Diff : IDiff
         }
     }
 
+    /// <summary>
+    /// Represents a contiguous section of the diff between the original and
+    /// modified sequences.
+    /// </summary>
+    /// <remarks>
+    /// A <see cref="Hunk"/> stores the ranges from the original and modified
+    /// sequences that make up a single section of the generated diff.
+    /// </remarks>
     public class Hunk : WikiFunctions.Hunk
     {
         private IList left, right;
         private readonly int s1start, s1end, s2start, s2end;
         private readonly bool same;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Hunk"/> class.
+        /// </summary>
+        /// <param name="left">
+        /// The original input sequence.
+        /// </param>
+        /// <param name="right">
+        /// The modified input sequence.
+        /// </param>
+        /// <param name="s1start">
+        /// The inclusive start index within the original sequence.
+        /// </param>
+        /// <param name="s1end">
+        /// The inclusive end index within the original sequence.
+        /// </param>
+        /// <param name="s2start">
+        /// The inclusive start index within the modified sequence.
+        /// </param>
+        /// <param name="s2end">
+        /// The inclusive end index within the modified sequence.
+        /// </param>
+        /// <param name="same">
+        /// <see langword="true"/> if this hunk represents unchanged content;
+        /// otherwise, <see langword="false"/>.
+        /// </param>
         internal Hunk(IList left, IList right, int s1start, int s1end, int s2start, int s2end, bool same)
         {
             this.left = left;
@@ -110,33 +211,81 @@ public class Diff : IDiff
             this.same = same;
         }
 
+        /// <summary>
+        /// Updates the sequence references used by this hunk.
+        /// </summary>
+        /// <param name="left">
+        /// The original input sequence.
+        /// </param>
+        /// <param name="right">
+        /// The modified input sequence.
+        /// </param>
+        /// <remarks>
+        /// This method updates only the sequence references. The range indices
+        /// remain unchanged.
+        /// </remarks>
         internal void SetLists(IList left, IList right)
         {
             this.left = left;
             this.right = right;
         }
 
-        public override int ChangedLists
-        {
-            get { return 1; }
-        }
+        /// <summary>
+        /// Gets the number of modified sequences represented by this hunk.
+        /// </summary>
+        /// <remarks>
+        /// This implementation compares a single modified sequence against the
+        /// original sequence and therefore always returns <c>1</c>.
+        /// </remarks>
+        public override int ChangedLists => 1;
 
-        public override bool Same
-        {
-            get { return same; }
-        }
+        /// <summary>
+        /// Gets a value indicating whether this hunk represents identical content
+        /// in the original and modified sequences.
+        /// </summary>
+        public override bool Same => same;
 
-        public override bool Conflict
-        {
-            get { return false; }
-        }
+        /// <summary>
+        /// Gets a value indicating whether this hunk represents a merge conflict.
+        /// </summary>
+        /// <remarks>
+        /// This implementation performs a two-way comparison and therefore never
+        /// produces merge conflicts.
+        /// </remarks>
+        public override bool Conflict => false;
 
+        /// <summary>
+        /// Determines whether the specified modified sequence is identical to the
+        /// original sequence for this hunk.
+        /// </summary>
+        /// <param name="index">
+        /// The zero-based index of the modified sequence.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the specified sequence matches the original;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="index"/> is not zero.
+        /// </exception>
         public override bool IsSame(int index)
         {
-            if (index != 0) throw new ArgumentException();
+            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Same;
         }
 
+        /// <summary>
+        /// Gets the range represented by this hunk for the specified sequence.
+        /// </summary>
+        /// <param name="seq">
+        /// The sequence identifier. A value of <c>1</c> represents the original
+        /// sequence, and a value of <c>2</c> represents the modified sequence.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Range"/> describing the portion of the specified sequence
+        /// represented by this hunk. If the range is empty, a zero-length
+        /// <see cref="Range"/> is returned at the insertion point.
+        /// </returns>
         private Range get(int seq)
         {
             int start = (seq == 1 ? s1start : s2start);
@@ -149,24 +298,27 @@ public class Diff : IDiff
             return new Range(list, start, end - start + 1);
         }
 
-        public Range Left
-        {
-            get { return get(1); }
-        }
+        /// <summary>
+        /// Gets the range from the original sequence represented by this hunk.
+        /// </summary>
+        public Range Left => get(1);
 
-        public Range Right
-        {
-            get { return get(2); }
-        }
+        /// <summary>
+        /// Gets the range from the modified sequence represented by this hunk.
+        /// </summary>
+        public Range Right => get(2);
 
-        public override Range Original()
-        {
-            return Left;
-        }
+        /// <summary>
+        /// Gets the range from the original sequence represented by this hunk.
+        /// </summary>
+        /// <returns>
+        /// The corresponding range from the original sequence.
+        /// </returns>
+        public override Range Original() => Left;
 
         public override Range Changes(int index)
         {
-            if (index != 0) throw new ArgumentException();
+            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Right;
         }
 
@@ -306,6 +458,16 @@ public class Diff : IDiff
         return new Enumerator(this);
     }
 
+    /// <summary>
+    /// Returns a unified diff representation of this <see cref="Diff"/>.
+    /// </summary>
+    /// <returns>
+    /// A string containing the diff formatted using the unified diff format.
+    /// </returns>
+    /// <remarks>
+    /// The returned string is generated by <see cref="UnifiedDiff.WriteUnifiedDiff"/>
+    /// and is suitable for display or serialization.
+    /// </remarks>
     public override string ToString()
     {
         System.IO.StringWriter w = new System.IO.StringWriter();
@@ -313,6 +475,23 @@ public class Diff : IDiff
         return w.ToString();
     }
 
+    // TODO (Modernization):
+    // Replace the non-generic ArrayList and manual rightData array construction
+    // with generic collections such as List<Patch.Hunk> and List<object>.
+    // Preserve the current two-pass behavior unless profiling shows that a
+    // single-pass implementation would be beneficial.
+    /// <summary>
+    /// Creates a <see cref="Patch"/> representing the changes contained in this diff.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="Patch"/> that can be applied to the original sequence to
+    /// produce the modified sequence.
+    /// </returns>
+    /// <remarks>
+    /// The patch contains only the changed elements from the modified sequence.
+    /// Unchanged hunks retain their original positions but do not duplicate their
+    /// content in the patch data.
+    /// </remarks>
     public Patch CreatePatch()
     {
         int ctr = 0;
@@ -399,7 +578,15 @@ public class Diff : IDiff
     # This is where the bulk (75%) of the time is spent in this module, so
     # try to make it fast!
     */
+    // Perform a binary search to locate the insertion point for the specified
+    // value. If the value already exists, no change is made and -1 is returned.
+    // Otherwise, the next larger value is replaced. This is a performance-
+    // critical section of the diff algorithm, so keep the implementation
+    // efficient.
     // NOTE: Instead of returning undef, it returns -1.
+    // Performance-critical section.
+    // This binary search accounts for most of the execution time in the
+    // diff algorithm, so keep the implementation efficient.
     private int _replaceNextLargerWith(IntList array, int value, int high)
     {
         if (high <= 0)
@@ -627,15 +814,9 @@ public class Diff : IDiff
             }
         }
 
-        public bool MoveNext()
-        {
-            return next();
-        }
+        public bool MoveNext() => next();
 
-        public void Reset()
-        {
-            reset(0);
-        }
+        public void Reset() => reset(0);
 
         private void _ChkPos()
         {
@@ -698,20 +879,23 @@ public class Range : IList
         this.count = count;
     }
 
-    public int Start
-    {
-        get { return start; }
-    }
+    /// <summary>
+    /// Gets the zero-based starting index of the range.
+    /// </summary>
+    public int Start => start;
 
-    public int Count
-    {
-        get { return count; }
-    }
+    /// <summary>
+    /// Gets the number of elements in the range.
+    /// </summary>
+    public int Count => count;
 
-    public int End
-    {
-        get { return start + count - 1; }
-    }
+    /// <summary>
+    /// Gets the inclusive ending index of the range.
+    /// </summary>
+    /// <remarks>
+    /// The value is calculated as <c>Start + Count - 1</c>.
+    /// </remarks>
+    public int End => start + count - 1;
 
     private void Check()
     {
@@ -749,10 +933,7 @@ public class Range : IList
             this.list = list;
         }
 
-        public void Reset()
-        {
-            index = -1;
-        }
+        public void Reset() => index = -1;
 
         public bool MoveNext()
         {
@@ -760,10 +941,7 @@ public class Range : IList
             return index < list.Count;
         }
 
-        public object Current
-        {
-            get { return list[index]; }
-        }
+        public object Current => list[index];
     }
 
     // ICollection Functions
@@ -775,27 +953,18 @@ public class Range : IList
             array.SetValue(this[i], i + index);
     }
 
-    object ICollection.SyncRoot
-    {
-        get { return null; }
-    }
+    // TODO (Modernization):
+    // Review the explicit ICollection.SyncRoot implementation. Returning null is
+    // a legacy behavior that may no longer be appropriate.
+    object ICollection.SyncRoot => null;
 
-    bool ICollection.IsSynchronized
-    {
-        get { return false; }
-    }
+    bool ICollection.IsSynchronized => false;
 
     // IList Functions
 
-    bool IList.IsFixedSize
-    {
-        get { return true; }
-    }
+    bool IList.IsFixedSize => true;
 
-    bool IList.IsReadOnly
-    {
-        get { return true; }
-    }
+    bool IList.IsReadOnly => true;
 
     object IList.this[int index]
     {
