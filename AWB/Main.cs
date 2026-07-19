@@ -673,7 +673,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </remarks>
     private void InitializeBuildConfiguration()
     {
-        Debug();
+        EnableDebugMode();
         Release();
     }
 
@@ -6734,40 +6734,66 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
-
-
+    /// <summary>
+    /// Clears the current editor search state when the article text changes.
+    /// </summary>
+    /// <param name="sender">The control that raised the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtEdit_TextChanged(object sender, EventArgs e)
     {
         txtEdit.ResetFind();
-
-        // when highlight enabled reset back color for newly inserted text
-        /* TODO: does not work fully in that: focus always scrolls to current line unnecessarily
-         * text inserted at very end of text box goes before last character
-        if (highlightAllFindToolStripMenuItem.Checked)
-        {
-            txtEdit.SetEditBoxSelection(txtEdit.SelectionStart-1, 1);
-            txtEdit.SelectionBackColor = Color.White;
-            txtEdit.SetEditBoxSelection(txtEdit.SelectionStart+1, 1);
-            txtEdit.DeselectAll();
-        }
-         */
     }
 
+    /// <summary>
+    /// Searches the editor for the text or regular expression entered in the Find
+    /// box using the selected case-sensitivity and regular-expression options.
+    /// </summary>
+    /// <param name="sender">The control that raised the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnFind_Click(object sender, EventArgs e)
     {
+        if (txtFind.TextLength == 0)
+        {
+            return;
+        }
+
         EditBoxTab.SelectedTab = tpEdit;
-        txtEdit.Find(txtFind.Text, chkFindRegex.Checked, chkFindCaseSensitive.Checked, TheArticle.Name);
+
+        txtEdit.Find(
+            txtFind.Text,
+            chkFindRegex.Checked,
+            chkFindCaseSensitive.Checked,
+            TheArticle?.Name ?? string.Empty);
     }
 
+    /// <summary>
+    /// Clears the toolbar text box when its placeholder text is clicked.
+    /// </summary>
+    /// <param name="sender">The control that raised the event.</param>
+    /// <param name="e">The event data.</param>
     private void toolStripTextBox2_Click(object sender, EventArgs e)
     {
-        toolStripTextBox2.Text = "";
+        if (toolStripTextBox2.Text == "Placeholder text")
+        {
+            toolStripTextBox2.Clear();
+        }
     }
 
+    /// <summary>
+    /// Restricts the Go To Line text box to numeric input and navigates to the
+    /// requested line when the Enter key is pressed.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Information about the pressed key.
+    /// </param>
     private void toolStripTextBox2_KeyPress(
-       object sender,
-       KeyPressEventArgs e)
+        object sender,
+        KeyPressEventArgs e)
     {
+        // Allow digits, Backspace, and Enter only.
         if (!char.IsDigit(e.KeyChar) &&
             e.KeyChar != '\b' &&
             e.KeyChar != '\r')
@@ -6776,25 +6802,33 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        if (e.KeyChar == '\r')
+        if (e.KeyChar != '\r')
         {
-            e.Handled = true;
+            return;
+        }
 
-            if (int.TryParse(
-                    toolStripTextBox2.Text,
-                    out int lineNumber))
-            {
-                txtEdit.GoToLine(lineNumber);
-                mnuTextBox.Hide();
-            }
+        e.Handled = true;
+
+        if (int.TryParse(
+                toolStripTextBox2.Text,
+                out int lineNumber))
+        {
+            txtEdit.GoToLine(lineNumber);
+            mnuTextBox.Hide();
         }
     }
-    [Conditional("DEBUG")]
-    private void Debug()
+
+    /// <summary>
+    /// Enables AWB diagnostic features, exposes debugging menu commands, ensures
+    /// the AWB sandbox is available in the article list, and initializes profiling
+    /// when compiled in the Debug configuration.
+    /// </summary>
+    private void EnableDebugMode()
     {
         Tools.WriteDebugEnabled = true;
-        if (!listMaker.Contains(@"Wikipedia:AutoWikiBrowser/Sandbox") && !listMaker.Contains(@"Project:AutoWikiBrowser/Sandbox"))
-            listMaker.Add("Project:AutoWikiBrowser/Sandbox");
+
+        EnsureDebugSandboxIsAvailable();
+
         lblOnlyBots.Visible = false;
         bypassAllRedirectsToolStripMenuItem.Enabled = true;
 
@@ -6805,16 +6839,49 @@ font-size: 150%;'>No changes</h2>
         cEvalToolStripMenuItem.Visible = true;
 
 #if DEBUG
-        try
-        {
-            Variables.Profiler = new Profiler(Path.Combine(Application.StartupPath, "profiling.txt"), true);
-        }
-        catch
-        {
-            Variables.Profiler = new Profiler(Path.Combine(AwbDirs.UserData, "profiling.txt"), true);
-        }
+        InitializeDebugProfiler();
 #endif
     }
+
+    /// <summary>
+    /// Adds the AWB sandbox to the current list when neither recognized sandbox
+    /// title is already present.
+    /// </summary>
+    private void EnsureDebugSandboxIsAvailable()
+    {
+        bool containsSandbox =
+            listMaker.Contains(@"Wikipedia:AutoWikiBrowser/Sandbox") ||
+            listMaker.Contains(@"Project:AutoWikiBrowser/Sandbox");
+
+        if (!containsSandbox)
+        {
+            listMaker.Add("Project:AutoWikiBrowser/Sandbox");
+        }
+    }
+
+#if DEBUG
+    /// <summary>
+    /// Initializes the debug profiler, preferring the application directory and
+    /// falling back to the user data directory when that location is unavailable.
+    /// </summary>
+    private static void InitializeDebugProfiler()
+    {
+        string applicationPath =
+            Path.Combine(Application.StartupPath, "profiling.txt");
+
+        try
+        {
+            Variables.Profiler = new Profiler(applicationPath, true);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            string userDataPath =
+                Path.Combine(AwbDirs.UserData, "profiling.txt");
+
+            Variables.Profiler = new Profiler(userDataPath, true);
+        }
+    }
+#endif
 
     [Conditional("RELEASE")]
     private void Release()
