@@ -3453,23 +3453,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             Variables.Profiler.Profile("Files");
 
-            // disambiguation
-            if (!preParseModeToolStripMenuItem.Checked && chkEnableDab.Checked && txtDabLink.Text.Trim().Length > 0 &&
-                txtDabVariants.Text.Trim().Length > 0)
+            if (!ApplyDisambiguation(theArticle))
             {
-                if (theArticle.Disambiguate(TheSession, txtDabLink.Text.Trim(), txtDabVariants.Lines, BotMode,
-                                            (int)udContextChars.Value, chkSkipNoDab.Checked))
-                {
-                    if (theArticle.SkipArticle)
-                        return;
-                }
-                else
-                {
-                    Abort = true;
-                    Stop();
-                    return;
-                }
+                return;
             }
+
             Variables.Profiler.Profile("Disambiguate");
         }
         catch (Exception ex)
@@ -3750,6 +3738,44 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             restrictOrphanTaggingToolStripMenuItem.Checked);
 
         return !(mainProcess && article.SkipArticle);
+    }
+
+    /// <summary>
+    /// Applies the configured disambiguation processing to the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when processing has been stopped because the
+    /// article was skipped or disambiguation failed.
+    /// </returns>
+    private bool ApplyDisambiguation(Article article)
+    {
+        if (preParseModeToolStripMenuItem.Checked ||
+            !chkEnableDab.Checked ||
+            txtDabLink.Text.Trim().Length == 0 ||
+            txtDabVariants.Text.Trim().Length == 0)
+        {
+            return true;
+        }
+
+        if (article.Disambiguate(
+                TheSession,
+                txtDabLink.Text.Trim(),
+                txtDabVariants.Lines,
+                BotMode,
+                (int)udContextChars.Value,
+                chkSkipNoDab.Checked))
+        {
+            return !article.SkipArticle;
+        }
+
+        Abort = true;
+        Stop();
+
+        return false;
     }
 
     bool _diffAccessViolationSeen;
