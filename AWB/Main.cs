@@ -3352,18 +3352,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     return;
             }
 
-            // replace/add/remove categories
-            if (cmboCategorise.SelectedIndex != 0)
+            if (!ApplyCategorisationChanges(theArticle))
             {
-                theArticle.Categorisation((WikiFunctions.Options.CategorisationOptions)
-                                          cmboCategorise.SelectedIndex, Parser, chkSkipNoCatChange.Checked,
-                                          txtNewCategory.Text.Trim(),
-                                          txtNewCategory2.Text.Trim(), chkRemoveSortKey.Checked);
-                if (theArticle.SkipArticle)
-                    return;
-                else if (!chkGeneralFixes.Checked)
-                    theArticle.AWBChangeArticleText("Fix categories",
-                                                    Parsers.FixCategories(theArticle.ArticleText), true);
+                return;
             }
 
             Variables.Profiler.Profile("Categories");
@@ -3661,6 +3652,48 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             chkSkipNoImgChange.Checked);
 
         return !article.SkipArticle;
+    }
+
+    /// <summary>
+    /// Applies the configured categorization operation to the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to update.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when categorization skips the article.
+    /// </returns>
+    private bool ApplyCategorisationChanges(Article article)
+    {
+        if (cmboCategorise.SelectedIndex == 0)
+        {
+            return true;
+        }
+
+        article.Categorisation(
+            (WikiFunctions.Options.CategorisationOptions)
+            cmboCategorise.SelectedIndex,
+            Parser,
+            chkSkipNoCatChange.Checked,
+            txtNewCategory.Text.Trim(),
+            txtNewCategory2.Text.Trim(),
+            chkRemoveSortKey.Checked);
+
+        if (article.SkipArticle)
+        {
+            return false;
+        }
+
+        if (!chkGeneralFixes.Checked)
+        {
+            article.AWBChangeArticleText(
+                "Fix categories",
+                Parsers.FixCategories(article.ArticleText),
+                true);
+        }
+
+        return true;
     }
 
     bool _diffAccessViolationSeen;
