@@ -3380,23 +3380,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 {
                     if (chkGeneralFixes.Checked)
                     {
-                        if (!TemplateRedirectsLoaded)
-                        {
-                            LoadTemplateRedirects();
-                            Variables.Profiler.Profile("LoadTemplateRedirects");
-                        }
-
-                        if (!DatedTemplatesLoaded)
-                        {
-                            LoadDatedTemplates();
-                            Variables.Profiler.Profile("LoadDatedTemplates");
-                        }
-
-                        if (!RenamedTemplateParametersLoaded)
-                        {
-                            LoadRenameTemplateParameters();
-                            Variables.Profiler.Profile("LoadRenameTemplateParameters");
-                        }
+                        EnsureGeneralFixResourcesLoaded();
 
                         theArticle.PerformGeneralFixes(Parser, RemoveText, Skip,
                                                        replaceReferenceTagsToolStripMenuItem.Checked,
@@ -3604,6 +3588,30 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Variables.Profiler.Profile("Plugins");
 
         return true;
+    }
+
+    /// <summary>
+    /// Loads the supporting data required by the general-fixes pipeline.
+    /// </summary>
+    private void EnsureGeneralFixResourcesLoaded()
+    {
+        if (!TemplateRedirectsLoaded)
+        {
+            LoadTemplateRedirects();
+            Variables.Profiler.Profile("LoadTemplateRedirects");
+        }
+
+        if (!DatedTemplatesLoaded)
+        {
+            LoadDatedTemplates();
+            Variables.Profiler.Profile("LoadDatedTemplates");
+        }
+
+        if (!RenamedTemplateParametersLoaded)
+        {
+            LoadRenameTemplateParameters();
+            Variables.Profiler.Profile("LoadRenameTemplateParameters");
+        }
     }
 
     bool _diffAccessViolationSeen;
