@@ -5272,52 +5272,165 @@ font-size: 150%;'>No changes</h2>
     }
 #endif
 
-
-
+    // TODO (Architecture):
+    // Move the AWB summary-tag eligibility rules out of MainForm and into a
+    // dedicated summary or session policy component when UI logic is separated
+    // from edit-summary generation.
     /// <summary>
-    /// Appends (translation of) "using AWB" wikilinked summary tag to edit summary
+    /// Appends the localized AWB edit-summary tag when tagging is enabled for the
+    /// current user, wiki, and session.
     /// </summary>
-    /// <param name="summary">The current edit summary</param>
-    /// <returns>The updated edit summary</returns>
+    /// <param name="summary">
+    /// The edit summary to which the AWB tag may be appended.
+    /// </param>
+    /// <returns>
+    /// The trimmed edit summary with the AWB tag appended when required;
+    /// otherwise, the original summary.
+    /// </returns>
+    /// <remarks>
+    /// Bot users may suppress the tag through the corresponding option. The tag
+    /// is appended only on supported Wikimedia projects and when session-level
+    /// suppression has not been enabled.
+    /// </remarks>
     private string AppendUsingAWBSummary(string summary)
     {
-        if (!(TheSession.User.IsBot && chkSuppressTag.Checked)
-            && (Variables.IsWikimediaProject && !_suppressUsingAWB))
-            summary = Summary.Trim(summary) + Variables.SummaryTag;
+        bool suppressForBot =
+            TheSession.User.IsBot &&
+            chkSuppressTag.Checked;
 
-        return summary;
-    }
+        bool shouldAppendTag =
+            !suppressForBot &&
+            Variables.IsWikimediaProject &&
+            !_suppressUsingAWB;
 
-    private void chkFindandReplace_CheckedChanged(object sender, EventArgs e)
-    {
-        btnMoreFindAndReplce.Enabled = btnFindAndReplaceAdvanced.Enabled =
-            chkSkipWhenNoFAR.Enabled = chkSkipOnlyMinorFaR.Enabled = btnSubst.Enabled = chkFindandReplace.Checked;
-    }
-
-    private void chkSkipGeneralFixes_CheckedChanged(object sender, EventArgs e)
-    {
-        if (chkSkipGeneralFixes.Checked)
-            chkSkipMinorGeneralFixes.Enabled = chkSkipMinorGeneralFixes.Checked = false;
-        else
-            chkSkipMinorGeneralFixes.Enabled = true;
-    }
-
-    private void cmboCategorise_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        txtNewCategory.Enabled = chkSkipNoCatChange.Enabled = (cmboCategorise.SelectedIndex > 0);
-
-        if (cmboCategorise.SelectedIndex == 1)
+        if (!shouldAppendTag)
         {
-            label1.Text = "with Category:";
-            txtNewCategory2.Enabled = true;
-            chkRemoveSortKey.Enabled = true;
+            return summary;
         }
-        else
+
+        return Summary.Trim(summary) +
+               Variables.SummaryTag;
+    }
+
+    /// <summary>
+    /// Updates the availability of find-and-replace options when the main
+    /// find-and-replace option changes.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the checked-state change.
+    /// </param>
+    private void chkFindandReplace_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        bool findAndReplaceEnabled =
+            chkFindandReplace.Checked;
+
+        btnMoreFindAndReplce.Enabled =
+            findAndReplaceEnabled;
+
+        btnFindAndReplaceAdvanced.Enabled =
+            findAndReplaceEnabled;
+
+        chkSkipWhenNoFAR.Enabled =
+            findAndReplaceEnabled;
+
+        chkSkipOnlyMinorFaR.Enabled =
+            findAndReplaceEnabled;
+
+        btnSubst.Enabled =
+            findAndReplaceEnabled;
+    }
+
+    /// <summary>
+    /// Updates the minor-general-fixes option when skipping all general fixes is
+    /// enabled or disabled.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the checked-state change.
+    /// </param>
+    /// <remarks>
+    /// Selecting the option to skip all general fixes clears and disables the
+    /// option that skips only minor general fixes.
+    /// </remarks>
+    private void chkSkipGeneralFixes_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        bool skipGeneralFixes =
+            chkSkipGeneralFixes.Checked;
+
+        chkSkipMinorGeneralFixes.Enabled =
+            !skipGeneralFixes;
+
+        if (skipGeneralFixes)
         {
-            label1.Text = "";
-            txtNewCategory2.Enabled = false;
-            chkRemoveSortKey.Enabled = false;
+            chkSkipMinorGeneralFixes.Checked = false;
         }
+    }
+
+    // TODO (UI Maintainability):
+    // Replace categorization SelectedIndex checks with a named enum or typed
+    // selection model so behavior does not depend on the order of combo-box items.
+    //
+    // TODO (UI Modernization):
+    // Rename legacy designer controls such as label1 and
+    // btnMoreFindAndReplce to descriptive, consistently spelled names after the
+    // current migration work is complete.
+    //
+    // TODO (Localization):
+    // Move category-related UI text into application resources instead of
+    // assigning English text directly in the selection-change handler.
+    /// <summary>
+    /// Updates category-related controls when the selected categorization action
+    /// changes.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the selection change.
+    /// </param>
+    /// <remarks>
+    /// Category input and skip controls are enabled for any categorization action
+    /// other than the default selection. Secondary category and sort-key options
+    /// are available only for the category-replacement action at index 1.
+    /// </remarks>
+    private void cmboCategorise_SelectedIndexChanged(
+        object sender,
+        EventArgs e)
+    {
+        int selectedIndex =
+            cmboCategorise.SelectedIndex;
+
+        bool categorisationEnabled =
+            selectedIndex > 0;
+
+        bool replacingCategory =
+            selectedIndex == 1;
+
+        txtNewCategory.Enabled =
+            categorisationEnabled;
+
+        chkSkipNoCatChange.Enabled =
+            categorisationEnabled;
+
+        label1.Text =
+            replacingCategory
+                ? "with Category:"
+                : string.Empty;
+
+        txtNewCategory2.Enabled =
+            replacingCategory;
+
+        chkRemoveSortKey.Enabled =
+            replacingCategory;
     }
 
     private void UpdateBotStatus()
