@@ -4716,41 +4716,109 @@ font-size: 150%;'>No changes</h2>
 
     #endregion
 
+    // TODO (UI Modernization):
+    // Rename legacy designer controls such as panel1 and label8 to names that
+    // describe their purpose after the current migration work is complete.
+    /// <summary>
+    /// Toggles the visibility of the auxiliary panel and updates the corresponding
+    /// menu-item state.
+    /// </summary>
+    /// <remarks>
+    /// The browser layout is recalculated after the panel visibility changes.
+    /// </remarks>
     private void PanelShowHide()
     {
-        if (panel1.Visible) panel1.Hide();
-        else panel1.Show();
+        panel1.Visible = !panel1.Visible;
         showHidePanelToolStripMenuItem.Checked = panel1.Visible;
 
         SetBrowserSize();
     }
 
+    /// <summary>
+    /// Stores the article editor's location before the parameter panels are
+    /// hidden and the editor is enlarged.
+    /// </summary>
     private Point _oldPosition;
+
+    /// <summary>
+    /// Stores the article editor's size before the parameter panels are hidden
+    /// and the editor is enlarged.
+    /// </summary>
     private Size _oldSize;
+
+    /// <summary>
+    /// Toggles between the normal parameter layout and an enlarged article-editing
+    /// area.
+    /// </summary>
+    /// <remarks>
+    /// When the parameter controls are visible, their space is reassigned to the
+    /// article editor and the editor's original bounds are saved. When the
+    /// controls are restored, the saved editor bounds are reapplied.
+    /// </remarks>
     private void ParametersShowHide()
     {
-        enlargeEditAreaToolStripMenuItem.Checked = !enlargeEditAreaToolStripMenuItem.Checked;
-        if (listMaker.Visible)
+        bool parametersVisible = listMaker.Visible;
+
+        enlargeEditAreaToolStripMenuItem.Checked =
+            !enlargeEditAreaToolStripMenuItem.Checked;
+
+        if (parametersVisible)
         {
-            btntsShowHideParameters.Image = Resources.Showhideparameters2;
-
-            _oldPosition = EditBoxTab.Location;
-            EditBoxTab.Location = new Point(listMaker.Location.X, listMaker.Location.Y - 17);
-
-            _oldSize = EditBoxTab.Size;
-            EditBoxTab.Size = new Size((EditBoxTab.Size.Width + MainTab.Size.Width + listMaker.Size.Width + 8), EditBoxTab.Size.Height);
+            EnlargeEditorArea();
         }
         else
         {
-            btntsShowHideParameters.Image = Resources.Showhideparameters;
-
-            EditBoxTab.Location = _oldPosition;
-            EditBoxTab.Size = _oldSize;
+            RestoreEditorArea();
         }
-        listMaker.Visible = MainTab.Visible = !listMaker.Visible;
-        label8.Visible = listMaker.Visible;
+
+        bool showParameters = !parametersVisible;
+
+        listMaker.Visible = showParameters;
+        MainTab.Visible = showParameters;
+        label8.Visible = showParameters;
     }
 
+    /// <summary>
+    /// Saves the current editor bounds and enlarges the editor into the space
+    /// occupied by the parameter controls.
+    /// </summary>
+    private void EnlargeEditorArea()
+    {
+        btntsShowHideParameters.Image =
+            Resources.Showhideparameters2;
+
+        _oldPosition = EditBoxTab.Location;
+        _oldSize = EditBoxTab.Size;
+
+        EditBoxTab.Location = new Point(
+            listMaker.Location.X,
+            listMaker.Location.Y - 17);
+
+        EditBoxTab.Size = new Size(
+            EditBoxTab.Width +
+            MainTab.Width +
+            listMaker.Width +
+            8,
+            EditBoxTab.Height);
+    }
+
+    /// <summary>
+    /// Restores the editor bounds that were saved before the parameter controls
+    /// were hidden.
+    /// </summary>
+    private void RestoreEditorArea()
+    {
+        btntsShowHideParameters.Image =
+            Resources.Showhideparameters;
+
+        EditBoxTab.Location = _oldPosition;
+        EditBoxTab.Size = _oldSize;
+    }
+
+    /// <summary>
+    /// Refreshes the user identity and permission indicators displayed in the
+    /// status area.
+    /// </summary>
     private void UpdateStatusUI()
     {
         UpdateUserName();
@@ -4758,72 +4826,152 @@ font-size: 150%;'>No changes</h2>
         UpdateAdminStatus();
     }
 
+    // TODO (UI Modernization):
+    // Cache the bold and regular notification fonts instead of creating new
+    // Font instances each time the notification count is updated. This will
+    // reduce GDI object allocations and centralize font lifetime management.
+    // TODO (Globalization):
+    // Review whether the notification count should be formatted using the
+    // current UI culture or InvariantCulture. The current implementation uses
+    // the default integer formatting, which is appropriate for most UI scenarios.
+    /// <summary>
+    /// Updates the user notification indicator shown in the status area.
+    /// </summary>
+    /// <remarks>
+    /// The notification indicator is hidden when notifications are disabled.
+    /// Otherwise, the current notification count is displayed and the visual
+    /// appearance is updated to indicate whether any unread notifications exist.
+    /// </remarks>
     private void UpdateUserNotifications()
     {
+        lblUserNotifications.Visible = Variables.NotificationsEnabled;
+
         if (!Variables.NotificationsEnabled)
         {
-            lblUserNotifications.Visible = false;
             return;
         }
-        if (!lblUserNotifications.Visible)
-        {
-            lblUserNotifications.Visible = true;
-        }
 
-        lblUserNotifications.Text = TheSession.User.Notifications.ToString();
+        int notificationCount = TheSession.User.Notifications;
 
-        if (TheSession.User.Notifications > 0)
-        {
-            lblUserNotifications.BackColor = Color.Tomato;
-            lblUserNotifications.Font = new Font(lblUserNotifications.Font, FontStyle.Bold);
-        }
-        else
-        {
-            lblUserNotifications.BackColor = Color.Gray;
-            lblUserNotifications.Font = new Font(lblUserNotifications.Font, FontStyle.Regular);
-        }
+        lblUserNotifications.Text = notificationCount.ToString();
+
+        UpdateNotificationAppearance(notificationCount);
     }
 
+    /// <summary>
+    /// Updates the visual appearance of the notification indicator.
+    /// </summary>
+    /// <param name="notificationCount">
+    /// The current number of unread user notifications.
+    /// </param>
+    private void UpdateNotificationAppearance(int notificationCount)
+    {
+        bool hasNotifications = notificationCount > 0;
+
+        lblUserNotifications.BackColor =
+            hasNotifications
+                ? Color.Tomato
+                : Color.Gray;
+
+        lblUserNotifications.Font = new Font(
+            lblUserNotifications.Font,
+            hasNotifications
+                ? FontStyle.Bold
+                : FontStyle.Regular);
+    }
+
+    // TODO (UI Consistency):
+    // Verify whether the user-name foreground color should be explicitly reset
+    // when the session is no longer registered. The current behavior preserves
+    // the previously assigned foreground color.
+    /// <summary>
+    /// Updates the displayed user name and the controls that reflect the current
+    /// wiki registration status.
+    /// </summary>
+    /// <remarks>
+    /// When no user name is available, the localized user namespace name is
+    /// displayed when possible. Registered users are shown with the registered
+    /// status styling and may start processing; all other statuses disable the
+    /// Start button.
+    /// </remarks>
     private void UpdateUserName()
     {
-        if (string.IsNullOrEmpty(TheSession.User.Name))
+        string userName = TheSession.User.Name;
+
+        if (string.IsNullOrEmpty(userName))
         {
-            lblUserName.Text = Variables.Namespaces.ContainsKey(Namespace.User)
-                ? Variables.Namespaces[Namespace.User]
-                : "User:";
+            lblUserName.Text =
+                Variables.Namespaces.TryGetValue(
+                    Namespace.User,
+                    out string userNamespace)
+                    ? userNamespace
+                    : "User:";
         }
         else
         {
-            lblUserName.Text = TheSession.User.Name;
+            lblUserName.Text = userName;
         }
 
-        if (TheSession.Status == WikiStatusResult.Registered)
+        bool isRegistered =
+            TheSession.Status == WikiStatusResult.Registered;
+
+        lblUserName.BackColor =
+            isRegistered
+                ? Color.Green
+                : Color.Red;
+
+        if (isRegistered)
         {
-            lblUserName.BackColor = Color.Green;
             lblUserName.ForeColor = Color.White;
-            btnStart.Enabled = true;
         }
-        else
-        {
-            lblUserName.BackColor = Color.Red;
-            btnStart.Enabled = false;
-        }
+
+        btnStart.Enabled = isRegistered;
     }
 
-    private void UpdateListStatus(object sender, EventArgs e)
+    /// <summary>
+    /// Updates the main status display with the current list-maker status.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the status update.
+    /// </param>
+    private void UpdateListStatus(
+        object sender,
+        EventArgs e)
     {
         StatusLabelText = listMaker.Status;
     }
 
+    /// <summary>
+    /// Refreshes the typo statistics for the current article.
+    /// </summary>
     private void UpdateCurrentTypoStats()
     {
-        CurrentTypoStats.UpdateStats(TypoStats, false);
+        CurrentTypoStats.UpdateStats(
+            TypoStats,
+            false);
     }
 
+    /// <summary>
+    /// Refreshes the accumulated typo statistics and updates the displayed typo
+    /// count.
+    /// </summary>
+    /// <remarks>
+    /// Overall regular-expression typo statistics are updated only when the
+    /// regular-expression typo option is enabled. The displayed typo count is
+    /// refreshed regardless of that option.
+    /// </remarks>
     private void UpdateOverallTypoStats()
     {
         if (chkRegExTypo.Checked)
-            OverallTypoStats.UpdateStats(TypoStats, false);
+        {
+            OverallTypoStats.UpdateStats(
+                TypoStats,
+                false);
+        }
+
         UpdateTypoCount();
     }
 
