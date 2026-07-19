@@ -239,12 +239,12 @@ namespace WikiFunctions
         /// <param name="fileName"></param>
         public void Save(string fileName)
         {
+            ArgumentException.ThrowIfNullOrEmpty(fileName);
+
             FileName = fileName;
 
-            using (FileStream fs = File.OpenWrite(fileName))
-            {
-                Save(fs);
-            }
+            using FileStream stream = File.Create(fileName);
+            Save(stream);
         }
 
         /// <summary>

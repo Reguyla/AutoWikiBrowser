@@ -41,11 +41,11 @@
     <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
   </PropertyGroup>
 	<ItemGroup>
-		<Reference Include="Microsoft.mshtml">
-			<HintPath>$(WINDIR)\assembly\GAC\Microsoft.mshtml\7.0.3300.0__b03f5f7f11d50a3a\Microsoft.mshtml.dll</HintPath>
-			<EmbedInteropTypes>false</EmbedInteropTypes>
-			<Private>false</Private>
-		</Reference>
+<Reference Include="Microsoft.mshtml">
+  <HintPath>$(WINDIR)\assembly\GAC\Microsoft.mshtml\7.0.3300.0__b03f5f7f11d50a3a\Microsoft.mshtml.dll</HintPath>
+  <EmbedInteropTypes>false</EmbedInteropTypes>
+  <Private>true</Private>
+</Reference>
 	</ItemGroup>
   <ItemGroup>
     <Compile Update="AWBWebBrowser.cs" />
