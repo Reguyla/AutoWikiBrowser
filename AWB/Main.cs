@@ -5849,46 +5849,63 @@ font-size: 150%;'>No changes</h2>
                 : RightToLeft.No;
     }
 
+    // TODO (UI Consistency):
+    // Verify that lblUserName.BackColor is restored after a later successful
+    // status check so the old-version error state does not persist.
+    //
+    // TODO (Localization):
+    // Move the old-version message and caption into application resources.
+    //
+    // TODO (Client Validation Architecture):
+    // Return a structured client-version validation result instead of handling
+    // update prompts and UI disabling directly inside MainForm.
+    /// <summary>
+    /// Handles an unsupported or disabled AWB version by disabling editing and
+    /// offering the user automatic or manual update options.
+    /// </summary>
+    /// <remarks>
+    /// Choosing automatic update launches the updater. Choosing manual update
+    /// opens the AWB download page. Cancelling leaves the application open with
+    /// editing disabled.
+    /// </remarks>
     private void OldVersion()
     {
         lblUserName.BackColor = Color.Red;
         DisableButtons();
 
-        switch (
-            MessageBox.Show(
-                "This version of AWB is not enabled, please download the newest version. If you have the newest version, check that Wikipedia is online.\r\n\r\nPlease press \"Yes\" to run the AutoUpdater, \"No\" to load the download page and update manually, or \"Cancel\" to not update (but you will not be able to edit).",
-                "Problem", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information))
+        DialogResult result = MessageBox.Show(
+            "This version of AWB is not enabled, please download the newest " +
+            "version. If you have the newest version, check that Wikipedia is " +
+            "online.\r\n\r\n" +
+            "Please press \"Yes\" to run the AutoUpdater, \"No\" to load the " +
+            "download page and update manually, or \"Cancel\" to not update " +
+            "(but you will not be able to edit).",
+            "Problem",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Information);
+
+        switch (result)
         {
             case DialogResult.Yes:
                 RunUpdater();
                 break;
 
             case DialogResult.No:
-                Tools.OpenURLInBrowser(
-                    "https://sourceforge.net/projects/autowikibrowser/files/");
+                OpenManualUpdatePage();
                 break;
         }
     }
 
-    private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+    // TODO (Updater Modernization):
+    // Move the manual update URL into the updater configuration or a centralized
+    // application constant so update destinations are not embedded in MainForm.
+    /// <summary>
+    /// Opens the AWB download page for a manual update.
+    /// </summary>
+    private static void OpenManualUpdatePage()
     {
-        CloseAWB();
-    }
-
-    private void CloseAWB()
-    {
-        Close();
-    }
-
-    private void chkAppend_CheckedChanged(object sender, EventArgs e)
-    {
-        txtAppendMessage.Enabled = rdoAppend.Enabled = rdoPrepend.Enabled =
-            udNewlineChars.Enabled = lblUse.Enabled = lblNewlineCharacters.Enabled = chkAppendMetaDataSort.Enabled = chkAppend.Checked;
-    }
-
-    private void wordWrapToolStripMenuItem1_Click(object sender, EventArgs e)
-    {
-        txtEdit.WordWrap = wordWrapToolStripMenuItem1.Checked;
+        Tools.OpenURLInBrowser(
+            "https://sourceforge.net/projects/autowikibrowser/files/");
     }
 
     private void CategoryLeave(object sender, EventArgs e)
@@ -5904,6 +5921,91 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO (Shutdown Architecture):
+    // Consolidate all application-close entry points through a single named
+    // shutdown command if additional pre-close behavior is introduced.
+    /// <summary>
+    /// Closes the application when the Exit menu item is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu selection.
+    /// </param>
+    private void exitToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
+    {
+        CloseAWB();
+    }
+
+    /// <summary>
+    /// Initiates the normal application close workflow.
+    /// </summary>
+    private void CloseAWB()
+    {
+        Close();
+    }
+
+    // TODO (UI Maintainability):
+    // Group append-related controls in a dedicated container or helper so their
+    // enabled state can be updated as a single logical unit.
+    /// <summary>
+    /// Updates append and prepend controls when article text appending is enabled
+    /// or disabled.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the checked-state change.
+    /// </param>
+    private void chkAppend_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        bool appendEnabled = chkAppend.Checked;
+
+        txtAppendMessage.Enabled = appendEnabled;
+        rdoAppend.Enabled = appendEnabled;
+        rdoPrepend.Enabled = appendEnabled;
+        udNewlineChars.Enabled = appendEnabled;
+        lblUse.Enabled = appendEnabled;
+        lblNewlineCharacters.Enabled = appendEnabled;
+        chkAppendMetaDataSort.Enabled = appendEnabled;
+    }
+
+    // TODO (UI Modernization):
+    // Rename wordWrapToolStripMenuItem1 to a descriptive name and verify whether
+    // duplicate word-wrap controls should share a single command or checked state.
+    /// <summary>
+    /// Applies the selected word-wrap setting to the article editor.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu selection.
+    /// </param>
+    private void wordWrapToolStripMenuItem1_Click(
+        object sender,
+        EventArgs e)
+    {
+        txtEdit.WordWrap =
+            wordWrapToolStripMenuItem1.Checked;
+    }
+
+    // TODO (Localization):
+    // Move article statistics labels into application resources so they can be
+    // localized independently of the application code.
+    //
+    // TODO (Documentation):
+    // Document the meaning of "Dates O/I/A" or replace it with clearer
+    // terminology if the UI is modernized.
+    /// <summary>
+    /// Label prefixes used when displaying article analysis statistics.
+    /// </summary>
     private const string Words = "Words: ",
     Cats = "Categories: ",
     Imgs = "Images: ",
