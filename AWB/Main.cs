@@ -6208,14 +6208,7 @@ font-size: 150%;'>No changes</h2>
                 }
             }
 
-            // Check for {{sic}} tags and similar markup when performing typo fixes.
-            if ((hasAlertsOn
-                 || alertPreferences.Contains(2)
-                 || chkRegExTypo.Checked)
-                && TheArticle.HasSicTag)
-            {
-                lbAlerts.Items.Add("Contains 'sic' tag");
-            }
+            EvaluateSicTagAlert(hasAlertsOn);
 
             // Check for links to user or user-talk namespaces in article content.
             if ((hasAlertsOn || alertPreferences.Contains(22))
@@ -6237,11 +6230,7 @@ font-size: 150%;'>No changes</h2>
             lblLinks.Text = Links + Tools.LinkCount(articleText);
             lblInterLinks.Text = IWLinks + Tools.InterwikiCount(articleText);
 
-            // for date types count ignore images and URLs
-            string articleTextNoImagesURLs = WikiRegexes.ExternalLinksHTTPOnlyQuick.Replace(Tools.ReplaceWithSpaces(articleText, imagesMC), "");
-            Dictionary<Parsers.DateLocale, int> results = Tools.DatesCount(articleTextNoImagesURLs);
-
-            lblDates.Text = Dates + results[Parsers.DateLocale.ISO] + "/" + results[Parsers.DateLocale.International] + "/" + results[Parsers.DateLocale.American];
+            UpdateDateStatistics(articleText, imagesMC);
 
             UpdateDuplicateWikilinks(articleText);
         }
@@ -6313,6 +6302,62 @@ font-size: 150%;'>No changes</h2>
         // Get all the links, ignoring commented-out text and similar markup.
         lbDuplicateWikilinks.Items.AddRange(
             Tools.DuplicateWikiLinks(articleText).ToArray());
+    }
+
+    /// <summary>
+    /// Adds an alert when the current article contains a <c>{{sic}}</c> tag or
+    /// similar markup and the corresponding alert should be evaluated.
+    /// </summary>
+    /// <param name="hasAlertsOn">
+    /// <see langword="true"/> when all article alerts are enabled because no
+    /// individual alert preferences are selected.
+    /// </param>
+    /// <remarks>
+    /// The alert is also evaluated whenever RegExTypoFix is enabled, even when
+    /// the individual <c>sic</c> alert preference is disabled.
+    /// </remarks>
+    private void EvaluateSicTagAlert(bool hasAlertsOn)
+    {
+        bool shouldEvaluate =
+            hasAlertsOn ||
+            alertPreferences.Contains(2) ||
+            chkRegExTypo.Checked;
+
+        if (shouldEvaluate && TheArticle.HasSicTag)
+        {
+            lbAlerts.Items.Add("Contains 'sic' tag");
+        }
+    }
+
+    /// <summary>
+    /// Calculates and displays the article's date format statistics.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to analyze.
+    /// </param>
+    /// <param name="images">
+    /// The image matches that should be ignored when counting date formats.
+    /// </param>
+    private void UpdateDateStatistics(
+        string articleText,
+        MatchCollection images)
+    {
+        // For date type counts, ignore images and external URLs.
+        string articleTextNoImagesUrls =
+            WikiRegexes.ExternalLinksHTTPOnlyQuick.Replace(
+                Tools.ReplaceWithSpaces(articleText, images),
+                "");
+
+        Dictionary<Parsers.DateLocale, int> results =
+            Tools.DatesCount(articleTextNoImagesUrls);
+
+        lblDates.Text =
+            Dates +
+            results[Parsers.DateLocale.ISO] +
+            "/" +
+            results[Parsers.DateLocale.International] +
+            "/" +
+            results[Parsers.DateLocale.American];
     }
 
 
