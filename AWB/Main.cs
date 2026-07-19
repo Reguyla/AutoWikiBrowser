@@ -3326,31 +3326,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             Variables.Profiler.Profile("Initial skip checks");
 
-            if (CModule.ModuleUsable)
+            if (!RunExtensionProcessing(theArticle))
             {
-                theArticle.SendPageToCustomModule(CModule.Module);
-                if (theArticle.SkipArticle) return;
+                return;
             }
-
-            Variables.Profiler.Profile("Custom module");
-
-            if (ExtProgram.ModuleEnabled)
-            {
-                theArticle.SendPageToCustomModule(ExtProgram);
-                if (theArticle.SkipArticle) return;
-            }
-
-            Variables.Profiler.Profile("External Program");
-
-            if (Plugin.AWBPlugins.Any())
-            {
-                foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
-                {
-                    theArticle.SendPageToPlugin(a.Value, this);
-                    if (theArticle.SkipArticle) return;
-                }
-            }
-            Variables.Profiler.Profile("Plugins");
 
             // unicodify whole article
             if (process && chkUnicodifyWhole.Checked)
@@ -3570,6 +3549,61 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             Variables.Profiler.Flush();
         }
+    }
+
+    /// <summary>
+    /// Runs the configured custom module, external program, and plugins for the
+    /// supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to pass through the configured extension pipeline.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when extension processing completes without
+    /// skipping the article; otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool RunExtensionProcessing(Article article)
+    {
+        if (CModule.ModuleUsable)
+        {
+            article.SendPageToCustomModule(CModule.Module);
+
+            if (article.SkipArticle)
+            {
+                return false;
+            }
+        }
+
+        Variables.Profiler.Profile("Custom module");
+
+        if (ExtProgram.ModuleEnabled)
+        {
+            article.SendPageToCustomModule(ExtProgram);
+
+            if (article.SkipArticle)
+            {
+                return false;
+            }
+        }
+
+        Variables.Profiler.Profile("External Program");
+
+        if (Plugin.AWBPlugins.Any())
+        {
+            foreach (KeyValuePair<string, IAWBPlugin> plugin in Plugin.AWBPlugins)
+            {
+                article.SendPageToPlugin(plugin.Value, this);
+
+                if (article.SkipArticle)
+                {
+                    return false;
+                }
+            }
+        }
+
+        Variables.Profiler.Profile("Plugins");
+
+        return true;
     }
 
     bool _diffAccessViolationSeen;
