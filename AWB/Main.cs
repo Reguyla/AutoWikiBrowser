@@ -3018,26 +3018,48 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         TheSession.Editor.SynchronousEditor.ClearNewMessages();
     }
 
+    /// <summary>
+    /// Stops processing and informs the user that the current account does not
+    /// have permission to perform automatic edits on the active wiki.
+    /// </summary>
     private void NoWriteApiRight()
     {
         Stop();
-        MessageBox.Show(this,
-                        "This user doesn't have enough privileges to make automatic edits on this wiki.",
-                        "Permission error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+        MessageBox.Show(
+            this,
+            "This user doesn't have enough privileges to make automatic edits on this wiki.",
+            "Permission error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
     }
 
+    // TODO (.NET 8 Modernization):
+    // Narrow this exception handling once the expected API and session failure
+    // types are known. Catching all exceptions can hide programming errors and
+    // makes load failures difficult to classify.
+    /// <summary>
+    /// Validates the loaded API page state and determines whether article
+    /// processing may continue.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when the page was skipped, new messages were
+    /// handled, or validation failed.
+    /// </returns>
     private bool LoadSuccessApi()
     {
         try
         {
-            if (!TheSession.Editor.Page.Exists && radSkipNonExistent.Checked)
+            bool pageExists = TheSession.Editor.Page.Exists;
+
+            if (!pageExists && radSkipNonExistent.Checked)
             {
                 SkipPage("Non-existent page");
                 return false;
             }
 
-            if (TheSession.Editor.Page.Exists && radSkipExistent.Checked)
+            if (pageExists && radSkipExistent.Checked)
             {
                 SkipPage("Existing page");
                 return false;
@@ -3060,73 +3082,111 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    private void PageSaved(AsyncApiEdit sender, SaveInfo saveInfo)
+    // TODO (.NET 8 Modernization):
+    // Confirm whether the NumberOfEdits > 5 check is still required. Combined
+    // with NumberOfEdits % 10 == 0, the first automatic save already occurs at
+    // ten successful edits.
+    /// <summary>
+    /// Completes post-save processing after an article has been saved successfully.
+    /// </summary>
+    /// <param name="sender">
+    /// The API editor that completed the save operation.
+    /// </param>
+    /// <param name="saveInfo">
+    /// Information returned by the successful save operation.
+    /// </param>
+    private void PageSaved(
+        AsyncApiEdit sender,
+        SaveInfo saveInfo)
     {
         ClearBrowser();
-        txtEdit.Text = "";
+        txtEdit.Clear();
 
-        // lower restart delay
+        // Gradually reduce the retry delay after successful saves.
         if (_restartDelay > 5)
-            _restartDelay -= 1;
+        {
+            _restartDelay--;
+        }
 
         NumberOfEdits++;
+        LastArticle = string.Empty;
 
-        LastArticle = "";
         listMaker.Remove(TheArticle);
+
         NudgeTimer.Stop();
         SameArticleNudges = 0;
+
         if (EditBoxTab.SelectedTab == tpHistory)
+        {
             EditBoxTab.SelectedTab = tpEdit;
+        }
+
         if (loggingEnabled)
         {
             TheArticle.LogListener.NewId = saveInfo.NewId;
             TheArticle.LogListener.URLLong = Variables.URLLong;
-            logControl.AddLog(false, TheArticle.LogListener);
+
+            logControl.AddLog(
+                false,
+                TheArticle.LogListener);
         }
+
         UpdateOverallTypoStats();
 
-        if (!listMaker.Any() && _autoSaveEditBoxEnabled)
+        if (!listMaker.Any() &&
+            _autoSaveEditBoxEnabled)
+        {
             EditBoxSaveTimer.Enabled = false;
+        }
+
         Retries = 0;
 
-        // if user has loaded a settings file, save it every 10 edits if autosavesettings is set
-        if (autoSaveSettingsToolStripMenuItem.Checked && (NumberOfEdits % 10 == 0) && !string.IsNullOrEmpty(SettingsFile) && (NumberOfEdits > 5))
+        // Persist the active settings file after every ten successful edits when
+        // automatic settings saving is enabled.
+        if (ShouldAutoSaveSettings())
+        {
             SavePrefs(SettingsFile);
+        }
 
         Start();
     }
 
+    /// <summary>
+    /// Determines whether the current settings file should be automatically saved.
+    /// </summary>
+    private bool ShouldAutoSaveSettings()
+    {
+        return autoSaveSettingsToolStripMenuItem.Checked
+            && NumberOfEdits % 10 == 0
+            && !string.IsNullOrEmpty(SettingsFile);
+    }
+
+
+    /// <summary>
+    /// Completes a page skip when the skip reason has already been recorded.
+    /// </summary>
+    /// <remarks>
+    /// Resets the editor and timers, removes the current article from the list,
+    /// records the skip when logging is enabled, and continues processing the next
+    /// article. Processing is stopped when the article cannot be removed safely.
+    /// </remarks>
     private void SkipPageReasonAlreadyProvided()
     {
         try
         {
-            TheSession.Editor.Reset();
-            // reset timer.
-            NumberOfIgnoredEdits++;
-            StopDelayedAutoSaveTimer();
-            NudgeTimer.Stop();
-            txtEdit.Text = "";
+            ResetSkippedPageState();
 
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_15#Endless_cycle_of_loading_and_skipping
-            bool successfullyremoved = listMaker.Remove(TheArticle);
+            bool articleRemoved = listMaker.Remove(TheArticle);
 
             SameArticleNudges = 0;
 
-            if (!successfullyremoved)
+            if (!articleRemoved)
             {
-                TheArticle = null;
-                MessageBox.Show("AWB failed to automatically remove the page from the list while skipping the page. Please remove it manually.", "Page removal from list failed", MessageBoxButtons.OK,
-                                MessageBoxIcon.Exclamation);
-                Stop();
+                HandleSkippedPageRemovalFailure();
+                return;
             }
-            else
-            {
-                if (loggingEnabled)
-                    logControl.AddLog(true, TheArticle.LogListener);
-                TheArticle = null;
-                Retries = 0;
-                Start();
-            }
+
+            CompleteSuccessfulPageSkip();
         }
         catch (Exception ex)
         {
@@ -3134,6 +3194,74 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    // TODO (.NET 8 Modernization):
+    // Define consistent recovery behavior for failures during page-skip cleanup.
+    // An exception after partially resetting editor, timer, or article state may
+    // leave the workflow unable to continue safely.
+    /// <summary>
+    /// Resets editor, timer, and counter state before removing a skipped article.
+    /// </summary>
+    private void ResetSkippedPageState()
+    {
+        TheSession.Editor.Reset();
+
+        NumberOfIgnoredEdits++;
+        StopDelayedAutoSaveTimer();
+        NudgeTimer.Stop();
+        txtEdit.Clear();
+    }
+
+    /// <summary>
+    /// Handles failure to remove a skipped article from the active list.
+    /// </summary>
+    private void HandleSkippedPageRemovalFailure()
+    {
+        // Historical safeguard against repeatedly loading and skipping the same
+        // article when automatic list removal fails.
+        TheArticle = null;
+
+        MessageBox.Show(
+            this,
+            "AWB failed to automatically remove the page from the list while "
+            + "skipping the page. Please remove it manually.",
+            "Page removal from list failed",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Exclamation);
+
+        Stop();
+    }
+
+    /// <summary>
+    /// Records a successful skip, clears the current article, and continues
+    /// processing.
+    /// </summary>
+    private void CompleteSuccessfulPageSkip()
+    {
+        if (loggingEnabled)
+        {
+            logControl.AddLog(
+                true,
+                TheArticle.LogListener);
+        }
+
+        TheArticle = null;
+        Retries = 0;
+
+        Start();
+    }
+
+    // TODO (.NET 8 Modernization):
+    // Replace the string-based skip source with a strongly typed enum or separate
+    // methods so user, plugin, and AWB skips cannot be misclassified by a typo.
+    /// <summary>
+    /// Records the supplied skip reason for the current article and completes the
+    /// page-skip workflow.
+    /// </summary>
+    /// <param name="reason">
+    /// The skip source or reason. The values <c>user</c> and <c>plugin</c> are
+    /// recorded through their dedicated trace methods; all other non-empty values
+    /// are recorded as AWB skip reasons.
+    /// </param>
     private void SkipPage(string reason)
     {
         if (TheArticle == null)
@@ -3154,7 +3282,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             default:
                 if (!string.IsNullOrEmpty(reason))
+                {
                     TheArticle.Trace.AWBSkipped(reason);
+                }
+
                 break;
         }
 
