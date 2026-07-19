@@ -5017,56 +5017,106 @@ font-size: 150%;'>No changes</h2>
         UpdateTypoCount();
     }
 
-    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+    // TODO (Shutdown Modernization):
+    // Review whether persistent settings should be saved when the user cancels
+    // the closing request, and whether CloseDownAWB() should run for shutdown
+    // reasons that cannot be cancelled, such as Windows session termination.
+    /// <summary>
+    /// Handles the form-closing request, saves persistent settings, and optionally
+    /// asks the user to confirm that AWB should terminate.
+    /// </summary>
+    /// <param name="sender">
+    /// The object that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The form-closing event data, which may be updated to cancel closing.
+    /// </param>
+    /// <remarks>
+    /// Window settings are saved even when the user cancels the closing request,
+    /// preserving the existing behavior.
+    /// </remarks>
+    private void MainForm_FormClosing(
+        object sender,
+        FormClosingEventArgs e)
     {
-        ExitQuestion dlg = null;
+        SaveWindowSettings();
 
-        Properties.Settings.Default.WindowState = WindowState;
-
-        if (WindowState == FormWindowState.Normal)
+        if (!Properties.Settings.Default.AskForTerminate)
         {
-            Properties.Settings.Default.WindowSize = Size;
-            Properties.Settings.Default.WindowLocation = Location;
-        }
-        else
-        {
-            Properties.Settings.Default.WindowSize = RestoreBounds.Size;
-            Properties.Settings.Default.WindowLocation = RestoreBounds.Location;
+            Properties.Settings.Default.Save();
+            CloseDownAWB();
+            return;
         }
 
-        if (Properties.Settings.Default.AskForTerminate)
-        {
-            TimeSpan elapsedTime = _sessionTimer.Elapsed;
-            dlg = new ExitQuestion(elapsedTime, NumberOfEdits, string.Empty);
-            dlg.ShowDialog(this);
-            Properties.Settings.Default.AskForTerminate = !dlg.CheckBoxDontAskAgain;
-        }
+        TimeSpan elapsedTime = _sessionTimer.Elapsed;
 
-        // save user persistent settings
+        using ExitQuestion dialog = new ExitQuestion(
+            elapsedTime,
+            NumberOfEdits,
+            string.Empty);
+
+        DialogResult result = dialog.ShowDialog(this);
+
+        Properties.Settings.Default.AskForTerminate =
+            !dialog.CheckBoxDontAskAgain;
+
+        // Preserve user settings even when closing is cancelled.
         Properties.Settings.Default.Save();
 
-        if (dlg != null)
+        switch (result)
         {
-            switch (dlg.DialogResult)
-            {
-                case DialogResult.OK:
-                    CloseDownAWB();
-                    break;
-                case DialogResult.Cancel:
-                    e.Cancel = true;
-                    break;
-            }
-        }
-        else if (!Properties.Settings.Default.AskForTerminate)
-        {
-            CloseDownAWB();
-        }
-        else
-        {
-            e.Cancel = true;
+            case DialogResult.OK:
+                CloseDownAWB();
+                break;
+
+            case DialogResult.Cancel:
+                e.Cancel = true;
+                break;
         }
     }
 
+    /// <summary>
+    /// Stores the current form state, size, and location in the user settings.
+    /// </summary>
+    /// <remarks>
+    /// When the form is minimized or maximized, its restored bounds are stored so
+    /// that the next session opens using the normal window size and position.
+    /// </remarks>
+    private void SaveWindowSettings()
+    {
+        Properties.Settings.Default.WindowState =
+            WindowState;
+
+        if (WindowState == FormWindowState.Normal)
+        {
+            Properties.Settings.Default.WindowSize =
+                Size;
+
+            Properties.Settings.Default.WindowLocation =
+                Location;
+
+            return;
+        }
+
+        Properties.Settings.Default.WindowSize =
+            RestoreBounds.Size;
+
+        Properties.Settings.Default.WindowLocation =
+            RestoreBounds.Location;
+    }
+
+    // TODO (Shutdown Reliability):
+    // Review whether shutdown operations should be isolated so that a failure in
+    // editor cancellation, settings persistence, or usage-stat recording does not
+    // prevent the remaining cleanup steps from completing.
+    /// <summary>
+    /// Performs the one-time application shutdown cleanup for AWB.
+    /// </summary>
+    /// <remarks>
+    /// The method prevents duplicate shutdown processing, aborts any active editor
+    /// operation when a session is available, saves recent settings, records final
+    /// usage statistics, and disposes the notification-area icon.
+    /// </remarks>
     private void CloseDownAWB()
     {
         if (ShuttingDown)
@@ -5076,15 +5126,32 @@ font-size: 150%;'>No changes</h2>
 
         ShuttingDown = true;
 
-        // TheSession can be null if AWB encounters network problems on startup
-        if (TheSession != null)
-        {
-            TheSession.Editor.Abort();
-        }
-
+        AbortActiveEditorOperation();
         SaveRecentSettingsList();
         UsageStats.Do(true);
+        DisposeTrayIcon();
+    }
 
+    // TODO (AsyncApiEdit Modernization):
+    // Replace the legacy editor Abort() call with cooperative cancellation when
+    // the MainForm shutdown workflow is migrated to AsyncApiEditModern.
+    /// <summary>
+    /// Aborts the active editor operation when a session was created successfully.
+    /// </summary>
+    /// <remarks>
+    /// The session may be unavailable when startup fails before initialization is
+    /// complete, such as after an early network error.
+    /// </remarks>
+    private void AbortActiveEditorOperation()
+    {
+        TheSession?.Editor.Abort();
+    }
+
+    /// <summary>
+    /// Hides and disposes the notification-area icon during application shutdown.
+    /// </summary>
+    private void DisposeTrayIcon()
+    {
         ntfyTray.Visible = false;
         ntfyTray.Dispose();
     }
