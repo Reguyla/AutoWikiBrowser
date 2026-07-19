@@ -4017,24 +4017,56 @@ font-size: 150%;'>No changes</h2>
         Tools.OpenURLInBrowser(externalUrl);
     }
 
+    /// <summary>
+    /// Requests a preview of the current editor contents for the active article.
+    /// </summary>
+    /// <remarks>
+    /// If no article is loaded, the surrounding controls are disabled. A preview
+    /// request is started only when the session editor is not already processing
+    /// another operation.
+    /// </remarks>
     private void GetPreview()
     {
-        if (TheArticle == null)
+        Article article = TheArticle;
+
+        if (article == null)
         {
             DisableButtons();
             return;
         }
 
-        if (!TheSession.Editor.IsActive)
+        if (TheSession.Editor.IsActive)
         {
-            StatusLabelText = "Previewing...";
-            TheSession.Editor.Preview(TheArticle.Name, txtEdit.Text);
-        }
-        else
             StatusLabelText = "Editor busy";
+            return;
+        }
+
+        StatusLabelText = "Previewing...";
+
+        TheSession.Editor.Preview(
+            article.Name,
+            txtEdit.Text);
     }
 
-    private void PreviewComplete(AsyncApiEdit sender, string result)
+    /// <summary>
+    /// Handles completion of an asynchronous preview request and displays the
+    /// returned HTML in the preview browser.
+    /// </summary>
+    /// <param name="sender">
+    /// The editor that completed the preview request.
+    /// </param>
+    /// <param name="result">
+    /// The rendered preview HTML returned by the wiki API.
+    /// </param>
+    /// <remarks>
+    /// The method records the current editor text, marks the page as no longer
+    /// skippable, refreshes the browser document when available, restores the
+    /// browser mouse-move handler, clears the status message, and updates the
+    /// surrounding user interface.
+    /// </remarks>
+    private void PreviewComplete(
+        AsyncApiEdit sender,
+        string result)
     {
         LastArticle = txtEdit.Text;
         Skippable = false;
@@ -4044,13 +4076,7 @@ font-size: 150%;'>No changes</h2>
         if (document != null)
         {
             document.OpenNew(false);
-
-            document.Write(
-                "<html><head>" +
-                sender.HtmlHeaders +
-                "</head><body style=\"background:white; margin:10px; text-align:left;\">" +
-                result +
-                "</body></html>");
+            document.Write(BuildPreviewHtml(sender, result));
 
             document.MouseMove -= Document_MouseMove;
             document.MouseMove += Document_MouseMove;
@@ -4059,6 +4085,30 @@ font-size: 150%;'>No changes</h2>
         StatusLabelText = string.Empty;
 
         GuiUpdateAfterProcessing();
+    }
+
+    /// <summary>
+    /// Builds the HTML document displayed by the preview browser.
+    /// </summary>
+    /// <param name="sender">
+    /// The editor providing the HTML header content required by the preview.
+    /// </param>
+    /// <param name="result">
+    /// The rendered article HTML returned by the wiki API.
+    /// </param>
+    /// <returns>
+    /// A complete HTML document containing the rendered preview.
+    /// </returns>
+    private static string BuildPreviewHtml(
+        AsyncApiEdit sender,
+        string result)
+    {
+        return
+            "<html><head>" +
+            sender.HtmlHeaders +
+            "</head><body style=\"background:white; margin:10px; text-align:left;\">" +
+            result +
+            "</body></html>";
     }
 
     /// <summary>
