@@ -289,11 +289,14 @@ namespace WikiFunctions
 
             FileName = fileName;
 
+            if (!File.Exists(fileName))
+                return;
+
             try
             {
                 bool loadedSuccessfully;
 
-                using (FileStream fs = File.Open(
+                using (FileStream fs = new(
                            fileName,
                            FileMode.Open,
                            FileAccess.Read,
