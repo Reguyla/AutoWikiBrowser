@@ -94,10 +94,6 @@
   </ItemGroup>
 <ItemGroup>
   <ProjectReference Include="..\WikiFunctions\WikiFunctions.csproj" />
-
-  <ProjectReference
-    Include="..\AWBUpdater\AWBUpdater.csproj"
-    ReferenceOutputAssembly="false" />
 </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4078.44" />
@@ -116,15 +112,5 @@
 		  <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
 	  </EmbeddedResource>
    </ItemGroup>
-</Project>
-<Target Name="CopyAwbUpdaterFiles" AfterTargets="Build">
-  <ItemGroup>
-    <AwbUpdaterFiles Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
-  </ItemGroup>
 
-  <Copy
-    SourceFiles="@(AwbUpdaterFiles)"
-    DestinationFolder="$(TargetDir)"
-    SkipUnchangedFiles="true"
-    Condition="'@(AwbUpdaterFiles)' != ''" />
-</Target>
+</Project>
