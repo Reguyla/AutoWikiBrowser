@@ -593,7 +593,11 @@ public class ApiEdit : IApiEdit
                     break;
 
                 case HttpStatusCode.NotFound: // 404
-                    return ""; // emulate the behavior of Tools.HttpGet()
+                    Tools.WriteDebug(
+                        nameof(ApiEdit),
+                        $"HTTP 404 returned for '{req.RequestUri}'.");
+
+                    return string.Empty;
             }
 
             throw;
