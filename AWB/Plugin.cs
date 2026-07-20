@@ -130,6 +130,12 @@ internal static class Plugin
     }
 
     /// <summary>
+    /// Controls whether external plugins are discovered and loaded.
+    /// Plugins remain disabled during the core .NET 8 migration.
+    /// </summary>
+    private static readonly bool ExternalPluginLoadingEnabled = false;
+
+    /// <summary>
     /// Loads the specified plugin assemblies.
     /// </summary>
     /// <param name="awb">The active AWB application instance.</param>
@@ -312,7 +318,17 @@ internal static class Plugin
         string pluginFile,
         IAutoWikiBrowser awb,
         bool afterStartup)
+    
     {
+        if (!ExternalPluginLoadingEnabled)
+        {
+            Tools.WriteDebug(
+                nameof(Plugin),
+                $"Skipping external plugin '{pluginFile}' during the .NET 8 migration.");
+
+            return;
+        }
+
         foreach (Type type in assembly.GetTypes())
         {
             if (!IsCreatablePluginType(type))
