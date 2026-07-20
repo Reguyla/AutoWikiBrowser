@@ -279,6 +279,39 @@ namespace WikiFunctions
         }
 
         /// <summary>
+        /// Loads ObjectCache.xml if it exists. Invalid cache files are deleted after
+        /// the input stream has been closed.
+        /// </summary>
+        /// <param name="fileName">The cache file to load.</param>
+        public void Load(string fileName)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(fileName);
+
+            FileName = fileName;
+
+            try
+            {
+                bool loadedSuccessfully;
+
+                using (FileStream fs = File.Open(
+                           fileName,
+                           FileMode.Open,
+                           FileAccess.Read,
+                           FileShare.Read))
+                {
+                    loadedSuccessfully = Load(fs);
+                }
+
+                if (!loadedSuccessfully && File.Exists(fileName))
+                    File.Delete(fileName);
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="str"></param>
@@ -312,26 +345,6 @@ namespace WikiFunctions
         private void ReportException(Exception ex)
         {
             Trace.WriteLine("Exception caught in ObjectCache: " + ex.Message);
-        }
-
-        /// <summary>
-        /// Loads ObjectCache.xml file if it exists
-        /// </summary>
-        /// <param name="fileName"></param>
-        public void Load(string fileName)
-        {
-            if (fileName == null) throw new ArgumentNullException("fileName");
-
-            FileName = fileName;
-            try
-            {
-                using (FileStream fs = File.Open(fileName, FileMode.Open))
-                {
-                    if (!Load(fs) && File.Exists(fileName)) File.Delete(fileName);
-                }
-            }
-            catch
-            { } // give up silently
         }
 
         /// <summary>
