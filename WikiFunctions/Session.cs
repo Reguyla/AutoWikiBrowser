@@ -562,14 +562,17 @@ public class Session
             return WikiStatusResult.Registered;
         }
 
-        foreach (string globalUser in
-            ReadStringArray(
-                versionJson,
-                "globalusers"))
+        if (Variables.Project != ProjectEnum.custom)
         {
-            if (User.Name == globalUser)
+            foreach (string globalUser in
+                ReadStringArray(
+                    versionJson,
+                    "globalusers"))
             {
-                return WikiStatusResult.Registered;
+                if (User.Name == globalUser)
+                {
+                    return WikiStatusResult.Registered;
+                }
             }
         }
 
@@ -652,9 +655,19 @@ public class Session
                 return WikiStatusResult.Error;
             }
 
-            return DetermineRegistrationStatus(
-                versionJson,
-                configJson);
+            WikiStatusResult registrationStatus =
+                DetermineRegistrationStatus(
+                    versionJson,
+                    configJson);
+
+            Tools.WriteDebug(
+                nameof(UpdateWikiStatus),
+                $"Registration status: {registrationStatus}; " +
+                $"IsBot: {IsBot}; " +
+                $"Check page empty: {string.IsNullOrEmpty(CheckPageJSONText)}; " +
+                $"Logged in: {User.IsLoggedIn}");
+
+            return registrationStatus;
         }
         catch (Exception ex)
         {
