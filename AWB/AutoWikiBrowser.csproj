@@ -112,5 +112,20 @@
 		  <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
 	  </EmbeddedResource>
    </ItemGroup>
+  <Target Name="CopyAwbUpdaterFiles"
+          AfterTargets="Build">
+    <ItemGroup>
+      <AwbUpdaterFiles Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
+    </ItemGroup>
+
+    <Error
+      Condition="'@(AwbUpdaterFiles)' == ''"
+      Text="AWBUpdater output files were not found in the expected build directory." />
+
+    <Copy
+      SourceFiles="@(AwbUpdaterFiles)"
+      DestinationFolder="$(TargetDir)"
+      SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
