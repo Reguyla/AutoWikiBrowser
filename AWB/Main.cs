@@ -1118,16 +1118,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Handles completion of an article-open operation.
-    /// </summary>
-    /// <param name="editor">The editor that completed the operation.</param>
-    /// <param name="page">Information about the loaded page.</param>
-    private void OpenComplete(AsyncApiEdit editor, PageInfo page)
-    {
-        PageLoaded(page);
-    }
-
-    /// <summary>
     /// Handles a server maxlag response by incrementing the consecutive retry
     /// count and scheduling another attempt until the retry limit is reached.
     /// </summary>
@@ -2300,22 +2290,50 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void WriteProcessedArticleToEditor()
     {
         Tools.WriteDebug(
-            "PageLoaded",
-            $"TheArticle.ArticleText length is {TheArticle.ArticleText.Length}");
+            "WriteProcessedArticleToEditor",
+            $"Starting. Article text length: {TheArticle.ArticleText.Length}; " +
+            $"InvokeRequired: {InvokeRequired}; " +
+            $"Editor disposed: {txtEdit.IsDisposed}");
 
-        // Toggling word wrapping avoids severe RichTextBox performance degradation
-        // when assigning very large article text after processing several pages.
+        Tools.WriteDebug(
+            "WriteProcessedArticleToEditor",
+            "Toggling WordWrap off/on.");
+
         txtEdit.WordWrap = !txtEdit.WordWrap;
         txtEdit.WordWrap = !txtEdit.WordWrap;
+
+        Tools.WriteDebug(
+            "WriteProcessedArticleToEditor",
+            "WordWrap toggled successfully. Assigning editor text.");
 
         txtEdit.Text = TheArticle.ArticleText;
 
+        Tools.WriteDebug(
+            "WriteProcessedArticleToEditor",
+            $"Editor text assigned successfully. Editor length: {txtEdit.TextLength}");
+
         Variables.Profiler.Profile("Set edit box text");
+
+        Tools.WriteDebug(
+            "WriteProcessedArticleToEditor",
+            $"Profiler updated. BotMode: {BotMode}");
 
         if (!BotMode)
         {
+            Tools.WriteDebug(
+                "WriteProcessedArticleToEditor",
+                "Calling ArticleInfo(false).");
+
             ArticleInfo(false);
+
+            Tools.WriteDebug(
+                "WriteProcessedArticleToEditor",
+                "ArticleInfo(false) completed.");
         }
+
+        Tools.WriteDebug(
+            "WriteProcessedArticleToEditor",
+            "Completed.");
     }
 
     /// <summary>
@@ -2803,7 +2821,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         };
 
         parent.Controls.Add(_diffWebView);
-        _diffWebView.BringToFront();
+
     }
 
     /// <summary>
@@ -2912,6 +2930,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             return;
         }
+
+        webBrowser.Visible = false;
+        _diffWebView.Visible = true;
 
         _diffWebView.NavigateToString(html);
     }
@@ -4018,37 +4039,6 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Requests a preview of the current editor contents for the active article.
-    /// </summary>
-    /// <remarks>
-    /// If no article is loaded, the surrounding controls are disabled. A preview
-    /// request is started only when the session editor is not already processing
-    /// another operation.
-    /// </remarks>
-    private void GetPreview()
-    {
-        Article article = TheArticle;
-
-        if (article == null)
-        {
-            DisableButtons();
-            return;
-        }
-
-        if (TheSession.Editor.IsActive)
-        {
-            StatusLabelText = "Editor busy";
-            return;
-        }
-
-        StatusLabelText = "Previewing...";
-
-        TheSession.Editor.Preview(
-            article.Name,
-            txtEdit.Text);
-    }
-
-    /// <summary>
     /// Handles completion of an asynchronous preview request and displays the
     /// returned HTML in the preview browser.
     /// </summary>
@@ -4071,9 +4061,20 @@ font-size: 150%;'>No changes</h2>
         LastArticle = txtEdit.Text;
         Skippable = false;
 
+        if (_diffWebView != null)
+        {
+            _diffWebView.Visible = false;
+        }
+
+        webBrowser.Visible = true;
+
         HtmlDocument document = webBrowser.Document;
 
-        if (document != null)
+        if (document == null)
+        {
+            webBrowser.DocumentText = BuildPreviewHtml(sender, result);
+        }
+        else
         {
             document.OpenNew(false);
             document.Write(BuildPreviewHtml(sender, result));
@@ -4083,8 +4084,59 @@ font-size: 150%;'>No changes</h2>
         }
 
         StatusLabelText = string.Empty;
-
         GuiUpdateAfterProcessing();
+    }
+
+    private void OpenComplete(
+    AsyncApiEdit editor,
+    PageInfo page)
+    {
+        Tools.WriteDebug(
+            nameof(OpenComplete),
+            $"Before PageLoaded: IsActive={editor.IsActive}");
+
+        PageLoaded(page);
+
+        Tools.WriteDebug(
+            nameof(OpenComplete),
+            $"After PageLoaded: IsActive={editor.IsActive}");
+    }
+
+    private void GetPreview()
+    {
+        Article article = TheArticle;
+
+        Tools.WriteDebug(
+            nameof(GetPreview),
+            $"Entered. ArticleNull={article == null}, " +
+            $"EditorActive={TheSession.Editor.IsActive}");
+
+        if (article == null)
+        {
+            DisableButtons();
+            return;
+        }
+
+        if (TheSession.Editor.IsActive)
+        {
+            StatusLabelText = "Editor busy";
+
+            Tools.WriteDebug(
+                nameof(GetPreview),
+                "Preview was not started because the editor was active.");
+
+            return;
+        }
+
+        StatusLabelText = "Previewing...";
+
+        Tools.WriteDebug(
+            nameof(GetPreview),
+            $"Starting preview for '{article.Name}'.");
+
+        TheSession.Editor.Preview(
+            article.Name,
+            txtEdit.Text);
     }
 
     /// <summary>
@@ -5179,9 +5231,24 @@ font-size: 150%;'>No changes</h2>
 
         string summary = GetConfiguredEditSummary();
 
+        Tools.WriteDebug(
+            nameof(MakeDefaultEditSummary),
+            $"Configured summary length: {summary.Length}; " +
+            $"value: '{summary}'");
+
+        Tools.WriteDebug(
+            nameof(MakeDefaultEditSummary),
+            $"Article.EditSummary length: {article.EditSummary?.Length ?? 0}; " +
+            $"starts with: '{GetDiagnosticPrefix(article.EditSummary, 200)}'");
+
         summary = AppendArticleEditSummary(
             summary,
             article.EditSummary);
+
+        Tools.WriteDebug(
+            nameof(MakeDefaultEditSummary),
+            $"Combined summary length: {summary.Length}; " +
+            $"starts with: '{GetDiagnosticPrefix(summary, 300)}'");
 
         if (!noSectionEditSummaryToolStripMenuItem.Checked)
         {
@@ -5195,6 +5262,23 @@ font-size: 150%;'>No changes</h2>
 #endif
 
         return summary;
+    }
+
+    /// <summary>
+    /// TEMP helper file
+    /// </summary>
+    private static string GetDiagnosticPrefix(
+    string value,
+    int maximumLength)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        return value.Length <= maximumLength
+            ? value
+            : value.Substring(0, maximumLength);
     }
 
     /// <summary>
