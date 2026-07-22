@@ -25,7 +25,6 @@ using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Diff;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
-using System;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
@@ -3028,6 +3027,65 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         if (_diffWebView != null)
         {
             _diffWebView.Visible = true;
+        }
+    }
+
+    /// <summary>
+    /// Renders generated diff HTML and waits for the WebView2 document to finish
+    /// loading.
+    /// </summary>
+    /// <param name="html">
+    /// The complete diff HTML document.
+    /// </param>
+    /// <returns>
+    /// A task that completes when the diff navigation has finished.
+    /// </returns>
+    private async Task RenderWebView2DiffAsync(string html)
+    {
+        if (_diffWebView == null ||
+            _diffWebView.IsDisposed ||
+            _diffWebView.CoreWebView2 == null)
+        {
+            Tools.WriteDebug(
+                nameof(RenderWebView2DiffAsync),
+                "WebView2 was unavailable when the diff was rendered.");
+
+            return;
+        }
+
+        ShowDiffBrowser();
+
+        var navigationCompletion =
+            new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void NavigationCompleted(
+            object sender,
+            CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                navigationCompletion.TrySetResult(true);
+            }
+            else
+            {
+                navigationCompletion.TrySetException(
+                    new InvalidOperationException(
+                        $"WebView2 diff navigation failed: {e.WebErrorStatus}."));
+            }
+        }
+
+        _diffWebView.NavigationCompleted += NavigationCompleted;
+
+        try
+        {
+            _diffWebView.NavigateToString(html);
+
+            await navigationCompletion.Task;
+        }
+        finally
+        {
+            _diffWebView.NavigationCompleted -= NavigationCompleted;
         }
     }
 
