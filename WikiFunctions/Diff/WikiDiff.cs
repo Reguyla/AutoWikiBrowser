@@ -152,7 +152,7 @@ public class WikiDiff
 
         if (Variables.RTL)
         {
-            Result.AppendFormat(@"<tr onclick='goTo({1})'ondblclick='undoChange({0},{1})'>
+            Result.AppendFormat(@"<tr onclick=' goTo({1})'ondblclick='undoChange({0},{1})'>
   <td>+</td>
   <td class='diff-addedline'>", rightLine, leftLine);
             Result.Append(right);
@@ -165,7 +165,7 @@ public class WikiDiff
         }
         else
         {
-            Result.AppendFormat(@"<tr onclick='goTo({1})'ondblclick='undoChange({0},{1})'>
+            Result.AppendFormat(@"<tr onclick=' goTo({1})'ondblclick='undoChange({0},{1})'>
   <td>-</td>
   <td class='diff-deletedline'>", leftLine, rightLine);
             Result.Append(left);

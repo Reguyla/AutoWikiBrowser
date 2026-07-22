@@ -32,6 +32,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -2829,19 +2830,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private async Task InitializeWebView2DiffBrowserAsync()
     {
-        WebView2 diffWebView = _diffWebView
-            ?? throw new InvalidOperationException(
-                "The WebView2 diff control has not been created.");
+        WebView2 diffWebView = _diffWebView ?? throw new InvalidOperationException(
+            "The WebView2 diff control has not been created.");
 
         if (diffWebView.IsDisposed)
         {
-            throw new ObjectDisposedException(
-                nameof(_diffWebView));
+            throw new ObjectDisposedException(nameof(_diffWebView));
         }
 
-        // TODO (.NET 8 Modernization):
-        // Verify that WebView2 creation, initialization, rendering, visibility
-        // changes, and disposal always occur on the WinForms UI thread.
         await diffWebView.EnsureCoreWebView2Async();
 
         CoreWebView2 core = diffWebView.CoreWebView2
@@ -2850,19 +2846,130 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         ConfigureWebView2DiffBrowser(core);
 
+        core.WebMessageReceived += DiffWebView_WebMessageReceived;
+
         Tools.WriteDebug(
             nameof(InitializeWebView2DiffBrowserAsync),
             "WebView2 initialized.");
     }
 
+    /// <summary>
+    /// Configures the WebView2 instance used to display generated article diffs.
+    /// </summary>
+    /// <param name="core">
+    /// The initialized WebView2 core whose browser settings will be configured.
+    /// </param>
+    /// <remarks>
+    /// The diff viewer is restricted to the features required for rendering and
+    /// interacting with locally generated diff content. Web messaging and script
+    /// execution remain enabled so the document can send commands to the host and
+    /// support diff navigation behavior.
+    /// </remarks>
     private static void ConfigureWebView2DiffBrowser(
-    CoreWebView2 core)
+        CoreWebView2 core)
     {
         core.Settings.AreDefaultContextMenusEnabled = false;
         core.Settings.AreDevToolsEnabled = false;
         core.Settings.AreBrowserAcceleratorKeysEnabled = false;
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.IsZoomControlEnabled = false;
+
+        core.Settings.IsWebMessageEnabled = true;
+        core.Settings.IsScriptEnabled = true;
+    }
+
+    /// <summary>
+    /// Handles commands sent from the generated WebView2 diff document.
+    /// </summary>
+    /// <param name="sender">
+    /// The WebView2 core that received the message.
+    /// </param>
+    /// <param name="e">
+    /// Information about the message received from the diff document.
+    /// </param>
+    private void DiffWebView_WebMessageReceived(
+        object sender,
+        CoreWebView2WebMessageReceivedEventArgs e)
+    {
+        try
+        {
+            DiffWebMessage message =
+                JsonSerializer.Deserialize<DiffWebMessage>(
+                    e.WebMessageAsJson);
+
+            if (message == null ||
+                string.IsNullOrWhiteSpace(message.Action))
+            {
+                Tools.WriteDebug(
+                    nameof(DiffWebView_WebMessageReceived),
+                    "An empty or invalid diff message was received.");
+
+                return;
+            }
+
+            switch (message.Action)
+            {
+                case "UndoChange":
+                    if (message.LeftLine.HasValue &&
+                        message.RightLine.HasValue)
+                    {
+                        UndoChangeGeneric(
+                            DiffChangeMode.Change,
+                            message.LeftLine.Value,
+                            message.RightLine.Value);
+                    }
+
+                    break;
+
+                case "UndoDeletion":
+                    if (message.LeftLine.HasValue &&
+                        message.RightLine.HasValue)
+                    {
+                        UndoChangeGeneric(
+                            DiffChangeMode.Deletion,
+                            message.LeftLine.Value,
+                            message.RightLine.Value);
+                    }
+
+                    break;
+
+                case "UndoAddition":
+                    if (message.RightLine.HasValue)
+                    {
+                        UndoChangeGeneric(
+                            DiffChangeMode.Addition,
+                            0,
+                            message.RightLine.Value);
+                    }
+
+                    break;
+
+                case "GoTo":
+                    if (message.RightLine.HasValue)
+                    {
+                        GoTo(message.RightLine.Value);
+                    }
+
+                    break;
+
+                default:
+                    Tools.WriteDebug(
+                        nameof(DiffWebView_WebMessageReceived),
+                        $"Unknown diff action: {message.Action}");
+
+                    break;
+            }
+        }
+        catch (JsonException ex)
+        {
+            Tools.WriteDebug(
+                nameof(DiffWebView_WebMessageReceived),
+                $"Invalid diff message: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
     }
 
     // TODO (.NET 8 Modernization):
@@ -4468,6 +4575,28 @@ font-size: 150%;'>No changes</h2>
         {
             _owner.GoTo(destLine);
         }
+    }
+
+    /// <summary>
+    /// Represents a command sent from the generated diff document to the host
+    /// application through WebView2 messaging.
+    /// </summary>
+    private sealed class DiffWebMessage
+    {
+        /// <summary>
+        /// Gets or sets the requested diff action.
+        /// </summary>
+        public string Action { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the corresponding line in the original text, when used.
+        /// </summary>
+        public int? LeftLine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the corresponding line in the modified text, when used.
+        /// </summary>
+        public int? RightLine { get; set; }
     }
 
     /// <summary>
