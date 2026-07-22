@@ -2887,7 +2887,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="e">
     /// Information about the message received from the diff document.
     /// </param>
-    private void DiffWebView_WebMessageReceived(
+    private async void DiffWebView_WebMessageReceived(
         object sender,
         CoreWebView2WebMessageReceivedEventArgs e)
     {
@@ -2913,7 +2913,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     if (message.LeftLine.HasValue &&
                         message.RightLine.HasValue)
                     {
-                        UndoChangeGeneric(
+                        await UndoChangeGenericAsync(
                             DiffChangeMode.Change,
                             message.LeftLine.Value,
                             message.RightLine.Value);
@@ -2925,7 +2925,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     if (message.LeftLine.HasValue &&
                         message.RightLine.HasValue)
                     {
-                        UndoChangeGeneric(
+                        await UndoChangeGenericAsync(
                             DiffChangeMode.Deletion,
                             message.LeftLine.Value,
                             message.RightLine.Value);
@@ -2936,7 +2936,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 case "UndoAddition":
                     if (message.RightLine.HasValue)
                     {
-                        UndoChangeGeneric(
+                        await UndoChangeGenericAsync(
                             DiffChangeMode.Addition,
                             0,
                             message.RightLine.Value);
@@ -4613,11 +4613,12 @@ font-size: 150%;'>No changes</h2>
     /// The position of the affected content in the modified text.
     /// </param>
     /// <remarks>
-    /// The method preserves the current browser scroll position and editor caret
-    /// position while rebuilding the diff. Any exception raised while processing
-    /// the undo operation is passed to the application's central error handler.
+    /// The method preserves the current WebView2 diff scroll position and editor
+    /// caret position while rebuilding the diff. Any exception raised while
+    /// processing the undo operation is passed to the application's central error
+    /// handler.
     /// </remarks>
-    private void UndoChangeGeneric(
+    private async Task UndoChangeGenericAsync(
         DiffChangeMode changeType,
         int left,
         int right)
@@ -4629,19 +4630,8 @@ font-size: 150%;'>No changes</h2>
 
         try
         {
-            HtmlDocument document = webBrowser.Document;
-
-            if (document == null)
-            {
-                Tools.WriteDebug(
-                    nameof(UndoChangeGeneric),
-                    "The browser document was unavailable.");
-
-                return;
-            }
-
             int browserScrollPosition =
-                GetBrowserVerticalScrollPosition(document);
+                await GetDiffScrollPositionAsync();
 
             int caretPosition = txtEdit.SelectionStart;
 
@@ -4661,7 +4651,7 @@ font-size: 150%;'>No changes</h2>
                 HighlightSyntax();
             }
 
-            RestoreBrowserVerticalScrollPosition(
+            await RestoreDiffScrollPositionAsync(
                 browserScrollPosition);
 
             RestoreEditorCaretPosition(
@@ -4674,23 +4664,45 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Gets the current vertical scroll position of the browser document.
+    /// Starts the asynchronous diff undo workflow for legacy synchronous callers.
     /// </summary>
-    /// <param name="document">
-    /// The browser document whose scroll position should be read.
-    /// </param>
-    /// <returns>
-    /// The document's vertical scroll position, or zero when its root HTML element
-    /// is unavailable.
-    /// </returns>
-    private static int GetBrowserVerticalScrollPosition(
-        HtmlDocument document)
+    private void UndoChangeGeneric(
+        DiffChangeMode changeType,
+        int left,
+        int right)
     {
-        HtmlElementCollection htmlElements =
-            document.GetElementsByTagName("HTML");
+        _ = UndoChangeGenericAsync(
+            changeType,
+            left,
+            right);
+    }
 
-        return htmlElements.Count > 0
-            ? htmlElements[0].ScrollTop
+    /// <summary>
+    /// Gets the current vertical scroll position of the WebView2 diff document.
+    /// </summary>
+    /// <returns>
+    /// The vertical scroll position in pixels, or zero when the diff viewer is
+    /// unavailable or the script result cannot be parsed.
+    /// </returns>
+    private async Task<int> GetDiffScrollPositionAsync()
+    {
+        if (_diffWebView == null ||
+            _diffWebView.IsDisposed ||
+            _diffWebView.CoreWebView2 == null)
+        {
+            return 0;
+        }
+
+        string scriptResult =
+            await _diffWebView.CoreWebView2.ExecuteScriptAsync(
+                "Math.round(window.scrollY)");
+
+        return int.TryParse(
+            scriptResult,
+            NumberStyles.Integer,
+            CultureInfo.InvariantCulture,
+            out int scrollPosition)
+            ? scrollPosition
             : 0;
     }
 
@@ -4741,29 +4753,24 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Restores the vertical scroll position of the current browser document.
+    /// Restores the vertical scroll position of the WebView2 diff document.
     /// </summary>
     /// <param name="scrollPosition">
-    /// The vertical position to restore.
+    /// The vertical scroll position, in pixels, to restore.
     /// </param>
-    private void RestoreBrowserVerticalScrollPosition(
+    private async Task RestoreDiffScrollPositionAsync(
         int scrollPosition)
     {
-        HtmlDocument document = webBrowser.Document;
-
-        if (document == null)
+        if (_diffWebView == null ||
+            _diffWebView.IsDisposed ||
+            _diffWebView.CoreWebView2 == null)
         {
             return;
         }
 
-        object[] arguments =
-        {
-        "window.scrollTo(0, " + scrollPosition + ")"
-    };
-
-        document.InvokeScript(
-            "eval",
-            arguments);
+        await _diffWebView.CoreWebView2.ExecuteScriptAsync(
+            FormattableString.Invariant(
+                $"window.scrollTo(0, {scrollPosition});"));
     }
 
     /// <summary>
