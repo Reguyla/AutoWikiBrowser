@@ -3954,6 +3954,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     bool _diffAccessViolationSeen;
 
     /// <summary>
+    /// Starts generation and display of the current article diff.
+    /// </summary>
+    private void GetDiff()
+    {
+        _ = GetDiffAsync();
+    }
+
+    /// <summary>
     /// Generates and displays the diff between the article's original text and
     /// the current editor contents.
     /// </summary>
@@ -3962,7 +3970,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// After rendering, the editor and surrounding UI are restored to their
     /// normal post-processing state.
     /// </remarks>
-    private void GetDiff()
+    private async Task GetDiffAsync()
     {
         if (TheArticle == null)
         {
@@ -3975,7 +3983,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             string diffHtml =
                 BuildDiffHtml(TheArticle);
 
-            DisplayDiffHtml(diffHtml);
+            await DisplayDiffHtmlAsync(diffHtml);
             CompleteDiffDisplay();
         }
         catch (Exception ex)
@@ -4081,6 +4089,29 @@ font-size: 150%;'>No changes</h2>
         }
 
         RenderWebView2Diff(diffHtml);
+    }
+
+    /// <summary>
+    /// Displays the generated diff using the available platform-specific viewer
+    /// and waits for WebView2 navigation to complete when applicable.
+    /// </summary>
+    /// <param name="diffHtml">
+    /// The complete HTML diff document to display.
+    /// </param>
+    private async Task DisplayDiffHtmlAsync(string diffHtml)
+    {
+        // WebView2 is unavailable under Mono, so write the diff to a file.
+        if (Globals.UsingMono)
+        {
+            Tools.WriteTextFile(
+                diffHtml,
+                "Diff.html",
+                false);
+
+            return;
+        }
+
+        await RenderWebView2DiffAsync(diffHtml);
     }
 
     /// <summary>
