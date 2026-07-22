@@ -2879,45 +2879,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Attempts to render generated diff HTML in the WebView2 diff control.
     /// </summary>
     /// <param name="html">The complete diff HTML document.</param>
-    /// <returns>
-    /// <see langword="true"/> when rendering was started; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private bool TryRenderWebView2Diff(string html)
-    {
-        ArgumentNullException.ThrowIfNull(html);
 
-        WebView2? diffWebView = _diffWebView;
-
-        if (diffWebView == null
-            || diffWebView.IsDisposed
-            || diffWebView.CoreWebView2 == null)
-        {
-            Tools.WriteDebug(
-                nameof(TryRenderWebView2Diff),
-                "WebView2 was unavailable when the diff was rendered.");
-
-            return false;
-        }
-
-        try
-        {
-            diffWebView.NavigateToString(html);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Tools.WriteDebug(
-                nameof(TryRenderWebView2Diff),
-                ex.ToString());
-
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Renders generated diff HTML in the WebView2 diff control.
-    /// </summary>
     private void RenderWebView2Diff(string html)
     {
         if (_diffWebView == null ||
@@ -2931,10 +2893,35 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return;
         }
 
-        webBrowser.Visible = false;
-        _diffWebView.Visible = true;
+        ShowDiffBrowser();
 
         _diffWebView.NavigateToString(html);
+    }
+
+    /// <summary>
+    /// Displays the legacy browser used for article previews.
+    /// </summary>
+    private void ShowPreviewBrowser()
+    {
+        if (_diffWebView != null)
+        {
+            _diffWebView.Visible = false;
+        }
+
+        webBrowser.Visible = true;
+    }
+
+    /// <summary>
+    /// Displays the WebView2 control used for article diffs.
+    /// </summary>
+    private void ShowDiffBrowser()
+    {
+        webBrowser.Visible = false;
+
+        if (_diffWebView != null)
+        {
+            _diffWebView.Visible = true;
+        }
     }
 
     /// <summary>
@@ -4061,12 +4048,7 @@ font-size: 150%;'>No changes</h2>
         LastArticle = txtEdit.Text;
         Skippable = false;
 
-        if (_diffWebView != null)
-        {
-            _diffWebView.Visible = false;
-        }
-
-        webBrowser.Visible = true;
+        ShowPreviewBrowser();
 
         HtmlDocument document = webBrowser.Document;
 
