@@ -135,12 +135,31 @@ namespace WikiFunctions.Networking
                 .GetAwaiter()
                 .GetResult();
 
-            response.EnsureSuccessStatusCode();
-
-            return response.Content
+            string responseText = response.Content
                 .ReadAsStringAsync()
                 .GetAwaiter()
                 .GetResult();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string action = values["action"] ?? "(unknown)";
+                string title = values["title"];
+
+                Tools.WriteDebug(
+                    "AwbHttpClient::PostForm",
+                    $"HTTP {(int)response.StatusCode} {response.ReasonPhrase} " +
+                    $"for action '{action}'" +
+                    (string.IsNullOrEmpty(title) ? string.Empty : $" on '{title}'") +
+                    $" at '{url}'." +
+                    Environment.NewLine +
+                    $"Response: {responseText}");
+
+                throw new HttpRequestException(
+                    $"POST request failed with HTTP {(int)response.StatusCode} "
+                    + $"{response.ReasonPhrase}.");
+            }
+
+            return responseText;
         }
 
         /// <summary>
