@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -4675,16 +4676,19 @@ font-size: 150%;'>No changes</h2>
         /// <summary>
         /// Gets or sets the requested diff action.
         /// </summary>
+        [JsonPropertyName("action")]
         public string Action { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the corresponding line in the original text, when used.
         /// </summary>
+        [JsonPropertyName("leftLine")]
         public int? LeftLine { get; set; }
 
         /// <summary>
         /// Gets or sets the corresponding line in the modified text, when used.
         /// </summary>
+        [JsonPropertyName("rightLine")]
         public int? RightLine { get; set; }
     }
 
