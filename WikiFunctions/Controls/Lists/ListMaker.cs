@@ -1466,6 +1466,8 @@ public partial class ListMaker : UserControl, IList<Article>
     private static readonly Regex HTMLItalics = new Regex(@"(.*?)<i>(.*?)</i>(.*?(?=<i>|$))");
     private static readonly Regex SpanHide = new Regex(@"< *span +style *= *"" *position *: *absolute *; *top *: *-9999px;? *"" *>.*?< */ *span *>");
 
+    int lastItemCount = 0;
+
     /// <summary>
     /// Overrides default Item Drawing to enable different color if the article has been pre-processed
     /// Formats text per displaytitle (italics etc.) if option enabled
@@ -1553,13 +1555,17 @@ public partial class ListMaker : UserControl, IList<Article>
 
         // using "DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed" to enable rich formatting above means
         // we need to set the horizontal width ourselves so that a horizontal scrollbar is shown when needed
-        string longestName = String.Empty;
-        foreach (Article ar in lbArticles.Items)
+        if (lbArticles.Items.Count != lastItemCount)
         {
-            if (ar.Name.Length > longestName.Length)
-                longestName = ar.Name;
+            lastItemCount = lbArticles.Items.Count;
+            string longestName = String.Empty;
+            foreach (Article ar in lbArticles.Items)
+            {
+              if (ar.Name.Length > longestName.Length)
+                  longestName = ar.Name;
+            }
+            lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestName, e.Font).Width;
         }
-        lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestName, e.Font).Width;
 
         e.DrawFocusRectangle();
     }
