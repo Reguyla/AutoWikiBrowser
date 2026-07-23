@@ -4724,8 +4724,9 @@ font-size: 150%;'>No changes</h2>
 
             int caretPosition = txtEdit.SelectionStart;
 
-            // Rebuild the diff so the undo operation uses the current editor text.
-            GetDiff();
+            // Rebuild the diff state so the undo operation uses the current
+            // editor contents and the correct diff line indexes.
+            await GetDiffAsync();
 
             ApplyDiffUndo(
                 changeType,
@@ -4733,7 +4734,7 @@ font-size: 150%;'>No changes</h2>
                 right);
 
             // Refresh the displayed diff after modifying the editor contents.
-            GetDiff();
+            await GetDiffAsync();
 
             if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
             {
@@ -4795,9 +4796,6 @@ font-size: 150%;'>No changes</h2>
             : 0;
     }
 
-    // TODO (Browser Modernization):
-    // Replace the legacy WebBrowser script invocation with the equivalent WebView2
-    // scrolling API when the diff viewer migration is completed.
     /// <summary>
     /// Applies the requested undo operation to the current editor contents.
     /// </summary>
@@ -4810,6 +4808,11 @@ font-size: 150%;'>No changes</h2>
     /// <param name="right">
     /// The position of the affected content in the modified text.
     /// </param>
+    /// <remarks>
+    /// The undo methods operate against the state produced by the most recently
+    /// generated diff, so callers must rebuild the diff before invoking this
+    /// method.
+    /// </remarks>
     private void ApplyDiffUndo(
         DiffChangeMode changeType,
         int left,
