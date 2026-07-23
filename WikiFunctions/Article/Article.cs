@@ -194,32 +194,60 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// Edit summary proposed for article
+    /// Gets the accumulated edit summary for the current article.
     /// </summary>
+    /// <remarks>
+    /// The summary is built incrementally as processing steps contribute
+    /// individual summary fragments. Fragments are combined using the
+    /// appropriate language-specific separator.
+    /// </remarks>
     [XmlIgnore]
     public string EditSummary
-    { get { return summary.ToString(); } }
+    {
+        get { return summary.ToString(); }
+    }
 
+    /// <summary>
+    /// Clears all accumulated edit summary text for the current article.
+    /// </summary>
+    /// <remarks>
+    /// Called before beginning a new processing pass to ensure the edit
+    /// summary reflects only the changes generated during the current run.
+    /// </remarks>
     public void ResetEditSummary()
     {
         summary.Length = 0;
     }
 
+    /// <summary>
+    /// Stores the incremental edit summary while it is being constructed.
+    /// </summary>
     private readonly StringBuilder summary = new StringBuilder();
 
+    /// <summary>
+    /// Appends a summary fragment to the accumulated edit summary.
+    /// </summary>
+    /// <param name="newText">
+    /// The summary fragment to append. Null, empty, or whitespace-only
+    /// values are ignored.
+    /// </param>
+    /// <remarks>
+    /// Summary fragments are separated using the standard comma for most
+    /// languages and the Arabic comma for Arabic-language wikis.
+    /// </remarks>
     private void AppendToSummary(string newText)
     {
-        if (string.IsNullOrEmpty(newText.Trim()))
+        if (string.IsNullOrWhiteSpace(newText))
             return;
 
-        string comma = ", ";
-        if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
-            comma = "، ";
+        string comma = Variables.LangCode is "ar" or "arz" or "fa"
+            ? "، "
+            : ", ";
 
         if (summary.Length > 0)
-            summary.Append(comma + newText);
-        else
-            summary.Append(newText);
+            summary.Append(comma);
+
+        summary.Append(newText);
     }
 
     /// <summary>
