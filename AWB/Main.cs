@@ -4724,16 +4724,15 @@ font-size: 150%;'>No changes</h2>
 
             int caretPosition = txtEdit.SelectionStart;
 
-            // Rebuild the diff state so the undo operation uses the current
-            // editor contents and the correct diff line indexes.
-            await GetDiffAsync();
+            // Rebuild the internal diff state from the current editor contents.
+            _ = BuildDiffHtml(TheArticle);
 
             ApplyDiffUndo(
                 changeType,
                 left,
                 right);
 
-            // Refresh the displayed diff after modifying the editor contents.
+            // Generate and display the updated diff after modifying the editor contents.
             await GetDiffAsync();
 
             if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
