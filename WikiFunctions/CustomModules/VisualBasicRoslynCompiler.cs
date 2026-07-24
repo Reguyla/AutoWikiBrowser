@@ -38,7 +38,7 @@ internal static class VisualBasicRoslynCompiler
 
         VisualBasicParseOptions parseOptions =
             new VisualBasicParseOptions(
-                languageVersion: LanguageVersion.VisualBasic17_13);
+                languageVersion: LanguageVersion.VisualBasic16_9);
 
         SyntaxTree syntaxTree =
             VisualBasicSyntaxTree.ParseText(

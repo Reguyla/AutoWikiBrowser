@@ -8,7 +8,7 @@ public sealed class VbModuleCompiler : CustomModuleCompiler
 {
     /// <inheritdoc />
     public override string Name =>
-        "VB.NET 2.0";
+        "VB.NET 16.9";
 
     /// <inheritdoc />
     public override string CodeStart =>
