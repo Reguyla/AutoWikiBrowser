@@ -8,7 +8,7 @@ public sealed class CSharpCustomModule : CustomModuleCompiler
 {
     /// <inheritdoc />
     public override string Name =>
-        "C# 10.0";
+        "C# 12.0";
 
     /// <inheritdoc />
     public override bool CanHandleLanguage(string language)
