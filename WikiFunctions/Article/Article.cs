@@ -1247,7 +1247,13 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         IProcessArticleEventArgs processArticleEventArgs = this;
 
+        // Prevent values from an earlier plugin or module invocation
+        // from being reused during the current processing pass.
+        mPluginEditSummary = string.Empty;
+        mPluginSkip = false;
+
         string originalArticleText = processArticleEventArgs.ArticleText;
+
         string updatedArticleText = module.ProcessArticle(
             originalArticleText,
             processArticleEventArgs.ArticleTitle,
@@ -1255,64 +1261,141 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             out string editSummary,
             out bool skipArticle);
 
-        if (updatedArticleText == null)
-        {
-            throw new InvalidOperationException(
-                "The custom module returned null article text.");
-        }
-
-        editSummary = editSummary?.Trim() ?? string.Empty;
-
-        if (LooksLikeArticleText(editSummary, originalArticleText, updatedArticleText))
-        {
-            string preview = editSummary.Length > 250
-                ? editSummary.Substring(0, 250)
-                : editSummary;
-
-            Tools.WriteDebug(
-                "Article::SendPageToCustomModule",
-                $"Custom module '{module.GetType().FullName}' returned an invalid edit summary."
-                + Environment.NewLine
-                + $"Original text length: {originalArticleText.Length}"
-                + Environment.NewLine
-                + $"Updated text length: {updatedArticleText.Length}"
-                + Environment.NewLine
-                + $"Edit summary length: {editSummary.Length}"
-                + Environment.NewLine
-                + $"Summary begins:"
-                + Environment.NewLine
-                + preview);
-
-            throw new InvalidOperationException(
-                $"The custom module '{module.GetType().FullName}' returned an invalid " +
-                $"edit summary of {editSummary.Length} characters. The summary appears to contain article text.");
-        }
-
-        _customModuleMadeChanges = !string.Equals(
-            updatedArticleText,
+        ValidateCustomModuleEditSummary(
+            editSummary,
             originalArticleText,
-            StringComparison.Ordinal);
+            updatedArticleText);
 
-        // Retain the module's updated text even when it requests that the
-        // article be skipped, because re-parse mode may reuse the result.
+        // Validation will be added in the next step.
+
+        _customModuleMadeChanges =
+            !string.Equals(
+                updatedArticleText,
+                originalArticleText,
+                StringComparison.Ordinal);
+
+        // Take updated article text even when skipArticle is true so that
+        // re-parse mode retains changes made by the custom module.
         AWBChangeArticleText(
-            "Custom module",
+            "Custom module changes",
             updatedArticleText,
-            checkIfChanged: true);
-
-        if (skipArticle)
-        {
-            Trace.AWBSkipped(
-                string.IsNullOrEmpty(editSummary)
-                    ? "Skipped by custom module"
-                    : $"Skipped by custom module ({editSummary})");
-
-            return;
-        }
+            false);
 
         processArticleEventArgs.EditSummary = editSummary;
-        processArticleEventArgs.Skip = false;
-        AppendPluginEditSummary();
+        processArticleEventArgs.Skip = skipArticle;
+
+        if (!skipArticle)
+            AppendPluginEditSummary();
+    }
+
+    /// <summary>
+    /// Validates the edit summary returned by a custom module before it is
+    /// incorporated into the article's accumulated edit summary.
+    /// </summary>
+    /// <param name="editSummary">
+    /// The edit summary returned by the custom module.
+    /// </param>
+    /// <param name="originalArticleText">
+    /// The article text supplied to the custom module before processing.
+    /// </param>
+    /// <param name="updatedArticleText">
+    /// The article text returned by the custom module after processing.
+    /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the custom module appears to have returned article text through
+    /// its edit-summary output parameter instead of supplying a brief description
+    /// of the changes it made.
+    /// </exception>
+    /// <remarks>
+    /// <para>
+    /// Custom modules communicate two independent pieces of information:
+    /// </para>
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// The updated article text is returned as the method's return value.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// The edit summary is returned through the <c>Summary</c> output parameter.
+    /// </description>
+    /// </item>
+    /// </list>
+    /// <para>
+    /// This helper detects cases where the article text has been mistakenly
+    /// assigned to the edit summary. Performing this validation before the
+    /// summary is stored prevents article content from being appended to the
+    /// final edit summary and provides a diagnostic that identifies the contract
+    /// violation.
+    /// </para>
+    /// </remarks>
+    private static void ValidateCustomModuleEditSummary(
+        string editSummary,
+        string originalArticleText,
+        string updatedArticleText)
+    {
+        // Empty or whitespace-only summaries are valid. A module is not required
+        // to contribute an edit summary when no summary text is appropriate.
+        if (string.IsNullOrWhiteSpace(editSummary))
+            return;
+
+        string trimmedSummary = editSummary.Trim();
+
+        // Compare the returned summary against both the original and updated article
+        // text. A match (or embedded match) strongly indicates that the module
+        // accidentally returned article content through its Summary output parameter.
+        bool equalsOriginalArticle =
+            string.Equals(
+                trimmedSummary,
+                originalArticleText?.Trim(),
+                StringComparison.Ordinal);
+
+        bool equalsUpdatedArticle =
+            string.Equals(
+                trimmedSummary,
+                updatedArticleText?.Trim(),
+                StringComparison.Ordinal);
+
+        bool containsOriginalArticle =
+            !string.IsNullOrEmpty(originalArticleText)
+            && trimmedSummary.Contains(
+                originalArticleText,
+                StringComparison.Ordinal);
+
+        bool containsUpdatedArticle =
+            !string.IsNullOrEmpty(updatedArticleText)
+            && trimmedSummary.Contains(
+                updatedArticleText,
+                StringComparison.Ordinal);
+
+        if (equalsOriginalArticle
+            || equalsUpdatedArticle
+            || containsOriginalArticle
+            || containsUpdatedArticle)
+        {
+            // Extremely long edit summaries are usually unintended. Although length
+            // alone is not proof of a contract violation, rejecting unusually large
+            // values helps identify modules that may be returning processed article
+            // text instead of a concise summary.
+            throw new InvalidOperationException(
+                "The custom module returned article text through its edit-summary "
+                + $"output. The returned summary contains {trimmedSummary.Length:N0} "
+                + "characters. Custom modules must return updated article text as "
+                + "the ProcessArticle return value and place only a brief edit "
+                + "description in the Summary output parameter.");
+        }
+
+        const int diagnosticLengthLimit = 1_000;
+
+        if (trimmedSummary.Length > diagnosticLengthLimit)
+        {
+            throw new InvalidOperationException(
+                "The custom module returned an unusually long edit summary of "
+                + $"{trimmedSummary.Length:N0} characters. Verify that the module "
+                + "assigns a brief description to Summary rather than assigning "
+                + "processed article text.");
+        }
     }
 
     /// <summary>
@@ -1415,7 +1498,8 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// Allows plugins to modify the article text. Plugins should set their own log entry using the object passed in ProcessArticle()
+    /// Allows plugins to modify the article text. 
+    /// Plugins should set their own log entry using the object passed in ProcessArticle()
     /// </summary>
     /// <param name="newText"></param>
     public void PluginChangeArticleText(string newText)
@@ -1512,16 +1596,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     string IProcessArticleEventArgs.ArticleTitle
     { get { return Name; } }
 
-    string IProcessArticleEventArgs.EditSummary // this is temp edit summary field, sent from plugin
+    string IProcessArticleEventArgs.EditSummary
     {
-        get { return mPluginEditSummary; }
-        set
-        {
-            if (!string.IsNullOrEmpty(value))
-            {
-                mPluginEditSummary = value.Trim();
-            }
-        }
+        get => mPluginEditSummary;
+        set => mPluginEditSummary = value?.Trim() ?? string.Empty;
     }
 
     bool IProcessArticleEventArgs.Skip
