@@ -1229,30 +1229,125 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     private bool _customModuleMadeChanges = false;
 
     /// <summary>
-    /// Invokes the Custom Module code
+    /// Sends the current article to a custom module for processing and applies
+    /// the returned article text and edit summary.
     /// </summary>
-    /// <param name="module"></param>
+    /// <param name="module">The custom module to execute.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="module"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the module returns invalid article text or appears to return
+    /// article content as its edit summary.
+    /// </exception>
     public void SendPageToCustomModule(IModule module)
     {
+        if (module == null)
+            throw new ArgumentNullException(nameof(module));
+
         IProcessArticleEventArgs processArticleEventArgs = this;
-        string strEditSummary;
-        bool skipArticle;
 
-        string strTemp = module.ProcessArticle(processArticleEventArgs.ArticleText,
-                                               processArticleEventArgs.ArticleTitle, NameSpaceKey, out strEditSummary, out skipArticle);
+        string originalArticleText = processArticleEventArgs.ArticleText;
+        string updatedArticleText = module.ProcessArticle(
+            originalArticleText,
+            processArticleEventArgs.ArticleTitle,
+            NameSpaceKey,
+            out string editSummary,
+            out bool skipArticle);
 
-        _customModuleMadeChanges = !strTemp.Equals(processArticleEventArgs.ArticleText);
-        // take updated article text even if skip true, so that in re-parse mode updates are taken
-        AWBChangeArticleText("Custom module", strTemp, true);
-
-        if (!skipArticle)
+        if (updatedArticleText == null)
         {
-            processArticleEventArgs.EditSummary = strEditSummary;
-            processArticleEventArgs.Skip = false;
-            AppendPluginEditSummary();
+            throw new InvalidOperationException(
+                "The custom module returned null article text.");
         }
-        else
-            Trace.AWBSkipped("Skipped by custom module (" + strEditSummary + ")");
+
+        editSummary = editSummary?.Trim() ?? string.Empty;
+
+        if (LooksLikeArticleText(editSummary, originalArticleText, updatedArticleText))
+        {
+            string preview = editSummary.Length > 250
+                ? editSummary.Substring(0, 250)
+                : editSummary;
+
+            Tools.WriteDebug(
+                "Article::SendPageToCustomModule",
+                $"Custom module '{module.GetType().FullName}' returned an invalid edit summary."
+                + Environment.NewLine
+                + $"Original text length: {originalArticleText.Length}"
+                + Environment.NewLine
+                + $"Updated text length: {updatedArticleText.Length}"
+                + Environment.NewLine
+                + $"Edit summary length: {editSummary.Length}"
+                + Environment.NewLine
+                + $"Summary begins:"
+                + Environment.NewLine
+                + preview);
+
+            throw new InvalidOperationException(
+                $"The custom module '{module.GetType().FullName}' returned an invalid " +
+                $"edit summary of {editSummary.Length} characters. The summary appears to contain article text.");
+        }
+
+        _customModuleMadeChanges = !string.Equals(
+            updatedArticleText,
+            originalArticleText,
+            StringComparison.Ordinal);
+
+        // Retain the module's updated text even when it requests that the
+        // article be skipped, because re-parse mode may reuse the result.
+        AWBChangeArticleText(
+            "Custom module",
+            updatedArticleText,
+            checkIfChanged: true);
+
+        if (skipArticle)
+        {
+            Trace.AWBSkipped(
+                string.IsNullOrEmpty(editSummary)
+                    ? "Skipped by custom module"
+                    : $"Skipped by custom module ({editSummary})");
+
+            return;
+        }
+
+        processArticleEventArgs.EditSummary = editSummary;
+        processArticleEventArgs.Skip = false;
+        AppendPluginEditSummary();
+    }
+
+    /// <summary>
+    /// Determines whether a custom-module edit summary appears to contain
+    /// complete article text rather than a short description of the changes.
+    /// </summary>
+    private static bool LooksLikeArticleText(
+        string editSummary,
+        string originalArticleText,
+        string updatedArticleText)
+    {
+        if (string.IsNullOrEmpty(editSummary))
+            return false;
+
+        if (string.Equals(
+            editSummary,
+            originalArticleText,
+            StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (string.Equals(
+            editSummary,
+            updatedArticleText,
+            StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        const int suspiciousSummaryLength = 1000;
+
+        return editSummary.Length > suspiciousSummaryLength
+            && (originalArticleText.Contains(editSummary, StringComparison.Ordinal)
+                || updatedArticleText.Contains(editSummary, StringComparison.Ordinal));
     }
     #endregion
 
