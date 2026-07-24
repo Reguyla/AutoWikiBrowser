@@ -24,7 +24,7 @@ public static class RoslynCompiler
             CSharpSyntaxTree.ParseText(
                 sourceCode,
                 new CSharpParseOptions(
-                    LanguageVersion.CSharp12),
+                    LanguageVersion.Latest),
                 path: "CustomModule.cs",
                 encoding: Encoding.UTF8);
 
