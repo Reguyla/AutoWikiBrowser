@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading;
 using System.Xml;
@@ -1014,6 +1015,14 @@ public class ApiEdit : IApiEdit
                    StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
+    // TODO (Authentication Modernization):
+    // Consolidate Basic Authentication header generation so the legacy
+    // HttpWebRequest and modern HttpRequestMessage pipelines use the same
+    // credential encoding and header construction behavior.
+    //
+    // TODO: Review the character encoding used for Basic Authentication during
+    // the HttpWebRequest-to-HttpClient migration. Encoding.Default depends on the
+    // local system code page and may not produce consistent credentials across environments.
     /// <summary>
     /// Adds an HTTP Basic Authentication header to the specified request.
     /// </summary>
@@ -1036,10 +1045,6 @@ public class ApiEdit : IApiEdit
     /// Source:
     /// http://blog.kowalczyk.info/article/Forcing-basic-http-authentication-for-HttpWebReq.html
     /// </remarks>
-    // TODO: Review the character encoding used for Basic Authentication during
-    // the HttpWebRequest-to-HttpClient migration. Encoding.Default depends on the
-    // local system code page and may not produce consistent credentials across
-    // environments.
     protected WebRequest SetBasicAuthHeader(
         WebRequest req,
         string userName,
@@ -1106,6 +1111,10 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    // TODO (Diagnostics Modernization):
+    // Replace the separate lastGetUrl and lastPostParameters fields with one
+    // immutable request-diagnostics record if ApiEdit begins supporting concurrent
+    // requests.
     /// <summary>
     /// Records redacted request information for later diagnostics.
     /// </summary>
@@ -1138,6 +1147,9 @@ public class ApiEdit : IApiEdit
     private static byte[] BuildPostData(
         Dictionary<string, string> post)
     {
+        // TODO (Request Construction):
+        // Separate form-body encoding from URL query construction when request-building
+        // responsibilities move into a dedicated component.
         string query = BuildQuery(post);
 
         return Encoding.UTF8.GetBytes(query);
@@ -1168,6 +1180,9 @@ public class ApiEdit : IApiEdit
         return req;
     }
 
+    // TODO (HTTP Modernization):
+    // Replace direct request-stream writing with HttpContent when the legacy
+    // HttpWebRequest POST pipeline is retired.
     /// <summary>
     /// Writes the encoded POST body to the request stream.
     /// </summary>
@@ -1226,23 +1241,39 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// Performs a HTTP request
+    /// Sends an HTTP GET request using the specified API parameters and action options.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns>Text received</returns>
+    /// <param name="request">
+    /// The query parameters to include in the API URL.
+    /// </param>
+    /// <param name="options">
+    /// Options that control URL construction and request behavior.
+    /// </param>
+    /// <returns>
+    /// The response body returned by the server.
+    /// </returns>
     protected string HttpGet(Dictionary<string, string> request)
     {
         return HttpGet(request, ActionOptions.None);
     }
 
     /// <summary>
-    /// Performs a HTTP request
+    /// Sends an HTTP GET request to the specified URL and returns the response body.
     /// </summary>
-    /// <param name="url"></param>
-    /// <returns>Text received</returns>
+    /// <param name="url">
+    /// The complete URL to request.
+    /// </param>
+    /// <returns>
+    /// The response body returned by the server.
+    /// </returns>
     public string HttpGet(string url)
     {
         Tools.WriteDebug("ApiEdit::HttpGet", url);
+
+        // TODO (HTTP Resilience):
+        // Replace this unbounded retry loop with an explicit retry policy that documents
+        // retryable failures, delay or backoff behavior, maximum attempts, and
+        // cancellation handling.
         while (true)
         {
             try
@@ -1258,6 +1289,10 @@ public class ApiEdit : IApiEdit
 
     }
 
+    // TODO (HTTP Modernization):
+    // Centralize HttpClient and handler lifetime instead of creating a new client
+    // per request. Preserve per-session proxy, cookie, credential, and destination
+    // isolation while allowing connection pooling and deterministic disposal.
     /// <summary>
     /// Creates an HTTP client configured with the current ApiEdit session's proxy,
     /// cookies, decompression, credentials, and user-agent settings.
@@ -1324,7 +1359,7 @@ public class ApiEdit : IApiEdit
                 Encoding.Default.GetBytes(authenticationText));
 
         request.Headers.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue(
+            new AuthenticationHeaderValue(
                 "Basic",
                 encodedCredentials);
     }
@@ -1425,17 +1460,20 @@ public class ApiEdit : IApiEdit
     {
         string result = HttpPost(
             new()
-            {
-            { "action", "query" },
-            { "meta", "tokens" },
-            { "type", "login" }
-            },
+                {
+                { "action", "query" },
+                { "meta", "tokens" },
+                { "type", "login" }
+                },
             new());
 
         Tools.WriteDebug(
             "API::Edit meta/tokens",
             "Received login-token response.");
 
+        // TODO (API Response Modernization):
+        // Replace the XML login-token parsing with the shared response model or parser
+        // selected for the broader MediaWiki API response modernization.
         XmlDocument document = CheckForErrors(result, "query");
 
         XmlNode tokenNode =
@@ -1462,7 +1500,15 @@ public class ApiEdit : IApiEdit
     private static bool ShouldUseClientLogin(
         string username,
         string token) =>
-        !username.Contains("@") &&
+
+        /// <remarks>
+        /// Usernames containing <c>@</c> are treated as bot-password style credentials
+        /// and continue through the legacy action-login workflow.
+        /// </remarks>
+        // TODO (Authentication Modernization):
+        // Review the username-based bot-password detection rule once the supported
+        // MediaWiki authentication baseline is finalized.
+        !username.Contains('@') &&
         !string.IsNullOrEmpty(token);
 
     /// <summary>
@@ -1489,7 +1535,7 @@ public class ApiEdit : IApiEdit
         string domain,
         string token)
     {
-        var post = BuildLegacyLoginParameters(
+        Dictionary<string, string> post = BuildLegacyLoginParameters(
             username,
             password,
             domain,
@@ -1513,10 +1559,13 @@ public class ApiEdit : IApiEdit
                 loginNode,
                 "result");
 
+        // TODO (MediaWiki Compatibility):
+        // Remove the NeedToken retry path when the minimum supported MediaWiki
+        // version no longer requires the legacy two-step action-login workflow.
         if (string.IsNullOrEmpty(token) &&
             status.Equals(
                 "NeedToken",
-                StringComparison.InvariantCultureIgnoreCase))
+                StringComparison.OrdinalIgnoreCase))
         {
             result = RetryLegacyLoginWithToken(
                 post,
@@ -1527,7 +1576,7 @@ public class ApiEdit : IApiEdit
         if (status != null &&
             !status.Equals(
                 "Success",
-                StringComparison.InvariantCultureIgnoreCase))
+                StringComparison.OrdinalIgnoreCase))
         {
             throw new LoginException(this, status);
         }
