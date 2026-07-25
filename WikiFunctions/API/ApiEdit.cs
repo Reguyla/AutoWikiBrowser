@@ -3674,146 +3674,359 @@ public class ApiEdit : IApiEdit
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>
-    /// Checks the XML returned by the server for error codes and throws an appropriate exception
+    /// Parses and validates XML returned by the server, translating API errors,
+    /// warnings, and invalid response states into the appropriate exceptions.
     /// </summary>
-    /// <param name="xml">Server output</param>
-    /// <param name="action">The action performed, null if don't check</param>
-    private XmlDocument CheckForErrors(string xml, string action)
+    /// <param name="xml">
+    /// The XML returned by the server.
+    /// </param>
+    /// <param name="action">
+    /// The API action expected in the response, or <see langword="null"/> when
+    /// action-specific validation is not required.
+    /// </param>
+    /// <returns>
+    /// The validated API response document.
+    /// </returns>
+    private XmlDocument CheckForErrors(
+        string xml,
+        string action)
     {
-        if (string.IsNullOrEmpty(xml)) throw new ApiBlankException(this);
+        if (string.IsNullOrEmpty(xml))
+            throw new ApiBlankException(this);
 
-        XmlDocument doc;
+        XmlDocument document = ParseApiXmlDocument(xml);
 
-        try
-        {
-            doc = LoadApiXmlDocument(xml);
-        }
-        catch (XmlException xe)
-        {
-            Tools.WriteDebug("ApiEdit::CheckForErrors", xml);
-
-            string postParams = "";
-
-            if (lastPostParameters != null)
-            {
-                postParams = BuildQuery(lastPostParameters);
-            }
-
-            throw new ApiXmlException(this, xe, lastGetUrl, postParams, xml);
-        }
-
-        var errors = doc.GetElementsByTagName("error");
-
-        if (errors.Count > 0)
-        {
-            var error = errors[0];
-            string errorCode = XmlResponseHelpers.RequireAttributeValue(error, "code");
-
-            string errorMessage = XmlResponseHelpers.RequireAttributeValue(error, "info");
-
-            switch (errorCode.ToLower())
-            {
-                case "maxlag": // guessing
-                    double maxlag;
-                    double.TryParse(MaxLag.Match(xml).Groups[1].Value, out maxlag);
-                    throw new MaxlagException(this, maxlag, 10);
-                case "wrnotloggedin":
-                    throw new LoggedOffException(this);
-                case "spamdetected":
-                    throw new SpamlistException(this, errorMessage);
-                case "spamblacklist":
-                    throw new SpamlistException(this, errorMessage);
-                case "spamprotectiontext":
-                    throw new SpamlistException(this, errorMessage);
-                case "fileexists-sharedrepo-perm":
-                    throw new SharedRepoException(this, errorMessage);
-                case "hookaborted":
-                    throw new MediaWikiSaysNoException(this, errorMessage);
-                case "readonly":
-                    throw new MediaWikiReadOnlyException(this, errorMessage + "\r\n\r\nReason: " + XmlResponseHelpers.RequireAttributeValue(error, "readonlyreason"));
-
-                //case "confirmemail":
-                //
-                default:
-                    if (errorCode.Contains("disabled"))
-                    {
-                        throw new FeatureDisabledException(this, errorCode, errorMessage);
-                    }
-                    if (errorMessage == "Unknown error: \"tpt-target-page\"")
-                    {
-                        throw new TranslationPageEditException(this);
-                    }
-
-                    throw new ApiErrorException(this, errorCode, errorMessage);
-            }
-        }
-
-        // look at warnings: are notifications enabled on wiki
-        var warnings = doc.GetElementsByTagName("warnings");
-        if (warnings.Count > 0)
-        {
-            var xmlNode = warnings.Item(0);
-            if (xmlNode != null)
-            {
-                StringBuilder warningBuilder = new StringBuilder();
-                foreach (XmlNode childNode in xmlNode.ChildNodes)
-                {
-                    // use Contains as warnings may be in a single XML block
-                    if (childNode.InnerText.Contains("Unrecognized value for parameter 'meta': notifications"))
-                    {
-                        Variables.NotificationsEnabled = false;
-                    }
-                    else if (childNode.InnerText.Contains("The parameter \"intoken\" has been deprecated.") ||
-                             childNode.InnerText.Contains("Unrecognized parameter: intoken."))
-                    {
-                        UseInToken = false;
-                    }
-                    warningBuilder.AppendLine(childNode.InnerText);
-                }
-                if (warningBuilder.Length > 0)
-                {
-                    Tools.WriteDebug("ApiEdit::CheckForErrors warnings", warningBuilder.ToString());
-                }
-            }
-        }
+        ThrowIfApiError(document, xml);
+        ProcessApiWarnings(document);
 
         if (string.IsNullOrEmpty(action))
-            return CompleteSuccessfulResponseValidation(doc, action);
+            return CompleteSuccessfulResponseValidation(document, action);
 
-        var api = doc["api"];
+        ValidateActionResponse(document, action, xml);
+
+        return CompleteSuccessfulResponseValidation(document, action);
+    }
+
+    /// <summary>
+    /// Parses an API response into an XML document.
+    /// </summary>
+    /// <param name="xml">
+    /// The raw XML returned by the server.
+    /// </param>
+    /// <returns>
+    /// The parsed API response document.
+    /// </returns>
+    /// <exception cref="ApiXmlException">
+    /// Thrown when the server response is not valid XML.
+    /// </exception>
+    private XmlDocument ParseApiXmlDocument(string xml)
+    {
+        try
+        {
+            return LoadApiXmlDocument(xml);
+        }
+        catch (XmlException ex)
+        {
+            Tools.WriteDebug(
+                "ApiEdit::CheckForErrors",
+                xml);
+
+            string postParams = lastPostParameters == null
+                ? string.Empty
+                : BuildQuery(lastPostParameters);
+
+            throw new ApiXmlException(
+                this,
+                ex,
+                lastGetUrl,
+                postParams,
+                xml);
+        }
+    }
+
+    /// <summary>
+    /// Examines the API response for an error element and throws the corresponding
+    /// typed exception when one is present.
+    /// </summary>
+    /// <param name="document">
+    /// The parsed API response.
+    /// </param>
+    /// <param name="xml">
+    /// The raw XML response, used to extract additional error details.
+    /// </param>
+    private void ThrowIfApiError(
+        XmlDocument document,
+        string xml)
+    {
+        XmlNodeList errors =
+            document.GetElementsByTagName("error");
+
+        if (errors.Count == 0)
+            return;
+
+        XmlNode error = errors[0];
+
+        string errorCode =
+            XmlResponseHelpers.RequireAttributeValue(
+                error,
+                "code");
+
+        string errorMessage =
+            XmlResponseHelpers.RequireAttributeValue(
+                error,
+                "info");
+
+        ThrowApiError(
+            error,
+            errorCode,
+            errorMessage,
+            xml);
+    }
+
+    /// <summary>
+    /// Translates an API error code into the appropriate exception.
+    /// </summary>
+    /// <param name="error">
+    /// The API error element.
+    /// </param>
+    /// <param name="errorCode">
+    /// The error code returned by MediaWiki.
+    /// </param>
+    /// <param name="errorMessage">
+    /// The accompanying error message.
+    /// </param>
+    /// <param name="xml">
+    /// The raw XML response.
+    /// </param>
+    private void ThrowApiError(
+        XmlNode error,
+        string errorCode,
+        string errorMessage,
+        string xml)
+    {
+        switch (errorCode.ToLowerInvariant())
+        {
+            case "maxlag":
+                double.TryParse(
+                    MaxLag.Match(xml).Groups[1].Value,
+                    out double maxlag);
+
+                throw new MaxlagException(
+                    this,
+                    maxlag,
+                    10);
+
+            case "wrnotloggedin":
+                throw new LoggedOffException(this);
+
+            case "spamdetected":
+            case "spamblacklist":
+            case "spamprotectiontext":
+                throw new SpamlistException(
+                    this,
+                    errorMessage);
+
+            case "fileexists-sharedrepo-perm":
+                throw new SharedRepoException(
+                    this,
+                    errorMessage);
+
+            case "hookaborted":
+                throw new MediaWikiSaysNoException(
+                    this,
+                    errorMessage);
+
+            case "readonly":
+                string readOnlyReason =
+                    XmlResponseHelpers.RequireAttributeValue(
+                        error,
+                        "readonlyreason");
+
+                throw new MediaWikiReadOnlyException(
+                    this,
+                    errorMessage +
+                    "\r\n\r\nReason: " +
+                    readOnlyReason);
+
+            default:
+                ThrowUnrecognizedApiError(
+                    errorCode,
+                    errorMessage);
+
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Handles API errors that do not have a dedicated switch case.
+    /// </summary>
+    /// <param name="errorCode">
+    /// The error code returned by MediaWiki.
+    /// </param>
+    /// <param name="errorMessage">
+    /// The accompanying error message.
+    /// </param>
+    private void ThrowUnrecognizedApiError(
+        string errorCode,
+        string errorMessage)
+    {
+        if (errorCode.Contains("disabled"))
+        {
+            throw new FeatureDisabledException(
+                this,
+                errorCode,
+                errorMessage);
+        }
+
+        if (errorMessage == "Unknown error: \"tpt-target-page\"")
+            throw new TranslationPageEditException(this);
+
+        throw new ApiErrorException(
+            this,
+            errorCode,
+            errorMessage);
+    }
+
+    /// <summary>
+    /// Processes API warnings, updates compatibility settings, and writes warning
+    /// details to the debug log.
+    /// </summary>
+    /// <param name="document">
+    /// The parsed API response.
+    /// </param>
+    private void ProcessApiWarnings(XmlDocument document)
+    {
+        XmlNodeList warnings =
+            document.GetElementsByTagName("warnings");
+
+        if (warnings.Count == 0)
+            return;
+
+        XmlNode warningsNode = warnings.Item(0);
+
+        if (warningsNode == null)
+            return;
+
+        StringBuilder warningBuilder = new();
+
+        foreach (XmlNode childNode in warningsNode.ChildNodes)
+        {
+            ProcessApiWarning(childNode.InnerText);
+            warningBuilder.AppendLine(childNode.InnerText);
+        }
+
+        if (warningBuilder.Length > 0)
+        {
+            Tools.WriteDebug(
+                "ApiEdit::CheckForErrors warnings",
+                warningBuilder.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Applies compatibility changes indicated by an API warning.
+    /// </summary>
+    /// <param name="warning">
+    /// The warning text returned by MediaWiki.
+    /// </param>
+    private void ProcessApiWarning(string warning)
+    {
+        // Contains is intentional because multiple warnings may be returned in a
+        // single XML block.
+        if (warning.Contains(
+            "Unrecognized value for parameter 'meta': notifications"))
+        {
+            Variables.NotificationsEnabled = false;
+        }
+        else if (
+            warning.Contains(
+                "The parameter \"intoken\" has been deprecated.") ||
+            warning.Contains(
+                "Unrecognized parameter: intoken."))
+        {
+            UseInToken = false;
+        }
+    }
+
+    /// <summary>
+    /// Performs validation that depends on the expected API action.
+    /// </summary>
+    /// <param name="document">
+    /// The parsed API response.
+    /// </param>
+    /// <param name="action">
+    /// The expected API action.
+    /// </param>
+    /// <param name="xml">
+    /// The raw XML response.
+    /// </param>
+    private void ValidateActionResponse(
+        XmlDocument document,
+        string action,
+        string xml)
+    {
+        XmlElement api = document["api"];
 
         if (api == null)
-            return CompleteSuccessfulResponseValidation(doc, action);
+            return;
 
-        var redirects = api.GetElementsByTagName("r");
-        if (action == "query" && redirects.Count > 0) //We have redirects
-        {
-            // Workaround for https://phabricator.wikimedia.org/T41492
-            string redirectTarget = XmlResponseHelpers.RequireAttributeValue(redirects[redirects.Count - 1], "to");
-
-            if (Namespace.IsSpecial(Namespace.Determine(redirectTarget)))
-            {
-                throw new RedirectToSpecialPageException(this);
-            }
-        }
+        ThrowIfRedirectToSpecialPage(
+            api,
+            action);
 
         ThrowIfInvalidTitle(api);
         ThrowIfInterwikiRedirect(api);
 
-        var actionElement = api[action];
+        XmlElement actionElement = api[action];
 
         if (actionElement == null)
-        {
-            return CompleteSuccessfulResponseValidation(doc, action);
-        }
+            return;
 
         ThrowIfAssertionFailed(actionElement);
         ThrowIfSpamBlacklisted(actionElement);
         ThrowIfCaptchaRequired(actionElement);
-        ThrowIfActionFailed(actionElement, action, xml);
-
-        return CompleteSuccessfulResponseValidation(doc, action);
+        ThrowIfActionFailed(
+            actionElement,
+            action,
+            xml);
     }
+
+    /// <summary>
+    /// Rejects query redirects that target a special page.
+    /// </summary>
+    /// <param name="api">
+    /// The root API response element.
+    /// </param>
+    /// <param name="action">
+    /// The expected API action.
+    /// </param>
+    private void ThrowIfRedirectToSpecialPage(
+        XmlElement api,
+        string action)
+    {
+        if (action != "query")
+            return;
+
+        XmlNodeList redirects =
+            api.GetElementsByTagName("r");
+
+        if (redirects.Count == 0)
+            return;
+
+        // Workaround for https://phabricator.wikimedia.org/T41492
+        string redirectTarget =
+            XmlResponseHelpers.RequireAttributeValue(
+                redirects[redirects.Count - 1],
+                "to");
+
+        if (Namespace.IsSpecial(
+            Namespace.Determine(redirectTarget)))
+        {
+            throw new RedirectToSpecialPageException(this);
+        }
+    }
+
+
 
     /// <summary>
     /// Begins a scoped cancellation context for modern task-based ApiEdit callers.
