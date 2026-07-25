@@ -594,30 +594,53 @@ public class AsyncApiEditModern
             cancellationToken);
     }
 
+    /// <summary>
+    /// Starts an asynchronous Parse API request using the supplied query
+    /// parameters and no cancellation token.
+    /// </summary>
+    /// <param name="queryParameters">
+    /// MediaWiki API query parameters to submit.
+    /// </param>
+    /// <returns>
+    /// A task that completes with the raw Parse API response.
+    /// </returns>
     public Task<string> ParseApiAsync(
-        Dictionary<string, string> queryParameters)
-    {
-        return ParseApiAsync(
+        Dictionary<string, string> queryParameters) =>
+        ParseApiAsync(
             queryParameters,
             CancellationToken.None);
-    }
 
+    /// <summary>
+    /// Starts an asynchronous Parse API request using the supplied query
+    /// parameters and cancellation token.
+    /// </summary>
+    /// <param name="queryParameters">
+    /// MediaWiki API query parameters to submit.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the request before completion.
+    /// </param>
+    /// <returns>
+    /// A task that completes with the raw Parse API response.
+    /// </returns>
+    /// <remarks>
+    /// This overload routes the request through <c>RunOperation</c> so the
+    /// operation is tracked consistently with other asynchronous editor
+    /// actions, ensuring centralized exception handling, status management,
+    /// and cancellation behavior.
+    /// </remarks>
     public Task<string> ParseApiAsync(
         Dictionary<string, string> queryParameters,
         CancellationToken cancellationToken)
     {
-        if (queryParameters == null)
-            throw new ArgumentNullException("queryParameters");
+        ArgumentNullException.ThrowIfNull(queryParameters);
 
-        return RunOperation<string>(
+        return RunOperation(
             "ParseApi",
-            delegate (CancellationToken token)
-            {
-                return ApiOperations.ParseApi(
-                    SynchronousEditor,
-                    queryParameters,
-                    token);
-            },
+            token => ApiOperations.ParseApi(
+                SynchronousEditor,
+                queryParameters,
+                token),
             cancellationToken);
     }
 
