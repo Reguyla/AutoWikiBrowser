@@ -1424,14 +1424,30 @@ public class AsyncApiEditModernTests
                 "Login was not configured for this test.");
         }
 
+        /// <summary>
+        /// Logs out the current API session.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
+        /// <exception cref="NotSupportedException">
+        /// Always thrown because logout behavior has not been configured for this test.
+        /// </exception>
         public void Logout(
             ApiEdit editor,
-            CancellationToken cancellationToken)
-        {
+            CancellationToken cancellationToken) =>
             throw new NotSupportedException(
                 "Logout was not configured for this test.");
-        }
 
+        /// <summary>
+        /// Records a request to watch the specified page.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="title">The title of the page to watch.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
         public void Watch(
             ApiEdit editor,
             string title,
@@ -1443,6 +1459,14 @@ public class AsyncApiEditModernTests
             WatchCancellationToken = cancellationToken;
         }
 
+        /// <summary>
+        /// Records a request to stop watching the specified page.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="title">The title of the page to stop watching.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
         public void Unwatch(
             ApiEdit editor,
             string title,
@@ -1454,6 +1478,17 @@ public class AsyncApiEditModernTests
             UnwatchCancellationToken = cancellationToken;
         }
 
+        /// <summary>
+        /// Records an HTTP GET request and returns the configured result.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="url">The URL to request.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// The value configured in <see cref="HttpGetResult"/>.
+        /// </returns>
         public string HttpGet(
             ApiEdit editor,
             string url,
@@ -1467,6 +1502,15 @@ public class AsyncApiEditModernTests
             return HttpGetResult;
         }
 
+        /// <summary>
+        /// Records a rollback request for the specified page and user.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="title">The title of the page to roll back.</param>
+        /// <param name="user">The user whose edits should be rolled back.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
         public void Rollback(
             ApiEdit editor,
             string title,
@@ -1539,33 +1583,81 @@ public class AsyncApiEditModernTests
             ProtectCancellationToken = cancellationToken;
         }
 
+        /// <summary>
+        /// Executes a query API request.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="queryParameters">The query parameters to submit.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
+        /// <exception cref="NotSupportedException">
+        /// Always thrown because this test implementation has not been configured
+        /// to handle query API requests.
+        /// </exception>
         public void QueryApi(
             ApiEdit editor,
             string queryParameters,
-            CancellationToken cancellationToken)
-        {
+            CancellationToken cancellationToken) =>
             throw new NotSupportedException(
                 "QueryApi was not configured for this test.");
-        }
 
+        /// <summary>
+        /// Executes a parse API request using a query string.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="queryParameters">The query parameters to submit.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// The configured parse result.
+        /// </returns>
+        /// <exception cref="NotSupportedException">
+        /// Always thrown because this test implementation has not been configured
+        /// to handle string-based parse API requests.
+        /// </exception>
         public string ParseApi(
             ApiEdit editor,
             string queryParameters,
-            CancellationToken cancellationToken)
-        {
+            CancellationToken cancellationToken) =>
             throw new NotSupportedException(
-                "ParseApi string was not configured for this test.");
-        }
+                "String-based ParseApi was not configured for this test.");
 
+        /// <summary>
+        /// Executes a parse API request using a parameter dictionary.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="queryParameters">The query parameters to submit.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// The configured parse result.
+        /// </returns>
+        /// <exception cref="NotSupportedException">
+        /// Always thrown because this test implementation has not been configured
+        /// to handle dictionary-based parse API requests.
+        /// </exception>
         public string ParseApi(
             ApiEdit editor,
             Dictionary<string, string> queryParameters,
-            CancellationToken cancellationToken)
-        {
+            CancellationToken cancellationToken) =>
             throw new NotSupportedException(
-                "ParseApi was not configured for this test.");
-        }
+                "Dictionary-based ParseApi was not configured for this test.");
 
+        /// <summary>
+        /// Records an expand-templates request and returns the configured result.
+        /// </summary>
+        /// <param name="editor">The API editor used for the request.</param>
+        /// <param name="title">The title associated with the text being expanded.</param>
+        /// <param name="text">The text containing templates to expand.</param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// The value configured in <see cref="ExpandTemplatesResult"/>.
+        /// </returns>
         public string ExpandTemplates(
             ApiEdit editor,
             string title,
