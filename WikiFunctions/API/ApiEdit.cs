@@ -1587,6 +1587,21 @@ public class ApiEdit : IApiEdit
     /// <summary>
     /// Builds the form parameters required by the legacy login API.
     /// </summary>
+    /// <param name="username">
+    /// The username to authenticate.
+    /// </param>
+    /// <param name="password">
+    /// The password associated with the username.
+    /// </param>
+    /// <param name="domain">
+    /// The optional authentication domain.
+    /// </param>
+    /// <param name="token">
+    /// The login token to include when one is available.
+    /// </param>
+    /// <returns>
+    /// The legacy login form parameters.
+    /// </returns>
     private static Dictionary<string, string> BuildLegacyLoginParameters(
         string username,
         string password,
@@ -1595,7 +1610,7 @@ public class ApiEdit : IApiEdit
     {
         bool domainSet = !string.IsNullOrEmpty(domain);
 
-        var post = new Dictionary<string, string>
+        Dictionary<string, string> post = new()
     {
         { "lgname", username },
         { "lgpassword", password }
@@ -1619,8 +1634,8 @@ public class ApiEdit : IApiEdit
     /// <returns>
     /// The response's <c>login</c> element.
     /// </returns>
-    /// <exception cref="Exception">
-    /// Thrown when the response does not contain a login element.
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response does not contain a <c>login</c> element.
     /// </exception>
     private static XmlNode GetLoginResponseNode(string result)
     {
@@ -1631,7 +1646,10 @@ public class ApiEdit : IApiEdit
             loginDocument.SelectSingleNode("/api/login");
 
         if (loginNode == null)
-            throw new Exception("Cannot find <login> element");
+        {
+            throw new InvalidOperationException(
+                "The API response does not contain a <login> element.");
+        }
 
         return loginNode;
     }
@@ -1675,7 +1693,7 @@ public class ApiEdit : IApiEdit
 
         Tools.WriteDebug(
             "API::Edit action/login NeedToken",
-            result);
+            "Received login retry response.");
 
         loginNode = GetLoginResponseNode(result);
 
