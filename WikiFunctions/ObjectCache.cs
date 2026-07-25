@@ -137,30 +137,52 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Retrieves a cached value associated with the specified key.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">
+        /// The expected type of the cached value.
+        /// </typeparam>
+        /// <param name="key">
+        /// The key identifying the cached value.
+        /// </param>
+        /// <returns>
+        /// The cached value when present and not expired; otherwise, <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="key"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="InvalidCastException">
+        /// Thrown when the stored value cannot be cast to <typeparamref name="T"/>.
+        /// </exception>
+        // TODO: Review callers and consider returning T instead of object.
+        // The method already casts stored values to T, so a generic return type
+        // would provide stronger type safety. Define the intended behavior for
+        // missing or expired value types before making this API change.
         public object Get<T>(string key)
         {
+            ArgumentNullException.ThrowIfNull(key);
+
             lock (Storage)
             {
                 Type type = typeof(T);
-                StoredData found;
-                Dictionary<string, StoredData> foundD;
-                if (Storage.TryGetValue(type, out foundD) && foundD.TryGetValue(key, out found))
-                {
-                    if (found.Expires < DateTime.Now)
-                    {
-                        Storage[type].Remove(key);
-                        return null;
-                    }
 
-                    return (T)found.Data; // extra typecast to detect type mismatch earlier
+                if (!Storage.TryGetValue(
+                        type,
+                        out Dictionary<string, StoredData> values)
+                    || !values.TryGetValue(
+                        key,
+                        out StoredData storedData))
+                {
+                    return null;
                 }
 
-                return null;
+                if (storedData.Expires < DateTime.Now)
+                {
+                    values.Remove(key);
+                    return null;
+                }
+
+                return (T)storedData.Data;
             }
         }
 
