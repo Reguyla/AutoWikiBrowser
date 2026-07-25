@@ -2651,7 +2651,8 @@ public class ApiEdit : IApiEdit
     {
         var post = new Dictionary<string, string>
         {
-            // Parameter order matters. See Wikimedia Phabricator task T16210.
+            // Parameter order intentionally matches MediaWiki expectations.
+            // See Wikimedia Phabricator task T16210.
             { "md5", MD5(pageText) },
             { "summary", summary },
             { "basetimestamp", Page.Timestamp },
@@ -2716,21 +2717,9 @@ public class ApiEdit : IApiEdit
         string reason,
         bool watch)
     {
-        if (string.IsNullOrEmpty(title))
-        {
-            throw new ArgumentException(
-                "Page name required",
-                nameof(title));
-        }
+        ArgumentException.ThrowIfNullOrEmpty(title);
+        ArgumentException.ThrowIfNullOrEmpty(reason);
 
-        if (string.IsNullOrEmpty(reason))
-        {
-            throw new ArgumentException(
-                "Deletion reason required",
-                nameof(reason));
-        }
-
-        // Reset();
         Action = "delete";
 
         EnsureDeleteToken(title);
@@ -2774,6 +2763,9 @@ public class ApiEdit : IApiEdit
         string result = HttpGet(
             new()
             {
+                // TODO (MediaWiki Compatibility):
+                // Remove the pre-1.24 intoken compatibility path once the minimum supported
+                // MediaWiki version no longer requires it.
                 { "action", "query" },
                 { "prop", "info" },
                 { "meta", "tokens" },       // MediaWiki 1.24+
@@ -2783,9 +2775,6 @@ public class ApiEdit : IApiEdit
             },
             ActionOptions.All);
 
-        // TODO (Article State):
-        // Review whether SaveInfo should be constructed before Reset so a malformed
-        // successful-edit response does not clear the current page state prematurely.
         XmlDocument document = CheckForErrors(result);
 
         try
@@ -2813,6 +2802,10 @@ public class ApiEdit : IApiEdit
     /// </exception>
     private static string GetDeleteToken(XmlDocument document)
     {
+        // TODO (MediaWiki Compatibility):
+        // Remove the pre-1.24 intoken compatibility path once the minimum supported
+        // MediaWiki version no longer requires it.
+        //
         // MediaWiki 1.24+ returns the CSRF token in <tokens>.
         // Older compatibility responses can return deletetoken on <page>.
         XmlNode tokenSource =
@@ -2821,8 +2814,8 @@ public class ApiEdit : IApiEdit
 
         if (tokenSource == null)
         {
-            throw new Exception(
-                "Cannot find <tokens> or <page> element");
+            throw new InvalidOperationException(
+                "The API response does not contain a <tokens> or <page> element.");
         }
 
         string tokenAttribute =
@@ -2855,14 +2848,15 @@ public class ApiEdit : IApiEdit
         string reason,
         bool watch)
     {
-        var post = new Dictionary<string, string>
+        Dictionary<string, string> post = new()
     {
         { "title", title },
         { "token", Page.DeleteToken },
         { "reason", reason }
     };
 
-        // post.AddIfTrue(User.IsBot, "bot", null);
+        // TODO (MediaWiki Compatibility):
+        // Review whether the bot parameter should be restored for authenticated bot accounts.
         post.AddIfTrue(watch, "watch", null);
 
         return post;
@@ -3006,7 +3000,7 @@ public class ApiEdit : IApiEdit
         string protections = BuildProtectionLevels(edit, move);
         string expiryvalue = BuildProtectionExpiry(expiry);
 
-        var post = BuildProtectPostData(
+        Dictionary<string, string> post = BuildProtectPostData(
             title,
             reason,
             expiry,
@@ -3015,10 +3009,10 @@ public class ApiEdit : IApiEdit
             cascade,
             watch);
 
-        var get = new Dictionary<string, string>
-    {
-        { "action", "protect" }
-    };
+        Dictionary<string, string> get = new()
+        {
+            { "action", "protect" }
+        };
 
         string result = HttpPost(
             get,
@@ -3039,15 +3033,18 @@ public class ApiEdit : IApiEdit
         if (!string.IsNullOrEmpty(Page.ProtectToken))
             return;
 
+        // TODO (MediaWiki Compatibility):
+        // Remove the pre-1.24 intoken compatibility path once the minimum supported
+        // MediaWiki version no longer requires it.
         string result = HttpGet(
-            new Dictionary<string, string>
+            new()
             {
-            { "action", "query" },
-            { "prop", "info" },
-            { "meta", "tokens" },       // MediaWiki 1.24+
-            { "type", "csrf" },
-            { "intoken", "protect" },   // Pre-1.24 compatibility
-            { "titles", title }
+                { "action", "query" },
+                { "prop", "info" },
+                { "meta", "tokens" },       // MediaWiki 1.24+
+                { "type", "csrf" },
+                { "intoken", "protect" },   // Pre-1.24 compatibility
+                { "titles", title }
             },
             ActionOptions.All);
 
@@ -3068,6 +3065,10 @@ public class ApiEdit : IApiEdit
     /// </summary>
     /// <param name="document">The API response document.</param>
     /// <returns>The protection token returned by the API.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response does not contain a <c>tokens</c> or
+    /// <c>page</c> element.
+    /// </exception>
     private static string GetProtectToken(XmlDocument document)
     {
         // MediaWiki 1.24+ returns the CSRF token in <tokens>.
@@ -3092,12 +3093,10 @@ public class ApiEdit : IApiEdit
             tokenAttribute);
     }
 
-    /// <summary>
-    /// Builds the protection-level value for an existing or nonexistent page.
-    /// </summary>
+    /// <summary>Builds the protection-level value for an existing or nonexistent page.</summary>
     /// <param name="edit">The edit or creation protection level.</param>
     /// <param name="move">The move protection level.</param>
-    /// <returns>The protection-level value accepted by MediaWiki.</returns>
+    /// <returns>The protection-level string accepted by the MediaWiki API.</returns>
     private string BuildProtectionLevels(string edit, string move)
     {
         // Protecting a nonexistent page, commonly called salting, requires only
@@ -3122,9 +3121,9 @@ public class ApiEdit : IApiEdit
             : expiry;
     }
 
-    /// <summary>
-    /// Builds the POST parameters for a page-protection request.
-    /// </summary>
+    /// <summary>Builds the POST parameters required by the protect API.</summary>
+    /// <param name="title">The page to protect.</param>
+    /// <returns>The POST parameters for the protection request.</returns>
     private Dictionary<string, string> BuildProtectPostData(
         string title,
         string reason,
@@ -3134,7 +3133,7 @@ public class ApiEdit : IApiEdit
         bool cascade,
         bool watch)
     {
-        var post = new Dictionary<string, string>
+        Dictionary<string, string> post = new()
     {
         { "title", title },
         { "token", Page.ProtectToken },
