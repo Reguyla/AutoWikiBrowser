@@ -26,34 +26,64 @@ using System.Xml.Serialization;
 
 namespace WikiFunctions
 {
-
+    /// <summary>
+    /// Stores cached objects grouped by type and persists them between sessions
+    /// when backed by a cache file.
+    /// </summary>
+    /// <remarks>
+    /// The cache is initialized with a default set of commonly cached types.
+    /// Additional types can be registered by calling <see cref="AddType(Type, TimeSpan)"/>.
+    /// </remarks>
     public class ObjectCache : IDisposable
     {
+        /// <summary>
+        /// Initializes a new in-memory object cache using the default cached types.
+        /// </summary>
         public ObjectCache()
         {
             AddType(typeof(string), DefaultLifespan);
             AddType(typeof(List<string>), DefaultLifespan);
-            //AddType(typeof(string[]), DefaultLifespan);
             AddType(typeof(SiteInfo), DefaultLifespan);
             AddType(typeof(bool), DefaultLifespan);
         }
 
+        /// <summary>
+        /// Initializes a new object cache and loads its contents from the specified file.
+        /// </summary>
+        /// <param name="fileName">
+        /// The cache file to load.
+        /// </param>
+        /// <remarks>
+        /// If the cache file does not exist or cannot be loaded, the cache remains
+        /// initialized with the default registered types.
+        /// </remarks>
         public ObjectCache(string fileName)
             : this()
         {
             Load(fileName);
         }
 
+        /// <summary>
+        /// Initializes the shared application-wide object cache.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is called automatically before the cache is first used.
+        /// The global cache is backed by the user's ObjectCache.xml file.
+        /// </remarks>
         static ObjectCache()
         {
             Global = new ObjectCache(Path.Combine(AwbDirs.UserData, "ObjectCache.xml"));
             Global.AddType(typeof(SiteInfo), DefaultLifespan);
         }
 
-
         /// <summary>
-        /// Saves the current cache and releases this instance.
+        /// Saves the cache to its configured backing file and releases this instance.
         /// </summary>
+        /// <remarks>
+        /// Disposal is safe to call multiple times. Any exceptions that occur while
+        /// saving the cache are reported for diagnostics and are not propagated to
+        /// the caller.
+        /// </remarks>
         public void Dispose()
         {
             if (_disposed)
@@ -78,22 +108,38 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Gets the shared application-wide object cache.
         /// </summary>
+        /// <remarks>
+        /// The global cache is initialized from the cache file stored in the
+        /// application's user-data directory.
+        /// </remarks>
         public static ObjectCache Global
         { get; private set; }
 
         /// <summary>
-        /// 
+        /// Gets the path of the file used to load and persist this cache.
         /// </summary>
+        /// <value>
+        /// The backing cache-file path, or <see langword="null"/> when the cache is
+        /// not associated with a file.
+        /// </value>
         public string FileName
         { get; private set; }
 
+        /// <summary>
+        /// Represents a cached value and the time at which it expires.
+        /// </summary>
         private class StoredData
         {
             public readonly object Data;
             public readonly DateTime Expires;
 
+            /// <summary>
+            /// Initializes a cached value with its expiration time.
+            /// </summary>
+            /// <param name="data">The value being cached.</param>
+            /// <param name="expires">The date and time at which the value expires.</param>
             public StoredData(object data, DateTime expires)
             {
                 Data = data;
@@ -108,10 +154,18 @@ namespace WikiFunctions
             = new Dictionary<Type, Dictionary<string, StoredData>>();
 
         /// <summary>
-        /// 
+        /// Registers a type that may be stored in the cache and specifies its
+        /// default lifespan.
         /// </summary>
-        /// <param name="what"></param>
-        /// <param name="lifeSpan"></param>
+        /// <param name="what">
+        /// The type to register.
+        /// </param>
+        /// <param name="lifeSpan">
+        /// The amount of time values of the registered type remain valid.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="what"/> is <see langword="null"/>.
+        /// </exception>
         public void AddType(Type what, TimeSpan lifeSpan)
         {
             if (what == null) throw new ArgumentNullException("what");
@@ -120,10 +174,20 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets an object associated with the specified cache key.
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <param name="key">
+        /// The key identifying the cached object.
+        /// </param>
+        /// <returns>
+        /// The cached object when found and not expired; otherwise,
+        /// <see langword="null"/>.
+        /// </returns>
+        /// <remarks>
+        /// Values accessed through this indexer are stored and retrieved using the
+        /// <see cref="object"/> cache registration. Use the generic cache methods
+        /// when the value should be associated with a more specific type.
+        /// </remarks>
         public object this[string key]
         {
             set
@@ -187,32 +251,63 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Stores a value in the cache using the default lifespan registered for
+        /// the value's type.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">
+        /// The key used to identify the cached value.
+        /// </param>
+        /// <param name="value">
+        /// The value to store.
+        /// </param>
+        /// <remarks>
+        /// The actual expiration time is determined by the overload that accepts an
+        /// absolute expiration date.
+        /// </remarks>
         public void Set(string key, object value)
         {
             Set(key, value, DateTime.MinValue);
         }
 
         /// <summary>
-        /// 
+        /// Stores a value in the cache for the specified duration.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="duration"></param>
+        /// <param name="key">
+        /// The key used to identify the cached value.
+        /// </param>
+        /// <param name="value">
+        /// The value to store.
+        /// </param>
+        /// <param name="duration">
+        /// The amount of time the cached value remains valid.
+        /// </param>
         public void Set(string key, object value, TimeSpan duration)
         {
             Set(key, value, DateTime.Now + duration);
         }
 
         /// <summary>
-        /// 
+        /// Stores a value in the cache until the specified expiration time.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="expiry"></param>
+        /// <param name="key">
+        /// The key used to identify the cached value.
+        /// </param>
+        /// <param name="value">
+        /// The value to store. Its runtime type must be registered with
+        /// <see cref="AddType(Type, TimeSpan)"/>.
+        /// </param>
+        /// <param name="expiry">
+        /// The date and time at which the value expires. Specify
+        /// <see cref="DateTime.MinValue"/> to use the default lifespan registered
+        /// for the value's type.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="value"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="key"/> is null or empty, or when the value's
+        /// runtime type is not supported by the cache.
+        /// </exception>
         public void Set(string key, object value, DateTime expiry)
         {
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
@@ -337,9 +432,17 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Serializes the current cache contents to the specified stream.
         /// </summary>
-        /// <param name="str"></param>
+        /// <param name="str">
+        /// The destination stream that receives the serialized cache.
+        /// </param>
+        /// <remarks>
+        /// Expired cache entries are omitted during serialization.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="str"/> is <see langword="null"/>.
+        /// </exception>
         public void Save(Stream str)
         {
             var root = new Internal.CacheRoot();
