@@ -689,68 +689,46 @@ public class ApiEdit : IApiEdit
     private CancellationToken ActiveCancellationToken;
 
     /// <summary>
-    /// 
+    /// Executes an HTTP request and returns the response body.
     /// </summary>
-    /// <param name="req"></param>
-    /// <returns></returns>
+    /// <param name="req">
+    /// The configured HTTP request to execute.
+    /// </param>
+    /// <returns>
+    /// The response body returned by the server, or an empty string when the
+    /// server returns HTTP 404.
+    /// </returns>
+    /// <remarks>
+    /// This method tracks the active request, configures HTTP Basic
+    /// authentication when required, registers cancellation, validates protocol
+    /// redirects, handles selected HTTP errors, and clears the active request
+    /// reference when processing completes.
+    /// </remarks>
     protected string GetResponseString(HttpWebRequest req)
     {
         Request = req;
 
-        if (!string.IsNullOrEmpty(Variables.HttpAuthUsername) && !string.IsNullOrEmpty(Variables.HttpAuthPassword))
-        {
-            NetworkCredential login = new NetworkCredential
-            {
-                UserName = Variables.HttpAuthUsername,
-                Password = Variables.HttpAuthPassword,
-                // Domain = "",
-            };
-
-            CredentialCache myCache = new CredentialCache
-    {
-        {new Uri(URL), "Basic", login}
-    };
-            req.Credentials = myCache;
-
-            req = (HttpWebRequest)SetBasicAuthHeader(req, login.UserName, login.Password);
-        }
+        req = ConfigureBasicAuthentication(req);
 
         try
         {
-            using (IDisposable requestCancellation =
-                RegisterRequestCancellation(req))
-            using (WebResponse resp = req.GetResponse())
-            {
-                // T357908: A custom wiki may redirect HTTP requests to HTTPS.
-                // The current check prevents later requests from continuing with a mismatched
-                // protocol, but it occurs after the redirect has already happened.
-                //
-                // TODO: Before login or any POST request, resolve the canonical API endpoint.
-                // After user confirmation, update the complete active wiki/session URL state
-                // and retry the operation using that endpoint.
-                if (req.RequestUri.Scheme != resp.ResponseUri.Scheme)
-                {
-                    throw new UriChangedException(req.RequestUri.Scheme, resp.ResponseUri.Scheme);
-                }
-
-                using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
-                {
-                    return sr.ReadToEnd();
-                }
-            }
+            return ExecuteRequest(req);
         }
         catch (WebException ex)
         {
             ThrowIfModernRequestCancellation(ex);
 
             var resp = (HttpWebResponse)ex.Response;
-            if (resp == null) throw;
+
+            if (resp == null)
+                throw;
+
             switch (resp.StatusCode)
             {
-                case HttpStatusCode.Unauthorized: // 401
+                case HttpStatusCode.Unauthorized:
                     break;
 
-                case HttpStatusCode.NotFound: // 404
+                case HttpStatusCode.NotFound:
                     Tools.WriteDebug(
                         nameof(ApiEdit),
                         $"HTTP 404 returned for '{req.RequestUri}'.");
@@ -762,9 +740,117 @@ public class ApiEdit : IApiEdit
         }
         finally
         {
-            if (object.ReferenceEquals(Request, req))
+            if (ReferenceEquals(Request, req))
                 Request = null;
         }
+    }
+
+    /// <summary>
+    /// Configures HTTP Basic authentication for the request when credentials
+    /// have been provided.
+    /// </summary>
+    /// <param name="req">
+    /// The request to configure.
+    /// </param>
+    /// <returns>
+    /// The request containing the configured authentication credentials and
+    /// authorization header.
+    /// </returns>
+    private HttpWebRequest ConfigureBasicAuthentication(HttpWebRequest req)
+    {
+        if (string.IsNullOrEmpty(Variables.HttpAuthUsername) ||
+            string.IsNullOrEmpty(Variables.HttpAuthPassword))
+        {
+            return req;
+        }
+
+        var login = new NetworkCredential
+        {
+            UserName = Variables.HttpAuthUsername,
+            Password = Variables.HttpAuthPassword
+        };
+
+        var myCache = new CredentialCache
+        {
+            { new Uri(URL), "Basic", login }
+        };
+
+        req.Credentials = myCache;
+
+        return (HttpWebRequest)SetBasicAuthHeader(
+            req,
+            login.UserName,
+            login.Password);
+    }
+
+    /// <summary>
+    /// Executes the request, validates the response endpoint, and returns the
+    /// response body.
+    /// </summary>
+    /// <param name="req">
+    /// The configured request to execute.
+    /// </param>
+    /// <returns>
+    /// The response body returned by the server.
+    /// </returns>
+    private string ExecuteRequest(HttpWebRequest req)
+    {
+        using IDisposable requestCancellation =
+            RegisterRequestCancellation(req);
+
+        using WebResponse resp = req.GetResponse();
+
+        ValidateResponseScheme(req, resp);
+
+        return ReadResponseString(resp);
+    }
+
+    /// <summary>
+    /// Verifies that the response did not redirect the request to a different
+    /// URI scheme.
+    /// </summary>
+    /// <param name="req">
+    /// The original request.
+    /// </param>
+    /// <param name="resp">
+    /// The response returned by the server.
+    /// </param>
+    /// <exception cref="UriChangedException">
+    /// Thrown when the request and response use different URI schemes.
+    /// </exception>
+    private static void ValidateResponseScheme(
+        HttpWebRequest req,
+        WebResponse resp)
+    {
+        // T357908: A custom wiki may redirect HTTP requests to HTTPS.
+        // The current check prevents later requests from continuing with a
+        // mismatched protocol, but it occurs after the redirect has happened.
+        //
+        // TODO: During the networking modernization, resolve the canonical API
+        // endpoint before authentication or POST requests so HTTP-to-HTTPS
+        // redirects can update the active session state before the request is sent.
+        if (req.RequestUri.Scheme != resp.ResponseUri.Scheme)
+        {
+            throw new UriChangedException(
+                req.RequestUri.Scheme,
+                resp.ResponseUri.Scheme);
+        }
+    }
+
+    /// <summary>
+    /// Reads the complete response body as a string.
+    /// </summary>
+    /// <param name="resp">
+    /// The response whose content should be read.
+    /// </param>
+    /// <returns>
+    /// The complete response body.
+    /// </returns>
+    private static string ReadResponseString(WebResponse resp)
+    {
+        using var sr = new StreamReader(resp.GetResponseStream());
+
+        return sr.ReadToEnd();
     }
 
     /// <summary>
