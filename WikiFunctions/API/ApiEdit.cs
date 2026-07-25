@@ -232,69 +232,97 @@ public class ApiEdit : IApiEdit
     #region URL stuff
 
     /// <summary>
-    /// 
+    /// Builds a URL-encoded query string from the specified request parameters.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
+    /// <param name="request">
+    /// The request parameters to include in the query string.
+    /// </param>
+    /// <returns>
+    /// A query string containing the encoded request parameters. Each parameter
+    /// is prefixed with an ampersand.
+    /// </returns>
+    /// <remarks>
+    /// Empty parameter names are ignored. Empty parameter values are preserved
+    /// by emitting the parameter name followed by an equals sign.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="request"/> is <see langword="null"/>.
+    /// </exception>
     protected static string BuildQuery(Dictionary<string, string> request)
     {
-        if (!UseInToken && request.ContainsKey("intoken"))
-        {
-            request.Remove("intoken");
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
-        StringBuilder sb = new StringBuilder();
+        if (!UseInToken)
+            request.Remove("intoken");
+
+        var sb = new StringBuilder();
+
         foreach (KeyValuePair<string, string> kvp in request)
         {
-            string s = kvp.Key; // TODO: This is probably redundant now
-            if (string.IsNullOrEmpty(s))
-            {
+            if (string.IsNullOrEmpty(kvp.Key))
                 continue;
-            }
 
             sb.Append('&');
-            sb.Append(s);
-            if (s.Contains("="))
-            {
-                Tools.WriteDebug(s, "Api key parameter includes =");
-            }
+            sb.Append(kvp.Key);
 
-            // Always send a =, so we don't break boolean parameters passed in the POST part of the query
+            if (kvp.Key.Contains('='))
+                Tools.WriteDebug(kvp.Key, "Api key parameter includes =");
+
+            // Always emit an equals sign so empty values remain valid parameters,
+            // including boolean parameters passed in the POST portion of a request.
             sb.Append('=');
 
-            if (!string.IsNullOrEmpty(kvp.Value)) // empty string is a valid parameter value!
-            {
+            if (!string.IsNullOrEmpty(kvp.Value))
                 sb.Append(WebUtility.UrlEncode(kvp.Value));
-            }
         }
 
         return sb.ToString();
     }
 
     /// <summary>
-    /// 
+    /// Builds a MediaWiki query string containing one or more page titles.
     /// </summary>
-    /// <param name="titles"></param>
-    /// <returns></returns>
+    /// <param name="titles">
+    /// The page titles to encode and include in the query.
+    /// </param>
+    /// <returns>
+    /// A query string beginning with <c>&amp;titles=</c>, or an empty string
+    /// when no titles are supplied.
+    /// </returns>
     protected static string Titles(params string[] titles)
     {
-        for (int i = 0; i < titles.Length; i++) titles[i] = Tools.WikiEncode(titles[i]);
-        if (titles.Length > 0) return "&titles=" + string.Join("|", titles);
+        for (int i = 0; i < titles.Length; i++)
+            titles[i] = Tools.WikiEncode(titles[i]);
 
-        return "";
+        if (titles.Length == 0)
+            return string.Empty;
+
+        return "&titles=" + string.Join("|", titles);
     }
 
     /// <summary>
-    /// 
+    /// Builds a MediaWiki query string containing one or more page titles using
+    /// the specified parameter name.
     /// </summary>
-    /// <param name="paramName"></param>
-    /// <param name="titles"></param>
-    /// <returns></returns>
+    /// <param name="paramName">
+    /// The name of the query parameter.
+    /// </param>
+    /// <param name="titles">
+    /// The page titles to encode and include in the query.
+    /// </param>
+    /// <returns>
+    /// A query string beginning with the specified parameter name, or an empty
+    /// string when no titles are supplied.
+    /// </returns>
     protected static string NamedTitles(string paramName, params string[] titles)
     {
-        for (int i = 0; i < titles.Length; i++) titles[i] = Tools.WikiEncode(titles[i]);
-        if (titles.Length > 0) return "&" + paramName + "=" + string.Join("|", titles);
-        return "";
+        for (int i = 0; i < titles.Length; i++)
+            titles[i] = Tools.WikiEncode(titles[i]);
+
+        if (titles.Length == 0)
+            return string.Empty;
+
+        return "&" + paramName + "=" + string.Join("|", titles);
     }
 
     /// <summary>
@@ -1393,20 +1421,34 @@ public class ApiEdit : IApiEdit
         return Page.Text;
     }
 
+    /// <summary>
+    /// Determines whether the specified page exists.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to check.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the page exists; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="title"/> is null or empty.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the API response cannot be interpreted as valid page information.
+    /// </exception>
     public bool PageExists(string title)
     {
-        if (string.IsNullOrEmpty(title))
-            throw new ArgumentException("Page name required", "title");
+        ArgumentException.ThrowIfNullOrEmpty(title);
 
         var query = new Dictionary<string, string>
-        {
-            {"action", "query"},
-            {"prop", "info"},
-            {"titles", title}
-        };
+    {
+        { "action", "query" },
+        { "prop", "info" },
+        { "titles", title }
+    };
 
         string result = HttpGet(query, ActionOptions.None);
-
         XmlDocument document = CheckForErrors(result, "query");
 
         try
@@ -1419,59 +1461,103 @@ public class ApiEdit : IApiEdit
         }
     }
 
-    public SaveInfo Save(string pageText, string summary, bool minor, WatchOptions watch, string contentModel = "wikitext")
+    /// <summary>
+    /// Saves the current page text to the wiki.
+    /// </summary>
+    /// <param name="pageText">
+    /// The complete text to save to the page.
+    /// </param>
+    /// <param name="summary">
+    /// The edit summary describing the changes.
+    /// </param>
+    /// <param name="minor">
+    /// <see langword="true"/> to mark the edit as minor; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="watch">
+    /// The watchlist behavior to apply to the edited page.
+    /// </param>
+    /// <param name="contentModel">
+    /// The content model to assign to the page. The default is
+    /// <c>wikitext</c>.
+    /// </param>
+    /// <returns>
+    /// Information returned by the wiki after the page is saved.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when an empty new page is submitted.
+    /// </exception>
+    /// <exception cref="ApiException">
+    /// Thrown when the page was not opened for editing or no edit token is
+    /// available.
+    /// </exception>
+    public SaveInfo Save(
+        string pageText,
+        string summary,
+        bool minor,
+        WatchOptions watch,
+        string contentModel = "wikitext")
     {
         if (string.IsNullOrEmpty(pageText) && !Page.Exists)
         {
-            throw new ArgumentException("Can't save empty pages", "pageText");
+            throw new ArgumentException(
+                "Can't save empty pages.",
+                nameof(pageText));
         }
-        // if (string.IsNullOrEmpty(summary))
-        // {
-        //     throw new ArgumentException("Edit summary required", "summary");
-        // }
+
         if (Action != "edit")
         {
-            throw new ApiException(this, "This page is not opened properly for editing");
+            throw new ApiException(
+                this,
+                "This page is not opened properly for editing.");
         }
+
         if (string.IsNullOrEmpty(Page.EditToken))
         {
-            throw new ApiException(this, "Edit token is needed to edit pages");
+            throw new ApiException(
+                this,
+                "An edit token is required to edit pages.");
         }
 
         pageText = Tools.ConvertFromLocalLineEndings(pageText);
 
         var get = new Dictionary<string, string>
-        {
-            {"action", "edit"},
-            {"title", Page.Title},
-            {"watchlist", WatchOptionsToParam(watch)},
-        };
+    {
+        { "action", "edit" },
+        { "title", Page.Title },
+        { "watchlist", WatchOptionsToParam(watch) }
+    };
+
         get.AddIfTrue(minor, "minor", null);
         get.AddIfTrue(User.IsBot, "bot", null);
 
         var post = new Dictionary<string, string>
-        {
-            // order matters here - https://phabricator.wikimedia.org/T16210#183159
-            {"md5", MD5(pageText)},
-            {"summary", summary},
-            {"basetimestamp", Page.Timestamp},
-            {"text", pageText},
-            {"starttimestamp", Page.TokenTimestamp},
-        };
+    {
+        // Parameter order matters. See Wikimedia Phabricator task T16210.
+        { "md5", MD5(pageText) },
+        { "summary", summary },
+        { "basetimestamp", Page.Timestamp },
+        { "text", pageText },
+        { "starttimestamp", Page.TokenTimestamp }
+    };
 
         post.AddIfTrue(Variables.TagEdits, "tags", "AWB");
-        post.AddIfTrue(contentModel != "wikitext", "contentmodel", contentModel);
+        post.AddIfTrue(
+            contentModel != "wikitext",
+            "contentmodel",
+            contentModel);
 
         post.Add("token", Page.EditToken);
 
         string result = HttpPost(
             get,
             post,
-            ActionOptions.All
-        );
+            ActionOptions.All);
 
-        var xml = CheckForErrors(result, "edit");
+        XmlDocument xml = CheckForErrors(result, "edit");
+
         Reset();
+
         return new SaveInfo(xml);
     }
 
@@ -1555,19 +1641,92 @@ public class ApiEdit : IApiEdit
         Reset();
     }
 
-    public void Protect(string title, string reason, TimeSpan expiry, string edit, string move)
+    /// <summary>
+    /// Protects the specified page using a time-span expiry.
+    /// </summary>
+    /// <param name="title">The title of the page to protect.</param>
+    /// <param name="reason">The reason for applying protection.</param>
+    /// <param name="expiry">The duration of the protection.</param>
+    /// <param name="edit">The required protection level for editing.</param>
+    /// <param name="move">The required protection level for moving.</param>
+    public void Protect(
+        string title,
+        string reason,
+        TimeSpan expiry,
+        string edit,
+        string move)
     {
-        Protect(title, reason, expiry.ToString(), edit, move, false, false);
+        Protect(
+            title,
+            reason,
+            expiry.ToString(),
+            edit,
+            move,
+            false,
+            false);
     }
 
-    public void Protect(string title, string reason, string expiry, string edit, string move)
+    /// <summary>
+    /// Protects the specified page using the supplied expiry value.
+    /// </summary>
+    /// <param name="title">The title of the page to protect.</param>
+    /// <param name="reason">The reason for applying protection.</param>
+    /// <param name="expiry">
+    /// The protection expiry value accepted by the MediaWiki API.
+    /// </param>
+    /// <param name="edit">The required protection level for editing.</param>
+    /// <param name="move">The required protection level for moving.</param>
+    public void Protect(
+        string title,
+        string reason,
+        string expiry,
+        string edit,
+        string move)
     {
-        Protect(title, reason, expiry, edit, move, false, false);
+        Protect(
+            title,
+            reason,
+            expiry,
+            edit,
+            move,
+            false,
+            false);
     }
 
-    public void Protect(string title, string reason, TimeSpan expiry, string edit, string move, bool cascade, bool watch)
+    /// <summary>
+    /// Protects the specified page using a time-span expiry and the specified
+    /// cascading and watchlist options.
+    /// </summary>
+    /// <param name="title">The title of the page to protect.</param>
+    /// <param name="reason">The reason for applying protection.</param>
+    /// <param name="expiry">The duration of the protection.</param>
+    /// <param name="edit">The required protection level for editing.</param>
+    /// <param name="move">The required protection level for moving.</param>
+    /// <param name="cascade">
+    /// <see langword="true"/> to apply cascading protection; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="watch">
+    /// <see langword="true"/> to add the page to the watchlist; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    public void Protect(
+        string title,
+        string reason,
+        TimeSpan expiry,
+        string edit,
+        string move,
+        bool cascade,
+        bool watch)
     {
-        Protect(title, reason, expiry.ToString(), edit, move, cascade, watch);
+        Protect(
+            title,
+            reason,
+            expiry.ToString(),
+            edit,
+            move,
+            cascade,
+            watch);
     }
 
     public void Protect(string title, string reason, string expiry, string edit, string move, bool cascade,
@@ -1668,14 +1827,54 @@ public class ApiEdit : IApiEdit
         Reset();
     }
 
-    public void Move(string title, string newTitle, string reason)
+    /// <summary>
+    /// Moves a page using the default move options.
+    /// </summary>
+    /// <param name="title">The title of the page to move.</param>
+    /// <param name="newTitle">The new title for the page.</param>
+    /// <param name="reason">The reason for the move.</param>
+    public void Move(
+        string title,
+        string newTitle,
+        string reason)
     {
-        Move(title, newTitle, reason, true, false, false);
+        Move(
+            title,
+            newTitle,
+            reason,
+            true,
+            false,
+            false);
     }
 
-    public void Move(string title, string newTitle, string reason, bool moveTalk, bool noRedirect)
+    /// <summary>
+    /// Moves a page using the specified talk-page and redirect options.
+    /// </summary>
+    /// <param name="title">The title of the page to move.</param>
+    /// <param name="newTitle">The new title for the page.</param>
+    /// <param name="reason">The reason for the move.</param>
+    /// <param name="moveTalk">
+    /// <see langword="true"/> to move the associated talk page; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="noRedirect">
+    /// <see langword="true"/> to suppress creation of a redirect; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    public void Move(
+        string title,
+        string newTitle,
+        string reason,
+        bool moveTalk,
+        bool noRedirect)
     {
-        Move(title, newTitle, reason, moveTalk, noRedirect, false);
+        Move(
+            title,
+            newTitle,
+            reason,
+            moveTalk,
+            noRedirect,
+            false);
     }
 
     public void Move(string title, string newTitle, string reason, bool moveTalk, bool noRedirect, bool watch)
