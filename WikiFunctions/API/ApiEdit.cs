@@ -23,9 +23,13 @@ using WikiFunctions.Controls;
 
 namespace WikiFunctions.API;
 
-// TODO: Migrate remaining API operations from duplicate XmlReader parsing
-// to validated XmlDocument access.
-// TODO: generalize edit token retrieval
+// TODO (API Response Modernization):
+// Replace remaining duplicate XmlReader-based response parsing with the
+// validated XmlDocument response path used by CheckForErrors().
+//
+// TODO (Token Modernization):
+// Consolidate edit, delete, move, protect, and rollback token acquisition into
+// a shared token service once legacy MediaWiki token compatibility is removed.
 /// <summary>
 /// This class edits MediaWiki sites using api.php
 /// </summary>
@@ -64,6 +68,9 @@ public class ApiEdit : IApiEdit
     {
     }
 
+    // TODO (MediaWiki Compatibility):
+    // Review whether the legacy api.php5 endpoint remains necessary once AWB's
+    // minimum supported MediaWiki and PHP versions are formally established.
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiEdit"/> class.
     /// </summary>
@@ -87,10 +94,12 @@ public class ApiEdit : IApiEdit
                 nameof(url));
         }
 
-        URL = url;
+        URL = url.EndsWith("/", StringComparison.Ordinal)
+            ? url
+            : url + "/";
+
         PHP5 = usePHP5;
         ApiURL = URL + "api.php" + (PHP5 ? "5" : "");
-        Maxlag = 5;
 
         if (ProxyCache.TryGetValue(url, out IWebProxy proxy))
         {
@@ -110,6 +119,12 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    // TODO (Session State Modernization):
+    // Define the intended Clone() contract. The current implementation shares
+    // Cookies, ProxySettings, and User, but does not copy transient state such as
+    // Page, Action, HtmlHeaders, Request, or a changed NewMessageThrows value.
+    // Decide which state should be shared, copied, or reset before introducing
+    // independent mutable session objects.
     /// <summary>
     /// Creates a copy of the current API editor.
     /// </summary>
@@ -122,8 +137,6 @@ public class ApiEdit : IApiEdit
     /// including the cookie container, proxy settings, and user information,
     /// are reused by the cloned instance.
     /// </remarks>
-    // TODO: Review whether Clone should continue to perform a shallow copy
-    // or create independent copies of mutable session objects.
     public IApiEdit Clone()
     {
         return new ApiEdit
@@ -165,7 +178,7 @@ public class ApiEdit : IApiEdit
     /// this property returns <c>https://en.wikipedia.org</c>.
     /// </example>
     private string Server =>
-        $"https://{new Uri(URL).Host}";
+        new Uri(URL).GetLeftPart(UriPartial.Authority);
 
     /// <summary>
     /// Gets a value indicating whether the connected wiki uses the legacy
@@ -216,10 +229,17 @@ public class ApiEdit : IApiEdit
 
     #endregion
 
+    // TODO (Session State Modernization):
+    // Review whether Reset() should also clear cached response state such as
+    // HtmlHeaders once its consumers and lifetime requirements are documented.
     /// <summary>
-    /// Resets all internal variables, discarding edit tokens and so on,
-    /// but does not logs off
+    /// Resets transient API operation state without logging out or discarding the
+    /// current session cookies.
     /// </summary>
+    /// <remarks>
+    /// The current page information, action, active request reference, and abort
+    /// state are cleared. Authentication cookies and user information are retained.
+    /// </remarks>
     public void Reset()
     {
         Action = null;
