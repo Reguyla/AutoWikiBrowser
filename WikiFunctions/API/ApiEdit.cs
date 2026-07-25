@@ -3470,66 +3470,136 @@ public class ApiEdit : IApiEdit
             previewHtml;
     }
 
-    public void Rollback(string title, string user)
+    /// <summary>
+    /// Rolls back the most recent edits made by the specified user.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to roll back.
+    /// </param>
+    /// <param name="user">
+    /// The username whose edits should be reverted.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="title"/> or <paramref name="user"/> is empty.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the rollback token response does not contain the expected XML
+    /// structure.
+    /// </exception>
+    public void Rollback(
+        string title,
+        string user)
     {
         if (string.IsNullOrEmpty(title))
-            throw new ArgumentException("Page name required", "title");
-
-        if (string.IsNullOrEmpty(user))
-            throw new ArgumentException("User name required", "user");
-
-        if (string.IsNullOrEmpty(Page.RollbackToken))
         {
-            string result = HttpGet(
-                new Dictionary<string, string>
-                {
-                    {"action", "query"},
-                    {"prop", "revisions"},
-                    {"meta", "tokens"}, // Since 1.24
-                    {"type", "rollback"},
-                    {"rvtoken", "rollback"}, // Pre 1.24 compat
-                    {"titles", title}
-                },
-                ActionOptions.All);
-
-            XmlDocument document = CheckForErrors(result, "query");
-
-            try
-            {
-                // MediaWiki 1.24+ returns the rollback token in <tokens>.
-                // Older compatibility responses can return it on <page>.
-                XmlNode tokenSource =
-                    document.SelectSingleNode("/api/query/tokens") ??
-                    document.SelectSingleNode("/api/query/pages/page");
-
-                if (tokenSource == null)
-                    throw new Exception("Cannot find <tokens> or <page> element");
-
-                Page.RollbackToken =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        tokenSource,
-                        "rollbacktoken");
-            }
-            catch (Exception ex)
-            {
-                throw new BrokenXmlException(this, ex);
-            }
+            throw new ArgumentException(
+                "Page name required",
+                nameof(title));
         }
 
-        var result2 = HttpPost(
+        if (string.IsNullOrEmpty(user))
+        {
+            throw new ArgumentException(
+                "User name required",
+                nameof(user));
+        }
+
+        EnsureRollbackToken(title);
+
+        string result = HttpPost(
             new()
             {
-                { "action", "rollback" }
+            { "action", "rollback" }
             },
             new()
             {
-                { "title", title },
-                { "user", user },
-                { "token", Page.RollbackToken }
+            { "title", title },
+            { "user", user },
+            { "token", Page.RollbackToken }
             });
 
-        CheckForErrors(result2, "rollback");
+        CheckForErrors(result, "rollback");
     }
+
+    /// <summary>
+    /// Ensures that a rollback token is available for the specified page.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to roll back.
+    /// </param>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the token response does not contain the expected XML structure.
+    /// </exception>
+    private void EnsureRollbackToken(string title)
+    {
+        if (!string.IsNullOrEmpty(Page.RollbackToken))
+            return;
+
+        // TODO (MediaWiki Compatibility):
+        // Re-evaluate whether the legacy rollback token request
+        // (rvtoken=rollback) is still required once AWB's minimum supported
+        // MediaWiki version is finalized. Modern MediaWiki versions obtain
+        // rollback tokens through the CSRF token API.
+        string result = HttpGet(
+            new()
+            {
+            { "action", "query" },
+            { "prop", "revisions" },
+            { "meta", "tokens" },          // MediaWiki 1.24+
+            { "type", "rollback" },
+            { "rvtoken", "rollback" },     // Pre-1.24 compatibility
+            { "titles", title }
+            },
+            ActionOptions.All);
+
+        XmlDocument document =
+            CheckForErrors(result, "query");
+
+        try
+        {
+            Page.RollbackToken =
+                GetRollbackToken(document);
+        }
+        catch (Exception ex)
+        {
+            throw new BrokenXmlException(this, ex);
+        }
+    }
+
+    /// <summary>
+    /// Reads the rollback token from a MediaWiki API response.
+    /// </summary>
+    /// <param name="document">
+    /// The validated API response containing the rollback token.
+    /// </param>
+    /// <returns>
+    /// The rollback token returned by the wiki.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response contains neither a modern token element nor a
+    /// legacy page element.
+    /// </exception>
+    private static string GetRollbackToken(
+        XmlDocument document)
+    {
+        // MediaWiki 1.24+ returns the rollback token in <tokens>.
+        // Older compatibility responses can return it on <page>.
+        XmlNode tokenSource =
+            document.SelectSingleNode("/api/query/tokens") ??
+            document.SelectSingleNode("/api/query/pages/page");
+
+        if (tokenSource == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot find <tokens> or <page> element in the API response.");
+        }
+
+        return XmlResponseHelpers.RequireAttributeValue(
+            tokenSource,
+            "rollbacktoken");
+    }
+
+
 
     public string ExpandTemplates(string title, string text)
     {
