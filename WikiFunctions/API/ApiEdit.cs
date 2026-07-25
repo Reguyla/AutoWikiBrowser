@@ -3599,23 +3599,41 @@ public class ApiEdit : IApiEdit
             "rollbacktoken");
     }
 
-
-
+    // TODO (MediaWiki Compatibility):
+    // Verify whether the expandtemplates API supports additional parameters that
+    // should be exposed once AWB's supported MediaWiki version baseline is
+    // finalized.
+    /// <summary>
+    /// Expands templates within the supplied wiki text using the MediaWiki API.
+    /// </summary>
+    /// <param name="title">
+    /// The page title used as the expansion context.
+    /// </param>
+    /// <param name="text">
+    /// The wiki text whose templates should be expanded.
+    /// </param>
+    /// <returns>
+    /// The expanded wiki text returned by the API.
+    /// </returns>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the API response does not contain the expected XML structure.
+    /// </exception>
     public string ExpandTemplates(string title, string text)
     {
         string result = HttpPost(
             new()
             {
-                { "action", "expandtemplates" },
-                { "prop", "wikitext" }
+            { "action", "expandtemplates" },
+            { "prop", "wikitext" }
             },
             new()
             {
-                { "title", title },
-                { "text", text }
+            { "title", title },
+            { "text", text }
             });
 
-        XmlDocument document = CheckForErrors(result, "expandtemplates");
+        XmlDocument document =
+            CheckForErrors(result, "expandtemplates");
 
         try
         {
@@ -3623,7 +3641,10 @@ public class ApiEdit : IApiEdit
                 document.SelectSingleNode("/api/expandtemplates");
 
             if (expandedTextNode == null)
-                throw new Exception("Cannot find <expandtemplates> element");
+            {
+                throw new InvalidOperationException(
+                    "Cannot find <expandtemplates> element.");
+            }
 
             return expandedTextNode.InnerText;
         }
@@ -3638,13 +3659,16 @@ public class ApiEdit : IApiEdit
     #region Error handling
 
     /// <summary>
-    /// Checks the XML returned by the server for error codes and throws an appropriate exception
+    /// Checks the XML returned by the server for API errors.
     /// </summary>
-    /// <param name="xml">Server output</param>
-    private XmlDocument CheckForErrors(string xml)
-    {
-        return CheckForErrors(xml, null);
-    }
+    /// <param name="xml">
+    /// The XML returned by the server.
+    /// </param>
+    /// <returns>
+    /// A validated <see cref="XmlDocument"/>.
+    /// </returns>
+    private XmlDocument CheckForErrors(string xml) =>
+        CheckForErrors(xml, null);
 
     private static readonly Regex MaxLag = new Regex(@": (\d+(?:\.\d+)?) seconds lagged",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
