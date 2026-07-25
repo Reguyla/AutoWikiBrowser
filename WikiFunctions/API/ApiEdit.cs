@@ -2247,6 +2247,44 @@ public class ApiEdit : IApiEdit
 
         pageText = Tools.ConvertFromLocalLineEndings(pageText);
 
+        Dictionary<string, string> get =
+            BuildSaveQueryParameters(minor, watch);
+
+        Dictionary<string, string> post =
+            BuildSavePostParameters(
+                pageText,
+                summary,
+                contentModel);
+
+        string result = HttpPost(
+            get,
+            post,
+            ActionOptions.All);
+
+        XmlDocument xml =
+            CheckForErrors(result, "edit");
+
+        Reset();
+
+        return new SaveInfo(xml);
+    }
+
+    /// <summary>
+    /// Builds the query parameters required by the edit API.
+    /// </summary>
+    /// <param name="minor">
+    /// <see langword="true"/> to mark the edit as minor.
+    /// </param>
+    /// <param name="watch">
+    /// The watchlist behavior to apply to the edited page.
+    /// </param>
+    /// <returns>
+    /// The edit request query parameters.
+    /// </returns>
+    private Dictionary<string, string> BuildSaveQueryParameters(
+        bool minor,
+        WatchOptions watch)
+    {
         var get = new Dictionary<string, string>
     {
         { "action", "edit" },
@@ -2257,6 +2295,29 @@ public class ApiEdit : IApiEdit
         get.AddIfTrue(minor, "minor", null);
         get.AddIfTrue(User.IsBot, "bot", null);
 
+        return get;
+    }
+
+    /// <summary>
+    /// Builds the form parameters containing the page content and edit metadata.
+    /// </summary>
+    /// <param name="pageText">
+    /// The normalized page text to save.
+    /// </param>
+    /// <param name="summary">
+    /// The edit summary describing the changes.
+    /// </param>
+    /// <param name="contentModel">
+    /// The content model to assign to the page.
+    /// </param>
+    /// <returns>
+    /// The edit request form parameters.
+    /// </returns>
+    private Dictionary<string, string> BuildSavePostParameters(
+        string pageText,
+        string summary,
+        string contentModel)
+    {
         var post = new Dictionary<string, string>
     {
         // Parameter order matters. See Wikimedia Phabricator task T16210.
@@ -2267,25 +2328,24 @@ public class ApiEdit : IApiEdit
         { "starttimestamp", Page.TokenTimestamp }
     };
 
-        post.AddIfTrue(Variables.TagEdits, "tags", "AWB");
+        post.AddIfTrue(
+            Variables.TagEdits,
+            "tags",
+            "AWB");
+
         post.AddIfTrue(
             contentModel != "wikitext",
             "contentmodel",
             contentModel);
 
-        post.Add("token", Page.EditToken);
+        post.Add(
+            "token",
+            Page.EditToken);
 
-        string result = HttpPost(
-            get,
-            post,
-            ActionOptions.All);
-
-        XmlDocument xml = CheckForErrors(result, "edit");
-
-        Reset();
-
-        return new SaveInfo(xml);
+        return post;
     }
+
+
 
     /// <summary>
     /// Deletes the specified page using the supplied deletion reason.
