@@ -2045,22 +2045,26 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    // TODO (Token Modernization):
+    // Retrieve the logout CSRF token through the shared token service once token
+    // acquisition and caching are extracted from ApiEdit.
     /// <summary>
     /// Logs out of the current wiki session.
-    ///
+    /// </summary>
+    /// <remarks>
     /// MediaWiki requires logout requests to use a CSRF token and be sent as a
     /// POST request. The token is requested before any local session state is
     /// cleared so that a failed logout does not leave AWB believing it is logged
     /// out while the server session remains active.
-    /// </summary>
+    /// </remarks>
     public void Logout()
     {
         // Obtain an authenticated CSRF token before clearing local session state.
         string tokenResult = HttpGet(
             new Dictionary<string, string>
             {
-        {"action", "query"},
-        {"meta", "tokens"}
+                {"action", "query"},
+                {"meta", "tokens"}
             });
 
         XmlDocument document = CheckForErrors(tokenResult, "query");
@@ -2090,11 +2094,11 @@ public class ApiEdit : IApiEdit
         string result = HttpPost(
             new Dictionary<string, string>
             {
-        {"action", "logout"}
+               {"action", "logout"}
             },
             new Dictionary<string, string>
             {
-        {"token", csrfToken}
+               {"token", csrfToken}
             });
 
         CheckForErrors(result, "logout");
@@ -2118,71 +2122,150 @@ public class ApiEdit : IApiEdit
     public void Watch(string title) =>
         WatchAction(title, false);
 
+    /// <summary>
+    /// Adds or removes the specified page from the authenticated user's watchlist.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to watch or unwatch.
+    /// </param>
+    /// <param name="unwatch">
+    /// <see langword="true"/> to remove the page from the watchlist; otherwise,
+    /// <see langword="false"/> to add it.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="title"/> is null or empty.
+    /// </exception>
+    /// <exception cref="AbortedException">
+    /// Thrown when the current operation has been aborted.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the API response does not contain valid watch-token data.
+    /// </exception>
     public void WatchAction(string title, bool unwatch)
     {
-        if (string.IsNullOrEmpty(title)) throw new ArgumentException("Page name required", "title");
+        ArgumentException.ThrowIfNullOrEmpty(title);
 
-        if (string.IsNullOrEmpty(Page.WatchToken))
-        {
-            // Token needed as of 1.18
-            string result = HttpGet(
-                new Dictionary<string, string>
-                {
-                    {"action", "query"},
-                    {"prop", "info"},
-                    {"meta", "tokens"}, // Since 1.24
-                    {"type", "watch"},
-                    {"intoken", "watch"}, // Pre 1.24 compat
-                    {"titles", title}
-                },
-                ActionOptions.All);
+        EnsureWatchToken(title);
 
-            XmlDocument document = CheckForErrors(result);
+        if (Aborting)
+            throw new AbortedException(this);
 
-            try
+        Dictionary<string, string> watchParameters =
+            BuildWatchParameters(title, unwatch);
+
+        string result = HttpPost(
+            new()
             {
-                // MediaWiki 1.24+ returns the token in <tokens>. Older versions
-                // return it on the queried <page> element.
-                XmlNode tokenSource =
-                    document.SelectSingleNode("/api/query/tokens") ??
-                    document.SelectSingleNode("/api/query/pages/page");
-
-                if (tokenSource == null)
-                    throw new Exception("Cannot find <tokens> or <page> element");
-
-                Page.WatchToken =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        tokenSource,
-                        "watchtoken");
-            }
-            catch (Exception ex)
-            {
-                throw new BrokenXmlException(this, ex);
-            }
-        }
-
-        if (Aborting) throw new AbortedException(this);
-
-        var watchParameters = new Dictionary<string, string>
-        {
-            {"title", title},
-            {"token", Page.WatchToken}
-        };
-
-        if (unwatch)
-        {
-            watchParameters.Add("unwatch", null);
-        }
-
-        var result2 = HttpPost(
-            new Dictionary<string, string>
-            {
-               {"action", "watch"}
+                { "action", "watch" }
             },
             watchParameters,
             ActionOptions.All);
 
-        CheckForErrors(result2, "watch");
+        CheckForErrors(result, "watch");
+    }
+
+    /// <summary>
+    /// Ensures that the current page has a watch token available.
+    /// </summary>
+    /// <param name="title">
+    /// The title used when requesting page and token information.
+    /// </param>
+    /// <remarks>
+    /// MediaWiki 1.24 and later return the token in the <c>tokens</c> element.
+    /// Older versions return it on the queried <c>page</c> element.
+    /// </remarks>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the API response does not contain valid watch-token data.
+    /// </exception>
+    private void EnsureWatchToken(string title)
+    {
+        if (!string.IsNullOrEmpty(Page.WatchToken))
+            return;
+
+        string result = HttpGet(
+            new()
+            {
+                { "action", "query" },
+                { "prop", "info" },
+                { "meta", "tokens" },
+                { "type", "watch" },
+                { "intoken", "watch" },
+            { "titles", title }
+            },
+            ActionOptions.All);
+
+        XmlDocument document = CheckForErrors(result);
+
+        try
+        {
+            Page.WatchToken = GetWatchToken(document);
+        }
+        catch (Exception ex)
+        {
+            throw new BrokenXmlException(this, ex);
+        }
+    }
+
+    /// <summary>
+    /// Extracts the watch token from a MediaWiki query response.
+    /// </summary>
+    /// <param name="document">
+    /// The validated API response document.
+    /// </param>
+    /// <returns>
+    /// The watch token returned by the API.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response does not contain a <c>tokens</c> or <c>page</c>
+    /// element.
+    /// </exception>
+    private static string GetWatchToken(XmlDocument document)
+    {
+        // TODO (MediaWiki Compatibility):
+        // Remove the pre-1.24 intoken and page-element watch-token fallback once
+        // the minimum supported MediaWiki version no longer requires them.
+        XmlNode tokenSource =
+            document.SelectSingleNode("/api/query/tokens") ??
+            document.SelectSingleNode("/api/query/pages/page");
+
+        if (tokenSource == null)
+        {
+            throw new InvalidOperationException(
+                "The API response does not contain a <tokens> or <page> element.");
+        }
+
+        return XmlResponseHelpers.RequireAttributeValue(
+            tokenSource,
+            "watchtoken");
+    }
+
+    /// <summary>
+    /// Builds the form parameters for a watch or unwatch request.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to modify in the watchlist.
+    /// </param>
+    /// <param name="unwatch">
+    /// <see langword="true"/> to request removal from the watchlist; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The form parameters required by the watch API.
+    /// </returns>
+    private Dictionary<string, string> BuildWatchParameters(
+        string title,
+        bool unwatch)
+    {
+        Dictionary<string, string> watchParameters = new()
+        {
+            { "title", title },
+            { "token", Page.WatchToken }
+        };
+
+        if (unwatch)
+            watchParameters.Add("unwatch", null);
+
+        return watchParameters;
     }
 
     /// <summary>
