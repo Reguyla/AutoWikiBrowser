@@ -33,19 +33,18 @@ namespace AutoWikiBrowser.Plugins;
 internal static class Plugin
 {
     /// <summary>
-    /// Dictionary of loaded AWB plugins, keyed by plugin name.
+    /// Registry of loaded AWB plugins, keyed by plugin name.
     /// </summary>
-    internal static readonly Dictionary<string, IAWBPlugin> AWBPlugins =
-        new();
+    internal static readonly Dictionary<string, IAWBPlugin> AWBPlugins = new();
 
     /// <summary>
-    /// Dictionary of loaded AWB base plugins, keyed by plugin name.
+    /// Registry of loaded AWB base plugins, keyed by plugin name.
     /// </summary>
     internal static readonly Dictionary<string, IAWBBasePlugin>
         AWBBasePlugins = new();
 
     /// <summary>
-    /// Dictionary of loaded ListMaker plugins, keyed by plugin name.
+    /// Registry of loaded ListMaker plugins, keyed by plugin name.
     /// </summary>
     internal static readonly Dictionary<string, IListMakerPlugin>
         ListMakerPlugins = new();
