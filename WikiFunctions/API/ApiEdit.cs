@@ -1259,135 +1259,53 @@ public class ApiEdit : IApiEdit
     /// The password associated with the specified username.
     /// </param>
     /// <remarks>
-    /// This overload performs a standard login without supplying a two-factor
-    /// authentication code.
+    /// This overload performs a standard login without supplying an
+    /// authentication domain.
     /// </remarks>
     public void Login(string username, string password) =>
-        Login(username, password, "");
+        Login(username, password, string.Empty);
 
-    public void Login(string username, string password, string domain)
+    /// <summary>
+    /// Authenticates with the wiki using the supplied credentials and optional
+    /// authentication domain.
+    /// </summary>
+    /// <param name="username">
+    /// The username to authenticate.
+    /// </param>
+    /// <param name="password">
+    /// The password associated with the specified username.
+    /// </param>
+    /// <param name="domain">
+    /// The optional authentication domain used by legacy login endpoints.
+    /// </param>
+    /// <remarks>
+    /// The method first requests a modern MediaWiki login token. Standard user
+    /// accounts are authenticated through the client-login API, while bot
+    /// passwords and legacy configurations use the action-login workflow.
+    /// </remarks>
+    public void Login(
+        string username,
+        string password,
+        string domain)
     {
-        if (string.IsNullOrEmpty(username)) throw new ArgumentException("Username required", "username");
-        // if (string.IsNullOrEmpty(password)) throw new ArgumentException("Password required", "password");
+        if (string.IsNullOrEmpty(username))
+            throw new ArgumentException("Username required", nameof(username));
 
-        Reset();
-        User = new UserInfo(); // we don't know for sure what will be our status in case of exception
-        Cookies = new CookieContainer();
+        PrepareForLogin();
 
-        // first see if we can get a login token via the new MediaWiki way using action=query&meta=tokens&type=login
-        string result = HttpPost(
-            new Dictionary<string, string>
-            {
-                {"action", "query"},
-                {"meta", "tokens"},
-                {"type", "login"}
-            },
-            new Dictionary<string, string>());
+        string result = RequestLoginToken(out string token);
 
-        Tools.WriteDebug("API::Edit meta/tokens", "Received login-token response.");
-
-        /* Result format: <query><tokens logintoken="b0fc31b291ebf9999a8e9a4bfac8ef0456c44116+\"/></query> */
-        XmlDocument document = CheckForErrors(result, "query");
-
-        XmlNode tokenNode =
-            document.SelectSingleNode("/api/query/tokens");
-
-        string token = tokenNode == null || tokenNode.Attributes == null
-            ? null
-            : tokenNode.Attributes["logintoken"] == null
-                ? null
-                : tokenNode.Attributes["logintoken"].Value;
-
-        // If not a bot, use the clientlogin API, which gives an opportunity to supply a OTC
-        if (!username.Contains("@") && !string.IsNullOrEmpty(token))
+        if (ShouldUseClientLogin(username, token))
         {
             ClientLogin(username, password, token);
         }
         else
         {
-            // This is legacy code, now used for non-en or bots. Also, it's unlikely that modern wikis will have
-            // failed to provide a token above, but leaving the relevant code in doesn't hurt.
-            //
-            // first log in. If we got a logintoken then use it, this should be our only action=login in that case
-            bool domainSet = !string.IsNullOrEmpty(domain);
-            var post = new Dictionary<string, string>
-            {
-                {"lgname", username},
-                {"lgpassword", password},
-            };
-            post.AddIfTrue(domainSet, "lgdomain", domain);
-            post.AddIfTrue(!string.IsNullOrEmpty(token), "lgtoken", token);
-
-            result = HttpPost(
-                new Dictionary<string, string>
-                {
-                {"action", "login"}
-                },
-                post
-                );
-
-            XmlDocument loginDocument = LoadApiXmlDocument(result);
-
-            XmlNode loginNode =
-                loginDocument.SelectSingleNode("/api/login");
-
-            if (loginNode == null)
-                throw new Exception("Cannot find <login> element");
-
-            Tools.WriteDebug("API::Edit action/login", "Received login-token response.");
-
-            // Select the direct API result rather than navigating through any
-            // similarly named element that may appear inside warnings.
-            string status =
-                XmlResponseHelpers.RequireAttributeValue(
-                    loginNode,
-                    "result");
-
-            // Older MediaWiki versions can return NeedToken on the first
-            // action=login response. Retry with the returned token.
-            if (string.IsNullOrEmpty(token) &&
-                status.Equals(
-                    "NeedToken",
-                    StringComparison.InvariantCultureIgnoreCase))
-            {
-                AdjustCookies();
-
-                token =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        loginNode,
-                        "token");
-
-                post.Add("lgtoken", token);
-
-                result = HttpPost(
-                    new Dictionary<string, string>
-                    {
-                       {"action", "login"}
-                    },
-                    post
-                );
-
-                Tools.WriteDebug(
-                    "API::Edit action/login NeedToken",
-                    result);
-
-                loginDocument = LoadApiXmlDocument(result);
-
-                loginNode =
-                    loginDocument.SelectSingleNode("/api/login");
-
-                if (loginNode == null)
-                    throw new Exception("Cannot find <login> element");
-
-                status =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        loginNode,
-                        "result");
-            }
-            if (status != null && !status.Equals("Success", StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new LoginException(this, status);
-            }
+            result = PerformLegacyLogin(
+                username,
+                password,
+                domain,
+                token);
         }
 
         CheckForErrors(result, "login");
@@ -1395,6 +1313,248 @@ public class ApiEdit : IApiEdit
 
         RefreshUserInfo();
     }
+
+    /// <summary>
+    /// Resets the current API state and prepares a new cookie and user context
+    /// for authentication.
+    /// </summary>
+    private void PrepareForLogin()
+    {
+        Reset();
+
+        // The final user state is unknown until authentication completes.
+        User = new UserInfo();
+        Cookies = new CookieContainer();
+    }
+
+    /// <summary>
+    /// Requests a login token using the modern MediaWiki token API.
+    /// </summary>
+    /// <param name="token">
+    /// Receives the login token returned by the API, or <see langword="null"/>
+    /// when no token was supplied.
+    /// </param>
+    /// <returns>
+    /// The raw API response containing the token request result.
+    /// </returns>
+    private string RequestLoginToken(out string token)
+    {
+        string result = HttpPost(
+            new()
+            {
+            { "action", "query" },
+            { "meta", "tokens" },
+            { "type", "login" }
+            },
+            new());
+
+        Tools.WriteDebug(
+            "API::Edit meta/tokens",
+            "Received login-token response.");
+
+        XmlDocument document = CheckForErrors(result, "query");
+
+        XmlNode tokenNode =
+            document.SelectSingleNode("/api/query/tokens");
+
+        token = tokenNode?.Attributes?["logintoken"]?.Value;
+
+        return result;
+    }
+
+    /// <summary>
+    /// Determines whether the modern client-login workflow should be used.
+    /// </summary>
+    /// <param name="username">
+    /// The username being authenticated.
+    /// </param>
+    /// <param name="token">
+    /// The login token returned by the API.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when client login should be used; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool ShouldUseClientLogin(
+        string username,
+        string token) =>
+        !username.Contains("@") &&
+        !string.IsNullOrEmpty(token);
+
+    /// <summary>
+    /// Authenticates using the legacy MediaWiki action-login workflow.
+    /// </summary>
+    /// <param name="username">
+    /// The username to authenticate.
+    /// </param>
+    /// <param name="password">
+    /// The password associated with the username.
+    /// </param>
+    /// <param name="domain">
+    /// The optional authentication domain.
+    /// </param>
+    /// <param name="token">
+    /// The login token returned by the modern token API, when available.
+    /// </param>
+    /// <returns>
+    /// The raw response from the final login request.
+    /// </returns>
+    private string PerformLegacyLogin(
+        string username,
+        string password,
+        string domain,
+        string token)
+    {
+        var post = BuildLegacyLoginParameters(
+            username,
+            password,
+            domain,
+            token);
+
+        string result = HttpPost(
+            new()
+            {
+            { "action", "login" }
+            },
+            post);
+
+        XmlNode loginNode = GetLoginResponseNode(result);
+
+        Tools.WriteDebug(
+            "API::Edit action/login",
+            "Received login response.");
+
+        string status =
+            XmlResponseHelpers.RequireAttributeValue(
+                loginNode,
+                "result");
+
+        if (string.IsNullOrEmpty(token) &&
+            status.Equals(
+                "NeedToken",
+                StringComparison.InvariantCultureIgnoreCase))
+        {
+            result = RetryLegacyLoginWithToken(
+                post,
+                loginNode,
+                out status);
+        }
+
+        if (status != null &&
+            !status.Equals(
+                "Success",
+                StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new LoginException(this, status);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Builds the form parameters required by the legacy login API.
+    /// </summary>
+    private static Dictionary<string, string> BuildLegacyLoginParameters(
+        string username,
+        string password,
+        string domain,
+        string token)
+    {
+        bool domainSet = !string.IsNullOrEmpty(domain);
+
+        var post = new Dictionary<string, string>
+    {
+        { "lgname", username },
+        { "lgpassword", password }
+    };
+
+        post.AddIfTrue(domainSet, "lgdomain", domain);
+        post.AddIfTrue(
+            !string.IsNullOrEmpty(token),
+            "lgtoken",
+            token);
+
+        return post;
+    }
+
+    /// <summary>
+    /// Loads a login API response and returns its primary login result element.
+    /// </summary>
+    /// <param name="result">
+    /// The raw XML response returned by the login request.
+    /// </param>
+    /// <returns>
+    /// The response's <c>login</c> element.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown when the response does not contain a login element.
+    /// </exception>
+    private static XmlNode GetLoginResponseNode(string result)
+    {
+        XmlDocument loginDocument =
+            LoadApiXmlDocument(result);
+
+        XmlNode loginNode =
+            loginDocument.SelectSingleNode("/api/login");
+
+        if (loginNode == null)
+            throw new Exception("Cannot find <login> element");
+
+        return loginNode;
+    }
+
+    /// <summary>
+    /// Retries a legacy login request using the token returned by an initial
+    /// <c>NeedToken</c> response.
+    /// </summary>
+    /// <param name="post">
+    /// The existing legacy login parameters.
+    /// </param>
+    /// <param name="loginNode">
+    /// The login element returned by the initial request.
+    /// </param>
+    /// <param name="status">
+    /// Receives the result status from the retry response.
+    /// </param>
+    /// <returns>
+    /// The raw response returned by the retry request.
+    /// </returns>
+    private string RetryLegacyLoginWithToken(
+        Dictionary<string, string> post,
+        XmlNode loginNode,
+        out string status)
+    {
+        AdjustCookies();
+
+        string token =
+            XmlResponseHelpers.RequireAttributeValue(
+                loginNode,
+                "token");
+
+        post.Add("lgtoken", token);
+
+        string result = HttpPost(
+            new()
+            {
+            { "action", "login" }
+            },
+            post);
+
+        Tools.WriteDebug(
+            "API::Edit action/login NeedToken",
+            result);
+
+        loginNode = GetLoginResponseNode(result);
+
+        status =
+            XmlResponseHelpers.RequireAttributeValue(
+                loginNode,
+                "result");
+
+        return result;
+    }
+        
+
 
     public void ClientLogin(string username, string password, string token)
     {
