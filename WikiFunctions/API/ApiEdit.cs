@@ -222,6 +222,10 @@ public class ApiEdit : IApiEdit
     /// </summary>
     public CookieContainer Cookies { get; private set; }
 
+    // TODO (MediaWiki Compatibility):
+    // Review whether intoken capability should be tracked per wiki or ApiEdit
+    // instance rather than globally. A warning from one server currently disables
+    // intoken for all API sessions in the process.
     /// <summary>
     /// Whether we should pass the intoken parameter to the API
     /// </summary>
@@ -312,6 +316,10 @@ public class ApiEdit : IApiEdit
 
     #region URL stuff
 
+    // TODO (Request Construction):
+    // Make BuildQuery() non-mutating. It currently removes "intoken" from the
+    // caller's dictionary when legacy token support is disabled, which can affect
+    // retries or later reuse of the same request parameters.
     /// <summary>
     /// Builds a URL-encoded query string from the specified request parameters.
     /// </summary>
@@ -372,15 +380,25 @@ public class ApiEdit : IApiEdit
     /// </returns>
     protected static string Titles(params string[] titles)
     {
-        for (int i = 0; i < titles.Length; i++)
-            titles[i] = Tools.WikiEncode(titles[i]);
+        ArgumentNullException.ThrowIfNull(titles);
 
         if (titles.Length == 0)
             return string.Empty;
 
-        return "&titles=" + string.Join("|", titles);
+        string[] encodedTitles = new string[titles.Length];
+
+        for (int i = 0; i < titles.Length; i++)
+        {
+            encodedTitles[i] = Tools.WikiEncode(titles[i]);
+        }
+
+        return "&titles=" + string.Join("|", encodedTitles);
     }
 
+    // TODO (Request Construction):
+    // Review whether Titles() and NamedTitles() should share a common helper.
+    // Both methods perform identical title encoding and differ only in the
+    // generated query parameter name.
     /// <summary>
     /// Builds a MediaWiki query string containing one or more page titles using
     /// the specified parameter name.
@@ -395,15 +413,24 @@ public class ApiEdit : IApiEdit
     /// A query string beginning with the specified parameter name, or an empty
     /// string when no titles are supplied.
     /// </returns>
-    protected static string NamedTitles(string paramName, params string[] titles)
+    protected static string NamedTitles(
+        string paramName,
+        params string[] titles)
     {
-        for (int i = 0; i < titles.Length; i++)
-            titles[i] = Tools.WikiEncode(titles[i]);
+        ArgumentNullException.ThrowIfNull(paramName);
+        ArgumentNullException.ThrowIfNull(titles);
 
         if (titles.Length == 0)
             return string.Empty;
 
-        return "&" + paramName + "=" + string.Join("|", titles);
+        string[] encodedTitles = new string[titles.Length];
+
+        for (int i = 0; i < titles.Length; i++)
+        {
+            encodedTitles[i] = Tools.WikiEncode(titles[i]);
+        }
+
+        return "&" + paramName + "=" + string.Join("|", encodedTitles);
     }
 
     /// <summary>
