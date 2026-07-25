@@ -3339,60 +3339,46 @@ public class ApiEdit : IApiEdit
          * browser-default italic style to <cite> elements even when MediaWiki's
          * styles are expected to override it. Add an explicit citation-class rule
          * so previews match the rendered wiki page more closely.
+         * 
+         * TODO (.NET modernization): Re-evaluate this workaround after the preview
+         * pipeline has fully transitioned away from the legacy WinForms WebBrowser.
+         * WebView2 or a future preview renderer may no longer require this override.
          */
         HtmlHeaders += @" <style> .citation { font-style: normal; } </style>";
     }
 
+    /// <summary>
+    /// Generates rendered preview HTML for the supplied page text.
+    /// </summary>
+    /// <param name="title">
+    /// The title used as the parsing context.
+    /// </param>
+    /// <param name="text">
+    /// The wiki text to render.
+    /// </param>
+    /// <returns>
+    /// The rendered preview HTML with parse warnings and expanded resource URLs.
+    /// </returns>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the API response does not contain the expected XML structure.
+    /// </exception>
     public string Preview(string title, string text)
     {
         EnsureHtmlHeadersLoaded();
 
-        string result = HttpPost(
-            new()
-            {
-                { "action", "parse" },
-                { "prop", "text|parsewarnings" }
-            },
-            new()
-            {
-                { "title", title },
-                { "text", text },
-                { "pst", null },
-                { "disablelimitreport", null }
-            });
-
+        // TODO (Preview Modernization):
+        // Re-evaluate whether HtmlHeaders must be loaded before every preview request
+        // once the preview renderer has fully transitioned away from the legacy
+        // WebBrowser implementation.
+        string result = RequestPreview(title, text);
         XmlDocument document = CheckForErrors(result, "parse");
 
         try
         {
-            XmlNode textNode = document.SelectSingleNode("/api/parse/text");
-
-            if (textNode == null)
-                throw new Exception("Cannot find <text> element");
-
-            string previewHtml = textNode.InnerText;
-
-            // Extract parse warnings, such as duplicate template parameters, and
-            // place them above the preview in the existing warning style.
-            XmlNodeList warningNodes =
-                document.SelectNodes("/api/parse/parsewarnings/pw");
-
-            if (warningNodes != null && warningNodes.Count > 0)
-            {
-                StringBuilder warnings = new StringBuilder();
-
-                foreach (XmlNode warningNode in warningNodes)
-                {
-                    warnings.Append(warningNode.InnerText);
-                    warnings.Append("<p>");
-                }
-
-                previewHtml =
-                    @"<div class=""previewnote"" style=""color:#d33"">" +
-                    warnings +
-                    "</div>" +
-                    previewHtml;
-            }
+            // TODO (Preview Modernization):
+            // Consider moving the preview warning styling into the shared preview
+            // stylesheet once the preview HTML pipeline is modernized.
+            string previewHtml = BuildPreviewHtml(document);
 
             return ExpandRelativeUrls(previewHtml);
         }
@@ -3400,6 +3386,88 @@ public class ApiEdit : IApiEdit
         {
             throw new BrokenXmlException(this, ex);
         }
+    }
+
+    /// <summary>
+    /// Requests rendered preview content from the MediaWiki parse API.
+    /// </summary>
+    /// <param name="title">
+    /// The title used as the parsing context.
+    /// </param>
+    /// <param name="text">
+    /// The wiki text to render.
+    /// </param>
+    /// <returns>
+    /// The raw API response.
+    /// </returns>
+    private string RequestPreview(
+        string title,
+        string text) =>
+        HttpPost(
+            new()
+            {
+            { "action", "parse" },
+            { "prop", "text|parsewarnings" }
+            },
+            new()
+            {
+            { "title", title },
+            { "text", text },
+            { "pst", null },
+            { "disablelimitreport", null }
+            });
+
+    /// <summary>
+    /// Extracts the rendered preview HTML and prepends any parse warnings returned
+    /// by the API.
+    /// </summary>
+    /// <param name="document">
+    /// The validated parse API response.
+    /// </param>
+    /// <returns>
+    /// The rendered preview HTML, including any formatted parse warnings.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response does not contain the expected text element.
+    /// </exception>
+    private static string BuildPreviewHtml(XmlDocument document)
+    {
+        XmlNode textNode =
+            document.SelectSingleNode("/api/parse/text");
+
+        if (textNode == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot find <text> element");
+        }
+
+        string previewHtml = textNode.InnerText;
+
+        XmlNodeList warningNodes =
+            document.SelectNodes("/api/parse/parsewarnings/pw");
+
+        if (warningNodes == null || warningNodes.Count == 0)
+            return previewHtml;
+
+        StringBuilder warnings = new();
+
+        // TODO (Preview Modernization):
+        // Review how parse warnings are rendered. The current implementation inserts
+        // the API response directly into the preview HTML and relies on implicit HTML
+        // normalization by appending opening <p> tags. Verify that the warning content
+        // and generated markup are still appropriate after the preview renderer is
+        // modernized.
+        foreach (XmlNode warningNode in warningNodes)
+        {
+            warnings.Append(warningNode.InnerText);
+            warnings.Append("<p>");
+        }
+
+        return
+            @"<div class=""previewnote"" style=""color:#d33"">" +
+            warnings +
+            "</div>" +
+            previewHtml;
     }
 
     public void Rollback(string title, string user)
