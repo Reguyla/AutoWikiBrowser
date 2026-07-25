@@ -3301,8 +3301,13 @@ public class ApiEdit : IApiEdit
         RegexOptions.Compiled);
 
     /// <summary>
-    /// Loads wiki's UI HTML and scrapes everything we need to make correct previews
+    /// Loads and caches the wiki HTML header resources required to render
+    /// accurate article previews.
     /// </summary>
+    /// <remarks>
+    /// The headers are downloaded only once per session and reused for subsequent
+    /// preview generation.
+    /// </remarks>
     private void EnsureHtmlHeadersLoaded()
     {
         if (!string.IsNullOrEmpty(HtmlHeaders)) return;
@@ -3319,12 +3324,12 @@ public class ApiEdit : IApiEdit
             );
 
         result = Tools.StringBetween(Tools.UnescapeXML(result), "<head>", "</head>");
-        StringBuilder extracted = new StringBuilder(2048);
+        StringBuilder extracted = new(2048);
 
         foreach (Match m in ExtractCssAndJs.Matches(result))
         {
             extracted.Append(m.Value);
-            extracted.Append("\n");
+            extracted.AppendLine();
         }
 
         HtmlHeaders = ExpandRelativeUrls(extracted.ToString());
