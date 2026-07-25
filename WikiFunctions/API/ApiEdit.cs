@@ -3255,10 +3255,10 @@ public class ApiEdit : IApiEdit
             noRedirect,
             watch);
 
-        var get = new Dictionary<string, string>
-    {
-        { "action", "move" }
-    };
+        Dictionary<string, string> get = new()
+            {
+                { "action", "move" }
+            };
 
         string result = HttpPost(
             get,
@@ -3343,15 +3343,18 @@ public class ApiEdit : IApiEdit
         if (!string.IsNullOrEmpty(Page.MoveToken))
             return;
 
+        // TODO (MediaWiki Compatibility):
+        // Remove the pre-1.24 intoken compatibility path once the minimum supported
+        // MediaWiki version no longer requires it.
         string result = HttpGet(
             new()
             {
-            { "action", "query" },
-            { "prop", "info" },
-            { "meta", "tokens" },      // MediaWiki 1.24+
-            { "type", "csrf" },
-            { "intoken", "move" },     // Pre-1.24 compatibility
-            { "titles", $"{title}|{newTitle}" }
+                { "action", "query" },
+                { "prop", "info" },
+                { "meta", "tokens" },      // MediaWiki 1.24+
+                { "type", "csrf" },
+                { "intoken", "move" },     // Pre-1.24 compatibility
+                { "titles", $"{title}|{newTitle}" }
             },
             ActionOptions.All);
 
@@ -3360,7 +3363,7 @@ public class ApiEdit : IApiEdit
 
         try
         {
-            ValidateMoveTarget(document);
+            ValidateMoveTarget(document, newTitle);
 
             Page.MoveToken =
                 GetMoveToken(document);
@@ -3384,7 +3387,9 @@ public class ApiEdit : IApiEdit
     /// <exception cref="ApiException">
     /// Thrown when the API reports that the destination title is invalid.
     /// </exception>
-    private void ValidateMoveTarget(XmlDocument document)
+    private void ValidateMoveTarget(
+        XmlDocument document,
+        string newTitle)
     {
         XmlNode invalidPage =
             document.SelectSingleNode("/api/query/pages/page[@invalid]");
@@ -3397,7 +3402,7 @@ public class ApiEdit : IApiEdit
             "invalidnewtitle",
             new ArgumentException(
                 "Target page invalid",
-                "newTitle"));
+                nameof(newTitle)));
     }
 
     /// <summary>
@@ -3472,19 +3477,20 @@ public class ApiEdit : IApiEdit
         bool noRedirect,
         bool watch)
     {
-        var post = new Dictionary<string, string>
+        Dictionary<string, string> post = new()
     {
         { "from", title },
         { "to", newTitle },
         { "token", Page.MoveToken },
         { "reason", reason },
 
-        // TODO: Verify whether the "protections" parameter is still required for
-        // modern MediaWiki versions or retained solely for legacy compatibility.
-        /// Required by the MediaWiki API, even when no protection changes
-        /// are being requested.
-        { "protections", string.Empty }
-    };
+    // Required by the MediaWiki API even when no protection changes are
+    // requested.
+    //
+    // TODO (MediaWiki Compatibility):
+    // Verify whether this parameter remains necessary on supported versions.
+    { "protections", string.Empty }
+};
 
         post.AddIfTrue(moveTalk, "movetalk", null);
         post.AddIfTrue(noRedirect, "noredirect", null);
@@ -3515,6 +3521,9 @@ public class ApiEdit : IApiEdit
     {
         ArgumentException.ThrowIfNullOrEmpty(queryParameters);
 
+        // TODO (API Request Modernization):
+        // Replace raw query-string parameters with structured parameter collections
+        // so encoding is handled consistently.
         string result = HttpGet(
             $"{ApiURL}?action=query&format=xml&{queryParameters}");
 
@@ -3543,6 +3552,9 @@ public class ApiEdit : IApiEdit
     {
         ArgumentException.ThrowIfNullOrEmpty(queryParameters);
 
+        // TODO (API Request Modernization):
+        // Replace raw query-string parameters with structured parameter collections
+        // so encoding is handled consistently.
         return HttpGet(
             $"{ApiURL}?action=query&format=json&{queryParameters}");
     }
@@ -3563,14 +3575,17 @@ public class ApiEdit : IApiEdit
     /// </exception>
     public string ParseApi(Dictionary<string, string> queryParameters)
     {
-        // TODO: Decide whether this generic API method should use the configured
+        ArgumentNullException.ThrowIfNull(queryParameters);
+
+        // TODO (HTTP Modernization):
+        // Decide whether this generic API method should use the configured
         // maxlag policy. Raw query-string methods currently bypass ActionOptions.
         string result = HttpPost(
-            new Dictionary<string, string>
+            new()
             {
-            { "action", "parse" },
-            { "format", "xml" },
-            { "prop", "text|displaytitle|langlinks|categories" }
+                { "action", "parse" },
+                { "format", "xml" },
+                { "prop", "text|displaytitle|langlinks|categories" }
             },
             queryParameters);
 
