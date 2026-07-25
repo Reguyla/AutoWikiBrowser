@@ -931,20 +931,42 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// 
+    /// Adds an HTTP Basic Authentication header to the specified request.
     /// </summary>
-    /// <param name="req"></param>
-    /// <param name="userName"></param>
-    /// <param name="userPassword"></param>
-    /// <returns></returns>
+    /// <param name="req">
+    /// The request whose authorization header should be configured.
+    /// </param>
+    /// <param name="userName">
+    /// The username to include in the Basic Authentication credentials.
+    /// </param>
+    /// <param name="userPassword">
+    /// The password to include in the Basic Authentication credentials.
+    /// </param>
+    /// <returns>
+    /// The same request instance with its <c>Authorization</c> header set.
+    /// </returns>
     /// <remarks>
-    /// Source: http://blog.kowalczyk.info/article/Forcing-basic-http-authentication-for-HttpWebReq.html
+    /// The username and password are combined using the Basic Authentication
+    /// credential format and encoded as Base64 before being added to the request.
+    ///
+    /// Source:
+    /// http://blog.kowalczyk.info/article/Forcing-basic-http-authentication-for-HttpWebReq.html
     /// </remarks>
-    protected WebRequest SetBasicAuthHeader(WebRequest req, string userName, string userPassword)
+    // TODO: Review the character encoding used for Basic Authentication during
+    // the HttpWebRequest-to-HttpClient migration. Encoding.Default depends on the
+    // local system code page and may not produce consistent credentials across
+    // environments.
+    protected WebRequest SetBasicAuthHeader(
+        WebRequest req,
+        string userName,
+        string userPassword)
     {
-        string authInfo = userName + ":" + userPassword;
-        authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
-        req.Headers["Authorization"] = "Basic " + authInfo;
+        string credentials = $"{userName}:{userPassword}";
+        string encodedCredentials =
+            Convert.ToBase64String(Encoding.Default.GetBytes(credentials));
+
+        req.Headers["Authorization"] = $"Basic {encodedCredentials}";
+
         return req;
     }
 
