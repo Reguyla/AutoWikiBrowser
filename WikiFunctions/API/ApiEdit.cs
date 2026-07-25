@@ -1106,15 +1106,26 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// 
+    /// Sends an HTTP POST request to the API using the default action options.
     /// </summary>
-    /// <param name="get"></param>
-    /// <param name="post"></param>
-    /// <returns></returns>
-    protected string HttpPost(Dictionary<string, string> get, Dictionary<string, string> post)
-    {
-        return HttpPost(get, post, ActionOptions.None);
-    }
+    /// <param name="get">
+    /// The query-string parameters to append to the API URL.
+    /// </param>
+    /// <param name="post">
+    /// The form parameters to include in the POST request body.
+    /// </param>
+    /// <returns>
+    /// The response body returned by the server.
+    /// </returns>
+    /// <remarks>
+    /// This overload delegates to
+    /// <see cref="HttpPost(Dictionary{string, string}, Dictionary{string, string}, ActionOptions)"/>
+    /// using <see cref="ActionOptions.None"/>.
+    /// </remarks>
+    protected string HttpPost(
+        Dictionary<string, string> get,
+        Dictionary<string, string> post) =>
+        HttpPost(get, post, ActionOptions.None);
 
     /// <summary>
     /// Performs a HTTP request
@@ -1234,16 +1245,25 @@ public class ApiEdit : IApiEdit
                 encodedCredentials);
     }
 
-
-
     #endregion
 
     #region Login / user props
 
-    public void Login(string username, string password)
-    {
+    /// <summary>
+    /// Authenticates with the wiki using the supplied username and password.
+    /// </summary>
+    /// <param name="username">
+    /// The username to authenticate.
+    /// </param>
+    /// <param name="password">
+    /// The password associated with the specified username.
+    /// </param>
+    /// <remarks>
+    /// This overload performs a standard login without supplying a two-factor
+    /// authentication code.
+    /// </remarks>
+    public void Login(string username, string password) =>
         Login(username, password, "");
-    }
 
     public void Login(string username, string password, string domain)
     {
@@ -1513,10 +1533,36 @@ public class ApiEdit : IApiEdit
         throw new LoginException(this, status);
     }
 
-    private static void ClientLoginValidator(object sender, InputBoxValidatingArgs e)
+    /// <summary>
+    /// Matches the six-digit one-time code required during client login.
+    /// </summary>
+    /// <remarks>
+    /// As of July 2025, MediaWiki client login requires a six-digit numeric
+    /// one-time code.
+    ///
+    /// TODO: Review this pattern if MediaWiki changes the client login
+    /// one-time code format in a future release.
+    /// </remarks>
+    private static readonly Regex ClientLoginCodeRegex =
+        new(@"^\d{6}$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Validates the one-time code entered during client login.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the validation event.
+    /// </param>
+    /// <param name="e">
+    /// Contains the entered text and allows the validation to be canceled.
+    /// </param>
+    /// <remarks>
+    /// The one-time code must consist of exactly six numeric digits.
+    /// </remarks>
+    private static void ClientLoginValidator(
+        object sender,
+        InputBoxValidatingArgs e)
     {
-        // Currently (July 2025) the OTC is six digits, and there is "no plan" to change that
-        if (e.Text == null || !Regex.IsMatch(e.Text, @"^\d{6}$"))
+        if (e.Text == null || !ClientLoginCodeRegex.IsMatch(e.Text))
         {
             e.Cancel = true;
             e.Message = "Code must be six digits";
@@ -1583,10 +1629,18 @@ public class ApiEdit : IApiEdit
         Cookies = new CookieContainer();
     }
 
-    public void Watch(string title)
-    {
+    /// <summary>
+    /// Adds the specified page to the authenticated user's watchlist.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to watch.
+    /// </param>
+    /// <remarks>
+    /// This overload performs a standard watch operation without requesting
+    /// any additional watch action options.
+    /// </remarks>
+    public void Watch(string title) =>
         WatchAction(title, false);
-    }
 
     public void WatchAction(string title, bool unwatch)
     {
@@ -1655,13 +1709,36 @@ public class ApiEdit : IApiEdit
         CheckForErrors(result2, "watch");
     }
 
-    public void Unwatch(string title)
-    {
+    /// <summary>
+    /// Removes the specified page from the authenticated user's watchlist.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to remove from the watchlist.
+    /// </param>
+    /// <remarks>
+    /// This overload performs a standard unwatch operation without requesting
+    /// any additional watch action options.
+    /// </remarks>
+    public void Unwatch(string title) =>
         WatchAction(title, true);
-    }
 
+    /// <summary>
+    /// Gets information about the currently authenticated user.
+    /// </summary>
+    /// <remarks>
+    /// The property is updated after a successful login and may be
+    /// <see langword="null"/> before authentication has completed.
+    /// </remarks>
     public UserInfo User { get; private set; }
 
+    /// <summary>
+    /// Refreshes information about the currently authenticated user.
+    /// </summary>
+    /// <remarks>
+    /// Clears any cached user state, retrieves the latest user information from
+    /// the MediaWiki API, validates the response, and updates the
+    /// <see cref="User"/> property.
+    /// </remarks>
     public void RefreshUserInfo()
     {
         Reset();
@@ -1671,8 +1748,8 @@ public class ApiEdit : IApiEdit
             new() { { "action", "query" } },
             new()
             {
-                { "meta", "userinfo" },
-                { "uiprop", "blockinfo|hasmsg|groups|rights" }
+            { "meta", "userinfo" },
+            { "uiprop", "blockinfo|hasmsg|groups|rights" }
             });
 
         var xml = CheckForErrors(result, "userinfo");
@@ -1680,12 +1757,17 @@ public class ApiEdit : IApiEdit
         User = new UserInfo(xml);
     }
 
-    public void ClearNewMessages()
-    {
+    /// <summary>
+    /// Clears the authenticated user's "new messages" notification.
+    /// </summary>
+    /// <remarks>
+    /// Sends the MediaWiki <c>clearhasmsg</c> action to acknowledge outstanding
+    /// user talk page notifications.
+    /// </remarks>
+    public void ClearNewMessages() =>
         HttpPost(
             new() { { "action", "clearhasmsg" } },
             new());
-    }
     #endregion
 
     #region Page modification
@@ -1896,10 +1978,21 @@ public class ApiEdit : IApiEdit
         return new SaveInfo(xml);
     }
 
-    public void Delete(string title, string reason)
-    {
+    /// <summary>
+    /// Deletes the specified page using the supplied deletion reason.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to delete.
+    /// </param>
+    /// <param name="reason">
+    /// The reason to record in the deletion log.
+    /// </param>
+    /// <remarks>
+    /// This overload performs a standard deletion without requesting the page
+    /// to be watched after the operation.
+    /// </remarks>
+    public void Delete(string title, string reason) =>
         Delete(title, reason, false);
-    }
 
     public void Delete(string title, string reason, bool watch)
     {
@@ -3217,29 +3310,37 @@ public class ApiEdit : IApiEdit
     #region Helpers
 
     /// <summary>
-    /// 
+    /// Converts a Boolean value to the numeric string representation expected by
+    /// the MediaWiki API.
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    protected static string BoolToParam(bool value)
-    {
-        return value ? "1" : "0";
-    }
+    /// <param name="value">
+    /// The Boolean value to convert.
+    /// </param>
+    /// <returns>
+    /// <c>"1"</c> when <paramref name="value"/> is <see langword="true"/>;
+    /// otherwise, <c>"0"</c>.
+    /// </returns>
+    protected static string BoolToParam(bool value) =>
+        value ? "1" : "0";
 
-    protected static string WatchOptionsToParam(WatchOptions watch)
-    {
-        switch (watch)
+    /// <summary>
+    /// Converts a <see cref="WatchOptions"/> value to the corresponding
+    /// MediaWiki API parameter.
+    /// </summary>
+    /// <param name="watch">
+    /// The watch option to convert.
+    /// </param>
+    /// <returns>
+    /// The parameter value expected by the MediaWiki API.
+    /// </returns>
+    protected static string WatchOptionsToParam(WatchOptions watch) =>
+        watch switch
         {
-            case WatchOptions.UsePreferences:
-                return "preferences";
-            case WatchOptions.Watch:
-                return "watch";
-            case WatchOptions.Unwatch:
-                return "unwatch";
-            default:
-                return "nochange";
-        }
-    }
+            WatchOptions.UsePreferences => "preferences",
+            WatchOptions.Watch => "watch",
+            WatchOptions.Unwatch => "unwatch",
+            _ => "nochange"
+        };
 
     /// <summary>
     /// Computes the MD5 sum of a string
