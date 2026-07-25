@@ -2275,8 +2275,7 @@ public class ApiEdit : IApiEdit
     /// The title of the page to remove from the watchlist.
     /// </param>
     /// <remarks>
-    /// This overload performs a standard unwatch operation without requesting
-    /// any additional watch action options.
+    /// This overload removes the page from the watchlist.
     /// </remarks>
     public void Unwatch(string title) =>
         WatchAction(title, true);
@@ -2285,8 +2284,8 @@ public class ApiEdit : IApiEdit
     /// Gets information about the currently authenticated user.
     /// </summary>
     /// <remarks>
-    /// The property is updated after a successful login and may be
-    /// <see langword="null"/> before authentication has completed.
+    /// The property is refreshed after login and reset to an empty user-information
+    /// instance when the session is cleared.
     /// </remarks>
     public UserInfo User { get; private set; }
 
@@ -2300,18 +2299,25 @@ public class ApiEdit : IApiEdit
     /// </remarks>
     public void RefreshUserInfo()
     {
+        // TODO (Session State Modernization):
+        // Review whether refreshing user information requires a full ApiEdit reset or
+        // only invalidation of user-related cached state.
         Reset();
         User = new UserInfo();
 
         string result = HttpPost(
-            new() { { "action", "query" } },
             new()
             {
-            { "meta", "userinfo" },
-            { "uiprop", "blockinfo|hasmsg|groups|rights" }
+                { "action", "query" }
+            },
+            new()
+            {
+                { "meta", "userinfo" },
+                { "uiprop", "blockinfo|hasmsg|groups|rights" }
             });
 
-        var xml = CheckForErrors(result, "userinfo");
+        XmlDocument xml =
+            CheckForErrors(result, "userinfo");
 
         User = new UserInfo(xml);
     }
@@ -2323,78 +2329,152 @@ public class ApiEdit : IApiEdit
     /// Sends the MediaWiki <c>clearhasmsg</c> action to acknowledge outstanding
     /// user talk page notifications.
     /// </remarks>
-    public void ClearNewMessages() =>
-        HttpPost(
-            new() { { "action", "clearhasmsg" } },
+    public void ClearNewMessages()
+    {
+        string result = HttpPost(
+            new()
+            {
+            { "action", "clearhasmsg" }
+            },
             new());
+
+        CheckForErrors(result, "clearhasmsg");
+    }
     #endregion
 
     #region Page modification
 
     /// <summary>
-    /// Opens the wiki page for editing
+    /// Opens the specified wiki page for editing without resolving redirects.
     /// </summary>
-    /// <param name="title">The wiki page title</param>
-    /// <returns>The current content of the wiki page</returns>
-    public string Open(string title)
-    {
-        return Open(title, false);
-    }
+    /// <param name="title">
+    /// The title of the page to open.
+    /// </param>
+    /// <returns>
+    /// The current content of the opened page.
+    /// </returns>
+    public string Open(string title) =>
+        Open(title, false);
 
     /// <summary>
-    /// Opens the wiki page for editing
+    /// Opens the specified wiki page for editing.
     /// </summary>
-    /// <param name="title">The wiki page title</param>
-    /// <param name="resolveRedirects"></param>
-    /// <returns>The current content of the wiki page</returns>
+    /// <param name="title">
+    /// The title of the page to open.
+    /// </param>
+    /// <param name="resolveRedirects">
+    /// <see langword="true"/> to resolve redirects before opening the page;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The current content of the opened page.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="title"/> is null or empty.
+    /// </exception>
+    /// <exception cref="LoggedOffException">
+    /// Thrown when no authenticated user session is available.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the API response cannot be interpreted as valid page
+    /// information.
+    /// </exception>
     public string Open(string title, bool resolveRedirects)
     {
-        if (string.IsNullOrEmpty(title))
-            throw new ArgumentException("Page name required", "title");
+        ArgumentException.ThrowIfNullOrEmpty(title);
 
         if (!User.IsLoggedIn)
             throw new LoggedOffException(this);
 
         Reset();
 
-        /* converttitles: API doc says "converttitles - Convert titles to other variants if necessary. Only works if the wiki's content language supports variant conversion.
-           Languages that support variant conversion include gan, iu, kk, ku, shi, sr, tg, uz, zh"
-         * Example with and without converttitles: zh-wiki page 龙门飞甲
-         * https://zh.wikipedia.org/w/api.php?action=query&prop=info|revisions&titles=龙门飞甲&rvprop=timestamp|user|comment|content
-         * https://zh.wikipedia.org/w/api.php?action=query&converttitles&prop=info|revisions&titles=龙门飞甲&rvprop=timestamp|user|comment|content
-         If convertitles is not set, API doesn't find the page
-         */
-        var query = new Dictionary<string, string>
-        {
-            {"action", "query"},
-            {"converttitles", null},
-            {"prop", "info|revisions"},
-            {"meta", "tokens"}, // Since 1.24
-            {"type", "csrf|watch|rollback"}, // CSRF is for most actions
-            {"intoken", "edit|protect|delete|move|watch"}, // Pre 1.24 compat
-            {"titles", title},
-            {"inprop", "protection|watched|displaytitle"},
-            {"rvprop", "content|timestamp"}, // timestamp|user|comment|
-            {"curtimestamp", null}
-        };
-        query.AddIfTrue(resolveRedirects, "redirects", null);
+        Dictionary<string, string> query =
+            BuildOpenQuery(title, resolveRedirects);
 
-        string result = HttpGet(query, ActionOptions.All);
+        string result =
+            HttpGet(query, ActionOptions.All);
 
-        XmlDocument document = CheckForErrors(result, "query");
+        XmlDocument document =
+            CheckForErrors(result, "query");
 
+        InitializeOpenedPage(document);
+
+        return Page.Text;
+    }
+
+    /// <summary>
+    /// Builds the MediaWiki query parameters required to open a page for editing.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to open.
+    /// </param>
+    /// <param name="resolveRedirects">
+    /// <see langword="true"/> to request redirect resolution; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The query parameters required to retrieve the page content, metadata, and
+    /// editing tokens.
+    /// </returns>
+    /// <remarks>
+    /// Title-variant conversion is requested so valid variant titles resolve
+    /// correctly on wikis whose content language supports variant conversion.
+    ///
+    /// Both modern token parameters and the legacy <c>intoken</c> parameter are
+    /// included for compatibility with older MediaWiki versions.
+    /// </remarks>
+    private static Dictionary<string, string> BuildOpenQuery(
+        string title,
+        bool resolveRedirects)
+    {
+        Dictionary<string, string> query = new()
+    {
+        { "action", "query" },
+        { "converttitles", null },
+        { "prop", "info|revisions" },
+        { "meta", "tokens" },
+        { "type", "csrf|watch|rollback" },
+
+        // TODO (MediaWiki Compatibility):
+        // Remove intoken once the minimum supported MediaWiki version no
+        // longer requires the pre-1.24 token workflow.
+        { "intoken", "edit|protect|delete|move|watch" },
+
+        { "titles", title },
+        { "inprop", "protection|watched|displaytitle" },
+        { "rvprop", "content|timestamp" },
+        { "curtimestamp", null }
+    };
+
+        query.AddIfTrue(
+            resolveRedirects,
+            "redirects",
+            null);
+
+        return query;
+    }
+
+    /// <summary>
+    /// Initializes the current page state from a validated MediaWiki query
+    /// response.
+    /// </summary>
+    /// <param name="document">
+    /// The validated API response containing the page content and metadata.
+    /// </param>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the response cannot be interpreted as valid page information.
+    /// </exception>
+    private void InitializeOpenedPage(XmlDocument document)
+    {
         try
         {
             Page = new PageInfo(document);
-
             Action = "edit";
         }
         catch (Exception ex)
         {
             throw new BrokenXmlException(this, ex);
         }
-
-        return Page.Text;
     }
 
     /// <summary>
