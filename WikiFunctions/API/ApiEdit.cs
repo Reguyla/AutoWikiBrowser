@@ -1874,7 +1874,7 @@ public class ApiEdit : IApiEdit
     /// The response's <c>clientlogin</c> element.
     /// </param>
     /// <returns>
-    /// The uppercase client-login status.
+    /// The client-login status normalized to uppercase using invariant casing.
     /// </returns>
     private static string GetClientLoginStatus(
         XmlNode clientLoginNode) =>
@@ -1907,6 +1907,9 @@ public class ApiEdit : IApiEdit
             clientLoginNode.Attributes?["message"]?.Value ??
             string.Empty;
 
+        // TODO (Authentication Modernization):
+        // Replace localized-message parsing with structured client-login response data
+        // if MediaWiki exposes the EmailAuth destination independently of message text.
         // Preserve the existing unverified assumption that the email address
         // appears inside parentheses in every localization.
         Match emailMatch =
@@ -1918,6 +1921,9 @@ public class ApiEdit : IApiEdit
         return emailMatch;
     }
 
+    // TODO (ApiEdit Decomposition):
+    // Obtain extension availability from shared site information when API metadata
+    // and capability discovery are moved out of the authentication workflow.
     /// <summary>
     /// Determines whether the connected wiki reports support for the EmailAuth
     /// extension.
@@ -1931,9 +1937,9 @@ public class ApiEdit : IApiEdit
         string result = HttpPost(
             new()
             {
-            { "action", "query" },
-            { "meta", "siteinfo" },
-            { "siprop", "extensions" }
+                { "action", "query" },
+                { "meta", "siteinfo" },
+                { "siprop", "extensions" }
             },
             new());
 
@@ -1984,12 +1990,15 @@ public class ApiEdit : IApiEdit
 
         postparams.Add("logintoken", token);
 
+        // TODO (Security):
+        // Review whether the one-time authentication code can be submitted in the POST
+        // body so it is not retained in URL, debug, or exception diagnostics.
         string result = HttpPost(
             new()
             {
-            { "action", "clientlogin" },
-            { "logincontinue", "1" },
-            { "token", coderesult.Text }
+                { "action", "clientlogin" },
+                { "logincontinue", "1" },
+                { "token", coderesult.Text }
             },
             postparams);
 
@@ -2004,14 +2013,11 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// Matches the six-digit one-time code required during client login.
+    /// Matches the six-digit one-time code currently required during client login.
     /// </summary>
     /// <remarks>
-    /// As of July 2025, MediaWiki client login requires a six-digit numeric
-    /// one-time code.
-    ///
-    /// TODO: Review this pattern if MediaWiki changes the client login
-    /// one-time code format in a future release.
+    /// TODO (MediaWiki Compatibility): Review this pattern if the supported
+    /// authentication providers allow a different one-time-code format.
     /// </remarks>
     private static readonly Regex ClientLoginCodeRegex =
         new(@"^\d{6}$", RegexOptions.Compiled);
