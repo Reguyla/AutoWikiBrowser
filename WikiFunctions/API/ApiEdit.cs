@@ -971,41 +971,42 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// 
+    /// Sends an HTTP POST request to the API and returns the response body.
     /// </summary>
-    /// <param name="get"></param>
-    /// <param name="post"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    protected string HttpPost(Dictionary<string, string> get, Dictionary<string, string> post, ActionOptions options)
+    /// <param name="get">
+    /// The query-string parameters to append to the API URL.
+    /// </param>
+    /// <param name="post">
+    /// The form parameters to include in the POST request body.
+    /// </param>
+    /// <param name="options">
+    /// Options that control URL construction and request behavior.
+    /// </param>
+    /// <returns>
+    /// The response body returned by the server.
+    /// </returns>
+    /// <remarks>
+    /// A redacted copy of the request parameters is retained for diagnostics.
+    /// The original parameter collection is used to construct and send the request.
+    /// </remarks>
+    protected string HttpPost(
+        Dictionary<string, string> get,
+        Dictionary<string, string> post,
+        ActionOptions options)
     {
         string url = BuildUrl(get, options);
         Tools.WriteDebug("ApiEdit::HttpPost", url);
 
-        lastGetUrl = url;
+        RecordPostDiagnostics(url, post);
 
-        // Keep only a redacted copy for exception/debug diagnostics.
-        // The original post dictionary is still used to send the real request.
-        lastPostParameters = CreateSafeDiagnosticCopy(post);
-
-        string query = BuildQuery(post);
-        byte[] postData = Encoding.UTF8.GetBytes(query);
-
-        HttpWebRequest req = CreateRequest(url);
-        req.Method = "POST";
-        req.ContentType = "application/x-www-form-urlencoded";
-        req.ContentLength = postData.Length;
+        byte[] postData = BuildPostData(post);
+        HttpWebRequest req = CreatePostRequest(url, postData.Length);
 
         Request = req;
 
         try
         {
-            using (IDisposable requestCancellation =
-                RegisterRequestCancellation(req))
-            using (Stream rs = req.GetRequestStream())
-            {
-                rs.Write(postData, 0, postData.Length);
-            }
+            WritePostData(req, postData);
 
             return GetResponseString(req);
         }
@@ -1016,9 +1017,92 @@ public class ApiEdit : IApiEdit
         }
         finally
         {
-            if (object.ReferenceEquals(Request, req))
+            if (ReferenceEquals(Request, req))
                 Request = null;
         }
+    }
+
+    /// <summary>
+    /// Records redacted request information for later diagnostics.
+    /// </summary>
+    /// <param name="url">
+    /// The URL used for the request.
+    /// </param>
+    /// <param name="post">
+    /// The POST parameters whose safe diagnostic copy should be retained.
+    /// </param>
+    private void RecordPostDiagnostics(
+        string url,
+        Dictionary<string, string> post)
+    {
+        lastGetUrl = url;
+
+        // Keep only a redacted copy for exception/debug diagnostics.
+        // The original post dictionary is still used to send the real request.
+        lastPostParameters = CreateSafeDiagnosticCopy(post);
+    }
+
+    /// <summary>
+    /// Encodes the POST parameters as a UTF-8 form request body.
+    /// </summary>
+    /// <param name="post">
+    /// The POST parameters to encode.
+    /// </param>
+    /// <returns>
+    /// The encoded request body.
+    /// </returns>
+    private static byte[] BuildPostData(
+        Dictionary<string, string> post)
+    {
+        string query = BuildQuery(post);
+
+        return Encoding.UTF8.GetBytes(query);
+    }
+
+    /// <summary>
+    /// Creates and configures an HTTP request for a form-encoded POST operation.
+    /// </summary>
+    /// <param name="url">
+    /// The destination URL.
+    /// </param>
+    /// <param name="contentLength">
+    /// The size of the encoded request body in bytes.
+    /// </param>
+    /// <returns>
+    /// The configured POST request.
+    /// </returns>
+    private HttpWebRequest CreatePostRequest(
+        string url,
+        int contentLength)
+    {
+        HttpWebRequest req = CreateRequest(url);
+
+        req.Method = "POST";
+        req.ContentType = "application/x-www-form-urlencoded";
+        req.ContentLength = contentLength;
+
+        return req;
+    }
+
+    /// <summary>
+    /// Writes the encoded POST body to the request stream.
+    /// </summary>
+    /// <param name="req">
+    /// The request whose body should be written.
+    /// </param>
+    /// <param name="postData">
+    /// The encoded request body.
+    /// </param>
+    private void WritePostData(
+        HttpWebRequest req,
+        byte[] postData)
+    {
+        using IDisposable requestCancellation =
+            RegisterRequestCancellation(req);
+
+        using Stream rs = req.GetRequestStream();
+
+        rs.Write(postData, 0, postData.Length);
     }
 
     /// <summary>
