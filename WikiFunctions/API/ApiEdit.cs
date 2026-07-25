@@ -1729,102 +1729,201 @@ public class ApiEdit : IApiEdit
             watch);
     }
 
-    public void Protect(string title, string reason, string expiry, string edit, string move, bool cascade,
+    /// <summary>
+    /// Protects the specified page using the supplied protection levels and options.
+    /// </summary>
+    /// <param name="title">The title of the page to protect.</param>
+    /// <param name="reason">The reason for applying protection.</param>
+    /// <param name="expiry">
+    /// The protection expiry value accepted by the MediaWiki API.
+    /// </param>
+    /// <param name="edit">The required protection level for editing.</param>
+    /// <param name="move">The required protection level for moving.</param>
+    /// <param name="cascade">
+    /// <see langword="true"/> to apply cascading protection; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="watch">
+    /// <see langword="true"/> to add the page to the watchlist; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="title"/> or <paramref name="reason"/> is null
+    /// or empty.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the protection token cannot be read from the API response.
+    /// </exception>
+    /// <exception cref="AbortedException">
+    /// Thrown when the operation has been aborted.
+    /// </exception>
+    public void Protect(
+        string title,
+        string reason,
+        string expiry,
+        string edit,
+        string move,
+        bool cascade,
         bool watch)
     {
-        if (string.IsNullOrEmpty(title)) throw new ArgumentException("Page name required", "title");
-        if (string.IsNullOrEmpty(reason)) throw new ArgumentException("Deletion reason required", "reason");
+        ArgumentException.ThrowIfNullOrEmpty(title);
+        ArgumentException.ThrowIfNullOrEmpty(reason);
 
-        // Reset();
         Action = "protect";
 
-        if (string.IsNullOrEmpty(Page.ProtectToken))
-        {
-            string result = HttpGet(
-                new Dictionary<string, string>
-                {
-                    {"action", "query"},
-                    {"prop", "info"},
-                    {"meta", "tokens"}, // Since 1.24
-                    {"type", "csrf"},
-                    {"intoken", "protect"}, // Pre 1.24 compat
-                    {"titles", title}
+        EnsureProtectToken(title);
 
-                },
-                ActionOptions.All);
+        if (Aborting)
+            throw new AbortedException(this);
 
-            XmlDocument document = CheckForErrors(result);
+        string protections = BuildProtectionLevels(edit, move);
+        string expiryvalue = BuildProtectionExpiry(expiry);
 
-            try
-            {
-                // MediaWiki 1.24+ returns the CSRF token in <tokens>.
-                // Older compatibility responses can return protecttoken on <page>.
-                XmlNode tokenSource =
-                    document.SelectSingleNode("/api/query/tokens") ??
-                    document.SelectSingleNode("/api/query/pages/page");
+        var post = BuildProtectPostData(
+            title,
+            reason,
+            expiry,
+            expiryvalue,
+            protections,
+            cascade,
+            watch);
 
-                if (tokenSource == null)
-                    throw new Exception("Cannot find <tokens> or <page> element");
+        var get = new Dictionary<string, string>
+    {
+        { "action", "protect" }
+    };
 
-                string tokenAttribute =
-                    tokenSource.Name == "tokens"
-                        ? "csrftoken"
-                        : "protecttoken";
-
-                Page.ProtectToken =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        tokenSource,
-                        tokenAttribute);
-            }
-            catch (Exception ex)
-            {
-                throw new BrokenXmlException(this, ex);
-            }
-        }
-
-        if (Aborting) throw new AbortedException(this);
-
-        // if page does not exist, protection (i.e. salting) requires create protection only
-        string protections;
-
-        if (Page.Exists)
-            protections = "edit=" + edit + "|move=" + move;
-        else
-            protections = "create=" + edit;
-
-        string expiryvalue;
-
-        if (string.IsNullOrEmpty(expiry))
-            expiryvalue = "";
-        else if (Page.Exists)
-            expiryvalue = expiry + "|" + expiry;
-        else
-            expiryvalue = expiry;
-
-        var post = new Dictionary<string, string>
-        {
-            {"title", title},
-            {"token", Page.ProtectToken},
-            {"reason", reason},
-            {"protections", protections},
-        };
-        post.AddIfTrue(!string.IsNullOrEmpty(expiry), "expiry", expiryvalue);
-        post.AddIfTrue(cascade, "cascade", null);
-
-        //post.AddIfTrue(User.IsBot, "bot", null);
-        post.AddIfTrue(watch, "watch", null);
-
-        var result2 = HttpPost(
-            new Dictionary<string, string>
-            {
-                {"action", "protect"}
-            },
+        string result = HttpPost(
+            get,
             post,
             ActionOptions.All);
 
-        CheckForErrors(result2);
+        CheckForErrors(result);
 
         Reset();
+    }
+
+    /// <summary>
+    /// Ensures that a protection token is available for the specified page.
+    /// </summary>
+    /// <param name="title">The title of the page being protected.</param>
+    private void EnsureProtectToken(string title)
+    {
+        if (!string.IsNullOrEmpty(Page.ProtectToken))
+            return;
+
+        string result = HttpGet(
+            new Dictionary<string, string>
+            {
+            { "action", "query" },
+            { "prop", "info" },
+            { "meta", "tokens" },       // MediaWiki 1.24+
+            { "type", "csrf" },
+            { "intoken", "protect" },   // Pre-1.24 compatibility
+            { "titles", title }
+            },
+            ActionOptions.All);
+
+        XmlDocument document = CheckForErrors(result);
+
+        try
+        {
+            Page.ProtectToken = GetProtectToken(document);
+        }
+        catch (Exception ex)
+        {
+            throw new BrokenXmlException(this, ex);
+        }
+    }
+
+    /// <summary>
+    /// Reads a protection token from a MediaWiki API response.
+    /// </summary>
+    /// <param name="document">The API response document.</param>
+    /// <returns>The protection token returned by the API.</returns>
+    private static string GetProtectToken(XmlDocument document)
+    {
+        // MediaWiki 1.24+ returns the CSRF token in <tokens>.
+        // Older compatibility responses return protecttoken on <page>.
+        XmlNode tokenSource =
+            document.SelectSingleNode("/api/query/tokens") ??
+            document.SelectSingleNode("/api/query/pages/page");
+
+        if (tokenSource == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot find a <tokens> or <page> element in the API response.");
+        }
+
+        string tokenAttribute =
+            tokenSource.Name == "tokens"
+                ? "csrftoken"
+                : "protecttoken";
+
+        return XmlResponseHelpers.RequireAttributeValue(
+            tokenSource,
+            tokenAttribute);
+    }
+
+    /// <summary>
+    /// Builds the protection-level value for an existing or nonexistent page.
+    /// </summary>
+    /// <param name="edit">The edit or creation protection level.</param>
+    /// <param name="move">The move protection level.</param>
+    /// <returns>The protection-level value accepted by MediaWiki.</returns>
+    private string BuildProtectionLevels(string edit, string move)
+    {
+        // Protecting a nonexistent page, commonly called salting, requires only
+        // create protection.
+        return Page.Exists
+            ? $"edit={edit}|move={move}"
+            : $"create={edit}";
+    }
+
+    /// <summary>
+    /// Builds the protection-expiry value for an existing or nonexistent page.
+    /// </summary>
+    /// <param name="expiry">The requested expiry value.</param>
+    /// <returns>The expiry value accepted by MediaWiki.</returns>
+    private string BuildProtectionExpiry(string expiry)
+    {
+        if (string.IsNullOrEmpty(expiry))
+            return string.Empty;
+
+        return Page.Exists
+            ? $"{expiry}|{expiry}"
+            : expiry;
+    }
+
+    /// <summary>
+    /// Builds the POST parameters for a page-protection request.
+    /// </summary>
+    private Dictionary<string, string> BuildProtectPostData(
+        string title,
+        string reason,
+        string expiry,
+        string expiryvalue,
+        string protections,
+        bool cascade,
+        bool watch)
+    {
+        var post = new Dictionary<string, string>
+    {
+        { "title", title },
+        { "token", Page.ProtectToken },
+        { "reason", reason },
+        { "protections", protections }
+    };
+
+        post.AddIfTrue(
+            !string.IsNullOrEmpty(expiry),
+            "expiry",
+            expiryvalue);
+
+        post.AddIfTrue(cascade, "cascade", null);
+        post.AddIfTrue(watch, "watch", null);
+
+        return post;
     }
 
     /// <summary>
