@@ -258,15 +258,23 @@ public class ApiEdit : IApiEdit
     /// </remarks>
     public void Abort()
     {
-        // TODO: Review this method during the HttpWebRequest-to-HttpClient
-        // migration. Modern requests should be canceled through
-        // CancellationToken rather than HttpWebRequest.Abort().
+        // TODO (HTTP Modernization):
+        // Remove Aborting, Request, HttpWebRequest.Abort(), and the Thread.Sleep()
+        // coordination workaround when all API requests use CancellationToken-based
+        // HttpClient operations.
 
         Aborting = true;
-        HttpWebRequest request = Request;
-        request?.Abort();
-        Thread.Sleep(1);
-        Aborting = false;
+
+        try
+        {
+            HttpWebRequest request = Request;
+            request?.Abort();
+            Thread.Sleep(1);
+        }
+        finally
+        {
+            Aborting = false;
+        }
     }
 
     /// <summary>
