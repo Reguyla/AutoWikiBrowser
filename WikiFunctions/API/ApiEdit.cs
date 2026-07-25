@@ -277,6 +277,11 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    // TODO (Authentication Modernization):
+    // Re-evaluate this CentralAuth cookie-domain workaround against current
+    // Wikimedia authentication behavior. If it remains necessary, copy cookies
+    // into new Cookie instances rather than mutating objects returned by the
+    // existing CookieContainer.
     /// <summary>
     /// This is a hack required for some multilingual Wikimedia projects,
     /// where CentralAuth returns cookies with a redundant domain restriction.
@@ -285,14 +290,20 @@ public class ApiEdit : IApiEdit
     {
         Uri uri = new Uri(URL);
         string host = uri.Host;
-        var newCookies = new CookieContainer();
-        var urls = new[] { uri, new Uri(uri.Scheme + Uri.SchemeDelimiter + "fnord." + host) };
-        foreach (var u in urls)
+
+        CookieContainer newCookies = new();
+
+        Uri alternateUri = new UriBuilder(uri)
+        {Host = "fnord." + host}.Uri;
+
+        Uri[] urls = { uri, alternateUri };
+
+        foreach (Uri currentUri in urls)
         {
-            foreach (Cookie c in Cookies.GetCookies(u))
+            foreach (Cookie cookie in Cookies.GetCookies(currentUri))
             {
-                c.Domain = host;
-                newCookies.Add(c);
+                cookie.Domain = host;
+                newCookies.Add(cookie);
             }
         }
 
