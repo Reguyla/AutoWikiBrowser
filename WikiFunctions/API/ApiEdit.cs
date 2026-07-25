@@ -39,8 +39,15 @@ namespace WikiFunctions.API;
 public class ApiEdit : IApiEdit
 {
     /// <summary>
-    /// 
+    /// Initializes a new instance of the <see cref="ApiEdit"/> class with the
+    /// default state required for MediaWiki API operations.
     /// </summary>
+    /// <remarks>
+    /// The constructor creates a new cookie container for session management,
+    /// initializes the user information object, and enables exceptions for new
+    /// user messages by default. Additional state is configured as API requests
+    /// are performed.
+    /// </remarks>
     private ApiEdit()
     {
         Cookies = new CookieContainer();
@@ -103,6 +110,20 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    /// <summary>
+    /// Creates a copy of the current API editor.
+    /// </summary>
+    /// <returns>
+    /// A new <see cref="IApiEdit"/> instance initialized with the current
+    /// connection settings and session state.
+    /// </returns>
+    /// <remarks>
+    /// This method performs a shallow copy. Shared reference-type members,
+    /// including the cookie container, proxy settings, and user information,
+    /// are reused by the cloned instance.
+    /// </remarks>
+    // TODO: Review whether Clone should continue to perform a shallow copy
+    // or create independent copies of mutable session objects.
     public IApiEdit Clone()
     {
         return new ApiEdit
@@ -120,50 +141,66 @@ public class ApiEdit : IApiEdit
     #region Properties
 
     /// <summary>
-    /// Path to scripts on server e.g. https://en.wikipedia.org/w/ for en-wiki
+    /// Gets the base URL for the wiki's MediaWiki installation, including the
+    /// trailing slash.
     /// </summary>
+    /// <example>
+    /// <c>https://en.wikipedia.org/w/</c>
+    /// </example>
     public string URL { get; private set; }
 
     /// <summary>
-    /// Path to api.php e.g. https://en.wikipedia.org/w/api.php for en-wiki
+    /// Gets the full URL of the wiki's MediaWiki API endpoint.
     /// </summary>
+    /// <example>
+    /// <c>https://en.wikipedia.org/w/api.php</c>
+    /// </example>
     public string ApiURL { get; private set; }
 
     /// <summary>
-    /// 
+    /// Gets the scheme and host of the configured wiki server.
     /// </summary>
-    private string Server
-    {
-        get { return "https://" + new Uri(URL).Host; }
-    }
+    /// <example>
+    /// For <see cref="URL"/> equal to <c>https://en.wikipedia.org/w/</c>,
+    /// this property returns <c>https://en.wikipedia.org</c>.
+    /// </example>
+    private string Server =>
+        $"https://{new Uri(URL).Host}";
 
     /// <summary>
-    /// 
+    /// Gets a value indicating whether the connected wiki uses the legacy
+    /// PHP 5 compatibility behavior expected by this API implementation.
     /// </summary>
     public bool PHP5 { get; private set; }
 
     /// <summary>
-    /// Maxlag parameter of every request (https://www.mediawiki.org/wiki/Manual:Maxlag_parameter)
+    /// Gets or sets the maximum replication lag, in seconds, permitted for API
+    /// requests that use maxlag checking.
     /// </summary>
+    /// <remarks>
+    /// A value accepted by the MediaWiki <c>maxlag</c> parameter is added to
+    /// requests when the selected <see cref="ActionOptions"/> require it.
+    /// </remarks>
     public int Maxlag { get; set; }
 
     /// <summary>
-    /// 
+    /// Gets or sets a value indicating whether detection of new user messages
+    /// should cause an exception.
     /// </summary>
     public bool NewMessageThrows { get; set; }
 
     /// <summary>
-    /// Action for which we have edit token
+    /// Gets the API action for which the current page token was obtained.
     /// </summary>
     public string Action { get; private set; }
 
     /// <summary>
-    /// Name of the page currently being edited
+    /// Gets information about the page currently loaded for an API operation.
     /// </summary>
     public PageInfo Page { get; private set; }
 
     /// <summary>
-    /// 
+    /// Gets the HTTP response headers captured from the most recent request.
     /// </summary>
     public string HtmlHeaders { get; private set; }
 
@@ -192,17 +229,22 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// 
+    /// Aborts the current API request.
     /// </summary>
+    /// <remarks>
+    /// This method cancels the active legacy <see cref="HttpWebRequest"/> by
+    /// calling <see cref="HttpWebRequest.Abort"/>. Modern task-based operations
+    /// use <see cref="CancellationToken"/> instead.
+    /// </remarks>
     public void Abort()
     {
+        // TODO: Review this method during the HttpWebRequest-to-HttpClient
+        // migration. Modern requests should be canceled through
+        // CancellationToken rather than HttpWebRequest.Abort().
+
         Aborting = true;
-
         HttpWebRequest request = Request;
-
-        if (request != null)
-            request.Abort();
-
+        request?.Abort();
         Thread.Sleep(1);
         Aborting = false;
     }
