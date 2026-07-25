@@ -2433,7 +2433,8 @@ public class ApiEdit : IApiEdit
         { "converttitles", null },
         { "prop", "info|revisions" },
         { "meta", "tokens" },
-        { "type", "csrf|watch|rollback" },
+        { "type", "csrf|watch|rollback"
+     },
 
         // TODO (MediaWiki Compatibility):
         // Remove intoken once the minimum supported MediaWiki version no
@@ -2498,13 +2499,13 @@ public class ApiEdit : IApiEdit
         ArgumentException.ThrowIfNullOrEmpty(title);
 
         var query = new Dictionary<string, string>
-    {
-        { "action", "query" },
-        { "prop", "info" },
-        { "titles", title }
-    };
+        {
+            { "action", "query" },
+            { "prop", "info" },
+            { "titles", title }
+        };
 
-        string result = HttpGet(query, ActionOptions.None);
+        string result = HttpGet(query);
         XmlDocument document = CheckForErrors(result, "query");
 
         try
@@ -2614,13 +2615,13 @@ public class ApiEdit : IApiEdit
     private Dictionary<string, string> BuildSaveQueryParameters(
         bool minor,
         WatchOptions watch)
-    {
+       {
         var get = new Dictionary<string, string>
-    {
-        { "action", "edit" },
-        { "title", Page.Title },
-        { "watchlist", WatchOptionsToParam(watch) }
-    };
+        {
+            { "action", "edit" },
+            { "title", Page.Title },
+            { "watchlist", WatchOptionsToParam(watch) }
+        };
 
         get.AddIfTrue(minor, "minor", null);
         get.AddIfTrue(User.IsBot, "bot", null);
@@ -2649,14 +2650,14 @@ public class ApiEdit : IApiEdit
         string contentModel)
     {
         var post = new Dictionary<string, string>
-    {
-        // Parameter order matters. See Wikimedia Phabricator task T16210.
-        { "md5", MD5(pageText) },
-        { "summary", summary },
-        { "basetimestamp", Page.Timestamp },
-        { "text", pageText },
-        { "starttimestamp", Page.TokenTimestamp }
-    };
+        {
+            // Parameter order matters. See Wikimedia Phabricator task T16210.
+            { "md5", MD5(pageText) },
+            { "summary", summary },
+            { "basetimestamp", Page.Timestamp },
+            { "text", pageText },
+            { "starttimestamp", Page.TokenTimestamp }
+        };
 
         post.AddIfTrue(
             Variables.TagEdits,
@@ -2773,15 +2774,18 @@ public class ApiEdit : IApiEdit
         string result = HttpGet(
             new()
             {
-            { "action", "query" },
-            { "prop", "info" },
-            { "meta", "tokens" },       // MediaWiki 1.24+
-            { "type", "csrf" },
-            { "intoken", "delete" },    // Pre-1.24 compatibility
-            { "titles", title }
+                { "action", "query" },
+                { "prop", "info" },
+                { "meta", "tokens" },       // MediaWiki 1.24+
+                { "type", "csrf" },
+                { "intoken", "delete" },    // Pre-1.24 compatibility
+                { "titles", title }
             },
             ActionOptions.All);
 
+        // TODO (Article State):
+        // Review whether SaveInfo should be constructed before Reset so a malformed
+        // successful-edit response does not clear the current page state prematurely.
         XmlDocument document = CheckForErrors(result);
 
         try
