@@ -1705,6 +1705,10 @@ public class ApiEdit : IApiEdit
         return result;
     }
 
+    // TODO (Authentication Modernization):
+    // Replace the EmailAuth-specific continuation logic with a generalized
+    // client-login continuation handler if additional authentication mechanisms
+    // such as OATHAuth are supported.
     /// <summary>
     /// Authenticates a user through the MediaWiki client-login workflow.
     /// </summary>
@@ -1743,9 +1747,9 @@ public class ApiEdit : IApiEdit
         if (status == "PASS")
             return;
 
-        // Handle 2FA using EmailAuth.
-        // OATHAuth should work similarly through the OATHToken parameter,
-        // but that path has not been tested.
+        // Handle two-factor authentication through EmailAuth.
+        // OATHAuth should use a similar continuation flow through the OATHToken
+        // parameter, but that path has not been tested.
         if (status != "UI")
             throw new LoginException(this, status);
 
@@ -1791,8 +1795,8 @@ public class ApiEdit : IApiEdit
         string token) =>
         new()
         {
-        { "password", password },
-        { "logintoken", token }
+            { "password", password },
+            { "logintoken", token }
         };
 
     /// <summary>
@@ -1814,11 +1818,14 @@ public class ApiEdit : IApiEdit
         string result = HttpPost(
             new()
             {
-            { "action", "clientlogin" },
-            { "username", username },
+                { "action", "clientlogin" },
+                { "username", username },
 
-            // Not used by AWB, but required by the MediaWiki API.
-            { "loginreturnurl", "https://en.wikipedia.org/" }
+                // TODO (Authentication Modernization):
+                // Replace the hard-coded login return URL with an appropriate URI derived
+                // from the active wiki or a documented neutral callback value.
+                // Not used by AWB, but required by the MediaWiki API.
+                { "loginreturnurl", "https://en.wikipedia.org/" }
             },
             postparams);
 
@@ -1838,7 +1845,7 @@ public class ApiEdit : IApiEdit
     /// <returns>
     /// The response's <c>clientlogin</c> element.
     /// </returns>
-    /// <exception cref="Exception">
+    /// <exception cref="InvalidOperationException">
     /// Thrown when the response does not contain a <c>clientlogin</c> element.
     /// </exception>
     private XmlNode GetClientLoginResponseNode(string result)
@@ -1852,7 +1859,10 @@ public class ApiEdit : IApiEdit
             document.SelectSingleNode("/api/clientlogin");
 
         if (clientLoginNode == null)
-            throw new Exception("Cannot find <clientlogin> element");
+        {
+            throw new InvalidOperationException(
+                "The API response does not contain a <clientlogin> element.");
+        }
 
         return clientLoginNode;
     }
