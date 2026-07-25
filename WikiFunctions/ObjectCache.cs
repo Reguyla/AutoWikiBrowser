@@ -147,11 +147,11 @@ namespace WikiFunctions
             }
         }
 
-        private static readonly TimeSpan DefaultLifespan = new TimeSpan(5, 0, 0, 0);
-        private readonly Dictionary<Type, TimeSpan> SupportedTypes = new Dictionary<Type, TimeSpan>();
+        private static readonly TimeSpan DefaultLifespan = TimeSpan.FromDays(5);
 
-        private readonly Dictionary<Type, Dictionary<string, StoredData>> Storage
-            = new Dictionary<Type, Dictionary<string, StoredData>>();
+        private readonly Dictionary<Type, TimeSpan> SupportedTypes = new();
+
+        private readonly Dictionary<Type, Dictionary<string, StoredData>> Storage = new();
 
         /// <summary>
         /// Registers a type that may be stored in the cache and specifies its
@@ -168,7 +168,7 @@ namespace WikiFunctions
         /// </exception>
         public void AddType(Type what, TimeSpan lifeSpan)
         {
-            if (what == null) throw new ArgumentNullException("what");
+            ArgumentNullException.ThrowIfNull(what);
 
             SupportedTypes[what] = lifeSpan;
         }
@@ -190,14 +190,8 @@ namespace WikiFunctions
         /// </remarks>
         public object this[string key]
         {
-            set
-            {
-                Set(key, value);
-            }
-            get
-            {
-                return Get<object>(key);
-            }
+            get => Get<object>(key);
+            set => Set(key, value);
         }
 
         /// <summary>
@@ -210,7 +204,8 @@ namespace WikiFunctions
         /// The key identifying the cached value.
         /// </param>
         /// <returns>
-        /// The cached value when present and not expired; otherwise, <see langword="null"/>.
+        /// The cached value when present and not expired; otherwise,
+        /// <see langword="null"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="key"/> is <see langword="null"/>.
@@ -252,7 +247,7 @@ namespace WikiFunctions
 
         /// <summary>
         /// Stores a value in the cache using the default lifespan registered for
-        /// the value's type.
+        /// the value's runtime type.
         /// </summary>
         /// <param name="key">
         /// The key used to identify the cached value.
@@ -260,10 +255,6 @@ namespace WikiFunctions
         /// <param name="value">
         /// The value to store.
         /// </param>
-        /// <remarks>
-        /// The actual expiration time is determined by the overload that accepts an
-        /// absolute expiration date.
-        /// </remarks>
         public void Set(string key, object value)
         {
             Set(key, value, DateTime.MinValue);
@@ -299,56 +290,70 @@ namespace WikiFunctions
         /// <param name="expiry">
         /// The date and time at which the value expires. Specify
         /// <see cref="DateTime.MinValue"/> to use the default lifespan registered
-        /// for the value's type.
+        /// for the value's runtime type.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="value"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown when <paramref name="key"/> is null or empty, or when the value's
-        /// runtime type is not supported by the cache.
+        /// Thrown when <paramref name="key"/> is null or empty, or when the runtime
+        /// type of <paramref name="value"/> is not supported by the cache.
         /// </exception>
         public void Set(string key, object value, DateTime expiry)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
-            if (value == null) throw new ArgumentNullException("value");
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            ArgumentNullException.ThrowIfNull(value);
 
             Type type = value.GetType();
-            if (!SupportedTypes.ContainsKey(type))
-                throw new ArgumentException("Caching of type " + value.GetType().Name + " is not supported",
-                                            "value");
 
-            if (expiry == DateTime.MinValue) expiry = DateTime.Now + SupportedTypes[type];
+            if (!SupportedTypes.TryGetValue(type, out TimeSpan defaultLifespan))
+            {
+                throw new ArgumentException(
+                    $"Caching of type {type.Name} is not supported.",
+                    nameof(value));
+            }
+
+            if (expiry == DateTime.MinValue)
+                expiry = DateTime.Now + defaultLifespan;
 
             lock (Storage)
             {
-                if (!Storage.ContainsKey(type))
-                    Storage[type] = new Dictionary<string, StoredData>();
-                Storage[type][key] = new StoredData(value, expiry);
+                if (!Storage.TryGetValue(
+                        type,
+                        out Dictionary<string, StoredData> values))
+                {
+                    values = new();
+                    Storage[type] = values;
+                }
+
+                values[key] = new StoredData(value, expiry);
             }
         }
 
-        private XmlSerializer serializer;
+        private XmlSerializer? serializer;
         private bool _disposed;
+
+        /// <summary>
+        /// Gets the XML serializer configured for the cache's currently supported types.
+        /// </summary>
         private XmlSerializer Serializer
         {
             get
             {
-                if (serializer != null) return serializer;
+                serializer ??= new XmlSerializer(
+                    typeof(Internal.CacheRoot),
+                    SupportedTypes.Keys.ToArray());
 
-                var usedTypes = new List<Type>();
-                foreach (var type in SupportedTypes)
-                {
-                    usedTypes.Add(type.Key);
-                }
-                serializer = new XmlSerializer(typeof(Internal.CacheRoot), usedTypes.ToArray());
                 return serializer;
             }
         }
 
         /// <summary>
-        /// 
+        /// Saves the cache to its configured backing file.
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the cache is not associated with a backing file.
+        /// </exception>
         public void Save()
         {
             Save(FileName);
@@ -358,7 +363,12 @@ namespace WikiFunctions
         /// Saves the cache to the specified file using a temporary file so an
         /// interrupted write does not corrupt the existing cache.
         /// </summary>
-        /// <param name="fileName">The cache file to write.</param>
+        /// <param name="fileName">
+        /// The cache file to write.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="fileName"/> is null or empty.
+        /// </exception>
         public void Save(string fileName)
         {
             ArgumentException.ThrowIfNullOrEmpty(fileName);
@@ -372,14 +382,13 @@ namespace WikiFunctions
 
             try
             {
-                using (FileStream stream = new(
-                           temporaryFileName,
-                           FileMode.Create,
-                           FileAccess.Write,
-                           FileShare.None))
-                {
-                    Save(stream);
-                }
+                using FileStream stream = new(
+                    temporaryFileName,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None);
+
+                Save(stream);
 
                 File.Move(
                     temporaryFileName,
@@ -396,10 +405,15 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Loads ObjectCache.xml if it exists. Invalid cache files are deleted after
-        /// the input stream has been closed.
+        /// Loads the cache from the specified file when it exists.
+        /// Invalid cache files are deleted after the input stream is closed.
         /// </summary>
-        /// <param name="fileName">The cache file to load.</param>
+        /// <param name="fileName">
+        /// The cache file to load.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="fileName"/> is null or empty.
+        /// </exception>
         public void Load(string fileName)
         {
             ArgumentException.ThrowIfNullOrEmpty(fileName);
@@ -445,21 +459,35 @@ namespace WikiFunctions
         /// </exception>
         public void Save(Stream str)
         {
-            var root = new Internal.CacheRoot();
+            ArgumentNullException.ThrowIfNull(str);
 
+            var root = new Internal.CacheRoot();
             DateTime now = DateTime.Now;
 
             lock (Storage)
             {
                 foreach (var type in Storage)
                 {
-                    var typeRoot = new Internal.Type { Name = type.Key.ToString() };
+                    var typeRoot = new Internal.Type
+                    {
+                        Name = type.Key.ToString()
+                    };
+
                     foreach (var value in type.Value)
                     {
-                        if (value.Value.Expires < now) continue;
-                        typeRoot.Items.Add(new Internal.Item { Value = value.Value.Data, Expires = value.Value.Expires, Key = value.Key });
+                        if (value.Value.Expires < now)
+                            continue;
+
+                        typeRoot.Items.Add(new Internal.Item
+                        {
+                            Value = value.Value.Data,
+                            Expires = value.Value.Expires,
+                            Key = value.Key
+                        });
                     }
-                    if (typeRoot.Items.Count > 0) root.Types.Add(typeRoot);
+
+                    if (typeRoot.Items.Count > 0)
+                        root.Types.Add(typeRoot);
                 }
             }
 
@@ -467,27 +495,50 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// 
+        /// Records a non-fatal cache exception for diagnostic purposes.
         /// </summary>
-        /// <param name="ex"></param>
+        /// <param name="ex">
+        /// The exception to record.
+        /// </param>
+        /// <remarks>
+        /// Cache failures are treated as non-critical and are written to the trace
+        /// output instead of being propagated to the caller.
+        /// </remarks>
         private void ReportException(Exception ex)
         {
-            Trace.WriteLine("Exception caught in ObjectCache: " + ex.Message);
+            ArgumentNullException.ThrowIfNull(ex);
+
+            Trace.WriteLine(
+                $"Exception caught in ObjectCache: {ex.Message}");
         }
 
         /// <summary>
-        /// 
+        /// Loads cache contents from the specified stream.
         /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
+        /// <param name="str">
+        /// The stream containing serialized cache data.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> when the cache is loaded successfully; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// Cache data created by a different WikiFunctions version is rejected.
+        /// Entries whose runtime types are unavailable or unsupported are skipped.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="str"/> is <see langword="null"/>.
+        /// </exception>
         public bool Load(Stream str)
         {
-            if (str == null) throw new ArgumentNullException("str");
+            ArgumentNullException.ThrowIfNull(str);
 
             try
             {
                 var loaded = (Internal.CacheRoot)Serializer.Deserialize(str);
-                if (loaded.Version != Globals.WikiFunctionsVersion.ToString()) return false;
+
+                if (loaded.Version != Globals.WikiFunctionsVersion.ToString())
+                    return false;
 
                 lock (Storage)
                 {
@@ -498,19 +549,27 @@ namespace WikiFunctions
                         try
                         {
                             Type type = Type.GetType(entry.Name);
-                            if (type == null || !SupportedTypes.ContainsKey(type)) continue;
 
-                            Storage[type] = new Dictionary<string, StoredData>();
+                            if (type == null || !SupportedTypes.ContainsKey(type))
+                                continue;
+
+                            Storage[type] = new();
+
                             foreach (var data in entry.Items)
-                                Storage[type][data.Key] = new StoredData(data.Value, data.Expires);
+                            {
+                                Storage[type][data.Key] =
+                                    new StoredData(data.Value, data.Expires);
+                            }
                         }
                         catch (Exception ex)
                         {
-                            // Ignore possible exceptions, attempting
+                            // Skip malformed or unsupported entries while continuing
+                            // to load the remaining cache contents.
                             ReportException(ex);
                         }
                     }
                 }
+
                 return true;
             }
             catch (Exception ex)
@@ -520,12 +579,19 @@ namespace WikiFunctions
             }
         }
 
+        /// <summary>
+        /// Clears all in-memory cache entries and removes the persisted cache file.
+        /// </summary>
+        /// <remarks>
+        /// The cache is saved after being cleared and the backing file is then deleted.
+        /// </remarks>
         public void Invalidate()
         {
             lock (Storage)
             {
                 Storage.Clear();
             }
+
             Save();
             File.Delete(FileName);
         }
@@ -533,45 +599,85 @@ namespace WikiFunctions
 
     namespace Internal
     {
+        /// <summary>
+        /// Represents a serialized cache entry.
+        /// </summary>
         [Serializable]
         public class Item
         {
+            /// <summary>
+            /// The key associated with the cached value.
+            /// </summary>
             [XmlAttribute("key")]
             public string Key;
 
+            /// <summary>
+            /// The date and time at which the cached value expires.
+            /// </summary>
             [XmlAttribute("expires")]
             public DateTime Expires;
 
-            //[XmlText]
+            /// <summary>
+            /// The serialized cached value.
+            /// </summary>
             public object Value;
         }
 
-        [Serializable/*, XmlElement("Type")*/]
+        /// <summary>
+        /// Represents the serialized cache entries associated with a runtime type.
+        /// </summary>
+        [Serializable]
         public class Type
         {
+            /// <summary>
+            /// The serialized runtime type name.
+            /// </summary>
             [XmlAttribute("name")]
             public string Name;
 
-            public readonly List<Item> Items = new List<Item>();
+            /// <summary>
+            /// The cached entries associated with this type.
+            /// </summary>
+            public readonly List<Item> Items = new();
         }
 
-        [Serializable, XmlRoot("Cache")]
+        /// <summary>
+        /// Represents the root element of the persisted object cache.
+        /// </summary>
+        [Serializable]
+        [XmlRoot("Cache")]
         public class CacheRoot
         {
+            /// <summary>
+            /// Initializes an empty cache root using the current WikiFunctions version.
+            /// </summary>
             public CacheRoot()
-            { }
+            {
+            }
 
+            /// <summary>
+            /// Initializes an empty cache root with the specified version.
+            /// </summary>
+            /// <param name="version">
+            /// The WikiFunctions version associated with the serialized cache.
+            /// </param>
             public CacheRoot(string version)
             {
                 Version = version;
             }
 
+            /// <summary>
+            /// The WikiFunctions version associated with the serialized cache.
+            /// </summary>
             [XmlAttribute("version")]
-            public readonly string Version = Globals.WikiFunctionsVersion.ToString();
+            public readonly string Version =
+                Globals.WikiFunctionsVersion.ToString();
 
-            // [XmlText]
+            /// <summary>
+            /// The serialized groups of cached values.
+            /// </summary>
             [XmlArray("Types")]
-            public readonly List<Type> Types = new List<Type>();
+            public readonly List<Type> Types = new();
         }
     }
 }
