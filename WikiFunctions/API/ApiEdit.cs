@@ -1553,144 +1553,293 @@ public class ApiEdit : IApiEdit
 
         return result;
     }
-        
 
-
-    public void ClientLogin(string username, string password, string token)
+    /// <summary>
+    /// Authenticates a user through the MediaWiki client-login workflow.
+    /// </summary>
+    /// <param name="username">
+    /// The username to authenticate.
+    /// </param>
+    /// <param name="password">
+    /// The password associated with the specified username.
+    /// </param>
+    /// <param name="token">
+    /// The login token returned by the MediaWiki token API.
+    /// </param>
+    /// <exception cref="LoginException">
+    /// Thrown when authentication fails, requires an unsupported continuation,
+    /// or is cancelled by the user.
+    /// </exception>
+    public void ClientLogin(
+        string username,
+        string password,
+        string token)
     {
-        Dictionary<string, string> postparams = new Dictionary<string, string>
-{
-    {"password", password},
-    {"logintoken", token}
-};
+        Dictionary<string, string> postparams =
+            BuildClientLoginParameters(password, token);
 
-        string result = HttpPost(
-            new Dictionary<string, string>
-            {
-        {"action", "clientlogin"},
-        {"username", username},
-        {"loginreturnurl", "https://en.wikipedia.org/"} // Not used but required by API
-            },
-            postparams
-        );
-
-        Tools.WriteDebug(
-            "API::Edit action/clientlogin",
-            "Received ClientLogin response.");
-
-        // ClientLogin can return a valid UI status for follow-up authentication,
-        // so validate API-level errors without treating the status itself as an
-        // action-specific success or failure result.
-        XmlDocument clientLoginDocument = CheckForErrors(result);
+        string result =
+            SendInitialClientLoginRequest(
+                username,
+                postparams);
 
         XmlNode clientLoginNode =
-            clientLoginDocument.SelectSingleNode("/api/clientlogin");
-
-        if (clientLoginNode == null)
-            throw new Exception("Cannot find <clientlogin> element");
+            GetClientLoginResponseNode(result);
 
         string status =
-            XmlResponseHelpers.RequireAttributeValue(
-                clientLoginNode,
-                "status").ToUpperInvariant();
+            GetClientLoginStatus(clientLoginNode);
 
         if (status == "PASS")
             return;
 
         // Handle 2FA using EmailAuth.
-        // OATHAuth should work the same way, using the OATHToken parameter,
+        // OATHAuth should work similarly through the OATHToken parameter,
         // but that path has not been tested.
         if (status != "UI")
             throw new LoginException(this, status);
 
-        string message = "";
+        Match emailMatch =
+            GetClientLoginEmailMatch(
+                clientLoginNode,
+                status);
 
-        if (clientLoginNode.Attributes != null)
+        postparams.Clear();
+
+        if (SupportsEmailAuthentication())
         {
-            XmlAttribute messageAttribute =
-                clientLoginNode.Attributes["message"];
+            status =
+                ContinueClientLoginWithEmailCode(
+                    token,
+                    emailMatch,
+                    postparams);
 
-            if (messageAttribute != null)
-                message = messageAttribute.Value;
+            if (status == "PASS")
+                return;
+
+            // A UI response here probably indicates an incorrect code. Preserve
+            // the existing single-attempt behavior rather than repeatedly prompting.
         }
 
-        // Makes the (unverified) assumption that the email will be in
-        // parentheses in all localizations.
-        Match emailMatch = Regex.Match(message, @"\(.+?@.+?\)");
+        throw new LoginException(this, status);
+    }
+
+    /// <summary>
+    /// Builds the form parameters required by the initial client-login request.
+    /// </summary>
+    /// <param name="password">
+    /// The password associated with the user.
+    /// </param>
+    /// <param name="token">
+    /// The login token returned by the API.
+    /// </param>
+    /// <returns>
+    /// The client-login form parameters.
+    /// </returns>
+    private static Dictionary<string, string> BuildClientLoginParameters(
+        string password,
+        string token) =>
+        new()
+        {
+        { "password", password },
+        { "logintoken", token }
+        };
+
+    /// <summary>
+    /// Sends the initial MediaWiki client-login request.
+    /// </summary>
+    /// <param name="username">
+    /// The username to authenticate.
+    /// </param>
+    /// <param name="postparams">
+    /// The client-login form parameters.
+    /// </param>
+    /// <returns>
+    /// The raw API response.
+    /// </returns>
+    private string SendInitialClientLoginRequest(
+        string username,
+        Dictionary<string, string> postparams)
+    {
+        string result = HttpPost(
+            new()
+            {
+            { "action", "clientlogin" },
+            { "username", username },
+
+            // Not used by AWB, but required by the MediaWiki API.
+            { "loginreturnurl", "https://en.wikipedia.org/" }
+            },
+            postparams);
+
+        Tools.WriteDebug(
+            "API::Edit action/clientlogin",
+            "Received ClientLogin response.");
+
+        return result;
+    }
+
+    /// <summary>
+    /// Validates a client-login response and returns its primary result element.
+    /// </summary>
+    /// <param name="result">
+    /// The raw API response.
+    /// </param>
+    /// <returns>
+    /// The response's <c>clientlogin</c> element.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown when the response does not contain a <c>clientlogin</c> element.
+    /// </exception>
+    private XmlNode GetClientLoginResponseNode(string result)
+    {
+        // ClientLogin can return a valid UI status for follow-up authentication,
+        // so validate API-level errors without treating the status itself as an
+        // action-specific success or failure result.
+        XmlDocument document = CheckForErrors(result);
+
+        XmlNode clientLoginNode =
+            document.SelectSingleNode("/api/clientlogin");
+
+        if (clientLoginNode == null)
+            throw new Exception("Cannot find <clientlogin> element");
+
+        return clientLoginNode;
+    }
+
+    /// <summary>
+    /// Gets the normalized status from a client-login response.
+    /// </summary>
+    /// <param name="clientLoginNode">
+    /// The response's <c>clientlogin</c> element.
+    /// </param>
+    /// <returns>
+    /// The uppercase client-login status.
+    /// </returns>
+    private static string GetClientLoginStatus(
+        XmlNode clientLoginNode) =>
+        XmlResponseHelpers
+            .RequireAttributeValue(
+                clientLoginNode,
+                "status")
+            .ToUpperInvariant();
+
+    /// <summary>
+    /// Extracts the email-address text from a client-login continuation message.
+    /// </summary>
+    /// <param name="clientLoginNode">
+    /// The response's <c>clientlogin</c> element.
+    /// </param>
+    /// <param name="status">
+    /// The current client-login status.
+    /// </param>
+    /// <returns>
+    /// The email-address match found in the response message.
+    /// </returns>
+    /// <exception cref="LoginException">
+    /// Thrown when the response does not contain the expected email-address syntax.
+    /// </exception>
+    private Match GetClientLoginEmailMatch(
+        XmlNode clientLoginNode,
+        string status)
+    {
+        string message =
+            clientLoginNode.Attributes?["message"]?.Value ??
+            string.Empty;
+
+        // Preserve the existing unverified assumption that the email address
+        // appears inside parentheses in every localization.
+        Match emailMatch =
+            Regex.Match(message, @"\(.+?@.+?\)");
 
         if (!emailMatch.Success)
             throw new LoginException(this, status);
 
-        postparams.Clear();
+        return emailMatch;
+    }
 
-        result = HttpPost(
-            new Dictionary<string, string>
+    /// <summary>
+    /// Determines whether the connected wiki reports support for the EmailAuth
+    /// extension.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the EmailAuth extension is present; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool SupportsEmailAuthentication()
+    {
+        string result = HttpPost(
+            new()
             {
-        {"action", "query"},
-        {"meta", "siteinfo"},
-        {"siprop", "extensions"}
+            { "action", "query" },
+            { "meta", "siteinfo" },
+            { "siprop", "extensions" }
             },
-            postparams
-        );
+            new());
 
-        XmlDocument siteInfoDocument = CheckForErrors(result, "query");
+        XmlDocument siteInfoDocument =
+            CheckForErrors(result, "query");
 
         XmlNode emailAuthExtension =
             siteInfoDocument.SelectSingleNode(
                 "/api/query/extensions/ext[@name='EmailAuth']");
 
-        if (emailAuthExtension != null)
-        {
-            // The message itself is too long for InputBox. Continue to assume
-            // the current email-address syntax.
-            InputBoxResult coderesult = InputBox.Show(
-                "Enter the code sent to your email " + emailMatch.Value + '.',
-                "Enter One-Time-Code",
-                "",
-                ClientLoginValidator);
+        return emailAuthExtension != null;
+    }
 
-            if (!coderesult.OK)
-                throw new LoginException(this, "Login cancelled");
+    /// <summary>
+    /// Prompts for an email authentication code and submits the client-login
+    /// continuation request.
+    /// </summary>
+    /// <param name="token">
+    /// The original login token.
+    /// </param>
+    /// <param name="emailMatch">
+    /// The email-address text extracted from the API response.
+    /// </param>
+    /// <param name="postparams">
+    /// The form parameters to use for the continuation request.
+    /// </param>
+    /// <returns>
+    /// The normalized status returned by the continuation request.
+    /// </returns>
+    /// <exception cref="LoginException">
+    /// Thrown when the user cancels the authentication prompt.
+    /// </exception>
+    private string ContinueClientLoginWithEmailCode(
+        string token,
+        Match emailMatch,
+        Dictionary<string, string> postparams)
+    {
+        // The complete server message is too long for InputBox. Continue using
+        // the email-address text extracted from the message.
+        InputBoxResult coderesult = InputBox.Show(
+            $"Enter the code sent to your email {emailMatch.Value}.",
+            "Enter One-Time-Code",
+            string.Empty,
+            ClientLoginValidator);
 
-            postparams.Add("logintoken", token);
+        if (!coderesult.OK)
+            throw new LoginException(this, "Login cancelled");
 
-            result = HttpPost(
-                new Dictionary<string, string>
-                {
-            {"action", "clientlogin"},
-            {"logincontinue", "1"},
-            {"token", coderesult.Text}
-                },
-                postparams
-            );
+        postparams.Add("logintoken", token);
 
-            Tools.WriteDebug(
-                "API::Edit action/clientlogin2",
-                "Received ClientLogin continuation response.");
+        string result = HttpPost(
+            new()
+            {
+            { "action", "clientlogin" },
+            { "logincontinue", "1" },
+            { "token", coderesult.Text }
+            },
+            postparams);
 
-            clientLoginDocument = CheckForErrors(result);
+        Tools.WriteDebug(
+            "API::Edit action/clientlogin2",
+            "Received ClientLogin continuation response.");
 
-            clientLoginNode =
-                clientLoginDocument.SelectSingleNode("/api/clientlogin");
+        XmlNode clientLoginNode =
+            GetClientLoginResponseNode(result);
 
-            if (clientLoginNode == null)
-                throw new Exception("Cannot find <clientlogin> element");
-
-            status =
-                XmlResponseHelpers.RequireAttributeValue(
-                    clientLoginNode,
-                    "status").ToUpperInvariant();
-
-            if (status == "PASS")
-                return;
-
-            // If status is UI, the entered code was likely incorrect. We do not
-            // loop indefinitely because repeated attempts could become confusing.
-            // The API's message is server-localized, so preserve the existing
-            // generic LoginException behavior below.
-        }
-
-        throw new LoginException(this, status);
+        return GetClientLoginStatus(clientLoginNode);
     }
 
     /// <summary>
