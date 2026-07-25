@@ -4026,8 +4026,6 @@ public class ApiEdit : IApiEdit
         }
     }
 
-
-
     /// <summary>
     /// Begins a scoped cancellation context for modern task-based ApiEdit callers.
     ///
@@ -4372,139 +4370,170 @@ public class ApiEdit : IApiEdit
             CreateSafeXmlReaderSettings());
     }
 
-    // Checks the API response for an invalid page title.
-    //
-    // MediaWiki returns a <page> element with an "invalid" attribute
-    // when the requested title cannot be used or does not meet title rules.
-    private void ThrowIfInvalidTitle(System.Xml.XmlElement api)
+    /// <summary>
+    /// Throws when the API response reports an invalid page title.
+    /// </summary>
+    /// <param name="api">
+    /// The root API response element.
+    /// </param>
+    /// <exception cref="InvalidTitleException">
+    /// Thrown when MediaWiki marks the returned page element as invalid.
+    /// </exception>
+    private void ThrowIfInvalidTitle(XmlElement api)
     {
-        // Look for page elements in the API response.
-        System.Xml.XmlNodeList pages = api.GetElementsByTagName("page");
+        XmlNodeList pages =
+            api.GetElementsByTagName("page");
 
-        // No page element means there is no invalid-title response to handle.
         if (pages.Count == 0)
+            return;
+
+        XmlElement pageElement =
+            pages[0] as XmlElement;
+
+        if (pageElement == null ||
+            !pageElement.HasAttribute("invalid"))
         {
             return;
         }
 
-        // XmlNodeList contains XmlNode objects, so safely cast the first
-        // page node to an XmlElement before checking its attributes.
-        System.Xml.XmlElement pageElement =
-            pages[0] as System.Xml.XmlElement;
-
-        // Continue normal processing unless this page explicitly has
-        // MediaWiki's "invalid" response attribute.
-        if (pageElement == null || !pageElement.HasAttribute("invalid"))
-        {
-            return;
-        }
-
-        // GetAttribute returns an empty string if title is unexpectedly absent,
-        // avoiding a NullReferenceException from direct attribute access.
-        string title = pageElement.GetAttribute("title");
+        string title =
+            pageElement.GetAttribute("title");
 
         throw new InvalidTitleException(this, title);
     }
 
-    // Checks whether MediaWiki redirected the request to an interwiki target.
-    //
-    // AWB handles these separately because the requested action cannot proceed
-    // against the current wiki when the target belongs to another wiki.
-    private void ThrowIfInterwikiRedirect(System.Xml.XmlElement api)
+    /// <summary>
+    /// Throws when the API response contains an interwiki redirect.
+    /// </summary>
+    /// <param name="api">
+    /// The root API response element.
+    /// </param>
+    /// <exception cref="InterwikiException">
+    /// Thrown when the requested title resolves to another wiki.
+    /// </exception>
+    private void ThrowIfInterwikiRedirect(XmlElement api)
     {
         if (api.GetElementsByTagName("interwiki").Count > 0)
-        {
             throw new InterwikiException(this);
-        }
     }
 
-    // Checks whether the API rejected the request because an assertion failed.
-    //
-    // The most common current case is assert=user, which means the user is no
-    // longer logged in or the login session is no longer valid.
-    private void ThrowIfAssertionFailed(System.Xml.XmlElement actionElement)
+    /// <summary>
+    /// Throws when MediaWiki reports that an API assertion failed.
+    /// </summary>
+    /// <param name="actionElement">
+    /// The action-specific API response element.
+    /// </param>
+    /// <exception cref="LoggedOffException">
+    /// Thrown when the failed assertion indicates that the user is no longer
+    /// logged in.
+    /// </exception>
+    /// <exception cref="AssertionFailedException">
+    /// Thrown for any other failed assertion.
+    /// </exception>
+    private void ThrowIfAssertionFailed(
+        XmlElement actionElement)
     {
-        // No assert attribute means MediaWiki did not report an assertion failure.
         if (!actionElement.HasAttribute("assert"))
-        {
             return;
-        }
 
-        string assertion = actionElement.GetAttribute("assert");
+        string assertion =
+            actionElement.GetAttribute("assert");
 
-        // Preserve the existing specialized exception for a lost login session.
         if (assertion == "user")
-        {
             throw new LoggedOffException(this);
-        }
 
-        // Other assertion types are still useful to expose to the caller.
-        throw new AssertionFailedException(this, assertion);
+        throw new AssertionFailedException(
+            this,
+            assertion);
     }
 
-    // Checks whether the attempted edit matched the wiki's spam blacklist.
-    //
-    // The spamblacklist attribute typically contains the pattern or URL fragment
-    // that caused MediaWiki to reject the request.
-    private void ThrowIfSpamBlacklisted(System.Xml.XmlElement actionElement)
+    /// <summary>
+    /// Throws when MediaWiki reports that the attempted action matched the
+    /// wiki's spam blacklist.
+    /// </summary>
+    /// <param name="actionElement">
+    /// The action-specific API response element.
+    /// </param>
+    /// <exception cref="SpamlistException">
+    /// Thrown when the response contains a spam blacklist match.
+    /// </exception>
+    private void ThrowIfSpamBlacklisted(
+        XmlElement actionElement)
     {
         if (!actionElement.HasAttribute("spamblacklist"))
-        {
             return;
-        }
 
         throw new SpamlistException(
             this,
             actionElement.GetAttribute("spamblacklist"));
     }
 
-    // Checks whether MediaWiki requires a CAPTCHA response before it will
-    // complete the requested edit or action.
-    private void ThrowIfCaptchaRequired(System.Xml.XmlElement actionElement)
+    /// <summary>
+    /// Throws when MediaWiki requires a CAPTCHA before completing the action.
+    /// </summary>
+    /// <param name="actionElement">
+    /// The action-specific API response element.
+    /// </param>
+    /// <exception cref="CaptchaException">
+    /// Thrown when the API response contains a CAPTCHA challenge.
+    /// </exception>
+    private void ThrowIfCaptchaRequired(
+        XmlElement actionElement)
     {
         if (actionElement.GetElementsByTagName("captcha").Count > 0)
-        {
             throw new CaptchaException(this);
-        }
     }
 
-    // Checks the action result for an unsuccessful API response.
-    //
-    // Successful actions either have result="Success" or, for some response
-    // shapes, no result attribute at all. All other result values are treated
-    // as failed operations.
+    /// <summary>
+    /// Throws when the action-specific API response reports an unsuccessful
+    /// result.
+    /// </summary>
+    /// <param name="actionElement">
+    /// The action-specific API response element.
+    /// </param>
+    /// <param name="action">
+    /// The API action being validated.
+    /// </param>
+    /// <param name="xml">
+    /// The raw XML response used when reporting a general operation failure.
+    /// </param>
+    /// <exception cref="MediaWikiSaysNoException">
+    /// Thrown when the action was rejected by an AbuseFilter rule.
+    /// </exception>
+    /// <exception cref="OperationFailedException">
+    /// Thrown for any other unsuccessful action result.
+    /// </exception>
     private void ThrowIfActionFailed(
-        System.Xml.XmlElement actionElement,
+        XmlElement actionElement,
         string action,
         string xml)
     {
-        string result = actionElement.GetAttribute("result");
+        string result =
+            actionElement.GetAttribute("result");
 
-        // No result value, or an explicit Success value, means this method
-        // has nothing to reject.
-        if (string.IsNullOrEmpty(result) || result == "Success")
+        if (string.IsNullOrEmpty(result) ||
+            result == "Success")
         {
             return;
         }
 
-        // Read the MediaWiki error code once so it can be checked for
-        // specialized failures before falling back to a general exception.
-        string errorCode = actionElement.GetAttribute("code");
+        string errorCode =
+            actionElement.GetAttribute("code");
 
-        // AbuseFilter failures have a dedicated exception because the warning
-        // attribute contains the useful user-facing explanation.
         if (errorCode.IndexOf(
                 "abusefilter",
-                System.StringComparison.OrdinalIgnoreCase) >= 0)
+                StringComparison.OrdinalIgnoreCase) >= 0)
         {
             throw new MediaWikiSaysNoException(
                 this,
                 actionElement.GetAttribute("warning"));
         }
 
-        // Preserve the original general failure behavior for every other
-        // non-successful MediaWiki action response.
-        throw new OperationFailedException(this, action, result, xml);
+        throw new OperationFailedException(
+            this,
+            action,
+            result,
+            xml);
     }
 
     #endregion
