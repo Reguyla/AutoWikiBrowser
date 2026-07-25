@@ -1976,107 +1976,223 @@ public class ApiEdit : IApiEdit
             false);
     }
 
-    public void Move(string title, string newTitle, string reason, bool moveTalk, bool noRedirect, bool watch)
+    /// <summary>
+    /// Moves the specified page to a new title.
+    /// </summary>
+    /// <param name="title">The current title of the page.</param>
+    /// <param name="newTitle">The destination title for the page.</param>
+    /// <param name="reason">The reason for moving the page.</param>
+    /// <param name="moveTalk">
+    /// <see langword="true"/> to move the associated talk page; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="noRedirect">
+    /// <see langword="true"/> to suppress creation of a redirect; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="watch">
+    /// <see langword="true"/> to add the destination page to the watchlist;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when a required argument is null or empty, the target title is
+    /// invalid, or the source and target titles are the same.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the move token cannot be read from the API response.
+    /// </exception>
+    /// <exception cref="AbortedException">
+    /// Thrown when the operation has been aborted.
+    /// </exception>
+    public void Move(
+        string title,
+        string newTitle,
+        string reason,
+        bool moveTalk,
+        bool noRedirect,
+        bool watch)
     {
-        if (string.IsNullOrEmpty(title)) throw new ArgumentException("Page title required", "title");
-        if (string.IsNullOrEmpty(newTitle)) throw new ArgumentException("Target page title required", "newTitle");
-        if (string.IsNullOrEmpty(reason)) throw new ArgumentException("Page rename reason required", "reason");
+        ValidateMoveArguments(title, newTitle, reason);
 
-        if (title == newTitle) throw new ArgumentException("Page cannot be moved to the same title");
-
-        //Reset();
         Action = "move";
 
-        if (string.IsNullOrEmpty(Page.MoveToken))
-        {
-            string result = HttpGet(
-                new Dictionary<string, string>
-                {
-                    {"action", "query"},
-                    {"prop", "info"},
-                    {"meta", "tokens"}, // Since 1.24
-                    {"type", "csrf"},
-                    {"intoken", "move"}, // Pre 1.24 compat
-                    {"titles", title + "|" + newTitle}
-                },
-                ActionOptions.All);
+        EnsureMoveToken(title, newTitle);
 
-            XmlDocument document = CheckForErrors(result, "query");
+        if (Aborting)
+            throw new AbortedException(this);
 
-            try
-            {
-                XmlNode invalidPage =
-                    document.SelectSingleNode("/api/query/pages/page[@invalid]");
+        Dictionary<string, string> post = BuildMovePostData(
+            title,
+            newTitle,
+            reason,
+            moveTalk,
+            noRedirect,
+            watch);
 
-                if (invalidPage != null)
-                {
-                    throw new ApiException(
-                        this,
-                        "invalidnewtitle",
-                        new ArgumentException(
-                            "Target page invalid",
-                            "newTitle"));
-                }
+        var get = new Dictionary<string, string>
+    {
+        { "action", "move" }
+    };
 
-                XmlNode sourcePage =
-                    document.SelectSingleNode("/api/query/pages/page");
-
-                if (sourcePage == null)
-                    throw new Exception("Cannot find <page> element");
-
-                XmlNode tokenSource =
-                    document.SelectSingleNode("/api/query/tokens") ??
-                    sourcePage;
-
-                string tokenAttribute =
-                    tokenSource.Name == "tokens"
-                        ? "csrftoken"
-                        : "movetoken";
-
-                Page.MoveToken =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        tokenSource,
-                        tokenAttribute);
-            }
-            catch (ApiException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new BrokenXmlException(this, ex);
-            }
-        }
-
-        if (Aborting) throw new AbortedException(this);
-
-        var post = new Dictionary<string, string>
-        {
-            {"from", title},
-            {"to", newTitle},
-            {"token", Page.MoveToken},
-            {"reason", reason},
-            {"protections", ""},
-        };
-
-        post.AddIfTrue(moveTalk, "movetalk", null);
-        post.AddIfTrue(noRedirect, "noredirect", null);
-        //post.AddIfTrue(User.IsBot, "bot", null);
-        post.AddIfTrue(watch, "watch", null);
-
-        var result2 = HttpPost(
-            new Dictionary<string, string>
-            {
-                {"action", "move"}
-            },
+        string result = HttpPost(
+            get,
             post,
             ActionOptions.All);
 
-        CheckForErrors(result2, "move");
+        CheckForErrors(result, "move");
 
         Reset();
     }
 
+    /// <summary>
+    /// Validates the arguments required to move a page.
+    /// </summary>
+    private static void ValidateMoveArguments(
+    string title,
+    string newTitle,
+    string reason)
+    {
+        if (string.IsNullOrEmpty(title))
+        {
+            throw new ArgumentException(
+                "Page title required",
+                nameof(title));
+        }
+
+        if (string.IsNullOrEmpty(newTitle))
+        {
+            throw new ArgumentException(
+                "Target page title required",
+                nameof(newTitle));
+        }
+
+        if (string.IsNullOrEmpty(reason))
+        {
+            throw new ArgumentException(
+                "Page rename reason required",
+                nameof(reason));
+        }
+
+        if (title == newTitle)
+        {
+            throw new ArgumentException(
+                "Page cannot be moved to the same title");
+        }
+    }
+
+    /// <summary>
+    /// Ensures that a move token is available for the specified page.
+    /// </summary>
+    private void EnsureMoveToken(string title, string newTitle)
+    {
+        if (!string.IsNullOrEmpty(Page.MoveToken))
+            return;
+
+        string result = HttpGet(
+            new Dictionary<string, string>
+            {
+            { "action", "query" },
+            { "prop", "info" },
+            { "meta", "tokens" },     // MediaWiki 1.24+
+            { "type", "csrf" },
+            { "intoken", "move" },    // Pre-1.24 compatibility
+            { "titles", $"{title}|{newTitle}" }
+            },
+            ActionOptions.All);
+
+        XmlDocument document = CheckForErrors(result, "query");
+
+        try
+        {
+            ValidateMoveTarget(document);
+
+            Page.MoveToken = GetMoveToken(document);
+        }
+        catch (ApiException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new BrokenXmlException(this, ex);
+        }
+    }
+
+    /// <summary>
+    /// Verifies that the target title was accepted by the API.
+    /// </summary>
+    private void ValidateMoveTarget(XmlDocument document)
+    {
+        XmlNode invalidPage =
+            document.SelectSingleNode("/api/query/pages/page[@invalid]");
+
+        if (invalidPage == null)
+            return;
+
+        throw new ApiException(
+            this,
+            "invalidnewtitle",
+            new ArgumentException(
+                "Target page invalid",
+                "newTitle"));
+    }
+
+    /// <summary>
+    /// Reads the move token from a MediaWiki API response.
+    /// </summary>
+    private static string GetMoveToken(XmlDocument document)
+    {
+        XmlNode sourcePage =
+            document.SelectSingleNode("/api/query/pages/page");
+
+        if (sourcePage == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot find a <page> element in the API response.");
+        }
+
+        // MediaWiki 1.24+ returns the CSRF token in <tokens>.
+        // Older compatibility responses return movetoken on <page>.
+        XmlNode tokenSource =
+            document.SelectSingleNode("/api/query/tokens") ??
+            sourcePage;
+
+        string tokenAttribute =
+            tokenSource.Name == "tokens"
+                ? "csrftoken"
+                : "movetoken";
+
+        return XmlResponseHelpers.RequireAttributeValue(
+            tokenSource,
+            tokenAttribute);
+    }
+
+    /// <summary>
+    /// Builds the POST parameters for a page-move request.
+    /// </summary>
+    private Dictionary<string, string> BuildMovePostData(
+        string title,
+        string newTitle,
+        string reason,
+        bool moveTalk,
+        bool noRedirect,
+        bool watch)
+    {
+        var post = new Dictionary<string, string>
+    {
+        { "from", title },
+        { "to", newTitle },
+        { "token", Page.MoveToken },
+        { "reason", reason },
+        { "protections", string.Empty }
+    };
+
+        post.AddIfTrue(moveTalk, "movetalk", null);
+        post.AddIfTrue(noRedirect, "noredirect", null);
+        post.AddIfTrue(watch, "watch", null);
+
+        return post;
+    }
     #endregion
 
     #region Query Api
