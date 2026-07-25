@@ -2345,8 +2345,6 @@ public class ApiEdit : IApiEdit
         return post;
     }
 
-
-
     /// <summary>
     /// Deletes the specified page using the supplied deletion reason.
     /// </summary>
@@ -2363,79 +2361,177 @@ public class ApiEdit : IApiEdit
     public void Delete(string title, string reason) =>
         Delete(title, reason, false);
 
-    public void Delete(string title, string reason, bool watch)
+    /// <summary>
+    /// Deletes the specified page from the wiki.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to delete.
+    /// </param>
+    /// <param name="reason">
+    /// The reason to record in the deletion log.
+    /// </param>
+    /// <param name="watch">
+    /// <see langword="true"/> to add the deleted page to the watchlist;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="title"/> or <paramref name="reason"/> is empty.
+    /// </exception>
+    /// <exception cref="AbortedException">
+    /// Thrown when the operation is aborted before the deletion request is sent.
+    /// </exception>
+    public void Delete(
+        string title,
+        string reason,
+        bool watch)
     {
-        if (string.IsNullOrEmpty(title)) throw new ArgumentException("Page name required", "title");
-        if (string.IsNullOrEmpty(reason)) throw new ArgumentException("Deletion reason required", "reason");
+        if (string.IsNullOrEmpty(title))
+        {
+            throw new ArgumentException(
+                "Page name required",
+                nameof(title));
+        }
+
+        if (string.IsNullOrEmpty(reason))
+        {
+            throw new ArgumentException(
+                "Deletion reason required",
+                nameof(reason));
+        }
 
         // Reset();
         Action = "delete";
 
-        if (string.IsNullOrEmpty(Page.DeleteToken))
-        {
-            var result = HttpGet(
-                new Dictionary<string, string>
-                {
-                    {"action", "query"},
-                    {"prop", "info"},
-                    {"meta", "tokens"}, // Since 1.24
-                    {"type", "csrf"},
-                    {"intoken", "delete"}, // Pre 1.24 compat
-                    {"titles", title}
-                },
-                ActionOptions.All);
+        EnsureDeleteToken(title);
 
-            XmlDocument document = CheckForErrors(result);
+        if (Aborting)
+            throw new AbortedException(this);
 
-            try
+        Dictionary<string, string> post =
+            BuildDeletePostParameters(
+                title,
+                reason,
+                watch);
+
+        string result = HttpPost(
+            new()
             {
-                // MediaWiki 1.24+ returns the CSRF token in <tokens>.
-                // Older compatibility responses can return deletetoken on <page>.
-                XmlNode tokenSource =
-                    document.SelectSingleNode("/api/query/tokens") ??
-                    document.SelectSingleNode("/api/query/pages/page");
-
-                if (tokenSource == null)
-                    throw new Exception("Cannot find <tokens> or <page> element");
-
-                string tokenAttribute =
-                    tokenSource.Name == "tokens"
-                        ? "csrftoken"
-                        : "deletetoken";
-
-                Page.DeleteToken =
-                    XmlResponseHelpers.RequireAttributeValue(
-                        tokenSource,
-                        tokenAttribute);
-            }
-            catch (Exception ex)
-            {
-                throw new BrokenXmlException(this, ex);
-            }
-        }
-
-        if (Aborting) throw new AbortedException(this);
-
-        var post = new Dictionary<string, string>
-        {
-            {"title", title},
-            {"token", Page.DeleteToken},
-            {"reason", reason},
-        };
-
-        // post.AddIfTrue(User.IsBot, "bot", null);
-        post.AddIfTrue(watch, "watch", null);
-        var result2 = HttpPost(
-            new Dictionary<string, string>
-            {
-                {"action", "delete"}
+            { "action", "delete" }
             },
             post,
             ActionOptions.All);
 
-        CheckForErrors(result2);
+        CheckForErrors(result);
 
         Reset();
+    }
+
+    /// <summary>
+    /// Ensures that a deletion token is available for the specified page.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page that will be deleted.
+    /// </param>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the token response does not contain the expected XML structure.
+    /// </exception>
+    private void EnsureDeleteToken(string title)
+    {
+        if (!string.IsNullOrEmpty(Page.DeleteToken))
+            return;
+
+        string result = HttpGet(
+            new()
+            {
+            { "action", "query" },
+            { "prop", "info" },
+            { "meta", "tokens" },       // MediaWiki 1.24+
+            { "type", "csrf" },
+            { "intoken", "delete" },    // Pre-1.24 compatibility
+            { "titles", title }
+            },
+            ActionOptions.All);
+
+        XmlDocument document = CheckForErrors(result);
+
+        try
+        {
+            Page.DeleteToken = GetDeleteToken(document);
+        }
+        catch (Exception ex)
+        {
+            throw new BrokenXmlException(this, ex);
+        }
+    }
+
+    /// <summary>
+    /// Extracts a deletion token from a MediaWiki token response.
+    /// </summary>
+    /// <param name="document">
+    /// The validated API response document.
+    /// </param>
+    /// <returns>
+    /// The deletion token returned by the wiki.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown when the response contains neither a modern token element nor a
+    /// legacy page element.
+    /// </exception>
+    private static string GetDeleteToken(XmlDocument document)
+    {
+        // MediaWiki 1.24+ returns the CSRF token in <tokens>.
+        // Older compatibility responses can return deletetoken on <page>.
+        XmlNode tokenSource =
+            document.SelectSingleNode("/api/query/tokens") ??
+            document.SelectSingleNode("/api/query/pages/page");
+
+        if (tokenSource == null)
+        {
+            throw new Exception(
+                "Cannot find <tokens> or <page> element");
+        }
+
+        string tokenAttribute =
+            tokenSource.Name == "tokens"
+                ? "csrftoken"
+                : "deletetoken";
+
+        return XmlResponseHelpers.RequireAttributeValue(
+            tokenSource,
+            tokenAttribute);
+    }
+
+    /// <summary>
+    /// Builds the form parameters required by the delete API.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page to delete.
+    /// </param>
+    /// <param name="reason">
+    /// The reason to record in the deletion log.
+    /// </param>
+    /// <param name="watch">
+    /// <see langword="true"/> to add the page to the watchlist.
+    /// </param>
+    /// <returns>
+    /// The deletion request form parameters.
+    /// </returns>
+    private Dictionary<string, string> BuildDeletePostParameters(
+        string title,
+        string reason,
+        bool watch)
+    {
+        var post = new Dictionary<string, string>
+    {
+        { "title", title },
+        { "token", Page.DeleteToken },
+        { "reason", reason }
+    };
+
+        // post.AddIfTrue(User.IsBot, "bot", null);
+        post.AddIfTrue(watch, "watch", null);
+
+        return post;
     }
 
     /// <summary>
