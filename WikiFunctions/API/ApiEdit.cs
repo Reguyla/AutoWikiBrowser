@@ -3248,25 +3248,57 @@ public class ApiEdit : IApiEdit
 
     #region Wikitext operations
 
+    // TODO: Review whether URL expansion should use HTML parsing instead of
+    // exact string replacement when the preview pipeline is modernized.
+    /// <summary>
+    /// Converts wiki-relative and protocol-relative resource URLs in rendered HTML
+    /// to absolute HTTPS URLs.
+    /// </summary>
+    /// <param name="html">
+    /// The rendered HTML containing relative links and resource references.
+    /// </param>
+    /// <returns>
+    /// The HTML with supported relative URLs expanded.
+    /// </returns>
     private string ExpandRelativeUrls(string html)
     {
-        // wikilinks
-        html = html.Replace(@" href=""/wiki/", @" href=""" + Server + @"/wiki/");
+        // Wiki article links.
+        html = html.Replace(
+            @" href=""/wiki/",
+            $@" href=""{Server}/wiki/");
 
-        // relative links (to images, scripts etc.)
-        html = html.Replace(@" href=""/w/", @" href=""" + Server + @"/w/");
+        // Relative links to wiki resources such as stylesheets and scripts.
+        html = html.Replace(
+            @" href=""/w/",
+            $@" href=""{Server}/w/");
 
-        html = html.Replace(@" href=""//", @" href=""https://");
-        return html.Replace(@" src=""//", @" src=""https://");
+        // Protocol-relative links.
+        html = html.Replace(
+            @" href=""//",
+            @" href=""https://");
+
+        return html.Replace(
+            @" src=""//",
+            @" src=""https://");
     }
 
-    private static readonly Regex ExtractCssAndJs = new Regex(@"("
-                                                              + @"<!--\[if .*?-->"
-                                                              + @"|<style\b.*?>.*?</style>"
-                                                              + @"|<link rel=""stylesheet"".*?/\s?>"
-                                                              // + @"|<script type=""text/javascript"".*?</script>"
-                                                              + ")",
-        RegexOptions.Singleline | RegexOptions.Compiled);
+    /// <summary>
+    /// Matches conditional comments, embedded style blocks, and stylesheet links
+    /// that must be extracted from rendered wiki HTML.
+    /// </summary>
+    /// <remarks>
+    /// JavaScript extraction is currently disabled even though the historical field
+    /// name still refers to both CSS and JavaScript.
+    /// </remarks>
+    private static readonly Regex ExtractCssAndJs = new(
+        @"("
+        + @"<!--\[if .*?-->"
+        + @"|<style\b.*?>.*?</style>"
+        + @"|<link rel=""stylesheet"".*?/\s?>"
+        // + @"|<script type=""text/javascript"".*?</script>"
+        + ")",
+        RegexOptions.Singleline |
+        RegexOptions.Compiled);
 
     /// <summary>
     /// Loads wiki's UI HTML and scrapes everything we need to make correct previews
