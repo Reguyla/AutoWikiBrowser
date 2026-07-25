@@ -2197,53 +2197,88 @@ public class ApiEdit : IApiEdit
 
     #region Query Api
 
+    /// <summary>
+    /// Executes a MediaWiki query request and returns the raw XML response.
+    /// </summary>
+    /// <param name="queryParameters">
+    /// The query parameters to append to the API request.
+    /// </param>
+    /// <returns>
+    /// The raw XML response returned by the MediaWiki API.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="queryParameters"/> is null or empty.
+    /// </exception>
+    /// <exception cref="ApiException">
+    /// Thrown when the API response contains an error.
+    /// </exception>
     public string QueryApi(string queryParameters)
     {
-        if (string.IsNullOrEmpty(queryParameters))
-            throw new ArgumentException("queryParamters cannot be null/empty", "queryParamters");
+        ArgumentException.ThrowIfNullOrEmpty(queryParameters);
 
-        string result = HttpGet(ApiURL + "?action=query&format=xml&" + queryParameters);
-        //Should we be checking for maxlag?
+        string result = HttpGet(
+            $"{ApiURL}?action=query&format=xml&{queryParameters}");
 
         CheckForErrors(result, "query");
 
         return result;
     }
 
+    /// <summary>
+    /// Executes a MediaWiki query request and returns the raw JSON response.
+    /// </summary>
+    /// <param name="queryParameters">
+    /// The query parameters to append to the API request.
+    /// </param>
+    /// <returns>
+    /// The raw JSON response returned by the MediaWiki API.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="queryParameters"/> is null or empty.
+    /// </exception>
+    /// <remarks>
+    /// JSON API errors are not currently validated. The raw response is returned
+    /// unchanged to preserve existing behavior.
+    /// </remarks>
     public string QueryApiJson(string queryParameters)
     {
-        if (string.IsNullOrEmpty(queryParameters))
-            throw new ArgumentException("queryParamters cannot be null/empty", "queryParamters");
+        ArgumentException.ThrowIfNullOrEmpty(queryParameters);
 
-        string result = HttpGet(ApiURL + "?action=query&format=json&" + queryParameters);
-        // TODO: Validate JSON API errors, including maxlag, without changing the
-        // successful raw JSON response returned to callers.
-
-        return result;
+        return HttpGet(
+            $"{ApiURL}?action=query&format=json&{queryParameters}");
     }
 
     #endregion
 
-    #region Parse Api
-
+    /// <summary>
+    /// Executes a MediaWiki parse request and returns the raw XML response.
+    /// </summary>
+    /// <param name="queryParameters">
+    /// The parse parameters to send in the POST body.
+    /// </param>
+    /// <returns>
+    /// The raw XML response returned by the MediaWiki API.
+    /// </returns>
+    /// <exception cref="ApiException">
+    /// Thrown when the API response contains an error.
+    /// </exception>
     public string ParseApi(Dictionary<string, string> queryParameters)
     {
+        // TODO: Decide whether this generic API method should use the configured
+        // maxlag policy. Raw query-string methods currently bypass ActionOptions.
         string result = HttpPost(
             new Dictionary<string, string>
             {
-                {"action", "parse"},
-                {"format", "xml"},
-                {"prop", "text|displaytitle|langlinks|categories"}
+            { "action", "parse" },
+            { "format", "xml" },
+            { "prop", "text|displaytitle|langlinks|categories" }
             },
-            queryParameters); // TODO: Decide whether this generic API method should opt into the configured
-                              // Maxlag policy. Raw query-string methods currently bypass ActionOptions.
+            queryParameters);
 
         CheckForErrors(result, "parse");
 
         return result;
     }
-
-    #endregion
 
     #region Wikitext operations
 
@@ -2635,6 +2670,13 @@ public class ApiEdit : IApiEdit
         return new CancellationScope(this, cancellationToken);
     }
 
+    /// <summary>
+    /// Gets the cancellation token associated with the active modern API operation.
+    /// </summary>
+    /// <returns>
+    /// The active operation's cancellation token, or
+    /// <see cref="CancellationToken.None"/> when no cancellation scope is active.
+    /// </returns>
     private CancellationToken GetActiveCancellationToken()
     {
         lock (CancellationSyncRoot)
@@ -2645,6 +2687,22 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    /// <summary>
+    /// Registers cancellation of an HTTP request with the active modern operation.
+    /// </summary>
+    /// <param name="request">
+    /// The request to abort when cancellation is requested.
+    /// </param>
+    /// <returns>
+    /// A registration that must be disposed when the request completes, or
+    /// <see langword="null"/> when no cancellable token is active.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="request"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown when cancellation has already been requested.
+    /// </exception>
     private IDisposable RegisterRequestCancellation(HttpWebRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -2654,11 +2712,10 @@ public class ApiEdit : IApiEdit
         if (!cancellationToken.CanBeCanceled)
             return null;
 
-        if (cancellationToken.IsCancellationRequested)
-            throw new OperationCanceledException(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
 
         return cancellationToken.Register(
-            delegate
+            () =>
             {
                 try
                 {
@@ -2676,6 +2733,16 @@ public class ApiEdit : IApiEdit
             });
     }
 
+    /// <summary>
+    /// Converts a canceled HTTP request into the appropriate cancellation exception.
+    /// </summary>
+    /// <param name="ex">The exception raised by the HTTP request.</param>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown when the active modern cancellation token requested cancellation.
+    /// </exception>
+    /// <exception cref="AbortedException">
+    /// Thrown when the request was canceled by the legacy abort mechanism.
+    /// </exception>
     private void ThrowIfModernRequestCancellation(WebException ex)
     {
         if (ex == null || ex.Status != WebExceptionStatus.RequestCanceled)
@@ -2689,18 +2756,33 @@ public class ApiEdit : IApiEdit
         throw new AbortedException(this);
     }
 
+    /// <summary>
+    /// Temporarily associates a cancellation token with an <see cref="ApiEdit"/>
+    /// operation and restores the previous cancellation state when disposed.
+    /// </summary>
     private sealed class CancellationScope : IDisposable
     {
         private ApiEdit Editor;
         private readonly bool PreviousScopeActive;
         private readonly CancellationToken PreviousCancellationToken;
 
+        /// <summary>
+        /// Initializes a new cancellation scope.
+        /// </summary>
+        /// <param name="editor">
+        /// The API editor whose cancellation state will be updated.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token to associate with the scope.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="editor"/> is <see langword="null"/>.
+        /// </exception>
         public CancellationScope(
             ApiEdit editor,
             CancellationToken cancellationToken)
         {
-            if (editor == null)
-                throw new ArgumentNullException("editor");
+            ArgumentNullException.ThrowIfNull(editor);
 
             Editor = editor;
 
@@ -2714,6 +2796,9 @@ public class ApiEdit : IApiEdit
             }
         }
 
+        /// <summary>
+        /// Restores the cancellation state that was active before this scope began.
+        /// </summary>
         public void Dispose()
         {
             ApiEdit editor = Editor;
@@ -3039,21 +3124,60 @@ public class ApiEdit : IApiEdit
     #endregion
 }
 
+/// <summary>
+/// Specifies how an operation should affect the watchlist status of a page.
+/// </summary>
 public enum WatchOptions
 {
+    /// <summary>
+    /// Leave the current watchlist status unchanged.
+    /// </summary>
     NoChange,
+
+    /// <summary>
+    /// Use the watchlist behavior configured in the user's preferences.
+    /// </summary>
     UsePreferences,
+
+    /// <summary>
+    /// Add the page to the watchlist.
+    /// </summary>
     Watch,
+
+    /// <summary>
+    /// Remove the page from the watchlist.
+    /// </summary>
     Unwatch
 }
 
+/// <summary>
+/// Specifies optional behaviors applied when executing an API request.
+/// </summary>
 [Flags]
 public enum ActionOptions
 {
+    /// <summary>
+    /// No additional processing.
+    /// </summary>
     None = 0,
+
+    /// <summary>
+    /// Check the server's maxlag status before executing the request.
+    /// </summary>
     CheckMaxlag = 1,
+
+    /// <summary>
+    /// Ensure the user is logged in before executing the request.
+    /// </summary>
     RequireLogin = 2,
+
+    /// <summary>
+    /// Check for new user messages after the request completes.
+    /// </summary>
     CheckNewMessages = 4,
 
+    /// <summary>
+    /// Enable all available request behaviors.
+    /// </summary>
     All = CheckMaxlag | RequireLogin | CheckNewMessages
 }
