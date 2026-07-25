@@ -433,6 +433,9 @@ public class ApiEdit : IApiEdit
         return "&" + paramName + "=" + string.Join("|", encodedTitles);
     }
 
+    // TODO (Request Construction):
+    // Consider returning a new request dictionary rather than mutating the
+    // supplied collection once request construction is centralized.
     /// <summary>
     /// Adds the selected API behavior parameters to the request.
     /// </summary>
@@ -467,6 +470,9 @@ public class ApiEdit : IApiEdit
         AppendNewMessageOptions(request);
     }
 
+    // TODO (Request Construction):
+    // Review whether these parameters should merge with existing values rather than
+    // assuming they are absent from every query request.
     /// <summary>
     /// Adds the API parameters required to check for new messages and
     /// notifications.
@@ -492,6 +498,9 @@ public class ApiEdit : IApiEdit
         request.Add("notprop", "count");
     }
 
+    // TODO (Networking Modernization):
+    // Review thread safety if ApiEdit begins creating requests concurrently.
+    // The current Dictionary assumes single-threaded proxy cache access.
     /// <summary>
     /// Builds the URL for an XML API request using the specified action options.
     /// </summary>
@@ -548,10 +557,10 @@ public class ApiEdit : IApiEdit
     /// </summary>
     private IWebProxy ProxySettings;
 
-    // TODO: Review the User-Agent format during the HttpWebRequest-to-HttpClient
-    // migration. Verify that the ".NET CLR" identifier and Environment.Version
-    // accurately represent the runtime on modern .NET versions while preserving
-    // any compatibility expectations for MediaWiki or downstream consumers.
+    // TODO (HTTP Modernization):
+    // Review the generated User-Agent once the legacy HttpWebRequest pipeline is
+    // removed. Verify that the runtime identifier accurately reflects modern .NET
+    // while preserving any MediaWiki compatibility expectations.
     /// <summary>
     /// Identifies WikiFunctions, the host operating system, and the active
     /// .NET runtime in outgoing HTTP requests.
@@ -627,6 +636,9 @@ public class ApiEdit : IApiEdit
     {
         ServicePointManager.Expect100Continue = false;
 
+        // TODO (HTTP Modernization):
+        // Re-evaluate whether explicit ServicePointManager configuration remains
+        // necessary after the HttpClient migration.
         ServicePointManager.SecurityProtocol |=
             SecurityProtocolType.Tls11 |
             SecurityProtocolType.Tls12 |
@@ -674,6 +686,8 @@ public class ApiEdit : IApiEdit
     /// <summary>
     /// Attaches the session cookie container only to requests targeting the
     /// current wiki, preventing cookies from being sent to third-party sites.
+    /// Cookies intentionally withheld from requests targeting 
+    /// other hosts to avoid leaking authenticated session cookies.
     /// </summary>
     private void ConfigureCookies(
         HttpWebRequest request,
@@ -784,9 +798,7 @@ public class ApiEdit : IApiEdit
         {
             ThrowIfModernRequestCancellation(ex);
 
-            var resp = (HttpWebResponse)ex.Response;
-
-            if (resp == null)
+            if (ex.Response is not HttpWebResponse resp)
                 throw;
 
             switch (resp.StatusCode)
@@ -830,16 +842,16 @@ public class ApiEdit : IApiEdit
             return req;
         }
 
-        var login = new NetworkCredential
+        NetworkCredential login = new()
         {
             UserName = Variables.HttpAuthUsername,
             Password = Variables.HttpAuthPassword
         };
 
-        var myCache = new CredentialCache
-        {
-            { new Uri(URL), "Basic", login }
-        };
+        CredentialCache myCache = new()
+    {
+        { new Uri(URL), "Basic", login }
+    };
 
         req.Credentials = myCache;
 
@@ -961,12 +973,18 @@ public class ApiEdit : IApiEdit
         foreach (KeyValuePair<string, string> parameter in parameters)
         {
             safeCopy[parameter.Key] = IsSensitiveParameter(parameter.Key)
-                ? "<removed>"
+                ? "<redacted>"
                 : parameter.Value;
         }
 
         return safeCopy;
     }
+
+    // =====================================================
+    // TODO (Request Construction):
+    // Consider extracting the low-level request-building helpers into a dedicated
+    // MediaWiki request builder once the HttpClient migration is complete.
+    // =====================================================
 
     /// <summary>
     /// Determines whether a request parameter name is likely to contain a
