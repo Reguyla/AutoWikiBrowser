@@ -2940,10 +2940,23 @@ public class ApiEdit : IApiEdit
     /// <summary>
     /// Validates the arguments required to move a page.
     /// </summary>
+    /// <param name="title">
+    /// The current title of the page.
+    /// </param>
+    /// <param name="newTitle">
+    /// The destination title for the page.
+    /// </param>
+    /// <param name="reason">
+    /// The reason to record in the move log.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when a required argument is empty or the source and destination
+    /// titles are identical.
+    /// </exception>
     private static void ValidateMoveArguments(
-    string title,
-    string newTitle,
-    string reason)
+        string title,
+        string newTitle,
+        string reason)
     {
         if (string.IsNullOrEmpty(title))
         {
@@ -2969,37 +2982,55 @@ public class ApiEdit : IApiEdit
         if (title == newTitle)
         {
             throw new ArgumentException(
-                "Page cannot be moved to the same title");
+                "Page cannot be moved to the same title",
+                nameof(newTitle));
         }
     }
 
     /// <summary>
-    /// Ensures that a move token is available for the specified page.
+    /// Ensures that a move token is available for the specified page and validates
+    /// that the requested destination can be used.
     /// </summary>
-    private void EnsureMoveToken(string title, string newTitle)
+    /// <param name="title">
+    /// The current title of the page.
+    /// </param>
+    /// <param name="newTitle">
+    /// The proposed destination title.
+    /// </param>
+    /// <exception cref="ApiException">
+    /// Thrown when the API reports that the move target is invalid.
+    /// </exception>
+    /// <exception cref="BrokenXmlException">
+    /// Thrown when the token response does not contain the expected XML structure.
+    /// </exception>
+    private void EnsureMoveToken(
+        string title,
+        string newTitle)
     {
         if (!string.IsNullOrEmpty(Page.MoveToken))
             return;
 
         string result = HttpGet(
-            new Dictionary<string, string>
+            new()
             {
             { "action", "query" },
             { "prop", "info" },
-            { "meta", "tokens" },     // MediaWiki 1.24+
+            { "meta", "tokens" },      // MediaWiki 1.24+
             { "type", "csrf" },
-            { "intoken", "move" },    // Pre-1.24 compatibility
+            { "intoken", "move" },     // Pre-1.24 compatibility
             { "titles", $"{title}|{newTitle}" }
             },
             ActionOptions.All);
 
-        XmlDocument document = CheckForErrors(result, "query");
+        XmlDocument document =
+            CheckForErrors(result, "query");
 
         try
         {
             ValidateMoveTarget(document);
 
-            Page.MoveToken = GetMoveToken(document);
+            Page.MoveToken =
+                GetMoveToken(document);
         }
         catch (ApiException)
         {
@@ -3012,8 +3043,14 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// Verifies that the target title was accepted by the API.
+    /// Verifies that the proposed move target was accepted by the API.
     /// </summary>
+    /// <param name="document">
+    /// The validated API response containing information about the requested move.
+    /// </param>
+    /// <exception cref="ApiException">
+    /// Thrown when the API reports that the destination title is invalid.
+    /// </exception>
     private void ValidateMoveTarget(XmlDocument document)
     {
         XmlNode invalidPage =
@@ -3033,6 +3070,15 @@ public class ApiEdit : IApiEdit
     /// <summary>
     /// Reads the move token from a MediaWiki API response.
     /// </summary>
+    /// <param name="document">
+    /// The validated API response containing the move token.
+    /// </param>
+    /// <returns>
+    /// The CSRF or legacy move token returned by the wiki.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response does not contain the expected page element.
+    /// </exception>
     private static string GetMoveToken(XmlDocument document)
     {
         XmlNode sourcePage =
@@ -3061,8 +3107,30 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// Builds the POST parameters for a page-move request.
+    /// Builds the POST parameters required for a page move request.
     /// </summary>
+    /// <param name="title">
+    /// The current title of the page.
+    /// </param>
+    /// <param name="newTitle">
+    /// The destination title for the page.
+    /// </param>
+    /// <param name="reason">
+    /// The reason to record in the move log.
+    /// </param>
+    /// <param name="moveTalk">
+    /// <see langword="true"/> to move the associated talk page when possible.
+    /// </param>
+    /// <param name="noRedirect">
+    /// <see langword="true"/> to suppress creation of a redirect from the
+    /// original title.
+    /// </param>
+    /// <param name="watch">
+    /// <see langword="true"/> to add the moved page to the watchlist.
+    /// </param>
+    /// <returns>
+    /// The form parameters required by the MediaWiki move API.
+    /// </returns>
     private Dictionary<string, string> BuildMovePostData(
         string title,
         string newTitle,
@@ -3077,6 +3145,11 @@ public class ApiEdit : IApiEdit
         { "to", newTitle },
         { "token", Page.MoveToken },
         { "reason", reason },
+
+        // TODO: Verify whether the "protections" parameter is still required for
+        // modern MediaWiki versions or retained solely for legacy compatibility.
+        /// Required by the MediaWiki API, even when no protection changes
+        /// are being requested.
         { "protections", string.Empty }
     };
 
