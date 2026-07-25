@@ -368,60 +368,101 @@ public class ApiEdit : IApiEdit
     }
 
     /// <summary>
-    /// 
+    /// Adds the selected API behavior parameters to the request.
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="options"></param>
-    protected void AppendOptions(Dictionary<string, string> request, ActionOptions options)
+    /// <param name="request">
+    /// The request parameters to update.
+    /// </param>
+    /// <param name="options">
+    /// The optional behaviors to apply to the request.
+    /// </param>
+    /// <remarks>
+    /// This method modifies <paramref name="request"/> directly. Maxlag and login
+    /// assertion parameters are added when requested. New-message properties are
+    /// added only to query requests.
+    /// </remarks>
+    protected void AppendOptions(
+        Dictionary<string, string> request,
+        ActionOptions options)
     {
-        if ((options & ActionOptions.CheckMaxlag) > 0 && Maxlag > 0)
-        {
+        if ((options & ActionOptions.CheckMaxlag) != 0 && Maxlag > 0)
             request.Add("maxlag", Maxlag.ToString());
-        }
 
-        if ((options & ActionOptions.RequireLogin) > 0)
-        {
+        if ((options & ActionOptions.RequireLogin) != 0)
             request.Add("assert", "user");
+
+        if (!request.TryGetValue("action", out string action) ||
+            action != "query" ||
+            (options & ActionOptions.CheckNewMessages) == 0)
+        {
+            return;
         }
 
-        if (request.ContainsKey("action") && request["action"] == "query"
-            && ((options & ActionOptions.CheckNewMessages) > 0))
-        {
-            if (request.ContainsKey("meta"))
-            {
-                request["meta"] += "|userinfo";
-            }
-            else
-            {
-                request.Add("meta", "userinfo");
-            }
-            if (Variables.NotificationsEnabled && User.HasReadNotificationsRight())
-            {
-                request["meta"] += "|notifications";
-            }
-            request.Add("uiprop", "hasmsg");
-            request.Add("notprop", "count");
-        }
+        AppendNewMessageOptions(request);
     }
 
     /// <summary>
-    /// 
+    /// Adds the API parameters required to check for new messages and
+    /// notifications.
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    protected string BuildUrl(Dictionary<string, string> request, ActionOptions options)
+    /// <param name="request">
+    /// The query request parameters to update.
+    /// </param>
+    private void AppendNewMessageOptions(
+        Dictionary<string, string> request)
+    {
+        if (request.TryGetValue("meta", out string meta))
+            request["meta"] = meta + "|userinfo";
+        else
+            request.Add("meta", "userinfo");
+
+        if (Variables.NotificationsEnabled &&
+            User.HasReadNotificationsRight())
+        {
+            request["meta"] += "|notifications";
+        }
+
+        request.Add("uiprop", "hasmsg");
+        request.Add("notprop", "count");
+    }
+
+    /// <summary>
+    /// Builds the URL for an XML API request using the specified action options.
+    /// </summary>
+    /// <param name="request">
+    /// The request parameters to include in the URL.
+    /// </param>
+    /// <param name="options">
+    /// The optional behaviors whose parameters should be added to the request.
+    /// </param>
+    /// <returns>
+    /// The complete MediaWiki API URL.
+    /// </returns>
+    /// <remarks>
+    /// This method modifies <paramref name="request"/> by passing it to
+    /// <see cref="AppendOptions(Dictionary{string, string}, ActionOptions)"/>.
+    /// </remarks>
+    protected string BuildUrl(
+        Dictionary<string, string> request,
+        ActionOptions options)
     {
         AppendOptions(request, options);
-        return ApiURL + "?format=xml" + BuildQuery(request);
+
+        return $"{ApiURL}?format=xml{BuildQuery(request)}";
     }
 
     /// <summary>
-    /// 
+    /// Builds the URL for an XML API request without adding optional behavior
+    /// parameters.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    protected string BuildUrl(Dictionary<string, string> request)
+    /// <param name="request">
+    /// The request parameters to include in the URL.
+    /// </param>
+    /// <returns>
+    /// The complete MediaWiki API URL.
+    /// </returns>
+    protected string BuildUrl(
+        Dictionary<string, string> request)
     {
         return BuildUrl(request, ActionOptions.None);
     }
@@ -430,13 +471,29 @@ public class ApiEdit : IApiEdit
 
     #region Network access
 
-    private static readonly Dictionary<string, IWebProxy> ProxyCache = new Dictionary<string, IWebProxy>();
+    /// <summary>
+    /// Caches proxy instances by their configuration key so equivalent proxy
+    /// settings can reuse the same <see cref="IWebProxy"/> instance.
+    /// </summary>
+    private static readonly Dictionary<string, IWebProxy> ProxyCache = new();
+
+    /// <summary>
+    /// Stores the proxy configuration used for outgoing API requests.
+    /// </summary>
     private IWebProxy ProxySettings;
 
-    private static readonly string UserAgent = string.Format("WikiFunctions ApiEdit/{0} ({1}; .NET CLR {2})",
-        Assembly.GetExecutingAssembly().GetName().Version,
-        Environment.OSVersion.VersionString,
-        Environment.Version);
+    // TODO: Review the User-Agent format during the HttpWebRequest-to-HttpClient
+    // migration. Verify that the ".NET CLR" identifier and Environment.Version
+    // accurately represent the runtime on modern .NET versions while preserving
+    // any compatibility expectations for MediaWiki or downstream consumers.
+    /// <summary>
+    /// Identifies WikiFunctions, the host operating system, and the active
+    /// .NET runtime in outgoing HTTP requests.
+    /// </summary>
+
+    private static readonly string UserAgent =
+        $"WikiFunctions ApiEdit/{Assembly.GetExecutingAssembly().GetName().Version} " +
+        $"({Environment.OSVersion.VersionString}; .NET CLR {Environment.Version})";
 
     /// <summary>
     /// Creates a configured HTTP request message.
@@ -593,11 +650,42 @@ public class ApiEdit : IApiEdit
                && requestUri.Port == wikiUri.Port;
     }
 
+    /// <summary>
+    /// Indicates whether a legacy API request is currently being aborted.
+    /// </summary>
+    /// <remarks>
+    /// This flag is used by the existing synchronous request workflow to
+    /// distinguish an explicit abort from cancellation requested through a
+    /// modern <see cref="CancellationToken"/>.
+    /// </remarks>
     private bool Aborting;
+
+    /// <summary>
+    /// Stores the currently active legacy HTTP request so it can be aborted.
+    /// </summary>
+    /// <remarks>
+    /// The request is shared with the legacy abort workflow and may be
+    /// <see langword="null"/> when no request is active.
+    /// </remarks>
+    // TODO: Review this field during the HttpWebRequest-to-HttpClient migration.
+    // Replace direct request storage and HttpWebRequest.Abort() with cooperative
+    // cancellation through CancellationToken where possible.
     private HttpWebRequest Request;
 
-    private readonly object CancellationSyncRoot = new object();
+    /// <summary>
+    /// Synchronizes access to the active cancellation-scope state.
+    /// </summary>
+    private readonly object CancellationSyncRoot = new();
+
+    /// <summary>
+    /// Indicates whether a modern cancellation scope is currently active.
+    /// </summary>
     private bool CancellationScopeActive;
+
+    /// <summary>
+    /// Stores the cancellation token associated with the active modern request
+    /// scope.
+    /// </summary>
     private CancellationToken ActiveCancellationToken;
 
     /// <summary>
@@ -679,7 +767,20 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    /// <summary>
+    /// Stores the POST parameters from the most recent API request.
+    /// </summary>
+    /// <remarks>
+    /// Retained for diagnostics, logging, or retry scenarios.
+    /// </remarks>
     private Dictionary<string, string> lastPostParameters;
+
+    /// <summary>
+    /// Stores the URL used for the most recent HTTP GET request.
+    /// </summary>
+    /// <remarks>
+    /// Retained for diagnostics, logging, or retry scenarios.
+    /// </remarks>
     private string lastGetUrl;
 
     /// <summary>
