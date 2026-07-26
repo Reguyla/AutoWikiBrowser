@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using WikiFunctions.API;
@@ -1234,37 +1235,65 @@ public partial class ListMaker : UserControl, IList<Article>
         Tools.Copy(lbArticles);
     }
 
+    /// <summary>
+    /// Pastes article titles from the clipboard into the article list.
+    /// </summary>
+    /// <remarks>
+    /// Clipboard text may contain article titles separated by line breaks or pipe
+    /// characters. Each title is normalized, stripped of wiki syntax, and adjusted
+    /// for the current wiki's capitalization rules before being added.
+    /// </remarks>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (!Clipboard.ContainsText(TextDataFormat.UnicodeText))
+            return;
+
         try
         {
-            object obj = Clipboard.GetDataObject();
-            if (obj == null)
+            string clipboardText = Clipboard.GetText(TextDataFormat.UnicodeText);
+
+            List<Article> newArticles = new();
+
+            foreach (string entry in clipboardText.Split(
+                         new[] { "\r\n", "\n", "|" },
+                         StringSplitOptions.RemoveEmptyEntries))
+            {
+                string title = entry.Trim();
+
+                if (title.Length == 0)
+                    continue;
+
+                title = NormalizeTitle(title);
+                title = Tools.RemoveSyntax(title);
+
+                if (Variables.CapitalizeFirstLetter)
+                    title = Tools.TurnFirstToUpper(title);
+
+                if (title.Length > 0)
+                    newArticles.Add(new Article(title));
+            }
+
+            if (newArticles.Count == 0)
                 return;
 
-            string textTba = ((IDataObject)obj).GetData(DataFormats.UnicodeText).ToString();
-
-            List<Article> NewArticles = new List<Article>();
-
-            foreach (string entry in textTba.Split(new[] { "\r\n", "\n", "|" }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                if (!string.IsNullOrEmpty(entry.Trim()))
-                {
-                    string s = NormalizeTitle(entry);
-                    s = Tools.RemoveSyntax(s);
-
-                    if (Variables.CapitalizeFirstLetter)
-                        s = Tools.TurnFirstToUpper(s);
-                    NewArticles.Add(new Article(s));
-                }
-            }
             lbArticles.BeginUpdate();
-            Add(NewArticles);
 
+            try
+            {
+                Add(newArticles);
+            }
+            finally
+            {
+                lbArticles.EndUpdate();
+            }
         }
-        catch
-        { }
-        lbArticles.EndUpdate();
+        catch (ExternalException)
+        {
+            // The clipboard can be temporarily unavailable when another process
+            // has it open. Leave the current article list unchanged.
+        }
     }
 
     private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
