@@ -20,6 +20,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Serialization;
 
 namespace WikiFunctions.ReplaceSpecial;
 
@@ -848,36 +849,68 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     #region Serialize/Deserialize for Clipboard work
     //Base code from http://www.dotnetjohn.com/articles.aspx?articleid=173
 
-    private string Serialize(IRule rule)
+    /// <summary>
+    /// Serializes a replacement rule to its XML clipboard representation.
+    /// </summary>
+    /// <param name="rule">The replacement rule to serialize.</param>
+    /// <returns>
+    /// An XML string containing the serialized replacement rule.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="rule"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the rule cannot be serialized.
+    /// </exception>
+    private static string Serialize(IRule rule)
     {
-        System.IO.MemoryStream memoryStream = new System.IO.MemoryStream();
-        System.Xml.Serialization.XmlSerializer xs = new System.Xml.Serialization.XmlSerializer(typeof(IRule));
-        XmlTextWriter xmlTextWriter = new XmlTextWriter(memoryStream, Encoding.UTF8);
-        xs.Serialize(xmlTextWriter, rule);
-        memoryStream = (System.IO.MemoryStream)xmlTextWriter.BaseStream;
+        ArgumentNullException.ThrowIfNull(rule);
 
-        return UTF8ByteArrayToString(memoryStream.ToArray());
+        var serializer = new XmlSerializer(typeof(IRule));
+
+        using var stream = new MemoryStream();
+
+        using (var writer = new XmlTextWriter(stream, Encoding.UTF8))
+        {
+            serializer.Serialize(writer, rule);
+        }
+
+        return Encoding.UTF8.GetString(stream.ToArray());
     }
 
-    public IRule Deserialize(string pXmlizedString)
+    /// <summary>
+    /// Deserializes a replacement rule from its XML clipboard representation.
+    /// </summary>
+    /// <param name="serializedRule">
+    /// The XML representation of the replacement rule.
+    /// </param>
+    /// <returns>The deserialized replacement rule.</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="serializedRule"/> is null, empty, or whitespace.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the supplied text is not valid replacement-rule XML.
+    /// </exception>
+    private static IRule Deserialize(string serializedRule)
     {
-        if (!pXmlizedString.Contains("<?xml"))
-            return null;
+        ArgumentException.ThrowIfNullOrWhiteSpace(serializedRule);
 
-        System.Xml.Serialization.XmlSerializer xs = new System.Xml.Serialization.XmlSerializer(typeof(IRule));
-        System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(StringToUTF8ByteArray(pXmlizedString));
+        if (!serializedRule.Contains(
+                "<?xml",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "The supplied text is not an XML replacement rule.");
+        }
 
-        return (IRule)xs.Deserialize(memoryStream);
-    }
+        var serializer = new XmlSerializer(typeof(IRule));
 
-    private static string UTF8ByteArrayToString(byte[] characters)
-    {
-        return (new UTF8Encoding().GetString(characters));
-    }
+        using var stream = new MemoryStream(
+            Encoding.UTF8.GetBytes(serializedRule));
 
-    private static byte[] StringToUTF8ByteArray(string pXmlString)
-    {
-        return (new UTF8Encoding().GetBytes(pXmlString));
+        return serializer.Deserialize(stream) as IRule
+            ?? throw new InvalidOperationException(
+                "The supplied XML does not contain a valid replacement rule.");
     }
     #endregion
 }
