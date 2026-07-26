@@ -520,17 +520,13 @@ public partial class Parsers
         }
 
         // {{sv icon}} -> sv in language=
+        newValue = NormalizeCitationLanguageTemplate(newValue, lang);
+
         if (lang.Contains("{{"))
-        {
-            newValue = LangTemplate.Replace(newValue, "$1$3");
             lang = Tools.GetTemplateParameterValue(newValue, "language");
-        }
 
         // remove italics for work field for book/periodical, but not website -- auto italicized by template
-        if (TheWork.Contains("''") && !TheWork.Contains("."))
-            newValue = WorkInItalics.Replace(newValue, "$1$2");
-
-        newValue = NormalizeCitationTitleQuotes(newValue, paramsFound);
+        newValue = RemoveRedundantCitationWorkItalics(newValue, TheWork);
 
         // page= and pages= fields don't need p. or pp. in them when nopp not set
         if ((pages.Contains("p") || page.Contains("p")) &&
@@ -926,6 +922,55 @@ public partial class Parsers
         }
 
         return template + " " + deadLink;
+    }
+
+    /// <summary>
+    /// Replaces a language icon template in the citation language parameter
+    /// with its corresponding language code.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="language">
+    /// The current value of the language parameter.
+    /// </param>
+    /// <returns>
+    /// The citation template with any supported language icon converted to
+    /// its language code.
+    /// </returns>
+    private static string NormalizeCitationLanguageTemplate(
+        string template,
+        string language)
+    {
+        if (!language.Contains("{{"))
+            return template;
+
+        return LangTemplate.Replace(template, "$1$3");
+    }
+
+    /// <summary>
+    /// Removes manually applied italics from a citation work parameter when
+    /// the citation template will apply the formatting automatically.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="work">
+    /// The current value of the work parameter.
+    /// </param>
+    /// <returns>
+    /// The citation template with unnecessary work-field italics removed.
+    /// </returns>
+    private static string RemoveRedundantCitationWorkItalics(
+        string template,
+        string work)
+    {
+        // Book and periodical work names are italicized automatically by the
+        // citation template. Preserve the existing website-related exception.
+        if (work.Contains("''") && !work.Contains("."))
+            return WorkInItalics.Replace(template, "$1$2");
+
+        return template;
     }
     #endregion
 
