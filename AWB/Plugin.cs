@@ -157,90 +157,257 @@ internal static class Plugin
 
             foreach (string pluginFile in candidatePlugins)
             {
-                Assembly assembly;
-
-                try
-                {
-                    // TODO:
-                    // Replace direct Assembly.LoadFile loading with a
-                    // controlled AssemblyLoadContext that shares AWB
-                    // contract assemblies and resolves plugin-local
-                    // dependencies predictably.
-                    assembly = Assembly.LoadFile(pluginFile);
-                }
-                catch (NotSupportedException ex)
-                {
-                    // Windows may block assemblies downloaded from another
-                    // computer until the file is explicitly unblocked.
-                    AddFailedAssembly(pluginFile);
-
-                    Tools.WriteDebug(
-                        pluginFile,
-                        ex.ToString());
-
-                    continue;
-                }
-                catch (Exception ex)
-                {
-                    Tools.WriteDebug(
-                        pluginFile,
-                        ex.ToString());
-
-                    continue;
-                }
-
-                try
-                {
-                    LoadPluginTypes(
-                        assembly,
-                        pluginFile,
-                        awb,
-                        afterStartup);
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    PluginObsolete(
-                        pluginFile,
-                        GetAssemblyVersion(assembly));
-
-                    LogLoaderExceptions(
-                        pluginFile,
-                        ex);
-                }
-                catch (MissingMemberException ex)
-                {
-                    PluginObsolete(
-                        pluginFile,
-                        GetAssemblyVersion(assembly));
-
-                    Tools.WriteDebug(
-                        pluginFile,
-                        ex.ToString());
-                }
-                catch (Exception ex)
-                {
-                    ErrorHandler.HandleException(ex);
-                }
+                LoadPluginAssembly(
+                    pluginFile,
+                    awb,
+                    afterStartup);
             }
         }
         catch (Exception ex)
         {
-#if DEBUG
-            ErrorHandler.HandleException(ex);
-#else
-            Tools.WriteDebug(
-                nameof(LoadPlugins),
-                ex.ToString());
-
-            MessageBox.Show(
-                ex.Message,
-                "Problem loading plugins",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-#endif
+            HandlePluginLoadingFailure(ex);
         }
     }
 
+    /// <summary>
+    /// Loads and processes a single candidate plugin assembly.
+    /// </summary>
+    /// <param name="pluginFile">
+    /// The path to the plugin assembly.
+    /// </param>
+    /// <param name="awb">
+    /// The active AWB application instance.
+    /// </param>
+    /// <param name="afterStartup">
+    /// Whether the plugin is being loaded after application startup.
+    /// </param>
+    private static void LoadPluginAssembly(
+        string pluginFile,
+        IAutoWikiBrowser awb,
+        bool afterStartup)
+    {
+        if (!TryLoadPluginAssembly(
+                pluginFile,
+                out Assembly assembly))
+        {
+            return;
+        }
+
+        TryLoadPluginTypes(
+            assembly,
+            pluginFile,
+            awb,
+            afterStartup);
+    }
+
+    /// <summary>
+    /// Attempts to load a candidate plugin assembly.
+    /// </summary>
+    /// <param name="pluginFile">
+    /// The path to the plugin assembly.
+    /// </param>
+    /// <param name="assembly">
+    /// The loaded assembly when the operation succeeds.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the assembly was loaded successfully;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool TryLoadPluginAssembly(
+        string pluginFile,
+        out Assembly assembly)
+    {
+        try
+        {
+            // TODO:
+            // Replace direct Assembly.LoadFile loading with a controlled
+            // AssemblyLoadContext that shares AWB contract assemblies and
+            // resolves plugin-local dependencies predictably.
+            assembly = Assembly.LoadFile(pluginFile);
+
+            return true;
+        }
+        catch (NotSupportedException ex)
+        {
+            // Windows may block assemblies downloaded from another computer
+            // until the file is explicitly unblocked.
+            AddFailedAssembly(pluginFile);
+
+            Tools.WriteDebug(
+                pluginFile,
+                ex.ToString());
+        }
+        catch (Exception ex)
+        {
+            Tools.WriteDebug(
+                pluginFile,
+                ex.ToString());
+        }
+
+        assembly = null;
+
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to discover and initialize supported plugin types from a
+    /// loaded assembly while isolating plugin-specific loading failures.
+    /// </summary>
+    /// <param name="assembly">
+    /// The loaded plugin assembly.
+    /// </param>
+    /// <param name="pluginFile">
+    /// The path to the plugin assembly.
+    /// </param>
+    /// <param name="awb">
+    /// The active AWB application instance.
+    /// </param>
+    /// <param name="afterStartup">
+    /// Whether the plugins are being loaded after application startup.
+    /// </param>
+    private static void TryLoadPluginTypes(
+        Assembly assembly,
+        string pluginFile,
+        IAutoWikiBrowser awb,
+        bool afterStartup)
+    {
+        try
+        {
+            LoadPluginTypes(
+                assembly,
+                pluginFile,
+                awb,
+                afterStartup);
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            PluginObsolete(
+                pluginFile,
+                GetAssemblyVersion(assembly));
+
+            LogLoaderExceptions(
+                pluginFile,
+                ex);
+        }
+        catch (MissingMemberException ex)
+        {
+            PluginObsolete(
+                pluginFile,
+                GetAssemblyVersion(assembly));
+
+            Tools.WriteDebug(
+                pluginFile,
+                ex.ToString());
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Discovers supported plugin implementations in an assembly and delegates
+    /// creation and registration to the appropriate plugin loader.
+    /// </summary>
+    /// <param name="assembly">
+    /// The plugin assembly whose types will be inspected.
+    /// </param>
+    /// <param name="pluginFile">
+    /// The path to the plugin assembly, used for diagnostics and duplicate-plugin
+    /// reporting.
+    /// </param>
+    /// <param name="awb">
+    /// The active AWB application instance passed to plugins during
+    /// initialization.
+    /// </param>
+    /// <param name="afterStartup">
+    /// Whether the plugins are being loaded after application startup.
+    /// </param>
+    /// <remarks>
+    /// External plugin types are not instantiated while plugin loading is disabled
+    /// for the .NET 8 migration. AWB plugins are checked before AWB base plugins
+    /// because <see cref="IAWBPlugin"/> inherits from
+    /// <see cref="IAWBBasePlugin"/>.
+    /// </remarks>
+    private static void LoadPluginTypes(
+        Assembly assembly,
+        string pluginFile,
+        IAutoWikiBrowser awb,
+        bool afterStartup)
+    {
+        if (!ExternalPluginLoadingEnabled)
+        {
+            Tools.WriteDebug(
+                nameof(Plugin),
+                $"Skipping external plugin '{pluginFile}' during the .NET 8 migration.");
+
+            return;
+        }
+
+        foreach (Type type in assembly.GetTypes())
+        {
+            if (!IsCreatablePluginType(type))
+                continue;
+
+            // IAWBPlugin must be checked before IAWBBasePlugin because
+            // IAWBPlugin inherits from IAWBBasePlugin.
+            if (typeof(IAWBPlugin).IsAssignableFrom(type))
+            {
+                LoadAWBPlugin(
+                    type,
+                    pluginFile,
+                    awb,
+                    afterStartup);
+            }
+            else if (typeof(IAWBBasePlugin).IsAssignableFrom(type))
+            {
+                LoadAWBBasePlugin(
+                    type,
+                    pluginFile,
+                    awb,
+                    afterStartup);
+            }
+            else if (typeof(IListMakerPlugin).IsAssignableFrom(type))
+            {
+                LoadListMakerPlugin(
+                    type,
+                    pluginFile,
+                    afterStartup);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Reports an unexpected failure in the overall plugin-loading operation.
+    /// </summary>
+    /// <param name="exception">
+    /// The exception raised while loading plugins.
+    /// </param>
+    private static void HandlePluginLoadingFailure(
+        Exception exception)
+    {
+#if DEBUG
+        ErrorHandler.HandleException(exception);
+#else
+    Tools.WriteDebug(
+        nameof(LoadPlugins),
+        exception.ToString());
+
+    MessageBox.Show(
+        exception.Message,
+        "Problem loading plugins",
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Error);
+#endif
+    }
+
+    // TODO (Plugin Modernization):
+    // Review the plugin version reporting helpers. GetPluginVersionString()
+    // currently requires overloads for different plugin interfaces even though
+    // the implementation is identical. Investigate replacing the interface-
+    // specific overloads with a single helper based on a common abstraction
+    // (for example, Type or Assembly) once the plugin architecture redesign
+    // begins.
     /// <summary>
     /// Gets the version string of an AWB base plugin.
     /// </summary>
@@ -258,7 +425,9 @@ internal static class Plugin
     /// <summary>
     /// Gets the version string of a ListMaker plugin.
     /// </summary>
-    /// <param name="plugin">The plugin whose version is requested.</param>
+    /// <param name="plugin">
+    /// The plugin whose version is requested.
+    /// </param>
     /// <returns>The plugin assembly version.</returns>
     internal static string GetPluginVersionString(
         IListMakerPlugin plugin)
@@ -307,58 +476,6 @@ internal static class Plugin
         builder.AppendLine("```");
 
         return builder.ToString();
-    }
-
-    /// <summary>
-    /// Loads supported plugin types from an assembly.
-    /// </summary>
-    private static void LoadPluginTypes(
-        Assembly assembly,
-        string pluginFile,
-        IAutoWikiBrowser awb,
-        bool afterStartup)
-    
-    {
-        if (!ExternalPluginLoadingEnabled)
-        {
-            Tools.WriteDebug(
-                nameof(Plugin),
-                $"Skipping external plugin '{pluginFile}' during the .NET 8 migration.");
-
-            return;
-        }
-
-        foreach (Type type in assembly.GetTypes())
-        {
-            if (!IsCreatablePluginType(type))
-                continue;
-
-            // IAWBPlugin must be checked before IAWBBasePlugin because
-            // IAWBPlugin inherits from IAWBBasePlugin.
-            if (typeof(IAWBPlugin).IsAssignableFrom(type))
-            {
-                LoadAWBPlugin(
-                    type,
-                    pluginFile,
-                    awb,
-                    afterStartup);
-            }
-            else if (typeof(IAWBBasePlugin).IsAssignableFrom(type))
-            {
-                LoadAWBBasePlugin(
-                    type,
-                    pluginFile,
-                    awb,
-                    afterStartup);
-            }
-            else if (typeof(IListMakerPlugin).IsAssignableFrom(type))
-            {
-                LoadListMakerPlugin(
-                    type,
-                    pluginFile,
-                    afterStartup);
-            }
-        }
     }
 
     /// <summary>
