@@ -612,18 +612,25 @@ public partial class Parsers
         }
 
         // correct volume=vol 7... and issue=no. 8 for {{cite journal}} only
-        if (templatename.Equals("cite journal", StringComparison.OrdinalIgnoreCase))
+        if (templatename.Equals(
+                "cite journal",
+                StringComparison.OrdinalIgnoreCase))
         {
-            if (TheVolume.Length > 0)
-                newValue = CiteTemplatesJournalVolume.Replace(newValue, "");
-            if (TheIssue.Length > 0)
-                newValue = CiteTemplatesJournalIssue.Replace(newValue, "");
-            else
-                newValue = CiteTemplatesJournalVolumeAndIssue.Replace(newValue, @"| issue = ");
+            newValue = NormalizeCitationJournalVolumeAndIssue(
+                newValue,
+                TheVolume,
+                TheIssue);
         }
         // {{cite web}} for Google books -> {{Cite book}}
-        else if (templatename.Contains("web") && newValue.Contains("http://books.google.") && TheWork.Length == 0)
-            newValue = Tools.RenameTemplate(newValue, templatename, "Cite book");
+        else if (templatename.Contains("web") &&
+                 newValue.Contains("http://books.google.") &&
+                 TheWork.Length == 0)
+        {
+            newValue = Tools.RenameTemplate(
+                newValue,
+                templatename,
+                "Cite book");
+        }
 
         // remove leading zero in day of month
         if (paramsFound.Any(p => p.Key.Contains("date") && Regex.IsMatch(p.Value, @"\b0[1-9]")))
@@ -1025,6 +1032,45 @@ public partial class Parsers
                 template,
                 parameter.Key,
                 parameter.Value.Replace("\r\n", " "));
+        }
+
+        return template;
+    }
+
+    /// <summary>
+    /// Removes redundant volume and issue labels from a
+    /// <c>cite journal</c> template.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="volume">
+    /// The current value of the journal volume parameter.
+    /// </param>
+    /// <param name="issue">
+    /// The current value of the journal issue parameter.
+    /// </param>
+    /// <returns>
+    /// The citation template with journal volume and issue formatting
+    /// normalized.
+    /// </returns>
+    private static string NormalizeCitationJournalVolumeAndIssue(
+        string template,
+        string volume,
+        string issue)
+    {
+        if (volume.Length > 0)
+            template = CiteTemplatesJournalVolume.Replace(template, "");
+
+        if (issue.Length > 0)
+        {
+            template = CiteTemplatesJournalIssue.Replace(template, "");
+        }
+        else
+        {
+            template = CiteTemplatesJournalVolumeAndIssue.Replace(
+                template,
+                @"| issue = ");
         }
 
         return template;
