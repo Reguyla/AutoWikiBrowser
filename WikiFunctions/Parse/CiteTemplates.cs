@@ -67,97 +67,325 @@ public partial class Parsers
     private static readonly char[] TemplateNameEndChars = "}|".ToCharArray();
 
     /// <summary>
-    /// Applies various formatting fixes to citation templates
+    /// Applies supported formatting corrections to citation-related templates.
     /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <returns>The updated wiki text</returns>
+    /// <param name="articleText">
+    /// The article wikitext to process.
+    /// </param>
+    /// <returns>
+    /// The updated article wikitext.
+    /// </returns>
+    /// <remarks>
+    /// Citation-template cleanup is currently implemented only for English-language
+    /// wikis. For other languages, the supplied article text is returned unchanged.
+    /// </remarks>
     public static string FixCitationTemplates(string articleText)
     {
         if (!Variables.LangCode.Equals("en"))
             return articleText;
 
         List<string> allTemplates = GetAllTemplates(articleText);
-        List<string> allTemplatesDetail = GetAllTemplateDetail(articleText);
+        List<string> allTemplateDetails = GetAllTemplateDetail(articleText);
 
-        // get name of all cite template calls used in article
-        List<string> citeTemplatesUsed =
-            allTemplates.FindAll(t => WikiRegexes.CiteTemplate.IsMatch(@"{{" + t + @"|}}"));
+        articleText = FixCiteTemplateCalls(
+            articleText,
+            allTemplates,
+            allTemplateDetails);
 
-        if (citeTemplatesUsed.Any())
+        articleText = FixHarvAndSfnTemplateCalls(
+            articleText,
+            allTemplates);
+
+        articleText = FixRpTemplateCalls(
+            articleText,
+            allTemplates,
+            allTemplateDetails);
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Applies citation-template formatting fixes to the detailed template calls
+    /// found in an article.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article wikitext.
+    /// </param>
+    /// <param name="allTemplates">
+    /// The template names found in the article.
+    /// </param>
+    /// <param name="allTemplateDetails">
+    /// The complete template calls found in the article.
+    /// </param>
+    /// <returns>
+    /// The article text after citation-template formatting fixes have been
+    /// applied.
+    /// </returns>
+    private static string FixCiteTemplateCalls(
+        string articleText,
+        List<string> allTemplates,
+        List<string> allTemplateDetails)
+    {
+        List<string> citeTemplatesUsed = allTemplates.FindAll(
+            templateName =>
+                WikiRegexes.CiteTemplate.IsMatch(
+                    "{{" + templateName + "|}}"));
+
+        if (!citeTemplatesUsed.Any())
+            return articleText;
+
+        // Filter template calls by name before applying the more expensive
+        // citation-template regular expression.
+        IEnumerable<string> citeTemplateCalls =
+            allTemplateDetails.Where(
+                templateCall =>
+                    citeTemplatesUsed.Any(
+                        citeTemplateName =>
+                            GetTemplateNamePortion(templateCall).IndexOf(
+                                citeTemplateName,
+                                StringComparison.OrdinalIgnoreCase) >= 0));
+
+        foreach (string templateCall in citeTemplateCalls)
         {
-            // Performance: filter all template calls down to cite templates on name, avoiding running template regex on each one
-            foreach (
-                string s in
-                    allTemplatesDetail.Where(
-                        t => citeTemplatesUsed.Any(c => t.Substring(0, t.IndexOfAny(TemplateNameEndChars)).IndexOf(c, StringComparison.OrdinalIgnoreCase) > -1)))
-            {
-                string res = s, original = "";
-                while (!res.Equals(original))
-                {
-                    original = res;
-                    res = WikiRegexes.CiteTemplate.Replace(res, FixCitationTemplatesME);
-                }
+            string result = ApplyCitationFixesUntilStable(templateCall);
 
-                if (!res.Equals(s))
-                    articleText = articleText.Replace(s, res);
-            }
-        }
-
-        if (TemplateExists(allTemplates, WikiRegexes.HarvTemplate))
-        {
-            articleText = WikiRegexes.HarvTemplate.Replace(articleText, m => FixHarvSfnTemplatesME(m));
-        }
-
-        if (TemplateExists(allTemplates, WikiRegexes.SfnTemplate))
-        {
-            articleText = WikiRegexes.SfnTemplate.Replace(articleText, m => FixHarvSfnTemplatesME(m));
-        }
-
-        // Performance: use TemplateDetail cache to avoid regex search on whole article text for the templates
-        if (TemplateExists(allTemplates, rpTemplate))
-        {
-            // filter down to templates with rp in name
-            List<string> rpTemplates = allTemplatesDetail.FindAll(t => t.Substring(0, t.IndexOfAny(TemplateNameEndChars)).IndexOf("rp", StringComparison.OrdinalIgnoreCase) > -1);
-            foreach (string s in rpTemplates)
-            {
-                string res = rpTemplate.Replace(s, m =>
-                {
-                    // rp can be simple {{rp|1-7}} or {{rp|pp=1-7}} so handle both formats
-                    Dictionary<string, string> Params = Tools.GetTemplateParameterValues(m.Value);
-
-                    if (Params.Any())
-                        return FixPageRanges(m.Value, Params);
-                    else
-                    {
-                        string pagerange = Tools.GetTemplateArgument(m.Value, 1);
-                        if (pagerange.Length > 0)
-                            return m.Value.Replace(pagerange, FixPageRangesValue(pagerange));
-                    }
-                    return m.Value;
-                });
-
-                if (!res.Equals(s))
-                    articleText = articleText.Replace(s, res);
-            }
+            if (!result.Equals(templateCall))
+                articleText = articleText.Replace(templateCall, result);
         }
 
         return articleText;
     }
 
-    private static string FixHarvSfnTemplatesME(Match m)
+    /// <summary>
+    /// Repeatedly applies citation-template corrections until an additional pass
+    /// produces no further changes.
+    /// </summary>
+    /// <param name="templateCall">
+    /// The template call to process.
+    /// </param>
+    /// <returns>
+    /// The stabilized template call.
+    /// </returns>
+    private static string ApplyCitationFixesUntilStable(string templateCall)
     {
-        string newValue = FixPageRanges(m.Value, Tools.GetTemplateParameterValues(m.Value));
-        string page = Tools.GetTemplateParameterValue(newValue, "p");
+        string current = templateCall;
+        string previous;
 
-        // ignore brackets
-        if (page.Contains(@"("))
-            page = page.Substring(0, page.IndexOf(@"(", StringComparison.Ordinal));
+        do
+        {
+            previous = current;
+            current = WikiRegexes.CiteTemplate.Replace(
+                current,
+                FixCitationTemplatesME);
+        }
+        while (!current.Equals(previous));
 
-        if (Regex.IsMatch(page, @"\d+\s*(?:–|&ndash;|, )\s*\d") &&
-            Tools.GetTemplateParameterValue(newValue, "pp").Length == 0)
-            newValue = Tools.RenameTemplateParameter(newValue, "p", "pp");
+        return current;
+    }
 
-        return newValue;
+    // TODO (validation): Confirm that every value returned by
+    // GetAllTemplateDetail contains at least one TemplateNameEndChars character.
+    // If malformed or incomplete template calls are possible, handle an
+    // IndexOfAny result of -1 instead of passing it to Substring.
+    /// <summary>
+    /// Gets the leading portion of a template call containing its template name.
+    /// </summary>
+    /// <param name="templateCall">
+    /// The complete template call.
+    /// </param>
+    /// <returns>
+    /// The portion of the template call preceding the first template-name
+    /// terminator.
+    /// </returns>
+    private static string GetTemplateNamePortion(string templateCall)
+    {
+        int nameEndIndex =
+            templateCall.IndexOfAny(TemplateNameEndChars);
+
+        return templateCall.Substring(
+            0,
+            nameEndIndex);
+    }
+
+    /// <summary>
+    /// Applies shared formatting corrections to Harvard-reference and shortened
+    /// footnote templates.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article wikitext.
+    /// </param>
+    /// <param name="allTemplates">
+    /// The template names found in the article.
+    /// </param>
+    /// <returns>
+    /// The article text after supported Harvard-reference and shortened-footnote
+    /// corrections have been applied.
+    /// </returns>
+    private static string FixHarvAndSfnTemplateCalls(
+        string articleText,
+        List<string> allTemplates)
+    {
+        if (TemplateExists(
+                allTemplates,
+                WikiRegexes.HarvTemplate))
+        {
+            articleText = WikiRegexes.HarvTemplate.Replace(
+                articleText,
+                FixHarvSfnTemplatesME);
+        }
+
+        if (TemplateExists(
+                allTemplates,
+                WikiRegexes.SfnTemplate))
+        {
+            articleText = WikiRegexes.SfnTemplate.Replace(
+                articleText,
+                FixHarvSfnTemplatesME);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes page-range parameters in a Harvard-reference or shortened
+    /// footnote template.
+    /// </summary>
+    /// <param name="match">
+    /// The matched <c>harv</c> or <c>sfn</c> template call.
+    /// </param>
+    /// <returns>
+    /// The updated template call with normalized page ranges. When the
+    /// <c>p</c> parameter contains a page range and no <c>pp</c> parameter is
+    /// already present, the parameter is renamed from <c>p</c> to <c>pp</c>.
+    /// </returns>
+    /// <remarks>
+    /// Parenthetical text in the <c>p</c> value is ignored when determining
+    /// whether the value represents multiple pages.
+    /// </remarks>
+    private static string FixHarvSfnTemplatesME(Match match)
+    {
+        string updatedTemplate = FixPageRanges(
+            match.Value,
+            Tools.GetTemplateParameterValues(match.Value));
+
+        string page = Tools.GetTemplateParameterValue(
+            updatedTemplate,
+            "p");
+
+        // Ignore parenthetical text when determining whether the value
+        // represents a page range.
+        int openingParenthesisIndex = page.IndexOf(
+            '(',
+            StringComparison.Ordinal);
+
+        if (openingParenthesisIndex >= 0)
+        {
+            page = page.Substring(
+                0,
+                openingParenthesisIndex);
+        }
+
+        // TODO (maintainability): Consider extracting the page-range detection
+        // expression into a named, shared regex if the same range syntax is checked
+        // elsewhere. Preserve the current pattern until all related citation and page
+        // range processing has been compared.
+        bool containsPageRange =
+            Regex.IsMatch(
+                page,
+                @"\d+\s*(?:–|&ndash;|, )\s*\d");
+
+        bool hasPluralPageParameter =
+            Tools.GetTemplateParameterValue(
+                updatedTemplate,
+                "pp").Length > 0;
+
+        if (containsPageRange &&
+            !hasPluralPageParameter)
+        {
+            updatedTemplate = Tools.RenameTemplateParameter(
+                updatedTemplate,
+                "p",
+                "pp");
+        }
+
+        return updatedTemplate;
+    }
+
+    /// <summary>
+    /// Normalizes page ranges in <c>rp</c> templates.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article wikitext.
+    /// </param>
+    /// <param name="allTemplates">
+    /// The template names found in the article.
+    /// </param>
+    /// <param name="allTemplateDetails">
+    /// The complete template calls found in the article.
+    /// </param>
+    /// <returns>
+    /// The article text after page-range corrections have been applied.
+    /// </returns>
+    private static string FixRpTemplateCalls(
+        string articleText,
+        List<string> allTemplates,
+        List<string> allTemplateDetails)
+    {
+        if (!TemplateExists(allTemplates, rpTemplate))
+            return articleText;
+
+        // Use the cached template details instead of scanning the entire article
+        // with the rp-template expression.
+        List<string> rpTemplates = allTemplateDetails.FindAll(
+            templateCall =>
+                GetTemplateNamePortion(templateCall).IndexOf(
+                    "rp",
+                    StringComparison.OrdinalIgnoreCase) >= 0);
+
+        foreach (string templateCall in rpTemplates)
+        {
+            string result = rpTemplate.Replace(
+                templateCall,
+                FixRpTemplatePageRange);
+
+            if (!result.Equals(templateCall))
+                articleText = articleText.Replace(templateCall, result);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes a page range in an <c>rp</c> template match.
+    /// </summary>
+    /// <param name="match">
+    /// The matched <c>rp</c> template.
+    /// </param>
+    /// <returns>
+    /// The template with its page range normalized, or the original matched text
+    /// when no page range is present.
+    /// </returns>
+    private static string FixRpTemplatePageRange(Match match)
+    {
+        // rp templates may use either an unnamed page range, such as
+        // {{rp|1-7}}, or a named page-range parameter, such as {{rp|pp=1-7}}.
+        Dictionary<string, string> parameters =
+            Tools.GetTemplateParameterValues(match.Value);
+
+        if (parameters.Any())
+            return FixPageRanges(match.Value, parameters);
+
+        string pageRange =
+            Tools.GetTemplateArgument(match.Value, 1);
+
+        if (pageRange.Length > 0)
+        {
+            return match.Value.Replace(
+                pageRange,
+                FixPageRangesValue(pageRange));
+        }
+
+        return match.Value;
     }
 
     private static readonly Regex IdISBN = new Regex(@"^ISBN ?[:=]?\s*([\d \-]+X?)$");
