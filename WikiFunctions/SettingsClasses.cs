@@ -103,30 +103,61 @@ public class UserPrefs
     public List<PluginPrefs> Plugin = new List<PluginPrefs>();
 
     /// <summary>
-    /// Loads the UserPrefs from the specified file
+    /// Loads user preferences from an AWB settings file.
     /// </summary>
-    /// <param name="file">File to load from</param>
-    /// <returns>Loaded UserPrefs</returns>
+    /// <param name="file">The path of the settings file to load.</param>
+    /// <returns>
+    /// The deserialized user preferences, or a new empty preferences object when
+    /// the settings file is empty.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="file"/> is null, empty, or whitespace.
+    /// </exception>
+    /// <exception cref="InvalidDataException">
+    /// Thrown when the settings file uses the unsupported legacy format.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the settings XML cannot be deserialized.
+    /// </exception>
     public static UserPrefs LoadPrefs(string file)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(file);
+
         string settings = File.ReadAllText(file, Encoding.UTF8);
 
-        // test to see if it is an old AWB file
-        if (settings.Contains("<projectlang proj="))
-            throw new Exception("This file uses old settings format unsupported by this version of AWB.");
-
-        // check for empty settings file
-        if (settings.Trim().Length == 0)
+        if (settings.Contains(
+                "<projectlang proj=",
+                StringComparison.Ordinal))
         {
-            MessageBox.Show("The settings file " + file + " is empty", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            return (new UserPrefs());
+            throw new InvalidDataException(
+                "This file uses an old settings format unsupported by this version of AWB.");
         }
 
-        settings = Regex.Replace(settings, @"<(/?)\s*SourceIndex>", "<$1SelectedProvider>");
+        if (string.IsNullOrWhiteSpace(settings))
+        {
+            MessageBox.Show(
+                $"The settings file {file} is empty.",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
 
-        XmlSerializer xs = new XmlSerializer(typeof(UserPrefs), new[] { typeof(PrefsKeyPair) });
-        return (UserPrefs)xs.Deserialize(new StringReader(settings));
+            return new UserPrefs();
+        }
 
+        settings = Regex.Replace(
+            settings,
+            @"<(/?)\s*SourceIndex>",
+            "<$1SelectedProvider>");
+
+        var serializer = new XmlSerializer(
+            typeof(UserPrefs),
+            new[] { typeof(PrefsKeyPair) });
+
+        using var reader = new StringReader(settings);
+
+        return serializer.Deserialize(reader) as UserPrefs
+            ?? throw new InvalidDataException(
+                $"The settings file '{file}' did not contain valid AWB user preferences.");
     }
 
     /// <summary>
