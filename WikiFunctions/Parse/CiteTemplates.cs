@@ -508,16 +508,16 @@ public partial class Parsers
                 newValue = Tools.RemoveTemplateParameter(newValue, "format");
         }
 
-        if (paramsFound.ContainsKey("origdate") && origdate.Length == 0)
-        {
-            newValue = Tools.RemoveTemplateParameter(newValue, "origdate");
-        }
+        // Remove Empty Citation Original Date
+        newValue = RemoveEmptyCitationOriginalDate(
+            newValue,
+            paramsFound,
+            origdate);
 
         // newlines to spaces in all parameters
-        foreach (KeyValuePair<string, string> newlines in paramsFound.Where(p => p.Value.Contains("\r\n")))
-        {
-            newValue = Tools.UpdateTemplateParameterValue(newValue, newlines.Key, newlines.Value.Replace("\r\n", " "));
-        }
+        newValue = NormalizeCitationParameterNewlines(
+            newValue,
+            paramsFound);
 
         // {{sv icon}} -> sv in language=
         newValue = NormalizeCitationLanguageTemplate(newValue, lang);
@@ -969,6 +969,63 @@ public partial class Parsers
         // citation template. Preserve the existing website-related exception.
         if (work.Contains("''") && !work.Contains("."))
             return WorkInItalics.Replace(template, "$1$2");
+
+        return template;
+    }
+
+    /// <summary>
+    /// Removes an empty <c>origdate</c> parameter from a citation template.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="parameters">
+    /// The citation parameters captured from the template.
+    /// </param>
+    /// <param name="originalDate">
+    /// The current value of the <c>origdate</c> parameter.
+    /// </param>
+    /// <returns>
+    /// The citation template with an empty <c>origdate</c> parameter removed,
+    /// or the original template when the parameter is absent or has a value.
+    /// </returns>
+    private static string RemoveEmptyCitationOriginalDate(
+        string template,
+        IReadOnlyDictionary<string, string> parameters,
+        string originalDate)
+    {
+        if (parameters.ContainsKey("origdate") && originalDate.Length == 0)
+            return Tools.RemoveTemplateParameter(template, "origdate");
+
+        return template;
+    }
+
+    /// <summary>
+    /// Replaces Windows-style line breaks within citation parameter values
+    /// with spaces.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="parameters">
+    /// The citation parameters and their current values.
+    /// </param>
+    /// <returns>
+    /// The citation template with line breaks removed from parameter values.
+    /// </returns>
+    private static string NormalizeCitationParameterNewlines(
+        string template,
+        IReadOnlyDictionary<string, string> parameters)
+    {
+        foreach (KeyValuePair<string, string> parameter in
+                 parameters.Where(parameter =>
+                     parameter.Value.Contains("\r\n")))
+        {
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                parameter.Key,
+                parameter.Value.Replace("\r\n", " "));
+        }
 
         return template;
     }
