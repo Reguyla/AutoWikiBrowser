@@ -411,88 +411,35 @@ public partial class Parsers
         newValue = Tools.RemoveDuplicateTemplateParameters(newValue, paramsFound);
 
         // fix cite params not in lower case, allowing for ISBN, DOI identifiers being uppercase, avoiding changing text within malformed URL
-        foreach (
-            string notlowercaseCiteParam in
-                paramsFound.Keys
-                    .Where(
-                        p =>
-                            (p.ToLower() != p) &&
-                            !Regex.IsMatch(p,
-                                @"(?:IS[BS]N|DOI|PMID|OCLC|PMC|LCCN|ASIN|ARXIV|ASIN\-TLD|BIBCODE|ID|ISBN13|JFM|JSTOR|MR|OL|OSTI|RFC|SSRN|URL|ZBL)")
-                            && !CiteUrl.Match(newValue).Value.Contains(p)))
-        {
-            newValue = Tools.RenameTemplateParameter(newValue, notlowercaseCiteParam,
-                notlowercaseCiteParam.ToLower());
-        }
+        newValue = NormalizeCitationParameterNames(
+            newValue,
+            paramsFound);
 
-        string theURL,
-            id,
-            format,
-            theTitle,
-            TheYear,
-            lang,
-            TheDate,
-            TheMonth,
-            TheWork,
-            nopp,
-            TheIssue,
-            TheVolume,
-            accessdate,
-            pages,
-            page,
-            ISBN,
-            ISSN,
-            origyear,
-            origdate,
-            archiveurl,
-            contributionurl,
-            website;
-        if (!paramsFound.TryGetValue("url", out theURL))
-            theURL = "";
-        if (!paramsFound.TryGetValue("id", out id) && !paramsFound.TryGetValue("ID", out id))
-            id = "";
-        if (!paramsFound.TryGetValue("format", out format))
-            format = "";
-        if (!paramsFound.TryGetValue("title", out theTitle))
-            theTitle = "";
-        if (!paramsFound.TryGetValue("year", out TheYear))
-            TheYear = "";
-        if (!paramsFound.TryGetValue("date", out TheDate))
-            TheDate = "";
-        if (!paramsFound.TryGetValue("language", out lang))
-            lang = "";
-        if (!paramsFound.TryGetValue("month", out TheMonth))
-            TheMonth = "";
-        if (!paramsFound.TryGetValue("work", out TheWork))
-            TheWork = "";
-        if (!paramsFound.TryGetValue("website", out website))
-            website = "";
-        if (!paramsFound.TryGetValue("nopp", out nopp))
-            nopp = "";
-        if (!paramsFound.TryGetValue("issue", out TheIssue))
-            TheIssue = "";
-        if (!paramsFound.TryGetValue("volume", out TheVolume))
-            TheVolume = "";
-        if (!paramsFound.TryGetValue("accessdate", out accessdate) &&
-            !paramsFound.TryGetValue("access-date", out accessdate))
-            accessdate = "";
-        if (!paramsFound.TryGetValue("pages", out pages))
-            pages = "";
-        if (!paramsFound.TryGetValue("page", out page))
-            page = "";
-        if (!paramsFound.TryGetValue("origyear", out origyear))
-            origyear = "";
-        if (!paramsFound.TryGetValue("origdate", out origdate))
-            origdate = "";
-        if (!paramsFound.TryGetValue("archiveurl", out archiveurl))
-            if (!paramsFound.TryGetValue("archive-url", out archiveurl))
-                archiveurl = "";
-        if (!paramsFound.TryGetValue("contribution-url", out contributionurl))
-            contributionurl = "";
-        if (!paramsFound.TryGetValue("isbn", out ISBN) && !paramsFound.TryGetValue("ISBN", out ISBN))
-            ISBN = "";
-        if (!paramsFound.TryGetValue("issn", out ISSN) && !paramsFound.TryGetValue("ISSN", out ISSN))
-            ISSN = "";
+        CitationParameterValues parameterValues =
+            GetCitationParameterValues(paramsFound);
+
+        string theURL = parameterValues.Url;
+        string id = parameterValues.Id;
+        string format = parameterValues.Format;
+        string theTitle = parameterValues.Title;
+        string TheYear = parameterValues.Year;
+        string lang = parameterValues.Language;
+        string TheDate = parameterValues.Date;
+        string TheMonth = parameterValues.Month;
+        string TheWork = parameterValues.Work;
+        string nopp = parameterValues.NoPagePrefix;
+        string TheIssue = parameterValues.Issue;
+        string TheVolume = parameterValues.Volume;
+        string accessdate = parameterValues.AccessDate;
+        string pages = parameterValues.Pages;
+        string page = parameterValues.Page;
+        string ISBN = parameterValues.Isbn;
+        string ISSN = parameterValues.Issn;
+        string origyear = parameterValues.OriginalYear;
+        string origdate = parameterValues.OriginalDate;
+        string archiveurl = parameterValues.ArchiveUrl;
+        string contributionurl = parameterValues.ContributionUrl;
+        string website = parameterValues.Website;
 
         string theURLoriginal = theURL;
 
@@ -1164,6 +1111,166 @@ public partial class Parsers
         }
 
         return template;
+    }
+
+    /// <summary>
+    /// Renames citation parameters that are not lowercase while preserving
+    /// recognized uppercase identifier names and text occurring inside a
+    /// malformed URL.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="parameters">
+    /// The citation parameters captured before normalization.
+    /// </param>
+    /// <returns>
+    /// The citation template with eligible parameter names converted to
+    /// lowercase.
+    /// </returns>
+    private static string NormalizeCitationParameterNames(
+        string template,
+        IReadOnlyDictionary<string, string> parameters)
+    {
+        foreach (string parameterName in parameters.Keys.Where(
+                     parameterName =>
+                         parameterName.ToLower() != parameterName &&
+                         !Regex.IsMatch(
+                             parameterName,
+                             @"(?:IS[BS]N|DOI|PMID|OCLC|PMC|LCCN|ASIN|ARXIV|ASIN\-TLD|BIBCODE|ID|ISBN13|JFM|JSTOR|MR|OL|OSTI|RFC|SSRN|URL|ZBL)") &&
+                         !CiteUrl.Match(template).Value.Contains(parameterName)))
+        {
+            template = Tools.RenameTemplateParameter(
+                template,
+                parameterName,
+                parameterName.ToLower());
+        }
+
+        return template;
+    }
+
+    /// <summary>
+    /// Retrieves the citation parameter values used by the remaining citation
+    /// cleanup rules.
+    /// </summary>
+    /// <param name="parameters">
+    /// The citation parameters captured from the template.
+    /// </param>
+    /// <returns>
+    /// An object containing the current values of the citation parameters used
+    /// during subsequent processing.
+    /// </returns>
+    private static CitationParameterValues GetCitationParameterValues(
+        IReadOnlyDictionary<string, string> parameters)
+    {
+        return new CitationParameterValues
+        {
+            Url = GetCitationParameterValue(parameters, "url"),
+            Id = GetCitationParameterValue(parameters, "id", "ID"),
+            Format = GetCitationParameterValue(parameters, "format"),
+            Title = GetCitationParameterValue(parameters, "title"),
+            Year = GetCitationParameterValue(parameters, "year"),
+            Date = GetCitationParameterValue(parameters, "date"),
+            Language = GetCitationParameterValue(parameters, "language"),
+            Month = GetCitationParameterValue(parameters, "month"),
+            Work = GetCitationParameterValue(parameters, "work"),
+            Website = GetCitationParameterValue(parameters, "website"),
+            NoPagePrefix = GetCitationParameterValue(parameters, "nopp"),
+            Issue = GetCitationParameterValue(parameters, "issue"),
+            Volume = GetCitationParameterValue(parameters, "volume"),
+            AccessDate = GetCitationParameterValue(
+                parameters,
+                "accessdate",
+                "access-date"),
+            Pages = GetCitationParameterValue(parameters, "pages"),
+            Page = GetCitationParameterValue(parameters, "page"),
+            OriginalYear = GetCitationParameterValue(parameters, "origyear"),
+            OriginalDate = GetCitationParameterValue(parameters, "origdate"),
+            ArchiveUrl = GetCitationParameterValue(
+                parameters,
+                "archiveurl",
+                "archive-url"),
+            ContributionUrl = GetCitationParameterValue(
+                parameters,
+                "contribution-url"),
+            Isbn = GetCitationParameterValue(parameters, "isbn", "ISBN"),
+            Issn = GetCitationParameterValue(parameters, "issn", "ISSN")
+        };
+    }
+
+    /// <summary>
+    /// Returns the value of the first matching citation parameter name.
+    /// </summary>
+    /// <param name="parameters">
+    /// The citation parameters to search.
+    /// </param>
+    /// <param name="parameterNames">
+    /// The parameter names to check in priority order.
+    /// </param>
+    /// <returns>
+    /// The first matching parameter value, or an empty string when none of
+    /// the supplied parameter names are present.
+    /// </returns>
+    private static string GetCitationParameterValue(
+        IReadOnlyDictionary<string, string> parameters,
+        params string[] parameterNames)
+    {
+        foreach (string parameterName in parameterNames)
+        {
+            if (parameters.TryGetValue(parameterName, out string value))
+                return value;
+        }
+
+        return "";
+    }
+
+    /// <summary>
+    /// Contains citation parameter values used by the citation cleanup rules.
+    /// </summary>
+    private sealed class CitationParameterValues
+    {
+        public string Url { get; set; } = "";
+        public string Id { get; set; } = "";
+
+        public string Format { get; set; } = "";
+
+        public string Title { get; set; } = "";
+
+        public string Year { get; set; } = "";
+
+        public string Date { get; set; } = "";
+
+        public string Language { get; set; } = "";
+
+        public string Month { get; set; } = "";
+
+        public string Work { get; set; } = "";
+
+        public string Website { get; set; } = "";
+
+        public string NoPagePrefix { get; set; } = "";
+
+        public string Issue { get; set; } = "";
+
+        public string Volume { get; set; } = "";
+
+        public string AccessDate { get; set; } = "";
+
+        public string Pages { get; set; } = "";
+
+        public string Page { get; set; } = "";
+
+        public string OriginalYear { get; set; } = "";
+
+        public string OriginalDate { get; set; } = "";
+
+        public string ArchiveUrl { get; set; } = "";
+
+        public string ContributionUrl { get; set; } = "";
+
+        public string Isbn { get; set; } = "";
+
+        public string Issn { get; set; } = "";
     }
     #endregion
 
