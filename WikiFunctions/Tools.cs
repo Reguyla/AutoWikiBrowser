@@ -2658,24 +2658,44 @@ Message: {2}
 
     private static readonly Regex param = new Regex(@"\|\s*([\w0-9_ -/]+?)\s*=([^|}]*)");
 
+    // TODO (parsing): Confirm that PipeCleanedTemplate preserves the length and
+    // character positions of the original template call. Match indexes obtained
+    // from the cleaned text are subsequently used to extract values from the
+    // original templateCall string.
     /// <summary>
-    /// Returns a dictionary of all named parameters used in the template and the value used.
-    /// If the parameter is specified with no value, an empty string is returned as the value.
-    /// If there are duplicate parameters, the value of the first (may be blank) is reported.
+    /// Gets the named parameters and corresponding values used in a template call.
     /// </summary>
-    /// <param name="templateCall"></param>
-    /// <returns></returns>
-    public static Dictionary<string, string> GetTemplateParameterValues(string templateCall)
+    /// <param name="templateCall">
+    /// The complete template call to inspect.
+    /// </param>
+    /// <returns>
+    /// A dictionary containing each named parameter and its trimmed value.
+    /// Parameters without a value are represented by <see cref="string.Empty"/>.
+    /// When a parameter occurs more than once, the value from its first occurrence
+    /// is retained.
+    /// </returns>
+    public static Dictionary<string, string> GetTemplateParameterValues(
+        string templateCall)
     {
-        Dictionary<string, string> paramsFound = new Dictionary<string, string>();
+        Dictionary<string, string> parametersFound =
+            new(StringComparer.Ordinal);
 
-        foreach (Match m in param.Matches(PipeCleanedTemplate(templateCall)))
+        foreach (Match match in param.Matches(
+                     PipeCleanedTemplate(templateCall)))
         {
-            if (!paramsFound.ContainsKey(m.Groups[1].Value))
-                paramsFound.Add(m.Groups[1].Value, templateCall.Substring(m.Groups[2].Index, m.Groups[2].Length).Trim());
+            string parameterName = match.Groups[1].Value;
+            string parameterValue = templateCall
+                .Substring(
+                    match.Groups[2].Index,
+                    match.Groups[2].Length)
+                .Trim();
+
+            parametersFound.TryAdd(
+                parameterName,
+                parameterValue);
         }
 
-        return paramsFound;
+        return parametersFound;
     }
 
     /// <summary>
@@ -2830,31 +2850,87 @@ Message: {2}
     }
 
     /// <summary>
-    /// Renames the given template named parameters in the input template
+    /// Renames multiple named parameters in a template call.
     /// </summary>
-    /// <param name="templateCall">The template to update</param>
-    /// <param name="templateparams">Dictionary of old names, new names to apply</param>
-    /// <returns>The updated template call</returns>
-    public static string RenameTemplateParameter(string templateCall, Dictionary<string, string> templateparams)
+    /// <param name="templateCall">
+    /// The template call whose named parameters are to be renamed.
+    /// </param>
+    /// <param name="templateparams">
+    /// A dictionary in which each key is an existing parameter name and its value
+    /// is the replacement parameter name.
+    /// </param>
+    /// <returns>
+    /// The template call after all specified parameter renames have been applied.
+    /// </returns>
+    /// <remarks>
+    /// Renames are applied sequentially in the dictionary's enumeration order.
+    /// Consequently, the result of an earlier rename is used as the input for
+    /// each subsequent rename.
+    /// </remarks>
+    public static string RenameTemplateParameter(
+        string templateCall,
+        Dictionary<string, string> templateparams)
     {
-        foreach (KeyValuePair<string, string> kvp in templateparams)
+        foreach (KeyValuePair<string, string> parameter in templateparams)
         {
-            templateCall = RenameTemplateParameter(templateCall, kvp.Key, kvp.Value);
+            templateCall = RenameTemplateParameter(
+                templateCall,
+                parameter.Key,
+                parameter.Value);
         }
 
         return templateCall;
     }
 
-    private static string RenameTemplateParameterME(Match m, string templateCall, string newparameter)
+    /// <summary>
+    /// Replaces a matched template parameter name unless the match occurs inside
+    /// a nested template.
+    /// </summary>
+    /// <param name="m">
+    /// The match containing the parameter name to replace.
+    /// </param>
+    /// <param name="templateCall">
+    /// The complete template call containing the match.
+    /// </param>
+    /// <param name="newparameter">
+    /// The replacement parameter name.
+    /// </param>
+    /// <returns>
+    /// The original matched text when the parameter belongs to a nested template;
+    /// otherwise, the matched parameter syntax containing the replacement name.
+    /// </returns>
+    private static string RenameTemplateParameterME(
+        Match m,
+        string templateCall,
+        string newparameter)
     {
-        // check for nested templates within the main template to avoid changing their parameter names
-        foreach (Match n in WikiRegexes.NestedTemplates.Matches("  " + templateCall.Substring(2)))
+        // TODO (API modernization): Review callers before changing templateparams to
+        // IReadOnlyDictionary<string, string> and renaming it to templateParameters.
+        // Changing the public signature may affect binary compatibility, while
+        // renaming the parameter may break callers that use named arguments.
+        //
+        // Avoid renaming parameters that belong to templates nested inside the
+        // main template call.
+        foreach (Match nestedTemplate in
+                 WikiRegexes.NestedTemplates.Matches(
+                     "  " + templateCall.Substring(2)))
         {
-            if (n.Index > 0 && m.Index >= n.Index && m.Index <= (n.Index + n.Length))
+            // TODO (parsing): Document and test the index-preservation behavior of
+            // "  " + templateCall.Substring(2). The two leading spaces appear to replace
+            // the template's opening braces so nested-template match indexes remain
+            // aligned with the original template call. Do not simplify this expression
+            // until nested-template and short-input cases are covered by tests.
+            if (nestedTemplate.Index > 0 &&
+                m.Index >= nestedTemplate.Index &&
+                m.Index <= nestedTemplate.Index + nestedTemplate.Length)
+            {
                 return m.Value;
+            }
         }
 
-        return (m.Groups[1].Value + newparameter + m.Groups[2].Value);
+        return m.Groups[1].Value +
+               newparameter +
+               m.Groups[2].Value;
     }
 
     /// <summary>
@@ -2927,10 +3003,16 @@ Message: {2}
     private static readonly Regex CiteUrl = new Regex(@"\|\s*url\s*=\s*([^\[\]<>""\s]+)", RegexOptions.Compiled);
 
     /// <summary>
-    /// Removes duplicate (same or null) named parameters from template calls
+    /// Removes duplicate named parameters from a template call.
     /// </summary>
-    /// <param name="templatecall">The template call to clean up</param>
-    /// <returns>The updated template call</returns>
+    /// <param name="templatecall">
+    /// The template call to process.
+    /// </param>
+    /// <returns>
+    /// The template call after duplicate named parameters have been removed.
+    /// When multiple parameters share the same name, only the retained
+    /// occurrence determined by the overload's processing rules remains.
+    /// </returns>
     public static string RemoveDuplicateTemplateParameters(string templatecall)
     {
         Dictionary<string, string> Params = new Dictionary<string, string>();
@@ -3494,20 +3576,68 @@ Message: {2}
         return WikiRegexes.MagicWordTemplates.Replace(articleText, TemplateToMagicWordME);
     }
 
+    /// <summary>
+    /// Converts a template invocation into the equivalent MediaWiki magic word
+    /// syntax when the template accepts one or more arguments.
+    /// </summary>
+    /// <param name="m">
+    /// The regular expression match representing the template invocation.
+    /// </param>
+    /// <returns>
+    /// The converted magic word invocation, or the original template text when
+    /// the template has no arguments.
+    /// </returns>
+    /// <remarks>
+    /// Most MediaWiki magic words are conventionally written in uppercase.
+    /// However, a small number (such as <c>namespace</c>,
+    /// <c>numberofarticles</c>, and <c>padleft</c>) are defined using lowercase
+    /// names and must retain that casing.
+    /// </remarks>
     private static string TemplateToMagicWordME(Match m)
     {
         if (GetTemplateArgumentCount(m.Value) == 0)
             return m.Value;
 
         // namespace, numberofarticles, padleft must be lowercase, others must be UPPERCASE
-        return @"{{" + (LowerMagicWordTemplates.IsMatch(m.Value.ToLower()) ? m.Groups[2].Value.ToLower() : m.Groups[2].Value.ToUpper()) + @":" + m.Groups[3].Value.Trim().TrimStart('|');
+        // Magic words without arguments remain ordinary template calls.
+        string magicWord = LowerMagicWordTemplates.IsMatch(m.Value.ToLower())
+            ? m.Groups[2].Value.ToLower()
+            : m.Groups[2].Value.ToUpper();
+
+        return @"{{" +
+               magicWord +
+               @":" +
+               m.Groups[3].Value.Trim().TrimStart('|');
     }
 
+    /// <summary>
+    /// Joins a list of strings using the comma separator appropriate for the
+    /// current wiki language.
+    /// </summary>
+    /// <param name="items">
+    /// The items to concatenate.
+    /// </param>
+    /// <returns>
+    /// A comma-separated string using either the Western comma or the Arabic
+    /// comma, depending on the current language.
+    /// </returns>
+    /// <remarks>
+    /// Arabic, Egyptian Arabic, and Persian use the Arabic comma (U+060C)
+    /// instead of the Western comma.
+    /// </remarks>
     public static string ListToStringCommaSeparator(List<string> items)
     {
-        if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
-            return string.Join("، ", items.ToArray());
-        return string.Join(", ", items.ToArray());
+        // TODO (localization): Consider centralizing locale-specific punctuation,
+        // including the Arabic comma, into a shared localization helper so all edit
+        // summaries and user-visible lists use the same separator rules.
+        if (Variables.LangCode.Equals("ar") ||
+            Variables.LangCode.Equals("arz") ||
+            Variables.LangCode.Equals("fa"))
+        {
+            return string.Join("، ", items);
+        }
+
+        return string.Join(", ", items);
     }
 
     /// <summary>
