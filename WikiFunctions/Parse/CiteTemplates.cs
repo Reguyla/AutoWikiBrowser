@@ -1590,52 +1590,156 @@ public partial class Parsers
         return templateCall;
     }
 
+    /// <summary>
+    /// Normalizes valid numeric page ranges within a citation page value.
+    /// </summary>
+    /// <param name="pageRange">
+    /// Page value that may contain one or more numeric page ranges.
+    /// </param>
+    /// <returns>
+    /// The normalized page value when all detected ranges are valid; otherwise,
+    /// the original value.
+    /// </returns>
+    /// <remarks>
+    /// Spaced ranges using an en dash or <c>&amp;ndash;</c> are normalized
+    /// immediately by removing the surrounding spaces.
+    ///
+    /// For other numeric ranges, abbreviated ending pages are expanded for
+    /// validation. For example, <c>350-2</c> is interpreted as
+    /// <c>350-352</c>.
+    ///
+    /// All detected ranges must:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>Increase from the starting page to the ending page.</description>
+    /// </item>
+    /// <item>
+    /// <description>Span fewer than 999 pages.</description>
+    /// </item>
+    /// <item>
+    /// <description>Not overlap another range in the same value.</description>
+    /// </item>
+    /// </list>
+    ///
+    /// When every detected range is valid, hyphens and em dashes matched by
+    /// <see cref="PageRange"/> are replaced with en dashes. The abbreviated
+    /// ending page remains abbreviated in the returned text.
+    /// </remarks>
     private static string FixPageRangesValue(string pageRange)
     {
-        string original = pageRange;
-        // fix spaced page ranges e.g. 15 – 20 --> 15–20
+        // TODO: Review whether this early return should remain. Once a spaced page
+        // range is normalized, the method skips validation and normalization of any
+        // additional page ranges contained in the same value.
         if (SpacedPageRange.IsMatch(pageRange))
             return SpacedPageRange.Replace(pageRange, "$1$2$3");
 
-        if (pageRange.Length > 2 && !pageRange.Contains(" to "))
-        {
-            bool pagerangesokay = false;
-            Dictionary<int, int> PageRanges = new Dictionary<int, int>();
+        if (!ShouldValidatePageRanges(pageRange))
+            return pageRange;
 
-            foreach (Match pagerange in PageRange.Matches(pageRange))
-            {
-                string page1 = pagerange.Groups[1].Value;
-                string page2 = pagerange.Groups[2].Value;
-
-                // convert 350-2 into 350-352 etc.
-                if (page1.Length > page2.Length)
-                    page2 = page1.Substring(0, page1.Length - page2.Length) + page2;
-
-                // check a valid range with difference < 999
-                pagerangesokay = (Convert.ToInt32(page1) < Convert.ToInt32(page2) &&
-                                  Convert.ToInt32(page2) - Convert.ToInt32(page1) < 999);
-
-                // check range doesn't overlap with another range found
-                if (PageRanges.Any(kvp => (Convert.ToInt32(page1) >= kvp.Key && Convert.ToInt32(page1) <= kvp.Value) ||
-                                          (Convert.ToInt32(page2) >= kvp.Key && Convert.ToInt32(page2) <= kvp.Value)))
-                {
-                    pagerangesokay = false;
-                }
-
-                if (!pagerangesokay)
-                    break;
-
-                // add to dictionary of ranges found
-                PageRanges.Add(Convert.ToInt32(page1), Convert.ToInt32(page2));
-            }
-
-            if (pagerangesokay)
-                return PageRange.Replace(pageRange, @"$1–$2");
-        }
-
-        return original;
+        return ArePageRangesValid(pageRange)
+            ? PageRange.Replace(pageRange, "$1–$2")
+            : pageRange;
     }
 
+    /// <summary>
+    /// Determines whether a page value should be inspected for numeric ranges.
+    /// </summary>
+    private static bool ShouldValidatePageRanges(string pageRange)
+    {
+        return pageRange.Length > 2 &&
+               !pageRange.Contains(" to ");
+    }
+
+    /// <summary>
+    /// Determines whether every numeric page range in a page value is ascending,
+    /// reasonably sized, and non-overlapping.
+    /// </summary>
+    private static bool ArePageRangesValid(string pageRange)
+    {
+        bool foundRange = false;
+        Dictionary<int, int> pageRanges = new();
+
+        foreach (Match pageRangeMatch in PageRange.Matches(pageRange))
+        {
+            foundRange = true;
+
+            // TODO: Consider replacing the page-range dictionary with a collection of
+            // range values. The starting page is used as a dictionary key even though
+            // this method only needs to retain range boundaries for overlap checks.
+            int firstPage =
+                Convert.ToInt32(pageRangeMatch.Groups[1].Value);
+
+            int lastPage =
+                GetExpandedLastPage(
+                    pageRangeMatch.Groups[1].Value,
+                    pageRangeMatch.Groups[2].Value);
+
+            if (!IsValidPageRange(firstPage, lastPage) ||
+                OverlapsExistingPageRange(firstPage, lastPage, pageRanges))
+            {
+                return false;
+            }
+
+            pageRanges.Add(firstPage, lastPage);
+        }
+
+        return foundRange;
+    }
+
+    /// <summary>
+    /// Expands an abbreviated ending page using the leading digits from the
+    /// starting page.
+    /// </summary>
+    /// <example>
+    /// <c>350</c> and <c>2</c> produce <c>352</c>.
+    /// </example>
+    private static int GetExpandedLastPage(
+        string firstPage,
+        string lastPage)
+    {
+        if (firstPage.Length > lastPage.Length)
+        {
+            lastPage =
+                firstPage.Substring(
+                    0,
+                    firstPage.Length - lastPage.Length) +
+                lastPage;
+        }
+
+        return Convert.ToInt32(lastPage);
+    }
+
+    /// <summary>
+    /// Determines whether a numeric page range is ascending and spans fewer
+    /// than 999 pages.
+    /// </summary>
+    private static bool IsValidPageRange(
+        int firstPage,
+        int lastPage)
+    {
+        return firstPage < lastPage &&
+               lastPage - firstPage < 999;
+    }
+
+    // TODO: Review page-range overlap detection. The current check detects when
+    // either endpoint falls inside an earlier range but does not detect a later
+    // range that completely contains an earlier one.
+    /// <summary>
+    /// Determines whether either endpoint of a page range lies within a previously
+    /// accepted range.
+    /// </summary>
+    private static bool OverlapsExistingPageRange(
+        int firstPage,
+        int lastPage,
+        Dictionary<int, int> pageRanges)
+    {
+        return pageRanges.Any(
+            existingRange =>
+                firstPage >= existingRange.Key &&
+                firstPage <= existingRange.Value ||
+                lastPage >= existingRange.Key &&
+                lastPage <= existingRange.Value);
+    }
     #endregion
 
     #region CitationPublisherToWork
