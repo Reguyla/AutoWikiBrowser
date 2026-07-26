@@ -25,46 +25,208 @@ namespace WikiFunctions.Parse;
 public partial class Parsers
 {
     #region FixCitationTemplates
+    // TODO: Review regex field naming for consistency during the planned
+    // CiteTemplates cleanup. Members such as rpTemplate currently use legacy
+    // naming conventions.
+    //
+    /// <summary>
+    /// Matches the value of a citation template's <c>url</c> parameter when the
+    /// value is an unquoted, whitespace-free URL.
+    /// </summary>
+    /// <remarks>
+    /// The capture group contains the URL value. Values containing square
+    /// brackets, angle brackets, quotation marks, or whitespace are excluded.
+    /// This is used to avoid modifying text inside malformed URL parameters.
+    /// </remarks>
+    private static readonly Regex CiteUrl =
+        new(
+            @"\|\s*url\s*=\s*([^\[\]<>""\s]+)",
+            RegexOptions.Compiled);
 
-    private static readonly Regex CiteUrl = new Regex(@"\|\s*url\s*=\s*([^\[\]<>""\s]+)");
+    /// <summary>
+    /// Matches a citation template's <c>work</c> parameter when its entire value
+    /// is enclosed in wiki italics.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 contains the parameter name and assignment text. Group 2 contains
+    /// the work value without the surrounding apostrophes. Values containing
+    /// apostrophes, braces, or template pipes are deliberately excluded.
+    /// </remarks>
+    private static readonly Regex WorkInItalics =
+        new(
+            @"(\|\s*work\s*=\s*)''([^'{}\|]+)''(?=\s*(?:\||}}))",
+            RegexOptions.Compiled);
 
-    private static readonly Regex WorkInItalics = new Regex(@"(\|\s*work\s*=\s*)''([^'{}\|]+)''(?=\s*(?:\||}}))");
-
+    /// <summary>
+    /// Matches redundant page prefixes such as <c>p.</c>, <c>pp.</c>,
+    /// <c>pg</c>, and <c>pgs</c> at the start of a citation
+    /// <c>page</c> or <c>pages</c> parameter value.
+    /// </summary>
+    /// <remarks>
+    /// Optional whitespace or <c>&amp;nbsp;</c> following the prefix is included
+    /// in the match. The lookarounds ensure that only the parameter value is
+    /// modified and that the value remains inside the citation template.
+    /// </remarks>
     private static readonly Regex CiteTemplatePagesPP =
-        new Regex(@"(?<=\|\s*pages?\s*=\s*)p(?:p|gs?)?(?:\.|\b)(?:&nbsp;|\s*)(?=[^{}\|]+(?:\||}}))");
+        new(
+            @"(?<=\|\s*pages?\s*=\s*)p(?:p|gs?)?(?:\.|\b)(?:&nbsp;|\s*)(?=[^{}\|]+(?:\||}}))",
+            RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches a redundant volume label at the start of a citation journal's
+    /// <c>volume</c> parameter.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes forms such as <c>vol</c>, <c>vol.</c>, <c>volume</c>, and
+    /// <c>volumes</c>, optionally followed by a colon or <c>&amp;nbsp;</c>.
+    /// Matching is case-insensitive.
+    /// </remarks>
     private static readonly Regex CiteTemplatesJournalVolume =
-        new Regex(@"(?<=\|\s*volume\s*=\s*)vol(?:umes?|\.)?(?:&nbsp;|:)?",
+        new(
+            @"(?<=\|\s*volume\s*=\s*)vol(?:umes?|\.)?(?:&nbsp;|:)?",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches a redundant issue or number label embedded at the end of a citation
+    /// journal's <c>volume</c> parameter.
+    /// </summary>
+    /// <remarks>
+    /// The lookbehind requires a numeric or Roman-numeral volume value. The match
+    /// includes labels such as <c>no.</c>, <c>nos.</c>, <c>number</c>,
+    /// <c>issue</c>, and <c>iss</c>, together with their preceding separator.
+    /// Matching is case-insensitive.
+    /// </remarks>
     private static readonly Regex CiteTemplatesJournalVolumeAndIssue =
-        new Regex(
+        new(
             @"(?<=\|\s*volume\s*=\s*[0-9VXMILC]+?)(?:[;,]?\s*(?:nos?[\.:; ]|(?:numbers?|issues?|iss)\s*[:; ]))",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches a redundant issue or number label at the start of a citation
+    /// journal's <c>issue</c> parameter.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes labels such as <c>issue</c>, <c>no.</c>, <c>iss.</c>, and
+    /// <c>number</c>, optionally followed by punctuation or <c>&amp;nbsp;</c>.
+    /// Matching is case-insensitive.
+    /// </remarks>
     private static readonly Regex CiteTemplatesJournalIssue =
-        new Regex(@"(?<=\|\s*issue\s*=\s*)(?:issues?|(?:nos?|iss)(?:[\.,;:]|\b)|numbers?[\.,;:]?)(?:&nbsp;)?",
+        new(
+            @"(?<=\|\s*issue\s*=\s*)(?:issues?|(?:nos?|iss)(?:[\.,;:]|\b)|numbers?[\.,;:]?)(?:&nbsp;)?",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex CiteTemplatesPageRangeName = new Regex(@"(\|\s*)page(\s*=\s*[0-9]+\s*(?:–|, )\s*[0-9])");
+    /// <summary>
+    /// Matches a citation <c>page</c> parameter whose value appears to contain
+    /// a page range or page list.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the parameter delimiter and surrounding whitespace.
+    /// Group 2 captures the parameter name, assignment, and numeric value.
+    /// Recognized separators are an en dash or a comma followed by a space.
+    /// </remarks>
+    private static readonly Regex CiteTemplatesPageRangeName =
+        new(
+            @"(\|\s*)page(\s*=\s*[0-9]+\s*(?:–|, )\s*[0-9])",
+            RegexOptions.Compiled);
 
+    // TODO: Review AccessDateYear year-range matching. The current pattern only
+    // recognizes years through 2029 and may require extension for future dates.
+    /// <summary>
+    /// Matches a separate <c>accessyear</c> parameter following an access date
+    /// that contains a day and named month.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures spacing before the <c>accessyear</c> parameter, group 2
+    /// captures the year, and group 3 captures the following template delimiter.
+    /// The year pattern currently recognizes years from 2000 through 2029.
+    /// </remarks>
     private static readonly Regex AccessDateYear =
-        new Regex(@"(?<=\|\s*access\-?date\s*=\s*(?:[1-3]?\d\s+" + WikiRegexes.MonthsNoGroup + @"|\s*" +
-                  WikiRegexes.MonthsNoGroup + @"\s+[1-3]?\d))(\s*)\|\s*accessyear\s*=\s*(20[012]\d)\s*(\||}})");
+        new(
+            @"(?<=\|\s*access\-?date\s*=\s*(?:[1-3]?\d\s+" +
+            WikiRegexes.MonthsNoGroup +
+            @"|\s*" +
+            WikiRegexes.MonthsNoGroup +
+            @"\s+[1-3]?\d))(\s*)\|\s*accessyear\s*=\s*(20[012]\d)\s*(\||}})",
+            RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches an empty legacy access-date component parameter.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes empty <c>accessdaymonth</c>, <c>accessmonth</c>,
+    /// <c>accessmonthday</c>, and <c>accessyear</c> parameters.
+    /// </remarks>
     private static readonly Regex AccessDayMonthDay =
-        new Regex(@"\|\s*access(?:daymonth|month(?:day)?|year)\s*=\s*(?=\||}})");
+        new(
+            @"\|\s*access(?:daymonth|month(?:day)?|year)\s*=\s*(?=\||}})",
+            RegexOptions.Compiled);
 
+    // TODO: Review DateLeadingZero year-range matching. The current expression
+    // limits recognized years to 1800–2029 and should be evaluated for long-term
+    // maintainability.
+    /// <summary>
+    /// Matches a leading zero in the day portion of a citation date parameter.
+    /// </summary>
+    /// <remarks>
+    /// Applies to <c>date</c>, <c>accessdate</c>, <c>access-date</c>,
+    /// <c>archivedate</c>, and <c>archive-date</c> parameters using recognized
+    /// named-month date formats. The optional year pattern currently supports
+    /// years from 1800 through 2029.
+    /// </remarks>
     private static readonly Regex DateLeadingZero =
-        new Regex(@"(?<=\|\s*(?:access|archive)?\-?date\s*=\s*)(?:0([1-9]\s+[A-Z][a-z]{2,})|(\s*[A-Z][a-z]{2,}\s)+0([1-9],?))(\s+(?:20[012]|1[89]\d)\d)?(\s*(?:\||}}))");
+        new(
+            @"(?<=\|\s*(?:access|archive)?\-?date\s*=\s*)(?:0([1-9]\s+[A-Z][a-z]{2,})|(\s*[A-Z][a-z]{2,}\s)+0([1-9],?))(\s+(?:20[012]|1[89]\d)\d)?(\s*(?:\||}}))",
+            RegexOptions.Compiled);
 
-    private static readonly Regex LangTemplate = new Regex(@"(\|\s*language\s*=\s*)({{(\w{2}) icon}}\s*)(?=\||}})");
+    // TODO: Evaluate LangTemplate support for modern language identifiers.
+    // The current pattern only recognizes two-character language codes.
+    /// <summary>
+    /// Matches a two-letter language icon template used as the complete value of
+    /// a citation <c>language</c> parameter.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the parameter assignment, group 2 captures the complete
+    /// icon template, and group 3 captures the two-letter language code.
+    /// </remarks>
+    private static readonly Regex LangTemplate =
+        new(
+            @"(\|\s*language\s*=\s*)({{(\w{2}) icon}}\s*)(?=\||}})",
+            RegexOptions.Compiled);
 
-    private static readonly Regex UnspacedCommaPageRange = new Regex(@"((?:[ ,–]|^)[0-9]+),([0-9]+(?:[ ,–]|$))");
+    /// <summary>
+    /// Matches a comma-separated numeric page range or page list that lacks
+    /// whitespace after the comma.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the first page number and its preceding boundary.
+    /// Group 2 captures the following page number and its trailing boundary.
+    /// </remarks>
+    private static readonly Regex UnspacedCommaPageRange =
+        new(
+            @"((?:[ ,–]|^)[0-9]+),([0-9]+(?:[ ,–]|$))",
+            RegexOptions.Compiled);
 
-    private static readonly List<string> ParametersToDequote = new List<string>(new[] { "title", "trans_title" });
-    private static readonly Regex rpTemplate = Tools.NestedTemplateRegex("rp");
-    private static readonly char[] TemplateNameEndChars = "}|".ToCharArray();
+    // TODO: Consider replacing ParametersToDequote with a read-only collection
+    // (for example, ReadOnlyCollection<string>, ImmutableArray<string>, or
+    // FrozenSet<string>) since the values are constant after initialization.
+    /// <summary>
+    /// Identifies citation parameters whose values may have unnecessary outer
+    /// quotation marks removed.
+    /// </summary>
+    private static readonly List<string> ParametersToDequote =
+        new(new[] { "title", "trans_title" });
+
+    /// <summary>
+    /// Matches an <c>rp</c> template, including supported nested template content.
+    /// </summary>
+    private static readonly Regex rpTemplate =
+        Tools.NestedTemplateRegex("rp");
+
+    /// <summary>
+    /// Contains characters that mark the end of a template name.
+    /// </summary>
+    private static readonly char[] TemplateNameEndChars =
+        "}|".ToCharArray();
 
     /// <summary>
     /// Applies supported formatting corrections to citation-related templates.
@@ -388,13 +550,90 @@ public partial class Parsers
         return match.Value;
     }
 
-    private static readonly Regex IdISBN = new Regex(@"^ISBN ?[:=]?\s*([\d \-]+X?)$");
-    private static readonly Regex IdASIN = new Regex(@"^ASIN ?[:=]?\s*([\d \-]+X?)$");
-    private static readonly Regex IdISSN = new Regex(@"^ISSN ?[:=]?\s*([0-9]{4}) *[- –]? *([0-9]{3}[0-9X])$", RegexOptions.IgnoreCase);
-    private static readonly Regex YearOnly = new Regex(@"^[12]\d{3}$", RegexOptions.Compiled);
-    private static readonly Regex ISBNDash = new Regex(@"(\d)[–](\d|X$)");
-    private static readonly Regex BalancedArrows = new Regex(@"(?:‹([^›]+)›)");
-    private static readonly Regex ArchiveOrgURL = new Regex(@"^https?://(?:web\.archive\.org|archive\.today)/(?:web/)?(\d{8})(?:\d{6}/)");
+    // TODO: Review identifier validation. The current ISBN, ASIN, and ISSN
+    // patterns recognize formatting but do not validate identifier checksums.
+    //
+    /// <summary>
+    /// Matches an <c>id</c> parameter containing an ISBN identifier.
+    /// </summary>
+    /// <remarks>
+    /// Captures the ISBN value without the leading <c>ISBN</c> label. Optional
+    /// whitespace and <c>:</c> or <c>=</c> separators are permitted.
+    /// </remarks>
+    private static readonly Regex IdISBN =
+        new(
+            @"^ISBN ?[:=]?\s*([\d \-]+X?)$",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an <c>id</c> parameter containing an ASIN identifier.
+    /// </summary>
+    /// <remarks>
+    /// Captures the ASIN value without the leading <c>ASIN</c> label. Optional
+    /// whitespace and <c>:</c> or <c>=</c> separators are permitted.
+    /// </remarks>
+    private static readonly Regex IdASIN =
+        new(
+            @"^ASIN ?[:=]?\s*([\d \-]+X?)$",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an <c>id</c> parameter containing an ISSN identifier.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the first four digits and group 2 captures the final
+    /// four-character component, allowing either a digit or <c>X</c> as the
+    /// checksum character.
+    /// </remarks>
+    private static readonly Regex IdISSN =
+        new(
+            @"^ISSN ?[:=]?\s*([0-9]{4}) *[- –]? *([0-9]{3}[0-9X])$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches a four-digit year with no surrounding text.
+    /// </summary>
+    private static readonly Regex YearOnly =
+        new(
+            @"^[12]\d{3}$",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an en dash separating adjacent ISBN components.
+    /// </summary>
+    /// <remarks>
+    /// Used to normalize ISBN separators to standard hyphens.
+    /// </remarks>
+    private static readonly Regex ISBNDash =
+        new(
+            @"(\d)[–](\d|X$)",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches text enclosed by single angle quotation marks.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the enclosed text without the quotation marks.
+    /// </remarks>
+    private static readonly Regex BalancedArrows =
+        new(
+            @"(?:‹([^›]+)›)",
+            RegexOptions.Compiled);
+
+    // TODO: Review ArchiveOrgURL support for additional archive services and URL
+    // formats (for example, archive.ph and future Internet Archive variants).
+    /// <summary>
+    /// Matches supported Internet Archive snapshot URLs.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the eight-digit archive date (YYYYMMDD).
+    /// Recognizes both <c>web.archive.org</c> and
+    /// <c>archive.today</c> URL formats.
+    /// </remarks>
+    private static readonly Regex ArchiveOrgURL =
+        new(
+            @"^https?://(?:web\.archive\.org|archive\.today)/(?:web/)?(\d{8})(?:\d{6}/)",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Performs fixes to a given citation template call
@@ -1276,10 +1515,60 @@ public partial class Parsers
 
     #region PageRanges
 
-    private static readonly List<string> PageFields = new List<string>(new[] { "page", "pages", "p", "pp" });
-    private static readonly Regex PageRange = new Regex(@"\b([0-9]{1,8})\s*[-—]+\s*([0-9]{1,8})");
-    private static readonly Regex SpacedPageRange = new Regex(@"(\d+) +(–|&ndash;) +(\d)");
-    private static readonly Regex HiddenRegex = new Regex("⌊⌊⌊⌊(\\d*)⌋⌋⌋⌋");
+    // TODO: Consider replacing PageFields with a read-only collection because
+    // the set of recognized page parameter names is constant after initialization.
+    /// <summary>
+    /// Identifies citation parameters that may contain a page number or page range.
+    /// </summary>
+    /// <remarks>
+    /// Includes both the full parameter names and their short aliases.
+    /// </remarks>
+    private static readonly List<string> PageFields =
+        new(new[] { "page", "pages", "p", "pp" });
+
+    // TODO: Review PageRange separator handling. The current expression accepts
+    // hyphens and em dashes but does not include en dashes or the &ndash; entity.
+    //
+    // TODO: Review the eight-digit page-number limit in PageRange and document
+    // whether it reflects an intentional validation rule or a legacy safeguard.
+    /// <summary>
+    /// Matches a numeric page range separated by one or more hyphens or em dashes.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the starting page and group 2 captures the ending page.
+    /// Each page number may contain between one and eight digits.
+    /// </remarks>
+    private static readonly Regex PageRange =
+        new(
+            @"\b([0-9]{1,8})\s*[-—]+\s*([0-9]{1,8})",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a page range containing spaces around an en dash or
+    /// <c>&amp;ndash;</c> entity.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the starting page, group 2 captures the separator, and
+    /// group 3 captures the first digit of the ending page.
+    /// </remarks>
+    private static readonly Regex SpacedPageRange =
+        new(
+            @"(\d+) +(–|&ndash;) +(\d)",
+            RegexOptions.Compiled);
+
+    // TODO: Document the lifecycle of HiddenRegex placeholders and verify that
+    // malformed or unmatched placeholder markers are handled safely.
+    /// <summary>
+    /// Matches an internal placeholder used to temporarily hide protected text.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the numeric placeholder identifier between the marker
+    /// characters.
+    /// </remarks>
+    private static readonly Regex HiddenRegex =
+        new(
+            "⌊⌊⌊⌊(\\d*)⌋⌋⌋⌋",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Converts hyphens in page ranges in citation template fields to endashes
@@ -1351,14 +1640,47 @@ public partial class Parsers
 
     #region CitationPublisherToWork
 
+    // TODO: Review CiteWebOrNews template aliases against currently supported
+    // citation-template redirects and aliases.
+    /// <summary>
+    /// Matches supported web and news citation templates, including nested
+    /// template content.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes <c>cite web</c>, <c>citeweb</c>, <c>cite news</c>, and
+    /// <c>citenews</c> template names.
+    /// </remarks>
     private static readonly Regex CiteWebOrNews =
-        Tools.NestedTemplateRegex(new[] { "cite web", "citeweb", "cite news", "citenews" });
+        Tools.NestedTemplateRegex(
+            new[] { "cite web", "citeweb", "cite news", "citenews" });
 
-    private static readonly Regex PressPublishers = new Regex(@"(Associated Press|United Press International)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    // TODO: Review whether PressPublishers should include additional wire
+    // services or use a shared publisher classification mechanism.
+    /// <summary>
+    /// Matches recognized wire-service publisher names.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes <c>Associated Press</c> and
+    /// <c>United Press International</c>. Matching is case-insensitive.
+    /// </remarks>
+    private static readonly Regex PressPublishers =
+        new(
+            @"(Associated Press|United Press International)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    // TODO: Consider replacing WorkParameterAndAliases with a read-only
+    // collection because the supported parameter names are constant.
+    /// <summary>
+    /// Identifies citation parameters that represent the publication or work
+    /// containing the cited item.
+    /// </summary>
+    /// <remarks>
+    /// Includes the primary <c>work</c> parameter and its supported aliases:
+    /// <c>newspaper</c>, <c>journal</c>, <c>periodical</c>, and
+    /// <c>magazine</c>.
+    /// </remarks>
     private static readonly List<string> WorkParameterAndAliases =
-        new List<string>(new[] { "work", "newspaper", "journal", "periodical", "magazine" });
+        new(new[] { "work", "newspaper", "journal", "periodical", "magazine" });
 
     /// <summary>
     /// Where the publisher field is used incorrectly instead of the work field in a {{cite web}} or {{cite news}} citation
@@ -1410,9 +1732,41 @@ public partial class Parsers
         return newText;
     }
 
-    private const string SiCitStart = @"(?si)(\|\s*";
-    private const string CitAccessdate = SiCitStart + @"(?:access|archive)\-?date\s*=\s*";
-    private const string CitDate = SiCitStart + @"(?:archive|air)?date2?\s*=\s*";
+    // TODO: Consider replacing shared regex string fragments with reusable
+    // RegexBuilder/helper methods during the planned regex reorganization if
+    // doing so improves readability without changing behavior.
+    /// <summary>
+    /// Common regular-expression prefix used by citation parameter patterns.
+    /// </summary>
+    /// <remarks>
+    /// Enables single-line and case-insensitive matching, then matches the
+    /// beginning of a template parameter assignment, including the leading pipe
+    /// and optional whitespace.
+    /// </remarks>
+    private const string SiCitStart =
+        @"(?si)(\|\s*";
+
+    /// <summary>
+    /// Common regular-expression prefix for citation access-date parameters.
+    /// </summary>
+    /// <remarks>
+    /// Matches the beginning of an <c>accessdate</c>, <c>access-date</c>,
+    /// <c>archivedate</c>, or <c>archive-date</c> parameter assignment,
+    /// immediately before the parameter value.
+    /// </remarks>
+    private const string CitAccessdate =
+        SiCitStart + @"(?:access|archive)\-?date\s*=\s*";
+
+    /// <summary>
+    /// Common regular-expression prefix for citation date parameters.
+    /// </summary>
+    /// <remarks>
+    /// Matches the beginning of <c>date</c>, <c>date2</c>,
+    /// <c>airdate</c>, <c>airdate2</c>, <c>archivedate</c>, or
+    /// <c>archivedate2</c> parameter assignments.
+    /// </remarks>
+    private const string CitDate =
+        SiCitStart + @"(?:archive|air)?date2?\s*=\s*";
 
     private static readonly RegexReplacement[] CiteTemplateIncorrectISOAccessdates =
     {
@@ -1689,21 +2043,87 @@ public partial class Parsers
     }
 
     #endregion
+    // TODO: Consider replacing the large citation-parameter regex alternations
+    // with shared read-only parameter collections once citation validation logic
+    // is reorganized.
+    //
+    // TODO: Review the case-sensitive matching behavior of citeWebParameters and
+    // citeArXivParameters. Capitalization variants are currently listed
+    // individually and should not be consolidated without compatibility tests.
+    /// <summary>
+    /// Matches supported arXiv citation templates, including nested template
+    /// content.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes both <c>cite arxiv</c> and <c>cite arXiv</c>.
+    /// </remarks>
+    private static readonly Regex CiteArXiv =
+        Tools.NestedTemplateRegex(
+            new[] { "cite arxiv", "cite arXiv" });
 
-    private static readonly Regex CiteArXiv = Tools.NestedTemplateRegex(new[] { "cite arxiv", "cite arXiv" });
-    private static readonly Regex CitationPopulatedParameter = new Regex(@"\|\s*([\w_\d- ']+)\s*=\s*([^\|}]+)");
+    // TODO: Review CitationPopulatedParameter handling of nested templates,
+    /// links, and values containing pipes. The current expression stops at the
+    // first pipe or closing brace and may rely on earlier masking or preprocessing.
+    /// <summary>
+    /// Matches a populated template parameter and captures its name and value.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the parameter name. Group 2 captures the non-empty
+    /// parameter value up to the next pipe or closing brace.
+    /// Parameter names may contain letters, digits, underscores, hyphens,
+    /// spaces, and apostrophes.
+    /// </remarks>
+    private static readonly Regex CitationPopulatedParameter =
+        new(
+            @"\|\s*([\w_\d- ']+)\s*=\s*([^\|}]+)",
+            RegexOptions.Compiled);
 
+    // TODO: Review citeWebParameters against the currently supported citation
+    // template parameters and aliases. The expression contains many legacy and
+    // deprecated names that may eventually be moved to shared metadata.
+    /// <summary>
+    /// Matches parameter names recognized for web-style citation templates.
+    /// </summary>
+    /// <remarks>
+    /// The expression contains current and legacy aliases, capitalization
+    /// variants, deprecated spellings, and identifier-specific parameter names.
+    /// The word boundary prevents matching a recognized name as the prefix of a
+    /// longer parameter name.
+    /// </remarks>
     private static readonly Regex citeWebParameters =
-        new Regex(
+        new(
             @"^(access-?date|agency|archive-?date|archive\-format|archive-?url|arxiv|ARXIV|asin|ASIN|asin-tld|ASIN-TLD|at|[Aa]uthor\d*|author\d*-first|author-?format|author\d*-(last|given|surname)|author-?link\d*|author\d*-?link|authors|author-mask|author-name-separator|author-separator|bibcode|BIBCODE|citeseerx|collaboration|date|dead-?url|department|df|dictionary|display-?(authors|subjects)|display-?editors|doi|DOI|DoiBroken|doi-broken|doi-broken-date|doi_brokendate|doi-inactive-date|doi_inactivedate|edition|[Ee]ditor|editor\d*|editor\d*-first|editor-?format|EditorGiven\d*|editor\d*-given|editor\d*-last|editor\d*-?link|editor-?mask|editor-name-separator|EditorSurname\d*|editor\d*-surname|editor-first\d*|editor-given\d*|editor-last\d*|editor-surname\d*|editorlink\d*|v?editors|eissn|[Ee]mbargo|encyclopa?edia|first\d*|format|given\d*|hdl|host|id|ID|ignoreisbnerror|ignore-isbn-error|institution|interviewer(\-(given|surname))?|i?sbn|ISBN|isbn13|ISBN13|issn|ISSN|issue|jfm|JFM|journal|jstor|JSTOR|language|last\d*|lastauthoramp|last-author-amp|lay-?(summary|url)|lccn|LCCN|location|magazine|medium|minutes|mode|mr|MR|name\-list\-style|newspaper|no-?pp|number|oclc|OCLC|ol|OL|orig-?(year|date)|others|osti|pp?|pages?|people|periodical|place|pmc|PMC|pmid|PMID|postscript|publication-?(?:place|date)|publisher|quotation|quote(\-pages?)?|[Rr]ef|registration|rfc|RFC|script\-title|script\-(website|work|quote)|separator|series|series-?link|ssrn|SSRN|subject(\-mask)?|subscription|surname\d*|s2cid(\-access)?|time|title(\-link)?|trans\-(quote|website|work)|trans[_-]title|translator\-(last\d*|surname)|translator(\-link\d*|\d+)?|translator\-(first\d*|given)|type|url|URL|vauthors|version|via|volume|website|work|year|zbl|ZBL)\b",
             RegexOptions.Compiled);
 
+    // TODO: Review citeArXivParameters against the current Cite arXiv template
+    // documentation and determine which legacy aliases must remain supported.
+    /// <summary>
+    /// Matches parameter names recognized for arXiv citation templates.
+    /// </summary>
+    /// <remarks>
+    /// The expression includes current parameters, legacy aliases,
+    /// capitalization variants, and known historical misspellings such as
+    /// <c>seperator</c>.
+    /// </remarks>
     private static readonly Regex citeArXivParameters =
-        new Regex(
+        new(
             @"\b(arxiv|asin|ASIN|author\d*|authorlink\d*|author\d*-link|bibcode|class|coauthors?|collaboration|date|day|display\-authors|doi|DOI|doi brokendate|doi inactivedate|eprint|first\d*|format|given\d*|id|in|isbn|ISBN|issn|ISSN|jfm|JFM|jstor|JSTOR|language|last\d*|laydate|laysource|laysummary|lccn|LCCN|mode|month|mr|MR|oclc|OCLC|ol|OL|osti|OSTI|page|pmc|PMC|pmid|PMID|postscript|publication-date|quote|ref|rfc|RFC|separator|seperator|ssrn|SSRN|surname\d*|title|vauthors|version|year|zbl)\b",
             RegexOptions.Compiled);
 
-    private static readonly Regex NoEqualsTwoBars = new Regex(@"\|[^=\|]+\|");
+    // TODO: Verify whether NoEqualsTwoBars should match positional template
+    // parameters intentionally or only malformed named parameters.
+    /// <summary>
+    /// Matches text between two template pipes when the text does not contain an
+    /// equals sign.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify positional or malformed template content that appears
+    /// between parameter separators.
+    /// </remarks>
+    private static readonly Regex NoEqualsTwoBars =
+        new(
+            @"\|[^=\|]+\|",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Searches for unknown/invalid parameters within citation templates
