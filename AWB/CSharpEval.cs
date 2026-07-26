@@ -83,6 +83,14 @@ public partial class CSharpEval : Form
         };
     }
 
+    /// <summary>
+    /// Builds the C# source code used to compile the expression entered in the
+    /// evaluator.
+    /// </summary>
+    /// <returns>
+    /// A complete C# source file containing an <c>EvalCode</c> method that
+    /// returns the entered expression.
+    /// </returns>
     private string BuildEvaluatorSource()
     {
         return @"using System;
@@ -105,9 +113,23 @@ namespace CSharpEvaluator
 ";
     }
 
+    /// <summary>
+    /// Adds references to the assemblies required to compile evaluator code.
+    /// </summary>
+    /// <param name="parameters">
+    /// The compiler parameters that receive the assembly reference paths.
+    /// </param>
+    /// <remarks>
+    /// The AutoWikiBrowser and WikiFunctions assemblies are added explicitly.
+    /// Other loaded, non-dynamic assemblies are also included so evaluator code
+    /// can use types already available to the application. Duplicate paths and
+    /// Microsoft-generated code assemblies are ignored.
+    /// </remarks>
     private static void AddLoadedAssemblyReferences(
         CompilerParameters parameters)
     {
+        ArgumentNullException.ThrowIfNull(parameters);
+
         HashSet<string> referencePaths =
             new(StringComparer.OrdinalIgnoreCase);
 
@@ -119,8 +141,8 @@ namespace CSharpEvaluator
             referencePaths,
             typeof(Tools).Assembly);
 
-        foreach (Assembly assembly in
-                 AppDomain.CurrentDomain.GetAssemblies())
+        foreach (Assembly assembly in 
+            AppDomain.CurrentDomain.GetAssemblies())
         {
             if (assembly.IsDynamic)
             {
@@ -139,18 +161,33 @@ namespace CSharpEvaluator
                 assembly);
         }
 
-        foreach (string referencePath in
-                 referencePaths)
+        foreach (string referencePath in referencePaths)
         {
-            parameters.ReferencedAssemblies.Add(
-                referencePath);
+            parameters.ReferencedAssemblies.Add(referencePath);
         }
     }
 
+    /// <summary>
+    /// Adds the location of a loadable assembly to the reference set.
+    /// </summary>
+    /// <param name="referencePaths">
+    /// Collection of unique assembly paths used during compilation.
+    /// </param>
+    /// <param name="assembly">
+    /// The assembly whose file location should be added.
+    /// </param>
+    /// <remarks>
+    /// Dynamic assemblies, assemblies without a file location, and
+    /// <c>mscorlib.dll</c> are ignored because they cannot or do not need to be
+    /// referenced explicitly.
+    /// </remarks>
     private static void AddAssemblyReference(
         ISet<string> referencePaths,
         Assembly assembly)
     {
+        ArgumentNullException.ThrowIfNull(referencePaths);
+        ArgumentNullException.ThrowIfNull(assembly);
+
         if (assembly.IsDynamic)
         {
             return;
@@ -172,8 +209,11 @@ namespace CSharpEvaluator
             return;
         }
 
+        // Ignore the legacy .NET Framework core library.
+        string fileName = Path.GetFileName(location);
+
         if (string.Equals(
-                Path.GetFileName(location),
+                fileName,
                 "mscorlib.dll",
                 StringComparison.OrdinalIgnoreCase))
         {
@@ -186,6 +226,21 @@ namespace CSharpEvaluator
         }
     }
 
+    /// <summary>
+    /// Displays compiler errors and warnings produced while compiling evaluator
+    /// code.
+    /// </summary>
+    /// <param name="results">
+    /// The compilation results containing any reported diagnostics.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when compilation produced no errors; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Warnings are displayed to the user but do not prevent the compiled
+    /// evaluator from running.
+    /// </remarks>
     private bool DisplayCompilerDiagnostics(
         CompilerResults results)
     {
@@ -197,8 +252,7 @@ namespace CSharpEvaluator
         bool hasErrors = false;
         StringBuilder builder = new();
 
-        foreach (CompilerError error in
-                 results.Errors)
+        foreach (CompilerError error in results.Errors)
         {
             hasErrors |= !error.IsWarning;
 
@@ -210,8 +264,7 @@ namespace CSharpEvaluator
                     error.Column);
             }
 
-            if (!string.IsNullOrEmpty(
-                    error.ErrorNumber))
+            if (!string.IsNullOrEmpty(error.ErrorNumber))
             {
                 builder.AppendFormat(
                     "[{0}] ",
@@ -222,11 +275,9 @@ namespace CSharpEvaluator
             builder.AppendLine();
         }
 
-        using CustomModuleErrors errorDialog =
-            new();
+        using CustomModuleErrors errorDialog = new();
 
-        errorDialog.ErrorText =
-            builder.ToString();
+        errorDialog.ErrorText = builder.ToString();
 
         errorDialog.Text =
             "Compilation " +
@@ -239,6 +290,23 @@ namespace CSharpEvaluator
         return !hasErrors;
     }
 
+    /// <summary>
+    /// Creates and executes the compiled evaluator and displays its result.
+    /// </summary>
+    /// <param name="assembly">
+    /// The compiled assembly containing the generated evaluator type.
+    /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// The compilation did not return an assembly, the evaluator could not be
+    /// created, or the evaluated expression threw an exception.
+    /// </exception>
+    /// <exception cref="TypeLoadException">
+    /// The generated evaluator type could not be loaded.
+    /// </exception>
+    /// <exception cref="MissingMethodException">
+    /// The generated evaluator does not contain the expected
+    /// <c>EvalCode</c> method.
+    /// </exception>
     private void InvokeEvaluator(
         Assembly? assembly)
     {
@@ -256,8 +324,7 @@ namespace CSharpEvaluator
                 $"The evaluator type '{EvaluatorTypeName}' could not be loaded.");
 
         object evaluator =
-            Activator.CreateInstance(
-                evaluatorType)
+            Activator.CreateInstance(evaluatorType)
             ?? throw new InvalidOperationException(
                 "The C# evaluator could not be created.");
 
@@ -290,9 +357,17 @@ namespace CSharpEvaluator
         }
     }
 
+    /// <summary>
+    /// Displays an exception raised while compiling or executing evaluator code.
+    /// </summary>
+    /// <param name="exception">
+    /// The exception to display.
+    /// </param>
     private void ShowEvaluationError(
         Exception exception)
     {
+        ArgumentNullException.ThrowIfNull(exception);
+
         Exception displayedException =
             exception.InnerException ??
             exception;
