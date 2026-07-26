@@ -530,33 +530,7 @@ public partial class Parsers
         if (TheWork.Contains("''") && !TheWork.Contains("."))
             newValue = WorkInItalics.Replace(newValue, "$1$2");
 
-        // format quotes in title fields, remove stray quotes
-        foreach (string dequoteParam in ParametersToDequote)
-        {
-            string quotetitle;
-            if (paramsFound.TryGetValue(dequoteParam, out quotetitle))
-            {
-                string before = quotetitle;
-                // convert curly quotes to straight quotes per [[MOS:PUNCT]]
-                quotetitle = WikiRegexes.CurlyDoubleQuotes.Replace(quotetitle, @"""");
-                quotetitle = BalancedArrows.Replace(quotetitle, @"""$1""");
-                quotetitle = quotetitle.Replace("’", "'"); // single curly quote close
-                quotetitle = quotetitle.Replace("‘", "'"); // single curly quote open
-
-                // trim stray quotes (but don't change title in quotes as this may be a title that is itself a quote)
-                // don't change if contains hidetext marker - we can't say what quote marks are or aren't in the hidden text
-                if (!quotetitle.Trim('"').Contains(@"""") && !quotetitle.Contains("⌊⌊⌊⌊"))
-                {
-                    if (quotetitle.StartsWith(@"""") && !quotetitle.EndsWith(@""""))
-                        quotetitle = quotetitle.TrimStart('"');
-                    else if (quotetitle.EndsWith(@"""") && !quotetitle.StartsWith(@""""))
-                        quotetitle = quotetitle.TrimEnd('"');
-                }
-
-                if (!before.Equals(quotetitle))
-                    newValue = Tools.SetTemplateParameterValue(newValue, dequoteParam, quotetitle);
-            }
-        }
+        newValue = NormalizeCitationTitleQuotes(newValue, paramsFound);
 
         // page= and pages= fields don't need p. or pp. in them when nopp not set
         if ((pages.Contains("p") || page.Contains("p")) &&
@@ -773,19 +747,7 @@ public partial class Parsers
             newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
         }
 
-        // {{dead link}} should be placed outside citation, not in format field per [[Template:Dead link]]
-        Match deadLinkMatch = WikiRegexes.DeadLink.Match(format);
-        if (deadLinkMatch.Success)
-        {
-            string deadLink = deadLinkMatch.Value;
-
-            if (theURL.ToUpper().TrimEnd('L').EndsWith("HTM") && format.Equals(deadLink))
-                newValue = Tools.RemoveTemplateParameter(newValue, "format");
-            else
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "format", format.Replace(deadLink, ""));
-
-            newValue += (" " + deadLink);
-        }
+        newValue = MoveDeadLinkOutsideCitation(newValue, format, theURL);
 
         if (id.Length > 0)
         {
@@ -861,6 +823,110 @@ public partial class Parsers
         return newValue;
     }
 
+    /// <summary>
+    /// Normalizes quotation marks in citation title parameters and removes
+    /// unmatched outer quotation marks when it is safe to do so.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="parameters">
+    /// The citation parameters captured from the template.
+    /// </param>
+    /// <returns>
+    /// The citation template with normalized title quotation marks.
+    /// </returns>
+    private static string NormalizeCitationTitleQuotes(
+        string template,
+        IReadOnlyDictionary<string, string> parameters)
+    {
+        foreach (string parameterName in ParametersToDequote)
+        {
+            if (!parameters.TryGetValue(parameterName, out string title))
+                continue;
+
+            string normalizedTitle = title;
+
+            // Convert curly quotation marks to straight quotation marks.
+            normalizedTitle =
+                WikiRegexes.CurlyDoubleQuotes.Replace(normalizedTitle, @"""");
+            normalizedTitle =
+                BalancedArrows.Replace(normalizedTitle, @"""$1""");
+            normalizedTitle = normalizedTitle.Replace("’", "'");
+            normalizedTitle = normalizedTitle.Replace("‘", "'");
+
+            // Do not alter hidden text because its quotation marks cannot be
+            // reliably evaluated at this stage.
+            if (!normalizedTitle.Trim('"').Contains(@"""") &&
+                !normalizedTitle.Contains("⌊⌊⌊⌊"))
+            {
+                if (normalizedTitle.StartsWith(@"""") &&
+                    !normalizedTitle.EndsWith(@""""))
+                {
+                    normalizedTitle = normalizedTitle.TrimStart('"');
+                }
+                else if (normalizedTitle.EndsWith(@"""") &&
+                         !normalizedTitle.StartsWith(@""""))
+                {
+                    normalizedTitle = normalizedTitle.TrimEnd('"');
+                }
+            }
+
+            if (!title.Equals(normalizedTitle))
+            {
+                template = Tools.SetTemplateParameterValue(
+                    template,
+                    parameterName,
+                    normalizedTitle);
+            }
+        }
+
+        return template;
+    }
+
+    /// <summary>
+    /// Moves a dead-link template from the citation's format parameter to
+    /// immediately after the citation template.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="format">
+    /// The current value of the format parameter.
+    /// </param>
+    /// <param name="url">
+    /// The current value of the URL parameter.
+    /// </param>
+    /// <returns>
+    /// The citation with any embedded dead-link template moved outside it.
+    /// </returns>
+    private static string MoveDeadLinkOutsideCitation(
+        string template,
+        string format,
+        string url)
+    {
+        Match deadLinkMatch = WikiRegexes.DeadLink.Match(format);
+
+        if (!deadLinkMatch.Success)
+            return template;
+
+        string deadLink = deadLinkMatch.Value;
+
+        if (url.ToUpper().TrimEnd('L').EndsWith("HTM") &&
+            format.Equals(deadLink))
+        {
+            template = Tools.RemoveTemplateParameter(template, "format");
+        }
+        else
+        {
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "format",
+                format.Replace(deadLink, ""));
+        }
+
+        return template + " " + deadLink;
+    }
     #endregion
 
     #region PageRanges
