@@ -608,6 +608,11 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         SetTreeViewColours();
     }
 
+    /// <summary>
+    /// Handles keyboard shortcuts used by the replacement-rules tree.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">Information about the pressed key.</param>
     private void ReplaceSpecial_KeyDown(object sender, KeyEventArgs e)
     {
         if (!RulesTreeView.Focused)
@@ -624,45 +629,83 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             return;
 
         e.Handled = true;
+
         switch (e.KeyCode)
         {
             case Keys.C:
-                CopyCmd(); break;
+                CopyCmd();
+                break;
+
             case Keys.V:
-                PasteCmd(); break;
+                PasteCmd();
+                break;
+
             case Keys.X:
-                CutCmd(); break;
+                CutCmd();
+                break;
+
             default:
                 e.Handled = false;
                 break;
         }
     }
 
+    /// <summary>
+    /// Starts a move operation when a node is dragged from the rules tree.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// Information about the item being dragged.
+    /// </param>
     private void RulesTreeView_ItemDrag(object sender, ItemDragEventArgs e)
     {
-        DoDragDrop(e.Item, DragDropEffects.Move);
+        if (e.Item is TreeNode draggedNode)
+            RulesTreeView.DoDragDrop(draggedNode, DragDropEffects.Move);
     }
 
+    /// <summary>
+    /// Determines whether incoming drag data can be accepted by the rules tree.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// Information about the current drag-and-drop operation.
+    /// </param>
     private void RulesTreeView_DragEnter(object sender, DragEventArgs e)
     {
-        e.Effect = e.AllowedEffect;
+        e.Effect = e.Data?.GetDataPresent(typeof(TreeNode)) == true
+            ? DragDropEffects.Move
+            : DragDropEffects.None;
     }
 
+    /// <summary>
+    /// Updates the prospective drop target and prevents invalid tree-node moves.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// Information about the current drag position and transferred data.
+    /// </param>
     private void RulesTreeView_DragOver(object sender, DragEventArgs e)
     {
-        Point targetPoint = RulesTreeView.PointToClient(new Point(e.X, e.Y));
-
-        TreeNode targetNode = RulesTreeView.GetNodeAt(targetPoint);
-        RulesTreeView.SelectedNode = targetNode;
-
-        TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
-
-        if (Tools.IsSubnodeOf(draggedNode, targetNode))
+        if (e.Data?.GetData(typeof(TreeNode)) is not TreeNode draggedNode)
         {
             e.Effect = DragDropEffects.None;
             return;
         }
 
+        Point targetPoint =
+            RulesTreeView.PointToClient(new Point(e.X, e.Y));
+
+        TreeNode targetNode = RulesTreeView.GetNodeAt(targetPoint);
+
+        if (targetNode == null ||
+            ReferenceEquals(draggedNode, targetNode) ||
+            Tools.IsSubnodeOf(draggedNode, targetNode))
+        {
+            e.Effect = DragDropEffects.None;
+            return;
+        }
+
+        RulesTreeView.SelectedNode = targetNode;
         e.Effect = DragDropEffects.Move;
     }
 
