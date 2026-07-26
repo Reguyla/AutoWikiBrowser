@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -3658,41 +3659,43 @@ public class ApiEdit : IApiEdit
     /// </remarks>
     private void EnsureHtmlHeadersLoaded()
     {
-        if (!string.IsNullOrEmpty(HtmlHeaders)) return;
+        if (!string.IsNullOrEmpty(HtmlHeaders))
+            return;
 
         string result = HttpGet(
-            new Dictionary<string, string>
+            new()
             {
-                {"action", "parse"},
-                {"prop", "headhtml"},
-                {"title", "a"},
-                {"text", "a"}
+                { "action", "parse" },
+                { "prop", "headhtml" },
+                { "title", "a" },
+                { "text", "a" }
             },
-            ActionOptions.None
-            );
+            ActionOptions.None);
 
-        result = Tools.StringBetween(Tools.UnescapeXML(result), "<head>", "</head>");
+        result = Tools.StringBetween(
+            Tools.UnescapeXML(result),
+            "<head>",
+            "</head>");
+
         StringBuilder extracted = new(2048);
 
-        foreach (Match m in ExtractCssAndJs.Matches(result))
+        foreach (Match match in ExtractCssAndJs.Matches(result))
         {
-            extracted.Append(m.Value);
+            extracted.Append(match.Value);
             extracted.AppendLine();
         }
 
         HtmlHeaders = ExpandRelativeUrls(extracted.ToString());
 
-        /*
-         * T117870: The legacy WinForms WebBrowser rendering engine may apply the
-         * browser-default italic style to <cite> elements even when MediaWiki's
-         * styles are expected to override it. Add an explicit citation-class rule
-         * so previews match the rendered wiki page more closely.
-         * 
-         * TODO (.NET modernization): Re-evaluate this workaround after the preview
-         * pipeline has fully transitioned away from the legacy WinForms WebBrowser.
-         * WebView2 or a future preview renderer may no longer require this override.
-         */
-        HtmlHeaders += @" <style> .citation { font-style: normal; } </style>";
+        // T117870: The legacy WinForms WebBrowser can render <cite> elements in
+        // italics despite MediaWiki styles. Apply an explicit citation rule so
+        // previews more closely match the rendered wiki page.
+        //
+        // TODO (Preview Modernization):
+        // Re-evaluate this workaround after the preview pipeline no longer uses
+        // the legacy WinForms WebBrowser.
+        HtmlHeaders +=
+            @" <style> .citation { font-style: normal; } </style>";
     }
 
     /// <summary>
@@ -3715,8 +3718,8 @@ public class ApiEdit : IApiEdit
         EnsureHtmlHeadersLoaded();
 
         // TODO (Preview Modernization):
-        // Re-evaluate whether HtmlHeaders must be loaded before every preview request
-        // once the preview renderer has fully transitioned away from the legacy
+        // Re-evaluate whether HTML headers must be loaded before every preview request
+        // after the preview pipeline has fully transitioned away from the legacy
         // WebBrowser implementation.
         string result = RequestPreview(title, text);
         XmlDocument document = CheckForErrors(result, "parse");
@@ -3754,15 +3757,15 @@ public class ApiEdit : IApiEdit
         HttpPost(
             new()
             {
-            { "action", "parse" },
-            { "prop", "text|parsewarnings" }
+                { "action", "parse" },
+                { "prop", "text|parsewarnings" }
             },
             new()
             {
-            { "title", title },
-            { "text", text },
-            { "pst", null },
-            { "disablelimitreport", null }
+                { "title", title },
+                { "text", text },
+                { "pst", null },
+                { "disablelimitreport", null }
             });
 
     /// <summary>
@@ -3786,7 +3789,7 @@ public class ApiEdit : IApiEdit
         if (textNode == null)
         {
             throw new InvalidOperationException(
-                "Cannot find <text> element");
+                "Cannot find a <text> element in the API response.");
         }
 
         string previewHtml = textNode.InnerText;
@@ -3891,12 +3894,12 @@ public class ApiEdit : IApiEdit
         string result = HttpGet(
             new()
             {
-            { "action", "query" },
-            { "prop", "revisions" },
-            { "meta", "tokens" },          // MediaWiki 1.24+
-            { "type", "rollback" },
-            { "rvtoken", "rollback" },     // Pre-1.24 compatibility
-            { "titles", title }
+                { "action", "query" },
+                { "prop", "revisions" },
+                { "meta", "tokens" },          // MediaWiki 1.24+
+                { "type", "rollback" },
+                { "rvtoken", "rollback" },     // Pre-1.24 compatibility
+                { "titles", title }
             },
             ActionOptions.All);
 
@@ -3985,21 +3988,40 @@ public class ApiEdit : IApiEdit
 
         try
         {
-            XmlNode expandedTextNode =
-                document.SelectSingleNode("/api/expandtemplates");
-
-            if (expandedTextNode == null)
-            {
-                throw new InvalidOperationException(
-                    "Cannot find <expandtemplates> element.");
-            }
-
-            return expandedTextNode.InnerText;
+            return GetExpandedTemplateText(document);
         }
         catch (Exception ex)
         {
             throw new BrokenXmlException(this, ex);
         }
+    }
+
+    /// <summary>
+    /// Extracts the expanded wiki text from a MediaWiki expandtemplates response.
+    /// </summary>
+    /// <param name="document">
+    /// The validated API response containing the expanded wiki text.
+    /// </param>
+    /// <returns>
+    /// The expanded wiki text returned by the API.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response does not contain the expected
+    /// <c>expandtemplates</c> element.
+    /// </exception>
+    private static string GetExpandedTemplateText(
+        XmlDocument document)
+    {
+        XmlNode expandedTextNode =
+            document.SelectSingleNode("/api/expandtemplates");
+
+        if (expandedTextNode == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot find an <expandtemplates> element in the API response.");
+        }
+
+        return expandedTextNode.InnerText;
     }
 
     #endregion
@@ -4018,7 +4040,14 @@ public class ApiEdit : IApiEdit
     private XmlDocument CheckForErrors(string xml) =>
         CheckForErrors(xml, null);
 
-    private static readonly Regex MaxLag = new Regex(@": (\d+(?:\.\d+)?) seconds lagged",
+    /// <summary>
+    /// Matches the lag duration reported in a MediaWiki <c>maxlag</c> API error.
+    /// </summary>
+    /// <remarks>
+    /// The captured value represents the server-reported replication lag in
+    /// seconds and is used when constructing <see cref="MaxlagException"/>.
+    /// </remarks>
+    private static readonly Regex MaxLag = new(@": (\d+(?:\.\d+)?) seconds lagged",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>
@@ -4047,12 +4076,17 @@ public class ApiEdit : IApiEdit
         ThrowIfApiError(document, xml);
         ProcessApiWarnings(document);
 
-        if (string.IsNullOrEmpty(action))
-            return CompleteSuccessfulResponseValidation(document, action);
+        if (!string.IsNullOrEmpty(action))
+        {
+            ValidateActionResponse(
+                document,
+                action,
+                xml);
+        }
 
-        ValidateActionResponse(document, action, xml);
-
-        return CompleteSuccessfulResponseValidation(document, action);
+        return CompleteSuccessfulResponseValidation(
+            document,
+            action);
     }
 
     /// <summary>
@@ -4157,6 +4191,8 @@ public class ApiEdit : IApiEdit
             case "maxlag":
                 double.TryParse(
                     MaxLag.Match(xml).Groups[1].Value,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
                     out double maxlag);
 
                 throw new MaxlagException(
@@ -4192,9 +4228,7 @@ public class ApiEdit : IApiEdit
 
                 throw new MediaWikiReadOnlyException(
                     this,
-                    errorMessage +
-                    "\r\n\r\nReason: " +
-                    readOnlyReason);
+                    $"{errorMessage}\r\n\r\nReason: {readOnlyReason}");
 
             default:
                 ThrowUnrecognizedApiError(
@@ -4218,7 +4252,9 @@ public class ApiEdit : IApiEdit
         string errorCode,
         string errorMessage)
     {
-        if (errorCode.Contains("disabled"))
+        if (errorCode.Contains(
+            "disabled",
+            StringComparison.OrdinalIgnoreCase))
         {
             throw new FeatureDisabledException(
                 this,
@@ -4226,8 +4262,13 @@ public class ApiEdit : IApiEdit
                 errorMessage);
         }
 
-        if (errorMessage == "Unknown error: \"tpt-target-page\"")
+        if (string.Equals(
+            errorMessage,
+            "Unknown error: \"tpt-target-page\"",
+            StringComparison.Ordinal))
+        {
             throw new TranslationPageEditException(this);
+        }
 
         throw new ApiErrorException(
             this,
@@ -4250,25 +4291,23 @@ public class ApiEdit : IApiEdit
         if (warnings.Count == 0)
             return;
 
-        XmlNode warningsNode = warnings.Item(0);
-
-        if (warningsNode == null)
-            return;
-
+        XmlNode warningsNode = warnings[0];
         StringBuilder warningBuilder = new();
 
         foreach (XmlNode childNode in warningsNode.ChildNodes)
         {
-            ProcessApiWarning(childNode.InnerText);
-            warningBuilder.AppendLine(childNode.InnerText);
+            string warning = childNode.InnerText;
+
+            ProcessApiWarning(warning);
+            warningBuilder.AppendLine(warning);
         }
 
-        if (warningBuilder.Length > 0)
-        {
-            Tools.WriteDebug(
-                "ApiEdit::CheckForErrors warnings",
-                warningBuilder.ToString());
-        }
+        if (warningBuilder.Length == 0)
+            return;
+
+        Tools.WriteDebug(
+            "ApiEdit::CheckForErrors warnings",
+            warningBuilder.ToString());
     }
 
     /// <summary>
@@ -4279,18 +4318,25 @@ public class ApiEdit : IApiEdit
     /// </param>
     private void ProcessApiWarning(string warning)
     {
+        // TODO (MediaWiki Compatibility):
+        // Replace exact English warning-message matching with structured warning
+        // identifiers when the supported API versions provide them consistently.
+        //
         // Contains is intentional because multiple warnings may be returned in a
         // single XML block.
         if (warning.Contains(
-            "Unrecognized value for parameter 'meta': notifications"))
+           "Unrecognized value for parameter 'meta': notifications",
+           StringComparison.Ordinal))
         {
             Variables.NotificationsEnabled = false;
         }
         else if (
             warning.Contains(
-                "The parameter \"intoken\" has been deprecated.") ||
+                "The parameter \"intoken\" has been deprecated.",
+                StringComparison.Ordinal) ||
             warning.Contains(
-                "Unrecognized parameter: intoken."))
+                "Unrecognized parameter: intoken.",
+                StringComparison.Ordinal))
         {
             UseInToken = false;
         }
@@ -4389,10 +4435,8 @@ public class ApiEdit : IApiEdit
     /// An object that restores the previous cancellation scope when disposed.
     /// </returns>
     internal IDisposable BeginCancellationScope(
-        CancellationToken cancellationToken)
-    {
-        return new CancellationScope(this, cancellationToken);
-    }
+        CancellationToken cancellationToken) =>
+        new CancellationScope(this, cancellationToken);
 
     /// <summary>
     /// Gets the cancellation token associated with the active modern API operation.
