@@ -18,51 +18,95 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace AutoWikiBrowser;
-
-using System;
 using System.Reflection;
 using System.Windows.Forms;
 using WikiFunctions;
 
+namespace AutoWikiBrowser;
+
+/// <summary>
+/// Displays AutoWikiBrowser version, environment, licensing, and support
+/// information.
+/// </summary>
 internal sealed partial class AboutBox : Form
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AboutBox"/> form.
+    /// </summary>
+    /// <param name="ieVersion">
+    /// The detected Internet Explorer version displayed in the environment
+    /// information. This parameter is retained until the browser integration
+    /// is fully migrated to WebView2.
+    /// </param>
     public AboutBox(string ieVersion)
     {
         InitializeComponent();
 
-        lblAWBVersion.Text = "Version " + Program.VersionString;
-        lblRevision.Text = "SVN " + Variables.Revision;
-        txtWarning.Text = WikiFunctions.Controls.AboutBox.GetDetailedMessage(Assembly.GetExecutingAssembly());
+        lblAWBVersion.Text = $"Version {Program.VersionString}";
+        lblRevision.Text = $"SVN {Variables.Revision}";
 
-        txtVersions.Text = string.Format(@"Internet Explorer version: {0}
-.NET version: {1}
-Windows version: {2}",
-                 ieVersion,
-                 Environment.Version,
-                 Environment.OSVersion.Version.Major + "." + Environment.OSVersion.Version.Minor);
+        txtWarning.Text =
+            WikiFunctions.Controls.AboutBox.GetDetailedMessage(
+                typeof(AboutBox).Assembly);
+
+        // TODO (.NET 8 / WebView2):
+        // Replace the legacy Internet Explorer version reporting with WebView2 runtime
+        // information once the browser migration is complete. Rename the constructor
+        // parameter from 'ieVersion' to 'browserVersion' (or 'webViewVersion') and
+        // update the About dialog to display the installed Microsoft Edge WebView2
+        // Runtime version instead of the legacy Internet Explorer version. This will
+        // require obtaining the runtime version from the WebView2 environment (or a
+        // centralized browser service) before constructing the AboutBox.
+        txtVersions.Text = $"""
+            Internet Explorer version: {ieVersion}
+            .NET version: {Environment.Version}
+            Windows version: {Environment.OSVersion.Version.Major}.{Environment.OSVersion.Version.Minor}
+            """;
     }
 
+    /// <summary>
+    /// Closes the About dialog.
+    /// </summary>
     private void OkButton_Click(object sender, EventArgs e)
     {
         Close();
     }
 
-    private void LinkAWBPage_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    /// <summary>
+    /// Opens the AutoWikiBrowser project page on the English Wikipedia.
+    /// </summary>
+    private void LinkAWBPage_LinkClicked(
+        object sender,
+        LinkLabelLinkClickedEventArgs e)
     {
         linkAWBPage.LinkVisited = true;
-        Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser", false);
+        Tools.OpenENArticleInBrowser(
+            "Wikipedia:AutoWikiBrowser",
+            false);
     }
 
-    private void UsageStatsLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    /// <summary>
+    /// Opens the AutoWikiBrowser usage statistics page.
+    /// </summary>
+    private void UsageStatsLabel_LinkClicked(
+        object sender,
+        LinkLabelLinkClickedEventArgs e)
     {
         UsageStatsLabel.LinkVisited = true;
         UsageStats.OpenUsageStatsURL();
     }
 
-    private void linkPhabricator_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    /// <summary>
+    /// Opens the Wikimedia Phabricator form for creating an AutoWikiBrowser
+    /// task.
+    /// </summary>
+    private void linkPhabricator_LinkClicked(
+        object sender,
+        LinkLabelLinkClickedEventArgs e)
     {
         linkPhabricator.LinkVisited = true;
-        Tools.OpenURLInBrowser("https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
+
+        Tools.OpenURLInBrowser(
+            "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
     }
 }
