@@ -2381,83 +2381,233 @@ public partial class Parsers
             RegexOptions.Compiled);
 
     /// <summary>
-    /// Searches for unknown/invalid parameters within citation templates
+    /// Searches citation templates for unknown parameters and malformed values.
     /// </summary>
-    /// <param name="articleText">the wiki text to search</param>
-    /// <returns>Dictionary of parameter index in wiki text, and parameter length</returns>
+    /// <param name="articleText">Wiki text to search.</param>
+    /// <returns>
+    /// A dictionary whose keys are character indexes in <paramref name="articleText"/>
+    /// and whose values are the lengths of the invalid parameter names or values.
+    /// </returns>
     public static Dictionary<int, int> BadCiteParameters(string articleText)
     {
-        Dictionary<int, int> found = new Dictionary<int, int>();
+        Dictionary<int, int> found = new();
 
-        // unknown parameters in cite arXiv, TemplateExists check for performance
-        if (TemplateExists(GetAllTemplates(articleText), CiteArXiv))
-        {
-            foreach (Match m in CiteArXiv.Matches(articleText))
-            {
-                // ignore parameters in templates within cite
-                string cite = @"{{" +
-                              Tools.ReplaceWithSpaces(m.Value.Substring(2),
-                                  WikiRegexes.NestedTemplates.Matches(m.Value.Substring(2)));
-
-                foreach (Match m2 in CitationPopulatedParameter.Matches(cite))
-                {
-                    if (!citeArXivParameters.IsMatch(m2.Groups[1].Value) &&
-                        Tools.GetTemplateParameterValue(cite, m2.Groups[1].Value).Length > 0)
-                    {
-                        found.Add(m.Index + m2.Groups[1].Index, m2.Groups[1].Length);
-                    }
-                }
-            }
-        }
-
-        foreach (Match m in WikiRegexes.CiteTemplate.Matches(articleText))
-        {
-            // unknown parameters in cite web
-            if (m.Groups[2].Value.EndsWith("web"))
-            {
-                // ignore parameters in templates within cite
-                string cite = @"{{" +
-                              Tools.ReplaceWithSpaces(m.Value.Substring(2),
-                                  WikiRegexes.NestedTemplates.Matches(m.Value.Substring(2)));
-
-                foreach (Match m2 in CitationPopulatedParameter.Matches(cite))
-                {
-                    if (!citeWebParameters.IsMatch(m2.Groups[1].Value) &&
-                        Tools.GetTemplateParameterValue(cite, m2.Groups[1].Value).Length > 0)
-                    {
-                        found.Add(m.Index + m2.Groups[1].Index, m2.Groups[1].Length);
-                    }
-                }
-            }
-
-            string pipecleaned = Tools.PipeCleanedTemplate(m.Value, false);
-
-            // no equals between two separator pipes
-            if (pipecleaned.Contains("="))
-            {
-                Match m2 = NoEqualsTwoBars.Match(pipecleaned);
-
-                if (m2.Success)
-                    found.Add(m.Index + m2.Index, m2.Length);
-            }
-
-            // URL has space in it
-            int urlpos = m.Value.IndexOf("url", StringComparison.Ordinal);
-            if (urlpos > 0)
-            {
-                string URL = Tools.GetTemplateParameterValue(m.Value, "url");
-                if (URL.Contains(" ") &&
-                    WikiRegexes.UnformattedText.Replace(WikiRegexes.NestedTemplates.Replace(URL, ""), "")
-                        .Trim()
-                        .Contains(" "))
-                {
-                    // value of url may be in another earlier parameter, report correct position
-                    string fromURL = m.Value.Substring(urlpos);
-                    found.Add(m.Index + urlpos + fromURL.IndexOf(URL, StringComparison.Ordinal), URL.Length);
-                }
-            }
-        }
+        FindInvalidArXivParameters(articleText, found);
+        FindInvalidCitationParametersAndValues(articleText, found);
 
         return found;
+    }
+
+    /// <summary>
+    /// Finds populated parameters that are not recognized by
+    /// <c>cite arXiv</c>.
+    /// </summary>
+    /// <param name="articleText">Wiki text to search.</param>
+    /// <param name="found">
+    /// Collection that receives the source indexes and lengths of invalid
+    /// parameter names.
+    /// </param>
+    private static void FindInvalidArXivParameters(
+        string articleText,
+        Dictionary<int, int> found)
+    {
+        // Avoid the more expensive template scan when cite arXiv is absent.
+        if (!TemplateExists(GetAllTemplates(articleText), CiteArXiv))
+            return;
+
+        foreach (Match citationMatch in CiteArXiv.Matches(articleText))
+        {
+            FindUnknownCitationParameters(
+                citationMatch,
+                citeArXivParameters,
+                found);
+        }
+    }
+
+    /// <summary>
+    /// Searches citation templates for unknown web-citation parameters,
+    /// malformed pipe-separated content, and URL values containing spaces.
+    /// </summary>
+    /// <param name="articleText">Wiki text to search.</param>
+    /// <param name="found">
+    /// Collection that receives the source indexes and lengths of invalid
+    /// parameters or values.
+    /// </param>
+    private static void FindInvalidCitationParametersAndValues(
+        string articleText,
+        Dictionary<int, int> found)
+    {
+        foreach (Match citationMatch in WikiRegexes.CiteTemplate.Matches(articleText))
+        {
+            if (citationMatch.Groups[2].Value.EndsWith("web"))
+            {
+                FindUnknownCitationParameters(
+                    citationMatch,
+                    citeWebParameters,
+                    found);
+            }
+
+            FindPipeWithoutParameterAssignment(citationMatch, found);
+            FindUrlContainingSpaces(citationMatch, found);
+        }
+    }
+
+    /// <summary>
+    /// Finds populated citation parameters that are not accepted by the supplied
+    /// parameter-name expression.
+    /// </summary>
+    /// <param name="citationMatch">
+    /// Match containing the complete citation template.
+    /// </param>
+    /// <param name="validParameterNames">
+    /// Expression that recognizes parameter names supported by the citation
+    /// template.
+    /// </param>
+    /// <param name="found">
+    /// Collection that receives source indexes and lengths of unknown parameter
+    /// names.
+    /// </param>
+    private static void FindUnknownCitationParameters(
+        Match citationMatch,
+        Regex validParameterNames,
+        Dictionary<int, int> found)
+    {
+        string citation = BuildCitationWithoutNestedTemplateContent(
+            citationMatch.Value);
+
+        foreach (Match parameterMatch in CitationPopulatedParameter.Matches(citation))
+        {
+            string parameterName = parameterMatch.Groups[1].Value;
+
+            if (!validParameterNames.IsMatch(parameterName) &&
+                Tools.GetTemplateParameterValue(citation, parameterName).Length > 0)
+            {
+                found.Add(
+                    citationMatch.Index + parameterMatch.Groups[1].Index,
+                    parameterMatch.Groups[1].Length);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Replaces nested template content with spaces while preserving character
+    /// positions relative to the original citation template.
+    /// </summary>
+    /// <param name="citation">Complete citation template text.</param>
+    /// <returns>
+    /// Citation text in which nested templates are masked with spaces.
+    /// </returns>
+    private static string BuildCitationWithoutNestedTemplateContent(
+        string citation)
+    {
+        string citationBody = citation.Substring(2);
+
+        return "{{" +
+               Tools.ReplaceWithSpaces(
+                   citationBody,
+                   WikiRegexes.NestedTemplates.Matches(citationBody));
+    }
+
+    /// <summary>
+    /// Finds pipe-separated citation content that does not contain a parameter
+    /// assignment.
+    /// </summary>
+    /// <param name="citationMatch">
+    /// Match containing the complete citation template.
+    /// </param>
+    /// <param name="found">
+    /// Collection that receives the source index and length of the malformed
+    /// content.
+    /// </param>
+    private static void FindPipeWithoutParameterAssignment(
+        Match citationMatch,
+        Dictionary<int, int> found)
+    {
+        string pipeCleanedCitation =
+            Tools.PipeCleanedTemplate(citationMatch.Value, false);
+
+        // Preserve the existing guard so the check is only performed on
+        // templates containing at least one named parameter.
+        if (!pipeCleanedCitation.Contains("="))
+            return;
+
+        Match malformedContent = NoEqualsTwoBars.Match(pipeCleanedCitation);
+
+        if (malformedContent.Success)
+        {
+            found.Add(
+                citationMatch.Index + malformedContent.Index,
+                malformedContent.Length);
+        }
+    }
+
+    /// <summary>
+    /// Finds citation URL values containing unformatted spaces.
+    /// </summary>
+    /// <param name="citationMatch">
+    /// Match containing the complete citation template.
+    /// </param>
+    /// <param name="found">
+    /// Collection that receives the source index and length of the invalid URL
+    /// value.
+    /// </param>
+    private static void FindUrlContainingSpaces(
+        Match citationMatch,
+        Dictionary<int, int> found)
+    {
+        int urlParameterPosition =
+            citationMatch.Value.IndexOf("url", StringComparison.Ordinal);
+
+        if (urlParameterPosition <= 0)
+            return;
+
+        string url =
+            Tools.GetTemplateParameterValue(citationMatch.Value, "url");
+
+        if (!ContainsUnformattedUrlSpace(url))
+            return;
+
+        // The URL value may occur in an earlier parameter as well, so search
+        // from the detected URL parameter name to identify the correct instance.
+        string citationFromUrlParameter =
+            citationMatch.Value.Substring(urlParameterPosition);
+
+        // TODO: Verify the located URL value before adding its source position.
+        // IndexOf returns -1 if the extracted value cannot be found in the expected
+        // portion of the citation template.
+        int urlValuePosition =
+            citationFromUrlParameter.IndexOf(
+                url,
+                StringComparison.Ordinal);
+
+        found.Add(
+            citationMatch.Index +
+            urlParameterPosition +
+            urlValuePosition,
+            url.Length);
+    }
+
+    /// <summary>
+    /// Determines whether a URL value contains spaces outside nested templates
+    /// or other protected wiki text.
+    /// </summary>
+    /// <param name="url">Citation URL parameter value.</param>
+    /// <returns>
+    /// <see langword="true"/> when the value contains an unformatted space;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool ContainsUnformattedUrlSpace(string url)
+    {
+        if (!url.Contains(" "))
+            return false;
+
+        string unformattedUrl =
+            WikiRegexes.UnformattedText.Replace(
+                WikiRegexes.NestedTemplates.Replace(url, string.Empty),
+                string.Empty);
+
+        return unformattedUrl
+            .Trim()
+            .Contains(" ");
     }
 }
