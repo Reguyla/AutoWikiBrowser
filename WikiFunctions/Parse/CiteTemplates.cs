@@ -1768,41 +1768,164 @@ public partial class Parsers
     private const string CitDate =
         SiCitStart + @"(?:archive|air)?date2?\s*=\s*";
 
+    /// <summary>
+    /// Defines ordered replacements that normalize malformed or nonstandard
+    /// citation access-date and archive-date values to ISO-style
+    /// <c>YYYY-MM-DD</c> format.
+    /// </summary>
+    /// <remarks>
+    /// The replacements recognize several historical date layouts, including:
+    /// <list type="bullet">
+    /// <item><description><c>MM-DD-YY</c> and <c>MM-DD-YYYY</c>.</description></item>
+    /// <item><description><c>DD-MM-YY</c> and <c>DD-MM-YYYY</c>.</description></item>
+    /// <item><description><c>YYYY-MM-DD</c> values with missing or inconsistent separators.</description></item>
+    /// <item><description>Single-digit months or days that require leading zeroes.</description></item>
+    /// <item><description>Ambiguous dates whose equal month and day values allow safe normalization.</description></item>
+    /// </list>
+    ///
+    /// Rules are evaluated in declaration order. More specific or unambiguous
+    /// patterns must therefore remain before broader patterns.
+    ///
+    /// The expressions use <see cref="CitAccessdate"/> so that the matched
+    /// parameter prefix is retained in each replacement. Supported parameter
+    /// names include access-date and archive-date variants.
+    ///
+    /// The patterns intentionally preserve the trailing template separator or
+    /// closing braces where those characters are included in the match.
+    /// </remarks>
     private static readonly RegexReplacement[] CiteTemplateIncorrectISOAccessdates =
     {
-        new RegexReplacement(CitAccessdate + @")(1[0-2])[/_\-\.]?(1[3-9])[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-$2-$3"),
-        new RegexReplacement(CitAccessdate + @")(1[0-2])[/_\-\.]?([23]\d)[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-$2-$3"),
-        new RegexReplacement(CitAccessdate + @")(1[0-2])[/_\-\.]?\2[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
-            "${1}20$3-$2-$2"), // nn-nn-2004 and nn-nn-04 to ISO format (both nn the same)
-        new RegexReplacement(CitAccessdate + @")(1[3-9])[/_\-\.]?(1[0-2])[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-$3-$2"),
-        new RegexReplacement(
-            CitAccessdate + @")(1[3-9])[/_\-\.]?0?([1-9])[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-0$3-$2"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)0?([01]\d)[/_\-\.]([0-3]\d\s*(?:\||}}))", "$1$2-$3-$4"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)[/_\-\.]([01]\d)0?([0-3]\d\s*(?:\||}}))", "$1$2-$3-$4"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)[/_\-\.]?([01]\d)[/_\-\.]?([1-9]\s*(?:\||}}))",
-            "$1$2-$3-0$4"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)[/_\-\.]?([1-9])[/_\-\.]?([0-3]\d\s*(?:\||}}))",
-            "$1$2-0$3-$4"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)[/_\-\.]?([1-9])[/_\-\.]0?([1-9]\s*(?:\||}}))",
-            "$1$2-0$3-0$4"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)[/_\-\.]0?([1-9])[/_\-\.]([1-9]\s*(?:\||}}))",
-            "$1$2-0$3-0$4"),
-        new RegexReplacement(CitAccessdate + @")(20[012]\d)[/_\.]?([01]\d)[/_\.]?([0-3]\d\s*(?:\||}}))", "$1$2-$3-$4"),
-        new RegexReplacement(CitAccessdate + @")([23]\d)[/_\-\.](1[0-2])[/_\-\.]?(?:20)?([012]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-$3-$2"),
-        new RegexReplacement(CitAccessdate + @")([23]\d)[/_\-\.]0?([1-9])[/_\-\.](?:20)?([012]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-0$3-$2"),
-        new RegexReplacement(
-            CitAccessdate + @")0?([1-9])[/_\-\.]?(1[3-9]|[23]\d)[/_\-\.]?(?:20)?([012]\d)(?=\s*(?:\||}}))",
-            "${1}20$4-0$2-$3"),
-        new RegexReplacement(CitAccessdate + @")0?([1-9])[/_\-\.]?0?\2[/_\-\.]?(?:20)?([012]\d)(?=\s*(?:\||}}))",
-            "${1}20$3-0$2-0$2") // n-n-2004 and n-n-04 to ISO format (both n the same)
-    };
+    new RegexReplacement(
+        CitAccessdate + @")(1[0-2])[/_\-\.]?(1[3-9])[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-$2-$3"),
 
+    new RegexReplacement(
+        CitAccessdate + @")(1[0-2])[/_\-\.]?([23]\d)[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-$2-$3"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(1[0-2])[/_\-\.]?\2[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
+        "${1}20$3-$2-$2"), // nn-nn-2004 and nn-nn-04 to ISO format (both nn the same)
+
+    new RegexReplacement(
+        CitAccessdate + @")(1[3-9])[/_\-\.]?(1[0-2])[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-$3-$2"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(1[3-9])[/_\-\.]?0?([1-9])[/_\-\.]?(?:20)?([01]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-0$3-$2"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)0?([01]\d)[/_\-\.]([0-3]\d\s*(?:\||}}))",
+        "$1$2-$3-$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)[/_\-\.]([01]\d)0?([0-3]\d\s*(?:\||}}))",
+        "$1$2-$3-$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)[/_\-\.]?([01]\d)[/_\-\.]?([1-9]\s*(?:\||}}))",
+        "$1$2-$3-0$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)[/_\-\.]?([1-9])[/_\-\.]?([0-3]\d\s*(?:\||}}))",
+        "$1$2-0$3-$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)[/_\-\.]?([1-9])[/_\-\.]0?([1-9]\s*(?:\||}}))",
+        "$1$2-0$3-0$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)[/_\-\.]0?([1-9])[/_\-\.]([1-9]\s*(?:\||}}))",
+        "$1$2-0$3-0$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")(20[012]\d)[/_\.]?([01]\d)[/_\.]?([0-3]\d\s*(?:\||}}))",
+        "$1$2-$3-$4"),
+
+    new RegexReplacement(
+        CitAccessdate + @")([23]\d)[/_\-\.](1[0-2])[/_\-\.]?(?:20)?([012]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-$3-$2"),
+
+    new RegexReplacement(
+        CitAccessdate + @")([23]\d)[/_\-\.]0?([1-9])[/_\-\.](?:20)?([012]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-0$3-$2"),
+
+    new RegexReplacement(
+        CitAccessdate + @")0?([1-9])[/_\-\.]?(1[3-9]|[23]\d)[/_\-\.]?(?:20)?([012]\d)(?=\s*(?:\||}}))",
+        "${1}20$4-0$2-$3"),
+
+    new RegexReplacement(
+        CitAccessdate + @")0?([1-9])[/_\-\.]?0?\2[/_\-\.]?(?:20)?([012]\d)(?=\s*(?:\||}}))",
+        "${1}20$3-0$2-0$2") // n-n-2004 and n-n-04 to ISO format (both n the same)
+};
+
+    /// <summary>
+    /// Defines ordered replacements that normalize malformed or nonstandard
+    /// citation date values to ISO-style <c>YYYY-MM-DD</c> format.
+    /// </summary>
+    /// <remarks>
+    /// The collection applies to general citation date parameters matched by
+    /// <see cref="CitDate"/>, including supported date, airdate, and archivedate
+    /// parameter variants.
+    ///
+    /// The replacements recognize multiple historical and malformed layouts,
+    /// including:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// Year-first dates that use missing, incorrect, or inconsistent separators.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Month-day-year and day-month-year values where the component ranges make
+    /// the intended order unambiguous.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Two-digit years that are normalized to years in the 2000s.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Four-digit years from the late twentieth century and later.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Single-digit month or day components that require leading zeroes.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Dates enclosed in optional wiki-link brackets.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Ambiguous dates whose identical month and day values allow safe normalization.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Compact year-month-day values where one or more separators are missing.
+    /// </description>
+    /// </item>
+    /// </list>
+    ///
+    /// Rules are evaluated in declaration order. This ordering is significant:
+    /// specific and unambiguous layouts must remain before broader expressions
+    /// that could match the same input.
+    ///
+    /// Each replacement preserves the citation parameter prefix captured by
+    /// <see cref="CitDate"/> and, where included in the match, preserves optional
+    /// wiki-link brackets and the following template separator or closing braces.
+    ///
+    /// These expressions normalize recognized formatting errors; they are not a
+    /// complete calendar-date validation system.
+    /// </remarks>
     private static readonly RegexReplacement[] CiteTemplateIncorrectISODates =
     {
         new RegexReplacement(CitDate + @"\[?\[?)(20\d\d|19[7-9]\d)[/_]?([01]\d)[/_]?([0-3]\d\s*(?:\||}}))",
@@ -1866,22 +1989,81 @@ public partial class Parsers
             "$1$2-$3-$4")
     };
 
+    // TODO: Review the supported year ranges in citation date and time patterns.
+    // Some expressions are restricted to 1970–2099 or years beginning with 20.
+    //
+    // TODO: Review the redundant case-insensitive options in
+    // CiteTemplateAbbreviatedMonthISO. The pattern contains inline (?si) options
+    // while RegexOptions.IgnoreCase is also supplied externally.
+    /// <summary>
+    /// Matches citation date parameters containing a year, abbreviated month name,
+    /// and day in a partially ISO-style order.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the parameter name and assignment prefix. Group 2 captures
+    /// the date value in <c>year-month-day</c>, <c>year/month/day</c>, or
+    /// whitespace-separated form. Group 3 captures the following template
+    /// separator or closing braces.
+    /// </remarks>
     private static readonly Regex CiteTemplateAbbreviatedMonthISO =
-        new Regex(
+        new(
             @"(?si)(\|\s*(?:archive|air|access)?date2?\s*=\s*)(\d{4}[-/\s][A-Z][a-z]+\.?[-/\s][0-3]?\d)(\s*(?:\||}}))",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    // TODO: Verify whether CiteTemplateDateYYYYDDMMFormat intentionally accepts
+    // day values from 32 through 39 as malformed-date detection rather than
+    // valid calendar dates.
+    /// <summary>
+    /// Matches citation date parameters that appear to use a
+    /// <c>YYYY-DD-MM</c> date order.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the parameter assignment through the four-digit year.
+    /// Group 2 captures a day from 13 through 39, and group 3 captures a month
+    /// from 01 through 12. Optional wiki-link brackets surrounding the date are
+    /// also recognized.
+    /// </remarks>
     private static readonly Regex CiteTemplateDateYYYYDDMMFormat =
-        new Regex(SiCitStart +
-                  @"(?:archive|air|access)?date2?\s*=\s*(?:\[\[)?20\d\d)-([23]\d|1[3-9])-(0[1-9]|1[0-2])(\]\])?");
+        new(
+            SiCitStart +
+            @"(?:archive|air|access)?date2?\s*=\s*(?:\[\[)?20\d\d)-([23]\d|1[3-9])-(0[1-9]|1[0-2])(\]\])?",
+            RegexOptions.Compiled);
 
+    // TODO: Add focused tests for CiteTemplateTimeInDateParameter before
+    // simplifying or decomposing the expression. It currently combines date,
+    // time, wiki-link, namespace, and trailing-content handling.
+    /// <summary>
+    /// Matches a time appended to a citation date parameter.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the date parameter and date value. Group 2 captures the
+    /// appended time and any associated trailing text. The expression supports
+    /// numeric and month-name date formats and protects certain linked content
+    /// from being treated as part of the time.
+    /// </remarks>
     private static readonly Regex CiteTemplateTimeInDateParameter =
-        new Regex(
+        new(
             @"(\|\s*(?:archive|air|access)?date2?\s*=\s*(?:(?:20\d\d|19[7-9]\d)-[01]?\d-[0-3]?\d|[0-3]?\d[a-z]{0,2}\s*\w+,?\s*(?:20\d\d|19[7-9]\d)|\w+\s*[0-3]?\d[a-z]{0,2},?\s*(?:20\d\d|19[7-9]\d)))(\s*[,-:]?\s+[0-2]?\d[:\.]?[0-5]\d(?:\:?[0-5]\d)?\s*(?:[^\|\}]*\[\[[^[\]\n]+(?<!\[\[[A-Z]?[a-z-]{2,}:[^[\]\n]+)\]\][^\|\}]*|[^\|\}]*)?)(?<!.*(?:20|1[7-9])\d+\s*)",
-            RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            RegexOptions.Compiled |
+            RegexOptions.IgnoreCase |
+            RegexOptions.Singleline);
 
-    private static readonly Regex WhitespaceEnd = new Regex(@"(\s+)$");
-    private static readonly Regex CitePodcast = Tools.NestedTemplateRegex("cite podcast");
+    /// <summary>
+    /// Matches one or more whitespace characters at the end of a string.
+    /// </summary>
+    /// <remarks>
+    /// Group 1 captures the trailing whitespace.
+    /// </remarks>
+    private static readonly Regex WhitespaceEnd =
+        new(
+            @"(\s+)$",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a <c>cite podcast</c> template, including nested template content.
+    /// </summary>
+    private static readonly Regex CitePodcast =
+        Tools.NestedTemplateRegex("cite podcast");
 
     /// <summary>
     /// Corrects common formatting errors in dates in external reference citation templates (doesn't link/delink dates)
@@ -1985,24 +2167,97 @@ public partial class Parsers
         return newValue;
     }
 
+    /// <summary>
+    /// Determines whether any supplied citation date parameter value requires
+    /// additional processing.
+    /// </summary>
+    /// <param name="parameters">
+    /// Citation parameter values to examine.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when at least one value is longer than four
+    /// characters and is neither an ISO-formatted date nor a recognized
+    /// month-name date; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Four-character values are ignored, which prevents year-only values from
+    /// being treated as dates requiring normalization.
+    ///
+    /// A value is considered already acceptable when it either:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// Matches <see cref="WikiRegexes.ISODates"/>.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Begins with an optional one- or two-digit day followed by a recognized
+    /// month name.
+    /// </description>
+    /// </item>
+    /// </list>
+    /// The method returns immediately after finding the first value that does not
+    /// meet either condition.
+    /// </remarks>
     private static bool CiteTemplateMEParameterToProcess(List<string> parameters)
     {
         foreach (string s in parameters)
         {
-            if (s.Length > 4 && !WikiRegexes.ISODates.IsMatch(s)
-                && !Regex.IsMatch(s, @"^(\d{1,2} *)?" + WikiRegexes.MonthsNoGroup))
+            if (s.Length > 4 &&
+                !WikiRegexes.ISODates.IsMatch(s) &&
+                !Regex.IsMatch(
+                    s,
+                    @"^(\d{1,2} *)?" + WikiRegexes.MonthsNoGroup))
+            {
                 return true;
+            }
         }
+
         return false;
     }
 
+    /// <summary>
+    /// Matches the numeric portion of a potentially ambiguous citation date.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes supported citation date parameters whose first two components
+    /// are both valid month numbers, making the intended month/day order
+    /// uncertain.
+    ///
+    /// Group 1 captures the first numeric component, group 2 captures the second
+    /// numeric component, and group 3 captures either a four-digit year from
+    /// 1970 onward or a two-digit year.
+    ///
+    /// The positive lookbehind requires the date to immediately follow a
+    /// supported citation parameter assignment, but excludes that assignment
+    /// prefix from the match.
+    /// </remarks>
     private static readonly Regex PossibleAmbiguousCiteDate =
-        new Regex(
-            @"(?<=\|\s*(?:access|archive|air)?\-?date2?\s*=\s*)(0?[1-9]|1[0-2])[/_\-\.](0?[1-9]|1[0-2])[/_\-\.](20\d\d|19[7-9]\d|[01]\d)\b");
+        new(
+            @"(?<=\|\s*(?:access|archive|air)?\-?date2?\s*=\s*)(0?[1-9]|1[0-2])[/_\-\.](0?[1-9]|1[0-2])[/_\-\.](20\d\d|19[7-9]\d|[01]\d)\b",
+            RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches a supported citation parameter containing a potentially ambiguous
+    /// numeric date.
+    /// </summary>
+    /// <remarks>
+    /// This is the prefix-capturing counterpart to
+    /// <see cref="PossibleAmbiguousCiteDate"/>.
+    ///
+    /// Group 1 captures the citation parameter assignment prefix, group 2
+    /// captures the first numeric component, group 3 captures the second numeric
+    /// component, and group 4 captures either a four-digit year from 1970 onward
+    /// or a two-digit year.
+    ///
+    /// Including the parameter prefix allows callers to locate or replace the
+    /// complete parameter value without relying on lookbehind matching.
+    /// </remarks>
     private static readonly Regex PossibleAmbiguousCiteDateQuick =
-        new Regex(
-            @"(\|\s*(?:access|archive|air)?\-?date2?\s*=\s*)(0?[1-9]|1[0-2])[/_\-\.](0?[1-9]|1[0-2])[/_\-\.](20\d\d|19[7-9]\d|[01]\d)\b");
+        new(
+            @"(\|\s*(?:access|archive|air)?\-?date2?\s*=\s*)(0?[1-9]|1[0-2])[/_\-\.](0?[1-9]|1[0-2])[/_\-\.](20\d\d|19[7-9]\d|[01]\d)\b",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Returns whether the input article text contains ambiguous cite template dates in XX-XX-YYYY or XX-XX-YY format
