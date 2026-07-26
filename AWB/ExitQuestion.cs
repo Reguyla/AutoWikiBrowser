@@ -1,39 +1,44 @@
-﻿/*
-Autowikibrowser
-Copyright (C) 2007 Martin Richards
+﻿namespace AutoWikiBrowser;
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-using System.Windows.Forms;
-
-namespace AutoWikiBrowser;
-
+/// <summary>
+/// Displays a confirmation dialog when the user attempts to exit
+/// AutoWikiBrowser.
+/// </summary>
+/// <remarks>
+/// The dialog summarizes the current editing session and allows the user to
+/// suppress future exit confirmations.
+/// </remarks>
 internal sealed partial class ExitQuestion : Form
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ExitQuestion"/> class.
+    /// </summary>
+    /// <param name="time">
+    /// Total time spent during the current editing session.
+    /// </param>
+    /// <param name="edits">
+    /// Number of edits completed during the current session.
+    /// </param>
+    /// <param name="msg">
+    /// Optional message displayed before the standard exit confirmation
+    /// prompt.
+    /// </param>
     public ExitQuestion(TimeSpan time, int edits, string msg)
     {
         InitializeComponent();
 
         lblPrompt.Text = msg + "Are you sure you want to exit?";
 
-        lblTimeAndEdits.Text = string.Format("You made {0} edits in {1}", edits, time);
+        lblTimeAndEdits.Text =
+            string.Format(
+                "You made {0} edits in {1}",
+                edits,
+                time);
     }
 
-    public bool CheckBoxDontAskAgain
-    {
-        get { return chkDontAskAgain.Checked; }
-    }
+    /// <summary>
+    /// Gets a value indicating whether the user chose not to display this
+    /// confirmation dialog again.
+    /// </summary>
+    public bool CheckBoxDontAskAgain => chkDontAskAgain.Checked;
 }
