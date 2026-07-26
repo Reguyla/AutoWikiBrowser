@@ -760,35 +760,53 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         e.Effect = DragDropEffects.Move;
     }
 
+    /// <summary>
+    /// Moves the dragged rule node to the selected location in the rules tree.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// Information about the completed drag-and-drop operation.
+    /// </param>
     private void RulesTreeView_DragDrop(object sender, DragEventArgs e)
     {
-        Point targetPoint = RulesTreeView.PointToClient(new Point(e.X, e.Y));
-
-        TreeNode targetNode = RulesTreeView.GetNodeAt(targetPoint);
-
-        TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
-
-        if (Tools.IsSubnodeOf(draggedNode, targetNode))
+        if (e.Data?.GetData(typeof(TreeNode)) is not TreeNode draggedNode)
         {
             e.Effect = DragDropEffects.None;
             return;
         }
 
-        RulesTreeView.Nodes.Remove(draggedNode);
+        Point targetPoint =
+            RulesTreeView.PointToClient(new Point(e.X, e.Y));
 
-        if (targetNode != null)
+        TreeNode targetNode = RulesTreeView.GetNodeAt(targetPoint);
+
+        if (ReferenceEquals(draggedNode, targetNode) ||
+            targetNode != null && Tools.IsSubnodeOf(draggedNode, targetNode))
         {
-            targetNode.Nodes.Insert(0, draggedNode);
+            e.Effect = DragDropEffects.None;
+            return;
         }
-        else
+
+        RulesTreeView.BeginUpdate();
+
+        try
         {
-            RulesTreeView.Nodes.Add(draggedNode);
+            draggedNode.Remove();
+
+            if (targetNode == null)
+                RulesTreeView.Nodes.Add(draggedNode);
+            else
+                targetNode.Nodes.Insert(0, draggedNode);
+
+            RulesTreeView.SelectedNode = draggedNode;
+            RestoreSelectedRule();
+
+            e.Effect = DragDropEffects.Move;
         }
-
-        RulesTreeView.SelectedNode = draggedNode;
-        RestoreSelectedRule();
-
-        e.Effect = DragDropEffects.Move;
+        finally
+        {
+            RulesTreeView.EndUpdate();
+        }
     }
 
     private void SetTreeViewColours()
