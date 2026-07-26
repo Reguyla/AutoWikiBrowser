@@ -20,22 +20,33 @@ using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
 
+/// <summary>
+/// Provides an editor for managing the collection of predefined edit summaries.
+/// </summary>
 internal sealed partial class SummaryEditor : Form
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SummaryEditor"/> form.
+    /// </summary>
     public SummaryEditor()
     {
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Sorts the non-empty summary entries using the current culture's
+    /// default string comparison rules.
+    /// </summary>
+    /// <param name="sender">The control that raised the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnSort_Click(object sender, EventArgs e)
     {
-        List<string> list =
-            new List<string>(Summaries.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries));
-        list.Sort();
+        List<string> summaries = Summaries.Lines
+            .Where(summary => !string.IsNullOrEmpty(summary))
+            .ToList();
 
-        Summaries.Clear();
+        summaries.Sort(StringComparer.CurrentCulture);
 
-        foreach (string s in list)
-            Summaries.Text += s + "\r\n";
+        Summaries.Lines = summaries.ToArray();
     }
 }
