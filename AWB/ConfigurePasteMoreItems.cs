@@ -21,14 +21,50 @@ using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
 
+/// <summary>
+/// Displays the configuration dialog for the Paste More Items feature.
+/// </summary>
+/// <remarks>
+/// The dialog allows the user to define up to ten custom text entries that
+/// can be inserted through the Paste More Items functionality.
+/// </remarks>
 public partial class ConfigurePasteMoreItems : Form
 {
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ConfigurePasteMoreItems"/> class.
+    /// </summary>
     public ConfigurePasteMoreItems()
     {
         InitializeComponent();
     }
 
-    public ConfigurePasteMoreItems(string string1, string string2, string string3, string string4, string string5, string string6, string string7, string string8, string string9, string string10)
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ConfigurePasteMoreItems"/> class using the supplied item
+    /// values.
+    /// </summary>
+    /// <param name="string1">Initial value for item 1.</param>
+    /// <param name="string2">Initial value for item 2.</param>
+    /// <param name="string3">Initial value for item 3.</param>
+    /// <param name="string4">Initial value for item 4.</param>
+    /// <param name="string5">Initial value for item 5.</param>
+    /// <param name="string6">Initial value for item 6.</param>
+    /// <param name="string7">Initial value for item 7.</param>
+    /// <param name="string8">Initial value for item 8.</param>
+    /// <param name="string9">Initial value for item 9.</param>
+    /// <param name="string10">Initial value for item 10.</param>
+    public ConfigurePasteMoreItems(
+        string string1,
+        string string2,
+        string string3,
+        string string4,
+        string string5,
+        string string6,
+        string string7,
+        string string8,
+        string string9,
+        string string10)
         : this()
     {
         String1 = string1;
@@ -43,14 +79,63 @@ public partial class ConfigurePasteMoreItems : Form
         String10 = string10;
     }
 
-    public string String1 { get { return textBox1.Text; } private set { textBox1.Text = value; } }
-    public string String2 { get { return textBox2.Text; } private set { textBox2.Text = value; } }
-    public string String3 { get { return textBox3.Text; } private set { textBox3.Text = value; } }
-    public string String4 { get { return textBox4.Text; } private set { textBox4.Text = value; } }
-    public string String5 { get { return textBox5.Text; } private set { textBox5.Text = value; } }
-    public string String6 { get { return textBox6.Text; } private set { textBox6.Text = value; } }
-    public string String7 { get { return textBox7.Text; } private set { textBox7.Text = value; } }
-    public string String8 { get { return textBox8.Text; } private set { textBox8.Text = value; } }
-    public string String9 { get { return textBox9.Text; } private set { textBox9.Text = value; } }
-    public string String10 { get { return textBox10.Text; } private set { textBox10.Text = value; } }
+    public string String1
+    {
+        get => textBox1.Text;
+        private set => textBox1.Text = value;
+    }
+
+    public string String2
+    {
+        get => textBox2.Text;
+        private set => textBox2.Text = value;
+    }
+
+    public string String3
+    {
+        get => textBox3.Text;
+        private set => textBox3.Text = value;
+    }
+
+    public string String4
+    {
+        get => textBox4.Text;
+        private set => textBox4.Text = value;
+    }
+
+    public string String5
+    {
+        get => textBox5.Text;
+        private set => textBox5.Text = value;
+    }
+
+    public string String6
+    {
+        get => textBox6.Text;
+        private set => textBox6.Text = value;
+    }
+
+    public string String7
+    {
+        get => textBox7.Text;
+        private set => textBox7.Text = value;
+    }
+
+    public string String8
+    {
+        get => textBox8.Text;
+        private set => textBox8.Text = value;
+    }
+
+    public string String9
+    {
+        get => textBox9.Text;
+        private set => textBox9.Text = value;
+    }
+
+    public string String10
+    {
+        get => textBox10.Text;
+        private set => textBox10.Text = value;
+    }
 }
