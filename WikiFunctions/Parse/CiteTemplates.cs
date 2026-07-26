@@ -509,15 +509,10 @@ public partial class Parsers
         }
 
         // Remove Empty Citation Original Date
-        newValue = RemoveEmptyCitationOriginalDate(
-            newValue,
-            paramsFound,
-            origdate);
+        newValue = RemoveEmptyCitationOriginalDate(newValue, paramsFound, origdate);
 
         // newlines to spaces in all parameters
-        newValue = NormalizeCitationParameterNewlines(
-            newValue,
-            paramsFound);
+        newValue = NormalizeCitationParameterNewlines(newValue, paramsFound);
 
         // {{sv icon}} -> sv in language=
         newValue = NormalizeCitationLanguageTemplate(newValue, lang);
@@ -545,22 +540,7 @@ public partial class Parsers
         // year = full date --> date = full date
         if (TheYear.Length > 5)
         {
-            string TheYearCorected = IncorrectCommaInternationalDates.Replace(TheYear, @"$1 $2");
-            TheYearCorected = IncorrectCommaAmericanDates.Replace(TheYearCorected, @"$1 $2, $3");
-
-            if (!TheYearCorected.Equals(TheYear))
-            {
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "year", TheYearCorected);
-                TheYear = TheYearCorected;
-            }
-
-            if (WikiRegexes.ISODates.IsMatch(TheYear) || WikiRegexes.InternationalDates.IsMatch(TheYear)
-                 || WikiRegexes.AmericanDates.IsMatch(TheYear))
-            {
-                TheDate = TheYear;
-                TheYear = "";
-                newValue = Tools.RenameTemplateParameter(newValue, "year", "date");
-            }
+            newValue = MoveFullDateFromCitationYear(newValue, ref TheYear, ref TheDate);
         }
 
         // year=YYYY and date=...YYYY -> remove year; not for year=YYYYa
@@ -612,24 +592,16 @@ public partial class Parsers
         }
 
         // correct volume=vol 7... and issue=no. 8 for {{cite journal}} only
-        if (templatename.Equals(
-                "cite journal",
-                StringComparison.OrdinalIgnoreCase))
+        if (templatename.Equals( "cite journal", StringComparison.OrdinalIgnoreCase))
         {
-            newValue = NormalizeCitationJournalVolumeAndIssue(
-                newValue,
-                TheVolume,
-                TheIssue);
+            newValue = NormalizeCitationJournalVolumeAndIssue(newValue, TheVolume, TheIssue);
         }
         // {{cite web}} for Google books -> {{Cite book}}
         else if (templatename.Contains("web") &&
                  newValue.Contains("http://books.google.") &&
                  TheWork.Length == 0)
         {
-            newValue = Tools.RenameTemplate(
-                newValue,
-                templatename,
-                "Cite book");
+            newValue = Tools.RenameTemplate(newValue, templatename, "Cite book");
         }
 
         // remove leading zero in day of month
@@ -687,30 +659,8 @@ public partial class Parsers
         }
 
         // remove ordinals from dates
-        if (Ordinal.IsMatch(TheDate) || Ordinal.IsMatch(accessdate))
-        {
-            if (OrdinalsInDatesInt.IsMatch(TheDate))
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "date",
-                    OrdinalsInDatesInt.Replace(TheDate, "$1$2$3 $4"));
-            else if (OrdinalsInDatesAm.IsMatch(TheDate))
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "date",
-                    OrdinalsInDatesAm.Replace(TheDate, "$1 $2$3"));
+        newValue = RemoveCitationDateOrdinals(newValue, TheDate, accessdate);
 
-            if (OrdinalsInDatesInt.IsMatch(accessdate))
-            {
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "accessdate",
-                    OrdinalsInDatesInt.Replace(accessdate, "$1$2$3 $4"));
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "access-date",
-                    OrdinalsInDatesInt.Replace(accessdate, "$1$2$3 $4"));
-            }
-            else if (OrdinalsInDatesAm.IsMatch(accessdate))
-            {
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "accessdate",
-                    OrdinalsInDatesAm.Replace(accessdate, "$1 $2$3"));
-                newValue = Tools.UpdateTemplateParameterValue(newValue, "access-date",
-                    OrdinalsInDatesAm.Replace(accessdate, "$1 $2$3"));
-            }
-        }
         // catch after any other fixes
         if (!IncorrectCommaAmericanDates.IsMatch(theURLoriginal))
             newValue = IncorrectCommaAmericanDates.Replace(newValue, @"$1 $2, $3");
@@ -1071,6 +1021,146 @@ public partial class Parsers
             template = CiteTemplatesJournalVolumeAndIssue.Replace(
                 template,
                 @"| issue = ");
+        }
+
+        return template;
+    }
+
+    /// <summary>
+    /// Corrects punctuation in a full date stored in the citation
+    /// <c>year</c> parameter and moves recognized full dates to
+    /// the <c>date</c> parameter.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="year">
+    /// The current value of the citation <c>year</c> parameter.
+    /// This value is updated when its punctuation is corrected and
+    /// cleared when the parameter is renamed to <c>date</c>.
+    /// </param>
+    /// <param name="date">
+    /// The current value of the citation <c>date</c> parameter.
+    /// This value is updated when a full date is moved from
+    /// <c>year</c>.
+    /// </param>
+    /// <returns>
+    /// The citation template with the year value corrected and,
+    /// when applicable, moved to the <c>date</c> parameter.
+    /// </returns>
+    private static string MoveFullDateFromCitationYear(
+        string template,
+        ref string year,
+        ref string date)
+    {
+        string correctedYear =
+            IncorrectCommaInternationalDates.Replace(
+                year,
+                @"$1 $2");
+
+        correctedYear =
+            IncorrectCommaAmericanDates.Replace(
+                correctedYear,
+                @"$1 $2, $3");
+
+        if (!correctedYear.Equals(year))
+        {
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "year",
+                correctedYear);
+
+            year = correctedYear;
+        }
+
+        if (WikiRegexes.ISODates.IsMatch(year) ||
+            WikiRegexes.InternationalDates.IsMatch(year) ||
+            WikiRegexes.AmericanDates.IsMatch(year))
+        {
+            date = year;
+            year = "";
+
+            template = Tools.RenameTemplateParameter(
+                template,
+                "year",
+                "date");
+        }
+
+        return template;
+    }
+
+    /// <summary>
+    /// Removes ordinal suffixes from citation publication and access dates.
+    /// </summary>
+    /// <param name="template">
+    /// The citation template being processed.
+    /// </param>
+    /// <param name="date">
+    /// The current value of the citation <c>date</c> parameter.
+    /// </param>
+    /// <param name="accessDate">
+    /// The current value of the citation access-date parameter.
+    /// </param>
+    /// <returns>
+    /// The citation template with recognized ordinal suffixes removed from
+    /// publication and access dates.
+    /// </returns>
+    private static string RemoveCitationDateOrdinals(
+        string template,
+        string date,
+        string accessDate)
+    {
+        if (!Ordinal.IsMatch(date) && !Ordinal.IsMatch(accessDate))
+            return template;
+
+        if (OrdinalsInDatesInt.IsMatch(date))
+        {
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "date",
+                OrdinalsInDatesInt.Replace(date, "$1$2$3 $4"));
+        }
+        else if (OrdinalsInDatesAm.IsMatch(date))
+        {
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "date",
+                OrdinalsInDatesAm.Replace(date, "$1 $2$3"));
+        }
+
+        if (OrdinalsInDatesInt.IsMatch(accessDate))
+        {
+            string normalizedAccessDate =
+                OrdinalsInDatesInt.Replace(
+                    accessDate,
+                    "$1$2$3 $4");
+
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "accessdate",
+                normalizedAccessDate);
+
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "access-date",
+                normalizedAccessDate);
+        }
+        else if (OrdinalsInDatesAm.IsMatch(accessDate))
+        {
+            string normalizedAccessDate =
+                OrdinalsInDatesAm.Replace(
+                    accessDate,
+                    "$1 $2$3");
+
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "accessdate",
+                normalizedAccessDate);
+
+            template = Tools.UpdateTemplateParameterValue(
+                template,
+                "access-date",
+                normalizedAccessDate);
         }
 
         return template;
