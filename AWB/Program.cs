@@ -18,63 +18,128 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.Reflection;
 using System.Security;
 using System.Windows.Forms;
 using WikiFunctions;
+using WikiFunctions.Plugin;
+using AutoWikiBrowser.Logging;
 
 namespace AutoWikiBrowser;
 
+/// <summary>
+/// Provides the application entry point and shared process-level state for
+/// AutoWikiBrowser.
+/// </summary>
 internal static class Program
 {
     /// <summary>
-    /// The main entry point for the application.
+    /// Initializes application-wide services and starts the main application form.
     /// </summary>
+    /// <param name="args">
+    /// Command-line arguments passed to the application.
+    /// </param>
     [STAThread]
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        Encoding.RegisterProvider(
+            CodePagesEncodingProvider.Instance);
 
         try
         {
-            System.Threading.Thread.CurrentThread.Name = "Main thread";
+            Thread.CurrentThread.Name = "Main thread";
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += ApplicationThreadException;
 
             if (Globals.UsingMono)
             {
-                MessageBox.Show("AWB is not currently supported by mono. You may use it for testing purposes, but functionality is not guaranteed.",
+                MessageBox.Show(
+                    "AWB is not currently supported by Mono. You may use it for " +
+                    "testing purposes, but functionality is not guaranteed.",
                     "Not supported",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
             }
 
             AwbDirs.MigrateDefaultSettings();
 
-            MainForm awb = new MainForm();
+            MainForm awb = new();
             AWB = awb;
+
             awb.ParseCommandLine(args);
 
-            Article.SetAddListener(MyTrace.AddListener, MyTrace, "AWB");
+            Article.SetAddListener(
+                MyTrace.AddListener,
+                MyTrace,
+                "AWB");
 
             Application.Run(awb);
         }
         catch (Exception ex)
         {
-            if (ex is SecurityException) //"Fix" - http://geekswithblogs.net/TimH/archive/2006/03/08/71714.aspx
-                MessageBox.Show("AWB is unable to start up from the current location due to a lack of permissions.\r\nPlease try on a local drive or similar.", "Permissions Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (ex is SecurityException)
+            {
+                // Some execution locations, such as restricted network shares,
+                // may not grant the permissions required to start AWB.
+                MessageBox.Show(
+                    "AWB is unable to start from the current location due to a " +
+                    "lack of permissions.\r\nPlease try a local drive or a " +
+                    "similarly trusted location.",
+                    "Permissions Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
             else
+            {
                 ErrorHandler.HandleException(ex);
+            }
         }
     }
 
-    private static void ApplicationThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+    /// <summary>
+    /// Handles exceptions that escape the Windows Forms message loop.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data containing the unhandled thread exception.
+    /// </param>
+    private static void ApplicationThreadException(
+        object sender,
+        ThreadExceptionEventArgs e)
     {
         ErrorHandler.HandleException(e.Exception);
     }
 
-    internal static Version Version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
-    internal static string VersionString { get { return Version.ToString(); } }
+    /// <summary>
+    /// Gets the version of the currently executing AutoWikiBrowser assembly.
+    /// </summary>
+    internal static Version Version =>
+        Assembly.GetExecutingAssembly()
+            .GetName()
+            .Version;
+
+    /// <summary>
+    /// Gets the application version as a string.
+    /// </summary>
+    internal static string VersionString =>
+        Version.ToString();
+
+    /// <summary>
+    /// The application display name.
+    /// </summary>
     internal const string Name = "AutoWikiBrowser";
-    internal static WikiFunctions.Plugin.IAutoWikiBrowser AWB;
-    internal static readonly Logging.MyTrace MyTrace = new Logging.MyTrace();
+
+    /// <summary>
+    /// Gets or sets the active AutoWikiBrowser application instance.
+    /// </summary>
+    internal static IAutoWikiBrowser AWB;
+
+    /// <summary>
+    /// Provides the shared application trace listener.
+    /// </summary>
+    internal static readonly MyTrace MyTrace = new();
 }
