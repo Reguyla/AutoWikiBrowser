@@ -23,157 +23,273 @@ using WikiFunctions.Plugin;
 
 namespace AutoWikiBrowser;
 
+// TODO (maintainability): Consider introducing a SkipOption model or enum
+// to define the available skip options in one place. This would eliminate
+// duplicated option IDs, descriptions, and property mappings, making it
+// easier to add, remove, or reorder skip options while preserving their
+// stable identifiers.
+///
+//TODO (optimization): If additional skip options are introduced, consider
+// maintaining a mapping between option IDs and CheckedListBox indexes to
+// avoid scanning the list each time IsOptionChecked() is called. The current
+// linear search is appropriate for the small, fixed number of options.
+/// <summary>
+/// Provides options for skipping articles when selected automatic processing
+/// operations did not make a change.
+/// </summary>
+/// <remarks>
+/// The form is hidden rather than disposed when closed so that its selected
+/// options remain available to the main AWB workflow.
+/// </remarks>
 internal sealed partial class SkipOptions : Form, ISkipOptions
 {
+    private const int BoldTitleOptionId = 1;
+    private const int BulletedExternalLinkOptionId = 2;
+    private const int BadLinksOptionId = 3;
+    private const int UnicodeOptionId = 4;
+    private const int AutoTagOptionId = 5;
+    private const int HeaderErrorOptionId = 6;
+    private const int DefaultSortOptionId = 7;
+    private const int UserTalkTemplatesOptionId = 8;
+    private const int CitationTemplateDatesOptionId = 9;
+    private const int HumanCategoriesOptionId = 10;
+
+    /// <summary>
+    /// Options displayed in the checked list box, in their intended display
+    /// order.
+    /// </summary>
+    private static readonly (int Id, string Description)[] AvailableOptions =
+    [
+        (BoldTitleOptionId, "Title boldened"),
+        (BulletedExternalLinkOptionId, "External link bulleted"),
+        (BadLinksOptionId, "Bad links fixed"),
+        (UnicodeOptionId, "Unicodification"),
+        (AutoTagOptionId, "Auto tag changes"),
+        (HeaderErrorOptionId, "Header error fixed"),
+        (DefaultSortOptionId, "{{defaultsort}} added"),
+        (UserTalkTemplatesOptionId, "User talk templates subst'd"),
+        (CitationTemplateDatesOptionId, "Citation templates dates fixed"),
+        (HumanCategoriesOptionId, "Human category changes")
+    ];
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SkipOptions"/> form and
+    /// populates the available skip conditions.
+    /// </summary>
     public SkipOptions()
     {
         InitializeComponent();
 
-        foreach (KeyValuePair<int, string> kvp in skipOptions)
+        foreach ((int id, string description) in AvailableOptions)
         {
-            skipListBox.Items.Add(new CheckedBoxItem
-            {
-                ID = kvp.Key,
-                Description = kvp.Value
-            });
+            skipListBox.Items.Add(
+                new CheckedBoxItem
+                {
+                    ID = id,
+                    Description = description
+                });
         }
     }
 
-    private readonly Dictionary<int, string> skipOptions = new Dictionary<int, string>
-    {
-        {1, "Title boldened"},
-        {2, "External link bulleted"},
-        {3, "Bad links fixed"},
-        {4, "Unicodification"},
-        {5, "Auto tag changes"},
-        {6, "Header error fixed"},
-        {7, "{{defaultsort}} added"},
-        {8, "User talk templates subst'd"},
-        {9, "Citation templates dates fixed"},
-        {10, "Human category changes"},
-    };
-
     #region Properties
 
-    // NOTE 0 based indexing
+    /// <inheritdoc />
+    public bool SkipNoBoldTitle =>
+        IsOptionChecked(BoldTitleOptionId);
 
-    public bool SkipNoBoldTitle
+    /// <inheritdoc />
+    public bool SkipNoBulletedLink =>
+        IsOptionChecked(BulletedExternalLinkOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoBadLink =>
+        IsOptionChecked(BadLinksOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoUnicode =>
+        IsOptionChecked(UnicodeOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoTag =>
+        IsOptionChecked(AutoTagOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoHeaderError =>
+        IsOptionChecked(HeaderErrorOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoDefaultSortAdded =>
+        IsOptionChecked(DefaultSortOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoUserTalkTemplatesSubstd =>
+        IsOptionChecked(UserTalkTemplatesOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoCiteTemplateDatesFixed =>
+        IsOptionChecked(CitationTemplateDatesOptionId);
+
+    /// <inheritdoc />
+    public bool SkipNoPeopleCategoriesFixed =>
+        IsOptionChecked(HumanCategoriesOptionId);
+
+    // TODO (performance): If the number of skip options grows significantly,
+    // consider converting the supplied List<int> to a HashSet<int> before
+    // iterating through the checked list. This would reduce repeated
+    // List.Contains() lookups from O(n) to O(1). With the current ten
+    // options, the existing implementation is simple and sufficiently fast.
+    /// <summary>
+    /// Gets or sets the identifiers of the currently selected skip options.
+    /// </summary>
+    /// <remarks>
+    /// Setting this property updates the checked state of every displayed
+    /// option and clears the transient Check All and Check None controls.
+    /// </remarks>
+    public List<int> SelectedItems
     {
-        get { return skipListBox.GetItemChecked(0); }
+        get
+        {
+            List<int> selectedItems = new();
+
+            for (int index = 0;
+                 index < skipListBox.Items.Count;
+                 index++)
+            {
+                if (!skipListBox.GetItemChecked(index))
+                {
+                    continue;
+                }
+
+                CheckedBoxItem item =
+                    (CheckedBoxItem)skipListBox.Items[index];
+
+                selectedItems.Add(item.ID);
+            }
+
+            return selectedItems;
+        }
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            CheckAll.Checked = false;
+            CheckNone.Checked = false;
+
+            for (int index = 0;
+                 index < skipListBox.Items.Count;
+                 index++)
+            {
+                CheckedBoxItem item =
+                    (CheckedBoxItem)skipListBox.Items[index];
+
+                skipListBox.SetItemChecked(
+                    index,
+                    value.Contains(item.ID));
+            }
+        }
     }
 
-    public bool SkipNoBulletedLink
-    {
-        get { return skipListBox.GetItemChecked(1); }
-    }
-
-    public bool SkipNoBadLink
-    {
-        get { return skipListBox.GetItemChecked(2); }
-    }
-
-    public bool SkipNoUnicode
-    {
-        get { return skipListBox.GetItemChecked(3); }
-    }
-
-    public bool SkipNoTag
-    {
-        get { return skipListBox.GetItemChecked(4); }
-    }
-
-    public bool SkipNoHeaderError
-    {
-        get { return skipListBox.GetItemChecked(5); }
-    }
-
-    public bool SkipNoDefaultSortAdded
-    {
-        get { return skipListBox.GetItemChecked(6); }
-    }
-
-    public bool SkipNoUserTalkTemplatesSubstd
-    {
-        get { return skipListBox.GetItemChecked(7); }
-    }
-
-    public bool SkipNoCiteTemplateDatesFixed
-    {
-        get { return skipListBox.GetItemChecked(8); }
-    }
-
-    public bool SkipNoPeopleCategoriesFixed
-    {
-        get { return skipListBox.GetItemChecked(9); }
-    }
     #endregion
 
-    #region Methods
+    #region Event handlers
 
-    private void SkipOptions_FormClosing(object sender, FormClosingEventArgs e)
+    /// <summary>
+    /// Prevents the form from being disposed and hides it instead.
+    /// </summary>
+    private void SkipOptions_FormClosing(
+        object sender,
+        FormClosingEventArgs e)
     {
         e.Cancel = true;
         Hide();
     }
 
-    private void btnClose_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Hides the skip-options form.
+    /// </summary>
+    private void btnClose_Click(
+        object sender,
+        EventArgs e)
     {
         Hide();
     }
 
-    public List<int> SelectedItems
+    /// <summary>
+    /// Selects every available skip option when the Check All control is
+    /// selected.
+    /// </summary>
+    private void CheckAll_CheckedChanged(
+        object sender,
+        EventArgs e)
     {
-        get
+        if (!CheckAll.Checked)
         {
-            List<int> items = new List<int>();
-            for (int i = 0; i < skipListBox.Items.Count; i++)
-            {
-                if (skipListBox.GetItemChecked(i))
-                {
-                    CheckedBoxItem cbi = (CheckedBoxItem)skipListBox.Items[i];
-                    items.Add(cbi.ID);
-                }
-            }
-            return items;
+            return;
         }
-        set
-        {
-            CheckAll.Checked = false;
-            CheckNone.Checked = false;
 
-            for (int i = 0; i < skipListBox.Items.Count; i++)
-            {
-                CheckedBoxItem cbi = (CheckedBoxItem)skipListBox.Items[i];
-                skipListBox.SetItemChecked(i, value.Contains(cbi.ID));
-            }
+        CheckNone.Checked = false;
+        SetCheckboxes(true);
+    }
+
+    /// <summary>
+    /// Clears every available skip option when the Check None control is
+    /// selected.
+    /// </summary>
+    private void CheckNone_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        if (!CheckNone.Checked)
+        {
+            return;
         }
+
+        CheckAll.Checked = false;
+        SetCheckboxes(false);
     }
 
     #endregion
 
-    private void CheckAll_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Determines whether the skip option with the specified identifier is
+    /// currently selected.
+    /// </summary>
+    /// <param name="optionId">The stable identifier of the option.</param>
+    /// <returns>
+    /// <see langword="true"/> when the option exists and is checked; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool IsOptionChecked(int optionId)
     {
-        if (CheckAll.Checked)
+        for (int index = 0;
+             index < skipListBox.Items.Count;
+             index++)
         {
-            CheckNone.Checked = false;
-            SetCheckboxes(true);
+            if (skipListBox.Items[index] is CheckedBoxItem item &&
+                item.ID == optionId)
+            {
+                return skipListBox.GetItemChecked(index);
+            }
         }
+
+        return false;
     }
 
-    private void CheckNone_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Sets the checked state of every skip option.
+    /// </summary>
+    /// <param name="isChecked">
+    /// The checked state to apply to every option.
+    /// </param>
+    private void SetCheckboxes(bool isChecked)
     {
-        if (CheckNone.Checked)
+        for (int index = 0;
+             index < skipListBox.Items.Count;
+             index++)
         {
-            CheckAll.Checked = false;
-            SetCheckboxes(false);
-        }
-    }
-
-    private void SetCheckboxes(bool value)
-    {
-        for (int i = 0; i < skipListBox.Items.Count; i++)
-        {
-            skipListBox.SetItemChecked(i, value);
+            skipListBox.SetItemChecked(
+                index,
+                isChecked);
         }
     }
 }
