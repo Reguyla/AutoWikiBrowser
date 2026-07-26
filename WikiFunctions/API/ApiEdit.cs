@@ -19,6 +19,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Xml;
 using WikiFunctions.Controls;
@@ -4624,25 +4625,22 @@ public class ApiEdit : IApiEdit
         string action,
         bool previouslyHadMessages)
     {
-        if (!NewMessageThrows ||
-            previouslyHadMessages ||
-            !User.HasMessages)
-        {
-            return false;
-        }
-
-        return !string.Equals(
-                   action,
-                   "login",
-                   StringComparison.OrdinalIgnoreCase)
-               && !string.Equals(
-                   action,
-                   "clientlogin",
-                   StringComparison.OrdinalIgnoreCase)
-               && !string.Equals(
-                   action,
-                   "userinfo",
-                   StringComparison.OrdinalIgnoreCase);
+        return
+            NewMessageThrows &&
+            !previouslyHadMessages &&
+            User.HasMessages &&
+            !string.Equals(
+                action,
+                "login",
+                StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(
+                action,
+                "clientlogin",
+                StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(
+                action,
+                "userinfo",
+                StringComparison.OrdinalIgnoreCase);
     }
 
     #endregion
@@ -4687,10 +4685,8 @@ public class ApiEdit : IApiEdit
     /// </summary>
     /// <param name="input">String to get MD5 sum of</param>
     /// <returns>MD5 sum</returns>
-    protected static string MD5(string input)
-    {
-        return MD5(Encoding.UTF8.GetBytes(input));
-    }
+    protected static string MD5(string input) =>
+        MD5(Encoding.UTF8.GetBytes(input));
 
     /// <summary>
     /// Computes the MD5 sum of a byte array
@@ -4699,14 +4695,17 @@ public class ApiEdit : IApiEdit
     /// <returns>MD5 sum</returns>
     protected static string MD5(byte[] input)
     {
-        var summer = System.Security.Cryptography.MD5.Create();
-        StringBuilder sb = new StringBuilder(20);
-        foreach (byte t in summer.ComputeHash(input))
+        using System.Security.Cryptography.MD5 md5 =
+            System.Security.Cryptography.MD5.Create();
+
+        StringBuilder hash = new(32);
+
+        foreach (byte value in md5.ComputeHash(input))
         {
-            sb.Append(t.ToString("x2"));
+            hash.Append(value.ToString("x2"));
         }
 
-        return sb.ToString();
+        return hash.ToString();
     }
 
     /// <summary>
@@ -4733,7 +4732,7 @@ public class ApiEdit : IApiEdit
     /// <returns>The parsed XML document.</returns>
     private static XmlDocument LoadApiXmlDocument(string xml)
     {
-        XmlDocument document = new XmlDocument
+        XmlDocument document = new()
         {
             XmlResolver = null
         };
@@ -4755,12 +4754,10 @@ public class ApiEdit : IApiEdit
     /// </summary>
     /// <param name="result">The API response XML to read.</param>
     /// <returns>An XML reader positioned before the response document.</returns>
-    protected XmlReader CreateXmlReader(string result)
-    {
-        return XmlReader.Create(
+    protected XmlReader CreateXmlReader(string result) =>
+        XmlReader.Create(
             new StringReader(result),
             CreateSafeXmlReaderSettings());
-    }
 
     /// <summary>
     /// Throws when the API response reports an invalid page title.
@@ -4831,7 +4828,10 @@ public class ApiEdit : IApiEdit
         string assertion =
             actionElement.GetAttribute("assert");
 
-        if (assertion == "user")
+        if (string.Equals(
+                assertion,
+                "user",
+                StringComparison.Ordinal))
             throw new LoggedOffException(this);
 
         throw new AssertionFailedException(
@@ -4904,7 +4904,10 @@ public class ApiEdit : IApiEdit
             actionElement.GetAttribute("result");
 
         if (string.IsNullOrEmpty(result) ||
-            result == "Success")
+            string.Equals(
+                result,
+                "Success",
+                StringComparison.Ordinal))
         {
             return;
         }
