@@ -373,29 +373,79 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         RestoreSelectedRule();
     }
 
+    /// <summary>
+    /// Copies the currently selected replacement rule to the clipboard.
+    /// </summary>
+    /// <remarks>
+    /// The selected rule is saved, serialized to its text representation, and
+    /// placed on the clipboard so it can be pasted into another rules tree.
+    /// </remarks>
     private void CopyCmd()
     {
         if (RulesTreeView.SelectedNode == null)
             return;
+
         SaveCurrentRule();
         History.Save();
 
-        Tools.CopyToClipboard(Serialize(GetSelectedRule()), true);
+        string serializedRule = Serialize(GetSelectedRule());
+        Tools.CopyToClipboard(serializedRule, true);
+
         UpdateEnabledStates();
     }
 
+    /// <summary>
+    /// Pastes a serialized replacement rule from the clipboard into the rules tree.
+    /// </summary>
+    /// <remarks>
+    /// Clipboard data is accepted only when it contains text. The serialized rule
+    /// is parsed before the tree enters its bulk-update state so invalid clipboard
+    /// contents leave the current rules tree unchanged.
+    /// </remarks>
     private void PasteCmd()
     {
-        RulesTreeView.BeginUpdate();
-        SaveCurrentRule();
-        History.Save();
+        IDataObject clipboardData = Clipboard.GetDataObject();
 
-        AddNewRule(Deserialize(Clipboard.GetDataObject().GetData(typeof(string)).ToString()));
+        if (clipboardData?.GetDataPresent(typeof(string)) != true)
+            return;
 
-        RulesTreeView.Select();
-        RestoreSelectedRule();
-        RulesTreeView.ExpandAll();
-        RulesTreeView.EndUpdate();
+        if (clipboardData.GetData(typeof(string)) is not string serializedRule ||
+            string.IsNullOrWhiteSpace(serializedRule))
+        {
+            return;
+        }
+
+        try
+        {
+            var rule = Deserialize(serializedRule);
+
+            RulesTreeView.BeginUpdate();
+
+            try
+            {
+                SaveCurrentRule();
+                History.Save();
+
+                AddNewRule(rule);
+
+                RulesTreeView.Select();
+                RestoreSelectedRule();
+                RulesTreeView.ExpandAll();
+            }
+            finally
+            {
+                RulesTreeView.EndUpdate();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            MessageBox.Show(
+                this,
+                "The clipboard does not contain a valid replacement rule.",
+                "Unable to paste rule",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
     }
 
     private void NewRule()
