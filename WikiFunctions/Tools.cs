@@ -1992,43 +1992,75 @@ Message: {2}
 
     #region Copy
     /// <summary>
-    /// Copy selected items from a listbox
+    /// Copies the selected items from a list box to the clipboard as plain text.
     /// </summary>
-    /// <param name="box">The list box to copy from</param>
+    /// <param name="box">The list box containing the items to copy.</param>
     public static void Copy(ListBox box)
     {
-        try
+        if (box == null)
+            throw new ArgumentNullException(nameof(box));
+
+        var builder = new StringBuilder();
+
+        foreach (object item in box.SelectedItems)
         {
-            StringBuilder builder = new StringBuilder();
-            foreach (object t in box.SelectedItems)
-            {
-                builder.AppendLine(t.ToString());
-            }
-            Clipboard.SetDataObject(builder.ToString().Trim(), true);
+            if (item != null)
+                builder.AppendLine(item.ToString());
         }
-        catch { }
+
+        CopyToClipboard(builder.ToString().TrimEnd());
     }
 
     /// <summary>
-    /// Copy selected items from a listview
+    /// Copies the selected items from a list view to the clipboard as plain text.
     /// </summary>
-    /// <param name="view">The list view to copy from</param>
+    /// <param name="view">The list view containing the items to copy.</param>
     public static void Copy(ListView view)
     {
+        if (view == null)
+            throw new ArgumentNullException(nameof(view));
+
+        var builder = new StringBuilder();
+
+        foreach (ListViewItem item in view.SelectedItems)
+            builder.AppendLine(item.Text);
+
+        CopyToClipboard(builder.ToString().TrimEnd());
+    }
+
+    /// <summary>
+    /// Copies text to the clipboard and keeps it available after AWB exits.
+    /// </summary>
+    /// <param name="text">The text to copy.</param>
+    public static void CopyToClipboard(string text)
+    {
+        CopyToClipboard(text, true);
+    }
+
+    /// <summary>
+    /// Copies data to the clipboard.
+    /// </summary>
+    /// <param name="data">The data to place on the clipboard.</param>
+    /// <param name="copy">
+    /// Whether the clipboard data should remain available after AWB exits.
+    /// </param>
+    public static void CopyToClipboard(object data, bool copy)
+    {
+        if (data == null)
+            return;
+
         try
         {
-            StringBuilder builder = new StringBuilder();
-            foreach (ListViewItem a in view.SelectedItems)
-            {
-                builder.AppendLine(a.Text);
-            }
-            Clipboard.SetDataObject(builder.ToString().Trim(), true);
+            Clipboard.SetDataObject(data, copy);
         }
-        catch { }
+        catch (ExternalException)
+        {
+            // Another process may temporarily have the clipboard locked.
+        }
     }
-    #endregion
+#endregion
 
-    private const char ReturnLine = '\r', NewLine = '\n';
+private const char ReturnLine = '\r', NewLine = '\n';
     private static readonly char[] Separators = { ReturnLine, NewLine };
 
     // Covered by ToolsTests.SplitLines()
@@ -2296,37 +2328,6 @@ Message: {2}
         }
 
         return ret.ToString();
-    }
-
-    /// <summary>
-    /// Wrapper function for setting text to clipboard. Clears clipboard and waits before continuing
-    /// </summary>
-    /// <param name="text">Text to copy to clipboard</param>
-    public static void CopyToClipboard(string text)
-    {
-        try
-        {
-            Clipboard.Clear();
-            System.Threading.Thread.Sleep(50); // give it some time to clear
-            Clipboard.SetText(text);
-        }
-        catch { }
-    }
-
-    /// <summary>
-    /// Wrapper function for setting text to clipboard. Clears clipboard and waits before continuing
-    /// </summary>
-    /// <param name="data"></param>
-    /// <param name="copy"></param>
-    public static void CopyToClipboard(object data, bool copy)
-    {
-        try
-        {
-            Clipboard.Clear();
-            System.Threading.Thread.Sleep(50); // give it some time to clear
-            Clipboard.SetDataObject(data, copy);
-        }
-        catch { }
     }
 
     /// <summary>
