@@ -591,30 +591,6 @@ public class ApiEdit : IApiEdit
         return request;
     }
 
-    /// <summary>
-    /// Creates and configures a legacy HTTP request using AWB networking settings.
-    /// </summary>
-    /// <param name="url">The absolute URL to request.</param>
-    /// <returns>A configured HTTP request.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when network access is attempted during unit tests.
-    /// </exception>
-    protected HttpWebRequest CreateRequest(string url)
-    {
-        EnsureNetworkAccessAllowed();
-
-        ConfigureLegacyTransportSecurity();
-
-        HttpWebRequest request =
-            (HttpWebRequest)WebRequest.Create(url);
-
-        ConfigureConnectionSettings(request);
-        ConfigureProxy(request);
-        ConfigureRequestHeaders(request);
-        ConfigureCookies(request, url);
-
-        return request;
-    }
 
     /// <summary>
     /// Prevents live network access while unit tests are running.
@@ -628,76 +604,6 @@ public class ApiEdit : IApiEdit
         {
             throw new InvalidOperationException(
                 "Wikipedia must not be accessed during unit tests.");
-        }
-    }
-
-    /// <summary>
-    /// Applies the transport settings required by the legacy request pipeline.
-    /// </summary>
-    private static void ConfigureLegacyTransportSecurity()
-    {
-        ServicePointManager.Expect100Continue = false;
-
-        // TODO (HTTP Modernization):
-        // Re-evaluate whether explicit ServicePointManager configuration remains
-        // necessary after the HttpClient migration.
-        ServicePointManager.SecurityProtocol |=
-            SecurityProtocolType.Tls11 |
-            SecurityProtocolType.Tls12 |
-            SecurityProtocolType.Tls13;
-    }
-
-    /// <summary>
-    /// Configures connection reuse and disables the Expect: 100-continue behavior.
-    /// </summary>
-    private static void ConfigureConnectionSettings(
-        HttpWebRequest request)
-    {
-        request.KeepAlive = true;
-        request.ServicePoint.Expect100Continue = false;
-        request.Expect = string.Empty;
-    }
-
-    /// <summary>
-    /// Applies the configured proxy settings to the request.
-    /// </summary>
-    private void ConfigureProxy(HttpWebRequest request)
-    {
-        if (ProxySettings == null)
-        {
-            request.Proxy = null;
-            return;
-        }
-
-        request.Proxy = ProxySettings;
-        request.UseDefaultCredentials = true;
-    }
-
-    /// <summary>
-    /// Applies the AWB user agent and supported response decompression methods.
-    /// </summary>
-    private void ConfigureRequestHeaders(HttpWebRequest request)
-    {
-        request.UserAgent = UserAgent;
-
-        request.AutomaticDecompression =
-            DecompressionMethods.Deflate |
-            DecompressionMethods.GZip;
-    }
-
-    /// <summary>
-    /// Attaches the session cookie container only to requests targeting the
-    /// current wiki, preventing cookies from being sent to third-party sites.
-    /// Cookies intentionally withheld from requests targeting 
-    /// other hosts to avoid leaking authenticated session cookies.
-    /// </summary>
-    private void ConfigureCookies(
-        HttpWebRequest request,
-        string url)
-    {
-        if (IsCurrentWikiRequest(url))
-        {
-            request.CookieContainer = Cookies;
         }
     }
 
