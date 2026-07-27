@@ -3952,8 +3952,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return false;
     }
 
-    bool _diffAccessViolationSeen;
-
     /// <summary>
     /// Starts generation and display of the current article diff.
     /// </summary>
@@ -4122,7 +4120,6 @@ font-size: 150%;'>No changes</h2>
     {
         txtEdit.Focus();
         txtEdit.SelectionLength = 0;
-        _diffAccessViolationSeen = false;
 
         GuiUpdateAfterProcessing();
     }
