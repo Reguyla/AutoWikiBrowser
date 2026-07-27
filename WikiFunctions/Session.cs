@@ -209,10 +209,7 @@ public class Session
         }
         catch (WebException ex)
         {
-            if (ex.Response is not HttpWebResponse response)
-                throw;
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (ShouldRethrowProjectLoadWebException(ex))
                 throw;
 
             return false;
@@ -222,6 +219,28 @@ public class Session
             Editor = CreateEditor("https://en.wikipedia.org/w/");
             return false;
         }
+    }
+
+    /// <summary>
+    /// Determines whether a project-loading network exception should be
+    /// propagated to the caller.
+    /// </summary>
+    /// <param name="exception">The network exception to inspect.</param>
+    /// <returns>
+    /// <see langword="true"/> when the exception has no HTTP response or represents
+    /// an HTTP 401 Unauthorized response; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Unauthorized responses are propagated so the caller can prompt for
+    /// authentication and retry project loading.
+    /// </remarks>
+    private static bool ShouldRethrowProjectLoadWebException(
+        WebException exception)
+    {
+        if (exception.Response is not HttpWebResponse response)
+            return true;
+
+        return response.StatusCode == HttpStatusCode.Unauthorized;
     }
 
 
