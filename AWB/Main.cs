@@ -8292,8 +8292,6 @@ if (MessageBox.Show(
         ReparseEditBox();
     }
 
-    private BackgroundRequest RunReparseEditBoxBackground;
-
     // run process page step of reparse edit box in a background thread
     // use .Complete event to do rest of processing (alerts etc.) once thread finished
     private void ReparseEditBox()
@@ -8301,13 +8299,16 @@ if (MessageBox.Show(
         if (TheArticle == null)
             return;
 
-        if ((_runProcessPageBackground != null && (_runProcessPageBackground.ThreadStatus() == ThreadState.Running
-        || _runProcessPageBackground.ThreadStatus() == ThreadState.Background)) ||
-        (_runProcessPageBackground != null && (_runProcessPageBackground.ThreadStatus() == ThreadState.Running
-        || _runProcessPageBackground.ThreadStatus() == ThreadState.Background)))
+        if (_runProcessPageBackground != null)
         {
-            StatusLabelText = "Background process running";
-            return;
+            ThreadState threadState = _runProcessPageBackground.ThreadStatus();
+
+            if (threadState == ThreadState.Running ||
+                threadState == ThreadState.Background)
+            {
+                StatusLabelText = "Background process running";
+                return;
+            }
         }
 
         StatusLabelText = "Processing page";
