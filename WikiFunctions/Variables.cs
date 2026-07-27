@@ -104,28 +104,14 @@ public static partial class Variables
     }
 
     /// <summary>
-    /// Gets the SVN revision of the current build and the date it was committed
+    /// Gets the source revision identifier for the current build.
     /// </summary>
-    public static string Revision
-    {
-        get // see SvnInfo.template.cs for details
-        {
-            return !m_Revision.Contains("$") ? m_Revision.Replace("/", "-") : "?";
-        }
-    }
+    public static string Revision => "?";
 
     /// <summary>
-    /// Gets the SVN revision number of the current build
+    /// Gets the numeric source revision for the current build.
     /// </summary>
-    public static int RevisionNumber
-    {
-        get
-        {
-            return !m_Revision.Contains("$")
-                ? int.Parse(m_Revision.Substring(0, m_Revision.IndexOf(' ')))
-                : 0;
-        }
-    }
+    public static int RevisionNumber => 0;
 
     /// <summary>
     /// Page of RegexTypoFix rules page e.g. Project:AutoWikiBrowser/Typos.
