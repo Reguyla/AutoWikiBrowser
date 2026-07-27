@@ -1090,27 +1090,17 @@ public class ApiEdit : IApiEdit
 
         RecordPostDiagnostics(url, post);
 
-        byte[] postData = BuildPostData(post);
-        HttpWebRequest req = CreatePostRequest(url, postData.Length);
+        using HttpRequestMessage request =
+            CreateRequest(HttpMethod.Post, url);
 
-        Request = req;
+        string formData = BuildQuery(post);
 
-        try
-        {
-            WritePostData(req, postData);
+        request.Content = new StringContent(
+            formData,
+            Encoding.UTF8,
+            "application/x-www-form-urlencoded");
 
-            return GetResponseString(req);
-        }
-        catch (WebException ex)
-        {
-            ThrowIfModernRequestCancellation(ex);
-            throw;
-        }
-        finally
-        {
-            if (ReferenceEquals(Request, req))
-                Request = null;
-        }
+        return SendRequest(url, request);
     }
 
     // TODO (Diagnostics Modernization):
@@ -1365,7 +1355,88 @@ public class ApiEdit : IApiEdit
                 "Basic",
                 encodedCredentials);
     }
+    #endregion
 
+    #region New WebView2 infrastructure
+    /// <summary>
+    /// Executes an HTTP request and returns its response body.
+    /// </summary>
+    /// <param name="client">
+    /// The client used to send the request.
+    /// </param>
+    /// <param name="request">
+    /// The configured request to send.
+    /// </param>
+    /// <returns>
+    /// The response body, or an empty string when the server returns HTTP 404.
+    /// </returns>
+    private string ExecuteRequest(
+        HttpClient client,
+        HttpRequestMessage request)
+    {
+        CancellationToken cancellationToken =
+            GetActiveCancellationToken();
+
+        using HttpResponseMessage response = client.Send(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
+
+        ValidateResponseScheme(request, response);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            Tools.WriteDebug(
+                nameof(ApiEdit),
+                $"HTTP 404 returned for '{request.RequestUri}'.");
+
+            return string.Empty;
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        return response.Content
+            .ReadAsStringAsync(cancellationToken)
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    /// <summary>
+    /// Verifies that the response did not redirect the request to a different
+    /// URI scheme.
+    /// </summary>
+    private static void ValidateResponseScheme(
+        HttpRequestMessage request,
+        HttpResponseMessage response)
+    {
+        Uri requestUri = request.RequestUri;
+        Uri responseUri = response.RequestMessage?.RequestUri;
+
+        if (requestUri == null || responseUri == null)
+            return;
+
+        if (!string.Equals(
+                requestUri.Scheme,
+                responseUri.Scheme,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new UriChangedException(
+                requestUri.Scheme,
+                responseUri.Scheme);
+        }
+    }
+
+    /// <summary>
+    /// Creates a client, sends the request, and returns the response body.
+    /// </summary>
+    private string SendRequest(
+        string url,
+        HttpRequestMessage request)
+    {
+        using HttpClient client = CreateHttpClient(url);
+
+        return ExecuteRequest(client, request);
+    }
     #endregion
 
     #region Login / user props
