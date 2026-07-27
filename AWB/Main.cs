@@ -7286,17 +7286,25 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
-    private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Reloads the current wiki status and refreshes cached project data that has
+    /// already been loaded during the current session.
+    /// </summary>
+    /// <param name="sender">The menu item that raised the event.</param>
+    /// <param name="e">The event data.</param>
+    private void reloadToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        // refresh login status, and reload check list
+        // Refresh login status and reload the checklist.
         CheckStatus(false);
 
-        // refresh typo list
+        // Refresh the typo list.
         LoadTypos(true);
 
         WikiDiff.ResetCustomStyles();
 
-        // refresh talk warnings list
+        // Refresh optional data only when it was previously loaded.
         if (UserTalkWarningsLoaded)
             LoadUserTalkWarnings();
 
@@ -7310,7 +7318,15 @@ font-size: 150%;'>No changes</h2>
             LoadRenameTemplateParameters();
     }
 
-    private void resetEditSkippedCountToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Records the current usage statistics when necessary and resets the
+    /// edit, skip, page, and processing counters.
+    /// </summary>
+    /// <param name="sender">The menu item that raised the event.</param>
+    /// <param name="e">The event data.</param>
+    private void resetEditSkippedCountToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (NumberOfEdits > 0)
             UsageStats.Do(false);
@@ -7324,113 +7340,240 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// 
+    /// Loads the selected wiki project and updates project-dependent application
+    /// state and user-interface settings.
     /// </summary>
-    /// <param name="code"></param>
-    /// <param name="project"></param>
-    /// <param name="customProject"></param>
-    /// <param name="protocol"></param>
-    private void SetProject(string code, ProjectEnum project, string customProject, string protocol)
+    /// <param name="code">The project language code.</param>
+    /// <param name="project">The project type.</param>
+    /// <param name="customProject">The custom project URL or identifier.</param>
+    /// <param name="protocol">The protocol used to access the project.</param>
+    private void SetProject(
+        string code,
+        ProjectEnum project,
+        string customProject,
+        string protocol)
     {
         SplashScreen.SetProgress(81);
-        // set namespaces
+
+        if (!TryLoadProject(
+                code,
+                project,
+                customProject,
+                protocol))
+        {
+            return;
+        }
+
+        ShowRestrictedWikiMessageIfRequired();
+        ConfigureInterWikiOrder(project);
+        ConfigureProjectSpecificUi();
+        UpdateProjectLabel();
+
+        UserTalkWarningsLoaded = false;
+        TemplateRedirectsLoaded = false;
+
+        ResetTypoStats();
+    }
+
+    /// <summary>
+    /// Attempts to load the selected wiki project, prompting for authentication
+    /// and retrying once when the server returns an unauthorized response.
+    /// </summary>
+    /// <param name="code">The project language code.</param>
+    /// <param name="project">The project type.</param>
+    /// <param name="customProject">The custom project URL or identifier.</param>
+    /// <param name="protocol">The protocol used to access the project.</param>
+    /// <returns>
+    /// <see langword="true"/> when the project loads successfully; otherwise,
+    /// <see langword="false"/> when a known project-loading error is shown to the
+    /// user.
+    /// </returns>
+    /// <exception cref="WebException">
+    /// Thrown when project loading fails with a network error other than an
+    /// unauthorized response.
+    /// </exception>
+    private bool TryLoadProject(
+        string code,
+        ProjectEnum project,
+        string customProject,
+        string protocol)
+    {
         try
         {
-            //set namespaces
-            Variables.SetProject(code, project, customProject, protocol);
-        }
-        catch (WebException ex)
-        {
-            if (!(ex.Response is HttpWebResponse response) ||
-                response.StatusCode != HttpStatusCode.Unauthorized)
-            {
-                throw;
-            }
-
-            ShowLogin();
-
-            // Retry project loading after authentication.
-            Variables.SetProject(
+            LoadProject(
                 code,
                 project,
                 customProject,
                 protocol);
+
+            return true;
+        }
+        catch (WebException ex) when (IsUnauthorizedResponse(ex))
+        {
+            ShowLogin();
+
+            LoadProject(
+                code,
+                project,
+                customProject,
+                protocol);
+
+            return true;
         }
         catch (UriFormatException)
         {
-            MessageBox.Show("Check the site url you entered is valid, and try again!");
+            MessageBox.Show(
+                "Check the site url you entered is valid, and try again!");
+
+            return false;
         }
         catch (ArgumentNullException)
         {
-            MessageBox.Show("The interwiki list didn't load correctly. Please check your internet connection, and then restart AWB.");
-        }
-
-        if (Variables.TryLoadingAgainAfterLogin)
-        {
             MessageBox.Show(
-                "You seem to be accessing a private wiki. Project loading will be attempted again after login.",
-                "Restricted Wiki");
+                "The interwiki list didn't load correctly. Please check your internet connection, and then restart AWB.");
+
+            return false;
         }
-
-        // set interwikiorder
-        switch (Variables.LangCode)
-        {
-            case "en":
-            case "lb":
-            case "pl":
-            case "no":
-            case "sv":
-            case "simple":
-                Parser.InterWikiOrder = InterWikiOrderEnum.LocalLanguageAlpha;
-                break;
-
-            case "he":
-            case "hu":
-            case "te":
-            case "yi":
-                Parser.InterWikiOrder = InterWikiOrderEnum.AlphabeticalEnFirst;
-                break;
-
-            case "ms":
-            case "et":
-            case "nn":
-            case "fi":
-            case "vi":
-            case "ur":
-                Parser.InterWikiOrder = InterWikiOrderEnum.LocalLanguageFirstWord;
-                break;
-
-            default:
-                Parser.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
-                break;
-        }
-
-        // commons uses alpha as https://commons.wikimedia.org/w/api.php?action=query&meta=allmessages&ammessages=Interwiki%20config-sorting%20order is not set to an override value
-        if (project == ProjectEnum.commons)
-            Parser.InterWikiOrder = InterWikiOrderEnum.Alphabetical;
-
-        // user interface
-        if (!Variables.IsWikipediaEN)
-        {
-            humanNameDisambigTagToolStripMenuItem.Visible = birthdeathCatsToolStripMenuItem.Visible = false;
-            chkAutoTagger.Checked = false;
-        }
-        else if (!humanNameDisambigTagToolStripMenuItem.Visible)
-        {
-            humanNameDisambigTagToolStripMenuItem.Visible = birthdeathCatsToolStripMenuItem.Visible = true;
-        }
-
-        UserTalkWarningsLoaded = false; // force reload
-
-        if (!Variables.IsCustomProject && !Variables.IsWikia && !Variables.IsWikimediaMonolingualProject)
-            lblProject.Text = Variables.LangCode + "." + Variables.Project;
-        else
-            lblProject.Text = Variables.IsWikimediaMonolingualProject ? Variables.Project.ToString() : Variables.URL;
-
-        TemplateRedirectsLoaded = false;
-        ResetTypoStats();
     }
 
+    /// <summary>
+    /// Loads the selected project into the shared application variables.
+    /// </summary>
+    /// <param name="code">The project language code.</param>
+    /// <param name="project">The project type.</param>
+    /// <param name="customProject">The custom project URL or identifier.</param>
+    /// <param name="protocol">The protocol used to access the project.</param>
+    private static void LoadProject(
+        string code,
+        ProjectEnum project,
+        string customProject,
+        string protocol)
+    {
+        Variables.SetProject(
+            code,
+            project,
+            customProject,
+            protocol);
+    }
+
+    /// <summary>
+    /// Determines whether a legacy network exception represents an HTTP 401
+    /// Unauthorized response.
+    /// </summary>
+    /// <param name="exception">The network exception to inspect.</param>
+    /// <returns>
+    /// <see langword="true"/> when the exception contains an unauthorized HTTP
+    /// response; otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool IsUnauthorizedResponse(
+        WebException exception)
+    {
+        return exception.Response is HttpWebResponse
+        {
+            StatusCode: HttpStatusCode.Unauthorized
+        };
+    }
+
+    /// <summary>
+    /// Displays a message when project loading has been deferred until after the
+    /// user authenticates with a restricted wiki.
+    /// </summary>
+    private static void ShowRestrictedWikiMessageIfRequired()
+    {
+        if (!Variables.TryLoadingAgainAfterLogin)
+            return;
+
+        MessageBox.Show(
+            "You seem to be accessing a private wiki. Project loading will be attempted again after login.",
+            "Restricted Wiki");
+    }
+
+    /// <summary>
+    /// Configures the parser's interwiki ordering for the current language and
+    /// project.
+    /// </summary>
+    /// <param name="project">The currently selected project.</param>
+    private void ConfigureInterWikiOrder(
+        ProjectEnum project)
+    {
+        Parser.InterWikiOrder =
+            GetInterWikiOrder(
+                Variables.LangCode);
+
+        if (project == ProjectEnum.commons)
+        {
+            Parser.InterWikiOrder =
+                InterWikiOrderEnum.Alphabetical;
+        }
+    }
+
+    /// <summary>
+    /// Gets the interwiki ordering appropriate for the specified language code.
+    /// </summary>
+    /// <param name="languageCode">The wiki language code.</param>
+    /// <returns>The interwiki ordering used by the parser.</returns>
+    private static InterWikiOrderEnum GetInterWikiOrder(
+        string languageCode)
+    {
+        return languageCode switch
+        {
+            "en" or "lb" or "pl" or "no" or "sv" or "simple"
+                => InterWikiOrderEnum.LocalLanguageAlpha,
+
+            "he" or "hu" or "te" or "yi"
+                => InterWikiOrderEnum.AlphabeticalEnFirst,
+
+            "ms" or "et" or "nn" or "fi" or "vi" or "ur"
+                => InterWikiOrderEnum.LocalLanguageFirstWord,
+
+            _ => InterWikiOrderEnum.Alphabetical
+        };
+    }
+
+    /// <summary>
+    /// Updates controls whose availability depends on whether the current project
+    /// is English Wikipedia.
+    /// </summary>
+    private void ConfigureProjectSpecificUi()
+    {
+        bool isEnglishWikipedia =
+            Variables.IsWikipediaEN;
+
+        humanNameDisambigTagToolStripMenuItem.Visible =
+            isEnglishWikipedia;
+
+        birthdeathCatsToolStripMenuItem.Visible =
+            isEnglishWikipedia;
+
+        if (!isEnglishWikipedia)
+        {
+            chkAutoTagger.Checked = false;
+        }
+    }
+
+    /// <summary>
+    /// Updates the project label using the current project type, language code,
+    /// and configured wiki URL.
+    /// </summary>
+    private void UpdateProjectLabel()
+    {
+        if (!Variables.IsCustomProject
+            && !Variables.IsWikia
+            && !Variables.IsWikimediaMonolingualProject)
+        {
+            lblProject.Text =
+                Variables.LangCode
+                + "."
+                + Variables.Project;
+
+            return;
+        }
+
+        lblProject.Text =
+            Variables.IsWikimediaMonolingualProject
+                ? Variables.Project.ToString()
+                : Variables.URL;
+    }
     #endregion
 
     // TODO: Cleanup/refactor UI update functions
