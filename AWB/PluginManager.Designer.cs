@@ -28,107 +28,94 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PluginManager));
-            this.lvPlugin = new WikiFunctions.Controls.NoFlickerExtendedListView();
-            this.colName = new System.Windows.Forms.ColumnHeader();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.loadPluginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.pluginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadNewPluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lblPluginCount = new System.Windows.Forms.Label();
-            this.contextMenuStrip1.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
-            this.SuspendLayout();
+            lvPlugin = new WikiFunctions.Controls.NoFlickerExtendedListView();
+            colName = new System.Windows.Forms.ColumnHeader();
+            contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
+            loadPluginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            menuStrip1 = new System.Windows.Forms.MenuStrip();
+            pluginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            loadNewPluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            label1 = new System.Windows.Forms.Label();
+            lblPluginCount = new System.Windows.Forms.Label();
+            contextMenuStrip1.SuspendLayout();
+            menuStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // lvPlugin
             // 
-            resources.ApplyResources(this.lvPlugin, "lvPlugin");
-            this.lvPlugin.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colName});
-            this.lvPlugin.ComparerFactory = this.lvPlugin;
-            this.lvPlugin.ContextMenuStrip = this.contextMenuStrip1;
-            this.lvPlugin.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups1"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups2"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups3"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups4"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups5"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups6"))),
-            ((System.Windows.Forms.ListViewGroup)(resources.GetObject("lvPlugin.Groups7")))});
-            this.lvPlugin.Name = "lvPlugin";
-            this.lvPlugin.UseCompatibleStateImageBehavior = false;
-            this.lvPlugin.View = System.Windows.Forms.View.Details;
+            resources.ApplyResources(lvPlugin, "lvPlugin");
+            lvPlugin.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { colName });
+            lvPlugin.ComparerFactory = lvPlugin;
+            lvPlugin.ContextMenuStrip = contextMenuStrip1;
+            lvPlugin.Name = "lvPlugin";
+            lvPlugin.UseCompatibleStateImageBehavior = false;
+            lvPlugin.View = System.Windows.Forms.View.Details;
             // 
             // colName
             // 
-            resources.ApplyResources(this.colName, "colName");
+            resources.ApplyResources(colName, "colName");
             // 
             // contextMenuStrip1
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadPluginToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            resources.ApplyResources(this.contextMenuStrip1, "contextMenuStrip1");
-            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { loadPluginToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            resources.ApplyResources(contextMenuStrip1, "contextMenuStrip1");
+            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // loadPluginToolStripMenuItem
             // 
-            this.loadPluginToolStripMenuItem.Name = "loadPluginToolStripMenuItem";
-            resources.ApplyResources(this.loadPluginToolStripMenuItem, "loadPluginToolStripMenuItem");
-            this.loadPluginToolStripMenuItem.Click += new System.EventHandler(this.loadPluginToolStripMenuItem_Click);
+            loadPluginToolStripMenuItem.Name = "loadPluginToolStripMenuItem";
+            resources.ApplyResources(loadPluginToolStripMenuItem, "loadPluginToolStripMenuItem");
+            loadPluginToolStripMenuItem.Click += loadPluginToolStripMenuItem_Click;
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pluginToolStripMenuItem});
-            resources.ApplyResources(this.menuStrip1, "menuStrip1");
-            this.menuStrip1.Name = "menuStrip1";
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { pluginToolStripMenuItem });
+            resources.ApplyResources(menuStrip1, "menuStrip1");
+            menuStrip1.Name = "menuStrip1";
             // 
             // pluginToolStripMenuItem
             // 
-            this.pluginToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadNewPluginsToolStripMenuItem});
-            this.pluginToolStripMenuItem.Name = "pluginToolStripMenuItem";
-            resources.ApplyResources(this.pluginToolStripMenuItem, "pluginToolStripMenuItem");
+            pluginToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { loadNewPluginsToolStripMenuItem });
+            pluginToolStripMenuItem.Name = "pluginToolStripMenuItem";
+            resources.ApplyResources(pluginToolStripMenuItem, "pluginToolStripMenuItem");
             // 
             // loadNewPluginsToolStripMenuItem
             // 
-            this.loadNewPluginsToolStripMenuItem.Name = "loadNewPluginsToolStripMenuItem";
-            resources.ApplyResources(this.loadNewPluginsToolStripMenuItem, "loadNewPluginsToolStripMenuItem");
-            this.loadNewPluginsToolStripMenuItem.Click += new System.EventHandler(this.loadNewPluginsToolStripMenuItem_Click);
+            loadNewPluginsToolStripMenuItem.Name = "loadNewPluginsToolStripMenuItem";
+            resources.ApplyResources(loadNewPluginsToolStripMenuItem, "loadNewPluginsToolStripMenuItem");
+            loadNewPluginsToolStripMenuItem.Click += loadNewPluginsToolStripMenuItem_Click;
             // 
             // label1
             // 
-            resources.ApplyResources(this.label1, "label1");
-            this.label1.Name = "label1";
+            resources.ApplyResources(label1, "label1");
+            label1.Name = "label1";
             // 
             // lblPluginCount
             // 
-            resources.ApplyResources(this.lblPluginCount, "lblPluginCount");
-            this.lblPluginCount.Name = "lblPluginCount";
+            resources.ApplyResources(lblPluginCount, "lblPluginCount");
+            lblPluginCount.Name = "lblPluginCount";
             // 
             // PluginManager
             // 
             resources.ApplyResources(this, "$this");
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.lvPlugin);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.lblPluginCount);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "PluginManager";
-            this.ShowIcon = false;
-            this.Load += new System.EventHandler(this.PluginManager_Load);
-            this.contextMenuStrip1.ResumeLayout(false);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            Controls.Add(menuStrip1);
+            Controls.Add(lvPlugin);
+            Controls.Add(label1);
+            Controls.Add(lblPluginCount);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            MainMenuStrip = menuStrip1;
+            Name = "PluginManager";
+            ShowIcon = false;
+            Load += PluginManager_Load;
+            contextMenuStrip1.ResumeLayout(false);
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 

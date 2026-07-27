@@ -36,7 +36,68 @@ internal sealed partial class PluginManager : Form
     public PluginManager(IAutoWikiBrowser awb)
     {
         InitializeComponent();
+        InitializePluginGroups();
+
         _awb = awb;
+    }
+
+    /// <summary>
+    /// Creates the groups used to organize plugins by type and load status.
+    /// </summary>
+    private void InitializePluginGroups()
+    {
+        lvPlugin.Groups.AddRange(
+            new[]
+            {
+            new ListViewGroup(
+                "Loaded AWB Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupAWBLoaded"
+            },
+            new ListViewGroup(
+                "Previously Loaded AWB Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupAWBPrevious"
+            },
+            new ListViewGroup(
+                "Loaded ListMaker Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupLMLoaded"
+            },
+            new ListViewGroup(
+                "Previously Loaded ListMaker Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupLMPrevious"
+            },
+            new ListViewGroup(
+                "Loaded Base Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupBaseLoaded"
+            },
+            new ListViewGroup(
+                "Previously Loaded Base Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupBasePrevious"
+            },
+            new ListViewGroup(
+                "Obsolete Plugins",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupObsolete"
+            },
+            new ListViewGroup(
+                "Assemblies that failed to load",
+                HorizontalAlignment.Left)
+            {
+                Name = "groupFailed"
+            }
+            });
     }
 
     public static void LoadNewPlugin(IAutoWikiBrowser awb)
