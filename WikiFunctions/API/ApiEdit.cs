@@ -1270,15 +1270,17 @@ public class ApiEdit : IApiEdit
         {
             try
             {
-                return GetResponseString(CreateRequest(url));
+                using HttpRequestMessage request =
+                    CreateRequest(HttpMethod.Get, url);
+
+                return SendRequest(url, request);
             }
-            catch (WebException ex)
+            catch (HttpRequestException ex)
             {
                 if (!Tools.HandleHttpException(ex))
                     throw;
             }
         }
-
     }
 
     // TODO (HTTP Modernization):

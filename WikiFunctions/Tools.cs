@@ -22,6 +22,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -3746,6 +3747,34 @@ private const char ReturnLine = '\r', NewLine = '\n';
             (int)statusCode == 429)
         {
             System.Threading.Thread.Sleep(5000);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Handles temporary HTTP/API failures that may succeed if retried.
+    /// </summary>
+    /// <param name="exception">
+    /// The HTTP request exception thrown by the request.
+    /// </param>
+    /// <returns>
+    /// true if the exception was handled and the caller should retry;
+    /// false if the exception should be rethrown.
+    /// </returns>
+    public static bool HandleHttpException(HttpRequestException exception)
+    {
+        if (exception?.StatusCode is not HttpStatusCode statusCode)
+            return false;
+
+        if (statusCode == HttpStatusCode.RequestTimeout ||
+            statusCode == HttpStatusCode.BadGateway ||
+            statusCode == HttpStatusCode.ServiceUnavailable ||
+            statusCode == HttpStatusCode.GatewayTimeout ||
+            (int)statusCode == 429)
+        {
+            Thread.Sleep(5000);
             return true;
         }
 
