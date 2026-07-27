@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <OutputType>Library</OutputType>
+    <Nullable>annotations</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <OutputType>WinExe</OutputType>
+    <Nullable>annotations</Nullable>
     <ApplicationIcon>globe.ico</ApplicationIcon>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>AC00F13177F564760CA7C93223447E28AFBED803</ManifestCertificateThumbprint>
