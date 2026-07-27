@@ -259,11 +259,6 @@ public interface IApiEdit
     string ExpandTemplates(string title, string text);
 
     /// <summary>
-    /// Aborts the current operation
-    /// </summary>
-    void Abort();
-
-    /// <summary>
     /// 
     /// </summary>
     /// <param name="queryParameters"></param>

@@ -235,13 +235,11 @@ public class ApiEdit : IApiEdit
 
     #endregion
 
-    // TODO (Session State Modernization):
-    // Review whether Reset() should also clear cached response state such as
-    // HtmlHeaders once its consumers and lifetime requirements are documented.
-    /// <summary>
-    /// Resets transient API operation state without logging out or discarding the
-    /// current session cookies.
-    /// </summary>
+
+    /// <remarks>
+    /// The current action and page information are cleared. Authentication cookies
+    /// and user information are retained.
+    /// </remarks>
     /// <remarks>
     /// The current page information, action, active request reference, and abort
     /// state are cleared. Authentication cookies and user information are retained.
@@ -250,38 +248,8 @@ public class ApiEdit : IApiEdit
     {
         Action = null;
         Page = new PageInfo();
-        Aborting = false;
-        Request = null;
     }
 
-    /// <summary>
-    /// Aborts the current API request.
-    /// </summary>
-    /// <remarks>
-    /// This method cancels the active legacy <see cref="HttpWebRequest"/> by
-    /// calling <see cref="HttpWebRequest.Abort"/>. Modern task-based operations
-    /// use <see cref="CancellationToken"/> instead.
-    /// </remarks>
-    public void Abort()
-    {
-        // TODO (HTTP Modernization):
-        // Remove Aborting, Request, HttpWebRequest.Abort(), and the Thread.Sleep()
-        // coordination workaround when all API requests use CancellationToken-based
-        // HttpClient operations.
-
-        Aborting = true;
-
-        try
-        {
-            HttpWebRequest request = Request;
-            request?.Abort();
-            Thread.Sleep(1);
-        }
-        finally
-        {
-            Aborting = false;
-        }
-    }
 
     // TODO (Authentication Modernization):
     // Re-evaluate this CentralAuth cookie-domain workaround against current
@@ -638,27 +606,6 @@ public class ApiEdit : IApiEdit
                && requestUri.Port == wikiUri.Port;
     }
 
-    /// <summary>
-    /// Indicates whether a legacy API request is currently being aborted.
-    /// </summary>
-    /// <remarks>
-    /// This flag is used by the existing synchronous request workflow to
-    /// distinguish an explicit abort from cancellation requested through a
-    /// modern <see cref="CancellationToken"/>.
-    /// </remarks>
-    private bool Aborting;
-
-    /// <summary>
-    /// Stores the currently active legacy HTTP request so it can be aborted.
-    /// </summary>
-    /// <remarks>
-    /// The request is shared with the legacy abort workflow and may be
-    /// <see langword="null"/> when no request is active.
-    /// </remarks>
-    // TODO: Review this field during the HttpWebRequest-to-HttpClient migration.
-    // Replace direct request storage and HttpWebRequest.Abort() with cooperative
-    // cancellation through CancellationToken where possible.
-    private HttpWebRequest Request;
 
     /// <summary>
     /// Synchronizes access to the active cancellation-scope state.
@@ -1883,9 +1830,6 @@ public class ApiEdit : IApiEdit
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="title"/> is null or empty.
     /// </exception>
-    /// <exception cref="AbortedException">
-    /// Thrown when the current operation has been aborted.
-    /// </exception>
     /// <exception cref="BrokenXmlException">
     /// Thrown when the API response does not contain valid watch-token data.
     /// </exception>
@@ -1895,16 +1839,13 @@ public class ApiEdit : IApiEdit
 
         EnsureWatchToken(title);
 
-        if (Aborting)
-            throw new AbortedException(this);
-
         Dictionary<string, string> watchParameters =
             BuildWatchParameters(title, unwatch);
 
         string result = HttpPost(
             new()
             {
-                { "action", "watch" }
+            { "action", "watch" }
             },
             watchParameters,
             ActionOptions.All);
@@ -2457,9 +2398,6 @@ public class ApiEdit : IApiEdit
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="title"/> or <paramref name="reason"/> is empty.
     /// </exception>
-    /// <exception cref="AbortedException">
-    /// Thrown when the operation is aborted before the deletion request is sent.
-    /// </exception>
     public void Delete(
         string title,
         string reason,
@@ -2471,9 +2409,6 @@ public class ApiEdit : IApiEdit
         Action = "delete";
 
         EnsureDeleteToken(title);
-
-        if (Aborting)
-            throw new AbortedException(this);
 
         Dictionary<string, string> post =
             BuildDeletePostParameters(
@@ -2723,9 +2658,6 @@ public class ApiEdit : IApiEdit
     /// <exception cref="BrokenXmlException">
     /// Thrown when the protection token cannot be read from the API response.
     /// </exception>
-    /// <exception cref="AbortedException">
-    /// Thrown when the operation has been aborted.
-    /// </exception>
     public void Protect(
         string title,
         string reason,
@@ -2741,9 +2673,6 @@ public class ApiEdit : IApiEdit
         Action = "protect";
 
         EnsureProtectToken(title);
-
-        if (Aborting)
-            throw new AbortedException(this);
 
         string protections = BuildProtectionLevels(edit, move);
         string expiryvalue = BuildProtectionExpiry(expiry);
@@ -2975,9 +2904,6 @@ public class ApiEdit : IApiEdit
     /// <exception cref="BrokenXmlException">
     /// Thrown when the move token cannot be read from the API response.
     /// </exception>
-    /// <exception cref="AbortedException">
-    /// Thrown when the operation has been aborted.
-    /// </exception>
     public void Move(
         string title,
         string newTitle,
@@ -2991,9 +2917,6 @@ public class ApiEdit : IApiEdit
         Action = "move";
 
         EnsureMoveToken(title, newTitle);
-
-        if (Aborting)
-            throw new AbortedException(this);
 
         Dictionary<string, string> post = BuildMovePostData(
             title,
