@@ -7465,6 +7465,11 @@ font-size: 150%;'>No changes</h2>
     /// <see langword="true"/> when the exception contains an unauthorized HTTP
     /// response; otherwise, <see langword="false"/>.
     /// </returns>
+    /// <remarks>
+    /// TODO (HTTP Modernization): Replace this helper after the project-loading
+    /// path in Session.UpdateProject() and LoadProjectOptions() has been migrated
+    /// from WebException/HttpWebResponse to the HttpClient-based error model.
+    /// </remarks>
     private static bool IsUnauthorizedResponse(
         WebException exception)
     {
