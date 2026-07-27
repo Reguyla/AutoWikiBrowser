@@ -3700,25 +3700,6 @@ private const char ReturnLine = '\r', NewLine = '\n';
         return WithoutDiacritics;
     }
 
-    /// <summary>
-    /// <param name="url">The URL to validate.</param>
-    /// </summary>
-    /// <c>true</c> if the URL is a valid absolute HTTP, HTTPS, or FTP URL; otherwise, <c>false</c>.
-    /// <returns></returns>
-    public static bool IsValidWebUrl(string url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-            return false;
-
-        Uri uri;
-
-        if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-            return false;
-
-        return uri.Scheme == Uri.UriSchemeHttp
-            || uri.Scheme == Uri.UriSchemeHttps
-            || uri.Scheme == Uri.UriSchemeFtp;
-    }
 
     /// <summary>
     /// Handles temporary HTTP/API failures that may succeed if retried.
@@ -3836,48 +3817,6 @@ private const char ReturnLine = '\r', NewLine = '\n';
                 Variables.Project,
                 Variables.LangCode,
                 user.Name));
-    }
-
-    /// <summary>
-    /// Applies the appropriate AWB user-agent to a legacy web request.
-    /// </summary>
-    public static void ApplyAuthenticatedUserAgent(
-        HttpWebRequest request,
-        IAutoWikiBrowser awb)
-    {
-        if (request == null)
-            return;
-
-        request.UserAgent = GetRequestUserAgent(awb);
-    }
-
-    /// <summary>
-    /// Applies AWB-specific HTTP request settings such as cookies and the
-    /// authenticated user agent.
-    /// </summary>
-    /// <param name="request">
-    /// The HTTP request to configure. If <c>null</c>, no action is taken.
-    /// </param>
-    /// <param name="url">
-    /// The target URL used to determine the appropriate cookie container.
-    /// </param>
-    /// <param name="awb">
-    /// The current AWB instance providing authentication context.
-    /// </param>
-    public static void ConfigureRequest(
-        HttpWebRequest request,
-        string url,
-        IAutoWikiBrowser awb)
-    {
-        if (request is null)
-            return;
-
-        request.CookieContainer =
-            GetCookieContainer(url, awb);
-
-        ApplyAuthenticatedUserAgent(
-            request,
-            awb);
     }
 
     /// <summary>
