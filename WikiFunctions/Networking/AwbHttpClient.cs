@@ -155,8 +155,8 @@ namespace WikiFunctions.Networking
                     $"Response: {responseText}");
 
                 throw new HttpRequestException(
-                    $"POST request failed with HTTP {(int)response.StatusCode} "
-                    + $"{response.ReasonPhrase}.");
+                    $"POST request for action '{action}' failed with HTTP " +
+                    $"{(int)response.StatusCode} {response.ReasonPhrase}.");
             }
 
             return responseText;
