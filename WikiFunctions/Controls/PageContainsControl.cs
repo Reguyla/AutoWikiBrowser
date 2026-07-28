@@ -36,7 +36,7 @@ public partial class PageContainsControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public bool CheckEnabled
     {
@@ -79,7 +79,7 @@ public partial class PageContainsControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="article"></param>
     /// <returns></returns>
@@ -98,7 +98,7 @@ public partial class PageContainsControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public virtual string SkipReason
     {

@@ -235,7 +235,6 @@ public class ApiEdit : IApiEdit
 
     #endregion
 
-
     /// <remarks>
     /// The current action and page information are cleared. Authentication cookies
     /// and user information are retained.
@@ -249,7 +248,6 @@ public class ApiEdit : IApiEdit
         Action = null;
         Page = new PageInfo();
     }
-
 
     // TODO (Authentication Modernization):
     // Re-evaluate this CentralAuth cookie-domain workaround against current
@@ -559,7 +557,6 @@ public class ApiEdit : IApiEdit
         return request;
     }
 
-
     /// <summary>
     /// Prevents live network access while unit tests are running.
     /// </summary>
@@ -605,7 +602,6 @@ public class ApiEdit : IApiEdit
                    StringComparison.OrdinalIgnoreCase)
                && requestUri.Port == wikiUri.Port;
     }
-
 
     /// <summary>
     /// Synchronizes access to the active cancellation-scope state.

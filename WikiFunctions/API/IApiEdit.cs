@@ -84,14 +84,14 @@ public interface IApiEdit
     string HttpGet(string url);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="username"></param>
     /// <param name="password"></param>
     void Login(string username, string password);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="username"></param>
     /// <param name="password"></param>
@@ -99,7 +99,7 @@ public interface IApiEdit
     void Login(string username, string password, string domain);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     void Logout();
 
@@ -244,14 +244,14 @@ public interface IApiEdit
     string Preview(string title, string text);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="title"></param>
     /// <param name="user"></param>
     void Rollback(string title, string user);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="title"></param>
     /// <param name="text"></param>
@@ -259,21 +259,21 @@ public interface IApiEdit
     string ExpandTemplates(string title, string text);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="queryParameters"></param>
     /// <returns></returns>
     string QueryApi(string queryParameters);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="queryParameters"></param>
     /// <returns></returns>
     string QueryApiJson(string queryParameters);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="queryParameters"></param>
     /// <returns></returns>

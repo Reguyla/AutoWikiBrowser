@@ -124,7 +124,6 @@ public partial class ArticleActionDialog : Form
                                    "[[WP:CSD#T3|T3]]: Unused, redundant template",
                                    "[[WP:CSD#G8|G8]]: Component or documentation of a deleted template"
                                };
-
             }
         }
         cmboSummary.Items.AddRange(messages);

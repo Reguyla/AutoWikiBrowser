@@ -93,7 +93,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     private static string whatName;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="del"></param>
     /// <param name="trace"></param>
@@ -106,7 +106,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public void InitialiseLogListener()
     {
@@ -141,7 +141,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     public string DisplayTitle { get; set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [XmlIgnore]
     public string NamespacelessName
@@ -1498,7 +1498,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// Allows plugins to modify the article text. 
+    /// Allows plugins to modify the article text.
     /// Plugins should set their own log entry using the object passed in ProcessArticle()
     /// </summary>
     /// <param name="newText"></param>
@@ -1783,7 +1783,6 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             // does significant fixes
             AWBChangeArticleText("Add missing {{reflist}}", Parsers.AddMissingReflist(ArticleText), true, true);
             Variables.Profiler.Profile("AddMissingReflist");
-
         }
 
         UnHideText(removeText);
@@ -1919,11 +1918,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         get { return Tools.IsRedirect(ArticleText); }
     }
 
-
     private static string _lastMove = "", _lastDelete = "", _lastProtect = "";
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="session"></param>
     /// <param name="newTitle"></param>
@@ -1966,7 +1964,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="session"></param>
     /// <returns></returns>
@@ -1995,7 +1993,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="session"></param>
     /// <returns></returns>

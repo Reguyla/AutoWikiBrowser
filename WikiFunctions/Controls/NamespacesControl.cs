@@ -20,7 +20,7 @@ using System.Windows.Forms;
 namespace WikiFunctions.Controls;
 
 /// <summary>
-/// 
+///
 /// </summary>
 public partial class NamespacesControl : UserControl
 {
@@ -55,7 +55,7 @@ public partial class NamespacesControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public void Populate()
     {
@@ -88,7 +88,7 @@ public partial class NamespacesControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <returns></returns>
     public List<int> GetSelectedNamespaces()
@@ -101,7 +101,7 @@ public partial class NamespacesControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="clb"></param>
     /// <returns></returns>
@@ -118,7 +118,7 @@ public partial class NamespacesControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tags"></param>
     public void SetSelectedNamespaces(ICollection<int> tags)
@@ -128,7 +128,7 @@ public partial class NamespacesControl : UserControl
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="clb"></param>
     /// <param name="tags"></param>
@@ -142,7 +142,7 @@ public partial class NamespacesControl : UserControl
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public sealed class NSItem
 {
@@ -154,7 +154,7 @@ public sealed class NSItem
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public int Key
     {
@@ -162,7 +162,7 @@ public sealed class NSItem
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public string Value
     {

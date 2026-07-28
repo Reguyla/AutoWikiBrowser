@@ -28,7 +28,7 @@ public partial class ListSplitter : Form
     private readonly UserPrefs _p;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="prefs"></param>
     public ListSplitter(UserPrefs prefs)
@@ -39,7 +39,7 @@ public partial class ListSplitter : Form
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="prefs"></param>
     /// <param name="list"></param>
@@ -149,7 +149,6 @@ public partial class ListSplitter : Form
         {
             ErrorHandler.HandleException(ex);
         }
-
 
         listMaker1.EndUpdate();
     }

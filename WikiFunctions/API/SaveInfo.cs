@@ -62,7 +62,7 @@ public sealed class SaveInfo
     { get; private set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public XmlDocument ResponseXml
     { get; private set; }

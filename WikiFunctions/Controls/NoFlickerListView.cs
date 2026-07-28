@@ -38,14 +38,14 @@ public interface IListViewItemComparerFactory
 public class NoFlickerExtendedListView : ListView, IListViewItemComparerFactory
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public NoFlickerExtendedListView()
         : this(false, false)
     { }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="sortColumnOnClick"></param>
     /// <param name="resizeColumnsOnControlResize"></param>
@@ -66,7 +66,7 @@ public class NoFlickerExtendedListView : ListView, IListViewItemComparerFactory
     private bool _resizeColumnsOnControlResize;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [DefaultValue(false)]
     public bool ResizeColumnsOnControlResize

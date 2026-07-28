@@ -42,7 +42,6 @@ public class ListBox2<T> : ListBox, IEnumerable<T>
         };
     }
 
-
     public IEnumerator<T> GetEnumerator()
     {
         int i = 0;
@@ -178,7 +177,7 @@ public class ListBox2<T> : ListBox, IEnumerable<T>
         // is this a contiguous block of selected items: e.g. last selected minus first selected+1 equals the number of selected items
         if (SelectedIndices[SelectedItems.Count - 1] - SelectedIndex + 1 == SelectedItems.Count)
         {
-            /* Fast block mode: convert all articles in listbox into an article list, remove range from article list by index, then add articles back to 
+            /* Fast block mode: convert all articles in listbox into an article list, remove range from article list by index, then add articles back to
                listbox. This means loop through listbox once, a single remove by index operation and a single loop through article list.
                Alternative of removing selected articles one by one from listbox means each removal requires scan of listbox from beginning up
                to point of item. e.g. scan 10,000x5 to remove five entries from position 10000 in a list. */
@@ -213,7 +212,7 @@ public class ListBox2<T> : ListBox, IEnumerable<T>
     static string _list = "";
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public enum OutputFormat
     {

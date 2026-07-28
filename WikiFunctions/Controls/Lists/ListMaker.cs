@@ -71,7 +71,7 @@ public partial class ListMaker : UserControl, IList<Article>
     public event ListMakerEventHandler ListFinished;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static event ListMakerProviderAdded ListProviderAdded;
 
@@ -190,7 +190,9 @@ public partial class ListMaker : UserControl, IList<Article>
             _listProviders.Add(provider);
     }
 
-    new public static void Refresh() { }
+    new public static void Refresh()
+    {
+    }
 
     #region Enumerator
     public IEnumerator<Article> GetEnumerator()
@@ -517,7 +519,7 @@ public partial class ListMaker : UserControl, IList<Article>
     {
         btnAdd.Enabled = txtPage.Text.Trim().Length > 0;
 
-        // under Mono assigning txtPage.Text fires another _TextChanged event so we get an infinite loop; so remove and reassign event as workaround 
+        // under Mono assigning txtPage.Text fires another _TextChanged event so we get an infinite loop; so remove and reassign event as workaround
         if (Globals.UsingMono)
             txtPage.TextChanged -= txtNewArticle_TextChanged;
 
@@ -1003,7 +1005,7 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private void RemoveSelectedArticle()
     {
@@ -1548,7 +1550,7 @@ public partial class ListMaker : UserControl, IList<Article>
             {
                 displayTitle = displayTitle.Replace("&amp;", "&");
 
-                // if no HTML, could be first letter lower or underscores in title, format using display title in standard font 
+                // if no HTML, could be first letter lower or underscores in title, format using display title in standard font
                 if (displayTitle.Replace("_", " ").TrimStart(" _".ToCharArray()).Equals(a.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     e.Graphics.DrawString(displayTitle, regular, (selected) ? Brushes.White : Brushes.Black, r,
@@ -1575,7 +1577,6 @@ public partial class ListMaker : UserControl, IList<Article>
                 }
 
                 // TODO bold support, sub/sup support, multiple italics support, span to hide support
-
                 else // unsupported other formatting in displaytitle, draw as default
                     e.Graphics.DrawString(a.Name, regular, (selected) ? Brushes.White : Brushes.Black, r,
                             StringFormat.GenericDefault);
@@ -1600,7 +1601,7 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public void BeginUpdate()
     {
@@ -1608,7 +1609,7 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public void EndUpdate()
     {

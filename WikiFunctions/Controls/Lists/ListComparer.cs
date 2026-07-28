@@ -29,7 +29,7 @@ public partial class ListComparer : Form
     private readonly ListMaker _mainFormListMaker;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="lmMain"></param>
     public ListComparer(ListMaker lmMain)
@@ -50,7 +50,7 @@ public partial class ListComparer : Form
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="lmMain"></param>
     /// <param name="list"></param>

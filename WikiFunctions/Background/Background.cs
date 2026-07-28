@@ -340,7 +340,7 @@ public class BackgroundRequest
     }
 
     /// <summary>
-    /// checks wikilinks to make them bypass redirects 
+    /// checks wikilinks to make them bypass redirects
     /// </summary>
     private void BypassRedirectsFunc()
     {

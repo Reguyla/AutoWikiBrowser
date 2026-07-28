@@ -27,7 +27,7 @@ namespace WikiFunctions;
 public static class ArticleComparerFactory
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="comparator">The test string</param>
     /// <param name="isCaseSensitive">Whether the comparison should be case sensitive</param>
@@ -86,7 +86,7 @@ public static class ArticleComparerFactory
 public interface IArticleComparer
 {
     /// <summary>
-    /// Compares the article text against the criteria provided 
+    /// Compares the article text against the criteria provided
     /// </summary>
     /// <param name="article">An article to check</param>
     /// <returns>Whether the article's text matches the criteria</returns>

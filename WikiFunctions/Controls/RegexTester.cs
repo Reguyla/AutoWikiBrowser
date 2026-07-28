@@ -45,7 +45,6 @@ public sealed partial class RegexTester : Form
     public static void Test(Form parent, TextBox find, TextBox replace,
                             CheckBox multiline, CheckBox singleline, CheckBox caseSensitive)
     {
-
         using (RegexTester t = new RegexTester(true))
         {
             t.Find = find.Text;

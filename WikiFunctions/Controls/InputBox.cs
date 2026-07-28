@@ -7,24 +7,24 @@ namespace WikiFunctions.Controls;
 /// </summary>
 /// <remarks>
 /// Copyright © 2003 Reflection IT
-/// 
+///
 /// This software is provided 'as-is', without any express or implied warranty.
 /// In no event will the authors be held liable for any damages arising from the
 /// use of this software.
-/// 
+///
 /// Permission is granted to anyone to use this software for any purpose,
 /// including commercial applications, subject to the following restrictions:
-/// 
+///
 /// 1. The origin of this software must not be misrepresented; you must not claim
-/// that you wrote the original software. 
-/// 
+/// that you wrote the original software.
+///
 /// 2. No substantial portion of the source code of this library may be redistributed
 /// without the express written permission of the copyright holders, where
-/// "substantial" is defined as enough code to be recognizably from this library. 
-/// 
+/// "substantial" is defined as enough code to be recognizably from this library.
+///
 /// Code from http://www.reflectionit.nl/blog/2003/c-inputbox
 /// Licence: Creative Commons Attribution By licenses
-/// 
+///
 /// </remarks>
 public partial class InputBox : Form
 {

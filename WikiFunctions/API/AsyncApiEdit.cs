@@ -206,7 +206,6 @@ public class AsyncApiEdit
         {
             if (LoggedOff != null) LoggedOff(this);
         }
-
         else
             OnExceptionCaught(ex);
     }
@@ -222,7 +221,7 @@ public class AsyncApiEdit
 
     /// <summary>
     /// Invokes a supplied delegate. If the editor is owned by a control, the
-    /// delegate will called from the control's thread, otherwise it will be 
+    /// delegate will called from the control's thread, otherwise it will be
     /// called from current thread.
     /// </summary>
     private void CallEvent(Delegate method, params object[] args)

@@ -85,7 +85,7 @@ public class ApiErrorException : ApiException
     public string ApiErrorMessage { get; private set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <returns></returns>
     public string GetErrorVariable()
@@ -323,7 +323,7 @@ public class MediaWikiSaysNoException : ApiException
 /// <summary>
 /// Thrown when we attempt to edit a subpage managed by the Translate extension.
 /// Usually a Namespace:Foo/de type subpage
-/// 
+///
 /// API has given an error of "Unknown error: \"tpt-target-page\""
 /// </summary>
 public class TranslationPageEditException : ApiErrorException
@@ -432,7 +432,7 @@ public class ApiXmlException : ApiException
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 /// <remarks>
 /// Part of workaround for https://phabricator.wikimedia.org/T41492

@@ -114,7 +114,7 @@ public class ArticleTextBox : RichTextBox
     protected override void OnEnter(EventArgs e)
     {
         // A hack for the annoying bug with this option being mysteriously enabled to switch
-        // user's kb layout for no good reason. Probably, there is a better place for doing this, 
+        // user's kb layout for no good reason. Probably, there is a better place for doing this,
         // but can't figure out where.
         if (!AutoKeyboardDisabled)
         {
@@ -291,7 +291,7 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Applies syntax highlighting to the input ArticleTextBox 
+    /// Applies syntax highlighting to the input ArticleTextBox
     /// </summary>
     /// <returns></returns>
     public void HighlightSyntax()
@@ -365,7 +365,7 @@ public class ArticleTextBox : RichTextBox
             SelectionFont = italicFont;
         }
 
-        // bold  
+        // bold
         foreach (Match m in WikiRegexes.Bold.Matches(RawText))
         {
             // reset anything incorrectly done by italics earlier
@@ -376,7 +376,7 @@ public class ArticleTextBox : RichTextBox
             SelectionFont = boldFont;
         }
 
-        // bold italics 
+        // bold italics
         foreach (Match m in WikiRegexes.BoldItalics.Matches(RawText))
         {
             // reset anything incorrectly done by italics/bold earlier
