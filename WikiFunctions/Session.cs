@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Windows.Forms;
@@ -207,9 +208,9 @@ public class Session
                 MessageBoxIcon.Error);
             return false;
         }
-        catch (WebException ex)
+        catch (HttpRequestException ex)
         {
-            if (ShouldRethrowProjectLoadWebException(ex))
+            if (ShouldRethrowProjectLoadHttpException(ex))
                 throw;
 
             return false;
@@ -222,25 +223,22 @@ public class Session
     }
 
     /// <summary>
-    /// Determines whether a project-loading network exception should be
-    /// propagated to the caller.
+    /// Determines whether a project-loading HTTP failure should be propagated to
+    /// the caller instead of being treated as a recoverable load failure.
     /// </summary>
-    /// <param name="exception">The network exception to inspect.</param>
+    /// <param name="exception">The HTTP request exception to inspect.</param>
     /// <returns>
-    /// <see langword="true"/> when the exception has no HTTP response or represents
-    /// an HTTP 401 Unauthorized response; otherwise, <see langword="false"/>.
+    /// <see langword="true"/> when the response status is HTTP 401 Unauthorized;
+    /// otherwise, <see langword="false"/>.
     /// </returns>
     /// <remarks>
-    /// Unauthorized responses are propagated so the caller can prompt for
+    /// Unauthorized responses are propagated so the main form can request
     /// authentication and retry project loading.
     /// </remarks>
-    private static bool ShouldRethrowProjectLoadWebException(
-        WebException exception)
+    private static bool ShouldRethrowProjectLoadHttpException(
+        HttpRequestException exception)
     {
-        if (exception.Response is not HttpWebResponse response)
-            return true;
-
-        return response.StatusCode == HttpStatusCode.Unauthorized;
+        return exception.StatusCode == HttpStatusCode.Unauthorized;
     }
 
 
@@ -895,9 +893,9 @@ public class Session
         {
             throw;
         }
-        catch (WebException ex)
+        catch (HttpRequestException ex)
         {
-            ShowProjectLoadWebException(ex);
+            ShowProjectLoadHttpException(ex);
             throw;
         }
         catch (Exception ex)
@@ -948,57 +946,30 @@ public class Session
     }
 
     /// <summary>
-    /// Displays an error message for a network failure encountered while loading
+    /// Displays an error message for an HTTP failure encountered while loading
     /// project information.
     /// </summary>
-    /// <param name="exception">The network exception to report.</param>
-    /// <remarks>
-    /// HTTP 401 Unauthorized responses are propagated without displaying the
-    /// general connection error because the caller handles authentication and
-    /// retry behavior separately.
-    /// </remarks>
-    private static void ShowProjectLoadWebException(
-        WebException exception)
+    /// <param name="exception">The HTTP request exception to report.</param>
+    private static void ShowProjectLoadHttpException(
+        HttpRequestException exception)
     {
-        if (ShouldRethrowUnauthorizedProjectLoadException(exception))
+        if (exception.StatusCode == HttpStatusCode.Unauthorized)
             return;
 
-        string message = BuildProjectLoadWebExceptionMessage(exception);
-
         MessageBox.Show(
-            message,
+            BuildProjectLoadHttpExceptionMessage(exception),
             "Error connecting to wiki",
             MessageBoxButtons.OK,
             MessageBoxIcon.Error);
     }
 
     /// <summary>
-    /// Determines whether a project-loading network exception represents an
-    /// HTTP 401 Unauthorized response handled by the calling workflow.
+    /// Builds the user-facing message for a project-loading HTTP failure.
     /// </summary>
-    /// <param name="exception">The network exception to inspect.</param>
-    /// <returns>
-    /// <see langword="true"/> when the exception has no inner exception and its
-    /// HTTP response has an Unauthorized status code; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private static bool ShouldRethrowUnauthorizedProjectLoadException(
-        WebException exception)
-    {
-        return exception.InnerException == null &&
-               exception.Response is HttpWebResponse
-               {
-                   StatusCode: HttpStatusCode.Unauthorized
-               };
-    }
-
-    /// <summary>
-    /// Builds the user-facing message for a project-loading network failure.
-    /// </summary>
-    /// <param name="exception">The network exception to describe.</param>
-    /// <returns>A message describing the network failure.</returns>
-    private static string BuildProjectLoadWebExceptionMessage(
-        WebException exception)
+    /// <param name="exception">The HTTP request exception to describe.</param>
+    /// <returns>A message describing the HTTP failure.</returns>
+    private static string BuildProjectLoadHttpExceptionMessage(
+        HttpRequestException exception)
     {
         if (exception.InnerException == null)
             return exception.Message;

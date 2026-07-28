@@ -178,6 +178,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly DiffGenerationService _diffGenerationService = new();
 
+    private Task? _diffWebViewInitializationTask;
+
     #endregion
 
     /// <summary>
@@ -560,16 +562,24 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private string _profileToLoad = string.Empty;
 
-    /// <summary>
-    /// Completes startup initialization after the main form has loaded.
-    /// </summary>
     private async void MainForm_Load(object sender, EventArgs e)
     {
         PrepareStartupUi();
 
         try
         {
-            await InitializeWebView2DiffBrowserAsync();
+            try
+            {
+                await InitializeWebView2DiffBrowserAsync();
+            }
+            catch (Exception ex)
+            {
+                Tools.WriteDebug(
+                    nameof(InitializeWebView2DiffBrowserAsync),
+                    ex.ToString());
+
+                ErrorHandler.HandleException(ex);
+            }
 
             SplashScreen.SetProgress(25);
 
@@ -577,8 +587,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             RestoreWindowState();
 
-            Plugin.LoadPluginsStartup(this, SplashScreen); // Progress 25-50.
-            LoadPrefs(); // Progress 50-59.
+            Plugin.LoadPluginsStartup(this, SplashScreen);
+            LoadPrefs();
 
             InitializeBuildConfiguration();
 
@@ -586,7 +596,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             UpdateButtons(null, null);
 
             SplashScreen.SetProgress(62);
-            LoadRecentSettingsList(); // Progress 63-66.
+            LoadRecentSettingsList();
 
             Updater.WaitForCompletion();
 
@@ -2826,12 +2836,40 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Initializes and configures the WebView2 diff renderer.
+    /// Initializes the WebView2 diff renderer, ensuring that only one
+    /// initialization attempt runs at a time.
     /// </summary>
     private async Task InitializeWebView2DiffBrowserAsync()
     {
-        WebView2 diffWebView = _diffWebView ?? throw new InvalidOperationException(
-            "The WebView2 diff control has not been created.");
+        Task initializationTask =
+            _diffWebViewInitializationTask ??=
+                InitializeWebView2DiffBrowserCoreAsync();
+
+        try
+        {
+            await initializationTask;
+        }
+        catch
+        {
+            if (ReferenceEquals(
+                    _diffWebViewInitializationTask,
+                    initializationTask))
+            {
+                _diffWebViewInitializationTask = null;
+            }
+
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Performs the WebView2 diff renderer initialization.
+    /// </summary>
+    private async Task InitializeWebView2DiffBrowserCoreAsync()
+    {
+        WebView2 diffWebView = _diffWebView
+            ?? throw new InvalidOperationException(
+                "The WebView2 diff control has not been created.");
 
         if (diffWebView.IsDisposed)
         {
@@ -2840,12 +2878,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         await diffWebView.EnsureCoreWebView2Async();
 
+        if (diffWebView.IsDisposed)
+            return;
+
         CoreWebView2 core = diffWebView.CoreWebView2
             ?? throw new InvalidOperationException(
                 "WebView2 initialization completed without creating CoreWebView2.");
 
         ConfigureWebView2DiffBrowser(core);
 
+        core.WebMessageReceived -= DiffWebView_WebMessageReceived;
         core.WebMessageReceived += DiffWebView_WebMessageReceived;
 
         Tools.WriteDebug(
