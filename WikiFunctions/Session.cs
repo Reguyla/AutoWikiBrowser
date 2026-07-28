@@ -879,40 +879,17 @@ public class Session
     }
 
     /// <summary>
-    /// Loads namespaces
+    /// Loads the namespace, magic-word, and localized month-name configuration
+    /// for the current wiki.
     /// </summary>
     private void LoadProjectOptions()
     {
-        string[] months = (string[])Variables.ENLangMonthNames.Clone();
-
         try
         {
             Site = new SiteInfo(Editor.SynchronousEditor);
 
-            for (int i = 0; i < months.Length; i++)
-            {
-                months[i] += "-gen";
-            }
-
-            // get localized month names if not en-wiki
-            if (!Variables.IsWikipediaEN)
-            {
-                Dictionary<string, string> messages = Site.GetMessages(months);
-
-                if (messages.Count == 12)
-                {
-                    for (int i = 0; i < months.Length; i++)
-                    {
-                        months[i] = messages[months[i]];
-                    }
-
-                    Variables.MonthNames = months;
-                }
-            }
-
-            Variables.Namespaces = Site.Namespaces;
-            Variables.NamespaceAliases = Site.NamespaceAliases;
-            Variables.MagicWords = Site.MagicWords;
+            LoadLocalizedMonthNames();
+            ApplySiteConfiguration();
         }
         catch (ReadApiDeniedException)
         {
@@ -920,112 +897,184 @@ public class Session
         }
         catch (WebException ex)
         {
-            string message = string.Empty;
-
-            if (ex.InnerException != null)
-            {
-                if (ex.InnerException is AuthenticationException)
-                {
-
-                    if (string.IsNullOrEmpty(message))
-                    {
-                        message = ex.Message;
-                    }
-                    else
-                    {
-                        message += " " + ex.Message;
-                    }
-                }
-
-                if (string.IsNullOrEmpty(message))
-                {
-                    message = ex.InnerException.Message;
-                }
-                else
-                {
-                    message += " " + ex.InnerException.Message;
-                }
-            }
-            else
-            {
-                HttpWebResponse response = ex.Response as HttpWebResponse;
-
-                // Preserve the existing authentication behavior. The caller handles
-                // unauthorized access separately.
-                if (response != null &&
-                    response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    throw;
-                }
-
-                message = ex.Message;
-            }
-
-            MessageBox.Show(message, "Error connecting to wiki", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+            ShowProjectLoadWebException(ex);
             throw;
         }
         catch (Exception ex)
         {
-            string message;
-            string guidance;
-
-            switch (ex)
-            {
-                case WikiUrlException:
-                    message = ex.InnerException?.Message ?? ex.Message;
-                    guidance =
-                        "The wiki URL or project configuration could not be recognized. " +
-                        "Enter the URL in the format \"en.wikipedia.org/w/\", including " +
-                        "the path containing index.php and api.php.";
-                    break;
-
-                case UriFormatException:
-                    message = ex.Message;
-                    guidance =
-                        "The wiki URL is not valid. Check the protocol, host name, " +
-                        "and path, then try again.";
-                    break;
-
-                case AuthenticationException:
-                    message = ex.Message;
-                    guidance =
-                        "A secure connection could not be established. Check the site's " +
-                        "TLS certificate and confirm that the wiki supports a compatible " +
-                        "HTTPS configuration.";
-                    break;
-
-                case Newtonsoft.Json.JsonException:
-                    message = ex.Message;
-                    guidance =
-                        "The wiki returned malformed or unexpected JSON while loading " +
-                        "project configuration.";
-                    break;
-
-                case FormatException:
-                    message = ex.Message;
-                    guidance =
-                        "The wiki returned project information in an unexpected format.";
-                    break;
-
-                default:
-                    message = ex.Message;
-                    guidance =
-                        "An unexpected error occurred while loading project information.";
-                    break;
-            }
-
-            Tools.WriteDebug(
-                nameof(LoadProjectOptions),
-                ex.ToString());
-
-            MessageBox.Show(
-                $"{guidance}\r\n\r\nError description: {message}",
-                "Error connecting to wiki",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-
+            ShowProjectLoadException(ex);
             throw;
         }
+    }
+
+    /// <summary>
+    /// Loads localized month names from the current wiki when the active project
+    /// is not the English Wikipedia.
+    /// </summary>
+    private void LoadLocalizedMonthNames()
+    {
+        string[] months = (string[])Variables.ENLangMonthNames.Clone();
+
+        for (int i = 0; i < months.Length; i++)
+        {
+            months[i] += "-gen";
+        }
+
+        if (Variables.IsWikipediaEN)
+            return;
+
+        Dictionary<string, string> messages = Site.GetMessages(months);
+
+        if (messages.Count != months.Length)
+            return;
+
+        for (int i = 0; i < months.Length; i++)
+        {
+            months[i] = messages[months[i]];
+        }
+
+        Variables.MonthNames = months;
+    }
+
+    /// <summary>
+    /// Applies the namespace, namespace-alias, and magic-word information loaded
+    /// from the current wiki to the shared project configuration.
+    /// </summary>
+    private void ApplySiteConfiguration()
+    {
+        Variables.Namespaces = Site.Namespaces;
+        Variables.NamespaceAliases = Site.NamespaceAliases;
+        Variables.MagicWords = Site.MagicWords;
+    }
+
+    /// <summary>
+    /// Displays an error message for a network failure encountered while loading
+    /// project information.
+    /// </summary>
+    /// <param name="exception">The network exception to report.</param>
+    /// <remarks>
+    /// HTTP 401 Unauthorized responses are propagated without displaying the
+    /// general connection error because the caller handles authentication and
+    /// retry behavior separately.
+    /// </remarks>
+    private static void ShowProjectLoadWebException(
+        WebException exception)
+    {
+        if (ShouldRethrowUnauthorizedProjectLoadException(exception))
+            return;
+
+        string message = BuildProjectLoadWebExceptionMessage(exception);
+
+        MessageBox.Show(
+            message,
+            "Error connecting to wiki",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
+    }
+
+    /// <summary>
+    /// Determines whether a project-loading network exception represents an
+    /// HTTP 401 Unauthorized response handled by the calling workflow.
+    /// </summary>
+    /// <param name="exception">The network exception to inspect.</param>
+    /// <returns>
+    /// <see langword="true"/> when the exception has no inner exception and its
+    /// HTTP response has an Unauthorized status code; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool ShouldRethrowUnauthorizedProjectLoadException(
+        WebException exception)
+    {
+        return exception.InnerException == null &&
+               exception.Response is HttpWebResponse
+               {
+                   StatusCode: HttpStatusCode.Unauthorized
+               };
+    }
+
+    /// <summary>
+    /// Builds the user-facing message for a project-loading network failure.
+    /// </summary>
+    /// <param name="exception">The network exception to describe.</param>
+    /// <returns>A message describing the network failure.</returns>
+    private static string BuildProjectLoadWebExceptionMessage(
+        WebException exception)
+    {
+        if (exception.InnerException == null)
+            return exception.Message;
+
+        if (exception.InnerException is AuthenticationException)
+        {
+            return $"{exception.Message} {exception.InnerException.Message}";
+        }
+
+        return exception.InnerException.Message;
+    }
+
+    /// <summary>
+    /// Logs and displays an error encountered while loading project information.
+    /// </summary>
+    /// <param name="exception">The exception to report.</param>
+    private static void ShowProjectLoadException(
+        Exception exception)
+    {
+        (string message, string guidance) =
+            GetProjectLoadErrorDetails(exception);
+
+        Tools.WriteDebug(
+            nameof(LoadProjectOptions),
+            exception.ToString());
+
+        MessageBox.Show(
+            $"{guidance}\r\n\r\nError description: {message}",
+            "Error connecting to wiki",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
+    }
+
+    /// <summary>
+    /// Gets the user-facing error message and guidance for a project-loading
+    /// exception.
+    /// </summary>
+    /// <param name="exception">The exception to classify.</param>
+    /// <returns>
+    /// A tuple containing the underlying error message and guidance for resolving
+    /// the problem.
+    /// </returns>
+    private static (string Message, string Guidance)
+        GetProjectLoadErrorDetails(Exception exception)
+    {
+        return exception switch
+        {
+            WikiUrlException => (
+                exception.InnerException?.Message ?? exception.Message,
+                "The wiki URL or project configuration could not be recognized. " +
+                "Enter the URL in the format \"en.wikipedia.org/w/\", including " +
+                "the path containing index.php and api.php."),
+
+            UriFormatException => (
+                exception.Message,
+                "The wiki URL is not valid. Check the protocol, host name, " +
+                "and path, then try again."),
+
+            AuthenticationException => (
+                exception.Message,
+                "A secure connection could not be established. Check the site's " +
+                "TLS certificate and confirm that the wiki supports a compatible " +
+                "HTTPS configuration."),
+
+            Newtonsoft.Json.JsonException => (
+                exception.Message,
+                "The wiki returned malformed or unexpected JSON while loading " +
+                "project configuration."),
+
+            FormatException => (
+                exception.Message,
+                "The wiki returned project information in an unexpected format."),
+
+            _ => (
+                exception.Message,
+                "An unexpected error occurred while loading project information.")
+        };
     }
 }
