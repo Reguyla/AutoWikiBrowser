@@ -36,73 +36,143 @@ namespace WikiFunctions
 
         private static bool HandleKnownExceptions(Exception ex)
         {
-            TryWriteDebug("HandleKnownExceptions", ex.StackTrace);
-            // invalid regex - only ArgumentException, without subclasses
-            if (ex is ArgumentException &&
-                (ex.StackTrace.Contains("System.Text.RegularExpressions") ||
-                 ex.ToString().StartsWith(@"System.ArgumentException: parsing")))
-            {
-                MessageBox.Show(ex.Message, "Invalid regular expression",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            //Unsupported Culture, possibly bn-BD
-            else if (ex is ArgumentException && Thrower(ex) == "CultureTableRecord.GetCultureTableRecord")
+            string stackTrace = ex.StackTrace ?? string.Empty;
+
+            TryWriteDebug(
+                nameof(HandleKnownExceptions),
+                stackTrace);
+
+            if (IsInvalidRegularExpression(ex, stackTrace))
             {
                 MessageBox.Show(
-                    "Microsoft unfortunately don't support your locale culture. Please try a more common one",
-                    "Unsupported culture");
+                    ex.Message,
+                    "Invalid regular expression",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return true;
             }
-            // network access error
-            else if (IsNetworkException(ex))
+
+            if (IsUnsupportedCulture(ex))
             {
-                // If AWB starts offline, a type initializer may wrap the actual
-                // network exception. Show the underlying network message when available.
-                Exception networkException =
-                    ex is WebException or HttpRequestException
-                        ? ex
-                        : ex.InnerException;
-
-                string message =
-                    ex.Message.StartsWith(
-                        "The type initializer for",
-                        StringComparison.Ordinal)
-                    && networkException != null
-                        ? networkException.Message
-                        : ex.Message;
-
                 MessageBox.Show(
-                    message,
+                    "Microsoft unfortunately doesn't support your locale culture. " +
+                    "Please try a more commonly supported culture.",
+                    "Unsupported culture",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return true;
+            }
+
+            if (IsNetworkException(ex))
+            {
+                MessageBox.Show(
+                    GetNetworkErrorMessage(ex),
                     "Network access error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
-            }
-            // out of memory error
-            else if (ex is OutOfMemoryException)
-            {
-                MessageBox.Show(ex.Message, "Out of Memory error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            // disk writer error / full
-            else if (ex is System.IO.IOException ||
-                     ex is ConfigurationErrorsException && ex.InnerException != null &&
-                     ex.InnerException.InnerException is System.IO.IOException)
-            {
-                MessageBox.Show(ex.Message, "I/O error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            // BackGroundRequest Abort called as user pressed stop, this is OK
-            else if (ex is ThreadAbortException &&
-                     (ex.StackTrace.Contains("AutoWikiBrowser.MainForm.ProcessPage") ||
-                      ex.StackTrace.Contains("Parsers.TagOrphans")))
-            {
+
                 return true;
             }
-            else
+
+            if (ex is OutOfMemoryException)
             {
-                return false; // We didn't handle the exception
+                MessageBox.Show(
+                    ex.Message,
+                    "Out of Memory error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return true;
             }
 
-            return true; // We handled the exception
+            if (IsIoException(ex))
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "I/O error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return true;
+            }
+
+            if (IsExpectedThreadAbort(ex, stackTrace))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether an exception represents an invalid regular expression.
+        /// </summary>
+        private static bool IsInvalidRegularExpression(
+            Exception ex,
+            string stackTrace)
+        {
+            return ex is ArgumentException &&
+                   (stackTrace.Contains(
+                        "System.Text.RegularExpressions",
+                        StringComparison.Ordinal) ||
+                    ex.ToString().StartsWith(
+                        "System.ArgumentException: parsing",
+                        StringComparison.Ordinal));
+        }
+
+        /// <summary>
+        /// Determines whether an exception was caused by an unsupported culture.
+        /// </summary>
+        private static bool IsUnsupportedCulture(Exception ex)
+        {
+            return ex is ArgumentException &&
+                   Thrower(ex) == "CultureTableRecord.GetCultureTableRecord";
+        }
+
+        /// <summary>
+        /// Gets the most useful user-facing message for a network exception.
+        /// </summary>
+        private static string GetNetworkErrorMessage(Exception ex)
+        {
+            Exception networkException =
+                ex is WebException or HttpRequestException
+                    ? ex
+                    : ex.InnerException;
+
+            return ex.Message.StartsWith(
+                       "The type initializer for",
+                       StringComparison.Ordinal) &&
+                   networkException != null
+                ? networkException.Message
+                : ex.Message;
+        }
+
+        /// <summary>
+        /// Determines whether an exception represents an I/O failure directly or
+        /// through a configuration exception.
+        /// </summary>
+        private static bool IsIoException(Exception ex)
+        {
+            return ex is IOException ||
+                   ex is ConfigurationErrorsException &&
+                   ex.InnerException?.InnerException is IOException;
+        }
+
+        /// <summary>
+        /// Determines whether a legacy thread-abort exception was caused by the user
+        /// stopping article processing.
+        /// </summary>
+        private static bool IsExpectedThreadAbort(
+            Exception ex,
+            string stackTrace)
+        {
+            return ex is ThreadAbortException &&
+                   (stackTrace.Contains(
+                        "AutoWikiBrowser.MainForm.ProcessPage",
+                        StringComparison.Ordinal) ||
+                    stackTrace.Contains(
+                        "Parsers.TagOrphans",
+                        StringComparison.Ordinal));
         }
 
         /// <summary>
