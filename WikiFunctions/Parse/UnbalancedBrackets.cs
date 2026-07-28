@@ -19,13 +19,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace WikiFunctions.Parse;
 
-
 /// <summary>
 /// Provides functions for editing wiki text, such as formatting and re-categorization.
 /// </summary>
 public partial class Parsers
 {
-
     private static readonly Regex SingleCurlyBrackets = new Regex(@"{((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))})", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
     private static readonly Regex DoubleCurlyBrackets = new Regex(@"{{(?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))}}", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
     private static readonly Regex DoubleSquareBrackets = new Regex(@"\[\[((?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\]\])", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
@@ -191,7 +189,6 @@ public partial class Parsers
         return -1;
     }
 
-
     private static readonly Regex CurlyBraceInsteadOfPipeInWikiLink = new Regex(@"(?<=\[\[[^\[\]{}<>\r\n\|]{1,50})}(?=[^\[\]{}<>\r\n\|]{1,50}\]\])", RegexOptions.Compiled);
     private static readonly Regex CurlyBraceInsteadOfBracketClosing = new Regex(@"(\([^{}<>\(\)]+[^{}<>\(\)\|])}(?=[^{}])", RegexOptions.Compiled);
     private static readonly Regex CurlyBraceInsteadOfSquareBracket = new Regex(@"(?<=\[[^{}<>\[\]]+[^{}<>\(\)\|\]])}(?=[^{}])", RegexOptions.Compiled);
@@ -269,7 +266,6 @@ public partial class Parsers
                 if (!(Parse.HideText.HiddenRegex.IsMatch(articleTextTemp) && articleTextTemp.Contains("⌋⌋⌋⌋[[")))
                     articleTextTemp = articleTextTemp.Remove(unbalancedBracket, 1);
             }
-
             else if (bracketLength == 1)
             {
                 switch (bracket)
@@ -519,5 +515,4 @@ public partial class Parsers
         }
         return back;
     }
-
 }

@@ -438,5 +438,4 @@ public partial class AWBProfilesForm : Form
     {
         chkSavePassword.Enabled = chkSaveProfile.Checked;
     }
-
 }

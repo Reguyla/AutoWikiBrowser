@@ -135,7 +135,7 @@ public interface IProcessArticleEventArgs
     bool Skip { get; set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     Exists Exists { get; }
 }

@@ -24,7 +24,6 @@ using WikiFunctions.Lists.Providers;
 
 namespace WikiFunctions.Parse;
 
-
 /// <summary>
 /// Provides functions for editing wiki text, such as formatting and re-categorization.
 /// </summary>
@@ -410,7 +409,6 @@ public partial class Parsers
                     tagsRemoved.Add("رده‌بندی‌نشده");
                 else
                     tagsRemoved.Add("uncategorised");
-
             }
             else if (totalCategories == 0 && WikiRegexes.Stub.IsMatch(commentsStripped))
             {
@@ -813,7 +811,6 @@ public partial class Parsers
                     ? (incomingLinks == 0)
                     : orphaned;
             }
-
             catch (Exception ex)
             {
                 // don't mark as orphan in case of exception
@@ -1035,7 +1032,6 @@ public partial class Parsers
                     tags = Tools.ListToStringWithSeparatorAndWordSuffix(tagsRemoved, "-", ", ", " och ") + "mallar";
                 summary = "tog bort " + tags;
             }
-
             else if (Variables.LangCode.Equals("tr"))
             {
                 if (tagsRemoved.Count == 1)

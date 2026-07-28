@@ -140,5 +140,4 @@ public partial class InTemplateRuleControl : UserControl
     {
         UpdateEndabledStates();
     }
-
 }

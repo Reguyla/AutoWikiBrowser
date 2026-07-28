@@ -869,7 +869,7 @@ public partial class FindandReplace : Form
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public class Replacement
 {

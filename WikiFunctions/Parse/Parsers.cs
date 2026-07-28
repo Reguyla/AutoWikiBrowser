@@ -864,7 +864,6 @@ public partial class Parsers
 
                 newtags.Remove(existingTagOriginal);
                 newtags.Add(existingTag);
-
             }
             else
                 newtags.Add(t);
@@ -1413,7 +1412,6 @@ public partial class Parsers
     private static readonly Regex UncertainWordings = new Regex(@"(?:\b(about|abt|approx\.?|before|\?\?\?|by|or \d+|later|after|near|either|probably|missing|prior to|around|late|[Cc]irca|between|be?tw\.?|[Bb]irth based on age as of date|\d{3,4}(?:\]\])?/(?:\[\[)?\d{1,4}|or +(?:\[\[)?\d{3,})\b|\d{3} *\?|\bca?(?:'')?\.|\b[Cc]a?\b|\b(bef|abt|est)\.|~|/|''fl''\.?)", RegexOptions.IgnoreCase);
     private static readonly Regex ReignedRuledUnsure = new Regex(@"(?:\?|[Rr](?:uled|eign(?:ed)?\b)|\br\.|(chr|fl(?:\]\])?)\.|\b(?:[Ff]lo(?:urished|ruit)|active|baptized)\b)");
 
-
     private static readonly Regex AgeBrackets = new Regex(@"(?:< *[Bb][Rr] */? *> *)?\s*[,;]?\s*\(? *[Aa]ged? +\d{1,3}(?: +or +\d{1,3})? *\)?$", RegexOptions.Compiled);
 
     /// <summary>
@@ -1485,7 +1483,6 @@ public partial class Parsers
 
         return articleText;
     }
-
 
     /// <summary>
     /// Converts/subst'd some deprecated templates

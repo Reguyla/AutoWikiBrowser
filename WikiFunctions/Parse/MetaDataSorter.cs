@@ -23,7 +23,7 @@ using WikiFunctions.TalkPages;
 namespace WikiFunctions.Parse;
 
 /// <summary>
-/// 
+///
 /// </summary>
 public enum InterWikiOrderEnum
 {
@@ -51,18 +51,18 @@ public enum InterWikiOrderEnum
 public class MetaDataSorter
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public List<string> PossibleInterwikis;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public bool SortInterwikis
     { get; set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public bool AddCatKey
     { get; set; }
@@ -98,7 +98,7 @@ public class MetaDataSorter
     private InterWikiOrderEnum Order = InterWikiOrderEnum.LocalLanguageAlpha;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public InterWikiOrderEnum InterWikiOrder
     {
@@ -138,7 +138,7 @@ public class MetaDataSorter
     private bool Loaded = true;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="what"></param>
     /// <returns></returns>
@@ -155,7 +155,7 @@ public class MetaDataSorter
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private void SaveInterWikiToCache()
     {
@@ -166,7 +166,7 @@ public class MetaDataSorter
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="what"></param>
     /// <returns></returns>
@@ -204,7 +204,7 @@ public class MetaDataSorter
     private static readonly CultureInfo EnUsCulture = new CultureInfo("en-US", true);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private void LoadInterWikiFromNetwork()
     {
@@ -245,7 +245,7 @@ en, sq, ru
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="input"></param>
     /// <returns>The updated article text</returns>
@@ -508,7 +508,7 @@ en, sq, ru
         if (displaytitle > -1)
         {
             /* If no infobox then template should be sorted per MOS:ORDER in 2nd position (after short description)
-             * If have infobox, but there are other templates inbetween, then again template should be sorted in 2nd position               
+             * If have infobox, but there are other templates inbetween, then again template should be sorted in 2nd position
              * If template just before infobox, or anywhere after infobox, don't sort it, as MOS:ORDER allows those positions too
              * */
             if (infobox == -1) // no infobox
@@ -1344,7 +1344,7 @@ en, sq, ru
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="match"></param>
     /// <returns></returns>
@@ -1430,7 +1430,7 @@ en, sq, ru
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="list"></param>
     /// <param name="name"></param>

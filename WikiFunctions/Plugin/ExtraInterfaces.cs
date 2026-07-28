@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 namespace WikiFunctions.Plugin;
 
 /// <summary>
-/// 
+///
 /// </summary>
 public interface IModule
 {
@@ -38,66 +38,66 @@ public interface IModule
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public interface ISkipOptions
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoUnicode
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoTag
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoHeaderError
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoBoldTitle
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoBulletedLink
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoBadLink
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoDefaultSortAdded
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoUserTalkTemplatesSubstd
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoCiteTemplateDatesFixed
     { get; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     bool SkipNoPeopleCategoriesFixed
     { get; }

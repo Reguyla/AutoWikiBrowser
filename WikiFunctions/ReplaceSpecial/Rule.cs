@@ -111,7 +111,7 @@ public class Rule : IRule
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     /// <param name="text"></param>
@@ -149,7 +149,7 @@ public class Rule : IRule
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     /// <param name="text"></param>
@@ -179,7 +179,7 @@ public class Rule : IRule
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     /// <param name="text"></param>
@@ -214,7 +214,7 @@ public class Rule : IRule
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     /// <param name="text"></param>

@@ -19,13 +19,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace WikiFunctions.Parse;
 
-
 /// <summary>
 /// Provides functions for editing wiki text, such as formatting and re-categorization.
 /// </summary>
 public partial class Parsers
 {
-
     // don't match on 'in the June of 2007', 'on the 11th May 2008' etc. as these won't read well if changed
     private static readonly Regex OfBetweenMonthAndYear = new Regex(@"\b" + WikiRegexes.Months + @" +of +(20\d\d|1[89]\d\d)\b(?<!\b[Tt]he {1,5}\w{3,15} {1,5}of {1,5}(20\d\d|1[89]\d\d))");
     private static readonly Regex OrdinalsInDatesAm = new Regex(@"(?<!\b[1-3]\d +)\b" + WikiRegexes.Months + @" +([0-3]?\d)(?:st|nd|rd|th)\b(?<!\b[Tt]he +\w{3,10} +(?:[0-3]?\d)(?:st|nd|rd|th)\b)(?:( *(?:to|and|.|&.dash;) *[0-3]?\d)(?:st|nd|rd|th)\b)?");
@@ -294,7 +292,6 @@ public partial class Parsers
 
         return textPortion;
     }
-
 
     private static string FullYearRangeME(Match m)
     {

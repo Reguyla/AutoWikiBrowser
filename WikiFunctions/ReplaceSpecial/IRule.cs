@@ -32,27 +32,27 @@ public abstract class IRule : ICloneable
     public string Name { get; set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <returns></returns>
     public abstract Control GetControl();
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public abstract void ForgetControl();
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public abstract void SelectName();
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public abstract void Save();
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public abstract void Restore();
 
@@ -71,7 +71,7 @@ public abstract class IRule : ICloneable
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     /// <param name="text"></param>
@@ -80,13 +80,13 @@ public abstract class IRule : ICloneable
     public abstract string Apply(TreeNode tn, string text, string title);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <returns></returns>
     public abstract Object Clone();
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     /// <returns></returns>
@@ -100,7 +100,7 @@ public abstract class IRule : ICloneable
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="tn"></param>
     private static void CloneTags(TreeNode tn)

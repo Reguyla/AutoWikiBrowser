@@ -1,6 +1,6 @@
 ﻿/*
 
-Copyright (C) 
+Copyright (C)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ struct RegexReplacement
     {
     }
 
-    // Making a compiled regex by default will only improve overall performance if regex will be used thousands 
+    // Making a compiled regex by default will only improve overall performance if regex will be used thousands
     // of times, otherwise instantiation penalty is much greater than any performance gain in use
     public RegexReplacement(string pattern, string replacement)
         : this(pattern, RegexOptions.None, replacement)

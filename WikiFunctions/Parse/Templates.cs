@@ -19,13 +19,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace WikiFunctions.Parse;
 
-
 /// <summary>
 /// Provides functions for editing wiki text, such as formatting and re-categorization.
 /// </summary>
 public partial class Parsers
 {
-
     private static readonly Regex TlOrTlx = Tools.NestedTemplateRegex(new[] { "tl", "tlx" });
     private static readonly Regex TemplateRedirectsR = new Regex(@"({{ *[Tt]lx? *\|.*}}) *→[ ']*({{ *[Tt]lx? *\| *(.*?) *}})");
 
@@ -204,7 +202,7 @@ public partial class Parsers
                 return found;
         }
 
-        /* performance: process all templates in bulk, extract template contents and reprocess. This is faster than loop applying template match on individual basis. 
+        /* performance: process all templates in bulk, extract template contents and reprocess. This is faster than loop applying template match on individual basis.
         Extract rough template name then get exact template names later, faster to deduplicate then get exact template names */
         // process all templates, handle nested templates to any level of nesting
         HashSet<string> TemplateNames = new HashSet<string>();
@@ -542,5 +540,4 @@ public partial class Parsers
     {
         return templatesFound.Count(s => r.IsMatch(@"{{" + s + "|}}"));
     }
-
 }

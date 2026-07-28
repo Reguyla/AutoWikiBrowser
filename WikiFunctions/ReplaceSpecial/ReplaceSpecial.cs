@@ -333,12 +333,12 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public int NoOfRules { get { return RulesTreeView.Nodes.Count; } }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public bool HasRules { get { return NoOfRules != 0; } }
 
@@ -572,7 +572,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="r"></param>
     private void AppendRule(IRule r)

@@ -9,7 +9,7 @@ namespace WikiFunctions.Parse;
 public sealed class HideText
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public HideText() { }
 
@@ -432,7 +432,6 @@ public sealed class HideText
         return articleText;
     }
     #endregion
-
 }
 
 struct HideObject

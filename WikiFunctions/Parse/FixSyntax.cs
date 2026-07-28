@@ -726,7 +726,6 @@ public partial class Parsers
     /// <returns>Updated article text</returns>
     public string FixImageSelfLinks(string articleText)
     {
-
         articleText = WikiRegexes.FileNamespaceLink.Replace(articleText, m =>
         {
             string res = m.Value;

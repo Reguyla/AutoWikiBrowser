@@ -328,7 +328,7 @@ class TypoGroup
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public class RegExTypoFix
 {
@@ -355,7 +355,7 @@ public class RegExTypoFix
     }
 
     /// <summary>
-    /// Constructs an object that 
+    /// Constructs an object that
     /// </summary>
     /// <param name="loadThreaded"></param>
     public RegExTypoFix(bool loadThreaded)
@@ -408,7 +408,7 @@ public class RegExTypoFix
     public bool TyposLoaded { get; private set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private static readonly Regex IgnoreRegex = new Regex("\\(sic\\)|\\[sic\\]|\\[''sic''\\]|\\{\\{sic\\}\\}|spellfixno", RegexOptions.Compiled);
     private static readonly Regex RemoveTail = new Regex(@"(\s|\n|\r|\*|#|:|⌊⌊⌊⌊M?\d*⌋⌋⌋⌋)+$", RegexOptions.Compiled);
@@ -691,7 +691,9 @@ public class TypoStat
 
 public class TypoException : ApplicationException
 {
-    public TypoException() { }
+    public TypoException()
+    {
+    }
 
     public TypoException(string message)
         : base(message) { }

@@ -124,7 +124,7 @@ public interface IAutoWikiBrowserCommands
     /// For the purposes of the logging tab, mark the page as Skipped and provide a reason.
     /// </summary>
     /// <remarks>IProcessArticleEventArgs.Skip needs to be set to True if you want AWB to actually skip the article.
-    /// 
+    ///
     ///  To write to all active log listeners, including logging to file listeners, use methods from IAutoWikiBrowser.TraceManager.</remarks>
     /// <param name="sender">A reference to the calling plugin</param>
     /// <param name="reason">The reason for skipping</param>
@@ -134,7 +134,7 @@ public interface IAutoWikiBrowserCommands
     /// For the purposes of the logging tab, mark the page as Skipped and provide a reason.
     /// </summary>
     /// <remarks>IProcessArticleEventArgs.Skip needs to be set to True if you want AWB to actually skip the article.
-    /// 
+    ///
     /// To write to all active log listeners, including logging to file listeners, use methods from IAutoWikiBrowser.TraceManager.</remarks>
     /// <param name="sender">The calling plugin's name</param>
     /// <param name="reason">The reason for skipping</param>
