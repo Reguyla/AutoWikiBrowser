@@ -287,34 +287,7 @@ namespace WikiFunctions
                 Version = BuildVersionInformation();
                 DotNetVersion = Environment.Version.ToString();
 
-                if (!string.IsNullOrEmpty(CurrentPage))
-                {
-                    try
-                    {
-                        // Use a plain URL because this context is included in Phabricator reports.
-                        // Do not use Tools.WikiEncode here, to keep this code portable to AWBUpdater.
-                        string pageUrl =
-                            Variables.URLIndex +
-                            "?title=" + WebUtility.UrlEncode(CurrentPage);
-
-                        if (CurrentRevision > 0)
-                        {
-                            pageUrl += "&oldid=" + CurrentRevision;
-                        }
-
-                        Duplicate = "Encountered while processing page: " + pageUrl;
-                    }
-                    catch
-                    {
-                        // The wiki configuration may be unavailable when Variables failed during
-                        // startup or while processing an earlier exception.
-                        Duplicate = "Encountered while processing a page.";
-                    }
-                }
-                else if (!string.IsNullOrEmpty(ListMakerText))
-                {
-                    Duplicate = "ListMaker text was present.";
-                }
+                Duplicate = BuildProcessingContext();
 
                 Site = GetCurrentSite();
             }
@@ -560,6 +533,48 @@ namespace WikiFunctions
                     // initialization has failed.
                     return null;
                 }
+            }
+
+            /// <summary>
+            /// Builds diagnostic context for the page or ListMaker input being processed
+            /// when the exception occurred.
+            /// </summary>
+            /// <returns>
+            /// Page-processing context, ListMaker context, or <see langword="null"/> when
+            /// no processing context is available.
+            /// </returns>
+            private static string BuildProcessingContext()
+            {
+                if (!string.IsNullOrEmpty(CurrentPage))
+                {
+                    try
+                    {
+                        // Use a plain URL because this context is included in Phabricator
+                        // reports. Do not use Tools.WikiEncode here, to keep this code
+                        // portable to AWBUpdater.
+                        string pageUrl =
+                            Variables.URLIndex +
+                            "?title=" + WebUtility.UrlEncode(CurrentPage);
+
+                        if (CurrentRevision > 0)
+                        {
+                            pageUrl += "&oldid=" + CurrentRevision;
+                        }
+
+                        return "Encountered while processing page: " + pageUrl;
+                    }
+                    catch
+                    {
+                        // The wiki configuration may be unavailable when Variables failed
+                        // during startup or while processing an earlier exception.
+                        return "Encountered while processing a page.";
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(ListMakerText))
+                    return "ListMaker text was present.";
+
+                return null;
             }
         }
 
