@@ -221,25 +221,9 @@ namespace WikiFunctions
             {
                 txtError =
                 {
-                    Text = ex.Message +
-                           Environment.NewLine +
-                           Environment.NewLine +
-                           "Before sharing this report publicly, review the details. " +
-                           "They may include wiki, page, ListMaker, or API-related context."
+                    Text = BuildErrorSummary(ex, diagnosticReportPath)
                 }
             };
-
-            // Show the saved-file location in the normal error dialog, but do not add
-            // it to txtDetails because that text can be copied into a public bug report.
-            if (!string.IsNullOrEmpty(diagnosticReportPath))
-            {
-                handler.txtError.Text +=
-                    Environment.NewLine +
-                    Environment.NewLine +
-                    "A local diagnostic report was saved to:" +
-                    Environment.NewLine +
-                    diagnosticReportPath;
-            }
 
             string errorMessage = new BugReport(ex).PrintForPhabricator();
             handler.txtDetails.Text = errorMessage;
@@ -519,6 +503,41 @@ namespace WikiFunctions
                     return string.Format("**{0}**: {1}", key, value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds the user-facing exception summary displayed in the error dialog.
+        /// </summary>
+        /// <param name="ex">The exception being reported.</param>
+        /// <param name="diagnosticReportPath">
+        /// The path to the saved local diagnostic report, or an empty value when no
+        /// report was created.
+        /// </param>
+        /// <returns>The exception summary to display to the user.</returns>
+        private static string BuildErrorSummary(
+            Exception ex,
+            string diagnosticReportPath)
+        {
+            string errorSummary =
+                ex.Message +
+                Environment.NewLine +
+                Environment.NewLine +
+                "Before sharing this report publicly, review the details. " +
+                "They may include wiki, page, ListMaker, or API-related context.";
+
+            // Show the saved-file location in the normal error dialog, but do not add
+            // it to txtDetails because that text can be copied into a public bug report.
+            if (!string.IsNullOrEmpty(diagnosticReportPath))
+            {
+                errorSummary +=
+                    Environment.NewLine +
+                    Environment.NewLine +
+                    "A local diagnostic report was saved to:" +
+                    Environment.NewLine +
+                    diagnosticReportPath;
+            }
+
+            return errorSummary;
         }
 
         #region Static helper functions
