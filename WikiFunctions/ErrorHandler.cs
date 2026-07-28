@@ -154,10 +154,7 @@ namespace WikiFunctions
         /// </summary>
         private static string GetNetworkErrorMessage(Exception ex)
         {
-            Exception networkException =
-                ex is WebException or HttpRequestException
-                    ? ex
-                    : ex.InnerException;
+            Exception networkException = FindNetworkException(ex);
 
             return ex.Message.StartsWith(
                        "The type initializer for",
@@ -196,23 +193,40 @@ namespace WikiFunctions
         }
 
         /// <summary>
-        /// Determines whether an exception, or its immediate inner exception,
-        /// represents a network request failure.
+        /// Determines whether an exception or one of its inner exceptions represents
+        /// a network request failure.
         /// </summary>
         /// <param name="exception">The exception to inspect.</param>
         /// <returns>
-        /// <see langword="true"/> when the exception represents either a legacy
+        /// <see langword="true"/> when the exception chain contains either a legacy
         /// <see cref="WebException"/> or a modern
         /// <see cref="HttpRequestException"/>; otherwise,
         /// <see langword="false"/>.
         /// </returns>
-        private static bool IsNetworkException(
-            Exception exception)
+        private static bool IsNetworkException(Exception exception)
         {
-            return exception is WebException
-                or HttpRequestException
-                || exception.InnerException is WebException
-                or HttpRequestException;
+            return FindNetworkException(exception) != null;
+        }
+
+        /// <summary>
+        /// Finds the first network request failure in an exception chain.
+        /// </summary>
+        /// <param name="exception">The exception chain to inspect.</param>
+        /// <returns>
+        /// The first matching network exception, or <see langword="null"/> when no
+        /// network exception is present.
+        /// </returns>
+        private static Exception FindNetworkException(Exception exception)
+        {
+            for (Exception current = exception;
+                 current != null;
+                 current = current.InnerException)
+            {
+                if (current is WebException or HttpRequestException)
+                    return current;
+            }
+
+            return null;
         }
 
         /// <summary>
