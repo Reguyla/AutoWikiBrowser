@@ -34,6 +34,26 @@ namespace WikiFunctions
         /// </summary>
         public static string ListMakerText;
 
+        /// <summary>
+        /// Detects exceptions that are expected or can be handled with a specific
+        /// user-facing message without displaying the full error report dialog.
+        /// </summary>
+        /// <param name="ex">
+        /// The exception to evaluate.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the exception was recognized, an appropriate
+        /// message was displayed (or the exception was intentionally ignored), and no
+        /// further error handling should occur; otherwise, <see langword="false"/> to
+        /// allow normal error reporting.
+        /// </returns>
+        /// <remarks>
+        /// This method provides fast-path handling for anticipated exceptions such as
+        /// invalid regular expressions, unsupported cultures, network failures,
+        /// out-of-memory conditions, I/O errors, and expected thread-abort scenarios.
+        /// Exceptions that are not recognized are returned to the caller for standard
+        /// diagnostic reporting.
+        /// </remarks>
         private static bool HandleKnownExceptions(Exception ex)
         {
             string stackTrace = ex.StackTrace ?? string.Empty;
@@ -244,12 +264,22 @@ namespace WikiFunctions
                 Site;
 
             /// <summary>
-            ///
+            /// Initializes a new instance of the <see cref="BugReport"/> class and
+            /// gathers diagnostic information about an unhandled exception.
             /// </summary>
-            /// <param name="ex"></param>
+            /// <param name="ex">
+            /// The exception for which diagnostic information will be collected.
+            /// </param>
+            /// <remarks>
+            /// The constructor captures contextual information used to generate a
+            /// comprehensive bug report, including the originating thread, stack trace,
+            /// API-specific details, application and .NET version information, processing
+            /// context, and the current wiki site. Optional diagnostic extensions are also
+            /// queried to include any additional information they provide.
+            /// </remarks>
             public BugReport(Exception ex)
             {
-                var apiException = ex as ApiException;
+                ApiException? apiException = ex as ApiException;
 
                 Thread = GetThrowingThreadName(apiException);
 
@@ -276,11 +306,34 @@ namespace WikiFunctions
                 return Print(new WikiBugFormatter());
             }
 
+            /// <summary>
+            /// Formats the diagnostic information as a report suitable for submission to
+            /// Wikimedia Phabricator.
+            /// </summary>
+            /// <returns>
+            /// A formatted bug report containing the collected diagnostic information.
+            /// </returns>
             public string PrintForPhabricator()
             {
                 return Print(new PhabricatorBugFormatter());
             }
 
+            /// <summary>
+            /// Formats the collected diagnostic information using the specified bug report
+            /// formatter.
+            /// </summary>
+            /// <param name="formatter">
+            /// The formatter responsible for rendering the diagnostic report.
+            /// </param>
+            /// <returns>
+            /// A formatted bug report containing the collected diagnostic information.
+            /// </returns>
+            /// <remarks>
+            /// The generated report includes the exception stack trace, API-specific
+            /// diagnostic information, thread details, operating system and application
+            /// version information, duplicate-processing context, and any additional
+            /// diagnostic information supplied by registered extensions.
+            /// </remarks>
             public string Print(BugFormatter formatter)
             {
                 StringBuilder errorMessage = new StringBuilder();
@@ -342,76 +395,182 @@ namespace WikiFunctions
                 }
             }
 
+            /// <summary>
+            /// Identifies the relationship of an exception to the primary exception being
+            /// formatted.
+            /// </summary>
             private enum ExceptionKind
             {
+                /// <summary>
+                /// The primary exception passed to the error-reporting system.
+                /// </summary>
                 TopLevel,
-                Inner,
-                LoaderException
-            };
 
+                /// <summary>
+                /// An exception referenced through <see cref="Exception.InnerException"/>.
+                /// </summary>
+                Inner,
+
+                /// <summary>
+                /// An exception reported while loading a type or assembly.
+                /// </summary>
+                LoaderException
+            }
+
+            /// <summary>
+            /// Returns the display label used for an exception category in a diagnostic
+            /// report.
+            /// </summary>
+            /// <param name="ek">The exception category to describe.</param>
+            /// <returns>
+            /// A user-readable label for the specified exception category.
+            /// </returns>
             private static string KindToString(ExceptionKind ek)
             {
                 switch (ek)
                 {
                     case ExceptionKind.Inner:
                         return "Inner exception";
+
                     case ExceptionKind.LoaderException:
                         return "Loader exception";
+
                     default:
                         return "Exception";
                 }
             }
 
+            /// <summary>
+            /// Defines the formatting operations used to render a diagnostic bug report.
+            /// </summary>
             public abstract class BugFormatter
             {
+                /// <summary>
+                /// Creates the text that appears before the main diagnostic report.
+                /// </summary>
+                /// <returns>The formatted report header.</returns>
                 public abstract string PrintHeader();
+
+                /// <summary>
+                /// Creates the text that appears after the main diagnostic report.
+                /// </summary>
+                /// <returns>The formatted report footer.</returns>
                 public abstract string PrintFooter();
+
+                /// <summary>
+                /// Formats a named diagnostic value.
+                /// </summary>
+                /// <param name="key">The diagnostic field name.</param>
+                /// <param name="value">The diagnostic field value.</param>
+                /// <returns>The formatted representation of the field.</returns>
                 public abstract string PrintLine(string key, string value);
 
+                /// <summary>
+                /// Indicates whether this formatter provides report header and footer
+                /// content.
+                /// </summary>
+                /// <returns>
+                /// <see langword="true"/> when the report header and footer should be
+                /// included; otherwise, <see langword="false"/>.
+                /// </returns>
                 public virtual bool HasHeaderFooter()
                 {
                     return false;
                 }
             }
 
+            /// <summary>
+            /// Formats diagnostic reports using the legacy AutoWikiBrowser wiki-template
+            /// syntax.
+            /// </summary>
             public class WikiBugFormatter : BugFormatter
             {
+                /// <summary>
+                /// Creates the opening portion of the AutoWikiBrowser bug-report template.
+                /// </summary>
+                /// <returns>The template opening and initial status field.</returns>
                 public override string PrintHeader()
                 {
-                    return @"{{AWB bug\r\n" + PrintLine("status", "new <!-- when fixed replace with \"fixed\" -->");
+                    return "{{AWB bug\r\n" +
+                           PrintLine(
+                               "status",
+                               "new <!-- when fixed replace with \"fixed\" -->");
                 }
 
+                /// <summary>
+                /// Creates the closing portion of the AutoWikiBrowser bug-report template.
+                /// </summary>
+                /// <returns>
+                /// The fix-version field followed by the template closing braces.
+                /// </returns>
                 public override string PrintFooter()
                 {
                     return
-                        PrintLine("fix_version",
-                            "<!-- Version of AWB the fix will be included in; AWB developer will complete when it's fixed -->") +
+                        PrintLine(
+                            "fix_version",
+                            "<!-- Version of AWB the fix will be included in; " +
+                            "AWB developer will complete when it's fixed -->") +
                         "\r\n}}";
                 }
 
+                /// <summary>
+                /// Formats a diagnostic field as a parameter in the legacy AWB wiki
+                /// bug-report template.
+                /// </summary>
+                /// <param name="key">The diagnostic field name.</param>
+                /// <param name="value">The diagnostic field value.</param>
+                /// <returns>The formatted template parameter.</returns>
                 public override string PrintLine(string key, string value)
                 {
                     return string.Format(" | {0,-14} = {1}", key, value);
                 }
 
+                /// <summary>
+                /// Indicates that the wiki formatter produces both a report header and
+                /// footer.
+                /// </summary>
+                /// <returns><see langword="true"/>.</returns>
                 public override bool HasHeaderFooter()
                 {
                     return true;
                 }
             }
 
+            /// <summary>
+            /// Formats diagnostic reports using Wikimedia Phabricator markup.
+            /// </summary>
             public class PhabricatorBugFormatter : BugFormatter
             {
+                /// <summary>
+                /// Returns the report header.
+                /// </summary>
+                /// <returns>
+                /// An empty string, since Phabricator reports do not require a header.
+                /// </returns>
                 public override string PrintHeader()
                 {
-                    return "";
+                    return string.Empty;
                 }
 
+                /// <summary>
+                /// Returns the report footer.
+                /// </summary>
+                /// <returns>
+                /// An empty string, since Phabricator reports do not require a footer.
+                /// </returns>
                 public override string PrintFooter()
                 {
-                    return "";
+                    return string.Empty;
                 }
 
+                /// <summary>
+                /// Formats a diagnostic field using Phabricator's bold-label syntax.
+                /// </summary>
+                /// <param name="key">The diagnostic field name.</param>
+                /// <param name="value">The diagnostic field value.</param>
+                /// <returns>
+                /// The formatted diagnostic field.
+                /// </returns>
                 public override string PrintLine(string key, string value)
                 {
                     return string.Format("**{0}**: {1}", key, value);
@@ -666,10 +825,19 @@ namespace WikiFunctions
 
             return append.ToString();
         }
-
+    
         #region Static helper functions
 
-        private static readonly Regex StackTrace = new Regex(@"([a-zA-Z_0-9\.`]+)(?=\()", RegexOptions.Compiled);
+        // TODO: Review this pattern against modern .NET stack trace formats,
+        // including generic methods, nested types, and async state machines.
+        /// <summary>
+        /// Matches fully qualified method names within exception stack traces for use
+        /// when formatting diagnostic reports.
+        /// </summary>
+        private static readonly Regex StackTrace =
+            new Regex(
+                @"([a-zA-Z_0-9\.`]+)(?=\()",
+                RegexOptions.Compiled);
 
         /// <summary>
         /// Returns names of functions in stack trace of an exception
