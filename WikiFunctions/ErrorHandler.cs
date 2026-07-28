@@ -284,20 +284,8 @@ namespace WikiFunctions
                     AppendedInfo = append.ToString();
                 }
 
-                AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
-                Version = string.Format("{0} ({1}), {2} ({3})", Application.ProductName, Application.ProductVersion,
-                    hostingApp.Name, hostingApp.Version);
-
+                Version = BuildVersionInformation();
                 DotNetVersion = Environment.Version.ToString();
-
-                // suppress unhandled exception if Variables constructor says 'ouch'
-                try
-                {
-                    Version += ", revision " + Variables.Revision;
-                }
-                catch
-                {
-                }
 
                 if (!string.IsNullOrEmpty(CurrentPage))
                 {
@@ -529,6 +517,34 @@ namespace WikiFunctions
                     // exception report from being generated.
                     return "API-specific diagnostic information could not be collected.";
                 }
+            }
+
+            /// <summary>
+            /// Builds the application and hosting assembly version information included
+            /// in the diagnostic report.
+            /// </summary>
+            /// <returns>The formatted version description.</returns>
+            private static string BuildVersionInformation()
+            {
+                AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
+
+                string version = string.Format(
+                    "{0} ({1}), {2} ({3})",
+                    Application.ProductName,
+                    Application.ProductVersion,
+                    hostingApp.Name,
+                    hostingApp.Version);
+
+                // Suppress failures when Variables has not completed initialization.
+                try
+                {
+                    version += ", revision " + Variables.Revision;
+                }
+                catch
+                {
+                }
+
+                return version;
             }
         }
 
