@@ -687,6 +687,14 @@ namespace WikiFunctions
             return res;
         }
 
+        // TODO: Review whether Tools.WriteDebug can expose a documented set of
+        // expected exceptions so this catch can eventually be narrowed.
+        /// <summary>
+        /// Attempts to write diagnostic information without allowing a logging failure
+        /// to interrupt exception handling.
+        /// </summary>
+        /// <param name="source">The component or operation producing the diagnostic entry.</param>
+        /// <param name="text">The diagnostic text to write.</param>
         private static void TryWriteDebug(string source, string text)
         {
             try
@@ -711,40 +719,45 @@ namespace WikiFunctions
             string[] trace = MethodNames(ex.StackTrace);
 
             if (trace.Length == 0)
-            {
                 return "unknown function";
-            }
 
-            string res = "";
-            foreach (string t in trace)
+            string thrower = trace[0];
+
+            foreach (string methodName in trace)
             {
-                if (PresetNamespaces.Any(ns => t.StartsWith(ns)))
+                if (!PresetNamespaces.Any(
+                        namespacePrefix => methodName.StartsWith(
+                            namespacePrefix,
+                            StringComparison.Ordinal)))
                 {
-                    res = trace[0];
-                }
-                else
-                {
-                    res = t;
+                    thrower = methodName;
                     break;
                 }
             }
 
-            // strip namespace for clarity
-            var res2 = Regex.Match(res, @"\w+\.{1,2}\w+$").Value;
-            if (res2.Length > 0)
-            {
-                return res2;
-            }
+            // TODO: Add tests for nested types, generic methods, async state machines,
+            // and compiler-generated stack trace names.
+            // Strip namespace for clarity.
+            string shortName = Regex.Match(
+                thrower,
+                @"\w+\.{1,2}\w+$").Value;
 
-            return res;
+            if (shortName.Length > 0)
+                return shortName;
+
+            return thrower;
         }
 
+        /// <summary>
+        /// Namespace prefixes treated as framework or runtime code when selecting the
+        /// most relevant method from an exception stack trace.
+        /// </summary>
         private static readonly string[] PresetNamespaces =
         {
-    "System.",
-    "Microsoft.",
-    "Mono."
-};
+            "System.",
+            "Microsoft.",
+            "Mono."
+        };
 
         #endregion
 
