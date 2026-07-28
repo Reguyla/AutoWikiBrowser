@@ -316,14 +316,7 @@ namespace WikiFunctions
                     Duplicate = "ListMaker text was present.";
                 }
 
-                try
-                {
-                    Site = Variables.URL;
-                }
-                catch
-                {
-                    Site = null;
-                }
+                Site = GetCurrentSite();
             }
 
             /// <summary>
@@ -476,6 +469,7 @@ namespace WikiFunctions
                     return string.Format("**{0}**: {1}", key, value);
                 }
             }
+
             /// <summary>
             /// Formats the supplied exception and its inner exceptions into the
             /// diagnostic stack trace used by the bug report.
@@ -545,6 +539,27 @@ namespace WikiFunctions
                 }
 
                 return version;
+            }
+
+            /// <summary>
+            /// Retrieves the current wiki site URL for inclusion in the diagnostic report.
+            /// </summary>
+            /// <returns>
+            /// The current site URL, or <see langword="null"/> when the wiki configuration
+            /// is unavailable.
+            /// </returns>
+            private static string GetCurrentSite()
+            {
+                try
+                {
+                    return Variables.URL;
+                }
+                catch
+                {
+                    // Error reporting must continue even when wiki configuration
+                    // initialization has failed.
+                    return null;
+                }
             }
         }
 
