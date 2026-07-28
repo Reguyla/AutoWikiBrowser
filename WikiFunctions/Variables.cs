@@ -120,7 +120,7 @@ public static partial class Variables
     public static string RetfPath;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static IAutoWikiBrowser MainForm { get; set; }
 
@@ -157,7 +157,7 @@ public static partial class Variables
     public static readonly Dictionary<int, string> NamespacesCaseInsensitive = new(24);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static Dictionary<string, List<string>> MagicWords = new();
 
@@ -704,7 +704,7 @@ public static partial class Variables
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private static void RegenerateRegexes()
     {
@@ -720,7 +720,7 @@ public static partial class Variables
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private static void SetToEnglish()
     {
@@ -1053,7 +1053,7 @@ public static partial class Variables
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public enum WikiStatusResult
 {
@@ -1065,4 +1065,3 @@ public enum WikiStatusResult
     Registered,
     PendingUpdate
 }
-

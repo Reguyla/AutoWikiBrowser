@@ -20,7 +20,6 @@ public static class Extensions
         {
             list.AddRange(collection);
         }
-
     }
 
     public static bool IsIn<T>(this T @this, params T[] possibles)

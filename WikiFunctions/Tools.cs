@@ -492,7 +492,6 @@ public static class Tools
                 return true;
             if (retrySeconds > 0)
             {
-
                 // Note: retry success is still not guaranteed after waiting the specified time.
                 WriteDebug("Tools::HandleHttpRetry",
                         $"HTTP {statusCode} and Retry-After {retrySeconds}; pausing to allow retry");
@@ -914,7 +913,6 @@ public static class Tools
                 {Parsers.DateLocale.International, international},
                 {Parsers.DateLocale.American, american}
             };
-
 
         return results;
     }
@@ -3519,7 +3517,7 @@ private const char ReturnLine = '\r', NewLine = '\n';
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="templateCall">The current template invocation</param>
     /// <param name="order">Order of template parameters to be used. Any others will be put to the end</param>
@@ -3699,7 +3697,6 @@ private const char ReturnLine = '\r', NewLine = '\n';
 
         return WithoutDiacritics;
     }
-
 
     /// <summary>
     /// Handles temporary HTTP/API failures that may succeed if retried.

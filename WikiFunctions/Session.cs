@@ -241,9 +241,8 @@ public class Session
         return exception.StatusCode == HttpStatusCode.Unauthorized;
     }
 
-
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public void RequireUpdate()
     {
@@ -251,7 +250,7 @@ public class Session
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <returns></returns>
     public WikiStatusResult Update()
@@ -261,7 +260,7 @@ public class Session
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static string AWBVersion
     { get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); } }

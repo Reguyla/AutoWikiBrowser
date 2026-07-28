@@ -29,7 +29,6 @@ using System.Threading;
 /// </summary>
 public class Profiler
 {
-
 #if DEBUG
     private Stopwatch Watch = new Stopwatch(); // fail-safe in case Start() wasn't called for some reason
     private TextWriter log;
@@ -56,7 +55,7 @@ public class Profiler
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public Profiler()
     {

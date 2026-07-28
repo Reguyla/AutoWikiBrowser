@@ -1,23 +1,23 @@
 ﻿//http://www.obviex.com/samples/Encryption.aspx
 ///////////////////////////////////////////////////////////////////////////////
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
-// EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED 
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+// EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
-// 
+//
 // Copyright (C) 2002 Obviex(TM). All rights reserved.
-// 
+//
 using System.Security.Cryptography;
 
     namespace WikiFunctions.Encryption;
 
 /// <summary>
-/// This class uses a symmetric key algorithm (Rijndael/AES) to encrypt and 
+/// This class uses a symmetric key algorithm (Rijndael/AES) to encrypt and
 /// decrypt data. As long as encryption and decryption routines use the same
 /// parameters to generate the keys, the keys are guaranteed to be the same.
 /// </summary>
 /// <remarks>
 /// The class uses static functions with duplicate code to make it easier to
-/// demonstrate encryption and decryption logic. In a real-life application, 
+/// demonstrate encryption and decryption logic. In a real-life application,
 /// this may not be the most efficient way of handling encryption, so - as
 /// soon as you feel comfortable with it - you may want to redesign this class.
 /// </remarks>
@@ -50,11 +50,11 @@ public static class RijndaelSimple
     /// </param>
     /// <param name="initVector">
     /// Initialization vector (or IV). This value is required to encrypt the
-    /// first block of plaintext data. For RijndaelManaged class IV must be 
+    /// first block of plaintext data. For RijndaelManaged class IV must be
     /// exactly 16 ASCII characters long.
     /// </param>
     /// <param name="keySize">
-    /// Size of encryption key in bits. Allowed values are: 128, 192, and 256. 
+    /// Size of encryption key in bits. Allowed values are: 128, 192, and 256.
     /// Longer keys are more secure than shorter keys.
     /// </param>
     /// <returns>
@@ -70,7 +70,7 @@ public static class RijndaelSimple
     {
         // Convert strings into byte arrays.
         // Let us assume that strings only contain ASCII codes.
-        // If strings include Unicode characters, use Unicode, UTF7, or UTF8 
+        // If strings include Unicode characters, use Unicode, UTF7, or UTF8
         // encoding.
         byte[] initVectorBytes = Encoding.ASCII.GetBytes(initVector);
         byte[] saltValueBytes = Encoding.ASCII.GetBytes(saltValue);
@@ -80,8 +80,8 @@ public static class RijndaelSimple
         byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
 
         // First, we must create a password, from which the key will be derived.
-        // This password will be generated from the specified passphrase and 
-        // salt value. The password will be created using the specified hash 
+        // This password will be generated from the specified passphrase and
+        // salt value. The password will be created using the specified hash
         // algorithm. Password creation can be done in several iterations.
         PasswordDeriveBytes password = new PasswordDeriveBytes(
                                                         passPhrase,
@@ -100,8 +100,8 @@ public static class RijndaelSimple
         symmetricKey.Padding = PaddingMode.PKCS7;
         symmetricKey.BlockSize = 128;
 
-        // Generate encryptor from the existing key bytes and initialization 
-        // vector. Key size will be defined based on the number of the key 
+        // Generate encryptor from the existing key bytes and initialization
+        // vector. Key size will be defined based on the number of the key
         // bytes.
         ICryptoTransform encryptor = symmetricKey.CreateEncryptor(
                                                          keyBytes,
@@ -192,8 +192,8 @@ public static class RijndaelSimple
         // Convert our ciphertext into a byte array.
         byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
 
-        // First, we must create a password, from which the key will be 
-        // derived. This password will be generated from the specified 
+        // First, we must create a password, from which the key will be
+        // derived. This password will be generated from the specified
         // passphrase and salt value. The password will be created using
         // the specified hash algorithm. Password creation can be done in
         // several iterations.
@@ -214,8 +214,8 @@ public static class RijndaelSimple
         symmetricKey.Padding = PaddingMode.PKCS7;
         symmetricKey.BlockSize = 128;
 
-        // Generate decryptor from the existing key bytes and initialization 
-        // vector. Key size will be defined based on the number of the key 
+        // Generate decryptor from the existing key bytes and initialization
+        // vector. Key size will be defined based on the number of the key
         // bytes.
         ICryptoTransform decryptor = symmetricKey.CreateDecryptor(
                                                          keyBytes,
@@ -243,11 +243,10 @@ public static class RijndaelSimple
         memoryStream.Close();
         cryptoStream.Close();
 
-        // Convert decrypted data into a string. 
+        // Convert decrypted data into a string.
         // Let us assume that the original plaintext string was UTF8-encoded.
         return Encoding.UTF8.GetString(plainTextBytes,
                                                    0,
                                                    decryptedByteCount);
     }
 }
-

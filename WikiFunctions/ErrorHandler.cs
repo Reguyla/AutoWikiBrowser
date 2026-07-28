@@ -158,7 +158,7 @@ namespace WikiFunctions
                 Site;
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             /// <param name="ex"></param>
             public BugReport(Exception ex)

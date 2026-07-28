@@ -1157,7 +1157,7 @@ public static class WikiRegexes
     public static readonly Regex CircaLinkTemplate = new Regex(@"({{[Cc]irca}}|\[\[[Cc]irca *(?:\|[Cc]a?\.?)?\]\]|\[\[[Cc]a?\.?\]*\.?)");
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static readonly Regex UnlinkedFloruit = new Regex(@"\(\s*(?:[Ff]l)\.*\s*(\d\d)");
 
@@ -1541,12 +1541,12 @@ public static class WikiRegexes
     public static Regex ExtractTitle;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static Regex EmptyLink;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static Regex EmptyTemplate;
 

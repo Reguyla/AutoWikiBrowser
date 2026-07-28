@@ -191,7 +191,7 @@ public static class Namespace
 
     // Covered by NamespaceTests.IsUserTalk()
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="articleTitle">Title of the article</param>
     /// <returns></returns>
@@ -202,7 +202,7 @@ public static class Namespace
 
     // Covered by NamespaceTests.IsUserPage()
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="articleTitle">Title of the article</param>
     /// <returns></returns>

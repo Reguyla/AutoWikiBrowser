@@ -99,7 +99,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
         }
 
         /// <summary>
-        /// Performs silent migration from the previous scheme when we used to 
+        /// Performs silent migration from the previous scheme when we used to
         /// </summary>
         public static void MigrateDefaultSettings()
         {

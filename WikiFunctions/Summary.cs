@@ -17,7 +17,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 namespace WikiFunctions;
 
 /// <summary>
-/// 
+///
 /// </summary>
 public static class Summary
 {
@@ -122,7 +122,7 @@ public static class Summary
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="input"></param>
     /// <param name="maxLength"></param>

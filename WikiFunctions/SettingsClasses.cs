@@ -199,7 +199,7 @@ public class UserPrefs
     public static List<Type> SavePluginSettings(UserPrefs prefs)
     {
         List<Type> types = new List<Type>();
-        /* Find out what types the plugins are using for their settings so we can 
+        /* Find out what types the plugins are using for their settings so we can
            add them to the Serializer. The plugin author must ensure s(he) is using
            serializable types.*/
 
@@ -221,7 +221,9 @@ public class UserPrefs
 [Serializable]
 public class FaRPrefs
 {
-    internal FaRPrefs() { }
+    internal FaRPrefs()
+    {
+    }
 
     /// <summary>
     /// Fill the object with settings from UI
@@ -258,7 +260,9 @@ public class FaRPrefs
 [Serializable]
 public class ListPrefs
 {
-    internal ListPrefs() { }
+    internal ListPrefs()
+    {
+    }
 
     /// <summary>
     /// Fill the object with settings from UI
@@ -496,7 +500,9 @@ public class ToolsPrefs
 [Serializable]
 public class PluginPrefs
 {
-    internal PluginPrefs() { }
+    internal PluginPrefs()
+    {
+    }
 
     public PluginPrefs(string aName, object[] aPluginSettings)
     {
@@ -517,7 +523,9 @@ public class PrefsKeyPair
     public string Name = "";
     public object Setting = null;
 
-    internal PrefsKeyPair() { }
+    internal PrefsKeyPair()
+    {
+    }
 
     public PrefsKeyPair(string aName, object aSetting)
     {

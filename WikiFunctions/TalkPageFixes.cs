@@ -71,7 +71,7 @@ public static class TalkPageFixes
         // 1. {{GA nominee}}, {{Featured article candidates}}, or {{Peer review}}
         // 2. {{Skip to talk}}
         // 3. {{Talk header}}
-        // 4. 
+        // 4.
         // 5. {{community article probation}}, {{censor}}, {{BLP others}} and other high-priority/importance, warning/attention templates.
         // 6. Specific talk page guideline banners, such as {{Not a forum}}, {{Recurring themes}}, {{FAQ}}, {{Round in circles}}, etc.
         // 7. Language related talk page guideline banners, such as {{American English}}
@@ -174,7 +174,6 @@ public static class TalkPageFixes
                 articleText = articleText.Replace(zerothbefore, zerothSection);
             }
         }
-
 
         return pr.FoundSkipToTalk || pr.FoundDefaultSort;
     }
@@ -561,7 +560,6 @@ public static class TalkPageFixes
         return articletext;
     }
 
-
     /// <summary>
     /// Does various fixes to WPSongs
     /// en-wiki only
@@ -595,7 +593,6 @@ public static class TalkPageFixes
                 articletext = articletext.Replace(m.Value, newvalue);
                 articletext = SirRegex.Replace(articletext, "");
             }
-
         }
 
         return articletext;
