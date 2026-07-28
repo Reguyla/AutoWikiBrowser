@@ -336,71 +336,6 @@ public class ApiEdit : IApiEdit
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Builds a MediaWiki query string containing one or more page titles.
-    /// </summary>
-    /// <param name="titles">
-    /// The page titles to encode and include in the query.
-    /// </param>
-    /// <returns>
-    /// A query string beginning with <c>&amp;titles=</c>, or an empty string
-    /// when no titles are supplied.
-    /// </returns>
-    protected static string Titles(params string[] titles)
-    {
-        ArgumentNullException.ThrowIfNull(titles);
-
-        if (titles.Length == 0)
-            return string.Empty;
-
-        string[] encodedTitles = new string[titles.Length];
-
-        for (int i = 0; i < titles.Length; i++)
-        {
-            encodedTitles[i] = Tools.WikiEncode(titles[i]);
-        }
-
-        return "&titles=" + string.Join("|", encodedTitles);
-    }
-
-    // TODO (Request Construction):
-    // Review whether Titles() and NamedTitles() should share a common helper.
-    // Both methods perform identical title encoding and differ only in the
-    // generated query parameter name.
-    /// <summary>
-    /// Builds a MediaWiki query string containing one or more page titles using
-    /// the specified parameter name.
-    /// </summary>
-    /// <param name="paramName">
-    /// The name of the query parameter.
-    /// </param>
-    /// <param name="titles">
-    /// The page titles to encode and include in the query.
-    /// </param>
-    /// <returns>
-    /// A query string beginning with the specified parameter name, or an empty
-    /// string when no titles are supplied.
-    /// </returns>
-    protected static string NamedTitles(
-        string paramName,
-        params string[] titles)
-    {
-        ArgumentNullException.ThrowIfNull(paramName);
-        ArgumentNullException.ThrowIfNull(titles);
-
-        if (titles.Length == 0)
-            return string.Empty;
-
-        string[] encodedTitles = new string[titles.Length];
-
-        for (int i = 0; i < titles.Length; i++)
-        {
-            encodedTitles[i] = Tools.WikiEncode(titles[i]);
-        }
-
-        return "&" + paramName + "=" + string.Join("|", encodedTitles);
-    }
-
     // TODO (Request Construction):
     // Consider returning a new request dictionary rather than mutating the
     // supplied collection once request construction is centralized.
@@ -492,22 +427,6 @@ public class ApiEdit : IApiEdit
         AppendOptions(request, options);
 
         return $"{ApiURL}?format=xml{BuildQuery(request)}";
-    }
-
-    /// <summary>
-    /// Builds the URL for an XML API request without adding optional behavior
-    /// parameters.
-    /// </summary>
-    /// <param name="request">
-    /// The request parameters to include in the URL.
-    /// </param>
-    /// <returns>
-    /// The complete MediaWiki API URL.
-    /// </returns>
-    protected string BuildUrl(
-        Dictionary<string, string> request)
-    {
-        return BuildUrl(request, ActionOptions.None);
     }
 
     #endregion
@@ -2119,6 +2038,11 @@ public class ApiEdit : IApiEdit
         }
     }
 
+    // TODO (Plugin Compatibility):
+    // PageExists() is currently unused by the AWB core but remains part of the
+    // public ApiEdit surface. Review during the plugin modernization phase to
+    // determine whether external plugins or consumers depend on this helper.
+    // Remove only after confirming it is no longer required for compatibility.
     /// <summary>
     /// Determines whether the specified page exists.
     /// </summary>
