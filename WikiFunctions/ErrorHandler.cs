@@ -257,29 +257,7 @@ namespace WikiFunctions
 
                 ApiExtra = GetApiSpecificInformation(apiException);
 
-                if (AppendToErrorHandler != null)
-                {
-                    StringBuilder append = new StringBuilder();
-
-                    foreach (Delegate d in AppendToErrorHandler.GetInvocationList())
-                    {
-                        try
-                        {
-                            object result = d.DynamicInvoke();
-                            string value = result as string;
-
-                            if (!string.IsNullOrEmpty(value))
-                                append.AppendLine(value);
-                        }
-                        catch
-                        {
-                            // A diagnostic extension must not prevent the main error report
-                            // from being generated or displayed.
-                        }
-                    }
-
-                    AppendedInfo = append.ToString();
-                }
+                AppendedInfo = GetAppendedDiagnosticInformation();
 
                 Version = BuildVersionInformation();
                 DotNetVersion = Environment.Version.ToString();
@@ -652,6 +630,41 @@ namespace WikiFunctions
             handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
 
             return errorMessage;
+        }
+
+        /// <summary>
+        /// Collects additional diagnostic information from registered error-handler
+        /// extensions.
+        /// </summary>
+        /// <returns>
+        /// The combined diagnostic information, or <see langword="null"/> when no
+        /// diagnostic extensions are registered.
+        /// </returns>
+        private static string GetAppendedDiagnosticInformation()
+        {
+            if (AppendToErrorHandler == null)
+                return null;
+
+            StringBuilder append = new StringBuilder();
+
+            foreach (Delegate d in AppendToErrorHandler.GetInvocationList())
+            {
+                try
+                {
+                    object result = d.DynamicInvoke();
+                    string value = result as string;
+
+                    if (!string.IsNullOrEmpty(value))
+                        append.AppendLine(value);
+                }
+                catch
+                {
+                    // A diagnostic extension must not prevent the main error report
+                    // from being generated or displayed.
+                }
+            }
+
+            return append.ToString();
         }
 
         #region Static helper functions
