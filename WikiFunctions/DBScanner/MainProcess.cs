@@ -252,7 +252,6 @@ class MainProcess
                 }
             }
         }
-
         catch (Exception ex)
         {
             if (Message)
@@ -324,7 +323,6 @@ class MainProcess
                     Thread.Sleep(1);
             }
         }
-
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);

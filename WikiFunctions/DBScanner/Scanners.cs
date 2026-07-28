@@ -326,7 +326,7 @@ public class HasHTMLEntities : Scan
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public class HasSimpleLinks : Scan
 {
@@ -347,7 +347,7 @@ public class HasSimpleLinks : Scan
 }
 
 /// <summary>
-/// 
+///
 /// </summary>
 public class HasSectionError : Scan
 {

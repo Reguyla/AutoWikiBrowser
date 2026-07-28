@@ -92,7 +92,7 @@ public partial class LogControl : UserControl
     /// Returns the ListView object from which the menu item was clicked
     /// Note: does not work when event triggered by keyboard shortcut as toolstrip not opened by keyboard shortcuts
     /// </summary>
-    /// 
+    ///
     private static ListView MenuItemOwner(object sender)
     {
         /* we seem to sometimes be receiving a ToolStripMenuItem, and sometimes a ContextMenuStrip...

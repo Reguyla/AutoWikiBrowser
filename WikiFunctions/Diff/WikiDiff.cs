@@ -276,7 +276,6 @@ public class WikiDiff
             Result.Append(@"  </td>
 </tr>");
         }
-
         else
         {
             Result.AppendFormat(@"<tr>
@@ -289,7 +288,6 @@ public class WikiDiff
   <td> </td>
   <td> </td>
 </tr>");
-
         }
     }
 
@@ -754,5 +752,4 @@ internal class WordComparer : IEqualityComparer
     {
         return x.Equals(y);
     }
-
 }

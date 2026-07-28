@@ -84,7 +84,6 @@ namespace WikiFunctions.Lists
                 //Causes exception on DBScanner otherwise
                 if (_destListBox.Parent is ListMaker)
                     (_destListBox.Parent as ListMaker).UpdateNumberOfArticles();
-
             }
             catch (Exception ex)
             {

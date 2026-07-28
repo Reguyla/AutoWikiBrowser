@@ -64,7 +64,7 @@ public partial class ArticleActionLogControl : UserControl
     /// <summary>
     /// Returns the ListView object from which the menu item was clicked
     /// </summary>
-    /// 
+    ///
     private static ListView MenuItemOwner(object sender)
     {
         /* we seem to sometimes be receiving a ToolStripMenuItem, and sometimes a ContextMenuStrip...

@@ -352,5 +352,4 @@ internal static class VisualBasicRoslynCompiler
                 compilerError);
         }
     }
-
 }

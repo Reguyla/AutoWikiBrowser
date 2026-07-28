@@ -237,7 +237,9 @@ public class CategoriesOnPageListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
 
@@ -361,7 +363,9 @@ public class WhatLinksHereListProvider : ApiListProviderBase, ISpecialPageProvid
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 
     #region ISpecialPageProvider Members
@@ -648,7 +652,9 @@ public class LinksOnPageListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
 
@@ -707,7 +713,9 @@ public class LinksOnPageOnlyRedListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
 }
 
 /// <summary>
@@ -769,7 +777,9 @@ public class FilesOnPageListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
 
@@ -818,7 +828,9 @@ public class TransclusionsOnPageListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
 
@@ -878,7 +890,9 @@ public class UserContribsListProvider : ApiListProviderBase, ISpecialPageProvide
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
 
     public override bool RunOnSeparateThread
     { get { return true; } }
@@ -978,7 +992,9 @@ public class ImageFileLinksListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
 
@@ -1008,7 +1024,6 @@ public class WikiSearchListProvider : ApiListProviderBase, ISpecialPageProvider
     {
         Limit = 1000; // slow query
     }
-
 
     public override List<Article> MakeList(params string[] searchCriteria)
     {
@@ -1059,10 +1074,11 @@ public class WikiSearchListProvider : ApiListProviderBase, ISpecialPageProvider
     public bool NamespacesEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
-
 
 /// <summary>
 /// Gets a list of pages which are returned from a title wiki search of the Named Pages, across all namespaces
@@ -1141,7 +1157,9 @@ public class MyWatchlistListProvider : ApiListProviderBase
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 }
 
@@ -1180,7 +1198,9 @@ public class DatabaseScannerListProvider : IListProvider
     public bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public void Selected() { }
+    public void Selected()
+    {
+    }
 
     public bool RunOnSeparateThread
     { get { return false; } }
@@ -1238,7 +1258,9 @@ public class RandomPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageP
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 
     public bool PagesNeeded
@@ -1314,7 +1336,9 @@ public class AllPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageProv
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
 
     public override string DisplayText
     { get { return "All Pages"; } }
@@ -1522,7 +1546,9 @@ public class RecentChangesSpecialPageProvider : ApiListProviderBase, ISpecialPag
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
 
     public bool NamespacesEnabled
     { get { return true; } }
@@ -1580,7 +1606,9 @@ public class AllUsersSpecialPageProvider : ApiListProviderBase, ISpecialPageProv
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
 
     public bool NamespacesEnabled
     { get { return false; } }
@@ -1642,7 +1670,9 @@ public class NewPagesListProvider : ApiListProviderBase, ISpecialPageProvider
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 
     public bool PagesNeeded
@@ -1697,7 +1727,6 @@ public class LinkSearchSpecialPageProvider : ApiListProviderBase, ISpecialPagePr
                 urlEnd = searchUrl;
             }
 
-
             string url = "list=exturlusage&euquery=" +
                          WebUtility.UrlEncode(urlEnd) + "&eunamespace=" + Namespace +
                            "&euprotocol=" + protocol + "&eulimit=max";
@@ -1718,7 +1747,9 @@ public class LinkSearchSpecialPageProvider : ApiListProviderBase, ISpecialPagePr
     public override bool UserInputTextBoxEnabled
     { get { return true; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 
     public bool PagesNeeded
@@ -1805,7 +1836,9 @@ public class GalleryNewFilesSpecialPageProvider : ApiListProviderBase, ISpecialP
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 
     public bool PagesNeeded
@@ -1864,7 +1897,9 @@ public class PagesWithPropListProvider : ApiListProviderBase, ISpecialPageProvid
         get { return true; }
     }
 
-    public override void Selected() { }
+    public override void Selected()
+    {
+    }
     #endregion
 
     public bool PagesNeeded { get { return true; } }

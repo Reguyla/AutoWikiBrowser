@@ -26,7 +26,7 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
 {    /* This class will:
      * Use the Logging interface previously defined in wikifunctions2
      * Be written to by AWB during processing and passed to plugins
-     * Format itself as a ListViewItem suitable (with subitems where appropriate) for adding to the skipped 
+     * Format itself as a ListViewItem suitable (with subitems where appropriate) for adding to the skipped
        or processed articles list
      * Handle MouseOver event (display log entry)
      * Handle double click event (open article in browser)
@@ -103,7 +103,6 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
             listView.Items.Insert(0, this);
             listView.EndUpdate();
         }
-
         catch { }
 
         Datestamped = true;
@@ -152,11 +151,21 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     #endregion
 
     #region IMyTraceListener Members
-    void IMyTraceListener.Close() { }
-    void IMyTraceListener.Flush() { }
-    void IMyTraceListener.ProcessingArticle(string fullArticleTitle, int ns) { }
-    void IMyTraceListener.WriteComment(string line) { }
-    void IMyTraceListener.WriteCommentAndNewLine(string line) { }
+    void IMyTraceListener.Close()
+    {
+    }
+    void IMyTraceListener.Flush()
+    {
+    }
+    void IMyTraceListener.ProcessingArticle(string fullArticleTitle, int ns)
+    {
+    }
+    void IMyTraceListener.WriteComment(string line)
+    {
+    }
+    void IMyTraceListener.WriteCommentAndNewLine(string line)
+    {
+    }
 
     void IMyTraceListener.SkippedArticle(string skippedBy, string reason)
     {

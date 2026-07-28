@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-
 using System.ComponentModel;
 using System.Windows.Forms;
 
@@ -109,7 +108,9 @@ public partial class SpecialPageListProvider : Form, IListProvider
     public bool UserInputTextBoxEnabled
     { get { return false; } }
 
-    public void Selected() { }
+    public void Selected()
+    {
+    }
 
     public bool RunOnSeparateThread
     { get { return true; } }

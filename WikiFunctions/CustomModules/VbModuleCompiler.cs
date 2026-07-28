@@ -1,5 +1,4 @@
-﻿
-namespace WikiFunctions.CustomModules;
+﻿namespace WikiFunctions.CustomModules;
 
 /// <summary>
 /// Provides Visual Basic custom-module source templates and compilation.

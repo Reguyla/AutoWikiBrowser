@@ -209,4 +209,3 @@ public abstract class TraceManager : IMyTraceListener
 
     protected abstract string ApplicationName { get; }
 }
-
