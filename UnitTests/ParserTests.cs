@@ -1600,7 +1600,6 @@ public class RecategorizerTests : RequiresParser
         Assert.That(Parsers.ReCategoriser("Foo", "-Bar II-", "[[Category:Foo]]", out noChange), Is.EqualTo("[[Category:-Bar II-]]"));
         ClassicAssert.IsFalse(noChange);
 
-
         Assert.That(Parsers.ReCategoriser("Foo", "Bar", "[[ catEgory: Foo]]", out noChange), Is.EqualTo("[[Category:Bar]]"));
         ClassicAssert.IsFalse(noChange);
 
@@ -2251,8 +2250,6 @@ public class MultipleIssuesNewTests : RequiresParser
 {{POV}}
 }}
 
-
-
 ==hello=="), "takes tags from separate lines, takes tags without dates");
 
         Assert.That(parser.MultipleIssues(@"{{wikify}}
@@ -2264,7 +2261,6 @@ public class MultipleIssuesNewTests : RequiresParser
 {{unreferenced}}
 {{POV}}
 }}
-
 
 Article starts.
 
@@ -2319,7 +2315,6 @@ Text
 Text
 
 ==hello=="), "takes tags from anywhere in zeroth section: all after");
-
     }
 
     [Test]
@@ -2342,8 +2337,6 @@ Foo"), Is.EqualTo(@"{{Multiple issues|
 {{wikify}}
 }}
 
-
-
 Foo"), "merge multiple MI");
 
         Assert.That(parser.MultipleIssues(@"{{Multiple issues|
@@ -2359,8 +2352,6 @@ Foo"), Is.EqualTo(@"{{Multiple issues|
 {{POV}}
 }}
 
-
-
 Foo"), "merge multiple MI, second empty");
 
         Assert.That(parser.MultipleIssues(@"{{Multiple issues|
@@ -2375,8 +2366,6 @@ Foo"), Is.EqualTo(@"{{Multiple issues|
 {{unreferenced}}
 {{POV}}
 }}
-
-
 
 Foo"), "merge multiple MI, one tag");
 
@@ -2394,8 +2383,6 @@ Foo"), Is.EqualTo(@"{{Multiple issues|
 {{POV}}
 }}
 
-
-
 Foo"), "merge multiple MI, dedupe tag");
 
         Assert.That(parser.MultipleIssues(@"{{Multiple issues|
@@ -2412,8 +2399,6 @@ Foo"), Is.EqualTo(@"{{Multiple issues|
 {{POV}}
 }}
 
-
-
 Foo"), "merge multiple MI, dedupe tag, using earlier date");
 
         Assert.That(parser.MultipleIssues(@"{{Multiple issues|
@@ -2425,8 +2410,6 @@ Foo"), "merge multiple MI, dedupe tag, using earlier date");
 }}
 
 Foo"), Is.EqualTo(@"{{unreferenced}}
-
-
 
 Foo"), "merge multiple MI, only dupe tags, convert to standalone tag");
 
@@ -2482,7 +2465,6 @@ Text
 {{unreferenced}}
 }}
 
-
 ==hello=="), "adds tags to existing MI, MI new style");
 
         Assert.That(parser.MultipleIssues(@"{{multiple issues|
@@ -2500,8 +2482,6 @@ Text
 {{POV}}
 {{unreferenced}}
 }}
-
-
 
 ==hello=="), "adds tags to existing MI, MI new style");
 
@@ -2530,7 +2510,6 @@ Text
 {{unreferenced}}
 }}
 
-
 ==hello=="), "adds 1 tag to existing MI with 1 tag, MI new style");
 
         Assert.That(parser.MultipleIssues(@"{{multiple issues|
@@ -2548,9 +2527,7 @@ Text
 {{unreferenced}}
 }}
 
-
 ==hello=="), "duplicate tags not added");
-
     }
 
     [Test]

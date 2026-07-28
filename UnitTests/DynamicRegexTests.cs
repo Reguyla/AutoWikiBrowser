@@ -53,7 +53,6 @@ public class DynamicRegexTests : RequiresInitialization
         RegexAssert.IsMatch(WikiRegexes.Category, "[[Κατηγορία:Δοκιμή]]");
         RegexAssert.IsMatch(WikiRegexes.CategoryQuick, "[[Κατηγορία:Δοκιμή]]");
 
-
         Variables.SetProjectLangCode("en");
         Variables.NamespacesCaseInsensitive.Remove(Namespace.Category);
         Variables.NamespacesCaseInsensitive.Add(Namespace.Category, @"(?i:Category)\s*:");
@@ -566,7 +565,6 @@ Image here");
         RegexAssert.IsMatch(WikiRegexes.UserSignature, "[[User talk :");
         RegexAssert.IsMatch(WikiRegexes.UserSignature, "[[User_talk:");
     }
-
 
     [Test]
     public void StubTests()

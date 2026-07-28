@@ -32,7 +32,7 @@ public class RegexTestsBase
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="r"></param>
     /// <param name="text"></param>
@@ -1409,7 +1409,6 @@ cit"));
         ClassicAssert.IsTrue(WikiRegexes.Pstyles.IsMatch(@"<p style=""font-family:monospace; line-height:130%"">hello</P>"));
         ClassicAssert.IsTrue(WikiRegexes.Pstyles.IsMatch(@"<p style = ""font-family:monospace; line-height:130%"">
 hello</P>"));
-
     }
 
     [Test]
@@ -1691,7 +1690,6 @@ words2"));
         ClassicAssert.IsTrue(WikiRegexes.BareExternalLink.IsMatch(@"* ftp://www.site.com
 "));
 
-
         ClassicAssert.IsFalse(WikiRegexes.BareExternalLink.IsMatch(@"* [http://www.site.com text]
 "));
         ClassicAssert.IsFalse(WikiRegexes.BareExternalLink.IsMatch(@"<ref>http://www.site.com</ref>
@@ -1790,7 +1788,6 @@ Bert").Groups[2].Value, Is.EqualTo("foo bar\r"));
     [Test]
     public void ReferenceList()
     {
-
 #if DEBUG
         Variables.SetProjectLangCode("fr");
         WikiRegexes.MakeLangSpecificRegexes();

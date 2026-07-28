@@ -204,7 +204,6 @@ abc={{bar}}
         ClassicAssert.IsTrue(Hide(@"[[File:foo.jpg|thumb|140px|[[Jo]] Assistant [[Ge]]]]").StartsWith("[["), "Retain starting brackets");
         ClassicAssert.IsTrue(Hide(@"[[File:foo.jpg|thumb|140px|[[Jo]] Assistant [[Ge]]]]").Contains(@"thumb|140px|[[Jo]] Assistant [[Ge]]]]"), "Retain ending brackets");
 
-
         AssertAllHidden(@"<imagemap>
 File:Blogs001.jpeg|Description
 File:Blogs002.jpeg|Description
@@ -1128,7 +1127,6 @@ public class ConcurrencyTests : RequiresInitialization
 
         // in the future, we may use parser objects for processing several wikis at once
         // Assert.AreNotEqual(p1.StubMaxWordCount, p2.StubMaxWordCount);
-
     }
 }
 
@@ -1455,7 +1453,6 @@ Some text";
         TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
         Assert.That(articleText, Is.EqualTo(articleText2), "moves skip to talk on the top 1");
 
-
         articleText = @"{{Talk header}}
 {{Skip to talk}}
 {{Random template}}
@@ -1669,7 +1666,6 @@ Hello world comment."), "don't add blank line when header is on the top");
 
 ==Untitled==
 Hello world comment."), "add header between template and text");
-
     }
 
     [Test]
@@ -1701,7 +1697,6 @@ Hello world comment."));
 ==Question==
 :Hello world comment3.";
 
-
         TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 
         Assert.That(articleTextIn, Is.EqualTo(articleTextHeader + @"
@@ -1713,7 +1708,6 @@ Hello world comment."));
 {{Some template}}
 ==Question==
 :Hello world comment3.";
-
 
         TalkPageFixes.ProcessTalkPage(ref articleTextIn, DEFAULTSORT.NoChange);
 

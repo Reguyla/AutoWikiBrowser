@@ -86,7 +86,6 @@ public class FixSyntaxTests : RequiresParser
         Assert.That(Parsers.FixSyntax(nochange), Is.EqualTo(nochange), "No change to ISBN at end of external link when no other link text");
         nochange = @"{{cite web |title=Markus |url=https://www.lesestoff.ch/de/detail/ISBN-9783426227817/Heitz |access-date=2 August 2023 }}";
         Assert.That(Parsers.FixSyntax(nochange), Is.EqualTo(nochange), "No change to ISBN at end of external link when no other link text");
-
     }
 
     [Test]
@@ -342,11 +341,11 @@ foo}}"));
         nonbreakingspace = "\u3000";
         templateCallWithNonBreakingSpace = "{{Foo" + nonbreakingspace + "one|1=yes}}";
         Assert.That(Parsers.FixSyntax(templateCallWithNonBreakingSpace), Is.EqualTo(@"{{Foo one|1=yes}}"), "Unicode IDEOGRAPHIC SPACE clean from template name");
-        Assert.That(Parsers.FixSyntax(@"{{foo 
+        Assert.That(Parsers.FixSyntax(@"{{foo
 bar|val=one}}"), Is.EqualTo(@"{{foo bar|val=one}}"));
-        Assert.That(Parsers.FixSyntax(@"{{Foo 
+        Assert.That(Parsers.FixSyntax(@"{{Foo
 bar|val=one}}"), Is.EqualTo(@"{{Foo bar|val=one}}"));
-        Assert.That(Parsers.FixSyntax(@"{{Foo 
+        Assert.That(Parsers.FixSyntax(@"{{Foo
 bar|val=one}} {{
  |val2=a}}"), Is.EqualTo(@"{{Foo bar|val=one}} {{
  |val2=a}}"), "Unnamed template handling");
@@ -839,7 +838,7 @@ Image:X.JPG|Japanese classification systemJapanese classification systemJapanese
 
         const string Football = @"{{Infobox football biography
 | playername     = D
-| image          = 
+| image          =
 | dateofdeath    = 1940 {aged 57)<ref name=A/>
 | cityofdeath    = [[S]]
 | years3         = 1911–19?? }}";
@@ -1348,5 +1347,4 @@ now"));
 
 {{DEFAULTSORT:A}}", "A"), Is.EqualTo("{{DEFAULTSORT:A}}"));
     }
-
 }

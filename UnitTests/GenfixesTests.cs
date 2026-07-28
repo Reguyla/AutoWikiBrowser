@@ -170,11 +170,9 @@ public class GenfixesTests : GenfixesTestsBase
 
         AssertChange(@"==External link==
 [http://www.site.com Foo]
-
 [http://www.site2.com Foo2]", @"==External links==
 * [http://www.site.com Foo]
 * [http://www.site2.com Foo2]");
-
     }
 
     [Test]
@@ -183,7 +181,7 @@ public class GenfixesTests : GenfixesTestsBase
         AssertChange(@"over July 09-11, 2009", @"over July 9–11, 2009");
         AssertChange(@"{{Citation | title = Admiralty notice | date = March 1st – March 5th, 1747 | page = 1}}", @"{{Citation | title = Admiralty notice | date = March 1–5, 1747 | page = 1}}");
 
-        AssertNotChanged(@"First was won on 2007 February 7. 
+        AssertNotChanged(@"First was won on 2007 February 7.
 In 2007 May 22 team has won gold medals.");
     }
 
@@ -328,7 +326,6 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
         AssertChange(@"Foo.{facts}}", @"Foo.{{citation needed}}");
     }
 
-
     [Test]
     public void Wikia()
     {
@@ -352,7 +349,6 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 '''Band''' is.
 
 [[Category:Blues rock groups]]
-
 
 {{Norway-band-stub}}", "no multiple issues added");
 
@@ -390,7 +386,6 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 
 [[Category:Blues rock groups]]
 
-
 {{Norway-band-stub}}", after = @"{{Multiple issues|
 {{Unreferenced|date=December 2009}}
 {{Underlinked|date=November 2006}}
@@ -404,7 +399,6 @@ W.<ref>[http://www.millerbrands.co.uk]. 0.</ref> T
 
 {{Norway-band-stub}}";
         AssertChange(before, after);
-
 
         ArticleText = @"{{POV|date=May 2016}}
 {{NPOV|date=May 2016}}
@@ -881,7 +875,6 @@ End of.
         Variables.SetProjectLangCode("en");
         WikiRegexes.MakeLangSpecificRegexes();
 
-
         Variables.SetProjectLangCode("ru");
         WikiRegexes.MakeLangSpecificRegexes();
         t = @"'''Article''' is great.<ref name = ""Fred1"">So says Fred</ref>
@@ -1006,9 +999,6 @@ public class TalkGenfixesTests : GenfixesTestsBase
 ==First==
 Word.
 
-
-
-
 Second.";
 
         a = @"{{WikiProject banner shell|1=
@@ -1021,9 +1011,6 @@ Second.";
 
 ==First==
 Word.
-
-
-
 
 Second.";
 

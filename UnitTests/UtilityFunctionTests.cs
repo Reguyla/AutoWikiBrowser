@@ -189,7 +189,6 @@ foo", "Hi", out noChange), Is.EqualTo(@"foo
 
 [[Category:Businesspeople]]
 
-
 {{DEFAULTSORT:Phillips, James M.}}
 foo"));
 
@@ -433,7 +432,6 @@ foo {{Infobox biography}}
 {{DEFAULTSORT:Bert}}"));
         ClassicAssert.IsTrue(noChange);
 
-
         // category sortkeys are cleaned too
         Assert.That(Parsers.ChangeToDefaultSort(@"[[Category:Parishes of the Azores|Agua Retorta]]
 [[Category:São Miguel Island]]", @"Água Retorta", out noChange), Is.EqualTo(@"[[Category:Parishes of the Azores]]
@@ -635,7 +633,6 @@ foo {{Infobox biography}}
 {{Reflist}}
 ";
         ClassicAssert.IsTrue(Parsers.IsArticleAboutAPerson(AR, "Opeti Fonua"), "Infobox about a person");
-
     }
 
     [Test]
@@ -829,7 +826,6 @@ foo {{Infobox biography}}
         ClassicAssert.IsTrue(Parsers.IsInUse("{{In use}} Hello world"));
         ClassicAssert.IsTrue(Parsers.IsInUse("{{in use|5 minutes}} Hello world"));
 
-
         // ignore commented inuse
         ClassicAssert.IsFalse(Parsers.IsInUse("<!--{{inuse}}--> Hello world"));
         ClassicAssert.IsFalse(Parsers.IsInUse("<nowiki>{{inuse}}</nowiki> Hello world"));
@@ -863,7 +859,7 @@ foo {{Infobox biography}}
         ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> {{reflist}}"));
         ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> {{Reflist}}"));
         ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> {{Reflist
-|refs = 
+|refs =
 {{cite news | title = A { hello }}
 }}"), "Unbalanced brackets within cite template in reflist does not affect logic");
         ClassicAssert.IsFalse(Parsers.IsMissingReferencesDisplay(@"Hello<ref>Fred</ref> {{ref-list}}"));

@@ -175,7 +175,6 @@ public class CiteTemplateDatesTests : RequiresParser
 
         Assert.That(Parsers.CiteTemplateDates(@"<ref>{{cite web|url=http://www.nuclearweaponarchive.org/Russia/TsarBomba.html|title=The Tsar Bomba (King of Bombs)|accessdate=2010-12}}</ref>"), Is.EqualTo(@"<ref>{{cite web|url=http://www.nuclearweaponarchive.org/Russia/TsarBomba.html|title=The Tsar Bomba (King of Bombs)|accessdate=2010-12}}</ref>"));
 
-
         // cite podcast is non-compliant to citation core standards
         const string CitePodcast = @"{{cite podcast
 | url =http://www.heretv.com/APodcastDetailPage.php?id=24

@@ -206,7 +206,6 @@ public class LinkTests : RequiresParser
 '''A''' (1 December 1920 &ndash; 28 May 2013)"));
     }
 
-
     [Test]
     public void FixDatesEnOnly()
     {
@@ -397,7 +396,6 @@ was"));
         genFixes.AssertNotChanged(@"from (1900–33) there");
     }
 
-
     [Test]
     public void FixLivingThingsRelatedDates()
     {
@@ -549,7 +547,6 @@ Other (fl. 1645) was also", FloruitTwice = @"'''Foo''' (fl. 55) was a peasant, r
         Assert.That(Parsers.GetInfoBoxFieldValue(@"hello {{infobox foo
 |  Year  =  {{efn|1990}}
 |other=great}} now", Year), Is.Empty);
-
     }
 
     [Test]
@@ -789,7 +786,7 @@ x
 <std::string, T>
 <typename T>
 <std::string, T>
-<std::string, T> 
+<std::string, T>
 <std::string, int>
 <int>
 <typename T>

@@ -112,8 +112,6 @@ public class SorterTests : RequiresParser2
 [[Category:Pub chains in the United Kingdom]]
 [[Category:Companies established in 1997]]
 
-
-
 [[es:Punch Taverns]]
 [[fr:Punch Taverns]]", "two newlines before interwikis"), Is.EqualTo(correct));
 
@@ -566,7 +564,7 @@ Hello";
 {{Infobox person
 | name               = A
 | module             = {{Infobox TikTok personality
-| subbox               =yes    
+| subbox               =yes
 <!-- Use the stats_update section of the {{Infobox YouTube personality -->
 }}
 | module2            = {{Infobox musical artist
@@ -916,7 +914,7 @@ some words"), "example 1");
         Assert.That(MetaDataSorter.MovePortalTemplates(@"text here {{Portal|Football}}
 text here2
 == see also ==
-some words"), Is.EqualTo(@"text here 
+some words"), Is.EqualTo(@"text here
 text here2
 == see also ==
 {{Portal|Football}}
@@ -1233,7 +1231,6 @@ Text.
     [Test]
     public void MovePortalTemplatesTestsDuplicates()
     {
-
         // remove duplicate portals
         Assert.That(MetaDataSorter.MovePortalTemplates(@"text here
 {{Portal|Football}}
@@ -1645,12 +1642,12 @@ text
         Assert.That(parser2.Sorter.RemoveCats(ref comm, "test"), Is.Empty, "Don't move commented out cats");
 
         comm = @"#REDIRECT [[X]]
-<!-- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX 
+<!-- XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX
+ XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX
+ XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX
+ XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX
+ XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX
+ XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX XXXXXXXXXX
 
 [[Category:Foo]]
 [[Category:Foo2]]
@@ -2450,7 +2447,6 @@ __FORCETOC__";
 {{botanist-stub}}
 [[Category:ABC]]", afterUK = @"Andy
 
-
 {{botanist-stub}}
 
 [[Category:ABC]]";
@@ -2462,7 +2458,6 @@ __FORCETOC__";
         string beforeDK = @"Andy
 {{botanist-dk-stub}}
 [[Category:ABC]]", afterDK = @"Andy
-
 
 {{botanist-dk-stub}}
 
@@ -2492,7 +2487,6 @@ __FORCETOC__";
 {{Personendaten}}
 [[Category:ABC]]
 [[en:Test]]", afterDe = @"Andy
-
 
 {{botanist-stub}}
 

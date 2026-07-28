@@ -451,7 +451,6 @@ public class TaggerTests : RequiresParser
 [[Category:Albanian people]]
 [[Category:Albanian Declaration of Independence]]
 
-
 {{Albania-bio-stub}}";
 
         string text = parser.Tagger(t1, "Test", false, out noChange, ref summary);
@@ -473,7 +472,6 @@ public class TaggerTests : RequiresParser
 {{DEFAULTSORT:bJqnzFm7e, opFhLKq7z}}
 [[Category:Albanian people]]
 [[Category:Albanian Declaration of Independence]]
-
 
 {{Albania-bio-stub}}";
 
@@ -937,7 +935,6 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
         text = parser.Tagger("{{يتيمة}}[[foo]]{{disambig}}", "Test", false, out noChange, ref summary);
         ClassicAssert.IsFalse(WikiRegexes.Orphan.IsMatch(text));
         Assert.That(text, Is.EqualTo("[[foo]]{{disambig}}"));
-
 
         Globals.UnitTestBoolValue = true;
         Variables.SetProjectLangCode("en");

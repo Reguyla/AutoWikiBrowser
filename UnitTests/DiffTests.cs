@@ -109,7 +109,6 @@ A2
 "), "Undo of delete last blank line");
     }
 
-
     [Test]
     public void DiffHTML()
     {

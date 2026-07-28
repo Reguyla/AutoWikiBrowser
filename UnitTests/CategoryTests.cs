@@ -563,7 +563,6 @@ died 2002
 |restingplacecoordinates =
 |alma_mater      =
 |occupation      =brickmason, mercha
-
 }}", infob2 = @"{{Infobox Officeholder
 |honorific-prefix   =
 |name            = John Footus
@@ -577,7 +576,6 @@ died 2002
 |death_place=
 |alma_mater      =
 |occupation      =brickmason, mercha
-
 }}", infob1a = @"{{Infobox Officeholder
 |honorific-prefix   =
 |name            = John C. Zimmerman, Sr.
@@ -593,7 +591,6 @@ died 2002
 |restingplacecoordinates =
 |alma_mater      =
 |occupation      =brickmason, mercha
-
 }}", infob1b = @"{{Infobox Officeholder
 |honorific-prefix   =
 |name            = John C. Zimmerman, Sr.
@@ -609,7 +606,6 @@ died 2002
 |restingplacecoordinates =
 |alma_mater      =
 |occupation      =brickmason, mercha
-
 }}";
 
         // scraped from infobox
@@ -648,7 +644,6 @@ died 2002
 |death_place=
 |alma_mater      =
 |occupation      =brickmason, mercha
-
 }}";
         Assert.That(Parsers.FixPeopleCategories(infob3, "foo"), Is.EqualTo(infob3), "no change if only decade of birth");
 
@@ -663,7 +658,6 @@ died 2002
 |death_place=
 |alma_mater      =
 |occupation      =brickmason, mercha
-
 }}";
         Assert.That(Parsers.FixPeopleCategories(infob4, "foo"), Is.EqualTo(infob4), "no change if only floruit");
 
@@ -688,7 +682,7 @@ died 2002
         const string infob5 = @"{{Infobox Officeholder
 |honorific-prefix   =
 |name            = John Foo
-|birth_date      = 
+|birth_date      =
 |death_date= XXX{{sfn|Smith|2005}}
 |death_place=
 }}";
@@ -698,13 +692,12 @@ died 2002
         const string infob6 = @"{{Infobox Officeholder
 |honorific-prefix   =
 |name            = John Foo
-|birth_date      = 
+|birth_date      =
 |death_date= {{birth date|2005|1|1}}
 |death_place=
 }}
 [[Category:2005 births]]";
         Assert.That(Parsers.FixPeopleCategories(infob6, "foo"), Is.EqualTo(infob6), "ignore ref for death year");
-
     }
 
     [Test]

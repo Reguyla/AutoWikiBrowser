@@ -197,11 +197,11 @@ Some news here."), "space trimmed from end of paragraph when br replaces newline
 
         Assert.That(Parsers.FixHeadings(@"==Further reading==
             bar bar
-            
+
 ==External Links==
 *http://foo.com", "a"), Is.EqualTo(@"==Further reading==
             bar bar
-            
+
 ==External links==
 *http://foo.com"));
 
@@ -254,8 +254,8 @@ B", "Foo");
 
         Assert.That(Parsers.FixHeadings(@"'''The'''.
 
-== History ==	 
- 		 
+== History ==
+
 Five", "a"), Is.EqualTo(@"'''The'''.
 
 == History ==
@@ -283,7 +283,7 @@ Five"));
 == hello world2 ==
 "), "removes colons from multiple places");
 
-        Assert.That(Parsers.FixHeadings(@"== hello world: == 
+        Assert.That(Parsers.FixHeadings(@"== hello world: ==
 == hello world2: ==
 ", "a"), Is.EqualTo(@"== hello world ==
 
@@ -482,7 +482,6 @@ Bar";
 Bar", "Test"), Is.EqualTo(correct), "no change when already one blank line");
         Assert.That(Parsers.FixHeadings(@"Foo
 
-
 ==1920s==
 Bar", "Test"), Is.EqualTo(correct), "fixes excess blank lines");
         Assert.That(Parsers.FixHeadings(@"Foo
@@ -556,7 +555,7 @@ x"));
 
         Assert.That(Parsers.FixHeadings(@"x
 ==Major championships==
-====Wins====	
+====Wins====
 x", "test"), Is.EqualTo(@"x
 
 ==Major championships==
@@ -765,7 +764,6 @@ Text."));
 *Foo2", "Bar").Contains(@"==See also=="));
     }
 
-
     [Test, Category("Incomplete")]
     // TODO: cover everything
     public void TestFixWhitespace()
@@ -847,7 +845,6 @@ Why miserable patient<br />
 Friendship betrayal
 They require
 
-
 Why miserable patient
 </poem>";
 
@@ -855,7 +852,6 @@ Why miserable patient
         Assert.That(Parsers.RemoveWhiteSpace("a\r\n\r\n\r\nb<poem>A</poem"), Is.EqualTo("a\r\n\r\nb<poem>A</poem"), "Changes to newlines OK when poem tags don't contain excess newlines");
 
         Assert.That(Parsers.RemoveWhiteSpace(@"</sup>
- 
 
 Bring"), Is.EqualTo(@"</sup>
 
@@ -874,7 +870,7 @@ Bring"));
 
         Assert.That(Parsers.RemoveWhiteSpace(@"The following items:
 * ab
-     
+
 * ac"), Is.EqualTo(@"The following items:
 * ab
 * ac"), "Newlines with spaces cleaned");
@@ -896,7 +892,6 @@ Bring"));
 * ab
 * ac
 
-
 * ba
 * bb";
 
@@ -906,7 +901,6 @@ Bring"));
 
 * ab
 * ac
-
 
 * [http://www.foo.com ba]
 * bb";
@@ -1116,7 +1110,6 @@ was"));
         Assert.That(Parsers.FixSyntax(@"1<sup> st </sup> day at school"), Is.EqualTo("1st day at school"), "1st with whitespace");
     }
 
-
     [Test]
     public void FixSmallTags()
     {
@@ -1213,23 +1206,23 @@ was"));
         Assert.That(Parsers.TemplateRedirects("now {{cn}} was{{cn}} or", TemplateRedirs), Is.EqualTo("now {{citation needed}} was{{citation needed}} or"), "renames multiple redirects");
 
         Assert.That(Parsers.TemplateRedirects(@"now {{one|
-{{cn}} 
+{{cn}}
 }}", TemplateRedirs), Is.EqualTo(@"now {{one|
-{{citation needed}} 
+{{citation needed}}
 }}"), "renames when template nested");
 
         Assert.That(Parsers.TemplateRedirects(@"now {{fact|
-{{cn}} 
+{{cn}}
 }}", TemplateRedirs), Is.EqualTo(@"now {{citation needed|
-{{citation needed}} 
+{{citation needed}}
 }}"), "renames nested templates, both levels");
 
         Assert.That(Parsers.TemplateRedirects(@"now {{one|
 {{two|
-{{cn}} 
+{{cn}}
 }}}}", TemplateRedirs), Is.EqualTo(@"now {{one|
 {{two|
-{{citation needed}} 
+{{citation needed}}
 }}}}"), "renames when template double nested");
 
         TemplateRedirs = Parsers.LoadTemplateRedirects("{{tl|Cn}}, {{tl|fact}} → {{tl|citation needed}}");

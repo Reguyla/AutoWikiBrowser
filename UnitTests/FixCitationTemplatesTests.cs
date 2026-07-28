@@ -201,7 +201,6 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
                         "Date removed if date is YYYY and year same");
     }
 
-
     [Test]
     public void FixCitationTemplatesMonthWithinDate()
     {
@@ -642,7 +641,6 @@ journal=Crypt of Cthulhu #19: A Pulp Thriller and Theological Journal |volume=3,
                         Is.EqualTo(@"*{{cite journal|first=Robert M.|last=Price|year=Candlemas 1984|title=Brian Lumley&mdash;Reanimator|
 journal=Crypt of Cthulhu #19: A Pulp Thriller and Theological Journal |volume=3| issue =  3–4|url=http://www.clare.ltd.new.net/cryptofcthulhu/blreanimator.htm}} Robert M. Price (ed.), Bloomfield, NJ"));
 
-
         Assert.That(Parsers.FixCitationTemplates(@"*{{cite journal|first=Robert M.|last=Price|year=Candlemas 1984|title=Brian Lumley&mdash;Reanimator|
 journal=Crypt of Cthulhu #19: A Pulp Thriller and Theological Journal |volume=volume 3 numbers 3–4|url=http://www.clare.ltd.new.net/cryptofcthulhu/blreanimator.htm}} Robert M. Price (ed.), Bloomfield, NJ"),
                         Is.EqualTo(@"*{{cite journal|first=Robert M.|last=Price|year=Candlemas 1984|title=Brian Lumley&mdash;Reanimator|
@@ -708,7 +706,6 @@ journal=Crypt of Cthulhu |volume= 3|issue= 3| ";
         Assert.That(Parsers.FixCitationTemplates(@"{{harv|Smith|2005|pp=55 – 59}}"), Is.EqualTo(@"{{harv|Smith|2005|pp=55–59}}"));
         Assert.That(Parsers.FixCitationTemplates(@"{{harv|Smith|2005|pp=55–59, 77-81}}"), Is.EqualTo(@"{{harv|Smith|2005|pp=55–59, 77–81}}"));
         Assert.That(Parsers.FixCitationTemplates(@"{{harv|Smith|at=7-8}}"), Is.EqualTo(@"{{harv|Smith|at=7-8}}"), "no change within at parameter");
-
 
         Assert.That(Parsers.FixCitationTemplates(@"{{rp|55–59, 77-81}}"), Is.EqualTo(@"{{rp|55–59, 77–81}}"));
         Assert.That(Parsers.FixCitationTemplates(@"{{rp|77-81}}"), Is.EqualTo(@"{{rp|77–81}}"));

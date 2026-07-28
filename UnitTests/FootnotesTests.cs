@@ -629,12 +629,11 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
 
         // don't condense a ref in {{reflist}}
         const string RefInReflist = @"Foo<ref name='first'>690nBTivR9o2mJ6vMYccwmjl5TO9BxvhF9deev2VSi17H</ref>here.
-            
+
             ==Notes==
             {{reflist|2|refs=
-            
+
             <ref name='first'>690nBTivR9o2mJ6vMYccwmjl5TO9BxvhF9deev2VSi17H</ref>
-            
             }}";
 
         Assert.That(Parsers.DuplicateNamedReferences(RefInReflist), Is.EqualTo(RefInReflist));
@@ -710,7 +709,6 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
         // existing named ref – good for edit
         Assert.That(Parsers.DuplicateUnnamedReferences(a + namedref), Is.EqualTo(@"<ref name=""bookrags.com"">""bookrags.com""</ref> foo <ref name=""bookrags.com""/>" + namedref), "named ref 1");
 #endif
-
     }
 
     [Test]
@@ -755,7 +753,6 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
         Assert.That(Parsers.DeriveReferenceName("a", @"{{cite book| last = Farlow| first = James O.| coauthors = M. K. Brett-Surmann| title = The Complete Dinosaur| publisher = Indiana University Press| date = 1999| location = Bloomington, Indiana| pages = 8| isbn = 0-253-21313-4}}"), Is.EqualTo("Farlow 1999 8"));
         Assert.That(Parsers.DeriveReferenceName("a", @"JAY STRAFFORD, ""[http://www.timesdispatch.com/rtd/entertainment/books_literature/article/BMYS25_20090121-192837/184966/ Globe-trotting with the Grim Reaper],"" ''Richmond-Times Dispatch'' (January 25, 2009)."), Is.EqualTo("Globe-trotting with the Grim Reaper"));
 
-
         Assert.That(Parsers.DeriveReferenceName("a", @""), Is.EqualTo("ReferenceA"));
 
         Assert.That(Parsers.DeriveReferenceName("a", @"* Cf. Ezriel Carlebach entry in the Hebrew Wikipedia"), Is.EqualTo("ReferenceA"));
@@ -776,7 +773,6 @@ A<ref name=""Wang"">{{cite journal |authors=Wang X |title=Recurrent |journal=Nat
         Assert.That(Parsers.DeriveReferenceName("a", @"""-logy."" ''The Oxford English Dictionary'', Second Edition. Oxford University Press, 1989. retrieved 20 Aug 2008."), Is.EqualTo("The Oxford English Dictionary 1989"));
 
         Assert.That(Parsers.DeriveReferenceName("a", @"{{cite web|title=firstaif|url=http://www.firstaif.info/pages/nz_mounted.htm}}</ref><ref>{{cite web|title=diggerhistory|url=http://www.diggerhistory.info/pages-nz/nzef.htm}}"), Is.EqualTo("firstaif"));
-
 
         Assert.That(Parsers.DeriveReferenceName("a", @"{{cite web
   | last =
@@ -883,7 +879,6 @@ Bar4.<ref name=""ABCDEFGHI""/>
     [Test]
     public void SameNamedRefShortText()
     {
-
         Assert.That(Parsers.SameRefDifferentName(@"Foo<ref name=Jones>Jones 2005 extra words of interest</ref> and bar<ref name=Jones>a</ref>"),
                         Is.EqualTo(@"Foo<ref name=Jones>Jones 2005 extra words of interest</ref> and bar<ref name=""Jones""/>"));
 
@@ -1145,7 +1140,6 @@ r</ref> The next"), "ref moved after punctuation when majority are after");
 The next";
         Assert.That(Parsers.RefsAfterPunctuation(AllAfter + R1), Is.EqualTo(AllAfter + @"Foo.<ref>bar</ref>
 The next"), "doesn't eat newlines after ref punctuation");
-
 
         string RandomTable = @"{|
 !title

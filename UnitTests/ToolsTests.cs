@@ -632,7 +632,6 @@ bar"), Is.EqualTo(2));
 }}
 {{Campaignbox Portuguese Crisis 1383}}
 
-
 {{History of Portugal|
 image=[[Image:AljubarrotaBattle.jpg|250px]]|
 caption=Battle of Aljubarrota}}
@@ -764,7 +763,6 @@ en.wikipedia.org"));
 
         ClassicAssert.IsFalse(Tools.IsWikimediaProject(ProjectEnum.custom));
         ClassicAssert.IsFalse(Tools.IsWikimediaProject(ProjectEnum.wikia));
-
     }
 
     [Test]
@@ -918,13 +916,13 @@ John", "*"), Is.EqualTo(@"* Fred
 * John"), "do not add list to blank lines/lines with just whitespace");
 
         Assert.That(Tools.HTMLListToWiki(@"Fred
- 
+
 Tim
- 
+
 John", "*"), Is.EqualTo(@"* Fred
- 
+
 * Tim
- 
+
 * John"), "do not add list to blank lines/lines with just whitespace 2");
     }
 
@@ -1300,7 +1298,6 @@ John", "*"), Is.EqualTo(@"* Fred
         Assert.That(Tools.GetTemplateParameterValue(@"{{cite|param other=here}}", "param other"), Is.EqualTo("here"));
     }
 
-
     [Test]
     public void GetTemplateParameterValues()
     {
@@ -1328,9 +1325,9 @@ John", "*"), Is.EqualTo(@"* Fred
         Assert.That(Tools.GetTemplateParameterValues(@"{{cite web|url=http://www.site.com/abc|title=Hello | author = | accessdate = 2012-05-15 | format={{PDF|test}} }}"), Is.EqualTo(Back), "handles nested templates");
         Back.Add("last1", "Jones");
         Assert.That(Tools.GetTemplateParameterValues(@"{{cite web|url=http://www.site.com/abc|title=Hello | author = | accessdate = 2012-05-15 | format={{PDF|test}} |last1=Jones}}"), Is.EqualTo(Back), "handles parameters with numbers");
-        Back.Add("trans_title", @"Here 
+        Back.Add("trans_title", @"Here
 There");
-        Assert.That(Tools.GetTemplateParameterValues(@"{{cite web|url=http://www.site.com/abc|title=Hello | author = | accessdate = 2012-05-15 | format={{PDF|test}} |last1=Jones|trans_title=Here 
+        Assert.That(Tools.GetTemplateParameterValues(@"{{cite web|url=http://www.site.com/abc|title=Hello | author = | accessdate = 2012-05-15 | format={{PDF|test}} |last1=Jones|trans_title=Here
 There}}"), Is.EqualTo(Back), "handles parameters with newlines");
 
         Back.Clear();
@@ -1360,7 +1357,6 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
         Back.Add("name", "X");
         Back.Add("other1/2", "Y");
         Assert.That(Tools.GetTemplateParameterValues(@"{{test|name = X |other1/2=Y}}"), Is.EqualTo(Back), "handles parameter name with forward slash");
-
     }
 
     [Test]
@@ -1602,7 +1598,6 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
         Assert.That(Tools.RenameTemplate(@"{{PAGENAME}}", "PAGENAME", "subst:PAGENAME"), Is.EqualTo(@"{{subst:PAGENAME}}"));
         Assert.That(Tools.RenameTemplate(@"{{PAGENAME}}", "PAGENAME", "subst:PAGENAME", false), Is.EqualTo(@"{{subst:PAGENAME}}"));
         Assert.That(Tools.RenameTemplate(@"{{PAGENAME}}", "PAGENAME", "subst:PAGENAME", true), Is.EqualTo(@"{{subst:PAGENAME}}"));
-
     }
 
     [Test]
@@ -1891,7 +1886,6 @@ valueafter}}"), "newline before populated parameter kept");
 |author=
 |title=Obituary 1 -- No Title
 |date=
-
 
 |work=[[New York Times]]
 |url=http://query.nytimes.com/gst/abstra }}";
