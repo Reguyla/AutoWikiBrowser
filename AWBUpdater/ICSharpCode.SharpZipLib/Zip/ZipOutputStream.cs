@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -53,7 +53,7 @@ namespace ICSharpCode.SharpZipLib.Zip;
 /// archive one after another.  It has a special method to start a new
 /// zip entry.  The zip entries contains information about the file name
 /// size, compressed size, CRC, etc.
-/// 
+///
 /// It includes support for Stored and Deflated entries.
 /// This class is not thread safe.
 /// <br/>
@@ -63,21 +63,21 @@ namespace ICSharpCode.SharpZipLib.Zip;
 /// <code>
 /// using System;
 /// using System.IO;
-/// 
+///
 /// using ICSharpCode.SharpZipLib.Core;
 /// using ICSharpCode.SharpZipLib.Zip;
-/// 
+///
 /// class MainClass
 /// {
 /// 	public static void Main(string[] args)
 /// 	{
 /// 		string[] filenames = Directory.GetFiles(args[0]);
 /// 		byte[] buffer = new byte[4096];
-/// 		
+///
 /// 		using ( ZipOutputStream s = new ZipOutputStream(File.Create(args[1])) ) {
-/// 		
+///
 /// 			s.SetLevel(9); // 0 - store only to 9 - means best compression
-/// 		
+///
 /// 			foreach (string file in filenames) {
 /// 				ZipEntry entry = new ZipEntry(file);
 /// 				s.PutNextEntry(entry);
@@ -88,7 +88,7 @@ namespace ICSharpCode.SharpZipLib.Zip;
 /// 			}
 /// 		}
 /// 	}
-/// }	
+/// }
 /// </code>
 /// </example>
 public class ZipOutputStream : DeflaterOutputStream
@@ -570,7 +570,6 @@ public class ZipOutputStream : DeflaterOutputStream
             if (curEntry.AESKeySize > 0)
             {
                 curEntry.CompressedSize += curEntry.AESOverheadSize;
-
             }
             else
             {
@@ -589,7 +588,6 @@ public class ZipOutputStream : DeflaterOutputStream
 
             if (curEntry.LocalHeaderRequiresZip64)
             {
-
                 if (sizePatchPos == -1)
                 {
                     throw new ZipException("Entry requires zip64 but this has been turned off");
@@ -649,7 +647,6 @@ public class ZipOutputStream : DeflaterOutputStream
 #if !NET_1_1 && !NETCF_2_0
     private static void AddExtraDataAES(ZipEntry entry, ZipExtraData extraData)
     {
-
         // Vendor Version: AE-1 IS 1. AE-2 is 2. With AE-2 no CRC is required and 0 is stored.
         const int VENDOR_VERSION = 2;
         // Vendor ID is the two ASCII characters "AE".

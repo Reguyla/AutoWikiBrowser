@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -40,7 +40,6 @@
 using ICSharpCode.SharpZipLib.Checksums;
 
 namespace ICSharpCode.SharpZipLib.Zip.Compression;
-
 
 /// <summary>
 /// Strategies for deflater
@@ -58,7 +57,6 @@ public enum DeflateStrategy
     /// </summary>
     Filtered = 1,
 
-
     /// <summary>
     /// This strategy will not look for string repetitions at all.  It
     /// only encodes with Huffman trees (which means, that more common
@@ -68,18 +66,17 @@ public enum DeflateStrategy
 }
 
 // DEFLATE ALGORITHM:
-// 
+//
 // The uncompressed stream is inserted into the window array.  When
 // the window array is full the first half is thrown away and the
 // second half is copied to the beginning.
 //
 // The head array is a hash table.  Three characters build a hash value
-// and they the value points to the corresponding index in window of 
+// and they the value points to the corresponding index in window of
 // the last string with this hash.  The prev array implements a
 // linked list of matches with the same hash: prev[index & WMASK] points
 // to the previous index with the same hash.
-// 
-
+//
 
 /// <summary>
 /// Low level compression engine for deflate algorithm which uses a 32K sliding window
@@ -199,7 +196,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Determines if more <see cref="SetInput">input</see> is needed.
-    /// </summary>		
+    /// </summary>
     /// <returns>Return true if input is needed via <see cref="SetInput">SetInput</see></returns>
     public bool NeedsInput()
     {
@@ -215,7 +212,7 @@ public class DeflaterEngine : DeflaterConstants
     public void SetDictionary(byte[] buffer, int offset, int length)
     {
 #if DebugDeflation
-			if (DeflaterConstants.DEBUGGING && (strstart != 1) ) 
+			if (DeflaterConstants.DEBUGGING && (strstart != 1) )
 			{
 				throw new InvalidOperationException("strstart not 1");
 			}
@@ -247,7 +244,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Reset internal state
-    /// </summary>		
+    /// </summary>
     public void Reset()
     {
         huffman.Reset();
@@ -271,7 +268,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Reset Adler checksum
-    /// </summary>		
+    /// </summary>
     public void ResetAdler()
     {
         adler.Reset();
@@ -279,7 +276,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Get current value of Adler checksum
-    /// </summary>		
+    /// </summary>
     public int Adler
     {
         get
@@ -290,7 +287,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Total data processed
-    /// </summary>		
+    /// </summary>
     public long TotalIn
     {
         get
@@ -301,7 +298,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Get/set the <see cref="DeflateStrategy">deflate strategy</see>
-    /// </summary>		
+    /// </summary>
     public DeflateStrategy Strategy
     {
         get
@@ -332,7 +329,6 @@ public class DeflaterEngine : DeflaterConstants
 
         if (DeflaterConstants.COMPR_FUNC[level] != compressionFunction)
         {
-
 #if DebugDeflation
 				if (DeflaterConstants.DEBUGGING) {
 				   Console.WriteLine("Change from " + compressionFunction + " to "
@@ -438,10 +434,10 @@ public class DeflaterEngine : DeflaterConstants
         int hash = ((ins_h << HASH_SHIFT) ^ window[strstart + (MIN_MATCH - 1)]) & HASH_MASK;
 
 #if DebugDeflation
-			if (DeflaterConstants.DEBUGGING) 
+			if (DeflaterConstants.DEBUGGING)
 			{
-				if (hash != (((window[strstart] << (2*HASH_SHIFT)) ^ 
-								  (window[strstart + 1] << HASH_SHIFT) ^ 
+				if (hash != (((window[strstart] << (2*HASH_SHIFT)) ^
+								  (window[strstart + 1] << HASH_SHIFT) ^
 								  (window[strstart + 2])) & HASH_MASK)) {
 						throw new SharpZipBaseException("hash inconsistent: " + hash + "/"
 												+window[strstart] + ","
@@ -480,7 +476,7 @@ public class DeflaterEngine : DeflaterConstants
     }
 
     /// <summary>
-    /// Find the best (longest) string in the window matching the 
+    /// Find the best (longest) string in the window matching the
     /// string starting at strstart.
     ///
     /// Preconditions:
@@ -529,7 +525,6 @@ public class DeflaterEngine : DeflaterConstants
 
         do
         {
-
 #if DebugDeflation
 
 				if (DeflaterConstants.DEBUGGING && (curMatch >= strstart) )
@@ -614,7 +609,7 @@ public class DeflaterEngine : DeflaterConstants
             }
 
 #if DebugDeflation
-				if (DeflaterConstants.DEBUGGING) 
+				if (DeflaterConstants.DEBUGGING)
 				{
 				   Console.WriteLine("storedBlock[" + storedLength + "," + lastBlock + "]");
 				}
@@ -662,7 +657,7 @@ public class DeflaterEngine : DeflaterConstants
             {
                 // longestMatch sets matchStart and matchLen
 #if DebugDeflation
-					if (DeflaterConstants.DEBUGGING) 
+					if (DeflaterConstants.DEBUGGING)
 					{
 						for (int i = 0 ; i < matchLen; i++) {
 							if (window[strstart + i] != window[matchStart + i]) {
@@ -736,7 +731,7 @@ public class DeflaterEngine : DeflaterConstants
 
                 // We are flushing everything
 #if DebugDeflation
-					if (DeflaterConstants.DEBUGGING && !flush) 
+					if (DeflaterConstants.DEBUGGING && !flush)
 					{
 						throw new SharpZipBaseException("Not flushing, but no lookahead");
 					}
@@ -760,7 +755,6 @@ public class DeflaterEngine : DeflaterConstants
             int prevLen = matchLen;
             if (lookahead >= MIN_MATCH)
             {
-
                 int hashHead = InsertString();
 
                 if (strategy != DeflateStrategy.HuffmanOnly &&
@@ -768,7 +762,6 @@ public class DeflaterEngine : DeflaterConstants
                     strstart - hashHead <= MAX_DIST &&
                     FindLongestMatch(hashHead))
                 {
-
                     // longestMatch sets matchStart and matchLen
 
                     // Discard match if too small and too far away
@@ -783,7 +776,7 @@ public class DeflaterEngine : DeflaterConstants
             if ((prevLen >= MIN_MATCH) && (matchLen <= prevLen))
             {
 #if DebugDeflation
-					if (DeflaterConstants.DEBUGGING) 
+					if (DeflaterConstants.DEBUGGING)
 					{
 					   for (int i = 0 ; i < matchLen; i++) {
 						  if (window[strstart-1+i] != window[prevMatch + i])
@@ -842,7 +835,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// Hashtable, hashing three characters to an index for window, so
-    /// that window[index]..window[index+2] have this hash code.  
+    /// that window[index]..window[index+2] have this hash code.
     /// Note that the array should really be unsigned short, so you need
     /// to and the values with 0xffff.
     /// </summary>
@@ -850,7 +843,7 @@ public class DeflaterEngine : DeflaterConstants
 
     /// <summary>
     /// <code>prev[index &amp; WMASK]</code> points to the previous index that has the
-    /// same hash code as the string starting at index.  This way 
+    /// same hash code as the string starting at index.  This way
     /// entries with the same hash code are in a linked list.
     /// Note that the array should really be unsigned short, so you need
     /// to and the values with 0xffff.
@@ -878,7 +871,7 @@ public class DeflaterEngine : DeflaterConstants
     int lookahead;
 
     /// <summary>
-    /// This array contains the part of the uncompressed stream that 
+    /// This array contains the part of the uncompressed stream that
     /// is of relevance.  The current character is indexed by strstart.
     /// </summary>
     byte[] window;

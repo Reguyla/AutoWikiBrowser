@@ -23,7 +23,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -39,7 +39,6 @@
 // HISTORY
 //	22-12-2009	DavidPierson	Added AES support
 
-
 #if !NETCF_1_0
 using ICSharpCode.SharpZipLib.Encryption;
 using System.Security.Cryptography;
@@ -50,7 +49,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 /// <summary>
 /// A special stream deflating or compressing the bytes that are
 /// written to it.  It uses a Deflater to perform actual deflating.<br/>
-/// Authors of the original java version : Tom Tromey, Jochen Hoenicke 
+/// Authors of the original java version : Tom Tromey, Jochen Hoenicke
 /// </summary>
 public class DeflaterOutputStream : Stream
 {
@@ -133,7 +132,7 @@ public class DeflaterOutputStream : Stream
 
     #region Public API
     /// <summary>
-    /// Finishes the stream by calling finish() on the deflater. 
+    /// Finishes the stream by calling finish() on the deflater.
     /// </summary>
     /// <exception cref="SharpZipBaseException">
     /// Not all input is deflated
@@ -285,13 +284,13 @@ public class DeflaterOutputStream : Stream
 				0x23456789,
 				0x34567890
 			};
-			
+
 			byte[] rawPassword = ZipConstants.ConvertToArray(password);
-			
+
 			for (int i = 0; i < rawPassword.Length; ++i) {
 				UpdateKeys((byte)rawPassword[i]);
 			}
-			
+
 #else
         PkzipClassicManaged pkManaged = new PkzipClassicManaged();
         byte[] key = PkzipClassic.GenerateKeys(ZipConstants.ConvertToArray(password));
@@ -327,9 +326,9 @@ public class DeflaterOutputStream : Stream
 #endif
 
 #if NETCF_1_0
-		
+
 		/// <summary>
-		/// Encrypt a single byte 
+		/// Encrypt a single byte
 		/// </summary>
 		/// <returns>
 		/// The encrypted value
@@ -341,8 +340,8 @@ public class DeflaterOutputStream : Stream
 		}
 
 		/// <summary>
-		/// Update encryption keys 
-		/// </summary>		
+		/// Update encryption keys
+		/// </summary>
 		protected void UpdateKeys(byte ch)
 		{
 			keys[0] = Crc32.ComputeCrc32(keys[0], ch);
@@ -371,7 +370,7 @@ public class DeflaterOutputStream : Stream
                 break;
             }
 #if NETCF_1_0
-				if (keys != null) 
+				if (keys != null)
 #else
             if (cryptoTransform_ != null)
 #endif
@@ -634,5 +633,4 @@ public class DeflaterOutputStream : Stream
 
     bool isStreamOwner_ = true;
     #endregion
-
 }

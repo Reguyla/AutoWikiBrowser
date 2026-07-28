@@ -20,7 +20,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -34,7 +34,6 @@
 // exception statement from your version.
 
 namespace ICSharpCode.SharpZipLib.Zip;
-
 
 /// <summary>
 /// Holds data pertinent to a data descriptor.
@@ -398,7 +397,6 @@ internal class ZipHelperStream : Stream
     public void WriteEndOfCentralDirectory(long noOfEntries, long sizeEntries,
         long startOfCentralDirectory, byte[] comment)
     {
-
         if ((noOfEntries >= 0xffff) ||
             (startOfCentralDirectory >= 0xffffffff) ||
             (sizeEntries >= 0xffffffff))
@@ -411,7 +409,6 @@ internal class ZipHelperStream : Stream
         // TODO: ZipFile Multi disk handling not done
         WriteLEShort(0);                    // number of this disk
         WriteLEShort(0);                    // no of disk with start of central dir
-
 
         // Number of entries
         if (noOfEntries >= 0xffff)
@@ -434,7 +431,6 @@ internal class ZipHelperStream : Stream
         {
             WriteLEInt((int)sizeEntries);
         }
-
 
         // offset of start of central directory
         if (startOfCentralDirectory >= 0xffffffff)

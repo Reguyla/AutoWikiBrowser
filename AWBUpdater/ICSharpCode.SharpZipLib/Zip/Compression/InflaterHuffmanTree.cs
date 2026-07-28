@@ -22,7 +22,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -38,7 +38,6 @@
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 namespace ICSharpCode.SharpZipLib.Zip.Compression;
-
 
 /// <summary>
 /// Huffman tree used for inflation
@@ -144,7 +143,7 @@ public class InflaterHuffmanTree
         }
 
         /* -jr comment this out! doesnt work for dynamic trees and pkzip 2.04g
-                    if (code != 65536) 
+                    if (code != 65536)
                     {
                         throw new SharpZipBaseException("Code lengths don't add up properly.");
                     }
@@ -196,7 +195,6 @@ public class InflaterHuffmanTree
             }
             nextCode[bits] = code + (1 << (16 - bits));
         }
-
     }
 
     /// <summary>
@@ -260,4 +258,3 @@ public class InflaterHuffmanTree
         }
     }
 }
-

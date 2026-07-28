@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -39,13 +39,12 @@
 
 namespace ICSharpCode.SharpZipLib.Zip.Compression;
 
-
 /// <summary>
 /// This class is general purpose class for writing data to a buffer.
-/// 
+///
 /// It allows you to write bits as well as bytes
 /// Based on DeflaterPending.java
-/// 
+///
 /// author of the original java version : Jochen Hoenicke
 /// </summary>
 public class PendingBuffer
@@ -154,7 +153,7 @@ public class PendingBuffer
     public void WriteBlock(byte[] block, int offset, int length)
     {
 #if DebugDeflation
-			if (DeflaterConstants.DEBUGGING && (start != 0) ) 
+			if (DeflaterConstants.DEBUGGING && (start != 0) )
 			{
 				throw new SharpZipBaseException("Debug check: start != 0");
 			}
@@ -180,7 +179,7 @@ public class PendingBuffer
     public void AlignToByte()
     {
 #if DebugDeflation
-			if (DeflaterConstants.DEBUGGING && (start != 0) ) 
+			if (DeflaterConstants.DEBUGGING && (start != 0) )
 			{
 				throw new SharpZipBaseException("Debug check: start != 0");
 			}
@@ -205,7 +204,7 @@ public class PendingBuffer
     public void WriteBits(int b, int count)
     {
 #if DebugDeflation
-			if (DeflaterConstants.DEBUGGING && (start != 0) ) 
+			if (DeflaterConstants.DEBUGGING && (start != 0) )
 			{
 				throw new SharpZipBaseException("Debug check: start != 0");
 			}
@@ -232,7 +231,7 @@ public class PendingBuffer
     public void WriteShortMSB(int s)
     {
 #if DebugDeflation
-			if (DeflaterConstants.DEBUGGING && (start != 0) ) 
+			if (DeflaterConstants.DEBUGGING && (start != 0) )
 			{
 				throw new SharpZipBaseException("Debug check: start != 0");
 			}

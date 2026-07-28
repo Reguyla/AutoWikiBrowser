@@ -21,7 +21,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -33,14 +33,13 @@
 // this exception to your version of the library, but you are not
 // obligated to do so.  If you do not wish to do so, delete this
 // exception statement from your version.
-// 
+//
 
 #if !NET_1_1 && !NETCF_2_0
 
 using System.Security.Cryptography;
 
 namespace ICSharpCode.SharpZipLib.Encryption;
-
 
 // Based on information from http://www.winzip.com/aes_info.htm
 // and http://www.gladman.me.uk/cryptography_technology/fileencrypt/
@@ -50,7 +49,6 @@ namespace ICSharpCode.SharpZipLib.Encryption;
 /// </summary>
 internal class ZipAESStream : CryptoStream
 {
-
     /// <summary>
     /// Constructor
     /// </summary>
@@ -60,7 +58,6 @@ internal class ZipAESStream : CryptoStream
     public ZipAESStream(Stream stream, ZipAESTransform transform, CryptoStreamMode mode)
         : base(stream, transform, mode)
     {
-
         _stream = stream;
         _transform = transform;
         _slideBuffer = new byte[1024];
@@ -101,7 +98,7 @@ internal class ZipAESStream : CryptoStream
             int byteCount = _slideBufFreePos - _slideBufStartPos;
 
             // Need to handle final block and Auth Code specially, but don't know total data length.
-            // Maintain a read-ahead equal to the length of (crypto block + Auth Code). 
+            // Maintain a read-ahead equal to the length of (crypto block + Auth Code).
             // When that runs out we can detect these final sections.
             int lengthToRead = _blockAndAuth - byteCount;
             if (_slideBuffer.Length - _slideBufFreePos < lengthToRead)

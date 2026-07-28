@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -59,15 +59,15 @@ namespace ICSharpCode.SharpZipLib.Zip;
 /// <br/>
 /// <br/>Author of the original java version : Jochen Hoenicke
 /// </summary>
-/// 
+///
 /// <example> This sample shows how to read a zip file
 /// <code lang="C#">
 /// using System;
 /// using System.Text;
 /// using System.IO;
-/// 
+///
 /// using ICSharpCode.SharpZipLib.Zip;
-/// 
+///
 /// class MainClass
 /// {
 /// 	public static void Main(string[] args)
@@ -77,7 +77,7 @@ namespace ICSharpCode.SharpZipLib.Zip;
 /// 			ZipEntry theEntry;
 /// 			const int size = 2048;
 /// 			byte[] data = new byte[2048];
-/// 			
+///
 /// 			while ((theEntry = s.GetNextEntry()) != null) {
 ///                 if ( entry.IsFile ) {
 /// 				    Console.Write("Show contents (y/n) ?");
@@ -103,7 +103,7 @@ public class ZipInputStream : InflaterInputStream
     #region Instance Fields
 
     /// <summary>
-    /// Delegate for reading bytes from a stream. 
+    /// Delegate for reading bytes from a stream.
     /// </summary>
     delegate int ReadDataHandler(byte[] b, int offset, int length);
 
@@ -159,7 +159,6 @@ public class ZipInputStream : InflaterInputStream
             password = value;
         }
     }
-
 
     /// <summary>
     /// Gets a value indicating if there is a current entry and it can be decompressed
@@ -259,11 +258,9 @@ public class ZipInputStream : InflaterInputStream
             entry.CompressedSize = csize & 0xFFFFFFFFL;
 
             entry.CryptoCheckValue = (byte)((crc2 >> 24) & 0xff);
-
         }
         else
         {
-
             // This allows for GNU, WinZip and possibly other archives, the PKZIP spec
             // says these values are zero under these circumstances.
             if (crc2 != 0)
@@ -327,7 +324,7 @@ public class ZipInputStream : InflaterInputStream
     }
 
     /// <summary>
-    /// Read data descriptor at the end of compressed data. 
+    /// Read data descriptor at the end of compressed data.
     /// </summary>
     void ReadDataDescriptor()
     {
@@ -482,7 +479,6 @@ public class ZipInputStream : InflaterInputStream
                 throw new InvalidOperationException("No current entry");
             }
         }
-
     }
 
     /// <summary>
@@ -522,7 +518,7 @@ public class ZipInputStream : InflaterInputStream
     }
 
     /// <summary>
-    /// Perform the initial read on an entry which may include 
+    /// Perform the initial read on an entry which may include
     /// reading encryption headers and setting up inflation.
     /// </summary>
     /// <param name="destination">The destination to fill with data read.</param>

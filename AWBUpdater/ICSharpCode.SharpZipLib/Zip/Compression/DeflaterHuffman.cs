@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -39,13 +39,12 @@
 
 namespace ICSharpCode.SharpZipLib.Zip.Compression;
 
-
 /// <summary>
 /// This is the DeflaterHuffman class.
-/// 
+///
 /// This class is <i>not</i> thread safe.  This is inherent in the API, due
 /// to the split of Deflate and SetInput.
-/// 
+///
 /// author of the original java version : Jochen Hoenicke
 /// </summary>
 public class DeflaterHuffman
@@ -208,7 +207,7 @@ public class DeflaterHuffman
             }
 
 #if DebugDeflation
-				if ( DeflaterConstants.DEBUGGING && (code != 65536) ) 
+				if ( DeflaterConstants.DEBUGGING && (code != 65536) )
 				{
 					throw new SharpZipBaseException("Inconsistent bl_counts!");
 				}
@@ -218,7 +217,6 @@ public class DeflaterHuffman
                 int bits = length[i];
                 if (bits > 0)
                 {
-
                     //						if (DeflaterConstants.DEBUGGING) {
                     //								//Console.WriteLine("codes["+i+"] = rev(" + nextCode[bits-1]+"),
                     //								                  +bits);
@@ -323,7 +321,6 @@ public class DeflaterHuffman
                     heap[path] = heap[ppos];
                 }
                 heap[path] = last;
-
 
                 int second = heap[0];
 
@@ -614,7 +611,6 @@ public class DeflaterHuffman
             //					}
             //				}
         }
-
     }
 
     #region Instance Fields
@@ -694,7 +690,7 @@ public class DeflaterHuffman
 
     /// <summary>
     /// Reset internal state
-    /// </summary>		
+    /// </summary>
     public void Reset()
     {
         last_lit = 0;
@@ -815,7 +811,7 @@ public class DeflaterHuffman
 
     /// <summary>
     /// Flush block to output with compression
-    /// </summary>		
+    /// </summary>
     /// <param name="stored">Data to flush</param>
     /// <param name="storedOffset">Index of first byte to flush</param>
     /// <param name="storedLength">Count of bytes to flush</param>
@@ -950,7 +946,6 @@ public class DeflaterHuffman
         }
         return IsFull();
     }
-
 
     /// <summary>
     /// Reverse the bits of a 16 bit value.

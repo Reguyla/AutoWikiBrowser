@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -40,13 +40,11 @@
 // HISTORY
 //	11-08-2009	GeoffHart	T9121	Added Multi-member gzip support
 
-
 #if !NETCF_1_0
 using System.Security.Cryptography;
 #endif
 
 namespace ICSharpCode.SharpZipLib.Zip.Compression.Streams;
-
 
 /// <summary>
 /// An input buffer customised for use by <see cref="InflaterInputStream"/>
@@ -463,7 +461,7 @@ public class InflaterInputStream : Stream
     /// Number of bytes to skip
     /// </param>
     /// <returns>
-    /// The number of bytes skipped, zero if the end of 
+    /// The number of bytes skipped, zero if the end of
     /// stream has been reached
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">
@@ -511,7 +509,7 @@ public class InflaterInputStream : Stream
 
     /// <summary>
     /// Clear any cryptographic state.
-    /// </summary>		
+    /// </summary>
     protected void StopDecrypting()
     {
 #if !NETCF_1_0

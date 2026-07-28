@@ -20,7 +20,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -33,7 +33,6 @@
 // obligated to do so.  If you do not wish to do so, delete this
 // exception statement from your version.
 
-
 using ICSharpCode.SharpZipLib.Core;
 
 namespace ICSharpCode.SharpZipLib.Zip;
@@ -41,7 +40,7 @@ namespace ICSharpCode.SharpZipLib.Zip;
 /// <summary>
 /// ZipNameTransform transforms names as per the Zip file naming convention.
 /// </summary>
-/// <remarks>The use of absolute names is supported although its use is not valid 
+/// <remarks>The use of absolute names is supported although its use is not valid
 /// according to Zip naming conventions, and should not be used if maximum compatability is desired.</remarks>
 public class ZipNameTransform : INameTransform
 {

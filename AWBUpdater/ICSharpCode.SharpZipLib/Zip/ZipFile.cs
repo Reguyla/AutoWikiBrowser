@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -297,9 +297,9 @@ public enum FileUpdateMode
 /// This class represents a Zip archive.  You can ask for the contained
 /// entries, or get an input stream for a file entry.  The entry is
 /// automatically decompressed.
-/// 
+///
 /// You can also update the archive adding or deleting entries.
-/// 
+///
 /// This class is thread safe for input:  You can open input streams for arbitrary
 /// entries in different threads.
 /// <br/>
@@ -311,9 +311,9 @@ public enum FileUpdateMode
 /// using System.Text;
 /// using System.Collections;
 /// using System.IO;
-/// 
+///
 /// using ICSharpCode.SharpZipLib.Zip;
-/// 
+///
 /// class MainClass
 /// {
 /// 	static public void Main(string[] args)
@@ -958,7 +958,6 @@ public class ZipFile : IEnumerable, IDisposable
 
                     using (Stream entryStream = this.GetInputStream(this[entryIndex]))
                     {
-
                         byte[] buffer = new byte[4096];
                         long totalBytes = 0;
                         int bytesRead;
@@ -1313,7 +1312,6 @@ public class ZipFile : IEnumerable, IDisposable
             if (((localFlags & (int)GeneralBitFlags.Descriptor) == 0) ||
                 ((size > 0) || (compressedSize > 0)))
             {
-
                 if (size != entry.Size)
                 {
                     throw new ZipException(
@@ -1438,7 +1436,7 @@ public class ZipFile : IEnumerable, IDisposable
 
     #region Immediate updating
     //		TBD: Direct form of updating
-    // 
+    //
     //		public void Update(IEntryMatcher deleteMatcher)
     //		{
     //		}
@@ -1580,7 +1578,6 @@ public class ZipFile : IEnumerable, IDisposable
                     }
                 }
             }
-
         }
         finally
         {
@@ -1753,7 +1750,6 @@ public class ZipFile : IEnumerable, IDisposable
         CheckUpdating();
         AddUpdate(new ZipUpdate(fileName, EntryFactory.MakeFileEntry(entryName)));
     }
-
 
     /// <summary>
     /// Add a file entry with data.
@@ -2650,7 +2646,6 @@ public class ZipFile : IEnumerable, IDisposable
             workFile.WriteLocalEntryHeader(update);
             update.OutEntry.CompressedSize = 0;
         }
-
     }
 
     void ModifyEntry(ZipFile workFile, ZipUpdate update)
@@ -2792,7 +2787,7 @@ public class ZipFile : IEnumerable, IDisposable
             if (archiveStorage_.UpdateMode == FileUpdateMode.Direct)
             {
                 // TODO: archiveStorage wasnt originally intended for this use.
-                // Need to revisit this to tidy up handling as archive storage currently doesnt 
+                // Need to revisit this to tidy up handling as archive storage currently doesnt
                 // handle the original stream well.
                 // The problem is when using an existing zip archive with an in memory archive storage.
                 // The open stream wont support writing but the memory storage should open the same file not an in memory one.
@@ -2845,7 +2840,7 @@ public class ZipFile : IEnumerable, IDisposable
     class UpdateComparer : IComparer
     {
         /// <summary>
-        /// Compares two objects and returns a value indicating whether one is 
+        /// Compares two objects and returns a value indicating whether one is
         /// less than, equal to or greater than the other.
         /// </summary>
         /// <param name="x">First object to compare</param>
@@ -3128,7 +3123,6 @@ public class ZipFile : IEnumerable, IDisposable
             entry_ = (ZipEntry)entry.Clone();
         }
 
-
         /// <summary>
         /// Copy an existing entry.
         /// </summary>
@@ -3300,7 +3294,6 @@ public class ZipFile : IEnumerable, IDisposable
             throw new EndOfStreamException("End of stream");
         }
 
-
         return unchecked((ushort)((ushort)data1 | (ushort)(data2 << 8)));
     }
 
@@ -3347,12 +3340,12 @@ public class ZipFile : IEnumerable, IDisposable
     {
         // Search for the End Of Central Directory.  When a zip comment is
         // present the directory will start earlier
-        // 
+        //
         // The search is limited to 64K which is the maximum size of a trailing comment field to aid speed.
         // This should be compatible with both SFX and ZIP files but has only been tested for Zip files
         // If a SFX file has the Zip data attached as a resource and there are other resources occuring later then
         // this could be invalid.
-        // Could also speed this up by reading memory in larger blocks.			
+        // Could also speed this up by reading memory in larger blocks.
 
         if (baseStream_.CanSeek == false)
         {
@@ -3406,9 +3399,9 @@ public class ZipFile : IEnumerable, IDisposable
                 throw new ZipException("Cannot find Zip64 locator");
             }
 
-            // number of the disk with the start of the zip64 end of central directory 4 bytes 
-            // relative offset of the zip64 end of central directory record 8 bytes 
-            // total number of disks 4 bytes 
+            // number of the disk with the start of the zip64 end of central directory 4 bytes
+            // relative offset of the zip64 end of central directory record 8 bytes
+            // total number of disks 4 bytes
             ReadLEUint(); // startDisk64 is not currently used
             ulong offset64 = ReadLEUlong();
             uint totalDisks = ReadLEUint();
@@ -4326,7 +4319,6 @@ public class StaticDiskDataSource : IStaticDataSource
     #endregion
 }
 
-
 /// <summary>
 /// Default implementation of <see cref="IDynamicDataSource"/> for files stored on disk.
 /// </summary>
@@ -4782,7 +4774,6 @@ public class MemoryArchiveStorage : BaseArchiveStorage
         Stream result;
         if ((stream == null) || !stream.CanWrite)
         {
-
             result = new MemoryStream();
 
             if (stream != null)

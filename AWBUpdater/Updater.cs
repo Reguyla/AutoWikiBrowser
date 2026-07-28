@@ -72,7 +72,7 @@ internal sealed partial class Updater : Form
     /// <summary>
     /// Main program function
     /// </summary>
-    /// 
+    ///
     /// TODO:
     /// Evaluate externally supplied regular expressions with a timeout to
     /// prevent pathological patterns from blocking the UI.

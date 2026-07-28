@@ -21,7 +21,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -35,7 +35,6 @@
 // exception statement from your version.
 //
 
-
 #if !NETCF_1_0
 
 using ICSharpCode.SharpZipLib.Checksums;
@@ -45,7 +44,7 @@ namespace ICSharpCode.SharpZipLib.Encryption;
 
 /// <summary>
 /// PkzipClassic embodies the classic or original encryption facilities used in Pkzip archives.
-/// While it has been superceded by more recent and more powerful algorithms, its still in use and 
+/// While it has been superceded by more recent and more powerful algorithms, its still in use and
 /// is viable for preventing casual snooping
 /// </summary>
 public abstract class PkzipClassic : SymmetricAlgorithm
@@ -105,7 +104,7 @@ public abstract class PkzipClassic : SymmetricAlgorithm
 class PkzipClassicCryptoBase
 {
     /// <summary>
-    /// Transform a single byte 
+    /// Transform a single byte
     /// </summary>
     /// <returns>
     /// The transformed value
@@ -139,8 +138,8 @@ class PkzipClassicCryptoBase
     }
 
     /// <summary>
-    /// Update encryption keys 
-    /// </summary>		
+    /// Update encryption keys
+    /// </summary>
     protected void UpdateKeys(byte ch)
     {
         keys[0] = Crc32.ComputeCrc32(keys[0], ch);
@@ -195,7 +194,7 @@ class PkzipClassicEncryptCryptoTransform : PkzipClassicCryptoBase, ICryptoTransf
     }
 
     /// <summary>
-    /// Transforms the specified region of the input byte array and copies 
+    /// Transforms the specified region of the input byte array and copies
     /// the resulting transform to the specified region of the output byte array.
     /// </summary>
     /// <param name="inputBuffer">The input for which to compute the transform.</param>
@@ -274,7 +273,6 @@ class PkzipClassicEncryptCryptoTransform : PkzipClassicCryptoBase, ICryptoTransf
     #endregion
 }
 
-
 /// <summary>
 /// PkzipClassic CryptoTransform for decryption.
 /// </summary>
@@ -306,7 +304,7 @@ class PkzipClassicDecryptCryptoTransform : PkzipClassicCryptoBase, ICryptoTransf
     }
 
     /// <summary>
-    /// Transforms the specified region of the input byte array and copies 
+    /// Transforms the specified region of the input byte array and copies
     /// the resulting transform to the specified region of the output byte array.
     /// </summary>
     /// <param name="inputBuffer">The input for which to compute the transform.</param>
@@ -386,7 +384,7 @@ class PkzipClassicDecryptCryptoTransform : PkzipClassicCryptoBase, ICryptoTransf
 }
 
 /// <summary>
-/// Defines a wrapper object to access the Pkzip algorithm. 
+/// Defines a wrapper object to access the Pkzip algorithm.
 /// This class cannot be inherited.
 /// </summary>
 public sealed class PkzipClassicManaged : PkzipClassic

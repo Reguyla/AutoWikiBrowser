@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -45,7 +45,6 @@ using System.Globalization;
 #endif
 
 namespace ICSharpCode.SharpZipLib.Zip;
-
 
 #region Enumerations
 
@@ -80,7 +79,7 @@ public enum CompressionMethod
     Stored = 0,
 
     /// <summary>
-    /// Common Zip compression method using a sliding dictionary 
+    /// Common Zip compression method using a sliding dictionary
     /// of up to 32KB and secondary compression from Huffman/Shannon-Fano trees
     /// </summary>
     Deflated = 8,
@@ -99,7 +98,6 @@ public enum CompressionMethod
     /// WinZip special for AES encryption, Now supported by #Zip.
     /// </summary>
     WinZipAES = 99,
-
 }
 
 /// <summary>
@@ -213,7 +211,7 @@ public enum GeneralBitFlags : int
     /// </summary>
     Unused10 = 0x0400,
     /// <summary>
-    /// Bit 11 if set indicates the filename and 
+    /// Bit 11 if set indicates the filename and
     /// comment fields for this file must be encoded using UTF-8.
     /// </summary>
     UnicodeText = 0x0800,
@@ -493,7 +491,7 @@ public sealed class ZipConstants
 
     /// <summary>
     /// Convert a portion of a byte array to a string.
-    /// </summary>		
+    /// </summary>
     /// <param name="data">
     /// Data to convert to string
     /// </param>
@@ -627,7 +625,6 @@ public sealed class ZipConstants
             return ConvertToArray(str);
         }
     }
-
 
     /// <summary>
     /// Initialise default instance of <see cref="ZipConstants">ZipConstants</see>

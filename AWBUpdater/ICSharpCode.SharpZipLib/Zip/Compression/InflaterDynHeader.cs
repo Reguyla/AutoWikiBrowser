@@ -39,7 +39,6 @@ using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 namespace ICSharpCode.SharpZipLib.Zip.Compression;
 
-
 class InflaterDynHeader
 {
     #region Constants
@@ -229,5 +228,4 @@ class InflaterDynHeader
     byte lastLen;
     int ptr;
     #endregion
-
 }

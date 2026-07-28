@@ -20,7 +20,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -265,7 +265,6 @@ public class ExtendedPathFilter : PathFilter
 [Obsolete("Use ExtendedPathFilter instead")]
 public class NameAndSizeFilter : PathFilter
 {
-
     /// <summary>
     /// Initialise a new instance of NameAndSizeFilter.
     /// </summary>

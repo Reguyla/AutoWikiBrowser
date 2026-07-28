@@ -20,7 +20,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -300,7 +300,7 @@ public class FastZip
     }
 
     /// <summary>
-    /// Get/set a value indicating wether file dates and times should 
+    /// Get/set a value indicating wether file dates and times should
     /// be restored when extracting files from an archive.
     /// </summary>
     /// <remarks>The default value is false.</remarks>
@@ -377,7 +377,6 @@ public class FastZip
 
         using (outputStream_ = new ZipOutputStream(outputStream))
         {
-
 #if !NETCF_1_0
             if (password_ != null)
             {
@@ -474,7 +473,6 @@ public class FastZip
 
         using (zipFile_ = new ZipFile(inputStream))
         {
-
 #if !NETCF_1_0
             if (password_ != null)
             {
@@ -542,7 +540,7 @@ public class FastZip
         {
             try
             {
-                // The open below is equivalent to OpenRead which gaurantees that if opened the 
+                // The open below is equivalent to OpenRead which gaurantees that if opened the
                 // file will not be changed by subsequent openers, but precludes opening in some cases
                 // were it could succeed.
                 using (FileStream stream = File.Open(e.Name, FileMode.Open, FileAccess.Read, FileShare.Read))

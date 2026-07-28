@@ -21,7 +21,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -36,19 +36,17 @@
 //
 
 #if !NET_1_1 && !NETCF_2_0
-// Framework version 2.0 required for Rfc2898DeriveBytes 
+// Framework version 2.0 required for Rfc2898DeriveBytes
 
 using System.Security.Cryptography;
 
 namespace ICSharpCode.SharpZipLib.Encryption;
-
 
 /// <summary>
 /// Transforms stream using AES in CTR mode
 /// </summary>
 internal class ZipAESTransform : ICryptoTransform
 {
-
     private const int PWD_VER_LENGTH = 2;
 
     // WinZip use iteration count of 1000 for PBKDF2 key generation
@@ -81,7 +79,6 @@ internal class ZipAESTransform : ICryptoTransform
     ///
     public ZipAESTransform(string key, byte[] saltBytes, int blockSize, bool writeMode)
     {
-
         if (blockSize != 16 && blockSize != 32) // 24 valid for AES but not supported by Winzip
             throw new Exception("Invalid blocksize " + blockSize + ". Must be 16 or 32.");
         if (saltBytes.Length != blockSize / 2)
@@ -122,7 +119,6 @@ internal class ZipAESTransform : ICryptoTransform
     /// </summary>
     public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
     {
-
         // Pass the data stream to the hash algorithm for generating the Auth Code.
         // This does not change the inputBuffer. Do this before decryption for read mode.
         if (!_writeMode)
@@ -151,7 +147,7 @@ internal class ZipAESTransform : ICryptoTransform
         }
         if (_writeMode)
         {
-            // This does not change the buffer. 
+            // This does not change the buffer.
             _hmacsha1.TransformBlock(outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);
         }
         return inputCount;
@@ -190,7 +186,6 @@ internal class ZipAESTransform : ICryptoTransform
     /// </summary>
     public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
     {
-
         throw new NotImplementedException("ZipAESTransform.TransformFinalBlock");
     }
 
@@ -247,6 +242,5 @@ internal class ZipAESTransform : ICryptoTransform
     }
 
     #endregion
-
 }
 #endif

@@ -20,7 +20,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -48,7 +48,7 @@ namespace ICSharpCode.SharpZipLib.Core;
 /// To include a semi-colon it may be quoted as in \;. Each expression can be prefixed by a plus '+' sign or
 /// a minus '-' sign to denote the expression is intended to include or exclude names.
 /// If neither a plus or minus sign is found include is the default.
-/// A given name is tested for inclusion before checking exclusions.  Only names matching an include spec 
+/// A given name is tested for inclusion before checking exclusions.  Only names matching an include spec
 /// and not matching an exclude spec are deemed to match the filter.
 /// An empty filter matches any name.
 /// </summary>

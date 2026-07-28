@@ -22,7 +22,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -78,7 +78,7 @@ public class ZipEntryFactory : IEntryFactory
         /// Use a fixed value.
         /// </summary>
         /// <remarks>The actual <see cref="DateTime"/> value used can be
-        /// specified via the <see cref="ZipEntryFactory(DateTime)"/> constructor or 
+        /// specified via the <see cref="ZipEntryFactory(DateTime)"/> constructor or
         /// using the <see cref="ZipEntryFactory(TimeSetting)"/> with the setting set
         /// to <see cref="TimeSetting.Fixed"/> which will use the <see cref="DateTime"/> when this class was constructed.
         /// The <see cref="FixedDateTime"/> property can also be used to set this value.</remarks>
@@ -318,7 +318,6 @@ public class ZipEntryFactory : IEntryFactory
     /// <returns>Returns a new <see cref="ZipEntry"></see> representing a directory.</returns>
     public ZipEntry MakeDirectoryEntry(string directoryName, bool useFileSystem)
     {
-
         ZipEntry result = new ZipEntry(nameTransform_.TransformDirectory(directoryName));
         result.IsUnicodeText = isUnicodeText_;
         result.Size = 0;
@@ -331,7 +330,6 @@ public class ZipEntryFactory : IEntryFactory
         {
             di = new DirectoryInfo(directoryName);
         }
-
 
         if ((di != null) && di.Exists)
         {

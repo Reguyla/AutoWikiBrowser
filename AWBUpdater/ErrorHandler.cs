@@ -168,7 +168,7 @@ public partial class ErrorHandler : Form
             DotNetVersion;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="ex"></param>
         public BugReport(Exception ex)

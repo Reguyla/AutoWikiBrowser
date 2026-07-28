@@ -24,7 +24,7 @@
 // making a combined work based on this library.  Thus, the terms and
 // conditions of the GNU General Public License cover the whole
 // combination.
-// 
+//
 // As a special exception, the copyright holders of this library give you
 // permission to link this library with independent modules to produce an
 // executable, regardless of the license terms of these independent
@@ -42,7 +42,6 @@
 //	02-02-2010	DavidPierson	Changed NTFS Extra Data min length to 4
 
 namespace ICSharpCode.SharpZipLib.Zip;
-
 
 /// <summary>
 /// Defines known values for the <see cref="HostSystemID"/> property.
@@ -138,7 +137,7 @@ public enum HostSystemID
 /// <summary>
 /// This class represents an entry in a zip archive.  This can be a file
 /// or a directory
-/// ZipFile and ZipInputStream will give you instances of this class as 
+/// ZipFile and ZipInputStream will give you instances of this class as
 /// information about the members in an archive.  ZipOutputStream
 /// uses an instance of this class when creating an entry in a Zip file.
 /// <br/>
@@ -179,7 +178,7 @@ public class ZipEntry : ICloneable
     /// </summary>
     /// <param name="name">
     /// The name for this entry. Can include directory components.
-    /// The convention for names is 'unix'  style paths with no device names and 
+    /// The convention for names is 'unix'  style paths with no device names and
     /// path elements separated by '/' characters.  This is not enforced see <see cref="CleanName(string)">CleanName</see>
     /// on how to ensure names are valid if this is desired.
     /// </param>
@@ -455,7 +454,7 @@ public class ZipEntry : ICloneable
 
     /// <summary>
     /// Get the version made by for this entry or zero if unknown.
-    /// The value / 10 indicates the major version number, and 
+    /// The value / 10 indicates the major version number, and
     /// the value mod 10 is the minor version number
     /// </summary>
     public int VersionMadeBy
@@ -484,7 +483,7 @@ public class ZipEntry : ICloneable
     /// and match the values
     /// </summary>
     /// <param name="attributes">The attributes to test.</param>
-    /// <returns>Returns true if the external attributes are known to be DOS/Windows 
+    /// <returns>Returns true if the external attributes are known to be DOS/Windows
     /// based and have the same attributes set as the value passed.</returns>
     bool HasDosAttributes(int attributes)
     {
@@ -507,7 +506,7 @@ public class ZipEntry : ICloneable
     /// by PKZIP for DOS version 2.04g then this value will be zero.  Otherwise the value
     /// will be non-zero and identify the host system on which the attributes are compatible.
     /// </summary>
-    /// 		
+    ///
     /// <remarks>
     /// The values for this as defined in the Zip File format and by others are shown below.  The values are somewhat
     /// misleading in some cases as they are not all used as shown.  You should consult the relevant documentation
@@ -554,7 +553,7 @@ public class ZipEntry : ICloneable
 
     /// <summary>
     /// Get minimum Zip feature version required to extract this entry
-    /// </summary>		
+    /// </summary>
     /// <remarks>
     /// Minimum features are defined as:<br/>
     /// 1.0 - Default value<br/>
@@ -626,7 +625,7 @@ public class ZipEntry : ICloneable
     /// <summary>
     /// Get a value indicating whether this entry can be decompressed by the library.
     /// </summary>
-    /// <remarks>This is based on the <see cref="Version"></see> and 
+    /// <remarks>This is based on the <see cref="Version"></see> and
     /// wether the <see cref="IsCompressionMethodSupported()">compression method</see> is supported.</remarks>
     public bool CanDecompress
     {
@@ -660,7 +659,7 @@ public class ZipEntry : ICloneable
     }
 
     /// <summary>
-    /// Gets a value indicating if the entry requires Zip64 extensions 
+    /// Gets a value indicating if the entry requires Zip64 extensions
     /// to store the full entry values.
     /// </summary>
     /// <value>A <see cref="bool"/> value of true if a local header requires Zip64 extensions; false if not.</value>
@@ -920,7 +919,6 @@ public class ZipEntry : ICloneable
     /// </returns>
     public byte[] ExtraData
     {
-
         get
         {
             // TODO: This is slightly safer but less efficient.  Think about wether it should change.
@@ -946,7 +944,6 @@ public class ZipEntry : ICloneable
             }
         }
     }
-
 
 #if !NET_1_1 && !NETCF_2_0
     /// <summary>
@@ -998,7 +995,7 @@ public class ZipEntry : ICloneable
 #endif
 
     /// <summary>
-    /// Returns the length of the salt, in bytes 
+    /// Returns the length of the salt, in bytes
     /// </summary>
     internal int AESSaltLen
     {
@@ -1135,7 +1132,6 @@ public class ZipEntry : ICloneable
     //
     private void ProcessAESExtraData(ZipExtraData extraData)
     {
-
 #if !NET_1_1 && !NETCF_2_0
         if (extraData.Find(0x9901))
         {
@@ -1186,7 +1182,7 @@ public class ZipEntry : ICloneable
         {
             // This test is strictly incorrect as the length is in characters
             // while the storage limit is in bytes.
-            // While the test is partially correct in that a comment of this length or greater 
+            // While the test is partially correct in that a comment of this length or greater
             // is definitely invalid, shorter comments may also have an invalid length
             // where there are multi-byte characters
             // The full test is not possible here however as the code page to apply conversions with
