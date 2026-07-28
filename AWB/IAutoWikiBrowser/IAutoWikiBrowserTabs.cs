@@ -31,7 +31,10 @@ partial class MainForm
     TabPage IAutoWikiBrowserTabs.StartTab { get { return tpStart; } }
     TabPage IAutoWikiBrowserTabs.DabTab { get { return tpDab; } }
     TabPage IAutoWikiBrowserTabs.BotTab { get { return tpBots; } }
-    bool IAutoWikiBrowserTabs.ContainsTabPage(TabPage tabp) { return MainTab.TabPages.Contains(tabp); }
+    bool IAutoWikiBrowserTabs.ContainsTabPage(TabPage tabp)
+    {
+        return MainTab.TabPages.Contains(tabp);
+    }
 
     private void AddTabPage(TabPage tabp)
     {

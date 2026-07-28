@@ -30,7 +30,7 @@ namespace AutoWikiBrowser;
 internal sealed partial class MyPreferences : Form
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="lang"></param>
     /// <param name="proj"></param>

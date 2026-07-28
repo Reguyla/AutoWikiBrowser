@@ -59,11 +59,10 @@ namespace AutoWikiBrowser;
 // Keep direct WinForms control updates, dialogs, and event wiring in MainForm,
 // using thin UI methods to apply decisions returned by those services.
 
-
 public sealed partial class MainForm : Form, IAutoWikiBrowser
 { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
     #region Fields
-  
+
     // --------------------------------------------------------------------
     // UI
     // --------------------------------------------------------------------
@@ -2832,7 +2831,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         };
 
         parent.Controls.Add(_diffWebView);
-
     }
 
     /// <summary>
@@ -3376,7 +3374,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             && NumberOfEdits % 10 == 0
             && !string.IsNullOrEmpty(SettingsFile);
     }
-
 
     /// <summary>
     /// Completes a page skip when the skip reason has already been recorded.
@@ -5017,7 +5014,6 @@ font-size: 150%;'>No changes</h2>
                targetLine;
     }
 
-
     #endregion
 
     // TODO (UI Modernization):
@@ -6580,7 +6576,6 @@ font-size: 150%;'>No changes</h2>
         {
             lbAlerts.Items.Add(
                 "Has 'No/More footnotes' template yet many references");
- 
         }
     }
 
@@ -6602,7 +6597,6 @@ font-size: 150%;'>No changes</h2>
         string templates,
         bool hasAlertsOn)
     {
-
         if ((hasAlertsOn || alertPreferences.Contains(16))
             && TheArticle.NameSpaceKey == Namespace.Article
             && articleText.StartsWith("=="))
@@ -7870,7 +7864,7 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private void BeginProcess()
     {
@@ -8507,7 +8501,6 @@ if (MessageBox.Show(
         _runProcessPageBackground = new BackgroundRequest();
         _runProcessPageBackground.Complete += ReparseEditBoxComplete;
         _runProcessPageBackground.Execute(ReparseEditBoxBackground);
-
     }
 
     /// <summary>
@@ -8761,7 +8754,6 @@ if (MessageBox.Show(
                     // Determine whether a failed custom typo-list lookup should explicitly
                     // restore Project:AutoWikiBrowser/Typos as the fallback location.
                 }
-
             }
 #if !DEBUG
             string message = @"Check each edit before you make it. Although this has been built to be very accurate there will be errors.";
@@ -8866,7 +8858,6 @@ if (MessageBox.Show(
 
             if (cmboEditSummary.Items.Contains(prevSummary))
                 cmboEditSummary.SelectedText = prevSummary;
-
             else if (cmboEditSummary.Items.Count > 0)
             {
                 cmboEditSummary.SelectedIndex = 0;
@@ -10170,7 +10161,7 @@ if (MessageBox.Show(
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private bool PageWatched
     {

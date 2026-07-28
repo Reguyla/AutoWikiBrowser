@@ -141,7 +141,7 @@ namespace CSharpEvaluator
             referencePaths,
             typeof(Tools).Assembly);
 
-        foreach (Assembly assembly in 
+        foreach (Assembly assembly in
             AppDomain.CurrentDomain.GetAssemblies())
         {
             if (assembly.IsDynamic)
