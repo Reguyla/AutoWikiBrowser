@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -61,17 +62,10 @@ public partial class ErrorHandler : Form
                 MessageBoxIcon.Error);
         }
         // Network access error
-        else if (ex is System.Net.WebException ||
-                 ex.InnerException is System.Net.WebException)
+        else if (IsNetworkException(ex))
         {
             // If AWB starts offline, provide a clear network-related message.
-            string message =
-                ex.Message.StartsWith(
-                    "The type initializer for",
-                    StringComparison.Ordinal) &&
-                ex.InnerException != null
-                    ? ex.InnerException.Message
-                    : ex.Message;
+            string message = GetNetworkErrorMessage(ex);
 
             MessageBox.Show(
                 message,
@@ -113,6 +107,58 @@ public partial class ErrorHandler : Form
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Gets the most useful user-facing message for a network exception.
+    /// </summary>
+    /// <param name="ex">The exception to inspect.</param>
+    /// <returns>The message that should be displayed to the user.</returns>
+    private static string GetNetworkErrorMessage(Exception ex)
+    {
+        Exception? networkException = FindNetworkException(ex);
+
+        return ex.Message.StartsWith(
+                   "The type initializer for",
+                   StringComparison.Ordinal) &&
+               networkException != null
+            ? networkException.Message
+            : ex.Message;
+    }
+
+    /// <summary>
+    /// Determines whether an exception or one of its inner exceptions represents
+    /// a network request failure.
+    /// </summary>
+    /// <param name="exception">The exception to inspect.</param>
+    /// <returns>
+    /// <see langword="true"/> when a network exception is present; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool IsNetworkException(Exception exception)
+    {
+        return FindNetworkException(exception) != null;
+    }
+
+    /// <summary>
+    /// Finds the first network request failure in an exception chain.
+    /// </summary>
+    /// <param name="exception">The exception chain to inspect.</param>
+    /// <returns>
+    /// The first matching network exception, or <see langword="null"/> when none
+    /// is present.
+    /// </returns>
+    private static Exception? FindNetworkException(Exception exception)
+    {
+        for (Exception? current = exception;
+             current != null;
+             current = current.InnerException)
+        {
+            if (current is System.Net.WebException or HttpRequestException)
+                return current;
+        }
+
+        return null;
     }
 
     /// <summary>

@@ -154,7 +154,7 @@ namespace WikiFunctions
         /// </summary>
         private static string GetNetworkErrorMessage(Exception ex)
         {
-            Exception networkException = FindNetworkException(ex);
+            Exception? networkException = FindNetworkException(ex);
 
             return ex.Message.StartsWith(
                        "The type initializer for",
@@ -216,9 +216,9 @@ namespace WikiFunctions
         /// The first matching network exception, or <see langword="null"/> when no
         /// network exception is present.
         /// </returns>
-        private static Exception FindNetworkException(Exception exception)
+        private static Exception? FindNetworkException(Exception exception)
         {
-            for (Exception current = exception;
+            for (Exception? current = exception;
                  current != null;
                  current = current.InnerException)
             {
@@ -858,15 +858,19 @@ namespace WikiFunctions
         /// </summary>
         /// <param name="stackTrace">Exception's StackTrace</param>
         /// <returns>List of fully qualified function names</returns>
-        public static string[] MethodNames(string stackTrace)
+        public static string[] MethodNames(string? stackTrace)
         {
-            MatchCollection mc = StackTrace.Matches(stackTrace);
+            if (string.IsNullOrEmpty(stackTrace))
+                return Array.Empty<string>();
 
-            string[] res = new string[mc.Count];
+            MatchCollection matches = StackTrace.Matches(stackTrace);
 
-            for (int i = 0; i < res.Length; i++) res[i] = mc[i].Groups[1].Value;
+            string[] result = new string[matches.Count];
 
-            return res;
+            for (int i = 0; i < result.Length; i++)
+                result[i] = matches[i].Groups[1].Value;
+
+            return result;
         }
 
         // TODO: Review whether Tools.WriteDebug can expose a documented set of
@@ -999,7 +1003,7 @@ namespace WikiFunctions
 
             try
             {
-                System.Diagnostics.Process.Start(
+                OpenUrl(
                     "https://phabricator.wikimedia.org/maniphest/task/create/" +
                     "?projects=AutoWikiBrowser");
             }
@@ -1007,6 +1011,20 @@ namespace WikiFunctions
             {
                 // Failure to open the browser must not interrupt the error dialog.
             }
+        }
+
+        /// <summary>
+        /// Opens a URL using the operating system's default browser.
+        /// </summary>
+        /// <param name="url">The URL to open.</param>
+        private static void OpenUrl(string url)
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
         }
 
         // TODO: Rename generic designer-generated control and event-handler names
@@ -1028,7 +1046,7 @@ namespace WikiFunctions
         {
             try
             {
-                System.Diagnostics.Process.Start(
+                OpenUrl(
                     "https://phabricator.wikimedia.org/maniphest/task/create/" +
                     "?projects=AutoWikiBrowser&description=" +
                     Uri.EscapeDataString(txtDetails.Text));
