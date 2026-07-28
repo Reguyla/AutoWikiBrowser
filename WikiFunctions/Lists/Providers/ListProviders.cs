@@ -462,7 +462,7 @@ public class WhatLinksHereAndPageRedirectsExcludingTheRedirectsListProvider : Wh
     public override string DisplayText
     { get { return base.DisplayText + " directly"; } }
 
-    protected override bool EvaluateXmlElement(XmlTextReader xml)
+    protected override bool EvaluateXmlElement(XmlReader xml)
     {
         return !xml.MoveToAttribute("redirect");
     }
@@ -699,19 +699,25 @@ public class LinksOnPageOnlyRedListProvider : ApiListProviderBase
         return list;
     }
 
-    protected override bool EvaluateXmlElement(XmlTextReader xml)
+    protected override bool EvaluateXmlElement(XmlReader xml)
     {
         return xml.MoveToAttribute("missing");
     }
 
     public override string DisplayText
-    { get { return "Links on page (only redlinks)"; } }
+    {
+        get { return "Links on page (only redlinks)"; }
+    }
 
     public override string UserInputTextBoxText
-    { get { return "Links on:"; } }
+    {
+        get { return "Links on:"; }
+    }
 
     public override bool UserInputTextBoxEnabled
-    { get { return true; } }
+    {
+        get { return true; }
+    }
 
     public override void Selected()
     {
@@ -721,15 +727,18 @@ public class LinksOnPageOnlyRedListProvider : ApiListProviderBase
 /// <summary>
 /// Gets a list of all blue links on the Named Pages
 /// </summary>
-public class LinksOnPageOnlyBlueListProvider : LinksOnPageOnlyRedListProvider
+public class LinksOnPageOnlyBlueListProvider
+    : LinksOnPageOnlyRedListProvider
 {
-    protected override bool EvaluateXmlElement(XmlTextReader xml)
+    protected override bool EvaluateXmlElement(XmlReader xml)
     {
         return !base.EvaluateXmlElement(xml);
     }
 
     public override string DisplayText
-    { get { return "Links on page (only bluelinks)"; } }
+    {
+        get { return "Links on page (only bluelinks)"; }
+    }
 }
 
 /// <summary>

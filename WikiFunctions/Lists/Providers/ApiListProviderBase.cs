@@ -66,113 +66,263 @@ public abstract class ApiListProviderBase : IListProvider
         string url,
         int haveSoFar)
     {
+        EnsureApiAccessAllowed();
+
+        List<Article> articles = new();
+
+        ApiEdit editor =
+            Variables.MainForm.TheSession.Editor.SynchronousEditor;
+
+        string continuationPostfix = string.Empty;
+
+        while (articles.Count + haveSoFar < Limit)
+        {
+            string response = QueryApiWithRetry(
+                editor,
+                url + "&rawcontinue=1" + continuationPostfix);
+
+            continuationPostfix =
+                ParseApiResponse(response, articles);
+
+            if (string.IsNullOrEmpty(continuationPostfix))
+                break;
+        }
+
+        return articles;
+    }
+
+    /// <summary>
+    /// Verifies that API access is permitted in the current execution context.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the application is running in unit test mode to prevent
+    /// accidental access to live MediaWiki services.
+    /// </exception>
+    private static void EnsureApiAccessAllowed()
+    {
         if (Globals.UnitTestMode)
         {
             throw new InvalidOperationException(
                 "Wikipedia should not be accessed during unit tests.");
         }
+    }
 
-        List<Article> list = new();
-        string postfix = string.Empty;
-
-        ApiEdit editor =
-            Variables.MainForm.TheSession.Editor.SynchronousEditor;
-
-        while (list.Count + haveSoFar < Limit)
+    /// <summary>
+    /// Executes an API query, retrying transient HTTP failures when appropriate.
+    /// </summary>
+    /// <param name="editor">
+    /// The <see cref="ApiEdit"/> instance used to execute the query.
+    /// </param>
+    /// <param name="query">
+    /// The API query string to execute.
+    /// </param>
+    /// <returns>
+    /// The raw XML response returned by the MediaWiki API.
+    /// </returns>
+    /// <exception cref="HttpRequestException">
+    /// Thrown when a non-retryable HTTP failure occurs.
+    /// </exception>
+    private static string QueryApiWithRetry(
+        ApiEdit editor,
+        string query)
+    {
+        while (true)
         {
-            string text;
-
             try
             {
-                // TODO:
-                // Replace legacy rawcontinue/query-continue handling with
-                // MediaWiki's modern continuation format while preserving
-                // provider paging and limit behavior.
-                text = editor.QueryApi(
-                    url + "&rawcontinue=1" + postfix);
+                return editor.QueryApi(query);
             }
             catch (HttpRequestException ex)
             {
-                if (Tools.HandleHttpException(ex))
-                    continue;
-
-                throw;
+                if (!Tools.HandleHttpException(ex))
+                    throw;
             }
+        }
+    }
 
-            using XmlTextReader xml =
-                new(new StringReader(text))
-                {
-                    DtdProcessing = DtdProcessing.Prohibit,
-                    XmlResolver = null
-                };
+    /// <summary>
+    /// Represents the outcome of attempting to parse a page element from an
+    /// API response.
+    /// </summary>
+    private enum ArticleElementResult
+    {
+        /// <summary>
+        /// The current XML element is not a page that should be converted into
+        /// an <see cref="Article"/>.
+        /// </summary>
+        Ignored,
 
-            xml.MoveToContent();
-            postfix = string.Empty;
+        /// <summary>
+        /// The current XML element was successfully converted into an
+        /// <see cref="Article"/>.
+        /// </summary>
+        Added,
 
-            while (xml.Read())
+        /// <summary>
+        /// The current XML element was malformed and parsing of the current
+        /// API response should stop.
+        /// </summary>
+        Malformed
+    }
+
+    /// <summary>
+    /// Parses an API response, extracting page results and continuation data.
+    /// </summary>
+    /// <param name="response">
+    /// The raw XML response returned by the MediaWiki API.
+    /// </param>
+    /// <param name="articles">
+    /// The collection that receives any parsed articles.
+    /// </param>
+    /// <returns>
+    /// The continuation query string to append to the next request, or an empty
+    /// string when no additional pages are available.
+    /// </returns>
+    private string ParseApiResponse(
+        string response,
+        ICollection<Article> articles)
+    {
+        XmlReaderSettings settings = new()
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null
+        };
+
+        using StringReader textReader =
+            new(response);
+
+        using XmlReader xml =
+            XmlReader.Create(textReader, settings);
+
+        xml.MoveToContent();
+
+        string continuationPostfix = string.Empty;
+
+        while (xml.Read())
+        {
+            if (xml.Name == "query-continue")
             {
-                if (xml.Name == "query-continue")
-                {
-                    using XmlReader continuationReader =
-                        xml.ReadSubtree();
+                continuationPostfix =
+                    ReadContinuationPostfix(xml);
 
-                    continuationReader.Read();
-
-                    while (continuationReader.Read())
-                    {
-                        if (!continuationReader.IsStartElement())
-                            continue;
-
-                        if (!continuationReader.MoveToFirstAttribute())
-                        {
-                            throw new FormatException(
-                                $"Malformed element " +
-                                $"'{continuationReader.Name}' " +
-                                "in <query-continue>.");
-                        }
-
-                        postfix +=
-                            $"&{continuationReader.Name}=" +
-                            WebUtility.UrlEncode(
-                                continuationReader.Value);
-                    }
-                }
-                else if (PageElements.Contains(xml.Name) &&
-                         xml.IsStartElement())
-                {
-                    if (!EvaluateXmlElement(xml))
-                        continue;
-
-                    bool namespaceIsValid =
-                        int.TryParse(
-                            xml.GetAttribute("ns"),
-                            out int namespaceId);
-
-                    string name =
-                        xml.GetAttribute(WantedAttribute);
-
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        Tools.WriteDebug(
-                            nameof(ApiMakeList),
-                            $"An API page element did not contain the " +
-                            $"required '{WantedAttribute}' attribute.");
-
-                        break;
-                    }
-
-                    list.Add(
-                        namespaceIsValid && namespaceId >= 0
-                            ? new Article(name, namespaceId)
-                            : new Article(name));
-                }
+                continue;
             }
 
-            if (string.IsNullOrEmpty(postfix))
+            if (!PageElements.Contains(xml.Name) ||
+                !xml.IsStartElement())
+            {
+                continue;
+            }
+
+            ArticleElementResult result =
+                ReadArticleElement(xml, out Article article);
+
+            if (result == ArticleElementResult.Malformed)
                 break;
+
+            if (result == ArticleElementResult.Added)
+                articles.Add(article);
         }
 
-        return list;
+        return continuationPostfix;
+    }
+
+    /// <summary>
+    /// Attempts to create an <see cref="Article"/> from the current XML element.
+    /// </summary>
+    /// <param name="xml">
+    /// The XML reader positioned on a page element.
+    /// </param>
+    /// <param name="article">
+    /// When this method returns, contains the parsed article when one was created;
+    /// otherwise <see langword="null"/>.
+    /// </param>
+    /// <returns>
+    /// A value indicating whether the element was ignored, successfully converted
+    /// into an article, or determined to be malformed.
+    /// </returns>
+    private ArticleElementResult ReadArticleElement(
+        XmlReader xml,
+        out Article article)
+    {
+        article = null;
+
+        if (!EvaluateXmlElement(xml))
+            return ArticleElementResult.Ignored;
+
+        bool namespaceIsValid =
+            int.TryParse(
+                xml.GetAttribute("ns"),
+                out int namespaceId);
+
+        string name =
+            xml.GetAttribute(WantedAttribute);
+
+        if (string.IsNullOrEmpty(name))
+        {
+            Tools.WriteDebug(
+                nameof(ApiMakeList),
+                $"An API page element did not contain the " +
+                $"required '{WantedAttribute}' attribute.");
+
+            return ArticleElementResult.Malformed;
+        }
+
+        article =
+            namespaceIsValid && namespaceId >= 0
+                ? new Article(name, namespaceId)
+                : new Article(name);
+
+        return ArticleElementResult.Added;
+    }
+
+    /// <summary>
+    /// Reads the legacy <c>&lt;query-continue&gt;</c> element and builds the
+    /// continuation query string for the next API request.
+    /// </summary>
+    /// <param name="xml">
+    /// The XML reader positioned on the
+    /// <c>&lt;query-continue&gt;</c> element.
+    /// </param>
+    /// <returns>
+    /// The continuation query string, or an empty string when no continuation
+    /// parameters are present.
+    /// </returns>
+    private static string ReadContinuationPostfix(
+        XmlReader xml)
+    {
+        StringBuilder postfix = new();
+
+        using XmlReader continuationReader =
+            xml.ReadSubtree();
+
+        continuationReader.Read();
+
+        while (continuationReader.Read())
+        {
+            if (!continuationReader.IsStartElement())
+                continue;
+
+            string elementName =
+                continuationReader.Name;
+
+            if (!continuationReader.MoveToFirstAttribute())
+            {
+                throw new FormatException(
+                    $"Malformed element '{elementName}' " +
+                    "in <query-continue>.");
+            }
+
+            postfix
+                .Append('&')
+                .Append(continuationReader.Name)
+                .Append('=')
+                .Append(
+                    WebUtility.UrlEncode(
+                        continuationReader.Value));
+        }
+
+        return postfix.ToString();
     }
 
     /// <summary>
@@ -183,11 +333,13 @@ public abstract class ApiListProviderBase : IListProvider
     /// The XML reader positioned on the element to evaluate.
     /// </param>
     /// <returns>
-    /// <c>true</c> if the element may be added; otherwise, <c>false</c>.
+    /// <see langword="true"/> by default. Derived providers may override this
+    /// method to filter specific XML elements.
     /// </returns>
-    protected virtual bool EvaluateXmlElement(
-        XmlTextReader xml) =>
-        true;
+    protected virtual bool EvaluateXmlElement(XmlReader xml)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Gets whether URL information should be removed from returned values.
