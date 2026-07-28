@@ -53,13 +53,28 @@ namespace WikiFunctions
                     "Unsupported culture");
             }
             // network access error
-            else if (ex is System.Net.WebException || ex.InnerException is System.Net.WebException)
+            else if (IsNetworkException(ex))
             {
-                // if AWB starts up offline we'll hit here, so provide clear network related message
-                string msg = ex.Message.StartsWith(@"The type initializer for") ? ex.InnerException.Message : ex.Message;
+                // If AWB starts offline, a type initializer may wrap the actual
+                // network exception. Show the underlying network message when available.
+                Exception networkException =
+                    ex is WebException or HttpRequestException
+                        ? ex
+                        : ex.InnerException;
 
-                MessageBox.Show(msg, "Network access error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string message =
+                    ex.Message.StartsWith(
+                        "The type initializer for",
+                        StringComparison.Ordinal)
+                    && networkException != null
+                        ? networkException.Message
+                        : ex.Message;
+
+                MessageBox.Show(
+                    message,
+                    "Network access error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
             // out of memory error
             else if (ex is OutOfMemoryException)
@@ -88,6 +103,26 @@ namespace WikiFunctions
             }
 
             return true; // We handled the exception
+        }
+
+        /// <summary>
+        /// Determines whether an exception, or its immediate inner exception,
+        /// represents a network request failure.
+        /// </summary>
+        /// <param name="exception">The exception to inspect.</param>
+        /// <returns>
+        /// <see langword="true"/> when the exception represents either a legacy
+        /// <see cref="WebException"/> or a modern
+        /// <see cref="HttpRequestException"/>; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
+        private static bool IsNetworkException(
+            Exception exception)
+        {
+            return exception is WebException
+                or HttpRequestException
+                || exception.InnerException is WebException
+                or HttpRequestException;
         }
 
         /// <summary>

@@ -89,8 +89,8 @@ public partial class Parsers
                 RegexOptions.IgnoreCase),
             "&amp;#$1;");
 
-        // Preserve characters that can cause a badmd5 API error after
-        // MediaWiki WebRequest Unicode normalization.
+        // Preserve characters that MediaWiki's server-side WebRequest Unicode
+        // normalization can transform, which may otherwise produce a badmd5 API error.
         RegexUnicode.Add(
             new("&#(x232[A9]);"),
             "&amp;#$1;");
