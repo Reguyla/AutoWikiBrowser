@@ -250,11 +250,8 @@ namespace WikiFunctions
             public BugReport(Exception ex)
             {
                 var apiException = ex as ApiException;
-                var thread = apiException != null ? apiException.ThrowingThread : System.Threading.Thread.CurrentThread;
-                if (thread.Name != "Main thread")
-                {
-                    Thread = thread.Name;
-                }
+
+                Thread = GetThrowingThreadName(apiException);
 
                 StackTrace = BuildStackTrace(ex);
 
@@ -573,6 +570,30 @@ namespace WikiFunctions
 
                 if (!string.IsNullOrEmpty(ListMakerText))
                     return "ListMaker text was present.";
+
+                return null;
+            }
+
+            /// <summary>
+            /// Gets the name of the thread that raised the exception when it was not the
+            /// application's main thread.
+            /// </summary>
+            /// <param name="apiException">
+            /// The API exception containing its originating thread, or
+            /// <see langword="null"/> for a non-API exception.
+            /// </param>
+            /// <returns>
+            /// The throwing thread name, or <see langword="null"/> when the exception
+            /// originated on the main thread or the thread has no name.
+            /// </returns>
+            private static string GetThrowingThreadName(ApiException apiException)
+            {
+                System.Threading.Thread thread = apiException != null
+                    ? apiException.ThrowingThread
+                    : System.Threading.Thread.CurrentThread;
+
+                if (thread.Name != "Main thread")
+                    return thread.Name;
 
                 return null;
             }
