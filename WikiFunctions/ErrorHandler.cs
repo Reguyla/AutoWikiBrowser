@@ -740,57 +740,107 @@ namespace WikiFunctions
         }
 
         private static readonly string[] PresetNamespaces =
-        {"System.", "Microsoft.", "Mono."};
+        {
+    "System.",
+    "Microsoft.",
+    "Mono."
+};
 
         #endregion
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ErrorHandler"/> dialog.
+        /// </summary>
         protected ErrorHandler()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Initializes the error dialog title when the form is loaded.
+        /// </summary>
+        /// <param name="sender">The source of the load event.</param>
+        /// <param name="e">The event data.</param>
         private void ErrorHandler_Load(object sender, EventArgs e)
         {
             Text = Application.ProductName;
         }
 
+        /// <summary>
+        /// Copies the formatted diagnostic report to the system clipboard.
+        /// </summary>
+        /// <param name="sender">The source of the click event.</param>
+        /// <param name="e">The event data.</param>
         private void btnCopy_Click(object sender, EventArgs e)
         {
             try
             {
                 Clipboard.Clear();
-                Thread.Sleep(50); // give it some time to clear
+
+                // Allow the clipboard clear operation to complete before writing the
+                // diagnostic report.
+                // TODO: Replace the fixed UI-thread delay with bounded clipboard retry logic.
+                Thread.Sleep(50);
+
                 Clipboard.SetText(txtDetails.Text);
             }
             catch
             {
+                // Clipboard access can fail when it is temporarily locked by another
+                // process. Copy failure must not close or interrupt the error dialog.
             }
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        /// <summary>
+        /// Opens the Wikimedia Phabricator task creation page for AutoWikiBrowser.
+        /// </summary>
+        /// <param name="sender">The source of the link-click event.</param>
+        /// <param name="e">The event data.</param>
+        private void linkLabel1_LinkClicked(
+            object sender,
+            LinkLabelLinkClickedEventArgs e)
         {
             linkLabel1.LinkVisited = true;
+
             try
             {
                 System.Diagnostics.Process.Start(
-                    "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
+                    "https://phabricator.wikimedia.org/maniphest/task/create/" +
+                    "?projects=AutoWikiBrowser");
             }
             catch
             {
+                // Failure to open the browser must not interrupt the error dialog.
             }
         }
 
+        // TODO: Rename generic designer-generated control and event-handler names
+        // during a dedicated ErrorHandler UI cleanup.
+        //
+        // TODO: Consider confirming that the diagnostic details were reviewed before
+        // inserting them into a public Phabricator task.
+        //
+        // TODO: Avoid placing large diagnostic reports entirely in the URL query.
+        // Consider opening a blank task and relying on clipboard copy when the report
+        // exceeds a safe URL length.
+        /// <summary>
+        /// Opens a new Wikimedia Phabricator task with the formatted diagnostic report
+        /// included in the task description.
+        /// </summary>
+        /// <param name="sender">The source of the click event.</param>
+        /// <param name="e">The event data.</param>
         private void btnPhab_Click(object sender, EventArgs e)
         {
             try
             {
                 System.Diagnostics.Process.Start(
-                    "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser&description=" +
-                    Uri.EscapeDataString(txtDetails.Text)
-                );
+                    "https://phabricator.wikimedia.org/maniphest/task/create/" +
+                    "?projects=AutoWikiBrowser&description=" +
+                    Uri.EscapeDataString(txtDetails.Text));
             }
             catch
             {
+                // Failure to open the browser must not interrupt the error dialog.
             }
         }
     }
