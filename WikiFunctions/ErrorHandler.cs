@@ -225,10 +225,7 @@ namespace WikiFunctions
                 }
             };
 
-            string errorMessage = new BugReport(ex).PrintForPhabricator();
-            handler.txtDetails.Text = errorMessage;
-
-            handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
+            string errorMessage = PopulateErrorDialog(handler, ex);
 
             TryWriteDebug("HandleException", errorMessage);
             handler.ShowDialog();
@@ -259,9 +256,7 @@ namespace WikiFunctions
                     Thread = thread.Name;
                 }
 
-                StringBuilder stackTrace = new StringBuilder();
-                FormatException(ex, stackTrace, ExceptionKind.TopLevel);
-                StackTrace = stackTrace.ToString();
+                StackTrace = BuildStackTrace(ex);
 
                 if (apiException != null)
                 {
@@ -503,6 +498,20 @@ namespace WikiFunctions
                     return string.Format("**{0}**: {1}", key, value);
                 }
             }
+            /// <summary>
+            /// Formats the supplied exception and its inner exceptions into the
+            /// diagnostic stack trace used by the bug report.
+            /// </summary>
+            /// <param name="ex">The exception to format.</param>
+            /// <returns>The formatted exception information.</returns>
+            private static string BuildStackTrace(Exception ex)
+            {
+                StringBuilder stackTrace = new StringBuilder();
+
+                FormatException(ex, stackTrace, ExceptionKind.TopLevel);
+
+                return stackTrace.ToString();
+            }
         }
 
         /// <summary>
@@ -538,6 +547,26 @@ namespace WikiFunctions
             }
 
             return errorSummary;
+        }
+
+        /// <summary>
+        /// Populates the error dialog with the formatted bug report and subject line.
+        /// </summary>
+        /// <param name="handler">The error dialog to populate.</param>
+        /// <param name="ex">The exception being reported.</param>
+        /// <returns>
+        /// The formatted bug report text used for both the dialog details and debug output.
+        /// </returns>
+        private static string PopulateErrorDialog(
+            ErrorHandler handler,
+            Exception ex)
+        {
+            string errorMessage = new BugReport(ex).PrintForPhabricator();
+
+            handler.txtDetails.Text = errorMessage;
+            handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
+
+            return errorMessage;
         }
 
         #region Static helper functions
