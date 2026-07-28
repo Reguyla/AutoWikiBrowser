@@ -361,13 +361,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// settings files under the application data directory.
     /// </remarks>
     private void InitializeFileDialogs()
-        {
-            string documentsFolder =
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+    {
+        string documentsFolder =
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-            saveXML.InitialDirectory = documentsFolder;
-            openXML.InitialDirectory = documentsFolder;
-        }
+        saveXML.InitialDirectory = documentsFolder;
+        openXML.InitialDirectory = documentsFolder;
+    }
 
     /// <summary>
     /// Checks whether the current per-user application configuration can be opened

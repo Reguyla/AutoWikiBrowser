@@ -1,5 +1,4 @@
-﻿using System.CodeDom.Compiler;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace WikiFunctions.CustomModules;
 

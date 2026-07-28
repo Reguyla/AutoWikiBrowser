@@ -17,7 +17,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Collections.ObjectModel;
 
-    namespace WikiFunctions;
+namespace WikiFunctions;
 
 /// <summary>
 /// Contains constants for canonical namespace numbers

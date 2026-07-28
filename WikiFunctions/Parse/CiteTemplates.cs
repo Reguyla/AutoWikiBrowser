@@ -778,7 +778,7 @@ public partial class Parsers
         }
 
         // correct volume=vol 7... and issue=no. 8 for {{cite journal}} only
-        if (templatename.Equals( "cite journal", StringComparison.OrdinalIgnoreCase))
+        if (templatename.Equals("cite journal", StringComparison.OrdinalIgnoreCase))
         {
             newValue = NormalizeCitationJournalVolumeAndIssue(newValue, TheVolume, TheIssue);
         }

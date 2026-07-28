@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using System.CodeDom.Compiler;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Runtime.Loader;

@@ -66,11 +66,11 @@ public interface IListProvider
     bool StripUrl { get; }
 }
 
-    /// <summary>
-    /// Extends <see cref="IListProvider"/> with options required by
-    /// MediaWiki special-page providers.
-    /// </summary>
-    interface ISpecialPageProvider : IListProvider
+/// <summary>
+/// Extends <see cref="IListProvider"/> with options required by
+/// MediaWiki special-page providers.
+/// </summary>
+interface ISpecialPageProvider : IListProvider
 {
     /// <summary>
     /// Processes the supplied search criteria for a specific namespace

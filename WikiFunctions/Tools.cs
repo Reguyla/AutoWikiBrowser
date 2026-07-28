@@ -2057,9 +2057,9 @@ Message: {2}
             // Another process may temporarily have the clipboard locked.
         }
     }
-#endregion
+    #endregion
 
-private const char ReturnLine = '\r', NewLine = '\n';
+    private const char ReturnLine = '\r', NewLine = '\n';
     private static readonly char[] Separators = { ReturnLine, NewLine };
 
     // Covered by ToolsTests.SplitLines()

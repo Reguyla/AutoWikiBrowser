@@ -23,7 +23,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using WikiFunctions.API;
 
-    namespace WikiFunctions;
+namespace WikiFunctions;
 
 /// <summary>
 /// This class holds all basic information about a wiki

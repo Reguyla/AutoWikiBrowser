@@ -687,7 +687,7 @@ public static partial class Variables
         RegenerateRegexes();
 
         if (projectName == ProjectEnum.wiktionary)
-        CapitalizeFirstLetter = false;
+            CapitalizeFirstLetter = false;
 
         RetfPath = Namespaces[Namespace.Project] + "AutoWikiBrowser/Typos";
 

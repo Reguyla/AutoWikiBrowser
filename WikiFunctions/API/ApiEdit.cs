@@ -266,7 +266,7 @@ public class ApiEdit : IApiEdit
         CookieContainer newCookies = new();
 
         Uri alternateUri = new UriBuilder(uri)
-        {Host = "fnord." + host}.Uri;
+        { Host = "fnord." + host }.Uri;
 
         Uri[] urls = { uri, alternateUri };
 
@@ -2300,7 +2300,7 @@ public class ApiEdit : IApiEdit
     private Dictionary<string, string> BuildSaveQueryParameters(
         bool minor,
         WatchOptions watch)
-       {
+    {
         var get = new Dictionary<string, string>
         {
             { "action", "edit" },

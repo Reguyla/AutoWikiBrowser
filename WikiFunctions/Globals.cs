@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Reflection;
 
-    namespace WikiFunctions;
+namespace WikiFunctions;
 
 /// <summary>
 /// Holds some deepest-level things to be initialized prior to most other static classes,

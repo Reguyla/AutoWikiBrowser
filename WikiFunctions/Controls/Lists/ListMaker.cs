@@ -1591,8 +1591,8 @@ public partial class ListMaker : UserControl, IList<Article>
             string longestName = String.Empty;
             foreach (Article ar in lbArticles.Items)
             {
-              if (ar.Name.Length > longestName.Length)
-                  longestName = ar.Name;
+                if (ar.Name.Length > longestName.Length)
+                    longestName = ar.Name;
             }
             lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestName, e.Font).Width;
         }

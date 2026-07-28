@@ -222,7 +222,7 @@ class InflaterDynHeader
     /// <summary>
     /// The current decode mode
     /// </summary>
-		int mode;
+    int mode;
     int lnum, dnum, blnum, num;
     int repSymbol;
     byte lastLen;
