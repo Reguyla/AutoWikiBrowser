@@ -22,7 +22,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -413,33 +412,11 @@ public static class Tools
     /// Gets the HTML from the given web address.
     /// </summary>
     /// <param name="url">The URL of the webpage.</param>
-    /// <param name="responseURL">The resolved URL of the webpage</param>
-    /// <returns>The HTML.</returns>
-    public static string GetHTML(string url, out string responseURL)
-    {
-        return GetHTML(url, Encoding.UTF8, out responseURL);
-    }
-
-    /// <summary>
-    /// Gets the HTML from the given web address.
-    /// </summary>
-    /// <param name="url">The URL of the webpage.</param>
     /// <param name="enc">The encoding to use.</param>
     /// <returns>The HTML.</returns>
     public static string GetHTML(string url, Encoding enc)
     {
         return GetHTML(url, enc, out _);
-    }
-
-    /// <summary>
-    /// Gets the HTML from the given web address, passing the main form to authenticate
-    /// </summary>
-    /// <param name="url"></param>
-    /// <param name="awb"></param>
-    /// <returns>The HTML.</returns>
-    public static string GetHTML(string url, IAutoWikiBrowser awb)
-    {
-        return GetHTML(url, Encoding.UTF8, out _, awb);
     }
 
     /// <summary>
@@ -473,33 +450,6 @@ public static class Tools
             enc,
             out responseURL,
             awb);
-    }
-
-    /// <summary>
-    /// Common code to handle 429's etc. Returns true if the exception was handled and the caller should retry.
-    /// Otherwise the caller should rethrow. Using "throw ex" here would reset the stack
-    /// </summary>
-    /// <param name="ex">The WebException to handle.</param>
-    /// <returns>True if the exception was handled and the caller should retry, otherwise false.</returns>
-    public static bool HandleHttpRetry(WebException ex)
-    {
-        if (ex.Response is HttpWebResponse errorResponse)
-        {
-            int statusCode = (int)errorResponse.StatusCode;
-
-            int retrySeconds = ParseRetry(errorResponse);
-            if (retrySeconds == 0)
-                return true;
-            if (retrySeconds > 0)
-            {
-                // Note: retry success is still not guaranteed after waiting the specified time.
-                WriteDebug("Tools::HandleHttpRetry",
-                        $"HTTP {statusCode} and Retry-After {retrySeconds}; pausing to allow retry");
-                Thread.Sleep(retrySeconds * 1000);
-                return true;
-            }
-        }
-        return false;
     }
 
     /// <summary>
@@ -1776,14 +1726,6 @@ Message: {2}
     }
 
     /// <summary>
-    /// Opens the specified diff in the browser in the current project
-    /// </summary>
-    public static void OpenDiffInBrowser(int newId)
-    {
-        OpenDiffInBrowser(Variables.URLLong, newId);
-    }
-
-    /// <summary>
     /// Opens the specified diff in the browser to the specified project
     /// </summary>
     public static void OpenDiffInBrowser(string URLLong, int newId)
@@ -2327,15 +2269,6 @@ Message: {2}
         }
 
         return ret.ToString();
-    }
-
-    /// <summary>
-    /// Wrapper for System.Windows.Forms.MessageBox.Show() - So things dont have to reference the Forms library
-    /// </summary>
-    /// <param name="message"></param>
-    public static void MessageBox(string message)
-    {
-        System.Windows.Forms.MessageBox.Show(message);
     }
 
     /// <summary>
@@ -3696,39 +3629,6 @@ Message: {2}
         }
 
         return WithoutDiacritics;
-    }
-
-    /// <summary>
-    /// Handles temporary HTTP/API failures that may succeed if retried.
-    /// </summary>
-    /// <param name="webex">The web exception thrown by the request.</param>
-    /// <returns>
-    /// true if the exception was handled and the caller should retry;
-    /// false if the exception should be rethrown.
-    /// </returns>
-    public static bool HandleHttpException(System.Net.WebException webex)
-    {
-        if (webex == null)
-            return false;
-
-        System.Net.HttpWebResponse response = webex.Response as System.Net.HttpWebResponse;
-
-        if (response == null)
-            return false;
-
-        System.Net.HttpStatusCode statusCode = response.StatusCode;
-
-        if (statusCode == System.Net.HttpStatusCode.RequestTimeout ||
-            statusCode == System.Net.HttpStatusCode.BadGateway ||
-            statusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
-            statusCode == System.Net.HttpStatusCode.GatewayTimeout ||
-            (int)statusCode == 429)
-        {
-            System.Threading.Thread.Sleep(5000);
-            return true;
-        }
-
-        return false;
     }
 
     /// <summary>

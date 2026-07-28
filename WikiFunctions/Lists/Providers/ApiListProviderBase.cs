@@ -91,7 +91,7 @@ public abstract class ApiListProviderBase : IListProvider
                 text = editor.QueryApi(
                     url + "&rawcontinue=1" + postfix);
             }
-            catch (WebException ex)
+            catch (HttpRequestException ex)
             {
                 if (Tools.HandleHttpException(ex))
                     continue;
