@@ -258,17 +258,7 @@ namespace WikiFunctions
 
                 StackTrace = BuildStackTrace(ex);
 
-                if (apiException != null)
-                {
-                    try
-                    {
-                        ApiExtra = apiException.GetExtraSpecificInformation();
-                    }
-                    catch
-                    {
-                        ApiExtra = "API-specific diagnostic information could not be collected.";
-                    }
-                }
+                ApiExtra = GetApiSpecificInformation(apiException);
 
                 if (AppendToErrorHandler != null)
                 {
@@ -511,6 +501,34 @@ namespace WikiFunctions
                 FormatException(ex, stackTrace, ExceptionKind.TopLevel);
 
                 return stackTrace.ToString();
+            }
+
+            /// <summary>
+            /// Retrieves additional diagnostic information from an API exception.
+            /// </summary>
+            /// <param name="apiException">
+            /// The API exception to inspect, or <see langword="null"/> when the reported
+            /// exception is not API-related.
+            /// </param>
+            /// <returns>
+            /// API-specific diagnostic information, a fallback message if collection
+            /// fails, or <see langword="null"/> for a non-API exception.
+            /// </returns>
+            private static string GetApiSpecificInformation(ApiException apiException)
+            {
+                if (apiException == null)
+                    return null;
+
+                try
+                {
+                    return apiException.GetExtraSpecificInformation();
+                }
+                catch
+                {
+                    // Failure to collect optional API details must not prevent the main
+                    // exception report from being generated.
+                    return "API-specific diagnostic information could not be collected.";
+                }
             }
         }
 
