@@ -525,10 +525,9 @@ public class ApiEdit : IApiEdit
     /// </summary>
     private IWebProxy ProxySettings;
 
-    // TODO (HTTP Modernization):
-    // Review the generated User-Agent once the legacy HttpWebRequest pipeline is
-    // removed. Verify that the runtime identifier accurately reflects modern .NET
-    // while preserving any MediaWiki compatibility expectations.
+    // TODO:
+    // Review the User-Agent string for modern .NET versions and verify that any
+    // changes remain compatible with MediaWiki expectations.
     /// <summary>
     /// Identifies WikiFunctions, the host operating system, and the active
     /// .NET runtime in outgoing HTTP requests.
@@ -702,49 +701,6 @@ public class ApiEdit : IApiEdit
                    StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
-    // TODO (Authentication Modernization):
-    // Consolidate Basic Authentication header generation so the legacy
-    // HttpWebRequest and modern HttpRequestMessage pipelines use the same
-    // credential encoding and header construction behavior.
-    //
-    // TODO: Review the character encoding used for Basic Authentication during
-    // the HttpWebRequest-to-HttpClient migration. Encoding.Default depends on the
-    // local system code page and may not produce consistent credentials across environments.
-    /// <summary>
-    /// Adds an HTTP Basic Authentication header to the specified request.
-    /// </summary>
-    /// <param name="req">
-    /// The request whose authorization header should be configured.
-    /// </param>
-    /// <param name="userName">
-    /// The username to include in the Basic Authentication credentials.
-    /// </param>
-    /// <param name="userPassword">
-    /// The password to include in the Basic Authentication credentials.
-    /// </param>
-    /// <returns>
-    /// The same request instance with its <c>Authorization</c> header set.
-    /// </returns>
-    /// <remarks>
-    /// The username and password are combined using the Basic Authentication
-    /// credential format and encoded as Base64 before being added to the request.
-    ///
-    /// Source:
-    /// http://blog.kowalczyk.info/article/Forcing-basic-http-authentication-for-HttpWebReq.html
-    /// </remarks>
-    protected WebRequest SetBasicAuthHeader(
-        WebRequest req,
-        string userName,
-        string userPassword)
-    {
-        string credentials = $"{userName}:{userPassword}";
-        string encodedCredentials =
-            Convert.ToBase64String(Encoding.Default.GetBytes(credentials));
-
-        req.Headers["Authorization"] = $"Basic {encodedCredentials}";
-
-        return req;
-    }
 
     /// <summary>
     /// Sends an HTTP POST request to the API and returns the response body.
@@ -966,7 +922,7 @@ public class ApiEdit : IApiEdit
 
         string encodedCredentials =
             Convert.ToBase64String(
-                Encoding.Default.GetBytes(authenticationText));
+                Encoding.UTF8.GetBytes(authenticationText));
 
         request.Headers.Authorization =
             new AuthenticationHeaderValue(
