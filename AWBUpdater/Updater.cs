@@ -80,10 +80,12 @@ internal sealed partial class Updater : Form
     {
         try
         {
-            _proxy = WebRequest.GetSystemWebProxy();
+            _proxy = HttpClient.DefaultProxy;
 
             if (_proxy.IsBypassed(new Uri("https://en.wikipedia.org")))
+            {
                 _proxy = null;
+            }
 
             UpdateUI("Getting current AWB and Updater versions", true);
             AWBVersion();
