@@ -200,19 +200,12 @@ public static class Updater
                 Result |= AWBEnabledStatus.OptionalUpdate;
             }
         }
-        catch (JsonException)
-        {
-            Result = AWBEnabledStatus.Error;
-        }
-        catch (IOException)
-        {
-            Result = AWBEnabledStatus.Error;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            Result = AWBEnabledStatus.Error;
-        }
-        catch (WebException)
+        catch (Exception ex)
+            when (ex is JsonException
+                or IOException
+                or UnauthorizedAccessException
+                or WebException
+                or HttpRequestException)
         {
             Result = AWBEnabledStatus.Error;
         }
