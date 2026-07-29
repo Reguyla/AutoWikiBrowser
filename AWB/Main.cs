@@ -7474,8 +7474,12 @@ font-size: 150%;'>No changes</h2>
     /// user.
     /// </returns>
     /// <exception cref="WebException">
-    /// Thrown when project loading fails with a network error other than an
-    /// unauthorized response.
+    /// Thrown when the legacy project-loading path fails with a network error other
+    /// than an unauthorized response.
+    /// </exception>
+    /// <exception cref="HttpRequestException">
+    /// Thrown when an HTTP-based project-loading path fails with a network error
+    /// other than an unauthorized response.
     /// </exception>
     private bool TryLoadProject(
         string code,
