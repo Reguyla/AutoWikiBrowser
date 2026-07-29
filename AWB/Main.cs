@@ -31,6 +31,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -1380,11 +1381,23 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private static bool IsRetryableNetworkException(
         Exception exception)
     {
-        return exception is WebException
-            || exception is IOException
-            && exception.Message.Contains(
-                "0x2746",
-                StringComparison.OrdinalIgnoreCase);
+        for (Exception? current = exception;
+             current != null;
+             current = current.InnerException)
+        {
+            if (current is WebException or HttpRequestException)
+                return true;
+
+            if (current is IOException
+                && current.Message.Contains(
+                    "0x2746",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
