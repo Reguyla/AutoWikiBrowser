@@ -111,7 +111,7 @@ public class ApiEdit : IApiEdit
         // Windows Internet Options are not available there.
         else if (!Globals.UsingLinux)
         {
-            IWebProxy systemProxy = WebRequest.GetSystemWebProxy();
+            IWebProxy systemProxy = HttpClient.DefaultProxy;
 
             ProxySettings = systemProxy.IsBypassed(projectUri)
                 ? null
