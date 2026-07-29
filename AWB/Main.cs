@@ -7493,7 +7493,7 @@ font-size: 150%;'>No changes</h2>
 
             return true;
         }
-        catch (WebException ex) when (IsUnauthorizedResponse(ex))
+        catch (Exception ex) when (IsUnauthorizedResponse(ex))
         {
             ShowLogin();
 
@@ -7542,26 +7542,50 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Determines whether a legacy network exception represents an HTTP 401
-    /// Unauthorized response.
+    /// Determines whether an exception or one of its inner exceptions represents
+    /// an HTTP 401 Unauthorized response.
     /// </summary>
-    /// <param name="exception">The network exception to inspect.</param>
+    /// <param name="exception">
+    /// The exception at the beginning of the exception chain to inspect.
+    /// </param>
     /// <returns>
-    /// <see langword="true"/> when the exception contains an unauthorized HTTP
-    /// response; otherwise, <see langword="false"/>.
+    /// <see langword="true"/> when the exception chain contains an unauthorized
+    /// HTTP response; otherwise, <see langword="false"/>.
     /// </returns>
     /// <remarks>
-    /// TODO (HTTP Modernization): Replace this helper after the project-loading
-    /// path in Session.UpdateProject() and LoadProjectOptions() has been migrated
-    /// from WebException/HttpWebResponse to the HttpClient-based error model.
+    /// Supports both the legacy <see cref="WebException"/> response model and the
+    /// modern <see cref="HttpRequestException"/> status-code model. Legacy support
+    /// can be removed after the remaining project-loading paths have been migrated
+    /// from <c>HttpWebRequest</c> to <c>HttpClient</c>.
     /// </remarks>
     private static bool IsUnauthorizedResponse(
-        WebException exception)
+        Exception exception)
     {
-        return exception.Response is HttpWebResponse
+        for (Exception? current = exception;
+             current != null;
+             current = current.InnerException)
         {
-            StatusCode: HttpStatusCode.Unauthorized
-        };
+            if (current is WebException
+                {
+                    Response: HttpWebResponse
+                    {
+                        StatusCode: HttpStatusCode.Unauthorized
+                    }
+                })
+            {
+                return true;
+            }
+
+            if (current is HttpRequestException
+                {
+                    StatusCode: HttpStatusCode.Unauthorized
+                })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
