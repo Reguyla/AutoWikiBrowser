@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿#nullable enable
+
+using System.Configuration;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
