@@ -1386,7 +1386,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
              current = current.InnerException)
         {
             if (current is WebException or HttpRequestException)
+            {
                 return true;
+            }
 
             if (current is IOException
                 && current.Message.Contains(
@@ -1445,6 +1447,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 true);
         }
 
+        // TODO (.NET 8 Modernization):
+        // Support retry delays from HttpResponseMessage when the remaining
+        // HttpWebRequest-based request paths are migrated to HttpClient.
         // Some HTTP responses specify a delay before another request should be
         // attempted. MediaWiki currently uses 429 and 503 responses with a delay
         // expressed in seconds.
