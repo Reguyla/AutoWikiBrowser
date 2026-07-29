@@ -143,6 +143,15 @@ public partial class ErrorHandler : Form
     /// <summary>
     /// Finds the first network request failure in an exception chain.
     /// </summary>
+    /// <remarks>
+    /// TODO (.NET 8 Modernization):
+    /// Remove legacy <see cref="System.Net.WebException"/> support after all
+    /// remaining <c>HttpWebRequest</c>-based code has been migrated to
+    /// <c>HttpClient</c>.
+    /// </remarks>
+    /// <summary>
+    /// Finds the first network request failure in an exception chain.
+    /// </summary>
     /// <param name="exception">The exception chain to inspect.</param>
     /// <returns>
     /// The first matching network exception, or <see langword="null"/> when none
@@ -153,10 +162,11 @@ public partial class ErrorHandler : Form
         for (Exception? current = exception;
              current != null;
              current = current.InnerException)
-        {
+
             if (current is System.Net.WebException or HttpRequestException)
+            {
                 return current;
-        }
+            }
 
         return null;
     }
