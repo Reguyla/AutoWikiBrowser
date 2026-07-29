@@ -208,6 +208,12 @@ namespace WikiFunctions
             return FindNetworkException(exception) != null;
         }
 
+        /// <remarks>
+        /// TODO (.NET 8 Modernization):
+        /// Remove <see cref="WebException"/> support after all remaining
+        /// <c>HttpWebRequest</c>-based request paths have been migrated to
+        /// <c>HttpClient</c>.
+        /// </remarks>
         /// <summary>
         /// Finds the first network request failure in an exception chain.
         /// </summary>
@@ -221,10 +227,11 @@ namespace WikiFunctions
             for (Exception? current = exception;
                  current != null;
                  current = current.InnerException)
-            {
+
                 if (current is WebException or HttpRequestException)
+                {
                     return current;
-            }
+                }
 
             return null;
         }
