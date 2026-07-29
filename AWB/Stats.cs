@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Collections.Specialized;
 using System.Net;
+using System.Net.Http;
 using System.Xml;
 using WikiFunctions;
 using WikiFunctions.Plugin;
@@ -329,13 +330,17 @@ internal static class UsageStats
     /// Attempts to post usage statistics to the server.
     /// </summary>
     /// <param name="postvars">The values to send.</param>
-    /// <param name="response">The server response when the request succeeds.</param>
+    /// <param name="response">
+    /// The server response when the request succeeds; otherwise,
+    /// <see langword="null"/>.
+    /// </param>
     /// <returns>
-    /// <c>true</c> when the server returned HTTP 200; otherwise, <c>false</c>.
+    /// <see langword="true"/> when the request completes successfully; otherwise,
+    /// <see langword="false"/> when a recognized network or I/O failure occurs.
     /// </returns>
     private static bool TryPostData(
         NameValueCollection postvars,
-        out string response)
+        out string? response)
     {
         response = null;
 
@@ -343,17 +348,16 @@ internal static class UsageStats
         {
             Program.AWB.StartProgressBar();
             StatusLabelText = "Contacting stats server...";
-            Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.WaitCursor;
+            Program.AWB.Form.Cursor =
+                System.Windows.Forms.Cursors.WaitCursor;
 
             response = Tools.PostData(postvars, StatsURL);
             return true;
         }
-        catch (WebException ex)
-        {
-            Tools.WriteDebug("UsageStats", ex.Message);
-            return false;
-        }
-        catch (IOException ex)
+        catch (Exception ex)
+            when (ex is WebException
+                or HttpRequestException
+                or IOException)
         {
             Tools.WriteDebug("UsageStats", ex.Message);
             return false;
@@ -362,7 +366,8 @@ internal static class UsageStats
         {
             Program.AWB.StopProgressBar();
             StatusLabelText = "";
-            Program.AWB.Form.Cursor = System.Windows.Forms.Cursors.Default;
+            Program.AWB.Form.Cursor =
+                System.Windows.Forms.Cursors.Default;
         }
     }
     #endregion
