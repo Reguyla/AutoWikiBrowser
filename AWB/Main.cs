@@ -1448,10 +1448,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         // Some HTTP responses specify a delay before another request should be
         // attempted. MediaWiki currently uses 429 and 503 responses with a delay
         // expressed in seconds.
-        if (exception is WebException
-            {
-                Response: HttpWebResponse response
-            })
+        WebException? webException =
+            FindException<WebException>(exception);
+
+        if (webException?.Response is HttpWebResponse response)
         {
             int restartDelay = Tools.ParseRetry(response);
 
@@ -1463,6 +1463,37 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         StartDelayedRestartTimer();
+    }
+
+    /// <summary>
+    /// Searches an exception and its inner-exception chain for the first exception
+    /// of the specified type.
+    /// </summary>
+    /// <typeparam name="TException">
+    /// The exception type to locate.
+    /// </typeparam>
+    /// <param name="exception">
+    /// The exception at the beginning of the chain to inspect.
+    /// </param>
+    /// <returns>
+    /// The first matching exception in the chain, or <see langword="null"/> when
+    /// no matching exception is found.
+    /// </returns>
+    private static TException? FindException<TException>(
+        Exception exception)
+        where TException : Exception
+    {
+        for (Exception? current = exception;
+             current != null;
+             current = current.InnerException)
+        {
+            if (current is TException matchingException)
+            {
+                return matchingException;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
