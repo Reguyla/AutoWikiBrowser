@@ -22,6 +22,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -453,35 +454,78 @@ public static class Tools
     }
 
     /// <summary>
-    /// Parses a response header to determine if there is a specific or implied retry request.
-    /// Handles status codes 429 and 503 (but not 3xx) and Retry-After headers with any status code.
-    /// See RFCs 6585 and 2616, and https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits#Errors
+    /// Parses a legacy HTTP response to determine whether the server has requested
+    /// that the operation be retried.
     /// </summary>
-    /// <param name="response">The HTTP response to parse.</param>
-    /// <returns>The number of seconds to wait before retrying, or -1 if no retry is requested.</returns>
+    /// <param name="response">
+    /// The legacy <see cref="HttpWebResponse"/> to inspect.
+    /// </param>
+    /// <returns>
+    /// The number of seconds to wait before retrying the request, or <c>-1</c>
+    /// when no retry has been requested.
+    /// </returns>
     public static int ParseRetry(HttpWebResponse response)
     {
-        int statusCode = (int)response.StatusCode;
-        // Although GetResponseHeader returns "" if it doesn't exist, that's not documented, so:
-        string retryString = response.Headers["Retry-After"];
+        ArgumentNullException.ThrowIfNull(response);
 
-        if (statusCode == 429 || statusCode == 503 || retryString != null)
+        return ParseRetryCore(
+            response.StatusCode,
+            response.Headers["Retry-After"]);
+    }
+
+    /// <summary>
+    /// Parses an HTTP status code and optional <c>Retry-After</c> header value to
+    /// determine whether a request should be retried.
+    /// </summary>
+    /// <param name="statusCode">
+    /// The HTTP status code returned by the server.
+    /// </param>
+    /// <param name="retryAfter">
+    /// The value of the HTTP <c>Retry-After</c> response header, or
+    /// <see langword="null"/> when the header is not present.
+    /// </param>
+    /// <returns>
+    /// The number of seconds to wait before retrying the request, or <c>-1</c>
+    /// when the response does not indicate that a retry is required.
+    /// </returns>
+    /// <remarks>
+    /// This method contains the shared retry parsing logic used by both the
+    /// legacy <see cref="HttpWebResponse"/> and modern
+    /// <see cref="HttpResponseMessage"/> overloads. It supports the HTTP
+    /// <c>429 Too Many Requests</c> and <c>503 Service Unavailable</c> status
+    /// codes, as well as the standard <c>Retry-After</c> response header defined
+    /// by the HTTP specification. When the server does not provide a valid retry
+    /// interval, a default delay of 60 seconds for HTTP 503 or 5 seconds for
+    /// HTTP 429 is used.
+    /// </remarks>
+    private static int ParseRetryCore(
+        HttpStatusCode statusCode,
+        string? retryAfter)
+    {
+        int numericStatusCode = (int)statusCode;
+
+        if (numericStatusCode != 429 &&
+            numericStatusCode != 503 &&
+            retryAfter == null)
         {
-            if (!int.TryParse(retryString, out int retrySeconds))
-            {
-                if (DateTime.TryParse(retryString, out DateTime retryDate))
-                {
-                    retrySeconds = Convert.ToInt32((retryDate.ToUniversalTime() - DateTime.UtcNow).TotalSeconds);
-                }
-                else
-                {
-                    retrySeconds = statusCode == 503 ? 60 : 5;
-                }
-            }
-            return Math.Max(retrySeconds, 0);
+            return -1;
         }
 
-        return -1;
+        if (!int.TryParse(retryAfter, out int retrySeconds))
+        {
+            if (DateTime.TryParse(retryAfter, out DateTime retryDate))
+            {
+                retrySeconds = Convert.ToInt32(
+                    (retryDate.ToUniversalTime() - DateTime.UtcNow)
+                    .TotalSeconds);
+            }
+            else
+            {
+                retrySeconds = numericStatusCode == 503 ? 60 : 5;
+            }
+        }
+
+        return Math.Max(retrySeconds, 0);
     }
 
     /// <summary>
