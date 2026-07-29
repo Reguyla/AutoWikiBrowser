@@ -76,7 +76,8 @@ public class SiteInfo : IXmlSerializable
         {
             throw;
         }
-        catch (WebException)
+        catch (Exception ex)
+            when (ex is WebException or HttpRequestException)
         {
             throw;
         }
