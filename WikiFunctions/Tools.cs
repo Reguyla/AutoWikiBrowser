@@ -1867,7 +1867,8 @@ Message: {2}
 
                         continue;
                     }
-                    catch (WebException ex)
+                    catch (Exception ex)
+                        when (ex is WebException or HttpRequestException)
                     {
                         Tools.WriteDebug(
                             nameof(ExpandTemplate),
