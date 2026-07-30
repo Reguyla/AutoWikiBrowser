@@ -216,12 +216,12 @@ public partial class ErrorHandler : Form
 
     class BugReport
     {
-        private string Thread = string.Empty;
+        private readonly string Thread = string.Empty;
         private readonly string OS = Environment.OSVersion.ToString();
-        private string StackTrace;
-        private string AppendedInfo = string.Empty;
-        private string Version;
-        private string DotNetVersion;
+        private readonly string StackTrace;
+        private readonly string AppendedInfo = string.Empty;
+        private readonly string Version;
+        private readonly string DotNetVersion;
 
         /// <summary>
         ///
