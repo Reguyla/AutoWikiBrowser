@@ -179,7 +179,7 @@ public partial class ErrorHandler : Form
     {
         if (ex == null || HandleKnownExceptions(ex)) return;
 
-        ErrorHandler handler = new ErrorHandler
+        ErrorHandler handler = new()
         {
             txtError =
             {
@@ -238,7 +238,7 @@ public partial class ErrorHandler : Form
                 Thread = currentThread.Name;
             }
 
-            StringBuilder stackTrace = new StringBuilder();
+            StringBuilder stackTrace = new();
             FormatException(ex, stackTrace, ExceptionKind.TopLevel);
             StackTrace = stackTrace.ToString();
 
@@ -246,12 +246,15 @@ public partial class ErrorHandler : Form
 
             if (handlers != null)
             {
-                StringBuilder append = new StringBuilder();
+                StringBuilder append = new();
 
-                foreach (ErrorHandlerAddition handler in handlers.GetInvocationList())
+                foreach (Delegate invocation in handlers.GetInvocationList())
                 {
                     try
                     {
+                        ErrorHandlerAddition handler =
+                            (ErrorHandlerAddition)invocation;
+
                         string value = handler();
 
                         if (!string.IsNullOrEmpty(value))
@@ -267,18 +270,18 @@ public partial class ErrorHandler : Form
                 }
 
                 AppendedInfo = append.ToString();
+
+                AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
+
+                Version = string.Format(
+                    "{0} ({1}), {2} ({3})",
+                    Application.ProductName,
+                    Application.ProductVersion,
+                    hostingApp.Name,
+                    hostingApp.Version);
+
+                DotNetVersion = Environment.Version.ToString();
             }
-
-            AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
-
-            Version = string.Format(
-                "{0} ({1}), {2} ({3})",
-                Application.ProductName,
-                Application.ProductVersion,
-                hostingApp.Name,
-                hostingApp.Version);
-
-            DotNetVersion = Environment.Version.ToString();
         }
 
         /// <summary>
@@ -292,7 +295,7 @@ public partial class ErrorHandler : Form
 
         public string Print(BugFormatter formatter)
         {
-            StringBuilder errorMessage = new StringBuilder();
+            StringBuilder errorMessage = new();
 
             errorMessage.AppendLine(formatter.PrintLine("description", ""));
             errorMessage.AppendLine(formatter.PrintLine("workaround", ""));
@@ -440,7 +443,7 @@ public partial class ErrorHandler : Form
     {
         if (string.IsNullOrEmpty(stackTrace))
         {
-            return new string[0];
+            return [];
         }
 
         MatchCollection matches =
