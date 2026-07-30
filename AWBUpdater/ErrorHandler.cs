@@ -360,18 +360,13 @@ public partial class ErrorHandler : Form
             LoaderException
         };
 
-        private static string KindToString(ExceptionKind ek)
-        {
-            switch (ek)
+        private static string KindToString(ExceptionKind kind) =>
+            kind switch
             {
-                case ExceptionKind.Inner:
-                    return "Inner exception";
-                case ExceptionKind.LoaderException:
-                    return "Loader exception";
-                default:
-                    return "Exception";
-            }
-        }
+                ExceptionKind.Inner => "Inner exception",
+                ExceptionKind.LoaderException => "Loader exception",
+                _ => "Exception"
+            };
 
         public abstract class BugFormatter
         {
