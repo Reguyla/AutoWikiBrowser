@@ -1,9 +1,12 @@
 ﻿#nullable enable
 
 using System.Configuration;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
+using ThreadingThread = System.Threading.Thread;
 using System.Windows.Forms;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,12 +22,7 @@ public delegate string ErrorHandlerAddition();
 /// </summary>
 public partial class ErrorHandler : Form
 {
-    public static event ErrorHandlerAddition AppendToErrorHandler;
-
-    /// <summary>
-    /// Title of the page currently being processed
-    /// </summary>
-    public static string CurrentPage;
+    public static event ErrorHandlerAddition? AppendToErrorHandler;
 
     /// <summary>
     /// Revision of the page currently being processed
@@ -34,7 +32,7 @@ public partial class ErrorHandler : Form
     /// <summary>
     /// Current text that the list is being made from in ListMaker
     /// </summary>
-    public static string ListMakerText;
+    public static string ListMakerText = string.Empty;
 
     private static bool HandleKnownExceptions(Exception ex)
     {
@@ -218,12 +216,12 @@ public partial class ErrorHandler : Form
 
     class BugReport
     {
-        private string Thread,
-            OS = Environment.OSVersion.ToString(),
-            StackTrace,
-            AppendedInfo,
-            Version,
-            DotNetVersion;
+        private string Thread = string.Empty;
+        private readonly string OS = Environment.OSVersion.ToString();
+        private string StackTrace;
+        private string AppendedInfo = string.Empty;
+        private string Version;
+        private string DotNetVersion;
 
         /// <summary>
         ///
@@ -231,8 +229,8 @@ public partial class ErrorHandler : Form
         /// <param name="ex"></param>
         public BugReport(Exception ex)
         {
-            System.Threading.Thread currentThread =
-                System.Threading.Thread.CurrentThread;
+            ThreadingThread currentThread =
+                ThreadingThread.CurrentThread;
 
             if (!string.IsNullOrEmpty(currentThread.Name) &&
                 currentThread.Name != "Main thread")
@@ -244,7 +242,7 @@ public partial class ErrorHandler : Form
             FormatException(ex, stackTrace, ExceptionKind.TopLevel);
             StackTrace = stackTrace.ToString();
 
-            ErrorHandlerAddition handlers = AppendToErrorHandler;
+            ErrorHandlerAddition? handlers = AppendToErrorHandler;
 
             if (handlers != null)
             {
@@ -339,11 +337,18 @@ public partial class ErrorHandler : Form
             {
                 FormatException(ex.InnerException, sb, ExceptionKind.Inner);
             }
-            if (ex is ReflectionTypeLoadException)
+            if (ex is ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                foreach (Exception e in ((ReflectionTypeLoadException)ex).LoaderExceptions)
+                foreach (Exception? loaderException
+                         in reflectionTypeLoadException.LoaderExceptions)
                 {
-                    FormatException(e, sb, ExceptionKind.LoaderException);
+                    if (loaderException != null)
+                    {
+                        FormatException(
+                            loaderException,
+                            sb,
+                            ExceptionKind.LoaderException);
+                    }
                 }
             }
         }
@@ -436,7 +441,7 @@ public partial class ErrorHandler : Form
     /// </summary>
     /// <param name="stackTrace">Exception's StackTrace</param>
     /// <returns>List of fully qualified function names</returns>
-    public static string[] MethodNames(string stackTrace)
+    public static string[] MethodNames(string? stackTrace)
     {
         if (string.IsNullOrEmpty(stackTrace))
         {
@@ -535,8 +540,8 @@ public partial class ErrorHandler : Form
 
     private static void OpenUrl(string url)
     {
-        System.Diagnostics.Process.Start(
-            new System.Diagnostics.ProcessStartInfo
+        Process.Start(
+            new ProcessStartInfo
             {
                 FileName = url,
                 UseShellExecute = true
