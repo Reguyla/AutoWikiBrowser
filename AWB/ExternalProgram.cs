@@ -423,19 +423,52 @@ private void chkEnabled_CheckedChanged(
         }
     }
 
-    private void btnSelectIO_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Allows the user to select the input/output file used by the external
+    /// program.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the click event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnSelectIO_Click(
+        object sender,
+        EventArgs e)
     {
-        if (string.IsNullOrEmpty(openIO.InitialDirectory))
-            openIO.InitialDirectory = Application.StartupPath;
+        InitializeDialogDirectory(openIO);
 
         if (openIO.ShowDialog() == DialogResult.OK)
         {
-            txtFile.Text = openIO.FileName;
+            txtFile.Text =
+                openIO.FileName;
         }
     }
 
-    private void RadioButtonCheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Updates the controls associated with file-based article processing.
+    /// </summary>
+    private void UpdateInputModeState()
     {
-        btnSelectIO.Enabled = txtFile.Enabled = radFile.Checked;
+        btnSelectIO.Enabled =
+            txtFile.Enabled =
+            radFile.Checked;
+    }
+
+    /// <summary>
+    /// Updates the dialog when the selected external-program input mode changes.
+    /// </summary>
+    /// <param name="sender">
+    /// The radio button that raised the checked-state change event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the checked-state change.
+    /// </param>
+    private void RadioButtonCheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        UpdateInputModeState();
     }
 }
