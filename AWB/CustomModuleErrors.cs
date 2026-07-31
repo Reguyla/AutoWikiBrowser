@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
 
@@ -22,6 +23,11 @@ public partial class CustomModuleErrors : Form
     /// <summary>
     /// Sets the error text displayed by the dialog.
     /// </summary>
+    /// <remarks>
+    /// This write-only property updates the contents of the internal error text
+    /// box at runtime. It is not serialized by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string ErrorText
     {
         set => textBox1.Text = value;

@@ -370,6 +370,15 @@ public partial class ListMaker : UserControl, IList<Article>
         UpdateNumberOfArticles(false);
     }
 
+    /// <summary>
+    /// Gets or sets the article at the specified index in the article list.
+    /// </summary>
+    /// <remarks>
+    /// This indexer provides runtime access to the underlying article collection.
+    /// It is not a design-time property and should not be serialized by the
+    /// Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Article this[int index]
     {
         get { return (Article)lbArticles.Items[index]; }
@@ -549,25 +558,31 @@ public partial class ListMaker : UserControl, IList<Article>
     { get { return lbArticles; } }
 
     /// <summary>
-    /// Gets or sets the selected provider type
+    /// Gets or sets the selected list-provider type.
     /// </summary>
+    /// <remarks>
+    /// This property exposes the provider selected by the internal source combo
+    /// box. It is used when loading and saving AWB settings and should not be
+    /// serialized independently by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string SelectedProvider
     {
         get { return cmboSourceSelect.SelectedItem.GetType().Name; }
         set
         {
-            int index;
-            if (int.TryParse(value, out index))
+            if (int.TryParse(value, out int index))
             {
-                // We're opening an old-style config where provider was set as an index
-                if (index < (cmboSourceSelect.Items.Count - 1))
+                // Support legacy settings where the provider was stored as
+                // the selected combo-box index rather than its type name.
+                if (index < cmboSourceSelect.Items.Count - 1)
                 {
                     cmboSourceSelect.SelectedIndex = index;
                 }
             }
             else
             {
-                // New settings format that specifies provider type name
+                // Current settings store the provider's type name.
                 foreach (var provider in _listProviders)
                 {
                     if (provider.GetType().Name == value)
@@ -583,8 +598,13 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Gets or sets the source text
+    /// Gets or sets the source text entered by the user.
     /// </summary>
+    /// <remarks>
+    /// This property is a runtime wrapper around the internal user-input text
+    /// box and should not be serialized separately by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string SourceText
     {
         get { return UserInputTextBox.Text; }
@@ -592,8 +612,14 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Set whether the make button is enabled
+    /// Sets whether the Make List button is enabled.
     /// </summary>
+    /// <remarks>
+    /// This write-only property controls the enabled state of an internal button
+    /// at runtime. It is not a design-time property and must not be serialized by
+    /// the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool MakeListEnabled
     {
         set { btnGenerate.Enabled = value; }
@@ -1458,10 +1484,16 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Get/Set the Special Filter settings
+    /// Gets or sets the Special Filter settings.
     /// </summary>
+    /// <remarks>
+    /// This property exposes the runtime settings of the internal special-filter
+    /// component. It is loaded and saved through AWB configuration handling and
+    /// should not be serialized independently by the Windows Forms designer.
+    /// </remarks>
     [Browsable(false)]
     [Localizable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public AWBSettings.SpecialFilterPrefs SpecialFilterSettings
     {
         get { return _specialFilter.Settings; }
@@ -1469,6 +1501,7 @@ public partial class ListMaker : UserControl, IList<Article>
         {
             if (DesignMode)
                 return;
+
             _specialFilter.Settings = value;
         }
     }

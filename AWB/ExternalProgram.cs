@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Windows.Forms;
 using WikiFunctions;
 
@@ -28,12 +29,30 @@ public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the external program module is enabled.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal enabled checkbox for
+    /// runtime use. It is not a design-time property and must not be serialized
+    /// by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool ModuleEnabled
     {
-        get { return chkEnabled.Checked; }
-        set { chkEnabled.Checked = value; }
+        get => chkEnabled.Checked;
+        set => chkEnabled.Checked = value;
     }
 
+    /// <summary>
+    /// Gets or sets the settings for the external program module.
+    /// </summary>
+    /// <remarks>
+    /// This property builds or applies the runtime external-program settings from
+    /// the form's child controls. It is managed by AWB's settings system and must
+    /// not be serialized independently by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public WikiFunctions.AWBSettings.ExternalProgramPrefs Settings
     {
         get

@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Windows.Forms;
 using WikiFunctions.Controls;
 
@@ -468,8 +469,9 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Gets or sets whether the replacements ignore external links and images
+    /// Gets or sets whether the replacements ignore external links and images.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IgnoreLinks
     {
         get { return chkIgnoreLinks.Checked; }
@@ -477,8 +479,10 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Gets or sets whether the replacements ignore headings, internal link targets, templates, and refs
+    /// Gets or sets whether the replacements ignore headings, internal link
+    /// targets, templates, and refs.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IgnoreMore
     {
         get { return chkIgnoreMore.Checked; }
@@ -486,8 +490,9 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Gets or sets whether the summary should be used
+    /// Gets or sets whether the summary should be used.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool AppendToSummary
     {
         get { return chkAddToSummary.Checked; }

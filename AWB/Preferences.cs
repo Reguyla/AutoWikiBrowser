@@ -18,10 +18,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-
 using WikiFunctions;
 using WikiFunctions.Parse;
 
@@ -244,170 +244,281 @@ internal sealed partial class MyPreferences : Form
         }
     }
 
+    /// <summary>
+    /// Gets or sets the preferred wiki domain.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string PrefDomain
     {
         get { return txtDomain.Text; }
         set
         {
             txtDomain.Text = value;
-            ProjectEnum prj = (ProjectEnum)Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString());
-            DomainEnabled = !string.IsNullOrEmpty(value) && prj.Equals(ProjectEnum.custom);
+
+            ProjectEnum prj = (ProjectEnum)Enum.Parse(
+                typeof(ProjectEnum),
+                cmboProject.SelectedItem.ToString());
+
+            DomainEnabled =
+                !string.IsNullOrEmpty(value) &&
+                prj.Equals(ProjectEnum.custom);
         }
     }
 
     private void btnTextBoxFont_Click(object sender, EventArgs e)
     {
         fontDialog.Font = TextBoxFont;
+
         if (fontDialog.ShowDialog() == DialogResult.OK)
             TextBoxFont = fontDialog.Font;
     }
 
+    /// <summary>
+    /// Gets or sets whether AWB attribution should be suppressed.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefSuppressUsingAWB
     {
         get { return chkSupressAWB.Checked; }
         set { chkSupressAWB.Checked = chkSupressAWB.Enabled && value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether AWB attribution is added to article-action summaries.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefAddUsingAWBOnArticleAction
     {
         get { return chkAddUsingAWBToActionSummaries.Checked; }
         set { chkAddUsingAWBToActionSummaries.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether AWB should run with low thread priority.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool LowThreadPriority
     {
         get { return chkLowPriority.Checked; }
         set { chkLowPriority.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the application should flash for alerts.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefFlash
     {
         get { return chkFlash.Checked; }
         set { chkFlash.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the application should beep for alerts.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefBeep
     {
         get { return chkBeep.Checked; }
         set { chkBeep.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the application should minimize when appropriate.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefMinimize
     {
         get { return chkMinimize.Checked; }
         set { chkMinimize.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the article list should be saved.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefSaveArticleList
     {
         get { return chkSaveArticleList.Checked; }
         set { chkSaveArticleList.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether automatic saving of the edit box is enabled.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefAutoSaveEditBoxEnabled
     {
         get { return chkAutoSaveEdit.Checked; }
         set
         {
-            chkAutoSaveEdit.Checked = btnSetFile.Enabled =
-                nudEditBoxAutosave.Enabled = txtAutosave.Enabled = lblAutosaveFile.Enabled = value;
+            chkAutoSaveEdit.Checked =
+                btnSetFile.Enabled =
+                nudEditBoxAutosave.Enabled =
+                txtAutosave.Enabled =
+                lblAutosaveFile.Enabled = value;
         }
     }
 
+    /// <summary>
+    /// Gets or sets the edit-box automatic-save interval.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public decimal PrefAutoSaveEditBoxPeriod
     {
         get { return nudEditBoxAutosave.Value; }
         set { nudEditBoxAutosave.Value = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the edit-box automatic-save file.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string PrefAutoSaveEditBoxFile
     {
         get { return txtAutosave.Text; }
         set { txtAutosave.Text = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether logging is enabled.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool EnableLogging
     {
         get { return chkEnableLogging.Checked; }
         set { chkEnableLogging.Checked = value; }
     }
 
-    //TODO:Reinstate/Use?
+    // TODO: Reinstate or remove this property.
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<string> PrefCustomWikis
     {
         get
         {
-            List<String> temp = new List<String> { cmboCustomProject.Text };
-            temp.AddRange(from object a in cmboCustomProject.Items select a.ToString());
+            List<string> temp = new List<string>
+        {
+            cmboCustomProject.Text
+        };
+
+            temp.AddRange(
+                from object a in cmboCustomProject.Items
+                select a.ToString());
+
             return temp;
         }
         set
         {
             cmboCustomProject.Items.Clear();
+
             foreach (string temp in value)
                 cmboCustomProject.Items.Add(temp);
         }
     }
 
+    /// <summary>
+    /// Gets or sets whether the nobots template should be ignored.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefIgnoreNoBots
     {
         get { return chkIgnoreNoBots.Checked; }
         set { chkIgnoreNoBots.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the timer should be displayed.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefShowTimer
     {
         get { return chkShowTimer.Checked; }
         set { chkShowTimer.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether List Comparer uses the current article list.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefListComparerUseCurrentArticleList
     {
         get { return cmboListComparer.SelectedIndex; }
         set { cmboListComparer.SelectedIndex = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether List Splitter uses the current article list.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefListSplitterUseCurrentArticleList
     {
         get { return cmboListSplitter.SelectedIndex; }
         set { cmboListSplitter.SelectedIndex = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether Database Scanner uses the current article list.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefDBScannerUseCurrentArticleList
     {
         get { return cmboDBScanner.SelectedIndex; }
         set { cmboDBScanner.SelectedIndex = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the action performed when an article is loaded.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefOnLoad
     {
-        // show edit page no longer available as an option
-        get { return (cmboOnLoad.SelectedIndex == 2 ? 0 : cmboOnLoad.SelectedIndex); }
-
+        get
+        {
+            // Showing the edit page is no longer available as an option.
+            return cmboOnLoad.SelectedIndex == 2
+                ? 0
+                : cmboOnLoad.SelectedIndex;
+        }
         set { cmboOnLoad.SelectedIndex = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether a diff is generated while running in bot mode.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefDiffInBotMode
     {
         get { return chkDiffInBotMode.Checked; }
         set { chkDiffInBotMode.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the page list is cleared when the project changes.
+    /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefClearPageListOnProjectChange
     {
         get { return chkEmptyOnProjectChange.Checked; }
         set { chkEmptyOnProjectChange.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the enabled alert identifiers.
+    /// </summary>
+    /// <remarks>
+    /// When no stored alert preferences exist, all alerts are treated as enabled.
+    /// This property is managed by AWB's settings system and is not serialized by
+    /// the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<int> AlertPreferences
     {
-        // if no alerts checked, will be settings file prior to alerts preferences, so enable all
-        // using anyChecked for get, value.Count == 0 for set
         get
         {
             List<int> alerts = new List<int>();
 
             bool anyChecked = false;
+
             for (int a = 0; a < alertListBox.Items.Count; a++)
             {
                 if (alertListBox.GetItemChecked(a))
@@ -421,7 +532,9 @@ internal sealed partial class MyPreferences : Form
             {
                 if (alertListBox.GetItemChecked(i) || !anyChecked)
                 {
-                    CheckedBoxItem cbi = (CheckedBoxItem)alertListBox.Items[i];
+                    CheckedBoxItem cbi =
+                        (CheckedBoxItem)alertListBox.Items[i];
+
                     alerts.Add(cbi.ID);
                 }
             }
@@ -432,13 +545,16 @@ internal sealed partial class MyPreferences : Form
         {
             alertListBox.BeginUpdate();
             alertListBox.Items.Clear();
+
             foreach (KeyValuePair<int, string> kvp in alertDescriptions)
             {
-                alertListBox.Items.Add(new CheckedBoxItem
-                {
-                    ID = kvp.Key,
-                    Description = kvp.Value,
-                }, (value.Contains(kvp.Key) || !value.Any()));
+                alertListBox.Items.Add(
+                    new CheckedBoxItem
+                    {
+                        ID = kvp.Key,
+                        Description = kvp.Value,
+                    },
+                    value.Contains(kvp.Key) || !value.Any());
             }
 
             alertListBox.EndUpdate();

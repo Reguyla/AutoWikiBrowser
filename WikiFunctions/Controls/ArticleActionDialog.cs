@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -139,27 +140,73 @@ public partial class ArticleActionDialog : Form
         get { return chkAutoProtect.Checked; }
     }
 
+    /// <summary>
+    /// Gets or sets the new article title entered by the user.
+    /// </summary>
+    /// <remarks>
+    /// This property is a runtime wrapper around <see cref="txtNewTitle"/> and
+    /// should not be serialized by the Windows Forms designer. The underlying
+    /// text box is already responsible for persisting its own design-time state.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string NewTitle
     {
         get { return txtNewTitle.Text; }
         set { txtNewTitle.Text = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the edit summary entered or selected by the user.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the current value of the summary combo box for
+    /// runtime use. Designer serialization is disabled because the underlying
+    /// control already manages its own design-time state.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Summary
     {
         get { return cmboSummary.Text; }
         set { cmboSummary.Text = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the edit protection level for the current protection action.
+    /// </summary>
+    /// <remarks>
+    /// This property forwards to the <c>MoveDelete</c> control and exists only as
+    /// a convenience wrapper for runtime code. It is not intended to participate
+    /// in Windows Forms designer serialization.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string EditProtectionLevel
     {
-        get { return CurrentAction == ArticleAction.Protect ? MoveDelete.EditProtectionLevel : ""; }
+        get
+        {
+            return CurrentAction == ArticleAction.Protect
+                ? MoveDelete.EditProtectionLevel
+                : string.Empty;
+        }
         set { MoveDelete.EditProtectionLevel = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the move protection level for the current protection action.
+    /// </summary>
+    /// <remarks>
+    /// This property forwards to the <c>MoveDelete</c> control and exists only as
+    /// a convenience wrapper for runtime code. It is not intended to participate
+    /// in Windows Forms designer serialization.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string MoveProtectionLevel
     {
-        get { return CurrentAction == ArticleAction.Protect ? MoveDelete.MoveProtectionLevel : ""; }
+        get
+        {
+            return CurrentAction == ArticleAction.Protect
+                ? MoveDelete.MoveProtectionLevel
+                : string.Empty;
+        }
         set { MoveDelete.MoveProtectionLevel = value; }
     }
 

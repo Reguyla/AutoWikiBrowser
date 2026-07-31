@@ -15,6 +15,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace WikiFunctions.Background
@@ -52,10 +53,11 @@ namespace WikiFunctions.Background
                 lblStatus.Text = status;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Status
         {
-            get { return lblStatus.Text; }
-            set { SetStatus(value); }
+            get => lblStatus.Text;
+            set => lblStatus.Text = value;
         }
 
         public void SetProgress(int completed, int total)

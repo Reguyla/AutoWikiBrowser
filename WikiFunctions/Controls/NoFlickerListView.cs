@@ -194,10 +194,16 @@ public class NoFlickerExtendedListView : ListView, IListViewItemComparerFactory
     private IListViewItemComparerFactory comparerFactory;
 
     /// <summary>
-    /// Allows to override default column sorting behavior by providing a factory for custom sorters
+    /// Gets or sets the factory used to create column comparers for the list view.
     /// </summary>
+    /// <remarks>
+    /// This property configures the runtime sorting behavior of the control. It is
+    /// supplied by application code and is not intended to be serialized by the
+    /// Windows Forms designer.
+    /// </remarks>
     [Browsable(false)]
     [Localizable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IListViewItemComparerFactory ComparerFactory
     {
         get { return comparerFactory; }

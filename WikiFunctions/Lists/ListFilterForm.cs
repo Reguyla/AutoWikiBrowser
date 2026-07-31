@@ -225,8 +225,18 @@ namespace WikiFunctions.Lists
             }
         }
 
+        /// <summary>
+        /// Gets or sets the special-filter settings represented by this form.
+        /// </summary>
+        /// <remarks>
+        /// This property builds or applies an AWB settings object from the current
+        /// state of the form's child controls. It is used by AWB's own configuration
+        /// handling and must not be serialized independently by the Windows Forms
+        /// designer.
+        /// </remarks>
         [Browsable(false)]
         [Localizable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public AWBSettings.SpecialFilterPrefs Settings
         {
             get
@@ -259,7 +269,10 @@ namespace WikiFunctions.Lists
                 _prefs = value;
 
                 if (_prefs.namespaceValues == null)
-                    _prefs.namespaceValues = new List<int>(new[] { 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 14, 15 });
+                {
+                    _prefs.namespaceValues = new List<int>(
+                        new[] { 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 14, 15 });
+                }
 
                 if (!_prefs.namespaceValues.Any())
                     pageNamespaces.SetSelectedNamespaces(_prefs.namespaceValues);
@@ -276,7 +289,8 @@ namespace WikiFunctions.Lists
                 cbOpType.SelectedIndex = _prefs.opType;
 
                 lbRemove.Items.Clear();
-                lbRemove.Items.AddRange(_prefs.remove.Select(s => new Article(s)).ToArray());
+                lbRemove.Items.AddRange(
+                    _prefs.remove.Select(s => new Article(s)).ToArray());
             }
         }
     }

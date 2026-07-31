@@ -69,71 +69,156 @@ public sealed partial class RegexTester : Form
 
     #region Properties for external access
 
+    /// <summary>
+    /// Sets the article text displayed in the regex tester.
+    /// </summary>
+    /// <remarks>
+    /// This write-only property updates the internal input text box at runtime.
+    /// It is not intended to be serialized by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string ArticleText
     {
         set
         {
-            /* Performance: simple "txtInput.Text = value" has poor performance (due to having WrapText=true), using append text improves performance by 2x
-            For example if find box is a long wiki page .Text= takes 16 seconds, .AppendText only 7 */
-            txtInput.Text = "";
+            /*
+             * Performance:
+             * Assigning directly to txtInput.Text performs poorly when word wrap
+             * is enabled. Clearing the control and using AppendText is
+             * significantly faster for large wiki pages.
+             */
+            txtInput.Text = string.Empty;
             txtInput.AppendText(value);
             txtInput.Select(0, 0);
             txtInput.ScrollToCaret();
         }
     }
 
+    /// <summary>
+    /// Gets or sets the regular expression used to find matching text.
+    /// </summary>
+    /// <remarks>
+    /// This property is a runtime wrapper around the internal find text box and
+    /// should not be serialized independently by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Find
     {
         get { return txtFind.Text; }
         set { txtFind.Text = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the replacement text used by the regex tester.
+    /// </summary>
+    /// <remarks>
+    /// This property is a runtime wrapper around the internal replacement text
+    /// box and should not be serialized independently by the Windows Forms
+    /// designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Replace
     {
         get { return txtReplace.Text; }
         set { txtReplace.Text = value; }
     }
 
+    /// <summary>
+    /// Gets or sets the regular-expression options selected in the tester.
+    /// </summary>
+    /// <remarks>
+    /// This property combines the state of several internal checkboxes into a
+    /// single <see cref="System.Text.RegularExpressions.RegexOptions"/> value.
+    /// The individual controls already manage their own design-time state, so
+    /// this wrapper must not be serialized separately by the Windows Forms
+    /// designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public RegexOptions RegexOptions
     {
         get
         {
             RegexOptions res = RegexOptions.None;
-            if (chkMultiline.Checked) res |= RegexOptions.Multiline;
-            if (chkSingleline.Checked) res |= RegexOptions.Singleline;
-            if (chkIgnoreCase.Checked) res |= RegexOptions.IgnoreCase;
-            if (chkExplicitCapture.Checked) res |= RegexOptions.ExplicitCapture;
+
+            if (chkMultiline.Checked)
+                res |= RegexOptions.Multiline;
+
+            if (chkSingleline.Checked)
+                res |= RegexOptions.Singleline;
+
+            if (chkIgnoreCase.Checked)
+                res |= RegexOptions.IgnoreCase;
+
+            if (chkExplicitCapture.Checked)
+                res |= RegexOptions.ExplicitCapture;
 
             return res;
         }
-
         set
         {
             chkMultiline.Checked = (value & RegexOptions.Multiline) != 0;
             chkSingleline.Checked = (value & RegexOptions.Singleline) != 0;
             chkIgnoreCase.Checked = (value & RegexOptions.IgnoreCase) != 0;
-            chkExplicitCapture.Checked = (value & RegexOptions.ExplicitCapture) != 0;
+            chkExplicitCapture.Checked =
+                (value & RegexOptions.ExplicitCapture) != 0;
         }
     }
 
+    /// <summary>
+    /// Gets or sets whether multiline regular-expression behavior is enabled.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal multiline checkbox for
+    /// runtime use and should not be serialized independently by the Windows
+    /// Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool Multiline
     {
         get { return chkMultiline.Checked; }
         set { chkMultiline.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether single-line regular-expression behavior is enabled.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal single-line checkbox for
+    /// runtime use and should not be serialized independently by the Windows
+    /// Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool Singleline
     {
         get { return chkSingleline.Checked; }
         set { chkSingleline.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether regular-expression matching ignores character case.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal ignore-case checkbox for
+    /// runtime use and should not be serialized independently by the Windows
+    /// Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IgnoreCase
     {
         get { return chkIgnoreCase.Checked; }
         set { chkIgnoreCase.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether explicit-capture regular-expression behavior is
+    /// enabled.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal explicit-capture checkbox
+    /// for runtime use and should not be serialized independently by the Windows
+    /// Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool ExplicitCapture
     {
         get { return chkExplicitCapture.Checked; }

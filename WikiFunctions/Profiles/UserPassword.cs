@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace WikiFunctions.Profiles;
@@ -28,9 +29,21 @@ public partial class UserPassword : Form
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Sets the username displayed by the dialog.
+    /// </summary>
+    /// <remarks>
+    /// This write-only property updates the text of the internal label at
+    /// runtime. It is not a design-time property and must not be serialized
+    /// by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Username
     {
-        set { lblText.Text = string.Format(lblText.Text, value); }
+        set
+        {
+            lblText.Text = string.Format(lblText.Text, value);
+        }
     }
 
     public string GetPassword

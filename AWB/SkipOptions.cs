@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.Plugin;
@@ -94,42 +95,52 @@ internal sealed partial class SkipOptions : Form, ISkipOptions
     #region Properties
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoBoldTitle =>
         IsOptionChecked(BoldTitleOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoBulletedLink =>
         IsOptionChecked(BulletedExternalLinkOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoBadLink =>
         IsOptionChecked(BadLinksOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoUnicode =>
         IsOptionChecked(UnicodeOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoTag =>
         IsOptionChecked(AutoTagOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoHeaderError =>
         IsOptionChecked(HeaderErrorOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoDefaultSortAdded =>
         IsOptionChecked(DefaultSortOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoUserTalkTemplatesSubstd =>
         IsOptionChecked(UserTalkTemplatesOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoCiteTemplateDatesFixed =>
         IsOptionChecked(CitationTemplateDatesOptionId);
 
     /// <inheritdoc />
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoPeopleCategoriesFixed =>
         IsOptionChecked(HumanCategoriesOptionId);
 
@@ -138,13 +149,18 @@ internal sealed partial class SkipOptions : Form, ISkipOptions
     // iterating through the checked list. This would reduce repeated
     // List.Contains() lookups from O(n) to O(1). With the current ten
     // options, the existing implementation is simple and sufficiently fast.
+
     /// <summary>
     /// Gets or sets the identifiers of the currently selected skip options.
     /// </summary>
     /// <remarks>
-    /// Setting this property updates the checked state of every displayed
-    /// option and clears the transient Check All and Check None controls.
+    /// This property exposes the checked state of the skip-options list for
+    /// AWB's runtime settings. Setting this property updates the checked state
+    /// of every displayed option and clears the transient <c>Check All</c> and
+    /// <c>Check None</c> controls. It is not intended to be serialized
+    /// independently by the Windows Forms designer.
     /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<int> SelectedItems
     {
         get

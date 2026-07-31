@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
 
@@ -12,6 +13,14 @@ public partial class ShutdownNotification : Form
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Sets the shutdown action displayed by the notification dialog.
+    /// </summary>
+    /// <remarks>
+    /// This write-only property updates the runtime shutdown state and refreshes
+    /// the dialog text. It is not intended for Windows Forms designer serialization.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string ShutdownType
     {
         set

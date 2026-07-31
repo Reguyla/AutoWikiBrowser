@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace WikiFunctions.Controls;
 
@@ -36,8 +37,14 @@ public partial class PageContainsControl : UserControl
     }
 
     /// <summary>
-    ///
+    /// Gets or sets whether the page-contains check is enabled.
     /// </summary>
+    /// <remarks>
+    /// This property updates the enabled and checked states of the internal
+    /// controls at runtime. It is not intended to be serialized independently
+    /// by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool CheckEnabled
     {
         get { return chkContains.Checked; }
@@ -51,18 +58,45 @@ public partial class PageContainsControl : UserControl
         }
     }
 
+    /// <summary>
+    /// Gets or sets the text used by the page-contains check.
+    /// </summary>
+    /// <remarks>
+    /// This property is a runtime wrapper around the internal text box and should
+    /// not be serialized separately by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string CheckText
     {
         get { return txtContains.Text; }
         set { txtContains.Text = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the page-contains text is interpreted as a regular
+    /// expression.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal regular-expression
+    /// checkbox for runtime use and should not be serialized independently by
+    /// the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IsRegex
     {
         get { return chkIsRegex.Checked; }
         set { chkIsRegex.Checked = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether the page-contains check is case-sensitive.
+    /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal case-sensitivity checkbox
+    /// for runtime use and should not be serialized independently by the Windows
+    /// Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IsCaseSensitive
     {
         get { return chkCaseSensitive.Checked; }
@@ -70,8 +104,14 @@ public partial class PageContainsControl : UserControl
     }
 
     /// <summary>
-    /// Whether to check before or after processing
+    /// Gets or sets whether the page-contains check runs after article processing.
     /// </summary>
+    /// <remarks>
+    /// This property exposes the state of the internal processing-order checkbox
+    /// for runtime use and should not be serialized independently by the Windows
+    /// Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool After
     {
         get { return chkAfterProcessing.Checked; }

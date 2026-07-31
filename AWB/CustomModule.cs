@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.CodeDom.Compiler;
+using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
@@ -49,6 +50,12 @@ internal sealed partial class CustomModule : Form
     /// Consecutive Windows-style line breaks are reduced when the code is
     /// assigned.
     /// </summary>
+    /// <remarks>
+    /// This property exposes the contents of the internal code editor for runtime
+    /// settings and module compilation. It should not be serialized independently
+    /// by the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Code
     {
         get => txtCode.Text;
@@ -60,8 +67,11 @@ internal sealed partial class CustomModule : Form
     /// </summary>
     /// <remarks>
     /// Older settings that do not contain a recognized language name default
-    /// to the first compiler, historically the C# compiler.
+    /// to the first compiler, historically the C# compiler. This property wraps
+    /// the selected item of the internal language combo box and should not be
+    /// serialized independently by the Windows Forms designer.
     /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Language
     {
         get => cmboLang.SelectedItem!.ToString()!;
@@ -89,6 +99,12 @@ internal sealed partial class CustomModule : Form
     /// Gets the compiler responsible for compiling the currently selected
     /// custom module language.
     /// </summary>
+    /// <remarks>
+    /// The compiler instance is resolved from the current combo-box selection at
+    /// runtime. It is not a design-time property and must not be serialized by
+    /// the Windows Forms designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public CustomModuleCompiler Compiler =>
         (CustomModuleCompiler)cmboLang.SelectedItem!;
 
@@ -96,6 +112,12 @@ internal sealed partial class CustomModule : Form
     /// Gets or sets a value indicating whether the custom module is enabled.
     /// Enabling the module automatically attempts to compile and load it.
     /// </summary>
+    /// <remarks>
+    /// This property wraps the enabled checkbox and may trigger runtime module
+    /// compilation. It must not be invoked or serialized by the Windows Forms
+    /// designer.
+    /// </remarks>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool ModuleEnabled
     {
         get => chkModuleEnabled.Checked;

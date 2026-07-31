@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace WikiFunctions
@@ -34,6 +35,15 @@ namespace WikiFunctions
 
         private readonly Parse.HideText RemoveUnformatted = new Parse.HideText(true, false, true);
 
+        /// <summary>
+        /// Gets or sets the list of templates to substitute.
+        /// </summary>
+        /// <remarks>
+        /// This property synchronizes the runtime template list with the internal
+        /// template text box and refreshes the generated regular expressions. It is
+        /// not intended to be serialized independently by the Windows Forms designer.
+        /// </remarks>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string[] TemplateList
         {
             get { return LocTemplateList; }
@@ -45,18 +55,47 @@ namespace WikiFunctions
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether template substitution should expand templates
+        /// recursively.
+        /// </summary>
+        /// <remarks>
+        /// This property exposes the state of the internal expand-templates checkbox
+        /// for runtime use and should not be serialized independently by the Windows
+        /// Forms designer.
+        /// </remarks>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ExpandRecursively
         {
             get { return chkUseExpandTemplates.Checked; }
             set { chkUseExpandTemplates.Checked = value; }
         }
 
+        /// <summary>
+        /// Gets or sets whether unformatted templates should be ignored.
+        /// </summary>
+        /// <remarks>
+        /// This property exposes the state of the internal ignore-unformatted
+        /// checkbox for runtime use and should not be serialized independently by
+        /// the Windows Forms designer.
+        /// </remarks>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IgnoreUnformatted
         {
             get { return chkIgnoreUnformatted.Checked; }
             set { chkIgnoreUnformatted.Checked = value; }
         }
 
+        /// <summary>
+        /// Gets or sets whether comments should be included during template
+        /// substitution.
+        /// </summary>
+        /// <remarks>
+        /// This property exposes the state of the internal include-comments checkbox
+        /// for runtime use and should not be serialized independently by the Windows
+        /// Forms designer.
+        /// </remarks>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IncludeComments
         {
             get { return chkIncludeComment.Checked; }

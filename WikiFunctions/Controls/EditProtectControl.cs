@@ -97,44 +97,84 @@ public partial class EditProtectControl : UserControl
         get { return ((lbEdit.SelectedIndex == 2) && (lbMove.SelectedIndex == 2)); }
     }
 
+    /// <summary>
+    /// Gets or sets the edit protection level selected by the control.
+    /// </summary>
+    /// <remarks>
+    /// This property is intended for runtime use only. It proxies the selected
+    /// value of the edit-protection list and must not be serialized separately
+    /// by the Windows Forms designer.
+    /// </remarks>
     [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string EditProtectionLevel
     {
         get { return GetProtectionLevel(lbEdit); }
         set
         {
-            if (DesignMode) return;
+            if (DesignMode)
+                return;
+
             if (string.IsNullOrEmpty(value))
             {
-                lbMove.SelectedIndex = 0;
+                lbEdit.SelectedIndex = 0;
                 return;
             }
+
             EnsureProtectionLevelExists(value);
             lbEdit.SelectedItem = value;
         }
     }
 
+    /// <summary>
+    /// Gets or sets the move protection level selected by the control.
+    /// </summary>
+    /// <remarks>
+    /// This property is intended for runtime use only. It proxies the selected
+    /// value of the move-protection list and must not be serialized separately
+    /// by the Windows Forms designer.
+    /// </remarks>
     [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string MoveProtectionLevel
     {
         get { return GetProtectionLevel(lbMove); }
         set
         {
-            if (DesignMode) return;
+            if (DesignMode)
+                return;
+
             if (string.IsNullOrEmpty(value))
             {
                 lbMove.SelectedIndex = 0;
                 return;
             }
+
             EnsureProtectionLevelExists(value);
             lbMove.SelectedItem = value;
         }
     }
 
+    /// <summary>
+    /// Sets whether the protection controls are visible.
+    /// </summary>
+    /// <remarks>
+    /// This write-only property updates the visibility of several child controls
+    /// at runtime. It is not a design-time property and must not be serialized by
+    /// the Windows Forms designer.
+    /// </remarks>
     [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool Visibility
     {
-        set { lbEdit.Visible = lbMove.Visible = lblEdit.Visible = lblMove.Visible = chkUnlock.Visible = value; }
+        set
+        {
+            lbEdit.Visible =
+                lbMove.Visible =
+                lblEdit.Visible =
+                lblMove.Visible =
+                chkUnlock.Visible = value;
+        }
     }
 
     public void Reset()
