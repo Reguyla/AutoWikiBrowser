@@ -30,49 +30,100 @@ namespace AutoWikiBrowser;
 internal sealed partial class MyPreferences : Form
 {
     /// <summary>
-    ///
+    /// Initializes the preferences dialog using the current wiki connection
+    /// and application settings.
     /// </summary>
-    /// <param name="lang"></param>
-    /// <param name="proj"></param>
-    /// <param name="customproj"></param>
-    /// <param name="protocol"></param>
-    public MyPreferences(string lang, ProjectEnum proj, string customproj, string protocol)
+    /// <param name="lang">
+    /// The language code to select in the language list.
+    /// </param>
+    /// <param name="proj">
+    /// The currently selected Wikimedia or supported wiki project.
+    /// </param>
+    /// <param name="customproj">
+    /// The custom wiki host or project name to display when a custom project
+    /// is selected.
+    /// </param>
+    /// <param name="protocol">
+    /// The currently selected connection protocol, normally
+    /// <c>http://</c> or <c>https://</c>.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="lang"/>, <paramref name="customproj"/>,
+    /// or <paramref name="protocol"/> is <see langword="null"/>.
+    /// </exception>
+    public MyPreferences(
+        string lang,
+        ProjectEnum proj,
+        string customproj,
+        string protocol)
     {
+        ArgumentNullException.ThrowIfNull(lang);
+        ArgumentNullException.ThrowIfNull(customproj);
+        ArgumentNullException.ThrowIfNull(protocol);
+
         InitializeComponent();
 
-        foreach (ProjectEnum l in Enum.GetValues(typeof(ProjectEnum)))
+        foreach (ProjectEnum project in Enum.GetValues<ProjectEnum>())
         {
-            cmboProject.Items.Add(l);
+            cmboProject.Items.Add(project);
         }
 
         cmboProject.SelectedItem = proj;
 
+        // TODO: Extract the reusable project-selection logic from the event
+        // handler into a dedicated helper. Event handlers should not normally
+        // be invoked directly with null event arguments.
         cmboProject_SelectedIndexChanged(null, null);
 
-        cmboLang.SelectedItem = lang.ToLower();
+        cmboLang.SelectedItem = lang.ToLowerInvariant();
 
         cmboCustomProject.Items.Clear();
-        foreach (string s in Properties.Settings.Default.CustomWikis.Split('|')
-                     .Where(s => !cmboCustomProject.Items.Contains(s)))
+
+        foreach (string customWiki in Properties.Settings.Default.CustomWikis
+                     .Split(
+                         '|',
+                         StringSplitOptions.RemoveEmptyEntries |
+                         StringSplitOptions.TrimEntries)
+                     .Distinct(StringComparer.Ordinal))
         {
-            cmboCustomProject.Items.Add(s);
+            cmboCustomProject.Items.Add(customWiki);
         }
 
         cmboCustomProject.Text = customproj;
 
-        chkSupressAWB.Enabled = (cmboProject.Text == "custom" || cmboProject.Text == "wikia" ||
-                                 cmboProject.Text == "fandom");
+        // TODO: Compare the selected ProjectEnum value directly rather than
+        // relying on the combo box display text. Confirm the corresponding
+        // ProjectEnum member names before changing this behavior.
+        chkSupressAWB.Enabled =
+            cmboProject.Text == "custom" ||
+            cmboProject.Text == "wikia" ||
+            cmboProject.Text == "fandom";
 
-        chkAlwaysConfirmExit.Checked = Properties.Settings.Default.AskForTerminate;
+        chkAlwaysConfirmExit.Checked =
+            Properties.Settings.Default.AskForTerminate;
+
+        // The persisted Privacy setting has inverse semantics relative to the
+        // checkbox state.
+        // TODO: Investigate whether this setting can be renamed or migrated to
+        // remove the inversion during a future settings-model redesign.
         chkPrivacy.Checked = !Properties.Settings.Default.Privacy;
 
         if (Globals.UsingMono)
         {
+            // Flashing the application window is not supported under Mono.
             chkFlash.Enabled = false;
             chkFlash.Checked = false;
         }
 
-        cmboProtocol.SelectedIndex = (protocol == "http://") ? 1 : 0;
+        // Index 1 represents HTTP; index 0 represents HTTPS.
+        // TODO: Replace index-based protocol selection with value-based
+        // selection so that future ComboBox item reordering is safe.
+        cmboProtocol.SelectedIndex = string.Equals(
+            protocol,
+            "http://",
+            StringComparison.Ordinal)
+            ? 1
+            : 0;
     }
 
     #region Language and project
