@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AutoWikiBrowser.Services.ExternalPrograms;
+﻿namespace AutoWikiBrowser.Services.ExternalPrograms;
 
 /// <summary>
 /// Contains the result of processing article text with an external program.
@@ -22,6 +18,8 @@ internal sealed class ExternalProgramResult
         string articleText,
         bool skip)
     {
+        ArgumentNullException.ThrowIfNull(articleText);
+
         ArticleText = articleText;
         Skip = skip;
     }
