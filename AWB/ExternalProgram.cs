@@ -382,14 +382,44 @@ private void chkEnabled_CheckedChanged(
         Hide();
     }
 
-    private void btnSelectProgram_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Allows the user to browse for the external program executable.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the click event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnSelectProgram_Click(
+        object sender,
+        EventArgs e)
     {
-        if (string.IsNullOrEmpty(openProgram.InitialDirectory))
-            openProgram.InitialDirectory = Application.StartupPath;
+        InitializeDialogDirectory(openProgram);
 
         if (openProgram.ShowDialog() == DialogResult.OK)
         {
-            txtProgram.Text = openProgram.FileName;
+            txtProgram.Text =
+                openProgram.FileName;
+        }
+    }
+
+    /// <summary>
+    /// Initializes the file dialog to the application directory when no initial
+    /// directory has been configured.
+    /// </summary>
+    /// <param name="dialog">
+    /// The file dialog to initialize.
+    /// </param>
+    private static void InitializeDialogDirectory(
+        FileDialog dialog)
+    {
+        ArgumentNullException.ThrowIfNull(dialog);
+
+        if (string.IsNullOrEmpty(dialog.InitialDirectory))
+        {
+            dialog.InitialDirectory =
+                Application.StartupPath;
         }
     }
 
