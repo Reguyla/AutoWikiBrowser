@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+using AutoWikiBrowser.Services.ExternalPrograms;
 using System.ComponentModel;
 using System.Windows.Forms;
 using WikiFunctions;
@@ -135,12 +136,6 @@ private void chkEnabled_CheckedChanged(
     UpdateEnabledState();
 }
 
-    // Look at User:Pseudomonas/AWBPerlWrapperPlugin
-    // TODO (External Program Modernization):
-    // Move process execution, argument construction, input/output file handling,
-    // and article-result processing into a dedicated service. Keep this form
-    // responsible only for collecting settings and displaying validation or
-    // execution results.
     /// <summary>
     /// Processes article text using the configured external program.
     /// </summary>
@@ -156,114 +151,76 @@ private void chkEnabled_CheckedChanged(
     /// </param>
     /// <param name="summary">
     /// Receives the edit summary produced by the module. This implementation
-    /// currently returns an empty summary.
+    /// returns an empty summary.
     /// </param>
     /// <param name="skip">
     /// Receives <see langword="true"/> when skip-unchanged is enabled and the
     /// external program returns text identical to the original article.
     /// </param>
     /// <returns>
-    /// The transformed article text, or the original text if processing fails or
-    /// no output file is produced.
+    /// The transformed article text, or the original text when external processing
+    /// fails or produces no output file.
     /// </returns>
-    public string ProcessArticle(string articleText, string articleTitle, int @namespace, out string summary, out bool skip)
+    public string ProcessArticle(
+        string articleText,
+        string articleTitle,
+        int @namespace,
+        out string summary,
+        out bool skip)
     {
-        string origText = articleText;
+        summary = string.Empty;
         skip = false;
-        summary = "";
 
-        string ioFile = txtFile.Text;
+        ExternalProgramOptions options =
+            CreateExecutionOptions();
 
         try
         {
-            // under Wine WaitForExit() does not work and need to use absolute file paths. So under Linux use StandardOutput.ReadToEnd instead
-            if (Globals.UsingLinux)
-            {
-                using (System.Diagnostics.Process p = new System.Diagnostics.Process())
-                {
-                    p.StartInfo.FileName = txtProgram.Text;
-                    p.StartInfo.Arguments = Tools.ApplyKeyWords(articleTitle, txtParameters.Text.Replace("%%file%%", txtFile.Text));
-                    p.StartInfo.UseShellExecute = false;
-                    p.StartInfo.RedirectStandardOutput = true;
+            ExternalProgramResult result =
+                ExternalProgramRunner.ProcessArticle(
+                    articleText,
+                    articleTitle,
+                    options);
 
-                    if (radFile.Checked)
-                        Tools.WriteTextFileAbsolutePath(articleText, ioFile, false);
-                    else
-                        p.StartInfo.Arguments = p.StartInfo.Arguments.Replace("%%articletext%%", articleText);
+            skip = result.Skip;
 
-                    p.Start();
-
-                    // TODO (External Program Reliability):
-                    // Add configurable timeout and cancellation support so an unresponsive
-                    // external process cannot block AWB indefinitely. Ensure the process is
-                    // terminated safely when the operation is canceled or times out.
-                    //
-                    // TODO (External Program Compatibility):
-                    // Define whether redirected standard output is diagnostic output or the
-                    // transformed article text. The Linux path currently reads and logs standard
-                    // output but only returns text read from the configured output file.
-                    string output = p.StandardOutput.ReadToEnd();
-
-                    p.Close();
-
-                    // pretend to do something with output just to keep compiler happy
-                    Tools.WriteDebug("Ext Proc", output);
-                }
-            }
-            else
-            {
-                System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
-                {
-                    WorkingDirectory = Path.GetDirectoryName(txtProgram.Text),
-                    FileName = Path.GetFileName(txtProgram.Text),
-                    Arguments = Tools.ApplyKeyWords(articleTitle, txtParameters.Text.Replace("%%file%%", txtFile.Text))
-                };
-
-                if (radFile.Checked)
-                {
-                    if (txtFile.Text.Contains("\\"))
-                        Tools.WriteTextFileAbsolutePath(articleText, ioFile, false);
-                    else
-                        Tools.WriteTextFile(articleText, ioFile, false);
-                }
-                else
-                    // TODO (External Program Modernization):
-                    // Replace direct article-text substitution into the command-line string with
-                    // standard input, a temporary file, or structured ProcessStartInfo.ArgumentList
-                    // handling. Large or quoted article text may exceed command-line limits or be
-                    // parsed incorrectly by the target program.
-                    psi.Arguments = psi.Arguments.Replace("%%articletext%%", articleText);
-
-                System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
-
-                p.WaitForExit();
-            }
-
-            // TODO (External Program Safety):
-            // Track whether AWB created the input/output file during the current operation
-            // and delete only files that AWB owns. Avoid deleting a pre-existing
-            // user-selected file unintentionally.
-            if (File.Exists(ioFile))
-            {
-                articleText = File.ReadAllText(ioFile);
-
-                skip = (chkSkip.Checked && (articleText == origText));
-
-                File.Delete(ioFile);
-            }
-            return articleText;
+            return result.ArticleText;
         }
         catch (Exception ex)
         {
-            Tools.WriteDebug("Ext Proc", ex.StackTrace);
-            // Most, if not all exceptions here are related to user wrong user input
-            // or environment specifics, so ErrorHandler is not needed.
-            MessageBox.Show(ActiveForm, ex.Message, "External processing error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Tools.WriteDebug(
+                "Ext Proc",
+                ex.ToString());
 
-            return origText;
+            // Most failures here result from invalid user configuration or
+            // environment-specific conditions, so the general ErrorHandler is not
+            // invoked.
+            MessageBox.Show(
+                this,
+                ex.Message,
+                "External processing error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return articleText;
         }
     }
+
+    /// <summary>
+    /// Creates an execution-settings snapshot from the current dialog controls.
+    /// </summary>
+    /// <returns>
+    /// The settings required to execute the configured external program.
+    /// </returns>
+    private ExternalProgramOptions CreateExecutionOptions() =>
+        new()
+        {
+            ProgramPath = txtProgram.Text,
+            Parameters = txtParameters.Text,
+            PassAsFile = radFile.Checked,
+            OutputFile = txtFile.Text,
+            SkipUnchanged = chkSkip.Checked
+        };
 
     /// <summary>
     /// Initializes the enabled state and tooltip text for the external program
