@@ -17,17 +17,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using AutoWikiBrowser.Services.ExternalPrograms;
+using ExternalProgramPrefs = WikiFunctions.AWBSettings.ExternalProgramPrefs;
 using System.ComponentModel;
 using System.Windows.Forms;
 using WikiFunctions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace AutoWikiBrowser;
 
-// TODO (Module Modernization):
-// Separate the external process execution logic from the Windows Forms UI.
-// This form should eventually become a configuration surface, with execution
-// handled by a dedicated service that can be reused by future UI frameworks.
 /// <summary>
 /// Configures and executes an external program as an AutoWikiBrowser
 /// custom processing module.
@@ -44,6 +40,7 @@ public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
     // Review whether AWBToolTip should be added to the form's component
     // container or disposed explicitly if it acquires disposable resources.
     private readonly WikiFunctions.Controls.AWBToolTip _toolTip;
+
     /// <summary>
     /// Initializes the external program configuration dialog.
     /// </summary>
@@ -79,11 +76,11 @@ public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
     /// not be serialized independently by the Windows Forms designer.
     /// </remarks>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public WikiFunctions.AWBSettings.ExternalProgramPrefs Settings
+    public ExternalProgramPrefs Settings
     {
         get
         {
-            return new WikiFunctions.AWBSettings.ExternalProgramPrefs
+            return new ExternalProgramPrefs
             {
                 Enabled = chkEnabled.Checked,
                 Skip = chkSkip.Checked,
@@ -95,6 +92,8 @@ public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
         }
         set
         {
+            ArgumentNullException.ThrowIfNull(value);
+
             chkEnabled.Checked = value.Enabled;
             chkSkip.Checked = value.Skip;
             txtProgram.Text = value.Program;
@@ -106,35 +105,36 @@ public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
         }
     }
 
-/// <summary>
-/// Updates the enabled state of the external program configuration controls.
-/// </summary>
-/// <remarks>
-/// When the module is disabled, all execution options are disabled to prevent
-/// editing settings that are not currently in use.
-/// </remarks>
-private void UpdateEnabledState()
-{
-    groupBox1.Enabled =
-        chkSkip.Enabled =
-        chkEnabled.Checked;
-}
+    /// <summary>
+    /// Updates the enabled state of the external program configuration controls.
+    /// </summary>
+    /// <remarks>
+    /// When the module is disabled, all execution options are disabled to prevent
+    /// editing settings that are not currently in use.
+    /// </remarks>
+    private void UpdateEnabledState()
+    {
+        groupBox1.Enabled =
+            chkSkip.Enabled =
+            chkEnabled.Checked;
+    }
 
-/// <summary>
-/// Updates the dialog when the module enabled state changes.
-/// </summary>
-/// <param name="sender">
-/// The checkbox that raised the event.
-/// </param>
-/// <param name="e">
-/// Event data for the checked-state change.
-/// </param>
-private void chkEnabled_CheckedChanged(
-    object sender,
-    EventArgs e)
-{
-    UpdateEnabledState();
-}
+    /// <summary>
+    /// Updates the dialog when the module enabled state changes.
+    /// </summary>
+    /// <param name="sender">
+    /// The checkbox that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the checked-state change.
+    /// </param>
+    private void chkEnabled_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        UpdateEnabledState();
+        UpdateInputModeState();
+    }
 
     /// <summary>
     /// Processes article text using the configured external program.
@@ -354,7 +354,7 @@ private void chkEnabled_CheckedChanged(
     {
         InitializeDialogDirectory(openProgram);
 
-        if (openProgram.ShowDialog() == DialogResult.OK)
+        if (openProgram.ShowDialog(this) == DialogResult.OK)
         {
             txtProgram.Text =
                 openProgram.FileName;
@@ -396,7 +396,7 @@ private void chkEnabled_CheckedChanged(
     {
         InitializeDialogDirectory(openIO);
 
-        if (openIO.ShowDialog() == DialogResult.OK)
+        if (openIO.ShowDialog(this) == DialogResult.OK)
         {
             txtFile.Text =
                 openIO.FileName;
