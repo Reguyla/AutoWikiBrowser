@@ -67,6 +67,10 @@
   </ItemGroup>
 <ItemGroup>
   <ProjectReference Include="..\WikiFunctions\WikiFunctions.csproj" />
+
+  <!-- Build AWBUpdater before copying its output into the AWB directory. -->
+  <ProjectReference Include="..\AWBUpdater\AWBUpdater.csproj"
+                    ReferenceOutputAssembly="false" />
 </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4078.44" />
