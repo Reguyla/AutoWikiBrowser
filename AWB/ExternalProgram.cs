@@ -306,16 +306,78 @@ private void chkEnabled_CheckedChanged(
             fileTooltip);
     }
 
-    private void btnOk_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Validates the external program configuration before closing the dialog.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the click event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnOk_Click(
+        object sender,
+        EventArgs e)
     {
-        if (!chkEnabled.Checked || !string.IsNullOrEmpty(txtProgram.Text) && !string.IsNullOrEmpty(txtFile.Text) || (radParameter.Checked && !string.IsNullOrEmpty(txtParameters.Text)))
+        if (HasValidSettings())
+        {
             Close();
-        else
-            MessageBox.Show("Please make sure all relevant fields are completed");
+            return;
+        }
+
+        MessageBox.Show(
+            this,
+            "Please make sure all relevant fields are completed.",
+            "Incomplete external program settings",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
     }
 
-    private void ExternalProgram_FormClosing(object sender, FormClosingEventArgs e)
+    /// <summary>
+    /// Determines whether the current external program settings are complete.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the current configuration contains all
+    /// required values; otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool HasValidSettings()
     {
+        if (!chkEnabled.Checked)
+            return true;
+
+        if (string.IsNullOrWhiteSpace(txtProgram.Text))
+            return false;
+
+        if (radFile.Checked)
+        {
+            return !string.IsNullOrWhiteSpace(
+                txtFile.Text);
+        }
+
+        return !string.IsNullOrWhiteSpace(
+            txtParameters.Text);
+    }
+
+    /// <summary>
+    /// Hides the dialog instead of disposing it when the user closes the window.
+    /// </summary>
+    /// <param name="sender">
+    /// The form that raised the closing event.
+    /// </param>
+    /// <param name="e">
+    /// Event data that allows the close operation to be canceled.
+    /// </param>
+    /// <remarks>
+    /// The dialog remains in memory so its configuration can be reused without
+    /// recreating the form.
+    /// </remarks>
+    private void ExternalProgram_FormClosing(
+        object sender,
+        FormClosingEventArgs e)
+    {
+        // TODO (UI Modernization):
+        // Review this lifecycle when the module configuration is converted to a
+        // dockable panel or other reusable UI component.
         e.Cancel = true;
         Hide();
     }
