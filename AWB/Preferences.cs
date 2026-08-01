@@ -240,92 +240,91 @@ internal sealed partial class MyPreferences : Form
         cmboCustomProject.Text = customProject;
     }
 
+    /// <summary>
+    /// Updates the available languages and project-specific controls when the
+    /// selected wiki project changes.
+    /// </summary>
     private void cmboProject_SelectedIndexChanged(object sender, EventArgs e)
     {
-        ProjectEnum prj = Project;
+        UpdateProjectSelection();
+    }
 
-        //disable language selection for single language projects
-        cmboLang.Enabled = prj < ProjectEnum.species;
+    /// <summary>
+    /// Configures the language list and project-specific controls for the
+    /// currently selected wiki project.
+    /// </summary>
+    private void UpdateProjectSelection()
+    {
+        ProjectEnum project = Project;
 
-        string temp = (cmboLang.SelectedItem != null) ? cmboLang.SelectedItem.ToString() : "";
+        // TODO: Replace this enum-order comparison with an explicit determination
+        // of whether the selected project supports multiple languages. The current
+        // behavior depends on the numeric ordering of ProjectEnum members.
+        cmboLang.Enabled = project < ProjectEnum.species;
+
+        string selectedLanguage =
+            cmboLang.SelectedItem?.ToString() ?? string.Empty;
 
         cmboLang.Items.Clear();
-        List<string> langs;
 
-        switch (prj)
+        List<string> languages = project switch
         {
-            case ProjectEnum.wikipedia:
-                langs = SiteMatrix.WikipediaLanguages;
-                break;
+            ProjectEnum.wikipedia => SiteMatrix.WikipediaLanguages,
+            ProjectEnum.wiktionary => SiteMatrix.WiktionaryLanguages,
+            ProjectEnum.wikibooks => SiteMatrix.WikibooksLanguages,
+            ProjectEnum.wikinews => SiteMatrix.WikinewsLanguages,
+            ProjectEnum.wikiquote => SiteMatrix.WikiquoteLanguages,
+            ProjectEnum.wikisource => SiteMatrix.WikisourceLanguages,
+            ProjectEnum.wikiversity => SiteMatrix.WikiversityLanguages,
+            _ => SiteMatrix.Languages
+        };
 
-            case ProjectEnum.wiktionary:
-                langs = SiteMatrix.WiktionaryLanguages;
-                break;
+        cmboLang.Items.AddRange(languages.ToArray());
 
-            case ProjectEnum.wikibooks:
-                langs = SiteMatrix.WikibooksLanguages;
-                break;
-
-            case ProjectEnum.wikinews:
-                langs = SiteMatrix.WikinewsLanguages;
-                break;
-
-            case ProjectEnum.wikiquote:
-                langs = SiteMatrix.WikiquoteLanguages;
-                break;
-
-            case ProjectEnum.wikisource:
-                langs = SiteMatrix.WikisourceLanguages;
-                break;
-
-            case ProjectEnum.wikiversity:
-                langs = SiteMatrix.WikiversityLanguages;
-                break;
-
-            default:
-                langs = SiteMatrix.Languages;
-                break;
+        if (!string.IsNullOrEmpty(selectedLanguage))
+        {
+            cmboLang.SelectedIndex =
+                cmboLang.Items.IndexOf(selectedLanguage);
         }
 
-        cmboLang.Items.AddRange(langs.ToArray());
+        bool isCustomProject = project == ProjectEnum.custom;
+        bool isWikiaProject = project == ProjectEnum.wikia;
+        bool isFandomProject = project == ProjectEnum.fandom;
+        bool usesCustomProjectControls =
+            isCustomProject || isWikiaProject || isFandomProject;
 
-        if (!string.IsNullOrEmpty(temp))
-        {
-            cmboLang.SelectedIndex = cmboLang.Items.IndexOf(temp);
-        }
+        chkSupressAWB.Enabled = isCustomProject;
+        cmboProtocol.Enabled = isCustomProject;
+        DomainEnabled = isCustomProject;
 
-        chkSupressAWB.Enabled = cmboProtocol.Enabled = DomainEnabled = prj.Equals(ProjectEnum.custom);
-        if (prj.Equals(ProjectEnum.custom) || prj.Equals(ProjectEnum.wikia) || prj.Equals(ProjectEnum.fandom))
+        if (usesCustomProjectControls)
         {
             cmboProtocol.Visible = true;
-
             cmboCustomProject.Visible = true;
             cmboLang.Visible = false;
-            if (prj.Equals(ProjectEnum.wikia) || prj.Equals(ProjectEnum.fandom))
+
+            if (isWikiaProject || isFandomProject)
             {
+                // Wikia and Fandom projects always use HTTPS.
                 cmboProtocol.SelectedIndex = 0;
             }
 
-            if (prj.Equals(ProjectEnum.wikia))
+            lblPostfix.Text = project switch
             {
-                lblPostfix.Text = ".wikia.com";
-            }
-            else if (prj.Equals(ProjectEnum.fandom))
-            {
-                lblPostfix.Text = ".fandom.com";
-            }
-            else
-            {
-                lblPostfix.Text = "";
-            }
+                ProjectEnum.wikia => ".wikia.com",
+                ProjectEnum.fandom => ".fandom.com",
+                _ => string.Empty
+            };
 
+            // TODO: Extract the reusable logic from cmboCustomProjectChanged into
+            // a dedicated helper rather than invoking an event handler directly.
             cmboCustomProjectChanged(null, null);
 
             return;
         }
 
         cmboProtocol.Visible = false;
-        lblPostfix.Text = "";
+        lblPostfix.Text = string.Empty;
         cmboCustomProject.Visible = false;
         cmboLang.Visible = true;
         btnOK.Enabled = true;
