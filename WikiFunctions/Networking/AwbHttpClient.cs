@@ -80,7 +80,14 @@ namespace WikiFunctions.Networking
                     continue;
                 }
 
-                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException(
+                        $"Request to '{response.RequestMessage?.RequestUri}' failed with "
+                        + $"{(int)response.StatusCode} ({response.ReasonPhrase}).",
+                        inner: null,
+                        response.StatusCode);
+                }
 
                 responseUrl =
                     response.RequestMessage?.RequestUri?.ToString() ?? url;
