@@ -760,7 +760,7 @@ internal sealed partial class MyPreferences : Form
             alertListBox.BeginUpdate();
             alertListBox.Items.Clear();
 
-            foreach (KeyValuePair<int, string> kvp in alertDescriptions)
+            foreach (KeyValuePair<int, string> kvp in _alertDescriptions)
             {
                 alertListBox.Items.Add(
                     new CheckedBoxItem
@@ -777,16 +777,25 @@ internal sealed partial class MyPreferences : Form
 
     #endregion
 
+    /// <summary>
+    /// Updates the autosave controls when the autosave option is enabled or
+    /// disabled.
+    /// </summary>
     private void chkAutoSaveEdit_CheckedChanged(object sender, EventArgs e)
     {
         PrefAutoSaveEditBoxEnabled = chkAutoSaveEdit.Checked;
     }
 
+    /// <summary>
+    /// Prompts the user to choose the autosave file location.
+    /// </summary>
     private void btnSetFile_Click(object sender, EventArgs e)
     {
+        // TODO: Consider initializing the dialog to the directory containing the
+        // current autosave file or the last directory selected by the user.
         saveFile.InitialDirectory = Application.StartupPath;
-        saveFile.ShowDialog();
-        if (!string.IsNullOrEmpty(saveFile.FileName))
+
+        if (saveFile.ShowDialog() == DialogResult.OK)
         {
             txtAutosave.Text = saveFile.FileName;
         }
@@ -842,48 +851,95 @@ internal sealed partial class MyPreferences : Form
         }
     }
 
+    /// <summary>
+    /// Updates the bot-mode diff option when the article-load action changes.
+    /// </summary>
     private void cmboOnLoad_SelectedIndexChanged(object sender, EventArgs e)
     {
-        chkDiffInBotMode.Enabled = (cmboOnLoad.SelectedIndex.Equals(0));
+        // TODO: Replace the raw article-load selection index with a named enum
+        // value so this logic is not coupled to ComboBox item ordering.
+        chkDiffInBotMode.Enabled = cmboOnLoad.SelectedIndex == 0;
     }
 
-    public bool FocusSiteTab = false;
+    /// <summary>
+    /// Gets or sets whether the site preferences tab should be selected when the
+    /// preferences form is activated.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool FocusSiteTab { get; set; }
 
+    /// <summary>
+    /// Selects the site preferences tab when requested after the form becomes
+    /// active.
+    /// </summary>
+    /// <param name="e">
+    /// The event data associated with form activation.
+    /// </param>
     protected override void OnActivated(EventArgs e)
     {
         base.OnActivated(e);
+
         if (FocusSiteTab)
+        {
             tbPrefs.SelectTab(1);
+        }
     }
 
+    /// <summary>
+    /// Updates the enabled state of the manual domain controls.
+    /// </summary>
+    private void UpdateDomainControls()
+    {
+        txtDomain.Enabled =
+            chkDomain.Enabled &&
+            chkDomain.Checked;
+    }
+
+    /// <summary>
+    /// Updates the domain text box when the manual-domain option changes.
+    /// </summary>
     private void chkDomain_CheckedChanged(object sender, EventArgs e)
     {
-        txtDomain.Enabled = chkDomain.Checked;
+        UpdateDomainControls();
     }
 
-    private readonly Dictionary<int, string> alertDescriptions = new Dictionary<int, string>
-    {
-        {1, "Ambiguous citation dates"},
-        {2, "Contains 'sic' tag"},
-        {3, "DAB page with <ref>s"},
-        {4, "Dead links"},
-        {5, "Duplicate parameters in WPBannerShell"},
-        {6, "Has <ref> after </references>"},
-        {7, "Has 'No/More footnotes' template yet many references"},
-        {8, "Headers with wikilinks"},
-        {9, "Invalid citation parameters"},
-        {10, "Links with double pipes"},
-        {11, "Links with no target"},
-        {12, "Long article with stub tag"},
-        {13, "Multiple DEFAULTSORT"},
-        {14, "No category (may be one in a template)"},
-        {15, "See also section out of place"},
-        {16, "Starts with heading"},
-        {17, "Unbalanced brackets"},
-        {18, "Unclosed tags"},
-        {19, "Unformatted references"},
-        {20, "Unknown parameters in multiple issues"},
-        {21, "Unknown parameters in WikiProject banner shell"},
-        {22, "Editor's signature or link to user space"}
-    };
+    /// <summary>
+    /// Maps article-alert identifiers to their user-facing descriptions.
+    /// </summary>
+    /// <remarks>
+    /// The numeric identifiers must remain synchronized with the alert values
+    /// used by the article-checking and preferences logic.
+    /// </remarks>
+    // TODO: Replace the numeric alert identifiers with a named enum after
+    // confirming whether these values are persisted or used outside this form.
+    //
+    // TODO: Move user-facing alert descriptions to application resources if the
+    // preferences interface is localized in the future.
+    private static readonly IReadOnlyDictionary<int, string> _alertDescriptions =
+        new Dictionary<int, string>
+        {
+        { 1, "Ambiguous citation dates" },
+        { 2, "Contains 'sic' tag" },
+        { 3, "DAB page with <ref>s" },
+        { 4, "Dead links" },
+        { 5, "Duplicate parameters in WPBannerShell" },
+        { 6, "Has <ref> after </references>" },
+        { 7, "Has 'No/More footnotes' template yet many references" },
+        { 8, "Headers with wikilinks" },
+        { 9, "Invalid citation parameters" },
+        { 10, "Links with double pipes" },
+        { 11, "Links with no target" },
+        { 12, "Long article with stub tag" },
+        { 13, "Multiple DEFAULTSORT" },
+        { 14, "No category (may be one in a template)" },
+        { 15, "See also section out of place" },
+        { 16, "Starts with heading" },
+        { 17, "Unbalanced brackets" },
+        { 18, "Unclosed tags" },
+        { 19, "Unformatted references" },
+        { 20, "Unknown parameters in multiple issues" },
+        { 21, "Unknown parameters in WikiProject banner shell" },
+        { 22, "Editor's signature or link to user space" }
+        };
 }
