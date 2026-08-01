@@ -44,6 +44,10 @@ public class TyposDownloader : ITyposProvider
 {
     private static readonly Regex TypoRegex = new Regex("<(?:Typo)?\\s+(?:word=\"(.*?)\"\\s+)?find=\"(.*?)\"\\s+replace=\"(.*?)\"\\s*/?>", RegexOptions.Compiled);
 
+    private const string EnglishWikipediaTypoListUrl =
+        "https://en.wikipedia.org/w/index.php" +
+        "?title=Wikipedia:AutoWikiBrowser/Typos&action=raw";
+
     /// <summary>
     /// Returns the full URL to the typo rules page e.g. https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/Typos
     /// </summary>
@@ -51,14 +55,28 @@ public class TyposDownloader : ITyposProvider
     {
         get
         {
-            string typolistUrl = Variables.RetfPath;
+            string typoListSource = Variables.RetfPath;
 
-            // convert RetfPath to full URL if currently a local page name only e.g. Wikipedia:AutoWikiBrowser/Typos
-            if (!typolistUrl.StartsWith("http"))
-                typolistUrl = Variables.GetPlainTextURL(typolistUrl);
+            // Preserve an explicitly configured absolute URL.
+            if (Uri.TryCreate(
+                    typoListSource,
+                    UriKind.Absolute,
+                    out Uri? absoluteUri))
+            {
+                return absoluteUri.AbsoluteUri;
+            }
 
-            return typolistUrl;
+            // For now, page-title-only configurations use the standard
+            // English Wikipedia typo list rather than the current wiki.
+            return EnglishWikipediaTypoListUrl;
         }
+    }
+
+    private static bool IsEnglishWikipediaTypoList(string url)
+    {
+        return url.Equals(
+            EnglishWikipediaTypoListUrl,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -73,48 +91,92 @@ public class TyposDownloader : ITyposProvider
         try
         {
             string text = "";
+            string sourceUrl = Url;
+            Exception? sourceException = null;
+
             try
             {
-                // TODO: This doesn't work against authenticated wikis, need to load via Editor.HttpGet() for auth'd request
-                text = Tools.GetHTML(Url, Encoding.UTF8);
+                text = Tools.GetHTML(sourceUrl, Encoding.UTF8);
             }
-            catch
+            catch (Exception ex)
             {
-                if (string.IsNullOrEmpty(text))
+                sourceException = ex;
+            }
+
+            if (string.IsNullOrEmpty(text))
+            {
+                // Do not offer to retry the same English Wikipedia source.
+                if (IsEnglishWikipediaTypoList(sourceUrl))
                 {
-                    if (
-                        MessageBox.Show(
-                            "No list of typos was found. Would you like to use the list of typos from the English Wikipedia?\r\nOnly choose 'Yes' if this is an English wiki.",
-                            "Load from English Wikipedia?", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                    {
-                        return typoStrings;
-                    }
-                    try
-                    {
-                        text =
-                            Tools.GetHTML(
-                                "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/Typos&action=raw",
-                                Encoding.UTF8);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("There was a problem loading the list of typos: " + ex.Message);
-                    }
+                    MessageBox.Show(
+                        "There was a problem loading the typo list from English Wikipedia:" +
+                        "\r\n\r\n" +
+                        sourceException?.Message,
+                        "Typo list unavailable",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+
+                    return typoStrings;
+                }
+
+                if (MessageBox.Show(
+                        "No list of typos was found at the configured location." +
+                        "\r\n\r\n" +
+                        "Would you like to use the list of typos from English Wikipedia?" +
+                        "\r\n\r\n" +
+                        "Only choose 'Yes' if this is an English-language wiki.",
+                        "Load from English Wikipedia?",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question) != DialogResult.Yes)
+                {
+                    return typoStrings;
+                }
+
+                try
+                {
+                    text = Tools.GetHTML(
+                        EnglishWikipediaTypoListUrl,
+                        Encoding.UTF8);
+                }
+                catch (Exception fallbackException)
+                {
+                    MessageBox.Show(
+                        "The configured typo list could not be loaded." +
+                        "\r\n\r\n" +
+                        "Configured source error:" +
+                        "\r\n" +
+                        (sourceException?.Message ??
+                         "No error details were available.") +
+                        "\r\n\r\n" +
+                        "English Wikipedia fallback error:" +
+                        "\r\n" +
+                        fallbackException.Message,
+                        "Typo list unavailable",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+
+                    return typoStrings;
                 }
             }
 
             if (string.IsNullOrEmpty(text))
-                return typoStrings; // Currently an empty dictionary
+                return typoStrings;
 
             foreach (Match m in TypoRegex.Matches(text))
             {
                 try
                 {
-                    typoStrings.Add(m.Groups[2].Value, m.Groups[3].Value);
+                    typoStrings.Add(
+                        m.Groups[2].Value,
+                        m.Groups[3].Value);
                 }
                 catch (ArgumentException)
                 {
-                    RegExTypoFix.TypoError("Duplicate typo rule '" + m.Groups[2].Value + "' found.");
+                    RegExTypoFix.TypoError(
+                        "Duplicate typo rule '" +
+                        m.Groups[2].Value +
+                        "' found.");
+
                     return new Dictionary<string, string>();
                 }
             }
@@ -122,582 +184,583 @@ public class TyposDownloader : ITyposProvider
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
-            // refuse to accept malformed typo lists to encourage people to correct errors
+
+            // Refuse to accept malformed typo lists to encourage people
+            // to correct errors.
             return new Dictionary<string, string>();
         }
 
         return typoStrings;
     }
 }
-
-/// <summary>
-/// Represents a group of similar typo regexes
-/// </summary>
-class TypoGroup
-{
     /// <summary>
-    /// Creates a group that holds similar typos
+    /// Represents a group of similar typo regexes
     /// </summary>
-    /// <param name="groupSize">Typos in a batch</param>
-    /// <param name="match">Regex each typo should match, its first group will be used for extraction</param>
-    /// <param name="dontMatch">Regex each typo shouldn't match</param>
-    /// <param name="prefix"></param>
-    /// <param name="postfix"></param>
-    public TypoGroup(int groupSize, string match, string dontMatch, string prefix, string postfix)
+    class TypoGroup
     {
-        GroupSize = groupSize;
-
-        if (!string.IsNullOrEmpty(match))
-            Allow = new Regex(match, RegexOptions.Compiled);
-        if (!string.IsNullOrEmpty(dontMatch))
-            Disallow = new Regex(dontMatch, RegexOptions.Compiled);
-
-        Prefix = prefix;
-        Postfix = postfix;
-    }
-
-    public readonly int GroupSize;
-    private readonly Regex Allow, Disallow;
-    private readonly string Prefix, Postfix;
-
-    private List<Regex> Groups;
-
-    public readonly List<KeyValuePair<Regex, string>> Typos = new List<KeyValuePair<Regex, string>>(20);
-
-    public readonly List<TypoStat> Statistics = new List<TypoStat>();
-
-    /// <summary>
-    /// Returns whether typo is suitable for group: not suitable if Allow regex doesn't match typo,
-    /// or Disallow regex matches typo
-    /// </summary>
-    /// <param name="typo"></param>
-    /// <returns></returns>
-    public bool IsSuitableTypo(string typo)
-    {
-        if (Allow != null && !Allow.IsMatch(typo)) return false;
-        if (Disallow != null && Disallow.IsMatch(typo)) return false;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Adds one typo regex to the list
-    /// </summary>
-    public void Add(string typo, string replacement)
-    {
-        if (!IsSuitableTypo(typo))
+        /// <summary>
+        /// Creates a group that holds similar typos
+        /// </summary>
+        /// <param name="groupSize">Typos in a batch</param>
+        /// <param name="match">Regex each typo should match, its first group will be used for extraction</param>
+        /// <param name="dontMatch">Regex each typo shouldn't match</param>
+        /// <param name="prefix"></param>
+        /// <param name="postfix"></param>
+        public TypoGroup(int groupSize, string match, string dontMatch, string prefix, string postfix)
         {
-            throw new ArgumentException("Typo \"" + typo + "\" is not suitable for this group.");
-        }
-        Regex r;
-        try
-        {
-            r = new Regex(typo, RegexOptions.Compiled);
-        }
-        catch (Exception ex)
-        {
-            RegExTypoFix.TypoError("Error in typo '" + typo + "': " + ex.Message);
-            throw new TypoException();
+            GroupSize = groupSize;
+
+            if (!string.IsNullOrEmpty(match))
+                Allow = new Regex(match, RegexOptions.Compiled);
+            if (!string.IsNullOrEmpty(dontMatch))
+                Disallow = new Regex(dontMatch, RegexOptions.Compiled);
+
+            Prefix = prefix;
+            Postfix = postfix;
         }
 
-        Typos.Add(new KeyValuePair<Regex, string>(r, replacement));
-    }
+        public readonly int GroupSize;
+        private readonly Regex Allow, Disallow;
+        private readonly string Prefix, Postfix;
 
-    /// <summary>
-    /// Makes grouped regexes
-    /// </summary>
-    public void MakeGroups()
-    {
-        if (GroupSize <= 1) return;
+        private List<Regex> Groups;
 
-        Groups = new List<Regex>(5);
-        for (int n = 0; n < (Typos.Count - 1) / GroupSize + 1; n++)
+        public readonly List<KeyValuePair<Regex, string>> Typos = new List<KeyValuePair<Regex, string>>(20);
+
+        public readonly List<TypoStat> Statistics = new List<TypoStat>();
+
+        /// <summary>
+        /// Returns whether typo is suitable for group: not suitable if Allow regex doesn't match typo,
+        /// or Disallow regex matches typo
+        /// </summary>
+        /// <param name="typo"></param>
+        /// <returns></returns>
+        public bool IsSuitableTypo(string typo)
         {
-            string s = "";
-            for (int i = 0; i < Math.Min(GroupSize, Typos.Count - n * GroupSize); i++)
+            if (Allow != null && !Allow.IsMatch(typo)) return false;
+            if (Disallow != null && Disallow.IsMatch(typo)) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Adds one typo regex to the list
+        /// </summary>
+        public void Add(string typo, string replacement)
+        {
+            if (!IsSuitableTypo(typo))
             {
-                string typo = Typos[n * GroupSize + i].Key.ToString();
-                if (Allow != null) typo = Allow.Match(typo).Groups[1].Value;
-                s += (s.Length == 0 ? "" : "|") + typo;
+                throw new ArgumentException("Typo \"" + typo + "\" is not suitable for this group.");
             }
-            if (s.Length > 0)
+            Regex r;
+            try
             {
-                Groups.Add(new Regex(Prefix + "(" + s + ")" + Postfix, RegexOptions.Compiled));
+                r = new Regex(typo, RegexOptions.Compiled);
             }
-        }
-    }
-
-    /// <summary>
-    /// Applies a given typo fix to the article, provided the typo does not also match the article title
-    /// Updates edit summary based on the first match (value and replacement) of the typo and the total number of replacements
-    /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="summary"></param>
-    /// <param name="typo"></param>
-    /// <param name="articleTitle">Title of the article</param>
-    private void FixTypo(ref string articleText, ref string summary, KeyValuePair<Regex, string> typo, string articleTitle)
-    {
-        // don't apply the typo if it matches on the Article's title
-        if (typo.Key.IsMatch(articleTitle))
-            return;
-
-        string comma = @", ";
-        if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
-            comma = @"، ";
-
-        MatchCollection matches = typo.Key.Matches(articleText);
-
-        if (matches.Count > 0)
-        {
-            TypoStat stats = new TypoStat(typo) { Total = matches.Count };
-
-            articleText = typo.Key.Replace(articleText, typo.Value);
-
-            int count = 0;
-
-            foreach (Match m in matches)
+            catch (Exception ex)
             {
-                string res = m.Result(typo.Value);
-                if (res != m.Value)
+                RegExTypoFix.TypoError("Error in typo '" + typo + "': " + ex.Message);
+                throw new TypoException();
+            }
+
+            Typos.Add(new KeyValuePair<Regex, string>(r, replacement));
+        }
+
+        /// <summary>
+        /// Makes grouped regexes
+        /// </summary>
+        public void MakeGroups()
+        {
+            if (GroupSize <= 1) return;
+
+            Groups = new List<Regex>(5);
+            for (int n = 0; n < (Typos.Count - 1) / GroupSize + 1; n++)
+            {
+                string s = "";
+                for (int i = 0; i < Math.Min(GroupSize, Typos.Count - n * GroupSize); i++)
                 {
-                    count++;
-                    if (1 == count)
-                        summary += (summary.Length > 0 ? comma : "") + m.Value + FindandReplace.Arrow + res;
+                    string typo = Typos[n * GroupSize + i].Key.ToString();
+                    if (Allow != null) typo = Allow.Match(typo).Groups[1].Value;
+                    s += (s.Length == 0 ? "" : "|") + typo;
+                }
+                if (s.Length > 0)
+                {
+                    Groups.Add(new Regex(Prefix + "(" + s + ")" + Postfix, RegexOptions.Compiled));
                 }
             }
-            if (count > 1)
-                summary += " (" + count + ")";
-
-            stats.SelfMatches = stats.Total - count;
-            Statistics.Add(stats);
         }
-    }
 
-    /// <summary>
-    /// Fixes typos
-    /// </summary>
-    /// <param name="articleText">The wiki text to update</param>
-    /// <param name="articleTitle">The title of the wiki page</param>
-    /// <param name="summary">The edit summary of the page changes</param>
-    [Obsolete]
-    public void FixTypos(ref string articleText, ref string summary, string articleTitle)
-    {
-        FixTypos(ref articleText, ref summary, articleTitle, articleText);
-    }
+        /// <summary>
+        /// Applies a given typo fix to the article, provided the typo does not also match the article title
+        /// Updates edit summary based on the first match (value and replacement) of the typo and the total number of replacements
+        /// </summary>
+        /// <param name="articleText">The wiki text of the article.</param>
+        /// <param name="summary"></param>
+        /// <param name="typo"></param>
+        /// <param name="articleTitle">Title of the article</param>
+        private void FixTypo(ref string articleText, ref string summary, KeyValuePair<Regex, string> typo, string articleTitle)
+        {
+            // don't apply the typo if it matches on the Article's title
+            if (typo.Key.IsMatch(articleTitle))
+                return;
 
-    private static readonly Object obj = new Object();
-    /// <summary>
-    /// Fixes typos
-    /// </summary>
-    /// <param name="articleText">The wiki text to update</param>
-    /// <param name="articleTitle">The title of the wiki page</param>
-    /// <param name="originalArticleText">The wiki text of the page, without any typo fixes applied</param>
-    /// <param name="summary">The edit summary of the page changes</param>
-    public void FixTypos(ref string articleText, ref string summary, string articleTitle, string originalArticleText)
-    {
-        Statistics.Clear();
-        if (Groups != null)
-            for (int i = 0; i < Groups.Count; i++)
+            string comma = @", ";
+            if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
+                comma = @"، ";
+
+            MatchCollection matches = typo.Key.Matches(articleText);
+
+            if (matches.Count > 0)
             {
-                if (Groups[i].IsMatch(articleText))
+                TypoStat stats = new TypoStat(typo) { Total = matches.Count };
+
+                articleText = typo.Key.Replace(articleText, typo.Value);
+
+                int count = 0;
+
+                foreach (Match m in matches)
                 {
-                    for (int j = 0; j < Math.Min(GroupSize, Typos.Count - i * GroupSize); j++)
+                    string res = m.Result(typo.Value);
+                    if (res != m.Value)
                     {
-                        // don't apply the typo if it matches on a link target in wikilink (but not image/interwiki/category link)
-                        // T350636 1-minute timeout to guard against regex backtracking
-                        if (!Regex.IsMatch(originalArticleText, @"\[\[[^[\]\n\|]*?" + Typos[i * GroupSize + j].Key + @"[^\[\]\r\n\|]*?(?<!\[\[[A-Z]?[a-z-]{2,}:[^[\]\n]+)(?:\]\]|\|)", RegexOptions.None, TimeSpan.FromSeconds(60)))
-                            FixTypo(ref articleText, ref summary, Typos[i * GroupSize + j], articleTitle);
+                        count++;
+                        if (1 == count)
+                            summary += (summary.Length > 0 ? comma : "") + m.Value + FindandReplace.Arrow + res;
                     }
                 }
+                if (count > 1)
+                    summary += " (" + count + ")";
+
+                stats.SelfMatches = stats.Total - count;
+                Statistics.Add(stats);
             }
-        else
-            foreach (KeyValuePair<Regex, string> typo in Typos)
-                FixTypo(ref articleText, ref summary, typo, articleTitle);
-    }
-
-    public void FixTypos2(string articleText, string summary, string articleTitle, string originalArticleText)
-    {
-        FixTypos(ref articleText, ref summary, articleTitle, originalArticleText);
-
-        lock (obj)
-        {
-            RegExTypoFix.resultSummary.Add(GroupSize, summary);
-            RegExTypoFix.resultArticleText.Add(GroupSize, articleText);
-        }
-    }
-}
-
-/// <summary>
-///
-/// </summary>
-public class RegExTypoFix
-{
-    private readonly BackgroundRequest TypoThread;
-    public event BackgroundRequestComplete Complete;
-
-    private readonly ITyposProvider Source;
-
-    /// <summary>
-    /// Default constructor, typos will be loaded on a new thread from the default location
-    /// </summary>
-    public RegExTypoFix()
-        : this(true, new TyposDownloader())
-    {
-    }
-
-    /// <summary>
-    /// Constructs an object that will load typos from the specified source in a separate thread
-    /// </summary>
-    /// <param name="provider">Typos provider to use</param>
-    public RegExTypoFix(ITyposProvider provider)
-        : this(true, provider)
-    {
-    }
-
-    /// <summary>
-    /// Constructs an object that
-    /// </summary>
-    /// <param name="loadThreaded"></param>
-    public RegExTypoFix(bool loadThreaded)
-        : this(loadThreaded, new TyposDownloader())
-    {
-    }
-
-    /// <summary>
-    /// Default constructor, typos being loaded on separate thread is optional
-    /// </summary>
-    /// <param name="loadThreaded">Whether to load typos on a new thread</param>
-    /// <param name="provider">Typos provider to use</param>
-    public RegExTypoFix(bool loadThreaded, ITyposProvider provider)
-    {
-        Source = provider;
-        if (!loadThreaded)
-        {
-            MakeRegexes();
-            return;
         }
 
-        TypoThread = new BackgroundRequest(Complete);
-        TypoThread.Execute(MakeRegexes);
+        /// <summary>
+        /// Fixes typos
+        /// </summary>
+        /// <param name="articleText">The wiki text to update</param>
+        /// <param name="articleTitle">The title of the wiki page</param>
+        /// <param name="summary">The edit summary of the page changes</param>
+        [Obsolete]
+        public void FixTypos(ref string articleText, ref string summary, string articleTitle)
+        {
+            FixTypos(ref articleText, ref summary, articleTitle, articleText);
+        }
+
+        private static readonly Object obj = new Object();
+        /// <summary>
+        /// Fixes typos
+        /// </summary>
+        /// <param name="articleText">The wiki text to update</param>
+        /// <param name="articleTitle">The title of the wiki page</param>
+        /// <param name="originalArticleText">The wiki text of the page, without any typo fixes applied</param>
+        /// <param name="summary">The edit summary of the page changes</param>
+        public void FixTypos(ref string articleText, ref string summary, string articleTitle, string originalArticleText)
+        {
+            Statistics.Clear();
+            if (Groups != null)
+                for (int i = 0; i < Groups.Count; i++)
+                {
+                    if (Groups[i].IsMatch(articleText))
+                    {
+                        for (int j = 0; j < Math.Min(GroupSize, Typos.Count - i * GroupSize); j++)
+                        {
+                            // don't apply the typo if it matches on a link target in wikilink (but not image/interwiki/category link)
+                            // T350636 1-minute timeout to guard against regex backtracking
+                            if (!Regex.IsMatch(originalArticleText, @"\[\[[^[\]\n\|]*?" + Typos[i * GroupSize + j].Key + @"[^\[\]\r\n\|]*?(?<!\[\[[A-Z]?[a-z-]{2,}:[^[\]\n]+)(?:\]\]|\|)", RegexOptions.None, TimeSpan.FromSeconds(60)))
+                                FixTypo(ref articleText, ref summary, Typos[i * GroupSize + j], articleTitle);
+                        }
+                    }
+                }
+            else
+                foreach (KeyValuePair<Regex, string> typo in Typos)
+                    FixTypo(ref articleText, ref summary, typo, articleTitle);
+        }
+
+        public void FixTypos2(string articleText, string summary, string articleTitle, string originalArticleText)
+        {
+            FixTypos(ref articleText, ref summary, articleTitle, originalArticleText);
+
+            lock (obj)
+            {
+                RegExTypoFix.resultSummary.Add(GroupSize, summary);
+                RegExTypoFix.resultArticleText.Add(GroupSize, articleText);
+            }
+        }
     }
-
-    /// <summary>
-    /// Creates a RETF rule
-    /// </summary>
-    public static string CreateRule(string find, string replace, string name)
-    {
-        return "<Typo word=\"" + name + "\" find=\"" + find + "\" replace=\"" + replace + "\" />";
-    }
-
-    /// <summary>
-    /// Creates a RETF rule with a placeholder name
-    /// </summary>
-    public static string CreateRule(string find, string replace)
-    {
-        return CreateRule(find, replace, "<enter a name>");
-    }
-
-    /// <summary>
-    /// Number of typos loaded
-    /// </summary>
-    public int TypoCount { get; private set; }
-
-    /// <summary>
-    /// Whether the typos have been loaded successfully
-    /// </summary>
-    public bool TyposLoaded { get; private set; }
 
     /// <summary>
     ///
     /// </summary>
-    private static readonly Regex IgnoreRegex = new Regex("\\(sic\\)|\\[sic\\]|\\[''sic''\\]|\\{\\{sic\\}\\}|spellfixno", RegexOptions.Compiled);
-    private static readonly Regex RemoveTail = new Regex(@"(\s|\n|\r|\*|#|:|⌊⌊⌊⌊M?\d*⌋⌋⌋⌋)+$", RegexOptions.Compiled);
-    private readonly List<TypoGroup> Groups = new List<TypoGroup>();
-
-    /// <summary>
-    /// Displays a typo rule error message and instructions for reloading the
-    /// typo definitions.
-    /// </summary>
-    /// <param name="error"></param>
-    internal static void TypoError(string error)
+    public class RegExTypoFix
     {
-        MessageBox.Show(error + "\r\n\r\nPlease visit the typo page at " + Variables.RetfPath +
-            " and fix this error, then click 'File → Refresh status/typos' menu item to reload typos.",
-            "RegexTypoFix error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
+        private readonly BackgroundRequest TypoThread;
+        public event BackgroundRequestComplete Complete;
 
-    /// <summary>
-    /// Clears the existing typo groups, loads typo rules from the configured source,
-    /// assigns each rule to the first suitable <see cref="TypoGroup"/>, and builds
-    /// the grouped regular expressions used for typo matching.
-    /// </summary>
-    private void MakeRegexes()
-    {
-        try
+        private readonly ITyposProvider Source;
+
+        /// <summary>
+        /// Default constructor, typos will be loaded on a new thread from the default location
+        /// </summary>
+        public RegExTypoFix()
+            : this(true, new TyposDownloader())
         {
-            Groups.Clear();
-            TypoCount = 0;
+        }
 
-            Groups.Add(new TypoGroup(20, @"^\\b(\(\[[A-M].*)\\b$", @"[^\\]\\\d", @"\b", @"\b"));
-            Groups.Add(new TypoGroup(19, @"^\\b(\(\[[N-Z].*)\\b$", @"[^\\]\\\d", @"\b", @"\b"));
-            Groups.Add(new TypoGroup(18, @"^\\b((\(|\[)?[A-Za-z].*)", @"[^\\]\\\d", @"\b", @""));
-            Groups.Add(new TypoGroup(5, null, @"[^\\]\\\d", "", ""));
-            Groups.Add(new TypoGroup(1, null, null, "", ""));
+        /// <summary>
+        /// Constructs an object that will load typos from the specified source in a separate thread
+        /// </summary>
+        /// <param name="provider">Typos provider to use</param>
+        public RegExTypoFix(ITyposProvider provider)
+            : this(true, provider)
+        {
+        }
 
-            Dictionary<string, string> typoStrings = Source.GetTypos();
+        /// <summary>
+        /// Constructs an object that
+        /// </summary>
+        /// <param name="loadThreaded"></param>
+        public RegExTypoFix(bool loadThreaded)
+            : this(loadThreaded, new TyposDownloader())
+        {
+        }
 
-            TyposLoaded = typoStrings.Count > 0;
-
-            if (TyposLoaded)
+        /// <summary>
+        /// Default constructor, typos being loaded on separate thread is optional
+        /// </summary>
+        /// <param name="loadThreaded">Whether to load typos on a new thread</param>
+        /// <param name="provider">Typos provider to use</param>
+        public RegExTypoFix(bool loadThreaded, ITyposProvider provider)
+        {
+            Source = provider;
+            if (!loadThreaded)
             {
-                foreach (KeyValuePair<string, string> rule in typoStrings)
+                MakeRegexes();
+                return;
+            }
+
+            TypoThread = new BackgroundRequest(Complete);
+            TypoThread.Execute(MakeRegexes);
+        }
+
+        /// <summary>
+        /// Creates a RETF rule
+        /// </summary>
+        public static string CreateRule(string find, string replace, string name)
+        {
+            return "<Typo word=\"" + name + "\" find=\"" + find + "\" replace=\"" + replace + "\" />";
+        }
+
+        /// <summary>
+        /// Creates a RETF rule with a placeholder name
+        /// </summary>
+        public static string CreateRule(string find, string replace)
+        {
+            return CreateRule(find, replace, "<enter a name>");
+        }
+
+        /// <summary>
+        /// Number of typos loaded
+        /// </summary>
+        public int TypoCount { get; private set; }
+
+        /// <summary>
+        /// Whether the typos have been loaded successfully
+        /// </summary>
+        public bool TyposLoaded { get; private set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private static readonly Regex IgnoreRegex = new Regex("\\(sic\\)|\\[sic\\]|\\[''sic''\\]|\\{\\{sic\\}\\}|spellfixno", RegexOptions.Compiled);
+        private static readonly Regex RemoveTail = new Regex(@"(\s|\n|\r|\*|#|:|⌊⌊⌊⌊M?\d*⌋⌋⌋⌋)+$", RegexOptions.Compiled);
+        private readonly List<TypoGroup> Groups = new List<TypoGroup>();
+
+        /// <summary>
+        /// Displays a typo rule error message and instructions for reloading the
+        /// typo definitions.
+        /// </summary>
+        /// <param name="error"></param>
+        internal static void TypoError(string error)
+        {
+            MessageBox.Show(error + "\r\n\r\nPlease visit the typo page at " + Variables.RetfPath +
+                " and fix this error, then click 'File → Refresh status/typos' menu item to reload typos.",
+                "RegexTypoFix error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        /// <summary>
+        /// Clears the existing typo groups, loads typo rules from the configured source,
+        /// assigns each rule to the first suitable <see cref="TypoGroup"/>, and builds
+        /// the grouped regular expressions used for typo matching.
+        /// </summary>
+        private void MakeRegexes()
+        {
+            try
+            {
+                Groups.Clear();
+                TypoCount = 0;
+
+                Groups.Add(new TypoGroup(20, @"^\\b(\(\[[A-M].*)\\b$", @"[^\\]\\\d", @"\b", @"\b"));
+                Groups.Add(new TypoGroup(19, @"^\\b(\(\[[N-Z].*)\\b$", @"[^\\]\\\d", @"\b", @"\b"));
+                Groups.Add(new TypoGroup(18, @"^\\b((\(|\[)?[A-Za-z].*)", @"[^\\]\\\d", @"\b", @""));
+                Groups.Add(new TypoGroup(5, null, @"[^\\]\\\d", "", ""));
+                Groups.Add(new TypoGroup(1, null, null, "", ""));
+
+                Dictionary<string, string> typoStrings = Source.GetTypos();
+
+                TyposLoaded = typoStrings.Count > 0;
+
+                if (TyposLoaded)
                 {
-                    foreach (TypoGroup grp in Groups)
+                    foreach (KeyValuePair<string, string> rule in typoStrings)
                     {
-                        if (grp.IsSuitableTypo(rule.Key))
+                        foreach (TypoGroup grp in Groups)
                         {
-                            grp.Add(rule.Key, rule.Value);
-                            TypoCount++;
-                            break;
+                            if (grp.IsSuitableTypo(rule.Key))
+                            {
+                                grp.Add(rule.Key, rule.Value);
+                                TypoCount++;
+                                break;
+                            }
                         }
                     }
+
+                    foreach (TypoGroup grp in Groups)
+                        grp.MakeGroups();
                 }
-
-                foreach (TypoGroup grp in Groups)
-                    grp.MakeGroups();
             }
-        }
-        catch (TypoException)
-        {
-            Groups.Clear();
-            TypoCount = 0;
-            TyposLoaded = false;
-        }
-        catch (Exception ex)
-        {
-            TyposLoaded = false;
-            ErrorHandler.HandleException(ex);
-        }
-        finally
-        {
-            if (Complete != null) Complete(TypoThread);
-        }
-    }
-
-    public static Dictionary<int, string> resultSummary = new Dictionary<int, string>();
-    public static Dictionary<int, string> resultArticleText = new Dictionary<int, string>();
-    /// <summary>
-    /// Performs typo fixes against the article text in multi-threaded mode
-    /// Typo fixes not performed if no typos loaded or any sic tags on page
-    /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="noChange">True if no typos fixed</param>
-    /// <param name="summary">Edit summary</param>
-    /// <param name="articleTitle">Title of the article</param>
-    /// <returns>Updated article text</returns>
-    public string PerformTypoFixes(string articleText, out bool noChange, out string summary, string articleTitle)
-    {
-        string originalArticleText = articleText;
-        summary = "";
-        if (TypoCount == 0 || IgnoreRegex.IsMatch(articleText))
-        {
-            noChange = true;
-            return articleText;
-        }
-
-        HideText removeText = new HideText(true, false, true);
-
-        articleText = removeText.HideMore(articleText, true);
-
-        // remove newlines, whitespace and hide tokens from bottom
-        // to avoid running 2K regexps on them
-        Match m = RemoveTail.Match(articleText);
-        string tail = m.Value;
-        if (!string.IsNullOrEmpty(tail))
-            articleText = articleText.Remove(m.Index);
-
-        string originalText = articleText;
-        string strSummary = "";
-        /* Run typos threaded, one thread per group for better performance
-         * http://stackoverflow.com/questions/13776846/pass-paramters-through-parameterizedthreadstart
-         * http://www.dotnetperls.com/parameterizedthreadstart
-         * http://stackoverflow.com/questions/831009/thread-with-multiple-parameters */
-        resultSummary.Clear();
-        resultArticleText.Clear();
-
-        Thread[] array = new Thread[Groups.Count];
-        int i = 0;
-        foreach (TypoGroup tg in Groups)
-        {
-            array[i] =
-                new Thread(
-                    delegate ()
-                    {
-                        tg.FixTypos2(articleText, strSummary, articleTitle, originalArticleText);
-                    });
-            array[i].Start();
-            i++;
-        }
-
-        // Join all the threads: wait for all to complete
-        foreach (Thread t in array)
-        {
-            t.Join();
-        }
-
-        foreach (TypoGroup tg in Groups)
-        {
-            string groupSummary;
-            resultSummary.TryGetValue(tg.GroupSize, out groupSummary);
-            string groupArticleText;
-            resultArticleText.TryGetValue(tg.GroupSize, out groupArticleText);
-
-            if (groupSummary.Length > 0)
+            catch (TypoException)
             {
-                if (strSummary.Length > 0)
-                {
-                    // earlier thread had changes, so need to re-run this one
-                    tg.FixTypos(ref articleText, ref strSummary, articleTitle, originalArticleText);
-                }
-                else
-                {
-                    strSummary = groupSummary;
-                    articleText = groupArticleText;
-                }
+                Groups.Clear();
+                TypoCount = 0;
+                TyposLoaded = false;
+            }
+            catch (Exception ex)
+            {
+                TyposLoaded = false;
+                ErrorHandler.HandleException(ex);
+            }
+            finally
+            {
+                if (Complete != null) Complete(TypoThread);
             }
         }
 
-        noChange = originalText.Equals(articleText);
+        public static Dictionary<int, string> resultSummary = new Dictionary<int, string>();
+        public static Dictionary<int, string> resultArticleText = new Dictionary<int, string>();
+        /// <summary>
+        /// Performs typo fixes against the article text in multi-threaded mode
+        /// Typo fixes not performed if no typos loaded or any sic tags on page
+        /// </summary>
+        /// <param name="articleText">The wiki text of the article.</param>
+        /// <param name="noChange">True if no typos fixed</param>
+        /// <param name="summary">Edit summary</param>
+        /// <param name="articleTitle">Title of the article</param>
+        /// <returns>Updated article text</returns>
+        public string PerformTypoFixes(string articleText, out bool noChange, out string summary, string articleTitle)
+        {
+            string originalArticleText = articleText;
+            summary = "";
+            if (TypoCount == 0 || IgnoreRegex.IsMatch(articleText))
+            {
+                noChange = true;
+                return articleText;
+            }
 
-        summary = Variables.TypoSummaryTag + strSummary.Trim();
+            HideText removeText = new HideText(true, false, true);
 
-        return removeText.AddBackMore(articleText + tail);
-    }
+            articleText = removeText.HideMore(articleText, true);
 
-    /// <summary>
-    /// Checks for known typos on the page
-    /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">Title of the article</param>
-    /// <returns>whether there are typos on the page</returns>
-    public bool DetectTypo(string articleText, string articleTitle)
-    {
-        string originalArticleText = articleText;
-        if (TypoCount == 0 || IgnoreRegex.IsMatch(articleText))
+            // remove newlines, whitespace and hide tokens from bottom
+            // to avoid running 2K regexps on them
+            Match m = RemoveTail.Match(articleText);
+            string tail = m.Value;
+            if (!string.IsNullOrEmpty(tail))
+                articleText = articleText.Remove(m.Index);
+
+            string originalText = articleText;
+            string strSummary = "";
+            /* Run typos threaded, one thread per group for better performance
+             * http://stackoverflow.com/questions/13776846/pass-paramters-through-parameterizedthreadstart
+             * http://www.dotnetperls.com/parameterizedthreadstart
+             * http://stackoverflow.com/questions/831009/thread-with-multiple-parameters */
+            resultSummary.Clear();
+            resultArticleText.Clear();
+
+            Thread[] array = new Thread[Groups.Count];
+            int i = 0;
+            foreach (TypoGroup tg in Groups)
+            {
+                array[i] =
+                    new Thread(
+                        delegate ()
+                        {
+                            tg.FixTypos2(articleText, strSummary, articleTitle, originalArticleText);
+                        });
+                array[i].Start();
+                i++;
+            }
+
+            // Join all the threads: wait for all to complete
+            foreach (Thread t in array)
+            {
+                t.Join();
+            }
+
+            foreach (TypoGroup tg in Groups)
+            {
+                string groupSummary;
+                resultSummary.TryGetValue(tg.GroupSize, out groupSummary);
+                string groupArticleText;
+                resultArticleText.TryGetValue(tg.GroupSize, out groupArticleText);
+
+                if (groupSummary.Length > 0)
+                {
+                    if (strSummary.Length > 0)
+                    {
+                        // earlier thread had changes, so need to re-run this one
+                        tg.FixTypos(ref articleText, ref strSummary, articleTitle, originalArticleText);
+                    }
+                    else
+                    {
+                        strSummary = groupSummary;
+                        articleText = groupArticleText;
+                    }
+                }
+            }
+
+            noChange = originalText.Equals(articleText);
+
+            summary = Variables.TypoSummaryTag + strSummary.Trim();
+
+            return removeText.AddBackMore(articleText + tail);
+        }
+
+        /// <summary>
+        /// Checks for known typos on the page
+        /// </summary>
+        /// <param name="articleText">The wiki text of the article.</param>
+        /// <param name="articleTitle">Title of the article</param>
+        /// <returns>whether there are typos on the page</returns>
+        public bool DetectTypo(string articleText, string articleTitle)
+        {
+            string originalArticleText = articleText;
+            if (TypoCount == 0 || IgnoreRegex.IsMatch(articleText))
+                return false;
+
+            HideText removeText = new HideText(true, false, true);
+
+            articleText = removeText.HideMore(articleText, true);
+
+            // remove newlines, whitespace and hide tokens from bottom
+            // to avoid running 2K regexps on them
+            Match m = RemoveTail.Match(articleText);
+            if (m.Success)
+                articleText = articleText.Remove(m.Index);
+
+            string strSummary = "";
+
+            foreach (TypoGroup grp in Groups)
+            {
+                grp.FixTypos(ref articleText, ref strSummary, articleTitle, originalArticleText);
+
+                if (strSummary.Length > 0)
+                    return true;
+            }
+
             return false;
-
-        HideText removeText = new HideText(true, false, true);
-
-        articleText = removeText.HideMore(articleText, true);
-
-        // remove newlines, whitespace and hide tokens from bottom
-        // to avoid running 2K regexps on them
-        Match m = RemoveTail.Match(articleText);
-        if (m.Success)
-            articleText = articleText.Remove(m.Index);
-
-        string strSummary = "";
-
-        foreach (TypoGroup grp in Groups)
-        {
-            grp.FixTypos(ref articleText, ref strSummary, articleTitle, originalArticleText);
-
-            if (strSummary.Length > 0)
-                return true;
         }
 
-        return false;
+        /// <summary>
+        /// Returns statistics of typos corrected in the past article
+        /// </summary>
+        public List<TypoStat> GetStatistics()
+        {
+            List<TypoStat> res = new List<TypoStat>();
+
+            foreach (TypoGroup g in Groups)
+            {
+                res.AddRange(g.Statistics);
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// Returns a consolidated list of all typo correction rules from every
+        /// <see cref="TypoGroup"/> in the collection.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="List{T}"/> containing all typo replacement rules as
+        /// <see cref="KeyValuePair{TKey, TValue}"/> objects, where the key is the
+        /// matching <see cref="Regex"/> pattern and the value is the replacement text.
+        /// </returns>
+        public List<KeyValuePair<Regex, string>> GetTypos()
+        {
+            List<KeyValuePair<Regex, string>> lst = new List<KeyValuePair<Regex, string>>();
+
+            foreach (TypoGroup grp in Groups)
+            {
+                lst.AddRange(grp.Typos);
+            }
+
+            return lst;
+        }
     }
 
     /// <summary>
-    /// Returns statistics of typos corrected in the past article
+    /// Represents statistics for one typo rule
     /// </summary>
-    public List<TypoStat> GetStatistics()
+    public class TypoStat
     {
-        List<TypoStat> res = new List<TypoStat>();
+        public readonly string Find, Replace;
+        public int Total, SelfMatches, FalsePositives;
 
-        foreach (TypoGroup g in Groups)
+        public TypoStatsListViewItem ListViewItem;
+
+        public TypoStat(KeyValuePair<Regex, string> typo)
+            : this(typo.Key.ToString(), typo.Value)
+        { }
+
+        public TypoStat(string find, string replace)
         {
-            res.AddRange(g.Statistics);
+            Find = find;
+            Replace = replace;
         }
 
-        return res;
-    }
-
-    /// <summary>
-    /// Returns a consolidated list of all typo correction rules from every
-    /// <see cref="TypoGroup"/> in the collection.
-    /// </summary>
-    /// <returns>
-    /// A <see cref="List{T}"/> containing all typo replacement rules as
-    /// <see cref="KeyValuePair{TKey, TValue}"/> objects, where the key is the
-    /// matching <see cref="Regex"/> pattern and the value is the replacement text.
-    /// </returns>
-    public List<KeyValuePair<Regex, string>> GetTypos()
-    {
-        List<KeyValuePair<Regex, string>> lst = new List<KeyValuePair<Regex, string>>();
-
-        foreach (TypoGroup grp in Groups)
+        #region Inherited from Object
+        public override string ToString()
         {
-            lst.AddRange(grp.Typos);
+            return Find + " → " + Replace;
         }
 
-        return lst;
+        public override int GetHashCode()
+        {
+            return Find.GetHashCode() + Replace.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            TypoStat item = (obj as TypoStat);
+
+            if (item == null)
+                return false;
+
+            return ((item.Find == Find) && (item.Replace == Replace));
+        }
+        #endregion
     }
-}
 
-/// <summary>
-/// Represents statistics for one typo rule
-/// </summary>
-public class TypoStat
-{
-    public readonly string Find, Replace;
-    public int Total, SelfMatches, FalsePositives;
-
-    public TypoStatsListViewItem ListViewItem;
-
-    public TypoStat(KeyValuePair<Regex, string> typo)
-        : this(typo.Key.ToString(), typo.Value)
-    { }
-
-    public TypoStat(string find, string replace)
+    public class TypoException : ApplicationException
     {
-        Find = find;
-        Replace = replace;
+        public TypoException()
+        {
+        }
+
+        public TypoException(string message)
+            : base(message) { }
+
+        public TypoException(string message, Exception inner)
+            : base(message, inner) { }
     }
-
-    #region Inherited from Object
-    public override string ToString()
-    {
-        return Find + " → " + Replace;
-    }
-
-    public override int GetHashCode()
-    {
-        return Find.GetHashCode() + Replace.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        TypoStat item = (obj as TypoStat);
-
-        if (item == null)
-            return false;
-
-        return ((item.Find == Find) && (item.Replace == Replace));
-    }
-    #endregion
-}
-
-public class TypoException : ApplicationException
-{
-    public TypoException()
-    {
-    }
-
-    public TypoException(string message)
-        : base(message) { }
-
-    public TypoException(string message, Exception inner)
-        : base(message, inner) { }
-}
