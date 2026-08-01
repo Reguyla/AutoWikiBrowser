@@ -232,72 +232,90 @@ internal static class UsageStats
 
     #region Server Contact
     /// <summary>
-    /// Send usage stats to server
+    /// Sends the initial usage statistics payload to the server.
     /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if the statistics were sent and the server response
+    /// was processed successfully; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="XmlException">
+    /// Thrown when the server returns an invalid XML response.
+    /// </exception>
     private static bool FirstContact()
     {
 #if !DEBUG && !INSTASTATS
-        if (Program.AWB.NumberOfEdits == 0) return false;
+    if (Program.AWB.NumberOfEdits == 0)
+    {
+        return false;
+    }
 #endif
-        NameValueCollection postvars = new NameValueCollection
-                                           {
-                                               {"Action", "Hello"},
-                                               {"Version", Program.VersionString}
-                                           };
 
-        // Greetings and AWB version:
+        int numberOfEdits = Program.AWB.NumberOfEdits;
 
-        // Site/project name:
-        // TODO: Here or in PHP: tl.wikipedia.org      CUS: Translate to site name/lang code any Wikimedia site set up as custom
+        NameValueCollection postVariables = new()
+    {
+        { "Action", "Hello" },
+        { "Version", Program.VersionString }
+    };
+
+        // Site or project name.
+        // TODO: Determine whether custom Wikimedia projects should submit a
+        // standardized project name and language code rather than the host name.
         if (Variables.IsCustomProject || Variables.IsWikia)
-            postvars.Add("Wiki", Variables.Host);
+        {
+            postVariables.Add("Wiki", Variables.Host);
+        }
         else
-            postvars.Add("Wiki", Variables.Project.ToString());
-        // This returns a short string such as "Wikipedia"; may want to convert to int and then to string so we store less in the db
+        {
+            postVariables.Add("Wiki", Variables.Project.ToString());
+        }
 
-        // Language code:
+        // Language code.
         if (Variables.IsWikia)
         {
-            postvars.Add("Language", "WIK");
+            postVariables.Add("Language", "WIK");
         }
-        else if (Variables.IsCustomProject || Variables.IsWikimediaMonolingualProject)
+        else if (Variables.IsCustomProject ||
+                 Variables.IsWikimediaMonolingualProject)
         {
-            postvars.Add("Language", "CUS");
+            postVariables.Add("Language", "CUS");
         }
         else
         {
-            postvars.Add("Language", Variables.LangCode);
+            postVariables.Add("Language", Variables.LangCode);
         }
 
-        // UI culture:
-        postvars.Add("Culture", System.Threading.Thread.CurrentThread.CurrentCulture.ToString());
+        // TODO: Confirm whether the server expects the formatting culture
+        // (CurrentCulture) or the user-interface culture (CurrentUICulture).
+        postVariables.Add(
+            "Culture",
+            Thread.CurrentThread.CurrentCulture.ToString());
 
-        // Username:
-        bool userFieldIncluded = ProcessUsername(postvars);
+        bool userNameIncluded = ProcessUsername(postVariables);
 
-        // Other details:
-        postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
-        postvars.Add("OS", Environment.OSVersion.VersionString);
+        postVariables.Add("Saves", numberOfEdits.ToString());
+        postVariables.Add("OS", Environment.OSVersion.VersionString);
+
 #if DEBUG
-        postvars.Add("Debug", "Y");
+        postVariables.Add("Debug", "Y");
 #else
-        postvars.Add("Debug", "N");
+    postVariables.Add("Debug", "N");
 #endif
-        EnumeratePlugins(postvars,
-                         Plugins.Plugin.AWBPlugins.Values,
-                         Plugins.Plugin.AWBBasePlugins.Values,
-                         Plugins.Plugin.ListMakerPlugins.Values);
 
-        string response;
+        EnumeratePlugins(
+            postVariables,
+            Plugins.Plugin.AWBPlugins.Values,
+            Plugins.Plugin.AWBBasePlugins.Values,
+            Plugins.Plugin.ListMakerPlugins.Values);
 
-        if (!TryPostData(postvars, out response))
+        if (!TryPostData(postVariables, out string response))
         {
             return false;
         }
 
         ReadXml(response);
 
-        if (userFieldIncluded)
+        if (userNameIncluded)
         {
             SentUserName = true;
         }
