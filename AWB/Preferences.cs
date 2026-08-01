@@ -199,21 +199,45 @@ internal sealed partial class MyPreferences : Form
         FixCustomProject();
     }
 
-    private static readonly Regex CustomProjectRegex =
-        new Regex(@"^.*?://(?:([\w/\.-]+?)/(?:index|api).php|([\w/\.-]+)).*$",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    // TODO: Investigate replacing the legacy regular-expression URL parsing with
+    // Uri.TryCreate. Preserve support for host names and paths entered without a
+    // URI scheme, and add tests for ports, localhost, IPv6, query strings, and
+    // index.php/api.php paths before changing the existing behavior.
+    /// <summary>
+    /// Matches a custom wiki URL and captures its host and optional script path,
+    /// excluding a trailing <c>index.php</c> or <c>api.php</c> filename.
+    /// </summary>
+    /// <remarks>
+    /// Text without a URI scheme does not match and is preserved by the
+    /// replacement operation.
+    /// </remarks>
+    private static readonly Regex CustomProjectRegex = new(
+        @"^.*?://(?:([\w/\.-]+?)/(?:index|api)\.php|([\w/\.-]+)).*$",
+        RegexOptions.Compiled |
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant);
 
+    /// <summary>
+    /// Normalizes the custom-project entry by removing its URI scheme, trimming
+    /// a trailing API filename, and applying the expected trailing-slash format.
+    /// </summary>
     private void FixCustomProject()
     {
-        string proj = CustomProjectRegex.Replace(cmboCustomProject.Text.Trim(), "$1$2");
+        string customProject = CustomProjectRegex.Replace(
+            cmboCustomProject.Text.Trim(),
+            "$1$2");
 
-        proj = proj.TrimEnd('/');
-        if (Project.Equals(ProjectEnum.custom)) // we shouldn't screw up Wikia/Fandom
+        customProject = customProject.TrimEnd('/');
+
+        // Generic custom projects require a trailing slash. Wikia and Fandom
+        // project values retain their existing non-custom formatting.
+        if (customProject.Length > 0 &&
+            Project == ProjectEnum.custom)
         {
-            proj += "/";
+            customProject += "/";
         }
 
-        cmboCustomProject.Text = proj;
+        cmboCustomProject.Text = customProject;
     }
 
     private void cmboProject_SelectedIndexChanged(object sender, EventArgs e)
