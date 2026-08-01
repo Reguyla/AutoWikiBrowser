@@ -243,70 +243,17 @@ internal static class UsageStats
     /// </exception>
     private static bool FirstContact()
     {
+        int numberOfEdits = Program.AWB.NumberOfEdits;
+
 #if !DEBUG && !INSTASTATS
-    if (Program.AWB.NumberOfEdits == 0)
+    if (numberOfEdits == 0)
     {
         return false;
     }
 #endif
 
-        int numberOfEdits = Program.AWB.NumberOfEdits;
-
-        NameValueCollection postVariables = new()
-    {
-        { "Action", "Hello" },
-        { "Version", Program.VersionString }
-    };
-
-        // Site or project name.
-        // TODO: Determine whether custom Wikimedia projects should submit a
-        // standardized project name and language code rather than the host name.
-        if (Variables.IsCustomProject || Variables.IsWikia)
-        {
-            postVariables.Add("Wiki", Variables.Host);
-        }
-        else
-        {
-            postVariables.Add("Wiki", Variables.Project.ToString());
-        }
-
-        // Language code.
-        if (Variables.IsWikia)
-        {
-            postVariables.Add("Language", "WIK");
-        }
-        else if (Variables.IsCustomProject ||
-                 Variables.IsWikimediaMonolingualProject)
-        {
-            postVariables.Add("Language", "CUS");
-        }
-        else
-        {
-            postVariables.Add("Language", Variables.LangCode);
-        }
-
-        // TODO: Confirm whether the server expects the formatting culture
-        // (CurrentCulture) or the user-interface culture (CurrentUICulture).
-        postVariables.Add(
-            "Culture",
-            Thread.CurrentThread.CurrentCulture.ToString());
-
-        bool userNameIncluded = ProcessUsername(postVariables);
-
-        postVariables.Add("Saves", numberOfEdits.ToString());
-        postVariables.Add("OS", Environment.OSVersion.VersionString);
-
-#if DEBUG
-        postVariables.Add("Debug", "Y");
-#else
-    postVariables.Add("Debug", "N");
-#endif
-
-        EnumeratePlugins(
-            postVariables,
-            Plugins.Plugin.AWBPlugins.Values,
-            Plugins.Plugin.AWBBasePlugins.Values,
-            Plugins.Plugin.ListMakerPlugins.Values);
+        NameValueCollection postVariables =
+            CreateInitialStatisticsPayload(numberOfEdits, out bool userNameIncluded);
 
         if (!TryPostData(postVariables, out string response))
         {
@@ -321,6 +268,113 @@ internal static class UsageStats
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Creates the initial usage statistics request payload.
+    /// </summary>
+    /// <param name="numberOfEdits">
+    /// The number of edits completed by the current application session.
+    /// </param>
+    /// <param name="userNameIncluded">
+    /// When this method returns, indicates whether the username was included
+    /// in the request.
+    /// </param>
+    /// <returns>
+    /// The populated initial usage statistics request fields.
+    /// </returns>
+    private static NameValueCollection CreateInitialStatisticsPayload(
+        int numberOfEdits,
+        out bool userNameIncluded)
+    {
+        NameValueCollection postVariables = new()
+    {
+        { "Action", "Hello" },
+        { "Version", Program.VersionString },
+        { "Saves", numberOfEdits.ToString() },
+        { "OS", Environment.OSVersion.VersionString }
+    };
+
+        AddProjectDetails(postVariables);
+        AddCulture(postVariables);
+
+        userNameIncluded = ProcessUsername(postVariables);
+
+        AddDebugState(postVariables);
+
+        EnumeratePlugins(
+            postVariables,
+            Plugins.Plugin.AWBPlugins.Values,
+            Plugins.Plugin.AWBBasePlugins.Values,
+            Plugins.Plugin.ListMakerPlugins.Values);
+
+        return postVariables;
+    }
+
+    /// <summary>
+    /// Adds the current wiki project and language identifiers to the request.
+    /// </summary>
+    /// <param name="postVariables">
+    /// The request fields to populate.
+    /// </param>
+    private static void AddProjectDetails(NameValueCollection postVariables)
+    {
+        // TODO: Determine whether custom Wikimedia projects should submit a
+        // standardized project name and language code rather than the host name.
+        string projectName =
+            Variables.IsCustomProject || Variables.IsWikia
+                ? Variables.Host
+                : Variables.Project.ToString();
+
+        postVariables.Add("Wiki", projectName);
+
+        string languageCode;
+
+        if (Variables.IsWikia)
+        {
+            languageCode = "WIK";
+        }
+        else if (Variables.IsCustomProject ||
+                 Variables.IsWikimediaMonolingualProject)
+        {
+            languageCode = "CUS";
+        }
+        else
+        {
+            languageCode = Variables.LangCode;
+        }
+
+        postVariables.Add("Language", languageCode);
+    }
+
+    /// <summary>
+    /// Adds the current culture identifier to the request.
+    /// </summary>
+    /// <param name="postVariables">
+    /// The request fields to populate.
+    /// </param>
+    private static void AddCulture(NameValueCollection postVariables)
+    {
+        // TODO: Confirm whether the server expects the formatting culture
+        // (CurrentCulture) or the user-interface culture (CurrentUICulture).
+        postVariables.Add(
+            "Culture",
+            Thread.CurrentThread.CurrentCulture.ToString());
+    }
+
+    /// <summary>
+    /// Adds the current build configuration to the request.
+    /// </summary>
+    /// <param name="postVariables">
+    /// The request fields to populate.
+    /// </param>
+    private static void AddDebugState(NameValueCollection postVariables)
+    {
+#if DEBUG
+        postVariables.Add("Debug", "Y");
+#else
+    postVariables.Add("Debug", "N");
+#endif
     }
 
     /// <summary>
