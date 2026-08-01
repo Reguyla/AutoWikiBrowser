@@ -76,19 +76,26 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Text.Json" Version="8.0.6" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="Stats.resx" />
-    <None Include="Stats.resx">
+<ItemGroup>
+  <EmbeddedResource Remove="Stats.resx" />
+
+  <None Include="Stats.resx">
     <DependentUpon>Stats.cs</DependentUpon>
-    </None>
-  </ItemGroup>
-   <ItemGroup>
-	  <EmbeddedResource Update="Preferences.resx">
-		  <DependentUpon>Preferences.cs</DependentUpon>
-		  <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
-	  </EmbeddedResource>
-   </ItemGroup>
-  <Target Name="CopyAwbUpdaterFiles" AfterTargets="Build">
+  </None>
+</ItemGroup>
+
+<ItemGroup>
+  <Compile Update="UserSettings.cs">
+    <SubType>Code</SubType>
+  </Compile>
+</ItemGroup>
+
+<ItemGroup>
+  <EmbeddedResource Update="Preferences.resx">
+    <DependentUpon>Preferences.cs</DependentUpon>
+    <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
+  </EmbeddedResource>
+</ItemGroup>  <Target Name="CopyAwbUpdaterFiles" AfterTargets="Build">
     <ItemGroup>
       <AwbUpdaterFiles Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
     </ItemGroup>
