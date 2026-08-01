@@ -100,46 +100,89 @@ internal sealed partial class PluginManager : Form
             });
     }
 
+    /// <summary>
+    /// Prompts the user to select one or more plugin assemblies and loads the
+    /// selected plugins into AutoWikiBrowser.
+    /// </summary>
+    /// <param name="awb">
+    /// The AutoWikiBrowser instance supplied to the loaded plugins.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="awb"/> is <see langword="null"/>.
+    /// </exception>
     public static void LoadNewPlugin(IAutoWikiBrowser awb)
     {
-        OpenFileDialog pluginOpen = new OpenFileDialog();
+        ArgumentNullException.ThrowIfNull(awb);
+
         if (string.IsNullOrEmpty(_lastPluginLoadedLocation))
-            LoadLastPluginLoadedLocation();
-
-        pluginOpen.InitialDirectory = string.IsNullOrEmpty(_lastPluginLoadedLocation) ? Application.StartupPath : _lastPluginLoadedLocation;
-
-        pluginOpen.DefaultExt = "dll";
-        pluginOpen.Filter = "DLL files|*.dll";
-        pluginOpen.CheckFileExists = pluginOpen.Multiselect = true;
-
-        pluginOpen.ShowDialog();
-
-        if (!string.IsNullOrEmpty(pluginOpen.FileName))
         {
-            string newPath = Path.GetDirectoryName(pluginOpen.FileName);
-            if (_lastPluginLoadedLocation != newPath)
-            {
-                _lastPluginLoadedLocation = newPath;
-                SaveLastPluginLoadedLocation();
-            }
+            LoadLastPluginLoadedLocation();
         }
 
-        Plugin.LoadPlugins(awb, pluginOpen.FileNames, true);
+        using OpenFileDialog pluginOpen = new()
+        {
+            InitialDirectory =
+                string.IsNullOrEmpty(_lastPluginLoadedLocation)
+                    ? Application.StartupPath
+                    : _lastPluginLoadedLocation,
+            DefaultExt = "dll",
+            Filter = "DLL files (*.dll)|*.dll",
+            CheckFileExists = true,
+            Multiselect = true
+        };
+
+        if (pluginOpen.ShowDialog() != DialogResult.OK ||
+            pluginOpen.FileNames.Length == 0)
+        {
+            return;
+        }
+
+        string? newPath =
+            Path.GetDirectoryName(pluginOpen.FileNames[0]);
+
+        if (!string.IsNullOrEmpty(newPath) &&
+            !string.Equals(
+                _lastPluginLoadedLocation,
+                newPath,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            _lastPluginLoadedLocation = newPath;
+            SaveLastPluginLoadedLocation();
+        }
+
+        Plugin.LoadPlugins(
+            awb,
+            pluginOpen.FileNames,
+            true);
     }
 
-    //TODO:Use Utils
-    static void LoadLastPluginLoadedLocation()
+    /// <summary>
+    /// Loads the most recently used plugin directory from the current user's
+    /// AutoWikiBrowser registry settings.
+    /// </summary>
+    /// <remarks>
+    /// Loading this optional preference is a best-effort operation. Registry
+    /// access failures leave the current location unchanged.
+    /// </remarks>
+    private static void LoadLastPluginLoadedLocation()
     {
         try
         {
-            Microsoft.Win32.RegistryKey reg = Microsoft.Win32.Registry.CurrentUser.
-                OpenSubKey("Software\\AutoWikiBrowser");
+            using Microsoft.Win32.RegistryKey? registryKey =
+                Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\AutoWikiBrowser");
 
-            if (reg != null)
-                _lastPluginLoadedLocation = reg.GetValue("RecentPluginLoadedLocation", "").ToString();
+            _lastPluginLoadedLocation =
+                registryKey?
+                    .GetValue(
+                        "RecentPluginLoadedLocation",
+                        string.Empty)
+                    ?.ToString() ??
+                string.Empty;
         }
         catch
         {
+            // Loading this optional preference must not prevent plugin use.
         }
     }
 
