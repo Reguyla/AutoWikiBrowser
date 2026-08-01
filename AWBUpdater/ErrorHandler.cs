@@ -359,13 +359,32 @@ public partial class ErrorHandler : Form
             }
         }
 
+        /// <summary>
+        /// Identifies an exception's role within the reported exception hierarchy.
+        /// </summary>
         private enum ExceptionKind
         {
+            /// <summary>
+            /// The primary exception being reported.
+            /// </summary>
             TopLevel,
-            Inner,
-            LoaderException
-        };
 
+            /// <summary>
+            /// An exception contained within another exception.
+            /// </summary>
+            Inner,
+
+            /// <summary>
+            /// An exception encountered while loading a type or assembly.
+            /// </summary>
+            LoaderException
+        }
+
+        /// <summary>
+        /// Gets the display label for an exception's role in the exception hierarchy.
+        /// </summary>
+        /// <param name="kind">The exception kind to describe.</param>
+        /// <returns>A label suitable for diagnostic output.</returns>
         private static string KindToString(ExceptionKind kind) =>
             kind switch
             {
@@ -501,15 +520,32 @@ public partial class ErrorHandler : Form
         return res;
     }
 
-    private static readonly string[] PresetNamespaces = { "System.", "Microsoft.", "Mono." };
+    /// <summary>
+    /// Contains namespace prefixes treated as framework or runtime namespaces
+    /// when identifying the likely source of an exception.
+    /// </summary>
+    private static readonly string[] PresetNamespaces =
+    {
+    "System.",
+    "Microsoft.",
+    "Mono."
+};
 
     #endregion
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ErrorHandler"/> form.
+    /// </summary>
     protected ErrorHandler()
     {
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Sets the form title to the current application product name when the form loads.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ErrorHandler_Load(object sender, EventArgs e)
     {
         Text = Application.ProductName;
