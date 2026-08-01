@@ -27,7 +27,7 @@ namespace WikiFunctions.Lists.Providers;
 /// </summary>
 public partial class SpecialPageListProvider : Form, IListProvider
 {
-    private static readonly BindingList<IListProvider> ListItems = new BindingList<IListProvider>();
+    private static readonly BindingList<IListProvider> ListItems = new();
 
     public SpecialPageListProvider()
     {
@@ -137,24 +137,42 @@ public partial class SpecialPageListProvider : Form, IListProvider
             string.Empty);
     }
 
-    public string DisplayText
-    { get { return "Special page"; } }
+    /// <summary>
+    /// Gets the display name shown for this list provider.
+    /// </summary>
+    public string DisplayText => "Special page";
 
-    public string UserInputTextBoxText
-    { get { return ""; } }
+    /// <summary>
+    /// Gets the default text displayed in the user-input field.
+    /// </summary>
+    public string UserInputTextBoxText => string.Empty;
 
-    public bool UserInputTextBoxEnabled
-    { get { return false; } }
+    /// <summary>
+    /// Gets a value indicating whether the user-input field is enabled.
+    /// </summary>
+    public bool UserInputTextBoxEnabled => false;
 
+    /// <summary>
+    /// Handles selection of this list provider.
+    /// </summary>
+    /// <remarks>
+    /// This provider does not require any additional action when selected.
+    /// </remarks>
     public void Selected()
     {
     }
 
-    public bool RunOnSeparateThread
-    { get { return true; } }
+    /// <summary>
+    /// Gets a value indicating whether list generation should run on a separate
+    /// thread.
+    /// </summary>
+    public bool RunOnSeparateThread => true;
 
-    public virtual bool StripUrl
-    { get { return false; } }
+    /// <summary>
+    /// Gets a value indicating whether URL prefixes should be removed from input
+    /// values.
+    /// </summary>
+    public virtual bool StripUrl => false;
 
     private void SpecialPageListProvider_Load(object sender, EventArgs e)
     {
