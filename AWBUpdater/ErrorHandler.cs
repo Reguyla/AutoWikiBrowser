@@ -453,21 +453,38 @@ public partial class ErrorHandler : Form
             }
         }
 
+        // TODO: Centralize exception handling and diagnostic reporting currently
+        // duplicated across the solution. Separate exception classification,
+        // diagnostic-data collection, report formatting, and reporting destinations.
+        // Provide dedicated Phabricator and wiki formatters for Wikimedia projects,
+        // and a Markdown-based issue formatter for Git-hosted projects such as Twain.
+        /// <summary>
+        /// Formats diagnostic report fields using markup suitable for Wikimedia
+        /// Phabricator task descriptions.
+        /// </summary>
         public class PhabricatorBugFormatter : BugFormatter
         {
-            public override string PrintHeader()
-            {
-                return "";
-            }
+            /// <summary>
+            /// Returns no report header because Phabricator reports do not require
+            /// a surrounding template.
+            /// </summary>
+            public override string PrintHeader() => string.Empty;
 
-            public override string PrintFooter()
-            {
-                return "";
-            }
+            /// <summary>
+            /// Returns no report footer because Phabricator reports do not require
+            /// a surrounding template.
+            /// </summary>
+            public override string PrintFooter() => string.Empty;
 
+            /// <summary>
+            /// Formats a diagnostic field using Phabricator-compatible Markdown.
+            /// </summary>
+            /// <param name="key">The diagnostic field name.</param>
+            /// <param name="value">The diagnostic field value.</param>
+            /// <returns>The formatted diagnostic field.</returns>
             public override string PrintLine(string key, string value)
             {
-                return string.Format("**{0}**: {1}", key, value);
+                return $"**{key}**: {value}";
             }
         }
     }
@@ -604,12 +621,19 @@ public partial class ErrorHandler : Form
         }
     }
 
+    /// <summary>
+    /// Opens the specified URL using the operating system's default application.
+    /// </summary>
+    /// <param name="url">
+    /// The URL to open.
+    /// </param>
     private static void OpenUrl(string url)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(url);
+
         Process.Start(
-            new ProcessStartInfo
+            new ProcessStartInfo(url)
             {
-                FileName = url,
                 UseShellExecute = true
             });
     }
@@ -618,16 +642,24 @@ public partial class ErrorHandler : Form
     // Introduce destination-specific report formatters so Wikimedia installations
     // can use Phabricator while non-Wikimedia installations and Twain can use
     // Git-hosted issue trackers or other reporting systems.
+    /// <summary>
+    /// The Wikimedia Phabricator task-creation URL preconfigured for the
+    /// AutoWikiBrowser project.
+    /// </summary>
+    private const string PhabricatorTaskUrl =
+        "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser";
+
+    /// <summary>
+    /// Opens the AutoWikiBrowser Phabricator task creation page.
+    /// </summary>
     private void linkLabel1_LinkClicked(
         object sender,
         LinkLabelLinkClickedEventArgs e)
     {
-        linkLabel1.LinkVisited = true;
-
         try
         {
-            OpenUrl(
-                "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
+            OpenUrl(PhabricatorTaskUrl);
+            linkLabel1.LinkVisited = true;
         }
         catch (Exception ex)
         {
