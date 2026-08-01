@@ -24,10 +24,10 @@ internal sealed class SettingsPersistenceService
     /// when unsuccessful, the type of failure that occurred.
     /// </returns>
     /// <remarks>
-    /// If a backup file already exists, it is deleted after a successful save.
-    /// For failures other than <see cref="IOException"/>, the backup is copied
-    /// back over the destination file when available.
-    /// </remarks>
+    /// When the destination file already exists, it is copied to a temporary
+    /// <c>.old</c> backup before the new settings are written. The backup is
+    /// deleted after a successful save and restored after eligible failures.
+
     internal SettingsSaveResult Save(
         UserPrefs preferences,
         string path)
@@ -36,7 +36,11 @@ internal sealed class SettingsPersistenceService
 
         try
         {
-            UserPrefs.SavePrefs(preferences, path);
+            CreateBackup(path, backupPath);
+
+            UserPrefs.SavePrefs(
+                preferences,
+                path);
 
             DeleteBackup(backupPath);
 
@@ -53,6 +57,31 @@ internal sealed class SettingsPersistenceService
             return new SettingsSaveResult(
                 ClassifyFailure(ex),
                 ex);
+        }
+    }
+
+    // TODO: Track whether the current save operation successfully created the
+    // backup so an unrelated stale .old file is not restored if backup creation
+    // itself fails.
+    /// <summary>
+    /// Creates a backup of an existing settings file before it is replaced.
+    /// </summary>
+    /// <param name="path">
+    /// The settings file that may be replaced.
+    /// </param>
+    /// <param name="backupPath">
+    /// The destination path for the backup.
+    /// </param>
+    private static void CreateBackup(
+        string path,
+        string backupPath)
+    {
+        if (File.Exists(path))
+        {
+            File.Copy(
+                path,
+                backupPath,
+                overwrite: true);
         }
     }
 

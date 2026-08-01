@@ -49,15 +49,12 @@ partial class MainForm
         }
     }
 
-    // TODO: Consider moving settings-file persistence into a dedicated service
-    // that performs atomic saves and can restore the backup if replacement fails.
     /// <summary>
     /// Saves the current application settings to the active settings file.
     /// </summary>
     /// <remarks>
-    /// If the active settings file already exists, the user is prompted before
-    /// it is replaced. The existing file is copied to a file with the
-    /// <c>.old</c> extension before the current settings are saved.
+    /// If the active settings file already exists, the user is prompted before it
+    /// is replaced.
     ///
     /// If no settings file is currently active, the user may save the current
     /// settings as the defaults or continue to the Save As workflow.
@@ -70,39 +67,33 @@ partial class MainForm
     {
         if (!string.IsNullOrEmpty(SettingsFile))
         {
-            if (File.Exists(SettingsFile))
+            if (File.Exists(SettingsFile) &&
+                MessageBox.Show(
+                    "Replace existing file?",
+                    "File exists - " + SettingsFile,
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1) == DialogResult.No)
             {
-                if (MessageBox.Show(
-                        "Replace existing file?",
-                        "File exists - " + SettingsFile,
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button1) == DialogResult.No)
-                {
-                    return;
-                }
-
-                // Preserve the previous settings file in case the new settings
-                // cannot be saved successfully.
-                File.Copy(
-                    SettingsFile,
-                    SettingsFile + ".old",
-                    overwrite: true);
+                return;
             }
 
             SavePrefs(SettingsFile);
+            return;
         }
-        else if (MessageBox.Show(
-                     "No settings file currently loaded. Save as Default?",
-                     "Save current settings as Default?",
-                     MessageBoxButtons.YesNo) == DialogResult.Yes)
+
+        if (MessageBox.Show(
+                "No settings file currently loaded. Save as Default?",
+                "Save current settings as Default?",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
             SavePrefs();
+            return;
         }
-        else
-        {
-            saveSettingsAsToolStripMenuItem_Click(null, null);
-        }
+
+        saveSettingsAsToolStripMenuItem_Click(
+            sender,
+            e);
     }
 
     /// <summary>
