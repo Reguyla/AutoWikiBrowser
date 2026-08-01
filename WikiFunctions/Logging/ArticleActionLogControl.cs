@@ -180,54 +180,179 @@ public partial class ArticleActionLogControl : UserControl
         }
     }
 
-    private void btnAddToList_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Adds all failed or ignored article entries to the list maker.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnAddToList_Click(
+        object sender,
+        EventArgs e)
     {
         AddToListMaker(lvFailed.Items);
     }
 
-    private void btnSaveSaved_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Saves the successful article entries to a file selected by the user.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnSaveSaved_Click(
+        object sender,
+        EventArgs e)
     {
         SaveListView(lvSuccessful);
     }
 
-    private void btnSaveIgnored_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Saves the failed or ignored article entries to a file selected by the
+    /// user.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnSaveIgnored_Click(
+        object sender,
+        EventArgs e)
     {
         SaveListView(lvFailed);
     }
 
-    private void btnClearSaved_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Removes all successful article entries from the log.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnClearSaved_Click(
+        object sender,
+        EventArgs e)
     {
         lvSuccessful.Items.Clear();
     }
 
-    private void btnClearIgnored_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Removes all failed or ignored article entries from the log.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnClearIgnored_Click(
+        object sender,
+        EventArgs e)
     {
         lvFailed.Items.Clear();
     }
 
-    private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Copies the selected entries to the clipboard and removes them from their
+    /// list.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void cutToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        Tools.Copy(MenuItemOwner(sender));
+        Tools.Copy(
+            MenuItemOwner(sender));
+
         RemoveSelected(sender);
     }
 
-    private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Copies the selected entries to the clipboard.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void copyToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        Tools.Copy(MenuItemOwner(sender));
+        Tools.Copy(
+            MenuItemOwner(sender));
     }
 
+    /// <summary>
+    /// Removes the selected entries from the list associated with the supplied
+    /// context-menu item.
+    /// </summary>
+    /// <param name="sender">
+    /// The context-menu item whose owning list contains the selected entries.
+    /// </param>
     private static void RemoveSelected(object sender)
     {
-        foreach (ListViewItem a in MenuItemOwner(sender).SelectedItems)
+        ListView listView =
+            MenuItemOwner(sender);
+
+        ListViewItem[] selectedItems =
+            new ListViewItem[listView.SelectedItems.Count];
+
+        listView.SelectedItems.CopyTo(
+            selectedItems,
+            0);
+
+        foreach (ListViewItem item in selectedItems)
         {
-            a.Remove();
+            item.Remove();
         }
     }
 
-    private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Selects every entry in the list associated with the supplied context-menu
+    /// item.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void selectAllToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        foreach (ListViewItem item in MenuItemOwner(sender).Items)
-        { item.Selected = true; }
+        ListView listView =
+            MenuItemOwner(sender);
+
+        listView.BeginUpdate();
+
+        try
+        {
+            foreach (ListViewItem item in listView.Items)
+            {
+                item.Selected = true;
+            }
+        }
+        finally
+        {
+            listView.EndUpdate();
+        }
     }
 
     private void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
