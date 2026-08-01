@@ -244,38 +244,63 @@ public interface IApiEdit
     string Preview(string title, string text);
 
     /// <summary>
-    ///
+    /// Reverts the most recent edit to the specified page.
     /// </summary>
-    /// <param name="title"></param>
-    /// <param name="user"></param>
+    /// <param name="title">
+    /// The title of the page to roll back.
+    /// </param>
+    /// <param name="user">
+    /// The user whose edit should be rolled back.
+    /// </param>
     void Rollback(string title, string user);
 
     /// <summary>
-    ///
+    /// Expands templates contained in the supplied wikitext.
     /// </summary>
-    /// <param name="title"></param>
-    /// <param name="text"></param>
-    /// <returns></returns>
+    /// <param name="title">
+    /// The title of the page whose text is being expanded.
+    /// </param>
+    /// <param name="text">
+    /// The wikitext to expand.
+    /// </param>
+    /// <returns>
+    /// The expanded wikitext returned by the MediaWiki API.
+    /// </returns>
     string ExpandTemplates(string title, string text);
 
     /// <summary>
-    ///
+    /// Sends a MediaWiki API request using the specified query string and
+    /// returns the server response.
     /// </summary>
-    /// <param name="queryParameters"></param>
-    /// <returns></returns>
+    /// <param name="queryParameters">
+    /// The URL-encoded API query parameters.
+    /// </param>
+    /// <returns>
+    /// The response returned by the MediaWiki API.
+    /// </returns>
     string QueryApi(string queryParameters);
 
     /// <summary>
-    ///
+    /// Sends a MediaWiki API request using the specified query string and
+    /// returns the JSON response.
     /// </summary>
-    /// <param name="queryParameters"></param>
-    /// <returns></returns>
+    /// <param name="queryParameters">
+    /// The URL-encoded API query parameters.
+    /// </param>
+    /// <returns>
+    /// The JSON response returned by the MediaWiki API.
+    /// </returns>
     string QueryApiJson(string queryParameters);
 
     /// <summary>
-    ///
+    /// Sends a MediaWiki API request using the specified query parameters and
+    /// returns the server response.
     /// </summary>
-    /// <param name="queryParameters"></param>
-    /// <returns></returns>
+    /// <param name="queryParameters">
+    /// The API query parameters to include in the request.
+    /// </param>
+    /// <returns>
+    /// The response returned by the MediaWiki API.
+    /// </returns>
     string ParseApi(Dictionary<string, string> queryParameters);
 }

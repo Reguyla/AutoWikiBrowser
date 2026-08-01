@@ -40,21 +40,18 @@ internal static class Plugin
     /// <summary>
     /// Registry of loaded AWB base plugins, keyed by plugin name.
     /// </summary>
-    internal static readonly Dictionary<string, IAWBBasePlugin>
-        AWBBasePlugins = new();
+    internal static readonly Dictionary<string, IAWBBasePlugin> AWBBasePlugins = new();
 
     /// <summary>
     /// Registry of loaded ListMaker plugins, keyed by plugin name.
     /// </summary>
-    internal static readonly Dictionary<string, IListMakerPlugin>
-        ListMakerPlugins = new();
+    internal static readonly Dictionary<string, IListMakerPlugin> ListMakerPlugins = new();
 
     /// <summary>
     /// Gets plugins that could not be loaded because they appear to be
     /// incompatible with the current AWB version.
     /// </summary>
-    public static readonly Dictionary<string, string> FailedPlugins =
-        new();
+    public static readonly Dictionary<string, string> FailedPlugins = new();
 
     /// <summary>
     /// Gets assembly files that Windows prevented AWB from loading.

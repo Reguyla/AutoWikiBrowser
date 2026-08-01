@@ -1249,7 +1249,7 @@ Expanded template test return<!-- {{hello2}} -->"), "performs multiple subsituti
     public void COinS()
     {
         string data1 = @"""coins"": ""ctx_ver=Z39.88-2004&amp;rft_id=info%3Adoi%2Fhttp%3A%2F%2Fdx.doi.org%2F10.1007%2Fs11046-005-4332-4&amp;rfr_id=info%3Asid%2Fcrossref.org%3Asearch&amp;rft.atitle=Morphological+alterations+in+toxigenic+Aspergillus+parasiticus+exposed+to+neem+%28Azadirachta+indica%29+leaf+and+seed+aqueous+extracts&amp;rft.jtitle=Nature+Structural+%26%2338%3B+Molecular+Biology&amp;rft.date=2005&amp;rft.volume=159&amp;rft.issue=4&amp;rft.spage=565&amp;rft.epage=570&amp;rft.aufirst=Mehdi&amp;rft.aulast=Razzaghi-Abyaneh&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.au=Mehdi+Razzaghi-Abyaneh&amp;rft.au=+Abdolamir+Allameh&amp;rft.au=+Taki+Tiraihi&amp;rft.au=+Masoomeh+Shams-Ghahfarokhi&amp;rft.au=+Mehdi+Ghorbanian""";
-        Dictionary<string, string> res = Parsers.ExtractCOinS(data1);
+        var res = Parsers.ExtractCOinS(data1);
         ClassicAssert.IsTrue(res.ContainsKey("volume"));
         ClassicAssert.IsTrue(res.ContainsKey("issue"));
         ClassicAssert.IsTrue(res.ContainsKey("spage"));
