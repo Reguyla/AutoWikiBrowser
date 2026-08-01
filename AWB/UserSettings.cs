@@ -103,31 +103,73 @@ partial class MainForm
         }
     }
 
-    private void loadSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the dialog used to load an application settings file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void loadSettingsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         LoadSettingsDialog();
     }
 
-    private void loadDefaultSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Prompts the user to restore the original default application settings.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void loadDefaultSettingsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        if (MessageBox.Show("Would you really like to load the original default settings?", "Reset settings to default?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        if (MessageBox.Show(
+                "Would you really like to load the original default settings?",
+                "Reset settings to default?",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
             ResetSettings();
+        }
     }
 
-    private void saveSettingsAsToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Prompts the user to select a file for saving the current settings.
+    /// </summary>
+    /// <remarks>
+    /// The selected file becomes the active settings file. The actual save
+    /// operation is performed elsewhere in the settings workflow.
+    /// </remarks>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void saveSettingsAsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (SettingsFile != AwbDirs.DefaultSettings)
+        {
             saveXML.FileName = SettingsFile;
+        }
 
         if (saveXML.ShowDialog() != DialogResult.OK)
+        {
             return;
+        }
 
         SettingsFile = saveXML.FileName;
     }
 
+    // TODO: Consider handling plugin reset failures individually so one faulty
+    // plugin does not prevent subsequent plugins from being reset.
+    //
     /// <summary>
-    /// Resets settings to Setting Class defaults
+    /// Restores the application settings to the default values defined by
+    /// <see cref="UserPrefs"/>.
     /// </summary>
+    /// <remarks>
+    /// Plugin settings are reset separately so that a plugin failure does not
+    /// prevent the core application settings from being restored.
+    /// </remarks>
     private void ResetSettings()
     {
         try
@@ -136,12 +178,21 @@ partial class MainForm
 
             try
             {
-                foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
-                    a.Value.Reset();
+                foreach (KeyValuePair<string, IAWBPlugin> plugin in Plugin.AWBPlugins)
+                {
+                    plugin.Value.Reset();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Problem resetting plugin\r\n\r\n" + ex.Message);
+                MessageBox.Show(
+                    "A problem occurred while resetting a plugin."
+                    + Environment.NewLine
+                    + Environment.NewLine
+                    + ex.Message,
+                    "Plugin reset error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
             }
 
             CModule.ModuleEnabled = false;
@@ -150,7 +201,11 @@ partial class MainForm
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error loading settings", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                ex.Message,
+                "Error loading settings",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
     }
 
