@@ -165,19 +165,37 @@ public partial class ArticleActionLogControl : UserControl
         lstView.ResizeColumns(true);
     }
 
-    private void SaveListView(ListView listview)
+    /// <summary>
+    /// Saves the contents of a log list to the selected file.
+    /// </summary>
+    /// <param name="listview">
+    /// The list view whose entries should be written.
+    /// </param>
+    private void SaveListView(
+        ListView listview)
     {
-        LogFileType logFileType = GetFilePrefs();
-        if (logFileType != 0)
-        {
-            StringBuilder strList = new StringBuilder();
+        ArgumentNullException.ThrowIfNull(listview);
 
-            foreach (ListViewItem lvi in listview.Items)
-            {
-                strList.AppendLine(lvi.Text);
-            }
-            Tools.WriteTextFileAbsolutePath(strList.ToString(), saveListDialog.FileName, false);
+        LogFileType logFileType =
+            GetFilePrefs();
+
+        if (logFileType == 0)
+        {
+            return;
         }
+
+        StringBuilder articleList =
+            new(listview.Items.Count * 32);
+
+        foreach (ListViewItem item in listview.Items)
+        {
+            articleList.AppendLine(item.Text);
+        }
+
+        Tools.WriteTextFileAbsolutePath(
+            articleList.ToString(),
+            saveListDialog.FileName,
+            false);
     }
 
     /// <summary>
