@@ -232,49 +232,85 @@ public partial class ErrorHandler : Form
     }
 
     /// <summary>
-    /// Displays exception information. Should be called from try...catch handlers
+    /// Handles an exception by displaying a known-condition message or, for an
+    /// unrecognized exception, a dialog containing diagnostic report details.
     /// </summary>
-    /// <param name="ex">Exception object to handle</param>
+    /// <param name="ex">The exception to handle.</param>
     public static void HandleException(Exception ex)
     {
-        if (ex == null || HandleKnownExceptions(ex)) return;
+        if (ex == null || HandleKnownExceptions(ex))
+        {
+            return;
+        }
 
-        ErrorHandler handler = new()
+        using ErrorHandler handler = new()
         {
             txtError =
-            {
-                Text =
-                    ex.Message +
-                    Environment.NewLine +
-                    Environment.NewLine +
-                    "This error was not recognized as a known condition. " +
-                    "Please review the details below and consider submitting a bug report."
-            }
+        {
+            Text =
+                ex.Message +
+                Environment.NewLine +
+                Environment.NewLine +
+                "This error was not recognized as a known condition. " +
+                "Please review the details below and consider submitting a bug report."
+        }
         };
 
-        string errorMessage;
+        handler.txtDetails.Text = CreateDiagnosticReport(ex);
+        handler.txtSubject.Text = CreateDiagnosticSubject(ex);
 
+        handler.ShowDialog();
+    }
+
+    /// <summary>
+    /// Creates a formatted diagnostic report for an unrecognized exception.
+    /// </summary>
+    /// <param name="ex">The exception to include in the report.</param>
+    /// <returns>
+    /// The formatted report, or a fallback representation if report generation
+    /// fails.
+    /// </returns>
+    private static string CreateDiagnosticReport(Exception ex)
+    {
         try
         {
-            errorMessage = new BugReport(ex).PrintForPhabricator();
+            return new BugReport(ex).PrintForPhabricator();
         }
         catch
         {
-            errorMessage =
+            return
                 "The formatted error report could not be generated." +
                 Environment.NewLine +
                 Environment.NewLine +
                 ex;
         }
-
-        handler.txtDetails.Text = errorMessage;
-
-        handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
-
-        handler.ShowDialog();
     }
 
-    class BugReport
+    /// <summary>
+    /// Creates the subject used when reporting an unrecognized exception.
+    /// </summary>
+    /// <param name="ex">The exception to describe.</param>
+    /// <returns>
+    /// A concise diagnostic subject containing the exception type and likely
+    /// originating method.
+    /// </returns>
+    private static string CreateDiagnosticSubject(Exception ex)
+    {
+        try
+        {
+            return $"{ex.GetType().Name} in {Thrower(ex)}";
+        }
+        catch
+        {
+            return ex.GetType().Name;
+        }
+    }
+
+    /// <summary>
+    /// Collects exception and environment information used to create a diagnostic
+    /// bug report.
+    /// </summary>
+    private sealed class BugReport
     {
         private readonly string Thread = string.Empty;
         private readonly string OS = Environment.OSVersion.ToString();
@@ -301,6 +337,7 @@ public partial class ErrorHandler : Form
             }
 
             StringBuilder stackTrace = new();
+
             FormatException(
                 ex,
                 stackTrace,
