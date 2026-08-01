@@ -271,7 +271,7 @@ internal static class UsageStats
             return false;
         }
 
-        ReadXML(response);
+        ReadXml(response);
 
         if (userFieldIncluded)
         {
@@ -409,33 +409,82 @@ internal static class UsageStats
         }
     }
 
-    private static void ReadXML(string xml)
+    /// <summary>
+    /// Reads the record identifier and verification number returned by the
+    /// usage statistics server.
+    /// </summary>
+    /// <param name="xml">
+    /// The XML response returned by the usage statistics server.
+    /// </param>
+    /// <exception cref="XmlException">
+    /// Thrown when the response does not contain a single valid
+    /// <c>DB</c> element with numeric <c>Record</c> and <c>Verify</c> attributes.
+    /// </exception>
+    private static void ReadXml(string xml)
     {
+        if (string.IsNullOrWhiteSpace(xml))
+        {
+            return;
+        }
+
         try
         {
-            if (string.IsNullOrEmpty(xml)) return; // handle network errors
+            XmlDocument document = new()
+            {
+                XmlResolver = null
+            };
 
-            // we don't *need* these IDs if we're exiting, but I think it does no harm to check we received a valid response
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-            XmlNodeList nodes = doc.GetElementsByTagName("DB");
-            if (nodes.Count == 1 && nodes[0].Attributes != null && nodes[0].Attributes.Count == 2)
+            document.LoadXml(xml);
+
+            XmlNodeList nodes = document.GetElementsByTagName("DB");
+
+            if (nodes.Count != 1 || nodes[0] is not XmlElement dbElement)
             {
-                RecordId = int.Parse(nodes[0].Attributes["Record"].Value);
-                SecretNumber = int.Parse(nodes[0].Attributes["Verify"].Value);
+                throw CreateUsageStatsXmlException();
             }
-            else
+
+            string? recordValue = dbElement.GetAttribute("Record");
+            string? verifyValue = dbElement.GetAttribute("Verify");
+
+            if (!int.TryParse(recordValue, out int recordId) ||
+                !int.TryParse(verifyValue, out int secretNumber))
             {
-                throw new XmlException("Error parsing XML returned from UsageStats server");
+                throw CreateUsageStatsXmlException();
             }
+
+            RecordId = recordId;
+            SecretNumber = secretNumber;
         }
-        catch (Exception ex)
+        catch (XmlException)
         {
-            if (ex is XmlException)
-                throw;
-
-            throw new XmlException("Error parsing XML returned from UsageStats server", ex);
+            throw;
         }
+        catch (Exception ex) when (
+            ex is InvalidOperationException ||
+            ex is ArgumentException)
+        {
+            throw CreateUsageStatsXmlException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Creates a standardized exception for an invalid usage statistics response.
+    /// </summary>
+    /// <param name="innerException">
+    /// The exception that caused parsing to fail, if available.
+    /// </param>
+    /// <returns>
+    /// An exception describing the invalid server response.
+    /// </returns>
+    private static XmlException CreateUsageStatsXmlException(
+        Exception? innerException = null)
+    {
+        const string message =
+            "Error parsing XML returned from the usage statistics server.";
+
+        return innerException is null
+            ? new XmlException(message)
+            : new XmlException(message, innerException);
     }
 
     /// <summary>
