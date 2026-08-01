@@ -195,14 +195,14 @@ internal static class UsageStats
         }
     }
 
-    static bool NewPluginsAdded
-    {
-        get
-        {
-            return NewAWBPlugins.Count > 0 || NewAWBBasePlugins.Count > 0
-                   || NewListMakerPlugins.Count > 0;
-        }
-    }
+    /// <summary>
+    /// Gets a value indicating whether any newly discovered plugins are awaiting
+    /// installation or processing.
+    /// </summary>
+    private static bool NewPluginsAdded =>
+        NewAWBPlugins.Count > 0 ||
+        NewAWBBasePlugins.Count > 0 ||
+        NewListMakerPlugins.Count > 0;
 
     /// <summary>
     /// Call when a plugin was added *after* application startup
@@ -306,37 +306,47 @@ internal static class UsageStats
     }
 
     /// <summary>
-    /// Send updated usage stats to server
+    /// Sends updated usage statistics to the server.
     /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if the update was sent successfully;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
     private static bool SubsequentContact()
     {
-        NameValueCollection postvars = new NameValueCollection
-                                           {
-                                               {"Action", "Update"},
-                                               {"RecordID", RecordId.ToString()},
-                                               {"Verify", SecretNumber.ToString()}
-                                           };
+        NameValueCollection postVariables = new()
+    {
+        { "Action", "Update" },
+        { "RecordID", RecordId.ToString() },
+        { "Verify", SecretNumber.ToString() }
+    };
 
-        EnumeratePlugins(postvars, NewAWBPlugins, NewAWBBasePlugins, NewListMakerPlugins);
+        EnumeratePlugins(
+            postVariables,
+            NewAWBPlugins,
+            NewAWBBasePlugins,
+            NewListMakerPlugins);
 
-        bool userFieldIncluded = ProcessUsername(postvars);
+        bool userNameIncluded = ProcessUsername(postVariables);
 
         if (Program.AWB.NumberOfEdits > LastEditCount)
-            postvars.Add("Saves", Program.AWB.NumberOfEdits.ToString());
+        {
+            postVariables.Add(
+                "Saves",
+                Program.AWB.NumberOfEdits.ToString());
+        }
 
-        string response;
-
-        if (!TryPostData(postvars, out response))
+        if (!TryPostData(postVariables, out _))
         {
             return false;
         }
 
-        if (userFieldIncluded)
+        if (userNameIncluded)
         {
             SentUserName = true;
         }
 
-        // Clear lists only after the update was successfully sent.
+        // Clear pending plugin updates only after the request succeeds.
         NewAWBPlugins.Clear();
         NewAWBBasePlugins.Clear();
         NewListMakerPlugins.Clear();
