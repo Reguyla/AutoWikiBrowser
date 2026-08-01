@@ -69,48 +69,88 @@ internal class ZipAESTransform : ICryptoTransform
     private bool _writeMode;
 
     /// <summary>
-    /// Constructor.
+    /// Initializes a WinZip AES encryption/decryption transform.
     /// </summary>
-    /// <param name="key">Password string</param>
-    /// <param name="saltBytes">Random bytes, length depends on encryption strength.
-    /// 128 bits = 8 bytes, 192 bits = 12 bytes, 256 bits = 16 bytes.</param>
-    /// <param name="blockSize">The encryption strength, in bytes eg 16 for 128 bits.</param>
-    /// <param name="writeMode">True when creating a zip, false when reading. For the AuthCode.</param>
-    ///
-    public ZipAESTransform(string key, byte[] saltBytes, int blockSize, bool writeMode)
+    /// <param name="key">Password string.</param>
+    /// <param name="saltBytes">
+    /// Random salt bytes. Length depends on the encryption strength:
+    /// 128-bit = 8 bytes, 256-bit = 16 bytes.
+    /// </param>
+    /// <param name="blockSize">
+    /// Encryption strength in bytes (16 for AES-128, 32 for AES-256).
+    /// </param>
+    /// <param name="writeMode">
+    /// <see langword="true"/> when creating a ZIP archive;
+    /// <see langword="false"/> when reading one.
+    /// </param>
+    public ZipAESTransform(
+        string key,
+        byte[] saltBytes,
+        int blockSize,
+        bool writeMode)
     {
-        if (blockSize != 16 && blockSize != 32) // 24 valid for AES but not supported by Winzip
-            throw new Exception("Invalid blocksize " + blockSize + ". Must be 16 or 32.");
+        if (blockSize != 16 && blockSize != 32)
+        {
+            throw new Exception(
+                $"Invalid block size {blockSize}. Must be 16 or 32.");
+        }
+
         if (saltBytes.Length != blockSize / 2)
-            throw new Exception("Invalid salt len. Must be " + blockSize / 2 + " for blocksize " + blockSize);
-        // initialise the encryption buffer and buffer pos
+        {
+            throw new Exception(
+                $"Invalid salt length. Must be {blockSize / 2} for block size {blockSize}.");
+        }
+
         _blockSize = blockSize;
         _encryptBuffer = new byte[_blockSize];
         _encrPos = ENCRYPT_BLOCK;
 
         // WinZip AES uses PBKDF2 with 1,000 iterations and SHA-1.
-        // These values must remain unchanged to preserve ZIP compatibility.
-        using Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(
-            key,
-            saltBytes,
-            KEY_ROUNDS,
-            HashAlgorithmName.SHA1);
+        // The output stream consists of:
+        //   - Encryption key
+        //   - Authentication key
+        //   - Password verifier
+        // Preserve this layout exactly for ZIP compatibility.
+        int derivedLength =
+            (_blockSize * 2) + PWD_VER_LENGTH;
 
-        // AES is used as the block cipher while this class implements
-        // counter mode manually.
+        byte[] derivedBytes =
+            Rfc2898DeriveBytes.Pbkdf2(
+                key,
+                saltBytes,
+                KEY_ROUNDS,
+                HashAlgorithmName.SHA1,
+                derivedLength);
+
+        byte[] encryptionKey = new byte[_blockSize];
+        byte[] authenticationKey = new byte[_blockSize];
+        _pwdVerifier = new byte[PWD_VER_LENGTH];
+
+        Buffer.BlockCopy(
+            derivedBytes, 0,
+            encryptionKey, 0, _blockSize);
+
+        Buffer.BlockCopy(
+            derivedBytes, _blockSize,
+            authenticationKey, 0, _blockSize);
+
+        Buffer.BlockCopy(
+            derivedBytes,
+            _blockSize * 2, _pwdVerifier, 0, PWD_VER_LENGTH);
+
         using Aes aes = Aes.Create();
+
         aes.Mode = CipherMode.ECB;
         aes.Padding = PaddingMode.None;
 
         _counterNonce = new byte[_blockSize];
 
-        byte[] byteKey1 = pdb.GetBytes(_blockSize);
-        byte[] byteKey2 = pdb.GetBytes(_blockSize);
+        _encryptor = aes.CreateEncryptor(
+            encryptionKey,
+            null);
 
-        _encryptor = aes.CreateEncryptor(byteKey1, null);
-        _pwdVerifier = pdb.GetBytes(PWD_VER_LENGTH);
+        _hmacsha1 = new HMACSHA1(authenticationKey);
 
-        _hmacsha1 = new HMACSHA1(byteKey2);
         _writeMode = writeMode;
     }
 
