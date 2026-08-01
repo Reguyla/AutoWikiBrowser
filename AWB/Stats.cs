@@ -516,17 +516,22 @@ internal static class UsageStats
         return false;
     }
 
-    private static bool HaveUserNameToSend
-    {
-        get
-        {
-            return (!SentUserName &&
-                (Properties.Settings.Default.Privacy || !string.IsNullOrEmpty(UserName)));
-        }
-    }
+    /// <summary>
+    /// Gets a value indicating whether the user's name should be included in the
+    /// next usage statistics submission.
+    /// </summary>
+    private static bool HaveUserNameToSend =>
+        !SentUserName &&
+        (Properties.Settings.Default.Privacy ||
+         !string.IsNullOrWhiteSpace(UserName));
 
     #endregion
 
+    /// <summary>
+    /// Opens the usage statistics information page in the user's default web browser.
+    /// </summary>
     internal static void OpenUsageStatsURL()
-    { Tools.OpenURLInBrowser(StatsURL); }
+    {
+        Tools.OpenURLInBrowser(StatsURL);
+    }
 }
