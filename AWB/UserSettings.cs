@@ -28,33 +28,75 @@ namespace AutoWikiBrowser;
 
 partial class MainForm
 {
-    private void saveAsDefaultToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Prompts the user to save the current application settings as the
+    /// default settings.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void saveAsDefaultToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        if (MessageBox.Show("Are you sure you want to save these settings as the default settings?", "Save as default?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        if (MessageBox.Show(
+                "Are you sure you want to save these settings as the default settings?",
+                "Save as default?",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
             SavePrefs();
+        }
     }
 
-    private void saveSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+    // TODO: Consider moving settings-file persistence into a dedicated service
+    // that performs atomic saves and can restore the backup if replacement fails.
+    /// <summary>
+    /// Saves the current application settings to the active settings file.
+    /// </summary>
+    /// <remarks>
+    /// If the active settings file already exists, the user is prompted before
+    /// it is replaced. The existing file is copied to a file with the
+    /// <c>.old</c> extension before the current settings are saved.
+    ///
+    /// If no settings file is currently active, the user may save the current
+    /// settings as the defaults or continue to the Save As workflow.
+    /// </remarks>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void saveSettingsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (!string.IsNullOrEmpty(SettingsFile))
         {
             if (File.Exists(SettingsFile))
             {
-                if (MessageBox.Show("Replace existing file?", "File exists - " + SettingsFile,
-                                    MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button1) == DialogResult.No)
+                if (MessageBox.Show(
+                        "Replace existing file?",
+                        "File exists - " + SettingsFile,
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1) == DialogResult.No)
+                {
                     return;
+                }
 
-                // Make an "old"/backup copy of a file. Old settings are still there if something goes wrong
-                File.Copy(SettingsFile, SettingsFile + ".old", true);
+                // Preserve the previous settings file in case the new settings
+                // cannot be saved successfully.
+                File.Copy(
+                    SettingsFile,
+                    SettingsFile + ".old",
+                    overwrite: true);
             }
 
             SavePrefs(SettingsFile);
         }
-        else if (
-            MessageBox.Show("No settings file currently loaded. Save as Default?",
-                            "Save current settings as Default?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        else if (MessageBox.Show(
+                     "No settings file currently loaded. Save as Default?",
+                     "Save current settings as Default?",
+                     MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
             SavePrefs();
+        }
         else
         {
             saveSettingsAsToolStripMenuItem_Click(null, null);
