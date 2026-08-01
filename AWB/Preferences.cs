@@ -801,54 +801,130 @@ internal sealed partial class MyPreferences : Form
         }
     }
 
+    /// <summary>
+    /// Validates the current preferences, updates application settings, and saves
+    /// any persistent values that have changed.
+    /// </summary>
     private void btnOk_Click(object sender, EventArgs e)
     {
-        bool save = false;
+        ValidateAutoSaveSettings();
+        AddCurrentCustomProject();
 
-        if (chkAutoSaveEdit.Checked && string.IsNullOrEmpty(txtAutosave.Text))
-        {
-            chkAutoSaveEdit.Checked = false;
-        }
-
-        if (cmboProject.Text.Equals("custom") && !string.IsNullOrEmpty(cmboCustomProject.Text))
-        {
-            FixCustomProject();
-            cmboCustomProject.Items.Add(cmboCustomProject.Text);
-        }
-
-        StringBuilder customs = new StringBuilder();
-        foreach (string s in from string s in cmboCustomProject.Items
-                             where !string.IsNullOrEmpty(s.Trim())
-                             select s)
-        {
-            customs.Append(s + "|");
-        }
-
-        string tmp = customs.ToString();
-        Properties.Settings.Default.CustomWikis =
-            string.IsNullOrEmpty(tmp) ? "" : tmp.Substring(0, tmp.LastIndexOf('|'));
-
-        if (!string.IsNullOrEmpty(Properties.Settings.Default.CustomWikis))
-        {
-            save = true;
-        }
-
-        if (Properties.Settings.Default.AskForTerminate != chkAlwaysConfirmExit.Checked)
-        {
-            Properties.Settings.Default.AskForTerminate = chkAlwaysConfirmExit.Checked;
-            save = true;
-        }
-
-        if (Properties.Settings.Default.Privacy.Equals(chkPrivacy.Checked))
-        {
-            Properties.Settings.Default.Privacy = !chkPrivacy.Checked;
-            save = true;
-        }
-
-        if (save)
+        if (UpdatePersistentSettings())
         {
             Properties.Settings.Default.Save();
         }
+    }
+
+    /// <summary>
+    /// Disables edit-box autosave when no autosave file has been specified.
+    /// </summary>
+    private void ValidateAutoSaveSettings()
+    {
+        if (chkAutoSaveEdit.Checked &&
+            string.IsNullOrWhiteSpace(txtAutosave.Text))
+        {
+            chkAutoSaveEdit.Checked = false;
+        }
+    }
+
+    /// <summary>
+    /// Normalizes and adds the current custom project to the saved project list.
+    /// </summary>
+    private void AddCurrentCustomProject()
+    {
+        if (Project != ProjectEnum.custom ||
+            string.IsNullOrWhiteSpace(cmboCustomProject.Text))
+        {
+            return;
+        }
+
+        FixCustomProject();
+
+        string customProject = cmboCustomProject.Text;
+
+        if (string.IsNullOrWhiteSpace(customProject))
+        {
+            return;
+        }
+
+        bool alreadyExists = cmboCustomProject.Items
+            .Cast<object>()
+            .Select(item => item?.ToString())
+            .Any(item => string.Equals(
+                item,
+                customProject,
+                StringComparison.Ordinal));
+
+        if (!alreadyExists)
+        {
+            cmboCustomProject.Items.Add(customProject);
+        }
+    }
+
+    // TODO: Move preferences persistence into a dedicated settings service or
+    // preferences model so the form is responsible only for presenting and
+    // collecting user input.
+    /// <summary>
+    /// Updates persistent application settings from the current form values.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when at least one persistent setting changed;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool UpdatePersistentSettings()
+    {
+        bool settingsChanged = false;
+
+        string customWikis = BuildCustomWikisSetting();
+
+        if (!string.Equals(
+                Properties.Settings.Default.CustomWikis,
+                customWikis,
+                StringComparison.Ordinal))
+        {
+            Properties.Settings.Default.CustomWikis = customWikis;
+            settingsChanged = true;
+        }
+
+        if (Properties.Settings.Default.AskForTerminate !=
+            chkAlwaysConfirmExit.Checked)
+        {
+            Properties.Settings.Default.AskForTerminate =
+                chkAlwaysConfirmExit.Checked;
+
+            settingsChanged = true;
+        }
+
+        // The persisted Privacy value has inverse semantics relative to the
+        // checkbox state.
+        bool privacySetting = !chkPrivacy.Checked;
+
+        if (Properties.Settings.Default.Privacy != privacySetting)
+        {
+            Properties.Settings.Default.Privacy = privacySetting;
+            settingsChanged = true;
+        }
+
+        return settingsChanged;
+    }
+
+    /// <summary>
+    /// Creates the pipe-delimited custom wiki value stored in application
+    /// settings.
+    /// </summary>
+    /// <returns>
+    /// A pipe-delimited list of nonempty custom wiki entries.
+    /// </returns>
+    private string BuildCustomWikisSetting()
+    {
+        return string.Join(
+            "|",
+            cmboCustomProject.Items
+                .Cast<object>()
+                .Select(item => item?.ToString())
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .Select(item => item!.Trim()));
     }
 
     /// <summary>
