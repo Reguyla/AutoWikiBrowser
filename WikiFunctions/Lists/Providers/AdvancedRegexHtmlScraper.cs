@@ -36,30 +36,73 @@ public partial class AdvancedRegexHtmlScraper : Form, IListProvider
         InitializeComponent();
     }
 
-    public List<Article> MakeList(params string[] searchCriteria)
+    /// <summary>
+    /// Displays the list-building dialog and creates articles from matches found
+    /// in the supplied web locations.
+    /// </summary>
+    /// <param name="searchCriteria">
+    /// The URLs or host names whose HTML content should be searched.
+    /// </param>
+    /// <returns>
+    /// A list of articles created from matching values, or an empty list when the
+    /// dialog is already visible, is cancelled, or no matches are found.
+    /// </returns>
+    public List<Article> MakeList(
+        params string[] searchCriteria)
     {
         if (Visible)
-            return null;
-
-        List<Article> list = new List<Article>();
-
-        if (ShowDialog() == DialogResult.OK)
         {
-            foreach (string url in searchCriteria)
-            {
-                string urlBuilt = url.Contains("http") ? url : "http://" + url;
+            return new List<Article>();
+        }
 
-                foreach (Match m in _regexToUse.Matches(Tools.GetHTML(urlBuilt)))
+        ArgumentNullException.ThrowIfNull(searchCriteria);
+
+        List<Article> articles = new();
+
+        if (ShowDialog() != DialogResult.OK)
+        {
+            return articles;
+        }
+
+        foreach (string searchLocation in searchCriteria)
+        {
+            if (string.IsNullOrWhiteSpace(searchLocation))
+            {
+                continue;
+            }
+
+            string url =
+                searchLocation.StartsWith(
+                    "http://",
+                    StringComparison.OrdinalIgnoreCase) ||
+                searchLocation.StartsWith(
+                    "https://",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? searchLocation
+                    : $"http://{searchLocation}";
+
+            string html =
+                Tools.GetHTML(url);
+
+            foreach (Match match in _regexToUse.Matches(html))
+            {
+                Group articleNameGroup =
+                    match.Groups[_groupNumber];
+
+                if (!articleNameGroup.Success ||
+                    articleNameGroup.Length == 0)
                 {
-                    if (m.Groups[_groupNumber].Length > 0)
-                    {
-                        list.Add(new Article(ModifyArticleName(m.Groups[_groupNumber].Value)));
-                    }
+                    continue;
                 }
+
+                articles.Add(
+                    new Article(
+                        ModifyArticleName(
+                            articleNameGroup.Value)));
             }
         }
 
-        return list;
+        return articles;
     }
 
     private static string ModifyArticleName(string title)
