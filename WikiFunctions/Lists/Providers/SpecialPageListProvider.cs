@@ -70,33 +70,71 @@ public partial class SpecialPageListProvider : Form, IListProvider
         }
     }
 
-    // ReSharper disable once RedundantAssignment
-    public List<Article> MakeList(params string[] searchCriteria)
+    /// <summary>
+    /// Displays the special-page list dialog and creates an article list using
+    /// the selected provider and namespace.
+    /// </summary>
+    /// <param name="searchCriteria">
+    /// Initial search criteria supplied by the caller. The current dialog
+    /// implementation replaces these values with the page text entered by the
+    /// user.
+    /// </param>
+    /// <returns>
+    /// The articles created by the selected provider, or an empty list when the
+    /// dialog is already visible, is cancelled, or cannot produce a list.
+    /// </returns>
+    public List<Article> MakeList(
+        params string[] searchCriteria)
     {
         if (Visible)
-            return null;
-
-        txtPages.Text = "";
-
-        List<Article> list = new List<Article>();
-
-        if (ShowDialog() == DialogResult.OK)
         {
-            searchCriteria = txtPages.Text.Split('|');
-
-            ISpecialPageProvider item = (ISpecialPageProvider)cmboSourceSelect.SelectedItem;
-
-            if (!string.IsNullOrEmpty(txtPages.Text))
-                list = item.MakeList(Namespace.Determine(cboNamespace.Text), searchCriteria);
-            else if (item.PagesNeeded)
-                MessageBox.Show("Pages needed!");
-            else
-                list = item.MakeList(Namespace.Determine(cboNamespace.Text), "");
+            return new List<Article>();
         }
 
-        Hide();
+        txtPages.Clear();
 
-        return list;
+        if (ShowDialog() != DialogResult.OK)
+        {
+            return new List<Article>();
+        }
+
+        if (cmboSourceSelect.SelectedItem is not
+            ISpecialPageProvider provider)
+        {
+            return new List<Article>();
+        }
+
+        int namespaceKey =
+            Namespace.Determine(
+                cboNamespace.Text);
+
+        string[] enteredPages =
+            txtPages.Text.Split(
+                '|',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries);
+
+        if (enteredPages.Length > 0)
+        {
+            return provider.MakeList(
+                namespaceKey,
+                enteredPages);
+        }
+
+        if (provider.PagesNeeded)
+        {
+            MessageBox.Show(
+                "Pages needed!",
+                "Special page list",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            return new List<Article>();
+        }
+
+        return provider.MakeList(
+            namespaceKey,
+            string.Empty);
     }
 
     public string DisplayText
