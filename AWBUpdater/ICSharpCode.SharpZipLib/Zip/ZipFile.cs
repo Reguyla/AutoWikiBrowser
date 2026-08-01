@@ -3534,22 +3534,30 @@ public class ZipFile : IEnumerable, IDisposable
     }
 
 #if !NETCF_1_0
-    Stream CreateAndInitDecryptionStream(Stream baseStream, ZipEntry entry)
+    Stream CreateAndInitDecryptionStream(
+        Stream baseStream,
+        ZipEntry entry)
     {
         CryptoStream result = null;
 
-        if ((entry.Version < ZipConstants.VersionStrongEncryption)
-            || (entry.Flags & (int)GeneralBitFlags.StrongEncryption) == 0)
+        if (entry.Version < ZipConstants.VersionStrongEncryption ||
+            (entry.Flags & (int)GeneralBitFlags.StrongEncryption) == 0)
         {
-            PkzipClassicManaged classicManaged = new PkzipClassicManaged();
+            PkzipClassicManaged classicManaged = new();
 
             OnKeysRequired(entry.Name);
-            if (HaveKeys == false)
+
+            if (!HaveKeys)
             {
-                throw new ZipException("No password available for encrypted stream");
+                throw new ZipException(
+                    "No password available for encrypted stream");
             }
 
-            result = new CryptoStream(baseStream, classicManaged.CreateDecryptor(key, null), CryptoStreamMode.Read);
+            result = new CryptoStream(
+                baseStream,
+                classicManaged.CreateDecryptor(key, null),
+                CryptoStreamMode.Read);
+
             CheckClassicPassword(result, entry);
         }
         else
@@ -3557,32 +3565,70 @@ public class ZipFile : IEnumerable, IDisposable
 #if !NET_1_1 && !NETCF_2_0
             if (entry.Version == ZipConstants.VERSION_AES)
             {
-                //
                 OnKeysRequired(entry.Name);
-                if (HaveKeys == false)
-                {
-                    throw new ZipException("No password available for AES encrypted stream");
-                }
-                int saltLen = entry.AESSaltLen;
-                byte[] saltBytes = new byte[saltLen];
-                int saltIn = baseStream.Read(saltBytes, 0, saltLen);
-                if (saltIn != saltLen)
-                    throw new ZipException("AES Salt expected " + saltLen + " got " + saltIn);
-                //
-                byte[] pwdVerifyRead = new byte[2];
-                baseStream.Read(pwdVerifyRead, 0, 2);
-                int blockSize = entry.AESKeySize / 8;   // bits to bytes
 
-                ZipAESTransform decryptor = new ZipAESTransform(rawPassword_, saltBytes, blockSize, false);
-                byte[] pwdVerifyCalc = decryptor.PwdVerifier;
-                if (pwdVerifyCalc[0] != pwdVerifyRead[0] || pwdVerifyCalc[1] != pwdVerifyRead[1])
-                    throw new Exception("Invalid password for AES");
-                result = new ZipAESStream(baseStream, decryptor, CryptoStreamMode.Read);
+                if (!HaveKeys)
+                {
+                    throw new ZipException(
+                        "No password available for AES encrypted stream");
+                }
+
+                int saltLength = entry.AESSaltLen;
+                byte[] saltBytes = new byte[saltLength];
+
+                try
+                {
+                    baseStream.ReadExactly(saltBytes);
+                }
+                catch (EndOfStreamException ex)
+                {
+                    throw new ZipException(
+                        $"AES salt expected {saltLength} bytes, but the stream ended early.",
+                        ex);
+                }
+
+                byte[] passwordVerifier = new byte[2];
+
+                try
+                {
+                    baseStream.ReadExactly(passwordVerifier);
+                }
+                catch (EndOfStreamException ex)
+                {
+                    throw new ZipException(
+                        "AES password verification data expected 2 bytes, " +
+                        "but the stream ended early.",
+                        ex);
+                }
+
+                // Convert the AES key size from bits to bytes.
+                int blockSize = entry.AESKeySize / 8;
+
+                ZipAESTransform decryptor = new(
+                    rawPassword_,
+                    saltBytes,
+                    blockSize,
+                    false);
+
+                byte[] calculatedPasswordVerifier =
+                    decryptor.PwdVerifier;
+
+                if (calculatedPasswordVerifier[0] != passwordVerifier[0] ||
+                    calculatedPasswordVerifier[1] != passwordVerifier[1])
+                {
+                    throw new ZipException("Invalid password for AES");
+                }
+
+                result = new ZipAESStream(
+                    baseStream,
+                    decryptor,
+                    CryptoStreamMode.Read);
             }
             else
 #endif
             {
-                throw new ZipException("Decryption method not supported");
+                throw new ZipException(
+                    "Decryption method not supported");
             }
         }
 
