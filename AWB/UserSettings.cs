@@ -241,7 +241,8 @@ partial class MainForm
     }
 
     /// <summary>
-    /// Displays the settings-file selection dialog and loads the selected file.
+    /// Displays the settings-file selection dialog and loads the selected settings
+    /// file when the user confirms the selection.
     /// </summary>
     private void LoadSettingsDialog()
     {
@@ -253,13 +254,16 @@ partial class MainForm
         LoadPrefs(openXML.FileName);
     }
 
+    // TODO: Consider replacing the delimiter-based recent settings registry value
+    // with structured application settings storage that can safely represent file
+    // paths and support validation, deduplication, and migration.
     /// <summary>
-    /// Loads the recent settings-file list from the registry and updates the
+    /// Loads the recently used settings files from the registry and updates the
     /// corresponding user-interface entries.
     /// </summary>
     /// <remarks>
-    /// Splash-screen progress is advanced to 70 even if loading the recent list
-    /// fails.
+    /// Splash-screen progress is advanced to 70 even if registry access or recent
+    /// settings processing fails.
     /// </remarks>
     private void LoadRecentSettingsList()
     {
@@ -267,8 +271,10 @@ partial class MainForm
 
         try
         {
-            string[] recentSettings =
-                RegistryUtils.GetValue("\\RecentList", "").Split('|');
+            string recentSettingsValue =
+                RegistryUtils.GetValue("\\RecentList", "");
+
+            string[] recentSettings = recentSettingsValue.Split('|');
 
             UpdateRecentList(recentSettings);
         }
@@ -278,16 +284,36 @@ partial class MainForm
         }
     }
 
+    // TODO: Consider enforcing a maximum number of recent settings entries
+    // to keep the Recent menu and registry value from growing indefinitely.
+    /// <summary>
+    /// Replaces the current recent settings list with the specified collection
+    /// of settings file paths.
+    /// </summary>
+    /// <param name="list">
+    /// The collection of recent settings file paths.
+    /// </param>
     private void UpdateRecentList(IEnumerable<string> list)
     {
         RecentList.Clear();
-        foreach (string s in list)
+
+        foreach (string path in list)
         {
-            if (!string.IsNullOrEmpty(s.Trim())) RecentList.Add(s);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                RecentList.Add(path);
+            }
         }
+
         UpdateRecentSettingsMenu();
     }
 
+    /// <summary>
+    /// Moves the specified settings file to the top of the recent settings list.
+    /// </summary>
+    /// <param name="path">
+    /// The settings file path to add to the recent settings list.
+    /// </param>
     private void UpdateRecentList(string path)
     {
         RecentList.Remove(path);
