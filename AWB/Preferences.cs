@@ -128,34 +128,72 @@ internal sealed partial class MyPreferences : Form
 
     #region Language and project
 
-    public string Language
-    {
-        get { return cmboLang.SelectedItem == null ? "" : cmboLang.SelectedItem.ToString(); }
-    }
+    /// <summary>
+    /// Gets the selected wiki language code.
+    /// </summary>
+    /// <value>
+    /// The selected language code, or an empty string when no language is selected.
+    /// </value>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public string Language =>
+        cmboLang.SelectedItem?.ToString() ?? string.Empty;
 
-    public ProjectEnum Project
-    {
-        get { return (ProjectEnum)Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString()); }
-    }
+    /// <summary>
+    /// Gets the selected wiki project.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the project selector does not contain a valid
+    /// <see cref="ProjectEnum"/> value.
+    /// </exception>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public ProjectEnum Project =>
+        cmboProject.SelectedItem is ProjectEnum project
+            ? project
+            : throw new InvalidOperationException(
+                "No valid wiki project is selected.");
 
+    /// <summary>
+    /// Gets the normalized custom wiki project name.
+    /// </summary>
+    /// <remarks>
+    /// Reading this property currently calls <c>FixCustomProject</c>, which may
+    /// update the custom-project control before returning its text.
+    /// </remarks>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string CustomProject
     {
         get
         {
+            // TODO: Remove the side effect from this getter by normalizing the
+            // custom project when the value is entered or when the dialog is
+            // accepted.
             FixCustomProject();
+
             return cmboCustomProject.Text;
         }
     }
 
     /// <summary>
-    /// Protocol for custom projects
-    /// WMF and Wikia/Fandom defaults to HTTPS
+    /// Gets the connection protocol selected for custom wiki projects.
     /// </summary>
-    public string Protocol
-    {
-        get { return cmboProtocol.Text; }
-    }
+    /// <value>
+    /// The selected protocol string, typically <c>https://</c> or
+    /// <c>http://</c>.
+    /// </value>
+    /// <remarks>
+    /// Wikimedia Foundation, Wikia, and Fandom projects always use HTTPS,
+    /// regardless of the value returned by this property.
+    /// </remarks>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public string Protocol => cmboProtocol.Text;
 
+    /// <summary>
+    /// Normalizes the custom project name when the user leaves the field.
+    /// </summary>
     private void txtCustomProject_Leave(object sender, EventArgs e)
     {
         FixCustomProject();
