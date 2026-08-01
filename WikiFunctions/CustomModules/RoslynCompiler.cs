@@ -240,6 +240,33 @@ public static class RoslynCompiler
             .ToList();
     }
 
+    // TODO: Consider resolving references by assembly identity
+    // (name/version/public key token) instead of file name alone if
+    // custom-module dependency resolution is expanded in the future.
+    /// <summary>
+    /// Resolves an assembly reference to a physical file path.
+    /// </summary>
+    /// <remarks>
+    /// References are resolved by checking:
+    /// <list type="number">
+    /// <item>
+    /// A fully-qualified path supplied by the caller.
+    /// </item>
+    /// <item>
+    /// The application's installation directory.
+    /// </item>
+    /// <item>
+    /// Assemblies already loaded into the current application domain.
+    /// </item>
+    /// </list>
+    /// </remarks>
+    /// <param name="reference">
+    /// The assembly name or file path to resolve.
+    /// </param>
+    /// <returns>
+    /// The resolved assembly path, or <see langword="null"/> if the reference
+    /// could not be resolved.
+    /// </returns>
     private static string? ResolveReferencePath(
         string reference)
     {
