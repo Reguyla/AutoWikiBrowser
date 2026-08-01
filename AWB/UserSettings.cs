@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Settings;
+using System.Drawing;
 using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.AWBSettings;
@@ -830,201 +831,671 @@ partial class MainForm
     }
 
     /// <summary>
-    /// Load preferences object
+    /// Applies the specified preferences to the current application state and
+    /// user-interface controls.
     /// </summary>
-    private void LoadPrefs(UserPrefs p)
+    /// <param name="preferences">
+    /// The preferences to apply.
+    /// </param>
+    /// <remarks>
+    /// Preference groups are applied in a deliberate order because some controls
+    /// raise events when their values change and some settings depend on earlier
+    /// initialization steps.
+    /// </remarks>
+    private void LoadPrefs(UserPrefs preferences)
+    {
+        LoadProjectPreferences(preferences);
+        LoadFindAndReplacePreferences(preferences.FindAndReplace);
+        LoadListPreferences(preferences);
+        LoadEditPreferences(preferences.Editprefs);
+        LoadSkipPreferences(preferences.SkipOptions);
+        LoadGeneralPreferences(preferences.General);
+        LoadDisambiguationPreferences(preferences.Disambiguation);
+        LoadSpecialFilterAndArticleListPreferences(preferences);
+        LoadModulePreferences(preferences.Module);
+        LoadExternalProgramPreferences(preferences);
+        LoadToolPreferences(preferences.Tool);
+        LoadPluginPreferences(preferences.Plugin);
+    }
+
+    /// <summary>
+    /// Applies the project and login-domain preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The preferences containing the project configuration.
+    /// </param>
+    private void LoadProjectPreferences(UserPrefs preferences)
     {
         chkRegExTypo.Checked = false;
-        SetProject(p.LanguageCode, p.Project, p.CustomProject, p.Protocol);
-        chkRegExTypo.Checked = p.Editprefs.RegexTypoFix;
-        Variables.LoginDomain = p.LoginDomain;
 
+        SetProject(
+            preferences.LanguageCode,
+            preferences.Project,
+            preferences.CustomProject,
+            preferences.Protocol);
+
+        chkRegExTypo.Checked =
+            preferences.Editprefs.RegexTypoFix;
+
+        Variables.LoginDomain =
+            preferences.LoginDomain;
+    }
+
+    /// <summary>
+    /// Applies the find-and-replace, advanced replacement, and template
+    /// substitution preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The find-and-replace preferences to apply.
+    /// </param>
+    private void LoadFindAndReplacePreferences(
+        FaRPrefs preferences)
+    {
         FindAndReplace.Clear();
-        chkFindandReplace.Checked = p.FindAndReplace.Enabled;
-        FindAndReplace.IgnoreLinks = p.FindAndReplace.IgnoreSomeText;
-        FindAndReplace.IgnoreMore = p.FindAndReplace.IgnoreMoreText;
-        FindAndReplace.AppendToSummary = p.FindAndReplace.AppendSummary;
-        FindAndReplace.AddNew(p.FindAndReplace.Replacements);
+        chkFindandReplace.Checked = preferences.Enabled;
+        FindAndReplace.IgnoreLinks = preferences.IgnoreSomeText;
+        FindAndReplace.IgnoreMore = preferences.IgnoreMoreText;
+        FindAndReplace.AppendToSummary = preferences.AppendSummary;
+        FindAndReplace.AddNew(preferences.Replacements);
 
         RplcSpecial.Clear();
-        RplcSpecial.AddNewRule(p.FindAndReplace.AdvancedReps);
+        RplcSpecial.AddNewRule(preferences.AdvancedReps);
 
         SubstTemplates.Clear();
-        SubstTemplates.TemplateList = p.FindAndReplace.SubstTemplates;
-        SubstTemplates.ExpandRecursively = p.FindAndReplace.ExpandRecursively;
-        SubstTemplates.IgnoreUnformatted = p.FindAndReplace.IgnoreUnformatted;
-        SubstTemplates.IncludeComments = p.FindAndReplace.IncludeComments;
+        SubstTemplates.TemplateList = preferences.SubstTemplates;
+        SubstTemplates.ExpandRecursively =
+            preferences.ExpandRecursively;
+        SubstTemplates.IgnoreUnformatted =
+            preferences.IgnoreUnformatted;
+        SubstTemplates.IncludeComments =
+            preferences.IncludeComments;
 
         FindAndReplace.MakeList();
+    }
 
-        listMaker.SourceText = p.List.ListSource;
-        listMaker.SelectedProvider = p.List.SelectedProvider;
+    /// <summary>
+    /// Applies the article-list source and general list preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The preferences containing the list and general settings.
+    /// </param>
+    private void LoadListPreferences(UserPrefs preferences)
+    {
+        listMaker.SourceText =
+            preferences.List.ListSource;
 
-        _saveArticleList = p.General.SaveArticleList;
+        listMaker.SelectedProvider =
+            preferences.List.SelectedProvider;
 
-        IgnoreNoBots = p.General.IgnoreNoBots;
-        ClearPageListOnProjectChange = p.General.ClearPageListOnProjectChange;
+        _saveArticleList =
+            preferences.General.SaveArticleList;
 
-        chkGeneralFixes.Checked = p.Editprefs.GeneralFixes;
-        chkAutoTagger.Checked = p.Editprefs.Tagger;
-        chkUnicodifyWhole.Checked = p.Editprefs.Unicodify;
+        IgnoreNoBots =
+            preferences.General.IgnoreNoBots;
 
-        cmboCategorise.SelectedIndex = p.Editprefs.Recategorisation;
-        txtNewCategory.Text = p.Editprefs.NewCategory;
-        txtNewCategory2.Text = p.Editprefs.NewCategory2;
+        ClearPageListOnProjectChange =
+            preferences.General.ClearPageListOnProjectChange;
+    }
 
-        cmboImages.SelectedIndex = p.Editprefs.ReImage;
-        txtImageReplace.Text = p.Editprefs.ImageFind;
-        txtImageWith.Text = p.Editprefs.Replace;
+    /// <summary>
+    /// Applies article editing, categorization, image replacement, append-text,
+    /// and bot timing preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The edit preferences to apply.
+    /// </param>
+    private void LoadEditPreferences(
+        EditPrefs preferences)
+    {
+        chkGeneralFixes.Checked = preferences.GeneralFixes;
+        chkAutoTagger.Checked = preferences.Tagger;
+        chkUnicodifyWhole.Checked = preferences.Unicodify;
 
-        chkSkipNoCatChange.Checked = p.Editprefs.SkipIfNoCatChange;
-        chkRemoveSortKey.Checked = p.Editprefs.RemoveSortKey;
-        chkSkipNoImgChange.Checked = p.Editprefs.SkipIfNoImgChange;
+        cmboCategorise.SelectedIndex =
+            preferences.Recategorisation;
 
-        chkAppend.Checked = p.Editprefs.AppendText;
-        chkAppendMetaDataSort.Checked = p.Editprefs.AppendTextMetaDataSort;
-        rdoAppend.Checked = p.Editprefs.Append;
-        rdoPrepend.Checked = !p.Editprefs.Append;
-        txtAppendMessage.Text = p.Editprefs.Text;
-        udNewlineChars.Value = p.Editprefs.Newlines;
+        txtNewCategory.Text =
+            preferences.NewCategory;
 
-        nudBotSpeed.Value = p.Editprefs.AutoDelay;
-        botEditsStop.Value = p.Editprefs.BotMaxEdits;
-        chkSuppressTag.Checked = p.Editprefs.SupressTag;
+        txtNewCategory2.Text =
+            preferences.NewCategory2;
 
-        radSkipNonExistent.Checked = p.SkipOptions.SkipNonexistent;
-        radSkipExistent.Checked = p.SkipOptions.Skipexistent;
-        radSkipNone.Checked = p.SkipOptions.SkipDontCare;
-        chkSkipNoChanges.Checked = p.SkipOptions.SkipWhenNoChanges;
-        chkSkipSpamFilter.Checked = p.SkipOptions.SkipSpamFilterBlocked;
-        chkSkipIfInuse.Checked = p.SkipOptions.SkipInuse;
-        chkSkipWhitespace.Checked = p.SkipOptions.SkipWhenOnlyWhitespaceChanged;
-        chkSkipCasing.Checked = p.SkipOptions.SkipOnlyCasingChanged;
-        chkSkipGeneralFixes.Checked = p.SkipOptions.SkipOnlyGeneralFixChanges;
-        chkSkipMinorGeneralFixes.Checked = p.SkipOptions.SkipOnlyMinorGeneralFixChanges;
-        chkSkipCosmetic.Checked = p.SkipOptions.SkipOnlyCosmetic;
-        chkSkipIfRedirect.Checked = p.SkipOptions.SkipIfRedirect;
-        chkSkipIfNoAlerts.Checked = p.SkipOptions.SkipIfNoAlerts;
+        cmboImages.SelectedIndex =
+            preferences.ReImage;
 
-        skipIfContains.CheckEnabled = p.SkipOptions.SkipDoes;
-        skipIfContains.CheckText = p.SkipOptions.SkipDoesText;
-        skipIfContains.IsRegex = p.SkipOptions.SkipDoesRegex;
-        skipIfContains.IsCaseSensitive = p.SkipOptions.SkipDoesCaseSensitive;
-        skipIfContains.After = p.SkipOptions.SkipDoesAfterProcessing;
+        txtImageReplace.Text =
+            preferences.ImageFind;
 
-        skipIfNotContains.CheckEnabled = p.SkipOptions.SkipDoesNot;
-        skipIfNotContains.CheckText = p.SkipOptions.SkipDoesNotText;
-        skipIfNotContains.IsRegex = p.SkipOptions.SkipDoesNotRegex;
-        skipIfNotContains.IsCaseSensitive = p.SkipOptions.SkipDoesNotCaseSensitive;
-        skipIfNotContains.After = p.SkipOptions.SkipDoesNotAfterProcessing;
+        txtImageWith.Text =
+            preferences.Replace;
 
-        chkSkipWhenNoFAR.Checked = p.SkipOptions.SkipNoFindAndReplace;
-        chkSkipOnlyMinorFaR.Checked = p.SkipOptions.SkipMinorFindAndReplace;
-        chkSkipIfNoRegexTypo.Checked = p.SkipOptions.SkipNoRegexTypoFix;
-        Skip.SelectedItems = p.SkipOptions.GeneralSkipList;
-        chkSkipNoDab.Checked = p.SkipOptions.SkipNoDisambiguation;
-        chkSkipNoPageLinks.Checked = p.SkipOptions.SkipNoLinksOnPage;
+        chkSkipNoCatChange.Checked =
+            preferences.SkipIfNoCatChange;
 
+        chkRemoveSortKey.Checked =
+            preferences.RemoveSortKey;
+
+        chkSkipNoImgChange.Checked =
+            preferences.SkipIfNoImgChange;
+
+        chkAppend.Checked =
+            preferences.AppendText;
+
+        chkAppendMetaDataSort.Checked =
+            preferences.AppendTextMetaDataSort;
+
+        rdoAppend.Checked =
+            preferences.Append;
+
+        rdoPrepend.Checked =
+            !preferences.Append;
+
+        txtAppendMessage.Text =
+            preferences.Text;
+
+        udNewlineChars.Value =
+            preferences.Newlines;
+
+        nudBotSpeed.Value =
+            preferences.AutoDelay;
+
+        botEditsStop.Value =
+            preferences.BotMaxEdits;
+
+        chkSuppressTag.Checked =
+            preferences.SupressTag;
+    }
+
+    /// <summary>
+    /// Applies article skip conditions and skip-list preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The skip preferences to apply.
+    /// </param>
+    private void LoadSkipPreferences(
+        SkipPrefs preferences)
+    {
+        radSkipNonExistent.Checked =
+            preferences.SkipNonexistent;
+
+        radSkipExistent.Checked =
+            preferences.Skipexistent;
+
+        radSkipNone.Checked =
+            preferences.SkipDontCare;
+
+        chkSkipNoChanges.Checked =
+            preferences.SkipWhenNoChanges;
+
+        chkSkipSpamFilter.Checked =
+            preferences.SkipSpamFilterBlocked;
+
+        chkSkipIfInuse.Checked =
+            preferences.SkipInuse;
+
+        chkSkipWhitespace.Checked =
+            preferences.SkipWhenOnlyWhitespaceChanged;
+
+        chkSkipCasing.Checked =
+            preferences.SkipOnlyCasingChanged;
+
+        chkSkipGeneralFixes.Checked =
+            preferences.SkipOnlyGeneralFixChanges;
+
+        chkSkipMinorGeneralFixes.Checked =
+            preferences.SkipOnlyMinorGeneralFixChanges;
+
+        chkSkipCosmetic.Checked =
+            preferences.SkipOnlyCosmetic;
+
+        chkSkipIfRedirect.Checked =
+            preferences.SkipIfRedirect;
+
+        chkSkipIfNoAlerts.Checked =
+            preferences.SkipIfNoAlerts;
+
+        LoadContainsSkipPreferences(preferences);
+        LoadAdditionalSkipPreferences(preferences);
+    }
+
+    /// <summary>
+    /// Applies the contains and does-not-contain skip conditions.
+    /// </summary>
+    /// <param name="preferences">
+    /// The skip preferences containing text-match conditions.
+    /// </param>
+    private void LoadContainsSkipPreferences(
+        SkipPrefs preferences)
+    {
+        skipIfContains.CheckEnabled =
+            preferences.SkipDoes;
+
+        skipIfContains.CheckText =
+            preferences.SkipDoesText;
+
+        skipIfContains.IsRegex =
+            preferences.SkipDoesRegex;
+
+        skipIfContains.IsCaseSensitive =
+            preferences.SkipDoesCaseSensitive;
+
+        skipIfContains.After =
+            preferences.SkipDoesAfterProcessing;
+
+        skipIfNotContains.CheckEnabled =
+            preferences.SkipDoesNot;
+
+        skipIfNotContains.CheckText =
+            preferences.SkipDoesNotText;
+
+        skipIfNotContains.IsRegex =
+            preferences.SkipDoesNotRegex;
+
+        skipIfNotContains.IsCaseSensitive =
+            preferences.SkipDoesNotCaseSensitive;
+
+        skipIfNotContains.After =
+            preferences.SkipDoesNotAfterProcessing;
+    }
+
+    /// <summary>
+    /// Applies the remaining processing-specific skip preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The skip preferences to apply.
+    /// </param>
+    private void LoadAdditionalSkipPreferences(
+        SkipPrefs preferences)
+    {
+        chkSkipWhenNoFAR.Checked =
+            preferences.SkipNoFindAndReplace;
+
+        chkSkipOnlyMinorFaR.Checked =
+            preferences.SkipMinorFindAndReplace;
+
+        chkSkipIfNoRegexTypo.Checked =
+            preferences.SkipNoRegexTypoFix;
+
+        Skip.SelectedItems =
+            preferences.GeneralSkipList;
+
+        chkSkipNoDab.Checked =
+            preferences.SkipNoDisambiguation;
+
+        chkSkipNoPageLinks.Checked =
+            preferences.SkipNoLinksOnPage;
+    }
+
+    /// <summary>
+    /// Applies general application, edit-summary, editor, toolbar, logging, and
+    /// behavior preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The general preferences to apply.
+    /// </param>
+    private void LoadGeneralPreferences(
+        GeneralPrefs preferences)
+    {
+        LoadEditSummaryPreferences(preferences);
+        LoadFindPreferences(preferences);
+        LoadGeneralMenuPreferences(preferences);
+        LoadGeneralApplicationPreferences(preferences);
+        LoadEditorPreferences(preferences);
+    }
+
+    /// <summary>
+    /// Applies edit-summary and Paste More preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The general preferences containing summary settings.
+    /// </param>
+    private void LoadEditSummaryPreferences(
+        GeneralPrefs preferences)
+    {
         cmboEditSummary.Items.Clear();
 
-        if (p.General.Summaries.Count == 0)
+        if (preferences.Summaries.Count == 0)
+        {
             LoadDefaultEditSummaries();
+        }
         else
-            foreach (string s in p.General.Summaries)
-                cmboEditSummary.Items.Add(s);
+        {
+            foreach (string summary in preferences.Summaries)
+            {
+                cmboEditSummary.Items.Add(summary);
+            }
+        }
 
-        chkLock.Checked = p.General.LockSummary;
-        EditToolBarVisible = p.General.EditToolbarEnabled;
+        chkLock.Checked =
+            preferences.LockSummary;
 
-        cmboEditSummary.Text = p.General.SelectedSummary;
+        EditToolBarVisible =
+            preferences.EditToolbarEnabled;
+
+        cmboEditSummary.Text =
+            preferences.SelectedSummary;
 
         if (chkLock.Checked)
-            lblSummary.Text = p.General.SelectedSummary;
+        {
+            lblSummary.Text =
+                preferences.SelectedSummary;
+        }
 
-        for (int i = 0; i < 10; ++i)
-            SetPasteMoreText(i, p.General.PasteMore[i]);
+        for (int index = 0; index < 10; index++)
+        {
+            SetPasteMoreText(
+                index,
+                preferences.PasteMore[index]);
+        }
+    }
 
-        txtFind.Text = p.General.FindText;
-        chkFindRegex.Checked = p.General.FindRegex;
-        chkFindCaseSensitive.Checked = p.General.FindCaseSensitive;
+    /// <summary>
+    /// Applies the editor find-text preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The general preferences containing find settings.
+    /// </param>
+    private void LoadFindPreferences(
+        GeneralPrefs preferences)
+    {
+        txtFind.Text =
+            preferences.FindText;
 
-        wordWrapToolStripMenuItem1.Checked = p.General.WordWrap;
-        EnableToolBar = p.General.ToolBarEnabled;
-        followRedirectsToolStripMenuItem.Checked = p.General.BypassRedirect;
-        autoSaveSettingsToolStripMenuItem.Checked = p.General.AutoSaveSettings;
-        preParseModeToolStripMenuItem.Checked = p.General.PreParseMode;
-        noSectionEditSummaryToolStripMenuItem.Checked = p.General.noSectionEditSummary;
-        restrictDefaultsortChangesToolStripMenuItem.Checked = p.General.restrictDefaultsortAddition;
-        restrictOrphanTaggingToolStripMenuItem.Checked = p.General.restrictOrphanTagging;
-        noMOSComplianceFixesToolStripMenuItem.Checked = p.General.noMOSComplianceFixes;
-        syntaxHighlightEditBoxToolStripMenuItem.Checked = p.General.syntaxHighlightEditBox;
-        highlightAllFindToolStripMenuItem.Checked = p.General.highlightAllFind;
-        automaticallyDoAnythingToolStripMenuItem.Checked = !p.General.NoAutoChanges;
-        actionOnLoad = p.General.OnLoadAction;
-        doDiffInBotMode = p.General.DiffInBotMode;
-        chkMinor.Checked = p.General.Minor;
-        addToWatchList.SelectedIndex = p.General.AddToWatchlist;
-        ShowMovingAverageTimer = p.General.TimerEnabled;
-        alertPreferences = p.General.AlertPreferences;
+        chkFindRegex.Checked =
+            preferences.FindRegex;
 
-        sortAlphabeticallyToolStripMenuItem.Checked = listMaker.AutoAlpha = p.General.SortListAlphabetically;
-        displayfalsePositivesButtonToolStripMenuItem.Checked = p.General.AddIgnoredToLog;
+        chkFindCaseSensitive.Checked =
+            preferences.FindCaseSensitive;
+    }
 
-        _autoSaveEditBoxEnabled = p.General.AutoSaveEdit.Enabled;
-        AutoSaveEditBoxPeriod = p.General.AutoSaveEdit.SavePeriod;
-        _autoSaveEditBoxFile = p.General.AutoSaveEdit.SaveFile;
+    /// <summary>
+    /// Applies menu-based workflow and processing preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The general preferences to apply.
+    /// </param>
+    private void LoadGeneralMenuPreferences(
+        GeneralPrefs preferences)
+    {
+        wordWrapToolStripMenuItem1.Checked =
+            preferences.WordWrap;
 
-        _suppressUsingAWB = p.General.SuppressUsingAWB;
-        Article.AddUsingAWBOnArticleAction = p.General.AddUsingAWBToActionSummaries;
+        EnableToolBar =
+            preferences.ToolBarEnabled;
 
-        filterOutNonMainSpaceToolStripMenuItem.Checked = p.General.filterNonMainSpace;
-        removeDuplicatesToolStripMenuItem.Checked = listMaker.FilterDuplicates = p.General.AutoFilterDuplicates;
+        followRedirectsToolStripMenuItem.Checked =
+            preferences.BypassRedirect;
 
-        alphaSortInterwikiLinksToolStripMenuItem.Checked = p.General.SortInterWikiOrder;
-        replaceReferenceTagsToolStripMenuItem.Checked = p.General.ReplaceReferenceTags;
-        focusAtEndOfEditTextBoxToolStripMenuItem.Checked = p.General.FocusAtEndOfEditBox;
-        scrollToAlertsToolStripMenuItem.Checked = p.General.scrollToUnbalancedBrackets;
+        autoSaveSettingsToolStripMenuItem.Checked =
+            preferences.AutoSaveSettings;
 
-        txtEdit.Font = new System.Drawing.Font(p.General.TextBoxFont, p.General.TextBoxSize);
+        preParseModeToolStripMenuItem.Checked =
+            preferences.PreParseMode;
 
-        loggingEnabled = p.General.LoggingEnabled;
+        noSectionEditSummaryToolStripMenuItem.Checked =
+            preferences.noSectionEditSummary;
 
-        LowThreadPriority = p.General.LowThreadPriority;
-        _flash = p.General.Flash;
-        _beep = p.General.Beep;
+        restrictDefaultsortChangesToolStripMenuItem.Checked =
+            preferences.restrictDefaultsortAddition;
 
-        _minimize = p.General.Minimize;
+        restrictOrphanTaggingToolStripMenuItem.Checked =
+            preferences.restrictOrphanTagging;
 
-        chkEnableDab.Checked = p.Disambiguation.Enabled;
-        txtDabLink.Text = p.Disambiguation.Link;
-        txtDabVariants.Lines = p.Disambiguation.Variants;
-        udContextChars.Value = p.Disambiguation.ContextChars;
+        noMOSComplianceFixesToolStripMenuItem.Checked =
+            preferences.noMOSComplianceFixes;
 
-        listMaker.SpecialFilterSettings = p.Special;
-        // ensure listmaker is only populated once listmaker filter settings (remove non-mainspace etc.) have been loaded
-        listMaker.Add(p.List.ArticleList);
+        syntaxHighlightEditBoxToolStripMenuItem.Checked =
+            preferences.syntaxHighlightEditBox;
 
-        CModule.Language = p.Module.Language;
-        CModule.Code = (p.Module.Code ?? string.Empty)
+        highlightAllFindToolStripMenuItem.Checked =
+            preferences.highlightAllFind;
+
+        automaticallyDoAnythingToolStripMenuItem.Checked =
+            !preferences.NoAutoChanges;
+
+        sortAlphabeticallyToolStripMenuItem.Checked =
+            listMaker.AutoAlpha =
+                preferences.SortListAlphabetically;
+
+        displayfalsePositivesButtonToolStripMenuItem.Checked =
+            preferences.AddIgnoredToLog;
+
+        filterOutNonMainSpaceToolStripMenuItem.Checked =
+            preferences.filterNonMainSpace;
+
+        removeDuplicatesToolStripMenuItem.Checked =
+            listMaker.FilterDuplicates =
+                preferences.AutoFilterDuplicates;
+
+        alphaSortInterwikiLinksToolStripMenuItem.Checked =
+            preferences.SortInterWikiOrder;
+
+        replaceReferenceTagsToolStripMenuItem.Checked =
+            preferences.ReplaceReferenceTags;
+
+        focusAtEndOfEditTextBoxToolStripMenuItem.Checked =
+            preferences.FocusAtEndOfEditBox;
+
+        scrollToAlertsToolStripMenuItem.Checked =
+            preferences.scrollToUnbalancedBrackets;
+    }
+
+    /// <summary>
+    /// Applies general application state and processing preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The general preferences to apply.
+    /// </param>
+    private void LoadGeneralApplicationPreferences(
+        GeneralPrefs preferences)
+    {
+        actionOnLoad =
+            preferences.OnLoadAction;
+
+        doDiffInBotMode =
+            preferences.DiffInBotMode;
+
+        chkMinor.Checked =
+            preferences.Minor;
+
+        addToWatchList.SelectedIndex =
+            preferences.AddToWatchlist;
+
+        ShowMovingAverageTimer =
+            preferences.TimerEnabled;
+
+        alertPreferences =
+            preferences.AlertPreferences;
+
+        _autoSaveEditBoxEnabled =
+            preferences.AutoSaveEdit.Enabled;
+
+        AutoSaveEditBoxPeriod =
+            preferences.AutoSaveEdit.SavePeriod;
+
+        _autoSaveEditBoxFile =
+            preferences.AutoSaveEdit.SaveFile;
+
+        _suppressUsingAWB =
+            preferences.SuppressUsingAWB;
+
+        Article.AddUsingAWBOnArticleAction =
+            preferences.AddUsingAWBToActionSummaries;
+
+        loggingEnabled =
+            preferences.LoggingEnabled;
+
+        LowThreadPriority =
+            preferences.LowThreadPriority;
+
+        _flash =
+            preferences.Flash;
+
+        _beep =
+            preferences.Beep;
+
+        _minimize =
+            preferences.Minimize;
+    }
+
+    /// <summary>
+    /// Applies editor appearance preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The general preferences containing editor settings.
+    /// </param>
+    private void LoadEditorPreferences(
+        GeneralPrefs preferences)
+    {
+        txtEdit.Font = new Font(
+            preferences.TextBoxFont,
+            preferences.TextBoxSize);
+    }
+
+    /// <summary>
+    /// Applies disambiguation processing preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The disambiguation preferences to apply.
+    /// </param>
+    private void LoadDisambiguationPreferences(
+        DabPrefs preferences)
+    {
+        chkEnableDab.Checked =
+            preferences.Enabled;
+
+        txtDabLink.Text =
+            preferences.Link;
+
+        txtDabVariants.Lines =
+            preferences.Variants;
+
+        udContextChars.Value =
+            preferences.ContextChars;
+    }
+
+    /// <summary>
+    /// Applies list filtering preferences before populating the article list.
+    /// </summary>
+    /// <param name="preferences">
+    /// The preferences containing filter settings and article-list entries.
+    /// </param>
+    /// <remarks>
+    /// Filter settings must be applied before the article list is populated so
+    /// filtering options such as non-mainspace removal affect the loaded list
+    /// correctly.
+    /// </remarks>
+    private void LoadSpecialFilterAndArticleListPreferences(
+        UserPrefs preferences)
+    {
+        listMaker.SpecialFilterSettings =
+            preferences.Special;
+
+        listMaker.Add(
+            preferences.List.ArticleList);
+    }
+
+    /// <summary>
+    /// Applies custom module language, source code, and enabled state.
+    /// </summary>
+    /// <param name="preferences">
+    /// The custom module preferences to apply.
+    /// </param>
+    /// <remarks>
+    /// Module code must be loaded before the module is enabled to avoid compiling
+    /// incomplete or stale source code.
+    /// </remarks>
+    private void LoadModulePreferences(
+        ModulePrefs preferences)
+    {
+        CModule.Language =
+            preferences.Language;
+
+        CModule.Code = NormalizeLineEndings(
+            preferences.Code);
+
+        CModule.ModuleEnabled =
+            preferences.Enabled;
+
+        if (!CModule.ModuleEnabled)
+        {
+            CModule.SetModuleNotBuilt();
+        }
+    }
+
+    /// <summary>
+    /// Normalizes text to Windows-style CRLF line endings.
+    /// </summary>
+    /// <param name="text">
+    /// The text to normalize.
+    /// </param>
+    /// <returns>
+    /// The normalized text, or an empty string when <paramref name="text"/> is
+    /// <see langword="null"/>.
+    /// </returns>
+    private static string NormalizeLineEndings(
+        string? text)
+    {
+        return (text ?? string.Empty)
             .Replace("\r\n", "\n")
             .Replace("\r", "\n")
             .Replace("\n", "\r\n");
-        // Don't enable custom module until code loaded, prevents phantom compile error
-        CModule.ModuleEnabled = p.Module.Enabled;
-        if (!CModule.ModuleEnabled)
-            CModule.SetModuleNotBuilt();
+    }
 
-        ExtProgram.Settings = p.ExternalProgram;
+    /// <summary>
+    /// Applies external program preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The preferences containing external program settings.
+    /// </param>
+    private void LoadExternalProgramPreferences(
+        UserPrefs preferences)
+    {
+        ExtProgram.Settings =
+            preferences.ExternalProgram;
+    }
 
-        _listComparerUseCurrentArticleList = p.Tool.ListComparerUseCurrentArticleList;
-        _listSplitterUseCurrentArticleList = p.Tool.ListSplitterUseCurrentArticleList;
-        _dbScannerUseCurrentArticleList = p.Tool.DatabaseScannerUseCurrentArticleList;
+    /// <summary>
+    /// Applies auxiliary tool preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The tool preferences to apply.
+    /// </param>
+    private void LoadToolPreferences(
+        ToolsPrefs preferences)
+    {
+        _listComparerUseCurrentArticleList =
+            preferences.ListComparerUseCurrentArticleList;
 
-        foreach (PluginPrefs pp in p.Plugin)
+        _listSplitterUseCurrentArticleList =
+            preferences.ListSplitterUseCurrentArticleList;
+
+        _dbScannerUseCurrentArticleList =
+            preferences.DatabaseScannerUseCurrentArticleList;
+    }
+
+    /// <summary>
+    /// Applies saved preferences to each currently available plugin.
+    /// </summary>
+    /// <param name="preferences">
+    /// The saved plugin preferences.
+    /// </param>
+    /// <remarks>
+    /// Settings for plugins that are not currently installed or loaded are
+    /// ignored.
+    /// </remarks>
+    private static void LoadPluginPreferences(
+        IEnumerable<PluginPrefs> preferences)
+    {
+        foreach (PluginPrefs pluginPreferences in preferences)
         {
-            IAWBPlugin plugin;
-            if (Plugin.AWBPlugins.TryGetValue(pp.Name, out plugin))
-                plugin.LoadSettings(pp.PluginSettings);
+            if (Plugin.AWBPlugins.TryGetValue(
+                    pluginPreferences.Name,
+                    out IAWBPlugin plugin))
+            {
+                plugin.LoadSettings(
+                    pluginPreferences.PluginSettings);
+            }
         }
     }
 
