@@ -331,24 +331,58 @@ internal sealed partial class MyPreferences : Form
         chkSupressAWB.Enabled = false;
     }
 
+    /// <summary>
+    /// Updates whether the current project settings contain enough information
+    /// for the dialog to be accepted.
+    /// </summary>
+    private void UpdateOkButtonState()
+    {
+        ProjectEnum project = Project;
+
+        bool requiresCustomProject =
+            project == ProjectEnum.custom ||
+            project == ProjectEnum.wikia ||
+            project == ProjectEnum.fandom;
+
+        btnOK.Enabled =
+            !requiresCustomProject ||
+            !string.IsNullOrWhiteSpace(cmboCustomProject.Text);
+    }
+
+    /// <summary>
+    /// Updates the dialog validation state when the custom project value changes.
+    /// </summary>
     private void cmboCustomProjectChanged(object sender, EventArgs e)
     {
-        ProjectEnum prj = (ProjectEnum)Enum.Parse(typeof(ProjectEnum), cmboProject.SelectedItem.ToString());
-        if (prj.Equals(ProjectEnum.custom) || prj.Equals(ProjectEnum.wikia) || prj.Equals(ProjectEnum.fandom))
-            btnOK.Enabled = !string.IsNullOrEmpty(cmboCustomProject.Text);
-        else
-            btnOK.Enabled = true;
+        UpdateOkButtonState();
     }
 
     #endregion
 
     #region Other
 
-    public Font TextBoxFont;
+    /// <summary>
+    /// Gets or sets the font used by editable text controls in the preferences dialog.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Font? TextBoxFont { get; set; }
 
+    // TODO:
+    // Investigate whether the enabled state of the domain controls should be
+    // updated from a single helper method shared with chkDomain_CheckedChanged
+    // to ensure all domain UI state changes remain synchronized.
+    /// <summary>
+    /// Gets or sets whether manual domain selection is available.
+    /// </summary>
+    /// <remarks>
+    /// Disabling this property also disables the domain text box. When enabled,
+    /// the text box is only enabled if the associated check box is checked.
+    /// </remarks>
     private bool DomainEnabled
     {
-        get { return chkDomain.Enabled; }
+        get => chkDomain.Enabled;
+
         set
         {
             chkDomain.Enabled = value;
@@ -377,82 +411,102 @@ internal sealed partial class MyPreferences : Form
         }
     }
 
+    /// <summary>
+    /// Opens the font selection dialog and updates the editor font when the user
+    /// confirms a new selection.
+    /// </summary>
     private void btnTextBoxFont_Click(object sender, EventArgs e)
     {
         fontDialog.Font = TextBoxFont;
 
         if (fontDialog.ShowDialog() == DialogResult.OK)
+        {
             TextBoxFont = fontDialog.Font;
+
+            // TODO: If the dialog does not immediately reflect font changes,
+            // apply the updated font to the relevant controls here.
+        }
     }
 
     /// <summary>
     /// Gets or sets whether AWB attribution should be suppressed.
     /// </summary>
+    /// <remarks>
+    /// The value is only applied when the suppression option is enabled for the
+    /// currently selected project.
+    /// </remarks>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefSuppressUsingAWB
     {
-        get { return chkSupressAWB.Checked; }
-        set { chkSupressAWB.Checked = chkSupressAWB.Enabled && value; }
+        get => chkSupressAWB.Checked;
+        set => chkSupressAWB.Checked = chkSupressAWB.Enabled && value;
     }
 
     /// <summary>
     /// Gets or sets whether AWB attribution is added to article-action summaries.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefAddUsingAWBOnArticleAction
     {
-        get { return chkAddUsingAWBToActionSummaries.Checked; }
-        set { chkAddUsingAWBToActionSummaries.Checked = value; }
+        get => chkAddUsingAWBToActionSummaries.Checked;
+        set => chkAddUsingAWBToActionSummaries.Checked = value;
     }
 
     /// <summary>
     /// Gets or sets whether AWB should run with low thread priority.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool LowThreadPriority
     {
-        get { return chkLowPriority.Checked; }
-        set { chkLowPriority.Checked = value; }
+        get => chkLowPriority.Checked;
+        set => chkLowPriority.Checked = value;
     }
 
     /// <summary>
     /// Gets or sets whether the application should flash for alerts.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefFlash
     {
-        get { return chkFlash.Checked; }
-        set { chkFlash.Checked = value; }
+        get => chkFlash.Checked;
+        set => chkFlash.Checked = value;
     }
 
     /// <summary>
     /// Gets or sets whether the application should beep for alerts.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefBeep
     {
-        get { return chkBeep.Checked; }
-        set { chkBeep.Checked = value; }
+        get => chkBeep.Checked;
+        set => chkBeep.Checked = value;
     }
 
     /// <summary>
     /// Gets or sets whether the application should minimize when appropriate.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefMinimize
     {
-        get { return chkMinimize.Checked; }
-        set { chkMinimize.Checked = value; }
+        get => chkMinimize.Checked;
+        set => chkMinimize.Checked = value;
     }
 
     /// <summary>
     /// Gets or sets whether the article list should be saved.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefSaveArticleList
     {
-        get { return chkSaveArticleList.Checked; }
-        set { chkSaveArticleList.Checked = value; }
+        get => chkSaveArticleList.Checked;
+        set => chkSaveArticleList.Checked = value;
     }
 
     /// <summary>
