@@ -7,8 +7,46 @@ using System.Runtime.Loader;
 
 namespace WikiFunctions.CustomModules;
 
+/// <summary>
+/// Compiles C# source code for an AutoWikiBrowser custom module by using the
+/// Roslyn compiler platform.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Custom modules are always compiled as in-memory dynamic-link libraries and
+/// loaded into the application's default assembly load context.
+/// </para>
+/// <para>
+/// This compiler supports only the subset of <see cref="CompilerParameters"/>
+/// required by the custom-module system. Options such as
+/// <see cref="CompilerParameters.GenerateExecutable"/>,
+/// <see cref="CompilerParameters.GenerateInMemory"/>, and
+/// <see cref="CompilerParameters.OutputAssembly"/> do not control the output.
+/// </para>
+/// </remarks>
 public static class RoslynCompiler
 {
+    /// <summary>
+    /// Compiles the supplied C# source code into an in-memory assembly.
+    /// </summary>
+    /// <param name="sourceCode">
+    /// The C# source code for the custom module.
+    /// </param>
+    /// <param name="parameters">
+    /// The compiler parameters containing assembly references, warning
+    /// configuration, and debug-build preferences.
+    /// </param>
+    /// <returns>
+    /// A <see cref="CompilerResults"/> instance containing compiler diagnostics
+    /// and, when compilation succeeds, the compiled assembly.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="sourceCode"/> is empty or consists only of white-space
+    /// characters.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="parameters"/> is <see langword="null"/>.
+    /// </exception>
     public static CompilerResults Compile(
         string sourceCode,
         CompilerParameters parameters)
@@ -55,6 +93,9 @@ public static class RoslynCompiler
 
         using MemoryStream assemblyStream = new();
 
+        // TODO: Emit a portable PDB when IncludeDebugInformation is enabled.
+        // The current implementation selects Debug optimization but does not
+        // generate a separate debugging-symbol stream.
         EmitResult emitResult =
             compilation.Emit(assemblyStream);
 
@@ -69,6 +110,8 @@ public static class RoslynCompiler
 
         assemblyStream.Position = 0;
 
+        // TODO: Consider loading custom modules into a collectible
+        // AssemblyLoadContext so superseded compilations can be unloaded.
         results.CompiledAssembly =
             AssemblyLoadContext.Default.LoadFromStream(
                 assemblyStream);
