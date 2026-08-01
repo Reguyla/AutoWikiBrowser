@@ -119,6 +119,15 @@ public static class RoslynCompiler
         return results;
     }
 
+    /// <summary>
+    /// Adds Roslyn compilation warnings and errors to the supplied compiler results.
+    /// </summary>
+    /// <param name="results">
+    /// The compiler results that receive the converted diagnostics.
+    /// </param>
+    /// <param name="diagnostics">
+    /// The Roslyn diagnostics produced while compiling the custom module.
+    /// </param>
     private static void AddDiagnostics(
         CompilerResults results,
         IEnumerable<Diagnostic> diagnostics)
@@ -132,13 +141,24 @@ public static class RoslynCompiler
                 continue;
             }
 
-            FileLinePositionSpan lineSpan =
-                diagnostic.Location.GetLineSpan();
+            string fileName = string.Empty;
+            int line = 0;
+            int column = 0;
+
+            if (diagnostic.Location.IsInSource)
+            {
+                FileLinePositionSpan lineSpan =
+                    diagnostic.Location.GetMappedLineSpan();
+
+                fileName = lineSpan.Path;
+                line = lineSpan.StartLinePosition.Line + 1;
+                column = lineSpan.StartLinePosition.Character + 1;
+            }
 
             CompilerError error = new(
-                lineSpan.Path,
-                lineSpan.StartLinePosition.Line + 1,
-                lineSpan.StartLinePosition.Character + 1,
+                fileName,
+                line,
+                column,
                 diagnostic.Id,
                 diagnostic.GetMessage())
             {
