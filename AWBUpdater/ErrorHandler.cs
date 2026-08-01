@@ -17,6 +17,9 @@ namespace AWBUpdater;
 
 public delegate string ErrorHandlerAddition();
 
+// TODO: Move known-exception classification into a non-UI service so the
+// detection rules can be shared, tested independently, and used by error
+// handlers without depending on WinForms.
 /// <summary>
 /// This class provides helper functions for handling errors and displaying them to users
 /// </summary>
@@ -34,79 +37,140 @@ public partial class ErrorHandler : Form
     /// </summary>
     public static string ListMakerText = string.Empty;
 
+    /// <summary>
+    /// Handles exceptions that can be presented directly to the user without
+    /// invoking the general unhandled-exception reporting process.
+    /// </summary>
+    /// <param name="ex">The exception to inspect.</param>
+    /// <returns>
+    /// <see langword="true"/> if the exception was handled or should be ignored;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
     private static bool HandleKnownExceptions(Exception ex)
     {
-        string stackTrace = ex.StackTrace ?? string.Empty;
+        ArgumentNullException.ThrowIfNull(ex);
 
-        if (ex is ArgumentException &&
-            (stackTrace.Contains("System.Text.RegularExpressions") ||
-             ex.ToString().StartsWith(
-                 "System.ArgumentException: parsing",
-                 StringComparison.Ordinal)))
+        if (IsInvalidRegularExpression(ex))
         {
-            MessageBox.Show(
+            ShowKnownException(
                 ex.Message,
-                "Invalid regular expression",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-        // Unsupported culture, possibly bn-BD
-        else if (ex is ArgumentException &&
-                 Thrower(ex) == "CultureTableRecord.GetCultureTableRecord")
-        {
-            MessageBox.Show(
-                "Microsoft unfortunately doesn't support your locale culture. " +
-                "Please try a more common one.",
-                "Unsupported culture",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-        // Network access error
-        else if (IsNetworkException(ex))
-        {
-            // If AWB starts offline, provide a clear network-related message.
-            string message = GetNetworkErrorMessage(ex);
+                "Invalid regular expression");
 
-            MessageBox.Show(
-                message,
-                "Network access error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-        // Out-of-memory error
-        else if (ex is OutOfMemoryException)
-        {
-            MessageBox.Show(
-                ex.Message,
-                "Out of Memory error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-        // Disk write error or full disk
-        else if (ex is System.IO.IOException ||
-                 ex is ConfigurationErrorsException &&
-                 ex.InnerException != null &&
-                 ex.InnerException.InnerException is System.IO.IOException)
-        {
-            MessageBox.Show(
-                ex.Message,
-                "I/O error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-        // BackgroundRequest abort caused by the user pressing Stop
-        else if (ex is ThreadAbortException &&
-                 (stackTrace.Contains("AutoWikiBrowser.MainForm.ProcessPage") ||
-                  stackTrace.Contains("Parsers.TagOrphans")))
-        {
             return true;
         }
-        else
+
+        if (IsUnsupportedCulture(ex))
+        {
+            ShowKnownException(
+                "Microsoft unfortunately doesn't support your locale culture. " +
+                "Please try a more common one.",
+                "Unsupported culture");
+
+            return true;
+        }
+
+        if (IsNetworkException(ex))
+        {
+            ShowKnownException(
+                GetNetworkErrorMessage(ex),
+                "Network access error");
+
+            return true;
+        }
+
+        if (ex is OutOfMemoryException)
+        {
+            ShowKnownException(
+                ex.Message,
+                "Out of Memory error");
+
+            return true;
+        }
+
+        if (IsIoException(ex))
+        {
+            ShowKnownException(
+                ex.Message,
+                "I/O error");
+
+            return true;
+        }
+
+        return IsUserRequestedThreadAbort(ex);
+    }
+
+    /// <summary>
+    /// Determines whether an exception represents an invalid regular expression.
+    /// </summary>
+    private static bool IsInvalidRegularExpression(Exception ex)
+    {
+        if (ex is not ArgumentException)
         {
             return false;
         }
 
-        return true;
+        string stackTrace = ex.StackTrace ?? string.Empty;
+
+        return stackTrace.Contains(
+                   "System.Text.RegularExpressions",
+                   StringComparison.Ordinal) ||
+               ex.ToString().StartsWith(
+                   "System.ArgumentException: parsing",
+                   StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Determines whether an exception represents an unsupported culture.
+    /// </summary>
+    private static bool IsUnsupportedCulture(Exception ex)
+    {
+        return ex is ArgumentException &&
+               Thrower(ex) == "CultureTableRecord.GetCultureTableRecord";
+    }
+
+    /// <summary>
+    /// Determines whether an exception represents an I/O failure.
+    /// </summary>
+    private static bool IsIoException(Exception ex)
+    {
+        return ex is IOException ||
+               ex is ConfigurationErrorsException
+               {
+                   InnerException.InnerException: IOException
+               };
+    }
+
+    /// <summary>
+    /// Determines whether an exception was caused by the user stopping a
+    /// background operation.
+    /// </summary>
+    private static bool IsUserRequestedThreadAbort(Exception ex)
+    {
+        if (ex is not ThreadAbortException)
+        {
+            return false;
+        }
+
+        string stackTrace = ex.StackTrace ?? string.Empty;
+
+        return stackTrace.Contains(
+                   "AutoWikiBrowser.MainForm.ProcessPage",
+                   StringComparison.Ordinal) ||
+               stackTrace.Contains(
+                   "Parsers.TagOrphans",
+                   StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Displays a known exception directly to the user.
+    /// </summary>
+    private static void ShowKnownException(string message, string title)
+    {
+        MessageBox.Show(
+            message,
+            title,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
     }
 
     /// <summary>
