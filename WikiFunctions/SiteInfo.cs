@@ -399,55 +399,63 @@ ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
 
     /// <summary>
     /// Retrieves localized MediaWiki system messages for the current wiki.
-    ///
-    /// This method is only used when the wiki language is not English.
     /// </summary>
     /// <param name="names">
     /// The names of the MediaWiki messages to retrieve.
     /// </param>
     /// <returns>
-    /// A dictionary keyed by message name containing the localized
-    /// message text.
+    /// A dictionary keyed by message name containing the localized message text.
+    /// Returns an empty dictionary when the messages cannot be retrieved or parsed.
     /// </returns>
     /// <remarks>
-    /// Only called when the wiki language is not English.
+    /// This method is used only when the wiki language is not English. Localized
+    /// messages are optional during initialization, so API failures fall back to
+    /// the default English messages.
     /// </remarks>
     public Dictionary<string, string> GetMessages(params string[] names)
     {
+        if (names.Length == 0)
+        {
+            return new();
+        }
+
+        string messageNames = Uri.EscapeDataString(string.Join("|", names));
+
         string response = Editor.HttpGet(
-            ApiPath +
-            "?format=json&action=query&meta=allmessages&continue=&ammessages=" +
-            string.Join("|", names));
+            $"{ApiPath}?format=json&action=query&meta=allmessages" +
+            $"&continue=&ammessages={messageNames}");
 
         if (!TryParseJsonObject(
                 response,
                 "The allmessages API response",
                 out JObject json))
         {
-            return new Dictionary<string, string>();
+            return new();
         }
 
         if (json["error"] != null)
         {
-            // Localized messages are optional during project initialization.
-            // If the API denies access or returns another error, continue with
-            // the default English month names rather than failing the session.
-            return new Dictionary<string, string>();
+            return new();
         }
 
         if (json["query"]?["allmessages"] is not JArray messages)
         {
-            return new Dictionary<string, string>();
+            return new();
         }
 
         return messages
             .OfType<JObject>()
+            .Select(message => new
+            {
+                Name = message.Value<string>("name"),
+                Text = message.Value<string>("*")
+            })
             .Where(message =>
-                message["name"]?.Type == JTokenType.String &&
-                message["*"]?.Type == JTokenType.String)
+                !string.IsNullOrEmpty(message.Name) &&
+                message.Text != null)
             .ToDictionary(
-                message => message.Value<string>("name"),
-                message => message.Value<string>("*"));
+                message => message.Name!,
+                message => message.Text!);
     }
 
     /// <summary>
