@@ -468,24 +468,88 @@ public partial class ArticleActionLogControl : UserControl
         MenuItemOwner(sender).Items.Clear();
     }
 
-    private void mnuListView_Opening(object sender, EventArgs e)
+    /// <summary>
+    /// Updates the enabled state of context-menu commands before the menu is
+    /// displayed.
+    /// </summary>
+    /// <param name="sender">
+    /// The context menu that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-opening operation.
+    /// </param>
+    private void mnuListView_Opening(
+        object sender,
+        EventArgs e)
     {
-        addSelectedToArticleListToolStripMenuItem.Enabled = cutToolStripMenuItem.Enabled =
-            copyToolStripMenuItem.Enabled = removeToolStripMenuItem.Enabled = openInBrowserToolStripMenuItem.Enabled = openHistoryInBrowserToolStripMenuItem.Enabled
-            = clearToolStripMenuItem.Enabled = MenuItemOwner(sender).SelectedItems.Count > 0;
+        ListView listView =
+            MenuItemOwner(sender);
 
-        selectAllToolStripMenuItem.Enabled = selectNoneToolStripMenuItem.Enabled = MenuItemOwner(sender).Items.Count > 0;
+        bool hasSelection =
+            listView.SelectedItems.Count > 0;
+
+        bool hasItems =
+            listView.Items.Count > 0;
+
+        addSelectedToArticleListToolStripMenuItem.Enabled =
+            hasSelection;
+        cutToolStripMenuItem.Enabled =
+            hasSelection;
+        copyToolStripMenuItem.Enabled =
+            hasSelection;
+        removeToolStripMenuItem.Enabled =
+            hasSelection;
+        openInBrowserToolStripMenuItem.Enabled =
+            hasSelection;
+        openHistoryInBrowserToolStripMenuItem.Enabled =
+            hasSelection;
+        clearToolStripMenuItem.Enabled =
+            hasSelection;
+
+        selectAllToolStripMenuItem.Enabled =
+            hasItems;
+        selectNoneToolStripMenuItem.Enabled =
+            hasItems;
     }
-    #endregion
 
-    private void openLogInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the log page for each selected article in the default web browser.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void openLogInBrowserToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-            Tools.OpenArticleLogInBrowser(item.Text);
+        ListView listView =
+            MenuItemOwner(sender);
+
+        foreach (ListViewItem item in listView.SelectedItems)
+        {
+            Tools.OpenArticleLogInBrowser(
+                item.Text);
+        }
     }
 
-    private void btnAddSucessfulToList_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Adds all successful article entries to the list maker.
+    /// </summary>
+    /// <param name="sender">
+    /// The button that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the button click.
+    /// </param>
+    private void btnAddSucessfulToList_Click(
+        object sender,
+        EventArgs e)
     {
-        AddToListMaker(lvSuccessful.Items);
+        AddToListMaker(
+            lvSuccessful.Items);
     }
 }
+#endregion
