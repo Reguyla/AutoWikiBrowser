@@ -597,16 +597,21 @@ public partial class ErrorHandler : Form
         Text = Application.ProductName;
     }
 
+    /// <summary>
+    /// Copies the current diagnostic report to the clipboard.
+    /// </summary>
     private void btnCopy_Click(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(txtDetails.Text))
+        string report = txtDetails.Text;
+
+        if (string.IsNullOrWhiteSpace(report))
         {
             return;
         }
 
         try
         {
-            Clipboard.SetText(txtDetails.Text);
+            Clipboard.SetText(report);
         }
         catch (Exception ex)
         {
