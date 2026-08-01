@@ -322,58 +322,104 @@ partial class MainForm
         UpdateRecentSettingsMenu();
     }
 
+    /// <summary>
+    /// Removes obsolete default-settings entries from the recent settings list
+    /// and limits the list to the five most recent entries.
+    /// </summary>
     private void FixupObsoleteRecentSettings()
     {
-        RecentList.Remove("Default.xml");
-        RecentList.RemoveAll(x => String.Compare(x, "Default.xml", StringComparison.OrdinalIgnoreCase) == 0
-            || String.Compare(x, AwbDirs.DefaultSettings, StringComparison.OrdinalIgnoreCase) == 0);
+        RecentList.RemoveAll(path =>
+            string.Equals(
+                path,
+                "Default.xml",
+                StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                path,
+                AwbDirs.DefaultSettings,
+                StringComparison.OrdinalIgnoreCase));
 
         while (RecentList.Count > 5)
+        {
             RecentList.RemoveAt(5);
+        }
     }
 
+    /// <summary>
+    /// Rebuilds the Recent Settings menu from the current recent settings list.
+    /// </summary>
+    /// <remarks>
+    /// The menu always includes the default settings entry. Recent settings files
+    /// are added after a separator, and the menu is shown only when at least one
+    /// recent settings file is available.
+    /// </remarks>
     private void UpdateRecentSettingsMenu()
     {
         FixupObsoleteRecentSettings();
 
-        recentToolStripMenuItem.DropDown.Items.Clear();
+        recentToolStripMenuItem.DropDownItems.Clear();
 
-        var item = recentToolStripMenuItem.DropDownItems.Add("Default settings");
-        item.Click += DefaultSettingsClick;
+        ToolStripItem defaultSettingsItem =
+            recentToolStripMenuItem.DropDownItems.Add("Default settings");
 
-        if (RecentList.Count > 0) recentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
-        foreach (string filename in RecentList)
+        defaultSettingsItem.Click += DefaultSettingsClick;
+
+        if (RecentList.Count > 0)
         {
-            item = recentToolStripMenuItem.DropDownItems.Add(filename);
-            item.Click += RecentSettingsClick;
+            recentToolStripMenuItem.DropDownItems.Add(
+                new ToolStripSeparator());
         }
 
-        recentToolStripMenuItem.Visible = (RecentList.Count > 0);
+        foreach (string fileName in RecentList)
+        {
+            ToolStripItem recentSettingsItem =
+                recentToolStripMenuItem.DropDownItems.Add(fileName);
+
+            recentSettingsItem.Click += RecentSettingsClick;
+        }
+
+        recentToolStripMenuItem.Visible = RecentList.Count > 0;
     }
 
     /// <summary>
-    /// Updates registry entry for recently used settings files
+    /// Saves the recent settings file list to the registry.
     /// </summary>
     private void SaveRecentSettingsList()
     {
-        RegistryUtils.SetValue("", "RecentList", string.Join("|", RecentList.ToArray()));
+        RegistryUtils.SetValue(
+            string.Empty,
+            "RecentList",
+            string.Join("|", RecentList));
     }
 
-    private void RecentSettingsClick(object sender, EventArgs e)
+    /// <summary>
+    /// Loads the settings file selected from the Recent Settings menu.
+    /// </summary>
+    /// <param name="sender">The selected menu item.</param>
+    /// <param name="e">The event data.</param>
+    private void RecentSettingsClick(
+        object sender,
+        EventArgs e)
     {
-        ToolStripItem item = (sender as ToolStripItem);
-
-        if (item != null)
+        if (sender is ToolStripItem item)
+        {
             LoadPrefs(item.Text);
+        }
     }
 
-    private void DefaultSettingsClick(object sender, EventArgs e)
+    /// <summary>
+    /// Loads the application's default settings file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void DefaultSettingsClick(
+        object sender,
+        EventArgs e)
     {
         LoadPrefs(AwbDirs.DefaultSettings);
     }
 
     /// <summary>
-    /// Save preferences as default
+    /// Saves the current preferences as the application's default settings.
     /// </summary>
     private void SavePrefs()
     {
