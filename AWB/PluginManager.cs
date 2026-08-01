@@ -143,29 +143,72 @@ internal sealed partial class PluginManager : Form
         }
     }
 
-    static void SaveLastPluginLoadedLocation()
+    /// <summary>
+    /// Saves the most recently used plugin location in the current user's
+    /// AutoWikiBrowser registry settings.
+    /// </summary>
+    /// <remarks>
+    /// Saving this preference is a best-effort operation. Registry access failures
+    /// do not prevent the plugin manager from continuing.
+    /// </remarks>
+    private static void SaveLastPluginLoadedLocation()
     {
         try
         {
-            Microsoft.Win32.RegistryKey reg = Microsoft.Win32.Registry.CurrentUser.
-                CreateSubKey("Software\\AutoWikiBrowser");
+            using Microsoft.Win32.RegistryKey? registryKey =
+                Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
+                    @"Software\AutoWikiBrowser");
 
-            if (reg != null)
-                reg.SetValue("RecentPluginLoadedLocation", _lastPluginLoadedLocation);
+            registryKey?.SetValue(
+                "RecentPluginLoadedLocation",
+                _lastPluginLoadedLocation);
         }
-        catch
+        catch (UnauthorizedAccessException)
         {
+            // The current user does not have permission to update the setting.
+        }
+        catch (System.Security.SecurityException)
+        {
+            // Registry access is restricted by the current security policy.
+        }
+        catch (IOException)
+        {
+            // The registry setting could not be written.
         }
     }
 
-    private void PluginManager_Load(object sender, EventArgs e)
+    /// <summary>
+    /// Loads the list of currently loaded plugins when the plugin manager opens.
+    /// </summary>
+    /// <param name="sender">
+    /// The form that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the form-load operation.
+    /// </param>
+    private void PluginManager_Load(
+        object sender,
+        EventArgs e)
     {
         LoadLoadedPluginList();
     }
 
-    private void loadNewPluginsToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Prompts the user to load new plugins and refreshes the displayed plugin
+    /// list afterward.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void loadNewPluginsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         LoadNewPlugin(_awb);
+
         lvPlugin.Items.Clear();
         LoadLoadedPluginList();
     }
@@ -200,25 +243,65 @@ internal sealed partial class PluginManager : Form
         UpdatePluginCount();
     }
 
-    private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+    /// <summary>
+    /// Updates the plugin context-menu commands before the menu is displayed.
+    /// </summary>
+    /// <param name="sender">
+    /// The context menu that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-opening operation.
+    /// </param>
+    private void contextMenuStrip1_Opening(
+        object sender,
+        CancelEventArgs e)
     {
-        loadPluginToolStripMenuItem.Enabled = false;
+        loadPluginToolStripMenuItem.Enabled =
+            lvPlugin.SelectedItems.Count > 0;
     }
 
-    private void loadPluginToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Loads the plugins currently selected in the plugin list.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void loadPluginToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        string[] plugins = new string[lvPlugin.SelectedItems.Count];
+        int selectedPluginCount =
+            lvPlugin.SelectedItems.Count;
 
-        for (int i = 0; i < lvPlugin.SelectedItems.Count; i++)
+        if (selectedPluginCount == 0)
         {
-            plugins[i] = lvPlugin.Items[lvPlugin.SelectedIndices[i]].Text;
+            return;
         }
 
-        Plugin.LoadPlugins(_awb, plugins, true);
+        string[] plugins =
+            new string[selectedPluginCount];
+
+        for (int i = 0; i < selectedPluginCount; i++)
+        {
+            plugins[i] =
+                lvPlugin.SelectedItems[i].Text;
+        }
+
+        Plugin.LoadPlugins(
+            _awb,
+            plugins,
+            true);
     }
 
+    /// <summary>
+    /// Updates the displayed number of plugins in the plugin list.
+    /// </summary>
     private void UpdatePluginCount()
     {
-        lblPluginCount.Text = lvPlugin.Items.Count.ToString();
+        lblPluginCount.Text =
+            lvPlugin.Items.Count.ToString();
     }
 }
