@@ -256,34 +256,71 @@ internal sealed partial class PluginManager : Form
         LoadLoadedPluginList();
     }
 
+    /// <summary>
+    /// Populates the plugin list with loaded, obsolete, and failed plugins.
+    /// </summary>
+    /// <remarks>
+    /// This method appends entries to the existing list. Callers should clear
+    /// <see cref="lvPlugin"/> first when rebuilding the complete plugin list.
+    /// </remarks>
     private void LoadLoadedPluginList()
     {
-        foreach (string pluginName in Plugin.GetAWBPluginList())
-        {
-            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupAWBLoaded"] });
-        }
+        lvPlugin.BeginUpdate();
 
-        foreach (string pluginName in Plugin.GetBasePluginList())
+        try
         {
-            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupBaseLoaded"] });
-        }
+            AddPluginsToGroup(
+                Plugin.GetAWBPluginList(),
+                "groupAWBLoaded");
 
-        foreach (string pluginName in Plugin.GetListMakerPluginList())
+            AddPluginsToGroup(
+                Plugin.GetBasePluginList(),
+                "groupBaseLoaded");
+
+            AddPluginsToGroup(
+                Plugin.GetListMakerPluginList(),
+                "groupLMLoaded");
+
+            AddPluginsToGroup(
+                Plugin.FailedPlugins.Keys,
+                "groupObsolete");
+
+            AddPluginsToGroup(
+                Plugin.FailedAssemblies,
+                "groupFailed");
+
+            UpdatePluginCount();
+        }
+        finally
         {
-            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupLMLoaded"] });
+            lvPlugin.EndUpdate();
         }
+    }
 
-        foreach (string pluginName in Plugin.FailedPlugins.Keys)
+    /// <summary>
+    /// Adds plugin or assembly names to the specified plugin-list group.
+    /// </summary>
+    /// <param name="names">
+    /// The plugin or assembly names to add.
+    /// </param>
+    /// <param name="groupName">
+    /// The key of the <see cref="ListViewGroup"/> that receives the entries.
+    /// </param>
+    private void AddPluginsToGroup(
+        IEnumerable<string> names,
+        string groupName)
+    {
+        ListViewGroup? group =
+            lvPlugin.Groups[groupName];
+
+        foreach (string name in names)
         {
-            lvPlugin.Items.Add(new ListViewItem(pluginName) { Group = lvPlugin.Groups["groupObsolete"] });
+            lvPlugin.Items.Add(
+                new ListViewItem(name)
+                {
+                    Group = group
+                });
         }
-
-        foreach (string assemblyName in Plugin.FailedAssemblies)
-        {
-            lvPlugin.Items.Add(new ListViewItem(assemblyName) { Group = lvPlugin.Groups["groupFailed"] });
-        }
-
-        UpdatePluginCount();
     }
 
     /// <summary>
