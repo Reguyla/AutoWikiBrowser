@@ -88,37 +88,80 @@ public partial class ArticleActionLogControl : UserControl
 
     #region Event Handlers
 
-    private void addSelectedToArticleListToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Adds the selected list-view entries to the article list.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void addSelectedToArticleListToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        List<Article> list = new List<Article>();
-        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-        {
-            list.Add(new Article(item.Text));
-        }
-        _listMaker.Add(list);
+        AddToListMaker(
+            MenuItemOwner(sender).SelectedItems);
     }
 
-    private void AddToListMaker(ListView.ListViewItemCollection sic)
+    /// <summary>
+    /// Converts the supplied list-view items into articles and adds them to the
+    /// list maker.
+    /// </summary>
+    /// <param name="sic">
+    /// The list-view items whose text is used as article names.
+    /// </param>
+    private void AddToListMaker(
+        System.Collections.IEnumerable sic)
     {
-        List<Article> list = new List<Article>();
+        ArgumentNullException.ThrowIfNull(sic);
+
+        List<Article> list = new();
+
         foreach (ListViewItem item in sic)
         {
-            list.Add(new Article(item.Text));
+            list.Add(
+                new Article(item.Text));
         }
+
         _listMaker.Add(list);
     }
 
-    private void LogLists_DoubleClick(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the focused log entry in the default web browser when the log list is
+    /// double-clicked.
+    /// </summary>
+    /// <param name="sender">
+    /// The list view that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the double-click operation.
+    /// </param>
+    private void LogLists_DoubleClick(
+        object sender,
+        EventArgs e)
     {
-        try
+        if (sender is not ListView listView ||
+            listView.FocusedItem is not AWBLogListener logEntry)
         {
-            ((AWBLogListener)((ListView)sender).FocusedItem).OpenInBrowser();
+            return;
         }
-        catch { }
+
+        logEntry.OpenInBrowser();
     }
 
-    private static void ResizeListView(NoFlickerExtendedListView lstView)
+    /// <summary>
+    /// Resizes the list-view columns to fit their current contents.
+    /// </summary>
+    /// <param name="lstView">
+    /// The list view whose columns should be resized.
+    /// </param>
+    private static void ResizeListView(
+        NoFlickerExtendedListView lstView)
     {
+        ArgumentNullException.ThrowIfNull(lstView);
+
         lstView.ResizeColumns(true);
     }
 
