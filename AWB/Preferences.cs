@@ -63,67 +63,150 @@ internal sealed partial class MyPreferences : Form
 
         InitializeComponent();
 
-        foreach (ProjectEnum project in Enum.GetValues<ProjectEnum>())
-        {
-            cmboProject.Items.Add(project);
-        }
+        InitializeProjectSelection(proj);
+        InitializeLanguageSelection(lang);
+        InitializeCustomProjects(customproj);
+        InitializeStoredPreferences();
+        ApplyPlatformRestrictions();
+        InitializeProtocolSelection(protocol);
+    }
 
-        cmboProject.SelectedItem = proj;
+    /// <summary>
+    /// Populates the project selector and applies the supplied project selection.
+    /// </summary>
+    private void InitializeProjectSelection(ProjectEnum project)
+    {
+        cmboProject.Items.Clear();
+        cmboProject.Items.AddRange(
+            Enum.GetValues<ProjectEnum>()
+                .Cast<object>()
+                .ToArray());
 
-        // TODO: Extract the reusable project-selection logic from the event
-        // handler into a dedicated helper. Event handlers should not normally
-        // be invoked directly with null event arguments.
-        cmboProject_SelectedIndexChanged(null, null);
+        cmboProject.SelectedItem = project;
+        UpdateProjectSelection();
+    }
 
-        cmboLang.SelectedItem = lang.ToLowerInvariant();
+    /// <summary>
+    /// Selects the supplied wiki language code.
+    /// </summary>
+    private void InitializeLanguageSelection(string language)
+    {
+        cmboLang.SelectedItem = NormalizeLanguageCode(language);
+    }
+
+    /// <summary>
+    /// Normalizes a wiki language code for selection.
+    /// </summary>
+    private static string NormalizeLanguageCode(string language)
+    {
+        return language.ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Populates the custom-project selector and applies the current value.
+    /// </summary>
+    private void InitializeCustomProjects(string customProject)
+    {
+        IReadOnlyList<string> customWikis = ParseCustomWikis(
+            Properties.Settings.Default.CustomWikis);
 
         cmboCustomProject.Items.Clear();
+        cmboCustomProject.Items.AddRange(
+            customWikis.Cast<object>().ToArray());
 
-        foreach (string customWiki in Properties.Settings.Default.CustomWikis
-                     .Split(
-                         '|',
-                         StringSplitOptions.RemoveEmptyEntries |
-                         StringSplitOptions.TrimEntries)
-                     .Distinct(StringComparer.Ordinal))
+        cmboCustomProject.Text = customProject;
+    }
+
+    /// <summary>
+    /// Parses the pipe-delimited custom wiki setting.
+    /// </summary>
+    private static IReadOnlyList<string> ParseCustomWikis(
+        string storedCustomWikis)
+    {
+        if (string.IsNullOrWhiteSpace(storedCustomWikis))
         {
-            cmboCustomProject.Items.Add(customWiki);
+            return Array.Empty<string>();
         }
 
-        cmboCustomProject.Text = customproj;
+        return storedCustomWikis
+            .Split(
+                '|',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+    }
 
-        // TODO: Compare the selected ProjectEnum value directly rather than
-        // relying on the combo box display text. Confirm the corresponding
-        // ProjectEnum member names before changing this behavior.
-        chkSupressAWB.Enabled =
-            cmboProject.Text == "custom" ||
-            cmboProject.Text == "wikia" ||
-            cmboProject.Text == "fandom";
-
+    /// <summary>
+    /// Applies preferences stored in the application settings.
+    /// </summary>
+    private void InitializeStoredPreferences()
+    {
         chkAlwaysConfirmExit.Checked =
             Properties.Settings.Default.AskForTerminate;
 
-        // The persisted Privacy setting has inverse semantics relative to the
-        // checkbox state.
-        // TODO: Investigate whether this setting can be renamed or migrated to
-        // remove the inversion during a future settings-model redesign.
-        chkPrivacy.Checked = !Properties.Settings.Default.Privacy;
+        chkPrivacy.Checked =
+            GetPrivacyCheckboxState(Properties.Settings.Default.Privacy);
+    }
 
-        if (Globals.UsingMono)
+    /// <summary>
+    /// Converts the persisted privacy value to its checkbox representation.
+    /// </summary>
+    // TODO: Rename or migrate the persisted Privacy setting during a future
+    // settings-model redesign so its meaning is not inverted relative to the UI.
+    private static bool GetPrivacyCheckboxState(bool privacyEnabled)
+    {
+        return !privacyEnabled;
+    }
+
+    /// <summary>
+    /// Applies platform-specific restrictions to the preference controls.
+    /// </summary>
+    private void ApplyPlatformRestrictions()
+    {
+        if (!Globals.UsingMono)
         {
-            // Flashing the application window is not supported under Mono.
-            chkFlash.Enabled = false;
-            chkFlash.Checked = false;
+            return;
         }
 
-        // Index 1 represents HTTP; index 0 represents HTTPS.
-        // TODO: Replace index-based protocol selection with value-based
-        // selection so that future ComboBox item reordering is safe.
-        cmboProtocol.SelectedIndex = string.Equals(
+        // Flashing the application window is not supported under Mono.
+        chkFlash.Enabled = false;
+        chkFlash.Checked = false;
+    }
+
+    /// <summary>
+    /// Applies the supplied protocol selection.
+    /// </summary>
+    private void InitializeProtocolSelection(string protocol)
+    {
+        cmboProtocol.SelectedIndex =
+            GetProtocolSelectionIndex(protocol);
+    }
+
+    /// <summary>
+    /// Gets the protocol selector index for a protocol value.
+    /// </summary>
+    // TODO: Replace index-based protocol selection with a named value or enum so
+    // behavior is not coupled to ComboBox item ordering.
+    private static int GetProtocolSelectionIndex(string protocol)
+    {
+        return string.Equals(
             protocol,
             "http://",
             StringComparison.Ordinal)
             ? 1
             : 0;
+    }
+
+    /// <summary>
+    /// Determines whether AWB attribution suppression is available for a project.
+    /// </summary>
+    private static bool SupportsAwbAttributionSuppression(
+        ProjectEnum project)
+    {
+        return project == ProjectEnum.custom ||
+               project == ProjectEnum.wikia ||
+               project == ProjectEnum.fandom;
     }
 
     #region Language and project
