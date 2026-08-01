@@ -209,36 +209,68 @@ partial class MainForm
         }
     }
 
+    // TODO: Review the built-in edit summaries to make them wiki-aware rather
+    // than English Wikipedia-specific. Consider providing defaults based on the
+    // connected wiki (for example, Wikipedia, Wiktionary, Commons, or third-party
+    // MediaWiki installations) and allowing projects to supply or override their
+    // own default edit summaries.
+    /// <summary>
+    /// Adds the built-in edit summaries to the edit-summary selection list.
+    /// </summary>
+    /// <remarks>
+    /// This method does not clear existing entries before adding the defaults.
+    /// Callers should ensure that it is not invoked repeatedly unless duplicate
+    /// entries are acceptable.
+    /// </remarks>
     private void LoadDefaultEditSummaries()
     {
-        // cmboEditSummary.Items.Clear();
-        cmboEditSummary.Items.Add("[[Wikipedia:AutoWikiBrowser/General fixes|Genfixes]], [[Wikipedia:AutoWikiBrowser/Typos|Typo fixing]] and clean up");
-        cmboEditSummary.Items.Add("Re-categorisation per [[Wikipedia:Categories for discussion|CFD]]");
-        cmboEditSummary.Items.Add("Re-categorisation per [[Wikipedia:Categories for discussion|CFD]] and cleanup");
-        cmboEditSummary.Items.Add("Removing category per [[Wikipedia:Categories for discussion|CFD]]");
-        cmboEditSummary.Items.Add("[[Wikipedia:Template substitution|subst:'ing]]");
-        cmboEditSummary.Items.Add("[[Wikipedia:WikiProject Stub sorting|stub sorting]]");
-        cmboEditSummary.Items.Add("[[Wikipedia:AutoWikiBrowser/Typos|Typo fixing]]");
-        cmboEditSummary.Items.Add("Bad link repair");
-        cmboEditSummary.Items.Add("Fixing [[Wikipedia:Disambiguation pages with links|links to disambiguation pages]]");
-        cmboEditSummary.Items.Add("Unicodifying");
-        cmboEditSummary.Items.Add("Updates to WikiProjects and/or WikiprojectBannerShell");
+        cmboEditSummary.Items.AddRange(
+        [
+         "[[Wikipedia:AutoWikiBrowser/General fixes|Genfixes]], [[Wikipedia:AutoWikiBrowser/Typos|Typo fixing]] and clean up",
+        "Re-categorisation per [[Wikipedia:Categories for discussion|CFD]]",
+        "Re-categorisation per [[Wikipedia:Categories for discussion|CFD]] and cleanup",
+        "Removing category per [[Wikipedia:Categories for discussion|CFD]]",
+        "[[Wikipedia:Template substitution|subst:'ing]]",
+        "[[Wikipedia:WikiProject Stub sorting|stub sorting]]",
+        "[[Wikipedia:AutoWikiBrowser/Typos|Typo fixing]]",
+        "Bad link repair",
+        "Fixing [[Wikipedia:Disambiguation pages with links|links to disambiguation pages]]",
+        "Unicodifying",
+        "Updates to WikiProjects and/or WikiprojectBannerShell"
+        ]);
     }
 
+    /// <summary>
+    /// Displays the settings-file selection dialog and loads the selected file.
+    /// </summary>
     private void LoadSettingsDialog()
     {
         if (openXML.ShowDialog() != DialogResult.OK)
+        {
             return;
+        }
 
         LoadPrefs(openXML.FileName);
     }
 
+    /// <summary>
+    /// Loads the recent settings-file list from the registry and updates the
+    /// corresponding user-interface entries.
+    /// </summary>
+    /// <remarks>
+    /// Splash-screen progress is advanced to 70 even if loading the recent list
+    /// fails.
+    /// </remarks>
     private void LoadRecentSettingsList()
     {
         SplashScreen.SetProgress(63);
+
         try
         {
-            UpdateRecentList(RegistryUtils.GetValue("\\RecentList", "").Split('|'));
+            string[] recentSettings =
+                RegistryUtils.GetValue("\\RecentList", "").Split('|');
+
+            UpdateRecentList(recentSettings);
         }
         finally
         {
