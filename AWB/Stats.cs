@@ -415,37 +415,69 @@ internal static class UsageStats
         set => Program.AWB.StatusLabelText = value;
     }
 
-    private static void EnumeratePlugins(NameValueCollection postvars, ICollection<IAWBPlugin> awbPlugins, ICollection<IAWBBasePlugin> awbBasePlugins, ICollection<IListMakerPlugin> listMakerPlugins)
+    /// <summary>
+    /// Adds plugin information to the usage statistics request.
+    /// </summary>
+    /// <param name="postvars">
+    /// The request fields to populate.
+    /// </param>
+    /// <param name="awbPlugins">
+    /// The standard AutoWikiBrowser plugins to include.
+    /// </param>
+    /// <param name="awbBasePlugins">
+    /// The AutoWikiBrowser base plugins to include.
+    /// </param>
+    /// <param name="listMakerPlugins">
+    /// The ListMaker plugins to include.
+    /// </param>
+    private static void EnumeratePlugins(
+        NameValueCollection postvars,
+        ICollection<IAWBPlugin> awbPlugins,
+        ICollection<IAWBBasePlugin> awbBasePlugins,
+        ICollection<IListMakerPlugin> listMakerPlugins)
     {
-        int i = 0;
+        int pluginIndex = 0;
 
-        postvars.Add("PluginCount", (awbPlugins.Count + awbBasePlugins.Count + listMakerPlugins.Count).ToString());
+        int pluginCount =
+            awbPlugins.Count +
+            awbBasePlugins.Count +
+            listMakerPlugins.Count;
+
+        postvars.Add("PluginCount", pluginCount.ToString());
 
         foreach (IAWBPlugin plugin in awbPlugins)
         {
-            i++;
-            string p = "P" + i;
-            postvars.Add(p + "N", plugin.Name);
-            postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
-            postvars.Add(p + "T", "0");
+            AddPlugin(
+                plugin.Name,
+                Plugins.Plugin.GetPluginVersionString(plugin), "0");
         }
 
         foreach (IListMakerPlugin plugin in listMakerPlugins)
         {
-            i++;
-            string p = "P" + i;
-            postvars.Add(p + "N", plugin.Name);
-            postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
-            postvars.Add(p + "T", "1");
+            AddPlugin(
+                plugin.Name,
+                Plugins.Plugin.GetPluginVersionString(plugin), "1");
         }
 
         foreach (IAWBBasePlugin plugin in awbBasePlugins)
         {
-            i++;
-            string p = "P" + i;
-            postvars.Add(p + "N", plugin.Name);
-            postvars.Add(p + "V", Plugins.Plugin.GetPluginVersionString(plugin));
-            postvars.Add(p + "T", "2");
+            AddPlugin(
+                plugin.Name,
+                Plugins.Plugin.GetPluginVersionString(plugin), "2");
+        }
+
+        void AddPlugin(
+            string pluginName,
+            string pluginVersion,
+            string pluginType)
+        {
+            pluginIndex++;
+
+            string prefix = $"P{pluginIndex}";
+
+            postvars.Add($"{prefix}N", pluginName);
+            postvars.Add($"{prefix}V", pluginVersion);
+            postvars.Add($"{prefix}T", pluginType);
         }
     }
 
