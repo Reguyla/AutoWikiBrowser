@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using AutoWikiBrowser.Plugins;
+using AutoWikiBrowser.Services.Settings;
 using System.Windows.Forms;
 using WikiFunctions;
 using WikiFunctions.AWBSettings;
@@ -427,36 +428,45 @@ partial class MainForm
     }
 
     /// <summary>
-    /// Save preferences to file
+    /// Saves the current user preferences to the specified settings file.
     /// </summary>
+    /// <param name="path">
+    /// The destination settings file.
+    /// </param>
+    /// <remarks>
+    /// File persistence and backup recovery are delegated to
+    /// <see cref="SettingsPersistenceService"/>. This method remains responsible
+    /// for updating application state and displaying errors to the user.
+    /// </remarks>
     private void SavePrefs(string path)
     {
-        try
-        {
-            UserPrefs.SavePrefs(MakePrefs(), path);
+        SettingsSaveResult result =
+            _settingsPersistenceService.Save(
+                MakePrefs(),
+                path);
 
+        if (result.Succeeded)
+        {
             UpdateRecentList(path);
             SettingsFile = path;
-
-            // Delete temporary/old file if exists when code reaches here
-            if (File.Exists(SettingsFile + ".old"))
-                File.Delete(SettingsFile + ".old");
+            return;
         }
-        catch (Exception ex)
-        {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#UnauthorizedAccessException_-_Default_settings_should_not_always_save_to_.25SYSTEMROOT.25.5Csystem32_for_UAC_reason
-            // if user runs AWB from somewhere they can't write to, saving settings as default will fail, so handle this
-            if (ex is UnauthorizedAccessException)
-            {
-                MessageBox.Show("Saving settings failed due to insufficient permissions.", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-                ErrorHandler.HandleException(ex);
 
-            // don't attempt to write to disk if the error was IOException (disk full etc.)
-            if (!(ex is IOException) && File.Exists(SettingsFile + ".old"))
-                File.Copy(SettingsFile + ".old", SettingsFile, true);
+        if (result.Failure ==
+            SettingsSaveFailure.UnauthorizedAccess)
+        {
+            MessageBox.Show(
+                "Saving settings failed due to insufficient permissions.",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return;
+        }
+
+        if (result.Exception != null)
+        {
+            ErrorHandler.HandleException(result.Exception);
         }
     }
 

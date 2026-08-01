@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Diff;
+using AutoWikiBrowser.Services.Settings;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.ComponentModel;
@@ -179,6 +180,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly DiffGenerationService _diffGenerationService = new();
 
     private Task? _diffWebViewInitializationTask;
+
+    private readonly SettingsPersistenceService _settingsPersistenceService = new();
 
     #endregion
 
