@@ -344,10 +344,11 @@ public class BackgroundRequest
     /// </summary>
     private void BypassRedirectsFunc()
     {
-        // checks links to make them bypass redirects and (TODO) disambigs
-        Dictionary<string, string> knownLinks = new Dictionary<string, string>();
+        // Maps original link targets to their resolved destinations so links bypass redirects.
+        // TODO: Extend this logic to handle disambiguation pages.
+        var knownLinks = new Dictionary<string, string>();
 
-        IApiEdit editor = ObjParam1 as IApiEdit;
+        IApiEdit? editor = ObjParam1 as IApiEdit;
 
         if (editor == null)
         {

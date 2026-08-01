@@ -3055,27 +3055,33 @@ Message: {2}
     private static readonly Regex anyParam = new Regex(@"\|\s*([^{}\|<>\r\n=]+)\s*=\s*([^}|]*)(?=\||}}$)");
 
     /// <summary>
-    /// Returns duplicate named parameters in a template call
+    /// Finds duplicate named parameters in a template invocation.
     /// </summary>
-    /// <param name="templatecall">The template call to check</param>
-    /// <returns>Dictionary of any duplicate parameters: index and length</returns>
-    public static Dictionary<int, int> DuplicateTemplateParameters(string templatecall)
+    /// <param name="templatecall">
+    /// The template invocation to inspect.
+    /// </param>
+    /// <returns>
+    /// A dictionary mapping each duplicate parameter's starting position to its
+    /// length within the template invocation.
+    /// </returns>
+    public static Dictionary<int, int> DuplicateTemplateParameters(
+        string templatecall)
     {
-        Dictionary<int, int> Dupes = new Dictionary<int, int>();
+        Dictionary<int, int> duplicates = new();
+        HashSet<string> parameterNames = new();
 
-        Dictionary<string, string> Params = new Dictionary<string, string>();
-
-        foreach (Match m in anyParam.Matches(PipeCleanedTemplate(templatecall)))
+        foreach (Match match in anyParam.Matches(
+                     PipeCleanedTemplate(templatecall)))
         {
-            string paramValue = templatecall.Substring(m.Groups[2].Index, m.Groups[2].Length).Trim(),
-            paramName = m.Groups[1].Value.Trim();
+            string parameterName = match.Groups[1].Value.Trim();
 
-            if (!Params.ContainsKey(paramName))
-                Params.Add(paramName, paramValue);
-            else
-                Dupes.Add(m.Index, m.Length);
+            if (!parameterNames.Add(parameterName))
+            {
+                duplicates.Add(match.Index, match.Length);
+            }
         }
-        return Dupes;
+
+        return duplicates;
     }
 
     private static readonly Regex SpacedPipes = new Regex(@"(\|\s*)(?:\||}})");

@@ -86,11 +86,11 @@ public class TyposDownloader : ITyposProvider
     /// <returns>Dictionary of typo rules</returns>
     public Dictionary<string, string> GetTypos()
     {
-        Dictionary<string, string> typoStrings = new Dictionary<string, string>();
+        Dictionary<string, string> typoStrings = new();
 
         try
         {
-            string text = "";
+            string text = string.Empty;
             string sourceUrl = Url;
             Exception? sourceException = null;
 
