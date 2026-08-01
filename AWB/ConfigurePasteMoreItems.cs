@@ -79,60 +79,90 @@ public partial class ConfigurePasteMoreItems : Form
         String10 = string10;
     }
 
+    /// <summary>
+    /// Gets the text entered in the first input field.
+    /// </summary>
     public string String1
     {
         get => textBox1.Text;
         private set => textBox1.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the second input field.
+    /// </summary>
     public string String2
     {
         get => textBox2.Text;
         private set => textBox2.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the third input field.
+    /// </summary>
     public string String3
     {
         get => textBox3.Text;
         private set => textBox3.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the fourth input field.
+    /// </summary>
     public string String4
     {
         get => textBox4.Text;
         private set => textBox4.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the fifth input field.
+    /// </summary>
     public string String5
     {
         get => textBox5.Text;
         private set => textBox5.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the sixth input field.
+    /// </summary>
     public string String6
     {
         get => textBox6.Text;
         private set => textBox6.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the seventh input field.
+    /// </summary>
     public string String7
     {
         get => textBox7.Text;
         private set => textBox7.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the eighth input field.
+    /// </summary>
     public string String8
     {
         get => textBox8.Text;
         private set => textBox8.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the ninth input field.
+    /// </summary>
     public string String9
     {
         get => textBox9.Text;
         private set => textBox9.Text = value;
     }
 
+    /// <summary>
+    /// Gets the text entered in the tenth input field.
+    /// </summary>
     public string String10
     {
         get => textBox10.Text;
