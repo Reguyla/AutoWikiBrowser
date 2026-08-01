@@ -355,39 +355,117 @@ public partial class ArticleActionLogControl : UserControl
         }
     }
 
-    private void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Clears the selection in the list associated with the supplied context-menu
+    /// item.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void selectNoneToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        foreach (ListViewItem item in MenuItemOwner(sender).Items)
-        { item.Selected = false; }
+        ListView listView =
+            MenuItemOwner(sender);
+
+        listView.BeginUpdate();
+
+        try
+        {
+            foreach (ListViewItem item in listView.Items)
+            {
+                item.Selected = false;
+            }
+        }
+        finally
+        {
+            listView.EndUpdate();
+        }
     }
 
-    private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens each selected article in the default web browser.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void openInBrowserToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-            Tools.OpenArticleInBrowser(item.Text);
+        ListView listView =
+            MenuItemOwner(sender);
+
+        foreach (ListViewItem item in listView.SelectedItems)
+        {
+            Tools.OpenArticleInBrowser(
+                item.Text);
+        }
     }
 
-    private void openHistoryInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the revision history for each selected article in the default web
+    /// browser.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void openHistoryInBrowserToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        foreach (ListViewItem item in MenuItemOwner(sender).SelectedItems)
-            Tools.OpenArticleHistoryInBrowser(item.Text);
+        ListView listView =
+            MenuItemOwner(sender);
+
+        foreach (ListViewItem item in listView.SelectedItems)
+        {
+            Tools.OpenArticleHistoryInBrowser(
+                item.Text);
+        }
     }
 
-    private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Removes the selected entries from the list associated with the supplied
+    /// context-menu item.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void removeToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         RemoveSelected(sender);
     }
 
-    private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Removes all entries from the list associated with the supplied
+    /// context-menu item.
+    /// </summary>
+    /// <param name="sender">
+    /// The menu item that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// Event data for the menu-item click.
+    /// </param>
+    private void clearToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        if (MenuItemOwner(sender) == lvFailed)
-        {
-            lvFailed.Items.Clear();
-        }
-        else
-        {
-            lvSuccessful.Items.Clear();
-        }
+        MenuItemOwner(sender).Items.Clear();
     }
 
     private void mnuListView_Opening(object sender, EventArgs e)
