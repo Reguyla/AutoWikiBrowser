@@ -257,26 +257,67 @@ public class FaRPrefs
     public bool IgnoreUnformatted = false;
 }
 
+/// <summary>
+/// Stores the list-maker settings and optionally the current article list.
+/// </summary>
 [Serializable]
-public class ListPrefs
+public sealed class ListPrefs
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ListPrefs"/> class.
+    /// </summary>
+    /// <remarks>
+    /// This constructor is retained for serialization and internal settings
+    /// restoration.
+    /// </remarks>
     internal ListPrefs()
     {
     }
 
     /// <summary>
-    /// Fill the object with settings from UI
+    /// Initializes a new instance of the <see cref="ListPrefs"/> class from
+    /// the current list-maker settings.
     /// </summary>
-    public ListPrefs(Controls.Lists.ListMaker listMaker, bool saveArticleList)
+    /// <param name="listMaker">
+    /// The list-maker control whose settings are copied.
+    /// </param>
+    /// <param name="saveArticleList">
+    /// Whether the current article list should be included.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="listMaker"/> is <see langword="null"/>.
+    /// </exception>
+    public ListPrefs(
+        Controls.Lists.ListMaker listMaker,
+        bool saveArticleList)
     {
+        ArgumentNullException.ThrowIfNull(listMaker);
+
         ListSource = listMaker.SourceText;
         SelectedProvider = listMaker.SelectedProvider;
-        ArticleList = saveArticleList ? listMaker.GetArticleList() : new List<Article>();
+        ArticleList =
+            saveArticleList
+                ? listMaker.GetArticleList()
+                : new List<Article>();
     }
 
-    public string ListSource = "";
-    public string SelectedProvider = "CategoryListProvider";
-    public List<Article> ArticleList = new List<Article>();
+    /// <summary>
+    /// Gets or sets the source text used to create the article list.
+    /// </summary>
+    public string ListSource { get; set; } =
+        string.Empty;
+
+    /// <summary>
+    /// Gets or sets the name of the selected list provider.
+    /// </summary>
+    public string SelectedProvider { get; set; } =
+        "CategoryListProvider";
+
+    /// <summary>
+    /// Gets or sets the saved article list.
+    /// </summary>
+    public List<Article> ArticleList { get; set; } =
+        new();
 }
 
 // the basic settings
