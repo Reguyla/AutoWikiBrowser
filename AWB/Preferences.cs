@@ -724,56 +724,102 @@ internal sealed partial class MyPreferences : Form
     /// This property is managed by AWB's settings system and is not serialized by
     /// the Windows Forms designer.
     /// </remarks>
+    // TODO: Determine whether users should be able to disable every alert.
+    // The current settings format treats an empty selection as "enable all,"
+    // so it cannot distinguish that state from an uninitialized preference.
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<int> AlertPreferences
     {
-        get
-        {
-            List<int> alerts = new List<int>();
+        get => GetEnabledAlertIds();
 
-            bool anyChecked = false;
-
-            for (int a = 0; a < alertListBox.Items.Count; a++)
-            {
-                if (alertListBox.GetItemChecked(a))
-                {
-                    anyChecked = true;
-                    break;
-                }
-            }
-
-            for (int i = 0; i < alertListBox.Items.Count; i++)
-            {
-                if (alertListBox.GetItemChecked(i) || !anyChecked)
-                {
-                    CheckedBoxItem cbi =
-                        (CheckedBoxItem)alertListBox.Items[i];
-
-                    alerts.Add(cbi.ID);
-                }
-            }
-
-            return alerts;
-        }
         set
         {
-            alertListBox.BeginUpdate();
+            ArgumentNullException.ThrowIfNull(value);
+            PopulateAlertPreferences(value);
+        }
+    }
+
+    /// <summary>
+    /// Gets the checked alert identifiers, or all available identifiers when no
+    /// alert is checked.
+    /// </summary>
+    private List<int> GetEnabledAlertIds()
+    {
+        List<CheckedBoxItem> alertItems = alertListBox.Items
+            .Cast<CheckedBoxItem>()
+            .ToList();
+
+        bool anyChecked = Enumerable.Range(0, alertListBox.Items.Count)
+            .Any(alertListBox.GetItemChecked);
+
+        return alertItems
+            .Where((_, index) =>
+                alertListBox.GetItemChecked(index) || !anyChecked)
+            .Select(alert => alert.ID)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Rebuilds the alert list using the supplied enabled alert identifiers.
+    /// </summary>
+    private void PopulateAlertPreferences(
+        IReadOnlyCollection<int> enabledAlertIds)
+    {
+        bool enableAllAlerts = enabledAlertIds.Count == 0;
+        var enabledAlerts = enabledAlertIds.ToHashSet();
+
+        alertListBox.BeginUpdate();
+
+        try
+        {
             alertListBox.Items.Clear();
 
-            foreach (KeyValuePair<int, string> kvp in _alertDescriptions)
+            foreach (KeyValuePair<int, string> alert in _alertDescriptions)
             {
                 alertListBox.Items.Add(
                     new CheckedBoxItem
                     {
-                        ID = kvp.Key,
-                        Description = kvp.Value,
+                        ID = alert.Key,
+                        Description = alert.Value
                     },
-                    value.Contains(kvp.Key) || !value.Any());
+                    enableAllAlerts || enabledAlerts.Contains(alert.Key));
             }
-
+        }
+        finally
+        {
             alertListBox.EndUpdate();
         }
     }
+
+    /// <summary>
+    /// Gets an alert item from the checked list.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based item index.
+    /// </param>
+    /// <returns>
+    /// The alert item at the specified index.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the checked-list item is not a
+    /// <see cref="CheckedBoxItem"/>.
+    /// </exception>
+    private CheckedBoxItem GetAlertItem(int index)
+    {
+        return alertListBox.Items[index] is CheckedBoxItem alertItem
+            ? alertItem
+            : throw new InvalidOperationException(
+                $"Alert item at index {index} is not a {nameof(CheckedBoxItem)}.");
+    }
+
+    /// <summary>
+    /// Represents an alert identifier and its selected state independently of
+    /// the Windows Forms controls.
+    /// </summary>
+    private readonly record struct AlertSelection(
+        int Id,
+        bool IsChecked);
 
     #endregion
 
