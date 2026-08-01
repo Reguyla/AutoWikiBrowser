@@ -757,47 +757,71 @@ partial class MainForm
         };
     }
 
-
-
+    // TODO: Consider moving the final splash-screen progress update into a
+    // finally block so startup progress continues if preference initialization
+    // fails before or outside the file-loading overload.
     /// <summary>
-    /// Load default preferences
+    /// Loads the active settings file, the default settings file, or a new set of
+    /// default preferences when no settings file is available.
     /// </summary>
+    /// <remarks>
+    /// The active settings file is preferred when one has already been selected.
+    /// Otherwise, the application's default settings file is loaded when it exists.
+    /// If neither is available, a new <see cref="UserPrefs"/> instance is applied.
+    /// </remarks>
     private void LoadPrefs()
     {
         SplashScreen.SetProgress(50);
 
         if (!string.IsNullOrEmpty(SettingsFile))
+        {
             LoadPrefs(SettingsFile);
-        else
-            if (File.Exists(AwbDirs.DefaultSettings))
+        }
+        else if (File.Exists(AwbDirs.DefaultSettings))
+        {
             LoadPrefs(AwbDirs.DefaultSettings);
+        }
         else
         {
             LoadPrefs(new UserPrefs());
-            SettingsFile = "";
+            SettingsFile = string.Empty;
         }
 
         SplashScreen.SetProgress(59);
     }
 
     /// <summary>
-    /// Load preferences from file
+    /// Loads application preferences from the specified settings file.
     /// </summary>
+    /// <param name="path">
+    /// The path of the settings file to load.
+    /// </param>
+    /// <remarks>
+    /// After the settings are loaded successfully, the file becomes the active
+    /// settings file and is moved to the top of the recent settings list.
+    /// Duplicate article-list entries are also removed when that option is enabled.
+    /// </remarks>
     private void LoadPrefs(string path)
     {
         if (string.IsNullOrEmpty(path))
+        {
             return;
+        }
 
         try
         {
-            LoadPrefs(UserPrefs.LoadPrefs(path));
+            UserPrefs preferences = UserPrefs.LoadPrefs(path);
+
+            LoadPrefs(preferences);
 
             SettingsFile = path;
             StatusLabelText = "Settings successfully loaded";
             UpdateRecentList(path);
 
             if (removeDuplicatesToolStripMenuItem.Checked)
+            {
                 listMaker.RemoveListDuplicates();
+            }
         }
         catch (Exception ex)
         {
@@ -1004,14 +1028,35 @@ partial class MainForm
         }
     }
 
-    private void SetPasteMoreText(int item, string s)
+    /// <summary>
+    /// Updates the text, stored value, and visibility of a Paste More menu item.
+    /// </summary>
+    /// <param name="item">
+    /// The zero-based Paste More menu item index.
+    /// </param>
+    /// <param name="text">
+    /// The text to associate with the menu item.
+    /// </param>
+    /// <remarks>
+    /// Ampersands are escaped before being displayed so they appear literally
+    /// rather than being interpreted as WinForms mnemonic markers.
+    /// </remarks>
+    private void SetPasteMoreText(
+        int item,
+        string text)
     {
-        if (item < _pasteMoreItems.Length)
+        if (item >= _pasteMoreItems.Length)
         {
-            _pasteMoreItems[item].Tag = s;
-            _pasteMoreItems[item].Text = _pasteMoreItemsPrefixes[item] +
-                                        (string.IsNullOrEmpty(s) ? "" : s.Replace("&", "&&"));
-            _pasteMoreItems[item].Visible = !string.IsNullOrEmpty(s);
+            return;
         }
+
+        _pasteMoreItems[item].Tag = text;
+        _pasteMoreItems[item].Text =
+            _pasteMoreItemsPrefixes[item] +
+            (string.IsNullOrEmpty(text)
+                ? string.Empty
+                : text.Replace("&", "&&"));
+
+        _pasteMoreItems[item].Visible = !string.IsNullOrEmpty(text);
     }
 }
