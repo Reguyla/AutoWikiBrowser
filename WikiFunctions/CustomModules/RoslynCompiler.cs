@@ -171,6 +171,26 @@ public static class RoslynCompiler
         }
     }
 
+    /// <summary>
+    /// Creates the metadata references required to compile a custom module.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The returned collection includes the trusted platform assemblies supplied
+    /// by the current .NET runtime together with assemblies explicitly requested
+    /// through <paramref name="referencedAssemblies"/>.
+    /// </para>
+    /// <para>
+    /// Duplicate reference paths are removed using a case-insensitive comparison.
+    /// </para>
+    /// </remarks>
+    /// <param name="referencedAssemblies">
+    /// The assembly names or paths requested by the custom-module compiler.
+    /// </param>
+    /// <returns>
+    /// A list of metadata references for assemblies that could be resolved and
+    /// whose files currently exist.
+    /// </returns>
     private static List<MetadataReference>
         CreateMetadataReferences(
             StringCollection referencedAssemblies)
@@ -204,8 +224,13 @@ public static class RoslynCompiler
             {
                 paths.Add(resolvedPath);
             }
+
+            // TODO: Report references that cannot be resolved instead of silently
+            // omitting them and relying on later compiler diagnostics.
         }
 
+        // TODO: Consider whether custom modules should eventually compile against
+        // a restricted reference set rather than every trusted platform assembly.
         return paths
             .Where(File.Exists)
             .Select(
