@@ -512,160 +512,208 @@ internal sealed partial class MyPreferences : Form
     /// <summary>
     /// Gets or sets whether automatic saving of the edit box is enabled.
     /// </summary>
+    /// <remarks>
+    /// Setting this property also updates the enabled state of the autosave
+    /// interval, file-path, label, and file-selection controls.
+    /// </remarks>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefAutoSaveEditBoxEnabled
     {
-        get { return chkAutoSaveEdit.Checked; }
+        get => chkAutoSaveEdit.Checked;
+
         set
         {
-            chkAutoSaveEdit.Checked =
-                btnSetFile.Enabled =
-                nudEditBoxAutosave.Enabled =
-                txtAutosave.Enabled =
-                lblAutosaveFile.Enabled = value;
+            chkAutoSaveEdit.Checked = value;
+            btnSetFile.Enabled = value;
+            nudEditBoxAutosave.Enabled = value;
+            txtAutosave.Enabled = value;
+            lblAutosaveFile.Enabled = value;
         }
     }
 
     /// <summary>
     /// Gets or sets the edit-box automatic-save interval.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public decimal PrefAutoSaveEditBoxPeriod
     {
-        get { return nudEditBoxAutosave.Value; }
-        set { nudEditBoxAutosave.Value = value; }
+        get => nudEditBoxAutosave.Value;
+        set => nudEditBoxAutosave.Value = value;
     }
 
     /// <summary>
-    /// Gets or sets the edit-box automatic-save file.
+    /// Gets or sets the path of the edit-box automatic-save file.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string PrefAutoSaveEditBoxFile
     {
-        get { return txtAutosave.Text; }
-        set { txtAutosave.Text = value; }
+        get => txtAutosave.Text;
+        set => txtAutosave.Text = value;
     }
 
     /// <summary>
     /// Gets or sets whether logging is enabled.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool EnableLogging
     {
-        get { return chkEnableLogging.Checked; }
-        set { chkEnableLogging.Checked = value; }
+        get => chkEnableLogging.Checked;
+        set => chkEnableLogging.Checked = value;
     }
 
-    // TODO: Reinstate or remove this property.
+    /// <summary>
+    /// Gets or sets the custom wiki values available in the custom-project list.
+    /// </summary>
+    /// <remarks>
+    /// The getter includes the currently entered custom-project text followed by
+    /// the values stored in the combo-box item collection.
+    /// </remarks>
+    // TODO: Determine whether this property is still used by settings
+    // serialization or external callers. Remove it if unused; otherwise define
+    // whether empty and duplicate custom-wiki values should be preserved.
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<string> PrefCustomWikis
     {
         get
         {
-            List<string> temp = new List<string>
+            var customWikis = new List<string>
         {
             cmboCustomProject.Text
         };
 
-            temp.AddRange(
-                from object a in cmboCustomProject.Items
-                select a.ToString());
+            customWikis.AddRange(
+                cmboCustomProject.Items
+                    .Cast<object>()
+                    .Select(item => item?.ToString() ?? string.Empty));
 
-            return temp;
+            return customWikis;
         }
+
         set
         {
+            ArgumentNullException.ThrowIfNull(value);
+
             cmboCustomProject.Items.Clear();
 
-            foreach (string temp in value)
-                cmboCustomProject.Items.Add(temp);
+            foreach (string customWiki in value)
+            {
+                cmboCustomProject.Items.Add(customWiki);
+            }
         }
     }
 
     /// <summary>
-    /// Gets or sets whether the nobots template should be ignored.
+    /// Gets or sets whether the <c>{{nobots}}</c> template should be ignored.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefIgnoreNoBots
     {
-        get { return chkIgnoreNoBots.Checked; }
-        set { chkIgnoreNoBots.Checked = value; }
+        get => chkIgnoreNoBots.Checked;
+        set => chkIgnoreNoBots.Checked = value;
     }
 
     /// <summary>
-    /// Gets or sets whether the timer should be displayed.
+    /// Gets or sets whether the processing timer should be displayed.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefShowTimer
     {
-        get { return chkShowTimer.Checked; }
-        set { chkShowTimer.Checked = value; }
+        get => chkShowTimer.Checked;
+        set => chkShowTimer.Checked = value;
     }
 
+    // TODO: Replace persisted ComboBox indexes with named enum values so that
+    // reordering or inserting UI options does not change existing preferences.
+
     /// <summary>
-    /// Gets or sets whether List Comparer uses the current article list.
+    /// Gets or sets the List Comparer article-list source selection.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefListComparerUseCurrentArticleList
     {
-        get { return cmboListComparer.SelectedIndex; }
-        set { cmboListComparer.SelectedIndex = value; }
+        get => cmboListComparer.SelectedIndex;
+        set => cmboListComparer.SelectedIndex = value;
     }
-
     /// <summary>
-    /// Gets or sets whether List Splitter uses the current article list.
+    /// Gets or sets the List Splitter article-list source selection.
     /// </summary>
+    /// <remarks>
+    /// The value corresponds to the selected index in the List Splitter
+    /// source selector.
+    /// </remarks>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefListSplitterUseCurrentArticleList
     {
-        get { return cmboListSplitter.SelectedIndex; }
-        set { cmboListSplitter.SelectedIndex = value; }
+        get => cmboListSplitter.SelectedIndex;
+        set => cmboListSplitter.SelectedIndex = value;
     }
 
     /// <summary>
-    /// Gets or sets whether Database Scanner uses the current article list.
+    /// Gets or sets the Database Scanner article-list source selection.
     /// </summary>
+    /// <remarks>
+    /// The value corresponds to the selected index in the Database Scanner
+    /// source selector.
+    /// </remarks>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefDBScannerUseCurrentArticleList
     {
-        get { return cmboDBScanner.SelectedIndex; }
-        set { cmboDBScanner.SelectedIndex = value; }
+        get => cmboDBScanner.SelectedIndex;
+        set => cmboDBScanner.SelectedIndex = value;
     }
 
     /// <summary>
     /// Gets or sets the action performed when an article is loaded.
     /// </summary>
+    /// <remarks>
+    /// Legacy option index <c>2</c>, which represented showing the edit page,
+    /// is no longer supported and is mapped to the default action at index
+    /// <c>0</c>.
+    /// </remarks>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefOnLoad
     {
-        get
-        {
-            // Showing the edit page is no longer available as an option.
-            return cmboOnLoad.SelectedIndex == 2
-                ? 0
-                : cmboOnLoad.SelectedIndex;
-        }
-        set { cmboOnLoad.SelectedIndex = value; }
+        get => cmboOnLoad.SelectedIndex == 2
+            ? 0
+            : cmboOnLoad.SelectedIndex;
+
+        set => cmboOnLoad.SelectedIndex = value == 2
+            ? 0
+            : value;
     }
 
     /// <summary>
     /// Gets or sets whether a diff is generated while running in bot mode.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefDiffInBotMode
     {
-        get { return chkDiffInBotMode.Checked; }
-        set { chkDiffInBotMode.Checked = value; }
+        get => chkDiffInBotMode.Checked;
+        set => chkDiffInBotMode.Checked = value;
     }
 
     /// <summary>
-    /// Gets or sets whether the page list is cleared when the project changes.
+    /// Gets or sets whether the page list is cleared when the selected project
+    /// changes.
     /// </summary>
+    [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool PrefClearPageListOnProjectChange
     {
-        get { return chkEmptyOnProjectChange.Checked; }
-        set { chkEmptyOnProjectChange.Checked = value; }
+        get => chkEmptyOnProjectChange.Checked;
+        set => chkEmptyOnProjectChange.Checked = value;
     }
 
     /// <summary>
