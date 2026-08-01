@@ -22,32 +22,65 @@ using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
 
+/// <summary>
+/// Displays application version and startup progress while
+/// AutoWikiBrowser is being initialized.
+/// </summary>
 internal sealed partial class Splash : Form
 {
-    public Splash()
+    /// <summary>
+    /// Initializes the splash screen and resets its progress display.
+    /// </summary>
+    internal Splash()
     {
         InitializeComponent();
 
-        lblVersion.Text = "Version " + Program.VersionString;
+        lblVersion.Text = $"Version {Program.VersionString}";
         SetProgress(0);
     }
 
-    private void ClickHandler(object sender, EventArgs e)
+    /// <summary>
+    /// Closes the splash screen when the user clicks a configured
+    /// splash-screen control.
+    /// </summary>
+    private void ClickHandler(object? sender, EventArgs e)
     {
         Close();
     }
 
-    public void SetProgress(int percent)
+    /// <summary>
+    /// Updates the startup progress display.
+    /// </summary>
+    /// <param name="percent">
+    /// The requested completion percentage. Values outside the progress bar's
+    /// configured range are clamped to that range.
+    /// </param>
+    /// <remarks>
+    /// This method can be called from a thread other than the splash screen's
+    /// UI thread.
+    /// </remarks>
+    internal void SetProgress(int percent)
     {
-        MethodBase method = new StackFrame(1).GetMethod();
+        // TODO: Replace runtime stack inspection with an explicit startup-stage
+        // description supplied by the caller. Stack-frame inspection adds
+        // overhead and can be affected by compiler or JIT method inlining.
+        MethodBase? method = new StackFrame(1, false).GetMethod();
 
-        string methodText = method?.DeclaringType == null
+        string methodText = method?.DeclaringType is null
             ? string.Empty
-            : method.DeclaringType.Name + "::" + method.Name + "()";
+            : $"{method.DeclaringType.Name}::{method.Name}()";
 
         SetProgressCore(percent, methodText);
     }
 
+    /// <summary>
+    /// Applies a startup progress update on the splash screen's UI thread.
+    /// </summary>
+    /// <param name="percent">The requested progress percentage.</param>
+    /// <param name="methodText">
+    /// The startup method to display, or an empty string to retain the
+    /// currently displayed method.
+    /// </param>
     private void SetProgressCore(int percent, string methodText)
     {
         if (IsDisposed || Disposing)
@@ -57,10 +90,23 @@ internal sealed partial class Splash : Form
 
         if (InvokeRequired)
         {
-            BeginInvoke(
-                new Action<int, string>(SetProgressCore),
-                percent,
-                methodText);
+            if (!IsHandleCreated)
+            {
+                return;
+            }
+
+            try
+            {
+                BeginInvoke(
+                    new Action<int, string>(SetProgressCore),
+                    percent,
+                    methodText);
+            }
+            catch (InvalidOperationException) when (IsDisposed || Disposing)
+            {
+                // The form was disposed after the state checks but before
+                // the update could be queued.
+            }
 
             return;
         }
