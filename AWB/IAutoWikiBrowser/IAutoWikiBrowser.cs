@@ -23,12 +23,42 @@ namespace AutoWikiBrowser;
 
 partial class MainForm
 {
-    // Objects:
-    TraceManager IAutoWikiBrowser.TraceManager { get { return Program.MyTrace; } }
+    // Objects and settings exposed through the IAutoWikiBrowser interface.
 
-    bool IAutoWikiBrowser.SkipNoChanges { get { return chkSkipNoChanges.Checked; } set { chkSkipNoChanges.Checked = value; } }
+    /// <summary>
+    /// Gets the application's trace manager used for diagnostic logging.
+    /// </summary>
+    TraceManager IAutoWikiBrowser.TraceManager =>
+        Program.MyTrace;
 
-    WikiFunctions.Parse.FindandReplace IAutoWikiBrowser.FindandReplace { get { return FindAndReplace; } }
-    WikiFunctions.SubstTemplates IAutoWikiBrowser.SubstTemplates { get { return SubstTemplates; } }
-    string IAutoWikiBrowser.CustomModule { get { return (CModule.ModuleUsable) ? CModule.Code : null; } }
+    /// <summary>
+    /// Gets or sets a value indicating whether pages with no detected changes
+    /// should be skipped.
+    /// </summary>
+    bool IAutoWikiBrowser.SkipNoChanges
+    {
+        get => chkSkipNoChanges.Checked;
+        set => chkSkipNoChanges.Checked = value;
+    }
+
+    /// <summary>
+    /// Gets the configured find-and-replace processor.
+    /// </summary>
+    WikiFunctions.Parse.FindandReplace IAutoWikiBrowser.FindandReplace =>
+        FindAndReplace;
+
+    /// <summary>
+    /// Gets the configured template substitution processor.
+    /// </summary>
+    WikiFunctions.SubstTemplates IAutoWikiBrowser.SubstTemplates =>
+        SubstTemplates;
+
+    /// <summary>
+    /// Gets the current custom module source code when a usable module is
+    /// available; otherwise, <see langword="null"/>.
+    /// </summary>
+    string? IAutoWikiBrowser.CustomModule =>
+        CModule.ModuleUsable
+            ? CModule.Code
+            : null;
 }
