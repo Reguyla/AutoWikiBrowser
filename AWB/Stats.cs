@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #undef INSTASTATS // turn on here and in Main.cs to make AWB log (empty) stats at startup (The scope of a symbol created by using #define is the file in which it was defined)
 
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Xml;
@@ -48,47 +49,68 @@ partial class MainForm
         }
     }
 
-    private int NoNewPages;
+    private int _numberOfNewPages;
+    private int _numberOfIgnoredEdits;
+    private int _numberOfEditsPerMinute;
+    private int _numberOfPagesPerMinute;
+
+    /// <summary>
+    /// Gets the number of new pages processed during the current session.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int NumberOfNewPages
     {
-        get { return NoNewPages; }
+        get => _numberOfNewPages;
         private set
         {
-            NoNewPages = value;
-            lblNewArticles.Text = "New: " + value;
+            _numberOfNewPages = value;
+            lblNewArticles.Text = $"New: {value}";
         }
     }
 
-    private int NoIgnoredEdits;
+    /// <summary>
+    /// Gets the number of edits skipped during the current session.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int NumberOfIgnoredEdits
     {
-        get { return NoIgnoredEdits; }
+        get => _numberOfIgnoredEdits;
         private set
         {
-            NoIgnoredEdits = value;
-            lblIgnoredArticles.Text = "Skipped: " + value;
+            _numberOfIgnoredEdits = value;
+            lblIgnoredArticles.Text = $"Skipped: {value}";
         }
     }
 
-    private int NoEditsPerMin;
+    /// <summary>
+    /// Gets the current number of edits completed per minute.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int NumberOfEditsPerMinute
     {
-        get { return NoEditsPerMin; }
+        get => _numberOfEditsPerMinute;
         private set
         {
-            NoEditsPerMin = value;
-            lblEditsPerMin.Text = "Edits/min: " + value;
+            _numberOfEditsPerMinute = value;
+            lblEditsPerMin.Text = $"Edits/min: {value}";
         }
     }
 
-    private int NoPagesPerMin;
+    /// <summary>
+    /// Gets the current number of pages processed per minute.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int NumberOfPagesPerMinute
     {
-        get { return NoPagesPerMin; }
+        get => _numberOfPagesPerMinute;
         private set
         {
-            NoPagesPerMin = value;
-            lblPagesPerMin.Text = "Pages/min: " + value;
+            _numberOfPagesPerMinute = value;
+            lblPagesPerMin.Text = $"Pages/min: {value}";
         }
     }
 
@@ -373,7 +395,13 @@ internal static class UsageStats
     #endregion
 
     #region Helper routines
-    private static string StatusLabelText { set { Program.AWB.StatusLabelText = value; } }
+    /// <summary>
+    /// Sets the text displayed in the application's status bar.
+    /// </summary>
+    private static string StatusLabelText
+    {
+        set => Program.AWB.StatusLabelText = value;
+    }
 
     private static void EnumeratePlugins(NameValueCollection postvars, ICollection<IAWBPlugin> awbPlugins, ICollection<IAWBBasePlugin> awbBasePlugins, ICollection<IListMakerPlugin> listMakerPlugins)
     {
