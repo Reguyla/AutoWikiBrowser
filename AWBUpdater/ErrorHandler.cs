@@ -427,26 +427,73 @@ public partial class ErrorHandler : Form
             public virtual bool HasHeaderFooter() => false;
         }
 
+        /// <summary>
+        /// Formats diagnostic reports using the legacy AutoWikiBrowser wiki bug-report
+        /// template.
+        /// </summary>
         public class WikiBugFormatter : BugFormatter
         {
+            /// <summary>
+            /// The default status assigned to newly created bug reports in the
+            /// legacy AWB wiki bug template.
+            /// </summary>
+            private const string DefaultStatus =
+                "new <!-- when fixed replace with \"fixed\" -->";
+
+            /// <summary>
+            /// The placeholder shown for the version in which the bug is fixed.
+            /// AWB developers replace this comment when the issue is resolved.
+            /// </summary>
+            private const string FixVersionPlaceholder =
+                "<!-- Version of AWB the fix will be included in; AWB developer will complete when it's fixed -->";
+
+            /// <summary>
+            /// Creates the opening portion of the legacy AWB bug-report template.
+            /// </summary>
+            /// <returns>
+            /// The formatted report header.
+            /// </returns>
             public override string PrintHeader()
             {
-                return @"{{AWB bug\r\n" + PrintLine("status", "new <!-- when fixed replace with \"fixed\" -->");
+                return @"{{AWB bug\r\n" +
+                       PrintLine("status", DefaultStatus);
             }
 
+            /// <summary>
+            /// Creates the closing portion of the legacy AWB bug-report template.
+            /// </summary>
+            /// <returns>
+            /// The formatted report footer.
+            /// </returns>
             public override string PrintFooter()
             {
                 return
-                    PrintLine("fix_version",
-                        "<!-- Version of AWB the fix will be included in; AWB developer will complete when it's fixed -->") +
+                    PrintLine("fix_version", FixVersionPlaceholder) +
                     "\r\n}}";
             }
 
+            /// <summary>
+            /// Formats a diagnostic field as a parameter in the legacy AWB wiki
+            /// bug-report template.
+            /// </summary>
+            /// <param name="key">The diagnostic field name.</param>
+            /// <param name="value">The diagnostic field value.</param>
+            /// <returns>
+            /// The formatted template parameter.
+            /// </returns>
             public override string PrintLine(string key, string value)
             {
-                return string.Format(" | {0,-14} = {1}", key, value);
+                return $" | {key,-14} = {value}";
             }
 
+            /// <summary>
+            /// Indicates that the wiki formatter emits both a report header and
+            /// footer.
+            /// </summary>
+            /// <returns>
+            /// <see langword="true"/>, since the legacy AWB bug template requires
+            /// opening and closing markup.
+            /// </returns>
             public override bool HasHeaderFooter()
             {
                 return true;
