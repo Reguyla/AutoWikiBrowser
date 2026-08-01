@@ -470,178 +470,294 @@ partial class MainForm
         }
     }
 
+    // TODO: Consider introducing a settings view model or mapper so preference
+    // creation no longer depends directly on MainForm controls. This would make
+    // settings conversion easier to test and support a future non-WinForms UI.
     /// <summary>
-    /// Make preferences object from current settings
+    /// Creates a user preferences object from the current application and
+    /// user-interface settings.
     /// </summary>
+    /// <returns>
+    /// A preferences object containing the current settings.
+    /// </returns>
     private UserPrefs MakePrefs()
     {
         return new UserPrefs(
-
-            new FaRPrefs(FindAndReplace, RplcSpecial, SubstTemplates)
-            {
-                Enabled = chkFindandReplace.Checked,
-            },
-
-            new EditPrefs
-            {
-                GeneralFixes = chkGeneralFixes.Checked,
-                Tagger = chkAutoTagger.Checked,
-                Unicodify = chkUnicodifyWhole.Checked,
-                Recategorisation = cmboCategorise.SelectedIndex,
-                NewCategory = txtNewCategory.Text,
-                NewCategory2 = txtNewCategory2.Text,
-                ReImage = cmboImages.SelectedIndex,
-                ImageFind = txtImageReplace.Text,
-                Replace = txtImageWith.Text,
-                SkipIfNoCatChange = chkSkipNoCatChange.Checked,
-                RemoveSortKey = chkRemoveSortKey.Checked,
-                SkipIfNoImgChange = chkSkipNoImgChange.Checked,
-                AppendText = chkAppend.Checked,
-                AppendTextMetaDataSort = chkAppendMetaDataSort.Checked,
-                Append = !rdoPrepend.Checked,
-                Text = txtAppendMessage.Text,
-                Newlines = (int)udNewlineChars.Value,
-                AutoDelay = (int)nudBotSpeed.Value,
-                BotMaxEdits = (int)botEditsStop.Value,
-                SupressTag = chkSuppressTag.Checked,
-                RegexTypoFix = chkRegExTypo.Checked
-            },
-
+            MakeFindAndReplacePrefs(),
+            MakeEditPrefs(),
             new ListPrefs(listMaker, _saveArticleList),
-
-            new SkipPrefs
-            {
-                SkipNonexistent = radSkipNonExistent.Checked,
-                Skipexistent = radSkipExistent.Checked,
-                SkipDontCare = radSkipNone.Checked,
-                SkipWhenNoChanges = chkSkipNoChanges.Checked,
-                SkipSpamFilterBlocked = chkSkipSpamFilter.Checked,
-                SkipInuse = chkSkipIfInuse.Checked,
-                SkipDoes = skipIfContains.CheckEnabled,
-                SkipDoesText = skipIfContains.CheckText,
-                SkipDoesRegex = skipIfContains.IsRegex,
-                SkipDoesCaseSensitive = skipIfContains.IsCaseSensitive,
-                SkipDoesAfterProcessing = skipIfContains.After,
-                SkipDoesNot = skipIfNotContains.CheckEnabled,
-                SkipDoesNotText = skipIfNotContains.CheckText,
-                SkipDoesNotRegex = skipIfNotContains.IsRegex,
-                SkipDoesNotCaseSensitive = skipIfNotContains.IsCaseSensitive,
-                SkipDoesNotAfterProcessing = skipIfNotContains.After,
-                SkipNoFindAndReplace = chkSkipWhenNoFAR.Checked,
-                SkipMinorFindAndReplace = chkSkipOnlyMinorFaR.Checked,
-                SkipNoRegexTypoFix = chkSkipIfNoRegexTypo.Checked,
-                SkipNoDisambiguation = chkSkipNoDab.Checked,
-                GeneralSkipList = Skip.SelectedItems,
-                SkipWhenOnlyWhitespaceChanged = chkSkipWhitespace.Checked,
-                SkipOnlyCasingChanged = chkSkipCasing.Checked,
-                SkipOnlyGeneralFixChanges = chkSkipGeneralFixes.Checked,
-                SkipOnlyMinorGeneralFixChanges = chkSkipMinorGeneralFixes.Checked,
-                SkipOnlyCosmetic = chkSkipCosmetic.Checked,
-                SkipNoLinksOnPage = chkSkipNoPageLinks.Checked,
-                SkipIfRedirect = chkSkipIfRedirect.Checked,
-                SkipIfNoAlerts = chkSkipIfNoAlerts.Checked
-            },
-
-            new GeneralPrefs(cmboEditSummary.Items)
-            {
-                SaveArticleList = _saveArticleList,
-                IgnoreNoBots = IgnoreNoBots,
-                ClearPageListOnProjectChange = ClearPageListOnProjectChange,
-                SelectedSummary = cmboEditSummary.Text,
-
-                PasteMore = new[]
-                                    {
-                                        (string) PasteMore1.Tag,
-                                        (string) PasteMore2.Tag,
-                                        (string) PasteMore3.Tag,
-                                        (string) PasteMore4.Tag,
-                                        (string) PasteMore5.Tag,
-                                        (string) PasteMore6.Tag,
-                                        (string) PasteMore7.Tag,
-                                        (string) PasteMore8.Tag,
-                                        (string) PasteMore9.Tag,
-                                        (string) PasteMore10.Tag
-                                    },
-                FindText = txtFind.Text,
-                FindRegex = chkFindRegex.Checked,
-                FindCaseSensitive = chkFindCaseSensitive.Checked,
-                WordWrap = wordWrapToolStripMenuItem1.Checked,
-                ToolBarEnabled = EnableToolBar,
-                BypassRedirect = followRedirectsToolStripMenuItem.Checked,
-                AutoSaveSettings = autoSaveSettingsToolStripMenuItem.Checked,
-                PreParseMode = preParseModeToolStripMenuItem.Checked,
-                noSectionEditSummary = noSectionEditSummaryToolStripMenuItem.Checked,
-                restrictDefaultsortAddition = restrictDefaultsortChangesToolStripMenuItem.Checked,
-                restrictOrphanTagging = restrictOrphanTaggingToolStripMenuItem.Checked,
-                noMOSComplianceFixes = noMOSComplianceFixesToolStripMenuItem.Checked,
-                syntaxHighlightEditBox = syntaxHighlightEditBoxToolStripMenuItem.Checked,
-                highlightAllFind = highlightAllFindToolStripMenuItem.Checked,
-                NoAutoChanges = !automaticallyDoAnythingToolStripMenuItem.Checked,
-                OnLoadAction = actionOnLoad,
-                DiffInBotMode = doDiffInBotMode,
-                Minor = chkMinor.Checked,
-                AddToWatchlist = addToWatchList.SelectedIndex,
-                TimerEnabled = ShowMovingAverageTimer,
-                SortListAlphabetically = sortAlphabeticallyToolStripMenuItem.Checked,
-                AddIgnoredToLog = Article.AddUsingAWBOnArticleAction,
-                TextBoxSize = (int)txtEdit.Font.Size,
-                TextBoxFont = txtEdit.Font.Name,
-                LowThreadPriority = LowThreadPriority,
-                Beep = _beep,
-                Flash = _flash,
-                Minimize = _minimize,
-                AutoSaveEdit = new EditBoxAutoSavePrefs
-                {
-                    Enabled = _autoSaveEditBoxEnabled,
-                    SavePeriod = AutoSaveEditBoxPeriod,
-                    SaveFile = _autoSaveEditBoxFile
-                },
-                LockSummary = chkLock.Checked,
-                EditToolbarEnabled = EditToolBarVisible,
-                SuppressUsingAWB = _suppressUsingAWB,
-                AddUsingAWBToActionSummaries = Article.AddUsingAWBOnArticleAction,
-                filterNonMainSpace = filterOutNonMainSpaceToolStripMenuItem.Checked,
-                AutoFilterDuplicates = removeDuplicatesToolStripMenuItem.Checked,
-                FocusAtEndOfEditBox = focusAtEndOfEditTextBoxToolStripMenuItem.Checked,
-                scrollToUnbalancedBrackets = scrollToAlertsToolStripMenuItem.Checked,
-
-                SortInterWikiOrder = alphaSortInterwikiLinksToolStripMenuItem.Checked,
-                ReplaceReferenceTags = replaceReferenceTagsToolStripMenuItem.Checked,
-                LoggingEnabled = loggingEnabled,
-                AlertPreferences = alertPreferences
-            },
-
-            new DabPrefs
-            {
-                Enabled = chkEnableDab.Checked,
-                Link = txtDabLink.Text,
-                Variants = txtDabVariants.Lines,
-                ContextChars = (int)udContextChars.Value
-            },
-
-            new ModulePrefs
-            {
-                Enabled = CModule.ModuleEnabled,
-                Language = CModule.Language,
-                Code = CModule.Code
-            },
-
+            MakeSkipPrefs(),
+            MakeGeneralPrefs(),
+            MakeDabPrefs(),
+            MakeModulePrefs(),
             ExtProgram.Settings,
             listMaker.SpecialFilterSettings,
-
-            new ToolsPrefs
-            {
-                ListComparerUseCurrentArticleList = _listComparerUseCurrentArticleList,
-                ListSplitterUseCurrentArticleList = _listSplitterUseCurrentArticleList,
-                DatabaseScannerUseCurrentArticleList = _dbScannerUseCurrentArticleList
-            },
-
-            Plugin.AWBPlugins
-            )
+            MakeToolsPrefs(),
+            Plugin.AWBPlugins)
         {
             LoginDomain = Variables.LoginDomain
         };
     }
+
+    /// <summary>
+    /// Creates the find-and-replace preferences from the current controls.
+    /// </summary>
+    /// <returns>
+    /// The current find-and-replace preferences.
+    /// </returns>
+    private FaRPrefs MakeFindAndReplacePrefs()
+    {
+        return new FaRPrefs(
+            FindAndReplace,
+            RplcSpecial,
+            SubstTemplates)
+        {
+            Enabled = chkFindandReplace.Checked
+        };
+    }
+
+    /// <summary>
+    /// Creates the article editing preferences from the current controls.
+    /// </summary>
+    /// <returns>
+    /// The current article editing preferences.
+    /// </returns>
+    private EditPrefs MakeEditPrefs()
+    {
+        return new EditPrefs
+        {
+            GeneralFixes = chkGeneralFixes.Checked,
+            Tagger = chkAutoTagger.Checked,
+            Unicodify = chkUnicodifyWhole.Checked,
+            Recategorisation = cmboCategorise.SelectedIndex,
+            NewCategory = txtNewCategory.Text,
+            NewCategory2 = txtNewCategory2.Text,
+            ReImage = cmboImages.SelectedIndex,
+            ImageFind = txtImageReplace.Text,
+            Replace = txtImageWith.Text,
+            SkipIfNoCatChange = chkSkipNoCatChange.Checked,
+            RemoveSortKey = chkRemoveSortKey.Checked,
+            SkipIfNoImgChange = chkSkipNoImgChange.Checked,
+            AppendText = chkAppend.Checked,
+            AppendTextMetaDataSort = chkAppendMetaDataSort.Checked,
+            Append = !rdoPrepend.Checked,
+            Text = txtAppendMessage.Text,
+            Newlines = (int)udNewlineChars.Value,
+            AutoDelay = (int)nudBotSpeed.Value,
+            BotMaxEdits = (int)botEditsStop.Value,
+            SupressTag = chkSuppressTag.Checked,
+            RegexTypoFix = chkRegExTypo.Checked
+        };
+    }
+
+    /// <summary>
+    /// Creates the article skip preferences from the current controls.
+    /// </summary>
+    /// <returns>
+    /// The current article skip preferences.
+    /// </returns>
+    private SkipPrefs MakeSkipPrefs()
+    {
+        return new SkipPrefs
+        {
+            SkipNonexistent = radSkipNonExistent.Checked,
+            Skipexistent = radSkipExistent.Checked,
+            SkipDontCare = radSkipNone.Checked,
+            SkipWhenNoChanges = chkSkipNoChanges.Checked,
+            SkipSpamFilterBlocked = chkSkipSpamFilter.Checked,
+            SkipInuse = chkSkipIfInuse.Checked,
+            SkipDoes = skipIfContains.CheckEnabled,
+            SkipDoesText = skipIfContains.CheckText,
+            SkipDoesRegex = skipIfContains.IsRegex,
+            SkipDoesCaseSensitive = skipIfContains.IsCaseSensitive,
+            SkipDoesAfterProcessing = skipIfContains.After,
+            SkipDoesNot = skipIfNotContains.CheckEnabled,
+            SkipDoesNotText = skipIfNotContains.CheckText,
+            SkipDoesNotRegex = skipIfNotContains.IsRegex,
+            SkipDoesNotCaseSensitive = skipIfNotContains.IsCaseSensitive,
+            SkipDoesNotAfterProcessing = skipIfNotContains.After,
+            SkipNoFindAndReplace = chkSkipWhenNoFAR.Checked,
+            SkipMinorFindAndReplace = chkSkipOnlyMinorFaR.Checked,
+            SkipNoRegexTypoFix = chkSkipIfNoRegexTypo.Checked,
+            SkipNoDisambiguation = chkSkipNoDab.Checked,
+            GeneralSkipList = Skip.SelectedItems,
+            SkipWhenOnlyWhitespaceChanged = chkSkipWhitespace.Checked,
+            SkipOnlyCasingChanged = chkSkipCasing.Checked,
+            SkipOnlyGeneralFixChanges = chkSkipGeneralFixes.Checked,
+            SkipOnlyMinorGeneralFixChanges = chkSkipMinorGeneralFixes.Checked,
+            SkipOnlyCosmetic = chkSkipCosmetic.Checked,
+            SkipNoLinksOnPage = chkSkipNoPageLinks.Checked,
+            SkipIfRedirect = chkSkipIfRedirect.Checked,
+            SkipIfNoAlerts = chkSkipIfNoAlerts.Checked
+        };
+    }
+
+    /// <summary>
+    /// Creates the general application preferences from the current controls and
+    /// application state.
+    /// </summary>
+    /// <returns>
+    /// The current general application preferences.
+    /// </returns>
+    private GeneralPrefs MakeGeneralPrefs()
+    {
+        return new GeneralPrefs(cmboEditSummary.Items)
+        {
+            SaveArticleList = _saveArticleList,
+            IgnoreNoBots = IgnoreNoBots,
+            ClearPageListOnProjectChange = ClearPageListOnProjectChange,
+            SelectedSummary = cmboEditSummary.Text,
+            PasteMore = GetPasteMoreValues(),
+            FindText = txtFind.Text,
+            FindRegex = chkFindRegex.Checked,
+            FindCaseSensitive = chkFindCaseSensitive.Checked,
+            WordWrap = wordWrapToolStripMenuItem1.Checked,
+            ToolBarEnabled = EnableToolBar,
+            BypassRedirect = followRedirectsToolStripMenuItem.Checked,
+            AutoSaveSettings = autoSaveSettingsToolStripMenuItem.Checked,
+            PreParseMode = preParseModeToolStripMenuItem.Checked,
+            noSectionEditSummary = noSectionEditSummaryToolStripMenuItem.Checked,
+            restrictDefaultsortAddition =
+                restrictDefaultsortChangesToolStripMenuItem.Checked,
+            restrictOrphanTagging =
+                restrictOrphanTaggingToolStripMenuItem.Checked,
+            noMOSComplianceFixes =
+                noMOSComplianceFixesToolStripMenuItem.Checked,
+            syntaxHighlightEditBox =
+                syntaxHighlightEditBoxToolStripMenuItem.Checked,
+            highlightAllFind = highlightAllFindToolStripMenuItem.Checked,
+            NoAutoChanges =
+                !automaticallyDoAnythingToolStripMenuItem.Checked,
+            OnLoadAction = actionOnLoad,
+            DiffInBotMode = doDiffInBotMode,
+            Minor = chkMinor.Checked,
+            AddToWatchlist = addToWatchList.SelectedIndex,
+            TimerEnabled = ShowMovingAverageTimer,
+            SortListAlphabetically =
+                sortAlphabeticallyToolStripMenuItem.Checked,
+            AddIgnoredToLog = Article.AddUsingAWBOnArticleAction,
+            TextBoxSize = (int)txtEdit.Font.Size,
+            TextBoxFont = txtEdit.Font.Name,
+            LowThreadPriority = LowThreadPriority,
+            Beep = _beep,
+            Flash = _flash,
+            Minimize = _minimize,
+            AutoSaveEdit = MakeEditBoxAutoSavePrefs(),
+            LockSummary = chkLock.Checked,
+            EditToolbarEnabled = EditToolBarVisible,
+            SuppressUsingAWB = _suppressUsingAWB,
+            AddUsingAWBToActionSummaries =
+                Article.AddUsingAWBOnArticleAction,
+            filterNonMainSpace =
+                filterOutNonMainSpaceToolStripMenuItem.Checked,
+            AutoFilterDuplicates =
+                removeDuplicatesToolStripMenuItem.Checked,
+            FocusAtEndOfEditBox =
+                focusAtEndOfEditTextBoxToolStripMenuItem.Checked,
+            scrollToUnbalancedBrackets =
+                scrollToAlertsToolStripMenuItem.Checked,
+            SortInterWikiOrder =
+                alphaSortInterwikiLinksToolStripMenuItem.Checked,
+            ReplaceReferenceTags =
+                replaceReferenceTagsToolStripMenuItem.Checked,
+            LoggingEnabled = loggingEnabled,
+            AlertPreferences = alertPreferences
+        };
+    }
+
+    /// <summary>
+    /// Gets the configured Paste More menu values.
+    /// </summary>
+    /// <returns>
+    /// The ten configured Paste More values, in menu order.
+    /// </returns>
+    private string[] GetPasteMoreValues()
+    {
+        return
+        [
+            (string)PasteMore1.Tag,
+        (string)PasteMore2.Tag,
+        (string)PasteMore3.Tag,
+        (string)PasteMore4.Tag,
+        (string)PasteMore5.Tag,
+        (string)PasteMore6.Tag,
+        (string)PasteMore7.Tag,
+        (string)PasteMore8.Tag,
+        (string)PasteMore9.Tag,
+        (string)PasteMore10.Tag
+        ];
+    }
+
+    /// <summary>
+    /// Creates the editor auto-save preferences from the current application
+    /// settings.
+    /// </summary>
+    /// <returns>
+    /// The current editor auto-save preferences.
+    /// </returns>
+    private EditBoxAutoSavePrefs MakeEditBoxAutoSavePrefs()
+    {
+        return new EditBoxAutoSavePrefs
+        {
+            Enabled = _autoSaveEditBoxEnabled,
+            SavePeriod = AutoSaveEditBoxPeriod,
+            SaveFile = _autoSaveEditBoxFile
+        };
+    }
+
+    /// <summary>
+    /// Creates the disambiguation preferences from the current controls.
+    /// </summary>
+    /// <returns>
+    /// The current disambiguation preferences.
+    /// </returns>
+    private DabPrefs MakeDabPrefs()
+    {
+        return new DabPrefs
+        {
+            Enabled = chkEnableDab.Checked,
+            Link = txtDabLink.Text,
+            Variants = txtDabVariants.Lines,
+            ContextChars = (int)udContextChars.Value
+        };
+    }
+
+    /// <summary>
+    /// Creates the custom module preferences from the current module state.
+    /// </summary>
+    /// <returns>
+    /// The current custom module preferences.
+    /// </returns>
+    private ModulePrefs MakeModulePrefs()
+    {
+        return new ModulePrefs
+        {
+            Enabled = CModule.ModuleEnabled,
+            Language = CModule.Language,
+            Code = CModule.Code
+        };
+    }
+
+    /// <summary>
+    /// Creates the auxiliary tool preferences from the current application state.
+    /// </summary>
+    /// <returns>
+    /// The current auxiliary tool preferences.
+    /// </returns>
+    private ToolsPrefs MakeToolsPrefs()
+    {
+        return new ToolsPrefs
+        {
+            ListComparerUseCurrentArticleList =
+                _listComparerUseCurrentArticleList,
+            ListSplitterUseCurrentArticleList =
+                _listSplitterUseCurrentArticleList,
+            DatabaseScannerUseCurrentArticleList =
+                _dbScannerUseCurrentArticleList
+        };
+    }
+
+
 
     /// <summary>
     /// Load default preferences
