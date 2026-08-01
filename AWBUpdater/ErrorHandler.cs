@@ -393,16 +393,38 @@ public partial class ErrorHandler : Form
                 _ => "Exception"
             };
 
+        /// <summary>
+        /// Defines the interface for formatting diagnostic reports for different
+        /// output targets.
+        /// </summary>
         public abstract class BugFormatter
         {
+            /// <summary>
+            /// Creates the header for the formatted report.
+            /// </summary>
             public abstract string PrintHeader();
+
+            /// <summary>
+            /// Creates the footer for the formatted report.
+            /// </summary>
             public abstract string PrintFooter();
+
+            /// <summary>
+            /// Formats a key/value pair within the report.
+            /// </summary>
+            /// <param name="key">The field name.</param>
+            /// <param name="value">The field value.</param>
+            /// <returns>The formatted output line.</returns>
             public abstract string PrintLine(string key, string value);
 
-            public virtual bool HasHeaderFooter()
-            {
-                return false;
-            }
+            /// <summary>
+            /// Indicates whether this formatter emits both a header and footer.
+            /// </summary>
+            /// <returns>
+            /// <see langword="true"/> if the formatter produces a header and footer;
+            /// otherwise, <see langword="false"/>.
+            /// </returns>
+            public virtual bool HasHeaderFooter() => false;
         }
 
         public class WikiBugFormatter : BugFormatter
@@ -452,8 +474,15 @@ public partial class ErrorHandler : Form
 
     #region Static helper functions
 
+    // TODO (.NET Modernization):
+    // Replace this cached Regex with a GeneratedRegex implementation after the
+    // remaining framework migration work is complete.
+    /// <summary>
+    /// Matches fully qualified method names within .NET stack traces.
+    /// </summary>
     private static readonly Regex StackTraceMethodRegex =
-        new Regex(@"([a-zA-Z_0-9\.`]+)(?=\()",
+        new Regex(
+            @"([a-zA-Z_0-9\.`]+)(?=\()",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>
@@ -585,6 +614,10 @@ public partial class ErrorHandler : Form
             });
     }
 
+    // TODO: Separate exception handling from diagnostic report generation.
+    // Introduce destination-specific report formatters so Wikimedia installations
+    // can use Phabricator while non-Wikimedia installations and Twain can use
+    // Git-hosted issue trackers or other reporting systems.
     private void linkLabel1_LinkClicked(
         object sender,
         LinkLabelLinkClickedEventArgs e)
