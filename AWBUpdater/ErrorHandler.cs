@@ -140,15 +140,10 @@ public partial class ErrorHandler : Form
         return FindNetworkException(exception) != null;
     }
 
-    /// <summary>
-    /// Finds the first network request failure in an exception chain.
-    /// </summary>
-    /// <remarks>
-    /// TODO (.NET 8 Modernization):
-    /// Remove legacy <see cref="System.Net.WebException"/> support after all
-    /// remaining <c>HttpWebRequest</c>-based code has been migrated to
-    /// <c>HttpClient</c>.
-    /// </remarks>
+    // TODO (.NET 8 Modernization):
+    // Remove legacy WebException support after all remaining
+    // HttpWebRequest-based code has been migrated to HttpClient.
+
     /// <summary>
     /// Finds the first network request failure in an exception chain.
     /// </summary>
@@ -162,11 +157,12 @@ public partial class ErrorHandler : Form
         for (Exception? current = exception;
              current != null;
              current = current.InnerException)
-
+        {
             if (current is System.Net.WebException or HttpRequestException)
             {
                 return current;
             }
+        }
 
         return null;
     }
@@ -224,11 +220,13 @@ public partial class ErrorHandler : Form
         private readonly string DotNetVersion;
 
         /// <summary>
-        ///
+        /// Initializes a diagnostic bug report for the supplied exception.
         /// </summary>
-        /// <param name="ex"></param>
+        /// <param name="ex">The exception to include in the report.</param>
         public BugReport(Exception ex)
         {
+            ArgumentNullException.ThrowIfNull(ex);
+
             ThreadingThread currentThread =
                 ThreadingThread.CurrentThread;
 
@@ -239,7 +237,11 @@ public partial class ErrorHandler : Form
             }
 
             StringBuilder stackTrace = new();
-            FormatException(ex, stackTrace, ExceptionKind.TopLevel);
+            FormatException(
+                ex,
+                stackTrace,
+                ExceptionKind.TopLevel);
+
             StackTrace = stackTrace.ToString();
 
             ErrorHandlerAddition? handlers = AppendToErrorHandler;
@@ -270,25 +272,26 @@ public partial class ErrorHandler : Form
                 }
 
                 AppendedInfo = append.ToString();
-
-                AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
-
-                Version = string.Format(
-                    "{0} ({1}), {2} ({3})",
-                    Application.ProductName,
-                    Application.ProductVersion,
-                    hostingApp.Name,
-                    hostingApp.Version);
-
-                DotNetVersion = Environment.Version.ToString();
             }
+
+            AssemblyName hostingApp =
+                Assembly.GetExecutingAssembly().GetName();
+
+            Version = string.Format(
+                "{0} ({1}), {2} ({3})",
+                Application.ProductName,
+                Application.ProductVersion,
+                hostingApp.Name,
+                hostingApp.Version);
+
+            DotNetVersion = Environment.Version.ToString();
         }
 
-        /// <summary>
-        /// Prints a wiki formatted bug report table
-        /// </summary>
-        /// <returns>String using {{AWB bug}} for reporting bugs</returns>
-        public string PrintForPhabricator()
+    /// <summary>
+    /// Prints a wiki formatted bug report table
+    /// </summary>
+    /// <returns>String using {{AWB bug}} for reporting bugs</returns>
+    public string PrintForPhabricator()
         {
             return Print(new PhabricatorBugFormatter());
         }
