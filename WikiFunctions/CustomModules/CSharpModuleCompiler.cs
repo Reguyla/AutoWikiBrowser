@@ -8,7 +8,7 @@ public sealed class CSharpCustomModule : CustomModuleCompiler
 {
     /// <inheritdoc />
     public override string Name =>
-        "C# 12.0";
+        "C# 14";
 
     /// <inheritdoc />
     public override bool CanHandleLanguage(string language)
@@ -19,7 +19,15 @@ public sealed class CSharpCustomModule : CustomModuleCompiler
                    StringComparison.OrdinalIgnoreCase)
             || string.Equals(
                    language,
+                   "C# 12.0",
+                   StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                   language,
                    "C# 4.0",
+                   StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                   language,
+                   "C#",
                    StringComparison.OrdinalIgnoreCase);
     }
 
