@@ -11,9 +11,6 @@
   <ItemGroup>
     <Content Include="globe.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="8.0.6" />
-  </ItemGroup>
 	<Target Name="CopyUpdaterToAwbOutput" AfterTargets="Build">
 		<PropertyGroup>
 			<AwbOutputDirectory>$(SolutionDir)AWB\bin\$(Configuration)\</AwbOutputDirectory>

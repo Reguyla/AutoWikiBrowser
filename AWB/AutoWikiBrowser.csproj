@@ -74,7 +74,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4078.44" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="System.Text.Json" Version="8.0.6" />
   </ItemGroup>
 <ItemGroup>
   <EmbeddedResource Remove="Stats.resx" />
