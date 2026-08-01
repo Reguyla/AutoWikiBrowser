@@ -319,33 +319,61 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// Most performant RenameTemplateParameters MatchEvaluator using HashSets
+    /// Renames deprecated template parameters found in a matched template.
     /// </summary>
-    /// <param name="m"></param>
-    /// <param name="RenamedTemplateParameters"></param>
-    /// <returns></returns>
-    private static string RenameTemplateParametersHashSetME(Match m, List<WikiRegexes.TemplateParameters> RenamedTemplateParameters)
+    /// <param name="match">
+    /// The regular-expression match containing the template text.
+    /// </param>
+    /// <param name="renamedTemplateParameters">
+    /// The configured template-parameter rename rules.
+    /// </param>
+    /// <returns>
+    /// The template text with applicable parameters renamed, or the original
+    /// matched text when no rename is required.
+    /// </returns>
+    private static string RenameTemplateParametersHashSetME(
+        Match match,
+        List<WikiRegexes.TemplateParameters> renamedTemplateParameters)
     {
-        string newvalue = m.Value;
+        string updatedValue = match.Value;
 
-        // performance: check for intersection of bad parameters and parameters used in template
-        // rather than simply looping through all parameters in list
-        Dictionary<string, string> pv = Tools.GetTemplateParameterValues(m.Value);
-        List<string> oldP = RenameTemplateParametersOldParams.Intersect(pv.Keys).ToList();
-        if (oldP.Any())
+        // Check only parameter names that occur both in the template and in the
+        // known set of deprecated parameter names.
+        Dictionary<string, string> parameterValues =
+            Tools.GetTemplateParameterValues(match.Value);
+
+        HashSet<string> matchingOldParameters = RenameTemplateParametersOldParams
+            .Intersect(parameterValues.Keys)
+            .ToHashSet();
+
+        if (matchingOldParameters.Count == 0)
         {
-            string tname = Tools.TurnFirstToLower(Tools.GetTemplateName(@"{{" + m.Groups[2].Value + @"}}"));
-            foreach (WikiRegexes.TemplateParameters Params in RenamedTemplateParameters.Where(r => oldP.Contains(r.OldParameter) && r.TemplateName.Equals(tname)))
-            {
-                string newp;
-                pv.TryGetValue(Params.NewParameter, out newp);
+            return updatedValue;
+        }
 
-                if (string.IsNullOrEmpty(newp))
-                    newvalue = Tools.RenameTemplateParameter(newvalue, Params.OldParameter, Params.NewParameter);
+        string templateName = Tools.TurnFirstToLower(
+            Tools.GetTemplateName($"{{{{{match.Groups[2].Value}}}}}"));
+
+        foreach (WikiRegexes.TemplateParameters parameter in
+                 renamedTemplateParameters.Where(
+                     rule =>
+                         matchingOldParameters.Contains(rule.OldParameter) &&
+                         rule.TemplateName.Equals(templateName)))
+        {
+            parameterValues.TryGetValue(
+                parameter.NewParameter,
+                out string? existingNewParameterValue);
+
+            if (string.IsNullOrEmpty(existingNewParameterValue))
+            {
+                updatedValue = Tools.RenameTemplateParameter(
+                    updatedValue,
+                    parameter.OldParameter,
+                    parameter.NewParameter);
             }
         }
 
-        return newvalue;
+        return updatedValue;
     }
 
     /// <summary>
