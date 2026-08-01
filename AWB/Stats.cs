@@ -129,24 +129,26 @@ partial class MainForm
 /// </remarks>
 internal static class UsageStats
 {
-    // TODO: Add other stuff we'd like to track
+    // TODO: Identify additional privacy-appropriate usage statistics that would
+    // provide meaningful maintenance or product insight.
 
     private const string StatsURL = "https://awb.toolforge.org/stats/";
 
-    private static int RecordId,
-        SecretNumber,
-        LastEditCount;
+    private static int RecordId;
+    private static int SecretNumber;
+    private static int LastEditCount;
 
     private static bool SentUserName;
 
-    private static readonly List<IAWBPlugin> NewAWBPlugins = new List<IAWBPlugin>();
-    private static readonly List<IAWBBasePlugin> NewAWBBasePlugins = new List<IAWBBasePlugin>();
-    private static readonly List<IListMakerPlugin> NewListMakerPlugins = new List<IListMakerPlugin>();
+    private static readonly List<IAWBPlugin> NewAWBPlugins = new();
+    private static readonly List<IAWBBasePlugin> NewAWBBasePlugins = new();
+    private static readonly List<IListMakerPlugin> NewListMakerPlugins = new();
 
-    private static string UserName
-    {
-        get { return Variables.MainForm.TheSession.User.Name; }
-    }
+    /// <summary>
+    /// Gets the name of the user in the current application session.
+    /// </summary>
+    private static string UserName =>
+        Variables.MainForm.TheSession.User.Name;
 
     #region Public
 
