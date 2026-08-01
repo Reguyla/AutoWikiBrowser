@@ -2261,20 +2261,37 @@ Message: {2}
     /// </summary>
     /// <param name="unfilteredArticles">Original unfiltered article list</param>
     /// <returns>Filtered article list</returns>
-    public static List<Article> FilterSomeArticles(List<Article> unfilteredArticles)
+    /// <summary>
+    /// Filters a collection of articles to include only eligible content
+    /// namespaces and removes duplicate articles.
+    /// </summary>
+    /// <param name="unfilteredArticles">
+    /// The articles to filter.
+    /// </param>
+    /// <returns>
+    /// A list containing unique articles from supported content namespaces.
+    /// </returns>
+    public static List<Article> FilterSomeArticles(
+        List<Article> unfilteredArticles)
     {
-        List<Article> items = new List<Article>();
+        ArgumentNullException.ThrowIfNull(unfilteredArticles);
 
-        foreach (Article a in unfilteredArticles)
+        HashSet<Article> filteredArticles = new();
+
+        foreach (Article article in unfilteredArticles)
         {
-            if (a.NameSpaceKey >= Namespace.Article && a.NameSpaceKey != Namespace.MediaWiki &&
-                a.NameSpaceKey != Namespace.MediaWikiTalk && !a.Name.StartsWith("Commons:"))
+            if (article.NameSpaceKey >= Namespace.Article &&
+                article.NameSpaceKey != Namespace.MediaWiki &&
+                article.NameSpaceKey != Namespace.MediaWikiTalk &&
+                !article.Name.StartsWith(
+                    "Commons:",
+                    StringComparison.Ordinal))
             {
-                if (!items.Contains(a))
-                    items.Add(a);
+                filteredArticles.Add(article);
             }
         }
-        return items;
+
+        return filteredArticles.ToList();
     }
 
     /// <summary>
