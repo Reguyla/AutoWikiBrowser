@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
+using Twain.Core.Editing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
@@ -25,35 +26,45 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
 
+        ArticleEditingSession editingSession = new(
+            """
+        This is the original article text.
+
+        Edit this text to produce an updated version.
+        """);
+
+        ArticleDocumentViewModel document = new(
+            editingSession);
+
         Panes =
         [
-          CreatePane(
-            BuiltInPaneDefinitions.ArticleEditor,
-            FindState(
-                layout,
-                BuiltInPaneIds.ArticleEditor),
-            new ArticleEditorViewModel()),
+            CreatePane(
+                BuiltInPaneDefinitions.ArticleEditor,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.ArticleEditor),
+                new ArticleEditorViewModel(document)),
 
-          CreatePane(
-            BuiltInPaneDefinitions.ArticleList,
-            FindState(
-                layout,
-                BuiltInPaneIds.ArticleList),
-            new ArticleListViewModel()),
+            CreatePane(
+                BuiltInPaneDefinitions.ArticleList,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.ArticleList),
+                new ArticleListViewModel()),
 
-          CreatePane(
-            BuiltInPaneDefinitions.Options,
-            FindState(
-                layout,
-                BuiltInPaneIds.Options),
-            new OptionsViewModel()),
+            CreatePane(
+                BuiltInPaneDefinitions.Options,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.Options),
+                new OptionsViewModel()),
 
-          CreatePane(
-            BuiltInPaneDefinitions.Diff,
-            FindState(
-                layout,
-                BuiltInPaneIds.Diff),
-            new DiffViewModel())
+            CreatePane(
+                BuiltInPaneDefinitions.Diff,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.Diff),
+                new DiffViewModel())
         ];
     }
 
