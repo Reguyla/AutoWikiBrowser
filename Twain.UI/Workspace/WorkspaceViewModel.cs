@@ -5,7 +5,7 @@ using System.Linq;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
-using Twain.UI.ViewModels.Editing;
+using Twain.UI.Editor;
 
 namespace Twain.UI.ViewModels.Workspaces;
 

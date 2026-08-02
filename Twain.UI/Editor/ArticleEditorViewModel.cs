@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Twain.UI.ViewModels.Editing;
+namespace Twain.UI.Editor;
 
 /// <summary>
 /// Provides presentation state for the article editor pane.

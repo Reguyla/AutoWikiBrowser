@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Twain.UI.Views.Editing;
+namespace Twain.UI.Editor;
 
 /// <summary>
 /// Displays the editable text of the active article.
