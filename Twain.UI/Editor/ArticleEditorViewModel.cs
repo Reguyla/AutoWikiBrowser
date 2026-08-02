@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Twain.UI;
 
 namespace Twain.UI.Editor;
 
@@ -10,7 +11,7 @@ namespace Twain.UI.Editor;
 /// article text. The initial Avalonia text editor can therefore be replaced
 /// with Monaco without changing the workspace or pane-host infrastructure.
 /// </remarks>
-public sealed partial class ArticleEditorViewModel : ObservableObject
+public sealed partial class ArticleEditorViewModel : ViewModelBase
 {
     /// <summary>
     /// Gets or sets the article text displayed by the editor.
