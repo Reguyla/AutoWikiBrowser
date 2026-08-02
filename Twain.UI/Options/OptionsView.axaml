@@ -1,0 +1,56 @@
+<UserControl
+    x:Class="Twain.UI.Options.OptionsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.Options"
+    x:DataType="vm:OptionsViewModel"
+    d:DesignWidth="320"
+    d:DesignHeight="500"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:OptionsViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+
+        <StackPanel Spacing="{DynamicResource TwainSpacingLarge}">
+
+            <TextBlock
+                FontSize="{DynamicResource TwainFontSizeMedium}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                Text="Processing" />
+
+            <CheckBox
+                Content="Enable general cleanup"
+                IsChecked="{Binding EnableGeneralCleanup}" />
+
+            <CheckBox
+                Content="Enable typo correction"
+                IsChecked="{Binding EnableTypoCorrection}" />
+
+            <CheckBox
+                Content="Skip unchanged articles"
+                IsChecked="{Binding SkipUnchangedArticles}" />
+
+            <TextBlock
+                Margin="0,8,0,0"
+                FontSize="{DynamicResource TwainFontSizeMedium}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                Text="Editing" />
+
+            <CheckBox
+                Content="Mark edits as minor"
+                IsChecked="{Binding MarkEditsAsMinor}" />
+
+        </StackPanel>
+
+    </ScrollViewer>
+
+</UserControl>

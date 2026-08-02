@@ -7,6 +7,7 @@ using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
 using Twain.UI.ArticleList;
 using Twain.UI.Editor;
+using Twain.UI.Options;
 
 namespace Twain.UI.ViewModels.Workspaces;
 
@@ -44,7 +45,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             FindState(
                 layout,
                 BuiltInPaneIds.Options),
-            "Options placeholder"),
+            new OptionsViewModel()),
 
           CreatePane(
             BuiltInPaneDefinitions.Diff,

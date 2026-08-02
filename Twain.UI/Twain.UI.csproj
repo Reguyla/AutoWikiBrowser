@@ -36,5 +36,8 @@
     <Compile Update="ArticleList\ArticleListView.axaml.cs">
       <DependentUpon>ArticleListView.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Options\OptionsView.axaml.cs">
+      <DependentUpon>OptionsView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
