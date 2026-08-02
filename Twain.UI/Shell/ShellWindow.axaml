@@ -13,7 +13,7 @@
     MinHeight="500"
     Background="{DynamicResource TwainApplicationBackgroundBrush}"
     Foreground="{DynamicResource TwainTextPrimaryBrush}"
-    Icon="/Assets/avalonia-logo.ico"
+    Icon="/Assets/Twainlogo.ico"
     Title="Twain"
     mc:Ignorable="d">
 

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Twain.UI</RootNamespace>
     <OutputType>WinExe</OutputType>
@@ -9,6 +9,11 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\..\..\Downloads\Twainlogo.png" Link="Assets\Twainlogo.png" />
+    <Content Include="..\..\..\..\Downloads\TwainSplash.png" Link="Assets\TwainSplash.png" />
   </ItemGroup>
 
   <ItemGroup>
