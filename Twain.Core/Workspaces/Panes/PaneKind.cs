@@ -1,4 +1,4 @@
-﻿namespace Twain.Core.Workspaces;
+﻿namespace Twain.Core.Workspaces.Panes;
 
 /// <summary>
 /// Describes the general role of a pane within a workspace.

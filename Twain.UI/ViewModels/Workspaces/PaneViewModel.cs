@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Twain.Core.Workspaces;
+using Twain.Core.Workspaces.Panes;
 
 namespace Twain.UI.ViewModels.Workspaces;
 

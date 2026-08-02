@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Workspaces;
+﻿using Twain.Core.Workspaces.Panes;
+
+namespace Twain.Core.Workspaces;
 
 /// <summary>
 /// Represents a named arrangement of panes within a Twain workspace.

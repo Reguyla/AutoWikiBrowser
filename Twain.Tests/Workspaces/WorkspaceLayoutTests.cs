@@ -1,4 +1,5 @@
 ﻿using Twain.Core.Workspaces;
+using Twain.Core.Workspaces.Panes;
 
 namespace Twain.Tests.Workspaces;
 

@@ -1,4 +1,4 @@
-﻿namespace Twain.Core.Workspaces;
+﻿namespace Twain.Core.Workspaces.Panes;
 
 /// <summary>
 /// Uniquely identifies a pane within a Twain workspace.

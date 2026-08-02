@@ -1,4 +1,4 @@
-﻿namespace Twain.Core.Workspaces;
+﻿namespace Twain.Core.Workspaces.Panes;
 
 /// <summary>
 /// Represents the persisted workspace state of one pane instance.
