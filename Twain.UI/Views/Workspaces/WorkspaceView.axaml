@@ -1,0 +1,122 @@
+<UserControl
+    x:Class="Twain.UI.Views.Workspaces.WorkspaceView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
+    x:DataType="vm:WorkspaceViewModel"
+    d:DesignWidth="1100"
+    d:DesignHeight="700"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:WorkspaceViewModel />
+    </Design.DataContext>
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Margin="16">
+
+        <StackPanel
+            Grid.Row="0"
+            Margin="0,0,0,12"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="22"
+                FontWeight="SemiBold"
+                Text="Workspace" />
+
+            <Button
+                Command="{Binding ShowAllPanesCommand}"
+                Content="Show all panes" />
+
+        </StackPanel>
+
+        <ItemsControl
+            Grid.Row="1"
+            ItemsSource="{Binding Panes}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel
+                        HorizontalAlignment="Stretch"
+                        Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PaneViewModel">
+
+                    <Border
+                        Width="320"
+                        MinHeight="220"
+                        Margin="6"
+                        Padding="12"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        IsVisible="{Binding IsVisible}">
+
+                        <Grid RowDefinitions="Auto,*">
+
+                            <Grid
+                                Grid.Row="0"
+                                ColumnDefinitions="*,Auto"
+                                Margin="0,0,0,12">
+
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding Title}" />
+
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding
+                                        $parent[ItemsControl].((vm:WorkspaceViewModel)DataContext).HidePaneCommand}"
+                                    CommandParameter="{Binding}"
+                                    Content="Close" />
+
+                            </Grid>
+
+                            <Border
+                                Grid.Row="1"
+                                Padding="16"
+                                Background="{DynamicResource ThemeControlLowBrush}"
+                                CornerRadius="6">
+
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="8">
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontSize="20"
+                                        Text="{Binding Title}" />
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        Opacity="0.65"
+                                        Text="Placeholder pane" />
+
+                                </StackPanel>
+
+                            </Border>
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+        </ItemsControl>
+
+    </Grid>
+
+</UserControl>
