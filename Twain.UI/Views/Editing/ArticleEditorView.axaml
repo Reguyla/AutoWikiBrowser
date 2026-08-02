@@ -1,0 +1,42 @@
+<UserControl
+    x:Class="Twain.UI.Views.Editing.ArticleEditorView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.ViewModels.Editing"
+    x:DataType="vm:ArticleEditorViewModel"
+    d:DesignWidth="700"
+    d:DesignHeight="450"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:ArticleEditorViewModel />
+    </Design.DataContext>
+
+    <!--
+    This TextBox is an initial editor implementation used to establish the
+    pane contract. It will later be replaced by the Monaco editor host.
+    -->
+
+    <TextBox
+        Padding="{DynamicResource TwainControlPadding}"
+        AcceptsReturn="True"
+        AcceptsTab="True"
+        Background="{DynamicResource TwainControlBackgroundBrush}"
+        BorderBrush="{DynamicResource TwainBorderBrush}"
+        BorderThickness="{DynamicResource TwainBorderThickness}"
+        FontFamily="Consolas, Cascadia Mono, monospace"
+        FontSize="{DynamicResource TwainFontSizeNormal}"
+        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        Text="{Binding ArticleText}"
+        TextWrapping="NoWrap"
+        VerticalAlignment="Stretch"
+        VerticalContentAlignment="Top"
+        Watermark="Article text"
+        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+        ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+</UserControl>

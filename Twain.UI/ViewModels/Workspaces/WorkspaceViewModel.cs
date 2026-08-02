@@ -5,6 +5,7 @@ using System.Linq;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
+using Twain.UI.ViewModels.Editing;
 
 namespace Twain.UI.ViewModels.Workspaces;
 
@@ -23,29 +24,33 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Panes =
         [
-            CreatePane(
-                BuiltInPaneDefinitions.ArticleEditor,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.ArticleEditor)),
+          CreatePane(
+            BuiltInPaneDefinitions.ArticleEditor,
+            FindState(
+                layout,
+                BuiltInPaneIds.ArticleEditor),
+            new ArticleEditorViewModel()),
 
-            CreatePane(
-                BuiltInPaneDefinitions.ArticleList,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.ArticleList)),
+          CreatePane(
+            BuiltInPaneDefinitions.ArticleList,
+            FindState(
+                layout,
+                BuiltInPaneIds.ArticleList),
+            "Article list placeholder"),
 
-            CreatePane(
-                BuiltInPaneDefinitions.Options,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.Options)),
+          CreatePane(
+            BuiltInPaneDefinitions.Options,
+            FindState(
+                layout,
+                BuiltInPaneIds.Options),
+            "Options placeholder"),
 
-            CreatePane(
-                BuiltInPaneDefinitions.Diff,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.Diff))
+          CreatePane(
+            BuiltInPaneDefinitions.Diff,
+            FindState(
+                layout,
+                BuiltInPaneIds.Diff),
+            "Diff placeholder")
         ];
     }
 
@@ -157,16 +162,20 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// <param name="state">
     /// The initial workspace state of the pane.
     /// </param>
+    /// <param name="content">
+    /// The view model or temporary content displayed within the pane.
+    /// </param>
     /// <returns>
     /// The corresponding pane view model.
     /// </returns>
     private static PaneViewModel CreatePane(
         PaneDefinition definition,
-        PaneState state)
+        PaneState state,
+        object content)
     {
         return new PaneViewModel(
             definition,
             state,
-            "Placeholder pane");
+            content);
     }
 }
