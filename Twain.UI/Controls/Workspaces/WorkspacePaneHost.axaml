@@ -1,0 +1,68 @@
+<UserControl
+    x:Class="Twain.UI.Controls.Workspaces.WorkspacePaneHost"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
+    x:DataType="vm:PaneViewModel"
+    d:DesignWidth="400"
+    d:DesignHeight="300"
+    mc:Ignorable="d">
+
+    <Border
+        Padding="{DynamicResource TwainPanePadding}"
+        Background="{DynamicResource TwainSurfaceBrush}"
+        BorderBrush="{DynamicResource TwainBorderBrush}"
+        BorderThickness="{DynamicResource TwainBorderThickness}"
+        CornerRadius="{DynamicResource TwainPaneCornerRadius}"
+        IsVisible="{Binding IsVisible}">
+
+        <Grid RowDefinitions="Auto,*">
+
+            <!-- Pane title bar. -->
+
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto"
+                Margin="0,0,0,8">
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="{DynamicResource TwainFontSizeMedium}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                    Text="{Binding Title}" />
+
+                <Button
+                    Grid.Column="1"
+                    MinHeight="{DynamicResource TwainCompactControlHeight}"
+                    Padding="{DynamicResource TwainControlPadding}"
+                    Command="{Binding CloseCommand}"
+                    Content="Close"
+                    IsVisible="{Binding CanClose}" />
+
+            </Grid>
+
+            <!-- Pane-specific content host. -->
+
+            <Border
+                Grid.Row="1"
+                Padding="{DynamicResource TwainContentPadding}"
+                Background="{DynamicResource TwainRaisedSurfaceBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="{DynamicResource TwainBorderThickness}"
+                CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+                <ContentControl
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="{Binding Content}" />
+
+            </Border>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

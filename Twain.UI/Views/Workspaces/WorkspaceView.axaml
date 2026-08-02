@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
+    xmlns:workspaceControls="using:Twain.UI.Controls.Workspaces"
     x:DataType="vm:WorkspaceViewModel"
     d:DesignWidth="1100"
     d:DesignHeight="700"
@@ -14,84 +15,20 @@
         <vm:WorkspaceViewModel />
     </Design.DataContext>
 
-    <UserControl.Resources>
+ <UserControl.Resources>
 
-        <!--
-        Provides the temporary shared appearance used by panes in the
-        initial built-in editing workspace.
-        -->
-        <DataTemplate
-            x:Key="WorkspacePaneTemplate"
-            x:DataType="vm:PaneViewModel">
+    <!--
+    Hosts each workspace pane through the shared pane presentation control.
+    -->
+    <DataTemplate
+        x:Key="WorkspacePaneTemplate"
+        x:DataType="vm:PaneViewModel">
 
-            <Border
-                Padding="{DynamicResource TwainPanePadding}"
-                Background="{DynamicResource TwainSurfaceBrush}"
-                BorderBrush="{DynamicResource TwainBorderBrush}"
-                BorderThickness="{DynamicResource TwainBorderThickness}"
-                CornerRadius="{DynamicResource TwainPaneCornerRadius}"
-                IsVisible="{Binding IsVisible}">
+        <workspaceControls:WorkspacePaneHost />
 
-                <Grid RowDefinitions="Auto,*">
+    </DataTemplate>
 
-                    <Grid
-                        Grid.Row="0"
-                        ColumnDefinitions="*,Auto"
-                        Margin="0,0,0,8">
-
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="{Binding Title}" />
-
-                        <Button
-                            Grid.Column="1"
-                            MinHeight="{DynamicResource TwainCompactControlHeight}"
-                            Padding="{DynamicResource TwainControlPadding}"
-                            Command="{Binding
-                                $parent[ItemsControl].((vm:WorkspaceViewModel)DataContext).HidePaneCommand}"
-                            CommandParameter="{Binding}"
-                            Content="Close" />
-
-                    </Grid>
-
-                    <Border
-                        Grid.Row="1"
-                        Padding="{DynamicResource TwainContentPadding}"
-                        Background="{DynamicResource TwainRaisedSurfaceBrush}"
-                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                        BorderThickness="{DynamicResource TwainBorderThickness}"
-                        CornerRadius="{DynamicResource TwainControlCornerRadius}">
-
-                        <StackPanel
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Spacing="{DynamicResource TwainSpacingMedium}">
-
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                FontSize="{DynamicResource TwainFontSizeLarge}"
-                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                                Text="{Binding Title}" />
-
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                                Text="Placeholder pane" />
-
-                        </StackPanel>
-
-                    </Border>
-
-                </Grid>
-
-            </Border>
-
-        </DataTemplate>
-
-    </UserControl.Resources>
+</UserControl.Resources>
 
     <Grid
         Margin="{DynamicResource TwainWorkspacePadding}"

@@ -166,6 +166,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         return new PaneViewModel(
             definition,
-            state);
+            state,
+            "Placeholder pane");
     }
 }
