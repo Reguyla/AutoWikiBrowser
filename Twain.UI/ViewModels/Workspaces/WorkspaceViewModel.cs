@@ -36,6 +36,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                     BuiltInPaneIds.ArticleList)),
 
             CreatePane(
+                BuiltInPaneDefinitions.Options,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.Options)),
+
+            CreatePane(
                 BuiltInPaneDefinitions.Diff,
                 FindState(
                     layout,
@@ -58,6 +64,20 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 WorkspaceRegion.Left);
 
     /// <summary>
+    /// Gets the panes assigned to the center workspace region.
+    /// </summary>
+    /// <remarks>
+    /// The center region is intended for secondary tools such as job options,
+    /// configuration panels, and other supporting functionality that complements
+    /// the primary editing experience.
+    /// </remarks>
+    public IEnumerable<PaneViewModel> CenterPanes =>
+        Panes.Where(
+            pane =>
+                pane.Definition.PreferredRegion ==
+                WorkspaceRegion.Center);
+
+    /// <summary>
     /// Gets the panes assigned to the primary document region.
     /// </summary>
     public IEnumerable<PaneViewModel> DocumentPanes =>
@@ -69,6 +89,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// <summary>
     /// Gets the panes assigned to the lower results region.
     /// </summary>
+    /// <remarks>
+    /// The bottom region is intended for supporting output such as diffs,
+    /// previews, validation results, and other information related to the
+    /// active document.
+    /// </remarks>
     public IEnumerable<PaneViewModel> BottomPanes =>
         Panes.Where(
             pane =>

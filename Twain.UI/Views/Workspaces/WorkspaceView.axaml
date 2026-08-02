@@ -152,60 +152,14 @@
                 ResizeDirection="Columns"
                 ResizeBehavior="PreviousAndNext" />
 
-            <!--
-            Center region: temporary placeholder for the future options
-            and job-configuration pane.
-            -->
+            <!-- Center region: options and job-configuration panes. -->
 
-            <Border
+            <ItemsControl
                 Grid.Row="0"
                 Grid.RowSpan="3"
                 Grid.Column="2"
-                Padding="{DynamicResource TwainPanePadding}"
-                Background="{DynamicResource TwainSurfaceBrush}"
-                BorderBrush="{DynamicResource TwainBorderBrush}"
-                BorderThickness="{DynamicResource TwainBorderThickness}"
-                CornerRadius="{DynamicResource TwainPaneCornerRadius}">
-
-                <Grid RowDefinitions="Auto,*">
-
-                    <TextBlock
-                        Grid.Row="0"
-                        Margin="0,0,0,8"
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Options" />
-
-                    <Border
-                        Grid.Row="1"
-                        Padding="{DynamicResource TwainContentPadding}"
-                        Background="{DynamicResource TwainRaisedSurfaceBrush}"
-                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                        BorderThickness="{DynamicResource TwainBorderThickness}"
-                        CornerRadius="{DynamicResource TwainControlCornerRadius}">
-
-                        <StackPanel
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Spacing="{DynamicResource TwainSpacingMedium}">
-
-                            <TextBlock
-                                FontSize="{DynamicResource TwainFontSizeLarge}"
-                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                                Text="Options" />
-
-                            <TextBlock
-                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                                Text="Future options pane" />
-
-                        </StackPanel>
-
-                    </Border>
-
-                </Grid>
-
-            </Border>
+                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+                ItemsSource="{Binding CenterPanes}" />
 
             <GridSplitter
                 Grid.Row="0"
