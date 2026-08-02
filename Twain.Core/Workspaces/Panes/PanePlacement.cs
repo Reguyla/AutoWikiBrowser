@@ -21,6 +21,11 @@ public enum PanePlacement
     Right,
 
     /// <summary>
+    /// The pane belongs in the secondary options or tools area.
+    /// </summary>
+    Center,
+
+    /// <summary>
     /// The pane belongs at the bottom of the workspace.
     /// </summary>
     Bottom,

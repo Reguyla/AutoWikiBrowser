@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
 using Twain.Core.Workspaces;
+using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
 
 namespace Twain.UI.ViewModels.Workspaces;
@@ -13,57 +14,39 @@ namespace Twain.UI.ViewModels.Workspaces;
 public sealed partial class WorkspaceViewModel : ObservableObject
 {
     /// <summary>
-    /// Initializes the initial Twain workspace.
+    /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel()
     {
+        WorkspaceLayout layout =
+            BuiltInWorkspaceLayouts.CreateDefaultEditing();
+
         Panes =
         [
-        CreatePane(
-            "editor",
-            "Article Editor",
-            PaneKind.Document,
-            WorkspaceRegion.Document,
-            PanePlacement.DocumentArea,
-            "documents",
-            0),
+            CreatePane(
+                BuiltInPaneDefinitions.ArticleEditor,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.ArticleEditor)),
 
-        CreatePane(
-            "article-list",
-            "Article List",
-            PaneKind.Navigation,
-            WorkspaceRegion.Left,
-            PanePlacement.Left,
-            "navigation",
-            0),
+            CreatePane(
+                BuiltInPaneDefinitions.ArticleList,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.ArticleList)),
 
-        CreatePane(
-            "diff",
-            "Diff",
-            PaneKind.Tool,
-            WorkspaceRegion.Bottom,
-            PanePlacement.Bottom,
-            "results",
-            0)
-         ];
+            CreatePane(
+                BuiltInPaneDefinitions.Diff,
+                FindState(
+                    layout,
+                    BuiltInPaneIds.Diff))
+        ];
     }
 
     /// <summary>
     /// Gets the panes available in the current workspace.
     /// </summary>
     public ObservableCollection<PaneViewModel> Panes { get; }
-
-    /// <summary>
-    /// Shows all panes in the current workspace.
-    /// </summary>
-    [RelayCommand]
-    private void ShowAllPanes()
-    {
-        foreach (PaneViewModel pane in Panes)
-        {
-            pane.IsVisible = true;
-        }
-    }
 
     /// <summary>
     /// Gets the panes assigned to the left workspace region.
@@ -93,6 +76,18 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 WorkspaceRegion.Bottom);
 
     /// <summary>
+    /// Shows all panes in the current workspace.
+    /// </summary>
+    [RelayCommand]
+    private void ShowAllPanes()
+    {
+        foreach (PaneViewModel pane in Panes)
+        {
+            pane.IsVisible = true;
+        }
+    }
+
+    /// <summary>
     /// Hides the specified pane.
     /// </summary>
     /// <param name="pane">The pane to hide.</param>
@@ -106,47 +101,46 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Creates a workspace pane using the supplied definition and initial state.
+    /// Finds the initial state associated with a pane definition.
     /// </summary>
-    /// <param name="id"> The stable identifier assigned to the pane.</param>
-    /// <param name="title"> The user-facing title displayed for the pane.</param>
-    /// <param name="kind"> The general role performed by the pane.</param>
-    /// <param name="preferredRegion"> The logical workspace region in which the pane should initially appear.</param>
-    /// <param name="placement"> The pane's initial placement within the workspace.</param>
-    /// <param name="group"> The logical docking or tab group that initially contains the pane.</param>
-    /// <param name="order"> The pane's initial ordering within its group.</param>
+    /// <param name="layout">
+    /// The workspace layout containing the pane state.
+    /// </param>
+    /// <param name="definitionId">
+    /// The stable identifier of the pane definition to locate.
+    /// </param>
     /// <returns>
-    /// A <see cref="PaneViewModel"/> initialized with the specified pane
-    /// definition and initial workspace state.
+    /// The pane state associated with the specified definition.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the layout does not contain exactly one matching pane state.
+    /// </exception>
+    private static PaneState FindState(
+        WorkspaceLayout layout,
+        PaneId definitionId)
+    {
+        return layout.Panes.Single(
+            pane => pane.DefinitionId == definitionId);
+    }
+
+    /// <summary>
+    /// Creates presentation state for a defined workspace pane.
+    /// </summary>
+    /// <param name="definition">
+    /// The pane definition.
+    /// </param>
+    /// <param name="state">
+    /// The initial workspace state of the pane.
+    /// </param>
+    /// <returns>
+    /// The corresponding pane view model.
     /// </returns>
     private static PaneViewModel CreatePane(
-        string id,
-        string title,
-        PaneKind kind,
-        WorkspaceRegion preferredRegion,
-        PanePlacement placement,
-        string group,
-        int order)
+        PaneDefinition definition,
+        PaneState state)
     {
-        PaneDefinition definition = new(
-            new PaneId(id),
-            title,
-            kind,
-            preferredRegion,
-            PaneCapabilities.Closable |
-            PaneCapabilities.Movable |
-            PaneCapabilities.Resizable |
-            PaneCapabilities.Floatable,
-            true);
-
-        PaneState state = new(
-            Guid.NewGuid(),
-            definition.Id,
-            true,
-            placement,
-            group,
-            order);
-
-        return new PaneViewModel(definition, state);
+        return new PaneViewModel(
+            definition,
+            state);
     }
 }
