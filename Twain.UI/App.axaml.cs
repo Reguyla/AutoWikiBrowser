@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Twain.UI.ViewModels.Shell;
+using Twain.UI.Shell;
 using Twain.UI.Views.Shell;
 
 namespace Twain.UI;

@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Twain.UI.ViewModels;
 
 namespace Twain.UI;
 

@@ -1,6 +1,6 @@
 ﻿using Twain.UI.ViewModels.Workspaces;
 
-namespace Twain.UI.ViewModels.Shell;
+namespace Twain.UI.Shell;
 
 /// <summary>
 /// Provides presentation state for the Twain application shell.

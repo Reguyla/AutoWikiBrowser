@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Twain.UI.ViewModels;
+namespace Twain.UI;
 
 public abstract class ViewModelBase : ObservableObject
 {
