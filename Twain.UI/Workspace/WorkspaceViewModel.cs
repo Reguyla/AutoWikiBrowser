@@ -5,6 +5,7 @@ using System.Linq;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
+using Twain.UI.ArticleList;
 using Twain.UI.Editor;
 
 namespace Twain.UI.ViewModels.Workspaces;
@@ -36,7 +37,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             FindState(
                 layout,
                 BuiltInPaneIds.ArticleList),
-            "Article list placeholder"),
+            new ArticleListViewModel()),
 
           CreatePane(
             BuiltInPaneDefinitions.Options,

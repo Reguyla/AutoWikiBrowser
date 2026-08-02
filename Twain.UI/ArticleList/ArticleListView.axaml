@@ -1,0 +1,45 @@
+<UserControl
+    x:Class="Twain.UI.ArticleList.ArticleListView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.ArticleList"
+    x:DataType="vm:ArticleListViewModel"
+    d:DesignWidth="320"
+    d:DesignHeight="500"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:ArticleListViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ListBox
+            Grid.Row="0"
+            Background="{DynamicResource TwainControlBackgroundBrush}"
+            BorderBrush="{DynamicResource TwainBorderBrush}"
+            BorderThickness="{DynamicResource TwainBorderThickness}"
+            ItemsSource="{Binding Articles}"
+            SelectedItem="{Binding SelectedArticle}" />
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,8,0,0"
+            Orientation="Horizontal"
+            Spacing="{DynamicResource TwainSpacingMedium}">
+
+            <Button
+                Command="{Binding AddArticleCommand}"
+                Content="Add" />
+
+            <Button
+                Command="{Binding RemoveSelectedArticleCommand}"
+                Content="Remove" />
+
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

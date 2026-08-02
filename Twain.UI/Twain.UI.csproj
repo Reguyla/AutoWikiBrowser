@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Twain.UI</RootNamespace>
     <OutputType>WinExe</OutputType>
@@ -30,5 +30,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="ArticleList\ArticleListView.axaml.cs">
+      <DependentUpon>ArticleListView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
