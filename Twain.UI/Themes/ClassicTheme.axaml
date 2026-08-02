@@ -1,0 +1,216 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+    Classic theme
+
+    Provides a familiar, compact desktop appearance inspired by the
+    existing AutoWikiBrowser interface without reproducing WinForms
+    control rendering exactly.
+    -->
+
+    <!-- Base colors -->
+
+    <Color x:Key="TwainColorApplicationBackground">
+        #FFF0F0F0
+    </Color>
+
+    <Color x:Key="TwainColorWorkspaceBackground">
+        #FFE5E5E5
+    </Color>
+
+    <Color x:Key="TwainColorSurface">
+        #FFF7F7F7
+    </Color>
+
+    <Color x:Key="TwainColorRaisedSurface">
+        #FFFFFFFF
+    </Color>
+
+    <Color x:Key="TwainColorControlBackground">
+        #FFFFFFFF
+    </Color>
+
+    <Color x:Key="TwainColorControlBackgroundDisabled">
+        #FFE3E3E3
+    </Color>
+
+    <Color x:Key="TwainColorBorder">
+        #FF9E9E9E
+    </Color>
+
+    <Color x:Key="TwainColorBorderSubtle">
+        #FFC8C8C8
+    </Color>
+
+    <Color x:Key="TwainColorTextPrimary">
+        #FF202020
+    </Color>
+
+    <Color x:Key="TwainColorTextSecondary">
+        #FF555555
+    </Color>
+
+    <Color x:Key="TwainColorTextDisabled">
+        #FF767676
+    </Color>
+
+    <!--
+    Blue is used as the primary Classic accent because it remains familiar
+    to desktop users and avoids relying on red or green status distinctions.
+    -->
+
+    <Color x:Key="TwainColorAccent">
+        #FF2B579A
+    </Color>
+
+    <Color x:Key="TwainColorAccentHover">
+        #FF1F4E8C
+    </Color>
+
+    <Color x:Key="TwainColorAccentPressed">
+        #FF173D70
+    </Color>
+
+    <Color x:Key="TwainColorSelection">
+        #FFD9E7F7
+    </Color>
+
+    <Color x:Key="TwainColorFocus">
+        #FF1B6AC9
+    </Color>
+
+    <!-- Accessible status colors -->
+
+    <Color x:Key="TwainColorInformation">
+        #FF005A9C
+    </Color>
+
+    <Color x:Key="TwainColorSuccess">
+        #FF006D77
+    </Color>
+
+    <Color x:Key="TwainColorWarning">
+        #FF8A5200
+    </Color>
+
+    <Color x:Key="TwainColorError">
+        #FF7A1F5C
+    </Color>
+
+    <!-- Brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainApplicationBackgroundBrush"
+        Color="{DynamicResource TwainColorApplicationBackground}" />
+
+    <SolidColorBrush
+        x:Key="TwainWorkspaceBackgroundBrush"
+        Color="{DynamicResource TwainColorWorkspaceBackground}" />
+
+    <SolidColorBrush
+        x:Key="TwainSurfaceBrush"
+        Color="{DynamicResource TwainColorSurface}" />
+
+    <SolidColorBrush
+        x:Key="TwainRaisedSurfaceBrush"
+        Color="{DynamicResource TwainColorRaisedSurface}" />
+
+    <SolidColorBrush
+        x:Key="TwainControlBackgroundBrush"
+        Color="{DynamicResource TwainColorControlBackground}" />
+
+    <SolidColorBrush
+        x:Key="TwainControlBackgroundDisabledBrush"
+        Color="{DynamicResource TwainColorControlBackgroundDisabled}" />
+
+    <SolidColorBrush
+        x:Key="TwainBorderBrush"
+        Color="{DynamicResource TwainColorBorder}" />
+
+    <SolidColorBrush
+        x:Key="TwainBorderSubtleBrush"
+        Color="{DynamicResource TwainColorBorderSubtle}" />
+
+    <SolidColorBrush
+        x:Key="TwainTextPrimaryBrush"
+        Color="{DynamicResource TwainColorTextPrimary}" />
+
+    <SolidColorBrush
+        x:Key="TwainTextSecondaryBrush"
+        Color="{DynamicResource TwainColorTextSecondary}" />
+
+    <SolidColorBrush
+        x:Key="TwainTextDisabledBrush"
+        Color="{DynamicResource TwainColorTextDisabled}" />
+
+    <SolidColorBrush
+        x:Key="TwainAccentBrush"
+        Color="{DynamicResource TwainColorAccent}" />
+
+    <SolidColorBrush
+        x:Key="TwainAccentHoverBrush"
+        Color="{DynamicResource TwainColorAccentHover}" />
+
+    <SolidColorBrush
+        x:Key="TwainAccentPressedBrush"
+        Color="{DynamicResource TwainColorAccentPressed}" />
+
+    <SolidColorBrush
+        x:Key="TwainSelectionBrush"
+        Color="{DynamicResource TwainColorSelection}" />
+
+    <SolidColorBrush
+        x:Key="TwainFocusBrush"
+        Color="{DynamicResource TwainColorFocus}" />
+
+    <SolidColorBrush
+        x:Key="TwainInformationBrush"
+        Color="{DynamicResource TwainColorInformation}" />
+
+    <SolidColorBrush
+        x:Key="TwainSuccessBrush"
+        Color="{DynamicResource TwainColorSuccess}" />
+
+    <SolidColorBrush
+        x:Key="TwainWarningBrush"
+        Color="{DynamicResource TwainColorWarning}" />
+
+    <SolidColorBrush
+        x:Key="TwainErrorBrush"
+        Color="{DynamicResource TwainColorError}" />
+
+    <!-- Spacing -->
+
+    <x:Double x:Key="TwainSpacingExtraSmall">2</x:Double>
+    <x:Double x:Key="TwainSpacingSmall">4</x:Double>
+    <x:Double x:Key="TwainSpacingMedium">8</x:Double>
+    <x:Double x:Key="TwainSpacingLarge">12</x:Double>
+    <x:Double x:Key="TwainSpacingExtraLarge">16</x:Double>
+
+    <!-- Control dimensions -->
+
+    <x:Double x:Key="TwainControlHeight">26</x:Double>
+    <x:Double x:Key="TwainCompactControlHeight">22</x:Double>
+    <x:Double x:Key="TwainPaneHeaderHeight">28</x:Double>
+
+    <!-- Typography -->
+
+    <x:Double x:Key="TwainFontSizeSmall">11</x:Double>
+    <x:Double x:Key="TwainFontSizeNormal">12</x:Double>
+    <x:Double x:Key="TwainFontSizeMedium">14</x:Double>
+    <x:Double x:Key="TwainFontSizeLarge">18</x:Double>
+    <x:Double x:Key="TwainFontSizeTitle">24</x:Double>
+
+    <!-- Geometry -->
+
+    <CornerRadius x:Key="TwainControlCornerRadius">2</CornerRadius>
+    <CornerRadius x:Key="TwainPaneCornerRadius">2</CornerRadius>
+
+    <Thickness x:Key="TwainBorderThickness">1</Thickness>
+    <Thickness x:Key="TwainControlPadding">8,3</Thickness>
+    <Thickness x:Key="TwainPanePadding">8</Thickness>
+    <Thickness x:Key="TwainWorkspacePadding">8</Thickness>
+
+</ResourceDictionary>

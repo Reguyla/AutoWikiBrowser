@@ -15,22 +15,26 @@
     </Design.DataContext>
 
     <Grid
-        RowDefinitions="Auto,*"
-        Margin="16">
+        Margin="{DynamicResource TwainWorkspacePadding}"
+        Background="{DynamicResource TwainWorkspaceBackgroundBrush}"
+        RowDefinitions="Auto,*">
 
         <StackPanel
             Grid.Row="0"
             Margin="0,0,0,12"
             Orientation="Horizontal"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
                 VerticalAlignment="Center"
-                FontSize="22"
+                FontSize="{DynamicResource TwainFontSizeLarge}"
                 FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
                 Text="Workspace" />
 
             <Button
+                MinHeight="{DynamicResource TwainControlHeight}"
+                Padding="{DynamicResource TwainControlPadding}"
                 Command="{Binding ShowAllPanesCommand}"
                 Content="Show all panes" />
 
@@ -55,10 +59,11 @@
                         Width="320"
                         MinHeight="220"
                         Margin="6"
-                        Padding="12"
-                        BorderBrush="{DynamicResource ThemeBorderLowBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                        Padding="{DynamicResource TwainPanePadding}"
+                        Background="{DynamicResource TwainSurfaceBrush}"
+                        BorderBrush="{DynamicResource TwainBorderBrush}"
+                        BorderThickness="{DynamicResource TwainBorderThickness}"
+                        CornerRadius="{DynamicResource TwainPaneCornerRadius}"
                         IsVisible="{Binding IsVisible}">
 
                         <Grid RowDefinitions="Auto,*">
@@ -70,12 +75,15 @@
 
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    FontSize="16"
+                                    FontSize="{DynamicResource TwainFontSizeMedium}"
                                     FontWeight="SemiBold"
+                                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
                                     Text="{Binding Title}" />
 
                                 <Button
                                     Grid.Column="1"
+                                    MinHeight="{DynamicResource TwainCompactControlHeight}"
+                                    Padding="{DynamicResource TwainControlPadding}"
                                     Command="{Binding
                                         $parent[ItemsControl].((vm:WorkspaceViewModel)DataContext).HidePaneCommand}"
                                     CommandParameter="{Binding}"
@@ -85,23 +93,26 @@
 
                             <Border
                                 Grid.Row="1"
-                                Padding="16"
-                                Background="{DynamicResource ThemeControlLowBrush}"
-                                CornerRadius="6">
+                                Padding="{DynamicResource TwainContentPadding}"
+                                Background="{DynamicResource TwainRaisedSurfaceBrush}"
+                                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                                BorderThickness="{DynamicResource TwainBorderThickness}"
+                                CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
                                 <StackPanel
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Spacing="8">
+                                    Spacing="{DynamicResource TwainSpacingMedium}">
 
                                     <TextBlock
                                         HorizontalAlignment="Center"
-                                        FontSize="20"
+                                        FontSize="{DynamicResource TwainFontSizeLarge}"
+                                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
                                         Text="{Binding Title}" />
 
                                     <TextBlock
                                         HorizontalAlignment="Center"
-                                        Opacity="0.65"
+                                        Foreground="{DynamicResource TwainTextSecondaryBrush}"
                                         Text="Placeholder pane" />
 
                                 </StackPanel>
