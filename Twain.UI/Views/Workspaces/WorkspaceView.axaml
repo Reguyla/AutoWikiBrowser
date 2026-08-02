@@ -14,10 +14,91 @@
         <vm:WorkspaceViewModel />
     </Design.DataContext>
 
+    <UserControl.Resources>
+
+        <!--
+        Provides the temporary shared appearance used by panes in the
+        initial built-in editing workspace.
+        -->
+        <DataTemplate
+            x:Key="WorkspacePaneTemplate"
+            x:DataType="vm:PaneViewModel">
+
+            <Border
+                Padding="{DynamicResource TwainPanePadding}"
+                Background="{DynamicResource TwainSurfaceBrush}"
+                BorderBrush="{DynamicResource TwainBorderBrush}"
+                BorderThickness="{DynamicResource TwainBorderThickness}"
+                CornerRadius="{DynamicResource TwainPaneCornerRadius}"
+                IsVisible="{Binding IsVisible}">
+
+                <Grid RowDefinitions="Auto,*">
+
+                    <Grid
+                        Grid.Row="0"
+                        ColumnDefinitions="*,Auto"
+                        Margin="0,0,0,8">
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{DynamicResource TwainFontSizeMedium}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                            Text="{Binding Title}" />
+
+                        <Button
+                            Grid.Column="1"
+                            MinHeight="{DynamicResource TwainCompactControlHeight}"
+                            Padding="{DynamicResource TwainControlPadding}"
+                            Command="{Binding
+                                $parent[ItemsControl].((vm:WorkspaceViewModel)DataContext).HidePaneCommand}"
+                            CommandParameter="{Binding}"
+                            Content="Close" />
+
+                    </Grid>
+
+                    <Border
+                        Grid.Row="1"
+                        Padding="{DynamicResource TwainContentPadding}"
+                        Background="{DynamicResource TwainRaisedSurfaceBrush}"
+                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                        BorderThickness="{DynamicResource TwainBorderThickness}"
+                        CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+                        <StackPanel
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="{DynamicResource TwainSpacingMedium}">
+
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="{DynamicResource TwainFontSizeLarge}"
+                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                                Text="{Binding Title}" />
+
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                Text="Placeholder pane" />
+
+                        </StackPanel>
+
+                    </Border>
+
+                </Grid>
+
+            </Border>
+
+        </DataTemplate>
+
+    </UserControl.Resources>
+
     <Grid
         Margin="{DynamicResource TwainWorkspacePadding}"
         Background="{DynamicResource TwainWorkspaceBackgroundBrush}"
         RowDefinitions="Auto,*">
+
+        <!-- Workspace heading and temporary pane-restoration command. -->
 
         <StackPanel
             Grid.Row="0"
@@ -40,93 +121,128 @@
 
         </StackPanel>
 
-        <ItemsControl
+        <!--
+        Initial built-in editing workspace.
+
+        The layout is intentionally fixed for now. Future changes will
+        allow the user to move, resize, dock, float, hide, and restore panes.
+        -->
+
+        <Grid
             Grid.Row="1"
-            ItemsSource="{Binding Panes}">
+            ColumnDefinitions="260,8,300,8,*"
+            RowDefinitions="*,8,260">
 
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel
-                        HorizontalAlignment="Stretch"
-                        Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            <!-- Left region: article navigation and queue-related panes. -->
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:PaneViewModel">
+            <ItemsControl
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Grid.Column="0"
+                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+                ItemsSource="{Binding LeftPanes}" />
+
+            <GridSplitter
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Grid.Column="1"
+                Width="8"
+                HorizontalAlignment="Stretch"
+                Background="{DynamicResource TwainBorderSubtleBrush}"
+                ResizeDirection="Columns"
+                ResizeBehavior="PreviousAndNext" />
+
+            <!--
+            Center region: temporary placeholder for the future options
+            and job-configuration pane.
+            -->
+
+            <Border
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Grid.Column="2"
+                Padding="{DynamicResource TwainPanePadding}"
+                Background="{DynamicResource TwainSurfaceBrush}"
+                BorderBrush="{DynamicResource TwainBorderBrush}"
+                BorderThickness="{DynamicResource TwainBorderThickness}"
+                CornerRadius="{DynamicResource TwainPaneCornerRadius}">
+
+                <Grid RowDefinitions="Auto,*">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="0,0,0,8"
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="Options" />
 
                     <Border
-                        Width="320"
-                        MinHeight="220"
-                        Margin="6"
-                        Padding="{DynamicResource TwainPanePadding}"
-                        Background="{DynamicResource TwainSurfaceBrush}"
-                        BorderBrush="{DynamicResource TwainBorderBrush}"
+                        Grid.Row="1"
+                        Padding="{DynamicResource TwainContentPadding}"
+                        Background="{DynamicResource TwainRaisedSurfaceBrush}"
+                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
                         BorderThickness="{DynamicResource TwainBorderThickness}"
-                        CornerRadius="{DynamicResource TwainPaneCornerRadius}"
-                        IsVisible="{Binding IsVisible}">
+                        CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-                        <Grid RowDefinitions="Auto,*">
+                        <StackPanel
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="{DynamicResource TwainSpacingMedium}">
 
-                            <Grid
-                                Grid.Row="0"
-                                ColumnDefinitions="*,Auto"
-                                Margin="0,0,0,12">
+                            <TextBlock
+                                FontSize="{DynamicResource TwainFontSizeLarge}"
+                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                                Text="Options" />
 
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontSize="{DynamicResource TwainFontSizeMedium}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                                    Text="{Binding Title}" />
+                            <TextBlock
+                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                Text="Future options pane" />
 
-                                <Button
-                                    Grid.Column="1"
-                                    MinHeight="{DynamicResource TwainCompactControlHeight}"
-                                    Padding="{DynamicResource TwainControlPadding}"
-                                    Command="{Binding
-                                        $parent[ItemsControl].((vm:WorkspaceViewModel)DataContext).HidePaneCommand}"
-                                    CommandParameter="{Binding}"
-                                    Content="Close" />
-
-                            </Grid>
-
-                            <Border
-                                Grid.Row="1"
-                                Padding="{DynamicResource TwainContentPadding}"
-                                Background="{DynamicResource TwainRaisedSurfaceBrush}"
-                                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                                BorderThickness="{DynamicResource TwainBorderThickness}"
-                                CornerRadius="{DynamicResource TwainControlCornerRadius}">
-
-                                <StackPanel
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Spacing="{DynamicResource TwainSpacingMedium}">
-
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        FontSize="{DynamicResource TwainFontSizeLarge}"
-                                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                                        Text="{Binding Title}" />
-
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                                        Text="Placeholder pane" />
-
-                                </StackPanel>
-
-                            </Border>
-
-                        </Grid>
+                        </StackPanel>
 
                     </Border>
 
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                </Grid>
 
-        </ItemsControl>
+            </Border>
+
+            <GridSplitter
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Grid.Column="3"
+                Width="8"
+                HorizontalAlignment="Stretch"
+                Background="{DynamicResource TwainBorderSubtleBrush}"
+                ResizeDirection="Columns"
+                ResizeBehavior="PreviousAndNext" />
+
+            <!-- Upper-right document region: primary article editor. -->
+
+            <ItemsControl
+                Grid.Row="0"
+                Grid.Column="4"
+                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+                ItemsSource="{Binding DocumentPanes}" />
+
+            <GridSplitter
+                Grid.Row="1"
+                Grid.Column="4"
+                Height="8"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource TwainBorderSubtleBrush}"
+                ResizeDirection="Rows"
+                ResizeBehavior="PreviousAndNext" />
+
+            <!-- Lower-right results region: diff and preview tools. -->
+
+            <ItemsControl
+                Grid.Row="2"
+                Grid.Column="4"
+                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+                ItemsSource="{Binding BottomPanes}" />
+
+        </Grid>
 
     </Grid>
 

@@ -211,6 +211,7 @@
     <Thickness x:Key="TwainBorderThickness">1</Thickness>
     <Thickness x:Key="TwainControlPadding">8,3</Thickness>
     <Thickness x:Key="TwainPanePadding">8</Thickness>
+    <Thickness x:Key="TwainContentPadding">16</Thickness>
     <Thickness x:Key="TwainWorkspacePadding">8</Thickness>
 
 </ResourceDictionary>
