@@ -23,44 +23,84 @@ using WikiFunctions.Controls.Lists;
 
 namespace WikiFunctions.Logging;
 
+/// <summary>
+/// Displays successful and failed article actions and allows logged articles
+/// to be added back to the list maker.
+/// </summary>
 public partial class ArticleActionLogControl : UserControl
 {
-    private ListMaker _listMaker;
+    private ListMaker? _listMaker;
 
-    #region Public
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ArticleActionLogControl"/> class.
+    /// </summary>
     public ArticleActionLogControl()
     {
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Associates the control with a list maker and initializes the log-list
+    /// column widths.
+    /// </summary>
+    /// <param name="rlistMaker">
+    /// The list maker that receives articles added from the action logs.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="rlistMaker"/> is <see langword="null"/>.
+    /// </exception>
     public void Initialise(ListMaker rlistMaker)
     {
+        ArgumentNullException.ThrowIfNull(rlistMaker);
+
         _listMaker = rlistMaker;
+
         ResizeListView(lvFailed);
         ResizeListView(lvSuccessful);
     }
 
-    public void LogArticleAction(string page, bool succeeded, ArticleAction action, string message)
+    /// <summary>
+    /// Adds an article action result to the successful or failed action log.
+    /// </summary>
+    /// <param name="page">
+    /// The name of the article on which the action was performed.
+    /// </param>
+    /// <param name="succeeded">
+    /// Whether the article action completed successfully.
+    /// </param>
+    /// <param name="action">
+    /// The article action that was performed.
+    /// </param>
+    /// <param name="message">
+    /// Additional information describing the result.
+    /// </param>
+    public void LogArticleAction(
+        string page,
+        bool succeeded,
+        ArticleAction action,
+        string message)
     {
-        ListViewItem item = new ListViewItem(page);
-        item.SubItems.Add(action.ToString());
-        item.SubItems.Add(DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        ListViewItem item = new(page);
+
+        item.SubItems.Add(
+            action.ToString());
+
+        item.SubItems.Add(
+            DateTime.Now.ToString(
+                CultureInfo.InvariantCulture));
+
         item.SubItems.Add(message);
 
-        if (!succeeded)
-        {
-            lvFailed.Items.Add(item);
-            ResizeListView(lvFailed);
-        }
-        else
-        {
-            lvSuccessful.Items.Add(item);
-            ResizeListView(lvSuccessful);
-        }
-    }
-    #endregion
+        NoFlickerExtendedListView targetList =
+            succeeded
+                ? lvSuccessful
+                : lvFailed;
 
-    #region Private/Protected
+        targetList.Items.Add(item);
+        ResizeListView(targetList);
+    }
+
     /// <summary>
     /// Returns the ListView object from which the menu item was clicked
     /// </summary>
@@ -84,7 +124,6 @@ public partial class ArticleActionLogControl : UserControl
             return 0;
         return (LogFileType)saveListDialog.FilterIndex;
     }
-    #endregion
 
     #region Event Handlers
 
@@ -569,5 +608,5 @@ public partial class ArticleActionLogControl : UserControl
         AddToListMaker(
             lvSuccessful.Items);
     }
+    #endregion
 }
-#endregion
