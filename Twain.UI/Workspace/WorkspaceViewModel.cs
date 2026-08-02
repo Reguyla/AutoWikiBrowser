@@ -6,6 +6,7 @@ using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
 using Twain.UI.ArticleList;
+using Twain.UI.Diff;
 using Twain.UI.Editor;
 using Twain.UI.Options;
 
@@ -52,7 +53,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             FindState(
                 layout,
                 BuiltInPaneIds.Diff),
-            "Diff placeholder")
+            new DiffViewModel())
         ];
     }
 

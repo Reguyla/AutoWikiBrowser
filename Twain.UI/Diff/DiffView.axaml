@@ -1,0 +1,83 @@
+<UserControl
+    x:Class="Twain.UI.Diff.DiffView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.Diff"
+    x:DataType="vm:DiffViewModel"
+    d:DesignWidth="800"
+    d:DesignHeight="300"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:DiffViewModel />
+    </Design.DataContext>
+
+    <Grid
+        ColumnDefinitions="*,8,*"
+        RowDefinitions="Auto,*">
+
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            Margin="0,0,0,8"
+            FontSize="{DynamicResource TwainFontSizeMedium}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+            Text="Original" />
+
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="2"
+            Margin="0,0,0,8"
+            FontSize="{DynamicResource TwainFontSizeMedium}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+            Text="Updated" />
+
+        <TextBox
+            Grid.Row="1"
+            Grid.Column="0"
+            AcceptsReturn="True"
+            Background="{DynamicResource TwainControlBackgroundBrush}"
+            BorderBrush="{DynamicResource TwainBorderBrush}"
+            BorderThickness="{DynamicResource TwainBorderThickness}"
+            FontFamily="Consolas, Cascadia Mono, monospace"
+            FontSize="{DynamicResource TwainFontSizeNormal}"
+            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+            IsReadOnly="True"
+            Text="{Binding OriginalText}"
+            TextWrapping="Wrap"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+        <GridSplitter
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Grid.Column="1"
+            Width="8"
+            HorizontalAlignment="Stretch"
+            Background="{DynamicResource TwainBorderSubtleBrush}"
+            ResizeDirection="Columns"
+            ResizeBehavior="PreviousAndNext" />
+
+        <TextBox
+            Grid.Row="1"
+            Grid.Column="2"
+            AcceptsReturn="True"
+            Background="{DynamicResource TwainControlBackgroundBrush}"
+            BorderBrush="{DynamicResource TwainBorderBrush}"
+            BorderThickness="{DynamicResource TwainBorderThickness}"
+            FontFamily="Consolas, Cascadia Mono, monospace"
+            FontSize="{DynamicResource TwainFontSizeNormal}"
+            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+            IsReadOnly="True"
+            Text="{Binding UpdatedText}"
+            TextWrapping="Wrap"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+    </Grid>
+
+</UserControl>
