@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.ObjectModel;
 using Twain.Core.Workspaces;
 
 namespace Twain.UI.ViewModels.Workspaces;

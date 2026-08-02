@@ -1,9 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Twain.UI.ViewModels.Workspaces;
 
-namespace Twain.UI.ViewModels;
+namespace Twain.UI.ViewModels.Shell;
 
-public partial class ShellViewModel : ViewModelBase
+/// <summary>
+/// Provides presentation state for the Twain application shell.
+/// </summary>
+public sealed class ShellViewModel : ViewModelBase
 {
-    [ObservableProperty]
-    public partial string Greeting { get; set; } = "Welcome to Avalonia!";
+    /// <summary>
+    /// Gets the active workspace.
+    /// </summary>
+    public WorkspaceViewModel Workspace { get; } = new();
 }
