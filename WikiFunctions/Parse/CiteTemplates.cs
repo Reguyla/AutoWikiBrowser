@@ -645,7 +645,7 @@ public partial class Parsers
         string newValue = Tools.RemoveExcessTemplatePipes(m.Value);
         string templatename = m.Groups[2].Value;
 
-        Dictionary<string, string> paramsFound = new Dictionary<string, string>();
+        Dictionary<string, string> paramsFound = new();
         // remove duplicated fields, ensure the URL is not touched (may have pipes in)
         newValue = Tools.RemoveDuplicateTemplateParameters(newValue, paramsFound);
 

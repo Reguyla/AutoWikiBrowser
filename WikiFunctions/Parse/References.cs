@@ -257,7 +257,7 @@ public partial class Parsers
     public static string DuplicateNamedReferences(string articleText)
     {
         string articleTextOriginal = articleText;
-        Dictionary<string, string> NamedRefs = new Dictionary<string, string>();
+        Dictionary<string, string> NamedRefs = new();
 
         // disable if known-incompatible templates present
         if (GetAllTemplateDetail(articleText).Any(t => WikiRegexes.NoRefCondensingTemplates.IsMatch(t)))
@@ -398,7 +398,7 @@ public partial class Parsers
         allRefs = allRefs.FindAll(m => !WikiRegexes.IbidLocCitation.IsMatch(m.Value));
 
         // now process the duplicate refs, add ref name to first and condense the later ones
-        Dictionary<string, string> refNameContent = new Dictionary<string, string>();
+        Dictionary<string, string> refNameContent = new();
 
         if (!allRefs.Any())
             return articleText;
@@ -468,7 +468,7 @@ public partial class Parsers
             List<string> RefsInGroupRef = (from Match m in WikiRegexes.RefsGrouped.Matches(articleText)
                                            select RefNameFromGroup.Match(m.Value).Groups["nm"].Value.Trim(@"'""".ToCharArray())).ToList();
 
-            Dictionary<string, string> NamedRefs = new Dictionary<string, string>();
+            Dictionary<string, string> NamedRefs = new();
 
             foreach (KeyValuePair<string, string> kvp in namedRefsList)
             {

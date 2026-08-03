@@ -466,8 +466,7 @@ CancellationToken cancellationToken)
                 "queryParameters cannot be null or empty.",
                 "queryParameters");
 
-        Dictionary<string, string> result =
-            new Dictionary<string, string>();
+        Dictionary<string, string> result = new();
 
         string[] pairs = queryParameters.TrimStart('?').Split('&');
 

@@ -1301,7 +1301,7 @@ John", "*"), Is.EqualTo(@"* Fred
     [Test]
     public void GetTemplateParameterValues()
     {
-        Dictionary<string, string> Back = new Dictionary<string, string>();
+        Dictionary<string, string> Back = new();
         Back.Add("accessdate", "2012-05-15");
         Back.Add("title", "Hello");
         Back.Add("url", "http://www.site.com/abc");
@@ -1522,7 +1522,7 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
     [Test]
     public void RenameTemplateParameterDictionary()
     {
-        Dictionary<string, string> Params = new Dictionary<string, string>();
+        Dictionary<string, string> Params = new();
 
         Params.Add("accesdate", "accessdate");
         Params.Add("acessdate", "accessdate");
@@ -1752,7 +1752,7 @@ def
 
         Assert.That(Tools.RemoveDuplicateTemplateParameters(@"{{foo|first=abc|second={{def|bar}}|second={{def|bar}}}}"), Is.EqualTo(@"{{foo|first=abc|second={{def|bar}}}}"));
 
-        Dictionary<string, string> Params = new Dictionary<string, string>();
+        Dictionary<string, string> Params = new();
         Tools.RemoveDuplicateTemplateParameters(@"{{foo|first=abc|second=def|second=def}}", Params);
         Assert.That(Params.Count, Is.EqualTo(2));
         Params.Clear();

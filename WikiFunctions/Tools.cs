@@ -3010,7 +3010,7 @@ Message: {2}
     /// </returns>
     public static string RemoveDuplicateTemplateParameters(string templatecall)
     {
-        Dictionary<string, string> Params = new Dictionary<string, string>();
+        Dictionary<string, string> Params = new();
         return RemoveDuplicateTemplateParameters(templatecall, Params);
     }
 
