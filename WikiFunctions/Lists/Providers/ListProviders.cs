@@ -211,7 +211,7 @@ public class CategoriesOnPageListProvider : ApiListProviderBase
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -318,7 +318,7 @@ public class WhatLinksHereListProvider : ApiListProviderBase, ISpecialPageProvid
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -555,7 +555,7 @@ public class WhatTranscludesPageListProvider : ApiListProviderBase, ISpecialPage
         string Namespace,
         params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -629,7 +629,7 @@ public class LinksOnPageListProvider : ApiListProviderBase
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -686,7 +686,7 @@ public class LinksOnPageOnlyRedListProvider : ApiListProviderBase
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -764,7 +764,7 @@ public class FilesOnPageListProvider : ApiListProviderBase
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -815,7 +815,7 @@ public class TransclusionsOnPageListProvider : ApiListProviderBase
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -873,7 +873,7 @@ public class UserContribsListProvider : ApiListProviderBase, ISpecialPageProvide
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -975,7 +975,7 @@ public class ImageFileLinksListProvider : ApiListProviderBase
     {
         searchCriteria = Tools.FirstToUpperAndRemoveHashOnArray(searchCriteria);
 
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -1041,7 +1041,7 @@ public class WikiSearchListProvider : ApiListProviderBase, ISpecialPageProvider
 
     public List<Article> MakeList(int @namespace, params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -1248,7 +1248,7 @@ public class RandomPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageP
 
     public List<Article> MakeList(int Namespace, string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         string url = "list=random&rnnamespace=" + Namespace +
                      "&rnlimit=max" + Extra;
@@ -1323,7 +1323,7 @@ public class AllPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageProv
 
     public virtual List<Article> MakeList(int Namespace, params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -1531,7 +1531,7 @@ public class RecentChangesSpecialPageProvider : ApiListProviderBase, ISpecialPag
 
     public List<Article> MakeList(int Namespace, params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string page in searchCriteria)
         {
@@ -1595,7 +1595,7 @@ public class AllUsersSpecialPageProvider : ApiListProviderBase, ISpecialPageProv
 
     public List<Article> MakeList(int NamespaceIn, params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         list.AddRange(Tools.ConvertNamespace(ApiMakeList("list=allusers&aulimit=max", list.Count), Namespace.User));
 
@@ -1659,7 +1659,7 @@ public class NewPagesListProvider : ApiListProviderBase, ISpecialPageProvider
 
     public List<Article> MakeList(int Namespace, params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         string url = "list=recentchanges"
                      + "&rclimit=max&rctype=new&rcshow=!redirect&rcnamespace=" + Namespace;
@@ -1717,7 +1717,7 @@ public class LinkSearchSpecialPageProvider : ApiListProviderBase, ISpecialPagePr
 
     public List<Article> MakeList(int Namespace, params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string searchUrl in searchCriteria)
         {
@@ -1823,7 +1823,7 @@ public class GalleryNewFilesSpecialPageProvider : ApiListProviderBase, ISpecialP
 
     public override List<Article> MakeList(params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         list.AddRange(ApiMakeList("list=logevents&letype=upload&lelimit=max", list.Count));
 
@@ -1873,7 +1873,7 @@ public class PagesWithPropListProvider : ApiListProviderBase, ISpecialPageProvid
 
     public override List<Article> MakeList(params string[] searchCriteria)
     {
-        List<Article> list = new List<Article>();
+        List<Article> list = new();
 
         foreach (string prop in searchCriteria)
         {

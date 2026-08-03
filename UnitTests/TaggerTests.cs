@@ -1600,7 +1600,7 @@ foo
     [Test]
     public void RegularCategories()
     {
-        List<Article> Cats = new List<Article>();
+        List<Article> Cats = new();
         Assert.That(Parsers.RegularCategories(Cats).Count, Is.EqualTo(0));
 
         Cats.Add(new Article("Category:Foo"));

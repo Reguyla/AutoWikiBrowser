@@ -2275,7 +2275,7 @@ public class ListMakerTests : RequiresInitialization
     public void AddList()
     {
         ListMaker LMaker = new ListMaker();
-        List<Article> l = new List<Article>();
+        List<Article> l = new();
 
         l.Add(new Article("A"));
         l.Add(new Article("B"));
@@ -2337,7 +2337,7 @@ public class ListComparerTests : RequiresInitialization
         System.Windows.Forms.ListBox lb2 = new System.Windows.Forms.ListBox();
         System.Windows.Forms.ListBox lb3 = new System.Windows.Forms.ListBox();
 
-        List<Article> articles = new List<Article>();
+        List<Article> articles = new();
         articles.Add(new Article("A"));
         articles.Add(new Article("D"));
         articles.Add(new Article("E"));
@@ -2377,7 +2377,7 @@ public class ListComparerTests : RequiresInitialization
         System.Windows.Forms.ListBox lb2 = new System.Windows.Forms.ListBox();
         System.Windows.Forms.ListBox lb3 = new System.Windows.Forms.ListBox();
 
-        List<Article> articlesC = new List<Article>();
+        List<Article> articlesC = new();
         for (int i = 0; i < big; i++)
             articlesC.Add(new Article(i.ToString()));
 
