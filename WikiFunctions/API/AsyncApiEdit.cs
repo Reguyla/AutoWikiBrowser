@@ -326,8 +326,7 @@ public class AsyncApiEdit
                 "An asynchronous call is already being performed");
         }
 
-        CancellationTokenSource cancellation =
-            new CancellationTokenSource();
+        CancellationTokenSource cancellation = new();
 
         State = EditState.Working;
 

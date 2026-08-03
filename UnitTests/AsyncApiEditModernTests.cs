@@ -61,8 +61,7 @@ public class AsyncApiEditModernTests
 
         AsyncApiEditModern editor = CreateEditor(operations);
 
-        CancellationTokenSource cancellation =
-            new CancellationTokenSource();
+        CancellationTokenSource cancellation = new();
 
         Task<string> previewTask = editor.PreviewAsync(
             "Sandbox",
@@ -276,8 +275,7 @@ public class AsyncApiEditModernTests
 
         AsyncApiEditModern editor = CreateEditor(operations);
 
-        CancellationTokenSource cancellation =
-            new CancellationTokenSource();
+        CancellationTokenSource cancellation = new();
 
         cancellation.Cancel();
 
