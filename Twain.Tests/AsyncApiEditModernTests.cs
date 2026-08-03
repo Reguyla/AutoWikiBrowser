@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using WikiFunctions.API;
 
-namespace UnitTests;
+namespace Twain.Tests;
 
 /// <summary>
 /// Tests the task-based AsyncApiEditModern wrapper without network access.

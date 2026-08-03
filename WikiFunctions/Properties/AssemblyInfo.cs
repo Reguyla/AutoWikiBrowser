@@ -36,4 +36,4 @@ using System.Runtime.Versioning;
 [assembly: AssemblyVersion("6.5.0.1")]
 [assembly: AssemblyFileVersion("6.5.0.1")]
 [assembly: CLSCompliant(true)]
-[assembly: InternalsVisibleTo("UnitTests")]
+[assembly: InternalsVisibleTo("Twain.Tests")]

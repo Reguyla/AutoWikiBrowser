@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace UnitTests;
+namespace Twain.Tests;
 
 [SetUpFixture]
 public sealed class TestAssemblySetup

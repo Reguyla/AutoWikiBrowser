@@ -1,6 +1,6 @@
 ﻿using WikiFunctions.Plugin;
 
-namespace UnitTests;
+namespace Twain.Tests;
 
 class MockSkipOptions : ISkipOptions
 {
