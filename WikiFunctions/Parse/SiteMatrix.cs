@@ -32,7 +32,7 @@ public static class SiteMatrix
     public static List<string> WikiquoteLanguages = new List<string>();
     public static List<string> WikiversityLanguages = new List<string>();
     public static List<string> Specials = new List<string>();
-    public static readonly Dictionary<string, string> LanguageNames = new Dictionary<string, string>();
+    public static readonly Dictionary<string, string> LanguageNames = new();
 
     static SiteMatrix()
     {

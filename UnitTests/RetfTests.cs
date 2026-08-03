@@ -24,7 +24,7 @@ public class RetfTests : RequiresInitialization
 {
     #region Preparations
     private RegExTypoFix Retf;
-    private readonly Dictionary<string, string> Typos = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> Typos = new();
     private string Summary;
 
     [SetUp]
