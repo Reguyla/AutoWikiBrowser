@@ -9344,7 +9344,7 @@ if (MessageBox.Show(
 
             txtDabVariants.Text = string.Empty;
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
 
             foreach (Article article in
                      new LinksOnPageListProvider().MakeList(linkTitles))
@@ -10301,7 +10301,7 @@ if (MessageBox.Show(
 
         times.Sort(CompareRegexPairs);
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
 
         builder.AppendLine("Profiling " + iterations + @" iterations of """ + TheArticle.Name + @"""");
 

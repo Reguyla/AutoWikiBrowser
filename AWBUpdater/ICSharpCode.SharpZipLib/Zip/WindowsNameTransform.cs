@@ -219,7 +219,7 @@ public class WindowsNameTransform : INameTransform
         index = name.IndexOfAny(InvalidEntryChars);
         if (index >= 0)
         {
-            StringBuilder builder = new StringBuilder(name);
+            StringBuilder builder = new(name);
 
             while (index >= 0)
             {

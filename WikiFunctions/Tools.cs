@@ -636,7 +636,7 @@ public static class Tools
             return input;
 
         input = input.Trim();
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         for (int i = 0; i <= input.Length - 1; i++)
         {
             if (char.IsLetter(input[i]))

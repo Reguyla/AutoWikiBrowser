@@ -413,7 +413,7 @@ public class ApiXmlException : ApiException
 
     public override string GetExtraSpecificInformation()
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.Append("<table>");
         builder.AppendFormat("<tr><td>Get</td><td>{0}</td></tr>", GetUrl);
         if (!string.IsNullOrEmpty(PostQuery))
