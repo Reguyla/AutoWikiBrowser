@@ -115,7 +115,7 @@ public partial class Parsers
     {
         // performance: first check there's a match between templates used in article and listed template redirects
         // using intersection of HashSet lists of the two
-        HashSet<string> TemplatesFound = new HashSet<string>(GetAllTemplates(articleText));
+        HashSet<string> TemplatesFound = new(GetAllTemplates(articleText));
         TemplatesFound.IntersectWith(WikiRegexes.AllTemplateRedirectsHS);
 
         // run replacements only if matches found
@@ -205,9 +205,9 @@ public partial class Parsers
         /* performance: process all templates in bulk, extract template contents and reprocess. This is faster than loop applying template match on individual basis.
         Extract rough template name then get exact template names later, faster to deduplicate then get exact template names */
         // process all templates, handle nested templates to any level of nesting
-        HashSet<string> TemplateNames = new HashSet<string>();
-        HashSet<string> TemplateDetail = new HashSet<string>();
-        HashSet<string> innerTemplateContents = new HashSet<string>();
+        HashSet<string> TemplateNames = new();
+        HashSet<string> TemplateDetail = new();
+        HashSet<string> innerTemplateContents = new();
         string originalarticleText = articleText;
 
         for (; ; )

@@ -243,8 +243,7 @@ internal sealed partial class CustomModule : Form
     {
         ArgumentNullException.ThrowIfNull(parameters);
 
-        HashSet<string> referencePaths =
-            new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> referencePaths = new(StringComparer.OrdinalIgnoreCase);
 
         foreach (Assembly assembly in
                  AppDomain.CurrentDomain.GetAssemblies())

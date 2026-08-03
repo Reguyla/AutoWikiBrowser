@@ -130,8 +130,7 @@ namespace CSharpEvaluator
     {
         ArgumentNullException.ThrowIfNull(parameters);
 
-        HashSet<string> referencePaths =
-            new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> referencePaths = new(StringComparer.OrdinalIgnoreCase);
 
         AddAssemblyReference(
             referencePaths,
