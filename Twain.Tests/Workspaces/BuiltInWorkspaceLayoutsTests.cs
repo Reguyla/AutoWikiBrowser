@@ -1,4 +1,5 @@
-﻿using Twain.Core.Workspaces;
+﻿using NUnit.Framework;
+using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
 
