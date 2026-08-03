@@ -68,22 +68,64 @@ public static class Extensions
         rtb.Select(i, 0);
     }
 
+    /// <summary>
+    /// Returns a sorted dictionary whose key order follows the specified key
+    /// sequence.
+    /// </summary>
+    /// <typeparam name="TKey">
+    /// The type of keys in the dictionary.
+    /// </typeparam>
+    /// <typeparam name="TValue">
+    /// The type of values in the dictionary.
+    /// </typeparam>
+    /// <param name="dictionary">
+    /// The dictionary to copy and sort.
+    /// </param>
+    /// <param name="keys">
+    /// The sequence that defines the preferred key order.
+    /// </param>
+    /// <returns>
+    /// A new sorted dictionary containing the original key-value pairs in the
+    /// order defined by <paramref name="keys"/>.
+    /// </returns>
     public static IDictionary<TKey, TValue> SortBy<TKey, TValue>(
         this IDictionary<TKey, TValue> dictionary,
-        IEnumerable<TKey> keys
-    )
+        IEnumerable<TKey> keys)
     {
-        var sorter = new KeyComparer<TKey>(keys);
-        return new SortedDictionary<TKey, TValue>(dictionary, sorter);
+        KeyComparer<TKey> sorter = new(keys);
+
+        return new SortedDictionary<TKey, TValue>(
+            dictionary,
+            sorter);
     }
 
-    public static bool IsNullOrEmpty(this string str)
-    {
-        return string.IsNullOrEmpty(str);
-    }
+    /// <summary>
+    /// Determines whether the specified string is <see langword="null"/> or empty.
+    /// </summary>
+    /// <param name="str">
+    /// The string to test.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="str"/> is
+    /// <see langword="null"/> or empty; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool IsNullOrEmpty(this string? str) =>
+        string.IsNullOrEmpty(str);
 
-    public static List<string> DistinctList(this JToken token)
-    {
-        return token.Select(item => item.ToString()).Distinct().ToList();
-    }
+    /// <summary>
+    /// Returns the distinct string representations of the token's immediate
+    /// child values.
+    /// </summary>
+    /// <param name="token">
+    /// The JSON token whose child values are inspected.
+    /// </param>
+    /// <returns>
+    /// A list containing the distinct string representations of the token's
+    /// immediate children.
+    /// </returns>
+    public static List<string> DistinctList(this JToken token) =>
+        token
+            .Select(item => item.ToString())
+            .Distinct()
+            .ToList();
 }
