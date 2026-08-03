@@ -214,10 +214,20 @@ public partial class ListComparer : Form
         UpdateCounts();
     }
 
-    private void AddListToListMaker(ListMaker lm, IEnumerable<Article> lb)
+    /// <summary>
+    /// Adds the supplied articles to the specified <see cref="ListMaker"/>.
+    /// </summary>
+    /// <param name="lm">
+    /// The <see cref="ListMaker"/> that receives the articles.
+    /// </param>
+    /// <param name="lb">
+    /// The articles to add.
+    /// </param>
+    private void AddListToListMaker(
+        ListMaker lm,
+        IEnumerable<Article> lb)
     {
-        List<Article> articles = new List<Article>();
-        articles.AddRange(lb);
+        List<Article> articles = new(lb);
         lm.Add(articles);
     }
 

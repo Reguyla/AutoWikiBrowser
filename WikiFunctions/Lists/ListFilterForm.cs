@@ -43,7 +43,7 @@ namespace WikiFunctions.Lists
                 Settings = _prefs;
         }
 
-        private List<Article> _list = new List<Article>();
+        private List<Article> _list = new();
         private static AWBSettings.SpecialFilterPrefs _prefs;
 
         private void btnApply_Click(object sender, EventArgs e)
@@ -180,49 +180,135 @@ namespace WikiFunctions.Lists
             _list = new List<Article>(list);
         }
 
+        /// <summary>
+        /// Loads articles from a UTF-8 text file and adds them to the removal list.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void btnGetList_Click(object sender, EventArgs e)
         {
-            lbRemove.Items.AddRange(new TextFileListProviderUFT8().MakeList().ToArray());
+            Article[] items = new TextFileListProviderUFT8()
+                .MakeList()
+                .ToArray();
+
+            lbRemove.Items.AddRange(items);
         }
 
+        /// <summary>
+        /// Removes all items from the removal list.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void btnClear_Click(object sender, EventArgs e)
         {
             lbRemove.Items.Clear();
         }
 
+        /// <summary>
+        /// Cancels the dialog without applying the current filter settings.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
         }
 
+        /// <summary>
+        /// Updates the content-filter controls when the contains option changes.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void chkContains_CheckedChanged(object sender, EventArgs e)
         {
-            txtContains.Enabled = chkContains.Checked;
-            chkIsRegex.Enabled = (chkContains.Checked || chkNotContains.Checked);
+            UpdateContainsControls();
         }
 
+        /// <summary>
+        /// Updates the content-filter controls when the does-not-contain option
+        /// changes.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void chkNotContains_CheckedChanged(object sender, EventArgs e)
         {
-            txtDoesNotContain.Enabled = chkNotContains.Checked;
-            chkIsRegex.Enabled = (chkContains.Checked || chkNotContains.Checked);
+            UpdateContainsControls();
         }
 
+        /// <summary>
+        /// Initializes the default operation type when the filter dialog loads.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void specialFilter_Load(object sender, EventArgs e)
         {
             cbOpType.SelectedIndex = 0;
         }
+
+        /// <summary>
+        /// Clears the current collection of filtered articles.
+        /// </summary>
         internal void Clear()
         {
             _list.Clear();
         }
 
+        /// <summary>
+        /// Updates the enabled state of the content-filter controls based on the
+        /// selected options.
+        /// </summary>
+        private void UpdateContainsControls()
+        {
+            txtContains.Enabled = chkContains.Checked;
+            txtDoesNotContain.Enabled = chkNotContains.Checked;
+            chkIsRegex.Enabled =
+                chkContains.Checked ||
+                chkNotContains.Checked;
+        }
+
+        /// <summary>
+        /// Refreshes the namespace list when the active wiki project changes and the
+        /// form becomes visible.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// The event data.
+        /// </param>
         private void SpecialFilter_VisibleChanged(object sender, EventArgs e)
         {
-            if (Visible && _project != Variables.URL)
+            if (!Visible || _project == Variables.URL)
             {
-                _project = Variables.URL;
-                pageNamespaces.Populate();
+                return;
             }
+
+            _project = Variables.URL;
+            pageNamespaces.Populate();
         }
 
         /// <summary>
