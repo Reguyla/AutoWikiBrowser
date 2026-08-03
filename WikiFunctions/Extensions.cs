@@ -4,9 +4,36 @@ using System.Windows.Forms;
 
 namespace WikiFunctions;
 
+/// <summary>
+/// Provides extension methods for commonly used collection operations.
+/// </summary>
 public static class Extensions
 {
-    public static void AddIfTrue(this Dictionary<string, string> dict, bool input, string key, string value)
+    /// <summary>
+    /// Adds the specified key and value to the dictionary when the supplied
+    /// condition is <see langword="true"/>.
+    /// </summary>
+    /// <param name="dict">
+    /// The dictionary to update.
+    /// </param>
+    /// <param name="input">
+    /// The condition that determines whether the value is added.
+    /// </param>
+    /// <param name="key">
+    /// The key to add.
+    /// </param>
+    /// <param name="value">
+    /// The value associated with the key.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="input"/> is <see langword="true"/> and
+    /// <paramref name="key"/> already exists in the dictionary.
+    /// </exception>
+    public static void AddIfTrue(
+        this Dictionary<string, string> dict,
+        bool input,
+        string key,
+        string value)
     {
         if (input)
         {
@@ -14,17 +41,52 @@ public static class Extensions
         }
     }
 
-    public static void AddRangeIfNotNull<T>(this List<T> list, IEnumerable<T> collection)
+    /// <summary>
+    /// Adds the supplied collection to the list when the collection is not
+    /// <see langword="null"/>.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The type of items contained in the list.
+    /// </typeparam>
+    /// <param name="list">
+    /// The list to update.
+    /// </param>
+    /// <param name="collection">
+    /// The collection to add, or <see langword="null"/> when there are no
+    /// items to add.
+    /// </param>
+    public static void AddRangeIfNotNull<T>(
+        this List<T> list,
+        IEnumerable<T>? collection)
     {
-        if (collection != null)
+        if (collection is not null)
         {
             list.AddRange(collection);
         }
     }
 
-    public static bool IsIn<T>(this T @this, params T[] possibles)
+    /// <summary>
+    /// Determines whether the value equals any of the supplied possible
+    /// values using the default equality comparer for <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The type of value being compared.
+    /// </typeparam>
+    /// <param name="this">
+    /// The value to locate.
+    /// </param>
+    /// <param name="possibles">
+    /// The possible matching values.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the value matches one of the supplied
+    /// possibilities; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool IsIn<T>(
+        this T @this,
+        params T[] possibles)
     {
-        return ((IList)possibles).Contains(@this);
+        return Array.IndexOf(possibles, @this) >= 0;
     }
 
     /// <summary>
