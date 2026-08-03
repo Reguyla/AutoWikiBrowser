@@ -741,25 +741,42 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// Returns the categories that are not stub or proposed deletion categories from the input article text
+    /// Extracts regular category links from the supplied article text.
     /// </summary>
-    /// <param name="articleText">Wiki text</param>
-    /// <param name="hideComments"></param>
-    /// <returns>List of regular categories</returns>
-    public static List<Article> RegularCategories(string articleText, bool hideComments)
+    /// <param name="articleText">
+    /// The article text to inspect.
+    /// </param>
+    /// <param name="hideComments">
+    /// Whether category links contained within comments or protected source-code
+    /// regions should be ignored.
+    /// </param>
+    /// <returns>
+    /// The regular categories found in the article text after additional category
+    /// filtering and normalization.
+    /// </returns>
+    public static List<Article> RegularCategories(
+        string articleText,
+        bool hideComments)
     {
-        // Don't count commented out categories
         if (hideComments)
-            articleText = WikiRegexes.MathPreSourceCodeComments.Replace(articleText, "");
-
-        List<Article> Cats = new List<Article>();
-
-        foreach (Match m in WikiRegexes.Category.Matches(articleText))
         {
-            Cats.Add(new Article(m.Groups[1].Value.Trim()));
+            articleText = WikiRegexes.MathPreSourceCodeComments.Replace(
+                articleText,
+                string.Empty);
         }
 
-        return RegularCategories(Cats);
+        MatchCollection categoryMatches =
+            WikiRegexes.Category.Matches(articleText);
+
+        List<Article> categories = new(categoryMatches.Count);
+
+        foreach (Match match in categoryMatches)
+        {
+            categories.Add(
+                new Article(match.Groups[1].Value.Trim()));
+        }
+
+        return RegularCategories(categories);
     }
 
     /// <summary>
