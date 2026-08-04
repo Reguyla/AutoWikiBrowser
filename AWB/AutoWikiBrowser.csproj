@@ -1,15 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net10.0-windows7.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <Nullable>annotations</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <StartupObject>AutoWikiBrowser.Program</StartupObject>
     <ApplicationIcon>globe.ico</ApplicationIcon>
-    <ManifestCertificateThumbprint>AC00F13177F564760CA7C93223447E28AFBED803</ManifestCertificateThumbprint>
+
+    <!--
+      TODO: Review and remove the remaining legacy ClickOnce configuration
+      after confirming that it is no longer required by publishing,
+      installation, or update workflows.
+
+      GenerateManifests and SignManifests are currently disabled, so several
+      properties below may no longer affect normal builds.
+    -->
+    <ManifestCertificateThumbprint>
+      AC00F13177F564760CA7C93223447E28AFBED803
+    </ManifestCertificateThumbprint>
     <ManifestKeyFile>AutoWikiBrowser_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>false</SignManifests>
     <TargetZone>LocalIntranet</TargetZone>
-    <StartupObject>AutoWikiBrowser.Program</StartupObject>
     <Install>true</Install>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
@@ -21,35 +36,52 @@
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>3.0.6.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
-    <UseWindowsForms>true</UseWindowsForms>
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile></DocumentationFile>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <UseWinFormsOutOfProcDesigner>true</UseWinFormsOutOfProcDesigner>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DefineConstants>TRACE;RELEASE</DefineConstants>
+
+    <!--
+      TODO: Determine whether explicit serialization assembly generation still
+      provides any benefit for this .NET 10 project. Remove it separately after
+      confirming that the Release build and runtime behavior remain unchanged.
+    -->
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-    <DocumentationFile></DocumentationFile>
-    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+
+    <UseWinFormsOutOfProcDesigner>true</UseWinFormsOutOfProcDesigner>
   </PropertyGroup>
-	<ItemGroup>
-<Reference Include="Microsoft.mshtml">
-  <HintPath>$(WINDIR)\assembly\GAC\Microsoft.mshtml\7.0.3300.0__b03f5f7f11d50a3a\Microsoft.mshtml.dll</HintPath>
-  <EmbedInteropTypes>false</EmbedInteropTypes>
-  <Private>true</Private>
-</Reference>
-	</ItemGroup>
+
   <ItemGroup>
-    <Compile Update="AWBWebBrowser.cs" />
+    <!--
+      TODO: Remove the legacy Microsoft.mshtml dependency after all remaining
+      Internet Explorer DOM functionality has been migrated to WebView2 or
+      another supported implementation.
+
+      This reference uses a specific GAC path and may not be available on every
+      development or build environment.
+    -->
+    <Reference Include="Microsoft.mshtml">
+      <HintPath>$(WINDIR)\assembly\GAC\Microsoft.mshtml\7.0.3300.0__b03f5f7f11d50a3a\Microsoft.mshtml.dll</HintPath>
+      <EmbedInteropTypes>false</EmbedInteropTypes>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="NudgeTimer.cs">
       <SubType>Component</SubType>
     </Compile>
+
+    <Compile Update="UserSettings.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
+
   <ItemGroup>
-    <None Include=".gitignore" />
     <Content Include="globe.ico" />
     <Content Include="Resources\AutoWikiBrowser2.png" />
     <Content Include="Resources\button_bold.png" />
@@ -65,57 +97,91 @@
     <Content Include="Resources\Button_strike.png" />
     <Content Include="Resources\Button_upper_letter.png" />
   </ItemGroup>
-<ItemGroup>
-  <ProjectReference Include="..\WikiFunctions\WikiFunctions.csproj" />
 
-  <!-- Build AWBUpdater before copying its output into the AWB directory. -->
-  <ProjectReference Include="..\AWBUpdater\AWBUpdater.csproj" ReferenceOutputAssembly="false" />
-</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2"
-                      Version="1.0.4078.44" />
-    <PackageReference Include="Newtonsoft.Json"
-                      Version="13.0.4" />
+    <ProjectReference Include="..\WikiFunctions\WikiFunctions.csproj" />
+
+    <!-- Build AWBUpdater before copying its output into the AWB directory. -->
+    <ProjectReference
+      Include="..\AWBUpdater\AWBUpdater.csproj"
+      ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference
+      Include="Microsoft.Web.WebView2"
+      Version="1.0.4078.44" />
+
+    <!--
+      TODO: Review the remaining Newtonsoft.Json usage and migrate suitable
+      code to System.Text.Json before removing this dependency.
+    -->
+    <PackageReference
+      Include="Newtonsoft.Json"
+      Version="13.0.4" />
+  </ItemGroup>
+
   <!--
     The WebView2 package currently adds its WPF assembly to WinForms projects.
     Remove that unused reference before MSBuild resolves assembly dependencies
     to avoid the WindowsBase 4.0/5.0 conflict.
+
+    TODO: Recheck whether this workaround remains necessary after future
+    WebView2 package updates.
   -->
-  <Target Name="RemoveUnusedWebView2WpfReference"
-          BeforeTargets="ResolveAssemblyReferences"
-          DependsOnTargets="ResolvePackageAssets">
+  <Target
+    Name="RemoveUnusedWebView2WpfReference"
+    BeforeTargets="ResolveAssemblyReferences"
+    DependsOnTargets="ResolvePackageAssets">
+
     <ItemGroup>
-      <Reference Remove="@(Reference)"
-                 Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+      <Reference
+        Remove="@(Reference)"
+        Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
     </ItemGroup>
-  </Target><ItemGroup>
-  <EmbeddedResource Remove="Stats.resx" />
+  </Target>
 
-  <None Include="Stats.resx">
-    <DependentUpon>Stats.cs</DependentUpon>
-  </None>
-</ItemGroup>
+  <!--
+    Stats.resx is kept beside Stats.cs for project organization but must not be
+    compiled as a normal embedded WinForms resource.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Remove="Stats.resx" />
 
-<ItemGroup>
-  <Compile Update="UserSettings.cs">
-    <SubType>Code</SubType>
-  </Compile>
-</ItemGroup>
+    <None Include="Stats.resx">
+      <DependentUpon>Stats.cs</DependentUpon>
+    </None>
+  </ItemGroup>
 
-<ItemGroup>
-  <EmbeddedResource Update="Preferences.resx">
-    <DependentUpon>Preferences.cs</DependentUpon>
-    <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
-  </EmbeddedResource>
-</ItemGroup>  <Target Name="CopyAwbUpdaterFiles" AfterTargets="Build">
+  <!--
+    Preserve the legacy logical resource name expected by the Preferences form.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Update="Preferences.resx">
+      <DependentUpon>Preferences.cs</DependentUpon>
+      <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!--
+    TODO: Replace this legacy updater-output copy process when AWBUpdater is
+    modernized or replaced. Until then, retain the project reference and copy
+    behavior so the updater remains available beside AutoWikiBrowser.exe.
+  -->
+  <Target Name="CopyAwbUpdaterFiles" AfterTargets="Build">
     <ItemGroup>
-      <AwbUpdaterFiles Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
+      <AwbUpdaterFiles
+        Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
     </ItemGroup>
 
-    <Error Condition="'@(AwbUpdaterFiles)' == ''" Text="AWBUpdater output files were not found in the expected build directory." />
+    <Error
+      Condition="'@(AwbUpdaterFiles)' == ''"
+      Text="AWBUpdater output files were not found in the expected build directory." />
 
-    <Copy SourceFiles="@(AwbUpdaterFiles)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(AwbUpdaterFiles)"
+      DestinationFolder="$(TargetDir)"
+      SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
