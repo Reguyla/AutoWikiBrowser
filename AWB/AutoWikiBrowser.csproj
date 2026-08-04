@@ -99,26 +99,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WikiFunctions\WikiFunctions.csproj" />
+    <ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
 
     <!-- Build AWBUpdater before copying its output into the AWB directory. -->
-    <ProjectReference
-      Include="..\AWBUpdater\AWBUpdater.csproj"
-      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\AWBUpdater\AWBUpdater.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference
-      Include="Microsoft.Web.WebView2"
-      Version="1.0.4078.44" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4078.44" />
 
     <!--
       TODO: Review the remaining Newtonsoft.Json usage and migrate suitable
       code to System.Text.Json before removing this dependency.
     -->
-    <PackageReference
-      Include="Newtonsoft.Json"
-      Version="13.0.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <!--
@@ -129,15 +123,10 @@
     TODO: Recheck whether this workaround remains necessary after future
     WebView2 package updates.
   -->
-  <Target
-    Name="RemoveUnusedWebView2WpfReference"
-    BeforeTargets="ResolveAssemblyReferences"
-    DependsOnTargets="ResolvePackageAssets">
+  <Target Name="RemoveUnusedWebView2WpfReference" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="ResolvePackageAssets">
 
     <ItemGroup>
-      <Reference
-        Remove="@(Reference)"
-        Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
     </ItemGroup>
   </Target>
 
@@ -170,18 +159,12 @@
   -->
   <Target Name="CopyAwbUpdaterFiles" AfterTargets="Build">
     <ItemGroup>
-      <AwbUpdaterFiles
-        Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
+      <AwbUpdaterFiles Include="$(MSBuildProjectDirectory)\..\AWBUpdater\bin\$(Configuration)\$(TargetFramework)\AWBUpdater.*" />
     </ItemGroup>
 
-    <Error
-      Condition="'@(AwbUpdaterFiles)' == ''"
-      Text="AWBUpdater output files were not found in the expected build directory." />
+    <Error Condition="'@(AwbUpdaterFiles)' == ''" Text="AWBUpdater output files were not found in the expected build directory." />
 
-    <Copy
-      SourceFiles="@(AwbUpdaterFiles)"
-      DestinationFolder="$(TargetDir)"
-      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(AwbUpdaterFiles)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

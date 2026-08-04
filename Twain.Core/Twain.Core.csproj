@@ -1,9 +1,84 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Nullable>annotations</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Controls\ComboBoxInvoke.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\NamespacesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\PageContainsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\PageNotContainsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\RichTextBoxInvoke.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\TypoStatsControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Logging\ArticleActionListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Logging\ArticleActionLogControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\ArticleTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\DeveloperLinkLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\Lists\ListBox2.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Controls\EditProtectControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Disambiguation\DabControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\Lists\ListMaker.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\NoFlickerListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="ReplaceSpecial\InTemplateRuleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ReplaceSpecial\RuleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ReplaceSpecial\TemplateParamRuleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Logging\LogControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\AWBToolTip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Bot Image.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="5.6.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SemanticVersion" Version="2.1.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
+  </ItemGroup>
 </Project>

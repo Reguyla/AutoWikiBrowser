@@ -25,7 +25,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\WikiFunctions\WikiFunctions.csproj" />
+		<ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
