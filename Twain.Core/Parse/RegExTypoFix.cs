@@ -19,10 +19,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Threading;
 using System.Windows.Forms;
-using WikiFunctions.Background;
-using WikiFunctions.Controls;
+using Twain.Core.Background;
+using Twain.Core.Controls;
 
-namespace WikiFunctions.Parse;
+namespace Twain.Core.Parse;
 
 /// <summary>
 /// Interface for loading typo list

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using WikiFunctions.Parse;
+using Twain.Core.Parse;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 public partial class TypoStatsControl : NoFlickerExtendedListView
 {

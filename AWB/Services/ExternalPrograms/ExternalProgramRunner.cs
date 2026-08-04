@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using WikiFunctions;
+using Twain.Core;
 
 namespace AutoWikiBrowser.Services.ExternalPrograms;
 

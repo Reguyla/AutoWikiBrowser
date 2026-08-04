@@ -19,9 +19,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-using WikiFunctions.AWBSettings;
+using Twain.Core.AWBSettings;
 
-namespace WikiFunctions.Controls.Lists;
+namespace Twain.Core.Controls.Lists;
 
 public partial class ListSplitter : Form
 {

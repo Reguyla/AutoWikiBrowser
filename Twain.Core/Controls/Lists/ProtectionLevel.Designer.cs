@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls.Lists
+﻿namespace Twain.Core.Controls.Lists
 {
     partial class ProtectionLevel
     {

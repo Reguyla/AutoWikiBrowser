@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace WikiFunctions.CustomModules;
+namespace Twain.Core.CustomModules;
 
 /// <summary>
 /// Compiles Visual Basic custom-module source code using Roslyn.

@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace WikiFunctions.CustomModules;
+namespace Twain.Core.CustomModules;
 
 /// <summary>
 /// Compiles C# source code for an AutoWikiBrowser custom module by using the

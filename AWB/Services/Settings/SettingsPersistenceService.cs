@@ -1,4 +1,4 @@
-﻿using WikiFunctions.AWBSettings;
+﻿using Twain.Core.AWBSettings;
 
 namespace AutoWikiBrowser.Services.Settings;
 

@@ -8,7 +8,7 @@
 //
 using System.Security.Cryptography;
 
-namespace WikiFunctions.Encryption;
+namespace Twain.Core.Encryption;
 
 /// <summary>
 /// This class uses a symmetric key algorithm (Rijndael/AES) to encrypt and

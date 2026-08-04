@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //TODO: Investigate moving this to a plugin or module. Unique to Wikipedia
 
-namespace WikiFunctions.TalkPages;
+namespace Twain.Core.TalkPages;
 
 public enum DEFAULTSORT
 {

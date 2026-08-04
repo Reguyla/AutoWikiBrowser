@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 public partial class AboutBox : Form
 {
@@ -52,10 +52,15 @@ public partial class AboutBox : Form
 
     #region Shared
     /// <summary>
-    /// Returns a GFDL authors and copyright notice for use within AWB projects
+    /// Returns a GFDL authors and copyright notice for use within AWB projects.
     /// </summary>
     public static string GPLNotice
-    { get { return Properties.Resources.GPL; } }
+    {
+        get
+        {
+            return Resources.GPL;
+        }
+    }
 
     /// <summary>
     /// Extracts an assembly description (usually created by Visual Studio?)

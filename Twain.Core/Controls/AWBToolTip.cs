@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls;
+﻿namespace Twain.Core.Controls;
 
 /// <summary>
 /// Extends ToolTip to implement custom Style to prevent tooltips changing window focus under Wine

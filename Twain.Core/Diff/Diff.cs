@@ -31,7 +31,7 @@ using IntList = System.Collections.Generic.List<int>;
 //using TrioList = System.Collections.Generic.List<Algorithm.Diff.Trio>;
 using TrioList = System.Collections.ArrayList;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Represents the input sequences used by the diff algorithm.
@@ -169,7 +169,7 @@ public class Diff : IDiff
     /// A <see cref="Hunk"/> stores the ranges from the original and modified
     /// sequences that make up a single section of the generated diff.
     /// </remarks>
-    public class Hunk : WikiFunctions.Hunk
+    public class Hunk : Twain.Core.Hunk
     {
         private IList left, right;
         private readonly int s1start, s1end, s2start, s2end;

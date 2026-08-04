@@ -22,9 +22,9 @@ using System.Net.Http;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Windows.Forms;
-using WikiFunctions.API;
+using Twain.Core.API;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// This class controls editing process in one wiki

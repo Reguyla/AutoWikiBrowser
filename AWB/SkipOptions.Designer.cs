@@ -34,7 +34,7 @@
             this.CheckAll = new System.Windows.Forms.CheckBox();
             this.CheckNone = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.toolTip1 = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.toolTip1 = new Twain.Core.Controls.AWBToolTip(this.components);
             this.skipListBox = new System.Windows.Forms.CheckedListBox();
             this.SuspendLayout();
             // 
@@ -100,7 +100,7 @@
         private System.Windows.Forms.CheckBox CheckAll;
         private System.Windows.Forms.CheckBox CheckNone;
         private System.Windows.Forms.Label label1;
-        private WikiFunctions.Controls.AWBToolTip toolTip1;
+        private Twain.Core.Controls.AWBToolTip toolTip1;
         private System.Windows.Forms.CheckedListBox skipListBox;
     }
 }

@@ -17,7 +17,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Windows.Forms;
-using WikiFunctions.Plugin;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
 
@@ -39,15 +39,15 @@ partial class MainForm
     CheckBox IAutoWikiBrowserForm.AutoTagCheckBox { get { return chkAutoTagger; } }
     CheckBox IAutoWikiBrowserForm.RegexTypoFix { get { return chkRegExTypo; } }
     bool IAutoWikiBrowserForm.PreParseMode { get { return preParseModeToolStripMenuItem.Checked; } }
-    WikiFunctions.Controls.ArticleTextBox IAutoWikiBrowserForm.EditBox { get { return txtEdit; } }
+    Twain.Core.Controls.ArticleTextBox IAutoWikiBrowserForm.EditBox { get { return txtEdit; } }
     Form IAutoWikiBrowserForm.Form { get { return this; } }
     ToolStripMenuItem IAutoWikiBrowserForm.HelpToolStripMenuItem { get { return helpToolStripMenuItem; } }
     ToolStripMenuItem IAutoWikiBrowserForm.PluginsToolStripMenuItem { get { return pluginsToolStripMenuItem; } }
     ToolStripMenuItem IAutoWikiBrowserForm.InsertTagToolStripMenuItem { get { return insertTagToolStripMenuItem; } }
     ToolStripMenuItem IAutoWikiBrowserForm.ToolStripMenuGeneral { get { return ToolStripMenuGeneral; } }
-    WikiFunctions.Controls.Lists.ListMaker IAutoWikiBrowserForm.ListMaker { get { return listMaker; } }
+    Twain.Core.Controls.Lists.ListMaker IAutoWikiBrowserForm.ListMaker { get { return listMaker; } }
     ContextMenuStrip IAutoWikiBrowserForm.EditBoxContextMenu { get { return mnuTextBox; } }
-    WikiFunctions.Logging.LogControl IAutoWikiBrowserForm.LogControl { get { return logControl; } }
+    Twain.Core.Logging.LogControl IAutoWikiBrowserForm.LogControl { get { return logControl; } }
 
     string IAutoWikiBrowserForm.StatusLabelText { get { return StatusLabelText; } set { StatusLabelText = value; } }
 }

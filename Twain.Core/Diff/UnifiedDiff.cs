@@ -4,7 +4,7 @@
 
 using System.Collections;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Provides methods for writing differences between two sequences in unified

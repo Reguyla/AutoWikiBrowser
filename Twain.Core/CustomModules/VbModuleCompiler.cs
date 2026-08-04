@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.CustomModules;
+﻿namespace Twain.Core.CustomModules;
 
 /// <summary>
 /// Provides Visual Basic custom-module source templates and compilation.
@@ -20,11 +20,11 @@ Imports WikiFunctions
 
 Namespace AutoWikiBrowser.CustomModules
     Public Class CustomModule
-        Implements WikiFunctions.Plugin.IModule
+        Implements Twain.Core.Plugin.IModule
 
-        Private awb As WikiFunctions.Plugin.IAutoWikiBrowser
+        Private awb As Twain.Core.Plugin.IAutoWikiBrowser
 
-        Public Sub New(ByRef _awb As WikiFunctions.Plugin.IAutoWikiBrowser)
+        Public Sub New(ByRef _awb As Twain.Core.Plugin.IAutoWikiBrowser)
             awb = _awb
         End Sub
 ";
@@ -42,7 +42,7 @@ End Namespace";
             ByVal wikiNamespace As Integer,
             ByRef Summary As String,
             ByRef Skip As Boolean
-        ) As String Implements WikiFunctions.Plugin.IModule.ProcessArticle
+        ) As String Implements Twain.Core.Plugin.IModule.ProcessArticle
 
             Skip = False
             Summary = ""test""

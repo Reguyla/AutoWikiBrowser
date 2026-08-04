@@ -19,9 +19,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 using Microsoft.Win32;
 using System.Windows.Forms;
-using WikiFunctions.Encryption;
+using Twain.Core.Encryption;
 
-namespace WikiFunctions.Profiles;
+namespace Twain.Core.Profiles;
 
 /// <summary>
 /// Provides registry-backed storage and retrieval for AWB user profiles.

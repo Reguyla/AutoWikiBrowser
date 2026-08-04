@@ -19,10 +19,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.ComponentModel;
 using System.Windows.Forms;
-using WikiFunctions.Controls.Lists;
-using WikiFunctions.Lists.Providers;
+using Twain.Core.Controls.Lists;
+using Twain.Core.Lists.Providers;
 
-namespace WikiFunctions.Lists
+namespace Twain.Core.Lists
 {
     public partial class ListFilterForm : Form
     {

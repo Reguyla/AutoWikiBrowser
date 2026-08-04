@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-namespace WikiFunctions.Parse;
+namespace Twain.Core.Parse;
 
 //TODO:Move Regexes to WikiRegexes as required
 //TODO:Move Regexes declared in method bodies (if not dynamic based on article title, etc), into class body

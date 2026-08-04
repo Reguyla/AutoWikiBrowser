@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.ReplaceSpecial
+﻿namespace Twain.Core.ReplaceSpecial
 {
   partial class TemplateParamRuleControl
   {

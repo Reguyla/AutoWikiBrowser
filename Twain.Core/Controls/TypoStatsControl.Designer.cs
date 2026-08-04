@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls
+namespace Twain.Core.Controls
 {
     partial class TypoStatsControl
     {

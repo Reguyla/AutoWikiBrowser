@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 public class RichTextBoxInvoke : RichTextBox
 {

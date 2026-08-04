@@ -18,7 +18,7 @@
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial;
+namespace Twain.Core.ReplaceSpecial;
 
 [System.Xml.Serialization.XmlInclude(typeof(Rule))]
 [System.Xml.Serialization.XmlInclude(typeof(TemplateParamRule))]

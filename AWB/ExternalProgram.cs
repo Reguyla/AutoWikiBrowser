@@ -17,10 +17,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using AutoWikiBrowser.Services.ExternalPrograms;
-using ExternalProgramPrefs = WikiFunctions.AWBSettings.ExternalProgramPrefs;
+using ExternalProgramPrefs = Twain.Core.AWBSettings.ExternalProgramPrefs;
 using System.ComponentModel;
 using System.Windows.Forms;
-using WikiFunctions;
+using Twain.Core;
 
 namespace AutoWikiBrowser;
 
@@ -29,17 +29,17 @@ namespace AutoWikiBrowser;
 /// custom processing module.
 /// </summary>
 /// <remarks>
-/// This form implements <see cref="WikiFunctions.Plugin.IModule"/> and allows
+/// This form implements <see cref="Twain.Core.Plugin.IModule"/> and allows
 /// AWB to pass article text to an external executable for processing.
 /// Depending on the selected configuration, article text is provided either
 /// through command-line parameters or a temporary input/output file.
 /// </remarks>
-public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
+public partial class ExternalProgram : Form, Twain.Core.Plugin.IModule
 {
     // TODO (UI Modernization):
     // Review whether AWBToolTip should be added to the form's component
     // container or disposed explicitly if it acquires disposable resources.
-    private readonly WikiFunctions.Controls.AWBToolTip _toolTip;
+    private readonly Twain.Core.Controls.AWBToolTip _toolTip;
 
     /// <summary>
     /// Initializes the external program configuration dialog.
@@ -49,7 +49,7 @@ public partial class ExternalProgram : Form, WikiFunctions.Plugin.IModule
         InitializeComponent();
 
         _toolTip =
-            new WikiFunctions.Controls.AWBToolTip();
+            new Twain.Core.Controls.AWBToolTip();
     }
 
     /// <summary>

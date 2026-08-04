@@ -24,13 +24,13 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using WikiFunctions.API;
-using WikiFunctions.DBScanner;
-using WikiFunctions.Lists;
-using WikiFunctions.Lists.Providers;
-using WikiFunctions.Plugin;
+using Twain.Core.API;
+using Twain.Core.DBScanner;
+using Twain.Core.Lists;
+using Twain.Core.Lists.Providers;
+using Twain.Core.Plugin;
 
-namespace WikiFunctions.Controls.Lists;
+namespace Twain.Core.Controls.Lists;
 
 public delegate void ListMakerEventHandler(object sender, EventArgs e);
 

@@ -18,7 +18,7 @@
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial;
+namespace Twain.Core.ReplaceSpecial;
 
 public interface IRuleControlOwner
 {

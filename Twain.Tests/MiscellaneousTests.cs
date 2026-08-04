@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Text.RegularExpressions;
-using WikiFunctions;
-using WikiFunctions.Controls.Lists;
-using WikiFunctions.Parse;
-using WikiFunctions.ReplaceSpecial;
-using WikiFunctions.TalkPages;
+using Twain.Core;
+using Twain.Core.Controls.Lists;
+using Twain.Core.Parse;
+using Twain.Core.ReplaceSpecial;
+using Twain.Core.TalkPages;
 
 namespace Twain.Tests;
 
@@ -725,7 +725,7 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
         Article theArticle = new Article("Category:Hello", "Text [[Category:Foo]]");
         Parsers p = new Parsers(500, true);
 
-        theArticle.Categorisation((WikiFunctions.Options.CategorisationOptions)
+        theArticle.Categorisation((Twain.Core.Options.CategorisationOptions)
             1, p, false,
             "Foo",
             "Foo2", false);
@@ -2645,7 +2645,7 @@ public class SubstTemplates
     [Test]
     public void SubstTemplatesNoExpand()
     {
-        WikiFunctions.SubstTemplates st = new WikiFunctions.SubstTemplates();
+        Twain.Core.SubstTemplates st = new Twain.Core.SubstTemplates();
         st.ExpandRecursively = false;
 
         Assert.That(st.SubstituteTemplates("Now {{foo}}", "test"), Is.EqualTo("Now {{foo}}"), "no change when no templates in list");

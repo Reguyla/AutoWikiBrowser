@@ -1,6 +1,6 @@
 ﻿using System.Xml;
 
-namespace WikiFunctions.API;
+namespace Twain.Core.API;
 
 internal static class XmlResponseHelpers
 {

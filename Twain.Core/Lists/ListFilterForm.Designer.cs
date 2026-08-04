@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Lists;
+﻿namespace Twain.Core.Lists;
 
 partial class ListFilterForm
 {
@@ -36,12 +36,12 @@ partial class ListFilterForm
         this.chkNotContains = new System.Windows.Forms.CheckBox();
         this.txtDoesNotContain = new System.Windows.Forms.RichTextBox();
         this.gbNamespaces = new System.Windows.Forms.GroupBox();
-        this.pageNamespaces = new WikiFunctions.Controls.NamespacesControl();
+        this.pageNamespaces = new Twain.Core.Controls.NamespacesControl();
         this.gbSearch = new System.Windows.Forms.GroupBox();
         this.gbSets = new System.Windows.Forms.GroupBox();
         this.btnClear = new System.Windows.Forms.Button();
         this.btnGetList = new System.Windows.Forms.Button();
-        this.lbRemove = new WikiFunctions.Controls.Lists.ListBoxArticle();
+        this.lbRemove = new Twain.Core.Controls.Lists.ListBoxArticle();
         this.cbOpType = new System.Windows.Forms.ComboBox();
         this.gbMisc = new System.Windows.Forms.GroupBox();
         this.flwOther = new System.Windows.Forms.FlowLayoutPanel();
@@ -355,10 +355,10 @@ partial class ListFilterForm
     private System.Windows.Forms.Button btnClear;
     private System.Windows.Forms.GroupBox gbMisc;
     private System.Windows.Forms.CheckBox chkRemoveDups;
-    private WikiFunctions.Controls.Lists.ListBoxArticle lbRemove;
+    private Twain.Core.Controls.Lists.ListBoxArticle lbRemove;
     private System.Windows.Forms.ComboBox cbOpType;
     private System.Windows.Forms.CheckBox chkSortAZ;
     private System.Windows.Forms.FlowLayoutPanel flwOther;
-    private WikiFunctions.Controls.NamespacesControl pageNamespaces;
+    private Twain.Core.Controls.NamespacesControl pageNamespaces;
     private System.Windows.Forms.SplitContainer splitContainer1;
 }

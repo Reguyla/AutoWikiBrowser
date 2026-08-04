@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using WikiFunctions;
-using WikiFunctions.Parse;
+using Twain.Core;
+using Twain.Core.Parse;
 
 namespace Twain.Tests;
 
@@ -1351,8 +1351,8 @@ words.
 ";
         const string g = @"words";
 
-        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, WikiFunctions.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + c + a + "\r\n" + g));
-        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, WikiFunctions.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + d + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + c + g, Twain.Core.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + c + a + "\r\n" + g));
+        Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + d + g, Twain.Core.WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + d + a + "\r\n" + g));
         Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e + g, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a + "\r\n" + g));
         Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a + b + e, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a + "\r\n"));
         Assert.That(MetaDataSorter.MoveTemplateToReferencesSection(a2 + b + e, WikiRegexes.MoreNoFootnotes, true), Is.EqualTo(b + e + a2 + "\r\n"));

@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls
+﻿namespace Twain.Core.Controls
 {
     partial class ArticleActionDialog
     {
@@ -40,9 +40,9 @@
             this.chkAutoProtect = new System.Windows.Forms.CheckBox();
             this.chkCascadingProtection = new System.Windows.Forms.CheckBox();
             this.chkNoRedirect = new System.Windows.Forms.CheckBox();
-            this.toolTip = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.toolTip = new Twain.Core.Controls.AWBToolTip(this.components);
             this.chkWatch = new System.Windows.Forms.CheckBox();
-            this.MoveDelete = new WikiFunctions.Controls.EditProtectControl();
+            this.MoveDelete = new Twain.Core.Controls.EditProtectControl();
             this.chkDealWithAssoc = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
@@ -234,7 +234,7 @@
         private System.Windows.Forms.CheckBox chkCascadingProtection;
         private EditProtectControl MoveDelete;
         private System.Windows.Forms.CheckBox chkNoRedirect;
-        private WikiFunctions.Controls.AWBToolTip toolTip;
+        private Twain.Core.Controls.AWBToolTip toolTip;
         private System.Windows.Forms.CheckBox chkWatch;
         private System.Windows.Forms.CheckBox chkDealWithAssoc;
     }

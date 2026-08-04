@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls.Lists
+﻿namespace Twain.Core.Controls.Lists
 {
     partial class ListComparer
     {
@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ListComparer));
-            this.lbBoth = new WikiFunctions.Controls.Lists.ListBoxArticle();
+            this.lbBoth = new Twain.Core.Controls.Lists.ListBoxArticle();
             this.mnuList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.transferToListMaker1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.transferToListMaker2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,14 +46,14 @@
             this.btnClear = new System.Windows.Forms.Button();
             this.lblBoth = new System.Windows.Forms.Label();
             this.gbList1 = new System.Windows.Forms.GroupBox();
-            this.listMaker1 = new WikiFunctions.Controls.Lists.ListMaker();
+            this.listMaker1 = new Twain.Core.Controls.Lists.ListMaker();
             this.gbList2 = new System.Windows.Forms.GroupBox();
-            this.listMaker2 = new WikiFunctions.Controls.Lists.ListMaker();
+            this.listMaker2 = new Twain.Core.Controls.Lists.ListMaker();
             this.gbResults = new System.Windows.Forms.GroupBox();
             this.flwDiff2 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblOnly2 = new System.Windows.Forms.Label();
             this.lblNo2 = new System.Windows.Forms.Label();
-            this.lbNo2 = new WikiFunctions.Controls.Lists.ListBoxArticle();
+            this.lbNo2 = new Twain.Core.Controls.Lists.ListBoxArticle();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnSaveOnly2 = new System.Windows.Forms.Button();
             this.btnMoveOnly2 = new System.Windows.Forms.Button();
@@ -63,7 +63,7 @@
             this.flwDiff1 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblOnly1 = new System.Windows.Forms.Label();
             this.lblNo1 = new System.Windows.Forms.Label();
-            this.lbNo1 = new WikiFunctions.Controls.Lists.ListBoxArticle();
+            this.lbNo1 = new Twain.Core.Controls.Lists.ListBoxArticle();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnSaveOnly1 = new System.Windows.Forms.Button();
             this.btnMoveOnly1 = new System.Windows.Forms.Button();
@@ -78,7 +78,7 @@
             this.flwDiff1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            this.tooltip = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.tooltip = new Twain.Core.Controls.AWBToolTip(this.components);
             // 
             // lbBoth
             // 
@@ -230,7 +230,7 @@
             this.listMaker1.SelectedProvider = "CategoryListProvider";
             this.listMaker1.Size = new System.Drawing.Size(212, 358);
             this.listMaker1.SourceText = "";
-            this.listMaker1.SpecialFilterSettings = ((WikiFunctions.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
+            this.listMaker1.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
             this.listMaker1.TabIndex = 14;
             // 
             // gbList2
@@ -251,7 +251,7 @@
             this.listMaker2.SelectedProvider = "CategoryListProvider";
             this.listMaker2.Size = new System.Drawing.Size(212, 358);
             this.listMaker2.SourceText = "";
-            this.listMaker2.SpecialFilterSettings = ((WikiFunctions.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker2.SpecialFilterSettings")));
+            this.listMaker2.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker2.SpecialFilterSettings")));
             this.listMaker2.TabIndex = 14;
             // 
             // gbResults
@@ -518,7 +518,7 @@
         private System.Windows.Forms.ToolStripMenuItem removeSelectedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transferToListMaker2ToolStripMenuItem;
-        private WikiFunctions.Controls.AWBToolTip tooltip;
+        private Twain.Core.Controls.AWBToolTip tooltip;
     }
 }
 

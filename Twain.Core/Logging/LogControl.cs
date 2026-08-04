@@ -20,16 +20,16 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-using WikiFunctions.Controls;
-using WikiFunctions.Controls.Lists;
+using Twain.Core.Controls;
+using Twain.Core.Controls.Lists;
 
-namespace WikiFunctions.Logging;
+namespace Twain.Core.Logging;
 
 public partial class LogControl : UserControl
 {
     protected ListMaker listMaker;
     protected readonly List<AWBLogListener> FilteredItems = new List<AWBLogListener>();
-    private WikiFunctions.Controls.AWBToolTip tooltip = new AWBToolTip();
+    private Twain.Core.Controls.AWBToolTip tooltip = new AWBToolTip();
 
     #region Public
     public LogControl()

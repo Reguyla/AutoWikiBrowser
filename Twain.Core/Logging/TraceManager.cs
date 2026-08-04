@@ -16,7 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Logging;
+namespace Twain.Core.Logging;
 
 /// <summary>
 /// An inheritable implementation of a Logging manager, built around a generic collection of IMyTraceListener objects and String keys

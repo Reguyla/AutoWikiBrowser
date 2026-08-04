@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Writes a sanitized local diagnostic report for an application exception.
@@ -142,7 +142,7 @@ internal static class LocalDiagnosticReport
 
         AppendAssemblyInformation(
             report,
-            "WikiFunctions assembly",
+            "Twain.Core assembly",
             typeof(LocalDiagnosticReport).Assembly);
 
         report.AppendLine(

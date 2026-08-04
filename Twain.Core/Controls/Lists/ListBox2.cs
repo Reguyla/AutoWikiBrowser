@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Collections;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls.Lists;
+namespace Twain.Core.Controls.Lists;
 
 /// <summary>
 /// Enhanced list box

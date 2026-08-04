@@ -18,9 +18,9 @@
 */
 
 using System.Windows.Forms;
-using WikiFunctions.Parse;
+using Twain.Core.Parse;
 
-namespace WikiFunctions.ReplaceSpecial;
+namespace Twain.Core.ReplaceSpecial;
 
 public class Rule : IRule
 {

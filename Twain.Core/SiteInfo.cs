@@ -21,9 +21,9 @@ using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.Xml;
 using System.Xml.Serialization;
-using WikiFunctions.API;
+using Twain.Core.API;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// This class holds all basic information about a wiki

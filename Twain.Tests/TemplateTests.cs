@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using WikiFunctions.Parse;
+using Twain.Core.Parse;
 
 namespace Twain.Tests;
 
@@ -62,10 +62,10 @@ public class TemplateTests : RequiresInitialization
     [Test]
     public void TemplateExistsTests()
     {
-        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{foo}}"), WikiFunctions.Tools.NestedTemplateRegex("Foo")));
-        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{Template:foo}}"), WikiFunctions.Tools.NestedTemplateRegex("Foo")));
-        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{ foo }}"), WikiFunctions.Tools.NestedTemplateRegex("Foo")));
-        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{foo|p=1}}"), WikiFunctions.Tools.NestedTemplateRegex("Foo")));
-        ClassicAssert.IsFalse(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{foo}}"), WikiFunctions.Tools.NestedTemplateRegex("Foo2")));
+        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{foo}}"), Twain.Core.Tools.NestedTemplateRegex("Foo")));
+        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{Template:foo}}"), Twain.Core.Tools.NestedTemplateRegex("Foo")));
+        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{ foo }}"), Twain.Core.Tools.NestedTemplateRegex("Foo")));
+        ClassicAssert.IsTrue(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{foo|p=1}}"), Twain.Core.Tools.NestedTemplateRegex("Foo")));
+        ClassicAssert.IsFalse(Parsers.TemplateExists(Parsers.GetAllTemplates(@"{{foo}}"), Twain.Core.Tools.NestedTemplateRegex("Foo2")));
     }
 }

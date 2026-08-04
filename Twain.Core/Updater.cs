@@ -18,9 +18,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Windows.Forms;
-using WikiFunctions.Background;
+using Twain.Core.Background;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 public static class Updater
 {

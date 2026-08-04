@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Lists.Providers;
+namespace Twain.Core.Lists.Providers;
 
 /// <summary>
 /// Gets the list of pages on the Named Special Pages

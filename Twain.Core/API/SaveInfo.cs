@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Xml;
 
-namespace WikiFunctions.API;
+namespace Twain.Core.API;
 
 /// <summary>
 /// Provides information about a successfully completed page editing operation

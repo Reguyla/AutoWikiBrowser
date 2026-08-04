@@ -25,8 +25,8 @@ using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Xml;
-using WikiFunctions;
-using WikiFunctions.Plugin;
+using Twain.Core;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
 

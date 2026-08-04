@@ -17,9 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using WikiFunctions.Lists.Providers;
+using Twain.Core.Lists.Providers;
 
-namespace WikiFunctions.Plugin;
+namespace Twain.Core.Plugin;
 
 /// <summary>
 /// Basic AWB Plugin Interface, no Article Processing or List Making, just access to the AWB interface

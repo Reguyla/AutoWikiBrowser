@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Profiles
+﻿namespace Twain.Core.Profiles
 {
     partial class AWBProfileAdd
     {

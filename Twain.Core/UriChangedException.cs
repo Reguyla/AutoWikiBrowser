@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions;
+﻿namespace Twain.Core;
 
 class UriChangedException : Exception
 {

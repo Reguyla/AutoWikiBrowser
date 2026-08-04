@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using WikiFunctions.Lists.Providers;
+using Twain.Core.Lists.Providers;
 
 //TODO: Investigate converting this to a plug-in or module.
 //There is a lot we can do to improve this
 
-namespace WikiFunctions.Parse;
+namespace Twain.Core.Parse;
 
 /// <summary>
 /// Provides functions for editing wiki text, such as formatting and re-categorization.

@@ -18,9 +18,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Xml;
-using WikiFunctions.Controls.Lists;
+using Twain.Core.Controls.Lists;
 
-namespace WikiFunctions.Lists.Providers;
+namespace Twain.Core.Lists.Providers;
 
 // TODO: Consolidate category-name normalization helpers so list providers use
 // one consistent implementation for decoding titles, removing fragments,

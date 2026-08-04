@@ -29,7 +29,7 @@ How to enable a new setting:
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-namespace WikiFunctions.AWBSettings;
+namespace Twain.Core.AWBSettings;
 
 // mother class
 [Serializable, XmlRoot("AutoWikiBrowserPreferences")]

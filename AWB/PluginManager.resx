@@ -164,7 +164,7 @@
     <value>lvPlugin</value>
   </data>
   <data name="&gt;&gt;lvPlugin.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.NoFlickerExtendedListView, WikiFunctions, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.NoFlickerExtendedListView, Twain.Core,Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;lvPlugin.Parent" xml:space="preserve">
     <value>$this</value>

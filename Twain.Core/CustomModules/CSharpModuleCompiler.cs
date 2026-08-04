@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.CustomModules;
+﻿namespace Twain.Core.CustomModules;
 
 /// <summary>
 /// Provides C# custom-module templates and compiles custom modules
@@ -38,15 +38,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using WikiFunctions;
+using Twain.Core;
 
 namespace AutoWikiBrowser.CustomModules
 {
-    public class CustomModule : WikiFunctions.Plugin.IModule
+    public class CustomModule : Twain.Core.Plugin.IModule
     {
-        private readonly WikiFunctions.Plugin.IAutoWikiBrowser awb;
+        private readonly Twain.Core.Plugin.IAutoWikiBrowser awb;
 
-        public CustomModule(WikiFunctions.Plugin.IAutoWikiBrowser awb)
+        public CustomModule(Twain.Core.Plugin.IAutoWikiBrowser awb)
         {
             this.awb = awb;
         }

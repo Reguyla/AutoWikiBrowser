@@ -1,4 +1,4 @@
-﻿using WikiFunctions.Plugin;
+﻿using Twain.Core.Plugin;
 
 namespace Twain.Tests;
 

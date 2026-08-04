@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Profiles
+﻿namespace Twain.Core.Profiles
 {
     partial class AWBProfilesForm
     {
@@ -42,7 +42,7 @@
             this.btnClose = new System.Windows.Forms.Button();
             this.btnLogin = new System.Windows.Forms.Button();
             this.BtnEdit = new System.Windows.Forms.Button();
-            this.lvAccounts = new WikiFunctions.Controls.NoFlickerExtendedListView();
+            this.lvAccounts = new Twain.Core.Controls.NoFlickerExtendedListView();
             this.colID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colAccountName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colPasswordSaved = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -342,7 +342,7 @@
 
         #endregion
 
-        protected WikiFunctions.Controls.NoFlickerExtendedListView lvAccounts;
+        protected Twain.Core.Controls.NoFlickerExtendedListView lvAccounts;
         protected System.Windows.Forms.ColumnHeader colAccountName;
         protected System.Windows.Forms.ColumnHeader colPasswordSaved;
         protected System.Windows.Forms.ColumnHeader colProfileSettings;

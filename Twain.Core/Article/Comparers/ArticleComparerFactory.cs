@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Factory class for making instances of IArticleComparer

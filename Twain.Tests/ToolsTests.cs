@@ -2,8 +2,8 @@
 using NUnit.Framework.Legacy;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using WikiFunctions;
-using WikiFunctions.Parse;
+using Twain.Core;
+using Twain.Core.Parse;
 
 namespace Twain.Tests;
 

@@ -18,9 +18,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 using System.Globalization;
-using WikiFunctions.TalkPages;
+using Twain.Core.TalkPages;
 
-namespace WikiFunctions.Parse;
+namespace Twain.Core.Parse;
 
 /// <summary>
 ///

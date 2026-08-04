@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls.Lists;
+namespace Twain.Core.Controls.Lists;
 
 /// <summary>
 /// Provides a form for comparing 2 lists, to find duplicates and/or removing one list from another.

@@ -24,7 +24,7 @@ Copyright © 2000-2002 Philip A. Craig
 
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using WikiFunctions;
+using Twain.Core;
 
 namespace Twain.Tests;
 

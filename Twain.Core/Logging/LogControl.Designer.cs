@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Logging
+﻿namespace Twain.Core.Logging
 {
     partial class LogControl
     {
@@ -57,12 +57,12 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lvIgnored = new WikiFunctions.Controls.NoFlickerExtendedListView();
+            this.lvIgnored = new Twain.Core.Controls.NoFlickerExtendedListView();
             this.colIgnoreArticle = new System.Windows.Forms.ColumnHeader();
             this.colIgnoreTime = new System.Windows.Forms.ColumnHeader();
             this.colSkippedBy = new System.Windows.Forms.ColumnHeader();
             this.colSkipReason = new System.Windows.Forms.ColumnHeader();
-            this.lvSaved = new WikiFunctions.Controls.NoFlickerExtendedListView();
+            this.lvSaved = new Twain.Core.Controls.NoFlickerExtendedListView();
             this.colSuccessSave = new System.Windows.Forms.ColumnHeader();
             this.colSuccessTime = new System.Windows.Forms.ColumnHeader();
             this.btnAddSuccessToList = new System.Windows.Forms.Button();

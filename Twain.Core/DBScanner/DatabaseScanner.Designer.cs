@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace WikiFunctions.DBScanner
+namespace Twain.Core.DBScanner
 {
     partial class DatabaseScanner
     {
@@ -59,7 +59,7 @@ namespace WikiFunctions.DBScanner
             this.chkHeading = new System.Windows.Forms.CheckBox();
             this.btnClear = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
-            this.tooltip = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.tooltip = new Twain.Core.Controls.AWBToolTip(this.components);
             this.btnTransfer = new System.Windows.Forms.Button();
             this.btnClearList = new System.Windows.Forms.Button();
             this.chkNoBold = new System.Windows.Forms.CheckBox();
@@ -82,7 +82,7 @@ namespace WikiFunctions.DBScanner
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gbOutput = new System.Windows.Forms.GroupBox();
             this.btnSaveArticleList = new System.Windows.Forms.Button();
-            this.lbArticles = new WikiFunctions.Controls.Lists.ListBoxArticle();
+            this.lbArticles = new Twain.Core.Controls.Lists.ListBoxArticle();
             this.btnFilter = new System.Windows.Forms.Button();
             this.lblStartFrom = new System.Windows.Forms.Label();
             this.lblLimitResutls = new System.Windows.Forms.Label();
@@ -122,7 +122,7 @@ namespace WikiFunctions.DBScanner
             this.txtDumpLocation = new System.Windows.Forms.TextBox();
             this.lblDBDump = new System.Windows.Forms.Label();
             this.tabNamespace = new System.Windows.Forms.TabPage();
-            this.pageNamespaces = new WikiFunctions.Controls.NamespacesControl();
+            this.pageNamespaces = new Twain.Core.Controls.NamespacesControl();
             this.tabTitle = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.chkTitleCaseSensitive = new System.Windows.Forms.CheckBox();
@@ -143,7 +143,7 @@ namespace WikiFunctions.DBScanner
             this.tabAWB = new System.Windows.Forms.TabPage();
             this.tabRestrict = new System.Windows.Forms.TabPage();
             this.chkProtection = new System.Windows.Forms.CheckBox();
-            this.MoveDelete = new WikiFunctions.Controls.EditProtectControl();
+            this.MoveDelete = new Twain.Core.Controls.EditProtectControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.flwHelpLinks = new System.Windows.Forms.FlowLayoutPanel();
             this.lblAlso = new System.Windows.Forms.Label();
@@ -1749,7 +1749,7 @@ namespace WikiFunctions.DBScanner
         private NumericUpDown nudWords;
         private Label lblWords;
         private Button btnFilter;
-        private WikiFunctions.Controls.Lists.ListBoxArticle lbArticles;
+        private Twain.Core.Controls.Lists.ListBoxArticle lbArticles;
         private CheckBox chkUnbulletedLinks;
         private CheckBox chkHeaderError;
         private CheckBox chkHasHTML;
@@ -1820,7 +1820,7 @@ namespace WikiFunctions.DBScanner
         private ToolStripStatusLabel toolStripStatusLabel1;
         private Button btnSaveTxtList;
         private Button btnSaveArticleList;
-        private WikiFunctions.Controls.EditProtectControl MoveDelete;
+        private Twain.Core.Controls.EditProtectControl MoveDelete;
         private CheckBox chkProtection;
         private TabPage tabTitle;
         private TableLayoutPanel tableLayoutPanel2;
@@ -1836,7 +1836,7 @@ namespace WikiFunctions.DBScanner
         private Label lblEndDate;
         private DateTimePicker dtpTo;
         private ToolStripStatusLabel lblPercentageComplete;
-        private WikiFunctions.Controls.NamespacesControl pageNamespaces;
+        private Twain.Core.Controls.NamespacesControl pageNamespaces;
         private TabPage tabPage1;
     }
 }

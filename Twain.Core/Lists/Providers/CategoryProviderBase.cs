@@ -16,7 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Lists.Providers;
+namespace Twain.Core.Lists.Providers;
 
 /// <summary>
 /// Provides shared MediaWiki category-listing and recursive category

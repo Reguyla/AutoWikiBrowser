@@ -25,8 +25,8 @@ Copyright © 2000-2002 Philip A. Craig
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Text.RegularExpressions;
-using WikiFunctions;
-using WikiFunctions.Parse;
+using Twain.Core;
+using Twain.Core.Parse;
 
 namespace Twain.Tests;
 

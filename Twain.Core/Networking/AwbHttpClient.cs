@@ -1,9 +1,9 @@
 ﻿using System.Collections.Specialized;
 using System.Net.Http;
 using System.Threading;
-using WikiFunctions.Plugin;
+using Twain.Core.Plugin;
 
-namespace WikiFunctions.Networking
+namespace Twain.Core.Networking
 {
     /// <summary>
     /// Provides the centralized HTTP networking infrastructure used by

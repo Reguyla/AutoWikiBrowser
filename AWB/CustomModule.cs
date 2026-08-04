@@ -23,9 +23,9 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.CustomModules;
-using WikiFunctions.Plugin;
+using Twain.Core;
+using Twain.Core.CustomModules;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
 

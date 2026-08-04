@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls.Lists
+﻿namespace Twain.Core.Controls.Lists
 {
     partial class ListMaker
     {
@@ -73,11 +73,11 @@
             this.saveListToFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sortAlphaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sortReverseAlphaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tooltip = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.tooltip = new Twain.Core.Controls.AWBToolTip(this.components);
             this.btnStop = new System.Windows.Forms.Button();
             this.btnFilter = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
-            this.lbArticles = new WikiFunctions.Controls.Lists.ListBoxArticle();
+            this.lbArticles = new Twain.Core.Controls.Lists.ListBoxArticle();
             this.mnuListBox.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -518,7 +518,7 @@
 
         #endregion
 
-        private WikiFunctions.Controls.Lists.ListBoxArticle lbArticles;
+        private Twain.Core.Controls.Lists.ListBoxArticle lbArticles;
         private System.Windows.Forms.Label lblNumOfPages;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.RichTextBox txtPage;
@@ -537,7 +537,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
-        private WikiFunctions.Controls.AWBToolTip tooltip;
+        private Twain.Core.Controls.AWBToolTip tooltip;
         public System.Windows.Forms.ContextMenuStrip mnuListBox;
         private System.Windows.Forms.ToolStripMenuItem openInBrowserToolStripMenuItem;
         private System.Windows.Forms.Button btnFilter;

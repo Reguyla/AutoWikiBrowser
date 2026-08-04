@@ -1,4 +1,4 @@
-﻿using WikiFunctions;
+﻿using Twain.Core;
 
 namespace AutoWikiBrowser.Services.Diff;
 

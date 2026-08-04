@@ -57,18 +57,18 @@ namespace AutoWikiBrowser
             this.UsageStatsLabel = new System.Windows.Forms.LinkLabel();
             this.lblRevision = new System.Windows.Forms.Label();
             this.flwDevs = new System.Windows.Forms.FlowLayoutPanel();
-            this.MagioladitisLabel = new WikiFunctions.Controls.DeveloperLinkLabel();
-            this.MaxSemLabel = new WikiFunctions.Controls.DeveloperLinkLabel();
-            this.ReedyLabel = new WikiFunctions.Controls.DeveloperLinkLabel();
-            this.RjLabel = new WikiFunctions.Controls.DeveloperLinkLabel();
+            this.MagioladitisLabel = new Twain.Core.Controls.DeveloperLinkLabel();
+            this.MaxSemLabel = new Twain.Core.Controls.DeveloperLinkLabel();
+            this.ReedyLabel = new Twain.Core.Controls.DeveloperLinkLabel();
+            this.RjLabel = new Twain.Core.Controls.DeveloperLinkLabel();
             this.flwOriginalDevs = new System.Windows.Forms.FlowLayoutPanel();
-            this.BluemooseLink = new WikiFunctions.Controls.DeveloperLinkLabel();
-            this.LigulemLink = new WikiFunctions.Controls.DeveloperLinkLabel();
+            this.BluemooseLink = new Twain.Core.Controls.DeveloperLinkLabel();
+            this.LigulemLink = new Twain.Core.Controls.DeveloperLinkLabel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.linkPhabricator = new System.Windows.Forms.LinkLabel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.kingboykLabel = new WikiFunctions.Controls.DeveloperLinkLabel();
+            this.kingboykLabel = new Twain.Core.Controls.DeveloperLinkLabel();
             this.lblContribs = new System.Windows.Forms.Label();
             this.txtVersions = new System.Windows.Forms.TextBox();
             this.flwDevs.SuspendLayout();
@@ -150,28 +150,28 @@ namespace AutoWikiBrowser
             resources.ApplyResources(this.MagioladitisLabel, "MagioladitisLabel");
             this.MagioladitisLabel.Name = "MagioladitisLabel";
             this.MagioladitisLabel.TabStop = true;
-            this.MagioladitisLabel.WhichDeveloper = WikiFunctions.Controls.Developers.Magioladitis;
+            this.MagioladitisLabel.WhichDeveloper = Twain.Core.Controls.Developers.Magioladitis;
             // 
             // MaxSemLabel
             // 
             resources.ApplyResources(this.MaxSemLabel, "MaxSemLabel");
             this.MaxSemLabel.Name = "MaxSemLabel";
             this.MaxSemLabel.TabStop = true;
-            this.MaxSemLabel.WhichDeveloper = WikiFunctions.Controls.Developers.MaxSem;
+            this.MaxSemLabel.WhichDeveloper = Twain.Core.Controls.Developers.MaxSem;
             // 
             // ReedyLabel
             // 
             resources.ApplyResources(this.ReedyLabel, "ReedyLabel");
             this.ReedyLabel.Name = "ReedyLabel";
             this.ReedyLabel.TabStop = true;
-            this.ReedyLabel.WhichDeveloper = WikiFunctions.Controls.Developers.Reedy;
+            this.ReedyLabel.WhichDeveloper = Twain.Core.Controls.Developers.Reedy;
             // 
             // RjLabel
             // 
             resources.ApplyResources(this.RjLabel, "RjLabel");
             this.RjLabel.Name = "RjLabel";
             this.RjLabel.TabStop = true;
-            this.RjLabel.WhichDeveloper = WikiFunctions.Controls.Developers.Rjwilmsi;
+            this.RjLabel.WhichDeveloper = Twain.Core.Controls.Developers.Rjwilmsi;
             // 
             // flwOriginalDevs
             // 
@@ -191,7 +191,7 @@ namespace AutoWikiBrowser
             resources.ApplyResources(this.LigulemLink, "LigulemLink");
             this.LigulemLink.Name = "LigulemLink";
             this.LigulemLink.TabStop = true;
-            this.LigulemLink.WhichDeveloper = WikiFunctions.Controls.Developers.Ligulem;
+            this.LigulemLink.WhichDeveloper = Twain.Core.Controls.Developers.Ligulem;
             // 
             // flowLayoutPanel3
             // 
@@ -225,7 +225,7 @@ namespace AutoWikiBrowser
             resources.ApplyResources(this.kingboykLabel, "kingboykLabel");
             this.kingboykLabel.Name = "kingboykLabel";
             this.kingboykLabel.TabStop = true;
-            this.kingboykLabel.WhichDeveloper = WikiFunctions.Controls.Developers.Kingboyk;
+            this.kingboykLabel.WhichDeveloper = Twain.Core.Controls.Developers.Kingboyk;
             // 
             // lblContribs
             // 
@@ -298,14 +298,14 @@ namespace AutoWikiBrowser
         private System.Windows.Forms.FlowLayoutPanel flwOriginalDevs;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private WikiFunctions.Controls.DeveloperLinkLabel BluemooseLink;
-        private WikiFunctions.Controls.DeveloperLinkLabel LigulemLink;
-        private WikiFunctions.Controls.DeveloperLinkLabel MagioladitisLabel;
-        private WikiFunctions.Controls.DeveloperLinkLabel MaxSemLabel;
-        private WikiFunctions.Controls.DeveloperLinkLabel ReedyLabel;
-        private WikiFunctions.Controls.DeveloperLinkLabel RjLabel;
+        private Twain.Core.Controls.DeveloperLinkLabel BluemooseLink;
+        private Twain.Core.Controls.DeveloperLinkLabel LigulemLink;
+        private Twain.Core.Controls.DeveloperLinkLabel MagioladitisLabel;
+        private Twain.Core.Controls.DeveloperLinkLabel MaxSemLabel;
+        private Twain.Core.Controls.DeveloperLinkLabel ReedyLabel;
+        private Twain.Core.Controls.DeveloperLinkLabel RjLabel;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-        private WikiFunctions.Controls.DeveloperLinkLabel kingboykLabel;
+        private Twain.Core.Controls.DeveloperLinkLabel kingboykLabel;
         private System.Windows.Forms.Label lblContribs;
         private System.Windows.Forms.TextBox txtVersions;
         private System.Windows.Forms.LinkLabel linkPhabricator;

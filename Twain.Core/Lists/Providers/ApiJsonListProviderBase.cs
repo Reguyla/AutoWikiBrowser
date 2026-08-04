@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using WikiFunctions.API;
+using Twain.Core.API;
 
-namespace WikiFunctions.Lists.Providers;
+namespace Twain.Core.Lists.Providers;
 
 /// <summary>
 /// Provides article lists from MediaWiki API responses formatted as JSON.

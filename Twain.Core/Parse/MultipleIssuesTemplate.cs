@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //TODO: Investigate moving this to a plugin or module. Unique to Wikipedia
 
-namespace WikiFunctions.Parse;
+namespace Twain.Core.Parse;
 
 /// <summary>
 /// Provides functions for editing wiki text, such as formatting and re-categorization.

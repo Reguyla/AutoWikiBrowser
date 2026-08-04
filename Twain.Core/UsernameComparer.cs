@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions;
+﻿namespace Twain.Core;
 
 /// <summary>
 /// First letter case insensitive comparison; used for username equality checks

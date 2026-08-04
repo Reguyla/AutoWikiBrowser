@@ -17,7 +17,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Parse
+namespace Twain.Core.Parse
 {
     partial class FindandReplace
     {
@@ -91,7 +91,7 @@ namespace WikiFunctions.Parse
             this.btnDone = new System.Windows.Forms.Button();
             this.lnkWpRE = new System.Windows.Forms.LinkLabel();
             this.btnClear = new System.Windows.Forms.Button();
-            this.toolTip1 = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.toolTip1 = new Twain.Core.Controls.AWBToolTip(this.components);
             this.chkIgnoreLinks = new System.Windows.Forms.CheckBox();
             this.chkAddToSummary = new System.Windows.Forms.CheckBox();
             this.chkIgnoreMore = new System.Windows.Forms.CheckBox();
@@ -630,7 +630,7 @@ namespace WikiFunctions.Parse
         private System.Windows.Forms.Button btnDone;
         private System.Windows.Forms.LinkLabel lnkWpRE;
         private System.Windows.Forms.Button btnClear;
-        private WikiFunctions.Controls.AWBToolTip toolTip1;
+        private Twain.Core.Controls.AWBToolTip toolTip1;
         private System.Windows.Forms.CheckBox chkIgnoreLinks;
         private System.Windows.Forms.CheckBox chkAddToSummary;
         private System.Windows.Forms.ContextMenuStrip FindAndReplaceContextMenu;

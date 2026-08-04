@@ -1,5 +1,5 @@
 ﻿
-namespace WikiFunctions.Logging
+namespace Twain.Core.Logging
 {
     partial class ArticleActionListView
     {

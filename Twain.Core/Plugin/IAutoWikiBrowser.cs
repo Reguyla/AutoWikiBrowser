@@ -18,9 +18,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Windows.Forms;
-using WikiFunctions.Logging;
+using Twain.Core.Logging;
 
-namespace WikiFunctions.Plugin;
+namespace Twain.Core.Plugin;
 
 public interface IAutoWikiBrowserForm : IAutoWikiBrowserTabs
 {
@@ -168,7 +168,7 @@ public interface IAutoWikiBrowserCommands
 public interface IAutoWikiBrowser : IAutoWikiBrowserForm, IAutoWikiBrowserCommands, IAutoWikiBrowserInfo
 {
     /// <summary>
-    /// Returns a reference to a WikiFunctions.Logging.TraceManager class which handles AWB's logging. This object also implements the IMyTraceListener interface. Plugin authors can use this reference to write to all active loggers, including the AWB Log tab and logfiles.
+    /// Returns a reference to a Twain.Core.Logging.TraceManager class which handles AWB's logging. This object also implements the IMyTraceListener interface. Plugin authors can use this reference to write to all active loggers, including the AWB Log tab and logfiles.
     /// </summary>
     TraceManager TraceManager { get; } // implements IMyTraceListener
     bool SkipNoChanges { get; set; }

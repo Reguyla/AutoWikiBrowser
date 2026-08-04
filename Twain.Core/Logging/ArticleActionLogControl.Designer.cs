@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Logging
+﻿namespace Twain.Core.Logging
 {
     partial class ArticleActionLogControl
     {
@@ -53,8 +53,8 @@
             this.openLogInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lvSuccessful = new WikiFunctions.Logging.ArticleActionListView();
-            this.lvFailed = new WikiFunctions.Logging.ArticleActionListView();
+            this.lvSuccessful = new Twain.Core.Logging.ArticleActionListView();
+            this.lvFailed = new Twain.Core.Logging.ArticleActionListView();
             this.btnAddSucessfulToList = new System.Windows.Forms.Button();
             this.mnuListView.SuspendLayout();
             this.SuspendLayout();

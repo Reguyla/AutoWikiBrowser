@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Threading;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Retains a bounded, in-memory trail of sanitized application events.

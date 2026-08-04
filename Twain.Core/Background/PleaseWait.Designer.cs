@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Background
+﻿namespace Twain.Core.Background
 {
     partial class PleaseWait
     {

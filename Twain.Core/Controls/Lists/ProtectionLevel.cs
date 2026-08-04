@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace WikiFunctions.Controls.Lists;
+namespace Twain.Core.Controls.Lists;
 
 public partial class ProtectionLevel : Form
 {

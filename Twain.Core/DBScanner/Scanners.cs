@@ -17,9 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using WikiFunctions.Parse;
+using Twain.Core.Parse;
 
-namespace WikiFunctions.DBScanner;
+namespace Twain.Core.DBScanner;
 
 /// <summary>
 /// Abstract base class for Scan objects

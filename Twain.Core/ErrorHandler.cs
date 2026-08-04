@@ -2,13 +2,13 @@
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
-using WikiFunctions.API;
+using Twain.Core.API;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 /* Don't use anything WikiFunctions-specific here, for source-compatibility with Updater  */
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace WikiFunctions
+namespace Twain.Core
 {
     public delegate string ErrorHandlerAddition();
 

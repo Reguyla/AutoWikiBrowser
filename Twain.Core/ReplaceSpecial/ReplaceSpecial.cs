@@ -22,7 +22,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace WikiFunctions.ReplaceSpecial;
+namespace Twain.Core.ReplaceSpecial;
 
 //TODO: Use IArticleComparer derivatives where possible
 

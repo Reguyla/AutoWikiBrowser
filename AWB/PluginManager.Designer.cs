@@ -30,7 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PluginManager));
-            lvPlugin = new WikiFunctions.Controls.NoFlickerExtendedListView();
+            lvPlugin = new Twain.Core.Controls.NoFlickerExtendedListView();
             colName = new System.Windows.Forms.ColumnHeader();
             contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
             loadPluginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -121,7 +121,7 @@
 
         #endregion
 
-        private WikiFunctions.Controls.NoFlickerExtendedListView lvPlugin;
+        private Twain.Core.Controls.NoFlickerExtendedListView lvPlugin;
         private System.Windows.Forms.ColumnHeader colName;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem pluginToolStripMenuItem;

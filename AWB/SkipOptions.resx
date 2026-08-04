@@ -304,7 +304,7 @@
     <value>toolTip1</value>
   </data>
   <data name="&gt;&gt;toolTip1.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.AWBToolTip, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.AWBToolTip, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>SkipOptions</value>

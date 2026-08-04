@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using System.Windows.Forms;
-using WikiFunctions;
+using Twain.Core;
 
 namespace AutoWikiBrowser;
 

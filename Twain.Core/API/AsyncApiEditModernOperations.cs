@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace WikiFunctions.API;
+namespace Twain.Core.API;
 
 /// <summary>
 /// Defines the ApiEdit work performed by AsyncApiEditModern.

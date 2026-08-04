@@ -21,11 +21,11 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
-using WikiFunctions.Background;
-using WikiFunctions.Controls.Lists;
-using WikiFunctions.Lists;
+using Twain.Core.Background;
+using Twain.Core.Controls.Lists;
+using Twain.Core.Lists;
 
-namespace WikiFunctions.DBScanner;
+namespace Twain.Core.DBScanner;
 
 //TODO:Load proper protection levels
 /// <summary>

@@ -22,7 +22,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 public sealed partial class RegexTester : Form
 {

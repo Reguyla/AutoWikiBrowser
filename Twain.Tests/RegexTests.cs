@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Text.RegularExpressions;
-using WikiFunctions;
+using Twain.Core;
 
 namespace Twain.Tests;
 

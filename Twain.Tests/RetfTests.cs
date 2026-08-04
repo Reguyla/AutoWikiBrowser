@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using WikiFunctions.Parse;
+using Twain.Core.Parse;
 
 namespace Twain.Tests;
 

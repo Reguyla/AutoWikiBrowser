@@ -22,8 +22,8 @@ using AutoWikiBrowser.Logging;
 using System.Reflection;
 using System.Security;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.Plugin;
+using Twain.Core;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
 

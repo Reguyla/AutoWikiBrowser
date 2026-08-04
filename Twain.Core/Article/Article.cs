@@ -20,15 +20,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using WikiFunctions.API;
-using WikiFunctions.Controls;
-using WikiFunctions.Logging;
-using WikiFunctions.Options;
-using WikiFunctions.Parse;
-using WikiFunctions.Plugin;
-using WikiFunctions.TalkPages;
+using Twain.Core.API;
+using Twain.Core.Controls;
+using Twain.Core.Logging;
+using Twain.Core.Options;
+using Twain.Core.Parse;
+using Twain.Core.Plugin;
+using Twain.Core.TalkPages;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 public delegate void ArticleRedirected(string oldTitle, string newTitle);
 

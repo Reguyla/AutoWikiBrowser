@@ -18,7 +18,7 @@
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.ReplaceSpecial;
+namespace Twain.Core.ReplaceSpecial;
 
 public class InTemplateRule : IRule
 {
@@ -120,7 +120,7 @@ public class InTemplateRule : IRule
         public void Parse(TreeNode tn)
         {
             // get all template calls in text, including nested
-            List<string> allT = WikiFunctions.Parse.Parsers.GetAllTemplateDetail(text_);
+            List<string> allT = Twain.Core.Parse.Parsers.GetAllTemplateDetail(text_);
 
             // only need to process template calls that match the input template name
             allT.RemoveAll(t => Tools.TurnFirstToUpperNoProjectCheck(Tools.GetTemplateName(t)) != Tools.TurnFirstToUpperNoProjectCheck(template_));

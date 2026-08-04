@@ -16,9 +16,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Windows.Forms;
-using WikiFunctions.Controls;
+using Twain.Core.Controls;
 
-namespace WikiFunctions.Lists.Providers;
+namespace Twain.Core.Lists.Providers;
 
 /// <summary>
 /// List provider to extract page titles from HTML based on a user-provided regex.

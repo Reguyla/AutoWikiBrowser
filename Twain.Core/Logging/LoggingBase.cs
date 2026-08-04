@@ -16,7 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-namespace WikiFunctions.Logging;
+namespace Twain.Core.Logging;
 
 /// <summary>
 /// This abstract class can be used to build trace listener classes, or you can build a class from scratch and implement IMyTraceListener

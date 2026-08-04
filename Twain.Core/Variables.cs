@@ -17,11 +17,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Threading;
-using WikiFunctions.Background;
-using WikiFunctions.Lists.Providers;
-using WikiFunctions.Plugin;
+using Twain.Core.Background;
+using Twain.Core.Lists.Providers;
+using Twain.Core.Plugin;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 public enum ProjectEnum
 {

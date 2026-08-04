@@ -22,7 +22,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 /// <summary>
 /// Inreface for creation of custom sorters

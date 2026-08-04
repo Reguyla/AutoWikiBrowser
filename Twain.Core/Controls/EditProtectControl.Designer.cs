@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls
+﻿namespace Twain.Core.Controls
 {
     partial class EditProtectControl
     {

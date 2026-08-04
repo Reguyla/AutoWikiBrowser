@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Windows.Forms;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Provides extension methods for commonly used collection operations.

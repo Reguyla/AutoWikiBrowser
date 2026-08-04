@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Windows.Forms;
-using WikiFunctions;
+using Twain.Core;
 
 namespace AutoWikiBrowser;
 
@@ -45,7 +45,7 @@ internal sealed partial class AboutBox : Form
         lblRevision.Text = $"SVN {Variables.Revision}";
 
         txtWarning.Text =
-            WikiFunctions.Controls.AboutBox.GetDetailedMessage(
+            Twain.Core.Controls.AboutBox.GetDetailedMessage(
                 typeof(AboutBox).Assembly);
 
         // TODO (.NET 8 / WebView2):

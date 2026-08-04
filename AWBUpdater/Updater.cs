@@ -584,7 +584,7 @@ internal sealed partial class Updater : Form
 
             DeleteIfExists("Diff.dll");
 
-            DeleteIfExists("WikiFunctions2.dll");
+            DeleteIfExists("Twain.Core2.dll");
 
             DeleteIfExists("WPAssessmentsCatCreator.dll");
 

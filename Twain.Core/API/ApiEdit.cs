@@ -21,9 +21,9 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading;
 using System.Xml;
-using WikiFunctions.Controls;
+using Twain.Core.Controls;
 
-namespace WikiFunctions.API;
+namespace Twain.Core.API;
 
 // TODO (API Response Modernization):
 // Replace remaining duplicate XmlReader-based response parsing with the
@@ -448,12 +448,12 @@ public class ApiEdit : IApiEdit
     // Review the User-Agent string for modern .NET versions and verify that any
     // changes remain compatible with MediaWiki expectations.
     /// <summary>
-    /// Identifies WikiFunctions, the host operating system, and the active
+    /// Identifies Twain.Core,the host operating system, and the active
     /// .NET runtime in outgoing HTTP requests.
     /// </summary>
 
     private static readonly string UserAgent =
-        $"WikiFunctions ApiEdit/{Assembly.GetExecutingAssembly().GetName().Version} " +
+        $"Twain.Core ApiEdit/{Assembly.GetExecutingAssembly().GetName().Version} " +
         $"({Environment.OSVersion.VersionString}; .NET CLR {Environment.Version})";
 
     /// <summary>

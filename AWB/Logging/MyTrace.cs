@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // From the Kingbotk plugin. Converted from VB to C#
 
 using System.Windows.Forms;
-using WikiFunctions.Logging;
+using Twain.Core.Logging;
 
 namespace AutoWikiBrowser.Logging;
 

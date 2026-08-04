@@ -22,8 +22,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.Parse;
+using Twain.Core;
+using Twain.Core.Parse;
 
 namespace AutoWikiBrowser;
 

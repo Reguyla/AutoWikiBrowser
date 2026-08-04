@@ -4,7 +4,7 @@
 
 using System.Collections;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Represents a set of changes that can be applied to an original sequence.

@@ -21,7 +21,7 @@ using System.ComponentModel;
 
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 public enum Developers { Bluemoose, Ligulem, Magioladitis, Reedy, Rjwilmsi, MaxSem, Kingboyk }
 public class DeveloperLinkLabel : LinkLabel

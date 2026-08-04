@@ -1,8 +1,8 @@
 ﻿using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.CustomModules;
+using Twain.Core;
+using Twain.Core.CustomModules;
 
 namespace AutoWikiBrowser;
 
@@ -98,7 +98,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using WikiFunctions;
+using Twain.Core;
 
 namespace CSharpEvaluator
 {
@@ -120,7 +120,7 @@ namespace CSharpEvaluator
     /// The compiler parameters that receive the assembly reference paths.
     /// </param>
     /// <remarks>
-    /// The AutoWikiBrowser and WikiFunctions assemblies are added explicitly.
+    /// The Twain and Twain.Core assemblies are added explicitly.
     /// Other loaded, non-dynamic assemblies are also included so evaluator code
     /// can use types already available to the application. Duplicate paths and
     /// Microsoft-generated code assemblies are ignored.

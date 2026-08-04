@@ -26,8 +26,8 @@ Copyright © 2000-2002 Philip A. Craig
 
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using WikiFunctions;
-using WikiFunctions.Parse;
+using Twain.Core;
+using Twain.Core.Parse;
 
 namespace Twain.Tests;
 
@@ -589,7 +589,7 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
 
         // Categorization and then universal genfix
         Article ar2 = new Article("Category:Hello", " Text [[Category:Foo]]");
-        ar2.Categorisation((WikiFunctions.Options.CategorisationOptions)
+        ar2.Categorisation((Twain.Core.Options.CategorisationOptions)
             1, parser, false,
             "Foo",
             "Foo2", false);

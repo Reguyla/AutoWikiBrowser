@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
-using WikiFunctions.Lists.Providers;
+using Twain.Core.Lists.Providers;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 public partial class LevelNumber : Form
 {

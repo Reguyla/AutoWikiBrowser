@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Lists.Providers
+﻿namespace Twain.Core.Lists.Providers
 {
     partial class AdvancedRegexHtmlScraper
     {
@@ -43,7 +43,7 @@
             this.SingleLineCheckBox = new System.Windows.Forms.CheckBox();
             this.MultiLineCheckBox = new System.Windows.Forms.CheckBox();
             this.CaseSensitiveCheckBox = new System.Windows.Forms.CheckBox();
-            this.toolTip1 = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.toolTip1 = new Twain.Core.Controls.AWBToolTip(this.components);
             this.menu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GroupNumber)).BeginInit();
             this.SuspendLayout();
@@ -224,6 +224,6 @@
         private System.Windows.Forms.CheckBox SingleLineCheckBox;
         private System.Windows.Forms.CheckBox MultiLineCheckBox;
         private System.Windows.Forms.CheckBox CaseSensitiveCheckBox;
-        private WikiFunctions.Controls.AWBToolTip toolTip1;
+        private Twain.Core.Controls.AWBToolTip toolTip1;
     }
 }

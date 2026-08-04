@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace WikiFunctions.Background
+namespace Twain.Core.Background
 {
     public partial class PleaseWait : Form
     {

@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 using System.Reflection;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.Plugin;
+using Twain.Core;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser.Plugins;
 
@@ -63,7 +63,7 @@ internal static class Plugin
         {
             "DotNetWikiBot",
             "Diff",
-            "WikiFunctions",
+            "Twain.Core",
             "Newtonsoft.Json",
             "Microsoft.mshtml"
         };
@@ -580,7 +580,7 @@ internal static class Plugin
             return;
         }
 
-        WikiFunctions.Controls.Lists.ListMaker.AddProvider(
+        Twain.Core.Controls.Lists.ListMaker.AddProvider(
             listMakerPlugin);
 
         ListMakerPlugins.Add(

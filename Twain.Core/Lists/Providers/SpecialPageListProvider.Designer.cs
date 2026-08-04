@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Lists.Providers
+﻿namespace Twain.Core.Lists.Providers
 {
     partial class SpecialPageListProvider
     {

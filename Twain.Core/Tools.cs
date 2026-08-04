@@ -22,16 +22,16 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using WikiFunctions.API;
-using WikiFunctions.Networking;
-using WikiFunctions.Parse;
-using WikiFunctions.Plugin;
+using Twain.Core;
+using Twain.Core.API;
+using Twain.Core.Networking;
+using Twain.Core.Parse;
+using Twain.Core.Plugin;
 
-namespace WikiFunctions;
+namespace Twain.Core;
 
 /// <summary>
 /// Provides various tools as static methods, such as getting the HTML of a page
@@ -42,10 +42,10 @@ public static class Tools
     {
         string OSVersionString = Environment.OSVersion.VersionString;
 
-        DefaultUserAgentString = string.Format("WikiFunctions/{0} ({1}; .NET CLR {2})", VersionString, OSVersionString, Environment.Version);
+        DefaultUserAgentString = string.Format("Twain.Core/{0} ({1}; .NET CLR {2})", VersionString, OSVersionString, Environment.Version);
 
         // https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
-        AuthUserAgentString = string.Format("WikiFunctions/{0} (###) {1} .NET CLR/{2}",
+        AuthUserAgentString = string.Format("Twain.Core/{0} (###) {1} .NET CLR/{2}",
             VersionString,
             Regex.Replace(OSVersionString, @"^(.*) ([\d\.]+)$", "$1/$2"),
             Environment.Version
@@ -1525,7 +1525,7 @@ public static class Tools
     public static void Beep()
     {
         // public domain sounds from http://www.partnersinrhyme.com/soundfx/PDsoundfx/beep.shtml
-        Sound.Stream = Properties.Resources.beep1;
+        Sound.Stream = Resources.beep1;
         Sound.Play();
     }
 

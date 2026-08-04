@@ -16,7 +16,7 @@ Important:
 
 using System.Threading;
 
-namespace WikiFunctions.API;
+namespace Twain.Core.API;
 
 /// <summary>
 /// Provides details when an AsyncApiEditModern operation fails.

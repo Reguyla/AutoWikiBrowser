@@ -17,9 +17,9 @@
 */
 
 using System.Windows.Forms;
-using WikiFunctions.Controls;
+using Twain.Core.Controls;
 
-namespace WikiFunctions.ReplaceSpecial;
+namespace Twain.Core.ReplaceSpecial;
 
 public partial class RuleControl : UserControl
 {

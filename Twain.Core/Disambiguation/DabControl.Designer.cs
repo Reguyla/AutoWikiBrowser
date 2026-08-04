@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Disambiguation
+﻿namespace Twain.Core.Disambiguation
 {
     partial class DabControl
     {

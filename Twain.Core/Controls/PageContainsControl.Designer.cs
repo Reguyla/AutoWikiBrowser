@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls
+﻿namespace Twain.Core.Controls
 {
     partial class PageContainsControl
     {
@@ -34,7 +34,7 @@
             this.chkIsRegex = new System.Windows.Forms.CheckBox();
             this.txtContains = new System.Windows.Forms.RichTextBox();
             this.chkContains = new System.Windows.Forms.CheckBox();
-            this.toolTip1 = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.toolTip1 = new Twain.Core.Controls.AWBToolTip(this.components);
             this.SuspendLayout();
             // 
             // chkCaseSensitive
@@ -120,6 +120,6 @@
         protected System.Windows.Forms.CheckBox chkIsRegex;
         protected System.Windows.Forms.RichTextBox txtContains;
         protected System.Windows.Forms.CheckBox chkContains;
-        protected WikiFunctions.Controls.AWBToolTip toolTip1;
+        protected Twain.Core.Controls.AWBToolTip toolTip1;
     }
 }

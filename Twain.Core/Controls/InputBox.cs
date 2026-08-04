@@ -1,6 +1,6 @@
 using System.Windows.Forms;
 
-namespace WikiFunctions.Controls;
+namespace Twain.Core.Controls;
 
 /// <summary>
 /// The InputBox class is used to show a prompt in a dialog box using the static method Show().

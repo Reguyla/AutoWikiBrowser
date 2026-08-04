@@ -22,9 +22,9 @@ using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Settings;
 using System.Drawing;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.AWBSettings;
-using WikiFunctions.Plugin;
+using Twain.Core;
+using Twain.Core.AWBSettings;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
 

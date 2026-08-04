@@ -16,8 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using WikiFunctions.Logging;
-using WikiFunctions.Plugin;
+using Twain.Core.Logging;
+using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
 
@@ -44,13 +44,13 @@ partial class MainForm
     /// <summary>
     /// Gets the configured find-and-replace processor.
     /// </summary>
-    WikiFunctions.Parse.FindandReplace IAutoWikiBrowser.FindandReplace =>
+    Twain.Core.Parse.FindandReplace IAutoWikiBrowser.FindandReplace =>
         FindAndReplace;
 
     /// <summary>
     /// Gets the configured template substitution processor.
     /// </summary>
-    WikiFunctions.SubstTemplates IAutoWikiBrowser.SubstTemplates =>
+    Twain.Core.SubstTemplates IAutoWikiBrowser.SubstTemplates =>
         SubstTemplates;
 
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Text.RegularExpressions;
-using WikiFunctions;
+using Twain.Core;
 
 namespace Twain.Tests;
 

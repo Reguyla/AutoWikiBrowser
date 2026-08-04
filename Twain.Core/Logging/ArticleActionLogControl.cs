@@ -18,10 +18,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Globalization;
 using System.Windows.Forms;
-using WikiFunctions.Controls;
-using WikiFunctions.Controls.Lists;
+using Twain.Core.Controls;
+using Twain.Core.Controls.Lists;
 
-namespace WikiFunctions.Logging;
+namespace Twain.Core.Logging;
 
 /// <summary>
 /// Displays successful and failed article actions and allows logged articles

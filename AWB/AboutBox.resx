@@ -403,7 +403,7 @@
     <value>MagioladitisLabel</value>
   </data>
   <data name="&gt;&gt;MagioladitisLabel.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;MagioladitisLabel.Parent" xml:space="preserve">
     <value>flwDevs</value>
@@ -433,7 +433,7 @@
     <value>MaxSemLabel</value>
   </data>
   <data name="&gt;&gt;MaxSemLabel.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;MaxSemLabel.Parent" xml:space="preserve">
     <value>flwDevs</value>
@@ -463,7 +463,7 @@
     <value>ReedyLabel</value>
   </data>
   <data name="&gt;&gt;ReedyLabel.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ReedyLabel.Parent" xml:space="preserve">
     <value>flwDevs</value>
@@ -493,7 +493,7 @@
     <value>RjLabel</value>
   </data>
   <data name="&gt;&gt;RjLabel.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;RjLabel.Parent" xml:space="preserve">
     <value>flwDevs</value>
@@ -550,7 +550,7 @@
     <value>BluemooseLink</value>
   </data>
   <data name="&gt;&gt;BluemooseLink.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;BluemooseLink.Parent" xml:space="preserve">
     <value>flwOriginalDevs</value>
@@ -580,7 +580,7 @@
     <value>LigulemLink</value>
   </data>
   <data name="&gt;&gt;LigulemLink.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;LigulemLink.Parent" xml:space="preserve">
     <value>flwOriginalDevs</value>
@@ -721,7 +721,7 @@
     <value>kingboykLabel</value>
   </data>
   <data name="&gt;&gt;kingboykLabel.Type" xml:space="preserve">
-    <value>WikiFunctions.Controls.DeveloperLinkLabel, WikiFunctions, Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>Twain.Core.Controls.DeveloperLinkLabel, Twain.Core,Version=6.3.1.2, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;kingboykLabel.Parent" xml:space="preserve">
     <value>flowLayoutPanel2</value>

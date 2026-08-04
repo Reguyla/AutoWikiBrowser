@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace WikiFunctions.Parse;
+namespace Twain.Core.Parse;
 
 /// <summary>
 /// This class provides functions for 'hiding' certain syntax by replacing it with unique tokens

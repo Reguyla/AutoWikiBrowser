@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls.Lists
+﻿namespace Twain.Core.Controls.Lists
 {
     partial class ListSplitter
     {
@@ -35,7 +35,7 @@
             this.btnXMLSave = new System.Windows.Forms.Button();
             this.saveXML = new System.Windows.Forms.SaveFileDialog();
             this.saveTXT = new System.Windows.Forms.SaveFileDialog();
-            this.listMaker1 = new WikiFunctions.Controls.Lists.ListMaker();
+            this.listMaker1 = new Twain.Core.Controls.Lists.ListMaker();
             ((System.ComponentModel.ISupportInitialize)(this.numSplitAmount)).BeginInit();
             this.SuspendLayout();
             // 
@@ -110,7 +110,7 @@
             this.listMaker1.SelectedProvider = "CategoryListProvider";
             this.listMaker1.Size = new System.Drawing.Size(205, 349);
             this.listMaker1.SourceText = "";
-            this.listMaker1.SpecialFilterSettings = ((WikiFunctions.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
+            this.listMaker1.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
             this.listMaker1.TabIndex = 0;
             // 
             // ListSplitter

@@ -1,4 +1,4 @@
-﻿namespace WikiFunctions.Controls
+﻿namespace Twain.Core.Controls
 {
     partial class AboutBox
     {
@@ -34,7 +34,7 @@
             this.okButton = new System.Windows.Forms.Button();
             this.textBoxDescription = new System.Windows.Forms.TextBox();
             this.lblVersion = new System.Windows.Forms.Label();
-            this.toolTip1 = new WikiFunctions.Controls.AWBToolTip(this.components);
+            this.toolTip1 = new Twain.Core.Controls.AWBToolTip(this.components);
             this.SuspendLayout();
             // 
             // lblMadeBy
@@ -110,7 +110,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "WikiFunctions";
+            this.Text = "Twain.Core";
             this.Load += new System.EventHandler(this.AboutBox_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -124,7 +124,7 @@
         protected System.Windows.Forms.Button okButton;
         protected System.Windows.Forms.TextBox textBoxDescription;
         protected System.Windows.Forms.Label lblVersion;
-        protected WikiFunctions.Controls.AWBToolTip toolTip1;
+        protected Twain.Core.Controls.AWBToolTip toolTip1;
 
 
     }

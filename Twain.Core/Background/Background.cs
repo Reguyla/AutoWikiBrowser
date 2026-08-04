@@ -19,10 +19,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.Collections.Specialized;
 using System.Threading;
 using System.Windows.Forms;
-using WikiFunctions.API;
-using WikiFunctions.Lists.Providers;
+using Twain.Core.API;
+using Twain.Core.Lists.Providers;
 
-namespace WikiFunctions.Background;
+namespace Twain.Core.Background;
 
 /// <summary>
 /// Represents the method invoked when a background request completes successfully.

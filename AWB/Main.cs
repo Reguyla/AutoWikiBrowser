@@ -38,15 +38,14 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WikiFunctions;
-using WikiFunctions.API;
-using WikiFunctions.Background;
-using WikiFunctions.Controls;
-using WikiFunctions.Controls.Lists;
-using WikiFunctions.Lists.Providers;
-using WikiFunctions.Parse;
-using WikiFunctions.Plugin;
-using WikiFunctions.Properties;
+using Twain.Core;
+using Twain.Core.API;
+using Twain.Core.Background;
+using Twain.Core.Controls;
+using Twain.Core.Controls.Lists;
+using Twain.Core.Lists.Providers;
+using Twain.Core.Parse;
+using Twain.Core.Plugin;
 using ThreadState = System.Threading.ThreadState;
 
 namespace AutoWikiBrowser;
@@ -70,7 +69,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // --------------------------------------------------------------------
 
     private readonly Splash SplashScreen = new();
-    private readonly WikiFunctions.Profiles.AWBProfilesForm Profiles;
+    private readonly Twain.Core.Profiles.AWBProfilesForm Profiles;
 
     private FormWindowState LastState = FormWindowState.Normal;
 
@@ -126,7 +125,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly SkipOptions Skip = new();
 
-    private readonly WikiFunctions.ReplaceSpecial.ReplaceSpecial RplcSpecial =
+    private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial RplcSpecial =
         new();
 
     private readonly Parsers Parser;
@@ -157,7 +156,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private ListComparer Comparer;
     private ListSplitter Splitter;
-    private WikiFunctions.DBScanner.DatabaseScanner DBScanner;
+    private Twain.Core.DBScanner.DatabaseScanner DBScanner;
 
     // --------------------------------------------------------------------
     // Statistics
@@ -314,7 +313,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Creates and configures the profile manager.
     /// </summary>
     /// <returns>
-    /// A fully initialized <see cref="WikiFunctions.Profiles.AWBProfilesForm"/>
+    /// A fully initialized <see cref="Twain.Core.Profiles.AWBProfilesForm"/>
     /// instance with its event handlers registered.
     /// </returns>
     /// <remarks>
@@ -322,10 +321,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// readonly <c>Profiles</c> field while keeping the initialization logic
     /// encapsulated in this helper method.
     /// </remarks>
-    private WikiFunctions.Profiles.AWBProfilesForm InitializeProfiles()
+    private Twain.Core.Profiles.AWBProfilesForm InitializeProfiles()
     {
-        WikiFunctions.Profiles.AWBProfilesForm profiles =
-            new WikiFunctions.Profiles.AWBProfilesForm(TheSession);
+        Twain.Core.Profiles.AWBProfilesForm profiles =
+            new Twain.Core.Profiles.AWBProfilesForm(TheSession);
 
         profiles.LoggedIn += ProfileLoggedIn;
         profiles.UserDefaultSettingsLoadRequired +=
@@ -3892,7 +3891,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         article.UpdateImages(
-            (WikiFunctions.Options.ImageReplaceOptions)cmboImages.SelectedIndex,
+            (Twain.Core.Options.ImageReplaceOptions)cmboImages.SelectedIndex,
             txtImageReplace.Text,
             txtImageWith.Text,
             chkSkipNoImgChange.Checked);
@@ -3918,7 +3917,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         article.Categorisation(
-            (WikiFunctions.Options.CategorisationOptions)
+            (Twain.Core.Options.CategorisationOptions)
             cmboCategorise.SelectedIndex,
             Parser,
             chkSkipNoCatChange.Checked,
@@ -8121,7 +8120,7 @@ font-size: 150%;'>No changes</h2>
                 DBScanner = listMaker.DBScanner();
                 break;
             case 2: // Never
-                DBScanner = new WikiFunctions.DBScanner.DatabaseScanner();
+                DBScanner = new Twain.Core.DBScanner.DatabaseScanner();
                 break;
         }
 
@@ -8270,7 +8269,7 @@ font-size: 150%;'>No changes</h2>
         Rectangle scrn = Screen.GetWorkingArea(this);
 
         var res =
-            WikiFunctions.Controls.InputBox.Show(
+            Twain.Core.Controls.InputBox.Show(
                 "Enter a reason. Leave blank if you'll edit the reason in the AWB text box",
                 "Speedy deletion",
                 "",

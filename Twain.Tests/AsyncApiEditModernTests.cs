@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using WikiFunctions.API;
+using Twain.Core.API;
 
 namespace Twain.Tests;
 

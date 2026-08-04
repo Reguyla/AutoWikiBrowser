@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace WikiFunctions.CustomModules;
+namespace Twain.Core.CustomModules;
 
 /// <summary>
 /// Defines the shared behavior for custom-module language compilers.
