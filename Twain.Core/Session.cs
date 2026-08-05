@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Windows.Forms;
@@ -215,9 +214,12 @@ public class Session
 
             return false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Editor = CreateEditor("https://en.wikipedia.org/w/");
+            Tools.WriteDebug(
+                nameof(UpdateProject),
+                ex.ToString());
+
             return false;
         }
     }
@@ -382,6 +384,52 @@ public class Session
         return token?.Type == JTokenType.Boolean
             ? token.Value<bool>()
             : defaultValue;
+    }
+
+    /// <summary>
+    /// Attempts to load the local AWB registration configuration from the
+    /// current wiki's <c>CheckPageJSON</c> page.
+    /// </summary>
+    /// <returns>
+    /// The raw JSON text from the local <c>CheckPageJSON</c> page when it is
+    /// successfully retrieved. If the page is unavailable because the wiki
+    /// does not provide it or denies access (for example, HTTP 403 or 404),
+    /// an empty string is returned.
+    /// </returns>
+    /// <remarks>
+    /// Many third-party MediaWiki installations do not host the optional
+    /// <c>Project:AutoWikiBrowser/CheckPageJSON</c> page used by Wikimedia
+    /// projects. In those cases, AWB continues using the normal registration
+    /// logic without a local user list rather than treating the missing page
+    /// as a fatal error.
+    ///
+    /// Only expected "page unavailable" responses are handled here. Other
+    /// network failures, such as DNS resolution, TLS negotiation, or server
+    /// errors, are allowed to propagate so they can be reported to the user.
+    /// </remarks>
+    private string LoadCheckPageJson()
+    {
+        string checkPageUrl =
+            Variables.URLIndex +
+            "?title=Project:AutoWikiBrowser/CheckPageJSON&action=raw";
+
+        try
+        {
+            return Editor.SynchronousEditor.HttpGet(checkPageUrl);
+        }
+        catch (HttpRequestException ex)
+            when (ex.StatusCode is
+                HttpStatusCode.Forbidden or
+                HttpStatusCode.NotFound)
+        {
+            Tools.WriteDebug(
+                nameof(UpdateWikiStatus),
+                "The local CheckPageJSON page is unavailable; " +
+                "continuing without a local registration list. " +
+                $"Status: {ex.StatusCode}; URL: {checkPageUrl}");
+
+            return string.Empty;
+        }
     }
 
     /// <summary>
@@ -637,9 +685,7 @@ public class Session
                 return WikiStatusResult.OldVersion;
             }
 
-            CheckPageJSONText = Editor.SynchronousEditor.HttpGet(
-                Variables.URLIndex +
-                "?title=Project:AutoWikiBrowser/CheckPageJSON&action=raw");
+            CheckPageJSONText = LoadCheckPageJson();
 
             if (!User.IsLoggedIn)
             {
