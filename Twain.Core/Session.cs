@@ -409,13 +409,22 @@ public class Session
     /// </remarks>
     private string LoadCheckPageJson()
     {
-        string checkPageUrl =
-            Variables.URLIndex +
-            "?title=Project:AutoWikiBrowser/CheckPageJSON&action=raw";
+        if (!TryBuildAwbProjectPageUrl(
+                "AutoWikiBrowser/CheckPageJSON",
+                out string checkPageUrl))
+        {
+            Tools.WriteDebug(
+                nameof(LoadCheckPageJson),
+                "The current wiki does not define a usable project namespace. " +
+                "Skipping the optional CheckPageJSON lookup.");
+
+            return string.Empty;
+        }
 
         try
         {
-            return Editor.SynchronousEditor.HttpGet(checkPageUrl);
+            return Editor.SynchronousEditor.HttpGet(
+                checkPageUrl);
         }
         catch (HttpRequestException ex)
             when (ex.StatusCode is
@@ -423,9 +432,8 @@ public class Session
                 HttpStatusCode.NotFound)
         {
             Tools.WriteDebug(
-                nameof(UpdateWikiStatus),
-                "The local CheckPageJSON page is unavailable; " +
-                "continuing without a local registration list. " +
+                nameof(LoadCheckPageJson),
+                "The optional CheckPageJSON page is unavailable. " +
                 $"Status: {ex.StatusCode}; URL: {checkPageUrl}");
 
             return string.Empty;
@@ -487,6 +495,83 @@ public class Session
     }
 
     /// <summary>
+    /// Attempts to retrieve the project namespace defined by the current wiki.
+    /// </summary>
+    /// <param name="projectNamespace">
+    /// When this method returns, contains the project namespace, including its
+    /// trailing colon, when one is available; otherwise, an empty string.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the wiki defines a usable project namespace;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// MediaWiki normally assigns namespace ID 4 to the project namespace.
+    /// Some third-party wikis do not define a usable project namespace, so
+    /// callers must not assume that the canonical <c>Project:</c> alias exists.
+    /// </remarks>
+    private bool TryGetProjectNamespace(
+        out string projectNamespace)
+    {
+        projectNamespace = string.Empty;
+
+        if (Site?.Namespaces == null ||
+            !Site.Namespaces.TryGetValue(
+                4,
+                out string namespaceName) ||
+            string.IsNullOrWhiteSpace(namespaceName))
+        {
+            return false;
+        }
+
+        projectNamespace = namespaceName;
+        return true;
+    }
+
+    /// <summary>
+    /// Attempts to build the raw-page URL for an optional AWB configuration
+    /// page on the current wiki.
+    /// </summary>
+    /// <param name="subpage">
+    /// The AWB subpage relative to the wiki's project namespace, such as
+    /// <c>AutoWikiBrowser/CheckPageJSON</c>.
+    /// </param>
+    /// <param name="url">
+    /// When successful, contains the URL used to retrieve the page content;
+    /// otherwise, an empty string.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the current wiki defines a project namespace
+    /// and the URL could be constructed; otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool TryBuildAwbProjectPageUrl(
+        string subpage,
+        out string url)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(subpage);
+
+        url = string.Empty;
+
+        if (!TryGetProjectNamespace(
+                out string projectNamespace))
+        {
+            return false;
+        }
+
+        string pageTitle =
+            projectNamespace +
+            subpage;
+
+        url =
+            Variables.URLIndex +
+            "?title=" +
+            Uri.EscapeDataString(pageTitle) +
+            "&action=raw";
+
+        return true;
+    }
+
+    /// <summary>
     /// Validates and parses the downloaded global version metadata.
     /// </summary>
     /// <param name="versionJson">
@@ -519,21 +604,44 @@ public class Session
     private bool TryLoadWikiConfiguration(
         out JObject configJson)
     {
-        string downloadedConfig =
-            Editor.SynchronousEditor.HttpGet(ConfigUrl);
+        string downloadedConfig = string.Empty;
 
-        if (!string.IsNullOrWhiteSpace(downloadedConfig))
+        if (TryBuildAwbProjectPageUrl(
+                "AutoWikiBrowser/Config",
+                out string configUrl))
+        {
+            try
+            {
+                downloadedConfig =
+                    Editor.SynchronousEditor.HttpGet(
+                        configUrl);
+            }
+            catch (HttpRequestException ex)
+                when (ex.StatusCode is
+                    HttpStatusCode.Forbidden or
+                    HttpStatusCode.NotFound)
+            {
+                Tools.WriteDebug(
+                    nameof(TryLoadWikiConfiguration),
+                    "The optional wiki configuration page is unavailable. " +
+                    $"Status: {ex.StatusCode}; URL: {configUrl}");
+            }
+        }
+        else
+        {
+            Tools.WriteDebug(
+                nameof(TryLoadWikiConfiguration),
+                "The current wiki does not define a usable project namespace. " +
+                "Using the default configuration.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(
+                downloadedConfig))
         {
             ConfigJSONText = downloadedConfig;
         }
         else
         {
-            Tools.WriteDebug(
-                nameof(UpdateWikiStatus),
-                "No JSON config page at " +
-                ConfigUrl +
-                "; falling back to default.");
-
             ConfigJSONText = DefaultWikiConfig;
         }
 
@@ -546,7 +654,6 @@ public class Session
         }
 
         JSONMessages(configJson["messages"]);
-
         TypoLink(configJson);
 
         Variables.LoadUnderscores(
