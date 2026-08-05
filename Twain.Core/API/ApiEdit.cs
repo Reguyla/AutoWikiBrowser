@@ -886,7 +886,40 @@ public class ApiEdit : IApiEdit
             return string.Empty;
         }
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            string requestMethod =
+                request.Method.Method;
+
+            string requestUri =
+                request.RequestUri?.ToString() ??
+                "<unknown URI>";
+
+            string responseUri =
+                response.RequestMessage?.RequestUri?.ToString() ??
+                requestUri;
+
+            string diagnosticMessage =
+                $"HTTP request failed.\r\n" +
+                $"Method: {requestMethod}\r\n" +
+                $"Request URI: {requestUri}\r\n" +
+                $"Response URI: {responseUri}\r\n" +
+                $"Status: {(int)response.StatusCode} " +
+                $"{response.ReasonPhrase}";
+
+            System.Diagnostics.Debug.WriteLine(
+                diagnosticMessage);
+
+            System.Diagnostics.Debug.WriteLine(
+                new System.Diagnostics.StackTrace(
+                    skipFrames: 1,
+                    fNeedFileInfo: true));
+
+            throw new HttpRequestException(
+                diagnosticMessage,
+                inner: null,
+                response.StatusCode);
+        }
 
         return response.Content
             .ReadAsStringAsync(cancellationToken)
