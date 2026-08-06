@@ -165,24 +165,32 @@ public partial class AWBProfilesForm : Form
     private void LoadProfiles()
     {
         lvAccounts.BeginUpdate();
-        lvAccounts.Items.Clear();
 
-        foreach (AWBProfile profile in AWBProfiles.GetProfiles())
+        try
         {
-            ListViewItem item = new(profile.ID.ToString());
-            item.SubItems.Add(profile.Username);
+            lvAccounts.Items.Clear();
 
-            item.SubItems.Add(!string.IsNullOrEmpty(profile.Password) ? "Yes" : "No");
+            foreach (AWBProfile profile in AWBProfiles.GetProfiles())
+            {
+                ListViewItem item = new(profile.ID.ToString());
+                item.SubItems.Add(profile.Username);
+                item.SubItems.Add(
+                    !string.IsNullOrEmpty(profile.Password)
+                        ? "Yes"
+                        : "No");
+                item.SubItems.Add(profile.DefaultSettings);
+                item.SubItems.Add(profile.Notes);
 
-            item.SubItems.Add(profile.DefaultSettings);
-            item.SubItems.Add(profile.Notes);
+                lvAccounts.Items.Add(item);
+            }
 
-            lvAccounts.Items.Add(item);
+            UpdateUI();
+            lvAccounts.ResizeColumns();
         }
-
-        UpdateUI();
-        lvAccounts.ResizeColumns();
-        lvAccounts.EndUpdate();
+        finally
+        {
+            lvAccounts.EndUpdate();
+        }
     }
 
     /// <summary>
