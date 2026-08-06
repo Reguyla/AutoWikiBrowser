@@ -22,8 +22,18 @@ using System.Windows.Forms;
 
 namespace Twain.Core.Profiles;
 
+/// <summary>
+/// Prompts the user to enter a password for a saved account profile.
+/// </summary>
+/// <remarks>
+/// This dialog is used when a profile does not store a password or when the
+/// user must supply credentials at runtime.
+/// </remarks>
 public partial class UserPassword : Form
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserPassword"/> class.
+    /// </summary>
     public UserPassword()
     {
         InitializeComponent();
@@ -40,14 +50,11 @@ public partial class UserPassword : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Username
     {
-        set
-        {
-            lblText.Text = string.Format(lblText.Text, value);
-        }
+        set => lblText.Text = string.Format(lblText.Text, value);
     }
 
-    public string GetPassword
-    {
-        get { return txtPassword.Text; }
-    }
+    /// <summary>
+    /// Gets the password entered by the user.
+    /// </summary>
+    public string GetPassword => txtPassword.Text;
 }
