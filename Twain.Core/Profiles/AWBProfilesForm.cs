@@ -117,37 +117,50 @@ public partial class AWBProfilesForm : Form
     }
 
     /// <summary>
-    /// Gets the integer of the first selected item
+    /// Gets the profile identifier of the first selected account.
     /// </summary>
+    /// <value>
+    /// The selected profile identifier, or <c>-1</c> if no valid profile is
+    /// selected.
+    /// </value>
     protected int SelectedItem
     {
         get
         {
-            try
-            {
-                if (lvAccounts.SelectedIndices.Count == 0)
-                {
-                    return -1;
-                }
-
-                return int.Parse(lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text);
-            }
-            catch
+            if (lvAccounts.SelectedIndices.Count == 0)
             {
                 return -1;
             }
+
+            return int.TryParse(
+                lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text,
+                out int profileId)
+                ? profileId
+                : -1;
         }
     }
 
+    /// <summary>
+    /// Updates the enabled state of controls that require a selected account.
+    /// </summary>
     private void UpdateUI()
     {
-        btnLogin.Enabled = btnDelete.Enabled = BtnEdit.Enabled = loginAsThisAccountToolStripMenuItem.Enabled =
-            editThisAccountToolStripMenuItem.Enabled = changePasswordToolStripMenuItem.Enabled =
-                deleteThisAccountToolStripMenuItem.Enabled = (lvAccounts.SelectedItems.Count > 0);
+        bool accountSelected = lvAccounts.SelectedItems.Count > 0;
+
+        btnLogin.Enabled = accountSelected;
+        btnDelete.Enabled = accountSelected;
+        BtnEdit.Enabled = accountSelected;
+        loginAsThisAccountToolStripMenuItem.Enabled = accountSelected;
+        editThisAccountToolStripMenuItem.Enabled = accountSelected;
+        changePasswordToolStripMenuItem.Enabled = accountSelected;
+        deleteThisAccountToolStripMenuItem.Enabled = accountSelected;
     }
 
+    // TODO: Move profile retrieval and ListView population into a
+    // UI-independent presenter or service to simplify future Avalonia migration.
     /// <summary>
-    /// Loads all the profiles onto the form
+    /// Loads the saved account profiles into the account list and refreshes the
+    /// associated user interface.
     /// </summary>
     private void LoadProfiles()
     {
@@ -156,7 +169,7 @@ public partial class AWBProfilesForm : Form
 
         foreach (AWBProfile profile in AWBProfiles.GetProfiles())
         {
-            ListViewItem item = new ListViewItem(profile.ID.ToString());
+            ListViewItem item = new(profile.ID.ToString());
             item.SubItems.Add(profile.Username);
 
             item.SubItems.Add(!string.IsNullOrEmpty(profile.Password) ? "Yes" : "No");
