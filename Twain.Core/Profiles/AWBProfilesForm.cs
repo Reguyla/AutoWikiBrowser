@@ -172,31 +172,76 @@ public partial class AWBProfilesForm : Form
         lvAccounts.EndUpdate();
     }
 
+    /// <summary>
+    /// Opens the dialog for adding a saved account.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void btnAdd_Click(object sender, EventArgs e)
     {
-        Add();
+        AddProfile();
     }
 
-    private void addNewAccountToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the dialog for adding a saved account from the context menu.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
+    private void addNewAccountToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        Add();
+        AddProfile();
     }
 
-    private void Add()
+    /// <summary>
+    /// Displays the account-creation dialog and reloads the saved profiles when
+    /// a new account is added successfully.
+    /// </summary>
+    private void AddProfile()
     {
-        AWBProfileAdd add = new AWBProfileAdd();
-        if (add.ShowDialog() == DialogResult.Yes)
+        using AWBProfileAdd add = new();
+
+        if (add.ShowDialog(this) == DialogResult.Yes)
         {
             LoadProfiles();
         }
     }
 
+    /// <summary>
+    /// Deletes the currently selected saved account.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void btnDelete_Click(object sender, EventArgs e)
     {
         Delete();
     }
 
-    private void deleteThisSavedAccountToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Deletes the currently selected saved account from the context menu.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
+    private void deleteThisSavedAccountToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         Delete();
     }
@@ -261,35 +306,93 @@ public partial class AWBProfilesForm : Form
         }
     }
 
+    /// <summary>
+    /// Closes the profiles form.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void btnExit_Click(object sender, EventArgs e)
     {
         Close();
     }
 
-    public string SettingsToLoad
-    {
-        get { return CurrentSettingsProfile; }
-    }
+    /// <summary>
+    /// Gets the settings profile selected for loading.
+    /// </summary>
+    public string SettingsToLoad =>
+        CurrentSettingsProfile;
 
+    /// <summary>
+    /// Updates the available profile actions when the account selection changes.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void lvAccounts_SelectedIndexChanged(object sender, EventArgs e)
     {
         UpdateUI();
     }
 
+    /// <summary>
+    /// Logs in using the selected saved account when the account is
+    /// double-clicked.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     protected virtual void lvAccounts_DoubleClick(object sender, EventArgs e)
     {
         Login();
     }
 
+    /// <summary>
+    /// Opens the editor for the selected saved account.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void BtnEdit_Click(object sender, EventArgs e)
     {
         Edit();
     }
 
+    /// <summary>
+    /// Logs in to the selected saved account using the specified password.
+    /// </summary>
+    /// <param name="password">
+    /// The password to use for authentication.
+    /// </param>
     private void PerformLogin(string password)
     {
-        PerformLogin(AWBProfiles.GetUsername(int.Parse(lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text)),
-            password);
+        if (lvAccounts.SelectedIndices.Count == 0)
+        {
+            return;
+        }
+
+        string profileIdText =
+            lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text;
+
+        if (!int.TryParse(profileIdText, out int profileId))
+        {
+            return;
+        }
+
+        string username = AWBProfiles.GetUsername(profileId);
+
+        PerformLogin(username, password);
     }
 
     private void PerformLogin(string username, string password)
