@@ -62,43 +62,81 @@ public class InTemplateRule : IRule
         return rc;
     }
 
+    /// <summary>
+    /// Saves the current rule-control values to this rule.
+    /// </summary>
     public override void Save()
     {
-        if (ruleControl_ == null)
+        if (ruleControl_ is null)
+        {
             return;
+        }
+
         ruleControl_.SaveToRule(this);
     }
 
+    /// <summary>
+    /// Restores this rule's values to the associated rule control.
+    /// </summary>
     public override void Restore()
     {
-        if (ruleControl_ == null)
+        if (ruleControl_ is null)
+        {
             return;
+        }
+
         ruleControl_.RestoreFromRule(this);
     }
 
+    /// <summary>
+    /// Selects the rule name in the associated rule control.
+    /// </summary>
     public override void SelectName()
     {
-        if (ruleControl_ == null)
+        if (ruleControl_ is null)
+        {
             return;
+        }
+
         ruleControl_.SelectName();
     }
 
-    public override string Apply(TreeNode tn, string text, string title)
+    /// <summary>
+    /// Applies this rule to the supplied text for each configured template name.
+    /// </summary>
+    /// <param name="tn">
+    /// The tree node associated with the rule being applied.
+    /// </param>
+    /// <param name="text">
+    /// The text to process.
+    /// </param>
+    /// <param name="title">
+    /// The title of the page being processed.
+    /// </param>
+    /// <returns>
+    /// The processed text, or the original text when the rule is disabled or the
+    /// input text is empty.
+    /// </returns>
+    public override string Apply(
+        TreeNode tn,
+        string text,
+        string title)
     {
         if (!enabled_ || string.IsNullOrEmpty(text))
+        {
             return text;
+        }
 
         foreach (string template in TemplateNames_)
         {
-            text = ApplyOnce(template, tn, text, title);
+            text = ApplyInsideTemplate(
+                template,
+                tn,
+                text,
+                title);
         }
 
         return text;
-    }
-
-    private static string ApplyOnce(string template, TreeNode tn, string text, string title)
-    {
-        return ApplyInsideTemplate(template, tn, text, title);
     }
 
     class ParseTemplate
