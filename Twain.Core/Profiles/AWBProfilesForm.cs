@@ -395,50 +395,77 @@ public partial class AWBProfilesForm : Form
         PerformLogin(username, password);
     }
 
+    /// <summary>
+    /// Attempts to log in using the specified credentials and updates the form
+    /// when authentication succeeds.
+    /// </summary>
+    /// <param name="username">
+    /// The username to use for authentication.
+    /// </param>
+    /// <param name="password">
+    /// The password to use for authentication.
+    /// </param>
     private void PerformLogin(string username, string password)
     {
         if (TheSession.IsBusy)
         {
             MessageBox.Show(
-                "Cannot log in, session is busy.\r\n\r\nPlease wait for currently saving pages to complete.",
-                "Session busy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this,
+                "Cannot log in because the session is busy.\r\n\r\n" +
+                "Please wait for the current page-saving operation to complete.",
+                "Session busy",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
             return;
         }
 
-        bool needsUpdate = TheSession.User.IsLoggedIn;
+        bool loginSucceeded = false;
+
         try
         {
-            // TODO: Review after AsyncApiEdit migration. This profile-login path remains
-            // synchronous because it depends on local login exception handling and the
-            // LoginDomain overload.
-            TheSession.Editor.SynchronousEditor.Login(username, password, Variables.LoginDomain);
-            needsUpdate = true;
+            // TODO: Review after the AsyncApiEdit migration. This profile-login
+            // path remains synchronous because it depends on local login exception
+            // handling and the LoginDomain overload.
+            TheSession.Editor.SynchronousEditor.Login(
+                username,
+                password,
+                Variables.LoginDomain);
+
+            loginSucceeded = true;
         }
         catch (UriChangedException ex)
         {
-            // TODO: We should offer to try changing the protocol to the response Uri scheme and attempt to load again
+            // TODO: Offer to change the configured protocol to match the response
+            // URI scheme and retry the login after user confirmation.
             MessageBox.Show(
+                this,
                 ex.Message,
                 ex.Header,
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
+                MessageBoxIcon.Error);
         }
         catch (LoginException ex)
         {
-            MessageBox.Show(this, ex.Message, "Login failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                this,
+                ex.Message,
+                "Login failed",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
         }
 
-        if (LoggedIn != null && needsUpdate)
+        if (loginSucceeded)
         {
-            LoggedIn(null, null);
+            LoggedIn?.Invoke(this, EventArgs.Empty);
         }
 
-        // do not close if we reached here via command line /u (user profile) argument and form was never shown to user
+        // Do not close when login was initiated through the /u command-line
+        // argument and the form was never displayed to the user.
         if (TheSession.User.IsLoggedIn && Visible)
         {
             Close();
