@@ -263,47 +263,113 @@ public partial class AWBProfilesForm : Form
         }
     }
 
-    private void changePasswordToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the password-change dialog for the selected saved account.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
+    private void changePasswordToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        try
+        if (!TryGetSelectedProfileId(out int profileId))
         {
-            UserPassword password = new UserPassword
-            {
-                Username = lvAccounts.Items[lvAccounts.SelectedIndices[0]].SubItems[1].Text
-            };
-
-            if (password.ShowDialog() == DialogResult.OK)
-            {
-                AWBProfiles.SetPassword(int.Parse(lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text),
-                    password.GetPassword);
-            }
+            return;
         }
-        finally
+
+        string username =
+            lvAccounts.Items[lvAccounts.SelectedIndices[0]]
+                .SubItems[1]
+                .Text;
+
+        using UserPassword password = new()
+        {
+            Username = username
+        };
+
+        if (password.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        AWBProfiles.SetPassword(
+            profileId,
+            password.GetPassword);
+
+        LoadProfiles();
+    }
+
+    /// <summary>
+    /// Opens the editor for the selected saved account from the context menu.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
+    private void editThisAccountToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
+    {
+        Edit();
+    }
+
+    /// <summary>
+    /// Opens the selected account profile for editing and reloads the profile
+    /// list when the changes are saved.
+    /// </summary>
+    private void Edit()
+    {
+        if (!TryGetSelectedProfileId(out int profileId))
+        {
+            return;
+        }
+
+        AWBProfile? profile = AWBProfiles.GetProfile(profileId);
+
+        if (profile is null)
+        {
+            return;
+        }
+
+        using AWBProfileAdd add = new(profile);
+
+        if (add.ShowDialog(this) == DialogResult.Yes)
         {
             LoadProfiles();
         }
     }
 
-    private void editThisAccountToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Attempts to retrieve the identifier of the currently selected account
+    /// profile.
+    /// </summary>
+    /// <param name="profileId">
+    /// When this method returns successfully, contains the selected profile
+    /// identifier.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if a selected profile has a valid numeric
+    /// identifier; otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool TryGetSelectedProfileId(out int profileId)
     {
-        Edit();
-    }
+        profileId = 0;
 
-    private void Edit()
-    {
-        try
+        if (lvAccounts.SelectedIndices.Count == 0)
         {
-            AWBProfileAdd add =
-                new AWBProfileAdd(
-                    AWBProfiles.GetProfile(int.Parse(lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text)));
-            if (add.ShowDialog() == DialogResult.Yes)
-            {
-                LoadProfiles();
-            }
+            return false;
         }
-        catch
-        {
-        }
+
+        string profileIdText =
+            lvAccounts.Items[lvAccounts.SelectedIndices[0]].Text;
+
+        return int.TryParse(profileIdText, out profileId);
     }
 
     /// <summary>
