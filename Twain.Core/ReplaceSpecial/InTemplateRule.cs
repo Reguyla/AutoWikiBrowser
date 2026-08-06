@@ -30,35 +30,82 @@ public class InTemplateRule : IRule
 
     InTemplateRuleControl ruleControl_;
 
-    public override Object Clone()
+    /// <summary>
+    /// Creates a copy of this rule without its associated user interface
+    /// control.
+    /// </summary>
+    /// <returns>
+    /// A shallow copy of the current rule.
+    /// </returns>
+    public override object Clone()
     {
-        InTemplateRule res = (InTemplateRule)MemberwiseClone();
-        res.ruleControl_ = null;
-        return res;
+        InTemplateRule clone = (InTemplateRule)MemberwiseClone();
+        clone.ruleControl_ = null;
+
+        return clone;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InTemplateRule"/> class.
+    /// </summary>
     public InTemplateRule()
     {
         Name = "In Template Rule";
     }
 
+    /// <summary>
+    /// Gets the user interface control associated with this rule.
+    /// </summary>
+    /// <returns>
+    /// The rule control, or <see langword="null"/> if no control is currently
+    /// associated with the rule.
+    /// </returns>
     public override Control GetControl()
     {
         return ruleControl_;
     }
 
+    /// <summary>
+    /// Removes the association between this rule and its current user interface
+    /// control.
+    /// </summary>
     public override void ForgetControl()
     {
         ruleControl_ = null;
     }
 
-    public override Control CreateControl(IRuleControlOwner owner, Control.ControlCollection collection, System.Drawing.Point pos)
+    /// <summary>
+    /// Creates and initializes the user interface control for this rule.
+    /// </summary>
+    /// <param name="owner">
+    /// The owner responsible for hosting the rule control.
+    /// </param>
+    /// <param name="collection">
+    /// The control collection that will contain the created control.
+    /// </param>
+    /// <param name="pos">
+    /// The initial location of the control.
+    /// </param>
+    /// <returns>
+    /// The newly created rule control.
+    /// </returns>
+    public override Control CreateControl(
+        IRuleControlOwner owner,
+        Control.ControlCollection collection,
+        System.Drawing.Point pos)
     {
-        InTemplateRuleControl rc = new InTemplateRuleControl(owner) { Location = pos };
+        InTemplateRuleControl rc = new(owner)
+        {
+            Location = pos
+        };
+
         rc.RestoreFromRule(this);
+
         DisposeControl();
+
         ruleControl_ = rc;
         collection.Add(rc);
+
         return rc;
     }
 
