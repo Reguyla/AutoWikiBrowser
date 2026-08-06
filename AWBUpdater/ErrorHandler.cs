@@ -690,7 +690,7 @@ public partial class ErrorHandler : Form
             return "unknown function";
         }
 
-        string res = "";
+        string res = string.Empty;
         foreach (string t in trace)
         {
             if (PresetNamespaces.Any(ns => t.StartsWith(ns)))

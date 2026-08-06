@@ -29,8 +29,8 @@ namespace AWBUpdater;
 internal sealed partial class Updater : Form
 {
     private UpdateStatus _updateStatus = UpdateStatus.None;
-    private readonly string _awbDirectory = "", _tempDirectory = "";
-    private string _zipName = "";
+    private readonly string _awbDirectory = "", _tempDirectory = string.Empty;
+    private string _zipName = string.Empty;
 
     private IWebProxy _proxy;
 
@@ -187,7 +187,7 @@ internal sealed partial class Updater : Form
     private void ReadyToExit()
     {
         btnCancel.Text = "Close";
-        lblStatus.Text = "";
+        lblStatus.Text = string.Empty;
         progressUpdate.Visible = false;
         btnCancel.Enabled = true;
     }
@@ -294,7 +294,7 @@ internal sealed partial class Updater : Form
                     "The version information response did not contain valid version data.");
             }
 
-            string versionToUpdateAWBTo = "";
+            string versionToUpdateAWBTo = string.Empty;
 
             if (updaterData.enabledversions.All(v => v.version != awbVersionInfo.FileVersion))
             {

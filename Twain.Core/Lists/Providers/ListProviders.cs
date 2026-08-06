@@ -1013,7 +1013,7 @@ public class ImageFileLinksListProvider : ApiListProviderBase
 /// <remarks>Slow query!!</remarks>
 public class WikiSearchListProvider : ApiListProviderBase, ISpecialPageProvider
 {
-    protected string SearchType = "text", SearchPrefix = "";
+    protected string SearchType = "text", SearchPrefix = string.Empty;
 
     #region Tags: <search>/<p>
     static readonly List<string> pe = new List<string>(new[] { "p" });
@@ -1732,7 +1732,7 @@ public class LinkSearchSpecialPageProvider : ApiListProviderBase, ISpecialPagePr
             }
             else
             {
-                protocol = "";
+                protocol = string.Empty;
                 urlEnd = searchUrl;
             }
 

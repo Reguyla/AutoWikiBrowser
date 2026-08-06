@@ -229,7 +229,7 @@
             this.listMaker1.Name = "listMaker1";
             this.listMaker1.SelectedProvider = "CategoryListProvider";
             this.listMaker1.Size = new System.Drawing.Size(212, 358);
-            this.listMaker1.SourceText = "";
+            this.listMaker1.SourceText = string.Empty;
             this.listMaker1.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
             this.listMaker1.TabIndex = 14;
             // 
@@ -250,7 +250,7 @@
             this.listMaker2.Name = "listMaker2";
             this.listMaker2.SelectedProvider = "CategoryListProvider";
             this.listMaker2.Size = new System.Drawing.Size(212, 358);
-            this.listMaker2.SourceText = "";
+            this.listMaker2.SourceText = string.Empty;
             this.listMaker2.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker2.SpecialFilterSettings")));
             this.listMaker2.TabIndex = 14;
             // 

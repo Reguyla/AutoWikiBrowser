@@ -112,7 +112,7 @@ public partial class InTemplateRuleControl : UserControl
         {
             AliasesListBox.Items.Add(alias);
         }
-        AliasTextBox.Text = "";
+        AliasTextBox.Text = string.Empty;
         AliasTextBox.Select();
         UpdateEndabledStates();
     }

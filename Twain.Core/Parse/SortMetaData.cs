@@ -143,7 +143,7 @@ public partial class Parsers
         // merging
 
         // multiple same about into one
-        string oldArticleText = "";
+        string oldArticleText = string.Empty;
         while (oldArticleText != articleText)
         {
             oldArticleText = articleText;
@@ -222,7 +222,7 @@ public partial class Parsers
                 if (Tools.GetTemplateArgument(about, 9).Length > 0)
                     continue;
 
-                string extra = "";
+                string extra = string.Empty;
 
                 // where about has 2 arguments need extra pipe
                 if (Tools.GetTemplateArgument(Tools.NestedTemplateRegex("about").Match(articleText).Value, 3).Length == 0
@@ -270,7 +270,7 @@ public partial class Parsers
         }
 
         // multiple {{distinguish}} into one, NOT when using text= parameter
-        oldArticleText = "";
+        oldArticleText = string.Empty;
         while (oldArticleText != articleText)
         {
             oldArticleText = articleText;
@@ -340,10 +340,10 @@ public partial class Parsers
 
         string sectionTextOriginal = sectionText;
         Regex TemplateToMerge = Tools.NestedTemplateRegex(templateName);
-        string mergedTemplates = "";
+        string mergedTemplates = string.Empty;
 
         // unless it's zeroth section must remove heading to have templates at start of section
-        string heading = "";
+        string heading = string.Empty;
         Match h = WikiRegexes.Headings.Match(sectionText);
 
         if (h.Success && h.Index == 0)

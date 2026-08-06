@@ -64,7 +64,7 @@
             this.textBoxText.Name = "textBoxText";
             this.textBoxText.Size = new System.Drawing.Size(416, 20);
             this.textBoxText.TabIndex = 1;
-            this.textBoxText.Text = "";
+            this.textBoxText.Text = string.Empty;
             this.textBoxText.Validating += new System.ComponentModel.CancelEventHandler(this.textBoxText_Validating);
             this.textBoxText.TextChanged += new System.EventHandler(this.textBoxText_TextChanged);
             // 

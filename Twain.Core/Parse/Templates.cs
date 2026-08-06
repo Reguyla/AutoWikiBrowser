@@ -132,7 +132,7 @@ public partial class Parsers
             articleText = MatchedTemplates.Replace(articleText, m2 =>
             {
                 string res = m2.Value;
-                string valBefore = "";
+                string valBefore = string.Empty;
 
                 // inner loop to handle nested templates
                 while (res != valBefore)
@@ -409,7 +409,7 @@ public partial class Parsers
     private static string ExtractTemplate(string articleText, Match m)
     {
         Regex theTemplate = new Regex(Regex.Escape(m.Groups[1].Value) + @"(?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))}}");
-        string res = "";
+        string res = string.Empty;
         foreach (Match n in theTemplate.Matches(articleText))
         {
             if (n.Index == m.Index)

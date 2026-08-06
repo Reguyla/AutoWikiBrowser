@@ -781,14 +781,14 @@ public static partial class Variables
                 break;
 
             case "ar":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "باستخدام [[Project:أوب|أوب]]";
                 Stub = @"[^{}|]*?(?:[Ss]tub|بذرة|بذور)[^{}]*?";
                 TypoSummaryTag = "الأخطاء المصححة: ";
                 break;
 
             case "arz":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "عن طريق [[Project:AWB|اوب]]";
                 Stub = @"[^{}|]*?(?:[Ss]tub|تقاوى|بذرة)[^{}]*?";
                 TypoSummaryTag = "الأخطاء المصححة: ";
@@ -804,13 +804,13 @@ public static partial class Variables
                 break;
 
             case "bn":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "[[Project:অউব্রা|অউব্রা]] ব্যবহার করে";
                 TypoSummaryTag = "বানান সংশোধন: ";
                 break;
 
             case "ca":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "[[Viquipèdia:AutoWikiBrowser|AWB]]";
                 break;
 
@@ -853,7 +853,7 @@ public static partial class Variables
                 break;
 
             case "fa":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "با استفاده از [[Project:AutoWikiBrowser|AWB]]";
                 break;
 
@@ -868,12 +868,12 @@ public static partial class Variables
                 break;
 
             case "hi":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "[[विकिपीडिया:ऑटोविकिब्राउज़र|AWB]] के साथ";
                 break;
 
             case "hu":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "[[Wikipédia:AutoWikiBrowser|AWB]]";
                 break;
 
@@ -884,12 +884,12 @@ public static partial class Variables
                 break;
 
             case "it":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 Stub = @"(DUMMYTEMPLATE)";
                 break;
 
             case "ku":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "[[Wîkîpediya:AutoWikiBrowser|AWB]]";
                 break;
 
@@ -898,7 +898,7 @@ public static partial class Variables
                 break;
 
             case "ne":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "स्वतःविकी ब्राउजर प्रयोग गर्दै";
                 break;
 
@@ -930,11 +930,11 @@ public static partial class Variables
                 break;
 
             case "sk":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 break;
 
             case "sl":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 Stub = "(?:[^{}]*?[Ss]tub|[Šš]krbina[^{}]*?)";
                 break;
 
@@ -957,7 +957,7 @@ public static partial class Variables
                 break;
 
             case "tr":
-                mSummaryTag = "";
+                mSummaryTag = string.Empty;
                 WPAWB = "[[Vikipedi:AWB|AWB]] ile ";
                 TypoSummaryTag = "yazış şekli: ";
                 break;
@@ -991,8 +991,8 @@ public static partial class Variables
                 break;
 
                 // case "xx":
-                // mSummaryTag = "";
-                // WPAWB = "";
+                // mSummaryTag = string.Empty;
+                // WPAWB = string.Empty;
                 // break;
         }
     }

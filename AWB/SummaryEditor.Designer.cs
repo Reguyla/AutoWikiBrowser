@@ -43,7 +43,7 @@
             this.Summaries.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
             this.Summaries.Size = new System.Drawing.Size(609, 299);
             this.Summaries.TabIndex = 1;
-            this.Summaries.Text = "";
+            this.Summaries.Text = string.Empty;
             // 
             // btnCancel
             // 

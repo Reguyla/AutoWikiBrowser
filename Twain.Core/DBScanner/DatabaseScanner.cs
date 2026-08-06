@@ -94,7 +94,7 @@ public partial class DatabaseScanner : Form
             }
 
             lbArticles.Items.Clear();
-            lblCount.Text = "";
+            lblCount.Text = string.Empty;
 
             Matches = 0;
             lblPercentageComplete.Text = "0%";
@@ -356,7 +356,7 @@ public partial class DatabaseScanner : Form
     private void WikifyToList()
     {
         StringBuilder strbList = new StringBuilder();
-        string s, l = "";
+        string s, l = string.Empty;
         int intHeadingSpace = System.Convert.ToInt32(nudHeadingSpace.Value);
 
         string strBullet = rdoHash.Checked ? "#" : "*";
@@ -417,7 +417,7 @@ public partial class DatabaseScanner : Form
         txtList.Text = strbList.ToString().Trim();
     }
 
-    private string File = "";
+    private string File = string.Empty;
     private string FileName
     {
         get { return File; }
@@ -534,7 +534,7 @@ public partial class DatabaseScanner : Form
 
     private void lbClear_Click(object sender, EventArgs e)
     {
-        lblCount.Text = "";
+        lblCount.Text = string.Empty;
         lbArticles.Items.Clear();
     }
 
@@ -722,8 +722,8 @@ public partial class DatabaseScanner : Form
         pageNamespaces.Reset();
 
         //contains
-        txtArticleDoesContain.Text = "";
-        txtArticleDoesNotContain.Text = "";
+        txtArticleDoesContain.Text = string.Empty;
+        txtArticleDoesNotContain.Text = string.Empty;
         chkArticleDoesContain.Checked = false;
         chkArticleDoesNotContain.Checked = false;
 
@@ -733,8 +733,8 @@ public partial class DatabaseScanner : Form
         chkSingle.Checked = false;
 
         //title
-        txtTitleContains.Text = "";
-        txtTitleNotContains.Text = "";
+        txtTitleContains.Text = string.Empty;
+        txtTitleNotContains.Text = string.Empty;
         chkTitleContains.Checked = false;
         chkTitleDoesNotContain.Checked = false;
         chkTitleRegex.Checked = false;
@@ -762,12 +762,12 @@ public partial class DatabaseScanner : Form
         rdoBullet.Checked = false;
         rdoHash.Checked = true;
 
-        FileName = "";
-        txtDumpLocation.Text = "";
-        txtSitename.Text = "";
-        lnkBase.Text = "";
-        txtGenerator.Text = "";
-        txtCase.Text = "";
+        FileName = string.Empty;
+        txtDumpLocation.Text = string.Empty;
+        txtSitename.Text = string.Empty;
+        lnkBase.Text = string.Empty;
+        txtGenerator.Text = string.Empty;
+        txtCase.Text = string.Empty;
     }
 
     private void UpdateControls(bool busy)

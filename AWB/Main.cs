@@ -96,7 +96,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool Skippable = true;
     private bool ShuttingDown;
 
-    private string LastArticle = "";
+    private string LastArticle = string.Empty;
     private string _settingsFile = string.Empty;
     private string _settingsFileDisplay = string.Empty;
 
@@ -4214,7 +4214,7 @@ font-size: 150%;'>No changes</h2>
         GuiUpdateAfterProcessing();
     }
 
-    private string webBrowserMouseOverUrl = "";
+    private string webBrowserMouseOverUrl = string.Empty;
     /// <summary>
     /// WebBrowser Document mouse move event: if mouse is over a link, store the URL
     /// Enables use of system browser for right-click Open in New Window option
@@ -8384,7 +8384,7 @@ if (MessageBox.Show(
             }
 
             //find first dates
-            string births = "", deaths = "";
+            string births = "", deaths = string.Empty;
 
             if (m.Count >= 1)
                 births = m[0].Value;
@@ -8589,7 +8589,7 @@ if (MessageBox.Show(
     {
         ProcessPage(TheArticle, false);
 
-        ErrorHandler.CurrentPage = "";
+        ErrorHandler.CurrentPage = string.Empty;
     }
 
     /// <summary>
@@ -9042,7 +9042,7 @@ if (MessageBox.Show(
         switch (cmboImages.SelectedIndex)
         {
             case 0:
-                lblImageWith.Text = "";
+                lblImageWith.Text = string.Empty;
                 txtImageReplace.Enabled = txtImageWith.Enabled = chkSkipNoImgChange.Enabled = false;
                 break;
             case 1:
@@ -9050,7 +9050,7 @@ if (MessageBox.Show(
                 txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
                 break;
             case 2:
-                lblImageWith.Text = "";
+                lblImageWith.Text = string.Empty;
                 txtImageWith.Enabled = false;
                 txtImageReplace.Enabled = true;
                 chkSkipNoImgChange.Enabled = true;
@@ -9926,7 +9926,7 @@ if (MessageBox.Show(
         wikifyToolStripMenuItem.Visible = !Variables.IsWikipediaEN;
 
         TheArticle = null;
-        txtEdit.Text = "";
+        txtEdit.Text = string.Empty;
         TemplateRedirectsLoaded = false;
 
         CheckStatus(true);
@@ -10568,7 +10568,7 @@ if (MessageBox.Show(
             TheSession.Editor.Abort();
 
         TheArticle = null;
-        txtEdit.Text = "";
+        txtEdit.Text = string.Empty;
 
         TheSession.Editor.Logout();
 
@@ -10630,7 +10630,7 @@ if (MessageBox.Show(
 
         ToolStripButton item = (sender as ToolStripButton);
 
-        string text = "";
+        string text = string.Empty;
 
         switch (item.Name)
         {

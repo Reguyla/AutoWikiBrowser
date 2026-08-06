@@ -1456,10 +1456,10 @@ namespace Twain.Core.DBScanner
             // 
             // MoveDelete
             // 
-            this.MoveDelete.EditProtectionLevel = "";
+            this.MoveDelete.EditProtectionLevel = string.Empty;
             this.MoveDelete.Enabled = false;
             this.MoveDelete.Location = new System.Drawing.Point(6, 29);
-            this.MoveDelete.MoveProtectionLevel = "";
+            this.MoveDelete.MoveProtectionLevel = string.Empty;
             this.MoveDelete.Name = "MoveDelete";
             this.MoveDelete.Size = new System.Drawing.Size(311, 101);
             this.MoveDelete.TabIndex = 0;

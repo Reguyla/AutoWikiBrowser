@@ -209,7 +209,7 @@ public class ListBox2<T> : ListBox, IEnumerable<T>
         Items.AddRange(articles.Except(Sarticles).ToArray());
     }
 
-    static string _list = "";
+    static string _list = string.Empty;
 
     /// <summary>
     ///

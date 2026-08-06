@@ -957,7 +957,7 @@ public partial class Parsers
         if (!Variables.LangCode.Equals("en") || !Regex.IsMatch(articleText, @"==\s+==[^=]"))
             return articleText;
 
-        string originalarticleText = "";
+        string originalarticleText = string.Empty;
         int tagsadded = 0;
 
         while (!originalarticleText.Equals(articleText))
@@ -991,7 +991,7 @@ public partial class Parsers
 
     private string PrepareTaggerEditSummary()
     {
-        string summary = "";
+        string summary = string.Empty;
         string tags;
         if (tagsRemoved.Any())
         {
@@ -1342,7 +1342,7 @@ public partial class Parsers
                     break;
 
                 default: // some other namespace, cannot tag
-                    template = "";
+                    template = string.Empty;
                     break;
             }
 

@@ -36,7 +36,7 @@ public class SorterTests : RequiresParser2
         Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.EqualTo("{{my-stub}}\r\n{{foo-stub|date=May 2012}}\r\n"));
 
         // shouldn't fail
-        s = "";
+        s = string.Empty;
         Assert.That(MetaDataSorter.RemoveStubs(ref s), Is.Empty);
         Assert.That(s, Is.Empty);
         s = "{{stub}}";

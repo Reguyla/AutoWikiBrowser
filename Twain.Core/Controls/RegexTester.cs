@@ -247,7 +247,7 @@ public sealed partial class RegexTester : Form
             {
                 progressBar.Style = ProgressBarStyle.Blocks;
                 progressBar.MarqueeAnimationSpeed = 0;
-                Status.Text = "";
+                Status.Text = string.Empty;
                 ConditionsChanged(null, null); // update buttons
             }
         }
@@ -296,8 +296,8 @@ public sealed partial class RegexTester : Form
         try
         {
             Captures.Nodes.Clear();
-            ResultText.Text = "";
-            Status.Text = "";
+            ResultText.Text = string.Empty;
+            Status.Text = string.Empty;
             txtInput.Text = CRNewLineRegex.Replace(txtInput.Text, "\n");
             Busy = true;
 
@@ -334,9 +334,9 @@ public sealed partial class RegexTester : Form
         {
             Captures.Nodes.Clear();
             Captures.Visible = true;
-            ResultText.Text = "";
+            ResultText.Text = string.Empty;
             ResultText.Visible = false;
-            Status.Text = "";
+            Status.Text = string.Empty;
             Busy = true;
 
             Regex r = new Regex(txtFind.Text, Options);

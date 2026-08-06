@@ -1865,7 +1865,7 @@ Message: {2}
     {
         foreach (KeyValuePair<Regex, string> p in regexes)
         {
-            string originalArticleText = "";
+            string originalArticleText = string.Empty;
 
             while (!originalArticleText.Equals(articleText))
             {
@@ -2600,7 +2600,7 @@ Message: {2}
                 int beforeSpacedBars = BeforeSpacedBars.Matches(templatecopy).Count;
 
                 if (bars > 3 && beforeSpacedBars <= 2)
-                    separatorBefore = "";
+                    separatorBefore = string.Empty;
                 else
                     separatorBefore = " ";
             }
@@ -2609,7 +2609,7 @@ Message: {2}
             int afterSpacedBars = AfterSpacedBars.Matches(templatecopy).Count;
 
             if (bars > 3 && afterSpacedBars <= 2)
-                separatorAfter = "";
+                separatorAfter = string.Empty;
             else
                 separatorAfter = " ";
 
@@ -3022,7 +3022,7 @@ Message: {2}
     /// <returns>The updated template call</returns>
     public static string RemoveDuplicateTemplateParameters(string templatecall, Dictionary<string, string> templateparams)
     {
-        string originalTemplateCall = templatecall, updatedTemplateCall = "";
+        string originalTemplateCall = templatecall, updatedTemplateCall = string.Empty;
 
         while (!updatedTemplateCall.Equals(templatecall))
         {
@@ -3199,7 +3199,7 @@ Message: {2}
     /// <returns>List of parameter values</returns>
     public static string MergeTemplateParametersValues(string templateCall, List<string> parameters, string newparameter, bool caseInsensitiveParameterNames)
     {
-        string combined = "";
+        string combined = string.Empty;
 
         foreach (string p in parameters)
         {
@@ -3649,7 +3649,7 @@ Message: {2}
     /// </summary>
     public static string ListToStringWithSeparatorAndWordSuffix(List<string> items, string separator, string suffix, string lastSeparator)
     {
-        string ret = "";
+        string ret = string.Empty;
         for (int i = 0; i < items.Count; i++)
         {
             if (i + 1 == items.Count)

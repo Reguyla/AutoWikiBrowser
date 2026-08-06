@@ -256,7 +256,7 @@ public partial class ArticleActionDialog : Form
         if (DialogResult != DialogResult.OK)
             return;
 
-        string errorTitle = "";
+        string errorTitle = string.Empty;
 
         StringBuilder errorMessage = new StringBuilder();
 

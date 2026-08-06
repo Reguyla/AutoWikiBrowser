@@ -404,7 +404,7 @@ public partial class ListMaker : UserControl, IList<Article>
     private void btnAdd_Click(object sender, EventArgs e)
     {
         Add(NormalizeTitle(txtPage.Text));
-        txtPage.Text = "";
+        txtPage.Text = string.Empty;
     }
 
     private void btnRemoveArticle_Click(object sender, EventArgs e)
@@ -436,7 +436,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
     private void lbArticles_MouseMove(object sender, MouseEventArgs e)
     {
-        string strTip = "";
+        string strTip = string.Empty;
 
         //Get the item
         int nIdx = lbArticles.IndexFromPoint(e.Location);
@@ -633,7 +633,7 @@ public partial class ListMaker : UserControl, IList<Article>
         get { return lbArticles.Items.Count; }
     }
 
-    string _status = "";
+    string _status = string.Empty;
     /// <summary>
     /// The status of the process
     /// </summary>
@@ -996,7 +996,7 @@ public partial class ListMaker : UserControl, IList<Article>
         {
             ErrorHandler.ListMakerText = UserInputTextBox.Text;
             ErrorHandler.HandleException(ex);
-            ErrorHandler.ListMakerText = "";
+            ErrorHandler.ListMakerText = string.Empty;
         }
         finally
         {

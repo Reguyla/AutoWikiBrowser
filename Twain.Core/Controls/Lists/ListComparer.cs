@@ -269,7 +269,7 @@ public partial class ListComparer : Form
 
     private void lb_MouseMove(object sender, MouseEventArgs e)
     {
-        string strTip = "";
+        string strTip = string.Empty;
 
         //Get the item
         ListBoxArticle lba = sender as ListBoxArticle;

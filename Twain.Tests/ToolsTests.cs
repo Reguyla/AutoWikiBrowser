@@ -1760,7 +1760,7 @@ def
         Assert.That(Params.Count, Is.EqualTo(3));
         Params.Clear();
         Tools.RemoveDuplicateTemplateParameters(@"{{foo|first=abc||second=  def <!--com-->  }}", Params);
-        string d = "";
+        string d = string.Empty;
         ClassicAssert.IsTrue(Params.TryGetValue("second", out d));
         Assert.That(d, Is.EqualTo("def <!--com-->"), "parameter with space and comment retrieved correctly");
 
@@ -2757,7 +2757,7 @@ public class HumanCatKeyTests : RequiresInitialization
 
         for (int i = 0; i < 10000; i++)
         {
-            string name = "";
+            string name = string.Empty;
 
             for (int j = 0; j < rnd.Next(45); j++)
             {

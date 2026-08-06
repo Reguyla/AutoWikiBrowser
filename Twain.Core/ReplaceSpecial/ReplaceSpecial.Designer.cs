@@ -344,7 +344,7 @@
             // UndoMenuItem
             // 
             this.UndoMenuItem.Name = "UndoMenuItem";
-            this.UndoMenuItem.ShortcutKeyDisplayString = "";
+            this.UndoMenuItem.ShortcutKeyDisplayString = string.Empty;
             this.UndoMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
             this.UndoMenuItem.Size = new System.Drawing.Size(174, 22);
             this.UndoMenuItem.Text = "&Undo";
@@ -353,7 +353,7 @@
             // RedoMenuItem
             // 
             this.RedoMenuItem.Name = "RedoMenuItem";
-            this.RedoMenuItem.ShortcutKeyDisplayString = "";
+            this.RedoMenuItem.ShortcutKeyDisplayString = string.Empty;
             this.RedoMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
             this.RedoMenuItem.Size = new System.Drawing.Size(174, 22);
             this.RedoMenuItem.Text = "&Redo";

@@ -22,7 +22,7 @@ namespace Twain.Core.ReplaceSpecial;
 
 public class TemplateParamRule : IRule
 {
-    public string ParamName = "", NewParamName = "";
+    public string ParamName = "", NewParamName = string.Empty;
 
     TemplateParamRuleControl ruleControl_;
 

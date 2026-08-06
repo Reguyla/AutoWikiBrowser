@@ -28,7 +28,7 @@ public class Rule : IRule
 
     public T ruletype_ = T.OnWholePage;
 
-    public string replace_ = "", with_ = "", ifContains_ = "", ifNotContains_ = "";
+    public string replace_ = "", with_ = "", ifContains_ = "", ifNotContains_ = string.Empty;
 
     public bool regex_, ifIsRegex_;
 

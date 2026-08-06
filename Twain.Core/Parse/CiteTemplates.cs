@@ -738,7 +738,7 @@ public partial class Parsers
             if (WikiRegexes.InternationalDates.IsMatch(TheDate) || WikiRegexes.AmericanDates.IsMatch(TheDate)
                 || WikiRegexes.ISODates.IsMatch(TheDate))
             {
-                TheYear = "";
+                TheYear = string.Empty;
                 newValue = Tools.RemoveTemplateParameter(newValue, "year");
             }
         }
@@ -805,7 +805,7 @@ public partial class Parsers
         {
             string accessyear;
             if (!paramsFound.TryGetValue("accessyear", out accessyear))
-                accessyear = "";
+                accessyear = string.Empty;
 
             if (Regex.IsMatch(templatename, @"[Cc]ite(?: ?web| book| news)"))
             {
@@ -1264,7 +1264,7 @@ public partial class Parsers
             WikiRegexes.AmericanDates.IsMatch(year))
         {
             date = year;
-            year = "";
+            year = string.Empty;
 
             template = Tools.RenameTemplateParameter(
                 template,
@@ -1468,48 +1468,48 @@ public partial class Parsers
     /// </summary>
     private sealed class CitationParameterValues
     {
-        public string Url { get; set; } = "";
-        public string Id { get; set; } = "";
+        public string Url { get; set; } = string.Empty;
+        public string Id { get; set; } = string.Empty;
 
-        public string Format { get; set; } = "";
+        public string Format { get; set; } = string.Empty;
 
-        public string Title { get; set; } = "";
+        public string Title { get; set; } = string.Empty;
 
-        public string Year { get; set; } = "";
+        public string Year { get; set; } = string.Empty;
 
-        public string Date { get; set; } = "";
+        public string Date { get; set; } = string.Empty;
 
-        public string Language { get; set; } = "";
+        public string Language { get; set; } = string.Empty;
 
-        public string Month { get; set; } = "";
+        public string Month { get; set; } = string.Empty;
 
-        public string Work { get; set; } = "";
+        public string Work { get; set; } = string.Empty;
 
-        public string Website { get; set; } = "";
+        public string Website { get; set; } = string.Empty;
 
-        public string NoPagePrefix { get; set; } = "";
+        public string NoPagePrefix { get; set; } = string.Empty;
 
-        public string Issue { get; set; } = "";
+        public string Issue { get; set; } = string.Empty;
 
-        public string Volume { get; set; } = "";
+        public string Volume { get; set; } = string.Empty;
 
-        public string AccessDate { get; set; } = "";
+        public string AccessDate { get; set; } = string.Empty;
 
-        public string Pages { get; set; } = "";
+        public string Pages { get; set; } = string.Empty;
 
-        public string Page { get; set; } = "";
+        public string Page { get; set; } = string.Empty;
 
-        public string OriginalYear { get; set; } = "";
+        public string OriginalYear { get; set; } = string.Empty;
 
-        public string OriginalDate { get; set; } = "";
+        public string OriginalDate { get; set; } = string.Empty;
 
-        public string ArchiveUrl { get; set; } = "";
+        public string ArchiveUrl { get; set; } = string.Empty;
 
-        public string ContributionUrl { get; set; } = "";
+        public string ContributionUrl { get; set; } = string.Empty;
 
-        public string Isbn { get; set; } = "";
+        public string Isbn { get; set; } = string.Empty;
 
-        public string Issn { get; set; } = "";
+        public string Issn { get; set; } = string.Empty;
     }
     #endregion
 
@@ -2186,7 +2186,7 @@ public partial class Parsers
         // loop in case a single citation has multiple dates to be fixed
         foreach (string s in GetAllTemplateDetail(articleText))
         {
-            string res = s, original = "";
+            string res = s, original = string.Empty;
             while (!res.Equals(original))
             {
                 original = res;
@@ -2218,17 +2218,17 @@ public partial class Parsers
         string accessdate, date, date2, archivedate, airdate, journal;
         if (!paramsFound.TryGetValue("accessdate", out accessdate) &&
             !paramsFound.TryGetValue("access-date", out accessdate))
-            accessdate = "";
+            accessdate = string.Empty;
         if (!paramsFound.TryGetValue("date", out date))
-            date = "";
+            date = string.Empty;
         if (!paramsFound.TryGetValue("date2", out date2))
-            date2 = "";
+            date2 = string.Empty;
         if (!paramsFound.TryGetValue("archivedate", out archivedate))
-            archivedate = "";
+            archivedate = string.Empty;
         if (!paramsFound.TryGetValue("airdate", out airdate))
-            airdate = "";
+            airdate = string.Empty;
         if (!paramsFound.TryGetValue("journal", out journal))
-            journal = "";
+            journal = string.Empty;
 
         List<string> dates = new List<string> { accessdate, archivedate, date, date2, airdate };
 
@@ -2255,7 +2255,7 @@ public partial class Parsers
         newValue = CiteTemplateTimeInDateParameter.Replace(newValue, m3 =>
         {
             // keep end whitespace outside comment
-            string comm = m3.Groups[2].Value, whitespace = "";
+            string comm = m3.Groups[2].Value, whitespace = string.Empty;
 
             Match whm = WhitespaceEnd.Match(comm);
 

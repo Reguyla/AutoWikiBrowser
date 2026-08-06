@@ -614,7 +614,7 @@ table.diff td div {
             }
             catch
             {
-                CustomStyles = "";
+                CustomStyles = string.Empty;
             }
         }
 

@@ -151,7 +151,7 @@ public partial class Parsers
                 string articleTextLocal = articleText;
                 articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleTextLocal, "");
 
-                string originalarticleText = "";
+                string originalarticleText = string.Empty;
                 while (!originalarticleText.Equals(articleText))
                 {
                     originalarticleText = articleText;

@@ -79,7 +79,7 @@ public partial class FindandReplace : Form
         };
 
         if (dataGridRow.Cells["replace"].Value == null)
-            dataGridRow.Cells["replace"].Value = "";
+            dataGridRow.Cells["replace"].Value = string.Empty;
 
         string f = Encode(dataGridRow.Cells["find"].Value.ToString());
         string r = Encode(dataGridRow.Cells["replace"].Value.ToString());
@@ -186,8 +186,8 @@ public partial class FindandReplace : Form
         if (!HasReplacements)
             return articleText;
 
-        ReplacedSummary = "";
-        RemovedSummary = "";
+        ReplacedSummary = string.Empty;
+        RemovedSummary = string.Empty;
 
         if (chkIgnoreMore.Checked)
         {

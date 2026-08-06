@@ -170,9 +170,9 @@ internal sealed partial class CustomModule : Form
         }
     }
 
-    private string _codeStart = "";
-    private string _codeEnd = "";
-    private string _codeExample = "";
+private string _codeStart = string.Empty;
+private string _codeEnd = string.Empty;
+private string _codeExample = string.Empty;
 
     /// <summary>
     /// Provides the user interface for creating, compiling, and managing
@@ -569,7 +569,7 @@ For more detailed information, click Help -> Manual on the Custom Module window.
         object sender,
         EventArgs e)
     {
-        toolStripTextBox1.Text = "";
+        toolStripTextBox1.Text = string.Empty;
     }
 
     /// <summary>

@@ -82,7 +82,7 @@
             this.txtContains.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.txtContains.Size = new System.Drawing.Size(154, 20);
             this.txtContains.TabIndex = 8;
-            this.txtContains.Text = "";
+            this.txtContains.Text = string.Empty;
             this.toolTip1.SetToolTip(this.txtContains, "Skip pages that contain this text");
             this.txtContains.TextChanged += new System.EventHandler(this.InvalidateComparer);
             // 

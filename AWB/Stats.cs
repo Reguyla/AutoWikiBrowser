@@ -471,7 +471,7 @@ internal static class UsageStats
         finally
         {
             Program.AWB.StopProgressBar();
-            StatusLabelText = "";
+            StatusLabelText = string.Empty;
             Program.AWB.Form.Cursor =
                 System.Windows.Forms.Cursors.Default;
         }

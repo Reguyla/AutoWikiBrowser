@@ -109,7 +109,7 @@
             this.listMaker1.Name = "listMaker1";
             this.listMaker1.SelectedProvider = "CategoryListProvider";
             this.listMaker1.Size = new System.Drawing.Size(205, 349);
-            this.listMaker1.SourceText = "";
+            this.listMaker1.SourceText = string.Empty;
             this.listMaker1.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
             this.listMaker1.TabIndex = 0;
             // 

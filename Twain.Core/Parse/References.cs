@@ -449,7 +449,7 @@ public partial class Parsers
         articleText = SameNamedRefShortText(articleText);
 
         // loop as could be a set of identical references with multiple different names in use
-        string currentArticleText = "";
+        string currentArticleText = string.Empty;
 
         while (!currentArticleText.Equals(articleText))
         {
@@ -550,7 +550,7 @@ public partial class Parsers
     /// <returns>the derived reference name</returns>
     private static string ExtractReferenceNameComponents(string reference, Regex referenceNameMask, int components)
     {
-        string referenceName = "";
+        string referenceName = string.Empty;
 
         if (referenceNameMask.Matches(reference).Count > 0)
         {
@@ -627,7 +627,7 @@ public partial class Parsers
     /// <returns>the derived reference name, or null if none could be determined</returns>
     public static string DeriveReferenceName(string articleText, string reference)
     {
-        string derivedReferenceName = "";
+        string derivedReferenceName = string.Empty;
 
         // try parameters from a citation: lastname, year and page
         string citationTemplate = CitationCiteBook.Match(reference).Value;

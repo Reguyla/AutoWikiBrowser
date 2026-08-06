@@ -42,9 +42,9 @@ public delegate void AddListenerDelegate(string key, IMyTraceListener listener);
 public class Article : IProcessArticleEventArgs, IComparable<Article>
 {
     protected AWBLogListener mAWBLogListener;
-    protected string mArticleText = "";
-    protected string mOriginalArticleText = "";
-    protected string mPluginEditSummary = "";
+    protected string mArticleText = string.Empty;
+    protected string mOriginalArticleText = string.Empty;
+    protected string mPluginEditSummary = string.Empty;
     protected bool mPluginSkip;
 
     private readonly PageInfo mPage;
@@ -850,7 +850,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     public void Categorisation(CategorisationOptions option, Parsers parsers,
                                bool skipIfNoChange, string categoryText, string categoryText2, bool removeSortKey)
     {
-        string strTemp, action = "";
+        string strTemp, action = string.Empty;
         bool noChange;
 
         categoryText = categoryText.Trim();
@@ -953,7 +953,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             return;
 
         string changedText = Tools.ConvertFromLocalLineEndings(mArticleText);
-        string originalText = changedText, editSummary = "";
+        string originalText = changedText, editSummary = string.Empty;
 
         bool majorChangesMade;
         changedText = findAndReplace.MultipleFindAndReplace(changedText, Name, onlyApplyAfter, ref editSummary, out majorChangesMade);
@@ -1028,7 +1028,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <param name="restrictOrphanTagging"></param>
     public void AutoTag(Parsers parsers, bool skipIfNoChange, bool restrictOrphanTagging)
     {
-        string tmpEditSummary = "";
+        string tmpEditSummary = string.Empty;
         bool noChange;
         string strTemp = parsers.Tagger(mArticleText, Name, restrictOrphanTagging, out noChange, ref tmpEditSummary);
 
@@ -1514,7 +1514,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         if (mPluginEditSummary.Length > 0)
         {
             AppendToSummary(mPluginEditSummary.Trim());
-            mPluginEditSummary = "";
+            mPluginEditSummary = string.Empty;
         }
     }
 
@@ -1918,7 +1918,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         get { return Tools.IsRedirect(ArticleText); }
     }
 
-    private static string _lastMove = "", _lastDelete = "", _lastProtect = "";
+    private static string _lastMove = "", _lastDelete = "", _lastProtect = string.Empty;
 
     /// <summary>
     ///
@@ -1950,7 +1950,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
                 if (session.Editor.State != AsyncApiEdit.EditState.Ready)
                 {
-                    newTitle = "";
+                    newTitle = string.Empty;
                     return false;
                 }
 
@@ -1958,7 +1958,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
                 return true;
             }
-            newTitle = "";
+            newTitle = string.Empty;
             return false;
         }
     }

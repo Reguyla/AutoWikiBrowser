@@ -239,7 +239,7 @@ public partial class Parsers
     /// <param name="articleText">Article text.</param>
     private string MergeMultipleMI(string articleText)
     {
-        string originalArticleText = articleText, mi = "";
+        string originalArticleText = articleText, mi = string.Empty;
 
         articleText = WikiRegexes.MultipleIssues.Replace(articleText, m =>
         {

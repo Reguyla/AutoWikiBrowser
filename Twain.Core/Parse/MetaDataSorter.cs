@@ -311,7 +311,7 @@ en, sq, ru
         // short pages monitor check for en-wiki: keep at very end of article if present
         // See [[Template:Long comment/doc]]
         // SPM regex quick check for performance on long pages
-        string shortPagesMonitor = "";
+        string shortPagesMonitor = string.Empty;
         if (Variables.LangCode.Equals("en") && alltemplates.Contains("Short pages monitor"))
         {
             Match spm = WikiRegexes.ShortPagesMonitor.Match(articleText);
@@ -325,11 +325,11 @@ en, sq, ru
 
         articleText = CommentedOutEnInterwiki.Replace(articleText, "");
 
-        string personData = "";
+        string personData = string.Empty;
         if (TemplateExists(alltemplates, WikiRegexes.Persondata))
             personData = Tools.Newline(RemovePersonData(ref articleText));
 
-        string disambig = "";
+        string disambig = string.Empty;
         if (TemplateExists(alltemplates, WikiRegexes.Disambigs))
             disambig = Tools.Newline(RemoveDisambig(ref articleText));
 
@@ -359,7 +359,7 @@ en, sq, ru
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Two_empty_lines_before_stub-templates
         // ru, sl, ar, arz wikis use only one newline
         // T382578: WP:STUBSPACING is now one blank line only for en-wiki
-        string strStub = "";
+        string strStub = string.Empty;
 
         // Category: can use {{Verylargestub}}/{{popstub}} which is not a stub template, don't do stub sorting
         if (!Namespace.Determine(articleTitle).Equals(Namespace.Category) && TemplateExists(alltemplates, new Regex(Variables.Stub)))
@@ -562,7 +562,7 @@ en, sq, ru
         if (!TemplatesToEndOfArticle.IsMatch(restOfArticleText) || allTemplatesDetail.Any(t => lastSection.Contains(t)))
             return articleText;
 
-        string allTemplatesFound = "";
+        string allTemplatesFound = string.Empty;
         foreach (Match m in WikiRegexes.NestedTemplates.Matches(articleText))
         {
             if (!TemplatesToEndOfArticle.IsMatch(m.Value) || TemplatesToEndOfArticle.Match(m.Value).Index > 0)
@@ -640,7 +640,7 @@ en, sq, ru
             }
         }
 
-        string defaultSort = "";
+        string defaultSort = string.Empty;
         bool defaultSortRemoved = false;
 
         // allow comments between categories, and keep them in the same place, only grab any comment after the last category if on same line
@@ -733,7 +733,7 @@ en, sq, ru
         MatchCollection hc = WikiRegexes.Headings.Matches(articleText);
         string lastSection = articleText;
         string lastSectionNoComments = articleTextNoComments;
-        string restOfArticleText = "";
+        string restOfArticleText = string.Empty;
 
         if (hc.Count > 0)
         {
@@ -743,7 +743,7 @@ en, sq, ru
             restOfArticleText = articleText.Substring(0, h);
         }
 
-        string uncat = "";
+        string uncat = string.Empty;
         if (UncategorizedImproveCats.IsMatch(lastSectionNoComments) && !UncategorizedImproveCats.IsMatch(restOfArticleText))
         {
             articleText = UncategorizedImproveCats.Replace(articleText, uncatm =>
@@ -784,7 +784,7 @@ en, sq, ru
         if (!Tools.UnformattedTextNotChanged(originalArticleText, articleText))
         {
             articleText = originalArticleText;
-            strPersonData = "";
+            strPersonData = string.Empty;
         }
 
         return strPersonData;
@@ -846,7 +846,7 @@ en, sq, ru
         if (!Variables.LangCode.Equals("en"))
             return "";
 
-        string strDisambig = "";
+        string strDisambig = string.Empty;
 
         // Extract up to one disambig (should not be multiple per page), don't pull out of comments
         if (WikiRegexes.Disambigs.IsMatch(WikiRegexes.Comments.Replace(articleText, "")))
@@ -887,7 +887,7 @@ en, sq, ru
         // get the rest of the article including first heading (may be null if article has no headings)
         string restOfArticle = articleText.Substring(zerothSection.Length);
 
-        string strTemplates = "";
+        string strTemplates = string.Empty;
 
         // extract templates, not section ones
         List<string> theTemplates = templateRegex.Matches(zerothSection).Cast<Match>().Where(m => Tools.GetTemplateArgument(m.Value, 1) != "section").Select(m => m.Value).ToList();
@@ -1252,7 +1252,7 @@ en, sq, ru
     /// <returns>string of interwiki featured article and interwiki links</returns>
     public string Interwikis(ref string articleText, bool linkFGAsInText)
     {
-        string interWikiComment = "";
+        string interWikiComment = string.Empty;
         if (articleText.Contains("<!--"))
             articleText = InterLangRegex.Replace(articleText, m =>
             {
@@ -1260,7 +1260,7 @@ en, sq, ru
                 return "";
             }, 1);
 
-        string interWikis = "";
+        string interWikis = string.Empty;
 
         // Only search for linkFGAs if necessary
         if (linkFGAsInText)

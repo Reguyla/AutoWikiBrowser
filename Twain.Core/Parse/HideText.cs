@@ -34,8 +34,8 @@ public sealed class HideText
     private readonly List<HideObject> HiddenTokens = new List<HideObject>();
     // cached versions of articletext before Hide, and with Hide applied
     // so AddBack can return cached version if no changes
-    private string cachedOriginalArticleTextBeforeHide = "";
-    private string cachedArticleTextAfterHide = "";
+    private string cachedOriginalArticleTextBeforeHide = string.Empty;
+    private string cachedArticleTextAfterHide = string.Empty;
 
     /// <summary>
     /// Puts back hidden text
@@ -196,8 +196,8 @@ public sealed class HideText
             articleText = cachedOriginalArticleTextBeforeHide;
 
             // clear down
-            cachedOriginalArticleTextBeforeHide = "";
-            cachedArticleTextAfterHide = "";
+            cachedOriginalArticleTextBeforeHide = string.Empty;
+            cachedArticleTextAfterHide = string.Empty;
         }
         else
         {
@@ -244,8 +244,8 @@ public sealed class HideText
 
     // cached versions of articletext before HideMore, and with HideMore applied
     // so AddBackMore can return cached version if no changes
-    private string cachedOriginalArticleTextBeforeHideMore = "";
-    private string cachedArticleTextAfterHideMore = "";
+    private string cachedOriginalArticleTextBeforeHideMore = string.Empty;
+    private string cachedArticleTextAfterHideMore = string.Empty;
 
     /// <summary>
     /// Replaces hidden images, external links, templates, headings etc.
@@ -418,8 +418,8 @@ public sealed class HideText
             articleText = cachedOriginalArticleTextBeforeHideMore;
 
             // clear down
-            cachedOriginalArticleTextBeforeHideMore = "";
-            cachedArticleTextAfterHideMore = "";
+            cachedOriginalArticleTextBeforeHideMore = string.Empty;
+            cachedArticleTextAfterHideMore = string.Empty;
         }
         else
         {

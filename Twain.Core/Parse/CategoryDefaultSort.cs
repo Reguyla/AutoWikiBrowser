@@ -272,7 +272,7 @@ public partial class Parsers
     /// <returns></returns>
     public static string GetCategorySort(string articleText, string articleTitle, out int matches)
     {
-        string sort = "";
+        string sort = string.Empty;
         bool allsame = true;
         matches = 0;
 
@@ -322,7 +322,7 @@ public partial class Parsers
         if (ds.Count > 1 || (ds.Count == 1 && !ds[0].Value.ToUpper().Contains("DEFAULTSORT")))
         {
             bool allsame2 = false;
-            string lastvalue = "";
+            string lastvalue = string.Empty;
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
             // if all the defaultsorts are the same just remove all but one
             foreach (Match m in ds)
@@ -651,7 +651,7 @@ public partial class Parsers
         }
 
         // scrape any infobox
-        yearFromInfoBox = "";
+        yearFromInfoBox = string.Empty;
         fromInfoBox = GetInfoBoxFieldValue(WikiRegexes.DateBirthAndAge.Replace(zerothSection, ""), WikiRegexes.InfoBoxDODFields);
 
         if (fromInfoBox.Length > 0 && !UncertainWordings.IsMatch(fromInfoBox))

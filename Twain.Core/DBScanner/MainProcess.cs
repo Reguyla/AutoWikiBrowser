@@ -46,7 +46,7 @@ class MainProcess
     public CrossThreadQueue<string> OutputQueue;
 
     private readonly string FileName;
-    private readonly string From = "";
+    private readonly string From = string.Empty;
     private Stream stream;
 
     private readonly SendOrPostCallback SOPCstopped;
@@ -185,7 +185,7 @@ class MainProcess
 
     private void Process()
     {
-        string articleTitle = "";
+        string articleTitle = string.Empty;
 
         try
         {

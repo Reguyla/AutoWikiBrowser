@@ -302,7 +302,7 @@ public static class TalkPageFixes
         // get the rest of the article including first heading (may be null if article has no headings)
         string restOfArticle = articleText.Substring(zerothSection.Length);
 
-        string strTags = "";
+        string strTags = string.Empty;
 
         foreach (Match m in r.Matches(zerothSection))
         {
@@ -445,7 +445,7 @@ public static class TalkPageFixes
         // Move WikiProjects into WPBS
         if (WikiRegexes.WikiProjectBannerShellTemplate.Matches(articletext).Count == 1)
         {
-            string WPBS = WikiRegexes.WikiProjectBannerShellTemplate.Match(articletext).Value, newParams = "";
+            string WPBS = WikiRegexes.WikiProjectBannerShellTemplate.Match(articletext).Value, newParams = string.Empty;
 
             foreach (Match m in WikiRegexes.NestedTemplates.Matches(articletext))
             {

@@ -276,7 +276,7 @@ public class TyposDownloader : ITyposProvider
             Groups = new List<Regex>(5);
             for (int n = 0; n < (Typos.Count - 1) / GroupSize + 1; n++)
             {
-                string s = "";
+                string s = string.Empty;
                 for (int i = 0; i < Math.Min(GroupSize, Typos.Count - n * GroupSize); i++)
                 {
                     string typo = Typos[n * GroupSize + i].Key.ToString();
@@ -561,7 +561,7 @@ public class TyposDownloader : ITyposProvider
         public string PerformTypoFixes(string articleText, out bool noChange, out string summary, string articleTitle)
         {
             string originalArticleText = articleText;
-            summary = "";
+            summary = string.Empty;
             if (TypoCount == 0 || IgnoreRegex.IsMatch(articleText))
             {
                 noChange = true;
@@ -580,7 +580,7 @@ public class TyposDownloader : ITyposProvider
                 articleText = articleText.Remove(m.Index);
 
             string originalText = articleText;
-            string strSummary = "";
+            string strSummary = string.Empty;
             /* Run typos threaded, one thread per group for better performance
              * http://stackoverflow.com/questions/13776846/pass-paramters-through-parameterizedthreadstart
              * http://www.dotnetperls.com/parameterizedthreadstart
@@ -659,7 +659,7 @@ public class TyposDownloader : ITyposProvider
             if (m.Success)
                 articleText = articleText.Remove(m.Index);
 
-            string strSummary = "";
+            string strSummary = string.Empty;
 
             foreach (TypoGroup grp in Groups)
             {

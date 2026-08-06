@@ -352,7 +352,7 @@ public class BackgroundRequest
 
         if (editor == null)
         {
-            Result = "";
+            Result = string.Empty;
             InvokeOnError();
             return;
         }

@@ -82,7 +82,7 @@ public abstract class WindowsPathUtils
                     }
                     else
                     {
-                        result = "";
+                        result = string.Empty;
                     }
                 }
             }

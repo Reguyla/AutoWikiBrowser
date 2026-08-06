@@ -1098,7 +1098,7 @@ public class NamespaceTests : RequiresInitialization
 
         var ns = new Dictionary<int, string>(Variables.CanonicalNamespaces);
 
-        ns[0] = "";
+        ns[0] = string.Empty;
         ClassicAssert.IsFalse(Namespace.VerifyNamespaces(ns));
 
         ns.Remove(0);

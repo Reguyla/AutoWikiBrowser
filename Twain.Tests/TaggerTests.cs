@@ -1004,7 +1004,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
     public void RemoveAr()
     {
 #if DEBUG
-        string text = "";
+        string text = string.Empty;
         Variables.SetProjectLangCode("ar");
         WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1035,7 +1035,7 @@ Proin in odio. Pellentesque habitant morbi tristique senectus et netus et malesu
     public void RemoveArz()
     {
 #if DEBUG
-        string text = "";
+        string text = string.Empty;
         Variables.SetProjectLangCode("arz");
         WikiRegexes.MakeLangSpecificRegexes();
 
@@ -1556,7 +1556,7 @@ text -->
 "), "Standard empty section is tagged");
 
         // tagging multiple sections
-        summary = "";
+        summary = string.Empty;
         returned = parser.Tagger(twoTwos + "\r\n" + twoTwos, "test", false, ref summary);
         ClassicAssert.IsTrue(returned.Contains(@"{{Empty section|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}
 

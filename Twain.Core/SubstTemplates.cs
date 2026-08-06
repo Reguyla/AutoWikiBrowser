@@ -139,7 +139,7 @@ namespace Twain.Core
 
         private void btnClear_Click(object sender, EventArgs e)
         {
-            textBoxTemplates.Text = "";
+            textBoxTemplates.Text = string.Empty;
         }
 
         private void btnOk_Click(object sender, EventArgs e)

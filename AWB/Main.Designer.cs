@@ -586,7 +586,7 @@ namespace AutoWikiBrowser
             // PasteMore1
             // 
             this.PasteMore1.Name = "PasteMore1";
-            this.PasteMore1.ShortcutKeyDisplayString = "";
+            this.PasteMore1.ShortcutKeyDisplayString = string.Empty;
             this.PasteMore1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D1)));
             this.PasteMore1.Size = new System.Drawing.Size(136, 22);
             this.PasteMore1.Visible = false;
@@ -1910,7 +1910,7 @@ namespace AutoWikiBrowser
             this.txtAppendMessage.Name = "txtAppendMessage";
             this.txtAppendMessage.Size = new System.Drawing.Size(251, 67);
             this.txtAppendMessage.TabIndex = 3;
-            this.txtAppendMessage.Text = "";
+            this.txtAppendMessage.Text = string.Empty;
             this.ToolTip.SetToolTip(this.txtAppendMessage, "Message, including title in wiki format");
             // 
             // chkAppend
@@ -2399,7 +2399,7 @@ namespace AutoWikiBrowser
             this.txtFind.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.txtFind.Size = new System.Drawing.Size(98, 20);
             this.txtFind.TabIndex = 0;
-            this.txtFind.Text = "";
+            this.txtFind.Text = string.Empty;
             this.ToolTip.SetToolTip(this.txtFind, "The text to find in the page ");
             this.txtFind.TextChanged += new System.EventHandler(this.ResetFind);
             this.txtFind.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtFind_KeyPress);
@@ -2631,7 +2631,7 @@ namespace AutoWikiBrowser
             this.txtReviewEditSummary.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.txtReviewEditSummary.Size = new System.Drawing.Size(103, 29);
             this.txtReviewEditSummary.TabIndex = 13;
-            this.txtReviewEditSummary.Text = "";
+            this.txtReviewEditSummary.Text = string.Empty;
             this.ToolTip.SetToolTip(this.txtReviewEditSummary, "The edit summary for the page");
             // 
             // imgBold
@@ -3521,7 +3521,7 @@ namespace AutoWikiBrowser
             // 
             this.skipIfNotContains.After = false;
             this.skipIfNotContains.CheckEnabled = false;
-            this.skipIfNotContains.CheckText = "";
+            this.skipIfNotContains.CheckText = string.Empty;
             this.skipIfNotContains.IsCaseSensitive = false;
             this.skipIfNotContains.IsRegex = false;
             this.skipIfNotContains.Location = new System.Drawing.Point(6, 61);
@@ -3533,7 +3533,7 @@ namespace AutoWikiBrowser
             // 
             this.skipIfContains.After = false;
             this.skipIfContains.CheckEnabled = false;
-            this.skipIfContains.CheckText = "";
+            this.skipIfContains.CheckText = string.Empty;
             this.skipIfContains.IsCaseSensitive = false;
             this.skipIfContains.IsRegex = false;
             this.skipIfContains.Location = new System.Drawing.Point(7, 14);
@@ -3827,7 +3827,7 @@ namespace AutoWikiBrowser
             this.listMaker.Name = "listMaker";
             this.listMaker.SelectedProvider = "CategoryListProvider";
             this.listMaker.Size = new System.Drawing.Size(209, 356);
-            this.listMaker.SourceText = "";
+            this.listMaker.SourceText = string.Empty;
             this.listMaker.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker.SpecialFilterSettings")));
             this.listMaker.TabIndex = 0;
             // 
@@ -3887,7 +3887,7 @@ namespace AutoWikiBrowser
             this.txtEdit.Name = "txtEdit";
             this.txtEdit.Size = new System.Drawing.Size(394, 313);
             this.txtEdit.TabIndex = 0;
-            this.txtEdit.Text = "";
+            this.txtEdit.Text = string.Empty;
             this.txtEdit.TextChanged += new System.EventHandler(this.txtEdit_TextChanged);
             // 
             // tpHistory

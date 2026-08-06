@@ -85,9 +85,9 @@ public class UserPrefs
     public string Version = Tools.VersionString;
     public ProjectEnum Project = ProjectEnum.wikipedia;
     public string LanguageCode = "en";
-    public string CustomProject = "";
+    public string CustomProject = string.Empty;
     public string Protocol = "https://";
-    public string LoginDomain = "";
+    public string LoginDomain = string.Empty;
 
     public ListPrefs List;
     public FaRPrefs FindAndReplace;
@@ -329,12 +329,12 @@ public class EditPrefs
     public bool Unicodify = true;
 
     public int Recategorisation = 0;
-    public string NewCategory = "";
-    public string NewCategory2 = "";
+    public string NewCategory = string.Empty;
+    public string NewCategory2 = string.Empty;
 
     public int ReImage = 0;
-    public string ImageFind = "";
-    public string Replace = "";
+    public string ImageFind = string.Empty;
+    public string Replace = string.Empty;
 
     public bool SkipIfNoCatChange = false;
     public bool RemoveSortKey = false;
@@ -343,7 +343,7 @@ public class EditPrefs
     public bool AppendText = false;
     public bool AppendTextMetaDataSort = false;
     public bool Append = true;
-    public string Text = "";
+    public string Text = string.Empty;
     public int Newlines = 2;
 
     public int AutoDelay = 10;
@@ -371,13 +371,13 @@ public class SkipPrefs
     public bool SkipIfNoAlerts = false;
 
     public bool SkipDoes = false;
-    public string SkipDoesText = "";
+    public string SkipDoesText = string.Empty;
     public bool SkipDoesRegex = false;
     public bool SkipDoesCaseSensitive = false;
     public bool SkipDoesAfterProcessing = false;
 
     public bool SkipDoesNot = false;
-    public string SkipDoesNotText = "";
+    public string SkipDoesNotText = string.Empty;
     public bool SkipDoesNotRegex = false;
     public bool SkipDoesNotCaseSensitive = false;
     public bool SkipDoesNotAfterProcessing = false;
@@ -411,7 +411,7 @@ public class GeneralPrefs
 
     public string[] PasteMore = { "", "", "", "", "", "", "", "", "", "" };
 
-    public string FindText = "";
+    public string FindText = string.Empty;
     public bool FindRegex = false;
     public bool FindCaseSensitive = false;
 
@@ -471,14 +471,14 @@ public class EditBoxAutoSavePrefs
 
     public bool Enabled = false;
     public decimal SavePeriod;
-    public string SaveFile = "";
+    public string SaveFile = string.Empty;
 }
 
 [Serializable]
 public class DabPrefs
 {
     public bool Enabled = false;
-    public string Link = "";
+    public string Link = string.Empty;
     public string[] Variants = new string[0];
     public int ContextChars = 20;
 }
@@ -487,7 +487,7 @@ public class DabPrefs
 public class ModulePrefs
 {
     public bool Enabled = false;
-    public string Language = ""; // should correspond to C# by default
+    public string Language = string.Empty; // should correspond to C# by default
     public string Code = @"        public string ProcessArticle(string ArticleText, string ArticleTitle, int wikiNamespace, out string Summary, out bool Skip)
         {
             Skip = false;
@@ -505,11 +505,11 @@ public class ExternalProgramPrefs
     public bool Enabled = false;
     public bool Skip = false;
 
-    public string Program = "";
-    public string Parameters = "";
+    public string Program = string.Empty;
+    public string Parameters = string.Empty;
 
     public bool PassAsFile = true;
-    public string OutputFile = "";
+    public string OutputFile = string.Empty;
 }
 
 [Serializable]
@@ -521,9 +521,9 @@ public class SpecialFilterPrefs
     public bool sortAZ = true;
 
     public bool filterTitlesThatContain = false;
-    public string filterTitlesThatContainText = "";
+    public string filterTitlesThatContainText = string.Empty;
     public bool filterTitlesThatDontContain = false;
-    public string filterTitlesThatDontContainText = "";
+    public string filterTitlesThatDontContainText = string.Empty;
     public bool areRegex = false;
 
     public int opType = -1;
@@ -551,7 +551,7 @@ public class PluginPrefs
         PluginSettings = aPluginSettings;
     }
 
-    public string Name = "";
+    public string Name = string.Empty;
     public object[] PluginSettings = null;
 }
 
@@ -561,7 +561,7 @@ public class PluginPrefs
 [Serializable]
 public class PrefsKeyPair
 {
-    public string Name = "";
+    public string Name = string.Empty;
     public object Setting = null;
 
     internal PrefsKeyPair()
