@@ -275,31 +275,65 @@ public class InTemplateRule : IRule
         return Regex.IsMatch(text, pattern);
     }
 
-    private static string ReplaceOn(string template, TreeNode tn, string text, string title)
+    /// <summary>
+    /// Applies child rules to the supplied text and optionally replaces the
+    /// matched template name.
+    /// </summary>
+    /// <param name="template">
+    /// The template name to replace.
+    /// </param>
+    /// <param name="tn">
+    /// The tree node associated with the current rule.
+    /// </param>
+    /// <param name="text">
+    /// The text being processed.
+    /// </param>
+    /// <param name="title">
+    /// The title of the page being processed.
+    /// </param>
+    /// <returns>
+    /// The processed text after child rules and any configured template-name
+    /// replacement have been applied.
+    /// </returns>
+    private static string ReplaceOn(
+        string template,
+        TreeNode tn,
+        string text,
+        string title)
     {
-        InTemplateRule r = (InTemplateRule)tn.Tag;
+        InTemplateRule rule = (InTemplateRule)tn.Tag;
 
-        foreach (TreeNode t in tn.Nodes)
+        foreach (TreeNode childNode in tn.Nodes)
         {
-            IRule sr = (IRule)t.Tag;
-            text = sr.Apply(t, text, title);
+            IRule childRule = (IRule)childNode.Tag;
+            text = childRule.Apply(childNode, text, title);
         }
 
-        if (r.DoReplace_ && !string.IsNullOrEmpty(r.ReplaceWith_))
+        if (!rule.DoReplace_ ||
+            string.IsNullOrEmpty(rule.ReplaceWith_) ||
+            string.IsNullOrEmpty(template))
         {
-            if (string.IsNullOrEmpty(template))
-                return text;
-
-            string pattern =
-              @"^([\s]*)" + Tools.FirstLetterCaseInsensitive(template) + @"([\s]*(?:<!--.*-->)?[\s]*(\}\}|\|))";
-
-            pattern = pattern.Replace(" ", "[ _]+");
-
-            string replace = Tools.ApplyKeyWords(title, r.ReplaceWith_, false);
-
-            text = Regex.Replace(text, pattern, "$1" + replace + "$2");
+            return text;
         }
 
-        return text;
+        // TODO: Review the template replacement regex with focused tests, including
+        // comments, whitespace, underscores, pipes, and closing braces.
+        string pattern =
+            @"^([\s]*)" +
+            Tools.FirstLetterCaseInsensitive(template) +
+            @"([\s]*(?:<!--.*-->)?[\s]*(\}\}|\|))";
+
+        pattern = pattern.Replace(" ", "[ _]+");
+
+        string replacement =
+            Tools.ApplyKeyWords(
+                title,
+                rule.ReplaceWith_,
+                false);
+
+        return Regex.Replace(
+            text,
+            pattern,
+            "$1" + replacement + "$2");
     }
 }
