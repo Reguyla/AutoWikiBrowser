@@ -551,46 +551,68 @@ public partial class AWBProfilesForm : Form
         }
     }
 
+    /// <summary>
+    /// Attempts to log in using the currently selected account.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void btnLogin_Click(object sender, EventArgs e)
     {
         Login();
     }
 
     /// <summary>
-    /// Login based on selected item on the form
+    /// Logs in using the account currently selected in the saved profiles list.
     /// </summary>
+    /// <remarks>
+    /// When the selected profile specifies default settings, those settings are
+    /// loaded before authentication so the session uses the profile's configured
+    /// wiki and project.
+    /// </remarks>
     private void Login()
     {
+        int selectedProfileId = SelectedItem;
+
+        if (selectedProfileId < 0)
+        {
+            return;
+        }
+
         try
         {
-            if (SelectedItem < 0)
-            {
-                return;
-            }
-
             Cursor = Cursors.WaitCursor;
-            ListViewItem item = lvAccounts.Items[lvAccounts.SelectedIndices[0]];
+
+            ListViewItem item =
+                lvAccounts.Items[lvAccounts.SelectedIndices[0]];
 
             CurrentSettingsProfile =
                 string.IsNullOrEmpty(item.SubItems[3].Text)
-                    ? ""
+                    ? string.Empty
                     : item.SubItems[3].Text;
 
-            // fire event to load settings before logging in so we log into user's project/wiki
-            if (CurrentSettingsProfile.Length > 0 && UserDefaultSettingsLoadRequired != null)
+            // Load the profile settings before login so authentication uses the
+            // wiki and project configured for the selected account.
+            if (CurrentSettingsProfile.Length > 0)
             {
-                UserDefaultSettingsLoadRequired(null, null);
+                UserDefaultSettingsLoadRequired?.Invoke(
+                    this,
+                    EventArgs.Empty);
             }
 
             if (item.SubItems[2].Text == "Yes")
             {
-                //Get 'Saved' Password
-                PerformLogin(AWBProfiles.GetPassword(int.Parse(item.Text)));
+                string password =
+                    AWBProfiles.GetPassword(selectedProfileId);
+
+                PerformLogin(password);
             }
             else
             {
-                //Get Password from User
-                UserPassword password = new UserPassword
+                using UserPassword password = new()
                 {
                     Username = item.SubItems[1].Text
                 };
@@ -602,56 +624,78 @@ public partial class AWBProfilesForm : Form
             }
 
             AWBProfiles.LastUsedAccount = item.Text;
-
-            Cursor = Cursors.Default;
         }
         catch (Exception ex)
         {
-            Cursor = Cursors.Default;
             ErrorHandler.HandleException(ex);
+        }
+        finally
+        {
+            Cursor = Cursors.Default;
         }
     }
 
+    // TODO: Replace the ambiguous ID-or-name startup argument with an explicit
+    // profile identifier format so numeric profile names are handled reliably.
     /// <summary>
-    /// Publically accessible login, to allow calling of login via AWB startup parameters
+    /// Logs in using a saved profile identified by its numeric profile ID or
+    /// profile name.
     /// </summary>
-    /// <param name="profileIdOrName">Profile ID to login to</param>
+    /// <param name="profileIdOrName">
+    /// The saved profile ID or profile name supplied through the application
+    /// startup arguments.
+    /// </param>
     public void Login(string profileIdOrName)
     {
-        if (profileIdOrName.Length == 0)
+        if (string.IsNullOrEmpty(profileIdOrName))
+        {
             return;
+        }
 
         try
         {
-            int profileID;
-            AWBProfile startupProfile = int.TryParse(profileIdOrName, out profileID)
-                ? AWBProfiles.GetProfile(profileID)
-                : AWBProfiles.GetProfile(profileIdOrName);
+            AWBProfile? startupProfile;
 
-            if (startupProfile == null)
+            if (int.TryParse(profileIdOrName, out int profileId))
             {
-                MessageBox.Show(Parent, "Can't find user '" + profileIdOrName + "'.", "Command line error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                startupProfile = AWBProfiles.GetProfile(profileId);
+            }
+            else
+            {
+                startupProfile = AWBProfiles.GetProfile(profileIdOrName);
+            }
+
+            if (startupProfile is null)
+            {
+                MessageBox.Show(
+                    this,
+                    $"Cannot find user profile '{profileIdOrName}'.",
+                    "Command-line error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+
                 return;
             }
 
             if (!string.IsNullOrEmpty(startupProfile.Password))
             {
-                //Get 'Saved' Password
-                PerformLogin(startupProfile.Username, startupProfile.Password);
-            }
-            else
-            {
-                //Get Password from User
-                UserPassword password = new UserPassword
-                {
-                    Username = startupProfile.Username
-                };
+                PerformLogin(
+                    startupProfile.Username,
+                    startupProfile.Password);
 
-                if (password.ShowDialog(this) == DialogResult.OK)
-                {
-                    PerformLogin(startupProfile.Username, password.GetPassword);
-                }
+                return;
+            }
+
+            using UserPassword password = new()
+            {
+                Username = startupProfile.Username
+            };
+
+            if (password.ShowDialog(this) == DialogResult.OK)
+            {
+                PerformLogin(
+                    startupProfile.Username,
+                    password.GetPassword);
             }
         }
         catch (Exception ex)
@@ -660,17 +704,54 @@ public partial class AWBProfilesForm : Form
         }
     }
 
+    /// <summary>
+    /// Updates the availability of the quick login button when the username or
+    /// password changes.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void UsernameOrPasswordChanged(object sender, EventArgs e)
     {
-        btnQuickLogin.Enabled = txtPassword.Text.Length > 0 && txtUsername.Text.Length > 0;
+        btnQuickLogin.Enabled =
+            txtUsername.TextLength > 0 &&
+            txtPassword.TextLength > 0;
     }
 
+    /// <summary>
+    /// Initiates a quick login when the Enter key is pressed in the password
+    /// field.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The keyboard event data.
+    /// </param>
     private void txtPassword_KeyUp(object sender, KeyEventArgs e)
     {
-        if ((e.KeyCode == Keys.Return || e.KeyCode == Keys.Enter) && btnQuickLogin.Enabled)
+        if ((e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return) &&
+            btnQuickLogin.Enabled)
+        {
             btnQuickLogin.PerformClick();
+        }
     }
 
+    // TODO: Move profile creation and persistence into a profile service so the
+    // form only gathers user input and displays results.
+    /// <summary>
+    /// Logs in using the supplied credentials and optionally saves the account as
+    /// a new profile.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void btnQuickLogin_Click(object sender, EventArgs e)
     {
         string user = txtUsername.Text;
@@ -678,17 +759,28 @@ public partial class AWBProfilesForm : Form
 
         if (chkSaveProfile.Checked)
         {
-            if (AWBProfiles.GetProfile(txtUsername.Text) != null)
+            if (AWBProfiles.GetProfile(user) is not null)
             {
-                MessageBox.Show("Username \"" + txtUsername.Text + "\" already exists.", "Username exists");
+                MessageBox.Show(
+                    this,
+                    $"Username \"{user}\" already exists.",
+                    "Username exists",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
                 return;
             }
 
-            var profile = new AWBProfile { Username = user };
+            AWBProfile profile = new()
+            {
+                Username = user
+            };
+
             if (chkSavePassword.Checked)
             {
                 profile.Password = password;
             }
+
             AWBProfiles.AddEditProfile(profile);
         }
 
@@ -696,6 +788,16 @@ public partial class AWBProfilesForm : Form
         PerformLogin(user, password);
     }
 
+    /// <summary>
+    /// Enables or disables password saving based on whether the profile will be
+    /// saved.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void chkSaveProfile_CheckedChanged(object sender, EventArgs e)
     {
         chkSavePassword.Enabled = chkSaveProfile.Checked;
