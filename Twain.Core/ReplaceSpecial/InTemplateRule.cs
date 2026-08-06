@@ -212,47 +212,109 @@ public class InTemplateRule : IRule
         return text;
     }
 
-    class ParseTemplate
+    /// <summary>
+    /// Parses and processes matching template invocations within article text.
+    /// </summary>
+    private sealed class ParseTemplate
     {
-        readonly string template_;
-        string text_;
-        readonly string title_;
-        string result_ = "";
+        private readonly string template_;
+        private string text_;
+        private readonly string title_;
+        private string result_ = string.Empty;
 
-        public ParseTemplate(string template, string text, string title)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParseTemplate"/> class.
+        /// </summary>
+        /// <param name="template">
+        /// The template name to locate and process.
+        /// </param>
+        /// <param name="text">
+        /// The text containing the template invocations.
+        /// </param>
+        /// <param name="title">
+        /// The title of the page being processed.
+        /// </param>
+        public ParseTemplate(
+            string template,
+            string text,
+            string title)
         {
             template_ = template;
             text_ = text;
             title_ = title;
         }
 
-        public string Result { get { return result_; } }
+        /// <summary>
+        /// Gets the processed text.
+        /// </summary>
+        public string Result =>
+            result_;
 
+        /// <summary>
+        /// Applies the supplied rule tree to each matching template invocation.
+        /// </summary>
+        /// <param name="tn">
+        /// The tree node containing the rules to apply.
+        /// </param>
         public void Parse(TreeNode tn)
         {
-            // get all template calls in text, including nested
-            List<string> allT = Twain.Core.Parse.Parsers.GetAllTemplateDetail(text_);
+            List<string> templateCalls =
+                Twain.Core.Parse.Parsers.GetAllTemplateDetail(text_);
 
-            // only need to process template calls that match the input template name
-            allT.RemoveAll(t => Tools.TurnFirstToUpperNoProjectCheck(Tools.GetTemplateName(t)) != Tools.TurnFirstToUpperNoProjectCheck(template_));
+            templateCalls.RemoveAll(
+                templateCall =>
+                    Tools.TurnFirstToUpperNoProjectCheck(
+                        Tools.GetTemplateName(templateCall)) !=
+                    Tools.TurnFirstToUpperNoProjectCheck(template_));
 
-            allT.ForEach(t =>
+            foreach (string templateCall in templateCalls)
             {
-                string res = ReplaceOn(template_, tn, t, title_);
-                text_ = text_.Replace(t, res);
-            });
+                string replacement =
+                    ReplaceOn(
+                        template_,
+                        tn,
+                        templateCall,
+                        title_);
+
+                text_ = text_.Replace(
+                    templateCall,
+                    replacement);
+            }
 
             result_ = text_;
         }
     }
 
-    private static string ApplyInsideTemplate(string template, TreeNode tn, string text, string title)
+    /// <summary>
+    /// Parses the supplied text within the context of the specified template and
+    /// applies the rule tree to the parsed template content.
+    /// </summary>
+    /// <param name="template">
+    /// The template name to locate and process.
+    /// </param>
+    /// <param name="tn">
+    /// The tree node containing the rules to apply.
+    /// </param>
+    /// <param name="text">
+    /// The text containing the template invocation.
+    /// </param>
+    /// <param name="title">
+    /// The title of the page being processed.
+    /// </param>
+    /// <returns>
+    /// The processed text returned by the template parser.
+    /// </returns>
+    private static string ApplyInsideTemplate(
+        string template,
+        TreeNode tn,
+        string text,
+        string title)
     {
-        ParseTemplate p = new ParseTemplate(template, text, title);
+        ParseTemplate parser = new(template, text, title);
 
-        p.Parse(tn);
+        parser.Parse(tn);
 
-        return p.Result;
+        return parser.Result;
     }
 
     /// <summary>
