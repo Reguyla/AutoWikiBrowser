@@ -20,15 +20,41 @@ using System.Windows.Forms;
 
 namespace Twain.Core.ReplaceSpecial;
 
+/// <summary>
+/// Defines a replacement rule that operates within one or more specified
+/// templates.
+/// </summary>
 public class InTemplateRule : IRule
 {
+    /// <summary>
+    /// The XML element name used when serializing this rule.
+    /// </summary>
     public const string XmlName = "InTemplateRule";
 
-    public List<string> TemplateNames_ = new List<string>();
-    public string ReplaceWith_ = "";
+    /// <summary>
+    /// Gets or sets the template names to which this rule applies.
+    /// </summary>
+    public List<string> TemplateNames_ = new();
+
+    /// <summary>
+    /// Gets or sets the replacement text applied by this rule.
+    /// </summary>
+    public string ReplaceWith_ = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether template replacement is
+    /// enabled for this rule.
+    /// </summary>
     public bool DoReplace_;
 
-    InTemplateRuleControl ruleControl_;
+    /// <summary>
+    /// The WinForms editor control currently associated with this rule.
+    /// </summary>
+    /// <remarks>
+    /// This field is not serialized and is recreated when the rule editor is
+    /// displayed.
+    /// </remarks>
+    private InTemplateRuleControl? ruleControl_;
 
     /// <summary>
     /// Creates a copy of this rule without its associated user interface
