@@ -22,45 +22,98 @@ using Twain.Core.API;
 
 namespace Twain.Core.Profiles;
 
+/// <summary>
+/// Provides the user interface for selecting, loading, and logging in with
+/// saved AutoWikiBrowser account profiles.
+/// </summary>
 public partial class AWBProfilesForm : Form
 {
-    protected string CurrentSettingsProfile;
-    private readonly Session TheSession;
-    public event EventHandler LoggedIn;
-    public event EventHandler UserDefaultSettingsLoadRequired;
+    /// <summary>
+    /// Stores the name or identifier of the currently selected settings
+    /// profile.
+    /// </summary>
+    protected string CurrentSettingsProfile = string.Empty;
 
+    private readonly Session TheSession;
+
+    /// <summary>
+    /// Occurs after the user has logged in successfully.
+    /// </summary>
+    public event EventHandler? LoggedIn;
+
+    /// <summary>
+    /// Occurs when the selected account's default settings must be loaded.
+    /// </summary>
+    public event EventHandler? UserDefaultSettingsLoadRequired;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AWBProfilesForm"/> class.
+    /// </summary>
+    /// <param name="session">
+    /// The session used to authenticate and manage the selected account.
+    /// </param>
     public AWBProfilesForm(Session session)
     {
+        ArgumentNullException.ThrowIfNull(session);
+
         InitializeComponent();
+
+        TheSession = session;
+
         loginAsThisAccountToolStripMenuItem.Visible = true;
         loginAsThisAccountToolStripMenuItem.Click += lvAccounts_DoubleClick;
         btnLogin.Visible = true;
-        TheSession = session;
-        UsernameOrPasswordChanged(this, null);
+
+        UsernameOrPasswordChanged(this, EventArgs.Empty);
     }
 
+    // TODO: Move profile lookup and last-used-account resolution into a
+    // UI-independent service so the behavior can be reused by Twain.
+
+    /// <summary>
+    /// Loads saved account profiles and restores the most recently used
+    /// account selection when the form opens.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
     private void AWBProfiles_Load(object sender, EventArgs e)
     {
         if (!DesignMode)
-            LoadProfiles();
-
-        string lua = AWBProfiles.LastUsedAccount;
-
-        if (!string.IsNullOrEmpty(lua))
         {
-            int id;
-            int.TryParse(lua, out id);
-
-            AWBProfile p = AWBProfiles.GetProfile(id);
-
-            if (p == null)
-            {
-                txtUsername.Text = lua;
-                return;
-            }
-
-            txtUsername.Text = (id > 0) ? p.Username : lua;
+            LoadProfiles();
         }
+
+        string lastUsedAccount = AWBProfiles.LastUsedAccount;
+
+        if (string.IsNullOrEmpty(lastUsedAccount))
+        {
+            return;
+        }
+
+        // TODO: Store the last-used profile ID and fallback username in separate
+        // settings so numeric usernames cannot be mistaken for profile identifiers.
+        if (!int.TryParse(lastUsedAccount, out int id))
+        {
+            txtUsername.Text = lastUsedAccount;
+            return;
+        }
+
+        AWBProfile? profile = AWBProfiles.GetProfile(id);
+
+        if (profile is null)
+        {
+            txtUsername.Text = lastUsedAccount;
+            return;
+        }
+
+        txtUsername.Text =
+            id > 0
+                ? profile.Username
+                : lastUsedAccount;
     }
 
     /// <summary>
