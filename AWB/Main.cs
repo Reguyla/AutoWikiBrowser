@@ -9816,25 +9816,50 @@ if (MessageBox.Show(
             { a.Value.Nudged(Nudges); }
         }
     }
+    /// <summary>
+    /// Gets the number of nudges recorded for the current session.
+    /// </summary>
     public int Nudges { get; private set; }
+
     #endregion
 
     #region Edit Box Saver
+
+    /// <summary>
+    /// Saves the current edit box contents when automatic saving is configured.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void EditBoxSaveTimer_Tick(object sender, EventArgs e)
     {
-        if (_autoSaveEditBoxFile.Trim().Length > 0) SaveEditBoxText(_autoSaveEditBoxFile);
+        if (!string.IsNullOrWhiteSpace(_autoSaveEditBoxFile))
+        {
+            SaveEditBoxText(_autoSaveEditBoxFile);
+        }
     }
 
+    /// <summary>
+    /// Saves the current edit box contents to the specified file.
+    /// </summary>
+    /// <param name="path">The absolute path of the file to write.</param>
     private void SaveEditBoxText(string path)
     {
         Tools.WriteTextFileAbsolutePath(txtEdit.Text, path, false);
     }
+
     #endregion
 
+    /// <summary>
+    /// Prompts the user for a file and saves the current edit box contents.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void saveTextToFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (saveListDialog.ShowDialog() == DialogResult.OK)
+        {
             SaveEditBoxText(saveListDialog.FileName);
+        }
     }
 
     /// <summary>
@@ -10029,10 +10054,26 @@ if (MessageBox.Show(
         }
     }
 
-    private void webBrowserHistory_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+    // TODO: Replace the legacy WebBrowser control with the
+    // modern browser implementation used by Twain.
+    /// <summary>
+    /// Processes the loaded history page before displaying it in the embedded
+    /// browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// Information about the completed document load.
+    /// </param>
+    private void webBrowserHistory_DocumentCompleted(
+        object sender,
+        WebBrowserDocumentCompletedEventArgs e)
     {
-        if (webBrowserHistory.Document != null && webBrowserHistory.Document.Body != null)
-            webBrowserHistory.Document.Body.InnerHtml = ProcessHTMLForDisplay(webBrowserHistory.DocumentText);
+        if (webBrowserHistory.Document != null &&
+            webBrowserHistory.Document.Body != null)
+        {
+            webBrowserHistory.Document.Body.InnerHtml =
+                ProcessHTMLForDisplay(webBrowserHistory.DocumentText);
+        }
     }
 
     private void NewWhatLinksHere(string title)
@@ -10079,13 +10120,35 @@ if (MessageBox.Show(
         }
     }
 
-    private void webBrowserLinks_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+    /// <summary>
+    /// Processes the loaded links page before displaying it in the embedded
+    /// browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// Information about the completed document load.
+    /// </param>
+    private void webBrowserLinks_DocumentCompleted(
+        object sender,
+        WebBrowserDocumentCompletedEventArgs e)
     {
-        if (webBrowserLinks.Document != null && webBrowserLinks.Document.Body != null)
-            webBrowserLinks.Document.Body.InnerHtml = ProcessHTMLForDisplay(webBrowserLinks.DocumentText);
+        if (webBrowserLinks.Document != null &&
+            webBrowserLinks.Document.Body != null)
+        {
+            webBrowserLinks.Document.Body.InnerHtml =
+                ProcessHTMLForDisplay(webBrowserLinks.DocumentText);
+        }
     }
 
-    private const string StartMark = "<!-- start content -->", EndMark = "<!-- end content -->";
+    /// <summary>
+    /// HTML marker indicating the beginning of the page content.
+    /// </summary>
+    private const string StartMark = "<!-- start content -->";
+
+    /// <summary>
+    /// HTML marker indicating the end of the page content.
+    /// </summary>
+    private const string EndMark = "<!-- end content -->";
 
     private string ProcessHTMLForDisplay(string linksHtml)
     {
@@ -10650,11 +10713,28 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Enables or disables all edit toolbar commands.
+    /// </summary>
+    /// <param name="enabled">
+    /// <see langword="true"/> to enable the edit toolbar; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
     private void SetEditToolBarEnabled(bool enabled)
     {
-        imgBold.Enabled = imgExtlink.Enabled = imgHr.Enabled = imgItalics.Enabled = imgLink.Enabled =
-            imgMath.Enabled = imgNowiki.Enabled = imgRedirect.Enabled = imgStrike.Enabled = imgSub.Enabled =
-            imgSup.Enabled = imgComment.Enabled = enabled;
+        imgBold.Enabled =
+            imgExtlink.Enabled =
+            imgHr.Enabled =
+            imgItalics.Enabled =
+            imgLink.Enabled =
+            imgMath.Enabled =
+            imgNowiki.Enabled =
+            imgRedirect.Enabled =
+            imgStrike.Enabled =
+            imgSub.Enabled =
+            imgSup.Enabled =
+            imgComment.Enabled =
+            enabled;
     }
 
     private bool EditToolBarVisible
@@ -10695,18 +10775,37 @@ if (MessageBox.Show(
         get { return imgBold.Visible; }
     }
 
-    private void showHideEditToolbarToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Shows or hides the edit toolbar based on the current menu item state.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void showHideEditToolbarToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         EditToolBarVisible = !showHideEditToolbarToolStripMenuItem.Checked;
     }
+
     #endregion
 
     #region various menus and event handlers
+
+    /// <summary>
+    /// Updates the Find text box tooltip to display its current contents.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtFind_MouseHover(object sender, EventArgs e)
     {
         ToolTip.SetToolTip(txtFind, txtFind.Text);
     }
 
+    /// <summary>
+    /// Watches or unwatches the current article when no editor operation is active.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnWatch_Click(object sender, EventArgs e)
     {
         if (TheArticle == null)
@@ -10716,14 +10815,20 @@ if (MessageBox.Show(
         }
 
         if (TheSession.Editor.IsActive)
+        {
             return;
+        }
 
         btnWatch.Enabled = false;
 
         if (PageWatched)
+        {
             TheSession.Editor.Unwatch(TheArticle.Name);
+        }
         else
+        {
             TheSession.Editor.Watch(TheArticle.Name);
+        }
 
         PageWatched = !PageWatched;
         btnWatch.Enabled = true;
