@@ -2312,28 +2312,33 @@ en, sq, ru
     }
 
     /// <summary>
-    /// Adds a category sort key to category links that do not already contain one.
+    /// Adds a generated category sort key to category links that do not already
+    /// contain one.
     /// </summary>
     /// <param name="list">
     /// The category links to process.
     /// </param>
     /// <param name="name">
-    /// The value used to generate the category sort key.
+    /// The value from which the category sort key is generated.
     /// </param>
     /// <returns>
     /// A new list containing the processed category links.
     /// </returns>
     private static List<string> CatKeyer(IEnumerable<string> list, string name)
     {
-        name = Tools.MakeHumanCatKey(name, ""); // Generate the category sort key.
+        name = Tools.MakeHumanCatKey(name, string.Empty);
 
         // Add the generated key to categories that do not already contain one.
         List<string> newCats = new();
+
         foreach (string s in list)
         {
             string z = s;
+
             if (!z.Contains("|"))
+            {
                 z = z.Replace("]]", "|" + name + "]]");
+            }
 
             newCats.Add(z);
         }
