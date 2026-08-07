@@ -1299,7 +1299,6 @@ en, sq, ru
             }
         }
 
-        string defaultSort = string.Empty;
         bool defaultSortRemoved = false;
 
         // allow comments between categories, and keep them in the same place, only grab any comment after the last category if on same line
@@ -1364,27 +1363,8 @@ en, sq, ru
                 }, 1);
         }
 
-        if (Variables.LangCode.Equals("sl") && LifeTime.IsMatch(articleText))
-        {
-            defaultSort = LifeTime.Match(articleText).Value;
-        }
-        if (Variables.LangCode.Equals("es") && NF.IsMatch(articleText))
-        {
-            defaultSort = NF.Match(articleText).Value;
-        }
-        else if (mc.Count > 0)
-            defaultSort = mc[0].Value;
-
-        if (!string.IsNullOrEmpty(defaultSort))
-        {
-            // if defaultsort wasn't in the cut area before the categories, remove now
-            if (!defaultSortRemoved)
-                articleText = articleText.Replace(defaultSort, "");
-
-            if (defaultSort.ToUpper().Contains("DEFAULTSORT"))
-                defaultSort = TalkPageFixes.FormatDefaultSort(defaultSort);
-            defaultSort += "\r\n";
-        }
+        string defaultSort = ExtractDefaultSort(
+            ref articleText, mc, defaultSortRemoved);
 
         // Extract any {{Uncategorized}}/{{Improve categories}} template from the
         // article's final section. Last-section detection is handled by GetLastSection().
@@ -1396,9 +1376,7 @@ en, sq, ru
            out string restOfArticleText);
 
         string uncat = RemoveUncategorizedTemplates(
-           ref articleText,
-           lastSectionNoComments,
-           restOfArticleText);
+           ref articleText, lastSectionNoComments, restOfArticleText);
 
         // per MOS:ORDER {{Improve categories}} or {{Uncategorized}} after cats if in last section
         if (Variables.IsWikipediaEN)
@@ -1539,6 +1517,61 @@ en, sq, ru
         articleText = p.MultipleIssues(articleText);
 
         return uncat;
+    }
+
+    /// <summary>
+    /// Determines and removes the applicable DEFAULTSORT-style metadata from the
+    /// article and prepares it for later restoration.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="mc">
+    /// The DEFAULTSORT matches previously detected in the article.
+    /// </param>
+    /// <param name="defaultSortRemoved">
+    /// Indicates whether the DEFAULTSORT declaration was already removed during
+    /// category extraction.
+    /// </param>
+    /// <returns>
+    /// The extracted and formatted DEFAULTSORT metadata, including its trailing
+    /// newline, or an empty string if none is applicable.
+    /// </returns>
+    private static string ExtractDefaultSort(
+        ref string articleText,
+        MatchCollection mc,
+        bool defaultSortRemoved)
+    {
+        string defaultSort = string.Empty;
+
+        if (Variables.LangCode.Equals("sl") &&
+            LifeTime.IsMatch(articleText))
+        {
+            defaultSort = LifeTime.Match(articleText).Value;
+        }
+
+        if (Variables.LangCode.Equals("es") &&
+            NF.IsMatch(articleText))
+        {
+            defaultSort = NF.Match(articleText).Value;
+        }
+        else if (mc.Count > 0)
+        {
+            defaultSort = mc[0].Value;
+        }
+
+        if (string.IsNullOrEmpty(defaultSort))
+            return string.Empty;
+
+        // If DEFAULTSORT was not removed from the category-processing area,
+        // remove it from the remaining article text now.
+        if (!defaultSortRemoved)
+            articleText = articleText.Replace(defaultSort, "");
+
+        if (defaultSort.ToUpper().Contains("DEFAULTSORT"))
+            defaultSort = TalkPageFixes.FormatDefaultSort(defaultSort);
+
+        return defaultSort + "\r\n";
     }
 
     /// <summary>
