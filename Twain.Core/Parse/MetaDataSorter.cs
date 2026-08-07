@@ -1395,21 +1395,10 @@ en, sq, ru
            out string lastSectionNoComments,
            out string restOfArticleText);
 
-        string uncat = string.Empty;
-        if (UncategorizedImproveCats.IsMatch(lastSectionNoComments) && !UncategorizedImproveCats.IsMatch(restOfArticleText))
-        {
-            articleText = UncategorizedImproveCats.Replace(articleText, uncatm =>
-            {
-                // remove exact duplicates
-                if (!uncat.Contains(uncatm.Value))
-                    uncat += uncatm.Value + "\r\n";
-
-                return "";
-            });
-            // now process {{multiple issues}} in case {{improve categories}} was in it and MI needs cleanup
-            Parsers p = new Parsers();
-            articleText = p.MultipleIssues(articleText);
-        }
+        string uncat = RemoveUncategorizedTemplates(
+           ref articleText,
+           lastSectionNoComments,
+           restOfArticleText);
 
         // per MOS:ORDER {{Improve categories}} or {{Uncategorized}} after cats if in last section
         if (Variables.IsWikipediaEN)
@@ -1501,6 +1490,55 @@ en, sq, ru
             WikiRegexes.Comments.Matches(lastSection));
 
         restOfArticleText = articleText.Substring(0, h);
+    }
+
+    /// <summary>
+    /// Removes Uncategorized and Improve categories templates when they occur
+    /// only in the article's final section and prepares them for later restoration.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="lastSectionNoComments">
+    /// The final article section with comments replaced by whitespace.
+    /// </param>
+    /// <param name="restOfArticleText">
+    /// The portion of the article preceding the final section.
+    /// </param>
+    /// <returns>
+    /// The removed maintenance templates, with exact duplicates omitted, or an
+    /// empty string when no applicable templates are found.
+    /// </returns>
+    private static string RemoveUncategorizedTemplates(
+        ref string articleText,
+        string lastSectionNoComments,
+        string restOfArticleText)
+    {
+        if (!UncategorizedImproveCats.IsMatch(lastSectionNoComments) ||
+            UncategorizedImproveCats.IsMatch(restOfArticleText))
+        {
+            return string.Empty;
+        }
+
+        string uncat = string.Empty;
+
+        articleText = UncategorizedImproveCats.Replace(
+            articleText,
+            uncatm =>
+            {
+                // Remove exact duplicates.
+                if (!uncat.Contains(uncatm.Value))
+                    uncat += uncatm.Value + "\r\n";
+
+                return "";
+            });
+
+        // Process {{Multiple issues}} in case {{Improve categories}} was
+        // contained within it and the template now requires cleanup.
+        Parsers p = new Parsers();
+        articleText = p.MultipleIssues(articleText);
+
+        return uncat;
     }
 
     /// <summary>
