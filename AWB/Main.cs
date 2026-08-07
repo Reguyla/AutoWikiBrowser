@@ -8541,12 +8541,25 @@ if (MessageBox.Show(
         UpdateButtons(null, null);
     }
 
+    /// <summary>
+    /// Opens the AutoWikiBrowser user manual in the default web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void helpToolStripMenuItem1_Click(object sender, EventArgs e)
     {
-        Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser/User manual", false);
+        Tools.OpenENArticleInBrowser(
+            "Wikipedia:AutoWikiBrowser/User manual",
+            false);
     }
 
     #region Edit Box Menu
+
+    /// <summary>
+    /// Reparses the current article text and refreshes the edit box state.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void reparseToolStripMenuItem_Click(object sender, EventArgs e)
     {
         ReparseEditBox();
@@ -8724,40 +8737,87 @@ if (MessageBox.Show(
     }
     #endregion
 
-    private void removeAllExcessWhitespaceToolStripMenuItem_Click(object sender, EventArgs e)
+    // TODO: Move article text transformation workflows into a dedicated
+    // formatting service as part of the Twain.Core modernization.
+    /// <summary>
+    /// Removes excess whitespace from the current article while preserving
+    /// protected regions that should not be modified.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void removeAllExcessWhitespaceToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         string text = RemoveText.Hide(txtEdit.Text);
+
         text = Parsers.RemoveAllWhiteSpace(text);
 
         txtEdit.Text = RemoveText.AddBack(text);
     }
     #endregion
 
+    /// <summary>
+    /// Selects all text in the primary new-category text box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtNewCategory_DoubleClick(object sender, EventArgs e)
     {
         txtNewCategory.SelectAll();
     }
 
+    /// <summary>
+    /// Selects all text in the secondary new-category text box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtNewCategory2_DoubleClick(object sender, EventArgs e)
     {
         txtNewCategory2.SelectAll();
     }
 
+    /// <summary>
+    /// Updates the edit summary tooltip based on the current article and
+    /// review edit summary.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The mouse event data.</param>
     private void cmboEditSummary_MouseMove(object sender, MouseEventArgs e)
     {
-        if ((TheArticle != null) && string.IsNullOrEmpty(TheArticle.EditSummary))
+        if (TheArticle != null && string.IsNullOrEmpty(TheArticle.EditSummary))
+        {
             ToolTip.SetToolTip(cmboEditSummary, "");
+        }
         else
+        {
             ToolTip.SetToolTip(cmboEditSummary, txtReviewEditSummary.Text);
+        }
     }
 
-    // If user changes default edit summary after article has been processed, refresh editable edit summary; any custom changes to editable edit summary will be lost
+    /// <summary>
+    /// Refreshes the editable edit summary when the default edit summary
+    /// changes and the review summary is currently enabled.
+    /// </summary>
+    /// <remarks>
+    /// Any custom changes made to the editable edit summary are replaced when
+    /// the default summary changes.
+    /// </remarks>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void cmboEditSummary_TextChanged(object sender, EventArgs e)
     {
         if (txtReviewEditSummary.Enabled)
+        {
             txtReviewEditSummary.Text = MakeDefaultEditSummary();
+        }
     }
 
+    /// <summary>
+    /// Updates the available command buttons when the selected tab changes.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
     {
         UpdateButtons(null, null);
@@ -8944,11 +9004,21 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Toggles the visibility of the associated panel.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void showHidePanelToolStripMenuItem_Click(object sender, EventArgs e)
     {
         PanelShowHide();
     }
 
+    /// <summary>
+    /// Toggles the parameter controls to enlarge or restore the edit area.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void enlargeEditAreaToolStripMenuItem_Click(object sender, EventArgs e)
     {
         ParametersShowHide();
@@ -9311,6 +9381,12 @@ if (MessageBox.Show(
         RegexTester.BringToFront();
     }
 
+    /// <summary>
+    /// Updates the edit summary controls when the summary lock option
+    /// changes.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void chkLock_CheckedChanged(object sender, EventArgs e)
     {
         cmboEditSummary.Visible = !chkLock.Checked;
@@ -9318,16 +9394,37 @@ if (MessageBox.Show(
         lblSummary.Visible = chkLock.Checked;
     }
 
+    /// <summary>
+    /// Enables or disables the link loading button based on whether a
+    /// disambiguation page name has been entered.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtDabLink_TextChanged(object sender, EventArgs e)
     {
-        btnLoadLinks.Enabled = !string.IsNullOrEmpty(txtDabLink.Text.Trim());
+        btnLoadLinks.Enabled =
+            !string.IsNullOrWhiteSpace(txtDabLink.Text);
     }
 
+    /// <summary>
+    /// Initializes the disambiguation page text box with the current list
+    /// maker source when it is empty.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtDabLink_Enter(object sender, EventArgs e)
     {
-        if (txtDabLink.Text.Length == 0) txtDabLink.Text = listMaker.SourceText;
+        if (txtDabLink.Text.Length == 0)
+        {
+            txtDabLink.Text = listMaker.SourceText;
+        }
     }
 
+    /// <summary>
+    /// Enables or disables the disambiguation controls.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void chkEnableDab_CheckedChanged(object sender, EventArgs e)
     {
         panelDab.Enabled = chkEnableDab.Checked;
@@ -9892,12 +9989,28 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Updates the History menu before it is displayed by enabling or
+    /// disabling commands based on whether an article is currently loaded.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// A <see cref="CancelEventArgs"/> that can be used to cancel the event.
+    /// </param>
     private void mnuHistory_Opening(object sender, CancelEventArgs e)
     {
-        openInBrowserToolStripMenuItem.Enabled = refreshHistoryToolStripMenuItem.Enabled = (TheArticle != null);
+        openInBrowserToolStripMenuItem.Enabled =
+            refreshHistoryToolStripMenuItem.Enabled =
+                (TheArticle != null);
     }
     #endregion
 
+    /// <summary>
+    /// Opens the profile management dialog unless the application is in the
+    /// process of shutting down.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void profilesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (!ShuttingDown)
@@ -9906,6 +10019,12 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Loads the settings associated with the currently selected user
+    /// profile.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void UserDefaultSettingsLoadRequired(object sender, EventArgs e)
     {
         LoadPrefs(Profiles.SettingsToLoad);
@@ -9941,22 +10060,36 @@ if (MessageBox.Show(
         UpdateUserNotifications();
     }
 
+    /// <summary>
+    /// Synchronizes the "Mark all edits as minor" menu option with the
+    /// Minor Edit check box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void chkMinor_CheckedChanged(object sender, EventArgs e)
     {
         markAllAsMinorToolStripMenuItem.Checked = chkMinor.Checked;
     }
 
+    /// <summary>
+    /// Synchronizes the Minor Edit check box with the "Mark all edits as
+    /// minor" menu option.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void markAllAsMinorToolStripMenuItem_Click(object sender, EventArgs e)
     {
         chkMinor.Checked = markAllAsMinorToolStripMenuItem.Checked;
     }
 
+    /// <summary>
+    /// Displays the login dialog.
+    /// </summary>
     private void ShowLogin()
     {
-        using (Login login = new Login())
-        {
-            login.ShowDialog(this);
-        }
+        using Login login = new();
+
+        login.ShowDialog(this);
     }
 
     #region Shutdown
@@ -10313,61 +10446,109 @@ if (MessageBox.Show(
 #endif
     }
 
+    /// <summary>
+    /// Opens the plugin loader and allows the user to load a new plugin.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void loadPluginToolStripMenuItem_Click(object sender, EventArgs e)
     {
         PluginManager.LoadNewPlugin(this);
     }
 
+    /// <summary>
+    /// Opens the plugin management dialog.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void managePluginsToolStripMenuItem_Click(
         object sender,
         EventArgs e)
     {
-        using (PluginManager pluginManager =
-               new PluginManager(this))
-        {
-            pluginManager.ShowDialog(this);
-        }
+        using PluginManager pluginManager = new(this);
+
+        pluginManager.ShowDialog(this);
     }
 
+    /// <summary>
+    /// Undoes the most recent edit in the list maker input text box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void menuitemMakeFromTextBoxUndo_Click(object sender, EventArgs e)
     {
         listMaker.UserInputTextBox.Undo();
     }
 
+    /// <summary>
+    /// Cuts the selected text from the list maker input text box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void menuitemMakeFromTextBoxCut_Click(object sender, EventArgs e)
     {
         listMaker.UserInputTextBox.Cut();
     }
 
+    /// <summary>
+    /// Copies the selected text from the list maker input text box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void menuitemMakeFromTextBoxCopy_Click(object sender, EventArgs e)
     {
         listMaker.UserInputTextBox.Copy();
     }
 
+    /// <summary>
+    /// Pastes clipboard contents into the list maker input text box.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void menuitemMakeFromTextBoxPaste_Click(object sender, EventArgs e)
     {
         listMaker.UserInputTextBox.Paste();
     }
 
+    /// <summary>
+    /// Opens the C# evaluation dialog.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void cEvalToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (CSharpEval cs = new CSharpEval())
-        {
-            cs.ShowDialog();
-        }
+        using CSharpEval cs = new();
+
+        cs.ShowDialog();
     }
 
+    // TODO: Determine category-source behavior from the selected source type
+    // rather than matching the displayed source text.
+    /// <summary>
+    /// Updates list maker controls when the selected list source changes.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ListMakerSourceSelectHandler(object sender, EventArgs e)
     {
-        toolStripSeparatorMakeFromTextBox.Visible = listMaker.cmboSourceSelect.Text.Contains("Category");
+        toolStripSeparatorMakeFromTextBox.Visible =
+            listMaker.cmboSourceSelect.Text.Contains("Category");
     }
 
+    /// <summary>
+    /// Displays the external program processing window.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void externalProcessingToolStripMenuItem_Click(object sender, EventArgs e)
     {
         ExtProgram.Show();
     }
 
-    private readonly CategoryNameForm _catName = new CategoryNameForm();
+    /// <summary>
+    /// Dialog used to obtain a category name from the user.
+    /// </summary>
+    private readonly CategoryNameForm _catName = new();
 
     private void categoryToolStripMenuItem_Click(object sender, EventArgs e)
     {
