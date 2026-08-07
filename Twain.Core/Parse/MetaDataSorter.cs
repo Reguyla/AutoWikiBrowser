@@ -540,8 +540,9 @@ en, sq, ru
         articleText = Parsers.RemoveWhiteSpace(articleText, fixOptionalWhitespace) + "\r\n";
 
         articleText += disambig;
-        if (TemplateExists(alltemplates, WikiRegexes.MultipleIssues))
-            articleText = WikiRegexes.MultipleIssues.Replace(articleText, m => Regex.Replace(m.Value, "(\r\n)+", "\r\n"));
+
+        articleText = NormalizeMultipleIssues(
+            articleText, alltemplates);
 
         switch (Variables.LangCode)
         {
@@ -837,6 +838,32 @@ en, sq, ru
             return string.Empty;
 
         return Tools.Newline(RemovePersonData(ref articleText));
+    }
+
+    /// <summary>
+    /// Normalizes excess line breaks within Multiple issues templates when
+    /// such a template is present in the article.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The article text with line breaks normalized within Multiple issues
+    /// templates, or the original text if no matching template is present.
+    /// </returns>
+    private static string NormalizeMultipleIssues(
+        string articleText,
+        List<string> alltemplates)
+    {
+        if (!TemplateExists(alltemplates, WikiRegexes.MultipleIssues))
+            return articleText;
+
+        return WikiRegexes.MultipleIssues.Replace(
+            articleText,
+            m => Regex.Replace(m.Value, "(\r\n)+", "\r\n"));
     }
 
     /// <summary>
