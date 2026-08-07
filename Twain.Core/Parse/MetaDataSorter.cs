@@ -142,12 +142,24 @@ public class MetaDataSorter
     /// </summary>
     private InterWikiOrderEnum Order = InterWikiOrderEnum.LocalLanguageAlpha;
 
+    // TODO (Modernization):
+    // Review the InterWikiOrder setter for simplification and performance.
+    // The current implementation rebuilds the interwiki language list and
+    // creates a new InterWikiComparer each time the ordering changes. Determine
+    // whether these objects can be cached or updated incrementally, and consider
+    // replacing the switch statement with a more maintainable mapping once
+    // regression tests are in place.
     /// <summary>
-    ///
+    /// Gets or sets the ordering method used when sorting interwiki links.
     /// </summary>
+    /// <remarks>
+    /// Setting this property updates the internal comparer used to order
+    /// interwiki links for the current project.
+    /// </remarks>
     public InterWikiOrderEnum InterWikiOrder
     {
-        // orders from https://meta.wikimedia.org/wiki/Interwiki_sorting_order
+        // Interwiki ordering definitions are based on:
+        // https://meta.wikimedia.org/wiki/Interwiki_sorting_order
         set
         {
             Order = value;
@@ -158,35 +170,52 @@ public class MetaDataSorter
                 case InterWikiOrderEnum.Alphabetical:
                     seq = InterwikiAlpha;
                     break;
+
                 case InterWikiOrderEnum.AlphabeticalEnFirst:
                     seq = InterwikiAlphaEnFirst;
                     break;
+
                 case InterWikiOrderEnum.LocalLanguageAlpha:
                     seq = InterwikiLocalAlpha;
                     break;
+
                 case InterWikiOrderEnum.LocalLanguageFirstWord:
                     seq = InterwikiLocalFirst;
                     break;
+
                 default:
-                    throw new ArgumentOutOfRangeException("MetaDataSorter.InterWikiOrder",
-                                                          (Exception)null);
+                    throw new ArgumentOutOfRangeException(
+                        "MetaDataSorter.InterWikiOrder",
+                        (Exception)null);
             }
+
             PossibleInterwikis = SiteMatrix.GetProjectLanguages(Variables.Project);
-            Comparer = new InterWikiComparer(new List<string>(seq), PossibleInterwikis);
+            Comparer = new InterWikiComparer(
+                new List<string>(seq),
+                PossibleInterwikis);
         }
+
         get
         {
             return Order;
         }
     }
 
+    /// <summary>
+    /// Tracks whether all requested interwiki data was successfully loaded
+    /// from the object cache.
+    /// </summary>
     private bool Loaded = true;
 
     /// <summary>
-    ///
+    /// Loads a cached interwiki data collection.
     /// </summary>
-    /// <param name="what"></param>
-    /// <returns></returns>
+    /// <param name="what">
+    /// The cache entry name identifying the interwiki data to load.
+    /// </param>
+    /// <returns>
+    /// The cached interwiki data, or an empty list if no cached value is found.
+    /// </returns>
     private List<string> Load(string what)
     {
         var result = (List<string>)ObjectCache.Global.Get<List<string>>(Key(what));
@@ -200,7 +229,7 @@ public class MetaDataSorter
     }
 
     /// <summary>
-    ///
+    /// Saves the current interwiki ordering collections to the object cache.
     /// </summary>
     private void SaveInterWikiToCache()
     {
