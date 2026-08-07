@@ -526,20 +526,7 @@ en, sq, ru
         if (Namespace.IsMainSpace(articleTitle) && (Parsers.NoIncludeIncludeOnlyProgrammingElement(articleText)))
             return articleText;
 
-        // short pages monitor check for en-wiki: keep at very end of article if present
-        // See [[Template:Long comment/doc]]
-        // SPM regex quick check for performance on long pages
-        string shortPagesMonitor = string.Empty;
-        if (Variables.LangCode.Equals("en") && alltemplates.Contains("Short pages monitor"))
-        {
-            Match spm = WikiRegexes.ShortPagesMonitor.Match(articleText);
-
-            if (spm.Success)
-            {
-                articleText = WikiRegexes.ShortPagesMonitor.Replace(articleText, "").TrimEnd();
-                shortPagesMonitor = spm.Value.TrimEnd();
-            }
-        }
+        string shortPagesMonitor = RemoveShortPagesMonitor(ref articleText, alltemplates);
 
         articleText = CommentedOutEnInterwiki.Replace(articleText, "");
 
@@ -630,6 +617,44 @@ en, sq, ru
 
         // Only trim start on Category namespace, restore any saved short page monitor text
         return (Namespace.Determine(articleTitle) == Namespace.Category ? articleText.Trim() : articleText.TrimEnd()) + shortPagesMonitor;
+    }
+
+    /// <summary>
+    /// Removes the English Wikipedia short pages monitor template from the
+    /// article text and returns its content for later restoration.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The removed short pages monitor text, or an empty string if no matching
+    /// template is present.
+    /// </returns>
+    private static string RemoveShortPagesMonitor(
+        ref string articleText,
+        List<string> alltemplates)
+    {
+        string shortPagesMonitor = string.Empty;
+
+        if (Variables.LangCode.Equals("en") &&
+            alltemplates.Contains("Short pages monitor"))
+        {
+            Match spm = WikiRegexes.ShortPagesMonitor.Match(articleText);
+
+            if (spm.Success)
+            {
+                articleText = WikiRegexes.ShortPagesMonitor
+                    .Replace(articleText, "")
+                    .TrimEnd();
+
+                shortPagesMonitor = spm.Value.TrimEnd();
+            }
+        }
+
+        return shortPagesMonitor;
     }
 
     /// <summary>
