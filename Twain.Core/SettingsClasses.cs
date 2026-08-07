@@ -407,7 +407,7 @@ public class GeneralPrefs
 
     public EditBoxAutoSavePrefs AutoSaveEdit;
     public string SelectedSummary = "Clean up";
-    public List<string> Summaries = new List<string>();
+    public List<string> Summaries = new();
 
     public string[] PasteMore = { "", "", "", "", "", "", "", "", "", "" };
 
@@ -527,7 +527,7 @@ public class SpecialFilterPrefs
     public bool areRegex = false;
 
     public int opType = -1;
-    public List<string> remove = new List<string>();
+    public List<string> remove = new();
 }
 
 [Serializable]

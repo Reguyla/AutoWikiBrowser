@@ -23,15 +23,15 @@ namespace Twain.Core.Parse;
 
 public static class SiteMatrix
 {
-    public static List<string> Languages = new List<string>();
-    public static List<string> WikipediaLanguages = new List<string>();
-    public static List<string> WiktionaryLanguages = new List<string>();
-    public static List<string> WikibooksLanguages = new List<string>();
-    public static List<string> WikinewsLanguages = new List<string>();
-    public static List<string> WikisourceLanguages = new List<string>();
-    public static List<string> WikiquoteLanguages = new List<string>();
-    public static List<string> WikiversityLanguages = new List<string>();
-    public static List<string> Specials = new List<string>();
+    public static List<string> Languages = new();
+    public static List<string> WikipediaLanguages = new();
+    public static List<string> WiktionaryLanguages = new();
+    public static List<string> WikibooksLanguages = new();
+    public static List<string> WikinewsLanguages = new();
+    public static List<string> WikisourceLanguages = new();
+    public static List<string> WikiquoteLanguages = new();
+    public static List<string> WikiversityLanguages = new();
+    public static List<string> Specials = new();
     public static readonly Dictionary<string, string> LanguageNames = new();
 
     static SiteMatrix()
@@ -236,7 +236,7 @@ public static class SiteMatrix
                 return WikiversityLanguages;
 
             default:
-                return new List<string>();
+                return new();
         }
     }
 }
@@ -247,8 +247,8 @@ internal sealed class InterWikiComparer : IComparer<string>
     public InterWikiComparer(List<string> order, List<string> languages)
     {
         languages = new List<string>(languages); // make a copy
-        List<string> unordered = new List<string>(),
-            output = new List<string>();
+        List<string> unordered = new(),
+            output = new();
 
         // remove unneeded languages from order
         for (int i = 0; i < order.Count;)

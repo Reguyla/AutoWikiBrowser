@@ -2112,11 +2112,11 @@ public class ConversionTests : RequiresParser
     [Test]
     public void DeduplicateMaintenanceTags()
     {
-        List<string> tags = new List<string>();
+        List<string> tags = new();
         tags.Add("{{orphan}}");
         tags.Add("{{orphan}}");
 
-        List<string> tags2 = new List<string>();
+        List<string> tags2 = new();
         tags2.Add("{{orphan}}");
 
         Assert.That(Parsers.DeduplicateMaintenanceTags(tags), Is.EqualTo(tags2), "exact dupes");

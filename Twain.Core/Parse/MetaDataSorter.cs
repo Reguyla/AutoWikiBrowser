@@ -409,7 +409,7 @@ en, sq, ru
                     startMarker,
                     endMarker));
 
-        List<string> result = new List<string>();
+        List<string> result = new();
 
         foreach (string s in raw.Split(
             new[] { "," },
@@ -1282,7 +1282,7 @@ en, sq, ru
             return string.Empty;
         }
 
-        List<string> categoryList = new List<string>();
+        List<string> categoryList = new();
         string articleTextNoComments = Tools.ReplaceWithSpaces(articleText, WikiRegexes.Comments.Matches(articleText));
 
         // Don't operate on pages with (incorrectly) multiple DEFAULTSORT declarations.
@@ -1628,7 +1628,7 @@ en, sq, ru
         if (Variables.LangCode.Equals("ru"))
             return string.Empty;
 
-        List<string> stubList = new List<string>();
+        List<string> stubList = new();
         string originalArticleText = articleText;
 
         articleText = WikiRegexes.PossiblyCommentedStub.Replace(articleText, m =>
@@ -2149,7 +2149,7 @@ en, sq, ru
     /// <returns>List of interwikis</returns>
     private List<string> RemoveInterWikis(ref string articleText)
     {
-        List<string> interWikiList = new List<string>();
+        List<string> interWikiList = new();
 
         // Performance: faster to get all wikilinks and filter on interwiki matches than simply run the regex on the whole article text
         var allInterwikisFound = (from Match m in WikiRegexes.WikiLink.Matches(articleText)
@@ -2168,7 +2168,7 @@ en, sq, ru
         string unformattedText = ut.ToString();
 
         List<Match> goodMatches = new List<Match>();
-        List<string> interWikiListLinksOnly = new List<string>();
+        List<string> interWikiListLinksOnly = new();
         List<string> allTemplates = Parsers.GetAllTemplateDetail(articleText);
 
         foreach (Match m in WikiRegexes.PossibleInterwikis.Matches(articleText))
@@ -2246,7 +2246,7 @@ en, sq, ru
         if (!items.Any())
             return string.Empty;
 
-        List<string> uniqueItems = new List<string>();
+        List<string> uniqueItems = new();
 
         // remove duplicates: duplicate if an existing list item starts the with string
         // also duplicate when one category is same as another with a sortkey
@@ -2328,7 +2328,7 @@ en, sq, ru
         name = Tools.MakeHumanCatKey(name, ""); // Generate the category sort key.
 
         // Add the generated key to categories that do not already contain one.
-        List<string> newCats = new List<string>();
+        List<string> newCats = new();
         foreach (string s in list)
         {
             string z = s;

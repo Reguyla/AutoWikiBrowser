@@ -51,10 +51,10 @@ public partial class Parsers
             Limit = 10
         };
 
-    private static readonly LinksOnPageListProvider LinksOnPageProv = new LinksOnPageListProvider();
+    private static readonly LinksOnPageListProvider LinksOnPageProv = new();
 
-    private readonly List<string> tagsRemoved = new List<string>();
-    private readonly List<string> tagsAdded = new List<string>();
+    private readonly List<string> tagsRemoved = new();
+    private readonly List<string> tagsAdded = new();
     private static readonly Regex ImproveCategories = Tools.NestedTemplateRegex("improve categories");
 
     private static readonly Regex ProposedDeletionDatedEndorsed = Tools.NestedTemplateRegex(new[]
@@ -1154,7 +1154,7 @@ public partial class Parsers
     {
         if (WikiRegexes.DatedTemplates.Any())
         {
-            List<string> t = GetAllTemplates(articleText), t2 = new List<string>();
+            List<string> t = GetAllTemplates(articleText), t2 = new();
 
             t2.AddRange(t.Where(s => WikiRegexes.DatedTemplates.Contains(s)));
 

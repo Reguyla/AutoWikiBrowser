@@ -483,7 +483,7 @@ bar"), Is.EqualTo(2));
     [Test]
     public void DeduplicateList()
     {
-        List<string> A = new List<string>();
+        List<string> A = new();
         Assert.That(Tools.DeduplicateList(A), Is.EqualTo(A));
         A.Add("hello");
         Assert.That(Tools.DeduplicateList(A), Is.EqualTo(A));
@@ -1042,7 +1042,7 @@ John", "*"), Is.EqualTo(@"* Fred
     [Test]
     public void DuplicateWikiLinks()
     {
-        List<string> dupeWikiLinks = new List<string>();
+        List<string> dupeWikiLinks = new();
 
         dupeWikiLinks.Add("Foo (2)");
 
@@ -1405,9 +1405,9 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
     [Test]
     public void GetTemplateParametersValues()
     {
-        List<string> returned = new List<string>();
+        List<string> returned = new();
 
-        List<string> parameters = new List<string>();
+        List<string> parameters = new();
 
         string template = @"{{cite web| title=abc |date=1 May 2009 | author=Smith, Ed | work=Times | location=Here }}";
 
@@ -1682,7 +1682,7 @@ There}}"), Is.EqualTo(Back), "handles parameters with newlines");
     [Test]
     public void RemoveTemplateParametersSingleTemplate()
     {
-        List<string> Params = new List<string>();
+        List<string> Params = new();
         Params.Add("dateformat");
 
         string correct = @"{{cite web|url=http://www.site.com |title=here |year=2008 }}";
@@ -1803,7 +1803,7 @@ def
     [Test]
     public void UnknownTemplateParameters()
     {
-        List<string> Unknowns = new List<string>();
+        List<string> Unknowns = new();
 
         List<string> Knowns = new List<string>(new[] { "title", "date", "url" });
 
@@ -2061,7 +2061,7 @@ title={{abc|fdkjdsfjk=fdaskjlfds
     [Test]
     public void NestedTemplateRegexListSingle()
     {
-        List<string> ListOfTemplates = new List<string>();
+        List<string> ListOfTemplates = new();
 
         Regex MultipleTemplatesN = Tools.NestedTemplateRegex(ListOfTemplates);
         ClassicAssert.IsNull(MultipleTemplatesN, "null return if zero-entry list input");

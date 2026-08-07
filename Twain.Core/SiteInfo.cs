@@ -221,7 +221,7 @@ public class SiteInfo : IXmlSerializable
 
         foreach (XmlNode xn in query["magicwords"].GetElementsByTagName("magicword"))
         {
-            List<string> alias = new List<string>();
+            List<string> alias = new();
 
             foreach (XmlNode xin in xn["aliases"].GetElementsByTagName("alias"))
             {

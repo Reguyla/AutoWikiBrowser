@@ -70,7 +70,7 @@ public partial class Parsers
             return articleText;
 
         string originalArticleText = articleText;
-        List<string> Portals = new List<string>();
+        List<string> Portals = new();
         int firstPortal = WikiRegexes.PortalTemplate.Match(articleText).Index;
 
         MatchCollection portalCalls = WikiRegexes.PortalTemplate.Matches(articleText);

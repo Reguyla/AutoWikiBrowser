@@ -35,7 +35,7 @@ public partial class Parsers
     {
         text = WikiRegexes.UnformattedText.Replace(text, "");
         Dictionary<Regex, string> TRs = new Dictionary<Regex, string>();
-        List<string> AllRedirectsList = new List<string>();
+        List<string> AllRedirectsList = new();
 
         foreach (Match m in TemplateRedirectsR.Matches(text))
         {
@@ -43,7 +43,7 @@ public partial class Parsers
             templateName = TlOrTlx.Match(templateName).Groups[3].Value.Trim('|').TrimEnd('}').Trim();
 
             // get all redirects into a list
-            List<string> redirectsList = new List<string>();
+            List<string> redirectsList = new();
 
             foreach (Match r in TlOrTlx.Matches(redirects))
             {
@@ -258,7 +258,7 @@ public partial class Parsers
     {
         GetAllTemplates(articleText);
 
-        List<string> found = new List<string>();
+        List<string> found = new();
 
         lock (GetAllTemplatesDetailNewQueueLock)
         {
@@ -269,7 +269,7 @@ public partial class Parsers
         return found;
     }
 
-    private static List<string> RenameTemplateParametersOldParams = new List<string>();
+    private static List<string> RenameTemplateParametersOldParams = new();
 
     /// <summary>
     /// Renames parameters in template calls.

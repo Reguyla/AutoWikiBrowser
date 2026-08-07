@@ -1011,7 +1011,7 @@ public static class Tools
     /// <returns>Array of strings, each represents a section with its heading (if any)</returns>
     public static string[] SplitToSections(string articleText)
     {
-        List<string> sections = new List<string>();
+        List<string> sections = new();
 
         int lastmatchpos = 0;
         foreach (Match m in WikiRegexes.Headings.Matches(articleText))
@@ -2057,7 +2057,7 @@ Message: {2}
     /// <returns>Array of lines</returns>
     public static string[] SplitLines(string source)
     {
-        List<string> res = new List<string>();
+        List<string> res = new();
 
         int pos = 0;
         int sourceLength = source.Length;
@@ -2713,7 +2713,7 @@ Message: {2}
     /// <returns>List of parameter values</returns>
     public static List<string> GetTemplateParametersValues(string templateCall, List<string> parameters, bool caseInsensitiveParameterNames)
     {
-        List<string> returnedvalues = new List<string>();
+        List<string> returnedvalues = new();
 
         foreach (string p in parameters)
         {
@@ -3141,7 +3141,7 @@ Message: {2}
     /// <returns>List of any unknown parameters</returns>
     public static List<string> UnknownTemplateParameters(string templatecall, List<string> knownParameters)
     {
-        List<string> Unknowns = new List<string>();
+        List<string> Unknowns = new();
 
         string pipecleanedtemplate = PipeCleanedTemplate(templatecall);
 

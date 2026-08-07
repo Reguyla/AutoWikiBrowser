@@ -455,7 +455,7 @@ public static class WikiRegexes
     /// <summary>
     /// List of templates that should be dated (with 'date=Month YYYY' on en-wiki), loaded as first letter upper from https://en.wikipedia.org/wiki/Wikipedia:AWB/Dated_templates, see Category:Wikipedia maintenance categories sorted by month
     /// </summary>
-    public static List<string> DatedTemplates = new List<string>();
+    public static List<string> DatedTemplates = new();
 
     /// <summary>
     /// Structure of template name (first letter lower), old parameter, new parameter for parameter renaming

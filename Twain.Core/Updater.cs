@@ -33,7 +33,7 @@ public static class Updater
     {
         AWBDirectory = Path.GetDirectoryName(Application.ExecutablePath) + "\\";
         Result = AWBEnabledStatus.None;
-        NewerVersions = new List<string>();
+        NewerVersions = new();
     }
 
     /// <summary>

@@ -36,11 +36,11 @@ public partial class DabForm : Form
 
     private bool BotMode;
 
-    private readonly List<string> Variants = new List<string>();
+    private readonly List<string> Variants = new();
     private string ArticleTitle;
     private Regex Search;
 
-    private readonly List<DabControl> Dabs = new List<DabControl>();
+    private readonly List<DabControl> Dabs = new();
 
     private static int SavedWidth, SavedHeight, SavedLeft, SavedTop;
     private bool NoSave = true;

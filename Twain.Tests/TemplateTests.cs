@@ -10,7 +10,7 @@ public class TemplateTests : RequiresInitialization
     [Test]
     public void GetAllTemplates()
     {
-        List<string> t = new List<string>();
+        List<string> t = new();
 
         Assert.That(Parsers.GetAllTemplates(""), Is.EqualTo(t));
         t.Add("Foo");
@@ -39,7 +39,7 @@ public class TemplateTests : RequiresInitialization
     [Test]
     public void GetAllTemplateDetail()
     {
-        List<string> t = new List<string>();
+        List<string> t = new();
 
         Assert.That(Parsers.GetAllTemplateDetail(""), Is.EqualTo(t));
         t.Add("{{foo}}");

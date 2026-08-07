@@ -718,7 +718,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <returns></returns>
     public List<string> UnknownWikiProjectBannerShellParameters()
     {
-        List<string> Unknowns = new List<string>();
+        List<string> Unknowns = new();
 
         if (NameSpaceKey.Equals(Namespace.Talk))
             Unknowns = Tools.UnknownTemplateParameters(WikiRegexes.WikiProjectBannerShellTemplate.Match(ArticleText).Value, WikiProjectBannerShellKnowns);
@@ -733,7 +733,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <returns>List of unknown parameters</returns>
     public List<string> UnknownMultipleIssuesParameters()
     {
-        List<string> Unknowns = new List<string>();
+        List<string> Unknowns = new();
 
         if (NameSpaceKey.Equals(Namespace.Mainspace) && WikiRegexes.MultipleIssues.IsMatch(string.Join("", Parsers.GetAllTemplateDetail(ArticleText).ToArray())))
             Unknowns = Tools.UnknownTemplateParameters(WikiRegexes.MultipleIssues.Match(ArticleText).Value, MultipleIssuesKnowns);

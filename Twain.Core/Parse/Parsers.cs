@@ -803,7 +803,7 @@ public partial class Parsers
         if (Tools.DeduplicateList(tags.Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t))).ToList()).Count == tags.Count)
             return tags;
 
-        List<string> newtags = new List<string>();
+        List<string> newtags = new();
         List<string> originalTags = tags;
 
         // if any tag has unnamed param as first argument, sort tags with the longest part before first = to be first, so we retain the unnamed param
@@ -1286,7 +1286,7 @@ public partial class Parsers
             return false;
 
         // not about one person if multiple different birth or death date templates
-        List<string> BD = new List<string>();
+        List<string> BD = new();
         foreach (Match m in BirthDate.Matches(articleText))
         {
             if (BD.Any() && !BD.Contains(m.Value))
@@ -1295,7 +1295,7 @@ public partial class Parsers
             BD.Add(m.Value);
         }
 
-        List<string> DD = new List<string>();
+        List<string> DD = new();
         foreach (Match m in DeathDate.Matches(articleText))
         {
             if (DD.Any() && !DD.Contains(m.Value))

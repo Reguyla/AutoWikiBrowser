@@ -404,7 +404,7 @@ public partial class Parsers
         }
 
         string text = articleText;
-        List<string> allLinks = new List<string>();
+        List<string> allLinks = new();
 
         for (; ; )
         {

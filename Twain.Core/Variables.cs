@@ -382,7 +382,7 @@ public static partial class Variables
         // fill aliases with empty lists, to avoid KeyNotFoundException
         foreach (int n in namespaces.Keys)
         {
-            ret[n] = new List<string>();
+            ret[n] = new();
         }
 
         return ret;
@@ -407,8 +407,8 @@ public static partial class Variables
     /// <summary>
     /// Contains list of pages with underscores in titles, from [[Category:Articles with underscores in the title]] for en wiki
     /// </summary>
-    public static readonly List<string> UnderscoredTitles = new List<string>();
-    private static readonly List<BackgroundRequest> DelayedRequests = new List<BackgroundRequest>();
+    public static readonly List<string> UnderscoredTitles = new();
+    private static readonly List<BackgroundRequest> DelayedRequests = new();
 
     /// <summary>
     /// For unit tests only, method to add entries to UnderscoredTitles

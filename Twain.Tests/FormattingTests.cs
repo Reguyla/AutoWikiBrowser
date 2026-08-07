@@ -1177,7 +1177,7 @@ was"));
     [Test]
     public void LoadDatedTemplates()
     {
-        List<string> DatedTemplates = new List<string>();
+        List<string> DatedTemplates = new();
 
         Assert.That(Parsers.LoadDatedTemplates(""), Is.EqualTo(DatedTemplates), "returns empty list when no rules present");
 

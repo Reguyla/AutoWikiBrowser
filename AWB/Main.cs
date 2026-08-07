@@ -9577,7 +9577,7 @@ if (MessageBox.Show(
         // Prevent repeated loading attempts on every page.
         UserTalkWarningsLoaded = true;
 
-        List<string> userTalkTemplates = new List<string>();
+        List<string> userTalkTemplates = new();
 
         try
         {
