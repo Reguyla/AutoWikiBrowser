@@ -10407,6 +10407,13 @@ if (MessageBox.Show(
         }
     }
 
+    // TODO: Make the usage statistics endpoint configurable to support
+    // future Twain services or self-hosted deployments.
+    /// <summary>
+    /// Opens the usage statistics website in the default web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void UsageStatsMenuItem_Click(object sender, EventArgs e)
     {
         UsageStats.OpenUsageStatsURL();
@@ -10446,14 +10453,32 @@ if (MessageBox.Show(
         MainFormProgressBar.Style = ProgressBarStyle.Continuous;
     }
 
+    // TODO: Replace the legacy Crystal Clear icon with Twain branding and
+    // update or remove this link as appropriate.
+    /// <summary>
+    /// Opens the Wikimedia Commons page for the bot icon displayed in the
+    /// application.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void BotImage_Click(object sender, EventArgs e)
     {
-        Tools.OpenURLInBrowser("https://commons.wikimedia.org/wiki/File:Crystal_Clear_action_run.png");
+        Tools.OpenURLInBrowser(
+            "https://commons.wikimedia.org/wiki/File:Crystal_Clear_action_run.png");
     }
 
-    private void displayfalsePositivesButtonToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Enables or disables logging of ignored matches (false positives)
+    /// based on the current menu item state.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void displayfalsePositivesButtonToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        AddIgnoredToLogFile = displayfalsePositivesButtonToolStripMenuItem.Checked;
+        AddIgnoredToLogFile =
+            displayfalsePositivesButtonToolStripMenuItem.Checked;
     }
 
     private void RedSelection(int index, int length)
@@ -10499,6 +10524,18 @@ if (MessageBox.Show(
         txtEdit.SelectionBackColor = Color.Tomato;
     }
 
+    // TODO: Replace editor-specific selection highlighting with an
+    // abstraction that supports both the legacy editor and Monaco.
+    /// <summary>
+    /// Highlights the specified range of text in the edit box using a yellow
+    /// background.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based starting index of the text to highlight.
+    /// </param>
+    /// <param name="length">
+    /// The number of characters to highlight.
+    /// </param>
     private void YellowSelection(int index, int length)
     {
         txtEdit.SetEditBoxSelection(index, length);
@@ -10545,18 +10582,44 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Invalidates the global object cache, forcing cached data to be
+    /// reloaded as needed.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void invalidateCacheToolStripMenuItem_Click(object sender, EventArgs e)
     {
         ObjectCache.Global.Invalidate();
     }
 
+    // TODO: Consider centralizing common confirmation dialogs to provide a
+    // consistent user experience throughout the application.
+    /// <summary>
+    /// Prompts the user to confirm clearing the current page list and, if
+    /// confirmed, removes all entries from the active list.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void clearCurrentListToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (listMaker.Any() && MessageBox.Show(this, "Do you want to clear the current list?", "Clear current list", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-            == DialogResult.Yes)
+        if (listMaker.Any() &&
+            MessageBox.Show(
+                this,
+                "Do you want to clear the current list?",
+                "Clear current list",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) == DialogResult.Yes)
+        {
             listMaker.Clear();
+        }
     }
 
+    /// <summary>
+    /// Submits the current usage statistics to the statistics service.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void submitStatToolStripMenuItem_Click(object sender, EventArgs e)
     {
         UsageStats.Do(false);
@@ -10585,15 +10648,28 @@ if (MessageBox.Show(
         DisableButtons();
     }
 
+    /// <summary>
+    /// Opens the profile management dialog.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void lblUserName_Click(object sender, EventArgs e)
     {
         Profiles.ShowDialog(this);
     }
 
+    /// <summary>
+    /// Opens the current user's notifications page in the default browser
+    /// when notifications are enabled and the user is logged in.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void lblUserNotifications_Click(object sender, EventArgs e)
     {
         if (Variables.NotificationsEnabled && TheSession.User.IsLoggedIn)
+        {
             Tools.OpenArticleInBrowser("Special:Notifications");
+        }
     }
 
     private void statusBar_MouseHover(
@@ -10669,6 +10745,11 @@ if (MessageBox.Show(
         tt.Show(text, item.Owner);
     }
 
+    /// <summary>
+    /// Opens the Preferences dialog with the project settings page selected.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void lblProject_Click(object sender, EventArgs e)
     {
         OpenPreferences(true);
