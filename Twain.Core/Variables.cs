@@ -362,7 +362,7 @@ public static partial class Variables
             if (TagEdits)
             {
                 // If we're applying an Edit Tag, don't append "using AWB" to the Edit Summary
-                return "";
+                return string.Empty;
             }
 
             string text = " " + mSummaryTag + " " + WPAWB;

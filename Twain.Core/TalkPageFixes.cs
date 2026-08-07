@@ -40,13 +40,13 @@ internal class Processor
         FoundDefaultSort = true;
         if (match.Groups["key"].Captures.Count > 0)
             DefaultSortKey = match.Groups["key"].Captures[0].Value.Trim();
-        return "";
+        return string.Empty;
     }
 
     public string SkipTOCMatchEvaluator(Match match)
     {
         FoundSkipToTalk = true;
-        return "";
+        return string.Empty;
     }
 }
 
@@ -218,7 +218,7 @@ public static class TalkPageFixes
                 return articleText + "\r\n{{DEFAULTSORT:" + key + "}}";
         }
 
-        return "";
+        return string.Empty;
     }
 
     /// <summary>

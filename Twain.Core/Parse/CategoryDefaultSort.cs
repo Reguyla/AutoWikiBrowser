@@ -252,7 +252,7 @@ public partial class Parsers
     public static string GetCategorySort(string articleText)
     {
         if (WikiRegexes.Defaultsort.Matches(articleText).Count == 1)
-            return "";
+            return string.Empty;
 
         int matches;
         const string dummy = @"@@@@";
@@ -297,7 +297,7 @@ public partial class Parsers
         }
         if (allsame && matches > 0)
             return sort;
-        return "";
+        return string.Empty;
     }
 
     // Covered by: UtilityFunctionTests.ChangeToDefaultSort()

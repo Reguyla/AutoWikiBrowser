@@ -36,7 +36,7 @@ public static class Summary
 
         // if number of sections has changed, can't provide section edit summary
         if (sectionsAfter.Length != sectionsBefore.Length)
-            return "";
+            return string.Empty;
 
         int sectionsChanged = 0, sectionChangeNumber = 0;
 
@@ -50,11 +50,11 @@ public static class Summary
 
             // if multiple sections changed, can't provide section edit summary
             if (sectionsChanged > 1)
-                return "";
+                return string.Empty;
         }
 
         if (sectionsChanged == 0)
-            return "";
+            return string.Empty;
 
         // so SectionsChanged == 1, get heading name from regex, or return "top" if zeroth section
         string heading = WikiRegexes.Headings.Match(sectionsAfter[sectionChangeNumber]).Groups[1].Value.Trim();

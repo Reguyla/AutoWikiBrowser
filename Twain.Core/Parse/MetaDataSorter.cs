@@ -1430,7 +1430,7 @@ en, sq, ru
                 if (d.Index > matches[0].Index &&
                     matches[0].Value == d.Value)
                 {
-                    return "";
+                    return string.Empty;
                 }
 
                 return d.Value;
@@ -1526,7 +1526,7 @@ en, sq, ru
                 if (!uncat.Contains(uncatm.Value))
                     uncat += uncatm.Value + "\r\n";
 
-                return "";
+                return string.Empty;
             });
 
         // Process {{Multiple issues}} in case {{Improve categories}} was
@@ -1604,7 +1604,7 @@ en, sq, ru
         articleText = WikiRegexes.Persondata.Replace(articleText, m =>
         {
             strPersonData += (strPersonData.Length == 0 ? m.Value : Tools.Newline(m.Value));
-            return "";
+            return string.Empty;
         });
 
         if (!Tools.UnformattedTextNotChanged(originalArticleText, articleText))
@@ -1626,7 +1626,7 @@ en, sq, ru
         // Per https://ru.wikipedia.org/wiki/Википедия:Опросы/Использование_служебных_разделов/Этап_2#.D0.A1.D0.BB.D1.83.D0.B6.D0.B5.D0.B1.D0.BD.D1.8B.D0.B5_.D1.88.D0.B0.D0.B1.D0.BB.D0.BE.D0.BD.D1.8B
         // Russian Wikipedia places stubs before navboxes
         if (Variables.LangCode.Equals("ru"))
-            return "";
+            return string.Empty;
 
         List<string> stubList = new List<string>();
         string originalArticleText = articleText;
@@ -1636,7 +1636,7 @@ en, sq, ru
             if (!Regex.IsMatch(m.Value, Variables.SectStub))
             {
                 stubList.Add(m.Value);
-                return "";
+                return string.Empty;
             }
 
             return m.Value;
@@ -1646,7 +1646,7 @@ en, sq, ru
         if (!Tools.UnformattedTextNotChanged(originalArticleText, articleText + ListToString(stubList)))
         {
             articleText = originalArticleText;
-            return "";
+            return string.Empty;
         }
 
         // en-wp only: remove {{stub}} if a more specific stub exists (not counting {{uncategorized stub}} template)
@@ -1670,7 +1670,7 @@ en, sq, ru
     public static string RemoveDisambig(ref string articleText)
     {
         if (!Variables.LangCode.Equals("en"))
-            return "";
+            return string.Empty;
 
         string strDisambig = string.Empty;
 
@@ -1680,7 +1680,7 @@ en, sq, ru
             articleText = WikiRegexes.Disambigs.Replace(articleText, m =>
             {
                 strDisambig = m.Value;
-                return "";
+                return string.Empty;
             }, 1);
         }
 
@@ -2125,7 +2125,7 @@ en, sq, ru
             articleText = InterLangRegex.Replace(articleText, m =>
             {
                 interWikiComment = m.Value;
-                return "";
+                return string.Empty;
             }, 1);
 
         string interWikis = string.Empty;
@@ -2244,7 +2244,7 @@ en, sq, ru
     private static string ListToString(ICollection<string> items)
     {
         if (!items.Any())
-            return "";
+            return string.Empty;
 
         List<string> uniqueItems = new List<string>();
 

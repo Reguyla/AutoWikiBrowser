@@ -447,7 +447,7 @@ public partial class Parsers
                                 tagsRemoved.Add("رده‌بندی‌نشده");
                             else if (!Variables.LangCode.Equals("en"))
                                 tagsRemoved.Add("uncategorised");
-                            return "";
+                            return string.Empty;
                         }
                     }
 
@@ -620,7 +620,7 @@ public partial class Parsers
                 if (Tools.NestedTemplateRegex("More citations needed").IsMatch(articleText))
                 {
                     tagsRemoved.Add("unreferenced");
-                    return "";
+                    return string.Empty;
                 }
 
                 tagsrenamed++;
@@ -638,7 +638,7 @@ public partial class Parsers
                 if (Tools.NestedTemplateRegex("BLP sources").IsMatch(articleText))
                 {
                     tagsRemoved.Add("BLP unsourced");
-                    return "";
+                    return string.Empty;
                 }
 
                 tagsrenamed++;

@@ -1161,7 +1161,7 @@ public class MyWatchlistListProvider : ApiListProviderBase
     { get { return "My watchlist"; } }
 
     public override string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
@@ -1202,7 +1202,7 @@ public class DatabaseScannerListProvider : IListProvider
     { get { return "Database dump"; } }
 
     public string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public bool UserInputTextBoxEnabled
     { get { return false; } }
@@ -1262,7 +1262,7 @@ public class RandomPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageP
     { get { return "Random pages"; } }
 
     public override string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
@@ -1610,7 +1610,7 @@ public class AllUsersSpecialPageProvider : ApiListProviderBase, ISpecialPageProv
     #endregion
 
     public override string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
@@ -1674,7 +1674,7 @@ public class NewPagesListProvider : ApiListProviderBase, ISpecialPageProvider
     { get { return "New pages"; } }
 
     public override string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
@@ -1787,7 +1787,7 @@ public class DisambiguationPagesSpecialPageProvider : WhatTranscludesPageListPro
     { get { return "Disambiguation Pages"; } }
 
     public override string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public override bool UserInputTextBoxEnabled
     { get { return false; } }
@@ -1840,7 +1840,7 @@ public class GalleryNewFilesSpecialPageProvider : ApiListProviderBase, ISpecialP
     { get { return "New files"; } }
 
     public override string UserInputTextBoxText
-    { get { return ""; } }
+    { get { return string.Empty; } }
 
     public override bool UserInputTextBoxEnabled
     { get { return false; } }

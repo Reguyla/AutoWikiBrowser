@@ -249,7 +249,7 @@ public partial class Parsers
             if (tags.Contains("{{") || tags.Equals(""))
             {
                 mi += tags;
-                return "";
+                return string.Empty;
             }
 
             return m.Value;
@@ -324,7 +324,7 @@ public partial class Parsers
         string newValue = Tools.RemoveTemplateParameter(Tools.RemoveExcessTemplatePipes(m.Value), "section");
 
         if (Tools.GetTemplateArgumentCount(newValue) == 0)
-            return "";
+            return string.Empty;
 
         // clean excess newlines
         return Regex.Replace(m.Value, "(\r\n)+", "\r\n");

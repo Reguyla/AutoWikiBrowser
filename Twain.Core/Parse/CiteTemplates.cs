@@ -1460,7 +1460,7 @@ public partial class Parsers
                 return value;
         }
 
-        return "";
+        return string.Empty;
     }
 
     /// <summary>

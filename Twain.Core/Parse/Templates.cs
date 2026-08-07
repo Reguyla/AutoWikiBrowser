@@ -444,7 +444,7 @@ public partial class Parsers
             return m.Success ? ExtractTemplate(articleText, m) : "";
         }
 
-        return "";
+        return string.Empty;
     }
 
     /// <summary>
@@ -534,7 +534,7 @@ public partial class Parsers
                 return f;
         }
 
-        return "";
+        return string.Empty;
     }
 
     /// <summary>

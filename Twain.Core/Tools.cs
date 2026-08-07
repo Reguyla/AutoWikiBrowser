@@ -986,7 +986,7 @@ public static class Tools
     public static string GetMetaContentValue(string pagesource, string metaname)
     {
         if (pagesource.Length == 0 || metaname.Length == 0)
-            return "";
+            return string.Empty;
 
         pagesource = pagesource.Replace("data-meta-updatable", "");
         pagesource = pagesource.Replace(@"data-ephemeral=""true""", "");
@@ -1583,7 +1583,7 @@ Message: {2}
         if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
             return source.Substring(startPos, endPos - startPos);
 
-        return "";
+        return string.Empty;
     }
 
     // Covered by ToolsTests.ReplacePartOfString()
@@ -2648,7 +2648,7 @@ Message: {2}
             return templateCall.Substring(paramValue.Index, paramValue.Length).Trim();
         }
 
-        return "";
+        return string.Empty;
     }
 
     private static readonly Regex param = new Regex(@"\|\s*([\w0-9_ -/]+?)\s*=([^|}]*)");
@@ -2754,7 +2754,7 @@ Message: {2}
             count++;
         }
 
-        return "";
+        return string.Empty;
     }
 
     /// <summary>

@@ -24,7 +24,7 @@ public partial class ProtectionLevel : Form
                 case 2:
                     return "edit|move";
                 default:
-                    return "";
+                    return string.Empty;
             }
         }
     }
@@ -42,7 +42,7 @@ public partial class ProtectionLevel : Form
                 case 2:
                     return "autoconfirmed|sysop";
                 default:
-                    return "";
+                    return string.Empty;
             }
         }
     }
