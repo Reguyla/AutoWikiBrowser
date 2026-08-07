@@ -168,41 +168,70 @@ public class MetaDataSorter
         {
             Order = value;
 
-            List<string> seq;
-            switch (Order)
-            {
-                case InterWikiOrderEnum.Alphabetical:
-                    seq = InterwikiAlpha;
-                    break;
-
-                case InterWikiOrderEnum.AlphabeticalEnFirst:
-                    seq = InterwikiAlphaEnFirst;
-                    break;
-
-                case InterWikiOrderEnum.LocalLanguageAlpha:
-                    seq = InterwikiLocalAlpha;
-                    break;
-
-                case InterWikiOrderEnum.LocalLanguageFirstWord:
-                    seq = InterwikiLocalFirst;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        "MetaDataSorter.InterWikiOrder",
-                        (Exception)null);
-            }
+            List<string> seq = GetInterWikiSequence(Order);
 
             PossibleInterwikis = SiteMatrix.GetProjectLanguages(Variables.Project);
-            Comparer = new InterWikiComparer(
-                new List<string>(seq),
-                PossibleInterwikis);
+            Comparer = CreateInterWikiComparer(seq);
         }
 
         get
         {
             return Order;
         }
+    }
+
+    /// <summary>
+    /// Gets the interwiki ordering sequence associated with the specified
+    /// ordering mode.
+    /// </summary>
+    /// <param name="order">
+    /// The interwiki ordering mode.
+    /// </param>
+    /// <returns>
+    /// The corresponding interwiki ordering sequence.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="order"/> does not represent a supported
+    /// interwiki ordering mode.
+    /// </exception>
+    private List<string> GetInterWikiSequence(InterWikiOrderEnum order)
+    {
+        switch (order)
+        {
+            case InterWikiOrderEnum.Alphabetical:
+                return InterwikiAlpha;
+
+            case InterWikiOrderEnum.AlphabeticalEnFirst:
+                return InterwikiAlphaEnFirst;
+
+            case InterWikiOrderEnum.LocalLanguageAlpha:
+                return InterwikiLocalAlpha;
+
+            case InterWikiOrderEnum.LocalLanguageFirstWord:
+                return InterwikiLocalFirst;
+
+            default:
+                throw new ArgumentOutOfRangeException(
+                    "MetaDataSorter.InterWikiOrder",
+                    (Exception)null);
+        }
+    }
+
+    /// <summary>
+    /// Creates the comparer used to sort interwiki links for the current project.
+    /// </summary>
+    /// <param name="sequence">
+    /// The interwiki ordering sequence to use.
+    /// </param>
+    /// <returns>
+    /// A comparer configured for the selected interwiki ordering and current
+    /// project languages.
+    /// </returns>
+    private InterWikiComparer CreateInterWikiComparer(List<string> sequence)
+    {
+        return new InterWikiComparer(
+            new List<string>(sequence),
+            PossibleInterwikis);
     }
 
     /// <summary>
