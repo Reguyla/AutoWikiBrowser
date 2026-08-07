@@ -1123,10 +1123,16 @@ en, sq, ru
             });
 
     /// <summary>
-    /// Moves templates to end of article text, from zeroth section only
+    /// Moves eligible templates from the article's zeroth section to the end of
+    /// the article when they are not already present in the final section.
     /// </summary>
-    /// <param name="articleText"></param>
-    /// <returns></returns>
+    /// <param name="articleText">
+    /// The complete article text to process.
+    /// </param>
+    /// <returns>
+    /// The updated article text, or the original text if the move cannot be
+    /// performed safely.
+    /// </returns>
     internal string MoveTemplateToEndOfArticle(string articleText)
     {
         string originalArticleText = articleText;
