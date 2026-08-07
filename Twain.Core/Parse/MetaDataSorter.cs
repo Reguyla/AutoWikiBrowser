@@ -501,6 +501,13 @@ en, sq, ru
     private static readonly Regex WikiTable =
         new Regex(@"^{\|", RegexOptions.Multiline);
 
+    // TODO (Research):
+    // Review which metadata-sorting rules are genuinely MediaWiki-wide and which
+    // are specific to English Wikipedia or other Wikimedia projects. Several
+    // helpers currently apply behavior based only on language code, while
+    // SortZerothSection() implements MOS:ORDER rules without an explicit
+    // English-Wikipedia project check. Verify the intended scope before changing
+    // any guards or moving these rules into wiki-specific configuration.
     /// <summary>
     /// Sorts and normalizes article metadata according to the rules applicable
     /// to the current wiki and article namespace.
@@ -860,6 +867,16 @@ en, sq, ru
             m => Regex.Replace(m.Value, "(\r\n)+", "\r\n"));
     }
 
+    // TODO (Modernization):
+    // Move language- and project-specific metadata ordering rules into wiki
+    // configuration once regression tests document the current behavior.
+    // The present switch encodes historical Wikimedia conventions directly
+    // in MetaDataSorter and may not be appropriate for non-Wikimedia projects.
+    //
+    // TODO (Research):
+    // Verify the historical "dk" language-code case in metadata ordering.
+    // Preserve the existing value until its source and expected Variables.LangCode
+    // behavior are confirmed.
     /// <summary>
     /// Appends the extracted metadata fragments to the article using the
     /// ordering rules required for the current wiki.
