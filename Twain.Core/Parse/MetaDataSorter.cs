@@ -240,19 +240,32 @@ public class MetaDataSorter
     }
 
     /// <summary>
-    ///
+    /// Builds the object-cache key used for <see cref="MetaDataSorter"/> data.
     /// </summary>
-    /// <param name="what"></param>
-    /// <returns></returns>
+    /// <param name="what">
+    /// The name of the metadata value being cached.
+    /// </param>
+    /// <returns>
+    /// The namespaced cache key for the specified metadata value.
+    /// </returns>
     private static string Key(string what)
     {
         return "MetaDataSorter::" + what;
     }
 
     /// <summary>
-    /// Loads interwikis from local disk cache if available
+    /// Loads the interwiki ordering data from the local object cache when
+    /// available.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>
+    /// <see langword="true"/> if all required interwiki ordering data was loaded
+    /// successfully, or if unit-test data was initialized; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// When unit-test mode is enabled, predefined interwiki ordering data is used
+    /// instead of reading from the cache.
+    /// </remarks>
     private bool LoadInterWikiFromCache()
     {
         if (!Globals.UnitTestMode)
@@ -264,6 +277,7 @@ public class MetaDataSorter
 
             return Loaded;
         }
+
         List<string> one = new List<string> { "ar", "de", "en", "ru", "sq" };
         List<string> two = new List<string> { "en", "ar", "de", "ru", "sq" };
 
@@ -275,7 +289,11 @@ public class MetaDataSorter
         return true;
     }
 
-    private static readonly CultureInfo EnUsCulture = new CultureInfo("en-US", true);
+    /// <summary>
+    /// Provides the U.S. English culture used by metadata sorting operations.
+    /// </summary>
+    private static readonly CultureInfo EnUsCulture =
+        new CultureInfo("en-US", true);
 
     /// <summary>
     ///
@@ -319,16 +337,26 @@ en, sq, ru
     }
 
     /// <summary>
-    ///
+    /// Removes extra formatting characters from extracted metadata text.
     /// </summary>
-    /// <param name="input"></param>
-    /// <returns>The updated article text</returns>
+    /// <param name="input">
+    /// The text to normalize.
+    /// </param>
+    /// <returns>
+    /// The input text with carriage returns, line feeds, and closing angle
+    /// brackets removed.
+    /// </returns>
     private static string RemExtra(string input)
     {
         return input.Replace("\r\n", "").Replace(">", "").Replace("\n", "");
     }
 
-    private static readonly Regex CommentedOutEnInterwiki = new Regex("<!-- ?\\[\\[en:.*?\\]\\] ?-->");
+    /// <summary>
+    /// Matches English interwiki links that have been commented out in article
+    /// text.
+    /// </summary>
+    private static readonly Regex CommentedOutEnInterwiki =
+        new Regex("<!-- ?\\[\\[en:.*?\\]\\] ?-->");
 
     /// <summary>
     /// Sorts article metadata, including optional whitespace fixing
