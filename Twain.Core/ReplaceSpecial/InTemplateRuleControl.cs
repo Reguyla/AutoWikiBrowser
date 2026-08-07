@@ -1,5 +1,4 @@
 ﻿/*
-
 Copyright (C) 2007 Martin Richards
 
 This program is free software; you can redistribute it and/or modify
@@ -9,135 +8,267 @@ the Free Software Foundation; either version 2 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 using System.Windows.Forms;
 
 namespace Twain.Core.ReplaceSpecial;
 
+/// <summary>
+/// Provides the WinForms editor used to configure an
+/// <see cref="InTemplateRule"/>.
+/// </summary>
 public partial class InTemplateRuleControl : UserControl
 {
-    readonly IRuleControlOwner Owner;
+	private readonly IRuleControlOwner Owner;
 
-    public InTemplateRuleControl(IRuleControlOwner owner)
-    {
-        InitializeComponent();
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="InTemplateRuleControl"/> class.
+	/// </summary>
+	/// <param name="owner">
+	/// The owner that receives notifications when the rule name changes.
+	/// </param>
+	public InTemplateRuleControl(IRuleControlOwner owner)
+	{
+		ArgumentNullException.ThrowIfNull(owner);
 
-        Owner = owner;
-        Anchor =
-          AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+		InitializeComponent();
 
-        UpdateEndabledStates();
-    }
+		Owner = owner;
 
-    public void SetName(string name)
-    {
-        NameTextbox.Text = name;
-    }
+		Anchor =
+			AnchorStyles.Bottom |
+			AnchorStyles.Left |
+			AnchorStyles.Right |
+			AnchorStyles.Top;
 
-    public void SelectName()
-    {
-        NameTextbox.Select();
-        NameTextbox.SelectAll();
-    }
+		UpdateEndabledStates();
+	}
 
-    public void SaveToRule(InTemplateRule rule)
-    {
-        if (rule == null)
-            return;
+	/// <summary>
+	/// Sets the name displayed in the rule name text box.
+	/// </summary>
+	/// <param name="name">
+	/// The rule name to display.
+	/// </param>
+	public void SetName(string name)
+	{
+		NameTextbox.Text = name;
+	}
 
-        rule.enabled_ = RuleEnabledCheckBox.Checked;
-        rule.Name = NameTextbox.Text.Trim();
-        rule.ReplaceWith_ = ReplaceWithTextBox.Text.Trim();
-        rule.DoReplace_ = ReplaceCheckBox.Checked;
+	/// <summary>
+	/// Selects all text in the rule name text box.
+	/// </summary>
+	public void SelectName()
+	{
+		NameTextbox.Select();
+		NameTextbox.SelectAll();
+	}
 
-        rule.TemplateNames_.Clear();
-        foreach (string s in AliasesListBox.Items)
-        {
-            rule.TemplateNames_.Add(s);
-        }
-    }
+	/// <summary>
+	/// Saves the values currently displayed by the control to the specified
+	/// rule.
+	/// </summary>
+	/// <param name="rule">
+	/// The rule to update.
+	/// </param>
+	public void SaveToRule(InTemplateRule rule)
+	{
+		if (rule is null)
+		{
+			return;
+		}
 
-    public void RestoreFromRule(InTemplateRule rule)
-    {
-        NameTextbox.Text = rule.Name;
-        RuleEnabledCheckBox.Checked = rule.enabled_;
-        ReplaceWithTextBox.Text = rule.ReplaceWith_;
-        ReplaceCheckBox.Checked = rule.DoReplace_;
+		rule.enabled_ = RuleEnabledCheckBox.Checked;
+		rule.Name = NameTextbox.Text.Trim();
+		rule.ReplaceWith_ = ReplaceWithTextBox.Text.Trim();
+		rule.DoReplace_ = ReplaceCheckBox.Checked;
 
-        AliasesListBox.BeginUpdate();
-        AliasesListBox.Items.Clear();
-        foreach (string s in rule.TemplateNames_)
-        {
-            AliasesListBox.Items.Add(s);
-        }
-        AliasesListBox.EndUpdate();
+		rule.TemplateNames_.Clear();
 
-        UpdateEndabledStates();
-    }
+		foreach (string alias in AliasesListBox.Items)
+		{
+			rule.TemplateNames_.Add(alias);
+		}
+	}
 
-    private void NameTextbox_TextChanged(object sender, EventArgs e)
-    {
-        Owner.NameChanged(this, NameTextbox.Text.Trim());
-    }
+	/// <summary>
+	/// Restores the specified rule values to the editor control.
+	/// </summary>
+	/// <param name="rule">
+	/// The rule whose values should be displayed.
+	/// </param>
+	public void RestoreFromRule(InTemplateRule rule)
+	{
+		ArgumentNullException.ThrowIfNull(rule);
 
-    private void NameTextbox_DoubleClick(object sender, EventArgs e)
-    {
-        NameTextbox.SelectAll();
-    }
+		NameTextbox.Text = rule.Name;
+		RuleEnabledCheckBox.Checked = rule.enabled_;
+		ReplaceWithTextBox.Text = rule.ReplaceWith_;
+		ReplaceCheckBox.Checked = rule.DoReplace_;
 
-    private void ReplaceCheckBox_CheckedChanged(object sender, EventArgs e)
-    {
-        UpdateEndabledStates();
-    }
+		AliasesListBox.BeginUpdate();
 
-    void UpdateEndabledStates()
-    {
-        ReplaceWithTextBox.Enabled = ReplaceCheckBox.Checked;
-        DeleteButton.Enabled = AliasesListBox.SelectedItem != null;
-    }
+		try
+		{
+			AliasesListBox.Items.Clear();
 
-    private void AddButton_Click(object sender, EventArgs e)
-    {
-        string alias = AliasTextBox.Text;
-        if (string.IsNullOrEmpty(alias))
-            return;
-        if (!AliasesListBox.Items.Contains(alias))
-        {
-            AliasesListBox.Items.Add(alias);
-        }
-        AliasTextBox.Text = string.Empty;
-        AliasTextBox.Select();
-        UpdateEndabledStates();
-    }
+			foreach (string alias in rule.TemplateNames_)
+			{
+				AliasesListBox.Items.Add(alias);
+			}
+		}
+		finally
+		{
+			AliasesListBox.EndUpdate();
+		}
 
-    private void DeleteButton_Click(object sender, EventArgs e)
-    {
-        if (AliasesListBox.SelectedItem == null)
-            return;
+		UpdateEndabledStates();
+	}
 
-        int i = AliasesListBox.SelectedIndex;
+	/// <summary>
+	/// Notifies the control owner when the rule name changes.
+	/// </summary>
+	/// <param name="sender">
+	/// The source of the event.
+	/// </param>
+	/// <param name="e">
+	/// The event data.
+	/// </param>
+	private void NameTextbox_TextChanged(object sender, EventArgs e)
+	{
+		Owner.NameChanged(
+			this,
+			NameTextbox.Text.Trim());
+	}
 
-        AliasesListBox.Items.Remove(AliasesListBox.SelectedItem);
+	/// <summary>
+	/// Selects the complete rule name when the name text box is
+	/// double-clicked.
+	/// </summary>
+	/// <param name="sender">
+	/// The source of the event.
+	/// </param>
+	/// <param name="e">
+	/// The event data.
+	/// </param>
+	private void NameTextbox_DoubleClick(object sender, EventArgs e)
+	{
+		NameTextbox.SelectAll();
+	}
 
-        int count = AliasesListBox.Items.Count;
-        if (count != 0)
-        {
-            if (i > count - 1)
-                i = count - 1;
-            AliasesListBox.SelectedIndex = i;
-        }
-        UpdateEndabledStates();
-    }
+	/// <summary>
+	/// Updates the enabled state of replacement controls when replacement is
+	/// enabled or disabled.
+	/// </summary>
+	/// <param name="sender">
+	/// The source of the event.
+	/// </param>
+	/// <param name="e">
+	/// The event data.
+	/// </param>
+	private void ReplaceCheckBox_CheckedChanged(object sender, EventArgs e)
+	{
+		UpdateEndabledStates();
+	}
 
-    private void AliasesListBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        UpdateEndabledStates();
-    }
+	/// <summary>
+	/// Updates the enabled state of controls based on the current rule
+	/// settings and alias selection.
+	/// </summary>
+	private void UpdateEndabledStates()
+	{
+		ReplaceWithTextBox.Enabled = ReplaceCheckBox.Checked;
+		DeleteButton.Enabled = AliasesListBox.SelectedItem is not null;
+	}
+
+	/// <summary>
+	/// Adds the entered template alias when it is non-empty and has not
+	/// already been added.
+	/// </summary>
+	/// <param name="sender">
+	/// The source of the event.
+	/// </param>
+	/// <param name="e">
+	/// The event data.
+	/// </param>
+	private void AddButton_Click(object sender, EventArgs e)
+	{
+		string alias = AliasTextBox.Text;
+
+		if (string.IsNullOrEmpty(alias))
+		{
+			return;
+		}
+
+		if (!AliasesListBox.Items.Contains(alias))
+		{
+			AliasesListBox.Items.Add(alias);
+		}
+
+		AliasTextBox.Text = string.Empty;
+		AliasTextBox.Select();
+
+		UpdateEndabledStates();
+	}
+
+	/// <summary>
+	/// Removes the selected template alias and selects the nearest remaining
+	/// alias when possible.
+	/// </summary>
+	/// <param name="sender">
+	/// The source of the event.
+	/// </param>
+	/// <param name="e">
+	/// The event data.
+	/// </param>
+	private void DeleteButton_Click(object sender, EventArgs e)
+	{
+		if (AliasesListBox.SelectedItem is null)
+		{
+			return;
+		}
+
+		int selectedIndex = AliasesListBox.SelectedIndex;
+
+		AliasesListBox.Items.Remove(
+			AliasesListBox.SelectedItem);
+
+		int count = AliasesListBox.Items.Count;
+
+		if (count > 0)
+		{
+			if (selectedIndex >= count)
+			{
+				selectedIndex = count - 1;
+			}
+
+			AliasesListBox.SelectedIndex = selectedIndex;
+		}
+
+		UpdateEndabledStates();
+	}
+
+	/// <summary>
+	/// Updates the available alias actions when the selected alias changes.
+	/// </summary>
+	/// <param name="sender">
+	/// The source of the event.
+	/// </param>
+	/// <param name="e">
+	/// The event data.
+	/// </param>
+	private void AliasesListBox_SelectedIndexChanged(
+		object sender,
+		EventArgs e)
+	{
+		UpdateEndabledStates();
+	}
 }
