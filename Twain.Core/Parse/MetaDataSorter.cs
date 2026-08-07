@@ -2236,11 +2236,22 @@ en, sq, ru
         return string.Concat(textArray);
     }
 
+    // TODO (Modernization):
+    // Add focused regression tests for metadata deduplication before simplifying
+    // this algorithm. The current logic handles categories, sort keys, comments,
+    // template-name casing, and prefix relationships through several overlapping
+    // rules that may represent historical edge cases.
     /// <summary>
-    /// Remove duplicates, and return List as string, one item per line
+    /// Removes duplicate metadata entries and formats the remaining items with
+    /// one entry per line.
     /// </summary>
-    /// <param name="items"></param>
-    /// <returns></returns>
+    /// <param name="items">
+    /// The metadata entries to deduplicate and format.
+    /// </param>
+    /// <returns>
+    /// A string containing the unique metadata entries separated by CRLF line
+    /// endings, or <see cref="string.Empty"/> when the collection is empty.
+    /// </returns>
     private static string ListToString(ICollection<string> items)
     {
         if (!items.Any())
@@ -2248,48 +2259,75 @@ en, sq, ru
 
         List<string> uniqueItems = new();
 
-        // remove duplicates: duplicate if an existing list item starts the with string
-        // also duplicate when one category is same as another with a sortkey
-        // e.g. [[Category:One]] is duplicate of [[Category:One|A]]
-        // Or sortkeys vary only by first letter case
+        // Entries are considered duplicates when an existing item begins with
+        // the same metadata value. Categories are also considered duplicates
+        // when they differ only by sort key or by the case of the first sort-key
+        // character.
         foreach (string s in items)
         {
             bool addme = true;
 
             string s2 = s;
             bool isACategory = WikiRegexes.Category.IsMatch(s2);
-            // compare based on first letter upper sortkey for categories
+
+            // Compare categories using an uppercase first character in the sort key.
             if (s2.Contains("|") && isACategory)
-                s2 = Regex.Replace(s2, @"(\|\s*)(.+)(\s*\]\]$)", m => m.Groups[1].Value + Tools.TurnFirstToUpper(m.Groups[2].Value) + m.Groups[3].Value);
+            {
+                s2 = Regex.Replace(
+                    s2,
+                    @"(\|\s*)(.+)(\s*\]\]$)",
+                    m => m.Groups[1].Value +
+                         Tools.TurnFirstToUpper(m.Groups[2].Value) +
+                         m.Groups[3].Value);
+            }
 
             foreach (string u in uniqueItems)
             {
-                if (u.StartsWith(s2) || u.StartsWith(s2.TrimEnd(']') + @"|") || u.Equals(s) || u.Equals(s2))
+                if (u.StartsWith(s2) ||
+                    u.StartsWith(s2.TrimEnd(']') + @"|") ||
+                    u.Equals(s) ||
+                    u.Equals(s2))
                 {
                     addme = false;
                     break;
                 }
-                if (s2.StartsWith(u)) // e.g. [[Category:A]] already added but [[Category:A]] <!-- comment--> next in list
+
+                // Example: [[Category:A]] was already added, followed by
+                // [[Category:A]] <!-- comment-->
+                if (s2.StartsWith(u))
                 {
                     uniqueItems.Remove(u);
                     break;
                 }
-                // for Category: e.g. [[Category:A|Foo]] already added but [[Category:A|Foo bar]] next in list
-                if (isACategory && u.Contains("|") && s2.TrimEnd(']').StartsWith(u.TrimEnd(']')))
+
+                // Example: [[Category:A|Foo]] was already added, followed by
+                // [[Category:A|Foo bar]].
+                if (isACategory &&
+                    u.Contains("|") &&
+                    s2.TrimEnd(']').StartsWith(u.TrimEnd(']')))
                 {
                     uniqueItems.Remove(u);
                     break;
                 }
-                if (isACategory && s2.Contains("|") && u.TrimEnd(']').StartsWith(s2.TrimEnd(']')))
+
+                if (isACategory &&
+                    s2.Contains("|") &&
+                    u.TrimEnd(']').StartsWith(s2.TrimEnd(']')))
                 {
                     addme = false;
                     break;
                 }
-                // compare on first letter case insensitive for templates
-                if (WikiRegexes.NestedTemplates.IsMatch(s2) && WikiRegexes.NestedTemplates.IsMatch(u))
+
+                // Compare template names with the first letter case-insensitive.
+                if (WikiRegexes.NestedTemplates.IsMatch(s2) &&
+                    WikiRegexes.NestedTemplates.IsMatch(u))
                 {
-                    string s2upper = s2.Substring(1, 3).ToUpper() + s2.Substring(3);
-                    string uupper = u.Substring(1, 3).ToUpper() + u.Substring(3);
+                    string s2upper =
+                        s2.Substring(1, 3).ToUpper() + s2.Substring(3);
+
+                    string uupper =
+                        u.Substring(1, 3).ToUpper() + u.Substring(3);
+
                     if (s2upper.Equals(uupper))
                     {
                         addme = false;
@@ -2299,13 +2337,18 @@ en, sq, ru
             }
 
             if (addme)
+            {
                 uniqueItems.Add(s);
+            }
         }
 
-        StringBuilder list = new StringBuilder();
+        StringBuilder list = new();
+
         foreach (string s in uniqueItems)
         {
-            list.Append(s + "\r\n"); // Don't just use AppendLine as this may just give \n under Mono
+            // Do not use AppendLine(), because Mono may emit only '\n'.
+            list.Append(s);
+            list.Append("\r\n");
         }
 
         return list.ToString();
