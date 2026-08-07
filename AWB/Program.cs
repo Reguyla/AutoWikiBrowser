@@ -56,7 +56,7 @@ internal static class Program
             if (Globals.UsingMono)
             {
                 MessageBox.Show(
-                    "AWB is not currently supported by Mono. You may use it for " +
+                    "This application is not currently supported by Mono. You may use it for " +
                     "testing purposes, but functionality is not guaranteed.",
                     "Not supported",
                     MessageBoxButtons.OK,
@@ -73,7 +73,7 @@ internal static class Program
             Article.SetAddListener(
                 MyTrace.AddListener,
                 MyTrace,
-                "AWB");
+                "Twain");
 
             Application.Run(awb);
         }
@@ -84,7 +84,7 @@ internal static class Program
                 // Some execution locations, such as restricted network shares,
                 // may not grant the permissions required to start AWB.
                 MessageBox.Show(
-                    "AWB is unable to start from the current location due to a " +
+                    "This application is unable to start from the current location due to a " +
                     "lack of permissions.\r\nPlease try a local drive or a " +
                     "similarly trusted location.",
                     "Permissions Error",

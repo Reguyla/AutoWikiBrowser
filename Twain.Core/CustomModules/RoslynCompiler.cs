@@ -8,7 +8,7 @@ using System.Runtime.Loader;
 namespace Twain.Core.CustomModules;
 
 /// <summary>
-/// Compiles C# source code for an AutoWikiBrowser custom module by using the
+/// Compiles C# source code for a custom module by using the
 /// Roslyn compiler platform.
 /// </summary>
 /// <remarks>

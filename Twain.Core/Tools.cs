@@ -3755,7 +3755,7 @@ Message: {2}
     /// Gets the appropriate user-agent string for the supplied AWB session.
     /// </summary>
     /// <param name="awb">
-    /// Optional AutoWikiBrowser instance containing the current session.
+    /// Optional instance containing the current session.
     /// </param>
     /// <returns>
     /// The authenticated user-agent when a logged-in user is available;

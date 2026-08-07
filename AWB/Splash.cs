@@ -24,7 +24,7 @@ namespace AutoWikiBrowser;
 
 /// <summary>
 /// Displays application version and startup progress while
-/// AutoWikiBrowser is being initialized.
+/// The application is being initialized.
 /// </summary>
 internal sealed partial class Splash : Form
 {

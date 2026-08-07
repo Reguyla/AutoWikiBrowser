@@ -195,7 +195,7 @@ namespace Twain.Core.Networking
         }
 
         /// <summary>
-        /// Creates a configured <see cref="HttpClient"/> using AWB's current
+        /// Creates a configured <see cref="HttpClient"/> using the applications current
         /// proxy, cookies, decompression, credentials, timeout, and user-agent
         /// settings.
         /// </summary>
@@ -203,7 +203,7 @@ namespace Twain.Core.Networking
         /// The destination URL used to select the appropriate session cookies.
         /// </param>
         /// <param name="awb">
-        /// Optional AutoWikiBrowser instance containing the current session.
+        /// Optional Twain instance containing the current session.
         /// </param>
         /// <param name="userAgent">
         /// Optional explicit user-agent. When omitted, the appropriate AWB
