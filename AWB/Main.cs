@@ -10918,19 +10918,29 @@ if (MessageBox.Show(
     /// </summary>
     private readonly CategoryNameForm _catName = new();
 
+    /// <summary>
+    /// Prompts the user for a category, verifies that the category exists,
+    /// and adds it to the current article when confirmed.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void categoryToolStripMenuItem_Click(object sender, EventArgs e)
     {
         DialogResult dires = _catName.ShowDialog();
 
-        if (string.IsNullOrEmpty(_catName.CategoryName) || !dires.Equals(DialogResult.OK))
+        if (string.IsNullOrEmpty(_catName.CategoryName) ||
+            dires != DialogResult.OK)
+        {
             return;
+        }
 
         bool pageExists;
 
-        // attempt validation of the category's existence, warn user if it doesn't exist
+        // Attempt to verify that the category exists before adding it.
         try
         {
-            // TODO:ApiEdit PageExists/similar function (wrapper for this, we don't need/care about page text)
+            // TODO: Add an API-level PageExists helper so callers can check
+            // page existence without retrieving page content.
             IApiEdit editor = TheSession.Editor.SynchronousEditor.Clone();
             editor.Open(_catName.CategoryName, false);
 
@@ -10938,19 +10948,28 @@ if (MessageBox.Show(
         }
         catch
         {
-            MessageBox.Show("Unable to check category existence");
+            MessageBox.Show(
+                "Unable to check whether the category exists.");
+
             return;
         }
 
         if (pageExists ||
-            MessageBox.Show(_catName.CategoryName + " does not exist. Add it to the page anyway?",
-                            "Non-existent category", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-            == DialogResult.Yes)
+            MessageBox.Show(
+                _catName.CategoryName +
+                " does not exist. Add it to the page anyway?",
+                "Non-existent category",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) == DialogResult.Yes)
         {
             txtEdit.Text += "\r\n\r\n[[" + _catName.CategoryName + "]]";
 
-            // remove any {{uncategorised}} tag now – tagger still counts categories based on saved page revision
-            txtEdit.Text = WikiRegexes.Uncategorized.Replace(txtEdit.Text, string.Empty);
+            // Remove any {{uncategorised}} tag now. The tagger still counts
+            // categories based on the saved page revision.
+            txtEdit.Text =
+                WikiRegexes.Uncategorized.Replace(
+                    txtEdit.Text,
+                    string.Empty);
 
             ReparseEditBox();
         }
