@@ -546,7 +546,7 @@ en, sq, ru
 
         string shortPagesMonitor = RemoveShortPagesMonitor(ref articleText, alltemplates);
 
-        articleText = CommentedOutEnInterwiki.Replace(articleText, "");
+        articleText = CommentedOutEnInterwiki.Replace(articleText, string.Empty);
 
         string personData = RemovePersonDataIfPresent(
             ref articleText, alltemplates);
@@ -2049,7 +2049,7 @@ en, sq, ru
     private static string MoveTemplateToSection(string articleText, Regex templateRegex, int section)
     {
         string extractedTemplate = templateRegex.Match(articleText).Value;
-        articleText = templateRegex.Replace(articleText, "");
+        articleText = templateRegex.Replace(articleText, string.Empty);
 
         switch (section)
         {
