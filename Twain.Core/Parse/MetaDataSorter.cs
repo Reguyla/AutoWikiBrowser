@@ -942,16 +942,33 @@ en, sq, ru
             "Collapsed infobox section end"
             });
 
+    // TODO (Modernization):
+    // Replace the numeric return values from DisplayLowerCaseItalicTitleNeedsMoving()
+    // with a dedicated enum. The current values (1-4) represent distinct placement
+    // states for DISPLAYTITLE, Lowercase title, and Italic title templates, but their
+    // meaning is not self-documenting. An enum would make the ordering logic easier
+    // to understand and reduce the risk of using an incorrect magic value.
     /// <summary>
-    /// Sorts article meta data - zeroth section per [[MOS:ORDER]]
+    /// Sorts zeroth-section article metadata according to the ordering rules
+    /// defined by <c>MOS:ORDER</c>.
     /// </summary>
-    /// <param name="zerothSection">The wiki text of the zeroth section of the article.</param>
+    /// <param name="zerothSection">
+    /// The wiki text of the article's zeroth section.
+    /// </param>
+    /// <returns>
+    /// The zeroth section with applicable templates reordered, or the original
+    /// text when sorting cannot be performed safely.
+    /// </returns>
     internal string SortZerothSection(string zerothSection)
     {
-        int moveDisplayLowerCaseItalicTitle = DisplayLowerCaseItalicTitleNeedsMoving(zerothSection);
-        List<string> alltemplates = Parsers.GetAllTemplates(zerothSection);
+        int moveDisplayLowerCaseItalicTitle =
+            DisplayLowerCaseItalicTitleNeedsMoving(zerothSection);
 
-        // do nothing if zeroth section contains these templates: cannot handle them
+        List<string> alltemplates =
+            Parsers.GetAllTemplates(zerothSection);
+
+        // Do not attempt sorting when the section contains templates that this
+        // sorter cannot safely handle.
         if (TemplateExists(alltemplates, TemplatesCannotHandle))
             return zerothSection;
 
@@ -959,7 +976,11 @@ en, sq, ru
         if (Parsers.UnbalancedBrackets(zerothSection, out bl) > 0)
             return zerothSection;
 
-        bool deletionProtectionTagsComments = WikiRegexes.DeletionProtectionTags.Matches(zerothSection).Cast<Match>().Any(m => WikiRegexes.Comments.IsMatch(m.Value));
+        bool deletionProtectionTagsComments =
+            WikiRegexes.DeletionProtectionTags
+                .Matches(zerothSection)
+                .Cast<Match>()
+                .Any(m => WikiRegexes.Comments.IsMatch(m.Value));
 
         // (rest of section) {{DISPLAYTITLE}}, {{Lowercase title}}, {{Italic title}} kept not directly after an infobox
         if (moveDisplayLowerCaseItalicTitle == 4)
