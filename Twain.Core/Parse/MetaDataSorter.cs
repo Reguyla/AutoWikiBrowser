@@ -2376,20 +2376,10 @@ en, sq, ru
                 }
 
                 // Compare template names with the first letter case-insensitive.
-                if (WikiRegexes.NestedTemplates.IsMatch(s2) &&
-                    WikiRegexes.NestedTemplates.IsMatch(u))
+                if (TemplatesMatchIgnoringInitialCase(s2, u))
                 {
-                    string s2upper =
-                        s2.Substring(1, 3).ToUpper() + s2.Substring(3);
-
-                    string uupper =
-                        u.Substring(1, 3).ToUpper() + u.Substring(3);
-
-                    if (s2upper.Equals(uupper))
-                    {
-                        addme = false;
-                        break;
-                    }
+                    addme = false;
+                    break;
                 }
             }
 
@@ -2409,6 +2399,35 @@ en, sq, ru
         }
 
         return list.ToString();
+    }
+
+    /// <summary>
+    /// Determines whether two template entries are equivalent when the initial
+    /// portion of the template name is compared without regard to case.
+    /// </summary>
+    /// <param name="first">The first template entry.</param>
+    /// <param name="second">The second template entry.</param>
+    /// <returns>
+    /// <see langword="true"/> when the entries represent equivalent templates;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool TemplatesMatchIgnoringInitialCase(
+        string first,
+        string second)
+    {
+        if (!WikiRegexes.NestedTemplates.IsMatch(first) ||
+            !WikiRegexes.NestedTemplates.IsMatch(second))
+        {
+            return false;
+        }
+
+        string firstUpper =
+            first.Substring(1, 3).ToUpper() + first.Substring(3);
+
+        string secondUpper =
+            second.Substring(1, 3).ToUpper() + second.Substring(3);
+
+        return firstUpper.Equals(secondUpper);
     }
 
     /// <summary>
