@@ -7823,7 +7823,7 @@ font-size: 150%;'>No changes</h2>
 
     private void UpdateBotTimer()
     {
-        lblBotTimer.Text = chkAutoMode.Checked ? "Bot timer: " + _intTimer : "";
+        lblBotTimer.Text = chkAutoMode.Checked ? "Bot timer: " + _intTimer : string.Empty;
     }
 
     private void StopDelayedAutoSaveTimer()
@@ -8361,13 +8361,13 @@ if (MessageBox.Show(
             foreach (Match m2 in WikiRegexes.NestedTemplates.Matches(articleTextLocal))
             {
                 if (Tools.GetTemplateParameterValue(m2.Value, "date").Length > 0)
-                    articleTextLocal = articleTextLocal.Replace(m2.Value, "");
+                    articleTextLocal = articleTextLocal.Replace(m2.Value, string.Empty);
             }
 
             foreach (Match m2 in WikiRegexes.TemplateMultiline.Matches(articleTextLocal))
             {
                 if (Tools.GetTemplateParameterValue(m2.Value, "date").Length > 0)
-                    articleTextLocal = articleTextLocal.Replace(m2.Value, "");
+                    articleTextLocal = articleTextLocal.Replace(m2.Value, string.Empty);
             }
 
             MatchCollection m = RegexDates.Matches(articleTextLocal);
@@ -10401,7 +10401,7 @@ if (MessageBox.Show(
             txtEdit.Text += "\r\n\r\n[[" + _catName.CategoryName + "]]";
 
             // remove any {{uncategorised}} tag now – tagger still counts categories based on saved page revision
-            txtEdit.Text = WikiRegexes.Uncategorized.Replace(txtEdit.Text, "");
+            txtEdit.Text = WikiRegexes.Uncategorized.Replace(txtEdit.Text, string.Empty);
 
             ReparseEditBox();
         }

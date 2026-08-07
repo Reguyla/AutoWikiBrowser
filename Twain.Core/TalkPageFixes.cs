@@ -154,7 +154,7 @@ public static class TalkPageFixes
         {
             // have we only added whitespace? then reset articletext
             if (zerothSection.Length > zerothSectionOriginal.Length &&
-               WikiRegexes.WhiteSpace.Replace(zerothSection, "").Equals(WikiRegexes.WhiteSpace.Replace(zerothSectionOriginal, "")))
+               WikiRegexes.WhiteSpace.Replace(zerothSection, "").Equals(WikiRegexes.WhiteSpace.Replace(zerothSectionOriginal, string.Empty)))
             {
                 articleText = articleTextOriginal;
             }
@@ -269,7 +269,7 @@ public static class TalkPageFixes
         if (m.Success && m.Index > 0)
         {
             // remove existing template – handle case where not at beginning of line
-            articleText = articleText.Replace(m.Value, articleText.Contains("\r\n" + m.Value) ? "" : "\r\n");
+            articleText = articleText.Replace(m.Value, articleText.Contains("\r\n" + m.Value) ? string.Empty : "\r\n");
 
             // write existing template to top
             articleText = m.Value.TrimEnd() + "\r\n" + articleText.TrimStart();
@@ -426,7 +426,7 @@ public static class TalkPageFixes
             if (blpom.Success)
             {
                 newValue = Tools.SetTemplateParameterValue(newValue, "blpo", "yes");
-                articletext = articletext.Replace(blpom.Value, "");
+                articletext = articletext.Replace(blpom.Value, string.Empty);
             }
 
             // If {{BLP}} then add blp=yes to WPBS and remove {{BLP}}
@@ -434,7 +434,7 @@ public static class TalkPageFixes
             if (blpm.Success)
             {
                 newValue = Tools.SetTemplateParameterValue(newValue, "blp", "yes");
-                articletext = articletext.Replace(blpm.Value, "");
+                articletext = articletext.Replace(blpm.Value, string.Empty);
             }
 
             // merge changes to article text
@@ -452,7 +452,7 @@ public static class TalkPageFixes
                 string templateName = Tools.TurnFirstToUpper(Tools.GetTemplateName(m.Value));
                 if ((templateName.StartsWith("WikiProject ") || templateName == "Vital article") && !WPBS.Contains(m.Value))
                 {
-                    articletext = articletext.Replace(m.Value, "");
+                    articletext = articletext.Replace(m.Value, string.Empty);
                     newParams += Tools.Newline(m.Value);
                 }
             }

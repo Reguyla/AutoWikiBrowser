@@ -522,8 +522,8 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         get
         {
             return
-                (String.CompareOrdinal(WikiRegexes.WhiteSpace.Replace(OriginalArticleText, ""),
-                                WikiRegexes.WhiteSpace.Replace(mArticleText, "")) == 0);
+                (String.CompareOrdinal(WikiRegexes.WhiteSpace.Replace(OriginalArticleText, string.Empty),
+                                WikiRegexes.WhiteSpace.Replace(mArticleText, string.Empty)) == 0);
         }
     }
 
@@ -544,8 +544,8 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     {
         get
         {
-            return Tools.CaseInsensitiveStringCompare(WikiRegexes.WhiteSpace.Replace(OriginalArticleText, ""),
-                                                      WikiRegexes.WhiteSpace.Replace(mArticleText, ""));
+            return Tools.CaseInsensitiveStringCompare(WikiRegexes.WhiteSpace.Replace(OriginalArticleText, string.Empty),
+                                                      WikiRegexes.WhiteSpace.Replace(mArticleText, string.Empty));
         }
     }
 

@@ -713,7 +713,7 @@ public partial class Parsers
         if ((pages.Contains("p") || page.Contains("p")) &&
             !templatename.Equals("cite journal", StringComparison.OrdinalIgnoreCase) && nopp.Length == 0)
         {
-            newValue = CiteTemplatePagesPP.Replace(newValue, "");
+            newValue = CiteTemplatePagesPP.Replace(newValue, string.Empty);
             pages = Tools.GetTemplateParameterValue(newValue, "pages");
             paramsFound.Remove("pages");
             paramsFound.Add("pages", pages);
@@ -810,7 +810,7 @@ public partial class Parsers
             if (Regex.IsMatch(templatename, @"[Cc]ite(?: ?web| book| news)"))
             {
                 // remove any empty accessdaymonth, accessmonthday, accessmonth and accessyear
-                newValue = AccessDayMonthDay.Replace(newValue, "");
+                newValue = AccessDayMonthDay.Replace(newValue, string.Empty);
 
                 // merge accessdate of 'D Month' or 'Month D' and accessyear of 'YYYY' in cite web
                 if (accessyear.Length == 4)
@@ -882,7 +882,7 @@ public partial class Parsers
             newValue = Tools.SetTemplateParameterValue(newValue, "archive-date", Regex.Replace(ArchiveOrgURL.Match(theURL).Groups[1].Value, @"(\d{4})(\d\d)(\d\d)", "$1-$2-$3"));
             if (website.ToLower().StartsWith("archive") || website.ToLower().StartsWith("web.archive"))
                 newValue = Tools.RemoveTemplateParameter(newValue, "website");
-            theURL = ArchiveOrgURL.Replace(theURL, "");
+            theURL = ArchiveOrgURL.Replace(theURL, string.Empty);
             newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
         }
 
@@ -1196,11 +1196,11 @@ public partial class Parsers
         string issue)
     {
         if (volume.Length > 0)
-            template = CiteTemplatesJournalVolume.Replace(template, "");
+            template = CiteTemplatesJournalVolume.Replace(template, string.Empty);
 
         if (issue.Length > 0)
         {
-            template = CiteTemplatesJournalIssue.Replace(template, "");
+            template = CiteTemplatesJournalIssue.Replace(template, string.Empty);
         }
         else
         {
