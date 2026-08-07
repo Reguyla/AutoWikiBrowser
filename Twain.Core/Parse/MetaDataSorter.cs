@@ -22,6 +22,10 @@ using Twain.Core.TalkPages;
 
 namespace Twain.Core.Parse;
 
+// TODO (Modernization):
+// Consolidate metadata-section regular expressions into a dedicated helper
+// or registry. Centralizing these patterns will improve maintainability,
+// simplify testing, and make wiki-specific section handling configurable.
 /// <summary>
 /// Specifies the ordering method used for interwiki links.
 /// </summary>
@@ -399,9 +403,27 @@ en, sq, ru
         return Sort(articleText, articleTitle, true);
     }
 
-    private static readonly List<string> DablinksPlusHatnoteGroupList = WikiRegexes.DablinksList.Union(new List<string>(new[] { "hatnote group" })).ToList();
-    private static readonly Regex DablinksPlusHatnoteGroup = Tools.NestedTemplateRegex(DablinksPlusHatnoteGroupList);
-    private static readonly Regex WikiTable = new Regex(@"^{\|", RegexOptions.Multiline);
+    /// <summary>
+    /// Contains the known disambiguation-link templates together with the
+    /// <c>hatnote group</c> template.
+    /// </summary>
+    private static readonly List<string> DablinksPlusHatnoteGroupList =
+        WikiRegexes.DablinksList
+            .Union(new List<string>(new[] { "hatnote group" }))
+            .ToList();
+
+    /// <summary>
+    /// Matches disambiguation-link templates and the
+    /// <c>{{hatnote group}}</c> template, including nested template content.
+    /// </summary>
+    private static readonly Regex DablinksPlusHatnoteGroup =
+        Tools.NestedTemplateRegex(DablinksPlusHatnoteGroupList);
+
+    /// <summary>
+    /// Matches the beginning of a wiki table at the start of a line.
+    /// </summary>
+    private static readonly Regex WikiTable =
+        new Regex(@"^{\|", RegexOptions.Multiline);
 
     /// <summary>
     /// Sorts article meta data
@@ -546,7 +568,24 @@ en, sq, ru
         return (Namespace.Determine(articleTitle) == Namespace.Category ? articleText.Trim() : articleText.TrimEnd()) + shortPagesMonitor;
     }
 
-    private static readonly Regex TemplatesCannotHandle = Tools.NestedTemplateRegex(new[] { "stack begin", "stack end", "stack", "Collapsed infobox section begin", "Collapsed infobox section end" });
+    /// <summary>
+    /// Matches templates that require special handling and should not be
+    /// processed by the standard metadata sorting logic.
+    /// </summary>
+    /// <remarks>
+    /// These templates define structural or layout regions whose contents may
+    /// not be safely reordered by the metadata sorter.
+    /// </remarks>
+    private static readonly Regex TemplatesCannotHandle =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "stack begin",
+            "stack end",
+            "stack",
+            "Collapsed infobox section begin",
+            "Collapsed infobox section end"
+            });
 
     /// <summary>
     /// Sorts article meta data - zeroth section per [[MOS:ORDER]]
@@ -657,8 +696,25 @@ en, sq, ru
 
         return 0;
     }
-
-    private static readonly Regex TemplatesToEndOfArticle = Tools.NestedTemplateRegex(new[] { "coord", "WikidataCoord", "Sky", "Authority control", "coord missing" });
+    /// <summary>
+    /// Matches templates that are conventionally placed near the end of an
+    /// article, such as coordinate and authority control templates.
+    /// </summary>
+    /// <remarks>
+    /// The regular expression is generated using
+    /// <see cref="Tools.NestedTemplateRegex(string[])"/> to correctly match
+    /// nested template structures.
+    /// </remarks>
+    private static readonly Regex TemplatesToEndOfArticle =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "coord",
+            "WikidataCoord",
+            "Sky",
+            "Authority control",
+            "coord missing"
+            });
 
     /// <summary>
     /// Moves templates to end of article text, from zeroth section only
@@ -722,17 +778,70 @@ en, sq, ru
     }
 
     /// <summary>
-    /// Returns whether the given regex matches any of the (first name upper) templates in the given list
+    /// Determines whether the specified template collection contains a template
+    /// matching the supplied regular expression.
     /// </summary>
+    /// <param name="templatesFound">
+    /// The collection of template names found in the article.
+    /// </param>
+    /// <param name="r">
+    /// The regular expression used to identify the template.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if a matching template is found; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Template names are converted into simple wiki template markup before being
+    /// evaluated against the supplied regular expression.
+    /// </remarks>
     private static bool TemplateExists(List<string> templatesFound, Regex r)
     {
         return templatesFound.Any(s => r.IsMatch(@"{{" + s + "}}"));
     }
 
-    private static readonly Regex LifeTime = Tools.NestedTemplateRegex("Lifetime");
-    private static readonly Regex NF = Tools.NestedTemplateRegex("NF");
-    private static readonly Regex CatsForDeletion = new Regex(@"\[\[Category:(Pages|Categories|Articles) for deletion\]\]");
-    private static readonly Regex UncategorizedImproveCats = Tools.NestedTemplateRegex(new[] { "Improve categories", "Ci", "Cleanup-cat", "Cleanup cat", "Few categories", "Few cats", "Fewcategories", "Fewcats", "Improve-categories", "Improve-cats", "Improve cats", "Improvecategories", "Improvecats", "More categories", "More category", "Morecat", "Morecategories", "Morecats", "Cat-improve", "Category-improve", "Categories-improve", "Category improve", "Categories improve", "Catimprove", "More cats", "Cat improve", "Additional categories", "Undercategorized", "Undercategorised", "CI", "Undercat", "Improve categorization", "Improve cat", "Uncategorized", "CatNeeded", "Catneeded", "Uncategorised", "Uncat", "Categorize", "Categories needed", "Categoryneeded", "Category needed", "Categories requested", "Nocats", "Categorise", "Nocat", "Uncatstub", "Uncategorisedstub", "Needs cat", "Needs cats", "Cat needed", "Uncategorized stub", "Uncat-stub", "Uncat stub", "Cats needed", "Uncategorizedstub", "Uncategorised stub", "Nocategory", "No category", "No categories", "No cats", "Category requested", "+cat", "Categorízame", "Needs categories", "Ncat", "Noc", "Categories missing", "Missing categories" });
+    /// <summary>
+    /// Matches the <c>{{Lifetime}}</c> template.
+    /// </summary>
+    private static readonly Regex LifeTime =
+        Tools.NestedTemplateRegex("Lifetime");
+
+    /// <summary>
+    /// Matches the <c>{{NF}}</c> template.
+    /// </summary>
+    private static readonly Regex NF =
+        Tools.NestedTemplateRegex("NF");
+
+    /// <summary>
+    /// Matches deletion-related maintenance categories.
+    /// </summary>
+    private static readonly Regex CatsForDeletion =
+        new Regex(
+            @"\[\[Category:(Pages|Categories|Articles) for deletion\]\]");
+
+    /// <summary>
+    /// Matches templates requesting additional or improved article
+    /// categorization.
+    /// </summary>
+    private static readonly Regex UncategorizedImproveCats =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+                "+cat", "Additional categories", "Categories improve", "Categories missing", "Categories needed",
+                "Categories requested", "Categories-improve", "Categorise", "Categorize", "Categorízame",
+                "Category improve", "Category needed", "Category requested", "Category-improve", "Categoryneeded",
+                "Cat improve", "Cat needed", "Cat-improve", "CatNeeded", "Catimprove",
+                "Catneeded", "CI", "Ci", "Cleanup cat", "Cleanup-cat",
+                "Few categories", "Few cats", "Fewcategories", "Fewcats", "Improve categorization",
+                "Improve cat", "Improve categories", "Improve cats", "Improve-categories", "Improve-cats",
+                "Improvecategories", "Improvecats", "Missing categories", "More categories", "More category",
+                "More cats", "Morecat", "Morecategories", "Morecats", "Ncat",
+                "No categories", "No category", "No cats", "Noc", "Nocat",
+                "Nocats", "Nocategory", "Needs cat", "Needs categories", "Needs cats",
+                "Uncat", "Uncat stub", "Uncat-stub", "Uncategorized", "Uncategorized stub",
+                "Uncategorizedstub", "Undercategorised", "Undercategorised stub", "Undercategorisedstub", "Undercategorized",
+                "Undercat", "Uncategorised", "Uncategorizedstub", "Uncatstub"
+            });
 
     /// <summary>
     /// Extracts DEFAULTSORT + categories from the article text; removes duplicate categories, cleans whitespace and underscores
@@ -1055,8 +1164,22 @@ en, sq, ru
         return originalArticletext;
     }
 
-    private static readonly Regex ExternalLinksSection = new Regex(@"(^== *[Ee]xternal +[Ll]inks? *==.*?)(?=^==+[^=][^\r\n]*?[^=]==+(\r\n?|\n)$)", RegexOptions.Multiline | RegexOptions.Singleline);
-    private static readonly Regex ExternalLinksToEnd = new Regex(@"(==+) *[Ee]xternal +[Ll]inks? *\1.*", RegexOptions.Singleline);
+    /// <summary>
+    /// Matches the complete "External links" section when it is followed by
+    /// another section heading.
+    /// </summary>
+    private static readonly Regex ExternalLinksSection =
+        new Regex(
+            @"(^== *[Ee]xternal +[Ll]inks? *==.*?)(?=^==+[^=][^\r\n]*?[^=]==+(\r\n?|\n)$)",
+            RegexOptions.Multiline | RegexOptions.Singleline);
+
+    /// <summary>
+    /// Matches the "External links" section through the end of the article.
+    /// </summary>
+    private static readonly Regex ExternalLinksToEnd =
+        new Regex(
+            @"(==+) *[Ee]xternal +[Ll]inks? *\1.*",
+            RegexOptions.Singleline);
 
     /// <summary>
     /// Moves sisterlinks such as {{wiktionary}} to the external links section
@@ -1292,8 +1415,28 @@ en, sq, ru
         }
     }
 
-    private static readonly Regex ReferencesSection = new Regex(@"(^== *([Rr]eferences|Notes) *==.*?)(?=^==[^=][^\r\n]*?[^=]==(\r\n?|\n)$)", RegexOptions.Multiline | RegexOptions.Singleline);
-    private static readonly Regex ReferencesToEnd = new Regex(@"^== *([Rr]eferences|Notes) *==\s*" + WikiRegexes.ReferencesTemplates + @"\s*(?={{DEFAULTSORT\:|\[\[Category\:)", RegexOptions.Multiline);
+    // TODO (Modernization):
+    // Review references-section detection alongside WikiRegexes.ReferencesTemplates
+    // and consolidate section-boundary handling into a dedicated, testable parser.
+    /// <summary>
+    /// Matches the complete "References" or "Notes" section when it is followed
+    /// by another top-level section heading.
+    /// </summary>
+    private static readonly Regex ReferencesSection =
+        new Regex(
+            @"(^== *([Rr]eferences|Notes) *==.*?)(?=^==[^=][^\r\n]*?[^=]==(\r\n?|\n)$)",
+            RegexOptions.Multiline | RegexOptions.Singleline);
+
+    /// <summary>
+    /// Matches a "References" or "Notes" section containing recognized reference
+    /// templates immediately before default-sort or category metadata.
+    /// </summary>
+    private static readonly Regex ReferencesToEnd =
+        new Regex(
+            @"^== *([Rr]eferences|Notes) *==\s*" +
+            WikiRegexes.ReferencesTemplates +
+            @"\s*(?={{DEFAULTSORT\:|\[\[Category\:)",
+            RegexOptions.Multiline);
 
     // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Place_.22External_links.22_section_after_.22References.22
     // TODO: only works when there is another section following the references section
