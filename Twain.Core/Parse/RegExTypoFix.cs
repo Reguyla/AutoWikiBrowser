@@ -678,7 +678,7 @@ public class TyposDownloader : ITyposProvider
         /// </summary>
         public List<TypoStat> GetStatistics()
         {
-            List<TypoStat> res = new List<TypoStat>();
+            List<TypoStat> res = new();
 
             foreach (TypoGroup g in Groups)
             {

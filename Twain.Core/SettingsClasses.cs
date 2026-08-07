@@ -100,7 +100,7 @@ public class UserPrefs
     public SpecialFilterPrefs Special;
     public ToolsPrefs Tool;
 
-    public List<PluginPrefs> Plugin = new List<PluginPrefs>();
+    public List<PluginPrefs> Plugin = new();
 
     /// <summary>
     /// Loads user preferences from an AWB settings file.
@@ -198,7 +198,7 @@ public class UserPrefs
     /// <returns>A list of the plugin types</returns>
     public static List<Type> SavePluginSettings(UserPrefs prefs)
     {
-        List<Type> types = new List<Type>();
+        List<Type> types = new();
         /* Find out what types the plugins are using for their settings so we can
            add them to the Serializer. The plugin author must ensure s(he) is using
            serializable types.*/
@@ -247,9 +247,9 @@ public class FaRPrefs
     public bool IgnoreSomeText = false;
     public bool IgnoreMoreText = false;
     public bool AppendSummary = true;
-    public List<Parse.Replacement> Replacements = new List<Parse.Replacement>();
+    public List<Parse.Replacement> Replacements = new();
 
-    public List<ReplaceSpecial.IRule> AdvancedReps = new List<ReplaceSpecial.IRule>();
+    public List<ReplaceSpecial.IRule> AdvancedReps = new();
 
     public string[] SubstTemplates = new string[0];
     public bool IncludeComments = false;

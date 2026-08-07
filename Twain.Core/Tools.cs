@@ -2166,7 +2166,7 @@ Message: {2}
     /// <returns>The list of the talk pages.</returns>
     public static List<Article> ConvertToTalk(List<Article> list)
     {
-        List<Article> newList = new List<Article>(list.Count);
+        List<Article> newList = new(list.Count);
 
         foreach (Article a in list)
         {
@@ -2210,7 +2210,7 @@ Message: {2}
     /// <returns>The list of articles.</returns>
     public static List<Article> ConvertFromTalk(List<Article> list)
     {
-        List<Article> newList = new List<Article>(list.Count);
+        List<Article> newList = new(list.Count);
 
         foreach (Article a in list)
         {
@@ -2229,7 +2229,7 @@ Message: {2}
     /// <returns>The list of articles.</returns>
     public static List<Article> ConvertNamespace(List<Article> list, int NewNamespace)
     {
-        List<Article> newList = new List<Article>(list.Count);
+        List<Article> newList = new(list.Count);
 
         foreach (Article a in list)
         {

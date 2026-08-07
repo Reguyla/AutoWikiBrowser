@@ -194,13 +194,13 @@ public class CategoriesOnPageListProvider : ApiListProviderBase
     protected string clshow;
 
     #region Tags: <categories>/<cl>
-    static readonly List<string> pe = new List<string>(new[] { "cl" });
+    static readonly List<string> pe = new(["cl"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "categories" });
+    static readonly List<string> ac = new(["categories"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -285,13 +285,13 @@ public class WhatLinksHereListProvider : ApiListProviderBase, ISpecialPageProvid
     }
 
     #region Tags: <backlinks>/<bl>
-    static readonly List<string> pe = new List<string>(new[] { "bl" });
+    static readonly List<string> pe = new(["bl"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "backlinks" });
+    static readonly List<string> ac = new(["backlinks"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -528,13 +528,13 @@ public class RedirectsAllNSListProvider : WhatLinksHereAllNSListProvider
 public class WhatTranscludesPageListProvider : ApiListProviderBase, ISpecialPageProvider
 {
     #region Tags: <embeddedin>/<ei>
-    static readonly List<string> pe = new List<string>(new[] { "ei" });
+    static readonly List<string> pe = new(["ei"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "embeddedin" });
+    static readonly List<string> ac = new(["embeddedin"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -612,13 +612,13 @@ public class WhatTranscludesPageAllNSListProvider : WhatTranscludesPageListProvi
 public class LinksOnPageListProvider : ApiListProviderBase
 {
     #region Tags: <links>/<pl>
-    static readonly List<string> pe = new List<string>(new[] { "pl" });
+    static readonly List<string> pe = new(["pl"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "links" });
+    static readonly List<string> ac = new(["links"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -669,13 +669,13 @@ public class LinksOnPageOnlyRedListProvider : ApiListProviderBase
     }
 
     #region Tags: <pages>/<page>
-    static readonly List<string> pe = new List<string>(new[] { "page" });
+    static readonly List<string> pe = new(["page"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "pages" });
+    static readonly List<string> ac = new(["pages"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -747,13 +747,13 @@ public class LinksOnPageOnlyBlueListProvider
 public class FilesOnPageListProvider : ApiListProviderBase
 {
     #region Tags: <images>/<im>
-    static readonly List<string> pe = new List<string>(new[] { "im" });
+    static readonly List<string> pe = new(["im"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "images" });
+    static readonly List<string> ac = new(["images"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -798,13 +798,13 @@ public class FilesOnPageListProvider : ApiListProviderBase
 public class TransclusionsOnPageListProvider : ApiListProviderBase
 {
     #region Tags: <templates>/<tl>
-    static readonly List<string> pe = new List<string>(new[] { "tl" });
+    static readonly List<string> pe = new(["tl"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "templates" });
+    static readonly List<string> ac = new(["templates"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -849,13 +849,13 @@ public class TransclusionsOnPageListProvider : ApiListProviderBase
 public class UserContribsListProvider : ApiListProviderBase, ISpecialPageProvider
 {
     #region Tags: <usercontribs>/<item>
-    static readonly List<string> pe = new List<string>(new[] { "item" });
+    static readonly List<string> pe = new(["item"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "usercontribs" });
+    static readonly List<string> ac = new(["usercontribs"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -958,13 +958,13 @@ public class UserContribUserDefinedNumberListProvider : UserContribsListProvider
 public class ImageFileLinksListProvider : ApiListProviderBase
 {
     #region Tags: <imageusage>/<iu>
-    static readonly List<string> pe = new List<string>(new[] { "iu" });
+    static readonly List<string> pe = new(["iu"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "imageusage" });
+    static readonly List<string> ac = new(["imageusage"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1016,13 +1016,13 @@ public class WikiSearchListProvider : ApiListProviderBase, ISpecialPageProvider
     protected string SearchType = "text", SearchPrefix = string.Empty;
 
     #region Tags: <search>/<p>
-    static readonly List<string> pe = new List<string>(new[] { "p" });
+    static readonly List<string> pe = new(["p"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "search" });
+    static readonly List<string> ac = new(["search"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1138,13 +1138,13 @@ public class WikiTitleSearchAllNSListProvider : WikiTitleSearchListProvider
 public class MyWatchlistListProvider : ApiListProviderBase
 {
     #region Tags: <watchlistraw>/<wr>
-    static readonly List<string> pe = new List<string>(new[] { "wr" });
+    static readonly List<string> pe = new(["wr"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "watchlistraw" });
+    static readonly List<string> ac = new(["watchlistraw"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1228,13 +1228,13 @@ public class RandomPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageP
     }
 
     #region Tags: <random>/<page>
-    static readonly List<string> pe = new List<string>(new[] { "page" });
+    static readonly List<string> pe = new(["page"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "random" });
+    static readonly List<string> ac = new(["random"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1299,13 +1299,13 @@ public class RandomRedirectsSpecialPageProvider : RandomPagesSpecialPageProvider
 public class AllPagesSpecialPageProvider : ApiListProviderBase, ISpecialPageProvider
 {
     #region Tags: <allpages>/<p>
-    static readonly List<string> pe = new List<string>(new[] { "p" });
+    static readonly List<string> pe = new(["p"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "allpages" });
+    static readonly List<string> ac = new(["allpages"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1510,13 +1510,13 @@ public class PrefixIndexSpecialPageProvider : AllPagesSpecialPageProvider
 public class RecentChangesSpecialPageProvider : ApiListProviderBase, ISpecialPageProvider
 {
     #region Tags: <recentchanges>/<rc>
-    static readonly List<string> pe = new List<string>(new[] { "rc" });
+    static readonly List<string> pe = new(["rc"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "recentchanges" });
+    static readonly List<string> ac = new(["recentchanges"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1574,13 +1574,13 @@ public class AllUsersSpecialPageProvider : ApiListProviderBase, ISpecialPageProv
     }
 
     #region Tags: <allusers>/<u>
-    static readonly List<string> pe = new List<string>(new[] { "u" });
+    static readonly List<string> pe = new(["u"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "allusers" });
+    static readonly List<string> ac = new(["allusers"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1639,13 +1639,13 @@ public class NewPagesListProvider : ApiListProviderBase, ISpecialPageProvider
     }
 
     #region Tags: <recentchanges>/<rc>
-    static readonly List<string> pe = new List<string>(new[] { "rc" });
+    static readonly List<string> pe = new(["rc"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "recentchanges" });
+    static readonly List<string> ac = new(["recentchanges"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1697,13 +1697,13 @@ public class NewPagesListProvider : ApiListProviderBase, ISpecialPageProvider
 public class LinkSearchSpecialPageProvider : ApiListProviderBase, ISpecialPageProvider
 {
     #region Tags: <exturlusage>/<eu>
-    static readonly List<string> pe = new List<string>(new[] { "eu" });
+    static readonly List<string> pe = new(["eu"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "exturlusage" });
+    static readonly List<string> ac = new(["exturlusage" ]);
     protected override ICollection<string> Actions
     {
         get { return ac; }
@@ -1803,13 +1803,13 @@ public class DisambiguationPagesSpecialPageProvider : WhatTranscludesPageListPro
 public class GalleryNewFilesSpecialPageProvider : ApiListProviderBase, ISpecialPageProvider
 {
     #region Tags: <logevents>/<item>
-    static readonly List<string> pe = new List<string>(new[] { "item" });
+    static readonly List<string> pe = new(["item"]);
     protected override ICollection<string> PageElements
     {
         get { return pe; }
     }
 
-    static readonly List<string> ac = new List<string>(new[] { "logevents" });
+    static readonly List<string> ac = new(["logevents"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }

@@ -652,7 +652,7 @@ public partial class Parsers
         return m.Value.Replace(@"{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}", DateTime.UtcNow.ToString("MMMM yyyy", BritishEnglish));
     }
 
-    private static readonly List<Regex> SmallTagRegexes = new List<Regex>();
+    private static readonly List<Regex> SmallTagRegexes = new();
     private static readonly Regex LegendTemplate = Tools.NestedTemplateRegex("legend");
 
     /// <summary>

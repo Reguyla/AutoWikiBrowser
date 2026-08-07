@@ -21,7 +21,7 @@ namespace Twain.Core.ReplaceSpecial;
 
 public class RuleTreeHistory
 {
-    readonly List<List<TreeNode>> History = new List<List<TreeNode>>();
+    readonly List<List<TreeNode>> History = new();
     int index_ = -1;
 
     readonly TreeView treeView_;

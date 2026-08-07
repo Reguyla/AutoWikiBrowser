@@ -175,7 +175,7 @@ public partial class DatabaseScanner : Form
                                  DateTime.Now.Millisecond);
         Limit = (int)nudLimitResults.Value;
 
-        List<Scan> s = new List<Scan>();
+        List<Scan> s = new();
 
         // First set of checks: article namespace and title contains/not contains checks
         if (Namespaces.Count > 0)

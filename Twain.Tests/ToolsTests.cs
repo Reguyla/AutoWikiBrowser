@@ -461,7 +461,7 @@ bar"), Is.EqualTo(2));
         matches = Regex.Matches("test", "[Tt]est");
         Assert.That(Tools.RemoveMatches("test", matches), Is.Empty);
 
-        List<Match> MatchesList = new List<Match>();
+        List<Match> MatchesList = new();
 
         Assert.That(Tools.RemoveMatches("test", MatchesList), Is.EqualTo("test"));
 

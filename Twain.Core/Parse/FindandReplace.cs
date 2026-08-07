@@ -38,7 +38,7 @@ public partial class FindandReplace : Form
 
     private readonly HideText _remove = new HideText(true, false, true);
 
-    private List<Replacement> _replacementList = new List<Replacement>();
+    private List<Replacement> _replacementList = new();
     private List<Replacement> replacementBackup;
 
     private bool _applyDefault;
@@ -688,7 +688,7 @@ public partial class FindandReplace : Form
             : dataGridView1.CurrentCell.RowIndex;
 
         // get list of all cells with text match
-        List<DataGridViewCell> cells = new List<DataGridViewCell>();
+        List<DataGridViewCell> cells = new();
 
         // search by row then column
         for (int j = 0; j < dataGridView1.Rows.Count; j++)

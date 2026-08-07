@@ -31,7 +31,7 @@ public sealed class HideText
     private static readonly Regex NoWikiIgnoreRegex = new Regex("<!-- ?(cat(egories)?|\\{\\{.*?stub\\}\\}.*?|other languages?|language links?|inter ?(language|wiki)? ?links|inter ?wiki ?language ?links|inter ?wikis?|The below are interlanguage links\\.?) ?-->", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     #region Hide
-    private readonly List<HideObject> HiddenTokens = new List<HideObject>();
+    private readonly List<HideObject> HiddenTokens = new();
     // cached versions of articletext before Hide, and with Hide applied
     // so AddBack can return cached version if no changes
     private string cachedOriginalArticleTextBeforeHide = string.Empty;
@@ -212,7 +212,7 @@ public sealed class HideText
     #endregion
 
     #region Unformatted Text
-    private readonly List<HideObject> HiddenUnformattedText = new List<HideObject>();
+    private readonly List<HideObject> HiddenUnformattedText = new();
 
     /// <summary>
     /// Hides unformatted text regions: nowiki, pre, math, html comments, timelines

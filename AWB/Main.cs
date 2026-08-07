@@ -10285,7 +10285,7 @@ if (MessageBox.Show(
         int iterations = 1000000 / text.Length;
         if (iterations > 500) iterations = 500;
 
-        List<KeyValuePair<int, string>> times = new List<KeyValuePair<int, string>>();
+        List<KeyValuePair<int, string>> times = new();
 
         foreach (KeyValuePair<Regex, string> p in typos)
         {

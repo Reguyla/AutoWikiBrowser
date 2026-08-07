@@ -2163,7 +2163,7 @@ public class ListMakerTests : RequiresInitialization
     [Test]
     public void NormalizeTitle()
     {
-        ListMaker LMaker = new ListMaker();
+        ListMaker LMaker = new();
         Assert.That(LMaker.NormalizeTitle(@"https://en.wikipedia.org/w/index.php?title=Foo&diff=3&oldid=4"), Is.EqualTo("Foo"));
         Assert.That(LMaker.NormalizeTitle(@"https://en.wikipedia.org/w/index.php?title=Foo&diff=3&curid=4"), Is.EqualTo("Foo"));
         Assert.That(LMaker.NormalizeTitle(@"https://en.wikipedia.org/w/index.php?title=Health_effects_of_chocolate&diff=4018&oldid=40182"), Is.EqualTo("Health effects of chocolate"));
@@ -2198,14 +2198,14 @@ public class ListMakerTests : RequiresInitialization
     [Test]
     public void NormalizeTitleSecure()
     {
-        ListMaker LMaker = new ListMaker();
+        ListMaker LMaker = new();
         Assert.That(LMaker.NormalizeTitle(@"https://en.wikipedia.org/w/index.php?title=Foo&diff=3&oldid=4"), Is.EqualTo("Foo"));
     }
 
     [Test]
     public void RemoveListDuplicatesSimple()
     {
-        ListMaker LMakerRLD = new ListMaker();
+        ListMaker LMakerRLD = new();
         LMakerRLD.Add(new Article("A"));
         LMakerRLD.Add(new Article("B"));
         LMakerRLD.Add(new Article("C"));
@@ -2225,7 +2225,7 @@ public class ListMakerTests : RequiresInitialization
     public void RemoveListDuplicates10K()
     {
         const int big = 10000;
-        ListMaker LMakerLarge = new ListMaker();
+        ListMaker LMakerLarge = new();
         LMakerLarge.Clear();
         for (int i = 1; i < big; i++)
             LMakerLarge.Add(new Article(i.ToString()));
@@ -2244,7 +2244,7 @@ public class ListMakerTests : RequiresInitialization
     public void FilterNonMainArticlesVolume()
     {
         const int big = 500;
-        ListMaker LMakerLarge = new ListMaker();
+        ListMaker LMakerLarge = new();
         LMakerLarge.Clear();
         for (int i = 1; i < big; i++)
             LMakerLarge.Add(i.ToString());
@@ -2258,7 +2258,7 @@ public class ListMakerTests : RequiresInitialization
     [Test]
     public void FilterNonMainArticles()
     {
-        ListMaker LMaker = new ListMaker();
+        ListMaker LMaker = new();
         LMaker.Add("One");
         LMaker.Add("Two");
         LMaker.Add("Talk:Three");
@@ -2274,7 +2274,7 @@ public class ListMakerTests : RequiresInitialization
     [Test]
     public void AddList()
     {
-        ListMaker LMaker = new ListMaker();
+        ListMaker LMaker = new();
         List<Article> l = new();
 
         l.Add(new Article("A"));
@@ -2304,7 +2304,7 @@ public class ListMakerTests : RequiresInitialization
     [Test]
     public void GetArticleList()
     {
-        ListMaker LMaker = new ListMaker();
+        ListMaker LMaker = new();
         LMaker.Add("A");
         LMaker.Add("B");
 
@@ -2328,7 +2328,7 @@ public class ListComparerTests : RequiresInitialization
     [Test]
     public void ListComparerSimple()
     {
-        ListMaker LMaker = new ListMaker();
+        ListMaker LMaker = new();
         LMaker.Add(new Article("A"));
         LMaker.Add(new Article("B"));
         LMaker.Add(new Article("C"));
@@ -2365,7 +2365,7 @@ public class ListComparerTests : RequiresInitialization
     public void ListComparer10K()
     {
         const int big = 10000;
-        ListMaker LMakerC10K = new ListMaker();
+        ListMaker LMakerC10K = new();
 
         for (int i = 0; i < big; i++)
             LMakerC10K.Add(new Article(i.ToString()));
@@ -2406,7 +2406,7 @@ public class ListBoxArticleTests : RequiresInitialization
     [Test]
     public void RemoveSelected()
     {
-        ListBoxArticle lbArticles = new ListBoxArticle();
+        ListBoxArticle lbArticles = new();
 
         const int big = 70000, sel = 5000;
 
@@ -2630,7 +2630,7 @@ public class FindAndReplaceTests
         ClassicAssert.IsFalse(fr.HasProcessingReplacements(false));
 
         fr.Clear();
-        List<Replacement> l = new List<Replacement>();
+        List<Replacement> l = new();
         l.Add(r);
         l.Add(r2);
         fr.AddNew(l);

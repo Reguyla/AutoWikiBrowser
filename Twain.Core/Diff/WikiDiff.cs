@@ -678,7 +678,7 @@ public sealed class Word
 
     public static List<Word> SplitString(string s)
     {
-        List<Word> lst = new List<Word>();
+        List<Word> lst = new();
 
         int pos = 0;
         int len = s.Length;

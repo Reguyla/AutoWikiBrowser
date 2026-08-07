@@ -23,7 +23,7 @@ namespace AutoWikiBrowser;
 
 partial class MainForm
 {
-    private static List<TabPage> HiddenTabPages = new List<TabPage>();
+    private static List<TabPage> HiddenTabPages = new();
 
     TabPage IAutoWikiBrowserTabs.MoreOptionsTab { get { return tpMoreOptions; } }
     TabPage IAutoWikiBrowserTabs.OptionsTab { get { return tpOptions; } }

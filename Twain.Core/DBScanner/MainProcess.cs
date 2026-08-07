@@ -53,7 +53,7 @@ class MainProcess
     private SynchronizationContext Context;
 
     private Thread ScanThread;
-    readonly List<Thread> SecondaryThreads = new List<Thread>();
+    readonly List<Thread> SecondaryThreads = new();
     private readonly bool MultiThreaded;
     private readonly int ProcessorCount;
     private readonly CrossThreadQueue<ArticleInfo> PendingArticles = new CrossThreadQueue<ArticleInfo>();

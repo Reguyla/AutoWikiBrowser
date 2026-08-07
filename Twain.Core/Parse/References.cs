@@ -1038,7 +1038,7 @@ public partial class Parsers
     /// <param name="articleText"></param>
     private static List<Match> GetUnnamedRefs(string articleText)
     {
-        List<Match> refsList = new List<Match>();
+        List<Match> refsList = new();
         lock (GetUnnamedRefsQueueLock)
         {
             // For performance, use cached result if available: articletext plus List matches
@@ -1069,7 +1069,7 @@ public partial class Parsers
     /// <param name="articleText"></param>
     private static List<Match> GetNamedRefs(string articleText)
     {
-        List<Match> refsList = new List<Match>();
+        List<Match> refsList = new();
         lock (GetNamedRefsQueueLock)
         {
             // For performance, use cached result if available: articletext plus List matches
