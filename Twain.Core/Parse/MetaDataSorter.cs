@@ -301,16 +301,25 @@ public class MetaDataSorter
     /// </remarks>
     private bool LoadInterWikiFromCache()
     {
-        if (!Globals.UnitTestMode)
+        if (Globals.UnitTestMode)
         {
-            InterwikiLocalAlpha = Load("InterwikiLocalAlpha");
-            InterwikiLocalFirst = Load("InterwikiLocalFirst");
-            InterwikiAlpha = Load("InterwikiAlpha");
-            InterwikiAlphaEnFirst = Load("InterwikiAlphaEnFirst");
-
-            return Loaded;
+            LoadUnitTestInterWikiData();
+            return true;
         }
 
+        InterwikiLocalAlpha = Load("InterwikiLocalAlpha");
+        InterwikiLocalFirst = Load("InterwikiLocalFirst");
+        InterwikiAlpha = Load("InterwikiAlpha");
+        InterwikiAlphaEnFirst = Load("InterwikiAlphaEnFirst");
+
+        return Loaded;
+    }
+
+    /// <summary>
+    /// Initializes the predefined interwiki ordering data used during unit tests.
+    /// </summary>
+    private void LoadUnitTestInterWikiData()
+    {
         List<string> one = new List<string> { "ar", "de", "en", "ru", "sq" };
         List<string> two = new List<string> { "en", "ar", "de", "ru", "sq" };
 
@@ -318,8 +327,6 @@ public class MetaDataSorter
         InterwikiLocalFirst = one;
         InterwikiAlpha = one;
         InterwikiAlphaEnFirst = two;
-
-        return true;
     }
 
     /// <summary>
