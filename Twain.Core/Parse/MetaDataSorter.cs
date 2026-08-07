@@ -51,12 +51,14 @@ public enum InterWikiOrderEnum
 }
 
 /// <summary>
-/// Provides functionality for sorting and processing article metadata.
+/// Provides functionality for sorting and processing article metadata,
+/// including categories and interwiki links.
 /// </summary>
 public class MetaDataSorter
 {
     /// <summary>
-    /// Contains the possible interwiki links used during metadata processing.
+    /// Contains the collection of recognized interwiki prefixes used during
+    /// metadata processing.
     /// </summary>
     public List<string> PossibleInterwikis;
 
@@ -72,6 +74,13 @@ public class MetaDataSorter
     public bool AddCatKey
     { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MetaDataSorter"/> class
+    /// and loads the interwiki ordering data.
+    /// </summary>
+    /// <exception cref="NullReferenceException">
+    /// Thrown when the local-language interwiki ordering data could not be loaded.
+    /// </exception>
     public MetaDataSorter()
     {
         SortInterwikis = true;
@@ -85,21 +94,52 @@ public class MetaDataSorter
         if (InterwikiLocalAlpha == null)
             throw new NullReferenceException("InterwikiLocalAlpha is null");
 
-        //create a comparer
+        // Create the comparer using the default interwiki ordering.
         InterWikiOrder = InterWikiOrderEnum.LocalLanguageAlpha;
     }
 
-    // now will be generated dynamically using Variables.Stub
-    private readonly Regex InterLangRegex = new Regex(@"<!--\s*(other languages?|language links?|inter ?(language|wiki)? ?links|inter ?wiki ?language ?links|(?:inter|Other) ?wikis?|The below are interlanguage links\.?|interwiki links to this article in other languages, below)\s*-->", RegexOptions.IgnoreCase);
-    private readonly Regex CatCommentRegex = new Regex("<!--+ ?cat(egories)? ?--+>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    // Generated dynamically using Variables.Stub.
+    private readonly Regex InterLangRegex =
+        new Regex(@"", RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches category marker comments used during metadata processing.
+    /// </summary>
+    private readonly Regex CatCommentRegex =
+        new Regex(
+            "<!--+ ?cat(egories)? ?--+>",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Contains interwiki entries sorted by local-language name.
+    /// </summary>
     private List<string> InterwikiLocalAlpha;
-    private List<string> InterwikiLocalFirst;
-    private List<string> InterwikiAlpha;
-    private List<string> InterwikiAlphaEnFirst;
-    //List<Regex> InterWikisList = new List<Regex>();
 
+    /// <summary>
+    /// Contains interwiki entries sorted by the first word of the
+    /// local-language name.
+    /// </summary>
+    private List<string> InterwikiLocalFirst;
+
+    /// <summary>
+    /// Contains interwiki entries sorted alphabetically by language code.
+    /// </summary>
+    private List<string> InterwikiAlpha;
+
+    /// <summary>
+    /// Contains interwiki entries with English first, followed by the
+    /// remaining entries sorted alphabetically by language code.
+    /// </summary>
+    private List<string> InterwikiAlphaEnFirst;
+
+    /// <summary>
+    /// Comparer used to order interwiki links.
+    /// </summary>
     private InterWikiComparer Comparer;
+
+    /// <summary>
+    /// Stores the currently selected interwiki ordering method.
+    /// </summary>
     private InterWikiOrderEnum Order = InterWikiOrderEnum.LocalLanguageAlpha;
 
     /// <summary>
