@@ -1041,37 +1041,67 @@ en, sq, ru
     }
 
     /// <summary>
-    /// Finds current relative order of DISPLAYTITLE/italic title/lowercase title templates versus infobox and other templates, so MetaDataSorter knows where to sort them
+    /// Determines the current relative position of DISPLAYTITLE, Italic title,
+    /// and Lowercase title templates in relation to infoboxes and other templates.
     /// </summary>
-    /// <param name="articleText">Article text.</param>
+    /// <param name="articleText">
+    /// The article text to inspect.
+    /// </param>
+    /// <returns>
+    /// A numeric placement state used by <see cref="MetaDataSorter"/> to determine
+    /// whether and where the title-formatting template should be moved.
+    /// </returns>
     private static int DisplayLowerCaseItalicTitleNeedsMoving(string articleText)
     {
-        List<string> alltemplatesZ = WikiRegexes.NestedTemplates.Matches(Tools.GetZerothSection(articleText)).Cast<Match>().Select(m => m.Value).ToList();
+        List<string> alltemplatesZ =
+            WikiRegexes.NestedTemplates
+                .Matches(Tools.GetZerothSection(articleText))
+                .Cast<Match>()
+                .Select(m => m.Value)
+                .ToList();
 
-        // determine relative position of DISPLAYTITLE/italic title/lowercase title template and any infobox
-        int displaytitle = alltemplatesZ.FindIndex(t => WikiRegexes.DisplayLowerCaseItalicTitle.IsMatch(t));
-        int infobox = alltemplatesZ.FindIndex(t => WikiRegexes.InfoBox.IsMatch(t));
+        // Determine the relative position of DISPLAYTITLE, Italic title, or
+        // Lowercase title templates and any infobox.
+        int displaytitle =
+            alltemplatesZ.FindIndex(
+                t => WikiRegexes.DisplayLowerCaseItalicTitle.IsMatch(t));
+
+        int infobox =
+            alltemplatesZ.FindIndex(
+                t => WikiRegexes.InfoBox.IsMatch(t));
 
         if (displaytitle > -1)
         {
-            /* If no infobox then template should be sorted per MOS:ORDER in 2nd position (after short description)
-             * If have infobox, but there are other templates inbetween, then again template should be sorted in 2nd position
-             * If template just before infobox, or anywhere after infobox, don't sort it, as MOS:ORDER allows those positions too
-             * */
-            if (infobox == -1) // no infobox
+            /*
+             * If no infobox exists, the template should be sorted according to
+             * MOS:ORDER in the second position, after Short description.
+             *
+             * If an infobox exists but other templates occur between the title
+             * template and infobox, the title template should again be sorted
+             * into the second position.
+             *
+             * If the title template is immediately before the infobox, or anywhere
+             * after it, MOS:ORDER permits the current placement.
+             */
+            if (infobox == -1)
                 return 1;
-            if (infobox - displaytitle > 1) // currently further before infobox
+
+            if (infobox - displaytitle > 1)
                 return 1;
-            if (infobox - displaytitle == 1) // currently just before infobox
+
+            if (infobox - displaytitle == 1)
                 return 2;
-            if (displaytitle - infobox == 1) // currently just after infobox
+
+            if (displaytitle - infobox == 1)
                 return 3;
-            if (displaytitle > infobox) // currently further after infobox
+
+            if (displaytitle > infobox)
                 return 4;
         }
 
         return 0;
     }
+
     /// <summary>
     /// Matches templates that are conventionally placed near the end of an
     /// article, such as coordinate and authority control templates.
