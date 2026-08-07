@@ -21,102 +21,213 @@ using System.Windows.Forms;
 
 namespace Twain.Core.Logging;
 
+/// <summary>
+/// Represents a log entry for an article processed by AutoWikiBrowser.
+/// </summary>
+/// <remarks>
+/// The listener receives processing information through the AWB logging
+/// interfaces and formats that information as a <see cref="ListViewItem"/>
+/// suitable for display in the processed or skipped article lists.
+///
+/// TODO: Separate the logging data model from the WinForms
+/// <see cref="ListViewItem"/> representation so that core logging does not
+/// depend on UI-specific types.
+/// </remarks>
 [Serializable]
 public class AWBLogListener : ListViewItem, IAWBTraceListener
-{    /* This class will:
-     * Use the Logging interface previously defined in wikifunctions2
-     * Be written to by AWB during processing and passed to plugins
-     * Format itself as a ListViewItem suitable (with subitems where appropriate) for adding to the skipped
-       or processed articles list
-     * Handle MouseOver event (display log entry)
-     * Handle double click event (open article in browser)
-    */
+{
+    /// <summary>
+    /// Default edit summary used when adding an individual log entry.
+    /// </summary>
+    public const string UploadingLogEntryDefaultEditSummary = "Adding log entry";
 
-    public const string UploadingLogEntryDefaultEditSummary = "Adding log entry",
-                 UploadingLogDefaultEditSummary = "Uploading log",
-                 LoggingStartButtonClicked = "Initialising log.",
-                 StringUser = "User",
-                 StringUserSkipped = "Clicked skip",
-                 StringPlugin = "Plugin",
-                 StringPluginSkipped = "Plugin sent skip event";
+    /// <summary>
+    /// Default edit summary used when uploading a log.
+    /// </summary>
+    public const string UploadingLogDefaultEditSummary = "Uploading log";
 
-    public static string AWBLoggingEditSummary
-    { get { return "(" + Variables.WPAWB + " Logging) "; } }
+    /// <summary>
+    /// Log message indicating that logging has been initialized.
+    /// </summary>
+    public const string LoggingStartButtonClicked = "Initialising log.";
 
-    private bool Datestamped, HaveSkipInfo;
+    /// <summary>
+    /// Identifies an action initiated by the user.
+    /// </summary>
+    public const string StringUser = "User";
 
-    // SaveInfo.NewId, Database ID of page's revision after editing
+    /// <summary>
+    /// Describes an article skipped manually by the user.
+    /// </summary>
+    public const string StringUserSkipped = "Clicked skip";
+
+    /// <summary>
+    /// Identifies an action initiated by a plugin.
+    /// </summary>
+    public const string StringPlugin = "Plugin";
+
+    /// <summary>
+    /// Describes an article skipped by a plugin.
+    /// </summary>
+    public const string StringPluginSkipped = "Plugin sent skip event";
+
+    /// <summary>
+    /// Gets the prefix used for AWB logging edit summaries.
+    /// </summary>
+    public static string AWBLoggingEditSummary =>
+        "(" + Variables.WPAWB + " Logging) ";
+
+    private bool Datestamped;
+    private bool HaveSkipInfo;
+
+    /// <summary>
+    /// Database revision ID created after the article was edited.
+    /// </summary>
     public int NewId;
-    // Variables.URLLong of the page
+
+    /// <summary>
+    /// Long-form URL associated with the processed article.
+    /// </summary>
     public string URLLong;
 
     #region AWB Interface
+
+    /// <summary>
+    /// Gets a value indicating whether the article was skipped.
+    /// </summary>
     public bool Skipped { get; internal set; }
 
+    /// <summary>
+    /// Initializes a new log listener for the specified article.
+    /// </summary>
+    /// <param name="articleTitle">
+    /// The full title of the article being processed.
+    /// </param>
     public AWBLogListener(string articleTitle)
     {
         Text = articleTitle;
         ArticleTitle = articleTitle;
     }
 
+    /// <summary>
+    /// Records that the current article was skipped by the user.
+    /// </summary>
     public void UserSkipped()
     {
         Skip(StringUser, StringUserSkipped);
     }
 
+    /// <summary>
+    /// Records that the current article was skipped by AutoWikiBrowser.
+    /// </summary>
+    /// <param name="reason">The reason the article was skipped.</param>
     public void AWBSkipped(string reason)
     {
         Skip("AWB", reason);
     }
 
+    /// <summary>
+    /// Records that the current article was skipped by a plugin.
+    /// </summary>
     public void PluginSkipped()
     {
         Skip(StringPlugin, StringPluginSkipped);
     }
 
+    /// <summary>
+    /// Opens the current article in the user's web browser.
+    /// </summary>
     public void OpenInBrowser()
     {
         Tools.OpenArticleInBrowser(ArticleTitle);
     }
 
+    /// <summary>
+    /// Opens the revision history of the current article in the user's
+    /// web browser.
+    /// </summary>
     public void OpenHistoryInBrowser()
     {
         Tools.OpenArticleHistoryInBrowser(ArticleTitle);
     }
 
+    /// <summary>
+    /// Opens the edited revision diff in the user's web browser.
+    /// </summary>
     public void OpenDiffInBrowser()
     {
         Tools.OpenDiffInBrowser(URLLong, NewId);
     }
 
+    /// <summary>
+    /// Adds a timestamp to this entry and inserts it at the beginning of the
+    /// specified list view.
+    /// </summary>
+    /// <param name="listView">
+    /// The list view to which the log entry should be added.
+    /// </param>
     public void AddAndDateStamp(ListView listView)
     {
-        var dateStamp = new ListViewSubItem { Text = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
+        var dateStamp = new ListViewSubItem
+        {
+            Text = DateTime.Now.ToString(CultureInfo.InvariantCulture)
+        };
 
         base.SubItems.Insert(1, dateStamp);
 
+        // Historical issue:
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#ArgumentException_in_AWBLogListener.AddAndDateStamp
-        // TODO resolve exception by prevention rather than simply catching
+        //
+        // TODO: Determine and prevent the underlying ListView insertion
+        // failure rather than suppressing the exception.
+        listView.BeginUpdate();
+
         try
         {
-            listView.BeginUpdate();
             listView.Items.Insert(0, this);
+        }
+        catch (ArgumentException)
+        {
+            // Preserve legacy behavior until the underlying insertion
+            // condition can be identified and prevented.
+        }
+        finally
+        {
             listView.EndUpdate();
         }
-        catch { }
 
         Datestamped = true;
     }
 
+    /// <summary>
+    /// Formats this log entry for the specified output format.
+    /// </summary>
+    /// <param name="logFileType">
+    /// The format in which the log entry should be returned.
+    /// </param>
+    /// <returns>The formatted log entry.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="logFileType"/> is not a recognized log file type.
+    /// </exception>
     public string Output(LogFileType logFileType)
     {
         switch (logFileType)
         {
             case LogFileType.AnnotatedWikiText:
-                string output = "*" + TimeStamp + ": [[" + ArticleTitle + "]]\r\n";
+                string output =
+                    "*" + TimeStamp + ": [[" + ArticleTitle + "]]\r\n";
+
                 if (Skipped)
-                    output += "'''Skipped''' by: " + SkippedBy + "\r\n" + "Skip reason: " +
-                        SkipReason + "\r\n";
+                {
+                    output +=
+                        "'''Skipped''' by: " +
+                        SkippedBy +
+                        "\r\n" +
+                        "Skip reason: " +
+                        SkipReason +
+                        "\r\n";
+                }
+
                 return output + ToolTipText + "\r\n";
 
             case LogFileType.PlainText:
@@ -126,43 +237,60 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
                 return "#[[:" + ArticleTitle + "]]";
 
             default:
-                throw new ArgumentOutOfRangeException("logFileType");
+                throw new ArgumentOutOfRangeException(nameof(logFileType));
         }
     }
 
+    /// <summary>
+    /// Gets the title of the article represented by this log entry.
+    /// </summary>
     public string ArticleTitle { get; private set; }
 
+    /// <summary>
+    /// Gets or sets the reason the article was skipped.
+    /// </summary>
     public string SkipReason
     {
-        get { return GetSubItemText(SubItem.SkippedReason); }
-        protected set { SetSubItemText(SubItem.SkippedReason, value); }
+        get => GetSubItemText(SubItem.SkippedReason);
+        protected set => SetSubItemText(SubItem.SkippedReason, value);
     }
 
-    public string TimeStamp
-    {
-        get { return GetSubItemText(SubItem.TimeStamp); }
-    }
+    /// <summary>
+    /// Gets the timestamp associated with this log entry.
+    /// </summary>
+    public string TimeStamp =>
+        GetSubItemText(SubItem.TimeStamp);
 
+    /// <summary>
+    /// Gets or sets the component or user that caused the article to be
+    /// skipped.
+    /// </summary>
     public string SkippedBy
     {
-        get { return GetSubItemText(SubItem.SkippedBy); }
-        protected set { SetSubItemText(SubItem.SkippedBy, value); }
+        get => GetSubItemText(SubItem.SkippedBy);
+        protected set => SetSubItemText(SubItem.SkippedBy, value);
     }
+
     #endregion
 
     #region IMyTraceListener Members
+
     void IMyTraceListener.Close()
     {
     }
+
     void IMyTraceListener.Flush()
     {
     }
+
     void IMyTraceListener.ProcessingArticle(string fullArticleTitle, int ns)
     {
     }
+
     void IMyTraceListener.WriteComment(string line)
     {
     }
+
     void IMyTraceListener.WriteCommentAndNewLine(string line)
     {
     }
@@ -172,34 +300,61 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
         Skip(skippedBy, reason);
     }
 
-    void IMyTraceListener.SkippedArticleBadTag(string skippedBy, string fullArticleTitle, int ns)
+    void IMyTraceListener.SkippedArticleBadTag(
+        string skippedBy,
+        string fullArticleTitle,
+        int ns)
     {
         Skip(skippedBy, "Bad tag");
     }
 
-    void IMyTraceListener.SkippedArticleRedlink(string skippedBy, string fullArticleTitle, int ns)
+    void IMyTraceListener.SkippedArticleRedlink(
+        string skippedBy,
+        string fullArticleTitle,
+        int ns)
     {
         Skip(skippedBy, "Red link (article deleted)");
     }
 
-    void IMyTraceListener.WriteArticleActionLine(string line, string pluginName, bool verboseOnly)
+    void IMyTraceListener.WriteArticleActionLine(
+        string line,
+        string pluginName,
+        bool verboseOnly)
     {
-        if (!verboseOnly) WriteLine(line, pluginName);
+        if (!verboseOnly)
+        {
+            WriteLine(line, pluginName);
+        }
     }
 
-    void IMyTraceListener.WriteArticleActionLine(string line, string pluginName)
+    void IMyTraceListener.WriteArticleActionLine(
+        string line,
+        string pluginName)
     {
         WriteLine(line, pluginName);
     }
 
-    void IMyTraceListener.WriteBulletedLine(string line, bool bold, bool verboseOnly)
+    void IMyTraceListener.WriteBulletedLine(
+        string line,
+        bool bold,
+        bool verboseOnly)
     {
-        if (!verboseOnly) Write(line);
+        if (!verboseOnly)
+        {
+            Write(line);
+        }
     }
 
-    void IMyTraceListener.WriteBulletedLine(string line, bool bold, bool verboseOnly, bool dateStamp)
+    void IMyTraceListener.WriteBulletedLine(
+        string line,
+        bool bold,
+        bool verboseOnly,
+        bool dateStamp)
     {
-        if (!verboseOnly) Write(line);
+        if (!verboseOnly)
+        {
+            Write(line);
+        }
     }
 
     void IMyTraceListener.WriteLine(string line)
@@ -207,23 +362,49 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
         Write(line);
     }
 
-    void IMyTraceListener.WriteTemplateAdded(string template, string pluginName)
+    void IMyTraceListener.WriteTemplateAdded(
+        string template,
+        string pluginName)
     {
         WriteLine("{{" + template + "}} added", pluginName);
     }
 
+    /// <summary>
+    /// Adds text to the log entry's tooltip.
+    /// </summary>
+    /// <param name="text">The text to add.</param>
+    /// <remarks>
+    /// New log messages are prepended so that the most recent message appears
+    /// first.
+    /// </remarks>
     public void Write(string text)
     {
-        if (string.IsNullOrEmpty(ToolTipText.Trim()))
-        { ToolTipText = text; }
+        if (string.IsNullOrWhiteSpace(ToolTipText))
+        {
+            ToolTipText = text;
+        }
         else
-        { ToolTipText = text + Environment.NewLine + ToolTipText; }
+        {
+            ToolTipText =
+                text +
+                Environment.NewLine +
+                ToolTipText;
+        }
     }
 
+    /// <summary>
+    /// Adds a sender-qualified message to the log entry.
+    /// </summary>
+    /// <param name="text">The message to add.</param>
+    /// <param name="sender">The component that generated the message.</param>
     public void WriteLine(string text, string sender)
     {
-        if (!string.IsNullOrEmpty(text.Trim())) Write(sender + ": " + text);
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            Write(sender + ": " + text);
+        }
     }
+
     #endregion
 
     private enum SubItem
@@ -231,13 +412,19 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
         SkippedBy,
         SkippedReason,
         TimeStamp
-    };
+    }
 
     /// <summary>
-    /// Returns the ListViewItem.SubItems number for a specified piece of information
+    /// Returns the <see cref="ListViewItem.SubItems"/> index for the specified
+    /// piece of log information.
     /// </summary>
-    /// <param name="subItem"></param>
-    /// <returns>-1 if the SubItem doesn't exist</returns>
+    /// <param name="subItem">
+    /// The logical subitem whose index should be returned.
+    /// </param>
+    /// <returns>
+    /// The subitem index, or <c>-1</c> when the requested subitem does not
+    /// exist.
+    /// </returns>
     private int GetSubItemNumber(SubItem subItem)
     {
         switch (subItem)
@@ -249,10 +436,10 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
                 return Datestamped ? 3 : 2;
 
             case SubItem.TimeStamp:
-                return (Datestamped) ? 1 : -1;
+                return Datestamped ? 1 : -1;
 
             default:
-                throw new ArgumentOutOfRangeException("subItem");
+                throw new ArgumentOutOfRangeException(nameof(subItem));
         }
     }
 
@@ -286,9 +473,16 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
         }
     }
 
+    /// <summary>
+    /// Stores text for the specified logical log subitem.
+    /// </summary>
+    /// <param name="subItem">The subitem to update.</param>
+    /// <param name="value">The value to store.</param>
     private void SetSubItemText(SubItem subItem, string value)
     {
-        if ((subItem == SubItem.SkippedBy || subItem == SubItem.SkippedReason) & !(HaveSkipInfo))
+        if ((subItem == SubItem.SkippedBy ||
+             subItem == SubItem.SkippedReason) &&
+            !HaveSkipInfo)
         {
             base.SubItems.Add("SkippedBy");
             base.SubItems.Add("SkipReason");
@@ -298,17 +492,34 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
         base.SubItems[GetSubItemNumber(subItem)].Text = value;
     }
 
+    /// <summary>
+    /// Marks the article as skipped and records the source and reason.
+    /// </summary>
+    /// <param name="mSkippedBy">
+    /// The user or component responsible for skipping the article.
+    /// </param>
+    /// <param name="mSkipReason">
+    /// The reason the article was skipped.
+    /// </param>
     protected void Skip(string mSkippedBy, string mSkipReason)
     {
         SetSubItemText(SubItem.SkippedBy, mSkippedBy);
         SetSubItemText(SubItem.SkippedReason, mSkipReason);
+
         WriteLine(SkipReason, SkippedBy);
+
         Skipped = true;
     }
 
-    // disable access to underlying Items property
-    public static new ListViewSubItemCollection SubItems
-    {
-        get { throw new NotImplementedException("The SubItems property should not be accessed directly"); }
-    }
+    /// <summary>
+    /// Prevents consumers of <see cref="AWBLogListener"/> from directly
+    /// accessing the underlying subitem collection.
+    /// </summary>
+    /// <exception cref="NotImplementedException">
+    /// Always thrown because callers should use the strongly named log
+    /// properties instead.
+    /// </exception>
+    public static new ListViewSubItemCollection SubItems =>
+        throw new NotImplementedException(
+            "The SubItems property should not be accessed directly");
 }
