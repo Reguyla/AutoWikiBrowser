@@ -10271,17 +10271,40 @@ if (MessageBox.Show(
     }
 
     #region Shutdown
+
+    /// <summary>
+    /// Enables or disables the shutdown options based on the current
+    /// shutdown setting.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void chkShutdown_CheckedChanged(object sender, EventArgs e)
     {
         EnableDisableShutdownControls(chkShutdown.Checked);
     }
 
+    /// <summary>
+    /// Enables or disables the available shutdown actions and sets the
+    /// shutdown option as the default when enabled.
+    /// </summary>
+    /// <param name="enabled">
+    /// <see langword="true"/> to enable shutdown controls; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
     private void EnableDisableShutdownControls(bool enabled)
     {
-        radShutdown.Enabled = radStandby.Enabled = radRestart.Enabled
-            = radHibernate.Enabled = radShutdown.Checked = enabled;
+        radShutdown.Enabled =
+            radStandby.Enabled =
+            radRestart.Enabled =
+            radHibernate.Enabled =
+            radShutdown.Checked =
+            enabled;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the application is currently allowed
+    /// to shut down the computer.
+    /// </summary>
     private bool CanShutdown
     {
         get
@@ -10324,18 +10347,40 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Gets the currently selected shutdown action.
+    /// </summary>
+    /// <returns>
+    /// The selected shutdown action name, or an empty string if no shutdown
+    /// action is selected.
+    /// </returns>
     private string GetShutdownType()
     {
         if (radShutdown.Checked)
+        {
             return "Shutdown";
+        }
+
         if (radStandby.Checked)
+        {
             return "Standby";
+        }
+
         if (radRestart.Checked)
+        {
             return "Restart";
+        }
 
         return radHibernate.Checked ? "Hibernate" : "";
     }
 
+    /// <summary>
+    /// Starts the Windows shutdown process using the specified command-line
+    /// arguments.
+    /// </summary>
+    /// <param name="arguments">
+    /// The arguments passed to the Windows shutdown command.
+    /// </param>
     private void StartShutdownProcess(string arguments)
     {
         Process.Start(
@@ -10347,10 +10392,16 @@ if (MessageBox.Show(
             });
     }
 
+    /// <summary>
+    /// Performs the configured shutdown action when the shutdown timer is
+    /// active.
+    /// </summary>
     private void ShutdownComputer()
     {
         if (!ShutdownTimer.Enabled)
+        {
             return;
+        }
 
         Stop();
 
@@ -10358,78 +10409,206 @@ if (MessageBox.Show(
         ShutdownTimer.Enabled = false;
 
         if (radHibernate.Checked)
-            Application.SetSuspendState(PowerState.Hibernate, true, true);
+        {
+            Application.SetSuspendState(
+                PowerState.Hibernate,
+                true,
+                true);
+        }
         else if (radRestart.Checked)
+        {
             StartShutdownProcess("-r");
+        }
         else if (radShutdown.Checked)
+        {
             StartShutdownProcess("-s");
+        }
         else if (radStandby.Checked)
-            Application.SetSuspendState(PowerState.Suspend, true, true);
+        {
+            Application.SetSuspendState(
+                PowerState.Suspend,
+                true,
+                true);
+        }
     }
 
+    /// <summary>
+    /// Shuts down the computer when the shutdown timer elapses.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ShutdownTimer_Tick(object sender, EventArgs e)
     {
         ShutdownComputer();
     }
+
     #endregion
 
     #region EditToolbar
+
+    /// <summary>
+    /// Applies bold wiki markup to the current selection or inserts bold
+    /// placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgBold_Click(object sender, EventArgs e)
     {
         EditToolBarAction("'''Bold text'''", 12, 9, "'''");
     }
 
+    /// <summary>
+    /// Applies italic wiki markup to the current selection or inserts italic
+    /// placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgItalics_Click(object sender, EventArgs e)
     {
         EditToolBarAction("''Italic text''", 13, 11, "''");
     }
 
+    /// <summary>
+    /// Applies internal-link wiki markup to the current selection or inserts
+    /// link placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgLink_Click(object sender, EventArgs e)
     {
         EditToolBarAction("[[Link title]]", 12, 10, "[[", "]]");
     }
 
+    /// <summary>
+    /// Applies external-link markup to the current selection or inserts
+    /// external-link placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgExtlink_Click(object sender, EventArgs e)
     {
-        EditToolBarAction("[http://www.example.com link title]", 34, 33, "[", "]");
+        EditToolBarAction(
+            "[http://www.example.com link title]",
+            34,
+            33,
+            "[",
+            "]");
     }
 
+    /// <summary>
+    /// Applies math markup to the current selection or inserts formula
+    /// placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgMath_Click(object sender, EventArgs e)
     {
-        EditToolBarAction("<math>Insert formula here</math>", 26, 19, "<math>", "</math>");
+        EditToolBarAction(
+            "<math>Insert formula here</math>",
+            26,
+            19,
+            "<math>",
+            "</math>");
     }
 
+    /// <summary>
+    /// Applies nowiki markup to the current selection or inserts
+    /// non-formatted placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgNowiki_Click(object sender, EventArgs e)
     {
-        EditToolBarAction("<nowiki>Insert non-formatted text here</nowiki>", 39, 30, "<nowiki>", "</nowiki>");
+        EditToolBarAction(
+            "<nowiki>Insert non-formatted text here</nowiki>",
+            39,
+            30,
+            "<nowiki>",
+            "</nowiki>");
     }
 
+    /// <summary>
+    /// Appends a horizontal rule to the current selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgHr_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = txtEdit.SelectedText + "\r\n----\r\n";
+        txtEdit.SelectedText += "\r\n----\r\n";
     }
 
+    /// <summary>
+    /// Applies redirect markup using the current wiki's configured redirect
+    /// magic word.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgRedirect_Click(object sender, EventArgs e)
     {
         string redirect = Variables.MagicWords["redirect"][0].ToUpper();
-        EditToolBarAction(redirect + " [[Insert text]]", 13, 11, redirect + " [[", "]]");
+
+        EditToolBarAction(
+            redirect + " [[Insert text]]",
+            13,
+            11,
+            redirect + " [[",
+            "]]");
     }
 
+    /// <summary>
+    /// Applies strikethrough markup to the current selection or inserts
+    /// strikethrough placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgStrike_Click(object sender, EventArgs e)
     {
-        EditToolBarAction("<s>Strike-through text</s>", 23, 19, "<s>", "</s>");
+        EditToolBarAction(
+            "<s>Strike-through text</s>",
+            23,
+            19,
+            "<s>",
+            "</s>");
     }
 
+    /// <summary>
+    /// Applies superscript markup to the current selection or inserts
+    /// superscript placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgSup_Click(object sender, EventArgs e)
     {
-        EditToolBarAction("<sup>Superscript text</sup>", 22, 16, "<sup>", "</sup>");
+        EditToolBarAction(
+            "<sup>Superscript text</sup>",
+            22,
+            16,
+            "<sup>",
+            "</sup>");
     }
 
+    /// <summary>
+    /// Applies subscript markup to the current selection or inserts
+    /// subscript placeholder text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgSub_Click(object sender, EventArgs e)
     {
-        EditToolBarAction("<sub>Subscript text</sub>", 20, 14, "<sub>", "</sub>");
+        EditToolBarAction(
+            "<sub>Subscript text</sub>",
+            20,
+            14,
+            "<sub>",
+            "</sub>");
     }
 
+    /// <summary>
+    /// Applies HTML comment markup to the current selection or inserts a
+    /// comment placeholder.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void imgComment_Click(object sender, EventArgs e)
     {
         EditToolBarAction("<!-- Comment -->", 11, 7, "<!-- ", " -->");
@@ -10551,7 +10730,8 @@ if (MessageBox.Show(
     }
 
     /// <summary>
-    ///
+    /// Gets or sets a value indicating whether the current page is marked
+    /// as watched in the user interface.
     /// </summary>
     private bool PageWatched
     {
@@ -10559,6 +10739,16 @@ if (MessageBox.Show(
         set { btnWatch.Text = value ? "Unwatch" : "Watch"; }
     }
 
+    /// <summary>
+    /// Compares two regular-expression entries by their integer keys in
+    /// descending order.
+    /// </summary>
+    /// <param name="x">The first regular-expression entry to compare.</param>
+    /// <param name="y">The second regular-expression entry to compare.</param>
+    /// <returns>
+    /// A value indicating the relative sort order of <paramref name="x"/>
+    /// and <paramref name="y"/>.
+    /// </returns>
     private static int CompareRegexPairs(
         KeyValuePair<int, string> x,
         KeyValuePair<int, string> y)
