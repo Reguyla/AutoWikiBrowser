@@ -2143,31 +2143,46 @@ en, sq, ru
     }
 
     /// <summary>
-    /// Extracts all of the interwiki links from the article text, handles comments beside interwiki links (not inline comments)
+    /// Extracts interwiki links from the article text while preserving links that
+    /// occur inside comments, templates, and other unformatted regions.
     /// </summary>
-    /// <param name="articleText">Article text with interwikis removed</param>
-    /// <returns>List of interwikis</returns>
+    /// <param name="articleText">
+    /// The article text to process. On return, extracted interwiki links have been
+    /// removed from this value.
+    /// </param>
+    /// <returns>
+    /// A list containing the extracted interwiki links, including any associated
+    /// trailing comment text.
+    /// </returns>
     private List<string> RemoveInterWikis(ref string articleText)
     {
         List<string> interWikiList = new();
 
         // Performance: faster to get all wikilinks and filter on interwiki matches than simply run the regex on the whole article text
-        var allInterwikisFound = (from Match m in WikiRegexes.WikiLink.Matches(articleText)
-                                  where
-            m.Value.Contains(":") && PossibleInterwikis.Contains(m.Groups[1].Value.Substring(0, m.Groups[1].Value.IndexOf(':')).Trim().ToLower())
-                                  select m);
+        var allInterwikisFound =
+            from Match m in WikiRegexes.WikiLink.Matches(articleText)
+            where m.Value.Contains(":") &&
+                  PossibleInterwikis.Contains(
+                      m.Groups[1].Value
+                          .Substring(0, m.Groups[1].Value.IndexOf(':'))
+                          .Trim()
+                          .ToLower())
+            select m;
 
         if (!allInterwikisFound.Any())
             return interWikiList;
 
         // get all unformatted text in article to avoid taking interwikis from comments etc.
-        StringBuilder ut = new StringBuilder();
+        StringBuilder ut = new();
+
         foreach (Match u in WikiRegexes.UnformattedText.Matches(articleText))
+        {
             ut.Append(u.Value);
+        }
 
         string unformattedText = ut.ToString();
 
-        List<Match> goodMatches = new List<Match>();
+        List<Match> goodMatches = new();
         List<string> interWikiListLinksOnly = new();
         List<string> allTemplates = Parsers.GetAllTemplateDetail(articleText);
 
@@ -2187,8 +2202,17 @@ en, sq, ru
 
             goodMatches.Add(m);
 
+            // TODO (Research):
+            // Verify whether jbo remains the only supported Wikipedia project whose
+            // article titles require first-letter case-sensitive handling here, and
+            // determine whether this behavior should be driven by site configuration
+            // rather than a hard-coded language code.
             // jbo is only Wikipedia article wiki that's first letter case sensitive
-            string IWTarget = site.Equals("jbo") ? m.Groups[2].Value.Trim() : Tools.TurnFirstToUpper(m.Groups[2].Value.Trim());
+            string IWTarget =
+                site.Equals("jbo")
+                    ? m.Groups[2].Value.Trim()
+                    : Tools.TurnFirstToUpper(m.Groups[2].Value.Trim());
+
             string IW = "[[" + site + ":" + IWTarget + "]]";
 
             // drop interwikis to own wiki, but not on commons where language = en and en interwikis go to Wikipedia
@@ -2201,6 +2225,10 @@ en, sq, ru
 
         articleText = Tools.RemoveMatches(articleText, goodMatches);
 
+        // TODO (Research):
+        // Add regression tests documenting why interwiki links are sorted twice.
+        // The current behavior intentionally preserves the relative order of multiple
+        // links targeting the same language project, but the mechanism is not obvious.
         if (SortInterwikis)
         {
             // sort twice to result in no reordering of two interwikis to same language project
