@@ -521,9 +521,8 @@ en, sq, ru
         string personData = RemovePersonDataIfPresent(
             ref articleText, alltemplates);
 
-        string disambig = string.Empty;
-        if (TemplateExists(alltemplates, WikiRegexes.Disambigs))
-            disambig = Tools.Newline(RemoveDisambig(ref articleText));
+        string disambig = RemoveDisambigIfPresent(
+            ref articleText, alltemplates);
 
         string categories = Tools.Newline(RemoveCats(ref articleText, articleTitle));
 
@@ -734,6 +733,30 @@ en, sq, ru
         articleText = MoveSeeAlso(articleText);
 
         return articleText;
+    }
+
+    /// <summary>
+    /// Removes disambiguation metadata from the article when a matching
+    /// template is present and prepares it for later restoration.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The removed disambiguation metadata with the required newline formatting,
+    /// or an empty string when no matching template is present.
+    /// </returns>
+    private string RemoveDisambigIfPresent(
+        ref string articleText,
+        List<string> alltemplates)
+    {
+        if (!TemplateExists(alltemplates, WikiRegexes.Disambigs))
+            return string.Empty;
+
+        return Tools.Newline(RemoveDisambig(ref articleText));
     }
 
     // TODO (Modernization):
