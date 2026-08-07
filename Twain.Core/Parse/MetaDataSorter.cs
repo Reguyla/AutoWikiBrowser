@@ -507,19 +507,7 @@ en, sq, ru
         // Performance: get all the templates so "move template" functions below only called when template(s) present in article
         List<string> alltemplates = Parsers.GetAllTemplates(articleText);
 
-        // sort zeroth section
-        if (Namespace.IsMainSpace(articleTitle) && !Tools.IsRedirect(articleText))
-        {
-            if (TemplateExists(alltemplates, TemplatesToEndOfArticle))
-                articleText = MoveTemplateToEndOfArticle(articleText);
-
-            string zerothSection = Tools.GetZerothSection(articleText);
-            string restOfArticle = articleText.Substring(zerothSection.Length);
-
-            // cannot safely apply sorting if noinclude/{{{1}}}/{{:ifexist/wikitable in zeroth section
-            if (!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection) && !WikiTable.IsMatch(zerothSection) && !WikiRegexes.MagicWordBehaviourSwitches.IsMatch(zerothSection))
-                articleText = SortZerothSection(zerothSection) + restOfArticle;
-        }
+        articleText = ProcessZerothSection(articleText, articleTitle, alltemplates);
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Substituted_templates
         // if article contains some substituted template stuff, sorting the data may mess it up (further)
@@ -634,6 +622,51 @@ en, sq, ru
 
         return articleNamespace == Namespace.Template ||
                articleNamespace == Namespace.Module;
+    }
+
+    /// <summary>
+    /// Processes metadata and templates in the zeroth section of a main-space
+    /// article when it is safe to do so.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article text.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The article text after zeroth-section processing.
+    /// </returns>
+    private string ProcessZerothSection(
+        string articleText,
+        string articleTitle,
+        List<string> alltemplates)
+    {
+        if (!Namespace.IsMainSpace(articleTitle) ||
+            Tools.IsRedirect(articleText))
+        {
+            return articleText;
+        }
+
+        if (TemplateExists(alltemplates, TemplatesToEndOfArticle))
+            articleText = MoveTemplateToEndOfArticle(articleText);
+
+        string zerothSection = Tools.GetZerothSection(articleText);
+        string restOfArticle = articleText.Substring(zerothSection.Length);
+
+        // Cannot safely apply sorting when the zeroth section contains
+        // programming elements, wiki tables, or magic-word behavior switches.
+        if (!Parsers.NoIncludeIncludeOnlyProgrammingElement(zerothSection) &&
+            !WikiTable.IsMatch(zerothSection) &&
+            !WikiRegexes.MagicWordBehaviourSwitches.IsMatch(zerothSection))
+        {
+            articleText = SortZerothSection(zerothSection) + restOfArticle;
+        }
+
+        return articleText;
     }
 
     /// <summary>
