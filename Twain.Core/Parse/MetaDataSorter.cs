@@ -1831,8 +1831,23 @@ en, sq, ru
         return articleText;
     }
 
-    private static readonly Regex SeeAlsoSection = new Regex(@"(^== *[Ss]ee also *==.*?)(?=^==[^=][^\r\n]*?[^=]==(\r\n?|\n)$)", RegexOptions.Multiline | RegexOptions.Singleline);
-    private static readonly Regex SeeAlsoToEnd = new Regex(@"(\s*(==+)\s*see\s+also\s*\2 *).*", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    /// <summary>
+    /// Matches the complete "See also" section when it is followed by another
+    /// section heading.
+    /// </summary>
+    private static readonly Regex SeeAlsoSection =
+        new(
+            @"(^== *[Ss]ee also *==.*?)(?=^==[^=][^\r\n]*?[^=]==(\r\n?|\n)$)",
+            RegexOptions.Multiline | RegexOptions.Singleline);
+
+    /// <summary>
+    /// Matches a "See also" section from its heading through the end of the
+    /// article.
+    /// </summary>
+    private static readonly Regex SeeAlsoToEnd =
+        new(
+            @"(\s*(==+)\s*see\s+also\s*\2 *).*",
+            RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     /// <summary>
     /// Moves template calls to the top of the "see also" section of the article
