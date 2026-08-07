@@ -1832,7 +1832,7 @@ public class GalleryNewFilesSpecialPageProvider : ApiListProviderBase, ISpecialP
 
     public List<Article> MakeList(int @namespace, string[] searchCriteria)
     {
-        return MakeList("");
+        return MakeList(string.Empty);
     }
 
     #region ListMaker properties

@@ -184,7 +184,7 @@ public partial class LogControl : UserControl
         catch { }
     }
 
-    private AWBLogListener previousLogListenerItem = new AWBLogListener("");
+    private AWBLogListener previousLogListenerItem = new(string.Empty);
 
     private void LogLists_MouseMove(object sender, MouseEventArgs e)
     {

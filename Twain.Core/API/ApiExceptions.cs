@@ -49,9 +49,16 @@ public class ApiException : Exception
         ThrowingThread = Thread.CurrentThread;
     }
 
+    /// <summary>
+    /// Gets additional, rule-specific diagnostic or descriptive information.
+    /// </summary>
+    /// <returns>
+    /// A string containing additional information for the rule, or
+    /// <see cref="string.Empty"/> if the rule has no additional information.
+    /// </returns>
     public virtual string GetExtraSpecificInformation()
     {
-        return "";
+        return string.Empty;
     }
 }
 

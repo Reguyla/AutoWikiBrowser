@@ -257,18 +257,29 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     }
 
     /// <summary>
-    /// Returns the Text from a ListViewItem.SubItems object
+    /// Returns the text for the specified subitem.
     /// </summary>
+    /// <param name="subItem">
+    /// The subitem whose text should be returned.
+    /// </param>
+    /// <returns>
+    /// The subitem text, or <see cref="string.Empty"/> when the requested
+    /// information is not available.
+    /// </returns>
     private string GetSubItemText(SubItem subItem)
     {
         switch (subItem)
         {
             case SubItem.SkippedBy:
             case SubItem.SkippedReason:
-                return HaveSkipInfo ? base.SubItems[GetSubItemNumber(subItem)].Text : "";
+                return HaveSkipInfo
+                    ? base.SubItems[GetSubItemNumber(subItem)].Text
+                    : string.Empty;
 
             case SubItem.TimeStamp:
-                return Datestamped ? base.SubItems[1].Text : "";
+                return Datestamped
+                    ? base.SubItems[1].Text
+                    : string.Empty;
 
             default:
                 return base.SubItems[GetSubItemNumber(subItem)].Text;
