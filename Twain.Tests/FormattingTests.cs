@@ -1156,7 +1156,7 @@ was"));
     [Test]
     public void LoadTemplateRedirects()
     {
-        Dictionary<Regex, string> TemplateRedirects = new Dictionary<Regex, string>();
+        Dictionary<Regex, string> TemplateRedirects = new();
 
         Assert.That(Parsers.LoadTemplateRedirects(""), Is.EqualTo(TemplateRedirects), "returns empty dictionary when no rules present");
 
@@ -1194,7 +1194,7 @@ was"));
     [Test]
     public void TemplateRedirects()
     {
-        Dictionary<Regex, string> TemplateRedirs = new Dictionary<Regex, string>();
+        Dictionary<Regex, string> TemplateRedirs = new();
         WikiRegexes.AllTemplateRedirects = null;
         Assert.That(Parsers.TemplateRedirects("now {{Cn}} was", TemplateRedirs), Is.EqualTo("now {{Cn}} was"), "no change when redirects dictionary not built");
         TemplateRedirs = Parsers.LoadTemplateRedirects("{{tl|Cn}}, {{tl|fact}} → {{tl|Citation needed}}");

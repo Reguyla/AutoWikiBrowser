@@ -24,7 +24,7 @@ namespace Twain.Core.Logging;
 public abstract class TraceManager : IMyTraceListener
 {
     // Listeners:
-    protected readonly Dictionary<string, IMyTraceListener> Listeners = new Dictionary<string, IMyTraceListener>();
+    protected readonly Dictionary<string, IMyTraceListener> Listeners = new();
 
     /// <summary>
     /// Override this if you want to programatically add an event handler

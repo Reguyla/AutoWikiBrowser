@@ -1015,7 +1015,7 @@ John", "*"), Is.EqualTo(@"* Fred
     [Test]
     public void DatesCount()
     {
-        Dictionary<Parsers.DateLocale, int> results = new Dictionary<Parsers.DateLocale, int>();
+        Dictionary<Parsers.DateLocale, int> results = new();
 
         results.Add(Parsers.DateLocale.ISO, 1);
         results.Add(Parsers.DateLocale.International, 1);
@@ -1782,7 +1782,7 @@ def
     [Test]
     public void DuplicateTemplateParameters()
     {
-        Dictionary<int, int> Dupes = new Dictionary<int, int>();
+        Dictionary<int, int> Dupes = new();
 
         Assert.That(Tools.DuplicateTemplateParameters(@"{{cite web|url=here |title=there}}"), Is.EqualTo(Dupes));
 

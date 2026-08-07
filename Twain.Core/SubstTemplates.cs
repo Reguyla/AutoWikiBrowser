@@ -31,7 +31,7 @@ namespace Twain.Core
 
         private string[] LocTemplateList = new string[0];
 
-        private readonly Dictionary<Regex, string> Regexes = new Dictionary<Regex, string>();
+        private readonly Dictionary<Regex, string> Regexes = new();
 
         private readonly Parse.HideText RemoveUnformatted = new Parse.HideText(true, false, true);
 

@@ -2380,7 +2380,7 @@ public partial class Parsers
     /// <returns>A dictionary of matches (index and length)</returns>
     public static Dictionary<int, int> AmbigCiteTemplateDates(string articleText)
     {
-        Dictionary<int, int> ambigDates = new Dictionary<int, int>();
+        Dictionary<int, int> ambigDates = new();
 
         // check for performance
         if (

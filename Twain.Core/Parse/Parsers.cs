@@ -123,8 +123,8 @@ public partial class Parsers
     /// <summary>
     /// Dictionary of HTML-encoded characters that mustn't be converted by Unicodify function
     /// </summary>
-    private static readonly Dictionary<Regex, string> RegexUnicode = new Dictionary<Regex, string>();
-    private static readonly Dictionary<Regex, string> RegexConversion = new Dictionary<Regex, string>();
+    private static readonly Dictionary<Regex, string> RegexUnicode = new();
+    private static readonly Dictionary<Regex, string> RegexConversion = new();
 
     private readonly HideText Hider = new HideText();
     private readonly HideText HiderHideExtLinksImages = new HideText(true, true, true);

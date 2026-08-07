@@ -761,7 +761,7 @@ x
     [Test]
     public void UnclosedTags()
     {
-        Dictionary<int, int> uct = new Dictionary<int, int>();
+        Dictionary<int, int> uct = new();
 
         uct = Parsers.UnclosedTags(@"<pre>bar</pre>");
         Assert.That(uct.Count, Is.EqualTo(0));

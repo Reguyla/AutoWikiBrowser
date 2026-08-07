@@ -547,8 +547,9 @@ public class TyposDownloader : ITyposProvider
             }
         }
 
-        public static Dictionary<int, string> resultSummary = new Dictionary<int, string>();
-        public static Dictionary<int, string> resultArticleText = new Dictionary<int, string>();
+        public static Dictionary<int, string> resultSummary = new();
+        public static Dictionary<int, string> resultArticleText = new();
+
         /// <summary>
         /// Performs typo fixes against the article text in multi-threaded mode
         /// Typo fixes not performed if no typos loaded or any sic tags on page

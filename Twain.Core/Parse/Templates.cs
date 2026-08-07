@@ -34,7 +34,7 @@ public partial class Parsers
     public static Dictionary<Regex, string> LoadTemplateRedirects(string text)
     {
         text = WikiRegexes.UnformattedText.Replace(text, "");
-        Dictionary<Regex, string> TRs = new Dictionary<Regex, string>();
+        Dictionary<Regex, string> TRs = new();
         List<string> AllRedirectsList = new();
 
         foreach (Match m in TemplateRedirectsR.Matches(text))

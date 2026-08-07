@@ -751,7 +751,7 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
     [Test]
     public void UnbalancedBrackets()
     {
-        Dictionary<int, int> UnB = new Dictionary<int, int>();
+        Dictionary<int, int> UnB = new();
 
         Article a = new Article("TestArticle", "This is the text (here.");
         UnB = a.UnbalancedBrackets();

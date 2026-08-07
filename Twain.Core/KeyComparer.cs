@@ -9,7 +9,7 @@ public class KeyComparer<T> : IComparer<T>
     private const int BOTTOM = 1;
     private const int EQUAL = 0;
 
-    private readonly Dictionary<T, int> _keys = new Dictionary<T, int>();
+    private readonly Dictionary<T, int> _keys = new();
 
     public KeyComparer(IEnumerable<T> keys)
     {

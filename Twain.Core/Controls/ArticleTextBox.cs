@@ -191,7 +191,7 @@ public class ArticleTextBox : RichTextBox
     /// <param name="articleName">Wiki page name</param>
     public Dictionary<int, int> FindAll(string strRegex, bool isRegex, bool caseSensitive, string articleName)
     {
-        Dictionary<int, int> found = new Dictionary<int, int>();
+        Dictionary<int, int> found = new();
 
         if (string.IsNullOrEmpty(strRegex))
             return found;

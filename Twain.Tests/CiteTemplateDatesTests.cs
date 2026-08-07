@@ -275,7 +275,7 @@ now {{cite web | url=http://site.it | title=hello|date = 5-5-1998}} was";
     [Test]
     public void AmbiguousCiteTemplateDates2()
     {
-        Dictionary<int, int> ambigDates = new Dictionary<int, int>();
+        Dictionary<int, int> ambigDates = new();
 
         ambigDates = Parsers.AmbigCiteTemplateDates(@"now {{cite web | url=http://site.it | title=a |date=7-6-2005 }}");
 

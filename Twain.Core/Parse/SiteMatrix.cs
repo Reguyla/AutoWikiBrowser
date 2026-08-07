@@ -243,7 +243,7 @@ public static class SiteMatrix
 
 internal sealed class InterWikiComparer : IComparer<string>
 {
-    readonly Dictionary<string, int> Order = new Dictionary<string, int>();
+    readonly Dictionary<string, int> Order = new();
     public InterWikiComparer(List<string> order, List<string> languages)
     {
         languages = new List<string>(languages); // make a copy

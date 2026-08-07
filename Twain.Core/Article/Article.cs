@@ -644,7 +644,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <returns>Dictionary of any unbalanced brackets found</returns>
     public Dictionary<int, int> UnbalancedBrackets()
     {
-        Dictionary<int, int> UnB = new Dictionary<int, int>();
+        Dictionary<int, int> UnB = new();
         int bracketLength;
 
         string pageText = ArticleText;
@@ -702,7 +702,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <returns></returns>
     public Dictionary<int, int> DuplicateWikiProjectBannerShellParameters()
     {
-        Dictionary<int, int> Dupes = new Dictionary<int, int>();
+        Dictionary<int, int> Dupes = new();
 
         if (NameSpaceKey.Equals(Namespace.Talk))
             Dupes = Tools.DuplicateTemplateParameters(WikiRegexes.WikiProjectBannerShellTemplate.Match(ArticleText).Value);
@@ -748,7 +748,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <returns></returns>
     public Dictionary<int, int> WikiLinkedHeaders()
     {
-        Dictionary<int, int> linkedHeaders = new Dictionary<int, int>();
+        Dictionary<int, int> linkedHeaders = new();
 
         if (NameSpaceKey.Equals(Namespace.Mainspace))
         {

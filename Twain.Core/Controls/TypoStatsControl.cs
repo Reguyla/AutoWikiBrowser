@@ -20,7 +20,7 @@ public partial class TypoStatsControl : NoFlickerExtendedListView
         {
             if (value)
             {
-                if (Data == null) Data = new Dictionary<string, TypoStat>();
+                if (Data == null) Data = new();
             }
             else
                 Data = null;

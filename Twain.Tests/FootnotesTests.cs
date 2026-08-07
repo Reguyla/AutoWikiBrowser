@@ -909,7 +909,7 @@ Bar4.<ref name=""ABCDEFGHI""/>
     [Test]
     public void BadCiteParameters()
     {
-        Dictionary<int, int> Found = new Dictionary<int, int>();
+        Dictionary<int, int> Found = new();
 
         // standard cases
         Found.Add(15, 3);

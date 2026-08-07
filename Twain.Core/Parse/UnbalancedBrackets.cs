@@ -439,7 +439,7 @@ public partial class Parsers
     /// <returns>dictionary of the index and length of any unclosed tags</returns>
     public static Dictionary<int, int> UnclosedTags(string articleText)
     {
-        Dictionary<int, int> back = new Dictionary<int, int>();
+        Dictionary<int, int> back = new();
 
         // Performance: get all tags, filter to the ones we're checking, compare the count of matched tags of same name
         // Then do full tag search if unmatched tags found

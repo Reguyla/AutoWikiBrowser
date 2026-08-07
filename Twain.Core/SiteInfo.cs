@@ -35,10 +35,9 @@ public class SiteInfo : IXmlSerializable
 
     // path in format https://en.wikipedia.org/w/
     private string scriptPath;
-    private readonly Dictionary<int, string> namespaces = new Dictionary<int, string>();
-    private Dictionary<int, List<string>> namespaceAliases = new Dictionary<int, List<string>>();
-    // private Dictionary<string, string> messageCache = new Dictionary<string, string>();
-    private readonly Dictionary<string, List<string>> magicWords = new Dictionary<string, List<string>>();
+    private readonly Dictionary<int, string> namespaces = new();
+    private Dictionary<int, List<string>> namespaceAliases = new();
+    private readonly Dictionary<string, List<string>> magicWords = new();
 
     private string siteinfoOutput;
 

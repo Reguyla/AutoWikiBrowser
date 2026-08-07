@@ -46,7 +46,7 @@ public partial class Parsers
 
         // build dictionary of all named references and index of first occurrence
         // No need to go collect refs in named refs section: must be used in article
-        Dictionary<string, int> NamedRefsIndexes = new Dictionary<string, int>();
+        Dictionary<string, int> NamedRefsIndexes = new();
 
         foreach (Match n in GetNamedRefs(articleText).Where(m => m.Index <= referencestags))
         {
