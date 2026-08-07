@@ -23,46 +23,51 @@ using Twain.Core.TalkPages;
 namespace Twain.Core.Parse;
 
 /// <summary>
-///
+/// Specifies the ordering method used for interwiki links.
 /// </summary>
 public enum InterWikiOrderEnum
 {
     /// <summary>
-    /// By order of alphabet, based on local language
+    /// Sorts interwiki links alphabetically using the local language name.
     /// </summary>
     LocalLanguageAlpha,
 
     /// <summary>
-    /// By order of alphabet, based on local language (by first word)
+    /// Sorts interwiki links alphabetically by the first word of the
+    /// local language name.
     /// </summary>
     LocalLanguageFirstWord,
 
     /// <summary>
-    /// By order of alphabet, based on language code
+    /// Sorts interwiki links alphabetically by language code.
     /// </summary>
     Alphabetical,
 
     /// <summary>
-    /// English link is first and the rest are sorted alphabetically by language code
+    /// Places the English interwiki link first, followed by the remaining
+    /// links sorted alphabetically by language code.
     /// </summary>
     AlphabeticalEnFirst
 }
 
+/// <summary>
+/// Provides functionality for sorting and processing article metadata.
+/// </summary>
 public class MetaDataSorter
 {
     /// <summary>
-    ///
+    /// Contains the possible interwiki links used during metadata processing.
     /// </summary>
     public List<string> PossibleInterwikis;
 
     /// <summary>
-    ///
+    /// Gets or sets a value indicating whether interwiki links should be sorted.
     /// </summary>
     public bool SortInterwikis
     { get; set; }
 
     /// <summary>
-    ///
+    /// Gets or sets a value indicating whether category sort keys should be added.
     /// </summary>
     public bool AddCatKey
     { get; set; }
@@ -1233,11 +1238,19 @@ en, sq, ru
     }
 
     /// <summary>
-    /// Extracts all of the interwiki featured article and interwiki links from the article text
-    /// Ignores interwikis in comments/nowiki tags
+    /// Extracts all interwiki and featured-article interwiki links from the
+    /// supplied article text.
     /// </summary>
-    /// <param name="articleText">Article text with interwiki and interwiki featured article links removed</param>
-    /// <returns>string of interwiki featured article and interwiki links</returns>
+    /// <param name="articleText">
+    /// The article text. On return, this parameter contains the article text
+    /// with the extracted interwiki and featured-article interwiki links
+    /// removed. Interwiki links within comments and <c>&lt;nowiki&gt;</c>
+    /// elements are ignored.
+    /// </param>
+    /// <returns>
+    /// A string containing the extracted interwiki and featured-article
+    /// interwiki links.
+    /// </returns>
     public string Interwikis(ref string articleText)
     {
         return Interwikis(ref articleText, true);
@@ -1344,13 +1357,27 @@ en, sq, ru
     }
 
     /// <summary>
-    ///
+    /// Formats an interwiki-link regular expression match as normalized wiki
+    /// link markup.
     /// </summary>
-    /// <param name="match"></param>
-    /// <returns></returns>
+    /// <param name="match">
+    /// The regular expression match containing the <c>site</c> and <c>text</c>
+    /// capture groups.
+    /// </param>
+    /// <returns>
+    /// The formatted interwiki link, with the site name converted to lowercase.
+    /// </returns>
     public static string IWMatchEval(Match match)
     {
-        string[] textArray = { "[[", match.Groups["site"].ToString().ToLower(), ":", match.Groups["text"].ToString(), "]]" };
+        string[] textArray =
+        {
+        "[[",
+        match.Groups["site"].ToString().ToLower(),
+        ":",
+        match.Groups["text"].ToString(),
+        "]]"
+    };
+
         return string.Concat(textArray);
     }
 
@@ -1430,16 +1457,22 @@ en, sq, ru
     }
 
     /// <summary>
-    ///
+    /// Adds a category sort key to category links that do not already contain one.
     /// </summary>
-    /// <param name="list"></param>
-    /// <param name="name"></param>
-    /// <returns></returns>
+    /// <param name="list">
+    /// The category links to process.
+    /// </param>
+    /// <param name="name">
+    /// The value used to generate the category sort key.
+    /// </param>
+    /// <returns>
+    /// A new list containing the processed category links.
+    /// </returns>
     private static List<string> CatKeyer(IEnumerable<string> list, string name)
     {
-        name = Tools.MakeHumanCatKey(name, ""); // make key
+        name = Tools.MakeHumanCatKey(name, ""); // Generate the category sort key.
 
-        // add key to cats that need it
+        // Add the generated key to categories that do not already contain one.
         List<string> newCats = new List<string>();
         foreach (string s in list)
         {
@@ -1449,6 +1482,7 @@ en, sq, ru
 
             newCats.Add(z);
         }
+
         return newCats;
     }
 }
