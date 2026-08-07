@@ -498,7 +498,7 @@ en, sq, ru
     /// <returns>The updated article text</returns>
     internal string Sort(string articleText, string articleTitle, bool fixOptionalWhitespace)
     {
-        if (Namespace.Determine(articleTitle) == Namespace.Template || Namespace.Determine(articleTitle) == Namespace.Module) // Don't sort on templates/modules
+        if (ShouldSkipMetadataSorting(articleTitle))
             return articleText;
 
         // trim stray tab whitespace
@@ -617,6 +617,23 @@ en, sq, ru
 
         // Only trim start on Category namespace, restore any saved short page monitor text
         return (Namespace.Determine(articleTitle) == Namespace.Category ? articleText.Trim() : articleText.TrimEnd()) + shortPagesMonitor;
+    }
+
+    /// <summary>
+    /// Determines whether metadata sorting should be skipped for the specified
+    /// article namespace.
+    /// </summary>
+    /// <param name="articleTitle">The title of the article.</param>
+    /// <returns>
+    /// <see langword="true"/> if metadata sorting should be skipped; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool ShouldSkipMetadataSorting(string articleTitle)
+    {
+        int articleNamespace = Namespace.Determine(articleTitle);
+
+        return articleNamespace == Namespace.Template ||
+               articleNamespace == Namespace.Module;
     }
 
     /// <summary>
