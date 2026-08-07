@@ -518,9 +518,8 @@ en, sq, ru
 
         articleText = CommentedOutEnInterwiki.Replace(articleText, "");
 
-        string personData = string.Empty;
-        if (TemplateExists(alltemplates, WikiRegexes.Persondata))
-            personData = Tools.Newline(RemovePersonData(ref articleText));
+        string personData = RemovePersonDataIfPresent(
+            ref articleText, alltemplates);
 
         string disambig = string.Empty;
         if (TemplateExists(alltemplates, WikiRegexes.Disambigs))
@@ -530,24 +529,9 @@ en, sq, ru
 
         string interwikis = Tools.Newline(Interwikis(ref articleText, TemplateExists(alltemplates, WikiRegexes.LinkFGAs)));
 
-        if (Namespace.IsMainSpace(articleTitle) && !Tools.IsRedirect(articleText))
-        {
-            if (Variables.LangCode.Equals("en"))
-            {
-                if (TemplateExists(alltemplates, WikiRegexes.PortalTemplate))
-                    articleText = MovePortalTemplates(articleText);
+        articleText = ProcessEnglishMainSpaceMetadata(
+            articleText, articleTitle, alltemplates);
 
-                if (TemplateExists(alltemplates, WikiRegexes.SisterLinks))
-                    articleText = MoveSisterlinks(articleText);
-
-                if (alltemplates.Contains("Ibid"))
-                    articleText = MoveTemplateToReferencesSection(articleText, WikiRegexes.Ibid);
-
-                articleText = MoveExternalLinks(articleText);
-
-                articleText = MoveSeeAlso(articleText);
-            }
-        }
         // two newlines here per https://en.wikipedia.org/w/index.php?title=Wikipedia_talk:AutoWikiBrowser&oldid=243224092#Blank_lines_before_stubs
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Two_empty_lines_before_stub-templates
         // ru, sl, ar, arz wikis use only one newline
@@ -705,6 +689,81 @@ en, sq, ru
         }
 
         return shortPagesMonitor;
+    }
+
+    /// <summary>
+    /// Processes English Wikipedia metadata and section placement rules that
+    /// apply to non-redirect articles in the main namespace.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The article text after applicable metadata and section movement.
+    /// </returns>
+    private string ProcessEnglishMainSpaceMetadata(
+        string articleText,
+        string articleTitle,
+        List<string> alltemplates)
+    {
+        if (!Namespace.IsMainSpace(articleTitle) ||
+            Tools.IsRedirect(articleText) ||
+            !Variables.LangCode.Equals("en"))
+        {
+            return articleText;
+        }
+
+        if (TemplateExists(alltemplates, WikiRegexes.PortalTemplate))
+            articleText = MovePortalTemplates(articleText);
+
+        if (TemplateExists(alltemplates, WikiRegexes.SisterLinks))
+            articleText = MoveSisterlinks(articleText);
+
+        if (alltemplates.Contains("Ibid"))
+            articleText = MoveTemplateToReferencesSection(
+                articleText,
+                WikiRegexes.Ibid);
+
+        articleText = MoveExternalLinks(articleText);
+        articleText = MoveSeeAlso(articleText);
+
+        return articleText;
+    }
+
+    // TODO (Modernization):
+    // Investigate whether Persondata support is still required.
+    // Persondata has been removed from English Wikipedia, but other MediaWiki
+    // installations may still use it. Before removing this logic, determine
+    // whether any supported projects depend on Persondata processing and whether
+    // it should become an optional or wiki-specific compatibility feature.
+    /// <summary>
+    /// Removes person data from the article when a matching template is present
+    /// and prepares it for later restoration.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The removed person data with the required newline formatting, or an empty
+    /// string when no matching template is present.
+    /// </returns>
+    private string RemovePersonDataIfPresent(
+        ref string articleText,
+        List<string> alltemplates)
+    {
+        if (!TemplateExists(alltemplates, WikiRegexes.Persondata))
+            return string.Empty;
+
+        return Tools.Newline(RemovePersonData(ref articleText));
     }
 
     /// <summary>
