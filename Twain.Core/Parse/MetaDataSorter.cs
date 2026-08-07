@@ -1256,17 +1256,31 @@ en, sq, ru
             });
 
     /// <summary>
-    /// Extracts DEFAULTSORT + categories from the article text; removes duplicate categories, cleans whitespace and underscores
+    /// Extracts DEFAULTSORT metadata and categories from the article text,
+    /// removes duplicate categories, and normalizes category formatting.
     /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">Title of the article</param>
-    /// <returns>The cleaned page categories in a single string</returns>
+    /// <param name="articleText">
+    /// The article text to process. On return, extracted category and DEFAULTSORT
+    /// metadata has been removed from this value.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <returns>
+    /// The extracted and normalized category metadata, including applicable
+    /// DEFAULTSORT and maintenance templates.
+    /// </returns>
     public string RemoveCats(ref string articleText, string articleTitle)
     {
-        // don't pull category from redirects to a category e.g. page Hello is #REDIRECT[[Category:Hello]]
+        // Do not extract a category from redirects that target a category,
+        // for example: #REDIRECT [[Category:Example]].
         string rt = Tools.RedirectTarget(articleText);
-        if (rt.Length > 0 && WikiRegexes.Category.IsMatch(@"[[" + rt + @"]]"))
-            return "";
+
+        if (rt.Length > 0 &&
+            WikiRegexes.Category.IsMatch(@"[[" + rt + @"]]"))
+        {
+            return string.Empty;
+        }
 
         List<string> categoryList = new List<string>();
         string articleTextNoComments = Tools.ReplaceWithSpaces(articleText, WikiRegexes.Comments.Matches(articleText));
@@ -1295,7 +1309,7 @@ en, sq, ru
                     "RemoveCats",
                     "Page " + articleTitle + " has multiple DEFAULTSORTs");
 
-                return "";
+                return string.Empty;
             }
         }
 
@@ -1311,10 +1325,14 @@ en, sq, ru
         {
             // T387084 don't apply sort where magic word behavior switches present as these can be placed anywhere in article
             if (WikiRegexes.MagicWordBehaviourSwitches.IsMatch(articleText.Substring(cq.Index)))
-                return "";
+                return string.Empty;
 
-            List<string> allUnformatted = (from Match m in WikiRegexes.UnformattedText.Matches(articleText)
-                                           select m.Value).ToList();
+            List<string> allUnformatted =
+                WikiRegexes.UnformattedText
+                    .Matches(articleText)
+                    .Cast<Match>()
+                    .Select(m => m.Value)
+                    .ToList();
 
             int cutoff = Math.Max(0, cq.Index - 500);
             string cut = articleText.Substring(cutoff);
@@ -1336,7 +1354,7 @@ en, sq, ru
                 if (m.Index > 2 && !cut.Substring(m.Index - 2, 2).Trim().Equals(""))
                     return "\r\n";
 
-                return "";
+                return string.Empty;
             });
 
             if (AddCatKey)
@@ -1359,7 +1377,7 @@ en, sq, ru
                 articleText = CatCommentRegex.Replace(articleText, m =>
                 {
                     categoryList.Insert(0, m.Value);
-                    return "";
+                    return string.Empty;
                 }, 1);
         }
 
