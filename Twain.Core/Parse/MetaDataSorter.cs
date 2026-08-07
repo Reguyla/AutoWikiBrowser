@@ -675,7 +675,7 @@ en, sq, ru
             if (spm.Success)
             {
                 articleText = WikiRegexes.ShortPagesMonitor
-                    .Replace(articleText, "")
+                    .Replace(articleText, string.Empty)
                     .TrimEnd();
 
                 shortPagesMonitor = spm.Value.TrimEnd();
@@ -1688,7 +1688,7 @@ en, sq, ru
                 stubList.RemoveAll(s => Tools.GetTemplateName(s).TrimStart('-').ToLower().Equals("stub"));
         }
 
-        return (stubList.Any()) ? ListToString(stubList) : "";
+        return (stubList.Any()) ? ListToString(stubList) : string.Empty;
     }
 
     /// <summary>
@@ -1704,7 +1704,7 @@ en, sq, ru
         string strDisambig = string.Empty;
 
         // Extract up to one disambig (should not be multiple per page), don't pull out of comments
-        if (WikiRegexes.Disambigs.IsMatch(WikiRegexes.Comments.Replace(articleText, "")))
+        if (WikiRegexes.Disambigs.IsMatch(WikiRegexes.Comments.Replace(articleText, string.Empty)))
         {
             articleText = WikiRegexes.Disambigs.Replace(articleText, m =>
             {
@@ -1730,7 +1730,7 @@ en, sq, ru
         string zerothSection = Tools.GetZerothSection(articleText);
 
         List<string> t1 = Parsers.GetAllTemplates(zerothSection).Where(t => templateRegex.IsMatch("{{" + t + "}}")).ToList();
-        List<string> t2 = Parsers.GetAllTemplates(WikiRegexes.Comments.Replace(zerothSection, "")).Where(t => templateRegex.IsMatch("{{" + t + "}}")).ToList();
+        List<string> t2 = Parsers.GetAllTemplates(WikiRegexes.Comments.Replace(zerothSection, string.Empty)).Where(t => templateRegex.IsMatch("{{" + t + "}}")).ToList();
 
         // avoid moving commented out templates / part commented out
         if (!Variables.LangCode.Equals("en") || t1.Except(t2).Any())

@@ -362,7 +362,7 @@ public partial class Parsers
     /// <returns>Whether the text contains named references</returns>
     public static bool HasNamedReferences(string articleText)
     {
-        articleText = WikiRegexes.Comments.Replace(articleText, "");
+        articleText = WikiRegexes.Comments.Replace(articleText, string.Empty);
         foreach (Match m in WikiRegexes.NamedReferencesIncludingCondensed.Matches(articleText))
         {
             if (!Regex.IsMatch(m.Value, @"<\s*/\s*ref"))
@@ -980,7 +980,7 @@ public partial class Parsers
 
         // empty <ref>...</ref> tags
         while (EmptyRefTags.IsMatch(articleText))
-            articleText = EmptyRefTags.Replace(articleText, "");
+            articleText = EmptyRefTags.Replace(articleText, string.Empty);
 
         // Trailing spaces at the beginning of a reference, within the reference
         if (AllTagsList.Any(s => s.EndsWith(" ")))

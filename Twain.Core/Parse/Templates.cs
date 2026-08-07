@@ -383,7 +383,7 @@ public partial class Parsers
     /// <returns>List of templates (first letter lower), old parameter, new parameter</returns>
     public static List<WikiRegexes.TemplateParameters> LoadRenamedTemplateParameters(string text)
     {
-        text = WikiRegexes.UnformattedText.Replace(text, "");
+        text = WikiRegexes.UnformattedText.Replace(text, string.Empty);
         List<WikiRegexes.TemplateParameters> TPs = new List<WikiRegexes.TemplateParameters>();
 
         foreach (Match m in Tools.NestedTemplateRegex("AWB rename template parameter").Matches(text))
@@ -434,14 +434,14 @@ public partial class Parsers
         Regex search = new Regex(@"(\{\{\s*" + Tools.FirstLetterCaseInsensitive(template) + @"\s*)(?:\||\}|<)", RegexOptions.Singleline);
 
         // remove commented out templates etc. before searching
-        string articleTextCleaned = WikiRegexes.UnformattedText.Replace(articleText, "");
+        string articleTextCleaned = WikiRegexes.UnformattedText.Replace(articleText, string.Empty);
 
         if (search.IsMatch(articleTextCleaned))
         {
             // extract from original article text
             Match m = search.Match(articleText);
 
-            return m.Success ? ExtractTemplate(articleText, m) : "";
+            return m.Success ? ExtractTemplate(articleText, m) : string.Empty;
         }
 
         return string.Empty;
@@ -522,9 +522,9 @@ public partial class Parsers
         string infoBox = WikiRegexes.InfoBox.Match(articleText).Value;
 
         // clean out references and comments
-        infoBox = WikiRegexes.Comments.Replace(infoBox, "");
-        infoBox = WikiRegexes.Refs.Replace(infoBox, "");
-        infoBox = Tools.NestedTemplateRegex("efn").Replace(infoBox, "");
+        infoBox = WikiRegexes.Comments.Replace(infoBox, string.Empty);
+        infoBox = WikiRegexes.Refs.Replace(infoBox, string.Empty);
+        infoBox = Tools.NestedTemplateRegex("efn").Replace(infoBox, string.Empty);
 
         List<string> FieldsBack = Tools.GetTemplateParametersValues(infoBox, fields, true);
 

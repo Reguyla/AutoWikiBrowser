@@ -193,7 +193,7 @@ public partial class Parsers
 
         // remove empty <gallery>, <center>, <blockquote>, <nowiki>, <sub> or <sup> tags, allow for nested tags
         while (EmptyTags.IsMatch(articleText))
-            articleText = EmptyTags.Replace(articleText, "");
+            articleText = EmptyTags.Replace(articleText, string.Empty);
 
         // try to fix invalid opening <ref> tag
         if (UnclosedTags(articleText).Any())
@@ -298,7 +298,7 @@ public partial class Parsers
         articleText = CategoryCurlyBracketsEnd.Replace(articleText, @"[[$1]]");
 
         // fixes for missing/unbalanced brackets, for performance only run if article has unbalanced templates
-        string withouttemplates = WikiRegexes.NestedTemplates.Replace(articleText, "");
+        string withouttemplates = WikiRegexes.NestedTemplates.Replace(articleText, string.Empty);
 
         if (withouttemplates.IndexOf("{{", StringComparison.Ordinal) > -1 || withouttemplates.IndexOf("}}", StringComparison.Ordinal) > -1)
         {
@@ -392,7 +392,7 @@ public partial class Parsers
 
         // only refresh nobrackets if changes
         if (!originalArticleText.Equals(articleText))
-            nobrackets = SingleSquareBrackets.Replace(articleText, "");
+            nobrackets = SingleSquareBrackets.Replace(articleText, string.Empty);
 
         if (nobrackets.Contains("[") || nobrackets.Contains("]"))
         {
@@ -768,6 +768,6 @@ public partial class Parsers
         if (!Namespace.IsMainSpace(articleTitle))
             return articleText;
 
-        return IndexNoIndexMagicWord.Replace(articleText, "");
+        return IndexNoIndexMagicWord.Replace(articleText, string.Empty);
     }
 }

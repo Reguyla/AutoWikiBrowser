@@ -96,10 +96,10 @@ public partial class Parsers
                 templates += mi.Value;
         }
 
-        string commentsStripped = WikiRegexes.Comments.Replace(articleText, "");
-        string commentsCategoriesStripped = WikiRegexes.Category.Replace(commentsStripped, "");
+        string commentsStripped = WikiRegexes.Comments.Replace(articleText, string.Empty);
+        string commentsCategoriesStripped = WikiRegexes.Category.Replace(commentsStripped, string.Empty);
         if (WikiRegexes.Defaultsort.IsMatch(templates))
-            commentsCategoriesStripped = WikiRegexes.Defaultsort.Replace(commentsCategoriesStripped, "");
+            commentsCategoriesStripped = WikiRegexes.Defaultsort.Replace(commentsCategoriesStripped, string.Empty);
         Sorter.Interwikis(ref commentsStripped, false);
 
         // remove stub tags from long articles, don't move section stubs
@@ -108,7 +108,7 @@ public partial class Parsers
             // bulleted or indented text should weigh less than simple text.
             // for example, actor stubs may contain large filmographies
             string crapStripped =
-                BulletedText.Replace(WikiRegexes.NestedTemplates.Replace(commentsCategoriesStripped, " "), "");
+                BulletedText.Replace(WikiRegexes.NestedTemplates.Replace(commentsCategoriesStripped, " "), string.Empty);
             int words = (Tools.WordCount(commentsCategoriesStripped, 999) + Tools.WordCount(crapStripped, 999)) / 2;
             if (words > StubMaxWordCount)
             {
@@ -140,15 +140,15 @@ public partial class Parsers
         // refresh
         if (tagsRemoved.Any())
         {
-            commentsStripped = WikiRegexes.Comments.Replace(articleText, "");
-            commentsCategoriesStripped = WikiRegexes.Category.Replace(commentsStripped, "");
+            commentsStripped = WikiRegexes.Comments.Replace(articleText, string.Empty);
+            commentsCategoriesStripped = WikiRegexes.Category.Replace(commentsStripped, string.Empty);
         }
 
         //remove disambiguation if disambiguation cleanup exists (en-wiki only)
         if (Variables.LangCode.Equals("en") && WikiRegexes.DisambigsCleanup.IsMatch(templates) &&
             WikiRegexes.DisambigsCleanup.IsMatch(commentsStripped))
         {
-            articleText = WikiRegexes.DisambigsGeneral.Replace(articleText, "").Trim();
+            articleText = WikiRegexes.DisambigsGeneral.Replace(articleText, string.Empty).Trim();
         }
 
         // do orphan tagging before template analysis for categorization tags
@@ -163,18 +163,18 @@ public partial class Parsers
         // ignore commented out wikilinks, and any in {{Proposed deletion/dated}}
         string forLinkCount = commentsStripped;
         if (ProposedDeletionDatedEndorsed.IsMatch(templates))
-            forLinkCount = ProposedDeletionDatedEndorsed.Replace(forLinkCount, "");
+            forLinkCount = ProposedDeletionDatedEndorsed.Replace(forLinkCount, string.Empty);
 
         // discount persondata, comments, infoboxes and categories from wikify/underlinked and stub evaluation
         string lengthtext = commentsCategoriesStripped;
         if (WikiRegexes.Persondata.IsMatch(templates))
-            lengthtext = WikiRegexes.Persondata.Replace(commentsCategoriesStripped, "");
+            lengthtext = WikiRegexes.Persondata.Replace(commentsCategoriesStripped, string.Empty);
         if (WikiRegexes.InfoBox.IsMatch(templates))
-            lengthtext = WikiRegexes.InfoBox.Replace(lengthtext, "");
+            lengthtext = WikiRegexes.InfoBox.Replace(lengthtext, string.Empty);
         if (Drugbox.IsMatch(templates))
-            lengthtext = Drugbox.Replace(lengthtext, "");
+            lengthtext = Drugbox.Replace(lengthtext, string.Empty);
         if (WikiRegexes.ReferenceList.IsMatch(templates))
-            lengthtext = WikiRegexes.ReferenceList.Replace(lengthtext, "");
+            lengthtext = WikiRegexes.ReferenceList.Replace(lengthtext, string.Empty);
 
         int length = lengthtext.Length + 1;
         int linkLimit = (int)(0.0025 * length) + 1;
@@ -205,10 +205,10 @@ public partial class Parsers
         if (wikiLinkCount > 0 && WikiRegexes.DeadEnd.IsMatch(templates))
         {
             if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz"))
-                articleText = WikiRegexes.DeadEnd.Replace(articleText, "");
+                articleText = WikiRegexes.DeadEnd.Replace(articleText, string.Empty);
             else
                 articleText = WikiRegexes.DeadEnd.Replace(articleText,
-                        m => Tools.IsSectionOrReasonTemplate(m.Value, articleText) ? m.Value : "")
+                        m => Tools.IsSectionOrReasonTemplate(m.Value, articleText) ? m.Value : string.Empty)
                     .TrimStart();
 
             if (!WikiRegexes.DeadEnd.IsMatch(articleText))
@@ -278,7 +278,7 @@ public partial class Parsers
                     tagsAdded.Add("stub");
                 }
 
-                commentsStripped = WikiRegexes.Comments.Replace(articleText, "");
+                commentsStripped = WikiRegexes.Comments.Replace(articleText, string.Empty);
             }
         }
 
@@ -300,7 +300,7 @@ public partial class Parsers
             // bulleted or indented text should weigh less than simple text.
             // for example, actor stubs may contain large filmographies
             string crapStripped =
-                BulletedText.Replace(WikiRegexes.NestedTemplates.Replace(commentsCategoriesStripped, " "), "");
+                BulletedText.Replace(WikiRegexes.NestedTemplates.Replace(commentsCategoriesStripped, " "), string.Empty);
             int words = (Tools.WordCount(commentsCategoriesStripped, 10) + Tools.WordCount(crapStripped, 10)) / 2;
 
             if (words > 6)
@@ -400,7 +400,7 @@ public partial class Parsers
         {
             if (totalCategories > 0)
             {
-                articleText = WikiRegexes.Uncategorized.Replace(articleText, "").TrimStart();
+                articleText = WikiRegexes.Uncategorized.Replace(articleText, string.Empty).TrimStart();
                 if (Variables.LangCode.Equals("ar"))
                     tagsRemoved.Add("غير مصنفة");
                 else if (Variables.LangCode.Equals("arz"))
@@ -477,12 +477,12 @@ public partial class Parsers
                 // no blank line between dead end and orphan tags for ar/arz
                 if (Variables.LangCode.Equals("ar"))
                 {
-                    articleText = "{{نهاية مسدودة|" + WikiRegexes.DateYearMonthParameter + "}}\r\n" + (WikiRegexes.Orphan.IsMatch(articleText) ? "" : "\r\n") + articleText;
+                    articleText = "{{نهاية مسدودة|" + WikiRegexes.DateYearMonthParameter + "}}\r\n" + (WikiRegexes.Orphan.IsMatch(articleText) ? string.Empty : "\r\n") + articleText;
                     tagsAdded.Add("[[:تصنيف:مقالات نهاية مسدودة|نهاية مسدودة]]");
                     // if dead end then remove underlinked/wikify
                     if (WikiRegexes.Wikify.IsMatch(articleText))
                     {
-                        articleText = WikiRegexes.Wikify.Replace(articleText, "").TrimStart();
+                        articleText = WikiRegexes.Wikify.Replace(articleText, string.Empty).TrimStart();
                         tagsRemoved.Add("وصلات قليلة");
                     }
                 }
@@ -493,7 +493,7 @@ public partial class Parsers
                     // if dead end then remove underlinked
                     if (WikiRegexes.Wikify.IsMatch(articleText))
                     {
-                        articleText = WikiRegexes.Wikify.Replace(articleText, "").TrimStart();
+                        articleText = WikiRegexes.Wikify.Replace(articleText, string.Empty).TrimStart();
                         tagsRemoved.Add("ويكى");
                     }
                 }
@@ -504,7 +504,7 @@ public partial class Parsers
                     // if dead end then remove underlinked
                     if (WikiRegexes.Wikify.IsMatch(articleText))
                     {
-                        articleText = WikiRegexes.Wikify.Replace(articleText, "").TrimStart();
+                        articleText = WikiRegexes.Wikify.Replace(articleText, string.Empty).TrimStart();
                         tagsRemoved.Add("کم‌پیوند");
                     }
                 }
@@ -518,7 +518,7 @@ public partial class Parsers
                     // if dead end then remove underlinked
                     if (articleText.IndexOf("underlinked", StringComparison.OrdinalIgnoreCase) > -1)
                     {
-                        articleText = Tools.NestedTemplateRegex("underlinked").Replace(articleText, "").TrimStart();
+                        articleText = Tools.NestedTemplateRegex("underlinked").Replace(articleText, string.Empty).TrimStart();
                         tagsRemoved.Add("underlinked");
                     }
                 }
@@ -535,7 +535,7 @@ public partial class Parsers
                  && !WikiRegexes.MeaningsOfMinorPlanetNames.IsMatch(articleTitle))
         {
             // Avoid excess newlines between templates
-            string templateEnd = "}}\r\n" + (articleText.TrimStart().StartsWith(@"{{") ? "" : "\r\n");
+            string templateEnd = "}}\r\n" + (articleText.TrimStart().StartsWith(@"{{") ? string.Empty : "\r\n");
 
             if (Variables.LangCode.Equals("ar"))
             {
@@ -572,11 +572,11 @@ public partial class Parsers
                  WikiRegexes.Wikify.IsMatch(templates))
         {
             if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz"))
-                articleText = WikiRegexes.Wikify.Replace(articleText, "");
+                articleText = WikiRegexes.Wikify.Replace(articleText, string.Empty);
             else
                 // remove wikify, except section templates or wikify tags with reason parameter specified
                 articleText = WikiRegexes.Wikify.Replace(articleText,
-                        m => Tools.IsSectionOrReasonTemplate(m.Value, articleText) ? m.Value : "")
+                        m => Tools.IsSectionOrReasonTemplate(m.Value, articleText) ? m.Value : string.Empty)
                     .TrimStart();
 
             if (!WikiRegexes.Wikify.IsMatch(articleText))
@@ -672,7 +672,7 @@ public partial class Parsers
     private static string StubChecker(Match m)
     {
         // if stub tag is a section stub tag, don't remove from section in article
-        return Variables.SectStubRegex.IsMatch(m.Value) ? m.Value : "";
+        return Variables.SectStubRegex.IsMatch(m.Value) ? m.Value : string.Empty;
     }
 
     /// <summary>
@@ -717,7 +717,7 @@ public partial class Parsers
 
         talkPageText = Tools.ExpandTemplate(talkPageText, talkPageTitle, regexes, true);
 
-        talkPageText = TemplateParameter2.Replace(talkPageText, "");
+        talkPageText = TemplateParameter2.Replace(talkPageText, string.Empty);
         return talkPageText.Replace("REPLACE_THIS_TEXT", "{{{subst");
     }
 
@@ -896,7 +896,7 @@ public partial class Parsers
                  && Tools.GetTemplateParameterValue(WikiRegexes.Orphan.Match(articleText).Value, "few").Length == 0)
         {
             // remove newline after tag if present
-            articleText = Regex.Replace(articleText, Regex.Escape(WikiRegexes.Orphan.Match(articleText).Value) + @"\r?\n?", "").TrimStart();
+            articleText = Regex.Replace(articleText, Regex.Escape(WikiRegexes.Orphan.Match(articleText).Value) + @"\r?\n?", string.Empty).TrimStart();
             if (Variables.LangCode.Equals("ar"))
             {
                 tagsRemoved.Add("يتيمة");
@@ -1249,7 +1249,7 @@ public partial class Parsers
             if (dateFieldValue.Contains(",") && !WikiRegexes.AmericanDates.IsMatch(dateFieldValue))
             {
                 templatecall =
-                    Tools.SetTemplateParameterValue(templatecall, dateparam, dateFieldValue.Replace(",", ""));
+                    Tools.SetTemplateParameterValue(templatecall, dateparam, dateFieldValue.Replace(",", string.Empty));
                 dateFieldValue = Tools.GetTemplateParameterValue(templatecall, dateparam);
             }
 
@@ -1355,8 +1355,8 @@ public partial class Parsers
         // {{R from modification}}
         // difference is extra/removed/changed punctuation
         if (!Tools.NestedTemplateRegex(WikiRegexes.RFromModificationList).IsMatch(articleText)
-            && !CommonPunctuation.Replace(redirecttarget, "").Equals(redirecttarget) && CommonPunctuation
-                .Replace(redirecttarget, "").Equals(CommonPunctuation.Replace(articleTitle, "")))
+            && !CommonPunctuation.Replace(redirecttarget, string.Empty).Equals(redirecttarget) && CommonPunctuation
+                .Replace(redirecttarget, string.Empty).Equals(CommonPunctuation.Replace(articleTitle, string.Empty)))
             return (articleText + " " + WikiRegexes.RFromModificationString);
 
         // {{R from title without diacritics}}

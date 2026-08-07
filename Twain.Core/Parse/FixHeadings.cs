@@ -84,7 +84,7 @@ public partial class Parsers
     public static string FixHeadings(string articleText, string articleTitle)
     {
         // remove unnecessary general header from start of article
-        articleText = RegexBadHeaderStartOfArticle.Replace(articleText, "");
+        articleText = RegexBadHeaderStartOfArticle.Replace(articleText, string.Empty);
 
         // remove identical duplicated headings with only whitespace in between
         articleText = DuplicatedSameLevelHeadings.Replace(articleText, "$1");
@@ -149,7 +149,7 @@ public partial class Parsers
             if (!customHeadings.Any(s => WikiRegexes.HeadingLevelTwo.IsMatch(s)))
             {
                 string articleTextLocal = articleText;
-                articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleTextLocal, "");
+                articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleTextLocal, string.Empty);
 
                 string originalarticleText = string.Empty;
                 while (!originalarticleText.Equals(articleText))
@@ -169,7 +169,7 @@ public partial class Parsers
                             articleText = RegexHeadingUpOneLevel.Replace(articleText, "$1$2");
                     }
 
-                    articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleText, "");
+                    articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleText, string.Empty);
                 }
             }
 
@@ -188,7 +188,7 @@ public partial class Parsers
     /// </summary>
     private static string FixHeadingsME(Match m)
     {
-        string hAfter = WikiRegexes.Br.Replace(m.Value, "");
+        string hAfter = WikiRegexes.Br.Replace(m.Value, string.Empty);
         hAfter = WikiRegexes.Big.Replace(hAfter, "$1").TrimStart(' ');
 
         // clean whitespace
@@ -220,6 +220,6 @@ public partial class Parsers
         // Removes bold from level 3 headers and below, as it makes no visible difference
         hAfter = RegexHeadingWithBold.Replace(hAfter, "$1");
 
-        return WikiRegexes.EmptyBold.Replace(hAfter, "");
+        return WikiRegexes.EmptyBold.Replace(hAfter, string.Empty);
     }
 }

@@ -527,7 +527,7 @@ public static class TalkPageFixes
             if (blpm.Success & !Tools.GetTemplateParameterValue(newvalue, "living").ToLower().StartsWith("n"))
             {
                 newvalue = Tools.SetTemplateParameterValue(newvalue, "living", "yes");
-                articletext = BLPRegex.Replace(articletext, "");
+                articletext = BLPRegex.Replace(articletext, string.Empty);
             }
 
             if (newvalue.Length > 0 && !m.Value.Equals(newvalue))
@@ -541,7 +541,7 @@ public static class TalkPageFixes
             return articletext;
 
         // remove {{blp}} if {{WPBiography|living=yes}}
-        articletext = BLPRegex.Replace(articletext, "");
+        articletext = BLPRegex.Replace(articletext, string.Empty);
 
         // move above any other WikiProject
         if (!WikiRegexes.WikiProjectBannerShellTemplate.IsMatch(articletext))
@@ -550,7 +550,7 @@ public static class TalkPageFixes
             {
                 if (n.Index < m.Index && Tools.GetTemplateName(n.Value).StartsWith("WikiProject "))
                 {
-                    articletext = articletext.Replace(m.Value, "");
+                    articletext = articletext.Replace(m.Value, string.Empty);
                     articletext = articletext.Insert(n.Index, m.Value + "\r\n");
                     break;
                 }
@@ -591,7 +591,7 @@ public static class TalkPageFixes
             {
                 newvalue = Tools.SetTemplateParameterValue(newvalue, "needs-infobox", "yes");
                 articletext = articletext.Replace(m.Value, newvalue);
-                articletext = SirRegex.Replace(articletext, "");
+                articletext = SirRegex.Replace(articletext, string.Empty);
             }
         }
 
@@ -666,7 +666,7 @@ public static class TalkPageFixes
 
                 wikiProjectTemplates++;
                 WPBS1 += Tools.Newline(m.Value);
-                articletextLocal = articletextLocal.Replace(m.Value, "");
+                articletextLocal = articletextLocal.Replace(m.Value, string.Empty);
             }
 
             if (wikiProjectTemplates > WikiProjectsWPBS)
@@ -677,7 +677,7 @@ public static class TalkPageFixes
 
                 // clean up excess whitespace
                 string zerothSection = WikiRegexes.ZerothSection.Match(articletext).Value;
-                string restOfArticle = articletext.Replace(zerothSection, "");
+                string restOfArticle = articletext.Replace(zerothSection, string.Empty);
 
                 zerothSection = WikiRegexes.ThreeOrMoreNewlines.Replace(zerothSection, "\r\n\r\n");
 

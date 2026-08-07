@@ -781,10 +781,10 @@ public partial class Parsers
         if (Tools.DeduplicateList(GetAllWikiLinks(articleText)).Any(link => WikiRegexes.EmptyLink.IsMatch(link)))
         {
             while (WikiRegexes.EmptyLink.IsMatch(articleText))
-                articleText = WikiRegexes.EmptyLink.Replace(articleText, "");
+                articleText = WikiRegexes.EmptyLink.Replace(articleText, string.Empty);
         }
 
-        articleText = WikiRegexes.EmptyTemplate.Replace(articleText, "");
+        articleText = WikiRegexes.EmptyTemplate.Replace(articleText, string.Empty);
 
         return articleText;
     }
@@ -1032,7 +1032,7 @@ public partial class Parsers
     /// <returns>The modified article text (removed empty comments).</returns>
     public static string RemoveEmptyComments(string articleText)
     {
-        return WikiRegexes.EmptyComments.Replace(articleText, "");
+        return WikiRegexes.EmptyComments.Replace(articleText, string.Empty);
     }
     #endregion
 
@@ -1056,7 +1056,7 @@ public partial class Parsers
         // remove zero width space - CHECKWIKI error 16
         // this character should not be used in domain names.
         // Browsers are blacklisting it because of the potential for phishing.
-        articleText = LineSeparatorZeroWidthSpaceStartOfLine.Replace(articleText, "");
+        articleText = LineSeparatorZeroWidthSpaceStartOfLine.Replace(articleText, string.Empty);
         return articleText.Replace('\x2028', ' ');
 
         //MOS:NBSP states that "A literal hard space, such as one of the Unicode non-breaking space characters, should not be used"
@@ -1345,7 +1345,7 @@ public partial class Parsers
             || WikiRegexes.LivingPeopleRegex2.IsMatch(articleText)
             || WikiRegexes.BirthsCategory.IsMatch(cats)
             || WikiRegexes.PeopleFromCategory.IsMatch(cats)
-            || WikiRegexes.BLPSources.IsMatch(BLPUnsourcedSection.Replace(articleText, ""))
+            || WikiRegexes.BLPSources.IsMatch(BLPUnsourcedSection.Replace(articleText, string.Empty))
             || RefImproveBLP.IsMatch(articleText);
     }
 
@@ -1569,7 +1569,7 @@ public partial class Parsers
                         // if also have existing BLP unsourced then remove unreferenced
                         if (BLPUnsourced.IsMatch(articleText))
                         {
-                            articleText = Tools.NestedTemplateRegex("unreferenced").Replace(articleText, "");
+                            articleText = Tools.NestedTemplateRegex("unreferenced").Replace(articleText, string.Empty);
                             Parsers p = new Parsers();
                             articleText = WikiRegexes.MultipleIssues.Replace(articleText, p.MultipleIssuesSingleTagME);
                         }
@@ -1604,7 +1604,7 @@ public partial class Parsers
                         // if also have existing BLP sources then remove refimprove
                         if (Tools.NestedTemplateRegex("BLP sources").IsMatch(articleText))
                         {
-                            articleText = Tools.NestedTemplateRegex("More citations needed").Replace(articleText, "");
+                            articleText = Tools.NestedTemplateRegex("More citations needed").Replace(articleText, string.Empty);
                             Parsers p = new Parsers();
                             articleText = WikiRegexes.MultipleIssues.Replace(articleText, p.MultipleIssuesSingleTagME);
                         }
@@ -1644,7 +1644,7 @@ public partial class Parsers
     /// Converts templates such as {{foo|section|...}} to {{foo section|...}}
     /// </summary>
     /// <param name="m">Template call</param>
-    /// <returns>The updated emplate call</returns>
+    /// <returns>The updated template call</returns>
     private static string SectionTemplateConversionsME(Match m)
     {
         string newValue = m.Value, existingName = Tools.GetTemplateName(newValue);
@@ -1698,7 +1698,7 @@ public partial class Parsers
     /// <returns>true if you can edit, false otherwise</returns>
     public static bool CheckNoBots(string articleText, string user)
     {
-        articleText = WikiRegexes.UnformattedText.Replace(articleText, "");
+        articleText = WikiRegexes.UnformattedText.Replace(articleText, string.Empty);
         Match bot = BotsAllow.Match(articleText);
 
         if (bot.Success)
@@ -1795,7 +1795,7 @@ public partial class Parsers
         if (!Variables.LangCode.Equals("en"))
             return false;
 
-        return WikiRegexes.InfoBox.IsMatch(WikiRegexes.UnformattedText.Replace(articleText, ""));
+        return WikiRegexes.InfoBox.IsMatch(WikiRegexes.UnformattedText.Replace(articleText, string.Empty));
     }
 
     /// <summary>
@@ -1803,7 +1803,7 @@ public partial class Parsers
     /// </summary>
     public static bool IsInUse(string articleText)
     {
-        return WikiRegexes.InUse.IsMatch(WikiRegexes.UnformattedText.Replace(articleText, ""));
+        return WikiRegexes.InUse.IsMatch(WikiRegexes.UnformattedText.Replace(articleText, string.Empty));
     }
 
     private static readonly Regex SicTypo = Tools.NestedTemplateRegex(new[] { "Sic", "Typo" });
@@ -1824,7 +1824,7 @@ public partial class Parsers
     /// <returns></returns>
     public static bool HasDeadLinks(string articleText)
     {
-        return WikiRegexes.DeadLink.IsMatch(WikiRegexes.Comments.Replace(articleText, ""));
+        return WikiRegexes.DeadLink.IsMatch(WikiRegexes.Comments.Replace(articleText, string.Empty));
     }
 
     /// <summary>
@@ -1834,7 +1834,7 @@ public partial class Parsers
     /// <returns></returns>
     public static bool HasTargetLessLinks(string articleText)
     {
-        return WikiRegexes.TargetLessLink.IsMatch(WikiRegexes.Comments.Replace(articleText, ""));
+        return WikiRegexes.TargetLessLink.IsMatch(WikiRegexes.Comments.Replace(articleText, string.Empty));
     }
 
     /// <summary>
@@ -1844,7 +1844,7 @@ public partial class Parsers
     /// <returns></returns>
     public static bool HasDoublePipeLinks(string articleText)
     {
-        return WikiRegexes.DoublePipeLink.IsMatch(WikiRegexes.Comments.Replace(articleText, ""));
+        return WikiRegexes.DoublePipeLink.IsMatch(WikiRegexes.Comments.Replace(articleText, string.Empty));
     }
 
     /// <summary>
@@ -1912,7 +1912,7 @@ public partial class Parsers
                 reflength = m.Length;
             }
             articleText = articleText.Substring(refstemplateindex + reflength);
-            articleText = WikiRegexes.Comments.Replace(articleText, "");
+            articleText = WikiRegexes.Comments.Replace(articleText, string.Empty);
 
             if (refstemplateindex > 0)
                 return Regex.IsMatch(articleText, WikiRegexes.ReferenceEnd);

@@ -102,7 +102,7 @@ public partial class Parsers
         }
 
         // Performance check: if article title not in zeroth section have nothing further to do
-        if (zerothSection.IndexOf(BracketedAtEndOfLine.Replace(articleTitle, ""), StringComparison.OrdinalIgnoreCase) < 0)
+        if (zerothSection.IndexOf(BracketedAtEndOfLine.Replace(articleTitle, string.Empty), StringComparison.OrdinalIgnoreCase) < 0)
             return articleTextAtStart;
 
         // 3) '''Emboldens''' the first occurrence of the article title
@@ -111,7 +111,7 @@ public partial class Parsers
         if (WikiRegexes.Dates2.IsMatch(articleTitle) || WikiRegexes.Dates.IsMatch(articleTitle))
             return articleTextAtStart;
 
-        string escTitle = Regex.Escape(articleTitle), escTitleNoBrackets = Regex.Escape(BracketedAtEndOfLine.Replace(articleTitle, ""));
+        string escTitle = Regex.Escape(articleTitle), escTitleNoBrackets = Regex.Escape(BracketedAtEndOfLine.Replace(articleTitle, string.Empty));
         Regex boldTitleAlready1 = new Regex(@"'''\s*(" + escTitle + "|" + Tools.TurnFirstToLower(escTitle) + @")");
         Regex boldTitleAlready2 = new Regex(@"'''\s*(" + escTitleNoBrackets + "|" + Tools.TurnFirstToLower(escTitleNoBrackets) + @")");
 
@@ -126,7 +126,7 @@ public partial class Parsers
             return articleTextAtStart;
 
         // so no self links to remove, check for the need to add bold
-        string articleTextNoTemplates = WikiRegexes.NestedTemplates.Replace(articleText, "");
+        string articleTextNoTemplates = WikiRegexes.NestedTemplates.Replace(articleText, string.Empty);
 
         // first quick check: ignore articles with some bold in first 5% of article, ignoring infoboxes, dablinks etc.
         int fivepc = articleTextNoTemplates.Length / 20;
@@ -195,7 +195,7 @@ public partial class Parsers
 
         int firstBoldPos = RegexFirstBold.Match(articleText).Length;
 
-        articleText = WikiRegexes.NestedTemplates.Replace(articleText, "");
+        articleText = WikiRegexes.NestedTemplates.Replace(articleText, string.Empty);
 
         articleText = Hider2.HideMore(articleText);
 
