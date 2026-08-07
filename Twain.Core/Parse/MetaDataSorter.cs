@@ -1900,9 +1900,29 @@ en, sq, ru
         return MoveTemplateToSeeAlsoSection(articleText, WikiRegexes.PortalTemplate);
     }
 
-    private static readonly Regex ReferencesSectionRegex = new Regex(@"^== *[Rr]eferences *==\s*", RegexOptions.Multiline);
-    private static readonly Regex NotesSectionRegex = new Regex(@"^== *[Nn]otes(?: and references)? *==\s*", RegexOptions.Multiline);
-    private static readonly Regex FootnotesSectionRegex = new Regex(@"^== *(?:[Ff]ootnotes|Sources) *==\s*", RegexOptions.Multiline);
+    /// <summary>
+    /// Matches the heading of a References section.
+    /// </summary>
+    private static readonly Regex ReferencesSectionRegex =
+        new Regex(
+            @"^== *[Rr]eferences *==\s*",
+            RegexOptions.Multiline);
+
+    /// <summary>
+    /// Matches the heading of a Notes or Notes and references section.
+    /// </summary>
+    private static readonly Regex NotesSectionRegex =
+        new Regex(
+            @"^== *[Nn]otes(?: and references)? *==\s*",
+            RegexOptions.Multiline);
+
+    /// <summary>
+    /// Matches the heading of a Footnotes or Sources section.
+    /// </summary>
+    private static readonly Regex FootnotesSectionRegex =
+        new Regex(
+            @"^== *(?:[Ff]ootnotes|Sources) *==\s*",
+            RegexOptions.Multiline);
 
     /// <summary>
     /// Moves given template to the references section from the zeroth section, if present (en only)
