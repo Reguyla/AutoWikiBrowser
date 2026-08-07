@@ -531,15 +531,8 @@ en, sq, ru
         articleText = ProcessEnglishMainSpaceMetadata(
             articleText, articleTitle, alltemplates);
 
-        // two newlines here per https://en.wikipedia.org/w/index.php?title=Wikipedia_talk:AutoWikiBrowser&oldid=243224092#Blank_lines_before_stubs
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Two_empty_lines_before_stub-templates
-        // ru, sl, ar, arz wikis use only one newline
-        // T382578: WP:STUBSPACING is now one blank line only for en-wiki
-        string strStub = string.Empty;
-
-        // Category: can use {{Verylargestub}}/{{popstub}} which is not a stub template, don't do stub sorting
-        if (!Namespace.Determine(articleTitle).Equals(Namespace.Category) && TemplateExists(alltemplates, new Regex(Variables.Stub)))
-            strStub = Tools.Newline(RemoveStubs(ref articleText), (Variables.LangCode.Equals("ru") || Variables.LangCode.Equals("sl") || Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.IsWikipediaEN) ? 1 : 2);
+        string strStub = RemoveStubsIfPresent(
+            ref articleText, articleTitle, alltemplates);
 
         // filter out excess white space and remove "----" from end of article
         if (Namespace.IsMainSpace(articleTitle))
@@ -688,6 +681,63 @@ en, sq, ru
         }
 
         return shortPagesMonitor;
+    }
+
+    // TODO (Research):
+    // Investigate why stub template spacing is customized for only a small
+    // subset of languages (ru, sl, ar, arz, and en). Determine whether these
+    // rules are still current, identify their original source or community
+    // consensus, and verify whether additional languages or projects require
+    // different spacing behavior.
+    //
+    // TODO (Modernization):
+    // Evaluate whether wiki-specific stub spacing rules should be moved into
+    // project or wiki configuration. The current implementation assumes
+    // Wikimedia-specific conventions, which may not apply to non-Wikimedia
+    // MediaWiki installations supported by Twain.
+    //
+    /// <summary>
+    /// Removes stub templates from the article when applicable and prepares
+    /// them for later restoration using the required wiki-specific spacing.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// The templates detected in the article.
+    /// </param>
+    /// <returns>
+    /// The removed stub templates with the required newline formatting, or an
+    /// empty string when stub processing does not apply.
+    /// </returns>
+    private string RemoveStubsIfPresent(
+        ref string articleText,
+        string articleTitle,
+        List<string> alltemplates)
+    {
+        // Category pages may contain templates such as {{Verylargestub}} or
+        // {{popstub}} that are not article stub templates.
+        if (Namespace.Determine(articleTitle).Equals(Namespace.Category) ||
+            !TemplateExists(alltemplates, new Regex(Variables.Stub)))
+        {
+            return string.Empty;
+        }
+
+        int newlineCount =
+            Variables.LangCode.Equals("ru") ||
+            Variables.LangCode.Equals("sl") ||
+            Variables.LangCode.Equals("ar") ||
+            Variables.LangCode.Equals("arz") ||
+            Variables.IsWikipediaEN
+                ? 1
+                : 2;
+
+        return Tools.Newline(
+            RemoveStubs(ref articleText),
+            newlineCount);
     }
 
     /// <summary>
