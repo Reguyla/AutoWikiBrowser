@@ -102,6 +102,10 @@ public class MetaDataSorter
         InterWikiOrder = InterWikiOrderEnum.LocalLanguageAlpha;
     }
 
+    // TODO (Modernization):
+    // Review instance regular expressions in MetaDataSorter and determine which
+    // can safely become static readonly. Preserve InterLangRegex as instance state
+    // until its dynamic initialization and mutation behavior is fully understood.
     // Generated dynamically using Variables.Stub.
     private readonly Regex InterLangRegex =
         new Regex(@"", RegexOptions.IgnoreCase);
@@ -286,6 +290,10 @@ public class MetaDataSorter
         return "MetaDataSorter::" + what;
     }
 
+    // TODO (Research):
+    // Verify whether LoadInterWikiFromCache() can be called more than once per
+    // MetaDataSorter instance. Loaded is set to false after a cache miss but is
+    // not reset before subsequent load attempts.
     /// <summary>
     /// Loads the interwiki ordering data from the local object cache when
     /// available.
@@ -315,6 +323,10 @@ public class MetaDataSorter
         return Loaded;
     }
 
+    // TODO (Research):
+    // Verify whether the unit-test interwiki collections intentionally share the
+    // same List<string> instance. Production loading creates independent lists,
+    // so mutations during tests could affect multiple ordering modes at once.
     /// <summary>
     /// Initializes the predefined interwiki ordering data used during unit tests.
     /// </summary>
@@ -457,7 +469,7 @@ en, sq, ru
         new Regex("<!-- ?\\[\\[en:.*?\\]\\] ?-->");
 
     /// <summary>
-    /// Sorts article metadata, including optional whitespace fixing
+    /// Sorts article metadata and enables optional whitespace normalization.
     /// </summary>
     /// <param name="articleText">The wiki text of the article.</param>
     /// <param name="articleTitle">Title of the article</param>
