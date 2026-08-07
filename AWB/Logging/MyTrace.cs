@@ -116,6 +116,6 @@ internal sealed class MyTrace : TraceManager, IAWBTraceListener
 
     protected override string ApplicationName
     {
-        get { return "AutoWikiBrowser logging manager"; }
+        get { return "Twain logging manager"; }
     }
 }

@@ -779,7 +779,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         if (updaterUpdate)
         {
             MessageBox.Show(
-                "There is an update to the AWB updater. Updating now.",
+                "There is an update available. Updating now.",
                 "Updater update",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
@@ -811,7 +811,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         string message = string.Format(
             CultureInfo.CurrentCulture,
-            "This version has been superseded by new versions of AWB: {0}."
+            "This version has been superseded by a newer version."
             + "\r\n\r\n"
             + "You may continue to use this version or update to the newest version."
             + "\r\n\r\n"
@@ -1090,7 +1090,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         MessageBox.Show(
             "You've been logged off, probably due to loss of session data.\r\n" +
-            "Please relogin.",
+            "Please re-login.",
             "Logged off",
             MessageBoxButtons.OK,
             MessageBoxIcon.Exclamation);
@@ -1214,7 +1214,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         else if (ex is CaptchaException)
         {
             MessageBox.Show(
-                "Captcha required, is the user account autoconfirmed etc?",
+                "Captcha required, is the user account auto-confirmed etc?",
                 "Captcha Required");
 
             Stop();
@@ -1360,7 +1360,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         MessageBox.Show(
             this,
-            "There has been an edit conflict. AWB will now re-apply its " +
+            "There has been an edit conflict. Twain will now re-apply its " +
             "changes on the updated page.\r\nPlease re-review the changes " +
             "before saving. Any custom edits will be lost and must be " +
             "re-added manually.",
@@ -1930,7 +1930,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         if (Program.MyTrace.HaveOpenFile)
         {
             Program.MyTrace.WriteBulletedLine(
-                "AWB started processing",
+                "The application has begun processing",
                 true,
                 true,
                 true);
@@ -2109,7 +2109,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             MessageBox.Show(
                 "This page contains character(s) in the Unicode Private Use Area "
-                + "and cannot safely be edited with AWB. The page will now be "
+                + "and cannot safely be edited with this application. The page will now be "
                 + "skipped. Surrounding text of the first character is: "
                 + surroundingText);
 
@@ -3486,7 +3486,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         MessageBox.Show(
             this,
-            "AWB failed to automatically remove the page from the list while "
+            "Application failed to automatically remove the page from the list while "
             + "skipping the page. Please remove it manually.",
             "Page removal from list failed",
             MessageBoxButtons.OK,
@@ -7521,7 +7521,7 @@ font-size: 150%;'>No changes</h2>
         catch (ArgumentNullException)
         {
             MessageBox.Show(
-                "The interwiki list didn't load correctly. Please check your internet connection, and then restart AWB.");
+                "The interwiki list didn't load correctly. Please check your internet connection, and then restart the application.");
 
             return false;
         }

@@ -2007,7 +2007,7 @@ namespace AutoWikiBrowser
             this.chkNudge.Size = new System.Drawing.Size(152, 17);
             this.chkNudge.TabIndex = 0;
             this.chkNudge.Text = "Resave (\"nudge\")  if stuck";
-            this.ToolTip.SetToolTip(this.chkNudge, "If checked, AWB will get a nudge if it is stuck: first after 2 minutes, then in d" +
+            this.ToolTip.SetToolTip(this.chkNudge, "If checked, the application will get a nudge if it is stuck: first after 2 minutes, then in d" +
         "ecreasing intervals");
             // 
             // chkLock
@@ -2302,7 +2302,7 @@ namespace AutoWikiBrowser
             this.chkNudgeSkip.Size = new System.Drawing.Size(194, 17);
             this.chkNudgeSkip.TabIndex = 3;
             this.chkNudgeSkip.Text = "Skip page if first nudge doesn\'t help";
-            this.ToolTip.SetToolTip(this.chkNudgeSkip, "Limits AWB to one nudge per page");
+            this.ToolTip.SetToolTip(this.chkNudgeSkip, "Limits the application to one nudge per page");
             // 
             // btnResetNudges
             // 
@@ -2322,7 +2322,7 @@ namespace AutoWikiBrowser
             this.lblNudges.Size = new System.Drawing.Size(81, 13);
             this.lblNudges.TabIndex = 1;
             this.lblNudges.Text = "Total nudges: 0";
-            this.ToolTip.SetToolTip(this.lblNudges, "How many times AWB has \"nudged\"");
+            this.ToolTip.SetToolTip(this.lblNudges, "How many times Twain has \"nudged\"");
             // 
             // chkSuppressTag
             // 
@@ -2332,8 +2332,8 @@ namespace AutoWikiBrowser
             this.chkSuppressTag.Name = "chkSuppressTag";
             this.chkSuppressTag.Size = new System.Drawing.Size(211, 17);
             this.chkSuppressTag.TabIndex = 4;
-            this.chkSuppressTag.Text = "Suppress \"using AWB\" in edit summary";
-            this.ToolTip.SetToolTip(this.chkSuppressTag, "Removes the automatic addition of the AWB suffix to edit summaries");
+            this.chkSuppressTag.Text = "Suppress \"using Twain\" in edit summary";
+            this.ToolTip.SetToolTip(this.chkSuppressTag, "Removes the automatic addition of the Twain suffix to edit summaries");
             // 
             // chkAutoMode
             // 
@@ -2366,7 +2366,7 @@ namespace AutoWikiBrowser
             this.lblbotEditsStop.Size = new System.Drawing.Size(52, 13);
             this.lblbotEditsStop.TabIndex = 1;
             this.lblbotEditsStop.Text = "Max edits";
-            this.ToolTip.SetToolTip(this.lblbotEditsStop, "Specify the maximum number of edits AWB should make (0=no limit)");
+            this.ToolTip.SetToolTip(this.lblbotEditsStop, "Specify the maximum number of edits (0=no limit)");
             // 
             // chkFindCaseSensitive
             // 

@@ -24,7 +24,7 @@ namespace Twain.Core.Profiles;
 
 /// <summary>
 /// Provides the user interface for selecting, loading, and logging in with
-/// saved AutoWikiBrowser account profiles.
+/// saved account profiles.
 /// </summary>
 public partial class AWBProfilesForm : Form
 {

@@ -50,13 +50,13 @@ internal sealed partial class PluginManager : Form
             new[]
             {
             new ListViewGroup(
-                "Loaded AWB Plugins",
+                "Loaded Plugins",
                 HorizontalAlignment.Left)
             {
                 Name = "groupAWBLoaded"
             },
             new ListViewGroup(
-                "Previously Loaded AWB Plugins",
+                "Previously Loaded Plugins",
                 HorizontalAlignment.Left)
             {
                 Name = "groupAWBPrevious"

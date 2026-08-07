@@ -494,10 +494,10 @@ internal static class UsageStats
     /// The request fields to populate.
     /// </param>
     /// <param name="awbPlugins">
-    /// The standard AutoWikiBrowser plugins to include.
+    /// The standard plugins to include.
     /// </param>
     /// <param name="awbBasePlugins">
-    /// The AutoWikiBrowser base plugins to include.
+    /// The base plugins to include.
     /// </param>
     /// <param name="listMakerPlugins">
     /// The ListMaker plugins to include.

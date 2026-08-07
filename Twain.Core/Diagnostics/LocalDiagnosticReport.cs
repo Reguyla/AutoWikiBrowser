@@ -119,7 +119,7 @@ internal static class LocalDiagnosticReport
     {
         StringBuilder report = new StringBuilder(4096);
 
-        report.AppendLine("AutoWikiBrowser Local Diagnostic Report");
+        report.AppendLine("Local Diagnostic Report");
         report.AppendLine("======================================");
         report.AppendLine();
 

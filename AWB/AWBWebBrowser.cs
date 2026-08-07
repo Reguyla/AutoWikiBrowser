@@ -16,7 +16,7 @@ namespace AutoWikiBrowser;
 //
 /// <summary>
 /// Extends the legacy Windows Forms <see cref="WebBrowser"/> control with
-/// AutoWikiBrowser keyboard shortcuts and browser-selection support.
+/// Keyboard shortcuts and browser-selection support.
 /// </summary>
 /// <remarks>
 /// This control depends on the legacy Internet Explorer/MSHTML browser engine.

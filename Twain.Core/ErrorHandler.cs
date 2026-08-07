@@ -507,7 +507,7 @@ namespace Twain.Core
             public class WikiBugFormatter : BugFormatter
             {
                 /// <summary>
-                /// Creates the opening portion of the AutoWikiBrowser bug-report template.
+                /// Creates the opening portion of the bug-report template.
                 /// </summary>
                 /// <returns>The template opening and initial status field.</returns>
                 public override string PrintHeader()
@@ -519,7 +519,7 @@ namespace Twain.Core
                 }
 
                 /// <summary>
-                /// Creates the closing portion of the AutoWikiBrowser bug-report template.
+                /// Creates the closing portion of the bug-report template.
                 /// </summary>
                 /// <returns>
                 /// The fix-version field followed by the template closing braces.

@@ -457,12 +457,12 @@ internal static class Plugin
 
         AppendPluginNames(
             builder,
-            "AWBPlugins",
+            "Plugins",
             AWBPlugins.Keys);
 
         AppendPluginNames(
             builder,
-            "AWBBasePlugins",
+            "BasePlugins",
             AWBBasePlugins.Keys);
 
         AppendPluginNames(
@@ -476,7 +476,7 @@ internal static class Plugin
     }
 
     /// <summary>
-    /// Creates and registers an AWB plugin.
+    /// Creates and registers a plugin.
     /// </summary>
     private static void LoadAWBPlugin(
         Type pluginType,
@@ -495,7 +495,7 @@ internal static class Plugin
             ShowDuplicatePluginMessage(
                 awbPlugin.Name,
                 pluginFile,
-                "AWB Plugin");
+                "Plugin");
 
             return;
         }
@@ -515,7 +515,7 @@ internal static class Plugin
     }
 
     /// <summary>
-    /// Creates and registers an AWB base plugin.
+    /// Creates and registers a base plugin.
     /// </summary>
     private static void LoadAWBBasePlugin(
         Type pluginType,
@@ -535,7 +535,7 @@ internal static class Plugin
             ShowDuplicatePluginMessage(
                 awbBasePlugin.Name,
                 pluginFile,
-                "AWB Base Plugin");
+                "Base Plugin");
 
             return;
         }
@@ -575,7 +575,7 @@ internal static class Plugin
             ShowDuplicatePluginMessage(
                 listMakerPlugin.Name,
                 pluginFile,
-                "AWB ListMaker Plugin");
+                "ListMaker Plugin");
 
             return;
         }
@@ -608,7 +608,7 @@ internal static class Plugin
     }
 
     /// <summary>
-    /// Determines whether a discovered DLL may contain an AWB plugin.
+    /// Determines whether a discovered DLL may contain a plugin.
     /// </summary>
     private static bool IsPotentialPluginAssembly(
         string pluginFile)
@@ -690,8 +690,8 @@ internal static class Plugin
         MessageBox.Show(
             $"A plugin with the name \"{pluginName}\" has already " +
             "been added.\r\n" +
-            "Please remove old duplicates from your AutoWikiBrowser " +
-            "directory and restart AWB.\r\n" +
+            "Please remove old duplicates from your Twain " +
+            "directory and restart the application.\r\n" +
             $"The duplicate was loaded from \"{pluginFile}\".",
             $"Duplicate {pluginType}",
             MessageBoxButtons.OK,

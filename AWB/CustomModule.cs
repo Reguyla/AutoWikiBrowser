@@ -176,7 +176,7 @@ private string _codeExample = string.Empty;
 
     /// <summary>
     /// Provides the user interface for creating, compiling, and managing
-    /// AutoWikiBrowser custom modules.
+    /// Custom modules.
     /// </summary>
     public void MakeModule()
     {
@@ -605,7 +605,7 @@ For more detailed information, click Help -> Manual on the Custom Module window.
     }
 
     /// <summary>
-    /// Opens the AutoWikiBrowser custom modules manual in the user's default
+    /// Opens the custom modules manual in the user's default
     /// web browser.
     /// </summary>
     /// <param name="sender">The control that raised the event.</param>

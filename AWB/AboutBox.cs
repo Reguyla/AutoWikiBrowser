@@ -24,7 +24,7 @@ using Twain.Core;
 namespace AutoWikiBrowser;
 
 /// <summary>
-/// Displays AutoWikiBrowser version, environment, licensing, and support
+/// Displays version, environment, licensing, and support
 /// information.
 /// </summary>
 internal sealed partial class AboutBox : Form

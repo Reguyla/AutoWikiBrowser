@@ -115,7 +115,7 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets the version of the currently executing AutoWikiBrowser assembly.
+    /// Gets the version of the currently executing Twain assembly.
     /// </summary>
     internal static Version Version =>
         Assembly.GetExecutingAssembly()
@@ -131,10 +131,10 @@ internal static class Program
     /// <summary>
     /// The application display name.
     /// </summary>
-    internal const string Name = "AutoWikiBrowser";
+    internal const string Name = "Twain";
 
     /// <summary>
-    /// Gets or sets the active AutoWikiBrowser application instance.
+    /// Gets or sets the active Twain application instance.
     /// </summary>
     internal static IAutoWikiBrowser AWB;
 
