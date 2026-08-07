@@ -490,12 +490,23 @@ en, sq, ru
         new Regex(@"^{\|", RegexOptions.Multiline);
 
     /// <summary>
-    /// Sorts article meta data
+    /// Sorts and normalizes article metadata according to the rules applicable
+    /// to the current wiki and article namespace.
     /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">Title of the article</param>
-    /// <param name="fixOptionalWhitespace">Whether to request optional excess whitespace to be fixed</param>
-    /// <returns>The updated article text</returns>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="fixOptionalWhitespace">
+    /// <see langword="true"/> to normalize optional excess whitespace;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The article text with applicable metadata extracted, reordered,
+    /// normalized, and restored.
+    /// </returns>
     internal string Sort(string articleText, string articleTitle, bool fixOptionalWhitespace)
     {
         if (ShouldSkipMetadataSorting(articleTitle))
