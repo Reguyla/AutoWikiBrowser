@@ -230,7 +230,7 @@ public class MetaDataSorter
     private InterWikiComparer CreateInterWikiComparer(List<string> sequence)
     {
         return new InterWikiComparer(
-            new List<string>(sequence),
+            new(sequence),
             PossibleInterwikis);
     }
 
@@ -255,7 +255,7 @@ public class MetaDataSorter
         if (result == null)
         {
             Loaded = false;
-            return new List<string>();
+            return new();
         }
 
         return result;
@@ -320,8 +320,8 @@ public class MetaDataSorter
     /// </summary>
     private void LoadUnitTestInterWikiData()
     {
-        List<string> one = new List<string> { "ar", "de", "en", "ru", "sq" };
-        List<string> two = new List<string> { "en", "ar", "de", "ru", "sq" };
+        List<string> one = new() { "ar", "de", "en", "ru", "sq" };
+        List<string> two = new() { "en", "ar", "de", "ru", "sq" };
 
         InterwikiLocalAlpha = one;
         InterwikiLocalFirst = one;
@@ -426,10 +426,10 @@ en, sq, ru
     /// </summary>
     private void BuildAlphabeticalInterWikiLists()
     {
-        InterwikiAlpha = new List<string>(InterwikiLocalFirst);
+        InterwikiAlpha = new(InterwikiLocalFirst);
         InterwikiAlpha.Sort(StringComparer.Create(EnUsCulture, true));
 
-        InterwikiAlphaEnFirst = new List<string>(InterwikiAlpha);
+        InterwikiAlphaEnFirst = new(InterwikiAlpha);
         InterwikiAlphaEnFirst.Remove("en");
         InterwikiAlphaEnFirst.Insert(0, "en");
     }
@@ -472,9 +472,9 @@ en, sq, ru
     /// <c>hatnote group</c> template.
     /// </summary>
     private static readonly List<string> DablinksPlusHatnoteGroupList =
-        WikiRegexes.DablinksList
-            .Union(new List<string>(new[] { "hatnote group" }))
-            .ToList();
+    WikiRegexes.DablinksList
+        .Union(new[] { "hatnote group" })
+        .ToList();
 
     /// <summary>
     /// Matches disambiguation-link templates and the
@@ -1652,7 +1652,7 @@ en, sq, ru
         // en-wp only: remove {{stub}} if a more specific stub exists (not counting {{uncategorized stub}} template)
         if (Variables.IsWikipediaEN)
         {
-            List<string> cp = new List<string>(stubList);
+            List<string> cp = new(stubList);
             cp.RemoveAll(s => Tools.GetTemplateName(s).ToLower().StartsWith("uncategori"));
 
             if (Parsers.GetAllTemplateDetail(ListToString(cp)).Count > 1)
