@@ -544,41 +544,12 @@ en, sq, ru
         articleText = NormalizeMultipleIssues(
             articleText, alltemplates);
 
-        switch (Variables.LangCode)
-        {
-            case "de":
-            case "sl":
-                articleText += strStub + categories + personData;
-
-                // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser#Removal_of_blank_lines
-                // on de wiki a blank line is desired between persondata and interwikis
-                if (Variables.LangCode.Equals("de") && personData.Length > 0 && interwikis.Length > 0)
-                    articleText += "\r\n";
-                break;
-
-            case "ar":
-            case "arz":
-            case "cs":
-            case "el":
-            case "dk":
-            case "pl":
-            case "ru":
-            case "uk":
-                articleText += personData + strStub + categories;
-                break;
-
-            case "it":
-                if (Variables.Project == ProjectEnum.wikiquote)
-                    articleText += personData + strStub + categories;
-                else
-                    articleText += personData + categories + strStub;
-                break;
-
-            default:
-                articleText += personData + categories + strStub;
-                break;
-        }
-        articleText += interwikis;
+        articleText = AppendSortedMetadata(
+            articleText,
+            personData,
+            categories,
+            strStub,
+            interwikis);
 
         // Only trim start on Category namespace, restore any saved short page monitor text
         return (Namespace.Determine(articleTitle) == Namespace.Category ? articleText.Trim() : articleText.TrimEnd()) + shortPagesMonitor;
@@ -864,6 +835,81 @@ en, sq, ru
         return WikiRegexes.MultipleIssues.Replace(
             articleText,
             m => Regex.Replace(m.Value, "(\r\n)+", "\r\n"));
+    }
+
+    /// <summary>
+    /// Appends the extracted metadata fragments to the article using the
+    /// ordering rules required for the current wiki.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to which metadata will be appended.
+    /// </param>
+    /// <param name="personData">
+    /// The extracted person data metadata.
+    /// </param>
+    /// <param name="categories">
+    /// The extracted category metadata.
+    /// </param>
+    /// <param name="strStub">
+    /// The extracted stub templates.
+    /// </param>
+    /// <param name="interwikis">
+    /// The extracted interwiki links.
+    /// </param>
+    /// <returns>
+    /// The article text with metadata appended in the required order.
+    /// </returns>
+    private static string AppendSortedMetadata(
+        string articleText,
+        string personData,
+        string categories,
+        string strStub,
+        string interwikis)
+    {
+        switch (Variables.LangCode)
+        {
+            case "de":
+            case "sl":
+                articleText += strStub + categories + personData;
+
+                // On German Wikipedia, a blank line is required between
+                // Persondata and interwiki links.
+                if (Variables.LangCode.Equals("de") &&
+                    personData.Length > 0 &&
+                    interwikis.Length > 0)
+                {
+                    articleText += "\r\n";
+                }
+
+                break;
+
+            case "ar":
+            case "arz":
+            case "cs":
+            case "el":
+            case "dk":
+            case "pl":
+            case "ru":
+            case "uk":
+                articleText += personData + strStub + categories;
+                break;
+
+            case "it":
+                if (Variables.Project == ProjectEnum.wikiquote)
+                    articleText += personData + strStub + categories;
+                else
+                    articleText += personData + categories + strStub;
+
+                break;
+
+            default:
+                articleText += personData + categories + strStub;
+                break;
+        }
+
+        articleText += interwikis;
+
+        return articleText;
     }
 
     /// <summary>
