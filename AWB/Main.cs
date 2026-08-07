@@ -7911,21 +7911,41 @@ font-size: 150%;'>No changes</h2>
 
     #region menus and buttons
 
+    /// <summary>
+    /// Displays the custom module editor.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void makeModuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
         CModule.Show();
     }
 
+    /// <summary>
+    /// Displays additional skip options.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnMoreSkip_Click(object sender, EventArgs e)
     {
         Skip.ShowDialog();
     }
 
+    /// <summary>
+    /// Retrieves and displays a preview of the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnPreview_Click(object sender, EventArgs e)
     {
         GetPreview();
     }
 
+    /// <summary>
+    /// Retrieves and displays a diff for the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnDiff_Click(object sender, EventArgs e)
     {
         GetDiff();
@@ -7975,73 +7995,146 @@ font-size: 150%;'>No changes</h2>
             Stop();
     }
 
+    /// <summary>
+    /// Saves the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnSave_Click(object sender, EventArgs e)
     {
         Save();
     }
 
+    /// <summary>
+    /// Skips the current article at the user's request.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnIgnore_Click(object sender, EventArgs e)
     {
         SkipPage("user");
     }
 
+    /// <summary>
+    /// Moves the current article and then continues processing.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnMove_Click(object sender, EventArgs e)
     {
         MoveArticle();
         Start();
     }
 
+    /// <summary>
+    /// Deletes the current article and then continues processing.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnDelete_Click(object sender, EventArgs e)
     {
         DeleteArticle();
         Start();
     }
 
+    /// <summary>
+    /// Protects the current article and then continues processing.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnProtect_Click(object sender, EventArgs e)
     {
         ProtectArticle();
         Start();
     }
 
+    /// <summary>
+    /// Enables or disables automatic filtering of non-mainspace pages and,
+    /// when enabled, immediately removes non-mainspace articles from the list.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void filterOutNonMainSpaceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        listMaker.FilterNonMainAuto = filterOutNonMainSpaceToolStripMenuItem.Checked;
+        listMaker.FilterNonMainAuto =
+            filterOutNonMainSpaceToolStripMenuItem.Checked;
 
         if (filterOutNonMainSpaceToolStripMenuItem.Checked)
+        {
             listMaker.FilterNonMainArticles();
+        }
     }
 
+    /// <summary>
+    /// Enables or disables duplicate filtering and, when enabled, immediately
+    /// removes duplicate entries from the current list.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void removeDuplicatesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        listMaker.FilterDuplicates = removeDuplicatesToolStripMenuItem.Checked;
+        listMaker.FilterDuplicates =
+            removeDuplicatesToolStripMenuItem.Checked;
 
         if (removeDuplicatesToolStripMenuItem.Checked)
+        {
             listMaker.RemoveListDuplicates();
+        }
     }
 
+    /// <summary>
+    /// Opens or applies the special list filter.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void specialFilterToolStripMenuItem_Click(object sender, EventArgs e)
     {
         listMaker.Filter();
     }
 
+    /// <summary>
+    /// Converts entries in the current list to their corresponding talk pages.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void convertToTalkPagesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         listMaker.ConvertToTalkPages();
     }
 
+    /// <summary>
+    /// Converts talk-page entries in the current list to their corresponding
+    /// subject pages.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void convertFromTalkPagesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         listMaker.ConvertFromTalkPages();
     }
 
+    /// <summary>
+    /// Enables or disables automatic alphabetical sorting and, when enabled,
+    /// immediately sorts the current list.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void sortAlphabeticallyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        listMaker.AutoAlpha = sortAlphabeticallyToolStripMenuItem.Checked;
+        listMaker.AutoAlpha =
+            sortAlphabeticallyToolStripMenuItem.Checked;
 
         if (sortAlphabeticallyToolStripMenuItem.Checked)
+        {
             listMaker.AlphaSortList();
+        }
     }
 
+    /// <summary>
+    /// Saves the current list to a text file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void saveListToTextFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         listMaker.SaveList();
@@ -8212,56 +8305,124 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Converts the selected HTML unordered list into wiki list markup.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void listToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = Tools.HTMLListToWiki(txtEdit.SelectedText, "*");
+        txtEdit.SelectedText =
+            Tools.HTMLListToWiki(txtEdit.SelectedText, "*");
     }
 
+    /// <summary>
+    /// Converts the selected HTML ordered list into wiki list markup.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void listToolStripMenuItem1_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = Tools.HTMLListToWiki(txtEdit.SelectedText, "#");
+        txtEdit.SelectedText =
+            Tools.HTMLListToWiki(txtEdit.SelectedText, "#");
     }
 
+    /// <summary>
+    /// Cuts the selected text to the clipboard.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void cutToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.Cut();
     }
 
+    /// <summary>
+    /// Copies the selected text to the clipboard.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void copyToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.Copy();
     }
 
+    /// <summary>
+    /// Pastes plain text from the clipboard.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        DataFormats.Format plainText = DataFormats.GetFormat(DataFormats.Text);
+        DataFormats.Format plainText =
+            DataFormats.GetFormat(DataFormats.Text);
+
         txtEdit.Paste(plainText);
     }
 
+    /// <summary>
+    /// Selects all text in the editor.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.SelectAll();
     }
 
+    /// <summary>
+    /// Undoes the most recent edit.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void undoToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.Undo();
     }
 
-    private void humanNameDisambigTagToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Inserts a human-name disambiguation template using the current
+    /// article information.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void humanNameDisambigTagToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (TheArticle != null)
-            txtEdit.SelectedText = "{{Hndis|name=" + Tools.MakeHumanCatKey(TheArticle.Name, TheArticle.ArticleText) + "}}";
+        {
+            txtEdit.SelectedText =
+                "{{Hndis|name=" +
+                Tools.MakeHumanCatKey(
+                    TheArticle.Name,
+                    TheArticle.ArticleText) +
+                "}}";
+        }
     }
 
+    /// <summary>
+    /// Prepends the Wikify maintenance template to the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void wikifyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Text = "{{Wikify|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\n" + txtEdit.Text;
+        txtEdit.Text =
+            "{{Wikify|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\n"
+            + txtEdit.Text;
     }
 
+    /// <summary>
+    /// Prepends the Cleanup maintenance template to the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void cleanupToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Text = "{{cleanup|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\n" + txtEdit.Text;
+        txtEdit.Text =
+            "{{cleanup|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\n"
+            + txtEdit.Text;
     }
 
     private void speedyDeleteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -8281,19 +8442,36 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Inserts the <c>{{subst:clear}}</c> template at the current selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void clearToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.SelectedText = "{{subst:clear}}";
     }
 
+    /// <summary>
+    /// Inserts the standard disambiguation template at the current selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void disambiguationToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.SelectedText = "{{Disambiguation}}";
     }
 
+    /// <summary>
+    /// Inserts the Uncategorized maintenance template with the current month
+    /// and year at the current selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void uncategorisedToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = "{{Uncategorized|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}";
+        txtEdit.SelectedText =
+            "{{Uncategorized|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}";
     }
 
     private void bypassAllRedirectsToolStripMenuItem_Click(object sender, EventArgs e)
