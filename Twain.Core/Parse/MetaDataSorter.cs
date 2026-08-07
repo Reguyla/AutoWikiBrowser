@@ -1386,21 +1386,14 @@ en, sq, ru
             defaultSort += "\r\n";
         }
 
-        // Extract any {{uncategorized}}/{{improve categories}} template, only from last section
-        // extract last section, if present, as text from final heading
-        // if no headings then last section is whole article
-        MatchCollection hc = WikiRegexes.Headings.Matches(articleText);
-        string lastSection = articleText;
-        string lastSectionNoComments = articleTextNoComments;
-        string restOfArticleText = string.Empty;
-
-        if (hc.Count > 0)
-        {
-            int h = hc[hc.Count - 1].Index;
-            lastSection = lastSection.Substring(h);
-            lastSectionNoComments = Tools.ReplaceWithSpaces(lastSection, WikiRegexes.Comments.Matches(lastSection));
-            restOfArticleText = articleText.Substring(0, h);
-        }
+        // Extract any {{Uncategorized}}/{{Improve categories}} template from the
+        // article's final section. Last-section detection is handled by GetLastSection().
+        GetLastSection(
+           articleText,
+           articleTextNoComments,
+           out string lastSection,
+           out string lastSectionNoComments,
+           out string restOfArticleText);
 
         string uncat = string.Empty;
         if (UncategorizedImproveCats.IsMatch(lastSectionNoComments) && !UncategorizedImproveCats.IsMatch(restOfArticleText))
@@ -1457,6 +1450,57 @@ en, sq, ru
 
                 return d.Value;
             });
+    }
+
+    /// <summary>
+    /// Splits the article into its final section and the text preceding that
+    /// section, and creates a comment-neutral version of the final section.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article text.
+    /// </param>
+    /// <param name="articleTextNoComments">
+    /// The article text with comments replaced by whitespace.
+    /// </param>
+    /// <param name="lastSection">
+    /// The final section of the article, or the complete article when no
+    /// headings are present.
+    /// </param>
+    /// <param name="lastSectionNoComments">
+    /// The final section with comments replaced by whitespace.
+    /// </param>
+    /// <param name="restOfArticleText">
+    /// The portion of the article preceding the final section.
+    /// </param>
+    /// <remarks>
+    /// The final section begins at the last top-level heading in the article.
+    /// If the article contains no headings, the entire article is treated as
+    /// the final section.
+    /// </remarks>
+    private static void GetLastSection(
+        string articleText,
+        string articleTextNoComments,
+        out string lastSection,
+        out string lastSectionNoComments,
+        out string restOfArticleText)
+    {
+        MatchCollection hc = WikiRegexes.Headings.Matches(articleText);
+
+        lastSection = articleText;
+        lastSectionNoComments = articleTextNoComments;
+        restOfArticleText = string.Empty;
+
+        if (hc.Count == 0)
+            return;
+
+        int h = hc[hc.Count - 1].Index;
+
+        lastSection = articleText.Substring(h);
+        lastSectionNoComments = Tools.ReplaceWithSpaces(
+            lastSection,
+            WikiRegexes.Comments.Matches(lastSection));
+
+        restOfArticleText = articleText.Substring(0, h);
     }
 
     /// <summary>
