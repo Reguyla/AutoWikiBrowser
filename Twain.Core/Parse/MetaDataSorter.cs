@@ -2333,15 +2333,9 @@ en, sq, ru
             string s2 = s;
             bool isACategory = WikiRegexes.Category.IsMatch(s2);
 
-            // Compare categories using an uppercase first character in the sort key.
-            if (s2.Contains("|") && isACategory)
+            if (isACategory)
             {
-                s2 = Regex.Replace(
-                    s2,
-                    @"(\|\s*)(.+)(\s*\]\]$)",
-                    m => m.Groups[1].Value +
-                         Tools.TurnFirstToUpper(m.Groups[2].Value) +
-                         m.Groups[3].Value);
+                s2 = NormalizeCategorySortKey(s2);
             }
 
             foreach (string u in uniqueItems)
@@ -2415,6 +2409,30 @@ en, sq, ru
         }
 
         return list.ToString();
+    }
+
+    /// <summary>
+    /// Normalizes the first character of a category sort key for duplicate
+    /// comparison.
+    /// </summary>
+    /// <param name="category">
+    /// The category markup to normalize.
+    /// </param>
+    /// <returns>
+    /// The category markup with the first character of its sort key normalized,
+    /// or the original value when no sort key is present.
+    /// </returns>
+    private static string NormalizeCategorySortKey(string category)
+    {
+        if (!category.Contains("|"))
+            return category;
+
+        return Regex.Replace(
+            category,
+            @"(\|\s*)(.+)(\s*\]\]$)",
+            m => m.Groups[1].Value +
+                 Tools.TurnFirstToUpper(m.Groups[2].Value) +
+                 m.Groups[3].Value);
     }
 
     /// <summary>
