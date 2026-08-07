@@ -295,9 +295,26 @@ public class MetaDataSorter
     private static readonly CultureInfo EnUsCulture =
         new CultureInfo("en-US", true);
 
+    // TODO (Modernization):
+    // Separate retrieval, parsing, and ordering into independent methods.
+    // This method currently downloads the source data, parses the raw text,
+    // normalizes language codes, and constructs multiple ordering collections,
+    // making it difficult to test each responsibility independently.
+    //
+    // TODO (Modernization):
+    // Replace the hard-coded AutoWikiBrowser interwiki definition URL with a
+    // configurable provider so different MediaWiki installations can supply
+    // project-specific interwiki ordering data.
+    //
     /// <summary>
-    ///
+    /// Loads the interwiki ordering data from the configured source and
+    /// initializes the supported ordering collections.
     /// </summary>
+    /// <remarks>
+    /// During normal operation, the ordering data is downloaded from the
+    /// AutoWikiBrowser interwiki definition page. In unit-test mode, a
+    /// predefined data set is used instead.
+    /// </remarks>
     private void LoadInterWikiFromNetwork()
     {
         string text = !Globals.UnitTestMode
@@ -310,20 +327,33 @@ en, sq, ru
 <!--InterwikiLocalFirstEnds-->";
 
         string interwikiLocalAlphaRaw =
-            RemExtra(Tools.StringBetween(text, "<!--InterwikiLocalAlphaBegins-->", "<!--InterwikiLocalAlphaEnds-->"));
+            RemExtra(
+                Tools.StringBetween(
+                    text,
+                    "<!--InterwikiLocalAlphaBegins-->",
+                    "<!--InterwikiLocalAlphaEnds-->"));
+
         string interwikiLocalFirstRaw =
-            RemExtra(Tools.StringBetween(text, "<!--InterwikiLocalFirstBegins-->", "<!--InterwikiLocalFirstEnds-->"));
+            RemExtra(
+                Tools.StringBetween(
+                    text,
+                    "<!--InterwikiLocalFirstBegins-->",
+                    "<!--InterwikiLocalFirstEnds-->"));
 
         InterwikiLocalAlpha = new List<string>();
 
-        foreach (string s in interwikiLocalAlphaRaw.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+        foreach (string s in interwikiLocalAlphaRaw.Split(
+            new[] { "," },
+            StringSplitOptions.RemoveEmptyEntries))
         {
             InterwikiLocalAlpha.Add(s.Trim().ToLower());
         }
 
         InterwikiLocalFirst = new List<string>();
 
-        foreach (string s in interwikiLocalFirstRaw.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+        foreach (string s in interwikiLocalFirstRaw.Split(
+            new[] { "," },
+            StringSplitOptions.RemoveEmptyEntries))
         {
             InterwikiLocalFirst.Add(s.Trim().ToLower());
         }
