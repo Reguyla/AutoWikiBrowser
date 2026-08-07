@@ -7280,7 +7280,7 @@ font-size: 150%;'>No changes</h2>
         OpenPreferences(false);
     }
 
-    List<int> alertPreferences = new List<int>();
+    List<int> alertPreferences = new();
 
     private void OpenPreferences(bool focusSiteTab)
     {

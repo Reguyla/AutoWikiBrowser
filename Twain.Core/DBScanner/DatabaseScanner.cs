@@ -116,7 +116,7 @@ public partial class DatabaseScanner : Form
 
     private Regex TitleDoesRegex, TitleDoesNotRegex;
     private Regex ArticleDoesContain, ArticleDoesNotContain;
-    private readonly List<int> Namespaces = new List<int>();
+    private readonly List<int> Namespaces = new();
 
     private readonly CrossThreadQueue<string> Queue = new CrossThreadQueue<string>();
 

@@ -93,7 +93,7 @@ public partial class NamespacesControl : UserControl
     /// <returns></returns>
     public List<int> GetSelectedNamespaces()
     {
-        List<int> ret = new List<int>();
+        List<int> ret = new();
         ret.AddRange(GetSelectedNamespaces(checkedLBContent));
         ret.AddRange(GetSelectedNamespaces(checkedLBTalk));
         ret.Sort();
@@ -107,7 +107,7 @@ public partial class NamespacesControl : UserControl
     /// <returns></returns>
     private static IEnumerable<int> GetSelectedNamespaces(CheckedListBox clb)
     {
-        List<int> ret = new List<int>();
+        List<int> ret = new();
         for (int i = 0; i < clb.Items.Count; i++)
         {
             if (clb.GetItemChecked(i))

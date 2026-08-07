@@ -522,7 +522,7 @@ public class AsyncApiEditModernTests
             callbackContext);
 
         int stateChangedCount = 0;
-        List<int> eventThreadIds = new List<int>();
+        List<int> eventThreadIds = new();
 
         editor.StateChanged +=
             delegate (object sender, EventArgs e)
@@ -598,7 +598,7 @@ public class AsyncApiEditModernTests
         int operationFailedCount = 0;
         string reportedOperationName = null;
         Exception reportedException = null;
-        List<int> eventThreadIds = new List<int>();
+        List<int> eventThreadIds = new();
 
         editor.OperationFailed +=
             delegate (object sender, AsyncApiEditOperationFailedEventArgs e)

@@ -388,7 +388,7 @@ public class SkipPrefs
     public bool SkipNoDisambiguation = false;
     public bool SkipNoLinksOnPage = false;
 
-    public List<int> GeneralSkipList = new List<int>();
+    public List<int> GeneralSkipList = new();
 }
 
 [Serializable]
@@ -458,7 +458,7 @@ public class GeneralPrefs
 
     public bool LoggingEnabled = true;
 
-    public List<int> AlertPreferences = new List<int>();
+    public List<int> AlertPreferences = new();
 }
 
 [Serializable]
