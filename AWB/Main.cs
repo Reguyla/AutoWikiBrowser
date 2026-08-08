@@ -4239,7 +4239,7 @@ font-size: 150%;'>No changes</h2>
         GuiUpdateAfterProcessing();
     }
 
-    private string webBrowserMouseOverUrl = string.Empty;
+    private string _webBrowserMouseOverUrl = string.Empty;
     /// <summary>
     /// WebBrowser Document mouse move event: if mouse is over a link, store the URL
     /// Enables use of system browser for right-click Open in New Window option
@@ -4250,7 +4250,7 @@ font-size: 150%;'>No changes</h2>
         object sender,
         HtmlElementEventArgs e)
     {
-        webBrowserMouseOverUrl = string.Empty;
+        _webBrowserMouseOverUrl = string.Empty;
 
         if (!(sender is HtmlDocument document))
         {
@@ -4264,7 +4264,7 @@ font-size: 150%;'>No changes</h2>
                 "A",
                 StringComparison.OrdinalIgnoreCase))
         {
-            webBrowserMouseOverUrl =
+            _webBrowserMouseOverUrl =
                 currentElement.GetAttribute("href");
         }
     }
@@ -4317,7 +4317,7 @@ font-size: 150%;'>No changes</h2>
         e.Cancel = true;
 
         if (!TryGetAllowedExternalUrl(
-                webBrowserMouseOverUrl,
+                _webBrowserMouseOverUrl,
                 out string externalUrl))
         {
             Tools.WriteDebug(
@@ -4352,7 +4352,7 @@ font-size: 150%;'>No changes</h2>
     /// </remarks>
     private void PreviewComplete(
         AsyncApiEdit sender,
-        string result)
+        string previewHtml)
     {
         _lastArticle = txtEdit.Text;
         _skippable = false;
@@ -4363,12 +4363,12 @@ font-size: 150%;'>No changes</h2>
 
         if (document == null)
         {
-            webBrowser.DocumentText = BuildPreviewHtml(sender, result);
+            webBrowser.DocumentText = BuildPreviewHtml(sender, previewHtml);
         }
         else
         {
             document.OpenNew(false);
-            document.Write(BuildPreviewHtml(sender, result));
+            document.Write(BuildPreviewHtml(sender, previewHtml));
 
             document.MouseMove -= Document_MouseMove;
             document.MouseMove += Document_MouseMove;
@@ -4378,9 +4378,23 @@ font-size: 150%;'>No changes</h2>
         GuiUpdateAfterProcessing();
     }
 
+    /// <summary>
+    /// Handles completion of an asynchronous page-open request and begins
+    /// processing the loaded page.
+    /// </summary>
+    /// <param name="editor">
+    /// The editor that completed the page-open request.
+    /// </param>
+    /// <param name="page">
+    /// Information and content for the page returned by the open operation.
+    /// </param>
+    /// <remarks>
+    /// Diagnostic messages are written before and after page processing so the
+    /// editor's active state can be observed during the completion workflow.
+    /// </remarks>
     private void OpenComplete(
-    AsyncApiEdit editor,
-    PageInfo page)
+        AsyncApiEdit editor,
+        PageInfo page)
     {
         Tools.WriteDebug(
             nameof(OpenComplete),
@@ -4393,6 +4407,15 @@ font-size: 150%;'>No changes</h2>
             $"After PageLoaded: IsActive={editor.IsActive}");
     }
 
+    /// <summary>
+    /// Starts generation of a preview for the current article using the current
+    /// editor contents.
+    /// </summary>
+    /// <remarks>
+    /// Preview generation is not started when no article is loaded or when the
+    /// session editor is already processing another request. Diagnostic messages
+    /// record the preview state and reason when the operation cannot be started.
+    /// </remarks>
     private void GetPreview()
     {
         Article article = TheArticle;
@@ -5005,7 +5028,7 @@ font-size: 150%;'>No changes</h2>
     // TODO (Editor Modernization):
     // Verify why the target line number is subtracted from the CRLF match
     // position. Preserve the calculation until line-navigation behavior has
-    // been tested with empty lines, the final line, and multiline content.
+    // been tested with empty lines, the final line, and multi-line content.
     /// <summary>
     /// Moves the caret to the specified line in the article editor.
     /// </summary>
