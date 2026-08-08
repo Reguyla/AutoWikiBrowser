@@ -196,6 +196,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     { get; private set; }
 
     #region Constructor and MainForm load/resize
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainForm"/> class.
+    /// </summary>
     /// <remarks>
     /// Performs application startup initialization, including loading application
     /// settings, creating the user interface, initializing the editing session,
