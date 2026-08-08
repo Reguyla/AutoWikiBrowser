@@ -288,13 +288,13 @@ partial class MainForm
     /// </param>
     private void UpdateRecentList(IEnumerable<string> list)
     {
-        RecentList.Clear();
+        _recentList.Clear();
 
         foreach (string path in list)
         {
             if (!string.IsNullOrWhiteSpace(path))
             {
-                RecentList.Add(path);
+                _recentList.Add(path);
             }
         }
 
@@ -309,8 +309,8 @@ partial class MainForm
     /// </param>
     private void UpdateRecentList(string path)
     {
-        RecentList.Remove(path);
-        RecentList.Insert(0, path);
+        _recentList.Remove(path);
+        _recentList.Insert(0, path);
 
         UpdateRecentSettingsMenu();
     }
@@ -321,7 +321,7 @@ partial class MainForm
     /// </summary>
     private void FixupObsoleteRecentSettings()
     {
-        RecentList.RemoveAll(path =>
+        _recentList.RemoveAll(path =>
             string.Equals(
                 path,
                 "Default.xml",
@@ -331,9 +331,9 @@ partial class MainForm
                 AwbDirs.DefaultSettings,
                 StringComparison.OrdinalIgnoreCase));
 
-        while (RecentList.Count > 5)
+        while (_recentList.Count > 5)
         {
-            RecentList.RemoveAt(5);
+            _recentList.RemoveAt(5);
         }
     }
 
@@ -356,13 +356,13 @@ partial class MainForm
 
         defaultSettingsItem.Click += DefaultSettingsClick;
 
-        if (RecentList.Count > 0)
+        if (_recentList.Count > 0)
         {
             recentToolStripMenuItem.DropDownItems.Add(
                 new ToolStripSeparator());
         }
 
-        foreach (string fileName in RecentList)
+        foreach (string fileName in _recentList)
         {
             ToolStripItem recentSettingsItem =
                 recentToolStripMenuItem.DropDownItems.Add(fileName);
@@ -370,7 +370,7 @@ partial class MainForm
             recentSettingsItem.Click += RecentSettingsClick;
         }
 
-        recentToolStripMenuItem.Visible = RecentList.Count > 0;
+        recentToolStripMenuItem.Visible = _recentList.Count > 0;
     }
 
     /// <summary>
@@ -381,7 +381,7 @@ partial class MainForm
         RegistryUtils.SetValue(
             string.Empty,
             "RecentList",
-            string.Join("|", RecentList));
+            string.Join("|", _recentList));
     }
 
     /// <summary>

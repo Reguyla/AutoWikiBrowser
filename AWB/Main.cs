@@ -164,7 +164,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly Stopwatch _sessionTimer = Stopwatch.StartNew();
 
-    private readonly List<string> RecentList = new();
+    private readonly List<string> _recentList = new();
 
     private List<TypoStat> _typoStats;
 
@@ -172,9 +172,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // Diff
     // --------------------------------------------------------------------
 
-    private readonly WikiDiff Diff = new();
+    private readonly WikiDiff _diff = new();
 
-    private readonly JsAdapter DiffScriptingAdapter;
+    private readonly JsAdapter _diffScriptingAdapter;
 
     private readonly DiffGenerationService _diffGenerationService = new();
 
@@ -206,7 +206,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         CheckSettings();
 
-        DiffScriptingAdapter = new JsAdapter(this);
+        _diffScriptingAdapter = new JsAdapter(this);
 
         // TODO(Twain): Remove legacy updater initialization when Twain.Updater
         // replaces the current AWB updater workflow.
@@ -4166,7 +4166,7 @@ font-size: 150%;'>No changes</h2>
             "</head>" +
             "<body>" +
             tableHeader +
-            Diff.GetDiff(
+            _diff.GetDiff(
                 article.OriginalArticleText,
                 txtEdit.Text,
                 2) +
@@ -4933,7 +4933,7 @@ font-size: 150%;'>No changes</h2>
         {
             case DiffChangeMode.Change:
                 txtEdit.Text =
-                    Diff.UndoChange(
+                    _diff.UndoChange(
                         left,
                         right);
 
@@ -4941,7 +4941,7 @@ font-size: 150%;'>No changes</h2>
 
             case DiffChangeMode.Deletion:
                 txtEdit.Text =
-                    Diff.UndoDeletion(
+                    _diff.UndoDeletion(
                         left,
                         right);
 
@@ -4949,7 +4949,7 @@ font-size: 150%;'>No changes</h2>
 
             case DiffChangeMode.Addition:
                 txtEdit.Text =
-                    Diff.UndoAddition(right);
+                    _diff.UndoAddition(right);
 
                 break;
         }
