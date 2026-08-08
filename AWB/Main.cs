@@ -9667,9 +9667,10 @@ font-size: 150%;'>No changes</h2>
     // TODO(Twain): Replace the BackgroundRequest callback and WinForms
     // InvokeRequired/BeginInvoke flow with an async completion path that
     // returns the typo-loading result explicitly.
+
     /// <summary>
-    /// Completes regular-expression typo loading, updates the typo-related UI,
-    /// and resets typo statistics when rules were loaded successfully.
+    /// Completes regular-expression typo loading and applies the resulting
+    /// typo state to the user interface.
     /// </summary>
     /// <param name="req">
     /// The completed background request.
@@ -9690,6 +9691,17 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        ApplyRegexTypoLoadResult();
+    }
+
+    // TODO(Twain): Replace direct control updates with a typo-load result model
+    // when typo loading is moved behind the shared diagnostics/language service.
+    /// <summary>
+    /// Applies the completed typo-loading state to the related controls,
+    /// statistics, and cached typo data.
+    /// </summary>
+    private void ApplyRegexTypoLoadResult()
+    {
         chkRegExTypo.Checked =
             chkSkipIfNoRegexTypo.Enabled =
                 RegexTypos.TyposLoaded;
