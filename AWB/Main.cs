@@ -11086,8 +11086,8 @@ font-size: 150%;'>No changes</h2>
     /// </param>
     private void NewWhatLinksHere(string title)
     {
-        // TODO(Twain): Extract browser URL construction and navigation into a
-        // shared helper so embedded wiki pages can be loaded consistently.
+        // TODO(Twain): Consolidate embedded browser navigation and error handling
+        // into a shared browser helper once all browser workflows have been reviewed.
         try
         {
             if (EditBoxTab.SelectedTab != tpLinks ||
@@ -11097,15 +11097,12 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            string encodedTitle = WebUtility.UrlEncode(title);
-
             string url =
-                Variables.URLIndex +
-                "?title=Special:WhatLinksHere/" +
-                encodedTitle +
-                "&printable=yes";
+                BuildWhatLinksHereUrl(
+                    Variables.URLIndex,
+                    title);
 
-            Uri targetUri = new Uri(url);
+            Uri targetUri = new(url);
 
             if (webBrowserLinks.Url != targetUri)
             {
@@ -11129,6 +11126,32 @@ font-size: 150%;'>No changes</h2>
                     "<html><body><p>Unable to load What Links Here</p></body></html>");
             }
         }
+    }
+
+    /// <summary>
+    /// Builds the printable "What Links Here" URL for the specified page.
+    /// </summary>
+    /// <param name="urlIndex">
+    /// The wiki index URL.
+    /// </param>
+    /// <param name="pageTitle">
+    /// The page title.
+    /// </param>
+    /// <returns>
+    /// The printable "What Links Here" URL.
+    /// </returns>
+    private static string BuildWhatLinksHereUrl(
+        string urlIndex,
+        string pageTitle)
+    {
+        string encodedTitle =
+            WebUtility.UrlEncode(pageTitle);
+
+        return
+            urlIndex +
+            "?title=Special:WhatLinksHere/" +
+            encodedTitle +
+            "&printable=yes";
     }
 
     /// <summary>
