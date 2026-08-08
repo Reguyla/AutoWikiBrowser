@@ -7264,28 +7264,63 @@ font-size: 150%;'>No changes</h2>
     }
 #endif
 
+    /// <summary>
+    /// Performs release-only UI initialization.
+    /// </summary>
+    /// <remarks>
+    /// This method is compiled only for release builds.
+    /// </remarks>
     [Conditional("RELEASE")]
     private void Release()
     {
         if (MainTab.Contains(tpBots) && !Globals.UsingMono)
+        {
             MainTab.Controls.Remove(tpBots);
+        }
     }
 
     #endregion
 
     #region set variables
 
-    private void PreferencesToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the Preferences dialog.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void PreferencesToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         OpenPreferences(false);
     }
 
     List<int> alertPreferences = new();
 
+    // TODO: Replace the manual preference mapping between Main and MyPreferences
+    // with a dedicated settings model or mapper to reduce duplication and make
+    // future preference additions less error-prone.
+    //
+    // TODO: Split preference dialog initialization, accepted-setting application,
+    // and project-change handling into separate helpers or services.
+    //
+    // TODO: Move project-change side effects out of the preferences UI workflow
+    // so project switching can be handled consistently from other entry points.
+    /// <summary>
+    /// Opens the preferences dialog, applies any accepted preference changes,
+    /// and updates project-dependent state when the selected wiki changes.
+    /// </summary>
+    /// <param name="focusSiteTab">
+    /// <see langword="true"/> to open the preferences dialog with the site
+    /// settings tab focused; otherwise, <see langword="false"/>.
+    /// </param>
     private void OpenPreferences(bool focusSiteTab)
     {
-        MyPreferences myPrefs = new MyPreferences(Variables.LangCode, Variables.Project,
-                                                  Variables.CustomProject, Variables.Protocol)
+        MyPreferences myPrefs = new MyPreferences(
+            Variables.LangCode,
+            Variables.Project,
+            Variables.CustomProject,
+            Variables.Protocol)
         {
             TextBoxFont = txtEdit.Font,
             LowThreadPriority = LowThreadPriority,
@@ -7305,12 +7340,18 @@ font-size: 150%;'>No changes</h2>
             PrefAddUsingAWBOnArticleAction = Article.AddUsingAWBOnArticleAction,
             PrefSuppressUsingAWB = _suppressUsingAWB,
 
-            PrefListComparerUseCurrentArticleList = _listComparerUseCurrentArticleList,
-            PrefListSplitterUseCurrentArticleList = _listSplitterUseCurrentArticleList,
-            PrefDBScannerUseCurrentArticleList = _dbScannerUseCurrentArticleList,
+            PrefListComparerUseCurrentArticleList =
+                _listComparerUseCurrentArticleList,
+            PrefListSplitterUseCurrentArticleList =
+                _listSplitterUseCurrentArticleList,
+            PrefDBScannerUseCurrentArticleList =
+                _dbScannerUseCurrentArticleList,
 
             PrefDiffInBotMode = doDiffInBotMode,
-            // show edit page no longer available as an option
+
+            // TODO: Remove the legacy actionOnLoad value mapping once the obsolete
+            // "show edit page" option and its persisted value are no longer supported.
+            // The "show edit page" option is no longer available.
             PrefOnLoad = actionOnLoad == 2 ? 0 : actionOnLoad,
 
             EnableLogging = loggingEnabled,
@@ -7332,21 +7373,28 @@ font-size: 150%;'>No changes</h2>
             _autoSaveEditBoxEnabled = myPrefs.PrefAutoSaveEditBoxEnabled;
 
             if (EditBoxSaveTimer.Enabled && !_autoSaveEditBoxEnabled)
+            {
                 EditBoxSaveTimer.Enabled = false;
+            }
 
             AutoSaveEditBoxPeriod = myPrefs.PrefAutoSaveEditBoxPeriod;
             _autoSaveEditBoxFile = myPrefs.PrefAutoSaveEditBoxFile;
             _suppressUsingAWB = myPrefs.PrefSuppressUsingAWB;
-            Article.AddUsingAWBOnArticleAction = myPrefs.PrefAddUsingAWBOnArticleAction;
+            Article.AddUsingAWBOnArticleAction =
+                myPrefs.PrefAddUsingAWBOnArticleAction;
 
             IgnoreNoBots = myPrefs.PrefIgnoreNoBots;
-            ClearPageListOnProjectChange = myPrefs.PrefClearPageListOnProjectChange;
+            ClearPageListOnProjectChange =
+                myPrefs.PrefClearPageListOnProjectChange;
 
             ShowMovingAverageTimer = myPrefs.PrefShowTimer;
 
-            _listComparerUseCurrentArticleList = myPrefs.PrefListComparerUseCurrentArticleList;
-            _listSplitterUseCurrentArticleList = myPrefs.PrefListSplitterUseCurrentArticleList;
-            _dbScannerUseCurrentArticleList = myPrefs.PrefDBScannerUseCurrentArticleList;
+            _listComparerUseCurrentArticleList =
+                myPrefs.PrefListComparerUseCurrentArticleList;
+            _listSplitterUseCurrentArticleList =
+                myPrefs.PrefListSplitterUseCurrentArticleList;
+            _dbScannerUseCurrentArticleList =
+                myPrefs.PrefDBScannerUseCurrentArticleList;
 
             doDiffInBotMode = myPrefs.PrefDiffInBotMode;
             actionOnLoad = myPrefs.PrefOnLoad;
@@ -7357,16 +7405,24 @@ font-size: 150%;'>No changes</h2>
 
             alertPreferences = myPrefs.AlertPreferences;
 
-            if (myPrefs.Language != Variables.LangCode || myPrefs.Project != Variables.Project
-                || (myPrefs.CustomProject != Variables.CustomProject) || (myPrefs.Protocol != Variables.Protocol))
+            if (myPrefs.Language != Variables.LangCode ||
+                myPrefs.Project != Variables.Project ||
+                myPrefs.CustomProject != Variables.CustomProject ||
+                myPrefs.Protocol != Variables.Protocol)
             {
-                SetProject(myPrefs.Language, myPrefs.Project, myPrefs.CustomProject, myPrefs.Protocol);
+                SetProject(
+                    myPrefs.Language,
+                    myPrefs.Project,
+                    myPrefs.CustomProject,
+                    myPrefs.Protocol);
 
                 BotMode = false;
                 lblOnlyBots.Visible = true;
 
                 if (ClearPageListOnProjectChange)
+                {
                     listMaker.Clear();
+                }
 
                 DisableButtons();
             }
@@ -7696,20 +7752,38 @@ font-size: 150%;'>No changes</h2>
     }
     #endregion
 
-    // TODO: Cleanup/refactor UI update functions
+    // TODO: Cleanup/refactor UI update functions.
     #region Enabling/Disabling of buttons
 
+    /// <summary>
+    /// Updates the availability of list-related commands and refreshes the
+    /// displayed article count.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void UpdateButtons(object sender, EventArgs e)
     {
         SetStartButton(listMaker.NumberOfArticles > 0);
 
-        lbltsNumberofItems.Text = "Pages: " + listMaker.NumberOfArticles;
+        lbltsNumberofItems.Text =
+            "Pages: " + listMaker.NumberOfArticles;
 
-        specialFilterToolStripMenuItem1.Enabled = saveListToTextFileToolStripMenuItem.Enabled
-            = clearCurrentListToolStripMenuItem.Enabled = convertFromTalkPagesToolStripMenuItem.Enabled
-            = convertToTalkPagesToolStripMenuItem.Enabled = (listMaker.NumberOfArticles > 0);
+        specialFilterToolStripMenuItem1.Enabled =
+            saveListToTextFileToolStripMenuItem.Enabled =
+            clearCurrentListToolStripMenuItem.Enabled =
+            convertFromTalkPagesToolStripMenuItem.Enabled =
+            convertToTalkPagesToolStripMenuItem.Enabled =
+            listMaker.NumberOfArticles > 0;
     }
 
+    /// <summary>
+    /// Enables or disables the Start controls without raising redundant
+    /// <see cref="Control.EnabledChanged"/> events.
+    /// </summary>
+    /// <param name="enabled">
+    /// <see langword="true"/> to enable the Start controls; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
     private void SetStartButton(bool enabled)
     {
         // Avoid raising EnabledChanged when the requested state is already set.
@@ -7725,41 +7799,90 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Disables editing and article-processing controls.
+    /// </summary>
     private void DisableButtons()
     {
         SetStartButton(false);
         SetButtons(false);
 
         if (listMaker.NumberOfArticles == 0)
+        {
             btnIgnore.Enabled = false;
+        }
 
-        if (cmboEditSummary.Focused) txtEdit.Focus();
+        if (cmboEditSummary.Focused)
+        {
+            txtEdit.Focus();
+        }
 
-        txtEdit.Enabled = txtReviewEditSummary.Enabled = false;
+        txtEdit.Enabled =
+            txtReviewEditSummary.Enabled =
+            false;
     }
 
+    /// <summary>
+    /// Enables editing and article-processing controls and refreshes their
+    /// current state.
+    /// </summary>
     private void EnableButtons()
     {
         UpdateButtons(null, null);
         SetButtons(true);
-        txtEdit.Enabled = txtReviewEditSummary.Enabled = true;
+
+        txtEdit.Enabled =
+            txtReviewEditSummary.Enabled =
+            true;
     }
 
+    /// <summary>
+    /// Enables or disables article-processing controls based on the current
+    /// application, article, page, and user state.
+    /// </summary>
+    /// <param name="enabled">
+    /// <see langword="true"/> to enable controls when their individual
+    /// conditions are satisfied; otherwise, <see langword="false"/>.
+    /// </param>
     private void SetButtons(bool enabled)
     {
-        btnIgnore.Enabled = btnPreview.Enabled = btnDiff.Enabled =
-            btntsPreview.Enabled = btntsChanges.Enabled = /*listMaker.MakeListEnabled = */
-            btntsSave.Enabled = btntsIgnore.Enabled = btnWatch.Enabled = findGroup.Enabled = enabled;
+        btnIgnore.Enabled =
+            btnPreview.Enabled =
+            btnDiff.Enabled =
+            btntsPreview.Enabled =
+            btntsChanges.Enabled =
+            /* listMaker.MakeListEnabled = */
+            btntsSave.Enabled =
+            btntsIgnore.Enabled =
+            btnWatch.Enabled =
+            findGroup.Enabled =
+            enabled;
 
-        btnSave.Enabled = enabled && TheArticle != null && !string.IsNullOrEmpty(TheSession.Page.Title);
+        btnSave.Enabled =
+            enabled &&
+            TheArticle != null &&
+            !string.IsNullOrEmpty(TheSession.Page.Title);
 
-        // allow protection of non-existent page (salting)
-        btnProtect.Enabled = (enabled && TheSession.User.CanProtectPage(TheSession.Page) && TheArticle != null);
-        btnMove.Enabled = btnProtect.Enabled && TheSession.Page.Exists;
-        btnDelete.Enabled = btntsDelete.Enabled = enabled && TheSession.User.CanDeletePage(TheSession.Page) && TheArticle != null && TheSession.Page.Exists;
+        // Allow protection of a non-existent page (salting).
+        btnProtect.Enabled =
+            enabled &&
+            TheSession.User.CanProtectPage(TheSession.Page) &&
+            TheArticle != null;
+
+        btnMove.Enabled =
+            btnProtect.Enabled &&
+            TheSession.Page.Exists;
+
+        btnDelete.Enabled =
+            btntsDelete.Enabled =
+            enabled &&
+            TheSession.User.CanDeletePage(TheSession.Page) &&
+            TheArticle != null &&
+            TheSession.Page.Exists;
+
         btnFind.Enabled = txtFind.TextLength > 0;
 
-        // if there are find matches, color the Find button yellow
+        // Highlight the Find button when matching text exists.
         if (btnFind.Enabled &&
             TheArticle != null &&
             txtEdit.FindAll(
@@ -7780,12 +7903,23 @@ font-size: 150%;'>No changes</h2>
 
     #region Timers
 
-    int _restartDelay = 5, _startInSeconds = 5;
+    private int _restartDelay = 5, _startInSeconds = 5;
+
+    /// <summary>
+    /// Counts down to an automatic restart and starts processing when the
+    /// countdown reaches zero.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void DelayedRestart(object sender, EventArgs e)
     {
         StopDelayedAutoSaveTimer();
-        StatusLabelText = "Restarting in " +
-            (_startInSeconds > 60 ? "over a minute" : _startInSeconds.ToString());
+
+        StatusLabelText =
+            "Restarting in " +
+            (_startInSeconds > 60
+                ? "over a minute"
+                : _startInSeconds.ToString());
 
         if (_startInSeconds == 0)
         {
@@ -7793,20 +7927,33 @@ font-size: 150%;'>No changes</h2>
             Start();
         }
         else
+        {
             _startInSeconds--;
+        }
     }
 
+    /// <summary>
+    /// Increases the automatic restart delay and starts the restart timer.
+    /// </summary>
     private void StartDelayedRestartTimer()
     {
-        //increase the restart delay each time, this is decreased by 1 on each successful save
+        // Increase the restart delay each time. The delay is reduced by one
+        // after each successful save.
         int delay = _restartDelay + 5;
+
         if (delay > 60)
+        {
             delay = 60;
+        }
 
         _restartDelay = delay;
         StartDelayedRestartTimer(delay);
     }
 
+    /// <summary>
+    /// Starts the delayed restart countdown using the specified delay.
+    /// </summary>
+    /// <param name="delay">The restart delay, in seconds.</param>
     private void StartDelayedRestartTimer(int delay)
     {
         _startInSeconds = delay;
@@ -7815,23 +7962,38 @@ font-size: 150%;'>No changes</h2>
         Ticker += DelayedRestart;
     }
 
+    /// <summary>
+    /// Stops the delayed restart countdown and resets the remaining time.
+    /// </summary>
     private void StopDelayedRestartTimer()
     {
         Ticker -= DelayedRestart;
         _startInSeconds = _restartDelay;
     }
 
+    /// <summary>
+    /// Updates the bot-mode timer display.
+    /// </summary>
     private void UpdateBotTimer()
     {
-        lblBotTimer.Text = chkAutoMode.Checked ? "Bot timer: " + _intTimer : string.Empty;
+        lblBotTimer.Text =
+            chkAutoMode.Checked
+                ? $"Bot timer: {_intTimer}"
+                : string.Empty;
     }
 
+    /// <summary>
+    /// Stops the delayed auto-save countdown and resets the bot timer.
+    /// </summary>
     private void StopDelayedAutoSaveTimer()
     {
         Ticker -= DelayedAutoSave;
         _intTimer = 0;
     }
 
+    /// <summary>
+    /// Starts the delayed auto-save countdown.
+    /// </summary>
     private void StartDelayedAutoSaveTimer()
     {
         Ticker -= DelayedAutoSave;
@@ -7839,12 +8001,24 @@ font-size: 150%;'>No changes</h2>
     }
 
     int _intTimer;
+
+    /// <summary>
+    /// Advances the delayed auto-save countdown, saves the current article
+    /// when the delay expires, and stops bot mode when the configured edit
+    /// limit is reached.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void DelayedAutoSave(object sender, EventArgs e)
     {
         if (_intTimer < nudBotSpeed.Value)
         {
             _intTimer++;
-            lblBotTimer.BackColor = (_intTimer == 1) ? Color.Red : DefaultBackColor;
+
+            lblBotTimer.BackColor =
+                _intTimer == 1
+                    ? Color.Red
+                    : DefaultBackColor;
         }
         else
         {
@@ -7854,13 +8028,20 @@ font-size: 150%;'>No changes</h2>
 
         UpdateBotTimer();
 
-        if (botEditsStop.Value > 0 && NumberOfEdits >= botEditsStop.Value)
+        if (botEditsStop.Value > 0 &&
+            NumberOfEdits >= botEditsStop.Value)
         {
             Stop();
-            StatusLabelText = "Stopped: " + botEditsStop.Value + " edits reached";
+
+            StatusLabelText =
+                $"Stopped: {botEditsStop.Value} edits reached";
         }
     }
 
+    /// <summary>
+    /// Updates the visibility of the moving-average timer and resets the
+    /// current save interval.
+    /// </summary>
     private void ShowTimer()
     {
         lblTimer.Visible = ShowMovingAverageTimer;
@@ -7868,12 +8049,21 @@ font-size: 150%;'>No changes</h2>
     }
 
     int _intStartTimer;
+
+    /// <summary>
+    /// Advances the save interval and updates the timer display.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void SaveInterval(object sender, EventArgs e)
     {
         _intStartTimer++;
-        lblTimer.Text = "Timer: " + _intStartTimer;
+        lblTimer.Text = $"Timer: {_intStartTimer}";
     }
 
+    /// <summary>
+    /// Stops and resets the save interval timer.
+    /// </summary>
     private void StopSaveInterval()
     {
         _intStartTimer = 0;
@@ -7881,7 +8071,17 @@ font-size: 150%;'>No changes</h2>
         Ticker -= SaveInterval;
     }
 
+    /// <summary>
+    /// Occurs when the application's periodic timer advances.
+    /// </summary>
     public event EventHandler Ticker;
+
+    /// <summary>
+    /// Raises the application ticker event and updates edit statistics once
+    /// per minute.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void Timer_Tick(object sender, EventArgs e)
     {
         Ticker?.Invoke(this, EventArgs.Empty);
@@ -7896,15 +8096,32 @@ font-size: 150%;'>No changes</h2>
     }
 
     int _seconds, _lastEditsTotal, _lastPagesTotal;
+
+    /// <summary>
+    /// Calculates the number of edits and pages processed during the previous
+    /// one-minute interval.
+    /// </summary>
     private void GenerateEditStatistics()
     {
-        //Edits in the last minute
-        NumberOfEditsPerMinute = (NumberOfEdits - _lastEditsTotal);
+        // Edits completed during the last minute.
+        NumberOfEditsPerMinute =
+            NumberOfEdits - _lastEditsTotal;
 
-        // pages processed in last minute: edits + skipped in normal mode or number of pages pre-parsed when in pre-parse mode
-        NumberOfPagesPerMinute = Math.Max(NumberOfEdits + NumberOfIgnoredEdits + NumberOfPagesParsed - _lastPagesTotal, 0);
+        // Pages processed during the last minute. This includes edits and
+        // skipped pages in normal mode, or pages parsed in pre-parse mode.
+        NumberOfPagesPerMinute = Math.Max(
+            NumberOfEdits +
+            NumberOfIgnoredEdits +
+            NumberOfPagesParsed -
+            _lastPagesTotal,
+            0);
+
         _lastEditsTotal = NumberOfEdits;
-        _lastPagesTotal = NumberOfEdits + NumberOfIgnoredEdits + NumberOfPagesParsed;
+
+        _lastPagesTotal =
+            NumberOfEdits +
+            NumberOfIgnoredEdits +
+            NumberOfPagesParsed;
     }
 
     #endregion
@@ -7951,33 +8168,51 @@ font-size: 150%;'>No changes</h2>
         GetDiff();
     }
 
+    /// <summary>
+    /// Records the current article as a false positive.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void FalsePositiveClick(object sender, EventArgs e)
     {
         if (TheArticle != null && TheArticle.Name.Length > 0)
-            Tools.WriteTextFileAbsolutePath("#[[" + TheArticle.Name + "]]\r\n", Path.Combine(AwbDirs.UserData, @"False positives.txt"), true);
+        {
+            Tools.WriteTextFileAbsolutePath(
+                "#[[" + TheArticle.Name + "]]\r\n",
+                Path.Combine(AwbDirs.UserData, @"False positives.txt"),
+                true);
+        }
     }
 
+    /// <summary>
+    /// Begins processing the current article list.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnStart_Click(object sender, EventArgs e)
     {
         BeginProcess();
     }
 
     /// <summary>
-    ///
+    /// Begins article processing after ensuring that the user is logged in
+    /// and that no background process is currently running.
     /// </summary>
     private void BeginProcess()
     {
         if (!TheSession.User.IsLoggedIn)
         {
             Profiles.ShowDialog();
-            if (!TheSession.User.IsLoggedIn) return;
+
+            if (!TheSession.User.IsLoggedIn)
+            {
+                return;
+            }
         }
-        else if (
-            (_runProcessPageBackground != null &&
-             _runProcessPageBackground.ThreadStatus().IsIn(ThreadState.Running, ThreadState.Background)) ||
-            (_runProcessPageBackground != null &&
-             _runProcessPageBackground.ThreadStatus().IsIn(ThreadState.Running, ThreadState.Background))
-            )
+        else if (_runProcessPageBackground != null &&
+                 _runProcessPageBackground.ThreadStatus().IsIn(
+                     ThreadState.Running,
+                     ThreadState.Background))
         {
             StatusLabelText = "Background process running";
             return;
@@ -7987,12 +8222,27 @@ font-size: 150%;'>No changes</h2>
         Start();
     }
 
+    /// <summary>
+    /// Stops article processing after confirming that any unsaved manual
+    /// changes in the edit box may be discarded.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnStop_Click(object sender, EventArgs e)
     {
-        // ask user confirmation if manual changes in edit box (edit box populated and not same as article text)
-        if (TheArticle == null || TheArticle.ArticleText.Equals(txtEdit.Text) || txtEdit.Text.Length == 0 ||
-        MessageBox.Show("There are manual changes to the page text in the edit box, are you sure you want to stop?", "Confirm stop", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        // Ask for confirmation when the edit box contains manual changes that
+        // differ from the current article text.
+        if (TheArticle == null ||
+            TheArticle.ArticleText.Equals(txtEdit.Text) ||
+            txtEdit.Text.Length == 0 ||
+            MessageBox.Show(
+                "There are manual changes to the page text in the edit box, " +
+                "are you sure you want to stop?",
+                "Confirm stop",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
             Stop();
+        }
     }
 
     /// <summary>
