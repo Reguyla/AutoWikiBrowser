@@ -260,7 +260,7 @@ partial class MainForm
     /// </remarks>
     private void LoadRecentSettingsList()
     {
-        SplashScreen.SetProgress(63);
+        _splashScreen.SetProgress(63);
 
         try
         {
@@ -273,7 +273,7 @@ partial class MainForm
         }
         finally
         {
-            SplashScreen.SetProgress(70);
+            _splashScreen.SetProgress(70);
         }
     }
 
@@ -763,7 +763,7 @@ partial class MainForm
     /// </remarks>
     private void LoadPrefs()
     {
-        SplashScreen.SetProgress(50);
+        _splashScreen.SetProgress(50);
 
         if (!string.IsNullOrEmpty(SettingsFile))
         {
@@ -779,7 +779,7 @@ partial class MainForm
             SettingsFile = string.Empty;
         }
 
-        SplashScreen.SetProgress(59);
+        _splashScreen.SetProgress(59);
     }
 
     /// <summary>

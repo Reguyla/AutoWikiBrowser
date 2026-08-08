@@ -65,8 +65,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // UI
     // --------------------------------------------------------------------
 
-    private readonly Splash SplashScreen = new();
-    private readonly Twain.Core.Profiles.AWBProfilesForm Profiles;
+    private readonly Splash _splashScreen = new();
+    private readonly Twain.Core.Profiles.AWBProfilesForm _profiles;
 
     private FormWindowState _lastState = FormWindowState.Normal;
 
@@ -212,22 +212,22 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         // replaces the current AWB updater workflow.
         Updater.UpdateUpdaterFile();
 
-        SplashScreen.Show(this);
+        _splashScreen.Show(this);
         RightToLeft = System.Globalization.CultureInfo.CurrentCulture.TextInfo.IsRightToLeft
             ? RightToLeft.Yes : RightToLeft.No;
 
-        SplashScreen.SetProgress(1);
+        _splashScreen.SetProgress(1);
 
         InitializeComponent();
 
         CreateWebView2DiffBrowser();
 
-        SplashScreen.SetProgress(5);
+        _splashScreen.SetProgress(5);
         try
         {
             InitializeToolbarImages();
 
-            SplashScreen.SetProgress(10);
+            _splashScreen.SetProgress(10);
             try
             {
                 _parser = new Parsers(500, false);
@@ -241,9 +241,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             InitializeSession();
 
-            Profiles = InitializeProfiles();
+            _profiles = InitializeProfiles();
 
-            SplashScreen.SetProgress(15);
+            _splashScreen.SetProgress(15);
 
             _pasteMoreItems = InitializePasteMoreItems();
             InitializeFileDialogs();
@@ -601,37 +601,37 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 ErrorHandler.HandleException(ex);
             }
 
-            SplashScreen.SetProgress(25);
+            _splashScreen.SetProgress(25);
 
             InitializeLogging();
 
             RestoreWindowState();
 
-            Plugin.LoadPluginsStartup(this, SplashScreen);
+            Plugin.LoadPluginsStartup(this, _splashScreen);
             LoadPrefs();
 
             InitializeBuildConfiguration();
 
-            SplashScreen.SetProgress(60);
+            _splashScreen.SetProgress(60);
             UpdateButtons(null, null);
 
-            SplashScreen.SetProgress(62);
+            _splashScreen.SetProgress(62);
             LoadRecentSettingsList();
 
             Updater.WaitForCompletion();
 
             ntfyTray.Visible = true;
 
-            SplashScreen.SetProgress(80);
+            _splashScreen.SetProgress(80);
 
             if (!HandleUpdaterResult())
                 return;
 
-            SplashScreen.SetProgress(90);
+            _splashScreen.SetProgress(90);
 
-            Profiles.Login(_profileToLoad);
+            _profiles.Login(_profileToLoad);
 
-            SplashScreen.SetProgress(95);
+            _splashScreen.SetProgress(95);
         }
         catch (Exception ex)
         {
@@ -714,12 +714,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         EditBoxTab.TabPages.Remove(tpTypos);
 
         StatusLabelText = "Initialising...";
-        SplashScreen.SetProgress(20);
+        _splashScreen.SetProgress(20);
 
         Variables.MainForm = this;
         lblOnlyBots.BringToFront();
 
-        SplashScreen.SetProgress(22);
+        _splashScreen.SetProgress(22);
     }
 
     /// <summary>
@@ -762,7 +762,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         OldVersion();
-        SplashScreen.Close();
+        _splashScreen.Close();
 
         return true;
     }
@@ -807,7 +807,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         Updater.RunUpdater();
-        SplashScreen.Close();
+        _splashScreen.Close();
         CloseAWB();
 
         return true;
@@ -891,8 +891,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void CompleteStartup()
     {
         StatusLabelText = string.Empty;
-        SplashScreen.SetProgress(100);
-        SplashScreen.Close();
+       _splashScreen.SetProgress(100);
+       _splashScreen.Close();
     }
     #endregion
 
@@ -1120,8 +1120,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         Stop();
 
-        if (!Profiles.Visible)
-            Profiles.ShowDialog(this);
+        if (!_profiles.Visible)
+            _profiles.ShowDialog(this);
     }
 
     /// <summary>
@@ -6195,7 +6195,7 @@ font-size: 150%;'>No changes</h2>
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
 
-        Profiles.ShowDialog();
+        _profiles.ShowDialog();
     }
 
     /// <summary>
@@ -7683,7 +7683,7 @@ font-size: 150%;'>No changes</h2>
         string customProject,
         string protocol)
     {
-        SplashScreen.SetProgress(81);
+        _splashScreen.SetProgress(81);
 
         if (!TryLoadProject(
                 code,
@@ -8479,7 +8479,7 @@ font-size: 150%;'>No changes</h2>
     {
         if (!TheSession.User.IsLoggedIn)
         {
-            Profiles.ShowDialog();
+            _profiles.ShowDialog();
 
             if (!TheSession.User.IsLoggedIn)
             {
@@ -12343,7 +12343,7 @@ font-size: 150%;'>No changes</h2>
     {
         if (!_shuttingDown)
         {
-            Profiles.ShowDialog(this);
+            _profiles.ShowDialog(this);
         }
     }
 
@@ -12355,7 +12355,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void UserDefaultSettingsLoadRequired(object sender, EventArgs e)
     {
-        LoadPrefs(Profiles.SettingsToLoad);
+        LoadPrefs(_profiles.SettingsToLoad);
     }
 
     /// <summary>
@@ -12368,7 +12368,7 @@ font-size: 150%;'>No changes</h2>
     {
         // TODO(Twain): Extract post-login session and project refresh logic from
         // MainForm so login completion is not responsible for UI orchestration.
-        if (string.IsNullOrEmpty(Profiles.SettingsToLoad) &&
+        if (string.IsNullOrEmpty(_profiles.SettingsToLoad) &&
             Variables.TryLoadingAgainAfterLogin)
         {
             SetProject(
@@ -13626,7 +13626,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void lblUserName_Click(object sender, EventArgs e)
     {
-        Profiles.ShowDialog(this);
+        _profiles.ShowDialog(this);
     }
 
     /// <summary>
