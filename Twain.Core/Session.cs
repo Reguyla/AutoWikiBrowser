@@ -281,13 +281,10 @@ public class Session
 
     private static bool ShouldEnforcePublicAwbVersionGate()
     {
-#if DEBUG
         // Debug builds have historically been allowed to continue through the
         // remaining status/config/user checks for regression testing.
         return false;
-#else
             return !AllowForkReleaseVersionGateBypass;
-#endif
     }
 
     /// <summary>

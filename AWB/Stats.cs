@@ -370,11 +370,8 @@ internal static class UsageStats
     /// </param>
     private static void AddDebugState(NameValueCollection postVariables)
     {
-#if DEBUG
         postVariables.Add("Debug", "Y");
-#else
     postVariables.Add("Debug", "N");
-#endif
     }
 
     /// <summary>

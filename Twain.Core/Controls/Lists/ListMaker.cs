@@ -79,9 +79,7 @@ public partial class ListMaker : UserControl, IList<Article>
     {
         if (!DefaultProviders.Any())
         {
-#if DEBUG
             DefaultProviders.Add(new PagesWithPropJsonListProvider());
-#endif
             DefaultProviders.Add(new CategoryListProvider());
             DefaultProviders.Add(new CategoryRecursiveListProvider());
             DefaultProviders.Add(new CategoryRecursiveOneLevelListProvider());

@@ -5604,9 +5604,7 @@ font-size: 150%;'>No changes</h2>
                 article);
         }
 
-#if DEBUG
         ValidateEditSummary(summary);
-#endif
 
         return summary;
     }
@@ -5688,7 +5686,6 @@ font-size: 150%;'>No changes</h2>
         return $"/* {sectionEditText} */ {summary.TrimStart()}";
     }
 
-#if DEBUG
     /// <summary>
     /// Writes a diagnostic message when the generated edit summary is invalid.
     /// </summary>
@@ -5701,7 +5698,6 @@ font-size: 150%;'>No changes</h2>
                 summary);
         }
     }
-#endif
 
     // TODO (Architecture):
     // Move the AWB summary-tag eligibility rules out of MainForm and into a
@@ -7345,9 +7341,7 @@ font-size: 150%;'>No changes</h2>
         toolStripSeparator32.Visible = true;
         cEvalToolStripMenuItem.Visible = true;
 
-#if DEBUG
         InitializeDebugProfiler();
-#endif
     }
 
     /// <summary>
@@ -7366,7 +7360,6 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
-#if DEBUG
     /// <summary>
     /// Initializes the debug profiler, preferring the application directory and
     /// falling back to the user data directory when that location is unavailable.
@@ -7388,7 +7381,6 @@ font-size: 150%;'>No changes</h2>
             Variables.Profiler = new Profiler(userDataPath, true);
         }
     }
-#endif
 
     /// <summary>
     /// Performs release-only UI initialization.

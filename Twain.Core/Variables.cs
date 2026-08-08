@@ -366,9 +366,7 @@ public static partial class Variables
             }
 
             string text = " " + mSummaryTag + " " + WPAWB;
-#if DEBUG
             text += " (" + RevisionNumber + ")";
-#endif
             return text;
         }
     }
@@ -507,7 +505,6 @@ public static partial class Variables
         SetProject(langCode, projectName, "", "https://");
     }
 
-#if DEBUG || UNITTEST
     /// <summary>
     /// Sets the language code of the current project
     /// </summary>
@@ -532,7 +529,6 @@ public static partial class Variables
         Project = projectName;
         SetProjectLangCode(langCode);
     }
-#endif
 
     public static bool TryLoadingAgainAfterLogin { get; private set; }
     public static ProjectHoldArea ReloadProjectSettings;

@@ -427,12 +427,10 @@ public class ApiXmlException : ApiException
         {
             builder.AppendFormat("<tr><td>Post</td><td>{0}</td></tr>", PostQuery);
         }
-#if DEBUG
         if (!string.IsNullOrEmpty(Content))
         {
             builder.AppendFormat("<tr><td>Content</td><td>{0}</td></tr>", Content);
         }
-#endif
         builder.AppendLine("</table>");
         return builder.ToString();
     }

@@ -383,9 +383,7 @@ internal static class Plugin
     private static void HandlePluginLoadingFailure(
         Exception exception)
     {
-#if DEBUG
         ErrorHandler.HandleException(exception);
-#else
     Tools.WriteDebug(
         nameof(LoadPlugins),
         exception.ToString());
@@ -395,7 +393,6 @@ internal static class Plugin
         "Problem loading plugins",
         MessageBoxButtons.OK,
         MessageBoxIcon.Error);
-#endif
     }
 
     // TODO (Plugin Modernization):
