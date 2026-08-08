@@ -10428,6 +10428,14 @@ font-size: 150%;'>No changes</h2>
         panelDab.Enabled = chkEnableDab.Checked;
     }
 
+    // TODO(Twain): Extract disambiguation link loading and filtering from
+    // MainForm so the UI only supplies input and displays the resulting titles.
+    /// <summary>
+    /// Loads links from the specified disambiguation page or pages and
+    /// populates the variants list, excluding likely year articles.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnLoadLinks_Click(object sender, EventArgs e)
     {
         try
@@ -10443,7 +10451,7 @@ font-size: 150%;'>No changes</h2>
             foreach (Article article in
                      new LinksOnPageListProvider().MakeList(linkTitles))
             {
-                // Exclude years.
+                // Exclude likely year articles.
                 if (uint.TryParse(article.Name, out uint year) &&
                     year < 2100)
                 {
@@ -10461,6 +10469,11 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Loads disambiguation links when Enter is pressed in the page input.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The key press event data.</param>
     private void txtDabLink_KeyPress(object sender, KeyPressEventArgs e)
     {
         switch (e.KeyChar)
@@ -10472,6 +10485,11 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Executes the current Find operation when Enter is pressed.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The key press event data.</param>
     private void txtFind_KeyPress(object sender, KeyPressEventArgs e)
     {
         switch (e.KeyChar)
@@ -10484,28 +10502,69 @@ font-size: 150%;'>No changes</h2>
     }
 
     #region Notify Tray
+    /// <summary>
+    /// Restores the main window from the notification area.
+    /// </summary>
+    /// <remarks>
+    /// This handler is also used when the notification area icon is
+    /// double-clicked.
+    /// </remarks>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
-    { // also handles double click of the tray icon
+    {
         Visible = true;
         WindowState = LastState;
     }
 
+    /// <summary>
+    /// Hides the main window to the notification area.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void hideToolStripMenuItem_Click(object sender, EventArgs e)
     {
         Visible = false;
     }
 
+    /// <summary>
+    /// Updates the notification area context menu before it is displayed.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// A <see cref="CancelEventArgs"/> that can be used to cancel the menu
+    /// opening.
+    /// </param>
     private void mnuNotify_Opening(object sender, CancelEventArgs e)
     {
         SetMenuVisibility(Visible);
     }
 
+    /// <summary>
+    /// Updates the enabled state of the notification area Show and Hide commands.
+    /// </summary>
+    /// <param name="visible">
+    /// <see langword="true"/> if the main window is currently visible;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
     private void SetMenuVisibility(bool visible)
     {
-        showToolStripMenuItem.Enabled = !visible || WindowState == FormWindowState.Minimized;
+        showToolStripMenuItem.Enabled =
+            !visible ||
+            WindowState == FormWindowState.Minimized;
+
         hideToolStripMenuItem.Enabled = visible;
     }
 
+    /// <summary>
+    /// Displays a notification balloon from the notification area icon.
+    /// </summary>
+    /// <param name="message">
+    /// The message to display.
+    /// </param>
+    /// <param name="icon">
+    /// The icon displayed with the notification.
+    /// </param>
     public void NotifyBalloon(string message, ToolTipIcon icon)
     {
         ntfyTray.BalloonTipText = message;
@@ -10514,40 +10573,90 @@ font-size: 150%;'>No changes</h2>
     }
     #endregion
 
+    /// <summary>
+    /// Removes wiki-link markup from the selected editor text while preserving
+    /// the most appropriate display text when possible.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnRemove_Click(object sender, EventArgs e)
     {
         EditBoxTab.SelectedTab = tpEdit;
+
         string selectedtext = txtEdit.SelectedText;
-        if (selectedtext.StartsWith("[[") && selectedtext.EndsWith("]]"))
+
+        // TODO(Twain): Extract wiki-link removal and display-text resolution
+        // from MainForm into a reusable text-processing helper or service.
+        if (selectedtext.StartsWith("[[") &&
+            selectedtext.EndsWith("]]"))
         {
-            selectedtext = selectedtext.Trim('[').Trim(']');
+            selectedtext =
+                selectedtext.Trim('[').Trim(']');
+
             if (selectedtext.EndsWith("|"))
             {
-                if (selectedtext.Contains("(") && selectedtext.Contains(")"))
-                    selectedtext = selectedtext.Substring(0, selectedtext.IndexOf("(", StringComparison.Ordinal));
-                if (selectedtext.Contains(":"))
-                    selectedtext = selectedtext.Substring(selectedtext.IndexOf(":", StringComparison.Ordinal)).TrimEnd('|');
-                if (txtEdit.SelectedText == "[[" + selectedtext + "]]")
+                if (selectedtext.Contains("(") &&
+                    selectedtext.Contains(")"))
                 {
-                    MessageBox.Show("The selected link could not be removed.");
-                    selectedtext = "[[" + selectedtext + "]]";
+                    selectedtext = selectedtext.Substring(
+                        0,
+                        selectedtext.IndexOf(
+                            "(",
+                            StringComparison.Ordinal));
+                }
+
+                if (selectedtext.Contains(":"))
+                {
+                    selectedtext = selectedtext.Substring(
+                        selectedtext.IndexOf(
+                            ":",
+                            StringComparison.Ordinal))
+                        .TrimEnd('|');
+                }
+
+                if (txtEdit.SelectedText ==
+                    "[[" + selectedtext + "]]")
+                {
+                    MessageBox.Show(
+                        "The selected link could not be removed.");
+
+                    selectedtext =
+                        "[[" + selectedtext + "]]";
                 }
             }
             else if (selectedtext.Contains("|"))
-                selectedtext = selectedtext.Substring(selectedtext.IndexOf("|", StringComparison.Ordinal) + 1);
+            {
+                selectedtext = selectedtext.Substring(
+                    selectedtext.IndexOf(
+                        "|",
+                        StringComparison.Ordinal) + 1);
+            }
 
             txtEdit.SelectedText = selectedtext;
             txtEdit.ResetFind();
         }
         else
-            MessageBox.Show("Select a link to remove either manually or by clicking a link in the list above.");
+        {
+            MessageBox.Show(
+                "Select a link to remove either manually or by clicking " +
+                "a link in the list above.");
+        }
     }
 
+    /// <summary>
+    /// Launches the application updater.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void runUpdaterToolStripMenuItem_Click(object sender, EventArgs e)
     {
         RunUpdater();
     }
 
+    /// <summary>
+    /// Launches the legacy AutoWikiBrowser updater when the updater executable
+    /// is available in the application directory.
+    /// </summary>
     private void RunUpdater()
     {
         string executableDirectory =
@@ -10578,6 +10687,8 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        // TODO(Twain): Replace the legacy AWBUpdater executable with the
+        // planned modern Twain updater and move updater launching out of MainForm.
         Process.Start(
             new ProcessStartInfo
             {
@@ -10586,6 +10697,11 @@ font-size: 150%;'>No changes</h2>
             });
     }
 
+    /// <summary>
+    /// Resets the accumulated nudge counters and updates the displayed count.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnResetNudges_Click(object sender, EventArgs e)
     {
         Nudges = 0;
@@ -10594,14 +10710,34 @@ font-size: 150%;'>No changes</h2>
     }
 
     #region "Nudge timer"
+
+    /// <summary>
+    /// Prefix displayed with the accumulated nudge count.
+    /// </summary>
     private const string NudgeTimerString = "Total nudges: ";
 
-    private void NudgeTimer_Tick(object sender, NudgeTimer.NudgeTimerEventArgs e)
+    // TODO(Twain): Extract nudge/retry processing from MainForm so timer state,
+    // retry decisions, and restart behavior can be tested independently of the UI.
+    //
+    // TODO(Twain): Move plugin nudge notifications behind the plugin service
+    // rather than iterating the plugin registry directly from MainForm.
+    /// <summary>
+    /// Handles a nudge timer event by allowing plugins to cancel the nudge,
+    /// updating nudge statistics, and restarting or skipping processing as
+    /// appropriate.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// The nudge timer event data, including the ability to cancel the nudge.
+    /// </param>
+    private void NudgeTimer_Tick(
+        object sender,
+        NudgeTimer.NudgeTimerEventArgs e)
     {
-        // make sure there was no error and bot mode is still enabled
+        // Ensure bot mode is still enabled before attempting a nudge.
         if (BotMode)
         {
-            // Tell plugins we're about to nudge, and give them the opportunity to cancel:
+            // Notify plugins before the nudge and allow them to cancel it.
             foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
             {
                 bool cancel;
@@ -10614,10 +10750,12 @@ font-size: 150%;'>No changes</h2>
                 }
             }
 
-            // Update stats and nudge:
+            // Update nudge statistics and restart or skip processing.
             Nudges++;
             lblNudges.Text = NudgeTimerString + Nudges;
+
             NudgeTimer.Stop();
+
             if (chkNudgeSkip.Checked && SameArticleNudges > 0)
             {
                 SameArticleNudges = 0;
@@ -10631,9 +10769,11 @@ font-size: 150%;'>No changes</h2>
                 Start();
             }
 
-            // Inform plugins:
+            // Inform plugins that the nudge completed.
             foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
-            { a.Value.Nudged(Nudges); }
+            {
+                a.Value.Nudged(Nudges);
+            }
         }
     }
     /// <summary>
@@ -10764,10 +10904,17 @@ font-size: 150%;'>No changes</h2>
         WikiRegexes.TemplateRedirects = Parsers.LoadTemplateRedirects(text);
     }
 
+    // TODO(Twain): Extract wiki-based parser configuration loading into a
+    // shared service to remove duplicated fetch/error-handling logic from MainForm.
+    /// <summary>
+    /// Loads the configured dated-template definitions from the wiki and
+    /// updates the corresponding parser expressions when data is available.
+    /// </summary>
     private void LoadDatedTemplates()
     {
         string text;
         DatedTemplatesLoaded = true;
+
         try
         {
             text = TheSession.Editor.SynchronousEditor.Clone().Open(
@@ -10784,13 +10931,21 @@ font-size: 150%;'>No changes</h2>
         }
 
         if (text.Length > 0)
-            WikiRegexes.DatedTemplates = Parsers.LoadDatedTemplates(text);
+        {
+            WikiRegexes.DatedTemplates =
+                Parsers.LoadDatedTemplates(text);
+        }
     }
 
+    /// <summary>
+    /// Loads renamed template-parameter definitions from the wiki and updates
+    /// the corresponding parser expressions when data is available.
+    /// </summary>
     private void LoadRenameTemplateParameters()
     {
         string text;
         RenamedTemplateParametersLoaded = true;
+
         try
         {
             text = TheSession.Editor.SynchronousEditor.Clone().Open(
@@ -10801,15 +10956,24 @@ font-size: 150%;'>No changes</h2>
         {
             Tools.WriteDebug(
                 "LoadRenameTemplateParameters",
-                "Unable to load renamed template parameters: " + ex.Message);
+                "Unable to load renamed template parameters: " +
+                ex.Message);
 
             text = string.Empty;
         }
 
         if (text.Length > 0)
-            WikiRegexes.RenamedTemplateParameters = Parsers.LoadRenamedTemplateParameters(text);
+        {
+            WikiRegexes.RenamedTemplateParameters =
+                Parsers.LoadRenamedTemplateParameters(text);
+        }
     }
 
+    /// <summary>
+    /// Restores the editor contents to the article text as originally loaded.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void undoAllChangesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (TheArticle == null)
@@ -10819,6 +10983,13 @@ font-size: 150%;'>No changes</h2>
     }
 
     #region History
+
+    /// <summary>
+    /// Loads history or incoming-link information when the corresponding
+    /// editor tab is selected.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void tabControl2_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (TheArticle == null)
@@ -10830,8 +11001,17 @@ font-size: 150%;'>No changes</h2>
             NewWhatLinksHere(TheArticle.Name);
     }
 
+    /// <summary>
+    /// Loads the printable revision history for the specified page into the
+    /// embedded history browser.
+    /// </summary>
+    /// <param name="pageTitle">
+    /// The title of the page whose revision history should be displayed.
+    /// </param>
     private void NewHistory(string pageTitle)
     {
+        // TODO(Twain): Extract history URL construction and loading from MainForm
+        // so browser navigation can be reused independently of the WinForms UI.
         try
         {
             if (EditBoxTab.SelectedTab != tpHistory ||
@@ -10860,7 +11040,8 @@ font-size: 150%;'>No changes</h2>
         {
             Tools.WriteDebug(
                 "NewHistory",
-                "Unable to load page history: " + ex.Message);
+                "Unable to load page history: " +
+                ex.Message);
 
             webBrowserHistory.Navigate("about:blank");
 
