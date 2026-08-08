@@ -9551,12 +9551,28 @@ font-size: 150%;'>No changes</h2>
         LoadTypos(false);
     }
 
+    /// <summary>
+    /// Loads or reloads the regular-expression typo rules when typo fixing is
+    /// enabled.
+    /// </summary>
+    /// <param name="reload">
+    /// <see langword="true"/> to discard the currently loaded typo rules and
+    /// force them to be reloaded; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <remarks>
+    /// When the user is not logged in, the method attempts to determine a
+    /// configured typo-list location before falling back to the existing
+    /// default location.
+    /// </remarks>
     public void LoadTypos(bool reload)
     {
-        // during change of user settings to settings with typos enabled, LoadTypos will be called more than once
-        // from LoadPrefs...SetProject with RETF to say reload is needed when RETF next used, and then again from LoadPrefs with RETF enabled
-        // so set RegexTypos to null if reload, even if RETF not enabled at the time
-        // This logic is needed to support use of SetProject in other scenarios
+        // During a settings change, LoadTypos may be called more than once:
+        // first from LoadPrefs/SetProject to indicate that typo rules must be
+        // reloaded, and again after typo fixing has been enabled.
+        //
+        // Clear RegexTypos whenever reload is requested, even if typo fixing is
+        // not currently enabled. This also supports callers of SetProject outside
+        // the normal LoadPrefs workflow.
         if (reload)
         {
             RegexTypos = null;
@@ -9569,22 +9585,28 @@ font-size: 150%;'>No changes</h2>
 
             StatusLabelText = "Loading typos";
 
-            // if not logged in will be using default Typos page location, so look up any custom page from CheckPage info
-            // if no checkpage then fall back to using default ReftPath
-            if (!TheSession.User.IsLoggedIn && !Variables.IsWikipediaEN &&
+            // When not logged in, determine whether the wiki defines a custom
+            // typo-list location. If no usable configuration is available, retain
+            // the existing default RetfPath.
+            if (!TheSession.User.IsLoggedIn &&
+                !Variables.IsWikipediaEN &&
                 Variables.RetfPath.EndsWith("AutoWikiBrowser/Typos"))
             {
                 try
                 {
-                    // Try and use the config json text if it's not empty... Is this actually going to work as expected?
-                    // Or should we just unconditionally do the else?
+                    // TODO: Verify whether ConfigJSONText should take precedence
+                    // over retrieving the current configuration from ConfigUrl.
                     if (!string.IsNullOrEmpty(TheSession.ConfigJSONText))
                     {
-                        Session.TypoLink(Tools.GetJObjectFromText(TheSession.ConfigJSONText));
+                        Session.TypoLink(
+                            Tools.GetJObjectFromText(
+                                TheSession.ConfigJSONText));
                     }
                     else
                     {
-                        Session.TypoLink(Tools.GetJObjectFromUrl(Session.ConfigUrl));
+                        Session.TypoLink(
+                            Tools.GetJObjectFromUrl(
+                                Session.ConfigUrl));
                     }
                 }
                 catch (Exception ex)
@@ -9594,35 +9616,47 @@ font-size: 150%;'>No changes</h2>
                         "Unable to load the configured typo-list location: " +
                         ex.Message);
 
-                    // TODO:
-                    // Determine whether a failed custom typo-list lookup should explicitly
-                    // restore Project:AutoWikiBrowser/Typos as the fallback location.
+                    // TODO: Determine whether a failed custom typo-list lookup
+                    // should explicitly restore Project:AutoWikiBrowser/Typos
+                    // as the fallback location.
                 }
             }
+
 #if !DEBUG
-            string message = @"Check each edit before you make it. Although this has been built to be very accurate there will be errors.";
+        string message =
+            "Check each edit before you make it. Although this has been " +
+            "built to be very accurate there will be errors.";
 
-            if (RegexTypos == null)
+        if (RegexTypos == null)
+        {
+            string s = Variables.RetfPath;
+
+            bool isHttpUrl =
+                s.StartsWith(
+                    "http://",
+                    StringComparison.OrdinalIgnoreCase) ||
+                s.StartsWith(
+                    "https://",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (!isHttpUrl)
             {
-                string s = Variables.RetfPath;
-
-                bool isHttpUrl =
-                    s.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                    s.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
-
-                if (!isHttpUrl)
-                {
-                    s = Variables.NonPrettifiedURL(s);
-                }
-                {
-                    // TODO: Try to use TheSession.Site.ArticleUrl for prettier URL
-                    s = Variables.NonPrettifiedURL(s);
-                }
-
-                message += "\r\n\r\nThe newest typos will now be downloaded from " + s + " when you press OK.";
+                // TODO: Use TheSession.Site.ArticleUrl or another wiki-aware
+                // URL builder to produce a cleaner display URL.
+                s = Variables.NonPrettifiedURL(s);
             }
 
-            MessageBox.Show(message, "Attention", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            message +=
+                "\r\n\r\nThe newest typos will now be downloaded from " +
+                s +
+                " when you press OK.";
+        }
+
+        MessageBox.Show(
+            message,
+            "Attention",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
 #endif
 
             RegexTypos = new RegExTypoFix();
@@ -9630,6 +9664,16 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO(Twain): Replace the BackgroundRequest callback and WinForms
+    // InvokeRequired/BeginInvoke flow with an async completion path that
+    // returns the typo-loading result explicitly.
+    /// <summary>
+    /// Completes regular-expression typo loading, updates the typo-related UI,
+    /// and resets typo statistics when rules were loaded successfully.
+    /// </summary>
+    /// <param name="req">
+    /// The completed background request.
+    /// </param>
     private void RegexTyposComplete(BackgroundRequest req)
     {
         if (IsDisposed || Disposing)
@@ -9675,37 +9719,61 @@ font-size: 150%;'>No changes</h2>
         _loadingTypos = false;
     }
 
-    private void ProfileToLoad_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    /// <summary>
+    /// Opens the AutoWikiBrowser typo documentation page in the default
+    /// web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The link-click event data.</param>
+    private void ProfileToLoad_LinkClicked(
+        object sender,
+        LinkLabelLinkClickedEventArgs e)
     {
-        Tools.OpenENArticleInBrowser("Wikipedia:AutoWikiBrowser/Typos", false);
+        Tools.OpenENArticleInBrowser(
+            "Wikipedia:AutoWikiBrowser/Typos",
+            false);
     }
 
+    /// <summary>
+    /// Opens the edit summary editor, applies accepted summary changes,
+    /// and restores the previously selected summary when possible.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void summariesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (SummaryEditor se = new SummaryEditor())
+        using SummaryEditor se = new();
+
+        string[] summaries = new string[cmboEditSummary.Items.Count];
+        cmboEditSummary.Items.CopyTo(summaries, 0);
+
+        se.Summaries.Lines = summaries;
+        se.Summaries.Select(0, 0);
+
+        string prevSummary = cmboEditSummary.SelectedText;
+
+        if (se.ShowDialog(this) != DialogResult.OK)
         {
-            string[] summaries = new string[cmboEditSummary.Items.Count];
-            cmboEditSummary.Items.CopyTo(summaries, 0);
-            se.Summaries.Lines = summaries;
-            se.Summaries.Select(0, 0);
+            return;
+        }
 
-            string prevSummary = cmboEditSummary.SelectedText;
+        cmboEditSummary.Items.Clear();
 
-            if (se.ShowDialog(this) != DialogResult.OK)
-                return;
-
-            cmboEditSummary.Items.Clear();
-
-            foreach (string s in se.Summaries.Lines)
-                if (!string.IsNullOrEmpty(s.Trim()))
-                    cmboEditSummary.Items.Add(s.Trim());
-
-            if (cmboEditSummary.Items.Contains(prevSummary))
-                cmboEditSummary.SelectedText = prevSummary;
-            else if (cmboEditSummary.Items.Count > 0)
+        foreach (string s in se.Summaries.Lines)
+        {
+            if (!string.IsNullOrWhiteSpace(s))
             {
-                cmboEditSummary.SelectedIndex = 0;
+                cmboEditSummary.Items.Add(s.Trim());
             }
+        }
+
+        if (cmboEditSummary.Items.Contains(prevSummary))
+        {
+            cmboEditSummary.SelectedText = prevSummary;
+        }
+        else if (cmboEditSummary.Items.Count > 0)
+        {
+            cmboEditSummary.SelectedIndex = 0;
         }
     }
 
