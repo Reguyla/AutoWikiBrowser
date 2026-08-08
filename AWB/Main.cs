@@ -10943,29 +10943,50 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void LoadRenameTemplateParameters()
     {
-        string text;
         RenamedTemplateParametersLoaded = true;
 
-        try
-        {
-            text = TheSession.Editor.SynchronousEditor.Clone().Open(
-                "Project:AutoWikiBrowser/Rename template parameters",
-                true);
-        }
-        catch (Exception ex)
-        {
-            Tools.WriteDebug(
-                "LoadRenameTemplateParameters",
-                "Unable to load renamed template parameters: " +
-                ex.Message);
-
-            text = string.Empty;
-        }
+        string text = LoadWikiConfigurationText(
+            "Project:AutoWikiBrowser/Rename template parameters",
+            "LoadRenameTemplateParameters",
+            "Unable to load renamed template parameters: ");
 
         if (text.Length > 0)
         {
             WikiRegexes.RenamedTemplateParameters =
                 Parsers.LoadRenamedTemplateParameters(text);
+        }
+    }
+
+    // TODO(Twain): Move wiki-based parser configuration loading out of MainForm
+    // once parser configuration services are extracted.
+    /// <summary>
+    /// Loads configuration text from the specified wiki page and logs failures.
+    /// </summary>
+    /// <param name="pageTitle">The wiki page containing the configuration text.</param>
+    /// <param name="logSource">The source name used for debug logging.</param>
+    /// <param name="errorMessage">The message prefix used when loading fails.</param>
+    /// <returns>
+    /// The loaded configuration text, or an empty string when the page cannot
+    /// be loaded.
+    /// </returns>
+    private string LoadWikiConfigurationText(
+        string pageTitle,
+        string logSource,
+        string errorMessage)
+    {
+        try
+        {
+            return TheSession.Editor.SynchronousEditor.Clone().Open(
+                pageTitle,
+                true);
+        }
+        catch (Exception ex)
+        {
+            Tools.WriteDebug(
+                logSource,
+                errorMessage + ex.Message);
+
+            return string.Empty;
         }
     }
 
