@@ -101,6 +101,6 @@ partial class MainForm
 
     void IAutoWikiBrowserCommands.AddArticleRedirectedEventHandler(ArticleRedirected handler)
     {
-        ArticleWasRedirected += handler;
+        _articleWasRedirected += handler;
     }
 }

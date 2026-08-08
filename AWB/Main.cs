@@ -104,7 +104,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private int _sameArticleNudges;
     private int _actionOnLoad;
 
-    private ArticleRedirected ArticleWasRedirected;
+    private ArticleRedirected _articleWasRedirected;
 
     // --------------------------------------------------------------------
     // Text Processing
@@ -2013,7 +2013,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return true;
         }
 
-        ArticleWasRedirected?.Invoke(
+        _articleWasRedirected?.Invoke(
             page.OriginalTitle,
             page.Title);
 
