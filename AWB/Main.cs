@@ -7301,11 +7301,9 @@ font-size: 150%;'>No changes</h2>
     // with a dedicated settings model or mapper to reduce duplication and make
     // future preference additions less error-prone.
     //
-    // TODO: Split preference dialog initialization, accepted-setting application,
-    // and project-change handling into separate helpers or services.
-    //
     // TODO: Move project-change side effects out of the preferences UI workflow
     // so project switching can be handled consistently from other entry points.
+
     /// <summary>
     /// Opens the preferences dialog, applies any accepted preference changes,
     /// and updates project-dependent state when the selected wiki changes.
@@ -7316,7 +7314,38 @@ font-size: 150%;'>No changes</h2>
     /// </param>
     private void OpenPreferences(bool focusSiteTab)
     {
-        MyPreferences myPrefs = new MyPreferences(
+        MyPreferences myPrefs =
+            CreatePreferencesDialog(
+                focusSiteTab);
+
+        if (myPrefs.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        bool projectChanged =
+            HasPreferencesProjectChanged(myPrefs);
+
+        ApplyAcceptedPreferences(myPrefs);
+
+        if (projectChanged)
+        {
+            ApplyPreferencesProjectChange(myPrefs);
+        }
+    }
+
+    /// <summary>
+    /// Creates and initializes the preferences dialog from the current
+    /// application settings.
+    /// </summary>
+    /// <param name="focusSiteTab">
+    /// <see langword="true"/> to focus the site settings tab; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <returns>The initialized preferences dialog.</returns>
+    private MyPreferences CreatePreferencesDialog(bool focusSiteTab)
+    {
+        return new MyPreferences(
             Variables.LangCode,
             Variables.Project,
             Variables.CustomProject,
@@ -7361,72 +7390,121 @@ font-size: 150%;'>No changes</h2>
 
             AlertPreferences = alertPreferences
         };
+    }
 
-        if (myPrefs.ShowDialog(this) == DialogResult.OK)
+    /// <summary>
+    /// Applies preference values accepted by the user to the current
+    /// application state.
+    /// </summary>
+    /// <param name="myPrefs">
+    /// The accepted preferences dialog containing the updated settings.
+    /// </param>
+    private void ApplyAcceptedPreferences(MyPreferences myPrefs)
+    {
+        txtEdit.Font = myPrefs.TextBoxFont;
+        LowThreadPriority = myPrefs.LowThreadPriority;
+        _flash = myPrefs.PrefFlash;
+        _beep = myPrefs.PrefBeep;
+        _minimize = myPrefs.PrefMinimize;
+        _saveArticleList = myPrefs.PrefSaveArticleList;
+        _autoSaveEditBoxEnabled = myPrefs.PrefAutoSaveEditBoxEnabled;
+
+        if (EditBoxSaveTimer.Enabled &&
+            !_autoSaveEditBoxEnabled)
         {
-            txtEdit.Font = myPrefs.TextBoxFont;
-            LowThreadPriority = myPrefs.LowThreadPriority;
-            _flash = myPrefs.PrefFlash;
-            _beep = myPrefs.PrefBeep;
-            _minimize = myPrefs.PrefMinimize;
-            _saveArticleList = myPrefs.PrefSaveArticleList;
-            _autoSaveEditBoxEnabled = myPrefs.PrefAutoSaveEditBoxEnabled;
-
-            if (EditBoxSaveTimer.Enabled && !_autoSaveEditBoxEnabled)
-            {
-                EditBoxSaveTimer.Enabled = false;
-            }
-
-            AutoSaveEditBoxPeriod = myPrefs.PrefAutoSaveEditBoxPeriod;
-            _autoSaveEditBoxFile = myPrefs.PrefAutoSaveEditBoxFile;
-            _suppressUsingAWB = myPrefs.PrefSuppressUsingAWB;
-            Article.AddUsingAWBOnArticleAction =
-                myPrefs.PrefAddUsingAWBOnArticleAction;
-
-            IgnoreNoBots = myPrefs.PrefIgnoreNoBots;
-            ClearPageListOnProjectChange =
-                myPrefs.PrefClearPageListOnProjectChange;
-
-            ShowMovingAverageTimer = myPrefs.PrefShowTimer;
-
-            _listComparerUseCurrentArticleList =
-                myPrefs.PrefListComparerUseCurrentArticleList;
-            _listSplitterUseCurrentArticleList =
-                myPrefs.PrefListSplitterUseCurrentArticleList;
-            _dbScannerUseCurrentArticleList =
-                myPrefs.PrefDBScannerUseCurrentArticleList;
-
-            doDiffInBotMode = myPrefs.PrefDiffInBotMode;
-            actionOnLoad = myPrefs.PrefOnLoad;
-
-            loggingEnabled = myPrefs.EnableLogging;
-
-            Variables.LoginDomain = myPrefs.PrefDomain;
-
-            alertPreferences = myPrefs.AlertPreferences;
-
-            if (myPrefs.Language != Variables.LangCode ||
-                myPrefs.Project != Variables.Project ||
-                myPrefs.CustomProject != Variables.CustomProject ||
-                myPrefs.Protocol != Variables.Protocol)
-            {
-                SetProject(
-                    myPrefs.Language,
-                    myPrefs.Project,
-                    myPrefs.CustomProject,
-                    myPrefs.Protocol);
-
-                BotMode = false;
-                lblOnlyBots.Visible = true;
-
-                if (ClearPageListOnProjectChange)
-                {
-                    listMaker.Clear();
-                }
-
-                DisableButtons();
-            }
+            EditBoxSaveTimer.Enabled = false;
         }
+
+        AutoSaveEditBoxPeriod =
+            myPrefs.PrefAutoSaveEditBoxPeriod;
+
+        _autoSaveEditBoxFile =
+            myPrefs.PrefAutoSaveEditBoxFile;
+
+        _suppressUsingAWB =
+            myPrefs.PrefSuppressUsingAWB;
+
+        Article.AddUsingAWBOnArticleAction =
+            myPrefs.PrefAddUsingAWBOnArticleAction;
+
+        IgnoreNoBots =
+            myPrefs.PrefIgnoreNoBots;
+
+        ClearPageListOnProjectChange =
+            myPrefs.PrefClearPageListOnProjectChange;
+
+        ShowMovingAverageTimer =
+            myPrefs.PrefShowTimer;
+
+        _listComparerUseCurrentArticleList =
+            myPrefs.PrefListComparerUseCurrentArticleList;
+
+        _listSplitterUseCurrentArticleList =
+            myPrefs.PrefListSplitterUseCurrentArticleList;
+
+        _dbScannerUseCurrentArticleList =
+            myPrefs.PrefDBScannerUseCurrentArticleList;
+
+        doDiffInBotMode =
+            myPrefs.PrefDiffInBotMode;
+
+        actionOnLoad =
+            myPrefs.PrefOnLoad;
+
+        loggingEnabled =
+            myPrefs.EnableLogging;
+
+        Variables.LoginDomain =
+            myPrefs.PrefDomain;
+
+        alertPreferences =
+            myPrefs.AlertPreferences;
+    }
+
+    /// <summary>
+    /// Determines whether the accepted preferences select a different wiki
+    /// project or connection configuration.
+    /// </summary>
+    /// <param name="myPrefs">
+    /// The accepted preferences to compare with the current project.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the project settings changed; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool HasPreferencesProjectChanged(
+        MyPreferences myPrefs)
+    {
+        return myPrefs.Language != Variables.LangCode ||
+            myPrefs.Project != Variables.Project ||
+            myPrefs.CustomProject != Variables.CustomProject ||
+            myPrefs.Protocol != Variables.Protocol;
+    }
+
+    /// <summary>
+    /// Applies project-dependent state changes after the selected wiki changes.
+    /// </summary>
+    /// <param name="myPrefs">
+    /// The accepted preferences containing the new project settings.
+    /// </param>
+    private void ApplyPreferencesProjectChange(
+        MyPreferences myPrefs)
+    {
+        SetProject(
+            myPrefs.Language,
+            myPrefs.Project,
+            myPrefs.CustomProject,
+            myPrefs.Protocol);
+
+        BotMode = false;
+        lblOnlyBots.Visible = true;
+
+        if (ClearPageListOnProjectChange)
+        {
+            listMaker.Clear();
+        }
+
+        DisableButtons();
     }
 
     /// <summary>
