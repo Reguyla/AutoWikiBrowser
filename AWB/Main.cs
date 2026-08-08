@@ -112,8 +112,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly HideText _removeText = new(false, true, true);
 
-    private readonly List<string> NoParse = new();
-    private readonly List<string> NoRetf = new();
+    private readonly List<string> _noParse = new();
+    private readonly List<string> _noRetf = new();
 
     private readonly FindandReplace FindAndReplace = new();
     private readonly SubstTemplates SubstTemplates = new();
@@ -3601,7 +3601,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                                             Parser.FixUnicode(theArticle.ArticleText),
                                             true);
 
-            if (NoParse.Contains(theArticle.Name))
+            if (_noParse.Contains(theArticle.Name))
                 process = false;
 
             if (!_ignoreNoBots &&
@@ -3696,7 +3696,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // RegexTypoFix
             if (chkRegExTypo.Checked && RegexTypos != null && !BotMode && !Namespace.IsTalk(theArticle.NameSpaceKey))
             {
-                if (!NoRetf.Contains(theArticle.Name))
+                if (!_noRetf.Contains(theArticle.Name))
                 {
                     theArticle.PerformTypoFixes(RegexTypos, chkSkipIfNoRegexTypo.Checked);
                     Variables.Profiler.Profile("Typos");
@@ -6223,13 +6223,13 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void PrepareRegisteredSession()
     {
-        NoParse.Clear();
-        NoRetf.Clear();
+        _noParse.Clear();
+        _noRetf.Clear();
 
-        NoParse.AddRangeIfNotNull(
+        _noParse.AddRangeIfNotNull(
             TheSession.NoGenfixes);
 
-        NoRetf.AddRangeIfNotNull(
+        _noRetf.AddRangeIfNotNull(
             TheSession.NoRETF);
     }
 
