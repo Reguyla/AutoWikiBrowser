@@ -620,7 +620,7 @@ partial class MainForm
             highlightAllFind = highlightAllFindToolStripMenuItem.Checked,
             NoAutoChanges =
                 !automaticallyDoAnythingToolStripMenuItem.Checked,
-            OnLoadAction = actionOnLoad,
+            OnLoadAction = _actionOnLoad,
             DiffInBotMode = _doDiffInBotMode,
             Minor = chkMinor.Checked,
             AddToWatchlist = addToWatchList.SelectedIndex,
@@ -1280,7 +1280,7 @@ partial class MainForm
     private void LoadGeneralApplicationPreferences(
         GeneralPrefs preferences)
     {
-        actionOnLoad =
+        _actionOnLoad =
             preferences.OnLoadAction;
 
         _doDiffInBotMode =

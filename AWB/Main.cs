@@ -102,7 +102,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private int _oldSelection;
     private int _retries;
     private int _sameArticleNudges;
-    private int actionOnLoad;
+    private int _actionOnLoad;
 
     private ArticleRedirected ArticleWasRedirected;
 
@@ -2611,7 +2611,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private void DisplayConfiguredPageResult()
     {
-        switch (actionOnLoad)
+        switch (_actionOnLoad)
         {
             case 0:
                 GetDiff();
@@ -7498,9 +7498,9 @@ font-size: 150%;'>No changes</h2>
     {
         // TODO: Remove this compatibility mapping once the obsolete
         // "show edit page" persisted value is no longer supported.
-        return actionOnLoad == 2
+        return _actionOnLoad == 2
             ? 0
-            : actionOnLoad;
+            : _actionOnLoad;
     }
 
     /// <summary>
@@ -7559,7 +7559,7 @@ font-size: 150%;'>No changes</h2>
         _doDiffInBotMode =
             myPrefs.PrefDiffInBotMode;
 
-        actionOnLoad =
+        _actionOnLoad =
             myPrefs.PrefOnLoad;
 
         _loggingEnabled =
@@ -10000,7 +10000,7 @@ font-size: 150%;'>No changes</h2>
         {
             txtEdit.Text = _lastArticle;
 
-            if (actionOnLoad == 0)
+            if (_actionOnLoad == 0)
             {
                 GetDiff();
             }
