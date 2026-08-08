@@ -11077,8 +11077,17 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Loads the printable "What Links Here" page for the specified article into
+    /// the embedded links browser.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the page whose incoming links should be displayed.
+    /// </param>
     private void NewWhatLinksHere(string title)
     {
+        // TODO(Twain): Extract browser URL construction and navigation into a
+        // shared helper so embedded wiki pages can be loaded consistently.
         try
         {
             if (EditBoxTab.SelectedTab != tpLinks ||
@@ -11107,7 +11116,8 @@ font-size: 150%;'>No changes</h2>
         {
             Tools.WriteDebug(
                 "NewWhatLinksHere",
-                "Unable to load What Links Here: " + ex.Message);
+                "Unable to load What Links Here: " +
+                ex.Message);
 
             webBrowserLinks.Navigate("about:blank");
 
@@ -11151,6 +11161,15 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private const string EndMark = "<!-- end content -->";
 
+    // TODO(Twain): Extract embedded-browser HTML processing from MainForm so
+    // content transformation can be reused independently of the WinForms browser.
+    /// <summary>
+    /// Prepares wiki HTML for display in the embedded browser by extracting the
+    /// main content, forcing links and forms to open externally, and prepending
+    /// the current article title.
+    /// </summary>
+    /// <param name="linksHtml">The HTML content to prepare for display.</param>
+    /// <returns>The processed HTML content.</returns>
     private string ProcessHTMLForDisplay(string linksHtml)
     {
         if (linksHtml.Contains(StartMark) &&
@@ -11179,6 +11198,11 @@ font-size: 150%;'>No changes</h2>
         return "<h3>" + articleName + "</h3>" + linksHtml;
     }
 
+    /// <summary>
+    /// Opens the current article's revision history in the default web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void openInBrowserToolStripMenuItem_Click(
         object sender,
         EventArgs e)
@@ -11192,6 +11216,12 @@ font-size: 150%;'>No changes</h2>
             TheArticle.Name);
     }
 
+    /// <summary>
+    /// Reloads the current article's printable revision history in the embedded
+    /// history browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void refreshHistoryToolStripMenuItem_Click(
         object sender,
         EventArgs e)
@@ -11272,32 +11302,49 @@ font-size: 150%;'>No changes</h2>
         LoadPrefs(Profiles.SettingsToLoad);
     }
 
+    /// <summary>
+    /// Refreshes project, session, article, and user-interface state after a
+    /// profile successfully logs in.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ProfileLoggedIn(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(Profiles.SettingsToLoad) && Variables.TryLoadingAgainAfterLogin)
+        // TODO(Twain): Extract post-login session and project refresh logic from
+        // MainForm so login completion is not responsible for UI orchestration.
+        if (string.IsNullOrEmpty(Profiles.SettingsToLoad) &&
+            Variables.TryLoadingAgainAfterLogin)
         {
-            SetProject(Variables.ReloadProjectSettings.langCode, Variables.ReloadProjectSettings.projectName,
-                       Variables.ReloadProjectSettings.customProject, Variables.ReloadProjectSettings.protocol);
+            SetProject(
+                Variables.ReloadProjectSettings.langCode,
+                Variables.ReloadProjectSettings.projectName,
+                Variables.ReloadProjectSettings.customProject,
+                Variables.ReloadProjectSettings.protocol);
         }
 
         if (TheSession.IsBusy)
+        {
             TheSession.Editor.Abort();
+        }
 
-        // English Wikipedia does not use {{Wikify}}
-        wikifyToolStripMenuItem.Visible = !Variables.IsWikipediaEN;
+        // English Wikipedia does not use {{Wikify}}.
+        wikifyToolStripMenuItem.Visible =
+            !Variables.IsWikipediaEN;
 
         TheArticle = null;
         txtEdit.Text = string.Empty;
         TemplateRedirectsLoaded = false;
 
         CheckStatus(true);
-
         UpdateStatusUI();
 
         StopProgressBar();
         DisableButtons();
+
         if (TheSession.User.HasMessages)
+        {
             WeHaveNewMessages();
+        }
 
         UpdateUserNotifications();
     }
@@ -11377,6 +11424,10 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Initiates the configured shutdown workflow, displays the shutdown
+    /// confirmation dialog, and performs or cancels the requested action.
+    /// </summary>
     private void Shutdown()
     {
         if (!CanShutdown)
@@ -11384,30 +11435,30 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        // TODO(Twain): Extract shutdown orchestration from MainForm so timer,
+        // confirmation, and platform shutdown behavior can be managed separately.
         ShutdownTimer.Enabled = true;
         ShutdownTimer.Start();
 
-        using (ShutdownNotification shutdownNotification =
-               new ShutdownNotification
-               {
-                   ShutdownType = GetShutdownType()
-               })
+        using ShutdownNotification shutdownNotification = new()
         {
-            switch (shutdownNotification.ShowDialog(this))
-            {
-                case DialogResult.Cancel:
-                    ShutdownTimer.Stop();
-                    ShutdownTimer.Enabled = false;
+            ShutdownType = GetShutdownType()
+        };
 
-                    MessageBox.Show(
-                        GetShutdownType() + " aborted!");
+        switch (shutdownNotification.ShowDialog(this))
+        {
+            case DialogResult.Cancel:
+                ShutdownTimer.Stop();
+                ShutdownTimer.Enabled = false;
 
-                    return;
+                MessageBox.Show(
+                    GetShutdownType() + " aborted!");
 
-                case DialogResult.OK:
-                    ShutdownComputer();
-                    break;
-            }
+                return;
+
+            case DialogResult.OK:
+                ShutdownComputer();
+                break;
         }
     }
 
@@ -11738,8 +11789,17 @@ font-size: 150%;'>No changes</h2>
             enabled;
     }
 
+    /// <summary>
+    /// Gets or sets whether the edit toolbar is visible and adjusts the edit
+    /// summary control to use the available space.
+    /// </summary>
     private bool EditToolBarVisible
     {
+        get
+        {
+            return imgBold.Visible;
+        }
+
         set
         {
             if (imgBold.Visible == value)
@@ -11747,33 +11807,54 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            // move edit summary box for toolbar
-            if (value) // Edit toolbar visible
+            // TODO(Twain): Replace manual toolbar layout calculations with
+            // layout-managed positioning when the editor UI is migrated.
+            if (value)
             {
+                // Edit toolbar visible.
                 txtReviewEditSummary.Location =
-                    new Point((int)Math.Round(txtEdit.Location.X + imgBold.Width * 12.4),
-                              txtReviewEditSummary.Location.Y);
-                txtReviewEditSummary.Size = new Size((int)Math.Round(txtEdit.Size.Width - imgBold.Width * 12.4),
-                                                     txtReviewEditSummary.Size.Height);
+                    new Point(
+                        (int)Math.Round(
+                            txtEdit.Location.X +
+                            imgBold.Width * 12.4),
+                        txtReviewEditSummary.Location.Y);
+
+                txtReviewEditSummary.Size =
+                    new Size(
+                        (int)Math.Round(
+                            txtEdit.Size.Width -
+                            imgBold.Width * 12.4),
+                        txtReviewEditSummary.Size.Height);
             }
             else
             {
-                txtReviewEditSummary.Location = new Point(txtEdit.Location.X, txtReviewEditSummary.Location.Y);
-                txtReviewEditSummary.Size = new Size(txtEdit.Size.Width, txtReviewEditSummary.Size.Height);
+                txtReviewEditSummary.Location =
+                    new Point(
+                        txtEdit.Location.X,
+                        txtReviewEditSummary.Location.Y);
+
+                txtReviewEditSummary.Size =
+                    new Size(
+                        txtEdit.Size.Width,
+                        txtReviewEditSummary.Size.Height);
             }
 
-            imgBold.Visible = imgExtlink.Visible = imgHr.Visible = imgItalics.Visible = imgLink.Visible =
-                                                                                        imgMath.Visible =
-                                                                                        imgNowiki.Visible =
-                                                                                        imgRedirect.Visible =
-                                                                                        imgStrike.Visible =
-                                                                                        imgSub.Visible =
-                                                                                        imgSup.Visible =
-                                                                                        imgComment.Visible =
-                                                                                        value;
+            imgBold.Visible =
+                imgExtlink.Visible =
+                imgHr.Visible =
+                imgItalics.Visible =
+                imgLink.Visible =
+                imgMath.Visible =
+                imgNowiki.Visible =
+                imgRedirect.Visible =
+                imgStrike.Visible =
+                imgSub.Visible =
+                imgSup.Visible =
+                imgComment.Visible =
+                value;
+
             showHideEditToolbarToolStripMenuItem.Checked = value;
         }
-        get { return imgBold.Visible; }
     }
 
     /// <summary>
@@ -11862,61 +11943,115 @@ font-size: 150%;'>No changes</h2>
         return y.Key.CompareTo(x.Key);
     }
 
+    /// <summary>
+    /// Profiles the currently loaded regular-expression typo rules against the
+    /// current article text and writes the timing results to a diagnostic file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void profileTyposToolStripMenuItem_Click(object sender, EventArgs e)
     {
 #if DEBUG
         if (RegexTypos == null)
         {
-            MessageBox.Show("No typos loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                "No typos loaded",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
             return;
         }
 
-        List<KeyValuePair<Regex, string>> typos = RegexTypos.GetTypos();
+        List<KeyValuePair<Regex, string>> typos =
+            RegexTypos.GetTypos();
+
         if (!typos.Any())
         {
-            MessageBox.Show("No typos loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                "No typos loaded",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
             return;
         }
 
         string text = txtEdit.Text;
+
         if (!txtEdit.Enabled || text.Length == 0)
         {
-            MessageBox.Show("No article text", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                "No article text",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
             return;
         }
 
-        if (MessageBox.Show("Test typo rules for performance (this takes up to 5 minutes)?",
-                            "Test typos", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        if (MessageBox.Show(
+            "Test typo rules for performance (this takes up to 5 minutes)?",
+            "Test typos",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question) != DialogResult.Yes)
+        {
             return;
+        }
 
+        // TODO(Twain): Extract typo-rule performance profiling from MainForm so
+        // diagnostics can run independently of the WinForms UI.
         int iterations = 1000000 / text.Length;
-        if (iterations > 500) iterations = 500;
+
+        if (iterations > 500)
+        {
+            iterations = 500;
+        }
 
         List<KeyValuePair<int, string>> times = new();
 
         foreach (KeyValuePair<Regex, string> p in typos)
         {
-            Stopwatch watch = new Stopwatch();
+            Stopwatch watch = new();
             watch.Start();
+
             for (int i = 0; i < iterations; i++)
             {
                 p.Key.IsMatch(text);
             }
-            times.Add(new KeyValuePair<int, string>((int)watch.ElapsedMilliseconds, p.Key + " > " + p.Value));
+
+            times.Add(
+                new KeyValuePair<int, string>(
+                    (int)watch.ElapsedMilliseconds,
+                    p.Key + " > " + p.Value));
         }
 
         times.Sort(CompareRegexPairs);
 
         StringBuilder builder = new();
 
-        builder.AppendLine("Profiling " + iterations + @" iterations of """ + TheArticle.Name + @"""");
+        builder.AppendLine(
+            "Profiling " +
+            iterations +
+            @" iterations of """ +
+            TheArticle.Name +
+            @"""");
 
-        foreach (KeyValuePair<int, string> p in times) builder.AppendLine(p.ToString());
+        foreach (KeyValuePair<int, string> p in times)
+        {
+            builder.AppendLine(p.ToString());
+        }
 
-        Tools.WriteTextFile(builder, "typos.txt", false);
+        Tools.WriteTextFile(
+            builder,
+            "typos.txt",
+            false);
 
-        MessageBox.Show("Results are saved in the file 'typos.txt'", "Profiling complete",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show(
+            "Results are saved in the file 'typos.txt'",
+            "Profiling complete",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
 #endif
     }
 
@@ -12093,6 +12228,10 @@ font-size: 150%;'>No changes</h2>
         UsageStats.OpenUsageStatsURL();
     }
 
+    /// <summary>
+    /// Starts the main progress indicator, marshaling to the UI thread when
+    /// necessary.
+    /// </summary>
     private void StartProgressBar()
     {
         if (IsDisposed || Disposing)
@@ -12102,7 +12241,9 @@ font-size: 150%;'>No changes</h2>
 
         if (InvokeRequired)
         {
-            BeginInvoke(new MethodInvoker(StartProgressBar));
+            BeginInvoke(
+                new MethodInvoker(StartProgressBar));
+
             return;
         }
 
@@ -12110,6 +12251,10 @@ font-size: 150%;'>No changes</h2>
         MainFormProgressBar.Style = ProgressBarStyle.Marquee;
     }
 
+    /// <summary>
+    /// Stops the main progress indicator, marshaling to the UI thread when
+    /// necessary.
+    /// </summary>
     private void StopProgressBar()
     {
         if (IsDisposed || Disposing)
@@ -12119,7 +12264,9 @@ font-size: 150%;'>No changes</h2>
 
         if (InvokeRequired)
         {
-            BeginInvoke(new MethodInvoker(StopProgressBar));
+            BeginInvoke(
+                new MethodInvoker(StopProgressBar));
+
             return;
         }
 
@@ -12155,6 +12302,16 @@ font-size: 150%;'>No changes</h2>
             displayfalsePositivesButtonToolStripMenuItem.Checked;
     }
 
+    /// <summary>
+    /// Highlights a range of text in the editor using a red background,
+    /// adjusting for RichTextBox newline indexing differences.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based article-text index to highlight.
+    /// </param>
+    /// <param name="length">
+    /// The number of characters to highlight.
+    /// </param>
     private void RedSelection(int index, int length)
     {
         if (!txtEdit.Enabled)
@@ -12179,9 +12336,9 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        // Article-text indexes differ from RichTextBox indexes because
-        // line endings are represented differently. Adjust the selection
-        // by the number of newline matches before and within the range.
+        // RichTextBox indexes differ from article-text indexes because
+        // RichTextBox stores line endings as CRLF while article text uses LF.
+        // Adjust the requested selection by accounting for newline expansion.
         int newlinesToIndex =
             WikiRegexes.Newline.Matches(
                 text.Substring(0, index)).Count;
@@ -12216,6 +12373,10 @@ font-size: 150%;'>No changes</h2>
         txtEdit.SelectionBackColor = Color.Yellow;
     }
 
+    /// <summary>
+    /// Highlights all matches for the current Find expression in the editor
+    /// and then restores the selection to the beginning of the document.
+    /// </summary>
     private void HighlightAllFind()
     {
         if (string.IsNullOrEmpty(txtFind.Text) ||
@@ -12243,15 +12404,31 @@ font-size: 150%;'>No changes</h2>
         txtEdit.ScrollToCaret();
     }
 
+    /// <summary>
+    /// Prevents configuration files opened from the Internet cache from being
+    /// loaded directly and warns the user about the risk of executing untrusted
+    /// custom module code.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// The file dialog event data used to cancel loading of an unsafe file.
+    /// </param>
     private void openXML_FileOk(object sender, CancelEventArgs e)
     {
-        if (openXML.FileName.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.InternetCache)))
+        if (openXML.FileName.StartsWith(
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.InternetCache)))
         {
             // What, no <big>, <font color="red"> and <blink>?
-            MessageBox.Show(this, "Please review the custom module code and save the config on your PC manually.\r\n"
-                            + "DON'T TRUST ANYTHING YOU FIND ON THE INTERNET UNLESS YOU UNDERSTAND WHAT IT DOES.\r\n"
-                            + "Failure to abide by this may result in arbitrary code execution on your machine.",
-                            "Security warning - READ THIS", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            MessageBox.Show(
+                this,
+                "Please review the custom module code and save the config on your PC manually.\r\n" +
+                "DON'T TRUST ANYTHING YOU FIND ON THE INTERNET UNLESS YOU UNDERSTAND WHAT IT DOES.\r\n" +
+                "Failure to abide by this may result in arbitrary code execution on your machine.",
+                "Security warning - READ THIS",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Hand);
+
             e.Cancel = true;
         }
     }
@@ -12299,23 +12476,30 @@ font-size: 150%;'>No changes</h2>
         UsageStats.Do(false);
     }
 
+    /// <summary>
+    /// Logs out the current user, clears the active article state, and updates
+    /// the user interface to reflect the completed logout.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void logOutToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (TheSession.IsBusy)
+        {
             TheSession.Editor.Abort();
+        }
 
         TheArticle = null;
         txtEdit.Text = string.Empty;
 
         TheSession.Editor.Logout();
 
-        // Logout runs asynchronously through AsyncApiEdit.
-        // Wait here so CheckStatus and UpdateStatusUI see the completed
-        // logged-out editor state instead of the previous logged-in state.
+        // Logout runs asynchronously through AsyncApiEdit. Wait here so
+        // CheckStatus and UpdateStatusUI observe the completed logged-out
+        // editor state rather than the previous logged-in state.
         TheSession.Editor.Wait();
 
         CheckStatus(true);
-
         UpdateStatusUI();
 
         StopProgressBar();
@@ -12346,16 +12530,22 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Displays context-sensitive help for status bar items.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void statusBar_MouseHover(
         object sender,
         EventArgs e)
     {
-        if (!(sender is ToolStripStatusLabel item))
+        if (sender is not ToolStripStatusLabel item)
         {
             return;
         }
 
-        AWBToolTip toolTip = new AWBToolTip();
+        AWBToolTip toolTip = new();
+
         string text = string.Empty;
 
         switch (item.Name)
@@ -12363,9 +12553,11 @@ font-size: 150%;'>No changes</h2>
             case "lblUserName":
                 text = "Click to switch user";
                 break;
+
             case "lblProject":
                 text = "Click to switch project";
                 break;
+
             case "lblUserNotifications":
                 text = "User notifications";
                 break;
@@ -12374,11 +12566,21 @@ font-size: 150%;'>No changes</h2>
         toolTip.Show(text, item.Owner);
     }
 
-    private void editToolBar_MouseHover(object sender, EventArgs e)
+    /// <summary>
+    /// Displays context-sensitive help for toolbar buttons.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void editToolBar_MouseHover(
+        object sender,
+        EventArgs e)
     {
-        AWBToolTip tt = new AWBToolTip();
+        if (sender is not ToolStripButton item)
+        {
+            return;
+        }
 
-        ToolStripButton item = (sender as ToolStripButton);
+        AWBToolTip tt = new();
 
         string text = string.Empty;
 
