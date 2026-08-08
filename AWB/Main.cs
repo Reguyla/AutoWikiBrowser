@@ -8390,6 +8390,9 @@ font-size: 150%;'>No changes</h2>
         listMaker.SaveList();
     }
 
+    // TODO(Twain): Replace numeric article-list preference values with a named
+    // mode and move ListComparer creation behind a shared service.
+
     /// <summary>
     /// Opens the List Comparer and optionally initializes it with the current
     /// article list, depending on the user's preferences.
@@ -8400,32 +8403,67 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
+        bool useCurrentArticleList =
+            ShouldListComparerUseCurrentArticleList();
+
+        Comparer =
+            CreateListComparer(
+                useCurrentArticleList);
+
+        Comparer.Show(this);
+    }
+
+    /// <summary>
+    /// Determines whether the List Comparer should use the current article list,
+    /// prompting the user when the configured preference requires confirmation.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> to use the current article list; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool ShouldListComparerUseCurrentArticleList()
+    {
         switch (_listComparerUseCurrentArticleList)
         {
             case 0: // Ask
-                if (listMaker.Any() &&
+                return listMaker.Any() &&
                     MessageBox.Show(
                         "Would you like to copy your current Article List to the ListComparer?",
                         "Copy Article List?",
-                        MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    goto case 1;
-                }
-
-                goto case 2;
+                        MessageBoxButtons.YesNo) == DialogResult.Yes;
 
             case 1: // Always
-                Comparer = new ListComparer(
-                    listMaker,
-                    listMaker.GetArticleList());
-                break;
+                return true;
 
             case 2: // Never
-                Comparer = new ListComparer(listMaker);
-                break;
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Creates the List Comparer configured for the requested article-list
+    /// behavior.
+    /// </summary>
+    /// <param name="useCurrentArticleList">
+    /// <see langword="true"/> to initialize the comparer with the current
+    /// article list; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>The configured List Comparer.</returns>
+    private ListComparer CreateListComparer(
+        bool useCurrentArticleList)
+    {
+        if (useCurrentArticleList)
+        {
+            return new ListComparer(
+                listMaker,
+                listMaker.GetArticleList());
         }
 
-        Comparer.Show(this);
+        return new ListComparer(
+            listMaker);
     }
 
     // TODO(Twain): Replace numeric article-list preference values with a named
