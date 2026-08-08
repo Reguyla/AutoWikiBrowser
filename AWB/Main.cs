@@ -90,7 +90,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool _doDiffInBotMode;
     private bool _loggingEnabled;
 
-    private bool Skippable = true;
+    private bool _skippable = true;
     private bool ShuttingDown;
 
     private string LastArticle = string.Empty;
@@ -1650,7 +1650,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         DisableButtons();
 
-        Skippable = true;
+        _skippable = true;
         txtEdit.Clear();
 
         ArticleInfo(true);
@@ -2226,7 +2226,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return;
         }
 
-        if (Skippable && TrySkipBasedOnArticleChanges())
+        if (_skippable && TrySkipBasedOnArticleChanges())
         {
             return;
         }
@@ -3761,7 +3761,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
             else
             {
-                Skippable = false;
+                _skippable = false;
             }
 
             Stop();
@@ -4353,7 +4353,7 @@ font-size: 150%;'>No changes</h2>
         string result)
     {
         LastArticle = txtEdit.Text;
-        Skippable = false;
+        _skippable = false;
 
         ShowPreviewBrowser();
 
