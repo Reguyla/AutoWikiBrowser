@@ -99,7 +99,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private const int MaxRetries = 10;
 
-    private int OldSelection;
+    private int _oldSelection;
     private int Retries;
     private int SameArticleNudges;
     private int actionOnLoad;
@@ -7036,7 +7036,7 @@ font-size: 150%;'>No changes</h2>
 
         RestoreDuplicateWikilinkSelection(selectedIndex);
 
-        OldSelection = selectedIndex;
+        _oldSelection = selectedIndex;
     }
 
     /// <summary>
@@ -7098,7 +7098,7 @@ font-size: 150%;'>No changes</h2>
     /// </param>
     private void UpdateDuplicateWikilinkSearch(int selectedIndex)
     {
-        if (selectedIndex != OldSelection)
+        if (selectedIndex != _oldSelection)
         {
             txtEdit.ResetFind();
         }
