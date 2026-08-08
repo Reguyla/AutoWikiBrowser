@@ -116,7 +116,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly List<string> _noRetf = new();
 
     private readonly FindandReplace _findAndReplace = new();
-    private readonly SubstTemplates SubstTemplates = new();
+    private readonly SubstTemplates _substTemplates = new();
 
     private RegExTypoFix RegexTypos;
 
@@ -3624,7 +3624,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // Do not apply skip checks when reparsing
             if (chkFindandReplace.Checked)
             {
-                theArticle.PerformFindAndReplace(_findAndReplace, SubstTemplates, RplcSpecial,
+                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, RplcSpecial,
                                                  (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), false);
 
                 Variables.Profiler.Profile("F&R");
@@ -3720,7 +3720,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // Do not apply skip checks when reparsing
             if (chkFindandReplace.Checked)
             {
-                theArticle.PerformFindAndReplace(_findAndReplace, SubstTemplates, RplcSpecial,
+                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, RplcSpecial,
                                                  (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), true);
 
                 theArticle.DoFaRSkips(_findAndReplace);
@@ -11252,7 +11252,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void btnSubst_Click(object sender, EventArgs e)
     {
-        SubstTemplates.ShowDialog();
+        _substTemplates.ShowDialog();
     }
 
     /// <summary>

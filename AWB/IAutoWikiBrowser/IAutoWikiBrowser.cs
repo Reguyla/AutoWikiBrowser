@@ -51,7 +51,7 @@ partial class MainForm
     /// Gets the configured template substitution processor.
     /// </summary>
     Twain.Core.SubstTemplates IAutoWikiBrowser.SubstTemplates =>
-        SubstTemplates;
+        _substTemplates;
 
     /// <summary>
     /// Gets the current custom module source code when a usable module is

@@ -502,7 +502,7 @@ partial class MainForm
         return new FaRPrefs(
             _findAndReplace,
             RplcSpecial,
-            SubstTemplates)
+            _substTemplates)
         {
             Enabled = chkFindandReplace.Checked
         };
@@ -892,13 +892,13 @@ partial class MainForm
         RplcSpecial.Clear();
         RplcSpecial.AddNewRule(preferences.AdvancedReps);
 
-        SubstTemplates.Clear();
-        SubstTemplates.TemplateList = preferences.SubstTemplates;
-        SubstTemplates.ExpandRecursively =
+        _substTemplates.Clear();
+        _substTemplates.TemplateList = preferences.SubstTemplates;
+        _substTemplates.ExpandRecursively =
             preferences.ExpandRecursively;
-        SubstTemplates.IgnoreUnformatted =
+        _substTemplates.IgnoreUnformatted =
             preferences.IgnoreUnformatted;
-        SubstTemplates.IncludeComments =
+        _substTemplates.IncludeComments =
             preferences.IncludeComments;
 
         _findAndReplace.MakeList();
