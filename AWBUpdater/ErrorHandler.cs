@@ -204,7 +204,7 @@ public partial class ErrorHandler : Form
         return FindNetworkException(exception) != null;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Remove legacy WebException support after all remaining
     // HttpWebRequest-based code has been migrated to HttpClient.
 

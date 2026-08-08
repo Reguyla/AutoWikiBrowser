@@ -209,7 +209,7 @@ namespace Twain.Core
         }
 
         /// <remarks>
-        /// TODO (.NET 8 Modernization):
+        /// TODO (.NET10 Modernization):
         /// Remove <see cref="WebException"/> support after all remaining
         /// <c>HttpWebRequest</c>-based request paths have been migrated to
         /// <c>HttpClient</c>.

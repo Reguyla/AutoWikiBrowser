@@ -48,7 +48,7 @@ internal sealed partial class AboutBox : Form
             Twain.Core.Controls.AboutBox.GetDetailedMessage(
                 typeof(AboutBox).Assembly);
 
-        // TODO (.NET 8 / WebView2):
+        // TODO (.NET10 / WebView2):
         // Replace the legacy Internet Explorer version reporting with WebView2 runtime
         // information once the browser migration is complete. Rename the constructor
         // parameter from 'ieVersion' to 'browserVersion' (or 'webViewVersion') and

@@ -213,7 +213,7 @@ internal sealed class AWBWebBrowser : WebBrowser
         return BrowserSelectionProvider.GetSelectedText(Document);
     }
 
-    // TODO (.NET 8): Remove the Mono-specific Refresh and Navigate guards after
+    // TODO (.NET10): Remove the Mono-specific Refresh and Navigate guards after
     // confirming that the modern AWB build no longer supports or targets the
     // legacy Mono runtime.
     /// <summary>
