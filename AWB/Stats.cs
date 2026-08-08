@@ -153,10 +153,10 @@ internal static class UsageStats
     #region Public
 
     /// <summary>
-    /// Call this when it's time to consider submitting some data
-    /// Don't try to send stats if no edits/new pages
+    /// Call this when it's time to consider submitting some data.
+    /// Don't try to send stats if no edits/new pages.
     /// </summary>
-    internal static void Do(bool appexit)
+    internal static void Do(bool appExit)
     {
         // no stats to send if no edits
         if (Program.AWB.NumberOfEdits == 0 && Program.AWB.NumberOfNewPages == 0)
@@ -191,7 +191,11 @@ internal static class UsageStats
         }
         catch (Exception ex)
         {
-            if (appexit) ErrorHandler.HandleException(ex); // else try again later
+            if (appExit)
+            {
+                ErrorHandler.HandleException(ex);
+            }
+            // else try again later
         }
     }
 
@@ -432,7 +436,7 @@ internal static class UsageStats
     /// <summary>
     /// Attempts to post usage statistics to the server.
     /// </summary>
-    /// <param name="postvars">The values to send.</param>
+    /// <param name="postVariables">The values to send.</param>
     /// <param name="response">
     /// The server response when the request succeeds; otherwise,
     /// <see langword="null"/>.
@@ -442,7 +446,7 @@ internal static class UsageStats
     /// <see langword="false"/> when a recognized network or I/O failure occurs.
     /// </returns>
     private static bool TryPostData(
-        NameValueCollection postvars,
+        NameValueCollection postVariables,
         out string? response)
     {
         response = null;
@@ -454,7 +458,7 @@ internal static class UsageStats
             Program.AWB.Form.Cursor =
                 System.Windows.Forms.Cursors.WaitCursor;
 
-            response = Tools.PostData(postvars, StatsURL);
+            response = Tools.PostData(postVariables, StatsURL);
             return true;
         }
         catch (Exception ex)
@@ -487,7 +491,7 @@ internal static class UsageStats
     /// <summary>
     /// Adds plugin information to the usage statistics request.
     /// </summary>
-    /// <param name="postvars">
+    /// <param name="postVariables">
     /// The request fields to populate.
     /// </param>
     /// <param name="awbPlugins">
@@ -500,7 +504,7 @@ internal static class UsageStats
     /// The ListMaker plugins to include.
     /// </param>
     private static void EnumeratePlugins(
-        NameValueCollection postvars,
+        NameValueCollection postVariables,
         ICollection<IAWBPlugin> awbPlugins,
         ICollection<IAWBBasePlugin> awbBasePlugins,
         ICollection<IListMakerPlugin> listMakerPlugins)
@@ -512,27 +516,30 @@ internal static class UsageStats
             awbBasePlugins.Count +
             listMakerPlugins.Count;
 
-        postvars.Add("PluginCount", pluginCount.ToString());
+        postVariables.Add("PluginCount", pluginCount.ToString());
 
         foreach (IAWBPlugin plugin in awbPlugins)
         {
             AddPlugin(
                 plugin.Name,
-                Plugins.Plugin.GetPluginVersionString(plugin), "0");
+                Plugins.Plugin.GetPluginVersionString(plugin),
+                "0");
         }
 
         foreach (IListMakerPlugin plugin in listMakerPlugins)
         {
             AddPlugin(
                 plugin.Name,
-                Plugins.Plugin.GetPluginVersionString(plugin), "1");
+                Plugins.Plugin.GetPluginVersionString(plugin),
+                "1");
         }
 
         foreach (IAWBBasePlugin plugin in awbBasePlugins)
         {
             AddPlugin(
                 plugin.Name,
-                Plugins.Plugin.GetPluginVersionString(plugin), "2");
+                Plugins.Plugin.GetPluginVersionString(plugin),
+                "2");
         }
 
         void AddPlugin(
@@ -544,9 +551,9 @@ internal static class UsageStats
 
             string prefix = $"P{pluginIndex}";
 
-            postvars.Add($"{prefix}N", pluginName);
-            postvars.Add($"{prefix}V", pluginVersion);
-            postvars.Add($"{prefix}T", pluginType);
+            postVariables.Add($"{prefix}N", pluginName);
+            postVariables.Add($"{prefix}V", pluginVersion);
+            postVariables.Add($"{prefix}T", pluginType);
         }
     }
 
@@ -554,16 +561,16 @@ internal static class UsageStats
     /// Reads the record identifier and verification number returned by the
     /// usage statistics server.
     /// </summary>
-    /// <param name="xml">
+    /// <param name="xmlResponse">
     /// The XML response returned by the usage statistics server.
     /// </param>
     /// <exception cref="XmlException">
     /// Thrown when the response does not contain a single valid
     /// <c>DB</c> element with numeric <c>Record</c> and <c>Verify</c> attributes.
     /// </exception>
-    private static void ReadXml(string xml)
+    private static void ReadXml(string xmlResponse)
     {
-        if (string.IsNullOrWhiteSpace(xml))
+        if (string.IsNullOrWhiteSpace(xmlResponse))
         {
             return;
         }
@@ -575,7 +582,7 @@ internal static class UsageStats
                 XmlResolver = null
             };
 
-            document.LoadXml(xml);
+            document.LoadXml(xmlResponse);
 
             XmlNodeList nodes = document.GetElementsByTagName("DB");
 
@@ -600,9 +607,9 @@ internal static class UsageStats
         {
             throw;
         }
-        catch (Exception ex) when (
-            ex is InvalidOperationException ||
-            ex is ArgumentException)
+        catch (Exception ex)
+            when (ex is InvalidOperationException ||
+                   ex is ArgumentException)
         {
             throw CreateUsageStatsXmlException(ex);
         }
@@ -632,25 +639,27 @@ internal static class UsageStats
     /// Adds the username or privacy marker to a pending statistics request when
     /// it has not yet been successfully sent.
     /// </summary>
-    /// <param name="postvars">The request values being prepared.</param>
+    /// <param name="postVariables">
+    /// The request values being prepared.
+    /// </param>
     /// <returns>
     /// <c>true</c> when this request includes a User field that should be marked
     /// as sent only after the request succeeds; otherwise, <c>false</c>.
     /// </returns>
-    private static bool ProcessUsername(NameValueCollection postvars)
+    private static bool ProcessUsername(NameValueCollection postVariables)
     {
         if (SentUserName)
             return false;
 
         if (Properties.Settings.Default.Privacy)
         {
-            postvars.Add("User", "<Withheld>");
+            postVariables.Add("User", "<Withheld>");
             return true;
         }
 
         if (!string.IsNullOrEmpty(UserName))
         {
-            postvars.Add("User", UserName);
+            postVariables.Add("User", UserName);
             return true;
         }
 
