@@ -68,7 +68,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly Splash SplashScreen = new();
     private readonly Twain.Core.Profiles.AWBProfilesForm Profiles;
 
-    private FormWindowState LastState = FormWindowState.Normal;
+    private FormWindowState _lastState = FormWindowState.Normal;
 
     // doesn't look like we can use RestoreBounds for this - any other built in way?
     private readonly ToolStripMenuItem[] _pasteMoreItems;
@@ -659,7 +659,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             if (_minimize) Visible = false;
         }
         else
-            LastState = WindowState; // remember if maximized or normal so can restore same when dbl click tray icon
+            _lastState = WindowState; // remember if maximized or normal so can restore same when dbl click tray icon
     }
 
     /// <summary>
@@ -11446,7 +11446,7 @@ font-size: 150%;'>No changes</h2>
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
     {
         Visible = true;
-        WindowState = LastState;
+        WindowState = _lastState;
     }
 
     /// <summary>
