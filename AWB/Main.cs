@@ -9216,9 +9216,10 @@ font-size: 150%;'>No changes</h2>
 
     // TODO(Twain): Replace the legacy BackgroundRequest/event-based reparse
     // workflow with an asynchronous, cancellation-aware processing service.
+
     /// <summary>
-    /// Reparses the current edit box contents by running the page-processing
-    /// step in a background request.
+    /// Reparses the current edit box contents by preparing the current article
+    /// and starting page processing in a background request.
     /// </summary>
     /// <remarks>
     /// User changes are copied from the edit box into the current article before
@@ -9232,17 +9233,10 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        if (_runProcessPageBackground != null)
+        if (IsPageProcessingBackgroundRequestRunning())
         {
-            ThreadState threadState =
-                _runProcessPageBackground.ThreadStatus();
-
-            if (threadState == ThreadState.Running ||
-                threadState == ThreadState.Background)
-            {
-                StatusLabelText = "Background process running";
-                return;
-            }
+            StatusLabelText = "Background process running";
+            return;
         }
 
         StatusLabelText = "Processing page";
@@ -9254,6 +9248,37 @@ font-size: 150%;'>No changes</h2>
             txtEdit.Text,
             false);
 
+        StartReparseBackgroundRequest();
+    }
+
+    /// <summary>
+    /// Determines whether the page-processing background request is currently
+    /// running.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if the background request is running or marked as
+    /// a background thread; otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool IsPageProcessingBackgroundRequestRunning()
+    {
+        if (_runProcessPageBackground == null)
+        {
+            return false;
+        }
+
+        ThreadState threadState =
+            _runProcessPageBackground.ThreadStatus();
+
+        return threadState == ThreadState.Running ||
+            threadState == ThreadState.Background;
+    }
+
+    /// <summary>
+    /// Creates and starts the background request used to complete edit-box
+    /// reparsing.
+    /// </summary>
+    private void StartReparseBackgroundRequest()
+    {
         _runProcessPageBackground = new BackgroundRequest();
         _runProcessPageBackground.Complete += ReparseEditBoxComplete;
         _runProcessPageBackground.Execute(ReparseEditBoxBackground);
