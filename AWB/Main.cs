@@ -8194,6 +8194,8 @@ font-size: 150%;'>No changes</h2>
         BeginProcess();
     }
 
+    // TODO(Twain): Move login and processing-start validation into the shared
+    // processing workflow once session and background processing services are extracted.
     /// <summary>
     /// Begins article processing after ensuring that the user is logged in
     /// and that no background process is currently running.
@@ -8209,10 +8211,7 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
         }
-        else if (_runProcessPageBackground != null &&
-                 _runProcessPageBackground.ThreadStatus().IsIn(
-                     ThreadState.Running,
-                     ThreadState.Background))
+        else if (IsPageProcessingBackgroundRequestRunning())
         {
             StatusLabelText = "Background process running";
             return;
