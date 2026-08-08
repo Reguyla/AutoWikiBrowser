@@ -11010,8 +11010,8 @@ font-size: 150%;'>No changes</h2>
     /// </param>
     private void NewHistory(string pageTitle)
     {
-        // TODO(Twain): Extract history URL construction and loading from MainForm
-        // so browser navigation can be reused independently of the WinForms UI.
+        // TODO(Twain): Consolidate embedded browser navigation and error handling
+        // into a shared browser helper once all browser workflows have been reviewed.
         try
         {
             if (EditBoxTab.SelectedTab != tpHistory ||
@@ -11021,15 +11021,15 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            string encodedTitle = WebUtility.UrlEncode(pageTitle);
+            string encodedTitle =
+                WebUtility.UrlEncode(pageTitle);
 
             string url =
-                Variables.URLIndex +
-                "?title=" +
-                encodedTitle +
-                "&action=history&printable=yes";
+                BuildHistoryUrl(
+                    Variables.URLIndex,
+                    encodedTitle);
 
-            Uri targetUri = new Uri(url);
+            Uri targetUri = new(url);
 
             if (webBrowserHistory.Url != targetUri)
             {
