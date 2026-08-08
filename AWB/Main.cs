@@ -9376,8 +9376,9 @@ font-size: 150%;'>No changes</h2>
         mnuTextBox.Hide();
     }
 
-    // TODO: Extract Paste More item collection and mapping logic so configuration
-    // does not depend on ten individually named menu items and dialog properties.
+    // TODO(Twain): Replace the fixed ten-item Paste More model with a collection-
+    // based configuration model so the UI is not tied to individually named slots.
+
     /// <summary>
     /// Opens the Paste More configuration dialog and applies any accepted
     /// text changes to the configured Paste More menu items.
@@ -9386,26 +9387,62 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void configureToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        string[] pasteMoreItems =
+            GetPasteMoreTexts();
+
         using ConfigurePasteMoreItems dialog = new(
-            (string)PasteMore1.Tag,
-            (string)PasteMore2.Tag,
-            (string)PasteMore3.Tag,
-            (string)PasteMore4.Tag,
-            (string)PasteMore5.Tag,
-            (string)PasteMore6.Tag,
-            (string)PasteMore7.Tag,
-            (string)PasteMore8.Tag,
-            (string)PasteMore9.Tag,
-            (string)PasteMore10.Tag);
+            pasteMoreItems[0],
+            pasteMoreItems[1],
+            pasteMoreItems[2],
+            pasteMoreItems[3],
+            pasteMoreItems[4],
+            pasteMoreItems[5],
+            pasteMoreItems[6],
+            pasteMoreItems[7],
+            pasteMoreItems[8],
+            pasteMoreItems[9]);
 
         if (dialog.ShowDialog(this) != DialogResult.OK)
         {
             return;
         }
 
-        string[] dialogStrings =
-        {
-        dialog.String1,
+        ApplyPasteMoreTexts(
+            GetPasteMoreDialogTexts(dialog));
+    }
+
+    /// <summary>
+    /// Gets the currently configured Paste More text values.
+    /// </summary>
+    /// <returns>The configured Paste More text values.</returns>
+    private string[] GetPasteMoreTexts()
+    {
+        return
+        [
+            (string)PasteMore1.Tag,
+        (string)PasteMore2.Tag,
+        (string)PasteMore3.Tag,
+        (string)PasteMore4.Tag,
+        (string)PasteMore5.Tag,
+        (string)PasteMore6.Tag,
+        (string)PasteMore7.Tag,
+        (string)PasteMore8.Tag,
+        (string)PasteMore9.Tag,
+        (string)PasteMore10.Tag
+        ];
+    }
+
+    /// <summary>
+    /// Gets the Paste More text values entered in the configuration dialog.
+    /// </summary>
+    /// <param name="dialog">The Paste More configuration dialog.</param>
+    /// <returns>The configured text values from the dialog.</returns>
+    private static string[] GetPasteMoreDialogTexts(
+        ConfigurePasteMoreItems dialog)
+    {
+        return
+        [
+            dialog.String1,
         dialog.String2,
         dialog.String3,
         dialog.String4,
@@ -9415,11 +9452,21 @@ font-size: 150%;'>No changes</h2>
         dialog.String8,
         dialog.String9,
         dialog.String10
-    };
+        ];
+    }
 
-        for (int i = 0; i < dialogStrings.Length; i++)
+    /// <summary>
+    /// Applies the supplied Paste More text values to the configured menu items.
+    /// </summary>
+    /// <param name="pasteMoreItems">The Paste More text values to apply.</param>
+    private void ApplyPasteMoreTexts(
+        string[] pasteMoreItems)
+    {
+        for (int i = 0; i < pasteMoreItems.Length; i++)
         {
-            SetPasteMoreText(i, dialogStrings[i]);
+            SetPasteMoreText(
+                i,
+                pasteMoreItems[i]);
         }
     }
     #endregion
