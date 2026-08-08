@@ -93,7 +93,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool _skippable = true;
     private bool _shuttingDown;
 
-    private string LastArticle = string.Empty;
+    private string _lastArticle = string.Empty;
     private string _settingsFile = string.Empty;
     private string _settingsFileDisplay = string.Empty;
 
@@ -1785,7 +1785,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 title,
                 StringComparison.Ordinal))
         {
-            LastArticle = string.Empty;
+            _lastArticle = string.Empty;
         }
 
         TheArticle = new Article(title, string.Empty);
@@ -3397,7 +3397,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         NumberOfEdits++;
-        LastArticle = string.Empty;
+        _lastArticle = string.Empty;
 
         listMaker.Remove(TheArticle);
 
@@ -4352,7 +4352,7 @@ font-size: 150%;'>No changes</h2>
         AsyncApiEdit sender,
         string result)
     {
-        LastArticle = txtEdit.Text;
+        _lastArticle = txtEdit.Text;
         _skippable = false;
 
         ShowPreviewBrowser();
@@ -4613,7 +4613,7 @@ font-size: 150%;'>No changes</h2>
     /// </remarks>
     private void SaveArticle()
     {
-        LastArticle = txtEdit.Text;
+        _lastArticle = txtEdit.Text;
 
         UpdateSaveIntervalTracking();
 
@@ -9553,7 +9553,7 @@ font-size: 150%;'>No changes</h2>
             !string.IsNullOrEmpty(TheArticle.Name);
 
         replaceTextWithLastEditToolStripMenuItem.Enabled =
-            !string.IsNullOrEmpty(LastArticle);
+            !string.IsNullOrEmpty(_lastArticle);
     }
 
     /// <summary>
@@ -9996,9 +9996,9 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
-        if (LastArticle.Length > 0)
+        if (_lastArticle.Length > 0)
         {
-            txtEdit.Text = LastArticle;
+            txtEdit.Text = _lastArticle;
 
             if (actionOnLoad == 0)
             {
