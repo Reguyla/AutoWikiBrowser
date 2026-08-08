@@ -903,6 +903,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     internal Article TheArticle { get; private set; }
 
+    // TODO(Twain): Decouple bot-mode workflow state from chkAutoMode.
+    // BotMode is referenced throughout processing, typo handling, diff behavior,
+    // and completion logic, so the checkbox should not remain the application
+    // source of truth. Introduce explicit processing state and bind the UI to it.
     /// <summary>
     /// Gets or sets whether AWB is running in bot mode.
     /// </summary>
