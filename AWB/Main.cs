@@ -9734,6 +9734,8 @@ font-size: 150%;'>No changes</h2>
             false);
     }
 
+    // TODO(Twain): Move edit-summary normalization and persistence into shared
+    // settings logic so MainForm only manages the summary editor UI.
     /// <summary>
     /// Opens the edit summary editor, applies accepted summary changes,
     /// and restores the previously selected summary when possible.
@@ -9757,14 +9759,26 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        ApplyEditSummaries(
+            se.Summaries.Lines,
+            prevSummary);
+    }
+
+    /// <summary>
+    /// Applies the supplied edit summaries to the summary control and restores
+    /// the previous selection when it remains available.
+    /// </summary>
+    /// <param name="summaries">The edit summaries to apply.</param>
+    /// <param name="prevSummary">The previously selected edit summary.</param>
+    private void ApplyEditSummaries(
+        IEnumerable<string> summaries,
+        string prevSummary)
+    {
         cmboEditSummary.Items.Clear();
 
-        foreach (string s in se.Summaries.Lines)
+        foreach (string s in NormalizeEditSummaries(summaries))
         {
-            if (!string.IsNullOrWhiteSpace(s))
-            {
-                cmboEditSummary.Items.Add(s.Trim());
-            }
+            cmboEditSummary.Items.Add(s);
         }
 
         if (cmboEditSummary.Items.Contains(prevSummary))
@@ -9774,6 +9788,23 @@ font-size: 150%;'>No changes</h2>
         else if (cmboEditSummary.Items.Count > 0)
         {
             cmboEditSummary.SelectedIndex = 0;
+        }
+    }
+
+    /// <summary>
+    /// Removes blank edit summaries and trims surrounding whitespace.
+    /// </summary>
+    /// <param name="summaries">The edit summaries to normalize.</param>
+    /// <returns>The normalized edit summaries.</returns>
+    private static IEnumerable<string> NormalizeEditSummaries(
+        IEnumerable<string> summaries)
+    {
+        foreach (string s in summaries)
+        {
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                yield return s.Trim();
+            }
         }
     }
 
