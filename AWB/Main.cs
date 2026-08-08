@@ -10822,8 +10822,9 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
-    // TODO(Twain): Extract user-talk template parsing from MainForm so wiki
-    // configuration loading and template matching can be tested independently.
+    // TODO(Twain): Move user-talk template parsing into a shared parser/
+    // configuration service once this logic is moved out of MainForm.
+
     /// <summary>
     /// Loads the configured user talk templates from the wiki and generates
     /// the corresponding template-matching regular expression.
@@ -10840,8 +10841,6 @@ font-size: 150%;'>No changes</h2>
         // Prevent repeated loading attempts on every page.
         UserTalkWarningsLoaded = true;
 
-        List<string> userTalkTemplates = new();
-
         try
         {
             string text = LoadWikiConfigurationText(
@@ -10854,9 +10853,15 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            foreach (Match match in userTalkTemplate.Matches(text))
+            List<string> userTalkTemplates =
+                ParseUserTalkTemplates(
+                    text,
+                    userTalkTemplate);
+
+            if (userTalkTemplates.Any())
             {
-                userTalkTemplates.Add(match.Groups[1].Value);
+                UserTalkTemplatesRegex =
+                    Tools.NestedTemplateRegex(userTalkTemplates);
             }
         }
         catch (Exception ex)
@@ -10864,12 +10869,28 @@ font-size: 150%;'>No changes</h2>
             ErrorHandler.HandleException(ex);
             UserTalkWarningsLoaded = false;
         }
+    }
 
-        if (userTalkTemplates.Any())
+    /// <summary>
+    /// Extracts user talk template names from the supplied configuration text.
+    /// </summary>
+    /// <param name="text">The configuration text to parse.</param>
+    /// <param name="userTalkTemplate">
+    /// The regular expression used to locate template entries.
+    /// </param>
+    /// <returns>The extracted template names.</returns>
+    private static List<string> ParseUserTalkTemplates(
+        string text,
+        Regex userTalkTemplate)
+    {
+        List<string> userTalkTemplates = new();
+
+        foreach (Match match in userTalkTemplate.Matches(text))
         {
-            UserTalkTemplatesRegex =
-                Tools.NestedTemplateRegex(userTalkTemplates);
+            userTalkTemplates.Add(match.Groups[1].Value);
         }
+
+        return userTalkTemplates;
     }
 
     // TODO(Twain): Move wiki-based parser configuration loading out of MainForm
