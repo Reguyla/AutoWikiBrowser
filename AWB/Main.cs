@@ -85,7 +85,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private bool _abort;
     private bool _ignoreNoBots;
-    private bool ClearPageListOnProjectChange;
+    private bool _clearPageListOnProjectChange;
     private bool _pageReload;
     private bool doDiffInBotMode;
     private bool loggingEnabled;
@@ -7464,7 +7464,7 @@ font-size: 150%;'>No changes</h2>
             PrefAutoSaveEditBoxPeriod = AutoSaveEditBoxPeriod,
 
             PrefIgnoreNoBots = _ignoreNoBots,
-            PrefClearPageListOnProjectChange = ClearPageListOnProjectChange,
+            PrefClearPageListOnProjectChange = _clearPageListOnProjectChange,
 
             PrefShowTimer = ShowMovingAverageTimer,
             PrefAddUsingAWBOnArticleAction = Article.AddUsingAWBOnArticleAction,
@@ -7541,7 +7541,7 @@ font-size: 150%;'>No changes</h2>
         _ignoreNoBots =
             myPrefs.PrefIgnoreNoBots;
 
-        ClearPageListOnProjectChange =
+        _clearPageListOnProjectChange =
             myPrefs.PrefClearPageListOnProjectChange;
 
         ShowMovingAverageTimer =
@@ -7610,7 +7610,7 @@ font-size: 150%;'>No changes</h2>
         BotMode = false;
         lblOnlyBots.Visible = true;
 
-        if (ClearPageListOnProjectChange)
+        if (_clearPageListOnProjectChange)
         {
             listMaker.Clear();
         }

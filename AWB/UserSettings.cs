@@ -597,7 +597,7 @@ partial class MainForm
         {
             SaveArticleList = _saveArticleList,
             IgnoreNoBots = _ignoreNoBots,
-            ClearPageListOnProjectChange = ClearPageListOnProjectChange,
+            ClearPageListOnProjectChange = _clearPageListOnProjectChange,
             SelectedSummary = cmboEditSummary.Text,
             PasteMore = GetPasteMoreValues(),
             FindText = txtFind.Text,
@@ -924,7 +924,7 @@ partial class MainForm
         _ignoreNoBots =
             preferences.General.IgnoreNoBots;
 
-        ClearPageListOnProjectChange =
+        _clearPageListOnProjectChange =
             preferences.General.ClearPageListOnProjectChange;
     }
 
