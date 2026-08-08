@@ -997,17 +997,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private bool _suppressUsingAWB;
 
-    private decimal _asEditPeriod = 60;
+    private decimal _autoSaveEditBoxPeriod = 60;
     /// <summary>
     /// Gets or sets the interval, in seconds, between automatic saves of the edit box.
     /// </summary>
     private decimal AutoSaveEditBoxPeriod
     {
-        get => _asEditPeriod;
+        get => _autoSaveEditBoxPeriod;
 
         set
         {
-            _asEditPeriod = value;
+            _autoSaveEditBoxPeriod = value;
             EditBoxSaveTimer.Interval = (int)(value * 1000m);
         }
     }
@@ -1152,7 +1152,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Handles notification that the active editing session has been logged off.
     /// </summary>
     /// <param name="sender">The editor that raised the event.</param>
-    private void LoggedOff(AsyncApiEdit _sender)
+    private void LoggedOff(AsyncApiEdit sender)
     {
         DisableButtons();
     }
@@ -1171,7 +1171,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// The number of seconds to wait before attempting to restart processing.
     /// </param>
     private void MaxlagExceeded(
-        AsyncApiEdit _sender,
+        AsyncApiEdit sender,
         double _maxlag,
         int retryAfter)
     {
@@ -1197,7 +1197,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <summary>
     /// Handles exceptions raised during asynchronous API editing operations.
     /// </summary>
-    /// <param name="_sender">
+    /// <param name="sender">
     /// The editor that raised the exception. This parameter is required by the
     /// event signature but is not currently used.
     /// </param>
@@ -1210,7 +1210,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// or reporting unexpected errors.
     /// </remarks>
     private void ApiEditExceptionCaught(
-        AsyncApiEdit _sender,
+        AsyncApiEdit sender,
         Exception ex)
     {
         if (ex is InterwikiException)
@@ -3280,7 +3280,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     // TODO (.NET10 Modernization):
     // Confirm that the reusable talk-message dialog is disposed with MainForm.
-    private readonly TalkMessage _dlgTalk = new TalkMessage();
+    private readonly TalkMessage _talkMessageDialog = new TalkMessage();
 
     /// <summary>
     /// Stops processing and prompts the user when new talk-page messages are
@@ -3293,12 +3293,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         TheSession.RequireUpdate();
 
         // Do not display a second instance while the reusable dialog is visible.
-        if (_dlgTalk.Visible)
+        if (_talkMessageDialog.Visible)
         {
             return;
         }
 
-        if (_dlgTalk.ShowDialog(this) != DialogResult.Yes)
+        if (_talkMessageDialog.ShowDialog(this) != DialogResult.Yes)
         {
             return;
         }
