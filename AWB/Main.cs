@@ -8528,6 +8528,10 @@ font-size: 150%;'>No changes</h2>
     // TODO(Twain): Extract keyboard shortcut handling into a dedicated
     // command/shortcut service so the shortcuts can be shared between the
     // WinForms and Avalonia user interfaces.
+    //
+    // TODO(Twain): Replace the keyboard shortcut conditional chain with a
+    // command map to simplify adding and maintaining shortcuts.
+
     /// <summary>
     /// Handles keyboard shortcuts for common editing and processing commands.
     /// </summary>
@@ -8542,75 +8546,118 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        // TODO(Twain): Replace the keyboard shortcut conditional chain with a
-        // command map to simplify adding and maintaining shortcuts.
-        if (e.Modifiers == Keys.Control)
+        if (e.Modifiers != Keys.Control)
         {
-            if (e.KeyCode == Keys.S)
-            {
-                if (btnSave.Enabled)
-                {
-                    Save();
-                }
-                else if (btnStart.Enabled)
-                {
-                    Start();
-                }
-
-                e.SuppressKeyPress = true;
-                return;
-            }
-
-            if (e.KeyCode == Keys.G)
-            {
-                BeginProcess();
-                e.SuppressKeyPress = true;
-                return;
-            }
-
-            if (e.KeyCode == Keys.I && btnIgnore.Enabled)
-            {
-                SkipPage("user");
-                e.SuppressKeyPress = true;
-                return;
-            }
-
-            if (e.KeyCode == Keys.D && btnDiff.Enabled)
-            {
-                GetDiff();
-                e.SuppressKeyPress = true;
-                return;
-            }
-
-            if (e.KeyCode == Keys.N && btnPreview.Enabled)
-            {
-                GetPreview();
-                e.SuppressKeyPress = true;
-                return;
-            }
-
-            if (e.KeyCode == Keys.F)
-            {
-                if (TheArticle != null)
-                {
-                    txtEdit.Find(
-                        txtFind.Text,
-                        chkFindRegex.Checked,
-                        chkFindCaseSensitive.Checked,
-                        TheArticle.Name);
-                }
-
-                e.SuppressKeyPress = true;
-                return;
-            }
-
-            // TODO(Twain): Replace event-handler invocation with a dedicated helper
-            // method or command so this functionality is not coupled to a UI event.
-            if (e.KeyCode == Keys.B)
-            {
-                lbAlerts_Click(null, null);
-            }
+            return;
         }
+
+        if (HandleControlShortcut(e.KeyCode))
+        {
+            e.SuppressKeyPress = true;
+        }
+    }
+
+    /// <summary>
+    /// Handles supported Control-key shortcuts.
+    /// </summary>
+    /// <param name="keyCode">The key pressed with the Control modifier.</param>
+    /// <returns>
+    /// <see langword="true"/> if the shortcut was handled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HandleControlShortcut(Keys keyCode)
+    {
+        switch (keyCode)
+        {
+            case Keys.S:
+                HandleSaveOrStartShortcut();
+                return true;
+
+            case Keys.G:
+                BeginProcess();
+                return true;
+
+            case Keys.I:
+                if (btnIgnore.Enabled)
+                {
+                    SkipPage("user");
+                    return true;
+                }
+
+                return false;
+
+            case Keys.D:
+                if (btnDiff.Enabled)
+                {
+                    GetDiff();
+                    return true;
+                }
+
+                return false;
+
+            case Keys.N:
+                if (btnPreview.Enabled)
+                {
+                    GetPreview();
+                    return true;
+                }
+
+                return false;
+
+            case Keys.F:
+                FindCurrentArticleText();
+                return true;
+
+            case Keys.B:
+                ShowAlerts();
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Executes the Control+S behavior by saving the current article when
+    /// possible or starting processing when saving is unavailable.
+    /// </summary>
+    private void HandleSaveOrStartShortcut()
+    {
+        if (btnSave.Enabled)
+        {
+            Save();
+        }
+        else if (btnStart.Enabled)
+        {
+            Start();
+        }
+    }
+
+    /// <summary>
+    /// Searches the current article text using the active Find settings.
+    /// </summary>
+    private void FindCurrentArticleText()
+    {
+        if (TheArticle == null)
+        {
+            return;
+        }
+
+        txtEdit.Find(
+            txtFind.Text,
+            chkFindRegex.Checked,
+            chkFindCaseSensitive.Checked,
+            TheArticle.Name);
+    }
+
+    /// <summary>
+    /// Displays the current alerts.
+    /// </summary>
+    private void ShowAlerts()
+    {
+        // TODO(Twain): Move alert presentation behind a dedicated command or
+        // service so callers do not invoke UI event handlers directly.
+        lbAlerts_Click(null, null);
     }
 
     /// <summary>
