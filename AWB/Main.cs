@@ -110,7 +110,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // Text Processing
     // --------------------------------------------------------------------
 
-    private readonly HideText RemoveText = new(false, true, true);
+    private readonly HideText _removeText = new(false, true, true);
 
     private readonly List<string> NoParse = new();
     private readonly List<string> NoRetf = new();
@@ -3655,7 +3655,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     {
                         EnsureGeneralFixResourcesLoaded();
 
-                        theArticle.PerformGeneralFixes(Parser, RemoveText, Skip,
+                        theArticle.PerformGeneralFixes(Parser, _removeText, Skip,
                                                        replaceReferenceTagsToolStripMenuItem.Checked,
                                                        restrictDefaultsortChangesToolStripMenuItem.Checked,
                                                        noMOSComplianceFixesToolStripMenuItem.Checked);
@@ -3682,12 +3682,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                             Variables.Profiler.Profile("loadUserTalkWarnings");
                         }
 
-                        theArticle.PerformUserTalkGeneralFixes(RemoveText, UserTalkTemplatesRegex,
+                        theArticle.PerformUserTalkGeneralFixes(_removeText, UserTalkTemplatesRegex,
                                                                Skip.SkipNoUserTalkTemplatesSubstd);
                     }
                     else if (theArticle.CanDoTalkGeneralFixes)
                     {
-                        theArticle.PerformTalkGeneralFixes(RemoveText);
+                        theArticle.PerformTalkGeneralFixes(_removeText);
                     }
                     Variables.Profiler.Profile("Talk Genfixes");
                 }
@@ -3988,7 +3988,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         article.Unicodify(
             Skip.SkipNoUnicode,
             Parser,
-            RemoveText);
+            _removeText);
 
         Variables.Profiler.Profile("Unicodify");
     }
@@ -10133,11 +10133,11 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
-        string text = RemoveText.Hide(txtEdit.Text);
+        string text = _removeText.Hide(txtEdit.Text);
 
         text = Parsers.RemoveAllWhiteSpace(text);
 
-        txtEdit.Text = RemoveText.AddBack(text);
+        txtEdit.Text = _removeText.AddBack(text);
     }
     #endregion
 
