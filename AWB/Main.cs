@@ -8820,9 +8820,10 @@ font-size: 150%;'>No changes</h2>
 
     // TODO(Twain): Replace the blocking redirect-processing workflow with an
     // asynchronous operation that does not block the UI thread.
+
     /// <summary>
     /// Replaces links to redirects in the current article with direct links
-    /// after confirming the operation when running a release build.
+    /// after confirming the operation with the user.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
@@ -8830,17 +8831,15 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
-#if !DEBUG
-    if (MessageBox.Show(
-        "Replacement of links to redirects with direct links is strongly discouraged, " +
-        "however it could be useful in some circumstances. Are you sure you want to continue?",
-        "Bypass redirects",
-        MessageBoxButtons.YesNo,
-        MessageBoxIcon.Warning) != DialogResult.Yes)
-    {
-        return;
-    }
-#endif
+        if (MessageBox.Show(
+            "Replacement of links to redirects with direct links is strongly discouraged, " +
+            "however it could be useful in some circumstances. Are you sure you want to continue?",
+            "Bypass redirects",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning) != DialogResult.Yes)
+        {
+            return;
+        }
 
         BackgroundRequest request = new();
 
