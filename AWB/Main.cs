@@ -10065,8 +10065,8 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        // TODO(Twain): Extract the article move workflow into a dedicated service
-        // so the UI coordinates the operation instead of performing it directly.
+        // TODO(Twain): Move article relocation into the shared article-action
+        // service once move, delete, and protect workflows are consolidated.
         try
         {
             if (!TheSession.Page.Exists)
@@ -10086,33 +10086,20 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            string newTitle;
-            string msg;
-
-            bool succeed = TheArticle.Move(
-                TheSession,
-                out newTitle);
+            bool succeed =
+                TryMoveArticle(
+                    TheArticle,
+                    TheSession,
+                    out string newTitle,
+                    out string msg);
 
             if (succeed)
             {
-                Article replacementArticle = new Article(newTitle);
-
-                msg =
-                    "Moved " +
-                    TheArticle.Name +
-                    " to " +
-                    newTitle;
+                Article replacementArticle = new(newTitle);
 
                 listMaker.ReplaceArticle(
                     TheArticle,
                     replacementArticle);
-            }
-            else
-            {
-                msg =
-                    "Move of " +
-                    TheArticle.Name +
-                    " failed!";
             }
 
             articleActionLogControl1.LogArticleAction(
@@ -10175,9 +10162,48 @@ font-size: 150%;'>No changes</h2>
         {
             ErrorHandler.HandleException(ex);
         }
+    }
 
-        // TODO(Twain): Separate move result processing from UI updates so move
-        // outcomes can be reused and tested independently of MainForm.
+    /// <summary>
+    /// Attempts to move the specified article and creates a message describing
+    /// the result.
+    /// </summary>
+    /// <param name="article">The article to move.</param>
+    /// <param name="session">The session used to perform the move.</param>
+    /// <param name="newTitle">The destination title returned by the move operation.</param>
+    /// <param name="msg">The message describing the move result.</param>
+    /// <returns>
+    /// <see langword="true"/> if the move succeeds; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool TryMoveArticle(
+        Article article,
+        Session session,
+        out string newTitle,
+        out string msg)
+    {
+        bool succeed =
+            article.Move(
+                session,
+                out newTitle);
+
+        if (succeed)
+        {
+            msg =
+                "Moved " +
+                article.Name +
+                " to " +
+                newTitle;
+        }
+        else
+        {
+            msg =
+                "Move of " +
+                article.Name +
+                " failed!";
+        }
+
+        return succeed;
     }
 
     /// <summary>
