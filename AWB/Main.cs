@@ -8390,14 +8390,24 @@ font-size: 150%;'>No changes</h2>
         listMaker.SaveList();
     }
 
-    private void launchListComparerToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the List Comparer and optionally initializes it with the current
+    /// article list, depending on the user's preferences.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void launchListComparerToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         switch (_listComparerUseCurrentArticleList)
         {
             case 0: // Ask
                 if (listMaker.Any() &&
-                    MessageBox.Show("Would you like to copy your current Article List to the ListComparer?",
-                                    "Copy Article List?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    MessageBox.Show(
+                        "Would you like to copy your current Article List to the ListComparer?",
+                        "Copy Article List?",
+                        MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     goto case 1;
                 }
@@ -8405,8 +8415,11 @@ font-size: 150%;'>No changes</h2>
                 goto case 2;
 
             case 1: // Always
-                Comparer = new ListComparer(listMaker, listMaker.GetArticleList());
+                Comparer = new ListComparer(
+                    listMaker,
+                    listMaker.GetArticleList());
                 break;
+
             case 2: // Never
                 Comparer = new ListComparer(listMaker);
                 break;
@@ -8415,14 +8428,24 @@ font-size: 150%;'>No changes</h2>
         Comparer.Show(this);
     }
 
-    private void launchListSplitterToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the List Splitter and optionally initializes it with the current
+    /// article list, depending on the user's preferences.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void launchListSplitterToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         switch (_listSplitterUseCurrentArticleList)
         {
             case 0: // Ask
                 if (listMaker.Any() &&
-                    MessageBox.Show("Would you like to copy your current Article List to the ListSplitter?",
-                                    "Copy Article List?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    MessageBox.Show(
+                        "Would you like to copy your current Article List to the ListSplitter?",
+                        "Copy Article List?",
+                        MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     goto case 1;
                 }
@@ -8430,8 +8453,11 @@ font-size: 150%;'>No changes</h2>
                 goto case 2;
 
             case 1: // Always
-                Splitter = new ListSplitter(MakePrefs(), listMaker.GetArticleList());
+                Splitter = new ListSplitter(
+                    MakePrefs(),
+                    listMaker.GetArticleList());
                 break;
+
             case 2: // Never
                 Splitter = new ListSplitter(MakePrefs());
                 break;
@@ -8440,19 +8466,32 @@ font-size: 150%;'>No changes</h2>
         Splitter.Show(this);
     }
 
-    private void launchDumpSearcherToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the database dump searcher.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void launchDumpSearcherToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         LaunchDumpSearcher();
     }
 
+    /// <summary>
+    /// Opens the database dump searcher and configures whether its results
+    /// are added to the current article list based on the user's preferences.
+    /// </summary>
     private void LaunchDumpSearcher()
     {
         switch (_dbScannerUseCurrentArticleList)
         {
             case 0: // Ask
-                if (MessageBox.Show("Would you like the results to be added to the ListMaker Article List?",
-                                    "Add to ListMaker?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
-                    DialogResult.Yes)
+                if (MessageBox.Show(
+                    "Would you like the results to be added to the ListMaker Article List?",
+                    "Add to ListMaker?",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     goto case 1;
                 }
@@ -8462,6 +8501,7 @@ font-size: 150%;'>No changes</h2>
             case 1: // Always
                 DBScanner = listMaker.DBScanner();
                 break;
+
             case 2: // Never
                 DBScanner = new Twain.Core.DBScanner.DatabaseScanner();
                 break;
@@ -8471,11 +8511,28 @@ font-size: 150%;'>No changes</h2>
         UpdateButtons(null, null);
     }
 
-    private void alphaSortInterwikiLinksToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Updates the parser setting that controls alphabetical sorting of
+    /// interwiki links.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void alphaSortInterwikiLinksToolStripMenuItem_CheckStateChanged(
+        object sender,
+        EventArgs e)
     {
-        Parser.SortInterwikis = alphaSortInterwikiLinksToolStripMenuItem.Checked;
+        Parser.SortInterwikis =
+            alphaSortInterwikiLinksToolStripMenuItem.Checked;
     }
 
+    // TODO(Twain): Extract keyboard shortcut handling into a dedicated
+    // command/shortcut service so the shortcuts can be shared between the
+    // WinForms and Avalonia user interfaces.
+    /// <summary>
+    /// Handles keyboard shortcuts for common editing and processing commands.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The keyboard event data.</param>
     private void MainForm_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Escape && btnStop.Enabled)
@@ -8485,50 +8542,70 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        // TODO(Twain): Replace the keyboard shortcut conditional chain with a
+        // command map to simplify adding and maintaining shortcuts.
         if (e.Modifiers == Keys.Control)
         {
             if (e.KeyCode == Keys.S)
             {
                 if (btnSave.Enabled)
+                {
                     Save();
+                }
                 else if (btnStart.Enabled)
+                {
                     Start();
+                }
 
                 e.SuppressKeyPress = true;
                 return;
             }
+
             if (e.KeyCode == Keys.G)
             {
                 BeginProcess();
                 e.SuppressKeyPress = true;
                 return;
             }
+
             if (e.KeyCode == Keys.I && btnIgnore.Enabled)
             {
                 SkipPage("user");
                 e.SuppressKeyPress = true;
                 return;
             }
+
             if (e.KeyCode == Keys.D && btnDiff.Enabled)
             {
                 GetDiff();
                 e.SuppressKeyPress = true;
                 return;
             }
+
             if (e.KeyCode == Keys.N && btnPreview.Enabled)
             {
                 GetPreview();
                 e.SuppressKeyPress = true;
                 return;
             }
+
             if (e.KeyCode == Keys.F)
             {
                 if (TheArticle != null)
-                    txtEdit.Find(txtFind.Text, chkFindRegex.Checked, chkFindCaseSensitive.Checked, TheArticle.Name);
+                {
+                    txtEdit.Find(
+                        txtFind.Text,
+                        chkFindRegex.Checked,
+                        chkFindCaseSensitive.Checked,
+                        TheArticle.Name);
+                }
+
                 e.SuppressKeyPress = true;
                 return;
             }
 
+            // TODO(Twain): Replace event-handler invocation with a dedicated helper
+            // method or command so this functionality is not coupled to a UI event.
             if (e.KeyCode == Keys.B)
             {
                 lbAlerts_Click(null, null);
@@ -8536,22 +8613,27 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Handles keyboard input for the edit summary control, including adding
+    /// new summaries and selecting all text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The keyboard event data.</param>
     private void cmbEditSummary_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.Enter && !cmboEditSummary.Items.Contains(cmboEditSummary.Text))
+        if (e.KeyCode == Keys.Enter &&
+            !cmboEditSummary.Items.Contains(cmboEditSummary.Text))
         {
             e.SuppressKeyPress = true;
             cmboEditSummary.Items.Add(cmboEditSummary.Text);
         }
 
-        if (e.Modifiers == Keys.Control)
+        if (e.Modifiers == Keys.Control &&
+            e.KeyCode == Keys.A)
         {
-            if (e.KeyCode == Keys.A)
-            {
-                cmboEditSummary.SelectAll();
-                e.SuppressKeyPress = true;
-                e.Handled = true;
-            }
+            cmboEditSummary.SelectAll();
+            e.SuppressKeyPress = true;
+            e.Handled = true;
         }
     }
 
@@ -8675,20 +8757,32 @@ font-size: 150%;'>No changes</h2>
             + txtEdit.Text;
     }
 
+    // TODO(Twain): Move speedy deletion template generation and user-facing
+    // text into wiki-specific configuration so non-Wikipedia wikis can define
+    // their own deletion workflow.
+    /// <summary>
+    /// Prompts the user for a speedy deletion reason and prepends the
+    /// corresponding deletion template to the current article text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void speedyDeleteToolStripMenuItem_Click(object sender, EventArgs e)
     {
         Rectangle scrn = Screen.GetWorkingArea(this);
 
-        var res =
-            Twain.Core.Controls.InputBox.Show(
-                "Enter a reason. Leave blank if you'll edit the reason in the AWB text box",
-                "Speedy deletion",
-                "",
-                null,
-                scrn.Width / 2, scrn.Height / 3);
+        var res = Twain.Core.Controls.InputBox.Show(
+            "Enter a reason. Leave blank if you'll edit the reason in the AWB text box",
+            "Speedy deletion",
+            "",
+            null,
+            scrn.Width / 2,
+            scrn.Height / 3);
+
         if (res.OK)
         {
-            txtEdit.Text = "{{db|" + res.Text.Trim() + "}}\r\n\r\n" + txtEdit.Text;
+            txtEdit.Text =
+                "{{db|" + res.Text.Trim() + "}}\r\n\r\n" +
+                txtEdit.Text;
         }
     }
 
@@ -8724,21 +8818,31 @@ font-size: 150%;'>No changes</h2>
             "{{Uncategorized|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}";
     }
 
-    private void bypassAllRedirectsToolStripMenuItem_Click(object sender, EventArgs e)
+    // TODO(Twain): Replace the blocking redirect-processing workflow with an
+    // asynchronous operation that does not block the UI thread.
+    /// <summary>
+    /// Replaces links to redirects in the current article with direct links
+    /// after confirming the operation when running a release build.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void bypassAllRedirectsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
 #if !DEBUG
-if (MessageBox.Show(
+    if (MessageBox.Show(
         "Replacement of links to redirects with direct links is strongly discouraged, " +
         "however it could be useful in some circumstances. Are you sure you want to continue?",
         "Bypass redirects",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Warning) != DialogResult.Yes)
-{
-    return;
-}
+    {
+        return;
+    }
 #endif
 
-        BackgroundRequest request = new BackgroundRequest();
+        BackgroundRequest request = new();
 
         Enabled = false;
 
@@ -8758,6 +8862,12 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Converts supported character entities in the selected text to their
+    /// Unicode equivalents.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void unicodifyToolStripMenuItem_Click(object sender, EventArgs e)
     {
         string text = txtEdit.SelectedText;
@@ -8765,13 +8875,32 @@ if (MessageBox.Show(
         txtEdit.SelectedText = text;
     }
 
-    private void humanNameCategoryKeyToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Inserts a DEFAULTSORT value based on the current article's human-name
+    /// category key.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void humanNameCategoryKeyToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (TheArticle != null)
-            txtEdit.SelectedText = "{{DEFAULTSORT:" + Tools.MakeHumanCatKey(TheArticle.Name, TheArticle.ArticleText) + "}}";
+        {
+            txtEdit.SelectedText =
+                "{{DEFAULTSORT:" +
+                Tools.MakeHumanCatKey(
+                    TheArticle.Name,
+                    TheArticle.ArticleText) +
+                "}}";
+        }
     }
 
-    private readonly Regex RegexDates = new Regex("[12][0-9]{3}", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches four-digit years beginning with 1 or 2.
+    /// </summary>
+    private readonly Regex RegexDates =
+        new("[12][0-9]{3}", RegexOptions.Compiled);
 
     private void birthdeathCatsToolStripMenuItem_Click(object sender, EventArgs e)
     {
@@ -8846,28 +8975,49 @@ if (MessageBox.Show(
         }
     }
 
+    /// <summary>
+    /// Inserts the configured stub text at the current editor selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void stubToolStripMenuItem_Click(object sender, EventArgs e)
     {
         txtEdit.SelectedText = toolStripTextBox1.Text;
     }
 
+    /// <summary>
+    /// Updates edit-box context menu commands before the menu is displayed.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">
+    /// A <see cref="CancelEventArgs"/> that can be used to cancel the menu opening.
+    /// </param>
     private void mnuTextBox_Opening(object sender, CancelEventArgs e)
     {
         txtEdit.Focus();
 
-        cutToolStripMenuItem.Enabled = copyToolStripMenuItem.Enabled =
+        cutToolStripMenuItem.Enabled =
+            copyToolStripMenuItem.Enabled =
             openSelectionInBrowserToolStripMenuItem.Enabled =
-            (!string.IsNullOrEmpty(txtEdit.SelectedText));
+            !string.IsNullOrEmpty(txtEdit.SelectedText);
 
         undoToolStripMenuItem.Enabled = txtEdit.CanUndo;
 
-        openPageInBrowserToolStripMenuItem.Enabled = openHistoryMenuItem.Enabled =
+        openPageInBrowserToolStripMenuItem.Enabled =
+            openHistoryMenuItem.Enabled =
             openTalkPageInBrowserToolStripMenuItem.Enabled =
-            (TheArticle != null && !string.IsNullOrEmpty(TheArticle.Name));
+            TheArticle != null &&
+            !string.IsNullOrEmpty(TheArticle.Name);
 
-        replaceTextWithLastEditToolStripMenuItem.Enabled = (!string.IsNullOrEmpty(LastArticle));
+        replaceTextWithLastEditToolStripMenuItem.Enabled =
+            !string.IsNullOrEmpty(LastArticle);
     }
 
+    /// <summary>
+    /// Opens the current article in the default web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void openPageInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (TheArticle == null)
