@@ -7029,9 +7029,8 @@ font-size: 150%;'>No changes</h2>
         string selectedItem =
             lbDuplicateWikilinks.SelectedItem?.ToString() ?? string.Empty;
 
-        // Remove the duplicate count appended to the displayed link.
         string link =
-            Regex.Replace(selectedItem, @" \(\d+\)$", string.Empty);
+            ExtractDuplicateWikilink(selectedItem);
 
         if (string.IsNullOrEmpty(link))
         {
@@ -7039,7 +7038,8 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        string searchPattern = BuildDuplicateWikilinkSearchPattern(link);
+        string searchPattern =
+            BuildDuplicateWikilinkSearchPattern(link);
 
         txtEdit.Find(
             searchPattern,
@@ -7048,6 +7048,24 @@ font-size: 150%;'>No changes</h2>
             TheArticle.Name);
 
         btnRemove.Enabled = true;
+    }
+
+    /// <summary>
+    /// Removes the appended duplicate count from a displayed duplicate wikilink.
+    /// </summary>
+    /// <param name="selectedItem">
+    /// The duplicate-wikilink display text.
+    /// </param>
+    /// <returns>
+    /// The wikilink text without the appended duplicate count.
+    /// </returns>
+    private static string ExtractDuplicateWikilink(
+        string selectedItem)
+    {
+        return Regex.Replace(
+            selectedItem,
+            @" \(\d+\)$",
+            string.Empty);
     }
 
     /// <summary>
