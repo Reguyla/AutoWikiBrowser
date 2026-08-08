@@ -10295,11 +10295,8 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        // TODO(Twain): Extract the article protection workflow into a dedicated
-        // service so the UI coordinates the operation instead of performing it.
-        //
-        // TODO(Twain): Separate protection result processing from UI updates so
-        // outcomes can be reused and tested independently of MainForm.
+        // TODO(Twain): Move article protection into the shared article-action
+        // service once protection, deletion, and move workflows are consolidated.
         try
         {
             if (!TheSession.User.IsSysop)
@@ -10313,20 +10310,11 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            string msg;
-            bool succeed = TheArticle.Protect(TheSession);
-
-            if (succeed)
-            {
-                msg = "Protected " + TheArticle.Name;
-            }
-            else
-            {
-                msg =
-                    "Protection of " +
-                    TheArticle.Name +
-                    " failed!";
-            }
+            bool succeed =
+                TryProtectArticle(
+                    TheArticle,
+                    TheSession,
+                    out string msg);
 
             articleActionLogControl1.LogArticleAction(
                 TheArticle.Name,
@@ -10340,6 +10328,39 @@ font-size: 150%;'>No changes</h2>
         {
             ErrorHandler.HandleException(ex);
         }
+    }
+
+    /// <summary>
+    /// Attempts to protect the specified article and creates a message describing
+    /// the result.
+    /// </summary>
+    /// <param name="article">The article to protect.</param>
+    /// <param name="session">The session used to perform the protection.</param>
+    /// <param name="msg">The message describing the protection result.</param>
+    /// <returns>
+    /// <see langword="true"/> if protection succeeds; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool TryProtectArticle(
+        Article article,
+        Session session,
+        out string msg)
+    {
+        bool succeed = article.Protect(session);
+
+        if (succeed)
+        {
+            msg = "Protected " + article.Name;
+        }
+        else
+        {
+            msg =
+                "Protection of " +
+                article.Name +
+                " failed!";
+        }
+
+        return succeed;
     }
     #endregion
 
