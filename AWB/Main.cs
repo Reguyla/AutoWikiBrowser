@@ -6831,7 +6831,7 @@ font-size: 150%;'>No changes</h2>
     /// </param>
     private void EvaluateTalkAndUserNamespaceAlerts(bool hasAlertsOn)
     {
-        if (hasAlertsOn || alertPreferences.Contains(5))
+        if (IsAlertEnabled(hasAlertsOn, 5))
         {
             _duplicateBannerShellParameters =
                 TheArticle.DuplicateWikiProjectBannerShellParameters();
@@ -6843,7 +6843,7 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(21))
+        if (IsAlertEnabled(hasAlertsOn, 21))
         {
             _unknownWikiProjectBannerShellParameters =
                 TheArticle.UnknownWikiProjectBannerShellParameters();
@@ -6858,11 +6858,13 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        // Check for links to user or user-talk namespaces in article content.
-        if ((hasAlertsOn || alertPreferences.Contains(22))
-            && TheArticle.NameSpaceKey == Namespace.Article)
+        // TODO(Twain): Replace numeric alert identifiers with named alert types
+        // and move alert evaluation out of MainForm into a shared alert service.
+        if (IsAlertEnabled(hasAlertsOn, 22) &&
+            TheArticle.NameSpaceKey == Namespace.Article)
         {
-            _userSignatures = TheArticle.UserSignature();
+            _userSignatures =
+                TheArticle.UserSignature();
 
             if (_userSignatures.Count > 0)
             {
@@ -6870,6 +6872,28 @@ font-size: 150%;'>No changes</h2>
                     $"Editor's signature or link to user space ({_userSignatures.Count})");
             }
         }
+    }
+
+    /// <summary>
+    /// Determines whether the specified alert is enabled by the current alert
+    /// configuration.
+    /// </summary>
+    /// <param name="hasAlertsOn">
+    /// <see langword="true"/> when all alerts are enabled.
+    /// </param>
+    /// <param name="alertId">
+    /// The alert identifier to evaluate.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the alert should be evaluated; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool IsAlertEnabled(
+        bool hasAlertsOn,
+        int alertId)
+    {
+        return hasAlertsOn ||
+            alertPreferences.Contains(alertId);
     }
 
     // TODO (Editor Architecture):
