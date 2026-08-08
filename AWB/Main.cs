@@ -10716,11 +10716,12 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private const string NudgeTimerString = "Total nudges: ";
 
-    // TODO(Twain): Extract nudge/retry processing from MainForm so timer state,
-    // retry decisions, and restart behavior can be tested independently of the UI.
-    //
     // TODO(Twain): Move plugin nudge notifications behind the plugin service
     // rather than iterating the plugin registry directly from MainForm.
+    //
+    // TODO(Twain): Move nudge/retry policy out of MainForm once processing
+    // orchestration is extracted into a shared service.
+
     /// <summary>
     /// Handles a nudge timer event by allowing plugins to cancel the nudge,
     /// updating nudge statistics, and restarting or skipping processing as
@@ -10734,48 +10735,81 @@ font-size: 150%;'>No changes</h2>
         object sender,
         NudgeTimer.NudgeTimerEventArgs e)
     {
-        // Ensure bot mode is still enabled before attempting a nudge.
-        if (BotMode)
+        if (!BotMode)
         {
-            // Notify plugins before the nudge and allow them to cancel it.
-            foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
+            return;
+        }
+
+        if (PluginsCancelNudge())
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        Nudges++;
+        lblNudges.Text = NudgeTimerString + Nudges;
+
+        NudgeTimer.Stop();
+
+        ProcessNudgeRetry();
+
+        NotifyPluginsNudged();
+    }
+
+    /// <summary>
+    /// Notifies plugins that a nudge is about to occur and determines whether
+    /// any plugin requests that the nudge be cancelled.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if a plugin cancels the nudge; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool PluginsCancelNudge()
+    {
+        foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
+        {
+            bool cancel;
+            a.Value.Nudge(out cancel);
+
+            if (cancel)
             {
-                bool cancel;
-                a.Value.Nudge(out cancel);
-
-                if (cancel)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-            }
-
-            // Update nudge statistics and restart or skip processing.
-            Nudges++;
-            lblNudges.Text = NudgeTimerString + Nudges;
-
-            NudgeTimer.Stop();
-
-            if (chkNudgeSkip.Checked && SameArticleNudges > 0)
-            {
-                SameArticleNudges = 0;
-                SkipPage("There was an error saving the page twice");
-            }
-            else
-            {
-                SameArticleNudges++;
-                Stop();
-                _stopProcessing = false;
-                Start();
-            }
-
-            // Inform plugins that the nudge completed.
-            foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
-            {
-                a.Value.Nudged(Nudges);
+                return true;
             }
         }
+
+        return false;
     }
+
+    /// <summary>
+    /// Applies the retry behavior for the current nudge, either skipping the
+    /// page after repeated failures or restarting processing.
+    /// </summary>
+    private void ProcessNudgeRetry()
+    {
+        if (chkNudgeSkip.Checked && SameArticleNudges > 0)
+        {
+            SameArticleNudges = 0;
+            SkipPage("There was an error saving the page twice");
+            return;
+        }
+
+        SameArticleNudges++;
+        Stop();
+        _stopProcessing = false;
+        Start();
+    }
+
+    /// <summary>
+    /// Notifies all registered plugins that the nudge has completed.
+    /// </summary>
+    private void NotifyPluginsNudged()
+    {
+        foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
+        {
+            a.Value.Nudged(Nudges);
+        }
+    }
+
     /// <summary>
     /// Gets the number of nudges recorded for the current session.
     /// </summary>
