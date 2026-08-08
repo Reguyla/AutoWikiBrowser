@@ -8478,37 +8478,74 @@ font-size: 150%;'>No changes</h2>
         LaunchDumpSearcher();
     }
 
+    // TODO(Twain): Replace numeric article-list preference values with a named
+    // mode and move dump-searcher creation behind a shared service.
+
     /// <summary>
     /// Opens the database dump searcher and configures whether its results
     /// are added to the current article list based on the user's preferences.
     /// </summary>
     private void LaunchDumpSearcher()
     {
-        switch (_dbScannerUseCurrentArticleList)
-        {
-            case 0: // Ask
-                if (MessageBox.Show(
-                    "Would you like the results to be added to the ListMaker Article List?",
-                    "Add to ListMaker?",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    goto case 1;
-                }
+        bool useCurrentArticleList =
+            ShouldDumpSearcherUseCurrentArticleList();
 
-                goto case 2;
-
-            case 1: // Always
-                DBScanner = listMaker.DBScanner();
-                break;
-
-            case 2: // Never
-                DBScanner = new Twain.Core.DBScanner.DatabaseScanner();
-                break;
-        }
+        DBScanner =
+            CreateDumpSearcher(
+                useCurrentArticleList);
 
         DBScanner.Show();
         UpdateButtons(null, null);
+    }
+
+    /// <summary>
+    /// Determines whether the dump searcher should use the current article list,
+    /// prompting the user when the configured preference requires confirmation.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> to use the current article list; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool ShouldDumpSearcherUseCurrentArticleList()
+    {
+        switch (_dbScannerUseCurrentArticleList)
+        {
+            case 0: // Ask
+                return MessageBox.Show(
+                    "Would you like the results to be added to the ListMaker Article List?",
+                    "Add to ListMaker?",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == DialogResult.Yes;
+
+            case 1: // Always
+                return true;
+
+            case 2: // Never
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Creates the database dump searcher configured for the requested
+    /// article-list behavior.
+    /// </summary>
+    /// <param name="useCurrentArticleList">
+    /// <see langword="true"/> to create a scanner connected to the current
+    /// article list; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>The configured database dump searcher.</returns>
+    private Twain.Core.DBScanner.DatabaseScanner CreateDumpSearcher(
+        bool useCurrentArticleList)
+    {
+        if (useCurrentArticleList)
+        {
+            return listMaker.DBScanner();
+        }
+
+        return new Twain.Core.DBScanner.DatabaseScanner();
     }
 
     /// <summary>
