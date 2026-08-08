@@ -10878,57 +10878,39 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO(Twain): Move wiki-based parser configuration loading out of MainForm
+    // once parser configuration services are extracted.
     /// <summary>
-    /// Loads the list of template redirects to bypass from [[WP:AWB/Template redirects]]
+    /// Loads the list of template redirects to bypass from the configured
+    /// AutoWikiBrowser template redirects page.
     /// </summary>
     private void LoadTemplateRedirects()
     {
-        string text;
         TemplateRedirectsLoaded = true;
-        try
-        {
-            text = TheSession.Editor.SynchronousEditor.Clone().Open(
-                "Project:AutoWikiBrowser/Template redirects",
-                true);
-        }
-        catch (Exception ex)
-        {
-            Tools.WriteDebug(
-                "LoadTemplateRedirects",
-                "Unable to load template redirects: " + ex.Message);
 
-            text = string.Empty;
-        }
+        string text = LoadWikiConfigurationText(
+            "Project:AutoWikiBrowser/Template redirects",
+            "LoadTemplateRedirects",
+            "Unable to load template redirects: ");
 
-        // always make this call even if no text found (if changed project from one to another must make sure redirects are cleared)
-        WikiRegexes.TemplateRedirects = Parsers.LoadTemplateRedirects(text);
+        // Always update the parser state, even when no text was loaded.
+        // This ensures redirects from a previously selected project are cleared.
+        WikiRegexes.TemplateRedirects =
+            Parsers.LoadTemplateRedirects(text);
     }
 
-    // TODO(Twain): Extract wiki-based parser configuration loading into a
-    // shared service to remove duplicated fetch/error-handling logic from MainForm.
     /// <summary>
     /// Loads the configured dated-template definitions from the wiki and
     /// updates the corresponding parser expressions when data is available.
     /// </summary>
     private void LoadDatedTemplates()
     {
-        string text;
         DatedTemplatesLoaded = true;
 
-        try
-        {
-            text = TheSession.Editor.SynchronousEditor.Clone().Open(
-                "Project:AutoWikiBrowser/Dated templates",
-                true);
-        }
-        catch (Exception ex)
-        {
-            Tools.WriteDebug(
-                "LoadDatedTemplates",
-                "Unable to load dated templates: " + ex.Message);
-
-            text = string.Empty;
-        }
+        string text = LoadWikiConfigurationText(
+            "Project:AutoWikiBrowser/Dated templates",
+            "LoadDatedTemplates",
+            "Unable to load dated templates: ");
 
         if (text.Length > 0)
         {
