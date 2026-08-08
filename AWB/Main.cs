@@ -142,8 +142,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // External Components
     // --------------------------------------------------------------------
 
-    private readonly CustomModule _cModule = new();
-    private readonly ExternalProgram _extProgram = new();
+    private readonly CustomModule _customModule = new();
+    private readonly ExternalProgram _externalProgram = new();
 
     private RegexTester _regexTester;
 
@@ -3784,9 +3784,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool RunExtensionProcessing(Article article)
     {
-        if (_cModule.ModuleUsable)
+        if (_customModule.ModuleUsable)
         {
-            article.SendPageToCustomModule(_cModule.Module);
+            article.SendPageToCustomModule(_customModule.Module);
 
             if (article.SkipArticle)
             {
@@ -3796,9 +3796,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         Variables.Profiler.Profile("Custom module");
 
-        if (_extProgram.ModuleEnabled)
+        if (_externalProgram.ModuleEnabled)
         {
-            article.SendPageToCustomModule(_extProgram);
+            article.SendPageToCustomModule(_externalProgram);
 
             if (article.SkipArticle)
             {
@@ -8410,7 +8410,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void makeModuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        _cModule.Show();
+        _customModule.Show();
     }
 
     /// <summary>
@@ -13227,7 +13227,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void externalProcessingToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        _extProgram.Show();
+        _externalProgram.Show();
     }
 
     /// <summary>

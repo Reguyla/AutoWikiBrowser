@@ -188,7 +188,7 @@ partial class MainForm
                     MessageBoxIcon.Warning);
             }
 
-            _cModule.ModuleEnabled = false;
+            _customModule.ModuleEnabled = false;
             Text = Program.Name;
             StatusLabelText = "Default settings loaded.";
         }
@@ -482,7 +482,7 @@ partial class MainForm
             MakeGeneralPrefs(),
             MakeDabPrefs(),
             MakeModulePrefs(),
-            _extProgram.Settings,
+            _externalProgram.Settings,
             listMaker.SpecialFilterSettings,
             MakeToolsPrefs(),
             Plugin.AWBPlugins)
@@ -724,9 +724,9 @@ partial class MainForm
     {
         return new ModulePrefs
         {
-            Enabled = _cModule.ModuleEnabled,
-            Language = _cModule.Language,
-            Code = _cModule.Code
+            Enabled = _customModule.ModuleEnabled,
+            Language = _customModule.Language,
+            Code = _customModule.Code
         };
     }
 
@@ -1399,18 +1399,18 @@ partial class MainForm
     private void LoadModulePreferences(
         ModulePrefs preferences)
     {
-        _cModule.Language =
+        _customModule.Language =
             preferences.Language;
 
-        _cModule.Code = NormalizeLineEndings(
+        _customModule.Code = NormalizeLineEndings(
             preferences.Code);
 
-        _cModule.ModuleEnabled =
+        _customModule.ModuleEnabled =
             preferences.Enabled;
 
-        if (!_cModule.ModuleEnabled)
+        if (!_customModule.ModuleEnabled)
         {
-            _cModule.SetModuleNotBuilt();
+            _customModule.SetModuleNotBuilt();
         }
     }
 
@@ -1442,7 +1442,7 @@ partial class MainForm
     private void LoadExternalProgramPreferences(
         UserPrefs preferences)
     {
-        _extProgram.Settings =
+        _externalProgram.Settings =
             preferences.ExternalProgram;
     }
 
