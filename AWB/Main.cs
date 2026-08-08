@@ -122,7 +122,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly SkipOptions _skip = new();
 
-    private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial RplcSpecial =
+    private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial _rplcSpecial =
         new();
 
     private readonly Parsers Parser;
@@ -3624,7 +3624,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // Do not apply skip checks when reparsing
             if (chkFindandReplace.Checked)
             {
-                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, RplcSpecial,
+                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, _rplcSpecial,
                                                  (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), false);
 
                 Variables.Profiler.Profile("F&R");
@@ -3720,7 +3720,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // Do not apply skip checks when reparsing
             if (chkFindandReplace.Checked)
             {
-                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, RplcSpecial,
+                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, _rplcSpecial,
                                                  (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), true);
 
                 theArticle.DoFaRSkips(_findAndReplace);
@@ -9676,13 +9676,13 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void btnFindAndReplaceAdvanced_Click(object sender, EventArgs e)
     {
-        if (!RplcSpecial.Visible)
+        if (!_rplcSpecial.Visible)
         {
-            RplcSpecial.Show(ntfyTray.Text + " – Replace Special");
+            _rplcSpecial.Show(ntfyTray.Text + " – Replace Special");
         }
         else
         {
-            RplcSpecial.Hide();
+            _rplcSpecial.Hide();
         }
     }
 

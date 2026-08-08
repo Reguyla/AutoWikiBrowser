@@ -501,7 +501,7 @@ partial class MainForm
     {
         return new FaRPrefs(
             _findAndReplace,
-            RplcSpecial,
+            _rplcSpecial,
             _substTemplates)
         {
             Enabled = chkFindandReplace.Checked
@@ -889,8 +889,8 @@ partial class MainForm
         _findAndReplace.AppendToSummary = preferences.AppendSummary;
         _findAndReplace.AddNew(preferences.Replacements);
 
-        RplcSpecial.Clear();
-        RplcSpecial.AddNewRule(preferences.AdvancedReps);
+        _rplcSpecial.Clear();
+        _rplcSpecial.AddNewRule(preferences.AdvancedReps);
 
         _substTemplates.Clear();
         _substTemplates.TemplateList = preferences.SubstTemplates;
