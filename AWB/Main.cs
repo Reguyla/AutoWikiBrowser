@@ -532,8 +532,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// The path of the current settings file, or an empty value when no settings file is loaded.
     /// </param>
     /// <returns>
-    /// The application display text, including the debug revision number and settings file name
-    /// when available.
+    /// The application display text, including the revision number and settings
+    /// file name when available.
     /// </returns>
     private static string BuildSettingsFileDisplayText(string settingsFile)
     {
@@ -569,8 +569,19 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             : displayText;
     }
 
+    /// <summary>
+    /// Stores the profile name requested from the command line so it can be
+    /// logged in after startup initialization has completed.
+    /// </summary>
     private string _profileToLoad = string.Empty;
 
+    /// <summary>
+    /// Completes application startup after the main form has loaded, including
+    /// browser initialization, logging, settings restoration, plugin loading,
+    /// updater processing, and profile login.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private async void MainForm_Load(object sender, EventArgs e)
     {
         PrepareStartupUi();
@@ -802,6 +813,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return true;
     }
 
+    // TODO(Twain): Determine whether the optional update prompt should display
+    // Updater.NewerVersions. The version list is currently retrieved but is not
+    // referenced by the format string.
     /// <summary>
     /// Prompts the user to install an optional AWB update.
     /// </summary>
@@ -831,7 +845,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             == DialogResult.Yes;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Report the actual updater failure category when available. A version-check
     // error may be caused by connectivity, HTTP, parsing, proxy, or service
     // failures rather than only a missing Internet connection.
@@ -866,7 +880,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return (Updater.Result & status) == status;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Review startup completion responsibilities after the startup workflow has
     // been moved out of MainForm. Splash screen management and status updates may
     // belong in a dedicated startup coordinator or UI service.
@@ -1022,7 +1036,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Changing this value updates the stop-button layout and controls the
     /// visibility of the false-positive actions.
     /// </remarks>
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Replace this write-only property with a clearly named method such as
     // UpdateIgnoredArticleControls(bool). The current implementation performs
     // UI layout changes rather than representing state, so a method would
@@ -1110,7 +1124,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Connects the session editor events to their corresponding
     /// main-form event handlers.
     /// </summary>
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Rename CreateEditor() to SubscribeToSessionEvents() because the method
     // does not create an editor; it attaches MainForm handlers to session events.
     // Before renaming, verify that the method is called only once per session.
@@ -1263,7 +1277,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="exception">
     /// The API exception containing the error code and associated message.
     /// </param>
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Inventory exception types, MediaWiki API error-code literals, and repeated
     // recovery behavior throughout the solution. Centralize stable MediaWiki
     // protocol values in a focused MediaWikiApiErrorCodes class, organize custom
@@ -1357,7 +1371,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Manual edits made in the editor cannot currently be merged with the latest
     /// revision and will be lost when processing restarts.
     /// </remarks>
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Preserve manual editor changes during edit-conflict recovery by comparing
     // the original article text, the current editor text, and the latest server
     // revision, then presenting or applying a three-way merge before retrying.
@@ -1454,7 +1468,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 true);
         }
 
-        // TODO (.NET 8 Modernization):
+        // TODO (.NET10 Modernization):
         // Support retry delays from HttpResponseMessage when the remaining
         // HttpWebRequest-based request paths are migrated to HttpClient.
         // Some HTTP responses specify a delay before another request should be
@@ -1574,7 +1588,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// invalid, the article list is empty, or the selected title is invalid.
     /// Unexpected failures schedule processing to restart.
     /// </remarks>
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Classify failures from article startup so transient network/session errors
     // can be retried while unexpected programming or UI errors are reported and
     // processing is stopped instead of entering a restart loop.
@@ -1791,7 +1805,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         OpenPage(title);
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Review these error-tracking collections after the MainForm cleanup is
     // complete. Determine whether they should remain cached fields, become
     // method-local variables, or be replaced with a single strongly typed error
@@ -1837,7 +1851,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private static readonly Regex _unicodePrivateUseRegex =
         new(@"\p{IsPrivateUse}", RegexOptions.Compiled);
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Replace the remaining BackgroundRequest-based processing with the modern
     // task-based infrastructure used elsewhere in the application.
     private BackgroundRequest _runProcessPageBackground;
@@ -1948,7 +1962,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Text = $"{_settingsFileDisplay} – {title}";
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Move redirect decisions, skip-rule evaluation, article validation, and
     // Unicode content checks out of MainForm into testable page-processing
     // components. Keep only workflow coordination and direct UI updates in the
@@ -2076,7 +2090,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return false;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Re-evaluate this check after replacing the legacy editor. This skip exists
     // because the current RichTextBox-based editor cannot reliably preserve
     // Unicode Private Use Area (PUA) characters. If the new editor fully supports
@@ -2172,7 +2186,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ? "Processing page (pre-parse mode)"
             : "Processing page";
 
-        // TODO (.NET 8 Modernization):
+        // TODO (.NET10 Modernization):
         // Replace the global CurrentPage assignment with a scoped, thread-safe page
         // context that is established immediately around page processing and restored
         // afterward. Consider AsyncLocal or explicit context passing so concurrent or
@@ -2188,7 +2202,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private void RunSkipChecks()
     {
-        // TODO (.NET 8 Modernization):
+        // TODO (.NET10 Modernization):
         // Replace the global CurrentPage value with scoped page-processing context.
         // The context is currently cleared before typo statistics and post-processing,
         // so failures in those operations may lack useful page information.
@@ -2455,7 +2469,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return true;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Review whether the NumberOfIgnoredEdits > 5 condition is still necessary.
     // Combined with NumberOfIgnoredEdits % 10 == 0, the first possible save occurs
     // at 10 ignored edits, so the greater-than-five check currently appears
@@ -2506,7 +2520,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Verify editor visibility when processing is aborted after the edit control
     // has been hidden for highlighting. The abort path currently enables buttons
     // but does not explicitly restore txtEdit.Visible.
@@ -2585,7 +2599,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return true;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Replace the numeric actionOnLoad values with a named enum after verifying
     // compatibility with persisted settings.
     /// <summary>
@@ -2698,11 +2712,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         HighlightErrors();
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Restore editor visibility with try/finally so highlighting failures cannot
     // leave the edit control hidden.
     //
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Review the completion workflow for robustness and exception safety.
     // Specifically verify that:
     // - the editor is always made visible again if processing is aborted or an
@@ -2777,7 +2791,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 break;
             }
 
-            // TODO (.NET 8 Modernization):
+            // TODO (.NET10 Modernization):
             // Verify that error highlight offsets and lengths are validated before they
             // are applied. Detection results may become stale if the editor content
             // changes after analysis, potentially producing an invalid selection range.
@@ -2832,7 +2846,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Error categories are added in priority order. When multiple categories
     // identify the same character position, the first category is retained.
     /// <summary>
@@ -3068,13 +3082,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Harden the WebView2 diff renderer as a non-browsing display surface.
     // Disable unused script, host-object, and web-message capabilities, and
     // explicitly handle link navigation and new-window requests so generated
     // diff content cannot navigate the embedded control unexpectedly.
     //
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Replace NavigateToString() or provide a fallback for generated diff HTML
     // approaching WebView2's 2 MB input limit. Large articles may generate diff
     // documents that exceed the supported size.
@@ -3221,7 +3235,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return false;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Remove this legacy WebBrowser-specific document reset when the remaining
     // browser functionality is migrated to WebView2.
     /// <summary>
@@ -3256,7 +3270,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Confirm that the reusable talk-message dialog is disposed with MainForm.
     private readonly TalkMessage _dlgTalk = new TalkMessage();
 
@@ -3304,7 +3318,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             MessageBoxIcon.Error);
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Narrow this exception handling once the expected API and session failure
     // types are known. Catching all exceptions can hide programming errors and
     // makes load failures difficult to classify.
@@ -3352,7 +3366,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Confirm whether the NumberOfEdits > 5 check is still required. Combined
     // with NumberOfEdits % 10 == 0, the first automatic save already occurs at
     // ten successful edits.
@@ -3463,7 +3477,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Define consistent recovery behavior for failures during page-skip cleanup.
     // An exception after partially resetting editor, timer, or article state may
     // leave the workflow unable to continue safely.
@@ -3519,7 +3533,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Start();
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Replace the string-based skip source with a strongly typed enum or separate
     // methods so user, plugin, and AWB skips cannot be misclassified by a typo.
     /// <summary>
@@ -4450,7 +4464,7 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Verify that SkipPage() always restores buttons, progress indicators, and
     // status text when the user declines to save a blank page. The save workflow
     // enters its busy UI state before displaying the confirmation dialog.
@@ -4526,7 +4540,7 @@ font-size: 150%;'>No changes</h2>
         return true;
     }
 
-    // TODO (.NET 8 Modernization):
+    // TODO (.NET10 Modernization):
     // Define and enforce the nullability contract for TheSession.Page. Save
     // validation currently assumes that a session page always exists and may
     // otherwise fail before producing the intended diagnostic information.
