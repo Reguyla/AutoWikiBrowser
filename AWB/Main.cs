@@ -11999,8 +11999,40 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        // TODO(Twain): Extract typo-rule performance profiling from MainForm so
-        // diagnostics can run independently of the WinForms UI.
+        // TODO(Twain): Move typo-rule profiling into Twain.Diagnostics once
+        // diagnostic services are separated from MainForm.
+        StringBuilder builder =
+            ProfileTypoRules(
+                typos,
+                text,
+                TheArticle.Name);
+
+        Tools.WriteTextFile(
+            builder,
+            "typos.txt",
+            false);
+
+        MessageBox.Show(
+            "Results are saved in the file 'typos.txt'",
+            "Profiling complete",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+#endif
+    }
+
+    /// <summary>
+    /// Profiles the supplied typo rules against the specified article text and
+    /// returns a formatted timing report.
+    /// </summary>
+    /// <param name="typos">The regular-expression typo rules to profile.</param>
+    /// <param name="text">The article text used for profiling.</param>
+    /// <param name="articleName">The article name included in the report.</param>
+    /// <returns>A formatted profiling report.</returns>
+    private static StringBuilder ProfileTypoRules(
+        List<KeyValuePair<Regex, string>> typos,
+        string text,
+        string articleName)
+    {
         int iterations = 1000000 / text.Length;
 
         if (iterations > 500)
@@ -12034,7 +12066,7 @@ font-size: 150%;'>No changes</h2>
             "Profiling " +
             iterations +
             @" iterations of """ +
-            TheArticle.Name +
+            articleName +
             @"""");
 
         foreach (KeyValuePair<int, string> p in times)
@@ -12042,17 +12074,7 @@ font-size: 150%;'>No changes</h2>
             builder.AppendLine(p.ToString());
         }
 
-        Tools.WriteTextFile(
-            builder,
-            "typos.txt",
-            false);
-
-        MessageBox.Show(
-            "Results are saved in the file 'typos.txt'",
-            "Profiling complete",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-#endif
+        return builder;
     }
 
     /// <summary>
