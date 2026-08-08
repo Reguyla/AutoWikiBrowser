@@ -57,7 +57,6 @@ public class FixNonBreakingSpacesTests : RequiresParser
         Assert.That(parser.FixNonBreakingSpaces(@"acid (15.2 %) "), Is.EqualTo(@"acid (15.2%) "), "decimal numbers in parenthenses");
         Assert.That(parser.FixNonBreakingSpaces(@"a 15.a2 % "), Is.EqualTo(@"a 15.a2 % "), "avoid weird things");
 
-#if DEBUG
         Variables.SetProjectLangCode("sv");
         Assert.That(parser.FixNonBreakingSpaces(@"a 15 % "), Is.EqualTo(@"a 15 % "), "Don't remove space in svwiki per sv:Procent");
 
@@ -66,7 +65,6 @@ public class FixNonBreakingSpacesTests : RequiresParser
 
         Variables.SetProjectLangCode("en");
         Assert.That(parser.FixNonBreakingSpaces(@"a 15 % "), Is.EqualTo(@"a 15% "), "remove space");
-#endif
     }
 
     [Test]
@@ -79,7 +77,6 @@ public class FixNonBreakingSpacesTests : RequiresParser
         Assert.That(parser.FixNonBreakingSpaces(@"£ &nbsp;123."), Is.EqualTo(@"£123."), "remove space and nbsp and maintain point");
         Assert.That(parser.FixNonBreakingSpaces(@"£ 12.3,"), Is.EqualTo(@"£12.3,"), "remove space and maintain comma");
 
-#if DEBUG
         Variables.SetProjectLangCode("sv");
         Assert.That(parser.FixNonBreakingSpaces(@"£ 123 "), Is.EqualTo(@"£ 123 "), "Don't remove space in svwiki");
 
@@ -88,7 +85,6 @@ public class FixNonBreakingSpacesTests : RequiresParser
 
         Variables.SetProjectLangCode("en");
         Assert.That(parser.FixNonBreakingSpaces(@"£ 123 "), Is.EqualTo(@"£123 "), "remove space");
-#endif
     }
 
     [Test]
@@ -184,7 +180,6 @@ public class FixNonBreakingSpacesTests : RequiresParser
     [Test]
     public void TestFixNonBreakingSpacesDE()
     {
-#if DEBUG
         Variables.SetProjectLangCode("fr");
         parser = new Parsers();
         Assert.That(parser.FixNonBreakingSpaces(@"a 50.247µm laser"), Is.EqualTo(@"a 50.247&nbsp;µm laser"));
@@ -193,7 +188,6 @@ public class FixNonBreakingSpacesTests : RequiresParser
         Variables.SetProjectLangCode("en");
         parser = new Parsers();
         Assert.That(parser.FixNonBreakingSpaces(@"a 50.247um laser"), Is.EqualTo(@"a 50.247&nbsp;um laser"));
-#endif
     }
 
     [Test]

@@ -246,7 +246,6 @@ now {{cite web | url=http://site.it | title=hello|date = 5-5-1998}} was";
     [Test]
     public void CiteTemplateDatesEnOnly()
     {
-#if DEBUG
         const string bad = @"now {{cite web | url=http://site.it | title=hello|accessdate = 25/03/2008 }} was";
 
         Variables.SetProjectLangCode("fr");
@@ -254,7 +253,6 @@ now {{cite web | url=http://site.it | title=hello|date = 5-5-1998}} was";
 
         Variables.SetProjectLangCode("en");
         Assert.That(Parsers.CiteTemplateDates(bad), Is.EqualTo(@"now {{cite web | url=http://site.it | title=hello|accessdate = 2008-03-25 }} was"));
-#endif
     }
 
     [Test]

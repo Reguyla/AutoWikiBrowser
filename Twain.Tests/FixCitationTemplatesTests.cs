@@ -520,7 +520,6 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
     [Test]
     public void FixCitationTemplatesEnOnly()
     {
-#if DEBUG
         const string bad = @"{{cite web|title=foo|url=http://site.net|year=2009|format=HTML}}";
 
         Variables.SetProjectLangCode("fr");
@@ -528,7 +527,6 @@ Bar}} was"), Is.EqualTo(@"now {{cite web| url=a.com|title=hello world|publisher=
 
         Variables.SetProjectLangCode("en");
         Assert.That(Parsers.FixCitationTemplates(bad), Is.EqualTo(@"{{cite web|title=foo|url=http://site.net|year=2009}}"));
-#endif
     }
 
     [Test]

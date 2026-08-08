@@ -525,11 +525,9 @@ Shul, p. 726    </ref>").Groups[2].Value, Is.EqualTo(@"Shul726"), "ref value doe
     {
         ClassicAssert.IsTrue(WikiRegexes.Persondata.IsMatch(@"{{Persondata}}"));
 
-#if DEBUG
         Variables.SetProjectLangCode("de");
         WikiRegexes.MakeLangSpecificRegexes();
         ClassicAssert.IsTrue(WikiRegexes.Persondata.IsMatch(@"{{personendaten}}"));
-#endif
     }
 
     [Test]
@@ -1788,7 +1786,6 @@ Bert").Groups[2].Value, Is.EqualTo("foo bar\r"));
     [Test]
     public void ReferenceList()
     {
-#if DEBUG
         Variables.SetProjectLangCode("fr");
         WikiRegexes.MakeLangSpecificRegexes();
         ClassicAssert.IsTrue(WikiRegexes.ReferenceList.IsMatch(@"{{références}}"));
@@ -1800,13 +1797,11 @@ Bert").Groups[2].Value, Is.EqualTo("foo bar\r"));
         ClassicAssert.IsTrue(WikiRegexes.ReferenceList.IsMatch(@"{{reflist}}"));
         ClassicAssert.IsTrue(WikiRegexes.ReferenceList.IsMatch(@"{{references-small}}"));
         ClassicAssert.IsTrue(WikiRegexes.ReferenceList.IsMatch(@"{{references-2column}}"));
-#endif
     }
 
     [Test]
     public void SimpleWiki()
     {
-#if DEBUG
         Variables.SetProjectLangCode("simple");
         WikiRegexes.MakeLangSpecificRegexes();
         ClassicAssert.IsTrue(WikiRegexes.SeeAlso.IsMatch(@"==Related pages=="));
@@ -1821,7 +1816,6 @@ Bert").Groups[2].Value, Is.EqualTo("foo bar\r"));
         ClassicAssert.IsFalse(WikiRegexes.SeeAlso.IsMatch(@"==Related pages=="));
         ClassicAssert.IsTrue(WikiRegexes.SeeAlso.IsMatch(@"==See also=="));
         ClassicAssert.IsTrue(WikiRegexes.ExternalLinksHeader.IsMatch(@"==External links=="));
-#endif
     }
 
     [Test]

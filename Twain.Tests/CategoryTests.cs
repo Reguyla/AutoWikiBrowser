@@ -525,7 +525,6 @@ died 2002
     [Test]
     public void YearOfBirthMissingCategoryEnOnly()
     {
-#if DEBUG
         const string good = @"[[Category:Pakistani lawyers]]
 [[Category:Attorneys General of Pakistan]]
 [[Category:Living people]]
@@ -540,7 +539,6 @@ died 2002
 
         Variables.SetProjectLangCode("en");
         Assert.That(Parsers.FixPeopleCategories(bad, "foo"), Is.EqualTo(good));
-#endif
     }
 
     [Test]
@@ -883,7 +881,6 @@ died 2002
     [Test]
     public void LivingPeopleTestsEnOnly()
     {
-#if DEBUG
         const string Before = @"'''Fred Smith''' (born 1960) is a bloke.
 [[Category:1960 births|Smith, Fred]]";
 
@@ -895,7 +892,6 @@ died 2002
 
         Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
         Assert.That(Parsers.LivingPeople(Before, "A"), Is.EqualTo(Before + @"[[Category:Living people|Smith, Fred]]"));
-#endif
     }
 
     [Test]
@@ -950,13 +946,11 @@ died 2002
     [Test]
     public void TestFixCategoriesRu()
     {
-#if DEBUG
         Variables.SetProjectLangCode("ru");
         Assert.That(Parsers.FixCategories(@"[[Category:World Scout Committee members|Lainé, Juan]]"), Is.EqualTo(@"[[Category:World Scout Committee members|Lainé, Juan]]"), "no diacritic removal for sort key on ru-wiki");
 
         Variables.SetProjectLangCode("en");
         Assert.That(Parsers.FixCategories(@"[[Category:World Scout Committee members|Lainé, Juan]]"), Is.EqualTo(@"[[Category:World Scout Committee members|Laine, Juan]]"));
-#endif
     }
 
     [Test]
