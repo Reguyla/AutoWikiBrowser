@@ -10822,12 +10822,15 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO(Twain): Extract user-talk template parsing from MainForm so wiki
+    // configuration loading and template matching can be tested independently.
     /// <summary>
-    /// Loads the list of user talk templates from [[WP:AWB/User talk templates]], generates UserTalkTemplatesRegex from them
+    /// Loads the configured user talk templates from the wiki and generates
+    /// the corresponding template-matching regular expression.
     /// </summary>
     private void LoadUserTalkWarnings()
     {
-        Regex userTalkTemplate = new Regex(
+        Regex userTalkTemplate = new(
             @"# ?\[\[" +
             Variables.NamespacesCaseInsensitive[Namespace.Template] +
             @"(.*?)\]\]");
@@ -10841,22 +10844,13 @@ font-size: 150%;'>No changes</h2>
 
         try
         {
-            string text;
+            string text = LoadWikiConfigurationText(
+                "Project:AutoWikiBrowser/User talk templates",
+                "LoadUserTalkWarnings",
+                "Unable to load user talk templates: ");
 
-            try
+            if (text.Length == 0)
             {
-                text = TheSession.Editor.SynchronousEditor
-                    .Clone()
-                    .Open(
-                        "Project:AutoWikiBrowser/User talk templates",
-                        true);
-            }
-            catch (Exception ex)
-            {
-                Tools.WriteDebug(
-                    "LoadUserTalkWarnings",
-                    "Unable to load user talk templates: " + ex.Message);
-
                 return;
             }
 
