@@ -43,6 +43,7 @@ using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
+using Twain.Core.DBScanner;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
@@ -156,7 +157,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // workflows are consolidated.
     private ListComparer _comparer;
     private ListSplitter _splitter;
-    private Twain.Core.DBScanner.DatabaseScanner _dBScanner;
+    private Twain.Core.DBScanner.DatabaseScanner _dataBaseScanner;
 
     // --------------------------------------------------------------------
     // Statistics
@@ -8840,11 +8841,11 @@ font-size: 150%;'>No changes</h2>
         bool useCurrentArticleList =
             ShouldDumpSearcherUseCurrentArticleList();
 
-        _dBScanner =
+        _dataBaseScanner =
             CreateDumpSearcher(
                 useCurrentArticleList);
 
-        _dBScanner.Show();
+        _dataBaseScanner.Show();
         UpdateButtons(null, null);
     }
 
