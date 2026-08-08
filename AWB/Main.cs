@@ -83,7 +83,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // Workflow State
     // --------------------------------------------------------------------
 
-    private bool Abort;
+    private bool _abort;
     private bool IgnoreNoBots;
     private bool ClearPageListOnProjectChange;
     private bool PageReload;
@@ -2214,7 +2214,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         UpdateCurrentTypoStats();
 
-        if (Abort)
+        if (_abort)
         {
             return;
         }
@@ -2358,7 +2358,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         PrepareEditorForHighlighting();
 
-        if (Abort)
+        if (_abort)
         {
             RestoreInterfaceAfterAbort();
             return;
@@ -2534,7 +2534,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void RestoreInterfaceAfterAbort()
     {
         EnableButtons();
-        Abort = false;
+        _abort = false;
     }
 
     /// <summary>
@@ -4059,7 +4059,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return !article.SkipArticle;
         }
 
-        Abort = true;
+        _abort = true;
         Stop();
 
         return false;
