@@ -9146,45 +9146,84 @@ font-size: 150%;'>No changes</h2>
     // TODO: Investigate cases where processing does not stop reliably,
     // including background work, editor operations, and timer-driven workflows.
     //
+    // TODO(Twain): Replace legacy abort-based cancellation with a coordinated,
+    // cancellation-aware processing shutdown once background services are extracted.
+
     /// <summary>
     /// Stops the current processing workflow, cancels active background work,
     /// resets timers, and updates the user interface to the stopped state.
     /// </summary>
     private void Stop()
     {
-        Retries = 0;
-        _stopProcessing = true;
-        PageReload = false;
-        NudgeTimer.Stop();
-
-        // Abort any background thread if one is running.
-        if (_runProcessPageBackground != null)
-        {
-            _runProcessPageBackground.Abort();
-        }
+        ResetProcessingStopState();
+        StopBackgroundProcessing();
 
         DisableButtons();
 
         if (_intTimer > 0)
         {
-            // Stop and reset the bot timer.
             StopDelayedAutoSaveTimer();
             EnableButtons();
             return;
         }
 
+        StopProcessingTimers();
+        StopActiveProcessing();
+
+        FinishStoppedState();
+    }
+
+    /// <summary>
+    /// Resets processing state used when stopping the current workflow.
+    /// </summary>
+    private void ResetProcessingStopState()
+    {
+        Retries = 0;
+        _stopProcessing = true;
+        PageReload = false;
+
+        NudgeTimer.Stop();
+    }
+
+    /// <summary>
+    /// Aborts the active page-processing background request when one exists.
+    /// </summary>
+    private void StopBackgroundProcessing()
+    {
+        if (_runProcessPageBackground != null)
+        {
+            _runProcessPageBackground.Abort();
+        }
+    }
+
+    /// <summary>
+    /// Stops timers associated with save and restart processing.
+    /// </summary>
+    private void StopProcessingTimers()
+    {
         StopSaveInterval();
         StopDelayedRestartTimer();
-
-        TheSession.Editor.Abort();
-
-        listMaker.Stop();
 
         if (_autoSaveEditBoxEnabled)
         {
             EditBoxSaveTimer.Enabled = false;
         }
+    }
 
+    /// <summary>
+    /// Stops active editor and article-list processing.
+    /// </summary>
+    private void StopActiveProcessing()
+    {
+        TheSession.Editor.Abort();
+        listMaker.Stop();
+    }
+
+    /// <summary>
+    /// Updates the application to its final stopped state.
+    /// </summary>
+    private void FinishStoppedState()
+    {
         StatusLabelText = "Stopped";
         ClearBrowser();
         UpdateButtons(null, null);
