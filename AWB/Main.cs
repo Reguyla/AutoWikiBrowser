@@ -9585,83 +9585,104 @@ font-size: 150%;'>No changes</h2>
 
             StatusLabelText = "Loading typos";
 
-            // When not logged in, determine whether the wiki defines a custom
-            // typo-list location. If no usable configuration is available, retain
-            // the existing default RetfPath.
-            if (!TheSession.User.IsLoggedIn &&
-                !Variables.IsWikipediaEN &&
-                Variables.RetfPath.EndsWith("AutoWikiBrowser/Typos"))
-            {
-                try
-                {
-                    // TODO: Verify whether ConfigJSONText should take precedence
-                    // over retrieving the current configuration from ConfigUrl.
-                    if (!string.IsNullOrEmpty(TheSession.ConfigJSONText))
-                    {
-                        Session.TypoLink(
-                            Tools.GetJObjectFromText(
-                                TheSession.ConfigJSONText));
-                    }
-                    else
-                    {
-                        Session.TypoLink(
-                            Tools.GetJObjectFromUrl(
-                                Session.ConfigUrl));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Tools.WriteDebug(
-                        "LoadTypos",
-                        "Unable to load the configured typo-list location: " +
-                        ex.Message);
+            ResolveConfiguredTypoListLocation();
 
-                    // TODO: Determine whether a failed custom typo-list lookup
-                    // should explicitly restore Project:AutoWikiBrowser/Typos
-                    // as the fallback location.
-                }
-            }
-
-#if !DEBUG
         string message =
-            "Check each edit before you make it. Although this has been " +
-            "built to be very accurate there will be errors.";
-
-        if (RegexTypos == null)
-        {
-            string s = Variables.RetfPath;
-
-            bool isHttpUrl =
-                s.StartsWith(
-                    "http://",
-                    StringComparison.OrdinalIgnoreCase) ||
-                s.StartsWith(
-                    "https://",
-                    StringComparison.OrdinalIgnoreCase);
-
-            if (!isHttpUrl)
-            {
-                // TODO: Use TheSession.Site.ArticleUrl or another wiki-aware
-                // URL builder to produce a cleaner display URL.
-                s = Variables.NonPrettifiedURL(s);
-            }
-
-            message +=
-                "\r\n\r\nThe newest typos will now be downloaded from " +
-                s +
-                " when you press OK.";
-        }
+            BuildTypoLoadingWarningMessage(
+                Variables.RetfPath);
 
         MessageBox.Show(
             message,
             "Attention",
             MessageBoxButtons.OK,
             MessageBoxIcon.Warning);
-#endif
 
             RegexTypos = new RegExTypoFix();
             RegexTypos.Complete += RegexTyposComplete;
         }
+    }
+
+    /// <summary>
+    /// Attempts to resolve a custom typo-list location from the current wiki
+    /// configuration when the default location may need to be overridden.
+    /// </summary>
+    private void ResolveConfiguredTypoListLocation()
+    {
+        if (TheSession.User.IsLoggedIn ||
+            Variables.IsWikipediaEN ||
+            !Variables.RetfPath.EndsWith("AutoWikiBrowser/Typos"))
+        {
+            return;
+        }
+
+        try
+        {
+            // TODO: Verify whether ConfigJSONText should take precedence over
+            // retrieving the current configuration from ConfigUrl.
+            if (!string.IsNullOrEmpty(TheSession.ConfigJSONText))
+            {
+                Session.TypoLink(
+                    Tools.GetJObjectFromText(
+                        TheSession.ConfigJSONText));
+            }
+            else
+            {
+                Session.TypoLink(
+                    Tools.GetJObjectFromUrl(
+                        Session.ConfigUrl));
+            }
+        }
+        catch (Exception ex)
+        {
+            Tools.WriteDebug(
+                "LoadTypos",
+                "Unable to load the configured typo-list location: " +
+                ex.Message);
+
+            // TODO: Determine whether a failed custom typo-list lookup should
+            // explicitly restore Project:AutoWikiBrowser/Typos as the fallback
+            // location.
+        }
+    }
+
+    // TODO(Twain): Move typo-source resolution and rule loading into the shared
+    // typo/language service so MainForm only coordinates the UI workflow.
+    /// <summary>
+    /// Builds the warning displayed before regular-expression typo rules are
+    /// downloaded.
+    /// </summary>
+    /// <param name="typoListPath">
+    /// The configured typo-list page or URL.
+    /// </param>
+    /// <returns>The warning message to display.</returns>
+    private static string BuildTypoLoadingWarningMessage(
+        string typoListPath)
+    {
+        string message =
+            "Check each edit before you make it. Although this has been " +
+            "built to be very accurate there will be errors.";
+
+        string s = typoListPath;
+
+        bool isHttpUrl =
+            s.StartsWith(
+                "http://",
+                StringComparison.OrdinalIgnoreCase) ||
+            s.StartsWith(
+                "https://",
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!isHttpUrl)
+        {
+            // TODO(Twain): Replace this with a wiki-aware URL builder when
+            // navigation services are extracted from MainForm.
+            s = Variables.NonPrettifiedURL(s);
+        }
+
+        return message +
+            "\r\n\r\nThe newest typos will now be downloaded from " +
+            s +
+            " when you press OK.";
     }
 
     // TODO(Twain): Replace the BackgroundRequest callback and WinForms
