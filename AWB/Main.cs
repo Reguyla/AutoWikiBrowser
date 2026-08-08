@@ -9953,8 +9953,9 @@ font-size: 150%;'>No changes</h2>
 
     #region Images
 
-    // TODO: Replace image-operation index values with named modes and extract
-    // shared image namespace cleanup logic from the Leave event handlers.
+    // TODO: Replace image-operation index values with named modes during the
+    // next cleanup pass.
+
     /// <summary>
     /// Updates image replacement controls based on the selected image operation.
     /// </summary>
@@ -9962,39 +9963,81 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void cmboImages_SelectedIndexChanged(object sender, EventArgs e)
     {
-        switch (cmboImages.SelectedIndex)
+        GetImageOperationState(
+            cmboImages.SelectedIndex,
+            out string labelText,
+            out bool imageWithEnabled,
+            out bool imageReplaceEnabled,
+            out bool skipNoImageChangeEnabled);
+
+        lblImageWith.Text = labelText;
+        txtImageWith.Enabled = imageWithEnabled;
+        txtImageReplace.Enabled = imageReplaceEnabled;
+        chkSkipNoImgChange.Enabled = skipNoImageChangeEnabled;
+    }
+
+    /// <summary>
+    /// Determines the control state associated with the specified image operation.
+    /// </summary>
+    /// <param name="selectedIndex">
+    /// The selected image-operation index.
+    /// </param>
+    /// <param name="labelText">
+    /// The label text associated with the selected operation.
+    /// </param>
+    /// <param name="imageWithEnabled">
+    /// Whether the replacement image text box should be enabled.
+    /// </param>
+    /// <param name="imageReplaceEnabled">
+    /// Whether the image-to-replace text box should be enabled.
+    /// </param>
+    /// <param name="skipNoImageChangeEnabled">
+    /// Whether the skip-if-no-image-change option should be enabled.
+    /// </param>
+    private static void GetImageOperationState(
+        int selectedIndex,
+        out string labelText,
+        out bool imageWithEnabled,
+        out bool imageReplaceEnabled,
+        out bool skipNoImageChangeEnabled)
+    {
+        switch (selectedIndex)
         {
             case 0:
-                lblImageWith.Text = string.Empty;
-                txtImageReplace.Enabled =
-                    txtImageWith.Enabled =
-                    chkSkipNoImgChange.Enabled =
-                    false;
+                labelText = string.Empty;
+                imageWithEnabled = false;
+                imageReplaceEnabled = false;
+                skipNoImageChangeEnabled = false;
                 break;
 
             case 1:
-                lblImageWith.Text =
+                labelText =
                     "&With " + Variables.Namespaces[Namespace.File];
 
-                txtImageWith.Enabled =
-                    txtImageReplace.Enabled =
-                    chkSkipNoImgChange.Enabled =
-                    true;
+                imageWithEnabled = true;
+                imageReplaceEnabled = true;
+                skipNoImageChangeEnabled = true;
                 break;
 
             case 2:
-                lblImageWith.Text = string.Empty;
-                txtImageWith.Enabled = false;
-                txtImageReplace.Enabled = true;
-                chkSkipNoImgChange.Enabled = true;
+                labelText = string.Empty;
+                imageWithEnabled = false;
+                imageReplaceEnabled = true;
+                skipNoImageChangeEnabled = true;
                 break;
 
             case 3:
-                lblImageWith.Text = "Comment:";
-                txtImageWith.Enabled =
-                    txtImageReplace.Enabled =
-                    chkSkipNoImgChange.Enabled =
-                    true;
+                labelText = "Comment:";
+                imageWithEnabled = true;
+                imageReplaceEnabled = true;
+                skipNoImageChangeEnabled = true;
+                break;
+
+            default:
+                labelText = string.Empty;
+                imageWithEnabled = false;
+                imageReplaceEnabled = false;
+                skipNoImageChangeEnabled = false;
                 break;
         }
     }
