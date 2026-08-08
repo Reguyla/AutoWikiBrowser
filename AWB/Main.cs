@@ -9270,49 +9270,82 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Second part of reparse edit box to update alerts, article stats etc.
-    /// Called after ReparseEditBoxBackground completes
+    /// Completes edit-box reparsing by updating article statistics, refreshing
+    /// editor content and highlighting, generating the diff, and restoring the
+    /// editor to its ready state.
     /// </summary>
     private void ReparseEditBoxPart2()
     {
         UpdateCurrentTypoStats();
         ArticleInfo(false);
 
+        RefreshReparsedEditBox();
+
+        GetDiff();
+
+        RestoreEditBoxFocus();
+
+        StopProgressBar();
+        StatusLabelText = "Ready to save";
+    }
+
+    // TODO(Twain): Move editor highlighting and selection restoration behind
+    // the editor abstraction so reparse completion does not depend directly
+    // on WinForms editor controls.
+    /// <summary>
+    /// Refreshes the editor with the reparsed article text and reapplies
+    /// configured find, alert, and syntax highlighting.
+    /// </summary>
+    private void RefreshReparsedEditBox()
+    {
         txtEdit.Text = TheArticle.ArticleText;
         txtEdit.Visible = false;
 
-        // clear any red from previous alerts to avoid entire edit box being colored red after reparse
+        // Clear highlighting from previous alerts before applying the current
+        // highlighting rules.
         txtEdit.SelectAll();
         txtEdit.SelectionBackColor = Color.White;
 
         if (highlightAllFindToolStripMenuItem.Checked)
+        {
             HighlightAllFind();
+        }
 
         _errors.Clear();
 
         if (scrollToAlertsToolStripMenuItem.Checked)
+        {
             HighlightErrors();
+        }
 
         if (syntaxHighlightEditBoxToolStripMenuItem.Checked)
+        {
             HighlightSyntax();
+        }
 
         txtEdit.Visible = true;
+    }
 
-        GetDiff();
-
-        // refocus edit box and Save button
+    /// <summary>
+    /// Restores the editor selection, scroll position, and Save button focus
+    /// after reparsing completes.
+    /// </summary>
+    private void RestoreEditBoxFocus()
+    {
         if (!focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
             txtEdit.SetEditBoxSelection(0, 0);
             txtEdit.Select(0, 0);
         }
         else
-            txtEdit.Select(txtEdit.Text.Length, 0);
+        {
+            txtEdit.Select(
+                txtEdit.Text.Length,
+                0);
+        }
 
         txtEdit.ScrollToCaret();
         btnSave.Select();
-        StopProgressBar();
-        StatusLabelText = "Ready to save";
     }
 
     /// <summary>
