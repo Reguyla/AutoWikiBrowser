@@ -572,7 +572,7 @@ partial class MainForm
             SkipMinorFindAndReplace = chkSkipOnlyMinorFaR.Checked,
             SkipNoRegexTypoFix = chkSkipIfNoRegexTypo.Checked,
             SkipNoDisambiguation = chkSkipNoDab.Checked,
-            GeneralSkipList = Skip.SelectedItems,
+            GeneralSkipList = _skip.SelectedItems,
             SkipWhenOnlyWhitespaceChanged = chkSkipWhitespace.Checked,
             SkipOnlyCasingChanged = chkSkipCasing.Checked,
             SkipOnlyGeneralFixChanges = chkSkipGeneralFixes.Checked,
@@ -1107,7 +1107,7 @@ partial class MainForm
         chkSkipIfNoRegexTypo.Checked =
             preferences.SkipNoRegexTypoFix;
 
-        Skip.SelectedItems =
+        _skip.SelectedItems =
             preferences.GeneralSkipList;
 
         chkSkipNoDab.Checked =

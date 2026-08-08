@@ -120,7 +120,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private RegExTypoFix _regexTypos;
 
-    private readonly SkipOptions Skip = new();
+    private readonly SkipOptions _skip = new();
 
     private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial RplcSpecial =
         new();
@@ -3655,7 +3655,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     {
                         EnsureGeneralFixResourcesLoaded();
 
-                        theArticle.PerformGeneralFixes(Parser, _removeText, Skip,
+                        theArticle.PerformGeneralFixes(Parser, _removeText, _skip,
                                                        replaceReferenceTagsToolStripMenuItem.Checked,
                                                        restrictDefaultsortChangesToolStripMenuItem.Checked,
                                                        noMOSComplianceFixesToolStripMenuItem.Checked);
@@ -3683,7 +3683,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                         }
 
                         theArticle.PerformUserTalkGeneralFixes(_removeText, UserTalkTemplatesRegex,
-                                                               Skip.SkipNoUserTalkTemplatesSubstd);
+                                                               _skip.SkipNoUserTalkTemplatesSubstd);
                     }
                     else if (theArticle.CanDoTalkGeneralFixes)
                     {
@@ -3986,7 +3986,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         article.Unicodify(
-            Skip.SkipNoUnicode,
+            _skip.SkipNoUnicode,
             Parser,
             _removeText);
 
@@ -4021,7 +4021,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         article.AutoTag(
             Parser,
-            Skip.SkipNoTag,
+            _skip.SkipNoTag,
             restrictOrphanTaggingToolStripMenuItem.Checked);
 
         return !(mainProcess && article.SkipArticle);
@@ -8422,7 +8422,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void btnMoreSkip_Click(object sender, EventArgs e)
     {
-        Skip.ShowDialog();
+        _skip.ShowDialog();
     }
 
     /// <summary>
