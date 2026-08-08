@@ -500,7 +500,7 @@ partial class MainForm
     private FaRPrefs MakeFindAndReplacePrefs()
     {
         return new FaRPrefs(
-            FindAndReplace,
+            _findAndReplace,
             RplcSpecial,
             SubstTemplates)
         {
@@ -882,12 +882,12 @@ partial class MainForm
     private void LoadFindAndReplacePreferences(
         FaRPrefs preferences)
     {
-        FindAndReplace.Clear();
+        _findAndReplace.Clear();
         chkFindandReplace.Checked = preferences.Enabled;
-        FindAndReplace.IgnoreLinks = preferences.IgnoreSomeText;
-        FindAndReplace.IgnoreMore = preferences.IgnoreMoreText;
-        FindAndReplace.AppendToSummary = preferences.AppendSummary;
-        FindAndReplace.AddNew(preferences.Replacements);
+        _findAndReplace.IgnoreLinks = preferences.IgnoreSomeText;
+        _findAndReplace.IgnoreMore = preferences.IgnoreMoreText;
+        _findAndReplace.AppendToSummary = preferences.AppendSummary;
+        _findAndReplace.AddNew(preferences.Replacements);
 
         RplcSpecial.Clear();
         RplcSpecial.AddNewRule(preferences.AdvancedReps);
@@ -901,7 +901,7 @@ partial class MainForm
         SubstTemplates.IncludeComments =
             preferences.IncludeComments;
 
-        FindAndReplace.MakeList();
+        _findAndReplace.MakeList();
     }
 
     /// <summary>

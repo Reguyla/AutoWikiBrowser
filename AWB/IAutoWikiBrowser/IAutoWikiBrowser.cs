@@ -45,7 +45,7 @@ partial class MainForm
     /// Gets the configured find-and-replace processor.
     /// </summary>
     Twain.Core.Parse.FindandReplace IAutoWikiBrowser.FindandReplace =>
-        FindAndReplace;
+        _findAndReplace;
 
     /// <summary>
     /// Gets the configured template substitution processor.

@@ -115,7 +115,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly List<string> _noParse = new();
     private readonly List<string> _noRetf = new();
 
-    private readonly FindandReplace FindAndReplace = new();
+    private readonly FindandReplace _findAndReplace = new();
     private readonly SubstTemplates SubstTemplates = new();
 
     private RegExTypoFix RegexTypos;
@@ -3624,12 +3624,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // Do not apply skip checks when reparsing
             if (chkFindandReplace.Checked)
             {
-                theArticle.PerformFindAndReplace(FindAndReplace, SubstTemplates, RplcSpecial,
+                theArticle.PerformFindAndReplace(_findAndReplace, SubstTemplates, RplcSpecial,
                                                  (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), false);
 
                 Variables.Profiler.Profile("F&R");
 
-                theArticle.DoFaRSkips(FindAndReplace);
+                theArticle.DoFaRSkips(_findAndReplace);
                 if (theArticle.SkipArticle)
                     return;
             }
@@ -3720,10 +3720,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             // Do not apply skip checks when reparsing
             if (chkFindandReplace.Checked)
             {
-                theArticle.PerformFindAndReplace(FindAndReplace, SubstTemplates, RplcSpecial,
+                theArticle.PerformFindAndReplace(_findAndReplace, SubstTemplates, RplcSpecial,
                                                  (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), true);
 
-                theArticle.DoFaRSkips(FindAndReplace);
+                theArticle.DoFaRSkips(_findAndReplace);
 
                 Variables.Profiler.Profile("F&R (2nd)");
 
@@ -9693,7 +9693,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void btnMoreFindAndReplce_Click(object sender, EventArgs e)
     {
-        FindAndReplace.ShowDialog(this);
+        _findAndReplace.ShowDialog(this);
     }
 
     // TODO: Investigate cases where processing does not stop reliably,
