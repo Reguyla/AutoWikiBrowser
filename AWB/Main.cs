@@ -6630,6 +6630,13 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO(Twain): Replace numeric alert identifiers with named alert types
+    // and move article-structure alert evaluation into a shared alert service.
+    //
+    // TODO: Review whether DEFAULTSORT and See also alerts should depend on
+    // the double-pipe-link alert being enabled. They are currently nested
+    // inside alert 10 processing and therefore are not evaluated independently.
+
     /// <summary>
     /// Evaluates article structure and reference-related alerts.
     /// </summary>
@@ -6648,16 +6655,17 @@ font-size: 150%;'>No changes</h2>
         string templates,
         bool hasAlertsOn)
     {
-        if ((hasAlertsOn || alertPreferences.Contains(16))
-            && TheArticle.NameSpaceKey == Namespace.Article
-            && articleText.StartsWith("=="))
+        if (IsAlertEnabled(hasAlertsOn, 16) &&
+            TheArticle.NameSpaceKey == Namespace.Article &&
+            articleText.StartsWith("=="))
         {
             lbAlerts.Items.Add("Starts with heading");
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(17))
+        if (IsAlertEnabled(hasAlertsOn, 17))
         {
-            _unbalancedBrackets = TheArticle.UnbalancedBrackets();
+            _unbalancedBrackets =
+                TheArticle.UnbalancedBrackets();
 
             if (_unbalancedBrackets.Count > 0)
             {
@@ -6666,9 +6674,10 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(11))
+        if (IsAlertEnabled(hasAlertsOn, 11))
         {
-            _targetlessLinks = TheArticle.TargetlessLinks();
+            _targetlessLinks =
+                TheArticle.TargetlessLinks();
 
             if (_targetlessLinks.Count > 0)
             {
@@ -6677,9 +6686,10 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(10))
+        if (IsAlertEnabled(hasAlertsOn, 10))
         {
-            _doublePipeLinks = TheArticle.DoublepipeLinks();
+            _doublePipeLinks =
+                TheArticle.DoublepipeLinks();
 
             if (_doublePipeLinks.Count > 0)
             {
@@ -6688,33 +6698,49 @@ font-size: 150%;'>No changes</h2>
             }
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
-            if ((hasAlertsOn || alertPreferences.Contains(13))
-            && WikiRegexes.Defaultsort.Matches(templates).Count > 1)
+            if (IsAlertEnabled(hasAlertsOn, 13) &&
+                WikiRegexes.Defaultsort.Matches(templates).Count > 1)
             {
                 lbAlerts.Items.Add("Multiple DEFAULTSORTs");
             }
 
-            if ((hasAlertsOn || alertPreferences.Contains(15))
-               && TheArticle.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
+            if (IsAlertEnabled(hasAlertsOn, 15) &&
+                TheArticle.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
             {
-                lbAlerts.Items.Add("See also section out of place");
+                lbAlerts.Items.Add(
+                    "See also section out of place");
 
-                // Performance: fetching all headings and filtering them is faster than
-                // applying WikiRegexes.SeeAlso directly to the entire article.
-                Match seeAlsoHeading = WikiRegexes.Headings
-                    .Matches(articleText)
-                    .OfType<Match>()
-                    .FirstOrDefault(
-                        heading => WikiRegexes.SeeAlso.IsMatch(heading.Value));
-
-                if (seeAlsoHeading != null
-                    && !_otherErrors.ContainsKey(seeAlsoHeading.Index))
-                {
-                    _otherErrors.Add(
-                        seeAlsoHeading.Index,
-                        seeAlsoHeading.Length);
-                }
+                AddSeeAlsoHeadingError(articleText);
             }
+        }
+    }
+
+    /// <summary>
+    /// Locates the See also heading in the supplied article text and records
+    /// its position for editor highlighting when it has not already been added.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to search.
+    /// </param>
+    private void AddSeeAlsoHeadingError(string articleText)
+    {
+        // Performance: fetching all headings and filtering them is faster than
+        // applying WikiRegexes.SeeAlso directly to the entire article.
+        Match seeAlsoHeading =
+            WikiRegexes.Headings
+                .Matches(articleText)
+                .OfType<Match>()
+                .FirstOrDefault(
+                    heading =>
+                        WikiRegexes.SeeAlso.IsMatch(
+                            heading.Value));
+
+        if (seeAlsoHeading != null &&
+            !_otherErrors.ContainsKey(seeAlsoHeading.Index))
+        {
+            _otherErrors.Add(
+                seeAlsoHeading.Index,
+                seeAlsoHeading.Length);
         }
     }
 
