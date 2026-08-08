@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+*/
 
 using System.Diagnostics;
 using System.Threading;
@@ -23,104 +23,175 @@ using System.Threading;
 namespace Twain.Core;
 
 /// <summary>
-/// Provides basic performance profiling
+/// Provides lightweight performance profiling and writes elapsed timing
+/// information to a profiling log in Debug builds.
 /// </summary>
+/// <remarks>
+/// Profiling calls are compiled out of Release builds. Debug profiling uses
+/// a named semaphore to serialize access to the profiling log across profiler
+/// instances.
+/// </remarks>
 public class Profiler
 {
 #if DEBUG
-    private Stopwatch Watch = new Stopwatch(); // fail-safe in case Start() wasn't called for some reason
-    private TextWriter log;
-    private readonly string FileName = string.Empty;
-    private readonly bool Append = true;
+    private Stopwatch _watch = new();
 
-    private static readonly Semaphore ProfilerSemaphore = new Semaphore(1, 1, "AWBProfilerSemaphore");
+    private TextWriter _log;
+
+    private readonly string _fileName = string.Empty;
+
+    private readonly bool _append = true;
+
+    private static readonly Semaphore _profilerSemaphore =
+        new(1, 1, "AWBProfilerSemaphore");
 
     /// <summary>
-    /// Creates a profiler object
+    /// Initializes a new profiler that writes timing information to the
+    /// specified log file.
     /// </summary>
-    /// <param name="filename">Name of file to save profiling log to</param>
-    /// <param name="append">True if the file should not be overwritten</param>
+    /// <param name="filename">
+    /// The name of the file used to store profiling information.
+    /// </param>
+    /// <param name="append">
+    /// <see langword="true"/> to append profiling information to the existing
+    /// file; otherwise, <see langword="false"/> to overwrite it.
+    /// </param>
     public Profiler(string filename, bool append)
     {
-        // done to make sure file path is writeable – each time logging used new streamwriter opened & closed to prevent file locking for entire AWB session
-        using (log = new StreamWriter(filename, append, Encoding.Unicode))
-        {
-            log.Close();
-        }
+        // Verify that the profiling log path is writable. A new writer is
+        // opened for each log entry so the file is not locked for the
+        // lifetime of the application.
+        using StreamWriter writer =
+            new(filename, append, Encoding.Unicode);
 
-        FileName = filename;
-        Append = append;
+        _fileName = filename;
+        _append = append;
     }
 
     /// <summary>
-    ///
+    /// Initializes a profiler without configuring a profiling log file.
     /// </summary>
     public Profiler()
     {
     }
 
     /// <summary>
-    /// Starts measuring time
+    /// Starts measuring elapsed time for a profiling operation.
     /// </summary>
-    /// <param name="message">a message to associate with these measure</param>
+    /// <param name="message">
+    /// A description associated with the profiling operation.
+    /// </param>
     public void Start(string message)
     {
         AddLog("--------------------------------------");
-        Watch = Stopwatch.StartNew();
-        AddLog("Started profiling: " + message + " at " + System.DateTime.Now);
+
+        _watch = Stopwatch.StartNew();
+
+        AddLog(
+            "Started profiling: " +
+            message +
+            " at " +
+            DateTime.Now);
     }
 
     /// <summary>
-    /// Outputs time difference between previous time mark and now to the profiling log
+    /// Records the elapsed time since the previous profiling mark and starts
+    /// measuring the next interval.
     /// </summary>
-    /// <param name="message">description of the time interval</param>
+    /// <param name="message">
+    /// A description of the measured interval.
+    /// </param>
     public void Profile(string message)
     {
-        AddLog("\t" + message + "\t" + Watch.ElapsedMilliseconds);
-        Watch = Stopwatch.StartNew();
+        AddLog(
+            "\t" +
+            message +
+            "\t" +
+            _watch.ElapsedMilliseconds);
+
+        _watch = Stopwatch.StartNew();
     }
 
     /// <summary>
-    /// Adds a line to the log
+    /// Writes a line to the profiling log.
     /// </summary>
-    /// <param name="s"></param>
-    public void AddLog(string s)
+    /// <param name="message">
+    /// The text to write to the profiling log.
+    /// </param>
+    public void AddLog(string message)
     {
-        if (log == null) return;
-
-        ProfilerSemaphore.WaitOne();
-
-        using (log = new StreamWriter(FileName, Append, Encoding.Unicode))
+        if (_log == null)
         {
-            log.WriteLine(s);
+            return;
         }
-        ProfilerSemaphore.Release();
+
+        _profilerSemaphore.WaitOne();
+
+        try
+        {
+            using (_log = new StreamWriter(
+                _fileName,
+                _append,
+                Encoding.Unicode))
+            {
+                _log.WriteLine(message);
+            }
+        }
+        finally
+        {
+            _profilerSemaphore.Release();
+        }
     }
 
+    // TODO(Twain): Verify whether Flush() is still required. Profiling writes
+    // currently open and dispose a StreamWriter for every log entry, so no
+    // persistent buffered writer appears to remain for Flush() to flush.
     /// <summary>
-    /// Flushes profiling log on disk
+    /// Flushes profiling log output to disk.
     /// </summary>
     public void Flush()
     {
-        ProfilerSemaphore.WaitOne();
+        _profilerSemaphore.WaitOne();
 
-        using (log = new StreamWriter(FileName, Append, Encoding.Unicode))
+        try
         {
-            log.Flush();
+            using (_log = new StreamWriter(
+                _fileName,
+                _append,
+                Encoding.Unicode))
+            {
+                _log.Flush();
+            }
         }
-
-        ProfilerSemaphore.Release();
+        finally
+        {
+            _profilerSemaphore.Release();
+        }
     }
 #else
-    /* unfortunately it seems that code within [Conditional] blocks still gets analysed by the compiler; having the class level
-     * vars in #if's and all the methods inside these Conditional attribute blocks didn't work. So, I've used #if statements to
-     * get a clean compile, and the attribute to then have the calls totally compiled out in release mode. */
+    /*
+     * Unfortunately it seems that code within [Conditional] blocks still
+     * gets analysed by the compiler; having the class-level variables inside
+     * #if blocks and all methods inside Conditional attribute blocks did not
+     * work. The conditional compilation keeps the Release implementation
+     * free of the Debug-only profiler infrastructure, while the attributes
+     * ensure calls are compiled out in Release builds.
+     */
 
+    /// <summary>
+    /// Records a profiling interval in Debug builds.
+    /// </summary>
+    /// <param name="message">
+    /// A description of the measured interval.
+    /// </param>
     [Conditional("DEBUG")]
     public void Profile(string message)
     {
     }
 
+    /// <summary>
+    /// Flushes profiler output in Debug builds.
+    /// </summary>
     [Conditional("DEBUG")]
     public void Flush()
     {
