@@ -10053,6 +10053,10 @@ font-size: 150%;'>No changes</h2>
     #endregion
 
     #region ArticleActions
+    /// <summary>
+    /// Moves the current article to a new title and updates the article list,
+    /// action log, and user interface to reflect the result.
+    /// </summary>
     private void MoveArticle()
     {
         if (TheArticle == null)
@@ -10061,6 +10065,8 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        // TODO(Twain): Extract the article move workflow into a dedicated service
+        // so the UI coordinates the operation instead of performing it directly.
         try
         {
             if (!TheSession.Page.Exists)
@@ -10072,50 +10078,86 @@ font-size: 150%;'>No changes</h2>
             if (!TheSession.User.CanMovePage(TheSession.Page))
             {
                 MessageBox.Show(
-                    "Current user doesn't have enough rights to move \"" + TheSession.Page.Title + "\"",
+                    "Current user doesn't have enough rights to move \"" +
+                    TheSession.Page.Title +
+                    "\"",
                     "User rights not sufficient");
+
                 return;
             }
 
             string newTitle;
             string msg;
 
-            bool succeed = TheArticle.Move(TheSession, out newTitle);
+            bool succeed = TheArticle.Move(
+                TheSession,
+                out newTitle);
 
             if (succeed)
             {
                 Article replacementArticle = new Article(newTitle);
 
-                msg = "Moved " + TheArticle.Name + " to " + newTitle;
+                msg =
+                    "Moved " +
+                    TheArticle.Name +
+                    " to " +
+                    newTitle;
 
-                listMaker.ReplaceArticle(TheArticle, replacementArticle);
+                listMaker.ReplaceArticle(
+                    TheArticle,
+                    replacementArticle);
             }
             else
             {
-                msg = "Move of " + TheArticle.Name + " failed!";
+                msg =
+                    "Move of " +
+                    TheArticle.Name +
+                    " failed!";
             }
 
-            articleActionLogControl1.LogArticleAction(TheArticle.Name, succeed, ArticleAction.Move, msg);
+            articleActionLogControl1.LogArticleAction(
+                TheArticle.Name,
+                succeed,
+                ArticleAction.Move,
+                msg);
+
             StatusLabelText = msg;
         }
         catch (ApiErrorException ae)
         {
+            // TODO: Replace string-based API error handling with strongly typed
+            // move results or error classifications where practical.
             switch (ae.ErrorCode)
             {
                 case "missingtitle":
-                    StatusLabelText = "Article deleted, cannot move";
+                    StatusLabelText =
+                        "Article deleted, cannot move";
+
                     listMaker.Remove(TheArticle);
-                    articleActionLogControl1.LogArticleAction(TheArticle.Name, false, ArticleAction.Move,
-                                                              "Article already deleted, cannot move");
+
+                    articleActionLogControl1.LogArticleAction(
+                        TheArticle.Name,
+                        false,
+                        ArticleAction.Move,
+                        "Article already deleted, cannot move");
                     break;
+
                 case "articleexists":
-                    StatusLabelText = "Target exists, cannot move";
+                    StatusLabelText =
+                        "Target exists, cannot move";
+
                     MessageBox.Show(
-                        "The destination article already exists and is not a redirect to the source article.\r\nMove not completed",
+                        "The destination article already exists and is not a " +
+                        "redirect to the source article.\r\nMove not completed",
                         "Target exists");
-                    articleActionLogControl1.LogArticleAction(TheArticle.Name, false, ArticleAction.Move,
-                                                              "Target exists");
+
+                    articleActionLogControl1.LogArticleAction(
+                        TheArticle.Name,
+                        false,
+                        ArticleAction.Move,
+                        "Target exists");
                     break;
+
                 default:
                     ErrorHandler.HandleException(ae);
                     break;
@@ -10133,8 +10175,15 @@ font-size: 150%;'>No changes</h2>
         {
             ErrorHandler.HandleException(ex);
         }
+
+        // TODO(Twain): Separate move result processing from UI updates so move
+        // outcomes can be reused and tested independently of MainForm.
     }
 
+    /// <summary>
+    /// Deletes the current article and updates the article list, action log,
+    /// and user interface to reflect the result.
+    /// </summary>
     private void DeleteArticle()
     {
         if (TheArticle == null)
@@ -10143,6 +10192,11 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        // TODO(Twain): Extract the article deletion workflow into a dedicated
+        // service so the UI coordinates the operation instead of performing it.
+        //
+        // TODO(Twain): Separate delete result processing from UI updates so
+        // outcomes can be reused and tested independently of MainForm.
         try
         {
             if (!TheSession.Page.Exists)
@@ -10154,8 +10208,11 @@ font-size: 150%;'>No changes</h2>
             if (!TheSession.User.CanDeletePage(TheSession.Page))
             {
                 MessageBox.Show(
-                    "Current user doesn't have enough rights to delete \"" + TheSession.Page.Title + "\"",
+                    "Current user doesn't have enough rights to delete \"" +
+                    TheSession.Page.Title +
+                    "\"",
                     "User rights not sufficient");
+
                 return;
             }
 
@@ -10168,32 +10225,56 @@ font-size: 150%;'>No changes</h2>
                 listMaker.Remove(TheArticle);
             }
             else
-                msg = "Deletion of " + TheArticle.Name + " failed!";
+            {
+                msg =
+                    "Deletion of " +
+                    TheArticle.Name +
+                    " failed!";
+            }
 
             StatusLabelText = msg;
-            articleActionLogControl1.LogArticleAction(TheArticle.Name, succeed, ArticleAction.Delete, msg);
+
+            articleActionLogControl1.LogArticleAction(
+                TheArticle.Name,
+                succeed,
+                ArticleAction.Delete,
+                msg);
         }
         catch (ApiErrorException ae)
         {
+            // TODO: Replace string-based API error handling with strongly typed
+            // delete results or error classifications where practical.
             if (ae.ErrorCode == "missingtitle")
             {
                 StatusLabelText = "Article already deleted";
+
                 listMaker.Remove(TheArticle);
 
-                articleActionLogControl1.LogArticleAction(TheArticle.Name, false, ArticleAction.Delete,
-                                                          "Article already deleted");
+                articleActionLogControl1.LogArticleAction(
+                    TheArticle.Name,
+                    false,
+                    ArticleAction.Delete,
+                    "Article already deleted");
+
                 return;
             }
 
             if (ae.ErrorCode == "bigdelete")
             {
-                StatusLabelText = "You can't delete this page because it has more than 5,000 revisions";
+                StatusLabelText =
+                    "You can't delete this page because it has more than 5,000 revisions";
+
                 listMaker.Remove(TheArticle);
 
-                articleActionLogControl1.LogArticleAction(TheArticle.Name, false, ArticleAction.Delete,
-                                                          "Article can't be deleted");
+                articleActionLogControl1.LogArticleAction(
+                    TheArticle.Name,
+                    false,
+                    ArticleAction.Delete,
+                    "Article can't be deleted");
+
                 return;
             }
+
             ErrorHandler.HandleException(ae);
         }
         catch (Exception ex)
@@ -10202,6 +10283,10 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Protects the current article and updates the action log and user
+    /// interface to reflect the result.
+    /// </summary>
     private void ProtectArticle()
     {
         if (TheArticle == null)
@@ -10210,13 +10295,21 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
+        // TODO(Twain): Extract the article protection workflow into a dedicated
+        // service so the UI coordinates the operation instead of performing it.
+        //
+        // TODO(Twain): Separate protection result processing from UI updates so
+        // outcomes can be reused and tested independently of MainForm.
         try
         {
             if (!TheSession.User.IsSysop)
             {
                 MessageBox.Show(
-                    "Current user doesn't have enough rights to protect \"" + TheSession.Page.Title + "\"",
+                    "Current user doesn't have enough rights to protect \"" +
+                    TheSession.Page.Title +
+                    "\"",
                     "User rights not sufficient");
+
                 return;
             }
 
@@ -10224,11 +10317,23 @@ font-size: 150%;'>No changes</h2>
             bool succeed = TheArticle.Protect(TheSession);
 
             if (succeed)
+            {
                 msg = "Protected " + TheArticle.Name;
+            }
             else
-                msg = "Protection of " + TheArticle.Name + " failed!";
+            {
+                msg =
+                    "Protection of " +
+                    TheArticle.Name +
+                    " failed!";
+            }
 
-            articleActionLogControl1.LogArticleAction(TheArticle.Name, succeed, ArticleAction.Protect, msg);
+            articleActionLogControl1.LogArticleAction(
+                TheArticle.Name,
+                succeed,
+                ArticleAction.Protect,
+                msg);
+
             StatusLabelText = msg;
         }
         catch (Exception ex)
@@ -10238,11 +10343,22 @@ font-size: 150%;'>No changes</h2>
     }
     #endregion
 
+    /// <summary>
+    /// Opens the template substitution dialog.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnSubst_Click(object sender, EventArgs e)
     {
         SubstTemplates.ShowDialog();
     }
 
+    /// <summary>
+    /// Opens the Regex Tester and optionally transfers the currently selected
+    /// article text into the tester.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void launchRegexTester(object sender, EventArgs e)
     {
         if (RegexTester == null || RegexTester.IsDisposed)
