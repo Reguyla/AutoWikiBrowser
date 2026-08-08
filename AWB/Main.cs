@@ -8902,6 +8902,12 @@ font-size: 150%;'>No changes</h2>
     private readonly Regex RegexDates =
         new("[12][0-9]{3}", RegexOptions.Compiled);
 
+    /// <summary>
+    /// Generates birth and death categories from the article text and inserts
+    /// them at the current selection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void birthdeathCatsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (TheArticle == null)
@@ -8940,7 +8946,7 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            //find first dates
+            // Use the first two detected years as the birth and death years.
             string births = "", deaths = string.Empty;
 
             if (m.Count >= 1)
@@ -9028,7 +9034,15 @@ font-size: 150%;'>No changes</h2>
         TheSession.Site.OpenPageInBrowser(TheArticle.Name);
     }
 
-    private void openTalkPageInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the talk page associated with the current article in the default
+    /// web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void openTalkPageInBrowserToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (TheArticle == null)
         {
@@ -9039,6 +9053,12 @@ font-size: 150%;'>No changes</h2>
             Tools.ConvertToTalk(TheArticle));
     }
 
+    /// <summary>
+    /// Opens the revision history of the current article in the default
+    /// web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void openHistoryMenuItem_Click(object sender, EventArgs e)
     {
         if (TheArticle == null)
@@ -9049,14 +9069,32 @@ font-size: 150%;'>No changes</h2>
         TheSession.Site.OpenPageHistoryInBrowser(TheArticle.Name);
     }
 
-    private void openSelectionInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Opens the selected editor text as either a URL or a wiki page in the
+    /// default web browser.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void openSelectionInBrowserToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser#Open_text_selection_in_browser
-        // user feedback is better to (try to) open invalid HTTP link as HTTP link than open as wiki page
-        if (WikiRegexes.UrlValidator.IsMatch(txtEdit.SelectedText.Trim()) || txtEdit.SelectedText.Trim().StartsWith("http", StringComparison.OrdinalIgnoreCase))
-            Tools.OpenURLInBrowser(txtEdit.SelectedText.Trim());
+        // User feedback indicates that invalid HTTP links should still be
+        // treated as URLs rather than opened as wiki pages.
+        string selectedText = txtEdit.SelectedText.Trim();
+
+        if (WikiRegexes.UrlValidator.IsMatch(selectedText) ||
+            selectedText.StartsWith(
+                "http",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            Tools.OpenURLInBrowser(selectedText);
+        }
         else
+        {
             TheSession.Site.OpenPageInBrowser(txtEdit.SelectedText);
+        }
     }
 
     private void chkGeneralParse_CheckedChanged(object sender, EventArgs e)
