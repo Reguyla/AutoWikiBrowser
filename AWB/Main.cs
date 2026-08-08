@@ -125,7 +125,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial _rplcSpecial =
         new();
 
-    private readonly Parsers Parser;
+    private readonly Parsers _parser;
 
     // --------------------------------------------------------------------
     // Feature State
@@ -230,7 +230,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             SplashScreen.SetProgress(10);
             try
             {
-                Parser = new Parsers(500, false);
+                _parser = new Parsers(500, false);
             }
             catch (Exception ex)
             {
@@ -3590,15 +3590,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         bool process = true;
         TypoStats = null;
 
-#if DEBUG
         Variables.Profiler.Start("ProcessPage(\"" + theArticle.Name + "\")");
-#endif
 
         try
         {
             // Must be performed regardless of general fixes, otherwise there may be breakage
             theArticle.AWBChangeArticleText("Fixes for Unicode compatibility",
-                                            Parser.FixUnicode(theArticle.ArticleText),
+                                            _parser.FixUnicode(theArticle.ArticleText),
                                             true);
 
             if (_noParse.Contains(theArticle.Name))
@@ -3655,7 +3653,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     {
                         EnsureGeneralFixResourcesLoaded();
 
-                        theArticle.PerformGeneralFixes(Parser, _removeText, _skip,
+                        theArticle.PerformGeneralFixes(_parser, _removeText, _skip,
                                                        replaceReferenceTagsToolStripMenuItem.Checked,
                                                        restrictDefaultsortChangesToolStripMenuItem.Checked,
                                                        noMOSComplianceFixesToolStripMenuItem.Checked);
@@ -3891,7 +3889,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         if (chkAppendMetaDataSort.Checked)
         {
-            article.PerformMetaDataSort(Parser);
+            article.PerformMetaDataSort(_parser);
         }
     }
 
@@ -3942,7 +3940,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         article.Categorisation(
             (Twain.Core.Options.CategorisationOptions)
             cmboCategorise.SelectedIndex,
-            Parser,
+            _parser,
             chkSkipNoCatChange.Checked,
             txtNewCategory.Text.Trim(),
             txtNewCategory2.Text.Trim(),
@@ -3987,7 +3985,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         article.Unicodify(
             _skip.SkipNoUnicode,
-            Parser,
+            _parser,
             _removeText);
 
         Variables.Profiler.Profile("Unicodify");
@@ -4020,7 +4018,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         article.AutoTag(
-            Parser,
+            _parser,
             _skip.SkipNoTag,
             restrictOrphanTaggingToolStripMenuItem.Checked);
 
@@ -7861,13 +7859,13 @@ font-size: 150%;'>No changes</h2>
     private void ConfigureInterWikiOrder(
         ProjectEnum project)
     {
-        Parser.InterWikiOrder =
+        _parser.InterWikiOrder =
             GetInterWikiOrder(
                 Variables.LangCode);
 
         if (project == ProjectEnum.commons)
         {
-            Parser.InterWikiOrder =
+            _parser.InterWikiOrder =
                 InterWikiOrderEnum.Alphabetical;
         }
     }
@@ -8910,7 +8908,7 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
-        Parser.SortInterwikis =
+        _parser.SortInterwikis =
             alphaSortInterwikiLinksToolStripMenuItem.Checked;
     }
 
@@ -9306,7 +9304,7 @@ font-size: 150%;'>No changes</h2>
     private void unicodifyToolStripMenuItem_Click(object sender, EventArgs e)
     {
         string text = txtEdit.SelectedText;
-        text = Parser.Unicodify(text);
+        text = _parser.Unicodify(text);
         txtEdit.SelectedText = text;
     }
 
@@ -9399,7 +9397,7 @@ font-size: 150%;'>No changes</h2>
             if (!noChange)
             {
                 txtEdit.Text =
-                    Parser.SortMetaData(
+                    _parser.SortMetaData(
                         txtEdit.Text,
                         TheArticle.Name);
             }
