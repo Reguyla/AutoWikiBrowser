@@ -132,20 +132,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // --------------------------------------------------------------------
 
     private bool _userTalkWarningsLoaded;
-    private bool TemplateRedirectsLoaded;
-    private bool DatedTemplatesLoaded;
-    private bool RenamedTemplateParametersLoaded;
+    private bool _templateRedirectsLoaded;
+    private bool _datedTemplatesLoaded;
+    private bool _renamedTemplateParametersLoaded;
 
-    private Regex UserTalkTemplatesRegex;
+    private Regex _userTalkTemplatesRegex;
 
     // --------------------------------------------------------------------
     // External Components
     // --------------------------------------------------------------------
 
-    private readonly CustomModule CModule = new();
-    private readonly ExternalProgram ExtProgram = new();
+    private readonly CustomModule _cModule = new();
+    private readonly ExternalProgram _extProgram = new();
 
-    private RegexTester RegexTester;
+    private RegexTester _regexTester;
 
     // --------------------------------------------------------------------
     // List Processing
@@ -154,9 +154,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // TODO(Twain): Move auxiliary tool lifetime and creation management out of
     // MainForm once List Comparer, List Splitter, and database search launch
     // workflows are consolidated.
-    private ListComparer Comparer;
-    private ListSplitter Splitter;
-    private Twain.Core.DBScanner.DatabaseScanner DBScanner;
+    private ListComparer _comparer;
+    private ListSplitter _splitter;
+    private Twain.Core.DBScanner.DatabaseScanner _dBScanner;
 
     // --------------------------------------------------------------------
     // Statistics
@@ -166,7 +166,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly List<string> RecentList = new();
 
-    private List<TypoStat> TypoStats;
+    private List<TypoStat> _typoStats;
 
     // --------------------------------------------------------------------
     // Diff
@@ -3588,7 +3588,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void ProcessPage(Article theArticle, bool mainProcess)
     {
         bool process = true;
-        TypoStats = null;
+        _typoStats = null;
 
         Variables.Profiler.Start("ProcessPage(\"" + theArticle.Name + "\")");
 
@@ -3680,7 +3680,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                             Variables.Profiler.Profile("loadUserTalkWarnings");
                         }
 
-                        theArticle.PerformUserTalkGeneralFixes(_removeText, UserTalkTemplatesRegex,
+                        theArticle.PerformUserTalkGeneralFixes(_removeText, _userTalkTemplatesRegex,
                                                                _skip.SkipNoUserTalkTemplatesSubstd);
                     }
                     else if (theArticle.CanDoTalkGeneralFixes)
@@ -3698,7 +3698,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 {
                     theArticle.PerformTypoFixes(_regexTypos, chkSkipIfNoRegexTypo.Checked);
                     Variables.Profiler.Profile("Typos");
-                    TypoStats = _regexTypos.GetStatistics();
+                    _typoStats = _regexTypos.GetStatistics();
                 }
                 else if (chkSkipIfNoRegexTypo.Checked)
                     TheArticle.Trace.AWBSkipped("No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
@@ -3708,7 +3708,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     if (mainProcess)
                     {
                         // update stats only if not called from e.g. 'Re-parse' than could be clicked repeatedly
-                        OverallTypoStats.UpdateStats(TypoStats, true);
+                        OverallTypoStats.UpdateStats(_typoStats, true);
                         UpdateTypoCount();
                     }
                 }
@@ -3784,9 +3784,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool RunExtensionProcessing(Article article)
     {
-        if (CModule.ModuleUsable)
+        if (_cModule.ModuleUsable)
         {
-            article.SendPageToCustomModule(CModule.Module);
+            article.SendPageToCustomModule(_cModule.Module);
 
             if (article.SkipArticle)
             {
@@ -3796,9 +3796,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         Variables.Profiler.Profile("Custom module");
 
-        if (ExtProgram.ModuleEnabled)
+        if (_extProgram.ModuleEnabled)
         {
-            article.SendPageToCustomModule(ExtProgram);
+            article.SendPageToCustomModule(_extProgram);
 
             if (article.SkipArticle)
             {
@@ -3831,19 +3831,19 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private void EnsureGeneralFixResourcesLoaded()
     {
-        if (!TemplateRedirectsLoaded)
+        if (!_templateRedirectsLoaded)
         {
             LoadTemplateRedirects();
             Variables.Profiler.Profile("LoadTemplateRedirects");
         }
 
-        if (!DatedTemplatesLoaded)
+        if (!_datedTemplatesLoaded)
         {
             LoadDatedTemplates();
             Variables.Profiler.Profile("LoadDatedTemplates");
         }
 
-        if (!RenamedTemplateParametersLoaded)
+        if (!_renamedTemplateParametersLoaded)
         {
             LoadRenameTemplateParameters();
             Variables.Profiler.Profile("LoadRenameTemplateParameters");
@@ -5322,7 +5322,7 @@ font-size: 150%;'>No changes</h2>
     private void UpdateCurrentTypoStats()
     {
         CurrentTypoStats.UpdateStats(
-            TypoStats,
+            _typoStats,
             false);
     }
 
@@ -5340,7 +5340,7 @@ font-size: 150%;'>No changes</h2>
         if (chkRegExTypo.Checked)
         {
             OverallTypoStats.UpdateStats(
-                TypoStats,
+                _typoStats,
                 false);
         }
 
@@ -7638,13 +7638,13 @@ font-size: 150%;'>No changes</h2>
         if (_userTalkWarningsLoaded)
             LoadUserTalkWarnings();
 
-        if (TemplateRedirectsLoaded)
+        if (_templateRedirectsLoaded)
             LoadTemplateRedirects();
 
-        if (DatedTemplatesLoaded)
+        if (_datedTemplatesLoaded)
             LoadDatedTemplates();
 
-        if (RenamedTemplateParametersLoaded)
+        if (_renamedTemplateParametersLoaded)
             LoadRenameTemplateParameters();
     }
 
@@ -7700,7 +7700,7 @@ font-size: 150%;'>No changes</h2>
         UpdateProjectLabel();
 
         _userTalkWarningsLoaded = false;
-        TemplateRedirectsLoaded = false;
+        _templateRedirectsLoaded = false;
 
         ResetTypoStats();
     }
@@ -8410,7 +8410,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void makeModuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        CModule.Show();
+        _cModule.Show();
     }
 
     /// <summary>
@@ -8680,11 +8680,11 @@ font-size: 150%;'>No changes</h2>
         bool useCurrentArticleList =
             ShouldListComparerUseCurrentArticleList();
 
-        Comparer =
+        _comparer =
             CreateListComparer(
                 useCurrentArticleList);
 
-        Comparer.Show(this);
+        _comparer.Show(this);
     }
 
     /// <summary>
@@ -8756,11 +8756,11 @@ font-size: 150%;'>No changes</h2>
         bool useCurrentArticleList =
             ShouldListSplitterUseCurrentArticleList();
 
-        Splitter =
+        _splitter =
             CreateListSplitter(
                 useCurrentArticleList);
 
-        Splitter.Show(this);
+        _splitter.Show(this);
     }
 
     /// <summary>
@@ -8840,11 +8840,11 @@ font-size: 150%;'>No changes</h2>
         bool useCurrentArticleList =
             ShouldDumpSearcherUseCurrentArticleList();
 
-        DBScanner =
+        _dBScanner =
             CreateDumpSearcher(
                 useCurrentArticleList);
 
-        DBScanner.Show();
+        _dBScanner.Show();
         UpdateButtons(null, null);
     }
 
@@ -11261,9 +11261,9 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void launchRegexTester(object sender, EventArgs e)
     {
-        if (RegexTester == null || RegexTester.IsDisposed)
+        if (_regexTester == null || _regexTester.IsDisposed)
         {
-            RegexTester = new RegexTester();
+            _regexTester = new RegexTester();
         }
 
         if (txtEdit.SelectionLength > 0 &&
@@ -11272,11 +11272,11 @@ font-size: 150%;'>No changes</h2>
                 "Transfer Article Text?",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            RegexTester.ArticleText = txtEdit.SelectedText;
+            _regexTester.ArticleText = txtEdit.SelectedText;
         }
 
-        RegexTester.Show();
-        RegexTester.BringToFront();
+        _regexTester.Show();
+        _regexTester.BringToFront();
     }
 
     /// <summary>
@@ -11832,7 +11832,7 @@ font-size: 150%;'>No changes</h2>
             Variables.NamespacesCaseInsensitive[Namespace.Template] +
             @"(.*?)\]\]");
 
-        UserTalkTemplatesRegex = null;
+        _userTalkTemplatesRegex = null;
 
         // Prevent repeated loading attempts on every page.
         _userTalkWarningsLoaded = true;
@@ -11856,7 +11856,7 @@ font-size: 150%;'>No changes</h2>
 
             if (userTalkTemplates.Any())
             {
-                UserTalkTemplatesRegex =
+                _userTalkTemplatesRegex =
                     Tools.NestedTemplateRegex(userTalkTemplates);
             }
         }
@@ -11897,7 +11897,7 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void LoadTemplateRedirects()
     {
-        TemplateRedirectsLoaded = true;
+        _templateRedirectsLoaded = true;
 
         string text = LoadWikiConfigurationText(
             "Project:AutoWikiBrowser/Template redirects",
@@ -11916,7 +11916,7 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void LoadDatedTemplates()
     {
-        DatedTemplatesLoaded = true;
+        _datedTemplatesLoaded = true;
 
         string text = LoadWikiConfigurationText(
             "Project:AutoWikiBrowser/Dated templates",
@@ -11936,7 +11936,7 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void LoadRenameTemplateParameters()
     {
-        RenamedTemplateParametersLoaded = true;
+        _renamedTemplateParametersLoaded = true;
 
         string text = LoadWikiConfigurationText(
             "Project:AutoWikiBrowser/Rename template parameters",
@@ -12389,7 +12389,7 @@ font-size: 150%;'>No changes</h2>
 
         TheArticle = null;
         txtEdit.Text = string.Empty;
-        TemplateRedirectsLoaded = false;
+        _templateRedirectsLoaded = false;
 
         CheckStatus(true);
         UpdateStatusUI();
@@ -13227,7 +13227,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void externalProcessingToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        ExtProgram.Show();
+        _extProgram.Show();
     }
 
     /// <summary>

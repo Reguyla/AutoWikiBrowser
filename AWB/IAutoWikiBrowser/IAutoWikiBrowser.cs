@@ -58,7 +58,7 @@ partial class MainForm
     /// available; otherwise, <see langword="null"/>.
     /// </summary>
     string? IAutoWikiBrowser.CustomModule =>
-        CModule.ModuleUsable
-            ? CModule.Code
+        _cModule.ModuleUsable
+            ? _cModule.Code
             : null;
 }
