@@ -84,7 +84,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // --------------------------------------------------------------------
 
     private bool _abort;
-    private bool IgnoreNoBots;
+    private bool _ignoreNoBots;
     private bool ClearPageListOnProjectChange;
     private bool PageReload;
     private bool doDiffInBotMode;
@@ -3604,7 +3604,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             if (NoParse.Contains(theArticle.Name))
                 process = false;
 
-            if (!IgnoreNoBots &&
+            if (!_ignoreNoBots &&
                 !Parsers.CheckNoBots(theArticle.ArticleText, TheSession.User.Name))
             {
                 theArticle.AWBSkip("Restricted by {{bots}}/{{nobots}}");
@@ -7463,7 +7463,7 @@ font-size: 150%;'>No changes</h2>
             PrefAutoSaveEditBoxFile = _autoSaveEditBoxFile,
             PrefAutoSaveEditBoxPeriod = AutoSaveEditBoxPeriod,
 
-            PrefIgnoreNoBots = IgnoreNoBots,
+            PrefIgnoreNoBots = _ignoreNoBots,
             PrefClearPageListOnProjectChange = ClearPageListOnProjectChange,
 
             PrefShowTimer = ShowMovingAverageTimer,
@@ -7538,7 +7538,7 @@ font-size: 150%;'>No changes</h2>
         Article.AddUsingAWBOnArticleAction =
             myPrefs.PrefAddUsingAWBOnArticleAction;
 
-        IgnoreNoBots =
+        _ignoreNoBots =
             myPrefs.PrefIgnoreNoBots;
 
         ClearPageListOnProjectChange =

@@ -596,7 +596,7 @@ partial class MainForm
         return new GeneralPrefs(cmboEditSummary.Items)
         {
             SaveArticleList = _saveArticleList,
-            IgnoreNoBots = IgnoreNoBots,
+            IgnoreNoBots = _ignoreNoBots,
             ClearPageListOnProjectChange = ClearPageListOnProjectChange,
             SelectedSummary = cmboEditSummary.Text,
             PasteMore = GetPasteMoreValues(),
@@ -921,7 +921,7 @@ partial class MainForm
         _saveArticleList =
             preferences.General.SaveArticleList;
 
-        IgnoreNoBots =
+        _ignoreNoBots =
             preferences.General.IgnoreNoBots;
 
         ClearPageListOnProjectChange =
