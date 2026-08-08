@@ -6718,6 +6718,9 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    // TODO(Twain): Replace numeric alert identifiers with named alert types
+    // and move citation/URL alert evaluation into a shared alert service.
+
     /// <summary>
     /// Evaluates citation and URL-related article alerts.
     /// </summary>
@@ -6728,7 +6731,7 @@ font-size: 150%;'>No changes</h2>
     private void EvaluateCitationAndUrlAlerts(bool hasAlertsOn)
     {
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Some_additional_edits
-        if (hasAlertsOn || alertPreferences.Contains(4))
+        if (IsAlertEnabled(hasAlertsOn, 4))
         {
             _deadLinks = TheArticle.DeadLinks();
 
@@ -6740,26 +6743,29 @@ font-size: 150%;'>No changes</h2>
         }
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#.28Yet.29_more_reference_related_changes.
-        if ((hasAlertsOn || alertPreferences.Contains(6))
-            && TheArticle.HasRefAfterReflist)
+        if (IsAlertEnabled(hasAlertsOn, 6) &&
+            TheArticle.HasRefAfterReflist)
         {
-            lbAlerts.Items.Add(@"Has a <ref> after <references/>");
+            lbAlerts.Items.Add(
+                @"Has a <ref> after <references/>");
         }
 
-        if ((hasAlertsOn || alertPreferences.Contains(3))
-            && TheArticle.IsDisambiguationPageWithRefs)
+        if (IsAlertEnabled(hasAlertsOn, 3) &&
+            TheArticle.IsDisambiguationPageWithRefs)
         {
-            lbAlerts.Items.Add(@"DAB page with <ref>s");
+            lbAlerts.Items.Add(
+                @"DAB page with <ref>s");
         }
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Format_references
-        if ((hasAlertsOn || alertPreferences.Contains(19))
-            && TheArticle.HasBareReferences)
+        if (IsAlertEnabled(hasAlertsOn, 19) &&
+            TheArticle.HasBareReferences)
         {
-            lbAlerts.Items.Add("Unformatted references");
+            lbAlerts.Items.Add(
+                "Unformatted references");
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(1))
+        if (IsAlertEnabled(hasAlertsOn, 1))
         {
             _ambiguousCiteDates =
                 TheArticle.AmbiguousCiteTemplateDates();
@@ -6771,7 +6777,7 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(20))
+        if (IsAlertEnabled(hasAlertsOn, 20))
         {
             _unknownMultipleIssuesParameters =
                 TheArticle.UnknownMultipleIssuesParameters();
@@ -6780,15 +6786,18 @@ font-size: 150%;'>No changes</h2>
             {
                 string warning =
                     $"Unknown parameters in Multiple issues ({_unknownMultipleIssuesParameters.Count}): " +
-                    string.Join(", ", _unknownMultipleIssuesParameters);
+                    string.Join(
+                        ", ",
+                        _unknownMultipleIssuesParameters);
 
                 lbAlerts.Items.Add(warning);
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(8))
+        if (IsAlertEnabled(hasAlertsOn, 8))
         {
-            _wikilinkedHeaders = TheArticle.WikiLinkedHeaders();
+            _wikilinkedHeaders =
+                TheArticle.WikiLinkedHeaders();
 
             if (_wikilinkedHeaders.Count > 0)
             {
@@ -6797,9 +6806,10 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(18))
+        if (IsAlertEnabled(hasAlertsOn, 18))
         {
-            _unclosedTags = TheArticle.UnclosedTags();
+            _unclosedTags =
+                TheArticle.UnclosedTags();
 
             if (_unclosedTags.Count > 0)
             {
@@ -6808,7 +6818,7 @@ font-size: 150%;'>No changes</h2>
             }
         }
 
-        if (hasAlertsOn || alertPreferences.Contains(9))
+        if (IsAlertEnabled(hasAlertsOn, 9))
         {
             _badCiteParameters =
                 TheArticle.BadCiteParameters();
