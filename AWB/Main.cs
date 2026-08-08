@@ -9883,38 +9883,64 @@ font-size: 150%;'>No changes</h2>
 
     // TODO(Twain): Replace manual browser sizing calculations with layout-managed
     // resizing when the browser panel is migrated from WinForms.
+
     /// <summary>
     /// Updates the embedded browser size to reflect the current toolbar and
     /// panel visibility.
     /// </summary>
     private void SetBrowserSize()
     {
-        if (toolStrip.Visible)
-        {
-            webBrowser.Location = new Point(webBrowser.Location.X, 48);
+        GetBrowserLayout(
+            toolStrip.Visible,
+            panel1.Visible,
+            panel1.Location.Y,
+            StatusMain.Location.Y,
+            out int top,
+            out int height);
 
-            if (panel1.Visible)
-            {
-                webBrowser.Height = panel1.Location.Y - 48;
-            }
-            else
-            {
-                webBrowser.Height = StatusMain.Location.Y - 48;
-            }
-        }
-        else
-        {
-            webBrowser.Location = new Point(webBrowser.Location.X, 25);
+        webBrowser.Location =
+            new Point(
+                webBrowser.Location.X,
+                top);
 
-            if (panel1.Visible)
-            {
-                webBrowser.Height = panel1.Location.Y - 25;
-            }
-            else
-            {
-                webBrowser.Height = StatusMain.Location.Y - 25;
-            }
-        }
+        webBrowser.Height = height;
+    }
+
+    /// <summary>
+    /// Calculates the embedded browser position and height from the current
+    /// toolbar and panel visibility state.
+    /// </summary>
+    /// <param name="toolBarVisible">
+    /// Whether the main toolbar is visible.
+    /// </param>
+    /// <param name="panelVisible">
+    /// Whether the lower panel is visible.
+    /// </param>
+    /// <param name="panelTop">
+    /// The vertical position of the lower panel.
+    /// </param>
+    /// <param name="statusTop">
+    /// The vertical position of the main status bar.
+    /// </param>
+    /// <param name="top">
+    /// The calculated vertical position of the embedded browser.
+    /// </param>
+    /// <param name="height">
+    /// The calculated height of the embedded browser.
+    /// </param>
+    private static void GetBrowserLayout(
+        bool toolBarVisible,
+        bool panelVisible,
+        int panelTop,
+        int statusTop,
+        out int top,
+        out int height)
+    {
+        top = toolBarVisible ? 48 : 25;
+
+        height =
+            (panelVisible ? panelTop : statusTop) -
+            top;
     }
 
     /// <summary>
