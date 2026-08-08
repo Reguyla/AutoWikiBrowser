@@ -91,7 +91,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool _loggingEnabled;
 
     private bool _skippable = true;
-    private bool ShuttingDown;
+    private bool _shuttingDown;
 
     private string LastArticle = string.Empty;
     private string _settingsFile = string.Empty;
@@ -5493,12 +5493,12 @@ font-size: 150%;'>No changes</h2>
     /// </remarks>
     private void CloseDownAWB()
     {
-        if (ShuttingDown)
+        if (_shuttingDown)
         {
             return;
         }
 
-        ShuttingDown = true;
+        _shuttingDown = true;
 
         AbortActiveEditorOperation();
         SaveRecentSettingsList();
@@ -12343,7 +12343,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void profilesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (!ShuttingDown)
+        if (!_shuttingDown)
         {
             Profiles.ShowDialog(this);
         }

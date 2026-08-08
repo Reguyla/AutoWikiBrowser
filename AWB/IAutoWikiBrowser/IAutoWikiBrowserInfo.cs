@@ -32,5 +32,5 @@ partial class MainForm
     ProjectEnum IAutoWikiBrowserInfo.Project { get { return Variables.Project; } }
 
     bool IAutoWikiBrowserInfo.Privacy { get { return Properties.Settings.Default.Privacy; } }
-    bool IAutoWikiBrowserInfo.Shutdown { get { return ShuttingDown; } }
+    bool IAutoWikiBrowserInfo.Shutdown { get { return _shuttingDown; } }
 }
