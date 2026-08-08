@@ -7377,11 +7377,7 @@ font-size: 150%;'>No changes</h2>
                 _dbScannerUseCurrentArticleList,
 
             PrefDiffInBotMode = doDiffInBotMode,
-
-            // TODO: Remove the legacy actionOnLoad value mapping once the obsolete
-            // "show edit page" option and its persisted value are no longer supported.
-            // The "show edit page" option is no longer available.
-            PrefOnLoad = actionOnLoad == 2 ? 0 : actionOnLoad,
+            PrefOnLoad = GetSupportedActionOnLoadValue(),
 
             EnableLogging = loggingEnabled,
             FocusSiteTab = focusSiteTab,
@@ -7390,6 +7386,20 @@ font-size: 150%;'>No changes</h2>
 
             AlertPreferences = alertPreferences
         };
+    }
+
+    /// <summary>
+    /// Returns the supported preferences value for the current on-load action,
+    /// mapping the obsolete "show edit page" value to the default action.
+    /// </summary>
+    /// <returns>The supported on-load action value.</returns>
+    private int GetSupportedActionOnLoadValue()
+    {
+        // TODO: Remove this compatibility mapping once the obsolete
+        // "show edit page" persisted value is no longer supported.
+        return actionOnLoad == 2
+            ? 0
+            : actionOnLoad;
     }
 
     /// <summary>
