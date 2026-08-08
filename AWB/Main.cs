@@ -7846,6 +7846,32 @@ font-size: 150%;'>No changes</h2>
     /// </param>
     private void SetButtons(bool enabled)
     {
+        SetPrimaryProcessingControlsEnabled(enabled);
+
+        btnSave.Enabled =
+            CanSaveCurrentArticle(enabled);
+
+        btnProtect.Enabled =
+            CanProtectCurrentPage(enabled);
+
+        btnMove.Enabled =
+            CanMoveCurrentPage(enabled);
+
+        btnDelete.Enabled =
+            btntsDelete.Enabled =
+            CanDeleteCurrentPage(enabled);
+
+        UpdateFindButtonState();
+    }
+
+    /// <summary>
+    /// Applies the common enabled state to primary processing controls.
+    /// </summary>
+    /// <param name="enabled">
+    /// The enabled state to apply.
+    /// </param>
+    private void SetPrimaryProcessingControlsEnabled(bool enabled)
+    {
         btnIgnore.Enabled =
             btnPreview.Enabled =
             btnDiff.Enabled =
@@ -7857,46 +7883,108 @@ font-size: 150%;'>No changes</h2>
             btnWatch.Enabled =
             findGroup.Enabled =
             enabled;
+    }
 
-        btnSave.Enabled =
-            enabled &&
+    /// <summary>
+    /// Determines whether the current article can be saved.
+    /// </summary>
+    /// <param name="enabled">
+    /// Whether article-processing controls are generally enabled.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if saving should be enabled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool CanSaveCurrentArticle(bool enabled)
+    {
+        return enabled &&
             TheArticle != null &&
             !string.IsNullOrEmpty(TheSession.Page.Title);
+    }
 
+    /// <summary>
+    /// Determines whether the current page can be protected.
+    /// </summary>
+    /// <param name="enabled">
+    /// Whether article-processing controls are generally enabled.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if protection should be enabled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool CanProtectCurrentPage(bool enabled)
+    {
         // Allow protection of a non-existent page (salting).
-        btnProtect.Enabled =
-            enabled &&
+        return enabled &&
             TheSession.User.CanProtectPage(TheSession.Page) &&
             TheArticle != null;
+    }
 
-        btnMove.Enabled =
-            btnProtect.Enabled &&
+    /// <summary>
+    /// Determines whether the current page can be moved.
+    /// </summary>
+    /// <param name="enabled">
+    /// Whether article-processing controls are generally enabled.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if moving should be enabled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool CanMoveCurrentPage(bool enabled)
+    {
+        return CanProtectCurrentPage(enabled) &&
             TheSession.Page.Exists;
+    }
 
-        btnDelete.Enabled =
-            btntsDelete.Enabled =
-            enabled &&
+    /// <summary>
+    /// Determines whether the current page can be deleted.
+    /// </summary>
+    /// <param name="enabled">
+    /// Whether article-processing controls are generally enabled.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if deletion should be enabled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool CanDeleteCurrentPage(bool enabled)
+    {
+        return enabled &&
             TheSession.User.CanDeletePage(TheSession.Page) &&
             TheArticle != null &&
             TheSession.Page.Exists;
+    }
 
-        btnFind.Enabled = txtFind.TextLength > 0;
+    /// <summary>
+    /// Updates the Find button availability and highlights it when matches
+    /// exist in the current article.
+    /// </summary>
+    private void UpdateFindButtonState()
+    {
+        btnFind.Enabled =
+            txtFind.TextLength > 0;
 
-        // Highlight the Find button when matching text exists.
-        if (btnFind.Enabled &&
+        btnFind.BackColor =
+            HasCurrentFindMatches()
+                ? Color.Yellow
+                : SystemColors.ButtonFace;
+    }
+
+    /// <summary>
+    /// Determines whether the current Find expression matches the current article.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if matching text exists; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool HasCurrentFindMatches()
+    {
+        return btnFind.Enabled &&
             TheArticle != null &&
             txtEdit.FindAll(
                 txtFind.Text,
                 chkFindRegex.Checked,
                 chkFindCaseSensitive.Checked,
-                TheArticle.Name).Any())
-        {
-            btnFind.BackColor = Color.Yellow;
-        }
-        else
-        {
-            btnFind.BackColor = SystemColors.ButtonFace;
-        }
+                TheArticle.Name).Any();
     }
 
     #endregion
