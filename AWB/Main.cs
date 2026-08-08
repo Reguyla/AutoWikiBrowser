@@ -530,12 +530,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         string displayText = Program.Name;
 
-#if DEBUG
         if (Variables.RevisionNumber > 0)
         {
             displayText += $" rev {Variables.RevisionNumber}";
         }
-#endif
 
         if (!string.IsNullOrEmpty(settingsFile))
         {
