@@ -100,7 +100,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private const int MaxRetries = 10;
 
     private int _oldSelection;
-    private int Retries;
+    private int _retries;
     private int SameArticleNudges;
     private int actionOnLoad;
 
@@ -1171,9 +1171,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         double _maxlag,
         int retryAfter)
     {
-        Retries++;
+        _retries++;
 
-        if (Retries < MaxRetries)
+        if (_retries < MaxRetries)
         {
             StartDelayedRestartTimer(retryAfter);
             return;
@@ -1872,7 +1872,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return;
         }
 
-        Retries = 0;
+        _retries = 0;
 
         if (_stopProcessing)
         {
@@ -3427,7 +3427,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             EditBoxSaveTimer.Enabled = false;
         }
 
-        Retries = 0;
+        _retries = 0;
 
         // Persist the active settings file after every ten successful edits when
         // automatic settings saving is enabled.
@@ -3532,7 +3532,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         TheArticle = null;
-        Retries = 0;
+        _retries = 0;
 
         Start();
     }
@@ -9731,7 +9731,7 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void ResetProcessingStopState()
     {
-        Retries = 0;
+        _retries = 0;
         _stopProcessing = true;
         _pageReload = false;
 
