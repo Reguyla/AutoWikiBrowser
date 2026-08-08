@@ -101,7 +101,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private int _oldSelection;
     private int _retries;
-    private int SameArticleNudges;
+    private int _sameArticleNudges;
     private int actionOnLoad;
 
     private ArticleRedirected ArticleWasRedirected;
@@ -3402,7 +3402,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         listMaker.Remove(TheArticle);
 
         NudgeTimer.Stop();
-        SameArticleNudges = 0;
+        _sameArticleNudges = 0;
 
         if (EditBoxTab.SelectedTab == tpHistory)
         {
@@ -3465,7 +3465,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             bool articleRemoved = listMaker.Remove(TheArticle);
 
-            SameArticleNudges = 0;
+            _sameArticleNudges = 0;
 
             if (!articleRemoved)
             {
@@ -11669,7 +11669,7 @@ font-size: 150%;'>No changes</h2>
     private void btnResetNudges_Click(object sender, EventArgs e)
     {
         Nudges = 0;
-        SameArticleNudges = 0;
+        _sameArticleNudges = 0;
         lblNudges.Text = NudgeTimerString + "0";
     }
 
@@ -11750,14 +11750,14 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void ProcessNudgeRetry()
     {
-        if (chkNudgeSkip.Checked && SameArticleNudges > 0)
+        if (chkNudgeSkip.Checked && _sameArticleNudges > 0)
         {
-            SameArticleNudges = 0;
+            _sameArticleNudges = 0;
             SkipPage("There was an error saving the page twice");
             return;
         }
 
-        SameArticleNudges++;
+        _sameArticleNudges++;
         Stop();
         _stopProcessing = false;
         Start();
