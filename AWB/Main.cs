@@ -50,15 +50,12 @@ using ThreadState = System.Threading.ThreadState;
 
 namespace AutoWikiBrowser;
 
-// TODO:Move any code that doesn't need to be directly behind the form to WF or other code files (Preferably WF)
-// TODO:Move Regexes declared in method bodies (if not dynamic based on article title, etc), into class body
-// TODO:Move any Regexes to WikiRegexes as required
-// TODO (.NET 8 Modernization):
-// Review MainForm responsibilities after behavior-preserving cleanup is
-// complete. Move article-processing rules, API error classification, retry
-// decisions, title preparation, and workflow state into testable services.
-// Keep direct WinForms control updates, dialogs, and event wiring in MainForm,
-// using thin UI methods to apply decisions returned by those services.
+// TODO(Twain): Continue decomposing MainForm by moving non-UI workflow,
+// processing, navigation, configuration, and authorization logic into
+// testable Twain.Core services.
+//
+// TODO(Twain): Consolidate reusable regular expressions into WikiRegexes
+// when they are not dependent on dynamic article or project state.
 
 public sealed partial class MainForm : Form, IAutoWikiBrowser
 { // this class needs to be public, otherwise we get an exception which recommends setting ComVisibleAttribute to true (which we've already done)
@@ -154,6 +151,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // List Processing
     // --------------------------------------------------------------------
 
+    // TODO(Twain): Move auxiliary tool lifetime and creation management out of
+    // MainForm once List Comparer, List Splitter, and database search launch
+    // workflows are consolidated.
     private ListComparer Comparer;
     private ListSplitter Splitter;
     private Twain.Core.DBScanner.DatabaseScanner DBScanner;
@@ -195,21 +195,21 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     { get; private set; }
 
     #region Constructor and MainForm load/resize
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MainForm"/> class.
-    /// </summary>
     /// <remarks>
     /// Performs application startup initialization, including loading application
     /// settings, creating the user interface, initializing the editing session,
     /// configuring application services, and preparing the main window for use.
     /// Long-running startup tasks continue during <see cref="MainForm_Load"/> after
-    /// the form has
+    /// the form has been displayed.
+    /// </remarks>
     public MainForm()
     {
         CheckSettings();
 
         DiffScriptingAdapter = new JsAdapter(this);
 
+        // TODO(Twain): Remove legacy updater initialization when Twain.Updater
+        // replaces the current AWB updater workflow.
         Updater.UpdateUpdaterFile();
 
         SplashScreen.Show(this);
@@ -288,6 +288,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         cmboCategorise.SelectedIndex = 0;
         cmboImages.SelectedIndex = 0;
 
+        // TODO(Twain): Move ListMaker state observation behind a view-model or
+        // coordinator so MainForm does not directly subscribe to processing events.
         listMaker.UserInputTextBox.ContextMenuStrip = mnuMakeFromTextBox;
         listMaker.BusyStateChanged += SetProgressBar;
         listMaker.NoOfArticlesChanged += UpdateButtons;
@@ -372,6 +374,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         openXML.InitialDirectory = documentsFolder;
     }
 
+    // TODO(Twain): Move corrupt user-settings detection and recovery into
+    // startup/settings infrastructure so MainForm is not responsible for
+    // application configuration repair.
     /// <summary>
     /// Checks whether the current per-user application configuration can be opened
     /// and deletes the configuration file when it is found to be corrupt.
@@ -428,6 +433,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    // TODO(Twain): Move command-line parsing into the application host and
+    // return a strongly typed startup-options model instead of mutating MainForm.
     /// <summary>
     /// Parses supported command-line arguments and applies the requested startup options.
     /// </summary>
@@ -516,6 +523,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    // TODO(Twain): Separate settings-file state from window/tray presentation
+    // so display text can be bound or applied by the UI layer independently.
     /// <summary>
     /// Builds the display text used for the main window title and notification-area tooltip.
     /// </summary>
@@ -620,9 +629,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         CompleteStartup();
 
-#if DEBUG && INSTASTATS
     UsageStats.Do(false);
-#endif
     }
 
     /// <summary>
