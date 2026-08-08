@@ -10192,11 +10192,8 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        // TODO(Twain): Extract the article deletion workflow into a dedicated
-        // service so the UI coordinates the operation instead of performing it.
-        //
-        // TODO(Twain): Separate delete result processing from UI updates so
-        // outcomes can be reused and tested independently of MainForm.
+        // TODO(Twain): Move article deletion into the shared article-action
+        // service once protection, deletion, and move workflows are consolidated.
         try
         {
             if (!TheSession.Page.Exists)
@@ -10216,20 +10213,15 @@ font-size: 150%;'>No changes</h2>
                 return;
             }
 
-            string msg;
-            bool succeed = TheArticle.Delete(TheSession);
+            bool succeed =
+                TryDeleteArticle(
+                    TheArticle,
+                    TheSession,
+                    out string msg);
 
             if (succeed)
             {
-                msg = "Deleted " + TheArticle.Name;
                 listMaker.Remove(TheArticle);
-            }
-            else
-            {
-                msg =
-                    "Deletion of " +
-                    TheArticle.Name +
-                    " failed!";
             }
 
             StatusLabelText = msg;
@@ -10281,6 +10273,39 @@ font-size: 150%;'>No changes</h2>
         {
             ErrorHandler.HandleException(ex);
         }
+    }
+
+    /// <summary>
+    /// Attempts to delete the specified article and creates a message describing
+    /// the result.
+    /// </summary>
+    /// <param name="article">The article to delete.</param>
+    /// <param name="session">The session used to perform the deletion.</param>
+    /// <param name="msg">The message describing the deletion result.</param>
+    /// <returns>
+    /// <see langword="true"/> if deletion succeeds; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool TryDeleteArticle(
+        Article article,
+        Session session,
+        out string msg)
+    {
+        bool succeed = article.Delete(session);
+
+        if (succeed)
+        {
+            msg = "Deleted " + article.Name;
+        }
+        else
+        {
+            msg =
+                "Deletion of " +
+                article.Name +
+                " failed!";
+        }
+
+        return succeed;
     }
 
     /// <summary>
