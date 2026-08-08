@@ -118,7 +118,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly FindandReplace _findAndReplace = new();
     private readonly SubstTemplates _substTemplates = new();
 
-    private RegExTypoFix RegexTypos;
+    private RegExTypoFix _regexTypos;
 
     private readonly SkipOptions Skip = new();
 
@@ -3694,13 +3694,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             // RegexTypoFix
-            if (chkRegExTypo.Checked && RegexTypos != null && !BotMode && !Namespace.IsTalk(theArticle.NameSpaceKey))
+            if (chkRegExTypo.Checked && _regexTypos != null && !BotMode && !Namespace.IsTalk(theArticle.NameSpaceKey))
             {
                 if (!_noRetf.Contains(theArticle.Name))
                 {
-                    theArticle.PerformTypoFixes(RegexTypos, chkSkipIfNoRegexTypo.Checked);
+                    theArticle.PerformTypoFixes(_regexTypos, chkSkipIfNoRegexTypo.Checked);
                     Variables.Profiler.Profile("Typos");
-                    TypoStats = RegexTypos.GetStatistics();
+                    TypoStats = _regexTypos.GetStatistics();
                 }
                 else if (chkSkipIfNoRegexTypo.Checked)
                     TheArticle.Trace.AWBSkipped("No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
@@ -10272,10 +10272,10 @@ font-size: 150%;'>No changes</h2>
         // the normal LoadPrefs workflow.
         if (reload)
         {
-            RegexTypos = null;
+            _regexTypos = null;
         }
 
-        if (chkRegExTypo.Checked && RegexTypos == null)
+        if (chkRegExTypo.Checked && _regexTypos == null)
         {
             _loadingTypos = true;
             chkRegExTypo.Checked = false;
@@ -10294,8 +10294,8 @@ font-size: 150%;'>No changes</h2>
             MessageBoxButtons.OK,
             MessageBoxIcon.Warning);
 
-            RegexTypos = new RegExTypoFix();
-            RegexTypos.Complete += RegexTyposComplete;
+            _regexTypos = new RegExTypoFix();
+            _regexTypos.Complete += RegexTyposComplete;
         }
     }
 
@@ -10422,12 +10422,12 @@ font-size: 150%;'>No changes</h2>
     {
         chkRegExTypo.Checked =
             chkSkipIfNoRegexTypo.Enabled =
-                RegexTypos.TyposLoaded;
+                _regexTypos.TyposLoaded;
 
-        if (RegexTypos.TyposLoaded)
+        if (_regexTypos.TyposLoaded)
         {
             StatusLabelText =
-                RegexTypos.TypoCount + " typos loaded";
+                _regexTypos.TypoCount + " typos loaded";
 
             if (!EditBoxTab.TabPages.Contains(tpTypos))
             {
@@ -10438,7 +10438,7 @@ font-size: 150%;'>No changes</h2>
         }
         else
         {
-            RegexTypos = null;
+            _regexTypos = null;
 
             if (EditBoxTab.TabPages.Contains(tpTypos))
             {
@@ -13009,8 +13009,7 @@ font-size: 150%;'>No changes</h2>
     /// <param name="e">The event data.</param>
     private void profileTyposToolStripMenuItem_Click(object sender, EventArgs e)
     {
-#if DEBUG
-        if (RegexTypos == null)
+        if (_regexTypos == null)
         {
             MessageBox.Show(
                 "No typos loaded",
@@ -13022,7 +13021,7 @@ font-size: 150%;'>No changes</h2>
         }
 
         List<KeyValuePair<Regex, string>> typos =
-            RegexTypos.GetTypos();
+            _regexTypos.GetTypos();
 
         if (!typos.Any())
         {
@@ -13075,7 +13074,6 @@ font-size: 150%;'>No changes</h2>
             "Profiling complete",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
-#endif
     }
 
     /// <summary>
