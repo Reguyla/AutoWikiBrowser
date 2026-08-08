@@ -87,7 +87,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool _ignoreNoBots;
     private bool _clearPageListOnProjectChange;
     private bool _pageReload;
-    private bool doDiffInBotMode;
+    private bool _doDiffInBotMode;
     private bool loggingEnabled;
 
     private bool Skippable = true;
@@ -2545,7 +2545,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         UpdateUserNotifications();
 
         bool showDiffInBotMode =
-            BotMode && doDiffInBotMode;
+            BotMode && _doDiffInBotMode;
 
         if (HandleBotModeCompletion(showDiffInBotMode))
         {
@@ -7477,7 +7477,7 @@ font-size: 150%;'>No changes</h2>
             PrefDBScannerUseCurrentArticleList =
                 _dbScannerUseCurrentArticleList,
 
-            PrefDiffInBotMode = doDiffInBotMode,
+            PrefDiffInBotMode = _doDiffInBotMode,
             PrefOnLoad = GetSupportedActionOnLoadValue(),
 
             EnableLogging = loggingEnabled,
@@ -7556,7 +7556,7 @@ font-size: 150%;'>No changes</h2>
         _dbScannerUseCurrentArticleList =
             myPrefs.PrefDBScannerUseCurrentArticleList;
 
-        doDiffInBotMode =
+        _doDiffInBotMode =
             myPrefs.PrefDiffInBotMode;
 
         actionOnLoad =

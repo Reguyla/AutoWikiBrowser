@@ -621,7 +621,7 @@ partial class MainForm
             NoAutoChanges =
                 !automaticallyDoAnythingToolStripMenuItem.Checked,
             OnLoadAction = actionOnLoad,
-            DiffInBotMode = doDiffInBotMode,
+            DiffInBotMode = _doDiffInBotMode,
             Minor = chkMinor.Checked,
             AddToWatchlist = addToWatchList.SelectedIndex,
             TimerEnabled = ShowMovingAverageTimer,
@@ -1283,7 +1283,7 @@ partial class MainForm
         actionOnLoad =
             preferences.OnLoadAction;
 
-        doDiffInBotMode =
+        _doDiffInBotMode =
             preferences.DiffInBotMode;
 
         chkMinor.Checked =
