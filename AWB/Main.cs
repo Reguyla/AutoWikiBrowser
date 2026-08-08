@@ -131,7 +131,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // Feature State
     // --------------------------------------------------------------------
 
-    private bool UserTalkWarningsLoaded;
+    private bool _userTalkWarningsLoaded;
     private bool TemplateRedirectsLoaded;
     private bool DatedTemplatesLoaded;
     private bool RenamedTemplateParametersLoaded;
@@ -3674,7 +3674,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 {
                     if (theArticle.NameSpaceKey == Namespace.UserTalk)
                     {
-                        if (!UserTalkWarningsLoaded)
+                        if (!_userTalkWarningsLoaded)
                         {
                             LoadUserTalkWarnings();
                             Variables.Profiler.Profile("loadUserTalkWarnings");
@@ -7635,7 +7635,7 @@ font-size: 150%;'>No changes</h2>
         WikiDiff.ResetCustomStyles();
 
         // Refresh optional data only when it was previously loaded.
-        if (UserTalkWarningsLoaded)
+        if (_userTalkWarningsLoaded)
             LoadUserTalkWarnings();
 
         if (TemplateRedirectsLoaded)
@@ -7699,7 +7699,7 @@ font-size: 150%;'>No changes</h2>
         ConfigureProjectSpecificUi();
         UpdateProjectLabel();
 
-        UserTalkWarningsLoaded = false;
+        _userTalkWarningsLoaded = false;
         TemplateRedirectsLoaded = false;
 
         ResetTypoStats();
@@ -11835,7 +11835,7 @@ font-size: 150%;'>No changes</h2>
         UserTalkTemplatesRegex = null;
 
         // Prevent repeated loading attempts on every page.
-        UserTalkWarningsLoaded = true;
+        _userTalkWarningsLoaded = true;
 
         try
         {
@@ -11863,7 +11863,7 @@ font-size: 150%;'>No changes</h2>
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
-            UserTalkWarningsLoaded = false;
+            _userTalkWarningsLoaded = false;
         }
     }
 
