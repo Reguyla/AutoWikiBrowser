@@ -86,7 +86,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool _abort;
     private bool _ignoreNoBots;
     private bool ClearPageListOnProjectChange;
-    private bool PageReload;
+    private bool _pageReload;
     private bool doDiffInBotMode;
     private bool loggingEnabled;
 
@@ -1994,7 +1994,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         if (!followRedirectsToolStripMenuItem.Checked
             || !wasRedirected
-            || PageReload)
+            || _pageReload)
         {
             return false;
         }
@@ -2050,12 +2050,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool HandlePageReload()
     {
-        if (!PageReload)
+        if (!_pageReload)
         {
             return false;
         }
 
-        PageReload = false;
+        _pageReload = false;
         GetDiff();
 
         return true;
@@ -9733,7 +9733,7 @@ font-size: 150%;'>No changes</h2>
     {
         Retries = 0;
         _stopProcessing = true;
-        PageReload = false;
+        _pageReload = false;
 
         NudgeTimer.Stop();
     }
