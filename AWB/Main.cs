@@ -10428,8 +10428,9 @@ font-size: 150%;'>No changes</h2>
         panelDab.Enabled = chkEnableDab.Checked;
     }
 
-    // TODO(Twain): Extract disambiguation link loading and filtering from
-    // MainForm so the UI only supplies input and displays the resulting titles.
+    // TODO(Twain): Move disambiguation link retrieval into a shared list service
+    // so MainForm only coordinates user input and displays the resulting titles.
+
     /// <summary>
     /// Loads links from the specified disambiguation page or pages and
     /// populates the variants list, excluding likely year articles.
@@ -10440,33 +10441,62 @@ font-size: 150%;'>No changes</h2>
     {
         try
         {
-            string[] linkTitles = txtDabLink.Text.Split(
-                new[] { '|' },
-                StringSplitOptions.RemoveEmptyEntries);
+            string[] linkTitles =
+                ParseDisambiguationLinkTitles(
+                    txtDabLink.Text);
 
             txtDabVariants.Text = string.Empty;
 
-            StringBuilder builder = new();
+            IEnumerable<Article> articles =
+                new LinksOnPageListProvider().MakeList(linkTitles);
 
-            foreach (Article article in
-                     new LinksOnPageListProvider().MakeList(linkTitles))
-            {
-                // Exclude likely year articles.
-                if (uint.TryParse(article.Name, out uint year) &&
-                    year < 2100)
-                {
-                    continue;
-                }
-
-                builder.AppendLine(article.Name);
-            }
-
-            txtDabVariants.Text = builder.ToString();
+            txtDabVariants.Text =
+                BuildDisambiguationVariantsText(articles);
         }
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
         }
+    }
+
+    /// <summary>
+    /// Splits the disambiguation page input into individual page titles.
+    /// </summary>
+    /// <param name="text">The disambiguation page input text.</param>
+    /// <returns>The parsed page titles.</returns>
+    private static string[] ParseDisambiguationLinkTitles(string text)
+    {
+        return text.Split(
+            new[] { '|' },
+            StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    /// <summary>
+    /// Builds the disambiguation variants text from the supplied articles,
+    /// excluding likely year articles.
+    /// </summary>
+    /// <param name="articles">The articles to process.</param>
+    /// <returns>
+    /// The article titles formatted as newline-separated text.
+    /// </returns>
+    private static string BuildDisambiguationVariantsText(
+        IEnumerable<Article> articles)
+    {
+        StringBuilder builder = new();
+
+        foreach (Article article in articles)
+        {
+            // Exclude likely year articles.
+            if (uint.TryParse(article.Name, out uint year) &&
+                year < 2100)
+            {
+                continue;
+            }
+
+            builder.AppendLine(article.Name);
+        }
+
+        return builder.ToString();
     }
 
     /// <summary>
