@@ -75,7 +75,7 @@ partial class MainForm
     }
 
     void IAutoWikiBrowserCommands.AddLogItem(bool skipped, AWBLogListener logListener)
-    { if (loggingEnabled) logControl.AddLog(skipped, logListener); }
+    { if (_loggingEnabled) logControl.AddLog(skipped, logListener); }
     void IAutoWikiBrowserCommands.ShowHelp(string url)
     {
         Tools.OpenURLInBrowser(url);

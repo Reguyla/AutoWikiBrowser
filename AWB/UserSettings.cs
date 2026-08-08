@@ -652,7 +652,7 @@ partial class MainForm
                 alphaSortInterwikiLinksToolStripMenuItem.Checked,
             ReplaceReferenceTags =
                 replaceReferenceTagsToolStripMenuItem.Checked,
-            LoggingEnabled = loggingEnabled,
+            LoggingEnabled = _loggingEnabled,
             AlertPreferences = alertPreferences
         };
     }
@@ -1313,7 +1313,7 @@ partial class MainForm
         Article.AddUsingAWBOnArticleAction =
             preferences.AddUsingAWBToActionSummaries;
 
-        loggingEnabled =
+        _loggingEnabled =
             preferences.LoggingEnabled;
 
         LowThreadPriority =

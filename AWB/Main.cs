@@ -88,7 +88,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool _clearPageListOnProjectChange;
     private bool _pageReload;
     private bool _doDiffInBotMode;
-    private bool loggingEnabled;
+    private bool _loggingEnabled;
 
     private bool Skippable = true;
     private bool ShuttingDown;
@@ -3409,7 +3409,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             EditBoxTab.SelectedTab = tpEdit;
         }
 
-        if (loggingEnabled)
+        if (_loggingEnabled)
         {
             TheArticle.LogListener.NewId = saveInfo.NewId;
             TheArticle.LogListener.URLLong = Variables.URLLong;
@@ -3524,7 +3524,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </summary>
     private void CompleteSuccessfulPageSkip()
     {
-        if (loggingEnabled)
+        if (_loggingEnabled)
         {
             logControl.AddLog(
                 true,
@@ -7480,7 +7480,7 @@ font-size: 150%;'>No changes</h2>
             PrefDiffInBotMode = _doDiffInBotMode,
             PrefOnLoad = GetSupportedActionOnLoadValue(),
 
-            EnableLogging = loggingEnabled,
+            EnableLogging = _loggingEnabled,
             FocusSiteTab = focusSiteTab,
 
             PrefDomain = Variables.LoginDomain,
@@ -7562,7 +7562,7 @@ font-size: 150%;'>No changes</h2>
         actionOnLoad =
             myPrefs.PrefOnLoad;
 
-        loggingEnabled =
+        _loggingEnabled =
             myPrefs.EnableLogging;
 
         Variables.LoginDomain =
