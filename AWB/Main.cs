@@ -11234,10 +11234,9 @@ font-size: 150%;'>No changes</h2>
         try
         {
             string url =
-                Variables.URLIndex +
-                "?title=" +
-                TheArticle.URLEncodedName +
-                "&action=history&printable=yes";
+                BuildHistoryUrl(
+                    Variables.URLIndex,
+                    TheArticle.URLEncodedName);
 
             webBrowserHistory.Navigate(url);
         }
@@ -11259,6 +11258,26 @@ font-size: 150%;'>No changes</h2>
                     "<html><body><p>Unable to load history</p></body></html>");
             }
         }
+    }
+
+    // TODO(Twain): Move wiki history URL construction into the site/navigation
+    // layer so MainForm does not construct MediaWiki URLs directly.
+    /// <summary>
+    /// Builds the printable revision-history URL for the specified page.
+    /// </summary>
+    /// <param name="urlIndex">The wiki index URL.</param>
+    /// <param name="encodedPageName">
+    /// The URL-encoded page name.
+    /// </param>
+    /// <returns>The printable revision-history URL.</returns>
+    private static string BuildHistoryUrl(
+        string urlIndex,
+        string encodedPageName)
+    {
+        return urlIndex +
+            "?title=" +
+            encodedPageName +
+            "&action=history&printable=yes";
     }
 
     /// <summary>
