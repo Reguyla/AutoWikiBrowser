@@ -9097,28 +9097,59 @@ font-size: 150%;'>No changes</h2>
         }
     }
 
+    /// <summary>
+    /// Updates general-fix related options when general parsing is enabled
+    /// or disabled.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void chkGeneralParse_CheckedChanged(object sender, EventArgs e)
     {
-        alphaSortInterwikiLinksToolStripMenuItem.Enabled = chkSkipGeneralFixes.Enabled = chkSkipMinorGeneralFixes.Enabled = chkGeneralFixes.Checked;
+        alphaSortInterwikiLinksToolStripMenuItem.Enabled =
+            chkSkipGeneralFixes.Enabled =
+            chkSkipMinorGeneralFixes.Enabled =
+            chkGeneralFixes.Checked;
 
         if (chkSkipGeneralFixes.Checked)
+        {
             chkSkipMinorGeneralFixes.Enabled = false;
+        }
     }
 
+    /// <summary>
+    /// Shows or hides the advanced replace window.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnFindAndReplaceAdvanced_Click(object sender, EventArgs e)
     {
         if (!RplcSpecial.Visible)
+        {
             RplcSpecial.Show(ntfyTray.Text + " – Replace Special");
+        }
         else
+        {
             RplcSpecial.Hide();
+        }
     }
 
+    /// <summary>
+    /// Opens the additional find-and-replace options dialog.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnMoreFindAndReplce_Click(object sender, EventArgs e)
     {
         FindAndReplace.ShowDialog(this);
     }
 
-    //TODO: Doesn't always stop
+    // TODO: Investigate cases where processing does not stop reliably,
+    // including background work, editor operations, and timer-driven workflows.
+    //
+    /// <summary>
+    /// Stops the current processing workflow, cancels active background work,
+    /// resets timers, and updates the user interface to the stopped state.
+    /// </summary>
     private void Stop()
     {
         Retries = 0;
@@ -9126,17 +9157,17 @@ font-size: 150%;'>No changes</h2>
         PageReload = false;
         NudgeTimer.Stop();
 
-        // abort any background thread if running
+        // Abort any background thread if one is running.
         if (_runProcessPageBackground != null)
+        {
             _runProcessPageBackground.Abort();
-
-        if (_runProcessPageBackground != null)
-            _runProcessPageBackground.Abort();
+        }
 
         DisableButtons();
 
         if (_intTimer > 0)
-        {// stop and reset the bot timer.
+        {
+            // Stop and reset the bot timer.
             StopDelayedAutoSaveTimer();
             EnableButtons();
             return;
@@ -9150,7 +9181,9 @@ font-size: 150%;'>No changes</h2>
         listMaker.Stop();
 
         if (_autoSaveEditBoxEnabled)
+        {
             EditBoxSaveTimer.Enabled = false;
+        }
 
         StatusLabelText = "Stopped";
         ClearBrowser();
@@ -9181,16 +9214,28 @@ font-size: 150%;'>No changes</h2>
         ReparseEditBox();
     }
 
-    // run process page step of reparse edit box in a background thread
-    // use .Complete event to do rest of processing (alerts etc.) once thread finished
+    // TODO(Twain): Replace the legacy BackgroundRequest/event-based reparse
+    // workflow with an asynchronous, cancellation-aware processing service.
+    /// <summary>
+    /// Reparses the current edit box contents by running the page-processing
+    /// step in a background request.
+    /// </summary>
+    /// <remarks>
+    /// User changes are copied from the edit box into the current article before
+    /// background processing begins. Remaining processing is performed when the
+    /// background request raises its completion event.
+    /// </remarks>
     private void ReparseEditBox()
     {
         if (TheArticle == null)
+        {
             return;
+        }
 
         if (_runProcessPageBackground != null)
         {
-            ThreadState threadState = _runProcessPageBackground.ThreadStatus();
+            ThreadState threadState =
+                _runProcessPageBackground.ThreadStatus();
 
             if (threadState == ThreadState.Running ||
                 threadState == ThreadState.Background)
@@ -9203,8 +9248,11 @@ font-size: 150%;'>No changes</h2>
         StatusLabelText = "Processing page";
         StartProgressBar();
 
-        // refresh text from text box to pick up user changes
-        TheArticle.AWBChangeArticleText("Reparse", txtEdit.Text, false);
+        // Refresh the article text to include any manual changes from the editor.
+        TheArticle.AWBChangeArticleText(
+            "Reparse",
+            txtEdit.Text,
+            false);
 
         _runProcessPageBackground = new BackgroundRequest();
         _runProcessPageBackground.Complete += ReparseEditBoxComplete;
@@ -9288,18 +9336,35 @@ font-size: 150%;'>No changes</h2>
         ReparseEditBoxPart2();
     }
 
-    private void replaceTextWithLastEditToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Replaces the current editor contents with the previously stored article
+    /// text and optionally refreshes the diff view.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void replaceTextWithLastEditToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (LastArticle.Length > 0)
         {
             txtEdit.Text = LastArticle;
 
             if (actionOnLoad == 0)
+            {
                 GetDiff();
+            }
         }
     }
 
     #region PasteMore
+
+    /// <summary>
+    /// Inserts the text stored in the selected Paste More menu item at the
+    /// current editor selection and closes the context menu.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void PasteMore_Click(object sender, EventArgs e)
     {
         if (sender is ToolStripMenuItem item &&
@@ -9311,44 +9376,50 @@ font-size: 150%;'>No changes</h2>
         mnuTextBox.Hide();
     }
 
+    // TODO: Extract Paste More item collection and mapping logic so configuration
+    // does not depend on ten individually named menu items and dialog properties.
+    /// <summary>
+    /// Opens the Paste More configuration dialog and applies any accepted
+    /// text changes to the configured Paste More menu items.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void configureToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (ConfigurePasteMoreItems dialog =
-               new ConfigurePasteMoreItems(
-                   (string)PasteMore1.Tag,
-                   (string)PasteMore2.Tag,
-                   (string)PasteMore3.Tag,
-                   (string)PasteMore4.Tag,
-                   (string)PasteMore5.Tag,
-                   (string)PasteMore6.Tag,
-                   (string)PasteMore7.Tag,
-                   (string)PasteMore8.Tag,
-                   (string)PasteMore9.Tag,
-                   (string)PasteMore10.Tag))
-        {
-            if (dialog.ShowDialog(this) != DialogResult.OK)
-            {
-                return;
-            }
+        using ConfigurePasteMoreItems dialog = new(
+            (string)PasteMore1.Tag,
+            (string)PasteMore2.Tag,
+            (string)PasteMore3.Tag,
+            (string)PasteMore4.Tag,
+            (string)PasteMore5.Tag,
+            (string)PasteMore6.Tag,
+            (string)PasteMore7.Tag,
+            (string)PasteMore8.Tag,
+            (string)PasteMore9.Tag,
+            (string)PasteMore10.Tag);
 
-            string[] dialogStrings =
-            {
-                dialog.String1,
-                dialog.String2,
-                dialog.String3,
-                dialog.String4,
-                dialog.String5,
-                dialog.String6,
-                dialog.String7,
-                dialog.String8,
-                dialog.String9,
-                dialog.String10
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        string[] dialogStrings =
+        {
+        dialog.String1,
+        dialog.String2,
+        dialog.String3,
+        dialog.String4,
+        dialog.String5,
+        dialog.String6,
+        dialog.String7,
+        dialog.String8,
+        dialog.String9,
+        dialog.String10
     };
 
-            for (int i = 0; i < dialogStrings.Length; i++)
-            {
-                SetPasteMoreText(i, dialogStrings[i]);
-            }
+        for (int i = 0; i < dialogStrings.Length; i++)
+        {
+            SetPasteMoreText(i, dialogStrings[i]);
         }
     }
     #endregion
@@ -9440,14 +9511,26 @@ font-size: 150%;'>No changes</h2>
     }
 
     bool _loadingTypos;
+
+    /// <summary>
+    /// Enables or disables regular expression typo fixing and loads typo rules
+    /// when the feature is enabled.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void chkRegExTypo_CheckedChanged(object sender, EventArgs e)
     {
         if (_loadingTypos)
+        {
             return;
+        }
 
         if (!chkRegExTypo.Checked)
         {
-            chkSkipIfNoRegexTypo.Checked = chkSkipIfNoRegexTypo.Enabled = false;
+            chkSkipIfNoRegexTypo.Checked =
+                chkSkipIfNoRegexTypo.Enabled =
+                false;
+
             return;
         }
 
@@ -9455,7 +9538,13 @@ font-size: 150%;'>No changes</h2>
 
         if (chkRegExTypo.Checked && BotMode)
         {
-            MessageBox.Show("RegExTypoFix cannot be used with bot mode on.\r\nBot mode will now be turned off, and Typos loaded.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            MessageBox.Show(
+                "RegExTypoFix cannot be used with bot mode on.\r\n" +
+                "Bot mode will now be turned off, and typos loaded.",
+                "Warning",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+
             BotMode = false;
         }
 
