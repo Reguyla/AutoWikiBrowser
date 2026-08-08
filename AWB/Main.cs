@@ -9801,77 +9801,150 @@ font-size: 150%;'>No changes</h2>
 
     #region tool bar stuff
 
+    /// <summary>
+    /// Shows or hides the associated panel.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btnShowHide_Click(object sender, EventArgs e)
     {
         PanelShowHide();
     }
 
+    /// <summary>
+    /// Shows or hides the parameter controls.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsShowHideParameters_Click(object sender, EventArgs e)
     {
         ParametersShowHide();
     }
 
+    /// <summary>
+    /// Begins processing the current article list.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsStart_Click(object sender, EventArgs e)
     {
         BeginProcess();
     }
 
+    /// <summary>
+    /// Saves the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsSave_Click(object sender, EventArgs e)
     {
         Save();
     }
 
+    /// <summary>
+    /// Skips the current article at the user's request.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsIgnore_Click(object sender, EventArgs e)
     {
         SkipPage("user");
     }
 
+    /// <summary>
+    /// Stops the current processing workflow.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsStop_Click(object sender, EventArgs e)
     {
         Stop();
     }
 
+    /// <summary>
+    /// Retrieves and displays a preview of the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsPreview_Click(object sender, EventArgs e)
     {
         GetPreview();
     }
 
+    /// <summary>
+    /// Retrieves and displays the changes made to the current article.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void btntsChanges_Click(object sender, EventArgs e)
     {
         GetDiff();
     }
 
+    // TODO(Twain): Replace manual browser sizing calculations with layout-managed
+    // resizing when the browser panel is migrated from WinForms.
+    /// <summary>
+    /// Updates the embedded browser size to reflect the current toolbar and
+    /// panel visibility.
+    /// </summary>
     private void SetBrowserSize()
     {
         if (toolStrip.Visible)
         {
             webBrowser.Location = new Point(webBrowser.Location.X, 48);
+
             if (panel1.Visible)
+            {
                 webBrowser.Height = panel1.Location.Y - 48;
+            }
             else
+            {
                 webBrowser.Height = StatusMain.Location.Y - 48;
+            }
         }
         else
         {
             webBrowser.Location = new Point(webBrowser.Location.X, 25);
+
             if (panel1.Visible)
+            {
                 webBrowser.Height = panel1.Location.Y - 25;
+            }
             else
+            {
                 webBrowser.Height = StatusMain.Location.Y - 25;
+            }
         }
     }
 
-    private void enableTheToolbarToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Enables or disables the main toolbar.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void enableTheToolbarToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         EnableToolBar = enableTheToolbarToolStripMenuItem.Checked;
     }
 
+    /// <summary>
+    /// Gets or sets whether the main toolbar is visible.
+    /// </summary>
     private bool EnableToolBar
     {
-        get { return toolStrip.Visible; }
+        get
+        {
+            return toolStrip.Visible;
+        }
+
         set
         {
-            toolStrip.Visible = enableTheToolbarToolStripMenuItem.Checked = value;
+            toolStrip.Visible =
+                enableTheToolbarToolStripMenuItem.Checked =
+                value;
+
             SetBrowserSize();
         }
     }
@@ -9880,31 +9953,57 @@ font-size: 150%;'>No changes</h2>
 
     #region Images
 
+    // TODO: Replace image-operation index values with named modes and extract
+    // shared image namespace cleanup logic from the Leave event handlers.
+    /// <summary>
+    /// Updates image replacement controls based on the selected image operation.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void cmboImages_SelectedIndexChanged(object sender, EventArgs e)
     {
         switch (cmboImages.SelectedIndex)
         {
             case 0:
                 lblImageWith.Text = string.Empty;
-                txtImageReplace.Enabled = txtImageWith.Enabled = chkSkipNoImgChange.Enabled = false;
+                txtImageReplace.Enabled =
+                    txtImageWith.Enabled =
+                    chkSkipNoImgChange.Enabled =
+                    false;
                 break;
+
             case 1:
-                lblImageWith.Text = "&With " + Variables.Namespaces[Namespace.File];
-                txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
+                lblImageWith.Text =
+                    "&With " + Variables.Namespaces[Namespace.File];
+
+                txtImageWith.Enabled =
+                    txtImageReplace.Enabled =
+                    chkSkipNoImgChange.Enabled =
+                    true;
                 break;
+
             case 2:
                 lblImageWith.Text = string.Empty;
                 txtImageWith.Enabled = false;
                 txtImageReplace.Enabled = true;
                 chkSkipNoImgChange.Enabled = true;
                 break;
+
             case 3:
                 lblImageWith.Text = "Comment:";
-                txtImageWith.Enabled = txtImageReplace.Enabled = chkSkipNoImgChange.Enabled = true;
+                txtImageWith.Enabled =
+                    txtImageReplace.Enabled =
+                    chkSkipNoImgChange.Enabled =
+                    true;
                 break;
         }
     }
 
+    /// <summary>
+    /// Removes a leading file namespace prefix from the image replacement text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtImageReplace_Leave(object sender, EventArgs e)
     {
         string fileNamespace =
@@ -9917,6 +10016,11 @@ font-size: 150%;'>No changes</h2>
             RegexOptions.IgnoreCase);
     }
 
+    /// <summary>
+    /// Removes a leading file namespace prefix from the replacement image text.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void txtImageWith_Leave(object sender, EventArgs e)
     {
         string fileNamespace =
@@ -9929,6 +10033,11 @@ font-size: 150%;'>No changes</h2>
             RegexOptions.IgnoreCase);
     }
 
+    /// <summary>
+    /// Starts or stops the progress indicator based on the list maker's busy state.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void SetProgressBar(object sender, EventArgs e)
     {
         if (listMaker.BusyStatus)
