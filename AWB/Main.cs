@@ -8428,6 +8428,9 @@ font-size: 150%;'>No changes</h2>
         Comparer.Show(this);
     }
 
+    // TODO(Twain): Replace numeric article-list preference values with a named
+    // mode and move ListSplitter creation behind a shared service.
+
     /// <summary>
     /// Opens the List Splitter and optionally initializes it with the current
     /// article list, depending on the user's preferences.
@@ -8438,32 +8441,67 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
+        bool useCurrentArticleList =
+            ShouldListSplitterUseCurrentArticleList();
+
+        Splitter =
+            CreateListSplitter(
+                useCurrentArticleList);
+
+        Splitter.Show(this);
+    }
+
+    /// <summary>
+    /// Determines whether the List Splitter should use the current article list,
+    /// prompting the user when the configured preference requires confirmation.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> to use the current article list; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool ShouldListSplitterUseCurrentArticleList()
+    {
         switch (_listSplitterUseCurrentArticleList)
         {
             case 0: // Ask
-                if (listMaker.Any() &&
+                return listMaker.Any() &&
                     MessageBox.Show(
                         "Would you like to copy your current Article List to the ListSplitter?",
                         "Copy Article List?",
-                        MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    goto case 1;
-                }
-
-                goto case 2;
+                        MessageBoxButtons.YesNo) == DialogResult.Yes;
 
             case 1: // Always
-                Splitter = new ListSplitter(
-                    MakePrefs(),
-                    listMaker.GetArticleList());
-                break;
+                return true;
 
             case 2: // Never
-                Splitter = new ListSplitter(MakePrefs());
-                break;
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Creates the List Splitter configured for the requested article-list
+    /// behavior.
+    /// </summary>
+    /// <param name="useCurrentArticleList">
+    /// <see langword="true"/> to initialize the splitter with the current
+    /// article list; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>The configured List Splitter.</returns>
+    private ListSplitter CreateListSplitter(
+        bool useCurrentArticleList)
+    {
+        if (useCurrentArticleList)
+        {
+            return new ListSplitter(
+                MakePrefs(),
+                listMaker.GetArticleList());
         }
 
-        Splitter.Show(this);
+        return new ListSplitter(
+            MakePrefs());
     }
 
     /// <summary>
