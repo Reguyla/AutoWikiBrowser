@@ -12177,15 +12177,9 @@ font-size: 150%;'>No changes</h2>
 
         bool pageExists;
 
-        // Attempt to verify that the category exists before adding it.
         try
         {
-            // TODO: Add an API-level PageExists helper so callers can check
-            // page existence without retrieving page content.
-            IApiEdit editor = TheSession.Editor.SynchronousEditor.Clone();
-            editor.Open(_catName.CategoryName, false);
-
-            pageExists = editor.Page.Exists;
+            pageExists = CategoryExists(_catName.CategoryName);
         }
         catch
         {
@@ -12195,25 +12189,68 @@ font-size: 150%;'>No changes</h2>
             return;
         }
 
-        if (pageExists ||
+        if (!pageExists &&
             MessageBox.Show(
                 _catName.CategoryName +
                 " does not exist. Add it to the page anyway?",
                 "Non-existent category",
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question) == DialogResult.Yes)
+                MessageBoxIcon.Question) != DialogResult.Yes)
         {
-            txtEdit.Text += "\r\n\r\n[[" + _catName.CategoryName + "]]";
-
-            // Remove any {{uncategorised}} tag now. The tagger still counts
-            // categories based on the saved page revision.
-            txtEdit.Text =
-                WikiRegexes.Uncategorized.Replace(
-                    txtEdit.Text,
-                    string.Empty);
-
-            ReparseEditBox();
+            return;
         }
+
+        txtEdit.Text =
+            AddCategoryToArticleText(
+                txtEdit.Text,
+                _catName.CategoryName);
+
+        ReparseEditBox();
+    }
+
+    // TODO(Twain): Move category existence checks and article category
+    // manipulation out of MainForm once wiki/API services are extracted.
+    /// <summary>
+    /// Determines whether the specified category page exists on the current wiki.
+    /// </summary>
+    /// <param name="categoryName">The category page name to check.</param>
+    /// <returns>
+    /// <see langword="true"/> if the category page exists; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private bool CategoryExists(string categoryName)
+    {
+        // TODO: Replace this page load with an API-level PageExists helper so
+        // callers can check existence without retrieving page content.
+        IApiEdit editor =
+            TheSession.Editor.SynchronousEditor.Clone();
+
+        editor.Open(categoryName, false);
+
+        return editor.Page.Exists;
+    }
+
+    /// <summary>
+    /// Adds the specified category to article text and removes any
+    /// Uncategorized maintenance template.
+    /// </summary>
+    /// <param name="articleText">The article text to update.</param>
+    /// <param name="categoryName">The category page name to add.</param>
+    /// <returns>The updated article text.</returns>
+    private static string AddCategoryToArticleText(
+        string articleText,
+        string categoryName)
+    {
+        articleText +=
+            "\r\n\r\n[[" +
+            categoryName +
+            "]]";
+
+        // Remove any {{uncategorised}} tag now. The tagger still counts
+        // categories based on the saved page revision.
+        return WikiRegexes.Uncategorized.Replace(
+            articleText,
+            string.Empty);
     }
 
     // TODO: Make the usage statistics endpoint configurable to support
