@@ -88,52 +88,104 @@ public partial class Parsers
     }
 
     // Covered by: RecategorizerTests.Replacement()
+
     /// <summary>
-    /// Re-categorizes the article.
+    /// Re-categorizes an article by replacing or removing the specified category.
     /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="oldCategory">The old category to replace.</param>
-    /// <param name="newCategory">The new category.</param>
-    /// <param name="noChange">Value that indicated whether no change was made.</param>
-    /// <param name="removeSortKey">If set, any sort key is removed when the category is replaced</param>
-    /// <returns>The re-categorized article text.</returns>
-    public static string ReCategoriser(string oldCategory, string newCategory, string articleText, out bool noChange, bool removeSortKey)
+    /// <param name="oldCategory">
+    /// The category currently assigned to the article.
+    /// </param>
+    /// <param name="newCategory">
+    /// The replacement category.
+    /// </param>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="noChange">
+    /// When this method returns, contains <see langword="true"/> if the article
+    /// text was unchanged; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="removeSortKey">
+    /// <see langword="true"/> to remove any existing category sort key when the
+    /// category is replaced; otherwise, <see langword="false"/> to preserve it.
+    /// </param>
+    /// <returns>
+    /// The article text after category replacement has been applied.
+    /// </returns>
+    public static string ReCategoriser(
+        string oldCategory,
+        string newCategory,
+        string articleText,
+        out bool noChange,
+        bool removeSortKey)
     {
-        // remove category prefix
-        oldCategory = Regex.Replace(oldCategory, "^"
-                                    + Variables.NamespacesCaseInsensitive[Namespace.Category], "", RegexOptions.IgnoreCase);
-        newCategory = Regex.Replace(newCategory, "^"
-                                    + Variables.NamespacesCaseInsensitive[Namespace.Category], "", RegexOptions.IgnoreCase);
+        string categoryNamespacePattern =
+            Variables.NamespacesCaseInsensitive[Namespace.Category];
 
-        // format categories properly
-        articleText = FixCategories(articleText);
+        string normalizedOldCategory =
+            Regex.Replace(
+                oldCategory,
+                "^" + categoryNamespacePattern,
+                "",
+                RegexOptions.IgnoreCase);
 
-        string testText = articleText;
+        string normalizedNewCategory =
+            Regex.Replace(
+                newCategory,
+                "^" + categoryNamespacePattern,
+                "",
+                RegexOptions.IgnoreCase);
 
-        if (Regex.IsMatch(articleText, "\\[\\["
-                          + Variables.NamespacesCaseInsensitive[Namespace.Category]
-                          + Tools.FirstLetterCaseInsensitive(Regex.Escape(newCategory)) + @"\s*(\||\]\])"))
+        articleText =
+            FixCategories(articleText);
+
+        string originalText =
+            articleText;
+
+        string newCategoryPattern =
+            @"\[\[" +
+            categoryNamespacePattern +
+            Tools.FirstLetterCaseInsensitive(
+                Regex.Escape(normalizedNewCategory)) +
+            @"\s*(\||\]\])";
+
+        if (Regex.IsMatch(
+                articleText,
+                newCategoryPattern))
         {
-            bool tmp;
-            articleText = RemoveCategory(oldCategory, articleText, out tmp);
+            articleText =
+                RemoveCategory(
+                    normalizedOldCategory,
+                    articleText,
+                    out _);
         }
         else
         {
-            oldCategory = Regex.Escape(oldCategory);
-            oldCategory = Tools.FirstLetterCaseInsensitive(oldCategory);
-
-            oldCategory = Variables.Namespaces[Namespace.Category] + oldCategory + @"\s*(\|[^\|\[\]]+\]\]|\]\])";
+            string oldCategoryPattern =
+                Variables.Namespaces[Namespace.Category] +
+                Tools.FirstLetterCaseInsensitive(
+                    Regex.Escape(normalizedOldCategory)) +
+                @"\s*(\|[^\|\[\]]+\]\]|\]\])";
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Replacing_categoring_and_keeping_pipes
-            if (!removeSortKey)
-                newCategory = Variables.Namespaces[Namespace.Category] + newCategory + "$1";
-            else
-                newCategory = Variables.Namespaces[Namespace.Category] + newCategory + @"]]";
+            string replacementCategory =
+                removeSortKey
+                    ? Variables.Namespaces[Namespace.Category] +
+                      normalizedNewCategory +
+                      @"]]"
+                    : Variables.Namespaces[Namespace.Category] +
+                      normalizedNewCategory +
+                      "$1";
 
-            articleText = Regex.Replace(articleText, oldCategory, newCategory);
+            articleText =
+                Regex.Replace(
+                    articleText,
+                    oldCategoryPattern,
+                    replacementCategory);
         }
 
-        noChange = (testText.Equals(articleText));
+        noChange =
+            originalText.Equals(articleText);
 
         return articleText;
     }
