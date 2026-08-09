@@ -877,25 +877,125 @@ public static partial class Variables
         string customProject,
         string protocol)
     {
+        bool typoReloadNeeded =
+            IsTypoReloadNeeded(
+                langCode,
+                projectName,
+                customProject);
+
+        ResetProjectState();
+
+        ApplyProjectSelection(
+            langCode,
+            projectName,
+            customProject,
+            protocol);
+
+        ResetProjectDefaults();
+
+        ConfigureProjectUrl(
+            projectName,
+            customProject);
+
+        ApplyProjectSpecificSettings(
+            langCode,
+            projectName,
+            customProject);
+
+        // Refresh once more in case project settings were reset due to an error
+        // while loading.
+        RefreshProxy();
+
+        if (!TryInitializeProjectSession(
+                langCode,
+                projectName,
+                customProject))
+        {
+            return;
+        }
+
+        FinalizeProjectConfiguration(
+            projectName,
+            typoReloadNeeded);
+    }
+
+    /// <summary>
+    /// Determines whether changing the requested project requires the typo-rule
+    /// source to be reloaded.
+    /// </summary>
+    /// <param name="langCode">
+    /// The requested language code.
+    /// </param>
+    /// <param name="projectName">
+    /// The requested project family.
+    /// </param>
+    /// <param name="customProject">
+    /// The requested custom project value.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the requested project differs from the current
+    /// typo-rule context; otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool IsTypoReloadNeeded(
+        string langCode,
+        ProjectEnum projectName,
+        string customProject)
+    {
+        return
+            LangCode != langCode ||
+            Project != projectName ||
+            customProject != CustomProject;
+    }
+
+    /// <summary>
+    /// Clears state that must not be retained when switching projects.
+    /// </summary>
+    private static void ResetProjectState()
+    {
         TryLoadingAgainAfterLogin = false;
 
         Namespaces.Clear();
         CancelBackgroundRequests();
         UnderscoredTitles.Clear();
         WikiRegexes.TemplateRedirects.Clear();
+    }
 
-        bool typoReloadNeeded =
-            LangCode != langCode ||
-            Project != projectName ||
-            customProject != CustomProject;
-
+    /// <summary>
+    /// Applies the basic project-selection values before project-specific
+    /// configuration is loaded.
+    /// </summary>
+    /// <param name="langCode">
+    /// The requested language code.
+    /// </param>
+    /// <param name="projectName">
+    /// The requested project family.
+    /// </param>
+    /// <param name="customProject">
+    /// The requested custom project value.
+    /// </param>
+    /// <param name="protocol">
+    /// The protocol used to access the project.
+    /// </param>
+    private static void ApplyProjectSelection(
+        string langCode,
+        ProjectEnum projectName,
+        string customProject,
+        string protocol)
+    {
         Project = projectName;
         LangCode = langCode;
         CustomProject = customProject;
         Protocol = protocol;
 
         RefreshProxy();
+    }
 
+    /// <summary>
+    /// Restores project-dependent values to their default configuration before
+    /// language and project overrides are applied.
+    /// </summary>
+    private static void ResetProjectDefaults()
+    {
         URLEnd = "/w/";
 
         Stub = "[^{}|]*?[Ss]tub";
@@ -915,8 +1015,22 @@ public static partial class Variables
         AWBDefaultSummaryTag();
         mSummaryTag = "using";
         NotificationsEnabled = true;
+    }
 
-        if (IsCustomProject)
+    /// <summary>
+    /// Configures the initial URL and script path for the requested project.
+    /// </summary>
+    /// <param name="projectName">
+    /// The project family being configured.
+    /// </param>
+    /// <param name="customProject">
+    /// The custom project host, identifier, or script path.
+    /// </param>
+    private static void ConfigureProjectUrl(
+        ProjectEnum projectName,
+        string customProject)
+    {
+        if (projectName == ProjectEnum.custom)
         {
             LangCode = "en";
 
@@ -928,7 +1042,7 @@ public static partial class Variables
             URLEnd = uri.AbsolutePath;
 
             URL =
-                protocol +
+                Protocol +
                 uri.Host;
 
             if (!uri.IsDefaultPort)
@@ -939,17 +1053,34 @@ public static partial class Variables
             }
 
             CustomProject = customProject;
-        }
-        else
-        {
-            URL =
-                "https://" +
-                LangCode +
-                "." +
-                Project +
-                ".org";
+            return;
         }
 
+        URL =
+            "https://" +
+            LangCode +
+            "." +
+            Project +
+            ".org";
+    }
+
+    /// <summary>
+    /// Applies project-family-specific URL, language, and localization overrides.
+    /// </summary>
+    /// <param name="langCode">
+    /// The requested language code.
+    /// </param>
+    /// <param name="projectName">
+    /// The project family being configured.
+    /// </param>
+    /// <param name="customProject">
+    /// The custom project identifier used by hosted wiki providers.
+    /// </param>
+    private static void ApplyProjectSpecificSettings(
+        string langCode,
+        ProjectEnum projectName,
+        string customProject)
+    {
         // TODO: Replace project-specific URL and language overrides with explicit
         // project metadata/configuration rather than a growing switch statement.
         switch (projectName)
@@ -1017,11 +1148,30 @@ public static partial class Variables
             case ProjectEnum.custom:
                 break;
         }
+    }
 
-        // Refresh once more in case project settings were reset due to an error
-        // while loading.
-        RefreshProxy();
-
+    /// <summary>
+    /// Initializes the active session for the newly selected project.
+    /// </summary>
+    /// <param name="langCode">
+    /// The requested language code.
+    /// </param>
+    /// <param name="projectName">
+    /// The requested project family.
+    /// </param>
+    /// <param name="customProject">
+    /// The requested custom project value.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when project initialization may continue;
+    /// <see langword="false"/> when initialization has been deferred until after
+    /// authentication.
+    /// </returns>
+    private static bool TryInitializeProjectSession(
+        string langCode,
+        ProjectEnum projectName,
+        string customProject)
+    {
         // Project initialization currently depends on the active WinForms session.
         // If a wiki requires authentication before project data can be read, retain
         // the requested settings and retry after login instead of applying partial
@@ -1030,35 +1180,54 @@ public static partial class Variables
         // TODO: Separate project-state configuration from MainForm/session
         // coordination so project switching can be validated and tested without UI
         // coupling.
-        if (MainForm != null &&
-            MainForm.TheSession != null)
+        if (MainForm == null ||
+            MainForm.TheSession == null)
         {
-            try
-            {
-                if (!MainForm.TheSession.UpdateProject(false))
-                {
-                    LangCode = "en";
-                    Project = ProjectEnum.wikipedia;
-                    SetToEnglish();
-                }
-            }
-            catch (ReadApiDeniedException)
-            {
-                TryLoadingAgainAfterLogin = true;
-
-                ReloadProjectSettings =
-                    new ProjectHoldArea
-                    {
-                        projectName = projectName,
-                        customProject = customProject,
-                        langCode = langCode,
-                        protocol = Protocol
-                    };
-
-                return;
-            }
+            return true;
         }
 
+        try
+        {
+            if (!MainForm.TheSession.UpdateProject(false))
+            {
+                LangCode = "en";
+                Project = ProjectEnum.wikipedia;
+                SetToEnglish();
+            }
+        }
+        catch (ReadApiDeniedException)
+        {
+            TryLoadingAgainAfterLogin = true;
+
+            ReloadProjectSettings =
+                new ProjectHoldArea
+                {
+                    projectName = projectName,
+                    customProject = customProject,
+                    langCode = langCode,
+                    protocol = Protocol
+                };
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Completes project initialization after project and session configuration
+    /// have succeeded.
+    /// </summary>
+    /// <param name="projectName">
+    /// The project family being configured.
+    /// </param>
+    /// <param name="typoReloadNeeded">
+    /// Whether the active typo-rule source should be reloaded.
+    /// </param>
+    private static void FinalizeProjectConfiguration(
+        ProjectEnum projectName,
+        bool typoReloadNeeded)
+    {
         RegenerateRegexes();
 
         if (projectName == ProjectEnum.wiktionary)
@@ -1074,6 +1243,14 @@ public static partial class Variables
             MainForm.LoadTypos(true);
         }
 
+        ValidateNamespaceConfiguration();
+    }
+
+    /// <summary>
+    /// Validates assumptions made by the namespace configuration.
+    /// </summary>
+    private static void ValidateNamespaceConfiguration()
+    {
         foreach (string namespaceName in Namespaces.Values)
         {
             System.Diagnostics.Trace.Assert(
@@ -1087,6 +1264,7 @@ public static partial class Variables
             "Internal error: key exists for namespace 0.",
             "Please contact a developer.");
     }
+
     /// <summary>
     /// Rebuilds namespace-aware regular expressions for the current project and
     /// refreshes other language-specific regex patterns.
