@@ -2208,32 +2208,32 @@ public partial class Parsers
             "Infobox racehorse",
             "Infobox named horse"
             });
+
+    // TODO: Determine whether parseTalkPage is still required; it is currently unused.
     /// <summary>
-    /// determines whether the article is about a person by looking for birth death categories, bio stub etc. for en wiki only
-    /// Should only return true if the article is the principle article about the individual (not early life/career/discography etc.)
+    /// Determines whether an English-wiki article is primarily about a single person.
     /// </summary>
+    /// <remarks>
+    /// The method excludes disambiguation pages, lists, organizations, fictional
+    /// character pages, multi-person articles, and sub-articles such as career or
+    /// early-life pages before evaluating person-specific categories, templates,
+    /// infoboxes, and birth/death indicators.
+    /// </remarks>
     /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">Title of the article</param>
-    /// <param name="parseTalkPage"></param>
-    /// <returns></returns>
-    public static bool IsArticleAboutAPerson(string articleText, string articleTitle, bool parseTalkPage)
+    /// <param name="articleTitle">The title of the article.</param>
+    /// <param name="parseTalkPage">
+    /// Indicates whether the caller is processing a talk page.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the article appears to be primarily about a
+    /// single person; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool IsArticleAboutAPerson(
+        string articleText,
+        string articleTitle,
+        bool parseTalkPage)
     {
-        if (
-            !Variables.LangCode.Equals("en")
-            || Namespace.Determine(articleTitle).Equals(Namespace.Category)
-            || NotPersonArticles.IsMatch(articleTitle)
-            || ListOf.IsMatch(articleTitle)
-            || articleText.Contains(@"[[fictional character")
-            || WikiRegexes.Disambigs.IsMatch(articleText)
-            || InUniverse.IsMatch(articleText)
-            || NotAboutAPersonCategories.IsMatch(articleText)
-            || NobleFamilies.IsMatch(articleText)
-            || CategoryCharacters.IsMatch(articleText)
-            || WikiRegexes.InfoBox.Match(articleText).Groups[1].Value.ToLower().Contains("organization")
-            || NotPersonInfoboxes.IsMatch(articleText)
-            || WikiRegexes.SIAs.IsMatch(articleText)
-            || WikiRegexes.PeopleInfoboxTemplates.Matches(articleText).Count > 1
-        )
+        if (IsClearlyNotPersonArticle(articleText, articleTitle))
         {
             return false;
         }
@@ -2318,6 +2318,36 @@ public partial class Parsers
             || WikiRegexes.PeopleFromCategory.IsMatch(cats)
             || WikiRegexes.BLPSources.IsMatch(BLPUnsourcedSection.Replace(articleText, string.Empty))
             || RefImproveBLP.IsMatch(articleText);
+    }
+
+    /// <summary>
+    /// Determines whether the article can be ruled out as a primary biography
+    /// using broad title, namespace, category, template, and infobox checks.
+    /// </summary>
+    private static bool IsClearlyNotPersonArticle(
+        string articleText,
+        string articleTitle)
+    {
+        return
+            !Variables.LangCode.Equals("en") ||
+            Namespace.Determine(articleTitle).Equals(Namespace.Category) ||
+            NotPersonArticles.IsMatch(articleTitle) ||
+            ListOf.IsMatch(articleTitle) ||
+            articleText.Contains(@"[[fictional character") ||
+            WikiRegexes.Disambigs.IsMatch(articleText) ||
+            InUniverse.IsMatch(articleText) ||
+            NotAboutAPersonCategories.IsMatch(articleText) ||
+            NobleFamilies.IsMatch(articleText) ||
+            CategoryCharacters.IsMatch(articleText) ||
+            WikiRegexes.InfoBox
+                .Match(articleText)
+                .Groups[1]
+                .Value
+                .ToLowerInvariant()
+                .Contains("organization") ||
+            NotPersonInfoboxes.IsMatch(articleText) ||
+            WikiRegexes.SIAs.IsMatch(articleText) ||
+            WikiRegexes.PeopleInfoboxTemplates.Matches(articleText).Count > 1;
     }
 
     /// <summary>
