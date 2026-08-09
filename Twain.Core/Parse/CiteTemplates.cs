@@ -851,29 +851,12 @@ public partial class Parsers
         if (!IncorrectCommaAmericanDates.IsMatch(theURLoriginal))
             newValue = IncorrectCommaAmericanDates.Replace(newValue, @"$1 $2, $3");
 
-        // URL starting www needs http://
-        if (theURL.StartsWith("www", StringComparison.OrdinalIgnoreCase))
-            theURL = "http://" + theURL;
-
-        // URL http format fix
-        if (theURL.StartsWith("http") && !theURL.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-            && !theURL.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            theURL = FixSyntax(" " + theURL).Trim();
-
-        if (archiveurl.StartsWith("www", StringComparison.OrdinalIgnoreCase))
-        {
-            newValue = Tools.UpdateTemplateParameterValue(newValue, "archiveurl", "http://" + archiveurl);
-            newValue = Tools.UpdateTemplateParameterValue(newValue, "archive-url", "http://" + archiveurl);
-        }
-        if (contributionurl.StartsWith("www", StringComparison.OrdinalIgnoreCase))
-            newValue = Tools.UpdateTemplateParameterValue(newValue, "contribution-url", "http://" + contributionurl);
-
-        // (part) wikilinked/external linked URL in cite template, don't change when named external link format
-        if (!theURL.Contains(" "))
-            theURL = theURL.Trim('[').Trim(']');
-
-        if (!theURLoriginal.Equals(theURL))
-            newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
+        newValue = NormalizeCitationUrls(
+            newValue,
+            ref theURL,
+            theURLoriginal,
+            archiveurl,
+            contributionurl);
 
         // url=...archive to url=original, archive-url=archive
         newValue = NormalizeCitationArchiveUrl(
@@ -899,6 +882,88 @@ public partial class Parsers
             origyear,
             TheYear,
             TheDate);
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Normalizes citation URL values and writes any corrected URL values back
+    /// to the citation template.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="theURL">
+    /// The citation URL. Updated when URL normalization changes its value.
+    /// </param>
+    /// <param name="theURLoriginal">
+    /// The original citation URL value before normalization.
+    /// </param>
+    /// <param name="archiveurl">
+    /// The archive URL value, if present.
+    /// </param>
+    /// <param name="contributionurl">
+    /// The contribution URL value, if present.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying URL normalization.
+    /// </returns>
+    private static string NormalizeCitationUrls(
+        string newValue,
+        ref string theURL,
+        string theURLoriginal,
+        string archiveurl,
+        string contributionurl)
+    {
+        // URL starting www needs http://
+        if (theURL.StartsWith("www", StringComparison.OrdinalIgnoreCase))
+        {
+            theURL = "http://" + theURL;
+        }
+
+        // URL http format fix
+        if (theURL.StartsWith("http") &&
+            !theURL.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+            !theURL.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            theURL = FixSyntax(" " + theURL).Trim();
+        }
+
+        if (archiveurl.StartsWith("www", StringComparison.OrdinalIgnoreCase))
+        {
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                "archiveurl",
+                "http://" + archiveurl);
+
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                "archive-url",
+                "http://" + archiveurl);
+        }
+
+        if (contributionurl.StartsWith("www", StringComparison.OrdinalIgnoreCase))
+        {
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                "contribution-url",
+                "http://" + contributionurl);
+        }
+
+        // (part) wikilinked/external linked URL in cite template,
+        // don't change when named external link format
+        if (!theURL.Contains(" "))
+        {
+            theURL = theURL.Trim('[').Trim(']');
+        }
+
+        if (!theURLoriginal.Equals(theURL))
+        {
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                "url",
+                theURL);
+        }
 
         return newValue;
     }
