@@ -1431,41 +1431,113 @@ public partial class Parsers
             return string.Empty;
         }
 
-        // When there is only an approximate birth year, add the appropriate
-        // category rather than a specific year-of-birth category.
-        if (UncertainWordings.IsMatch(birthpart) ||
-            alreadyUncertain)
+        if (IsUncertainBirthYear(
+                birthpart,
+                alreadyUncertain))
         {
-            if (!CategoryMatch(
+            uncertainCategory =
+                GetUncertainBirthCategory(
                     articleText,
-                    YearOfBirthMissingLivingPeople) &&
-                !CategoryMatch(
-                    articleText,
-                    YearOfBirthUncertain))
-            {
-                uncertainCategory =
-                    categoryPrefix +
-                    YearOfBirthUncertain +
-                    CatEnd(sort);
-            }
+                    categoryPrefix,
+                    sort);
 
             return string.Empty;
         }
 
-        // After removing dashes, birthpart must still contain a year and must
-        // not represent a year range.
-        if (birthpart.Contains(@"?") ||
-            !Regex.IsMatch(
+        if (!IsUsableBirthYearMatch(
                 birthpart,
-                @"\d{3,4}") ||
-            Regex.IsMatch(
-                birthMatch.Value,
-                @"[12]\d\d\d.[12]\d\d\d"))
+                birthMatch.Value))
         {
             return string.Empty;
         }
 
         return birthMatch.Groups[1].Value;
+    }
+
+    /// <summary>
+    /// Determines whether untemplated birth information represents an
+    /// approximate or otherwise uncertain birth year.
+    /// </summary>
+    /// <param name="birthpart">
+    /// The normalized portion of the lead containing birth information.
+    /// </param>
+    /// <param name="alreadyUncertain">
+    /// Whether uncertainty was identified before template normalization.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the birth year should be treated as uncertain;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool IsUncertainBirthYear(
+        string birthpart,
+        bool alreadyUncertain)
+    {
+        return alreadyUncertain ||
+               UncertainWordings.IsMatch(birthpart);
+    }
+
+    /// <summary>
+    /// Builds an uncertain-birth category when the article does not already
+    /// contain an equivalent birth-year status category.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article text used when checking existing categories.
+    /// </param>
+    /// <param name="categoryPrefix">
+    /// The category-link prefix to use when constructing the category.
+    /// </param>
+    /// <param name="sort">
+    /// The category sort key to append to the category.
+    /// </param>
+    /// <returns>
+    /// The uncertain-birth category text, or an empty string when an equivalent
+    /// category is already present.
+    /// </returns>
+    private static string GetUncertainBirthCategory(
+        string articleText,
+        string categoryPrefix,
+        string sort)
+    {
+        if (CategoryMatch(
+                articleText,
+                YearOfBirthMissingLivingPeople) ||
+            CategoryMatch(
+                articleText,
+                YearOfBirthUncertain))
+        {
+            return string.Empty;
+        }
+
+        return categoryPrefix +
+               YearOfBirthUncertain +
+               CatEnd(sort);
+    }
+
+    /// <summary>
+    /// Determines whether untemplated birth information contains a usable
+    /// specific birth year rather than an uncertain year or year range.
+    /// </summary>
+    /// <param name="birthpart">
+    /// The normalized portion of the lead containing birth information.
+    /// </param>
+    /// <param name="birthMatchValue">
+    /// The original matched birth text before normalization.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the text contains a usable specific birth year;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool IsUsableBirthYearMatch(
+        string birthpart,
+        string birthMatchValue)
+    {
+        return !birthpart.Contains(@"?") &&
+               Regex.IsMatch(
+                   birthpart,
+                   @"\d{3,4}") &&
+               !Regex.IsMatch(
+                   birthMatchValue,
+                   @"[12]\d\d\d.[12]\d\d\d");
     }
 
     /// <summary>
