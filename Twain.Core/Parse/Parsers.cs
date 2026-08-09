@@ -1974,18 +1974,7 @@ public partial class Parsers
 
         if (TemplateExists(alltemplates, ConversionsCnCommons))
         {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#.7B.7Bcommons.7CCategory:XXX.7D.7D_.3E_.7B.7Bcommonscat.7CXXX.7D.7D
-            if (Variables.IsWikimediaProject)
-            {
-                articleText = CommonsCategory.Replace(
-                    articleText,
-                    @"{{Commons category|$1}}");
-            }
-
-            foreach (KeyValuePair<Regex, string> k in RegexConversion)
-            {
-                articleText = k.Key.Replace(articleText, k.Value);
-            }
+            articleText = ApplyLegacyTemplateConversions(articleText);
         }
 
         bool BASEPAGENAMEInRefs = false;
@@ -2035,8 +2024,6 @@ public partial class Parsers
             alltemplates = GetAllTemplates(articleText);
         }
 
-        // TODO: Extract the English Wikipedia living-person template conversions
-        // into a dedicated helper once behavior-preserving parser cleanup begins.
         if (Variables.IsWikipediaEN &&
             CategoryMatch(articleText, "Living people"))
         {
@@ -2059,16 +2046,7 @@ public partial class Parsers
         // Normalize Template: prefixes and underscores in infobox names.
         if (TemplateExists(alltemplates, WikiRegexes.InfoBox))
         {
-            articleText = WikiRegexes.InfoBox.Replace(
-                articleText,
-                m =>
-                {
-                    string newName = CanonicalizeTitle(m.Groups[1].Value);
-
-                    return newName.Equals(m.Groups[1].Value)
-                        ? m.Value
-                        : Tools.RenameTemplate(m.Value, newName);
-                });
+            articleText = NormalizeInfoboxTemplateNames(articleText);
         }
 
         if (TemplateExists(alltemplates, WikiRegexes.Dablinks))
@@ -2332,6 +2310,52 @@ public partial class Parsers
             "BLP unreferenced",
             "More citations needed"
             });
+
+    /// <summary>
+    /// Normalizes infobox template names by canonicalizing their titles.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// The article text with applicable infobox template names normalized.
+    /// </returns>
+    private static string NormalizeInfoboxTemplateNames(string articleText)
+    {
+        return WikiRegexes.InfoBox.Replace(
+            articleText,
+            m =>
+            {
+                string newName = CanonicalizeTitle(m.Groups[1].Value);
+
+                return newName.Equals(m.Groups[1].Value)
+                    ? m.Value
+                    : Tools.RenameTemplate(m.Value, newName);
+            });
+    }
+
+    /// <summary>
+    /// Applies legacy and compatibility template conversions.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// The article text after applicable legacy template conversions have been
+    /// performed.
+    /// </returns>
+    private static string ApplyLegacyTemplateConversions(string articleText)
+    {
+        if (Variables.IsWikimediaProject)
+        {
+            articleText = CommonsCategory.Replace(
+                articleText,
+                @"{{Commons category|$1}}");
+        }
+
+        foreach (KeyValuePair<Regex, string> k in RegexConversion)
+        {
+            articleText = k.Key.Replace(articleText, k.Value);
+        }
+
+        return articleText;
+    }
 
     /// <summary>
     /// Converts templates such as {{foo|section|...}} to {{foo section|...}}
