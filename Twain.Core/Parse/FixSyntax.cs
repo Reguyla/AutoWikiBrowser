@@ -519,69 +519,16 @@ public partial class Parsers
         MatchCollection ssbMc = SingleSquareBrackets.Matches(articleText);
         string originalArticleText = articleText;
 
-        if (Variables.LangCode.Equals("en"))
-        {
-            // DEFAULTSORT whitespace fix - CHECKWIKI error 88, 89
-            articleText = FixSyntaxDefaultSort(articleText);
+        articleText = ApplyEnglishSyntaxFixes(articleText, alltemplates, ssbMc);
 
-            // This category should not be directly added, remove if template present else replace with template
-            if ((from Match m in ssbMc where m.Value.Equals(@"[[Category:Disambiguation pages]]") select m).Any())
-                articleText = articleText.Replace(@"[[Category:Disambiguation pages]]", TemplateExists(alltemplates, Tools.NestedTemplateRegex("disambiguation")) ? "" : @"{{Disambiguation}}");
-
-            // Remove br tags after maintenance templates
-            articleText = MaintanceTemplateWithBr.Replace(articleText, "$1");
-        }
 
         if (TemplateExists(alltemplates, WikiRegexes.MagicWordTemplates))
             articleText = Tools.TemplateToMagicWord(articleText);
 
         // get a list of all the simple html tags (not with properties) used in the article, so we can selectively apply HTML tag fixes below
-        List<string> SimpleTagsList = Tools.DeduplicateList((from Match m in SimpleTags.Matches(articleText) select m.Value).ToList());
-        SimpleTagsList = Tools.DeduplicateList(SimpleTagsList.Select(s => Regex.Replace(s, @"\s", "").ToLower()).ToList());
+        List<string> SimpleTagsList = GetSimpleTagsList(articleText);
 
-        // fix for <sup/>, <sub/>, <center/>, <small/>, <i/> etc.
-        if (SimpleTagsList.Any(s => !s.Equals("<br/>") && (s.EndsWith("/>") || s.Contains(@"\"))))
-            articleText = IncorrectClosingHtmlTags.Replace(articleText, "</$1>");
-
-        // The <strike> tag is not supported in HTML5. - CHECKWIKI error 42
-        if (SimpleTagsList.Any(s => s.Contains("strike")))
-        {
-            articleText = articleText.Replace(@"<strike>", @"<s>");
-            articleText = articleText.Replace(@"</strike>", @"</s>");
-        }
-
-        // remove empty <gallery>, <center>, <blockquote>, <nowiki>, <sub> or <sup> tags, allow for nested tags
-        while (EmptyTags.IsMatch(articleText))
-            articleText = EmptyTags.Replace(articleText, string.Empty);
-
-        // try to fix invalid opening <ref> tag
-        if (UnclosedTags(articleText).Any())
-        {
-            articleText = articleText.Replace("<ref<", "<ref>").Replace("}}/ref>", "}}</ref>");
-
-            if (Regex.IsMatch(articleText, @"[\.,] ?\/?ref"))
-                articleText = Regex.Replace(articleText, @"([\.,]) ?ref(\s*name\s*=[^{}<>]+?\s*)?>", "$1<ref$2>");
-        }
-
-        // merge italic/bold html tags if there are one after the other
-        //https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_21#Another_bug_on_italics
-        if (SimpleTagsList.Any(s => s.StartsWith("<b") && !s.StartsWith("<br")))
-            articleText = articleText.Replace("</b><b>", "");
-        if (SimpleTagsList.Any(s => s.StartsWith("<i")))
-            articleText = articleText.Replace("</i><i>", "");
-
-        //replace html with wiki syntax - CHECKWIKI error 26 and 38
-        if (SimpleTagsList.Any(s => Regex.IsMatch(s, @"<(i|b)\b")))
-        {
-            while (SyntaxRegexItalicBoldEm.IsMatch(articleText))
-                articleText = SyntaxRegexItalicBoldEm.Replace(articleText, BoldItalicME);
-        }
-
-        if (SimpleTagsList.Any(s => s.StartsWith("<hr")) || articleText.Contains("-----"))
-            articleText = SyntaxRegexHorizontalRule.Replace(articleText, "----");
-
-        // remove appearance of double line break
-        articleText = SyntaxRegexHeadingWithHorizontalRule.Replace(articleText, "$1");
+        articleText = NormalizeSimpleHtmlTags(articleText, SimpleTagsList);
 
         // remove unnecessary namespace
         if (alltemplatesDetail.Any(t => Regex.IsMatch(t, Variables.NamespacesCaseInsensitive[Namespace.Template])))
@@ -821,6 +768,167 @@ public partial class Parsers
 
         return articleText.Trim();
     }
+
+    /// <summary>
+    /// Applies English Wikipedia-specific syntax fixes that are only relevant when
+    /// the active language code is English.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// A collection of template names detected in the article text.
+    /// </param>
+    /// <param name="ssbMc">
+    /// A collection of single-square-bracket matches detected in the article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported English-only syntax fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing English-only behavior, including
+    /// DEFAULTSORT whitespace cleanup, disambiguation category replacement, and
+    /// removal of trailing <c>&lt;br&gt;</c> tags after maintenance templates.
+    /// </remarks>
+    private static string ApplyEnglishSyntaxFixes(
+        string articleText,
+        List<string> alltemplates,
+        MatchCollection ssbMc)
+    {
+        if (Variables.LangCode.Equals("en"))
+        {
+            // DEFAULTSORT whitespace fix - CHECKWIKI error 88, 89
+            articleText = FixSyntaxDefaultSort(articleText);
+
+            // This category should not be directly added, remove if template present else replace with template
+            if ((from Match m in ssbMc where m.Value.Equals(@"[[Category:Disambiguation pages]]") select m).Any())
+            {
+                articleText = articleText.Replace(
+                    @"[[Category:Disambiguation pages]]",
+                    TemplateExists(alltemplates, Tools.NestedTemplateRegex("disambiguation"))
+                        ? string.Empty
+                        : @"{{Disambiguation}}");
+            }
+
+            // Remove br tags after maintenance templates
+            articleText = MaintanceTemplateWithBr.Replace(articleText, "$1");
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Builds a normalized list of simple HTML-like tags used in the article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <returns>
+    /// A deduplicated list of simple tags with whitespace removed and text
+    /// normalized to lowercase.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing simple-tag collection behavior by
+    /// matching tags without properties, deduplicating them, removing internal
+    /// whitespace, and normalizing the results to lowercase so later syntax checks
+    /// can selectively apply tag-specific fixes.
+    /// </remarks>
+    private static List<string> GetSimpleTagsList(string articleText)
+    {
+        List<string> simpleTagsList =
+            Tools.DeduplicateList((from Match m in SimpleTags.Matches(articleText) select m.Value).ToList());
+
+        simpleTagsList = Tools.DeduplicateList(
+            simpleTagsList.Select(s => Regex.Replace(s, @"\s", "").ToLower()).ToList());
+
+        return simpleTagsList;
+    }
+
+    /// <summary>
+    /// Normalizes simple HTML-style tag syntax and related markup issues in the
+    /// article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="simpleTagsList">
+    /// A normalized list of simple HTML-like tags detected in the article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported simple-tag syntax fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing ordering of simple HTML cleanup,
+    /// including incorrect closing-tag repair, unsupported <c>&lt;strike&gt;</c>
+    /// replacement, empty-tag removal, malformed <c>&lt;ref&gt;</c> repair,
+    /// adjacent bold/italic tag merging, HTML-to-wiki bold/italic conversion,
+    /// horizontal-rule normalization, and removal of extra line breaks after
+    /// horizontal rules.
+    /// </remarks>
+    private static string NormalizeSimpleHtmlTags(string articleText, List<string> simpleTagsList)
+    {
+        // fix for <sup/>, <sub/>, <center/>, <small/>, <i/> etc.
+        if (simpleTagsList.Any(s => !s.Equals("<br/>") && (s.EndsWith("/>") || s.Contains(@"\"))))
+        {
+            articleText = IncorrectClosingHtmlTags.Replace(articleText, "</$1>");
+        }
+
+        // The <strike> tag is not supported in HTML5. - CHECKWIKI error 42
+        if (simpleTagsList.Any(s => s.Contains("strike")))
+        {
+            articleText = articleText.Replace(@"<strike>", @"<s>");
+            articleText = articleText.Replace(@"</strike>", @"</s>");
+        }
+
+        // remove empty <gallery>, <center>, <blockquote>, <nowiki>, <sub> or <sup> tags, allow for nested tags
+        while (EmptyTags.IsMatch(articleText))
+        {
+            articleText = EmptyTags.Replace(articleText, string.Empty);
+        }
+
+        // try to fix invalid opening <ref> tag
+        if (UnclosedTags(articleText).Any())
+        {
+            articleText = articleText.Replace("<ref<", "<ref>").Replace("}}/ref>", "}}</ref>");
+
+            if (Regex.IsMatch(articleText, @"[\.,] ?\/?ref"))
+            {
+                articleText = Regex.Replace(articleText, @"([\.,]) ?ref(\s*name\s*=[^{}<>]+?\s*)?>", "$1<ref$2>");
+            }
+        }
+
+        // merge italic/bold html tags if there are one after the other
+        // [en.wikipedia.org](https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_21#Another_bug_on_italics)
+        if (simpleTagsList.Any(s => s.StartsWith("<b") && !s.StartsWith("<br")))
+        {
+            articleText = articleText.Replace("</b><b>", string.Empty);
+        }
+
+        if (simpleTagsList.Any(s => s.StartsWith("<i")))
+        {
+            articleText = articleText.Replace("</i><i>", string.Empty);
+        }
+
+        // replace html with wiki syntax - CHECKWIKI error 26 and 38
+        if (simpleTagsList.Any(s => Regex.IsMatch(s, @"<(i|b)\b")))
+        {
+            while (SyntaxRegexItalicBoldEm.IsMatch(articleText))
+            {
+                articleText = SyntaxRegexItalicBoldEm.Replace(articleText, BoldItalicME);
+            }
+        }
+
+        if (simpleTagsList.Any(s => s.StartsWith("<hr")) || articleText.Contains("-----"))
+        {
+            articleText = SyntaxRegexHorizontalRule.Replace(articleText, "----");
+        }
+
+        // remove appearance of double line break
+        articleText = SyntaxRegexHeadingWithHorizontalRule.Replace(articleText, "$1");
+
+        return articleText;
+    }
+
 
     /// <summary>
     /// Matches an HTTP external link whose displayed text ends with an ISBN.
