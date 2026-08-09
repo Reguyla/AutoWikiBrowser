@@ -1098,62 +1098,138 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// Determines the predominant date format in the article text (American/International/ISO), if available
+    /// Determines the predominant date format used in article text.
     /// </summary>
-    /// <param name="articleText">the article text</param>
-    /// <param name="considerISO">whether to consider ISO as a possible predominant date format</param>
-    /// <param name="explicitonly">whether to restrict logic to look at {{use xxx dates}} template only</param>
-    /// <returns>The date locale determined</returns>
-    public static DateLocale DeterminePredominantDateLocale(string articleText, bool considerISO, bool explicitonly)
+    /// <remarks>
+    /// Explicit date-format templates are checked first. When explicit-only
+    /// detection is not requested, the method then compares American,
+    /// international, and optionally ISO date occurrences before checking
+    /// birth and death templates for explicit date-format parameters.
+    /// </remarks>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <param name="considerISO">
+    /// Whether ISO-formatted dates should be considered when determining the
+    /// predominant format.
+    /// </param>
+    /// <param name="explicitonly">
+    /// Whether detection should be limited to an explicit date-format template.
+    /// </param>
+    /// <returns>
+    /// The detected <see cref="DateLocale"/>, or
+    /// <see cref="DateLocale.Undetermined"/> when no predominant format can be
+    /// established.
+    /// </returns>
+    public static DateLocale DeterminePredominantDateLocale(
+        string articleText,
+        bool considerISO,
+        bool explicitonly)
     {
-        // first check for template telling us the preference
-        string DatesT = WikiRegexes.UseDatesTemplate.Match(articleText).Groups[2].Value.ToLower();
+        // Check first for an explicit date-format template.
+        string DatesT =
+            WikiRegexes.UseDatesTemplate
+                .Match(articleText)
+                .Groups[2]
+                .Value
+                .ToLowerInvariant();
 
         DatesT = DatesT.Replace("iso", "ymd");
         DatesT = Regex.Match(DatesT, @"(ymd|dmy|mdy)").Value;
 
         if (Variables.LangCode.Equals("en") && DatesT.Length > 0)
+        {
             switch (DatesT)
             {
                 case "dmy":
                     return DateLocale.International;
+
                 case "mdy":
                     return DateLocale.American;
+
                 case "ymd":
                     return DateLocale.ISO;
             }
+        }
 
         if (explicitonly)
+        {
             return DateLocale.Undetermined;
+        }
 
-        // secondly count the American and International dates
-        int Americans = WikiRegexes.MonthDay.Matches(articleText).Count;
-        int Internationals = WikiRegexes.DayMonth.Matches(articleText).Count;
+        // Count American and international date occurrences.
+        int Americans =
+            WikiRegexes.MonthDay.Matches(articleText).Count;
+
+        int Internationals =
+            WikiRegexes.DayMonth.Matches(articleText).Count;
 
         if (considerISO)
         {
-            int ISOs = WikiRegexes.ISODates.Matches(articleText).Count;
+            int ISOs =
+                WikiRegexes.ISODates.Matches(articleText).Count;
 
             if (ISOs > Americans && ISOs > Internationals)
+            {
                 return DateLocale.ISO;
+            }
         }
 
         if (Americans != Internationals)
         {
-            if (Americans == 0 && Internationals > 0 || (Internationals / Americans >= 2 && Internationals > 4))
+            if ((Americans == 0 && Internationals > 0) ||
+                (Internationals / Americans >= 2 && Internationals > 4))
+            {
                 return DateLocale.International;
-            if (Internationals == 0 && Americans > 0 || (Americans / Internationals >= 2 && Americans > 4))
+            }
+
+            if ((Internationals == 0 && Americans > 0) ||
+                (Americans / Internationals >= 2 && Americans > 4))
+            {
                 return DateLocale.American;
+            }
         }
 
-        // check for explicit df or mf in birth/death templates
-        if (Tools.GetTemplateParameterValue(BirthDate.Match(articleText).Value, "df").StartsWith("y")
-            || Tools.GetTemplateParameterValue(DeathDate.Match(articleText).Value, "df").StartsWith("y"))
-            return DateLocale.International;
+        return DetermineBirthDeathTemplateDateLocale(articleText);
+    }
 
-        if (Tools.GetTemplateParameterValue(BirthDate.Match(articleText).Value, "mf").StartsWith("y")
-            || Tools.GetTemplateParameterValue(DeathDate.Match(articleText).Value, "mf").StartsWith("y"))
+    /// <summary>
+    /// Determines whether birth or death templates explicitly request a date
+    /// format through their <c>df</c> or <c>mf</c> parameters.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// The explicitly requested date locale, or
+    /// <see cref="DateLocale.Undetermined"/> when none is specified.
+    /// </returns>
+    private static DateLocale DetermineBirthDeathTemplateDateLocale(
+        string articleText)
+    {
+        if (Tools
+                .GetTemplateParameterValue(
+                    BirthDate.Match(articleText).Value,
+                    "df")
+                .StartsWith("y") ||
+            Tools
+                .GetTemplateParameterValue(
+                    DeathDate.Match(articleText).Value,
+                    "df")
+                .StartsWith("y"))
+        {
+            return DateLocale.International;
+        }
+
+        if (Tools
+                .GetTemplateParameterValue(
+                    BirthDate.Match(articleText).Value,
+                    "mf")
+                .StartsWith("y") ||
+            Tools
+                .GetTemplateParameterValue(
+                    DeathDate.Match(articleText).Value,
+                    "mf")
+                .StartsWith("y"))
+        {
             return DateLocale.American;
+        }
 
         return DateLocale.Undetermined;
     }
