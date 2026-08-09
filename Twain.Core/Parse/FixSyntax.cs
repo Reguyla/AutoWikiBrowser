@@ -822,14 +822,59 @@ public partial class Parsers
         return articleText.Trim();
     }
 
+    /// <summary>
+    /// Matches an HTTP external link whose displayed text ends with an ISBN.
+    /// </summary>
+    /// <remarks>
+    /// The expression captures the external-link portion separately from the
+    /// trailing ISBN. An optional comma, semicolon, or colon may appear before
+    /// the ISBN, and the ISBN may optionally end with <c>X</c> and a period.
+    ///
+    /// TODO: Review whether this expression should eventually support HTTPS
+    /// explicitly rather than relying on the broader <c>http</c> prefix match,
+    /// and verify whether ISBN formats containing characters other than digits,
+    /// hyphens, and a terminal <c>X</c> need to be supported.
+    /// </remarks>
     private static readonly Regex ExternalLinkEndsISBN = new Regex(@"(\[http[^[\]]+? +[^[\]]+?)[,;:]? +(ISBN +[0-9-]+X?\.?) ?\]");
 
+    /// <summary>
+    /// Normalizes common ISBN syntax errors and formatting issues in article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="ssbISBN">
+    /// A collection of ISBN-related strings detected during preprocessing and used
+    /// to determine whether specific ISBN cleanup rules should be applied.
+    /// </param>
+    /// <returns>
+    /// The article text with supported ISBN syntax corrections applied.
+    /// </returns>
+    /// <remarks>
+    /// This method handles CHECKWIKI error 69 and related ISBN cleanup, including
+    /// malformed ISBN labels, legacy ISBN wiki-link forms, lowercase ISBN-10 check
+    /// digits, en dashes within ISBN numbers, redundant ISBN prefixes in infobox
+    /// parameters, and ISBNs incorrectly included at the end of external links.
+    ///
+    /// TODO: Consider extracting the individual ISBN cleanup operations into
+    /// focused helpers during a later refactoring pass once their behavior and
+    /// test coverage have been reviewed.
+    /// </remarks>
     private static string FixSyntaxISBN(string articleText, List<string> ssbISBN)
     {
-        //  CHECKWIKI error 69
-        bool isbnDash = articleText.Contains("ISBN-") || articleText.Contains("ISBN–");
-        if (isbnDash || articleText.Contains("ISBN:") || articleText.Contains("ISBN\t") || articleText.Contains("ISBN \t") || ssbISBN.Contains("[[ISBN]]"))
+        // CHECKWIKI error 69.
+        bool isbnDash =
+            articleText.Contains("ISBN-") ||
+            articleText.Contains("ISBN–");
+
+        if (isbnDash ||
+            articleText.Contains("ISBN:") ||
+            articleText.Contains("ISBN\t") ||
+            articleText.Contains("ISBN \t") ||
+            ssbISBN.Contains("[[ISBN]]"))
+        {
             articleText = SyntaxRegexISBN.Replace(articleText, "ISBN $1");
+        }
 
         if (isbnDash)
         {
@@ -843,25 +888,36 @@ public partial class Parsers
         if (ssbISBN.Contains("[[International Standard Book Number|ISBN]]"))
             articleText = SyntaxRegexISBN4.Replace(articleText, "ISBN $1");
 
-        // Capitalize check digit X in ISBN-10 format
+        // Capitalize the ISBN-10 check digit.
         articleText = ISBNx.Replace(articleText, "$1X");
 
-        // Endash to hyphen within ISBN numbers
-        articleText = ISBNEndash.Replace(articleText, m => "ISBN " + m.Groups[1].Value.Replace("–", "-"));
+        // Replace en dashes with hyphens within ISBN numbers.
+        articleText = ISBNEndash.Replace(
+            articleText,
+            m => "ISBN " + m.Groups[1].Value.Replace("–", "-"));
 
-        // remove ISBN from start of isbn= parameter in infoboxes
+        // Remove a redundant ISBN prefix from isbn= parameters in infoboxes.
         if (TemplateExists(GetAllTemplates(articleText), WikiRegexes.InfoBox))
         {
-            foreach (string infobox in GetAllTemplateDetail(articleText).Where(t => WikiRegexes.InfoBox.IsMatch(t)))
+            foreach (string infobox in GetAllTemplateDetail(articleText)
+                         .Where(t => WikiRegexes.InfoBox.IsMatch(t)))
             {
                 string isbn = Tools.GetTemplateParameterValue(infobox, "isbn");
 
                 if (isbn.StartsWith("ISBN"))
-                    articleText = articleText.Replace(infobox, Tools.UpdateTemplateParameterValue(infobox, "isbn", Regex.Replace(isbn, @"^ISBN\s*:?\s*", "")));
+                {
+                    articleText = articleText.Replace(
+                        infobox,
+                        Tools.UpdateTemplateParameterValue(
+                            infobox,
+                            "isbn",
+                            Regex.Replace(isbn, @"^ISBN\s*:?\s*", "")));
+                }
             }
         }
 
-        // ISBN out of end of external link
+        // Move an ISBN outside an external link when it appears at the end of
+        // the link's display text.
         while (ExternalLinkEndsISBN.IsMatch(articleText))
             articleText = ExternalLinkEndsISBN.Replace(articleText, "$1] $2");
 
@@ -951,8 +1007,21 @@ public partial class Parsers
         return (@"[" + externalLink + @"]");
     }
 
+    /// <summary>
+    /// Matches the opening wiki-link brackets of a redirect target when they
+    /// are immediately preceded by an equals sign or colon, with an optional
+    /// intervening space.
+    /// </summary>
     private static readonly Regex RedirectBracketsWithPrefix = new Regex(@"[=:] ?\[\[", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches sequences of three or four consecutive opening square brackets.
+    /// </summary>
     private static readonly Regex TooManyOpenSquareBrackets = new Regex(@"\[{3,4}", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches sequences of three or four consecutive closing square brackets.
+    /// </summary>
     private static readonly Regex TooManyCloseSquareBrackets = new Regex(@"\]{3,4}", RegexOptions.Compiled);
 
     /// <summary>
@@ -1006,12 +1075,37 @@ public partial class Parsers
         return articleText;
     }
 
+    // TODO: Consider supporting additional substituted date variables if
+    // FixSyntax is expanded to normalize other MediaWiki substitution patterns.
+    /// <summary>
+    /// Replaces substituted CURRENTMONTHNAME and CURRENTYEAR variables inside a
+    /// matched reference with the current UTC month and year using British
+    /// English month names.
+    /// </summary>
+    /// <param name="m">
+    /// The regex match containing the substituted variables.
+    /// </param>
+    /// <returns>
+    /// The updated reference text.
+    /// </returns>
     private static string FixSyntaxSubstRefTagsME(Match m)
     {
-        return m.Value.Replace(@"{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}", DateTime.UtcNow.ToString("MMMM yyyy", BritishEnglish));
+        return m.Value.Replace(
+            @"{{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}",
+            DateTime.UtcNow.ToString("MMMM yyyy", BritishEnglish));
     }
 
+    // TODO: Consider replacing List<Regex> with IReadOnlyList<Regex> or an array
+    // if the collection is immutable after initialization.
+    /// <summary>
+    /// Stores dynamically generated regular expressions used when processing
+    /// HTML <c>&lt;small&gt;</c> elements.
+    /// </summary>
     private static readonly List<Regex> SmallTagRegexes = new();
+
+    /// <summary>
+    /// Matches nested <c>{{legend}}</c> templates.
+    ///</summary>
     private static readonly Regex LegendTemplate = Tools.NestedTemplateRegex("legend");
 
     /// <summary>
@@ -1046,11 +1140,37 @@ public partial class Parsers
         return articleText;
     }
 
+    /// <summary>
+    /// Matches the closing markup of a wiki table at the beginning of a line.
+    /// </summary>
     private static readonly Regex TableEnd = new Regex(@"^\|}", RegexOptions.Multiline);
 
+    /// <summary>
+    /// Removes unnecessary <c>&lt;small&gt;</c> tags from the matched text while
+    /// preserving cases where the tags are required or expected.
+    /// </summary>
+    /// <param name="m">
+    /// The matched text containing one or more <c>&lt;small&gt;</c> elements.
+    /// </param>
+    /// <returns>
+    /// The modified text if removable <c>&lt;small&gt;</c> tags are found;
+    /// otherwise, the original matched text.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// <c>&lt;small&gt;</c> tags are intentionally preserved inside
+    /// <c>{{legend}}</c> templates and within wiki tables, where they are commonly
+    /// used for formatting.
+    /// </para>
+    /// <para>
+    /// When nested <c>&lt;small&gt;</c> tags are encountered, only the inner
+    /// removable tags are stripped while preserving the outer structure.
+    /// </para>
+    /// </remarks>
     private static string FixSmallTagsME(Match m)
     {
-        // don't remove <small> tags from within {{legend}} where use is not unreasonable
+        // Don't remove <small> tags from within {{legend}} where their use is
+        // intentional, or from wiki tables where they may be used for formatting.
         if (!LegendTemplate.IsMatch(m.Value) && !TableEnd.IsMatch(m.Value))
         {
             Match s = WikiRegexes.Small.Match(m.Value);
@@ -1058,13 +1178,32 @@ public partial class Parsers
             {
                 if (s.Index > 0)
                     return WikiRegexes.Small.Replace(m.Value, "$1");
-                // nested small
+
+                // Nested <small> element: preserve the outer tag while removing
+                // unnecessary inner tags.
                 return m.Value.Substring(0, 7) + WikiRegexes.Small.Replace(m.Value.Substring(7), "$1");
             }
         }
+
         return m.Value;
     }
 
+    /// <summary>
+    /// Removes redundant outer <c>&lt;small&gt;</c> tags when they contain only a
+    /// reference or superscript/subscript markup.
+    /// </summary>
+    /// <param name="m">
+    /// The matched <c>&lt;small&gt;</c> element.
+    /// </param>
+    /// <returns>
+    /// The inner content when the surrounding <c>&lt;small&gt;</c> element is
+    /// unnecessary; otherwise, the original matched text.
+    /// </returns>
+    /// <remarks>
+    /// References and superscript/subscript elements already render with reduced
+    /// visual emphasis, so an additional surrounding <c>&lt;small&gt;</c> element
+    /// is generally redundant.
+    /// </remarks>
     private static string FixSmallTagsME2(Match m)
     {
         string smallContent = m.Groups[1].Value.Trim();
@@ -1072,7 +1211,8 @@ public partial class Parsers
         if (!smallContent.Contains("<"))
             return m.Value;
 
-        if (WikiRegexes.Refs.Match(smallContent).Value.Equals(smallContent) || WikiRegexes.SupSub.Match(smallContent).Value.Equals(smallContent))
+        if (WikiRegexes.Refs.Match(smallContent).Value.Equals(smallContent) ||
+            WikiRegexes.SupSub.Match(smallContent).Value.Equals(smallContent))
             return smallContent;
 
         return m.Value;
@@ -1115,13 +1255,36 @@ public partial class Parsers
         return articleText;
     }
 
-    private static readonly Regex IndexNoIndexMagicWord = new Regex(@"^__(NO)?INDEX__(\s+|$)", RegexOptions.Multiline);
     /// <summary>
-    /// Performs mainspace only syntax fixes: removal of __INDEX__ and __NOINDEX__ magic words
+    /// Matches the MediaWiki <c>__INDEX__</c> and <c>__NOINDEX__</c> magic words
+    /// at the beginning of a line.
     /// </summary>
-    /// <param name="articleText"></param>
-    /// <param name="articleTitle"></param>
-    /// <returns></returns>
+    /// <remarks>
+    /// These magic words are not used in article (mainspace) pages and are removed
+    /// during syntax cleanup.
+    /// </remarks>
+    private static readonly Regex IndexNoIndexMagicWord =
+        new(@"^__(NO)?INDEX__(\s+|$)", RegexOptions.Multiline);
+
+    /// <summary>
+    /// Removes unsupported indexing magic words from mainspace articles.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <returns>
+    /// The updated article text. If the page is not in the main namespace, the
+    /// original text is returned unchanged.
+    /// </returns>
+    /// <remarks>
+    /// This cleanup removes the MediaWiki <c>__INDEX__</c> and
+    /// <c>__NOINDEX__</c> magic words only from articles in the main namespace.
+    /// Other namespaces are left unchanged because these magic words may be
+    /// intentionally used there.
+    /// </remarks>
     public static string FixSyntaxMainspace(string articleText, string articleTitle)
     {
         if (!Namespace.IsMainSpace(articleTitle))
