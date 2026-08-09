@@ -790,37 +790,11 @@ public partial class Parsers
             newValue = Tools.RenameTemplate(newValue, templatename, "Cite book");
         }
 
-        // remove leading zero in day of month
-        if (paramsFound.Any(p => p.Key.Contains("date") && Regex.IsMatch(p.Value, @"\b0[1-9]")))
-        {
-            newValue = DateLeadingZero.Replace(newValue, @"$1$2$3$4$5");
-            newValue = DateLeadingZero.Replace(newValue, @"$1$2$3$4$5");
-            TheDate = Tools.GetTemplateParameterValue(newValue, "date");
-            accessdate = Tools.GetTemplateParameterValue(newValue, "accessdate");
-            if (accessdate.Length == 0)
-                accessdate = Tools.GetTemplateParameterValue(newValue, "access-date");
-        }
-
-        if (paramsFound.Any(s => s.Key.Contains("access") && !s.Key.Contains("date")))
-        {
-            string accessyear;
-            if (!paramsFound.TryGetValue("accessyear", out accessyear))
-                accessyear = string.Empty;
-
-            if (Regex.IsMatch(templatename, @"[Cc]ite(?: ?web| book| news)"))
-            {
-                // remove any empty accessdaymonth, accessmonthday, accessmonth and accessyear
-                newValue = AccessDayMonthDay.Replace(newValue, string.Empty);
-
-                // merge accessdate of 'D Month' or 'Month D' and accessyear of 'YYYY' in cite web
-                if (accessyear.Length == 4)
-                    newValue = AccessDateYear.Replace(newValue, @" $2$1$3");
-            }
-
-            // remove accessyear where accessdate is present and contains said year
-            if (accessyear.Length > 0 && accessdate.Contains(accessyear))
-                newValue = Tools.RemoveTemplateParameter(newValue, "accessyear");
-        }
+        newValue = NormalizeCitationAccessDate(
+           newValue,
+           paramsFound,
+           accessdate,
+           templatename);
 
         newValue = NormalizeCitationPages(
             newValue,
@@ -865,6 +839,68 @@ public partial class Parsers
             origyear,
             TheYear,
             TheDate);
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Normalizes legacy access-date components and removes a redundant
+    /// <c>accessyear</c> parameter when appropriate.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="accessdate">
+    /// The citation access-date value.
+    /// </param>
+    /// <param name="templatename">
+    /// The name of the citation template being processed.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying access-date normalization.
+    /// </returns>
+    private static string NormalizeCitationAccessDate(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        string accessdate,
+        string templatename)
+    {
+        if (paramsFound.Any(s => s.Key.Contains("access") && !s.Key.Contains("date")))
+        {
+            string accessyear;
+
+            if (!paramsFound.TryGetValue("accessyear", out accessyear))
+            {
+                accessyear = string.Empty;
+            }
+
+            if (Regex.IsMatch(templatename, @"[Cc]ite(?: ?web| book| news)"))
+            {
+                // remove any empty accessdaymonth, accessmonthday, accessmonth and accessyear
+                newValue = AccessDayMonthDay.Replace(
+                    newValue,
+                    string.Empty);
+
+                // merge accessdate of 'D Month' or 'Month D' and accessyear of 'YYYY' in cite web
+                if (accessyear.Length == 4)
+                {
+                    newValue = AccessDateYear.Replace(
+                        newValue,
+                        @" $2$1$3");
+                }
+            }
+
+            // remove accessyear where accessdate is present and contains said year
+            if (accessyear.Length > 0 && accessdate.Contains(accessyear))
+            {
+                newValue = Tools.RemoveTemplateParameter(
+                    newValue,
+                    "accessyear");
+            }
+        }
 
         return newValue;
     }
