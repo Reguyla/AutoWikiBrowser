@@ -819,24 +819,6 @@ public partial class Parsers
     /// </summary>
     /// <param name="articleText">The wiki text of the article.</param>
     /// <param name="articleTitle">Title of the article</param>
-    /// <param name="noChange"></param>
-    /// <returns></returns>
-    [Obsolete]
-    [CLSCompliant(false)]
-    public string FixPeopleCategories(string articleText, string articleTitle, out bool noChange)
-    {
-        string newText = FixPeopleCategories(articleText, articleTitle);
-
-        noChange = newText.Equals(articleText);
-
-        return newText;
-    }
-
-    /// <summary>
-    /// Adds [[Category:XXXX births]], [[Category:XXXX deaths]] to articles about people where available, for en-wiki only
-    /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">Title of the article</param>
     /// <param name="parseTalkPage"></param>
     /// <param name="noChange"></param>
     /// <returns></returns>
