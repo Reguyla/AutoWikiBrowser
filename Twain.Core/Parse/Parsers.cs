@@ -1949,22 +1949,38 @@ public partial class Parsers
             @"\{\{\s*[Cc]ommons\s?\|\s*[Cc]ategory:\s*([^{}]+?)\s*\}\}");
 
     /// <summary>
-    /// Converts/subst'd some deprecated templates
+    /// Applies supported template conversions and normalization rules to article text.
     /// </summary>
+    /// <remarks>
+    /// This method performs several legacy and compatibility conversions, including
+    /// deprecated template replacement, BASEPAGENAME substitution, citation-template
+    /// conversions, English Wikipedia BLP-specific conversions, portal merging,
+    /// section-template merging, infobox-name normalization, and dablink cleanup.
+    ///
+    /// Many conversions are conditional on templates already being present in the
+    /// article to avoid unnecessary parsing and regular-expression work.
+    /// </remarks>
     /// <param name="articleText">The wiki text of the article.</param>
-    /// <returns>The new article text.</returns>
+    /// <returns>
+    /// The article text after applicable template conversions have been performed.
+    /// </returns>
     public static string Conversions(string articleText)
     {
         articleText = articleText.Replace("{{msg:", "{{");
 
-        // Performance: get all the templates so template changing functions below only called when template(s) present in article
+        // Performance: collect templates once so conversion routines are only
+        // invoked when their relevant templates are present.
         List<string> alltemplates = GetAllTemplates(articleText);
 
         if (TemplateExists(alltemplates, ConversionsCnCommons))
         {
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#.7B.7Bcommons.7CCategory:XXX.7D.7D_.3E_.7B.7Bcommonscat.7CXXX.7D.7D
             if (Variables.IsWikimediaProject)
-                articleText = CommonsCategory.Replace(articleText, @"{{Commons category|$1}}");
+            {
+                articleText = CommonsCategory.Replace(
+                    articleText,
+                    @"{{Commons category|$1}}");
+            }
 
             foreach (KeyValuePair<Regex, string> k in RegexConversion)
             {
@@ -1976,108 +1992,230 @@ public partial class Parsers
 
         if (TemplateExists(alltemplates, WikiRegexes.BASEPAGENAMETemplates))
         {
-            BASEPAGENAMEInRefs = WikiRegexes.Refs.Matches(articleText).OfType<Match>().Any(m => WikiRegexes.BASEPAGENAMETemplates.IsMatch(m.Value));
+            BASEPAGENAMEInRefs =
+                WikiRegexes.Refs
+                    .Matches(articleText)
+                    .OfType<Match>()
+                    .Any(m => WikiRegexes.BASEPAGENAMETemplates.IsMatch(m.Value));
 
             if (!BASEPAGENAMEInRefs && !articleText.Contains("{{#ifeq:{"))
             {
                 foreach (string T in WikiRegexes.BASEPAGENAMETemplatesL)
-                    articleText = Tools.RenameTemplate(articleText, T, "subst:" + T);
+                {
+                    articleText = Tools.RenameTemplate(
+                        articleText,
+                        T,
+                        "subst:" + T);
+                }
             }
         }
 
-        // {{no footnotes}} --> {{more footnotes}}, if some <ref>...</ref> or {{sfn}} references in article, uses regex from WikiRegexes.Refs
-        // does not change templates with section / reason tags
-        if (TemplateExists(alltemplates, NoFootnotes) && (TemplateExists(alltemplates, Footnote) || TotalRefsNotGrouped(articleText) > 0))
-            articleText = NoFootnotes.Replace(articleText, m => OnlyArticleBLPTemplateME(m, "more footnotes needed"));
+        // {{no footnotes}} --> {{more footnotes}}, if some <ref>...</ref> or
+        // {{sfn}} references exist in the article. Does not change templates
+        // containing section/reason parameters.
+        if (TemplateExists(alltemplates, NoFootnotes) &&
+            (TemplateExists(alltemplates, Footnote) ||
+             TotalRefsNotGrouped(articleText) > 0))
+        {
+            articleText = NoFootnotes.Replace(
+                articleText,
+                m => OnlyArticleBLPTemplateME(m, "more footnotes needed"));
+        }
 
-        // {{foo|section|...}} --> {{foo section|...}} for unreferenced, wikify, refimprove, BLPsources, expand, BLP unsourced
+        // {{foo|section|...}} --> {{foo section|...}} for templates such as
+        // unreferenced, wikify, refimprove, BLPsources, expand, and BLP unsourced.
         if (TemplateExists(alltemplates, SectionTemplates))
         {
-            articleText = SectionTemplates.Replace(articleText, SectionTemplateConversionsME);
-            // refresh for xxx section checks later
+            articleText = SectionTemplates.Replace(
+                articleText,
+                SectionTemplateConversionsME);
+
+            // Refresh the template list because subsequent checks depend on the
+            // results of the section-template conversions above.
             alltemplates = GetAllTemplates(articleText);
         }
 
-        // fixes if article has [[Category:Living people]]
-        if (Variables.IsWikipediaEN && CategoryMatch(articleText, "Living people"))
+        // TODO: Extract the English Wikipedia living-person template conversions
+        // into a dedicated helper once behavior-preserving parser cleanup begins.
+        if (Variables.IsWikipediaEN &&
+            CategoryMatch(articleText, "Living people"))
         {
             if (alltemplates.Contains("Unreferenced"))
             {
-                // {{unreferenced}} --> {{BLP unreferenced}} if article has [[Category:Living people]], and no free-text first argument to {{unref}}
-                MatchCollection unrefm = Tools.NestedTemplateRegex("unreferenced").Matches(articleText);
+                // {{unreferenced}} --> {{BLP unreferenced}} when the article is
+                // categorized as a living person and the template has no
+                // free-text first argument.
+                MatchCollection unrefm =
+                    Tools.NestedTemplateRegex("unreferenced").Matches(articleText);
+
                 if (unrefm.Count == 1)
                 {
-                    if (Tools.TurnFirstToLower(Tools.GetTemplateArgument(unrefm[0].Value, 1)).StartsWith("date")
-                        || Tools.GetTemplateArgumentCount(unrefm[0].Value) == 0)
+                    if (Tools
+                            .TurnFirstToLower(
+                                Tools.GetTemplateArgument(unrefm[0].Value, 1))
+                            .StartsWith("date") ||
+                        Tools.GetTemplateArgumentCount(unrefm[0].Value) == 0)
                     {
-                        // if also have existing BLP unsourced then remove unreferenced
+                        // If BLP unsourced already exists, remove the redundant
+                        // unreferenced template instead.
                         if (BLPUnsourced.IsMatch(articleText))
                         {
-                            articleText = Tools.NestedTemplateRegex("unreferenced").Replace(articleText, string.Empty);
+                            articleText =
+                                Tools.NestedTemplateRegex("unreferenced")
+                                    .Replace(articleText, string.Empty);
+
                             Parsers p = new Parsers();
-                            articleText = WikiRegexes.MultipleIssues.Replace(articleText, p.MultipleIssuesSingleTagME);
+
+                            articleText =
+                                WikiRegexes.MultipleIssues.Replace(
+                                    articleText,
+                                    p.MultipleIssuesSingleTagME);
                         }
                         else
-                            articleText = Tools.RenameTemplate(articleText, "unreferenced", "BLP unreferenced", false);
+                        {
+                            articleText = Tools.RenameTemplate(
+                                articleText,
+                                "unreferenced",
+                                "BLP unreferenced",
+                                false);
+                        }
                     }
                 }
             }
 
             if (alltemplates.Contains("Unreferenced section"))
-                articleText = Tools.RenameTemplate(articleText, "unreferenced section", "BLP unreferenced section", false);
+            {
+                articleText = Tools.RenameTemplate(
+                    articleText,
+                    "unreferenced section",
+                    "BLP unreferenced section",
+                    false);
+            }
+
             if (alltemplates.Contains("Primary sources"))
-                articleText = Tools.RenameTemplate(articleText, "primary sources", "BLP primary sources", false);
+            {
+                articleText = Tools.RenameTemplate(
+                    articleText,
+                    "primary sources",
+                    "BLP primary sources",
+                    false);
+            }
+
             if (alltemplates.Contains("One source"))
-                articleText = Tools.RenameTemplate(articleText, "one source", "BLP one source", false);
+            {
+                articleText = Tools.RenameTemplate(
+                    articleText,
+                    "one source",
+                    "BLP one source",
+                    false);
+            }
 
             if (alltemplates.Contains("Self-published"))
-                articleText = Tools.RenameTemplate(articleText, "self-published", "BLP self-published", false);
+            {
+                articleText = Tools.RenameTemplate(
+                    articleText,
+                    "self-published",
+                    "BLP self-published",
+                    false);
+            }
+
             if (alltemplates.Contains("No footnotes"))
-                articleText = Tools.RenameTemplate(articleText, "No footnotes", "BLP no footnotes", false);
+            {
+                articleText = Tools.RenameTemplate(
+                    articleText,
+                    "No footnotes",
+                    "BLP no footnotes",
+                    false);
+            }
 
             if (alltemplates.Contains("More citations needed"))
             {
-                // {{More citations needed}} --> {{BLP sources}} if article has [[Category:Living people]], and no free-text first argument to {{More citations needed}}
-                MatchCollection mc = Tools.NestedTemplateRegex("More citations needed").Matches(articleText);
+                // {{More citations needed}} --> {{BLP sources}} when the article
+                // is categorized as a living person and the template has no
+                // free-text first argument.
+                MatchCollection mc =
+                    Tools.NestedTemplateRegex("More citations needed")
+                        .Matches(articleText);
+
                 if (mc.Count == 1)
                 {
                     string refimprove = mc[0].Value;
-                    if (Tools.TurnFirstToLower(Tools.GetTemplateArgument(refimprove, 1)).StartsWith("date")
-                         || Tools.GetTemplateArgumentCount(refimprove) == 0)
+
+                    if (Tools
+                            .TurnFirstToLower(
+                                Tools.GetTemplateArgument(refimprove, 1))
+                            .StartsWith("date") ||
+                        Tools.GetTemplateArgumentCount(refimprove) == 0)
                     {
-                        // if also have existing BLP sources then remove refimprove
-                        if (Tools.NestedTemplateRegex("BLP sources").IsMatch(articleText))
+                        // If BLP sources already exists, remove the redundant
+                        // More citations needed template instead.
+                        if (Tools
+                            .NestedTemplateRegex("BLP sources")
+                            .IsMatch(articleText))
                         {
-                            articleText = Tools.NestedTemplateRegex("More citations needed").Replace(articleText, string.Empty);
+                            articleText =
+                                Tools.NestedTemplateRegex("More citations needed")
+                                    .Replace(articleText, string.Empty);
+
                             Parsers p = new Parsers();
-                            articleText = WikiRegexes.MultipleIssues.Replace(articleText, p.MultipleIssuesSingleTagME);
+
+                            articleText =
+                                WikiRegexes.MultipleIssues.Replace(
+                                    articleText,
+                                    p.MultipleIssuesSingleTagME);
                         }
                         else
-                            articleText = Tools.RenameTemplate(articleText, "More citations needed", "BLP sources", false);
+                        {
+                            articleText = Tools.RenameTemplate(
+                                articleText,
+                                "More citations needed",
+                                "BLP sources",
+                                false);
+                        }
                     }
                 }
             }
 
             if (alltemplates.Contains("More citations needed section"))
-                articleText = Tools.RenameTemplate(articleText, "More citations needed section", "BLP sources section", false);
+            {
+                articleText = Tools.RenameTemplate(
+                    articleText,
+                    "More citations needed section",
+                    "BLP sources section",
+                    false);
+            }
         }
 
         if (TemplateExists(alltemplates, WikiRegexes.PortalTemplate))
+        {
             articleText = MergePortals(articleText);
+        }
 
-        if (alltemplates.Count(s => SectionMergedTemplatesR.IsMatch(@"{{" + s + "|}}")) > 1)
+        if (alltemplates.Count(
+                s => SectionMergedTemplatesR.IsMatch(@"{{" + s + "|}}")) > 1)
+        {
             articleText = MergeTemplatesBySection(articleText);
+        }
 
-        // clean up Template:/underscores in infobox names
+        // Normalize Template: prefixes and underscores in infobox names.
         if (TemplateExists(alltemplates, WikiRegexes.InfoBox))
-            articleText = WikiRegexes.InfoBox.Replace(articleText, m =>
-            {
-                string newName = CanonicalizeTitle(m.Groups[1].Value);
-                return (newName.Equals(m.Groups[1].Value) ? m.Value : Tools.RenameTemplate(m.Value, newName));
-            });
+        {
+            articleText = WikiRegexes.InfoBox.Replace(
+                articleText,
+                m =>
+                {
+                    string newName = CanonicalizeTitle(m.Groups[1].Value);
+
+                    return newName.Equals(m.Groups[1].Value)
+                        ? m.Value
+                        : Tools.RenameTemplate(m.Value, newName);
+                });
+        }
 
         if (TemplateExists(alltemplates, WikiRegexes.Dablinks))
+        {
             articleText = Dablinks(articleText);
+        }
 
         return articleText;
     }
