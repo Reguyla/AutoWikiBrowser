@@ -368,29 +368,29 @@ private static readonly Regex RegexHeadingsSeeAlso =
             if (HeadingsIncorrectWhitespaceBefore.IsMatch(articleText))
             {
                 // list of headings that have a comment on the line before: these are correct as is
-                List<string> commentBeforeHeadings = CommentThenHeading.Matches(articleText).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+                List<string> commentBeforeHeadings = CommentThenHeading.Matches(articleText).Cast<Match>().Select(match => match.Groups[1].Value).ToList();
 
-                articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(articleText, m =>
+                articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(articleText, match =>
                     {
                         // avoid special case of indented text that may be code with lots of == that matches a heading
-                        if (m.Groups[2].Value.Contains("=="))
-                            return m.Value;
+                        if (match.Groups[2].Value.Contains("=="))
+                            return match.Value;
 
                         // if a sub-heading directly after a heading don't add blank line
-                        foreach (Match x in HeadingSubHeading.Matches(articleText))
+                        foreach (Match subHeadingMatch in HeadingSubHeading.Matches(articleText))
                         {
-                            if (x.Groups[3].Value.Contains(m.Groups[1].Value))
-                                return m.Value;
+                            if (subHeadingMatch.Groups[3].Value.Contains(match.Groups[1].Value))
+                                return match.Value;
                         }
 
                         // if comment on the line before heading then it's correct as is
-                        if (commentBeforeHeadings.Any(c => c.Equals(m.Groups[2].Value)))
-                            return m.Value;
+                        if (commentBeforeHeadings.Any(heading => heading.Equals(match.Groups[2].Value)))
+                            return match.Value;
 
-                        return "\r\n\r\n" + m.Groups[1].Value;
+                        return "\r\n\r\n" + match.Groups[1].Value;
                     });
 
-                articleText = Anchor2NewlineHeader.Replace(articleText, m => m.Value.Replace("\r\n\r\n==", "\r\n=="));
+                articleText = Anchor2NewlineHeader.Replace(articleText, match => match.Value.Replace("\r\n\r\n==", "\r\n=="));
             }
         }
 
