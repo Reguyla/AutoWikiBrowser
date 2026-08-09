@@ -1,20 +1,20 @@
 ﻿/*
-    Derived from Autowikibrowser
-    Copyright (C) 2007 Martin Richards
+Derived from Autowikibrowser
+Copyright (C) 2007 Martin Richards
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Drawing;
@@ -24,138 +24,243 @@ using System.Xml.Serialization;
 
 namespace Twain.Core.ReplaceSpecial;
 
-//TODO: Use IArticleComparer derivatives where possible
+// TODO: Replace applicable comparison/replacement logic with existing
+// IArticleComparer implementations where doing so preserves ReplaceSpecial
+// behavior and reduces duplicated comparison logic.
+//
+// TODO: Separate rule-tree editing operations from WinForms event handling so
+// rule creation, movement, copy/paste, history, and selection behavior can be
+// tested independently of the form.
 
+/// <summary>
+/// Provides the WinForms editor used to create, organize, configure, and apply
+/// ReplaceSpecial rules.
+/// </summary>
+/// <remarks>
+/// The form coordinates the rule tree, rule-specific editor controls, command
+/// history, and selection state.
+/// </remarks>
 public partial class ReplaceSpecial : Form, IRuleControlOwner
 {
     #region contextmenu
-    private void NewRuleContextMenuItem_Click(object sender, EventArgs e)
+
+    private void NewRuleContextMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         NewRule();
     }
 
-    private void NewSubruleContextMenuItem_Click(object sender, EventArgs e)
+    private void NewSubruleContextMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         NewSubrule();
     }
 
-    private void CutMenuItem_Click(object sender, EventArgs e)
+    private void CutMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         CutCmd();
     }
 
-    private void CopyMenuItem_Click(object sender, EventArgs e)
+    private void CopyMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         CopyCmd();
     }
 
-    private void PasteMenuItem_Click(object sender, EventArgs e)
+    private void PasteMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         PasteCmd();
     }
 
     #endregion
 
-    IRule CurrentRule;
-    Control ruleControl_;
-    private readonly RuleTreeHistory History;
+    private IRule _currentRule;
+    private Control _ruleControl;
+    private readonly RuleTreeHistory _history;
 
-    public void Clear()
-    {
-        if (NoOfRules > 0)
-            RulesTreeView.Nodes.Clear();
-    }
-
+    /// <summary>
+    /// Initializes a new ReplaceSpecial rule editor.
+    /// </summary>
     public ReplaceSpecial()
     {
         InitializeComponent();
 
-        History = new RuleTreeHistory(RulesTreeView);
+        _history =
+            new RuleTreeHistory(
+                RulesTreeView);
 
         UpdateEnabledStates();
     }
 
+    /// <summary>
+    /// Removes all rules from the rule tree when rules are currently present.
+    /// </summary>
+    public void Clear()
+    {
+        if (NoOfRules > 0)
+        {
+            RulesTreeView.Nodes.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Displays the ReplaceSpecial form with the specified window title.
+    /// </summary>
+    /// <param name="titleText">
+    /// The title to display in the form caption.
+    /// </param>
     public void Show(string titleText)
     {
         Text = titleText;
         base.Show();
     }
 
-    private void OkButton_Click(object sender, EventArgs e)
+    private void OkButton_Click(
+        object sender,
+        EventArgs e)
     {
         SaveCurrentRule();
         Hide();
     }
 
-    private void ReplaceSpecial_FormClosing(object sender, FormClosingEventArgs e)
+    /// <summary>
+    /// Saves the active rule and hides the form instead of allowing the form
+    /// to close and be disposed.
+    /// </summary>
+    private void ReplaceSpecial_FormClosing(
+        object sender,
+        FormClosingEventArgs e)
     {
         SaveCurrentRule();
+
         e.Cancel = true;
         Hide();
     }
 
-    private void RulesTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+    private void RulesTreeView_AfterSelect(
+        object sender,
+        TreeViewEventArgs e)
     {
         if (RulesTreeView.SelectedNode == null)
             return;
 
         SaveCurrentRule();
         RestoreSelectedRule();
+
+        // TODO: Confirm whether this call is still required. RestoreSelectedRule
+        // already updates enabled states after restoring the selection.
         UpdateEnabledStates();
     }
 
+    /// <summary>
+    /// Saves the currently active rule and refreshes its tree-view appearance.
+    /// </summary>
     private void SaveCurrentRule()
     {
-        if (CurrentRule == null)
+        if (_currentRule == null)
             return;
 
-        CurrentRule.Save();
+        _currentRule.Save();
         SetTreeViewColours();
     }
 
+    /// <summary>
+    /// Restores the rule associated with the currently selected tree node and
+    /// updates the rule editor UI.
+    /// </summary>
     private void RestoreSelectedRule()
     {
-        if (RulesTreeView.SelectedNode == null)
+        TreeNode selectedNode =
+            RulesTreeView.SelectedNode;
+
+        if (selectedNode == null)
         {
-            if (CurrentRule != null)
-            {
-                CurrentRule.DisposeControl();
-                CurrentRule = null;
-                NoRuleSelectedLabel.Show();
-            }
+            ClearSelectedRule();
         }
         else
         {
-            NoRuleSelectedLabel.Hide();
-
-            IRule oldrule = CurrentRule;
-
-            CurrentRule = (IRule)RulesTreeView.SelectedNode.Tag;
-
-            SuspendLayout();
-
-            ruleControl_ = CurrentRule.CreateControl(this, RuleControlSpace.Controls, new Point());
-            ruleControl_.Size = RuleControlSpace.Size;
-
-            CurrentRule.Name = RulesTreeView.SelectedNode.Text;
-
-            CurrentRule.Restore();
-
-            if (oldrule != null)
-            {
-                if (!CurrentRule.Equals(oldrule))
-                    oldrule.DisposeControl();
-            }
-
-            ruleControl_.Visible = true;
-
-            ResumeLayout();
+            ShowSelectedRule(selectedNode);
         }
+
         UpdateEnabledStates();
         SetTreeViewColours();
     }
 
-    private void UpButton_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Clears the active rule and displays the no-selection placeholder.
+    /// </summary>
+    private void ClearSelectedRule()
+    {
+        if (_currentRule == null)
+            return;
+
+        _currentRule.DisposeControl();
+        _currentRule = null;
+
+        NoRuleSelectedLabel.Show();
+    }
+
+    /// <summary>
+    /// Displays and restores the rule associated with the specified tree node.
+    /// </summary>
+    /// <param name="selectedNode">
+    /// The selected rule tree node.
+    /// </param>
+    private void ShowSelectedRule(
+        TreeNode selectedNode)
+    {
+        NoRuleSelectedLabel.Hide();
+
+        IRule previousRule =
+            _currentRule;
+
+        // TODO: Validate or encapsulate the TreeNode.Tag -> IRule invariant so
+        // rule-tree operations do not rely on repeated unchecked casts.
+        _currentRule =
+            (IRule)selectedNode.Tag;
+
+        SuspendLayout();
+
+        try
+        {
+            _ruleControl =
+                _currentRule.CreateControl(
+                    this,
+                    RuleControlSpace.Controls,
+                    Point.Empty);
+
+            _ruleControl.Size =
+                RuleControlSpace.Size;
+
+            _currentRule.Name =
+                selectedNode.Text;
+
+            _currentRule.Restore();
+
+            if (previousRule != null &&
+                !_currentRule.Equals(previousRule))
+            {
+                previousRule.DisposeControl();
+            }
+
+            _ruleControl.Visible = true;
+        }
+        finally
+        {
+            ResumeLayout();
+        }
+    }
+
+    private void UpButton_Click(
+        object sender,
+        EventArgs e)
     {
         MoveSelectedUp();
     }
@@ -178,7 +283,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         if (p == null)
             return;
 
-        History.Save();
+        _history.Save();
 
         col.Remove(tn);
         int i = col.IndexOf(p);
@@ -214,7 +319,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         if (p == null)
             return;
 
-        History.Save();
+        _history.Save();
 
         int i = col.IndexOf(p);
         col.Remove(tn);
@@ -251,8 +356,8 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     {
         bool hasSelection = RulesTreeView.SelectedNode != null;
 
-        if (ruleControl_ != null)
-            ruleControl_.Enabled = hasSelection;
+        if (_ruleControl != null)
+            _ruleControl.Enabled = hasSelection;
 
         DeleteButton.Enabled = hasSelection;
         UpButton.Enabled = hasSelection;
@@ -277,8 +382,8 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         CopyMenuItem.Enabled = hasSelection;
         CopyContextMenuItem.Enabled = hasSelection;
 
-        UndoMenuItem.Enabled = History.CanUndo;
-        RedoMenuItem.Enabled = History.CanRedo;
+        UndoMenuItem.Enabled = _history.CanUndo;
+        RedoMenuItem.Enabled = _history.CanRedo;
     }
 
     private void DeleteButton_Click(object sender, EventArgs e)
@@ -294,7 +399,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
 
         SaveCurrentRule();
 
-        History.Save();
+        _history.Save();
 
         TreeNode nt = st.NextNode;
 
@@ -387,7 +492,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             return;
 
         SaveCurrentRule();
-        History.Save();
+       _history.Save();
 
         string serializedRule = Serialize(GetSelectedRule());
         Tools.CopyToClipboard(serializedRule, true);
@@ -425,7 +530,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             try
             {
                 SaveCurrentRule();
-                History.Save();
+                _history.Save();
 
                 AddNewRule(rule);
 
@@ -520,7 +625,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             return;
 
         SaveCurrentRule();
-        History.Save();
+        _history.Save();
 
         TreeNode n = new TreeNode(r.Name) { Tag = r };
 
@@ -550,7 +655,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         }
 
         RestoreSelectedRule();
-        CurrentRule.SelectName();
+       _currentRule.SelectName();
     }
 
     private void AddNewRule(IRule r, TreeNode tn)
@@ -608,7 +713,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         if (s == null)
             return;
 
-        History.Save();
+        _history.Save();
 
         TreeNode n = new TreeNode(r.Name) { Tag = r };
 
@@ -617,7 +722,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         RulesTreeView.Select();
 
         RestoreSelectedRule();
-        CurrentRule.SelectName();
+        _currentRule.SelectName();
     }
 
     private void NewSubruleInTemplateCallMenuItem_Click(object sender, EventArgs e)
@@ -643,14 +748,14 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     private void UndoMenuItem_Click(object sender, EventArgs e)
     {
         SaveCurrentRule();
-        History.Undo();
+        _history.Undo();
         RestoreSelectedRule();
     }
 
     private void RedoMenuItem_Click(object sender, EventArgs e)
     {
         SaveCurrentRule();
-        History.Redo();
+        _history.Redo();
         RestoreSelectedRule();
     }
 
