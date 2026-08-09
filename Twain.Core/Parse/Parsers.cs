@@ -2040,150 +2040,9 @@ public partial class Parsers
         if (Variables.IsWikipediaEN &&
             CategoryMatch(articleText, "Living people"))
         {
-            if (alltemplates.Contains("Unreferenced"))
-            {
-                // {{unreferenced}} --> {{BLP unreferenced}} when the article is
-                // categorized as a living person and the template has no
-                // free-text first argument.
-                MatchCollection unrefm =
-                    Tools.NestedTemplateRegex("unreferenced").Matches(articleText);
-
-                if (unrefm.Count == 1)
-                {
-                    if (Tools
-                            .TurnFirstToLower(
-                                Tools.GetTemplateArgument(unrefm[0].Value, 1))
-                            .StartsWith("date") ||
-                        Tools.GetTemplateArgumentCount(unrefm[0].Value) == 0)
-                    {
-                        // If BLP unsourced already exists, remove the redundant
-                        // unreferenced template instead.
-                        if (BLPUnsourced.IsMatch(articleText))
-                        {
-                            articleText =
-                                Tools.NestedTemplateRegex("unreferenced")
-                                    .Replace(articleText, string.Empty);
-
-                            Parsers p = new Parsers();
-
-                            articleText =
-                                WikiRegexes.MultipleIssues.Replace(
-                                    articleText,
-                                    p.MultipleIssuesSingleTagME);
-                        }
-                        else
-                        {
-                            articleText = Tools.RenameTemplate(
-                                articleText,
-                                "unreferenced",
-                                "BLP unreferenced",
-                                false);
-                        }
-                    }
-                }
-            }
-
-            if (alltemplates.Contains("Unreferenced section"))
-            {
-                articleText = Tools.RenameTemplate(
-                    articleText,
-                    "unreferenced section",
-                    "BLP unreferenced section",
-                    false);
-            }
-
-            if (alltemplates.Contains("Primary sources"))
-            {
-                articleText = Tools.RenameTemplate(
-                    articleText,
-                    "primary sources",
-                    "BLP primary sources",
-                    false);
-            }
-
-            if (alltemplates.Contains("One source"))
-            {
-                articleText = Tools.RenameTemplate(
-                    articleText,
-                    "one source",
-                    "BLP one source",
-                    false);
-            }
-
-            if (alltemplates.Contains("Self-published"))
-            {
-                articleText = Tools.RenameTemplate(
-                    articleText,
-                    "self-published",
-                    "BLP self-published",
-                    false);
-            }
-
-            if (alltemplates.Contains("No footnotes"))
-            {
-                articleText = Tools.RenameTemplate(
-                    articleText,
-                    "No footnotes",
-                    "BLP no footnotes",
-                    false);
-            }
-
-            if (alltemplates.Contains("More citations needed"))
-            {
-                // {{More citations needed}} --> {{BLP sources}} when the article
-                // is categorized as a living person and the template has no
-                // free-text first argument.
-                MatchCollection mc =
-                    Tools.NestedTemplateRegex("More citations needed")
-                        .Matches(articleText);
-
-                if (mc.Count == 1)
-                {
-                    string refimprove = mc[0].Value;
-
-                    if (Tools
-                            .TurnFirstToLower(
-                                Tools.GetTemplateArgument(refimprove, 1))
-                            .StartsWith("date") ||
-                        Tools.GetTemplateArgumentCount(refimprove) == 0)
-                    {
-                        // If BLP sources already exists, remove the redundant
-                        // More citations needed template instead.
-                        if (Tools
-                            .NestedTemplateRegex("BLP sources")
-                            .IsMatch(articleText))
-                        {
-                            articleText =
-                                Tools.NestedTemplateRegex("More citations needed")
-                                    .Replace(articleText, string.Empty);
-
-                            Parsers p = new Parsers();
-
-                            articleText =
-                                WikiRegexes.MultipleIssues.Replace(
-                                    articleText,
-                                    p.MultipleIssuesSingleTagME);
-                        }
-                        else
-                        {
-                            articleText = Tools.RenameTemplate(
-                                articleText,
-                                "More citations needed",
-                                "BLP sources",
-                                false);
-                        }
-                    }
-                }
-            }
-
-            if (alltemplates.Contains("More citations needed section"))
-            {
-                articleText = Tools.RenameTemplate(
-                    articleText,
-                    "More citations needed section",
-                    "BLP sources section",
-                    false);
-            }
+            articleText = ApplyLivingPersonTemplateConversions(
+                articleText,
+                alltemplates);
         }
 
         if (TemplateExists(alltemplates, WikiRegexes.PortalTemplate))
@@ -2215,6 +2074,212 @@ public partial class Parsers
         if (TemplateExists(alltemplates, WikiRegexes.Dablinks))
         {
             articleText = Dablinks(articleText);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Applies English Wikipedia template conversions specific to articles about
+    /// living people.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <param name="alltemplates">
+    /// The templates currently detected in the article.
+    /// </param>
+    /// <returns>
+    /// The article text after applicable living-person template conversions have
+    /// been performed.
+    /// </returns>
+    private static string ApplyLivingPersonTemplateConversions(
+        string articleText,
+        List<string> alltemplates)
+    {
+        if (alltemplates.Contains("Unreferenced"))
+        {
+            // {{unreferenced}} --> {{BLP unreferenced}} if article has
+            // [[Category:Living people]], and no free-text first argument to {{unref}}.
+            MatchCollection unrefm =
+                Tools.NestedTemplateRegex("unreferenced").Matches(articleText);
+
+            if (unrefm.Count == 1)
+            {
+                if (Tools
+                        .TurnFirstToLower(
+                            Tools.GetTemplateArgument(unrefm[0].Value, 1))
+                        .StartsWith("date")
+                    || Tools.GetTemplateArgumentCount(unrefm[0].Value) == 0)
+                {
+                    // If BLP unsourced already exists, remove the redundant
+                    // unreferenced template.
+                    if (BLPUnsourced.IsMatch(articleText))
+                    {
+                        articleText =
+                            Tools.NestedTemplateRegex("unreferenced")
+                                .Replace(articleText, string.Empty);
+
+                        Parsers p = new();
+
+                        articleText =
+                            WikiRegexes.MultipleIssues.Replace(
+                                articleText,
+                                p.MultipleIssuesSingleTagME);
+                    }
+                    else
+                    {
+                        articleText =
+                            Tools.RenameTemplate(
+                                articleText,
+                                "unreferenced",
+                                "BLP unreferenced",
+                                false);
+                    }
+                }
+            }
+        }
+
+        if (alltemplates.Contains("Unreferenced section"))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    "unreferenced section",
+                    "BLP unreferenced section",
+                    false);
+        }
+
+        if (alltemplates.Contains("Primary sources"))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    "primary sources",
+                    "BLP primary sources",
+                    false);
+        }
+
+        if (alltemplates.Contains("One source"))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    "one source",
+                    "BLP one source",
+                    false);
+        }
+
+        if (alltemplates.Contains("Self-published"))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    "self-published",
+                    "BLP self-published",
+                    false);
+        }
+
+        if (alltemplates.Contains("No footnotes"))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    "No footnotes",
+                    "BLP no footnotes",
+                    false);
+        }
+
+        if (alltemplates.Contains("More citations needed"))
+        {
+            // {{More citations needed}} --> {{BLP sources}} if article has
+            // [[Category:Living people]], and no free-text first argument.
+            MatchCollection mc =
+                Tools.NestedTemplateRegex("More citations needed")
+                    .Matches(articleText);
+
+            if (mc.Count == 1)
+            {
+                string refimprove = mc[0].Value;
+
+                if (Tools
+                        .TurnFirstToLower(
+                            Tools.GetTemplateArgument(refimprove, 1))
+                        .StartsWith("date")
+                    || Tools.GetTemplateArgumentCount(refimprove) == 0)
+                {
+                    // If BLP sources already exists, remove the redundant
+                    // More citations needed template.
+                    if (Tools
+                        .NestedTemplateRegex("BLP sources")
+                        .IsMatch(articleText))
+                    {
+                        articleText =
+                            Tools.NestedTemplateRegex("More citations needed")
+                                .Replace(articleText, string.Empty);
+
+                        Parsers p = new();
+
+                        articleText =
+                            WikiRegexes.MultipleIssues.Replace(
+                                articleText,
+                                p.MultipleIssuesSingleTagME);
+                    }
+                    else
+                    {
+                        articleText =
+                            Tools.RenameTemplate(
+                                articleText,
+                                "More citations needed",
+                                "BLP sources",
+                                false);
+                    }
+                }
+            }
+        }
+
+        if (alltemplates.Contains("More citations needed section"))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    "More citations needed section",
+                    "BLP sources section",
+                    false);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Substitutes supported BASEPAGENAME-dependent templates when doing so is
+    /// safe for the current article text.
+    /// </summary>
+    /// <remarks>
+    /// Templates are not substituted when a matching template occurs inside a
+    /// reference or when the article contains the guarded parser-function pattern.
+    /// </remarks>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// The article text after applicable BASEPAGENAME template substitutions have
+    /// been performed.
+    /// </returns>
+    private static string SubstituteBasePageNameTemplates(string articleText)
+    {
+        bool BASEPAGENAMEInRefs =
+            WikiRegexes.Refs
+                .Matches(articleText)
+                .OfType<Match>()
+                .Any(m => WikiRegexes.BASEPAGENAMETemplates.IsMatch(m.Value));
+
+        if (!BASEPAGENAMEInRefs && !articleText.Contains("{{#ifeq:{"))
+        {
+            foreach (string T in WikiRegexes.BASEPAGENAMETemplatesL)
+            {
+                articleText =
+                    Tools.RenameTemplate(
+                        articleText,
+                        T,
+                        "subst:" + T);
+            }
         }
 
         return articleText;
