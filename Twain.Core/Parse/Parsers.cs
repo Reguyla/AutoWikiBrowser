@@ -1581,11 +1581,55 @@ public partial class Parsers
         return newText;
     }
 
-    private static readonly HideText BulletExternalHider = new HideText(false, true, false);
+    /// <summary>
+    /// Helper used to temporarily hide external links while leaving other wiki
+    /// markup visible during parsing operations.
+    /// </summary>
+    /// <remarks>
+    /// This instance is configured specifically for parsing scenarios that need
+    /// to process bullet lists without modifying external link syntax.
+    /// </remarks>
+    private static readonly HideText BulletExternalHider =
+        new(false, true, false);
 
-    private static readonly Regex ExternalLinksSection = new Regex(@"=\s*(?:external)?\s*links\s*=", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
-    private static readonly Regex NewlinesBeforeHTTP = new Regex("(\r\n|\n)?(\r\n|\n)(\\[?http)", RegexOptions.Compiled);
-    private static readonly Regex HeadingQuick = new Regex(@"^=+[^=\r\n]+=", RegexOptions.Multiline);
+    /// <summary>
+    /// Matches an "External links" section heading.
+    /// </summary>
+    /// <remarks>
+    /// Supports headings with or without the word "External" and performs a
+    /// case-insensitive search from the end of the article for improved
+    /// performance.
+    /// </remarks>
+    private static readonly Regex ExternalLinksSection =
+        new(
+            @"=\s*(?:external)?\s*links\s*=",
+            RegexOptions.Compiled |
+            RegexOptions.IgnoreCase |
+            RegexOptions.RightToLeft);
+
+    /// <summary>
+    /// Matches blank lines immediately preceding HTTP or HTTPS external links.
+    /// </summary>
+    /// <remarks>
+    /// Used when normalizing whitespace before external link entries.
+    /// </remarks>
+    private static readonly Regex NewlinesBeforeHTTP =
+        new(
+            "(\r\n|\n)?(\r\n|\n)(\\[?http)",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Quickly identifies wiki section headings without performing full heading
+    /// parsing.
+    /// </summary>
+    /// <remarks>
+    /// Intended as a lightweight pre-check before more expensive heading
+    /// processing.
+    /// </remarks>
+    private static readonly Regex HeadingQuick =
+        new(
+            @"^=+[^=\r\n]+=",
+            RegexOptions.Multiline);
 
     // Covered by: LinkTests.TestBulletExternalLinks()
     /// <summary>
@@ -1619,10 +1663,35 @@ public partial class Parsers
         return articleText;
     }
 
-    private static readonly Regex WordWhitespaceEndofline = new Regex(@"(\w+)\s+$", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches a word followed by trailing whitespace at the end of a line.
+    /// </summary>
+    /// <remarks>
+    /// Used by whitespace normalization routines to identify removable trailing
+    /// spaces while preserving the preceding word.
+    /// </remarks>
+    private static readonly Regex WordWhitespaceEndofline =
+        new(@"(\w+)\s+$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Cached wiki-specific category namespace prefix.
+    /// </summary>
+    /// <remarks>
+    /// Initialized from the current wiki configuration and used when constructing
+    /// or matching category links.
+    /// </remarks>
     private static string CategoryStart;
 
-    private static readonly Regex TripleBraceNumIfExist = new Regex(@"({{{\d}}}|{{#ifexist)", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches triple-brace numbered template parameters and the
+    /// <c>{{#ifexist:}}</c> parser function.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify constructs that require special handling because they
+    /// should not be processed by routines that assume ordinary template syntax.
+    /// </remarks>
+    private static readonly Regex TripleBraceNumIfExist =
+        new(@"({{{\d}}}|{{#ifexist)", RegexOptions.Compiled);
 
     /// <summary>
     /// Returns whether the article text has a &lt;noinclude&gt; or &lt;includeonly&gt; or '{{{1}}}' etc. which should not appear on the mainspace
@@ -1645,17 +1714,49 @@ public partial class Parsers
         return WikiRegexes.LooseImage.Replace(articleText, FixImagesME);
     }
 
+    /// <summary>
+    /// Matches temperature-unit markers using degree or ordinal symbols followed
+    /// by Celsius or Fahrenheit designators.
+    /// </summary>
+    /// <remarks>
+    /// Supports common HTML entities and Unicode degree symbols, optional
+    /// non-breaking spaces, and either upper- or lowercase <c>C</c> or <c>F</c>.
+    /// The unit letter is captured in group 1.
+    /// </remarks>
+    private static readonly Regex Temperature =
+        new(
+            @"(?:&deg;|&ordm;|º|°)(?:&nbsp;)?\s*([CcFf])(?![A-Za-z])",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Normalizes image links while preserving image names that contain encoded
+    /// apostrophe pairs.
+    /// </summary>
+    /// <remarks>
+    /// The image namespace and image title are normalized independently. URL or
+    /// underscore normalization is applied only to the image name captured in
+    /// group 2. Image names containing <c>%27%27</c> are preserved to avoid
+    /// changing encoded apostrophe pairs.
+    /// </remarks>
+    /// <param name="m">
+    /// The regular-expression match containing the image namespace in group 1,
+    /// the image name in group 2, and the remaining image-link content in group 3.
+    /// </param>
+    /// <returns>The normalized image link.</returns>
     private static string FixImagesME(Match m)
     {
         string imageName = m.Groups[2].Value;
-        // only apply underscore/URL encoding fixes to image name (group 2)
-        // don't convert %27%27 -- https://phabricator.wikimedia.org/T10932
-        return "[[" + Namespace.Normalize(m.Groups[1].Value, 6) +
-               (imageName.Contains("%27%27") ? imageName : CanonicalizeTitle(imageName).Trim()) +
-               m.Groups[3].Value.Trim() + "]]";
-    }
 
-    private static readonly Regex Temperature = new Regex(@"(?:&deg;|&ordm;|º|°)(?:&nbsp;)?\s*([CcFf])(?![A-Za-z])", RegexOptions.Compiled);
+        // Only apply underscore/URL encoding fixes to the image name (group 2).
+        // Do not convert %27%27; see Wikimedia Phabricator T10932.
+        return "[[" +
+               Namespace.Normalize(m.Groups[1].Value, 6) +
+               (imageName.Contains("%27%27")
+                   ? imageName
+                   : CanonicalizeTitle(imageName).Trim()) +
+               m.Groups[3].Value.Trim() +
+               "]]";
+    }
 
     /// <summary>
     /// Fix bad Temperatures
@@ -1773,9 +1874,35 @@ public partial class Parsers
         return newText;
     }
 
-    private static readonly Regex NDash = new Regex("&#150;|&#8211;|&#x2013;", RegexOptions.Compiled);
-    private static readonly Regex MDash = new Regex("&#151;|&#8212;|&#x2014;", RegexOptions.Compiled);
-    private static readonly Regex MathTagStart = new Regex("<[Mm]ath|[Cc]hem>", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches HTML entity representations of an en dash.
+    /// </summary>
+    /// <remarks>
+    /// Supports decimal and hexadecimal numeric character references commonly
+    /// encountered in wiki text.
+    /// </remarks>
+    private static readonly Regex NDash =
+        new("&#150;|&#8211;|&#x2013;", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches HTML entity representations of an em dash.
+    /// </summary>
+    /// <remarks>
+    /// Supports decimal and hexadecimal numeric character references commonly
+    /// encountered in wiki text.
+    /// </remarks>
+    private static readonly Regex MDash =
+        new("&#151;|&#8212;|&#x2014;", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches the beginning of <c>&lt;math&gt;</c> or <c>&lt;chem&gt;</c> tags.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify mathematical or chemical markup that requires special
+    /// handling during parser operations.
+    /// </remarks>
+    private static readonly Regex MathTagStart =
+        new("<[Mm]ath|[Cc]hem>", RegexOptions.Compiled);
 
     // Covered by: UnicodifyTests
     /// <summary>
