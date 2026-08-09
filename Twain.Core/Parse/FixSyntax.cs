@@ -38,113 +38,472 @@ public partial class Parsers
         return newText;
     }
 
-    // regexes for external link match on balanced bracket
+    /// <summary>
+    /// Matches an external link that begins with an extra opening square bracket,
+    /// while allowing balanced square brackets within the link.
+    /// </summary>
     private static readonly Regex DoubleBracketAtStartOfExternalLink = new Regex(@"\[\[+(https?:/(?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an external link followed by an extra closing square bracket,
+    /// while allowing balanced square brackets within the link.
+    /// </summary>
     private static readonly Regex DoubleBracketAtEndOfExternalLink = new Regex(@"(\[ *https?:/(?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\])\](?!\])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an external link followed by two extra closing square brackets,
+    /// while allowing balanced square brackets within the link.
+    /// </summary>
     private static readonly Regex TripleBracketAtEndOfExternalLink = new Regex(@"(\[ *https?:/(?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\])\]\](?!\])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an external link with an extra closing square bracket when the
+    /// link is followed by the closing brackets of an image or wiki-link context.
+    /// </summary>
     private static readonly Regex DoubleBracketAtEndOfExternalLinkWithinImage = new Regex(@"(\[https?:/(?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!)))\](?=\]{3})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a list-item external link whose content ends with a closing
+    /// parenthesis before the end of the line.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Verify whether the closing parenthesis is intentional. The current
+    /// field name refers to a curly brace, while the expression matches <c>\)</c>.
+    /// Rename the field in a later cleanup pass if the name is confirmed to be stale.
+    /// </remarks>
     private static readonly Regex ListExternalLinkEndsCurlyBrace = new Regex(@"^(\* *\[https?://[^<>\[\]]+?)\)\s*$", RegexOptions.Multiline | RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches a wiki link that appears to be missing one of its closing
+    /// square brackets.
+    /// </summary>
     private static readonly Regex SyntaxRegexWikilinkMissingClosingBracket = new Regex(@"\[\[([^][]*?)\|?\](?=[^\]]*?(?:$|\[|\n))", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a wiki link that appears to be missing one of its opening
+    /// square brackets.
+    /// </summary>
     private static readonly Regex SyntaxRegexWikilinkMissingOpeningBracket = new Regex(@"(?<=(?:^|\]|\n)[^\[]*?)\[([^][]*?)\]\](?!\])", RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches an external HTTP URL incorrectly associated with the localized
+    /// File namespace inside wiki-link syntax.
+    /// </summary>
     private static readonly Regex SyntaxRegexExternalLinkToImageURL = new Regex("\\[?\\[" + Variables.NamespacesCaseInsensitive[Namespace.File] + "(http:\\/\\/.*?)\\]\\]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches the beginning of a bracketed external link using one of the
+    /// supported URI schemes.
+    /// </summary>
     private static readonly Regex ExternalLinksStart = new Regex(@"^\[ *(?:https?|ftp|mailto|irc|gopher|telnet|nntp|worldwind|news|svn)://", RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches one or more trailing <c>&lt;br&gt;</c> tags at the end of a
+    /// wiki list row.
+    /// </summary>
     private static readonly Regex SyntaxRegexListRowBrTag = new Regex(@"((?:\r\n|^)[#\*:;]+.*?) *(?:<[/\\]?br ?[/\\]? ?>)+[ \t]*(?=\r\n|$)", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches one or more <c>&lt;br&gt;</c> tags separating consecutive
+    /// wiki list rows.
+    /// </summary>
     private static readonly Regex SyntaxRegexListRowBrTagMiddle = new Regex(@"^([#\*:;]+.*?)\s*(?:<[/\\]?br ?[/\\]? ?>)+[ \t]*\r\n([#\*:;]+)", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches a <c>&lt;br&gt;</c> tag immediately before a newline or the
+    /// end of the input.
+    /// </summary>
     private static readonly Regex SyntaxRegexBrNewline = new Regex(@"<[/\\]?[Bb][Rr] ?[/\\]? ?>[ \t]*(\r\n|$)");
 
+    /// <summary>
+    /// Matches a <c>&lt;br&gt;</c> tag immediately before the beginning of
+    /// a wiki list row.
+    /// </summary>
     private static readonly Regex SyntaxRegexListRowBrTagStart = new Regex(@"<[/\\]?br ?[/\\]? ?>[ \t]*(\r\n[#\*:;]+)", RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches simple HTML <c>&lt;i&gt;</c> or <c>&lt;b&gt;</c> elements
+    /// containing text between matching opening and closing tags.
+    /// </summary>
     private static readonly Regex SyntaxRegexItalicBoldEm = new Regex(@"< *(i|b) *>(.*?)< */ *\1 *>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    // Matches <p> tags only if current line does not start from ! or | (indicator of table cells), plus any spaces after
+    /// <summary>
+    /// Matches paragraph tags, including any following spaces, unless the
+    /// current line begins with a wiki-table cell marker.
+    /// </summary>
     private static readonly Regex SyntaxRemoveParagraphs = new Regex(@"(?<!^[!\|].*)</? ?[Pp]> *", RegexOptions.Multiline);
-    // Match execss <br> tags only if current line does not start from ! or | (indicator of table cells)
+
+    /// <summary>
+    /// Matches excess <c>&lt;br&gt;</c> tags unless the current line begins
+    /// with a wiki-table cell marker.
+    /// </summary>
     private static readonly Regex SyntaxRemoveBr = new Regex(@"(?:(?:<br[\s/]*> *){2,}|\r\n<br[\s/]*>\r\n<br[\s/]*>\r\n)(?<!^[!\|].*)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
+    /// <summary>
+    /// Matches a maintenance template followed by a <c>&lt;br&gt;</c> tag.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Consider renaming this field from <c>MaintanceTemplateWithBr</c>
+    /// to <c>MaintenanceTemplateWithBr</c> during a later naming cleanup pass.
+    /// </remarks>
     private static readonly Regex MaintanceTemplateWithBr = new Regex(@"({{" + WikiRegexes.MaintanceTemplatesString + @"\s*\|[^\}]*}}(\r\n)?)\<br[\s/]*\>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
+    /// <summary>
+    /// Provides a lightweight check for two adjacent <c>&lt;br&gt;</c> tags.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Confirm and document whether this expression is intentionally used
+    /// as a quick pre-check before the more detailed line-break cleanup.
+    /// </remarks>
     private static readonly Regex SyntaxRemoveBrQuick = new Regex(@"<br[\s/]*>\s*<br[\s/]*>", RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches duplicated or malformed HTTP or HTTPS protocol prefixes.
+    /// </summary>
     private static readonly Regex MultipleHttpInLink = new Regex(@"(?<=[\s\[>=])(https?(?::?/+|:/*)) *(\1)+", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches duplicated or malformed FTP protocol prefixes.
+    /// </summary>
     private static readonly Regex MultipleFtpInLink = new Regex(@"(?<=[\s\[>=])(ftp(?::?/+|:/*))(\1)+", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches external links that incorrectly use wiki-link pipe syntax.
+    /// </summary>
     private static readonly Regex PipedExternalLink = new Regex(@"(\[\w+://[^\]\[<>\""\s]*?\s*)(?: +\||\|([ ']))(?=[^\[\]\|]*\])");
+
+    /// <summary>
+    /// Matches malformed text beginning with an HTTP-like protocol sequence.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Rename this field in a later cleanup pass so that its name describes
+    /// the malformed HTTP syntax it recognizes rather than HTTP links generally.
+    /// </remarks>
     private static readonly Regex HttpLinks = new Regex(@"http[htps:/ %]+");
 
+    /// <summary>
+    /// Matches malformed HTTP, HTTPS, or FTP links where the protocol separator
+    /// contains a missing or incorrect colon or slash sequence.
+    /// </summary>
     private static readonly Regex MissingColonInHttpLink = new Regex(@"(?<=[\s\[>=](?:ht|f))(tps?)(?://?:?|:(?::+//)?)(\w+)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches HTTP, HTTPS, or FTP links containing an incorrect number of
+    /// slashes following the protocol.
+    /// </summary>
     private static readonly Regex SingleTripleSlashInHttpLink = new Regex(@"(?<=[\s\[>=](?:ht|f))(tps?):(?:/|////?)(\w+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    /// <summary>
+    /// Matches common misspellings of the <c>cellpadding</c> attribute within
+    /// a wikitable declaration.
+    /// </summary>
     private static readonly Regex CellpaddingTypo = new Regex(@"({\s*\|\s*class\s*=\s*""wikitable[^}]*?)cel(?:lpa|pad?)ding\b", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Provides a lightweight check for common misspellings of
+    /// <c>cellpadding</c>.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Confirm and document whether this expression is intentionally used
+    /// as a quick pre-check before <see cref="CellpaddingTypo"/>.
+    /// </remarks>
     private static readonly Regex CellpaddingTypoQuick = new Regex(@"\bcel(?:lpa|pad?)ding\b", RegexOptions.IgnoreCase);
 
     // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Remove_.3Cfont.3E_tags
+
+    /// <summary>
+    /// Matches <c>&lt;font&gt;</c> elements that contain no attributes and
+    /// contain no nested HTML tags.
+    /// </summary>
     private static readonly Regex RemoveNoPropertyFontTags = new Regex(@"<font>([^<>]+)</font>", RegexOptions.IgnoreCase);
 
-    // for fixing unbalanced brackets
+    // Regexes for correcting malformed or unbalanced brackets and braces.
+
+    /// <summary>
+    /// Matches malformed closing braces or brackets on a citation-like template
+    /// immediately inside a reference.
+    /// </summary>
     private static readonly Regex RefTemplateIncorrectBracesAtEnd = new Regex(@"(?<=<ref(?:\s*name\s*=[^{}<>/]+?\s*)?>\s*)({{\s*[Cc]it[ae][^{}<>]+?)(?:}\]?|\)\))?(?=\s*</ref>)", RegexOptions.Compiled);
-    private static readonly Regex RefExternalLinkUsingBraces = new Regex(@"(?<=<ref(?:\s*name\s*=[^{}<>]+?\s*)?>)\s*{{(\s*https?://[^{}\s\r\n]+)(\s+[^{}]+)?\s*}}\s*(</ref>)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an external link incorrectly enclosed in template braces inside
+    /// a reference.
+    /// </summary>
+    private static readonly Regex RefExternalLinkUsingBraces = new Regex(@"(?<=<ref(?:\s*name\s*=[^{}<>/]+?\s*)?>)\s*{{(\s*https?://[^{}\s\r\n]+)(\s+[^{}]+)?\s*}}\s*(</ref>)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a <c>www.</c> URL inside a reference that is missing its
+    /// protocol prefix.
+    /// </summary>
     private static readonly Regex RefURLMissingHttp = new Regex(@"(<ref(?:\s*name\s*=[^{}<>]+?\s*)?>\[?)\s*www\.", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches template-like content beginning with mismatched square and
+    /// curly braces.
+    /// </summary>
     private static readonly Regex TemplateIncorrectBracesAtStart = new Regex(@"(?:{\[|\[{)([^{}\[\]]+}})", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a citation-like template beginning with a single opening
+    /// curly brace rather than a template's normal opening braces.
+    /// </summary>
     private static readonly Regex CitationTemplateSingleBraceAtStart = new Regex(@"(?<=[^{])({\s*[Cc]it[ae])", RegexOptions.Compiled);
-    private static readonly Regex ReferenceTemplateQuadBracesAtEnd = new Regex(@"(?<=<ref(?:\s*name\s*=[^{}<>]+?\s*)?>\s*{{[^{}]+)}}(}}\s*</ref>)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches excess closing template braces immediately before the end of
+    /// a reference.
+    /// </summary>
+    private static readonly Regex ReferenceTemplateQuadBracesAtEnd = new Regex(@"(?<=<ref(?:\s*name\s*=[^{}<>/]+?\s*)?>\s*{{[^{}]+)}}(}}\s*</ref>)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Provides a lightweight check for excess closing template braces
+    /// immediately before <c>&lt;/ref&gt;</c>.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Confirm and document whether this expression is intentionally used
+    /// as a quick pre-check before <see cref="ReferenceTemplateQuadBracesAtEnd"/>.
+    /// </remarks>
     private static readonly Regex ReferenceTemplateQuadBracesAtEndQuick = new Regex(@"}}}}\s*</ref>");
+
+    /// <summary>
+    /// Matches a citation-like template inside a reference that begins with
+    /// mismatched curly and square braces.
+    /// </summary>
     private static readonly Regex CitationTemplateIncorrectBraceAtStart = new Regex(@"(?<=<ref(?:\s*name\s*=[^{}<>]+?\s*)?>){\[([Cc]it[ae])", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches several malformed closing-brace combinations on a citation-like
+    /// template immediately before the end of a reference.
+    /// </summary>
     private static readonly Regex CitationTemplateIncorrectBracesAtEnd = new Regex(@"(<ref(?:\s*name\s*=[^{}<>]+?\s*)?>\s*{{[Cc]it[ae][^{}]+?)(?:}\]|\]}|{})(?=\s*</ref>)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Provides a lightweight check for malformed citation-template closing
+    /// braces immediately before <c>&lt;/ref&gt;</c>.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Confirm and document whether this expression is intentionally used
+    /// as a quick pre-check before <see cref="CitationTemplateIncorrectBracesAtEnd"/>.
+    /// </remarks>
     private static readonly Regex CitationTemplateIncorrectBracesAtEndQuick = new Regex(@"(?:}\]|\]}|{})(?=\s*</ref>)");
+
+    /// <summary>
+    /// Matches an external link inside a reference that is missing its opening
+    /// square bracket.
+    /// </summary>
     private static readonly Regex RefExternalLinkMissingStartBracket = new Regex(@"(<ref(?:\s*name\s*=[^{}<>]+?\s*)?>[^{}\[\]<>]*?){?((?:ht|f)tps?://[^{}\[\]<>]+\][^{}\[\]<>]*</ref>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches an external link inside a reference that is missing its closing
+    /// square bracket.
+    /// </summary>
     private static readonly Regex RefExternalLinkMissingEndBracket = new Regex(@"(<ref(?:\s*name\s*=[^{}<>]+?\s*)?>[^{}\[\]<>]*?\[\s*(?:ht|f)tps?://[^{}\[\]<>]+)}?(</ref>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches a citation-like template inside a reference that has closing
+    /// template braces but is missing its opening template braces.
+    /// </summary>
     private static readonly Regex RefCitationMissingOpeningBraces = new Regex(@"(<\s*ref(?:\s+name\s*=[^<>]*?)?\s*>\s*)\(?\(?([Cc]it[ae][^{}]+}}\s*</ref>)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a <c>{{dead link}}</c> template immediately following the
+    /// reference with which it is associated.
+    /// </summary>
     private static readonly Regex DeadlinkOutsideRef = new Regex(@"(</ref>) ?(\{\{[Dd]ead ?link\s*\|\s*date\s*=[^{}\|]+\}\})", RegexOptions.Compiled);
 
-    // refs with wording and bare link: combine the two
+    // TODO: Consider extracting common <ref ...> regex fragments after the
+    // FixSyntax behavior is sufficiently characterized by tests. Several of
+    // the expressions above intentionally repeat similar reference syntax.
+
+    /// <summary>
+    /// Matches a reference containing descriptive wording followed by a
+    /// bracketed bare external link so the wording can be associated with
+    /// the link.
+    /// </summary>
     private static readonly Regex WordingIntoBareExternalLinks = new Regex(@"(<ref(?:\s*name\s*=[^{}<>]+?\s*)?>\s*)([^<>{}\[\]\r\n]{3,70}?)[\.,::]?\s*\[\s*((?:[Hh]ttps?|[Ff]tp|[Mm]ailto)://[^\ \n\r<>]+)\s*\](?=\s*</ref>)", RegexOptions.Compiled);
 
-    // space needed between word and external link
+    /// <summary>
+    /// Matches an external link immediately preceded by a word character,
+    /// indicating that whitespace may be required before the link.
+    /// </summary>
     private static readonly Regex ExternalLinkWordSpacingBefore = new Regex(@"(?<=\w)(\[(?:https?|ftp|mailto|irc|gopher|telnet|nntp|worldwind|news|svn)://.*?\])", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an external link immediately followed by a word character,
+    /// indicating that whitespace may be required after the link.
+    /// </summary>
     private static readonly Regex ExternalLinkWordSpacingAfter = new Regex(@"(\[(?:https?|ftp|mailto|irc|gopher|telnet|nntp|worldwind|news|svn)://[^\]\[<>]*?\])(\w)", RegexOptions.Compiled);
 
+    // TODO: Consider centralizing the repeated external-link protocol list
+    // used by related expressions after behavior and compatibility have been
+    // fully covered by tests.
+
+    /// <summary>
+    /// Matches a <c>&lt;br&gt;</c> tag immediately before the closing
+    /// brackets of a wiki link at the end of the input.
+    /// </summary>
     private static readonly Regex WikilinkEndsBr = new Regex(@"<br[\s/]*>\s*\]\]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    // for correcting square brackets within external links
+    /// <summary>
+    /// Matches HTTP external links that contain balanced square brackets
+    /// within the link text.
+    /// </summary>
     private static readonly Regex SquareBracketsInExternalLinks = new Regex(@"(\[https?://(?>[^\[\]<>]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\])", RegexOptions.Compiled);
 
-    // CHECKWIKI error 2: fix incorrect <br> of <br.>, <\br>, <br\> and <br./> etc.
+    /// <summary>
+    /// Matches malformed <c>&lt;br&gt;</c> syntax such as <c>&lt;\br&gt;</c>,
+    /// <c>&lt;br\&gt;</c>, <c>&lt;br.&gt;</c>, and related variants.
+    /// </summary>
+    /// <remarks>
+    /// CHECKWIKI error 2.
+    /// </remarks>
     private static readonly Regex IncorrectBr = new Regex(@"<(\\ *br *| *br *\\ *| *br\. */?| *br */([a-z/0-9•\-]|br)| *br *\?|/ *br */?)>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    // CHECKWIKI error 2: https://en.wikipedia.org/wiki/Wikipedia:HTML5#Other_obsolete_attributes
+
+    /// <summary>
+    /// Matches <c>&lt;br&gt;</c> elements using the obsolete
+    /// <c>clear</c> attribute.
+    /// </summary>
+    /// <remarks>
+    /// CHECKWIKI error 2.
+    /// See https://en.wikipedia.org/wiki/Wikipedia:HTML5#Other_obsolete_attributes.
+    /// </remarks>
     private static readonly Regex IncorrectBr2 = new Regex(@"<br\s*clear\s*=\s*""?(both|all|left|right)""?\s*\/?>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches <c>&lt;br&gt;</c> elements expressing a clear operation through
+    /// an inline style, optionally together with a <c>clear</c> attribute.
+    /// </summary>
     private static readonly Regex IncorrectBr3 = new Regex(@"<br\s*style\s*=\s*""?clear\:\s?(all|both|left|right)\;?""?(\s*clear=\s*""?(all|left|right)""?)?\s*/?>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches malformed opening or closing syntax for selected HTML tags
+    /// where slash or backslash characters are incorrectly positioned.
+    /// </summary>
     private static readonly Regex IncorrectClosingHtmlTags = new Regex(@"< */?(center|gallery|small|sub|sup|i) *[\\/] *>");
 
+    /// <summary>
+    /// Matches a horizontal rule represented by an HTML <c>&lt;hr&gt;</c>
+    /// element or five or more hyphens at the beginning of a line.
+    /// </summary>
     private static readonly Regex SyntaxRegexHorizontalRule = new Regex("^(<hr>|-{5,})", RegexOptions.Compiled | RegexOptions.Multiline);
+
+    /// <summary>
+    /// Matches a wiki heading immediately followed by a horizontal rule.
+    /// </summary>
     private static readonly Regex SyntaxRegexHeadingWithHorizontalRule = new Regex("(^==?[^=]*==?)\r\n(\r\n)?----+", RegexOptions.Compiled | RegexOptions.Multiline);
+
+    /// <summary>
+    /// Matches an HTTP version prefix followed by a single version digit
+    /// and period.
+    /// </summary>
     private static readonly Regex SyntaxRegexHTTPNumber = new Regex(@"HTTP/\d\.", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches malformed ISBN label syntax immediately before the first digit
+    /// of an ISBN.
+    /// </summary>
     private static readonly Regex SyntaxRegexISBN = new Regex(@"(?<![:/])(?:ISBN(?:[\-–]1[03])?:|\[\[ISBN\]\]|ISBN ?\t)\s*(\d)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a hyphen or en dash immediately following <c>ISBN</c>, except
+    /// when it forms the recognized <c>ISBN-10</c> or <c>ISBN-13</c> labels.
+    /// </summary>
     private static readonly Regex SyntaxRegexISBN2 = new Regex(@"(?<![:/])ISBN[\-–](?!1[03]\b)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches <c>ISBN–10</c> or <c>ISBN–13</c> when the label uses an
+    /// en dash.
+    /// </summary>
     private static readonly Regex SyntaxRegexISBN2a = new Regex(@"ISBN–(1[03]\b)");
+
+    /// <summary>
+    /// Matches the legacy <c>[[ISBN]]</c> form followed by a
+    /// <c>Special:BookSources</c> wiki link.
+    /// </summary>
     private static readonly Regex SyntaxRegexISBN3 = new Regex(@"\[\[ISBN\]\]\s\[\[Special\:BookSources[^\|]*\|(?:<bdi>)?([^\]]*?)(?:</?bdi>)?\]\]", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches the expanded <c>[[International Standard Book Number|ISBN]]</c>
+    /// form followed by a <c>Special:BookSources</c> wiki link.
+    /// </summary>
     private static readonly Regex SyntaxRegexISBN4 = new Regex(@"\[\[International Standard Book Number\|ISBN\]\]\:?\s\[\[Special\:BookSources[^\|]*\|(?:<bdi>)?([^\]]*?)(?:</?bdi>)?\]\]", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an ISBN whose numeric portion contains one or more en dashes.
+    /// </summary>
     private static readonly Regex ISBNEndash = new Regex(@"ISBN ([0-9][0-9–]+[0-9X])\b");
+
+    /// <summary>
+    /// Matches a lowercase terminal <c>x</c> in an ISBN.
+    /// </summary>
     private static readonly Regex ISBNx = new Regex(@"(ISBN [0-9\-]{9,14})x", RegexOptions.Compiled);
+
+    // TODO: Replace the numbered SyntaxRegexISBN2/2a/3/4 names with descriptive
+    // names during a later naming pass after their call sites and replacement
+    // behavior have been reviewed.
+
+    /// <summary>
+    /// Matches a PMID label followed by optional spaces and the first digit
+    /// of the identifier, excluding PMID text already inside a wiki link.
+    /// </summary>
     private static readonly Regex SyntaxRegexPMID = new Regex(@"(?<!\[\[)(PMID): *(\d)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an external HTTP link that occupies the entire input line.
+    /// </summary>
     private static readonly Regex SyntaxRegexExternalLinkOnWholeLine = new Regex(@"^\[(\s*http.*?)\]$", RegexOptions.Compiled | RegexOptions.Singleline);
+
+    /// <summary>
+    /// Matches an isolated closing square bracket that is not immediately
+    /// adjacent to another closing square bracket.
+    /// </summary>
     private static readonly Regex SyntaxRegexClosingBracket = new Regex(@"([^]])\]([^]]|$)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches an isolated opening square bracket that is not immediately
+    /// adjacent to another opening square bracket.
+    /// </summary>
     private static readonly Regex SyntaxRegexOpeningBracket = new Regex(@"([^[]|^)\[([^[])", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a wiki file link containing an HTTP URL.
+    /// </summary>
     private static readonly Regex SyntaxRegexFileWithHTTP = new Regex("\\[\\[" + Variables.NamespacesCaseInsensitive[Namespace.File] + ":[^]]*http", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches simple angle-bracketed tags whose contents do not contain
+    /// quotes, hyphens, equals signs, or additional angle brackets.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Review the call site and document why these particular characters
+    /// are excluded. The current field name does not explain the restrictions
+    /// imposed by the expression.
+    /// </remarks>
     private static readonly Regex SimpleTags = new Regex(@"<[^>""\-=]+>");
+
+    /// <summary>
+    /// Matches selected citation templates incorrectly enclosed in wiki-link
+    /// square brackets inside a reference.
+    /// </summary>
     private static readonly Regex CiteTemplateWithSquareBrackets = new Regex(@"(\<ref[^\[]*)\[\[(cite ?(journal|web|book|news)[^\]]*)\]\](\<\/ref\>)", RegexOptions.Compiled);
 
     /// <summary>
-    /// Matches double piped links e.g. [[foo||bar]] (CHECKWIKI error 32)
+    /// Matches double piped links, for example <c>[[foo||bar]]</c>
+    /// (CHECKWIKI error 32).
     /// </summary>
     private static readonly Regex DoublePipeInWikiLink = new Regex(@"(?<=\[\[[^\[\[\r\n\|{}]+)\|\|(?=[^\[\[\r\n\|{}]+\]\])", RegexOptions.Compiled);
 
     /// <summary>
-    /// Matches empty gallery, center, blockquote, small, nowiki, noinclude, includeonly, sub or sup tags (zero or more whitespace). Optionally with additional parameters
+    /// Matches empty gallery, center, blockquote, small, nowiki, noinclude,
+    /// includeonly, sub, or sup elements containing zero or more whitespace
+    /// characters and optionally containing attributes on the opening tag.
     /// </summary>
     private static readonly Regex EmptyTags = new Regex(@"<\s*(gallery|center|blockquote|small|noinclude|nowiki|includeonly|su[bp])\s*(\s+[^<>]*)?>\s*<\s*/\s*\1\s*>", RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Provides British English culture information for syntax corrections
+    /// that require culture-specific parsing or formatting.
+    /// </summary>
     private static readonly System.Globalization.CultureInfo BritishEnglish = new System.Globalization.CultureInfo("en-GB");
 
     // Covered by: LinkTests.TestFixSyntax(), incomplete
