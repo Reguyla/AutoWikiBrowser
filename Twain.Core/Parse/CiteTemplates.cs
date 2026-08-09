@@ -2962,70 +2962,150 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// convert invalid date formats like DD-MM-YYYY, MM-DD-YYYY, YYYY-D-M, YYYY-DD-MM, YYYY_MM_DD etc. to iso format of YYYY-MM-DD
+    /// Normalizes supported citation date parameters to ISO <c>YYYY-MM-DD</c>
+    /// format and removes time components from citation date fields.
     /// </summary>
-    /// <param name="m"></param>
-    /// <returns></returns>
+    /// <param name="m">
+    /// The regular-expression match containing the citation template to process.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying supported date normalization
+    /// and time-removal corrections.
+    /// </returns>
+    /// <remarks>
+    /// Date conversion is applied only when one or more supported citation date
+    /// parameters contain values eligible for processing. Abbreviated month
+    /// conversion is skipped for journal citations.
+    /// </remarks>
     private static string CiteTemplateME(Match m)
     {
         string newValue = m.Value;
 
-        Dictionary<string, string> paramsFound = Tools.GetTemplateParameterValues(newValue);
+        Dictionary<string, string> paramsFound =
+            Tools.GetTemplateParameterValues(newValue);
 
         string accessdate, date, date2, archivedate, airdate, journal;
+
         if (!paramsFound.TryGetValue("accessdate", out accessdate) &&
             !paramsFound.TryGetValue("access-date", out accessdate))
+        {
             accessdate = string.Empty;
-        if (!paramsFound.TryGetValue("date", out date))
-            date = string.Empty;
-        if (!paramsFound.TryGetValue("date2", out date2))
-            date2 = string.Empty;
-        if (!paramsFound.TryGetValue("archivedate", out archivedate))
-            archivedate = string.Empty;
-        if (!paramsFound.TryGetValue("airdate", out airdate))
-            airdate = string.Empty;
-        if (!paramsFound.TryGetValue("journal", out journal))
-            journal = string.Empty;
+        }
 
-        List<string> dates = new List<string> { accessdate, archivedate, date, date2, airdate };
+        if (!paramsFound.TryGetValue("date", out date))
+        {
+            date = string.Empty;
+        }
+
+        if (!paramsFound.TryGetValue("date2", out date2))
+        {
+            date2 = string.Empty;
+        }
+
+        if (!paramsFound.TryGetValue("archivedate", out archivedate))
+        {
+            archivedate = string.Empty;
+        }
+
+        if (!paramsFound.TryGetValue("airdate", out airdate))
+        {
+            airdate = string.Empty;
+        }
+
+        if (!paramsFound.TryGetValue("journal", out journal))
+        {
+            journal = string.Empty;
+        }
+
+        List<string> dates = new()
+    {
+        accessdate,
+        archivedate,
+        date,
+        date2,
+        airdate
+    };
 
         if (CiteTemplateMEParameterToProcess(dates))
         {
             // accessdate=, archivedate=
-            newValue = CiteTemplateIncorrectISOAccessdates.Aggregate(newValue,
-                (current, rr) => rr.Regex.Replace(current, rr.Replacement));
+            newValue = CiteTemplateIncorrectISOAccessdates.Aggregate(
+                newValue,
+                (current, rr) =>
+                    rr.Regex.Replace(
+                        current,
+                        rr.Replacement));
 
             // date=, archivedate=, airdate=, date2=
-            newValue = CiteTemplateIncorrectISODates.Aggregate(newValue,
-                (current, rr) => rr.Regex.Replace(current, rr.Replacement));
+            newValue = CiteTemplateIncorrectISODates.Aggregate(
+                newValue,
+                (current, rr) =>
+                    rr.Regex.Replace(
+                        current,
+                        rr.Replacement));
 
-            newValue = CiteTemplateDateYYYYDDMMFormat.Replace(newValue, "$1-$3-$2$4"); // YYYY-DD-MM to YYYY-MM-DD
+            // YYYY-DD-MM to YYYY-MM-DD
+            newValue = CiteTemplateDateYYYYDDMMFormat.Replace(
+                newValue,
+                "$1-$3-$2$4");
 
             // date = YYYY-Month-DD fix, not for cite journal PubMed date format
+            // TODO: Review whether skipping abbreviated-month ISO normalization
+            // based on an empty journal parameter remains the correct way to
+            // identify PubMed-style journal dates.
             if (journal.Length == 0)
-                newValue = CiteTemplateAbbreviatedMonthISO.Replace(newValue,
-                    m2 =>
-                        m2.Groups[1].Value + Tools.ConvertDate(m2.Groups[2].Value.Replace(".", ""), DateLocale.ISO) +
-                        m2.Groups[3].Value);
-        }
-        // all citation dates: Remove time from date fields
-        newValue = CiteTemplateTimeInDateParameter.Replace(newValue, m3 =>
-        {
-            // keep end whitespace outside comment
-            string comm = m3.Groups[2].Value, whitespace = string.Empty;
-
-            Match whm = WhitespaceEnd.Match(comm);
-
-            if (whm.Success)
             {
-                comm = comm.TrimEnd();
-                whitespace = whm.Groups[1].Value;
+                newValue = CiteTemplateAbbreviatedMonthISO.Replace(
+                    newValue,
+                    m2 =>
+                        m2.Groups[1].Value +
+                        Tools.ConvertDate(
+                            m2.Groups[2].Value.Replace(".", ""),
+                            DateLocale.ISO) +
+                        m2.Groups[3].Value);
             }
+        }
 
-            return m3.Groups[1].Value + "<!--" + comm + @"-->" + whitespace;
-        });
+        newValue = RemoveTimeFromCitationDates(newValue);
 
         return newValue;
+    }
+
+    /// <summary>
+    /// Removes time components from citation date parameters while preserving
+    /// trailing whitespace outside the generated comment.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <returns>
+    /// The citation template text with supported time components removed from
+    /// date parameters.
+    /// </returns>
+    private static string RemoveTimeFromCitationDates(string newValue)
+    {
+        return CiteTemplateTimeInDateParameter.Replace(
+            newValue,
+            m3 =>
+            {
+                // keep end whitespace outside comment
+                string comm = m3.Groups[2].Value;
+                string whitespace = string.Empty;
+
+                Match whm = WhitespaceEnd.Match(comm);
+
+                if (whm.Success)
+                {
+                    comm = comm.TrimEnd();
+                    whitespace = whm.Groups[1].Value;
+                }
+
+                return m3.Groups[1].Value +
+                       "<!--" +
+                       comm +
+                       @"-->" +
+                       whitespace;
+            });
     }
 
     /// <summary>
