@@ -983,18 +983,9 @@ public static string ChangeToDefaultSort(
         string articleTextBefore = articleText;
         int catCount = WikiRegexes.Category.Matches(articleText).Count;
 
-        // get the zeroth section (text upto first heading)
-        string zerothSection = Tools.GetZerothSection(articleText);
-
-        // remove references and long wikilinks (but allow an ISO date) that may contain false positives of birth/death date
-        zerothSection = WikiRegexes.Refs.Replace(zerothSection, " ");
-        zerothSection = FootnoteTemplates.Replace(zerothSection, " ");
-        while (LongWikilink.IsMatch(zerothSection))
-            zerothSection = LongWikilink.Replace(zerothSection, " ");
-
-        // ignore dates containing years from dated maintenance tags etc.
-        zerothSection = WikiRegexes.NestedTemplates.Replace(zerothSection, m2 => ThreeOrFourDigitNumber.IsMatch(Tools.GetTemplateParameterValue(m2.Value, "date")) ? "" : m2.Value);
-        zerothSection = WikiRegexes.TemplateMultiline.Replace(zerothSection, m2 => ThreeOrFourDigitNumber.IsMatch(Tools.GetTemplateParameterValue(m2.Value, "date")) ? "" : m2.Value);
+        string zerothSection =
+            PreparePeopleCategoryZerothSection(
+                articleText);
 
         string StartCategory = Tools.Newline(@"[[" + (Namespace.IsMainSpace(articleTitle) ? "" : ":") + @"Category:");
         string yearstring, yearFromInfoBox = "", sort = GetCategorySort(articleText);
@@ -1195,6 +1186,70 @@ public static string ChangeToDefaultSort(
              !hasDeathOrLivingCategory) ||
             (!hasDeathOrLivingCategory &&
              WikiRegexes.Refs.Matches(articleText).Count > 20);
+    }
+
+    /// <summary>
+    /// Prepares the article's zeroth section for birth- and death-year detection by
+    /// removing content likely to produce false-positive year matches.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete wiki text of the article.
+    /// </param>
+    /// <returns>
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </returns>
+    /// <remarks>
+    /// References, footnote templates, long wikilinks, and templates containing
+    /// dated maintenance parameters are removed or replaced before year matching is
+    /// performed.
+    /// </remarks>
+    private static string PreparePeopleCategoryZerothSection(
+        string articleText)
+    {
+        string zerothSection =
+            Tools.GetZerothSection(articleText);
+
+        zerothSection =
+            WikiRegexes.Refs.Replace(
+                zerothSection,
+                " ");
+
+        zerothSection =
+            FootnoteTemplates.Replace(
+                zerothSection,
+                " ");
+
+        while (LongWikilink.IsMatch(zerothSection))
+        {
+            zerothSection =
+                LongWikilink.Replace(
+                    zerothSection,
+                    " ");
+        }
+
+        zerothSection =
+            WikiRegexes.NestedTemplates.Replace(
+                zerothSection,
+                match =>
+                    ThreeOrFourDigitNumber.IsMatch(
+                        Tools.GetTemplateParameterValue(
+                            match.Value,
+                            "date"))
+                        ? ""
+                        : match.Value);
+
+        zerothSection =
+            WikiRegexes.TemplateMultiline.Replace(
+                zerothSection,
+                match =>
+                    ThreeOrFourDigitNumber.IsMatch(
+                        Tools.GetTemplateParameterValue(
+                            match.Value,
+                            "date"))
+                        ? ""
+                        : match.Value);
+
+        return zerothSection;
     }
 
     private static string CatEnd(string sort)
