@@ -822,34 +822,17 @@ public partial class Parsers
                 newValue = Tools.RemoveTemplateParameter(newValue, "accessyear");
         }
 
-        // fix unspaced comma ranges, avoid pages=12,345 as could be valid page number
-        if (pages.Contains(",") && !Regex.IsMatch(pages, @"\b[0-9]{1,2},[0-9]{3}\b"))
-        {
-            while (UnspacedCommaPageRange.IsMatch(pages))
-            {
-                pages = UnspacedCommaPageRange.Replace(pages, "$1, $2");
-            }
-            newValue = Tools.UpdateTemplateParameterValue(newValue, "pages", pages);
-            paramsFound.Remove("pages");
-            paramsFound.Add("pages", pages);
-        }
+        newValue = NormalizeCitationPages(
+            newValue,
+            paramsFound,
+            pages,
+            page);
 
-        // page range should have unspaced en-dash; validate that page is range not section link
-        newValue = FixPageRanges(newValue, paramsFound);
-
-        // page range or list should use 'pages' parameter not 'page'
-        if (page.Length > 0 && CiteTemplatesPageRangeName.IsMatch(newValue))
-        {
-            newValue = CiteTemplatesPageRangeName.Replace(newValue, @"$1pages$2");
-            newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
-        }
-
-        // remove ordinals from dates
-        newValue = RemoveCitationDateOrdinals(newValue, TheDate, accessdate);
-
-        // catch after any other fixes
-        if (!IncorrectCommaAmericanDates.IsMatch(theURLoriginal))
-            newValue = IncorrectCommaAmericanDates.Replace(newValue, @"$1 $2, $3");
+        newValue = NormalizeCitationDates(
+            newValue,
+            TheDate,
+            accessdate,
+            theURLoriginal);
 
         newValue = NormalizeCitationUrls(
             newValue,
@@ -882,6 +865,113 @@ public partial class Parsers
             origyear,
             TheYear,
             TheDate);
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Normalizes citation page values, page ranges, and the use of the
+    /// <c>page</c> and <c>pages</c> parameters.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="pages">
+    /// The value of the citation <c>pages</c> parameter.
+    /// </param>
+    /// <param name="page">
+    /// The value of the citation <c>page</c> parameter.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying page-related normalization.
+    /// </returns>
+    private static string NormalizeCitationPages(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        string pages,
+        string page)
+    {
+        // fix unspaced comma ranges, avoid pages=12,345 as could be valid page number
+        if (pages.Contains(",") &&
+            !Regex.IsMatch(pages, @"\b[0-9]{1,2},[0-9]{3}\b"))
+        {
+            while (UnspacedCommaPageRange.IsMatch(pages))
+            {
+                pages = UnspacedCommaPageRange.Replace(
+                    pages,
+                    "$1, $2");
+            }
+
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                "pages",
+                pages);
+
+            paramsFound.Remove("pages");
+            paramsFound.Add("pages", pages);
+        }
+
+        // page range should have unspaced en-dash;
+        // validate that page is range not section link
+        newValue = FixPageRanges(
+            newValue,
+            paramsFound);
+
+        // page range or list should use 'pages' parameter not 'page'
+        if (page.Length > 0 &&
+            CiteTemplatesPageRangeName.IsMatch(newValue))
+        {
+            newValue = CiteTemplatesPageRangeName.Replace(
+                newValue,
+                @"$1pages$2");
+
+            newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Applies final citation date cleanup after the earlier date normalization steps.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="TheDate">
+    /// The citation date value.
+    /// </param>
+    /// <param name="accessdate">
+    /// The citation access-date value.
+    /// </param>
+    /// <param name="theURLoriginal">
+    /// The original citation URL, used to avoid altering date-like text contained
+    /// within the URL.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying final date cleanup.
+    /// </returns>
+    private static string NormalizeCitationDates(
+        string newValue,
+        string TheDate,
+        string accessdate,
+        string theURLoriginal)
+    {
+        // remove ordinals from dates
+        newValue = RemoveCitationDateOrdinals(
+            newValue,
+            TheDate,
+            accessdate);
+
+        // catch after any other fixes
+        if (!IncorrectCommaAmericanDates.IsMatch(theURLoriginal))
+        {
+            newValue = IncorrectCommaAmericanDates.Replace(
+                newValue,
+                @"$1 $2, $3");
+        }
 
         return newValue;
     }
