@@ -352,41 +352,41 @@ public partial class Parsers
         return string.Empty;
     }
 
-// Covered by: UtilityFunctionTests.ChangeToDefaultSort()
+    // Covered by: UtilityFunctionTests.ChangeToDefaultSort()
 
-/// <summary>
-/// Normalizes, inserts, updates, or removes <c>{{DEFAULTSORT}}</c> markup based
-/// on the article's category sort keys and project-specific rules.
-/// </summary>
-/// <param name="articleText">
-/// The wiki text of the article.
-/// </param>
-/// <param name="articleTitle">
-/// The title of the article.
-/// </param>
-/// <param name="noChange">
-/// When this method returns, contains <see langword="true"/> if the article text
-/// was unchanged; otherwise, <see langword="false"/>.
-/// </param>
-/// <param name="restrictDefaultsortChanges">
-/// <see langword="true"/> to prevent insertion or modification of
-/// <c>{{DEFAULTSORT}}</c> where AWB-generated values may be inappropriate,
-/// particularly for articles about people; otherwise, <see langword="false"/>.
-/// </param>
-/// <returns>
-/// The article text after DEFAULTSORT and category sort-key processing.
-/// </returns>
-/// <remarks>
-/// This routine normalizes duplicate and existing DEFAULTSORT declarations,
-/// cleans category formatting, derives DEFAULTSORT values from category sort
-/// keys when appropriate, removes redundant explicit category sort keys, and
-/// abandons changes on pages containing include/noinclude programming elements.
-/// </remarks>
-public static string ChangeToDefaultSort(
-    string articleText,
-    string articleTitle,
-    out bool noChange,
-    bool restrictDefaultsortChanges)
+    /// <summary>
+    /// Normalizes, inserts, updates, or removes <c>{{DEFAULTSORT}}</c> markup based
+    /// on the article's category sort keys and project-specific rules.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="noChange">
+    /// When this method returns, contains <see langword="true"/> if the article text
+    /// was unchanged; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="restrictDefaultsortChanges">
+    /// <see langword="true"/> to prevent insertion or modification of
+    /// <c>{{DEFAULTSORT}}</c> where AWB-generated values may be inappropriate,
+    /// particularly for articles about people; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The article text after DEFAULTSORT and category sort-key processing.
+    /// </returns>
+    /// <remarks>
+    /// This routine normalizes duplicate and existing DEFAULTSORT declarations,
+    /// cleans category formatting, derives DEFAULTSORT values from category sort
+    /// keys when appropriate, removes redundant explicit category sort keys, and
+    /// abandons changes on pages containing include/noinclude programming elements.
+    /// </remarks>
+    public static string ChangeToDefaultSort(
+        string articleText,
+        string articleTitle,
+        out bool noChange,
+        bool restrictDefaultsortChanges)
     {
         string originalArticleText =
             articleText;
@@ -1628,18 +1628,58 @@ public static string ChangeToDefaultSort(
         return articleText;
     }
 
-    private static string CatEnd(string sort)
-    {
-        return ((sort.Length > 3) ? "|" + sort : "") + "]]";
-    }
+    // TODO: Replace the sort.Length > 3 check with an explicit test for the
+    // expected sort-key content once the category parsing logic is refactored.
+    /// <summary>
+    /// Builds the closing portion of a category link, including the supplied
+    /// sort key when it contains meaningful content.
+    /// </summary>
+    /// <param name="sort">
+    /// The category sort-key text to append.
+    /// </param>
+    /// <returns>
+    /// The formatted category-link suffix.
+    /// </returns>
+    private static string CatEnd(string sort) =>
+        ((sort.Length > 3) ? "|" + sort : "") + "]]";
 
-    private const string YearOfBirthMissingLivingPeople = "Year of birth missing (living people)",
-        YearOfBirthMissing = "Year of birth missing",
-        YearOfBirthUncertain = "Year of birth uncertain",
-        YearofDeathMissing = "Year of death missing";
+    /// <summary>
+    /// Category used for living people whose year of birth is unknown.
+    /// </summary>
+    private const string YearOfBirthMissingLivingPeople =
+        "Year of birth missing (living people)";
 
-    private static readonly Regex Cat4YearBirths = new Regex(@"\[\[Category *: *\d{1,4} (BC )?births\s*(?:\||\]\])");
-    private static readonly Regex CatYearDeaths = new Regex(@"\[\[Category *: *[0-9]{1,4} (BC )?(deaths|suicides)\s*(?:\||\]\])");
+    /// <summary>
+    /// Category used when a person's year of birth is unknown.
+    /// </summary>
+    private const string YearOfBirthMissing =
+        "Year of birth missing";
+
+    /// <summary>
+    /// Category used when a person's year of birth is uncertain.
+    /// </summary>
+    private const string YearOfBirthUncertain =
+        "Year of birth uncertain";
+
+    /// <summary>
+    /// Category used when a person's year of death is unknown.
+    /// </summary>
+    private const string YearofDeathMissing =
+        "Year of death missing";
+
+    /// <summary>
+    /// Matches category links representing a specific birth year,
+    /// including BC years.
+    /// </summary>
+    private static readonly Regex Cat4YearBirths =
+        new(@"\[\[Category *: *\d{1,4} (BC )?births\s*(?:\||\]\])");
+
+    /// <summary>
+    /// Matches category links representing a specific year of death or suicide,
+    /// including BC years.
+    /// </summary>
+    private static readonly Regex CatYearDeaths =
+        new(@"\[\[Category *: *[0-9]{1,4} (BC )?(deaths|suicides)\s*(?:\||\]\])");
 
     /// <summary>
     /// Removes year of birth/death missing categories when xxx births/deaths category also present
@@ -1714,22 +1754,45 @@ public static string ChangeToDefaultSort(
         return articleText;
     }
 
+    /// <summary>
+    /// Normalizes a loosely formatted category link matched by the category
+    /// parsing expression.
+    /// </summary>
+    /// <param name="m">
+    /// The category-link match to normalize.
+    /// </param>
+    /// <returns>
+    /// A normalized category link, or the original matched text when the
+    /// category title is not a valid wiki title.
+    /// </returns>
     private static string LooseCategoryME(Match m)
     {
         if (!Tools.IsValidTitle(m.Groups[1].Value))
+        {
             return m.Value;
+        }
 
         string sortkey = m.Groups[2].Value;
 
         if (!string.IsNullOrEmpty(sortkey))
         {
-            // diacritic removal in sortkeys on en-wiki/simple-wiki only
-            if (Variables.LangCode.Equals("en") || Variables.LangCode.Equals("simple"))
+            // Diacritic removal in sort keys is performed on English Wikipedia
+            // and Simple English Wikipedia only.
+            if (Variables.LangCode.Equals("en") ||
+                Variables.LangCode.Equals("simple"))
+            {
                 sortkey = Tools.CleanSortKey(sortkey);
+            }
 
             sortkey = WordWhitespaceEndofline.Replace(sortkey, "$1");
         }
 
-        return CategoryStart + Tools.TurnFirstToUpper(CanonicalizeTitleRaw(m.Groups[1].Value, false).Trim().TrimStart(':')) + sortkey + "]]";
+        return CategoryStart +
+            Tools.TurnFirstToUpper(
+                CanonicalizeTitleRaw(m.Groups[1].Value, false)
+                    .Trim()
+                    .TrimStart(':')) +
+            sortkey +
+            "]]";
     }
 }
