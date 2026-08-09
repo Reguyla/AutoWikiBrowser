@@ -888,34 +888,12 @@ public partial class Parsers
 
         newValue = MoveDeadLinkOutsideCitation(newValue, format, theURL);
 
-        if (id.Length > 0)
-        {
-            // get id param name, id or ID
-            string idParamName = paramsFound.FirstOrDefault(p => p.Key == "ID" || p.Key == "id").Key;
-
-            //id=ISBN fix
-            if (IdISBN.IsMatch(id) && ISBN.Length == 0)
-            {
-                newValue = Tools.RenameTemplateParameter(newValue, idParamName, "isbn");
-                newValue = Tools.SetTemplateParameterValue(newValue, "isbn", IdISBN.Match(id).Groups[1].Value.Trim());
-            }
-
-            //id=ASIN fix
-            if (IdASIN.IsMatch(id) && Tools.GetTemplateParameterValue(newValue, "asin", true).Length == 0)
-            {
-                newValue = Tools.RenameTemplateParameter(newValue, idParamName, "asin");
-                newValue = Tools.SetTemplateParameterValue(newValue, "asin", IdASIN.Match(id).Groups[1].Value.Trim());
-            }
-
-            //id=ISSN fix
-            Match IdISSNMatch = IdISSN.Match(id);
-            if (IdISSNMatch.Success && ISSN.Length == 0)
-            {
-                string newIssn = IdISSNMatch.Groups[1].Value + "-" + IdISSNMatch.Groups[2].Value; // 1234-5678 using standard hyphen
-                newValue = Tools.RenameTemplateParameter(newValue, idParamName, "issn");
-                newValue = Tools.SetTemplateParameterValue(newValue, "issn", newIssn);
-            }
-        }
+        newValue = NormalizeCitationId(
+            newValue,
+            paramsFound,
+            id,
+            ISBN,
+            ISSN);
 
         newValue = NormalizeCitationIssn(newValue, paramsFound, ISSN);
 
@@ -1033,6 +1011,98 @@ public partial class Parsers
                 paramsFound.FirstOrDefault(
                     p => p.Key == "ISSN" || p.Key == "issn").Key,
                 newISSN);
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Converts recognized values from a generic citation <c>id</c> parameter
+    /// to their dedicated identifier parameters.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="id">
+    /// The generic citation identifier value.
+    /// </param>
+    /// <param name="ISBN">
+    /// The existing ISBN value, if present.
+    /// </param>
+    /// <param name="ISSN">
+    /// The existing ISSN value, if present.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying supported identifier conversions.
+    /// </returns>
+    private static string NormalizeCitationId(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        string id,
+        string ISBN,
+        string ISSN)
+    {
+        if (id.Length == 0)
+        {
+            return newValue;
+        }
+
+        // get id param name, id or ID
+        string idParamName =
+            paramsFound.FirstOrDefault(
+                p => p.Key == "ID" || p.Key == "id").Key;
+
+        // id=ISBN fix
+        if (IdISBN.IsMatch(id) && ISBN.Length == 0)
+        {
+            newValue = Tools.RenameTemplateParameter(
+                newValue,
+                idParamName,
+                "isbn");
+
+            newValue = Tools.SetTemplateParameterValue(
+                newValue,
+                "isbn",
+                IdISBN.Match(id).Groups[1].Value.Trim());
+        }
+
+        // id=ASIN fix
+        if (IdASIN.IsMatch(id) &&
+            Tools.GetTemplateParameterValue(newValue, "asin", true).Length == 0)
+        {
+            newValue = Tools.RenameTemplateParameter(
+                newValue,
+                idParamName,
+                "asin");
+
+            newValue = Tools.SetTemplateParameterValue(
+                newValue,
+                "asin",
+                IdASIN.Match(id).Groups[1].Value.Trim());
+        }
+
+        // id=ISSN fix
+        Match IdISSNMatch = IdISSN.Match(id);
+
+        if (IdISSNMatch.Success && ISSN.Length == 0)
+        {
+            string newIssn =
+                IdISSNMatch.Groups[1].Value +
+                "-" +
+                IdISSNMatch.Groups[2].Value;
+
+            newValue = Tools.RenameTemplateParameter(
+                newValue,
+                idParamName,
+                "issn");
+
+            newValue = Tools.SetTemplateParameterValue(
+                newValue,
+                "issn",
+                newIssn);
         }
 
         return newValue;
