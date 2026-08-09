@@ -2249,23 +2249,11 @@ public partial class Parsers
         if (SeeAlsoOrMain.IsMatch(zerothSection))
             return false;
 
-        // not about one person if multiple different birth or death date templates
-        List<string> BD = new();
-        foreach (Match m in BirthDate.Matches(articleText))
+        // Not about one person if multiple different birth or death date templates exist.
+        if (HasConflictingTemplateInstances(BirthDate, articleText) ||
+            HasConflictingTemplateInstances(DeathDate, articleText))
         {
-            if (BD.Any() && !BD.Contains(m.Value))
-                return false;
-
-            BD.Add(m.Value);
-        }
-
-        List<string> DD = new();
-        foreach (Match m in DeathDate.Matches(articleText))
-        {
-            if (DD.Any() && !DD.Contains(m.Value))
-                return false;
-
-            DD.Add(m.Value);
+            return false;
         }
 
         // fix for duplicate living people categories being miscounted as article about multiple people
@@ -2365,6 +2353,36 @@ public partial class Parsers
         return MABackground.Contains("band") ||
                MABackground.Contains("classical_ensemble") ||
                MABackground.Contains("temporary");
+    }
+
+    /// <summary>
+    /// Determines whether a template occurs multiple times with differing values.
+    /// </summary>
+    /// <param name="templateRegex">
+    /// The regular expression used to locate template instances.
+    /// </param>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// <see langword="true"/> when multiple differing template instances are found;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool HasConflictingTemplateInstances(
+        Regex templateRegex,
+        string articleText)
+    {
+        List<string> matches = new();
+
+        foreach (Match m in templateRegex.Matches(articleText))
+        {
+            if (matches.Any() && !matches.Contains(m.Value))
+            {
+                return true;
+            }
+
+            matches.Add(m.Value);
+        }
+
+        return false;
     }
 
     /// <summary>
