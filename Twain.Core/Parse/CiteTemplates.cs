@@ -898,9 +898,49 @@ public partial class Parsers
         newValue = NormalizeCitationIssn(newValue, paramsFound, ISSN);
 
         // origyear --> year when no year/date
-        if (origyear.Length == 4 && TheYear.Length == 0 && TheDate.Length == 0)
+        newValue = NormalizeCitationOriginalYear(
+            newValue,
+            origyear,
+            TheYear,
+            TheDate);
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Moves a four-digit <c>origyear</c> value to <c>year</c> when the citation
+    /// does not already contain a year or date value.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="origyear">
+    /// The original publication year value.
+    /// </param>
+    /// <param name="TheYear">
+    /// The current citation year value.
+    /// </param>
+    /// <param name="TheDate">
+    /// The current citation date value.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying the original-year normalization.
+    /// </returns>
+    private static string NormalizeCitationOriginalYear(
+        string newValue,
+        string origyear,
+        string TheYear,
+        string TheDate)
+    {
+        if (origyear.Length == 4 &&
+            TheYear.Length == 0 &&
+            TheDate.Length == 0)
         {
-            newValue = Tools.RenameTemplateParameter(newValue, "origyear", "year");
+            newValue = Tools.RenameTemplateParameter(
+                newValue,
+                "origyear",
+                "year");
+
             newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
         }
 
