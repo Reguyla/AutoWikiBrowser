@@ -165,36 +165,108 @@ public partial class Parsers
 
     #region General Parse
 
+    /// <summary>
+    /// Hides wiki markup that should be ignored during text processing.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text to process.
+    /// </param>
+    /// <returns>
+    /// The article text with supported markup temporarily replaced by placeholders.
+    /// </returns>
     public string HideText(string articleText)
     {
         return Hider.Hide(articleText);
     }
 
+    /// <summary>
+    /// Restores markup previously hidden by <see cref="HideText"/>.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text containing placeholder tokens.
+    /// </param>
+    /// <returns>
+    /// The article text with the original markup restored.
+    /// </returns>
     public string AddBackText(string articleText)
     {
         return Hider.AddBack(articleText);
     }
 
+    /// <summary>
+    /// Hides wiki markup, external links, and image-related markup.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text to process.
+    /// </param>
+    /// <returns>
+    /// The article text with supported markup temporarily replaced by placeholders.
+    /// </returns>
     public string HideTextImages(string articleText)
     {
         return HiderHideExtLinksImages.Hide(articleText);
     }
 
+    /// <summary>
+    /// Restores markup previously hidden by <see cref="HideTextImages"/>.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text containing placeholder tokens.
+    /// </param>
+    /// <returns>
+    /// The article text with the original markup restored.
+    /// </returns>
     public string AddBackTextImages(string articleText)
     {
         return HiderHideExtLinksImages.AddBack(articleText);
     }
 
-    public string HideMoreText(string articleText, bool hideOnlyTargetOfWikilink)
+    /// <summary>
+    /// Hides additional wiki markup while optionally preserving only the display
+    /// text of wiki links.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text to process.
+    /// </param>
+    /// <param name="hideOnlyTargetOfWikilink">
+    /// <see langword="true"/> to hide only the target portion of wiki links;
+    /// otherwise, applies the default extended hiding behavior.
+    /// </param>
+    /// <returns>
+    /// The processed article text with additional markup hidden.
+    /// </returns>
+    public string HideMoreText(
+        string articleText,
+        bool hideOnlyTargetOfWikilink)
     {
-        return HiderHideExtLinksImages.HideMore(articleText, hideOnlyTargetOfWikilink);
+        return HiderHideExtLinksImages.HideMore(
+            articleText,
+            hideOnlyTargetOfWikilink);
     }
 
+    /// <summary>
+    /// Hides additional wiki markup using the default hiding behavior.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text to process.
+    /// </param>
+    /// <returns>
+    /// The processed article text with additional markup hidden.
+    /// </returns>
     public string HideMoreText(string articleText)
     {
         return HiderHideExtLinksImages.HideMore(articleText);
     }
 
+    /// <summary>
+    /// Restores markup previously hidden by <see cref="HideMoreText"/>.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text containing placeholder tokens.
+    /// </param>
+    /// <returns>
+    /// The article text with the original markup restored.
+    /// </returns>
     public string AddBackMoreText(string articleText)
     {
         return HiderHideExtLinksImages.AddBackMore(articleText);
@@ -215,25 +287,79 @@ public partial class Parsers
         return SyntaxRegexListRowBrTagStart.Replace(articleText, "$1");
     }
 
-    private static readonly Regex BoldToBracket = new Regex(@"('''(?:[^']+|.*?[^'])'''\s*\()(.*)");
+    /// <summary>
+    /// Matches a bolded article title immediately followed by an opening
+    /// parenthesis.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the bolded title and opening parenthesis.
+    /// Capture group 2 contains the remaining parenthetical text.
+    /// </remarks>
+    private static readonly Regex BoldToBracket =
+        new Regex(
+            @"('''(?:[^']+|.*?[^'])'''\s*\()(.*)");
 
+    /// <summary>
+    /// Matches a death date introduced by <c>d.</c>.
+    /// </summary>
+    /// <remarks>
+    /// Supports day-month and month-day formats with optional wiki markup.
+    /// Capture groups identify the day component when present.
+    /// </remarks>
     private static readonly Regex DiedDateRegex =
         new Regex(
             @"^d\.\s*(\[*(?:" + WikiRegexes.MonthsNoGroup + @"\s+0?([1-3]?\d)|0?([1-3]?\d)\s*" +
-            WikiRegexes.MonthsNoGroup + @")?\]*,?\s*\[*[12]?\d{3}\]*[\),])", RegexOptions.IgnoreCase);
+            WikiRegexes.MonthsNoGroup + @")?\]*,?\s*\[*[12]?\d{3}\]*[\),])",
+            RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches a birth date introduced by <c>born</c> or <c>b.</c>.
+    /// </summary>
+    /// <remarks>
+    /// Supports day-month and month-day formats with optional wiki markup and
+    /// optional trailing text such as <c>in</c>.
+    /// Capture groups identify the day component when present.
+    /// </remarks>
     private static readonly Regex DOBRegex =
         new Regex(
             @"^(?:b\.|[Bb]orn(?::+| +on)?)\s*(\[*(?:" + WikiRegexes.MonthsNoGroup + @"\s+0?([1-3]?\d)|0?([1-3]?\d)\s*" +
-            WikiRegexes.MonthsNoGroup + @")?[\]\s,]*\[*[12]?\d{3}\]*(?:[\),]| +in +))", RegexOptions.IgnoreCase);
+            WikiRegexes.MonthsNoGroup + @")?[\]\s,]*\[*[12]?\d{3}\]*(?:[\),]| +in +))",
+            RegexOptions.IgnoreCase);
 
+    /// <summary>
+    /// Matches a birth date immediately followed by a dash indicating a missing
+    /// or forthcoming death date.
+    /// </summary>
+    /// <remarks>
+    /// Used for lead formats such as
+    /// <c>'''Name''' (1 January 1900 – )</c>.
+    /// </remarks>
     private static readonly Regex DOBRegexDash =
         new Regex(
             @"(?<![\*#].*)('''(?:[^']+|.*?[^'])'''\s*\()(\[*(?:" + WikiRegexes.MonthsNoGroup + @"\s+0?([1-3]?\d)|0?([1-3]?\d)\s*" +
-            WikiRegexes.MonthsNoGroup + @")?\]*\s*\[*[12]?\d{3}\]*)\s*(?:\-|–|&ndash;)\s*\)", RegexOptions.IgnoreCase);
+            WikiRegexes.MonthsNoGroup + @")?\]*\s*\[*[12]?\d{3}\]*)\s*(?:\-|–|&ndash;)\s*\)",
+            RegexOptions.IgnoreCase);
 
-    private static readonly Regex DOBRegexDashQuick = new Regex(@"(?<=(?:\-|–|&ndash;)\s*)\)");
+    /// <summary>
+    /// Quickly detects a closing parenthesis following a birth-date dash pattern.
+    /// </summary>
+    /// <remarks>
+    /// Used as a fast preliminary check before performing more detailed
+    /// birth/death date parsing.
+    /// </remarks>
+    private static readonly Regex DOBRegexDashQuick =
+        new Regex(
+            @"(?<=(?:\-|–|&ndash;)\s*)\)");
 
+    /// <summary>
+    /// Matches combined birth and death date expressions introduced by
+    /// <c>born</c>/<c>b.</c> and <c>died</c>/<c>d.</c>.
+    /// </summary>
+    /// <remarks>
+    /// Supports common lead formats such as
+    /// <c>Born 1 January 1900 – Died 2 February 1980</c>.
+    /// Capture groups contain the parsed birth date, separator, and death date.
+    /// </remarks>
     private static readonly Regex BornDeathRegex =
         new Regex(
             @"^(?:[Bb]orn|b\.)\s*(\[*(?:" + WikiRegexes.MonthsNoGroup +
@@ -349,15 +475,88 @@ public partial class Parsers
         return false;
     }
 
-    private static readonly Regex PageRangeIncorrectMdash = new Regex(@"(pages\s*=\s*|pp\.?\s*)((?:&nbsp;)?\d+\s*)(?:\-\-?|—|&mdash;|&#8212;)(\s*\d+)", RegexOptions.IgnoreCase);
+    /// <summary>
+    /// Matches page ranges that use an incorrect dash form in citation page or
+    /// pages parameters.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes ranges following <c>page=</c>, <c>pages=</c>, <c>p.</c>, or
+    /// <c>pp.</c> style prefixes and captures the start and end page numbers.
+    /// </remarks>
+    private static readonly Regex PageRangeIncorrectMdash =
+        new Regex(
+            @"(pages\s*=\s*|pp\.?\s*)((?:&nbsp;)?\d+\s*)(?:\-\-?|—|&mdash;|&#8212;)(\s*\d+)",
+            RegexOptions.IgnoreCase);
 
-    // avoid dimensions in format 55-66-77
-    private static readonly Regex UnitTimeRangeIncorrectMdash = new Regex(@"(?<!-)(\b[1-9]?\d+\s*)(?:-|—|&mdash;|&#8212;)(\s*[1-9]?\d+)(\s+|&nbsp;)((?:years|months|weeks|days|hours|minutes|seconds|[km]g|kb|[ckm]?m|[Gk]?Hz|miles|mi\.|%|feet|foot|ft|met(?:er|re)s)\b|in\))");
-    private static readonly Regex DollarAmountIncorrectMdash = new Regex(@"(\$[1-9]?\d{1,3}\s*)(?:-|—|&mdash;|&#8212;)(\s*\$?[1-9]?\d{1,3})");
-    private static readonly Regex AMPMIncorrectMdash = new Regex(@"([01]?\d:[0-5]\d\s*([AP]M)\s*)(?:-|—|&mdash;|&#8212;)(\s*[01]?\d:[0-5]\d\s*([AP]M))", RegexOptions.IgnoreCase);
-    private static readonly Regex AgeIncorrectMdash = new Regex(@"([Aa]ge[sd])\s([1-9]?\d\s*)(?:-|—|&mdash;|&#8212;)(\s*[1-9]?\d)");
-    private static readonly Regex SentenceClauseIncorrectMdash = new Regex(@"(?!xn--)(\w{2}|⌊⌊⌊⌊M\d+⌋⌋⌋⌋)\s*--\s*(\w)");
-    private static readonly Regex SuperscriptMinus = new Regex(@"(<sup>)(?:-|–|—)(?=\d+</sup>)");
+    /// <summary>
+    /// Matches numeric ranges followed by supported units when the range uses an
+    /// incorrect dash form.
+    /// </summary>
+    /// <remarks>
+    /// Recognized units include time periods, weights, distances, frequencies,
+    /// percentages, and related measurements. The negative lookbehind prevents
+    /// matching the middle portion of formats such as <c>55-66-77</c>.
+    /// </remarks>
+    private static readonly Regex UnitTimeRangeIncorrectMdash =
+        new Regex(
+            @"(?<!-)(\b[1-9]?\d+\s*)(?:-|—|&mdash;|&#8212;)(\s*[1-9]?\d+)(\s+|&nbsp;)((?:years|months|weeks|days|hours|minutes|seconds|[km]g|kb|[ckm]?m|[Gk]?Hz|miles|mi\.|%|feet|foot|ft|met(?:er|re)s)\b|in\))");
+
+    /// <summary>
+    /// Matches dollar-value ranges that use an incorrect dash form.
+    /// </summary>
+    /// <remarks>
+    /// Supports an optional dollar sign on the second amount.
+    /// </remarks>
+    private static readonly Regex DollarAmountIncorrectMdash =
+        new Regex(
+            @"(\$[1-9]?\d{1,3}\s*)(?:-|—|&mdash;|&#8212;)(\s*\$?[1-9]?\d{1,3})");
+
+    /// <summary>
+    /// Matches AM/PM time ranges that use an incorrect dash form.
+    /// </summary>
+    /// <remarks>
+    /// Supports common 12-hour time values such as
+    /// <c>9:30 AM-10:45 AM</c>.
+    /// </remarks>
+    private static readonly Regex AMPMIncorrectMdash =
+        new Regex(
+            @"([01]?\d:[0-5]\d\s*([AP]M)\s*)(?:-|—|&mdash;|&#8212;)(\s*[01]?\d:[0-5]\d\s*([AP]M))",
+            RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches age ranges that use an incorrect dash form.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes forms beginning with <c>age</c> or <c>ages</c>, followed by two
+    /// numeric age values.
+    /// </remarks>
+    private static readonly Regex AgeIncorrectMdash =
+        new Regex(
+            @"([Aa]ge[sd])\s([1-9]?\d\s*)(?:-|—|&mdash;|&#8212;)(\s*[1-9]?\d)");
+
+    /// <summary>
+    /// Matches double-hyphen separators used incorrectly between sentence or
+    /// clause text.
+    /// </summary>
+    /// <remarks>
+    /// Excludes punycode prefixes beginning with <c>xn--</c> and also supports the
+    /// parser's internal marker format represented by the special marker sequence.
+    /// </remarks>
+    private static readonly Regex SentenceClauseIncorrectMdash =
+        new Regex(
+            @"(?!xn--)(\w{2}|⌊⌊⌊⌊M\d+⌋⌋⌋⌋)\s*--\s*(\w)");
+
+    /// <summary>
+    /// Matches hyphen, en-dash, or em-dash characters used as a minus sign inside
+    /// superscript numeric markup.
+    /// </summary>
+    /// <remarks>
+    /// Intended for forms such as <c>&lt;sup&gt;-2&lt;/sup&gt;</c>, where the
+    /// punctuation represents a numeric sign rather than a textual dash.
+    /// </remarks>
+    private static readonly Regex SuperscriptMinus =
+        new Regex(
+            @"(<sup>)(?:-|–|—)(?=\d+</sup>)");
 
     /// <summary>
     /// Matches the {{birth date}} family of templates
@@ -1211,12 +1410,71 @@ public partial class Parsers
         return newText;
     }
 
-    private static readonly Regex InUniverse = Tools.NestedTemplateRegex(@"In-universe");
-    private static readonly Regex CategoryCharacters = new Regex(@"\[\[Category:[^\[\]]*?[Cc]haracters", RegexOptions.Compiled);
-    private static readonly Regex SeeAlsoOrMain = Tools.NestedTemplateRegex(new[] { "See also", "Seealso", "Main" });
-    private static readonly Regex RefImproveBLP = Tools.NestedTemplateRegex("RefimproveBLP");
+    /// <summary>
+    /// Matches nested <c>{{In-universe}}</c> templates.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify articles or sections that are explicitly written from an
+    /// in-universe perspective.
+    /// </remarks>
+    private static readonly Regex InUniverse =
+        Tools.NestedTemplateRegex(
+            @"In-universe");
 
-    private static readonly Regex IMA = Tools.NestedTemplateRegex(new[] { "Infobox musical artist", "Infobox singer" });
+    /// <summary>
+    /// Matches category links for fictional characters.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify pages categorized as characters, regardless of the
+    /// specific franchise or work.
+    /// </remarks>
+    private static readonly Regex CategoryCharacters =
+        new Regex(
+            @"\[\[Category:[^\[\]]*?[Cc]haracters",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches common navigation templates that introduce related-topic or main
+    /// article links.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{See also}}</c>,
+    /// <c>{{Seealso}}</c>, and <c>{{Main}}</c>.
+    /// </remarks>
+    private static readonly Regex SeeAlsoOrMain =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "See also",
+            "Seealso",
+            "Main"
+            });
+
+    /// <summary>
+    /// Matches nested <c>{{RefimproveBLP}}</c> templates.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify biographies of living persons that have been marked as
+    /// requiring improved sourcing.
+    /// </remarks>
+    private static readonly Regex RefImproveBLP =
+        Tools.NestedTemplateRegex(
+            "RefimproveBLP");
+
+    /// <summary>
+    /// Matches common infobox templates used for musical artists.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{Infobox musical artist}}</c> and
+    /// <c>{{Infobox singer}}</c>.
+    /// </remarks>
+    private static readonly Regex IMA =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "Infobox musical artist",
+            "Infobox singer"
+            });
 
     /// <summary>
     /// determines whether the article is about a person by looking for birth death categories, bio stub etc. for en wiki only
@@ -1229,14 +1487,105 @@ public partial class Parsers
         return IsArticleAboutAPerson(articleText, articleTitle, false);
     }
 
-    private static readonly Regex BLPUnsourced = Tools.NestedTemplateRegex(new[] { "BLP unsourced", "BLP unreferenced" });
-    private static readonly Regex BLPUnsourcedSection = Tools.NestedTemplateRegex(new[] { "BLP unsourced section", "BLP sources section", "BLP unreferenced section" });
-    private static readonly Regex NotPersonArticles = new Regex(@"(^(((?:First )?(?:Premiership|Presidency|Governor|Mayoralty)|Murder|Atlanta murders|Disappearance|Suicide|Adoption) of|Deaths|The |Second |Brothers |Attack on|[12]\d{3}\b|\d{2,} )|Assembly of|(Birth|Death) rates|(discography|(?:film|bibli)ography| deaths| rebellion| haunting| native| children| campaign(?:, \d+)?| groups| (?:families|boom|case|syndrome|family|murders|people|sisters|brothers|quartet|team|twins|martyrs|mystery|center|\((?:artists|publisher|\w* ?(team|family))\)))(?: \(|$)|[^\(]*\w+,? (and|&|from) \w+|.* (in |Service))", RegexOptions.IgnoreCase);
-    private static readonly MetaDataSorter MDS = new MetaDataSorter();
-    private static readonly Regex NobleFamilies = new Regex(@"\[\[Category:[^\[\]\|]*(([nN]oble|[Rr]oyal) families| families(\||\]\]))");
-    private static readonly Regex NotAboutAPersonCategories = new Regex(@"\[\[Category:(\d{4} (establishments|animal|introductions)|.*(?:Animation|Business|Comedy|Criminal|Entertainer|Filmmaking|Tribes|Screenwriting|Sibling|Sibling musical|Sports|Writing) (duos|trios)|Articles about multiple people|Positions |Groups |Married couples|Fictional|Presidencies|Companies|Military careers|Parables of|[^\[\]\|\r\n]*(?:[Mm]usic(?:al)? groups| bands| gods| groups| troupes| nicknames| given names| pageants| teams and stables| magazines| titles| populated places)|Internet memes|[^\[\]\|\r\n]*Diaspora|Performing groups|Military animals|Collective pseudonyms|Sibling filmmakers|Surnames|Baronies)", RegexOptions.IgnoreCase);
-    private static readonly Regex NotPersonInfoboxes = Tools.NestedTemplateRegex(new[] { "Infobox cricketer tour biography", "Infobox political party", "Infobox settlement", "italic title", "Infobox animal", "Infobox racehorse", "Infobox named horse" });
+    /// <summary>
+    /// Matches nested biography-of-living-person templates that indicate the
+    /// article is unsourced or unreferenced.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{BLP unsourced}}</c> and
+    /// <c>{{BLP unreferenced}}</c>.
+    /// </remarks>
+    private static readonly Regex BLPUnsourced =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "BLP unsourced",
+            "BLP unreferenced"
+            });
 
+    /// <summary>
+    /// Matches nested section-level biography-of-living-person templates that
+    /// indicate a section requires sourcing.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{BLP unsourced section}}</c>,
+    /// <c>{{BLP sources section}}</c>, and
+    /// <c>{{BLP unreferenced section}}</c>.
+    /// </remarks>
+    private static readonly Regex BLPUnsourcedSection =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "BLP unsourced section",
+            "BLP sources section",
+            "BLP unreferenced section"
+            });
+
+    /// <summary>
+    /// Matches article-title patterns that strongly suggest the page is not about
+    /// a single person.
+    /// </summary>
+    /// <remarks>
+    /// The expression excludes titles describing offices, events, disappearances,
+    /// murders, deaths, groups, families, teams, discographies, filmographies,
+    /// campaigns, and other subjects that may otherwise resemble biographical
+    /// articles.
+    /// </remarks>
+    private static readonly Regex NotPersonArticles =
+        new Regex(
+            @"(^(((?:First )?(?:Premiership|Presidency|Governor|Mayoralty)|Murder|Atlanta murders|Disappearance|Suicide|Adoption) of|Deaths|The |Second |Brothers |Attack on|[12]\d{3}\b|\d{2,} )|Assembly of|(Birth|Death) rates|(discography|(?:film|bibli)ography| deaths| rebellion| haunting| native| children| campaign(?:, \d+)?| groups| (?:families|boom|case|syndrome|family|murders|people|sisters|brothers|quartet|team|twins|martyrs|mystery|center|\((?:artists|publisher|\w* ?(team|family))\)))(?: \(|$)|[^\(]*\w+,? (and|&|from) \w+|.* (in |Service))",
+            RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Provides metadata-sorting services used by category and article analysis
+    /// within this parser.
+    /// </summary>
+    private static readonly MetaDataSorter MDS =
+        new MetaDataSorter();
+
+    /// <summary>
+    /// Matches category links that identify noble or royal families, or family
+    /// categories used to distinguish family topics from individual biographies.
+    /// </summary>
+    private static readonly Regex NobleFamilies =
+        new Regex(
+            @"\[\[Category:[^\[\]\|]*(([nN]oble|[Rr]oyal) families| families(\||\]\]))");
+
+    /// <summary>
+    /// Matches category links that strongly indicate an article is not about a
+    /// single person.
+    /// </summary>
+    /// <remarks>
+    /// Recognized categories include groups, organizations, companies, fictional
+    /// subjects, presidencies, military careers, surnames, families, duos, trios,
+    /// teams, bands, settlements, and other collective or non-biographical topics.
+    /// </remarks>
+    private static readonly Regex NotAboutAPersonCategories =
+        new Regex(
+            @"\[\[Category:(\d{4} (establishments|animal|introductions)|.*(?:Animation|Business|Comedy|Criminal|Entertainer|Filmmaking|Tribes|Screenwriting|Sibling|Sibling musical|Sports|Writing) (duos|trios)|Articles about multiple people|Positions |Groups |Married couples|Fictional|Presidencies|Companies|Military careers|Parables of|[^\[\]\|\r\n]*(?:[Mm]usic(?:al)? groups| bands| gods| groups| troupes| nicknames| given names| pageants| teams and stables| magazines| titles| populated places)|Internet memes|[^\[\]\|\r\n]*Diaspora|Performing groups|Military animals|Collective pseudonyms|Sibling filmmakers|Surnames|Baronies)",
+            RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches nested infobox and title-formatting templates that indicate the
+    /// page is not about a single person.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include political-party, settlement, animal,
+    /// racehorse, named-horse, and tour-biography infoboxes, along with
+    /// <c>{{italic title}}</c>.
+    /// </remarks>
+    private static readonly Regex NotPersonInfoboxes =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "Infobox cricketer tour biography",
+            "Infobox political party",
+            "Infobox settlement",
+            "italic title",
+            "Infobox animal",
+            "Infobox racehorse",
+            "Infobox named horse"
+            });
     /// <summary>
     /// determines whether the article is about a person by looking for birth death categories, bio stub etc. for en wiki only
     /// Should only return true if the article is the principle article about the individual (not early life/career/discography etc.)
@@ -1365,8 +1714,30 @@ public partial class Parsers
         return newText;
     }
 
-    private static readonly Regex ThreeOrMoreDigits = new Regex(@"[0-9]{3,}", RegexOptions.Compiled);
-    private static readonly Regex BirthsSortKey = new Regex(@"\|.*?\]\]", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches numeric values containing three or more consecutive digits.
+    /// </summary>
+    /// <remarks>
+    /// Used when extracting or validating year values without restricting the
+    /// upper digit count.
+    /// </remarks>
+    private static readonly Regex ThreeOrMoreDigits =
+        new Regex(
+            @"[0-9]{3,}",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches the sort key portion of a category link.
+    /// </summary>
+    /// <remarks>
+    /// Used when examining or removing the <c>|sortkey</c> portion of category
+    /// markup such as <c>[[Category:People|Smith, John]]</c>.
+    /// </remarks>
+    private static readonly Regex BirthsSortKey =
+        new Regex(
+            @"\|.*?\]\]",
+            RegexOptions.Compiled);
+
     /// <summary>
     /// Adds [[Category:Living people]] to articles with a [[Category:XXXX births]] and no living people/deaths category, taking sortkey from births category if present
     /// When page is not mainspace, adds [[:Category rather than [[Category
@@ -1409,10 +1780,44 @@ public partial class Parsers
         return articleText + "[[" + (Namespace.IsMainSpace(articleTitle) ? "" : ":") + "Category:Living people" + catKey;
     }
 
-    private static readonly Regex UncertainWordings = new Regex(@"(?:\b(about|abt|approx\.?|before|\?\?\?|by|or \d+|later|after|near|either|probably|missing|prior to|around|late|[Cc]irca|between|be?tw\.?|[Bb]irth based on age as of date|\d{3,4}(?:\]\])?/(?:\[\[)?\d{1,4}|or +(?:\[\[)?\d{3,})\b|\d{3} *\?|\bca?(?:'')?\.|\b[Cc]a?\b|\b(bef|abt|est)\.|~|/|''fl''\.?)", RegexOptions.IgnoreCase);
-    private static readonly Regex ReignedRuledUnsure = new Regex(@"(?:\?|[Rr](?:uled|eign(?:ed)?\b)|\br\.|(chr|fl(?:\]\])?)\.|\b(?:[Ff]lo(?:urished|ruit)|active|baptized)\b)");
+    /// <summary>
+    /// Matches wording and punctuation that indicate an uncertain, approximate, or
+    /// otherwise non-exact biographical date or year.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes expressions such as <c>about</c>, <c>before</c>, <c>circa</c>,
+    /// <c>between</c>, <c>probably</c>, <c>fl.</c>, question marks, ranges, and
+    /// similar uncertainty markers.
+    /// </remarks>
+    private static readonly Regex UncertainWordings =
+        new Regex(
+            @"(?:\b(about|abt|approx\.?|before|\?\?\?|by|or \d+|later|after|near|either|probably|missing|prior to|around|late|[Cc]irca|between|be?tw\.?|[Bb]irth based on age as of date|\d{3,4}(?:\]\])?/(?:\[\[)?\d{1,4}|or +(?:\[\[)?\d{3,})\b|\d{3} *\?|\bca?(?:'')?\.|\b[Cc]a?\b|\b(bef|abt|est)\.|~|/|''fl''\.?)",
+            RegexOptions.IgnoreCase);
 
-    private static readonly Regex AgeBrackets = new Regex(@"(?:< *[Bb][Rr] */? *> *)?\s*[,;]?\s*\(? *[Aa]ged? +\d{1,3}(?: +or +\d{1,3})? *\)?$", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches biographical wording that makes a year unsuitable for confident
+    /// birth- or death-year inference.
+    /// </summary>
+    /// <remarks>
+    /// Recognizes reign, rule, floruit, activity, baptism, christening, and similar
+    /// indicators that may describe a period or event rather than an exact birth or
+    /// death date.
+    /// </remarks>
+    private static readonly Regex ReignedRuledUnsure =
+        new Regex(
+            @"(?:\?|[Rr](?:uled|eign(?:ed)?\b)|\br\.|(chr|fl(?:\]\])?)\.|\b(?:[Ff]lo(?:urished|ruit)|active|baptized)\b)");
+
+    /// <summary>
+    /// Matches an age expression appearing at the end of biographical text.
+    /// </summary>
+    /// <remarks>
+    /// Supports optional line-break markup, punctuation, parentheses, and formats
+    /// such as <c>aged 75</c> or <c>age 75 or 76</c>.
+    /// </remarks>
+    private static readonly Regex AgeBrackets =
+        new Regex(
+            @"(?:< *[Bb][Rr] */? *> *)?\s*[,;]?\s*\(? *[Aa]ged? +\d{1,3}(?: +or +\d{1,3})? *\)?$",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// takes input string of date and age e.g. "11 May 1990 (age 21)" and converts to {{birth date and age|1990|5|11}}
@@ -1499,10 +1904,49 @@ public partial class Parsers
         return newText;
     }
 
-    private static readonly Regex NoFootnotes = Tools.NestedTemplateRegex("no footnotes");
-    private static readonly Regex ConversionsCnCommons = Tools.NestedTemplateRegex(new[] { "citation needed", "commons", "commons cat", "commons category" });
-    private const string CategoryLivingPeople = @"[[Category:Living people";
-    private static readonly Regex CommonsCategory = new Regex(@"\{\{\s*[Cc]ommons\s?\|\s*[Cc]ategory:\s*([^{}]+?)\s*\}\}");
+    /// <summary>
+    /// Matches nested <c>{{No footnotes}}</c> templates.
+    /// </summary>
+    private static readonly Regex NoFootnotes =
+        Tools.NestedTemplateRegex(
+            "no footnotes");
+
+    /// <summary>
+    /// Matches nested templates related to citation-needed cleanup and Wikimedia
+    /// Commons links or category links.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{citation needed}}</c>,
+    /// <c>{{commons}}</c>, <c>{{commons cat}}</c>, and
+    /// <c>{{commons category}}</c>.
+    /// </remarks>
+    private static readonly Regex ConversionsCnCommons =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "citation needed",
+            "commons",
+            "commons cat",
+            "commons category"
+            });
+
+    /// <summary>
+    /// Defines the opening wiki markup for the
+    /// <c>[[Category:Living people]]</c> category.
+    /// </summary>
+    private const string CategoryLivingPeople =
+        @"[[Category:Living people";
+
+    /// <summary>
+    /// Matches a Commons template that explicitly references a Commons category
+    /// and captures the category name.
+    /// </summary>
+    /// <remarks>
+    /// The first capture group contains the Commons category name.
+    /// </remarks>
+    private static readonly Regex CommonsCategory =
+        new Regex(
+            @"\{\{\s*[Cc]ommons\s?\|\s*[Cc]ategory:\s*([^{}]+?)\s*\}\}");
 
     /// <summary>
     /// Converts/subst'd some deprecated templates
@@ -1638,7 +2082,53 @@ public partial class Parsers
         return articleText;
     }
 
-    private static readonly Regex SectionTemplates = Tools.NestedTemplateRegex(new[] { "unreferenced", "refimprove", "BLP sources", "expand", "BLP unsourced", "BLP unreferenced", "More citations needed" });
+    // TODO (Future Refactoring):
+    // Move maintenance template names into a dedicated, reusable configuration
+    // collection and build the regex from that collection instead of embedding
+    // the template list directly in this field.
+    //
+    // Benefits:
+    // - Makes it easier to add or remove supported templates.
+    // - Allows other maintenance-related logic to reuse the same template list.
+    // - Separates configuration data from regex construction.
+    // - Improves readability by keeping large template lists out of field
+    //   declarations.
+    //
+    // Example:
+    //
+    // private static readonly string[] SectionMaintenanceTemplateNames =
+    // {
+    //     "unreferenced",
+    //     "refimprove",
+    //     "BLP sources",
+    //     ...
+    // };
+    //
+    // private static readonly Regex SectionTemplates =
+    //     Tools.NestedTemplateRegex(SectionMaintenanceTemplateNames);
+    /// <summary>
+    /// Matches nested maintenance templates that apply to an entire article or
+    /// section and indicate that additional sourcing or expansion is needed.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{Unreferenced}}</c>,
+    /// <c>{{Refimprove}}</c>, <c>{{BLP sources}}</c>,
+    /// <c>{{Expand}}</c>, <c>{{BLP unsourced}}</c>,
+    /// <c>{{BLP unreferenced}}</c>, and
+    /// <c>{{More citations needed}}</c>.
+    /// </remarks>
+    private static readonly Regex SectionTemplates =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "unreferenced",
+            "refimprove",
+            "BLP sources",
+            "expand",
+            "BLP unsourced",
+            "BLP unreferenced",
+            "More citations needed"
+            });
 
     /// <summary>
     /// Converts templates such as {{foo|section|...}} to {{foo section|...}}
@@ -1686,7 +2176,22 @@ public partial class Parsers
         return Tools.RenameTemplate(m.Value, newTemplateName);
     }
 
-    private static readonly Regex BotsAllow = new Regex(@"{{\s*(?:[Nn]obots|[Bb]ots)\s*\|\s*allow\s*=(.*?)}}", RegexOptions.Singleline | RegexOptions.Compiled);
+    // TODO:
+    // Consider parsing {{Bots}}/{{Nobots}} parameters instead of relying on a
+    // single regex. A parser would correctly handle parameters in any order,
+    // multiline templates, duplicate parameters, and escaped template content.
+    /// <summary>
+    /// Matches <c>{{Bots}}</c> and <c>{{Nobots}}</c> templates that specify an
+    /// <c>allow=</c> parameter.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the comma-separated list of bot names or bot groups
+    /// permitted to edit the page.
+    /// </remarks>
+    private static readonly Regex BotsAllow =
+        new Regex(
+            @"{{\s*(?:[Nn]obots|[Bb]ots)\s*\|\s*allow\s*=(.*?)}}",
+            RegexOptions.Singleline | RegexOptions.Compiled);
 
     // Covered by UtilityFunctionTests.NoBotsTests()
     /// <summary>
@@ -1714,9 +2219,51 @@ public partial class Parsers
                            @"|awb|all)|optout=all))\s*(?:\}\}|,)", RegexOptions.IgnoreCase);
     }
 
-    private static readonly Regex ExtToIn = new Regex(@"(?<![*#:;]{2})\[https?://([a-z0-9\-]{2})\.(?:(wikt)ionary|wiki(n)ews|wiki(b)ooks|wiki(q)uote|wiki(s)ource|wiki(v)ersity|(w)ikipedia)\.(?:com|net|org)/w(?:iki)?/([^][{|}\s""]*) +([^\n\]]+)\]", RegexOptions.Compiled);
-    private static readonly Regex MetaCommonsIncubatorQualityExternalLink = new Regex(@"(?<![*#:;]{2})\[https?://(?:(m)eta|(commons)|(incubator)|(quality))\.wikimedia\.(?:com|net|org)/w(?:iki)?/([^][{|}\s""]*) +([^\n\]]+)\]", RegexOptions.Compiled);
-    private static readonly Regex WikiaExternalLink = new Regex(@"(?<![*#:;]{2})\[http://([a-z0-9\-]+)\.wikia\.(?:com|net|org)/wiki/([^][{|}\s""]+) +([^\n\]]+)\]", RegexOptions.Compiled);
+    // TODO:
+    // Replace positional capture-group contracts with named groups so callers can
+    // reference values such as language, project, page, and display text directly.
+    // Also review whether the legacy Wikia-only HTTP pattern should be generalized
+    // or retired as part of the broader Fandom/hosted-wiki modernization work.
+    /// <summary>
+    /// Matches external links to supported Wikimedia sister projects and captures
+    /// the information needed to convert them into internal or interwiki links.
+    /// </summary>
+    /// <remarks>
+    /// The expression recognizes project hosts such as Wiktionary, Wikinews,
+    /// Wikibooks, Wikiquote, Wikisource, Wikiversity, and Wikipedia.
+    /// Capture groups identify the language code, project type, target page, and
+    /// displayed link text.
+    /// </remarks>
+    private static readonly Regex ExtToIn =
+        new Regex(
+            @"(?<![*#:;]{2})\[https?://([a-z0-9\-]{2})\.(?:(wikt)ionary|wiki(n)ews|wiki(b)ooks|wiki(q)uote|wiki(s)ource|wiki(v)ersity|(w)ikipedia)\.(?:com|net|org)/w(?:iki)?/([^][{|}\s""]*) +([^\n\]]+)\]",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches external links to Meta-Wiki, Wikimedia Commons, Wikimedia
+    /// Incubator, or the historical Wikimedia Quality site.
+    /// </summary>
+    /// <remarks>
+    /// Capture groups identify the matched Wikimedia project, target page, and
+    /// displayed link text for later conversion into an internal or interwiki
+    /// link.
+    /// </remarks>
+    private static readonly Regex MetaCommonsIncubatorQualityExternalLink =
+        new Regex(
+            @"(?<![*#:;]{2})\[https?://(?:(m)eta|(commons)|(incubator)|(quality))\.wikimedia\.(?:com|net|org)/w(?:iki)?/([^][{|}\s""]*) +([^\n\]]+)\]",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches legacy external links to Wikia-hosted wiki pages.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the Wikia subdomain, capture group 2 contains the
+    /// target page, and capture group 3 contains the displayed link text.
+    /// </remarks>
+    private static readonly Regex WikiaExternalLink =
+        new Regex(
+            @"(?<![*#:;]{2})\[http://([a-z0-9\-]+)\.wikia\.(?:com|net|org)/wiki/([^][{|}\s""]+) +([^\n\]]+)\]",
+            RegexOptions.Compiled);
 
     // Covered by UtilityFunctionTests.ExternalURLToInternalLink(), incomplete
     /// <summary>
@@ -1736,8 +2283,36 @@ public partial class Parsers
         return SameLanguageLink.Replace(articleText, "$1$2");
     }
 
-    private static readonly Regex coinsR = new Regex(@"""coins"": ""([^""]+)");
-    private static readonly Regex coinsParam = new Regex(@"[&;]rft\.([a-z0-9]+)=([^&]+)");
+    // TODO (Future Refactoring):
+    // Rename these expressions to reflect the COinS metadata they process.
+    // For example:
+    //
+    // coinsR      -> CoinsMetadataRegex
+    // coinsParam  -> CoinsParameterRegex
+    //
+    // Also consider replacing these regexes with a dedicated COinS parser if
+    // additional metadata fields are supported in the future.
+    /// <summary>
+    /// Matches the value of a <c>"coins"</c> property in serialized metadata.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the value assigned to the
+    /// <c>"coins"</c> property.
+    /// </remarks>
+    private static readonly Regex coinsR =
+        new Regex(
+            @"""coins"": ""([^""]+)");
+
+    /// <summary>
+    /// Matches individual <c>rft.*</c> parameters within a COinS metadata string.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the parameter name, and capture group 2 contains
+    /// the corresponding parameter value.
+    /// </remarks>
+    private static readonly Regex coinsParam =
+        new Regex(
+            @"[&;]rft\.([a-z0-9]+)=([^&]+)");
 
     /// <summary>
     /// Returns a dictionary of COinS parameter and value from the input text
@@ -1806,8 +2381,28 @@ public partial class Parsers
         return WikiRegexes.InUse.IsMatch(WikiRegexes.UnformattedText.Replace(articleText, string.Empty));
     }
 
-    private static readonly Regex SicTypo = Tools.NestedTemplateRegex(new[] { "Sic", "Typo" });
-    private static readonly Regex SicTag = new Regex(@"[\(\[{]\s*[Ss]ic!?\s*[\)\]}]");
+    /// <summary>
+    /// Matches nested <c>{{Sic}}</c> and <c>{{Typo}}</c> templates.
+    /// </summary>
+    /// <remarks>
+    /// Used to identify explicit markup indicating that unusual or incorrect text
+    /// is intentionally preserved or has been marked as a typo.
+    /// </remarks>
+    private static readonly Regex SicTypo =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "Sic",
+            "Typo"
+            });
+
+    /// <summary>
+    /// Matches bracketed <c>sic</c> markers such as <c>(sic)</c>,
+    /// <c>[sic]</c>, <c>{sic}</c>, and their optional <c>sic!</c> forms.
+    /// </summary>
+    private static readonly Regex SicTag =
+        new Regex(
+            @"[\(\[{]\s*[Ss]ic!?\s*[\)\]}]");
 
     /// <summary>
     /// Check if the article contains a sic template or bracketed wording, indicating the presence of a deliberate typo
@@ -1855,8 +2450,31 @@ public partial class Parsers
         return (TemplateExists(GetAllTemplates(articleText), WikiRegexes.MoreNoFootnotes) && WikiRegexes.MoreNoFootnotes.IsMatch(WikiRegexes.Comments.Replace(string.Join("", GetAllTemplateDetail(articleText).ToArray()), "")) && WikiRegexes.Refs.Matches(articleText).Count > 4);
     }
 
-    private static readonly Regex GRTemplateDecimal = new Regex(@"{{GR\|\d}}", RegexOptions.Compiled);
-    private static readonly Regex ReflistQuick = new Regex(@"\{\{\s*(?:ref(?:-?li(?:st|nk)|erence)|[Ll]istaref)", RegexOptions.IgnoreCase);
+    /// <summary>
+    /// Matches a <c>{{GR}}</c> template that specifies a single decimal digit.
+    /// </summary>
+    /// <remarks>
+    /// Used when identifying or processing decimal-form GR templates.
+    /// </remarks>
+    private static readonly Regex GRTemplateDecimal =
+        new Regex(
+            @"{{GR\|\d}}",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches common reference list templates used to display article references.
+    /// </summary>
+    /// <remarks>
+    /// Recognized templates include <c>{{Reflist}}</c>,
+    /// <c>{{Ref-list}}</c>, <c>{{RefLink}}</c>,
+    /// <c>{{Reference}}</c>, and <c>{{Listaref}}</c>.
+    /// The expression is intended as a fast preliminary check for the presence of
+    /// a reference list template before performing more expensive processing.
+    /// </remarks>
+    private static readonly Regex ReflistQuick =
+        new Regex(
+            @"\{\{\s*(?:ref(?:-?li(?:st|nk)|erence)|[Ll]istaref)",
+            RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Searches for link to user and/or user talk namespace
