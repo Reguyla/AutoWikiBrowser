@@ -843,7 +843,7 @@ public partial class Parsers
     /// <param name="articleText">
     /// The wiki text of the article.
     /// </param>
-    /// <param name="ssbISBN">
+    /// <param name="isbnMarkers">
     /// A collection of ISBN-related strings detected during preprocessing and used
     /// to determine whether specific ISBN cleanup rules should be applied.
     /// </param>
@@ -859,34 +859,51 @@ public partial class Parsers
     /// TODO: Consider extracting the individual ISBN cleanup operations into
     /// focused helpers during a later refactoring pass once their behavior and
     /// test coverage have been reviewed.
+    ///
+    /// TODO: Consider replacing repeated literal ISBN marker strings with named
+    /// constants if this logic continues to grow.
+    ///
+    /// TODO: Consider expanding tests around idempotence and infobox parameter
+    /// rewriting before any structural refactoring.
     /// </remarks>
     private static string FixSyntaxISBN(string articleText, List<string> isbnMarkers)
     {
         // CHECKWIKI error 69.
-        bool containsIsbnDash =
-            articleText.Contains("ISBN-") ||
-            articleText.Contains("ISBN–");
+        bool containsDashedIsbnLabel =
+            articleText.Contains("ISBN-", StringComparison.Ordinal) ||
+            articleText.Contains("ISBN–", StringComparison.Ordinal);
 
-        if (containsIsbnDash ||
-            articleText.Contains("ISBN:") ||
-            articleText.Contains("ISBN\t") ||
-            articleText.Contains("ISBN \t") ||
-            isbnMarkers.Contains("[[ISBN]]"))
+        bool containsMalformedIsbnSeparator =
+            articleText.Contains("ISBN:", StringComparison.Ordinal) ||
+            articleText.Contains("ISBN\t", StringComparison.Ordinal) ||
+            articleText.Contains("ISBN \t", StringComparison.Ordinal);
+
+        bool containsLinkedIsbnMarker = isbnMarkers.Contains("[[ISBN]]");
+        bool containsPipedIsbnMarker =
+            isbnMarkers.Contains("[[International Standard Book Number|ISBN]]");
+
+        if (containsDashedIsbnLabel ||
+            containsMalformedIsbnSeparator ||
+            containsLinkedIsbnMarker)
         {
             articleText = SyntaxRegexISBN.Replace(articleText, "ISBN $1");
         }
 
-        if (containsIsbnDash)
+        if (containsDashedIsbnLabel)
         {
             articleText = SyntaxRegexISBN2.Replace(articleText, "ISBN ");
             articleText = SyntaxRegexISBN2a.Replace(articleText, "ISBN-$1");
         }
 
-        if (isbnMarkers.Contains("[[ISBN]]"))
+        if (containsLinkedIsbnMarker)
+        {
             articleText = SyntaxRegexISBN3.Replace(articleText, "ISBN $1");
+        }
 
-        if (isbnMarkers.Contains("[[International Standard Book Number|ISBN]]"))
+        if (containsPipedIsbnMarker)
+        {
             articleText = SyntaxRegexISBN4.Replace(articleText, "ISBN $1");
+        }
 
         // Capitalize the ISBN-10 check digit.
         articleText = ISBNx.Replace(articleText, "$1X");
@@ -894,7 +911,7 @@ public partial class Parsers
         // Replace en dashes with hyphens within ISBN numbers.
         articleText = ISBNEndash.Replace(
             articleText,
-            match=> "ISBN " + match.Groups[1].Value.Replace("–", "-"));
+            match => "ISBN " + match.Groups[1].Value.Replace("–", "-"));
 
         // Remove a redundant ISBN prefix from isbn= parameters in infoboxes.
         if (TemplateExists(GetAllTemplates(articleText), WikiRegexes.InfoBox))
@@ -904,7 +921,8 @@ public partial class Parsers
             {
                 string isbnValue = Tools.GetTemplateParameterValue(infoboxTemplate, "isbn");
 
-                if (isbnValue.StartsWith("ISBN"))
+                if (!string.IsNullOrEmpty(isbnValue) &&
+                    isbnValue.StartsWith("ISBN", StringComparison.Ordinal))
                 {
                     articleText = articleText.Replace(
                         infoboxTemplate,
@@ -919,10 +937,13 @@ public partial class Parsers
         // Move an ISBN outside an external link when it appears at the end of
         // the link's display text.
         while (ExternalLinkEndsISBN.IsMatch(articleText))
+        {
             articleText = ExternalLinkEndsISBN.Replace(articleText, "$1] $2");
+        }
 
         return articleText;
     }
+
 
     /// <summary>
     /// Applies fixes to any DEFAULTSORT templates in the input text
