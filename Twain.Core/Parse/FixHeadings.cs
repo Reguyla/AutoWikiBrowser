@@ -435,33 +435,33 @@ private static readonly Regex RegexHeadingsSeeAlso =
         {
             if (!customHeadings.Any(heading => WikiRegexes.HeadingLevelTwo.IsMatch(heading)))
             {
-                string articleTextLocal = articleText;
-                articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleTextLocal, string.Empty);
+                string articleTextWithoutStandardHeadings = articleText;
+                articleTextWithoutStandardHeadings = ReferencesExternalLinksSeeAlso.Replace(articleTextWithoutStandardHeadings, string.Empty);
 
-                string originalarticleText = string.Empty;
-                while (!originalarticleText.Equals(articleText))
+                string previousArticleText = string.Empty;
+                while (!previousArticleText.Equals(articleText))
                 {
-                    originalarticleText = articleText;
-                    if (!WikiRegexes.HeadingLevelTwo.IsMatch(articleTextLocal))
+                    previousArticleText = articleText;
+                    if (!WikiRegexes.HeadingLevelTwo.IsMatch(articleTextWithoutStandardHeadings))
                     {
                         // get index of last level 3+ heading
-                        int upone = 0;
+                        int lastHeadingToPromoteIndex = 0;
                         foreach (Match match in RegexHeadingUpOneLevel.Matches(articleText))
                         {
-                            if (match.Index > upone)
-                                upone = match.Index;
+                            if (match.Index > lastHeadingToPromoteIndex)
+                                lastHeadingToPromoteIndex = match.Index;
                         }
 
-                        if (!ReferencesExternalLinksSeeAlso.IsMatch(articleText) || (upone < ReferencesExternalLinksSeeAlso.Match(articleText).Index))
+                        if (!ReferencesExternalLinksSeeAlso.IsMatch(articleText) || (lastHeadingToPromoteIndex < ReferencesExternalLinksSeeAlso.Match(articleText).Index))
                             articleText = RegexHeadingUpOneLevel.Replace(articleText, "$1$2");
                     }
 
-                    articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleText, string.Empty);
+                    articleTextWithoutStandardHeadings = ReferencesExternalLinksSeeAlso.Replace(articleText, string.Empty);
                 }
             }
 
             // level 1 headings to level 2 on mainspace
-            if (Namespace.IsMainSpace(articleTitle) && customHeadings.Any(s => HeadingLevelOne.IsMatch(s)))
+            if (Namespace.IsMainSpace(articleTitle) && customHeadings.Any(heading => HeadingLevelOne.IsMatch(heading)))
                 articleText = HeadingLevelOne.Replace(articleText, "==$1==");
         }
 
