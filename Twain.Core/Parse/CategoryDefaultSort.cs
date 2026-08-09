@@ -966,19 +966,19 @@ public static string ChangeToDefaultSort(
         if (!Variables.LangCode.Equals("en"))
             return articleText;
 
-        // Performance: apply births/deaths category check on categories string, not whole article
-        string cats = GetCats(articleText);
+        // Performance: apply births/deaths category checks to the category text rather
+        // than the complete article.
+        string categories =
+            GetCats(articleText);
 
-        bool dolmatch = WikiRegexes.DeathsOrLivingCategory.IsMatch(cats),
-            bimatch = WikiRegexes.BirthsCategory.IsMatch(cats);
-
-        // no work to do if already has a birth and a death/living cat
-        if (dolmatch && bimatch)
-            return YearOfBirthDeathMissingCategory(articleText, cats);
-
-        // over 20 references or long and not DOB/DOD categorized at all yet: implausible
-        if ((articleText.Length > 15000 && !bimatch && !dolmatch) || (!dolmatch && WikiRegexes.Refs.Matches(articleText).Count > 20))
-            return YearOfBirthDeathMissingCategory(articleText, cats);
+        if (ShouldSkipPeopleCategoryProcessing(
+                articleText,
+                categories))
+        {
+            return YearOfBirthDeathMissingCategory(
+                articleText,
+                categories);
+        }
 
         string articleTextBefore = articleText;
         int catCount = WikiRegexes.Category.Matches(articleText).Count;
@@ -1141,14 +1141,60 @@ public static string ChangeToDefaultSort(
 
         // do this check last as IsArticleAboutAPerson can be relatively slow
         if (!articleText.Equals(articleTextBefore) && !IsArticleAboutAPerson(articleTextBefore, articleTitle, parseTalkPage))
-            return YearOfBirthDeathMissingCategory(articleTextBefore, cats);
+            return YearOfBirthDeathMissingCategory(articleTextBefore, categories);
 
-        // {{uncat}} --> {{Improve categories}} if we've added cats
+        // {{uncat}} --> {{Improve categories}} if we've added categories
         if (WikiRegexes.Category.Matches(articleText).Count > catCount && WikiRegexes.Uncategorized.IsMatch(articleText)
             && !WikiRegexes.CatImprove.IsMatch(articleText))
             articleText = Tools.RenameTemplate(articleText, Tools.GetTemplateName(WikiRegexes.Uncategorized.Match(articleText).Value), "Improve categories");
 
         return YearOfBirthDeathMissingCategory(articleText, GetCats(articleText));
+    }
+
+    /// <summary>
+    /// Determines whether birth- and death-category inference should be skipped for
+    /// the supplied article.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete wiki text of the article.
+    /// </param>
+    /// <param name="categories">
+    /// The category text extracted from the article.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the article already has sufficient
+    /// birth/death categorization or is unlikely to be suitable for automatic
+    /// category inference; otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool ShouldSkipPeopleCategoryProcessing(
+        string articleText,
+        string categories)
+    {
+        bool hasDeathOrLivingCategory =
+            WikiRegexes.DeathsOrLivingCategory
+                .IsMatch(categories);
+
+        bool hasBirthCategory =
+            WikiRegexes.BirthsCategory
+                .IsMatch(categories);
+
+        // No additional birth/death inference is needed when both categories are
+        // already represented.
+        if (hasDeathOrLivingCategory &&
+            hasBirthCategory)
+        {
+            return true;
+        }
+
+        // Articles that are unusually long and have neither category, or that have
+        // many references but no death/living category, are considered too
+        // ambiguous for automatic inference.
+        return
+            (articleText.Length > 15000 &&
+             !hasBirthCategory &&
+             !hasDeathOrLivingCategory) ||
+            (!hasDeathOrLivingCategory &&
+             WikiRegexes.Refs.Matches(articleText).Count > 20);
     }
 
     private static string CatEnd(string sort)
