@@ -926,37 +926,80 @@ public partial class Parsers
                 newValue = Tools.UpdateTemplateParameterValue(newValue, paramsFound.FirstOrDefault(p => p.Key == "ISSN" || p.Key == "issn").Key, newISSN);
         }
 
-        if (ISBN.Length > 0)
-        {
-            string ISBNbefore = ISBN;
-            // remove ISBN at start, but not if multiple ISBN
-            if (ISBN.IndexOf("isbn", StringComparison.OrdinalIgnoreCase) > -1
-                && ISBN.Substring(4).IndexOf("isbn", StringComparison.OrdinalIgnoreCase) == -1)
-                ISBN = Regex.Replace(ISBN, @"^(?i)ISBN\s*", "");
-
-            // trim unneeded characters
-            ISBN = ISBN.Trim(".;,:".ToCharArray()).Trim();
-
-            // fix dashes: only hyphens allowed
-            while (ISBNDash.IsMatch(ISBN))
-                ISBN = ISBNDash.Replace(ISBN, @"$1-$2");
-            ISBN = ISBN.Replace('\x2010', '-');
-            ISBN = ISBN.Replace('\x2012', '-');
-
-            if (!ISBN.Equals(ISBNbefore))
-            {
-                if (paramsFound.ContainsKey("ISBN"))
-                    newValue = Tools.UpdateTemplateParameterValue(newValue, "ISBN", ISBN);
-                else
-                    newValue = Tools.UpdateTemplateParameterValue(newValue, "isbn", ISBN);
-            }
-        }
+        newValue = NormalizeCitationIsbn(newValue, paramsFound, ISBN);
 
         // origyear --> year when no year/date
         if (origyear.Length == 4 && TheYear.Length == 0 && TheDate.Length == 0)
         {
             newValue = Tools.RenameTemplateParameter(newValue, "origyear", "year");
             newValue = Tools.RemoveDuplicateTemplateParameters(newValue);
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Normalizes the value of an ISBN citation parameter.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="ISBN">
+    /// The ISBN value to normalize.
+    /// </param>
+    /// <returns>
+    /// The citation template text with the normalized ISBN value.
+    /// </returns>
+    private static string NormalizeCitationIsbn(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        string ISBN)
+    {
+        if (ISBN.Length == 0)
+        {
+            return newValue;
+        }
+
+        string ISBNbefore = ISBN;
+
+        // remove ISBN at start, but not if multiple ISBN
+        if (ISBN.IndexOf("isbn", StringComparison.OrdinalIgnoreCase) > -1
+            && ISBN.Substring(4).IndexOf("isbn", StringComparison.OrdinalIgnoreCase) == -1)
+        {
+            ISBN = Regex.Replace(ISBN, @"^(?i)ISBN\s*", "");
+        }
+
+        // trim unneeded characters
+        ISBN = ISBN.Trim(".;,:".ToCharArray()).Trim();
+
+        // fix dashes: only hyphens allowed
+        while (ISBNDash.IsMatch(ISBN))
+        {
+            ISBN = ISBNDash.Replace(ISBN, @"$1-$2");
+        }
+
+        ISBN = ISBN.Replace('\x2010', '-');
+        ISBN = ISBN.Replace('\x2012', '-');
+
+        if (!ISBN.Equals(ISBNbefore))
+        {
+            if (paramsFound.ContainsKey("ISBN"))
+            {
+                newValue = Tools.UpdateTemplateParameterValue(
+                    newValue,
+                    "ISBN",
+                    ISBN);
+            }
+            else
+            {
+                newValue = Tools.UpdateTemplateParameterValue(
+                    newValue,
+                    "isbn",
+                    ISBN);
+            }
         }
 
         return newValue;
