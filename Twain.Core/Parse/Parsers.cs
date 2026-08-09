@@ -3461,64 +3461,110 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// Check if the article contains a &lt;ref>...&lt;/ref> reference after the {{reflist}} to show them
+    /// Determines whether an English-wiki article contains a reference after its
+    /// references template.
     /// </summary>
-    // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#.28Yet.29_more_reference_related_changes.
+    /// <remarks>
+    /// The article is scanned from the end in chunks to avoid processing the full
+    /// text when the references template is near the bottom of the page. Articles
+    /// containing multiple references templates are not supported by this check.
+    /// Comments occurring after the references template are ignored.
+    /// </remarks>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// <see langword="true"/> when a reference is found after the references
+    /// template; otherwise, <see langword="false"/>.
+    /// </returns>
     public static bool HasRefAfterReflist(string articleText)
     {
         if (!Variables.LangCode.Equals("en") || articleText.Length == 0)
+        {
             return false;
+        }
 
-        int refstemplateindex = 0, reflength = 0;
+        int refstemplateindex = 0;
+        int reflength = 0;
         int maxlen = Math.Min(articleText.Length, 1000);
         string articleTextoriginal = articleText;
 
-        // Performance: as {{reflist}} normally at end of page, process page in batches of last 1000 characters
-        // Should be that last 1000 or 2000 will contain {{reflist}} and no <ref> so we can avoid processing rest of article
+        // Performance: {{reflist}} is normally near the end of the page, so scan
+        // backward in chunks of up to 1000 characters before processing more text.
         for (int i = maxlen; i <= articleTextoriginal.Length; i += maxlen)
         {
-            articleText = articleTextoriginal.Substring(articleTextoriginal.Length - i, i);
+            articleText =
+                articleTextoriginal.Substring(
+                    articleTextoriginal.Length - i,
+                    i);
+
             foreach (Match m in WikiRegexes.ReferencesTemplate.Matches(articleText))
             {
                 if (refstemplateindex > 0)
-                    return false; // multiple {{reflist}} etc. in page, not supported for check
+                {
+                    // Multiple {{reflist}}-style templates are not supported by
+                    // this check.
+                    return false;
+                }
 
                 refstemplateindex = m.Index;
                 reflength = m.Length;
             }
-            articleText = articleText.Substring(refstemplateindex + reflength);
-            articleText = WikiRegexes.Comments.Replace(articleText, string.Empty);
+
+            articleText =
+                articleText.Substring(
+                    refstemplateindex + reflength);
+
+            articleText =
+                WikiRegexes.Comments.Replace(
+                    articleText,
+                    string.Empty);
 
             if (refstemplateindex > 0)
-                return Regex.IsMatch(articleText, WikiRegexes.ReferenceEnd);
+            {
+                return Regex.IsMatch(
+                    articleText,
+                    WikiRegexes.ReferenceEnd);
+            }
         }
 
         return false;
     }
 
     /// <summary>
-    /// Returns true if the article contains bare external links in the references section (just the URL link on a line with no description/name)
+    /// Determines whether the references section contains bare external links.
     /// </summary>
+    /// <remarks>
+    /// A bare reference is an external URL appearing without descriptive link text.
+    /// Only the references section is examined, ending at the external-links
+    /// section when one follows it, or at the end of the article otherwise.
+    /// </remarks>
     /// <param name="articleText">The wiki text of the article.</param>
-    /// <returns></returns>
-    // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Format_references
+    /// <returns>
+    /// <see langword="true"/> when a bare external link is found in the references
+    /// section; otherwise, <see langword="false"/>.
+    /// </returns>
     public static bool HasBareReferences(string articleText)
     {
-        int referencesIndex = WikiRegexes.ReferencesHeader.Match(articleText).Index;
+        int referencesIndex =
+            WikiRegexes.ReferencesHeader.Match(articleText).Index;
 
         if (referencesIndex < 2)
+        {
             return false;
+        }
 
         int externalLinksIndex =
             WikiRegexes.ExternalLinksHeader.Match(articleText).Index;
 
-        // get the references section: to external links or end of article, whichever is earlier
-        string refsArea = externalLinksIndex > referencesIndex
-            ? articleText.Substring(referencesIndex, (externalLinksIndex - referencesIndex))
-            : articleText.Substring(referencesIndex);
+        // Extract the references section through the external-links section or
+        // the end of the article, whichever comes first.
+        string refsArea =
+            externalLinksIndex > referencesIndex
+                ? articleText.Substring(
+                    referencesIndex,
+                    externalLinksIndex - referencesIndex)
+                : articleText.Substring(referencesIndex);
 
-        return (WikiRegexes.BareExternalLink.IsMatch(refsArea));
+        return WikiRegexes.BareExternalLink.IsMatch(refsArea);
     }
-
     #endregion
 }
