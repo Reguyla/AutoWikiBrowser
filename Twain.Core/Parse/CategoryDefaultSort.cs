@@ -1023,10 +1023,10 @@ public static string ChangeToDefaultSort(
         if (!articleText.Equals(articleTextBefore) && !IsArticleAboutAPerson(articleTextBefore, articleTitle, parseTalkPage))
             return YearOfBirthDeathMissingCategory(articleTextBefore, categories);
 
-        // {{uncat}} --> {{Improve categories}} if we've added categories
-        if (WikiRegexes.Category.Matches(articleText).Count > catCount && WikiRegexes.Uncategorized.IsMatch(articleText)
-            && !WikiRegexes.CatImprove.IsMatch(articleText))
-            articleText = Tools.RenameTemplate(articleText, Tools.GetTemplateName(WikiRegexes.Uncategorized.Match(articleText).Value), "Improve categories");
+        articleText =
+            UpdateUncategorizedTemplateIfNeeded(
+                articleText,
+                catCount);
 
         return YearOfBirthDeathMissingCategory(articleText, GetCats(articleText));
     }
@@ -1588,6 +1588,41 @@ public static string ChangeToDefaultSort(
                         CatEnd(sort);
                 }
             }
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Replaces an uncategorized maintenance template with
+    /// <c>{{Improve categories}}</c> when new categories have been added.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="originalCategoryCount">
+    /// The number of categories present before people-category processing began.
+    /// </param>
+    /// <returns>
+    /// The article text after any applicable maintenance-template update.
+    /// </returns>
+    private static string UpdateUncategorizedTemplateIfNeeded(
+        string articleText,
+        int originalCategoryCount)
+    {
+        if (WikiRegexes.Category.Matches(articleText).Count >
+                originalCategoryCount &&
+            WikiRegexes.Uncategorized.IsMatch(articleText) &&
+            !WikiRegexes.CatImprove.IsMatch(articleText))
+        {
+            articleText =
+                Tools.RenameTemplate(
+                    articleText,
+                    Tools.GetTemplateName(
+                        WikiRegexes.Uncategorized
+                            .Match(articleText)
+                            .Value),
+                    "Improve categories");
         }
 
         return articleText;
