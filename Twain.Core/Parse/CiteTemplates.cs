@@ -683,16 +683,11 @@ public partial class Parsers
         string theURLoriginal = theURL;
 
         // remove the unneeded 'format=HTML' field
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Remove_.22format.3DHTML.22_in_citation_templates
-        // remove format= field with null value when URL is HTML page
-        if (paramsFound.ContainsKey("format"))
-        {
-            if (format.TrimStart("[]".ToCharArray()).ToUpper().StartsWith("HTM")
-                ||
-                (format.Length == 0 &&
-                 theURL.ToUpper().TrimEnd('L').EndsWith("HTM")))
-                newValue = Tools.RemoveTemplateParameter(newValue, "format");
-        }
+        newValue = RemoveRedundantCitationFormat(
+            newValue,
+            paramsFound,
+            format,
+            theURL);
 
         // Remove Empty Citation Original Date
         newValue = RemoveEmptyCitationOriginalDate(newValue, paramsFound, origdate);
@@ -709,86 +704,35 @@ public partial class Parsers
         // remove italics for work field for book/periodical, but not website -- auto italicized by template
         newValue = RemoveRedundantCitationWorkItalics(newValue, TheWork);
 
-        // page= and pages= fields don't need p. or pp. in them when nopp not set
-        if ((pages.Contains("p") || page.Contains("p")) &&
-            !templatename.Equals("cite journal", StringComparison.OrdinalIgnoreCase) && nopp.Length == 0)
-        {
-            newValue = CiteTemplatePagesPP.Replace(newValue, string.Empty);
-            pages = Tools.GetTemplateParameterValue(newValue, "pages");
-            paramsFound.Remove("pages");
-            paramsFound.Add("pages", pages);
-        }
+        newValue = NormalizeCitationPagePrefixes(
+            newValue,
+            paramsFound,
+            ref pages,
+            page,
+            templatename,
+            nopp);
 
-        // with Lua no need to rename date to year when date = YYYY, just remove year and date duplicating each other
-        if (TheDate.Length == 4 && TheYear.Equals(TheDate))
-            newValue = Tools.RemoveTemplateParameter(newValue, "date");
+        newValue = NormalizeCitationYearAndDate(
+            newValue,
+            ref TheYear,
+            ref TheDate);
 
-        // year = full date --> date = full date
-        if (TheYear.Length > 5)
-        {
-            newValue = MoveFullDateFromCitationYear(newValue, ref TheYear, ref TheDate);
-        }
+        newValue = NormalizeCitationMonth(
+           newValue,
+           TheMonth,
+           TheDate);
 
-        // year=YYYY and date=...YYYY -> remove year; not for year=YYYYa
-        else if (TheYear.Length == 4 && TheDate.Contains(TheYear) && YearOnly.IsMatch(TheYear))
-        {
-            Parsers p = new Parsers();
-            TheDate = p.FixDatesAInternal(TheDate);
+        newValue = MergeCitationYearIntoDate(
+            newValue,
+            TheDate,
+            TheYear);
 
-            if (WikiRegexes.InternationalDates.IsMatch(TheDate) || WikiRegexes.AmericanDates.IsMatch(TheDate)
-                || WikiRegexes.ISODates.IsMatch(TheDate))
-            {
-                TheYear = string.Empty;
-                newValue = Tools.RemoveTemplateParameter(newValue, "year");
-            }
-        }
-
-        // month=Month and date=...Month... OR month=Month and date=same month (by conversion from ISO format) Or month=nn and date=same month (by conversion to ISO format)
-        int num;
-        if ((TheMonth.Length > 2 && TheDate.Contains(TheMonth)) // named month within date
-            || (TheMonth.Length > 2 && Tools.ConvertDate(TheDate, DateLocale.International).Contains(TheMonth))
-            ||
-            (int.TryParse(TheMonth, out num) &&
-             Regex.IsMatch(Tools.ConvertDate(TheDate, DateLocale.ISO), @"\-0?" + TheMonth + @"\-")))
-        {
-            newValue = Tools.RemoveTemplateParameter(newValue, "month");
-        }
-
-        // date = Month DD and year = YYYY --> date = Month DD, YYYY
-        if (!YearOnly.IsMatch(TheDate) && YearOnly.IsMatch(TheYear))
-        {
-            if (!WikiRegexes.AmericanDates.IsMatch(TheDate) &&
-                WikiRegexes.AmericanDates.IsMatch(TheDate + ", " + TheYear))
-            {
-                if (!TheDate.Contains(TheYear))
-                {
-                    newValue = Tools.SetTemplateParameterValue(newValue, "date", TheDate + ", " + TheYear);
-                }
-                newValue = Tools.RemoveTemplateParameter(newValue, "year");
-            }
-            else if (!WikiRegexes.InternationalDates.IsMatch(TheDate) &&
-                     WikiRegexes.InternationalDates.IsMatch(TheDate + " " + TheYear))
-            {
-                if (!TheDate.Contains(TheYear))
-                {
-                    newValue = Tools.SetTemplateParameterValue(newValue, "date", TheDate + " " + TheYear);
-                }
-                newValue = Tools.RemoveTemplateParameter(newValue, "year");
-            }
-        }
-
-        // correct volume=vol 7... and issue=no. 8 for {{cite journal}} only
-        if (templatename.Equals("cite journal", StringComparison.OrdinalIgnoreCase))
-        {
-            newValue = NormalizeCitationJournalVolumeAndIssue(newValue, TheVolume, TheIssue);
-        }
-        // {{cite web}} for Google books -> {{Cite book}}
-        else if (templatename.Contains("web") &&
-                 newValue.Contains("http://books.google.") &&
-                 TheWork.Length == 0)
-        {
-            newValue = Tools.RenameTemplate(newValue, templatename, "Cite book");
-        }
+        newValue = NormalizeCitationTemplateType(
+            newValue,
+            templatename,
+            TheVolume,
+            TheIssue,
+            TheWork);
 
         newValue = NormalizeCitationAccessDate(
            newValue,
@@ -839,6 +783,326 @@ public partial class Parsers
             origyear,
             TheYear,
             TheDate);
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Removes a redundant citation <c>format</c> parameter when it identifies
+    /// an HTML resource or is empty while the citation URL points to an HTML page.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="format">
+    /// The citation format value.
+    /// </param>
+    /// <param name="theURL">
+    /// The citation URL value.
+    /// </param>
+    /// <returns>
+    /// The citation template text after removing a redundant format parameter,
+    /// when applicable.
+    /// </returns>
+    private static string RemoveRedundantCitationFormat(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        string format,
+        string theURL)
+    {
+        // remove the unneeded 'format=HTML' field
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Remove_.22format.3DHTML.22_in_citation_templates
+        // remove format= field with null value when URL is HTML page
+        if (paramsFound.ContainsKey("format"))
+        {
+            if (format.TrimStart("[]".ToCharArray()).ToUpper().StartsWith("HTM")
+                ||
+                (format.Length == 0 &&
+                 theURL.ToUpper().TrimEnd('L').EndsWith("HTM")))
+            {
+                newValue = Tools.RemoveTemplateParameter(
+                    newValue,
+                    "format");
+            }
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Removes redundant page prefixes from citation page parameters when the
+    /// citation does not request preservation of those prefixes.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="pages">
+    /// The citation pages value. Updated after page-prefix normalization.
+    /// </param>
+    /// <param name="page">
+    /// The citation page value.
+    /// </param>
+    /// <param name="templatename">
+    /// The name of the citation template being processed.
+    /// </param>
+    /// <param name="nopp">
+    /// The value controlling whether page prefixes should be preserved.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying page-prefix normalization.
+    /// </returns>
+    private static string NormalizeCitationPagePrefixes(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        ref string pages,
+        string page,
+        string templatename,
+        string nopp)
+    {
+        // page= and pages= fields don't need p. or pp. in them when nopp not set
+        if ((pages.Contains("p") || page.Contains("p")) &&
+            !templatename.Equals(
+                "cite journal",
+                StringComparison.OrdinalIgnoreCase) &&
+            nopp.Length == 0)
+        {
+            newValue = CiteTemplatePagesPP.Replace(
+                newValue,
+                string.Empty);
+
+            pages = Tools.GetTemplateParameterValue(
+                newValue,
+                "pages");
+
+            paramsFound.Remove("pages");
+            paramsFound.Add("pages", pages);
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Reconciles citation <c>year</c> and <c>date</c> values when they duplicate
+    /// one another or when the year parameter contains a full date.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="TheYear">
+    /// The current citation year value. Updated when normalization changes it.
+    /// </param>
+    /// <param name="TheDate">
+    /// The current citation date value. Updated when normalization changes it.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying year and date normalization.
+    /// </returns>
+    private static string NormalizeCitationYearAndDate(
+        string newValue,
+        ref string TheYear,
+        ref string TheDate)
+    {
+        // with Lua no need to rename date to year when date = YYYY,
+        // just remove year and date duplicating each other
+        if (TheDate.Length == 4 && TheYear.Equals(TheDate))
+        {
+            newValue = Tools.RemoveTemplateParameter(
+                newValue,
+                "date");
+        }
+
+        // year = full date --> date = full date
+        if (TheYear.Length > 5)
+        {
+            newValue = MoveFullDateFromCitationYear(
+                newValue,
+                ref TheYear,
+                ref TheDate);
+        }
+
+        // year=YYYY and date=...YYYY -> remove year; not for year=YYYYa
+        else if (TheYear.Length == 4 &&
+                 TheDate.Contains(TheYear) &&
+                 YearOnly.IsMatch(TheYear))
+        {
+            Parsers p = new Parsers();
+            TheDate = p.FixDatesAInternal(TheDate);
+
+            if (WikiRegexes.InternationalDates.IsMatch(TheDate) ||
+                WikiRegexes.AmericanDates.IsMatch(TheDate) ||
+                WikiRegexes.ISODates.IsMatch(TheDate))
+            {
+                TheYear = string.Empty;
+
+                newValue = Tools.RemoveTemplateParameter(
+                    newValue,
+                    "year");
+            }
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Merges a four-digit citation year into a partial citation date when the
+    /// combined value forms a recognized American or international date.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="TheDate">
+    /// The current citation date value.
+    /// </param>
+    /// <param name="TheYear">
+    /// The current citation year value.
+    /// </param>
+    /// <returns>
+    /// The citation template text after merging the year into the date when
+    /// applicable.
+    /// </returns>
+    private static string MergeCitationYearIntoDate(
+        string newValue,
+        string TheDate,
+        string TheYear)
+    {
+        // date = Month DD and year = YYYY --> date = Month DD, YYYY
+        if (!YearOnly.IsMatch(TheDate) && YearOnly.IsMatch(TheYear))
+        {
+            if (!WikiRegexes.AmericanDates.IsMatch(TheDate) &&
+                WikiRegexes.AmericanDates.IsMatch(TheDate + ", " + TheYear))
+            {
+                if (!TheDate.Contains(TheYear))
+                {
+                    newValue = Tools.SetTemplateParameterValue(
+                        newValue,
+                        "date",
+                        TheDate + ", " + TheYear);
+                }
+
+                newValue = Tools.RemoveTemplateParameter(
+                    newValue,
+                    "year");
+            }
+            else if (!WikiRegexes.InternationalDates.IsMatch(TheDate) &&
+                     WikiRegexes.InternationalDates.IsMatch(TheDate + " " + TheYear))
+            {
+                if (!TheDate.Contains(TheYear))
+                {
+                    newValue = Tools.SetTemplateParameterValue(
+                        newValue,
+                        "date",
+                        TheDate + " " + TheYear);
+                }
+
+                newValue = Tools.RemoveTemplateParameter(
+                    newValue,
+                    "year");
+            }
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Removes a redundant citation <c>month</c> parameter when the same month
+    /// is already represented by the citation date.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="TheMonth">
+    /// The citation month value.
+    /// </param>
+    /// <param name="TheDate">
+    /// The citation date value.
+    /// </param>
+    /// <returns>
+    /// The citation template text after removing a redundant month parameter,
+    /// when applicable.
+    /// </returns>
+    private static string NormalizeCitationMonth(
+        string newValue,
+        string TheMonth,
+        string TheDate)
+    {
+        // month=Month and date=...Month... OR month=Month and date=same month
+        // (by conversion from ISO format) OR month=nn and date=same month
+        // (by conversion to ISO format)
+        int num;
+
+        if ((TheMonth.Length > 2 && TheDate.Contains(TheMonth))
+            || (TheMonth.Length > 2 &&
+                Tools.ConvertDate(
+                    TheDate,
+                    DateLocale.International).Contains(TheMonth))
+            || (int.TryParse(TheMonth, out num) &&
+                Regex.IsMatch(
+                    Tools.ConvertDate(TheDate, DateLocale.ISO),
+                    @"\-0?" + TheMonth + @"\-")))
+        {
+            newValue = Tools.RemoveTemplateParameter(
+                newValue,
+                "month");
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Applies citation-template-specific normalization for journal and
+    /// Google Books citations.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="templatename">
+    /// The name of the citation template being processed.
+    /// </param>
+    /// <param name="TheVolume">
+    /// The citation volume value.
+    /// </param>
+    /// <param name="TheIssue">
+    /// The citation issue value.
+    /// </param>
+    /// <param name="TheWork">
+    /// The citation work value.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying template-specific normalization.
+    /// </returns>
+    private static string NormalizeCitationTemplateType(
+        string newValue,
+        string templatename,
+        string TheVolume,
+        string TheIssue,
+        string TheWork)
+    {
+        // correct volume=vol 7... and issue=no. 8 for {{cite journal}} only
+        if (templatename.Equals(
+                "cite journal",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            newValue = NormalizeCitationJournalVolumeAndIssue(
+                newValue,
+                TheVolume,
+                TheIssue);
+        }
+        // {{cite web}} for Google books -> {{Cite book}}
+        else if (templatename.Contains("web") &&
+                 newValue.Contains("http://books.google.") &&
+                 TheWork.Length == 0)
+        {
+            newValue = Tools.RenameTemplate(
+                newValue,
+                templatename,
+                "Cite book");
+        }
 
         return newValue;
     }
