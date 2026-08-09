@@ -433,7 +433,7 @@ private static readonly Regex RegexHeadingsSeeAlso =
         // only apply if all level 3 headings and lower are before the first of references/external links/see also
         if (Namespace.IsMainSpace(articleTitle))
         {
-            if (!customHeadings.Any(s => WikiRegexes.HeadingLevelTwo.IsMatch(s)))
+            if (!customHeadings.Any(heading => WikiRegexes.HeadingLevelTwo.IsMatch(heading)))
             {
                 string articleTextLocal = articleText;
                 articleTextLocal = ReferencesExternalLinksSeeAlso.Replace(articleTextLocal, string.Empty);
@@ -446,10 +446,10 @@ private static readonly Regex RegexHeadingsSeeAlso =
                     {
                         // get index of last level 3+ heading
                         int upone = 0;
-                        foreach (Match m in RegexHeadingUpOneLevel.Matches(articleText))
+                        foreach (Match match in RegexHeadingUpOneLevel.Matches(articleText))
                         {
-                            if (m.Index > upone)
-                                upone = m.Index;
+                            if (match.Index > upone)
+                                upone = match.Index;
                         }
 
                         if (!ReferencesExternalLinksSeeAlso.IsMatch(articleText) || (upone < ReferencesExternalLinksSeeAlso.Match(articleText).Index))
