@@ -1516,11 +1516,21 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     /// <summary>
     /// Moves the dragged rule node to the selected location in the rules tree.
     /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">
-    /// Information about the completed drag-and-drop operation.
+    /// <param name="sender">
+    /// The control that raised the drag-and-drop event.
     /// </param>
-    private void RulesTreeView_DragDrop(object sender, DragEventArgs e)
+    /// <param name="e">
+    /// Information about the completed drag-and-drop operation, including the
+    /// dragged node and target coordinates.
+    /// </param>
+    /// <remarks>
+    /// Drops onto the dragged node itself or one of its descendants are rejected.
+    /// When a valid target node is present, the dragged node is inserted as that
+    /// node's first child; otherwise, it is added at the root level.
+    /// </remarks>
+    private void RulesTreeView_DragDrop(
+        object sender,
+        DragEventArgs e)
     {
         if (e.Data?.GetData(typeof(TreeNode)) is not TreeNode draggedNode)
         {
@@ -1529,12 +1539,17 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         }
 
         Point targetPoint =
-            RulesTreeView.PointToClient(new Point(e.X, e.Y));
+            RulesTreeView.PointToClient(
+                new Point(
+                    e.X,
+                    e.Y));
 
-        TreeNode targetNode = RulesTreeView.GetNodeAt(targetPoint);
+        TreeNode targetNode =
+            RulesTreeView.GetNodeAt(targetPoint);
 
-        if (ReferenceEquals(draggedNode, targetNode) ||
-            targetNode != null && Tools.IsSubnodeOf(draggedNode, targetNode))
+        if (!CanDropNode(
+                draggedNode,
+                targetNode))
         {
             e.Effect = DragDropEffects.None;
             return;
@@ -1547,19 +1562,60 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             draggedNode.Remove();
 
             if (targetNode == null)
-                RulesTreeView.Nodes.Add(draggedNode);
+            {
+                RulesTreeView.Nodes.Add(
+                    draggedNode);
+            }
             else
-                targetNode.Nodes.Insert(0, draggedNode);
+            {
+                // TODO: Confirm whether dropping onto a rule should always insert
+                // the dragged node as the target rule's first child, or whether
+                // before/after insertion should also be supported.
+                targetNode.Nodes.Insert(
+                    0,
+                    draggedNode);
+            }
 
-            RulesTreeView.SelectedNode = draggedNode;
+            RulesTreeView.SelectedNode =
+                draggedNode;
+
             RestoreSelectedRule();
 
-            e.Effect = DragDropEffects.Move;
+            e.Effect =
+                DragDropEffects.Move;
         }
         finally
         {
             RulesTreeView.EndUpdate();
         }
+    }
+
+    /// <summary>
+    /// Determines whether the specified rule node can be dropped onto the requested
+    /// target node.
+    /// </summary>
+    /// <param name="draggedNode">
+    /// The rule node being moved.
+    /// </param>
+    /// <param name="targetNode">
+    /// The target rule node, or <see langword="null"/> for the root of the tree.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the drop would not place the node onto itself or
+    /// one of its descendants; otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool CanDropNode(
+        TreeNode draggedNode,
+        TreeNode targetNode)
+    {
+        return
+            !ReferenceEquals(
+                draggedNode,
+                targetNode) &&
+            (targetNode == null ||
+             !Tools.IsSubnodeOf(
+                 draggedNode,
+                 targetNode));
     }
 
     /// <summary>
