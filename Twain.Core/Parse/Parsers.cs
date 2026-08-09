@@ -892,13 +892,28 @@ public partial class Parsers
     }
 
     // Covered by: FormattingTests.TestFixWhitespace(), incomplete
+
+    // TODO: Determine whether fixOptionalWhitespace should control any of the
+    // transformations in this method. The parameter is currently unused.
     /// <summary>
-    /// Applies/removes some excess whitespace from the article
+    /// Removes or normalizes excessive whitespace and blank lines in article text.
     /// </summary>
+    /// <remarks>
+    /// Normalizes redundant line breaks, removes unnecessary line breaks following
+    /// certain markup, preserves whitespace in contexts such as poem blocks, avoids
+    /// merging separate wiki lists, removes trailing horizontal rules, and performs
+    /// final whitespace cleanup.
+    /// </remarks>
     /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="fixOptionalWhitespace">Whether to remove cosmetic whitespace</param>
-    /// <returns>The modified article text.</returns>
-    public static string RemoveWhiteSpace(string articleText, bool fixOptionalWhitespace)
+    /// <param name="fixOptionalWhitespace">
+    /// Indicates whether optional cosmetic whitespace should be normalized.
+    /// </param>
+    /// <returns>
+    /// The article text after applicable whitespace normalization has been performed.
+    /// </returns>
+    public static string RemoveWhiteSpace(
+        string articleText,
+        bool fixOptionalWhitespace)
     {
         //Remove <br /> if followed by double newline, NOT in blockquotes
         if (BrTwoNewlines.IsMatch(articleText) && !WikiRegexes.Blockquote.IsMatch(articleText))
@@ -910,35 +925,7 @@ public partial class Parsers
         while (SpacesThenTwoNewline.IsMatch(articleText))
             articleText = SpacesThenTwoNewline.Replace(articleText, "\r\n\r\n");
 
-        // remove excessive newlines
-        // Don't apply within <poem> tags
-        // retain one or two newlines before stub
-        // don't merge together two lists
-        if (articleText.Contains("\r\n\r\n\r\n"))
-        {
-            bool OK = true;
-            int p = articleText.IndexOf("poem", StringComparison.OrdinalIgnoreCase);
-
-            if (p > -1)
-            {
-                foreach (Match m in WikiRegexes.Poem.Matches(articleText.Substring(Math.Max(p - 50, 0))))
-                {
-                    if (m.Value.Contains("\r\n\r\n"))
-                    {
-                        OK = false;
-                        break;
-                    }
-                }
-            }
-
-            if (OK)
-            {
-                if (WikiRegexes.Stub.IsMatch(articleText) || TwoLists.IsMatch(articleText))
-                    articleText = FourOrMoreNewlines.Replace(articleText, "\r\n\r\n");
-                else
-                    articleText = WikiRegexes.ThreeOrMoreNewlines.Replace(articleText, "\r\n\r\n");
-            }
-        }
+        articleText = NormalizeExcessiveNewlines(articleText);
 
         articleText = NewlinesBelowExternalLinks.Replace(articleText, "==External links==\r\n*");
         // For bulleted vertical lists, do not separate items by leaving blank lines between them (or lines with just spaces).
@@ -949,6 +936,59 @@ public partial class Parsers
         articleText = HorizontalRule.Replace(articleText.Trim(), "");
 
         return articleText.Replace("\r\n|\r\n\r\n", "\r\n|\r\n").Trim();
+    }
+
+    /// <summary>
+    /// Collapses excessive consecutive newlines when doing so will not disturb
+    /// protected poem content or merge formatting that requires additional spacing.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <returns>
+    /// The article text after applicable excessive-newline normalization.
+    /// </returns>
+    private static string NormalizeExcessiveNewlines(string articleText)
+    {
+        if (!articleText.Contains("\r\n\r\n\r\n"))
+        {
+            return articleText;
+        }
+
+        bool OK = true;
+        int p =
+            articleText.IndexOf(
+                "poem",
+                StringComparison.OrdinalIgnoreCase);
+
+        if (p > -1)
+        {
+            foreach (Match m in
+                     WikiRegexes.Poem.Matches(
+                         articleText.Substring(Math.Max(p - 50, 0))))
+            {
+                if (m.Value.Contains("\r\n\r\n"))
+                {
+                    OK = false;
+                    break;
+                }
+            }
+        }
+
+        if (!OK)
+        {
+            return articleText;
+        }
+
+        if (WikiRegexes.Stub.IsMatch(articleText) ||
+            TwoLists.IsMatch(articleText))
+        {
+            return FourOrMoreNewlines.Replace(
+                articleText,
+                "\r\n\r\n");
+        }
+
+        return WikiRegexes.ThreeOrMoreNewlines.Replace(
+            articleText,
+            "\r\n\r\n");
     }
 
     // covered by RemoveAllWhiteSpaceTests
