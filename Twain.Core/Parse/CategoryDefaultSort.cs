@@ -1377,26 +1377,9 @@ public partial class Parsers
         string categoryPrefix,
         string sort)
     {
-        string yearstring;
         string yearFromInfoBox =
-            string.Empty;
-
-        // scrape any infobox
-        string fromInfoBox =
-            GetInfoBoxFieldValue(
-                WikiRegexes.DateBirthAndAge.Replace(
-                    zerothSection,
-                    ""),
-                WikiRegexes.InfoBoxDODFields);
-
-        if (fromInfoBox.Length > 0 &&
-            !UncertainWordings.IsMatch(fromInfoBox))
-        {
-            yearFromInfoBox =
-                YearPossiblyWithBC
-                    .Match(fromInfoBox)
-                    .Value;
-        }
+            GetDeathYearFromInfoBox(
+                zerothSection);
 
         string checkText =
             Namespace.IsMainSpace(articleTitle)
@@ -1405,64 +1388,187 @@ public partial class Parsers
                     "[[:",
                     "[[");
 
-        if (!WikiRegexes.DeathsOrLivingCategory.IsMatch(
-                RemoveCategory(
-                    YearofDeathMissing,
-                    checkText)) &&
-            (PersonYearOfDeath.IsMatch(zerothSection) ||
-             WikiRegexes.DeathDate.IsMatch(zerothSection) ||
-             ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox)))
+        if (!ShouldAddDeathCategory(
+                checkText,
+                zerothSection,
+                yearFromInfoBox))
         {
-            // look for '{{death date...' template first
-            yearstring =
-                WikiRegexes.DeathDate
-                    .Match(articleText)
-                    .Groups[1]
-                    .Value;
+            return articleText;
+        }
 
-            // secondly use yearFromInfoBox
-            if (ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox))
-            {
-                yearstring =
-                    yearFromInfoBox;
-            }
+        string yearstring =
+            GetDeathYear(
+                articleText,
+                zerothSection,
+                yearFromInfoBox);
 
-            // look for '(died xxxx)'
-            if (string.IsNullOrEmpty(yearstring))
-            {
-                Match m =
-                    PersonYearOfDeath.Match(
-                        zerothSection);
-
-                // check died info after any untemplated born info
-                if (m.Index >=
-                        PersonYearOfBirth.Match(zerothSection).Index ||
-                    !PersonYearOfBirth.IsMatch(zerothSection))
-                {
-                    if (!UncertainWordings.IsMatch(m.Value) &&
-                        !m.Value.Contains(@"?"))
-                    {
-                        yearstring =
-                            m.Groups[1].Value;
-                    }
-                }
-            }
-
-            // validate a YYYY date is not in the future
-            if (!string.IsNullOrEmpty(yearstring) &&
-                yearstring.Length > 2 &&
-                (!YearOnly.IsMatch(yearstring) ||
-                 Convert.ToInt32(yearstring) <= DateTime.Now.Year))
-            {
-                articleText +=
-                    categoryPrefix +
-                    yearstring +
-                    " deaths" +
-                    CatEnd(sort);
-            }
+        if (IsValidDeathCategoryYear(yearstring))
+        {
+            articleText +=
+                categoryPrefix +
+                yearstring +
+                " deaths" +
+                CatEnd(sort);
         }
 
         return articleText;
+    }
+
+    /// <summary>
+    /// Attempts to extract a sufficiently certain death year from an infobox
+    /// in the zeroth section.
+    /// </summary>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section containing any infobox markup.
+    /// </param>
+    /// <returns>
+    /// The extracted death year, or an empty string when no suitable year
+    /// can be determined.
+    /// </returns>
+    private static string GetDeathYearFromInfoBox(string zerothSection)
+    {
+        string fromInfoBox =
+            GetInfoBoxFieldValue(
+                WikiRegexes.DateBirthAndAge.Replace(
+                    zerothSection,
+                    ""),
+                WikiRegexes.InfoBoxDODFields);
+
+        if (string.IsNullOrEmpty(fromInfoBox) ||
+            UncertainWordings.IsMatch(fromInfoBox))
+        {
+            return string.Empty;
+        }
+
+        return YearPossiblyWithBC
+            .Match(fromInfoBox)
+            .Value;
+    }
+
+    /// <summary>
+    /// Determines whether the article is eligible to receive a death-year category.
+    /// </summary>
+    /// <param name="checkText">
+    /// The article text normalized for category detection.
+    /// </param>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </param>
+    /// <param name="yearFromInfoBox">
+    /// The death year extracted from an infobox, if available.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when a death-year category may be added; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool ShouldAddDeathCategory(
+        string checkText,
+        string zerothSection,
+        string yearFromInfoBox)
+    {
+        if (WikiRegexes.DeathsOrLivingCategory.IsMatch(
+                RemoveCategory(
+                    YearofDeathMissing,
+                    checkText)))
+        {
+            return false;
+        }
+
+        return PersonYearOfDeath.IsMatch(zerothSection) ||
+               WikiRegexes.DeathDate.IsMatch(zerothSection) ||
+               ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox);
+    }
+
+    /// <summary>
+    /// Determines the death year to use for a death-year category.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article text.
+    /// </param>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </param>
+    /// <param name="yearFromInfoBox">
+    /// A previously extracted infobox death year, if available.
+    /// </param>
+    /// <returns>
+    /// The death year to use, or an empty string when no sufficiently certain
+    /// year can be determined.
+    /// </returns>
+    private static string GetDeathYear(
+        string articleText,
+        string zerothSection,
+        string yearFromInfoBox)
+    {
+        // Look for a {{death date...}} template first.
+        string yearstring =
+            WikiRegexes.DeathDate
+                .Match(articleText)
+                .Groups[1]
+                .Value;
+
+        // Prefer a valid year explicitly obtained from the infobox.
+        if (ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox))
+        {
+            return yearFromInfoBox;
+        }
+
+        if (!string.IsNullOrEmpty(yearstring))
+        {
+            return yearstring;
+        }
+
+        // Look for "(died xxxx)"-style text in the lead.
+        Match deathMatch =
+            PersonYearOfDeath.Match(
+                zerothSection);
+
+        if (!deathMatch.Success)
+        {
+            return string.Empty;
+        }
+
+        Match birthMatch =
+            PersonYearOfBirth.Match(
+                zerothSection);
+
+        // Check died information after any untemplated born information.
+        if (birthMatch.Success &&
+            deathMatch.Index < birthMatch.Index)
+        {
+            return string.Empty;
+        }
+
+        if (UncertainWordings.IsMatch(deathMatch.Value) ||
+            deathMatch.Value.Contains(@"?"))
+        {
+            return string.Empty;
+        }
+
+        return deathMatch.Groups[1].Value;
+    }
+
+    /// <summary>
+    /// Determines whether a detected death year is suitable for use in a
+    /// death-year category.
+    /// </summary>
+    /// <param name="yearstring">
+    /// The detected death year.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the year is suitable for categorization;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool IsValidDeathCategoryYear(string yearstring)
+    {
+        if (string.IsNullOrEmpty(yearstring) ||
+            yearstring.Length <= 2)
+        {
+            return false;
+        }
+
+        return !YearOnly.IsMatch(yearstring) ||
+               Convert.ToInt32(yearstring) <= DateTime.Now.Year;
     }
 
     /// <summary>
