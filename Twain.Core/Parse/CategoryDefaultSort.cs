@@ -1193,13 +1193,80 @@ public partial class Parsers
         string categoryPrefix,
         string sort)
     {
-        string yearstring = string.Empty;
-        string yearFromInfoBox = string.Empty;
+        string yearFromInfoBox =
+            GetBirthYearFromInfoBox(
+                zerothSection);
 
-        bool alreadyUncertain = false;
+        // Convert [[:Category to [[Category for non-mainspace category checking.
+        string checkText =
+            Namespace.IsMainSpace(articleTitle)
+                ? articleText
+                : articleText.Replace(
+                    "[[:",
+                    "[[");
 
-        // scrape any infobox for birth year, ignore
-        // {{Birth date based on age at death}}
+        if (!ShouldAddBirthCategory(
+                checkText,
+                zerothSection,
+                yearFromInfoBox))
+        {
+            return articleText;
+        }
+
+        string yearstring =
+            GetBirthYearFromTemplates(
+                articleText);
+
+        // Prefer a valid year explicitly obtained from the infobox.
+        if (ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox))
+        {
+            yearstring =
+                yearFromInfoBox;
+        }
+
+        if (string.IsNullOrEmpty(yearstring))
+        {
+            yearstring =
+                GetBirthYearFromLead(
+                    articleText,
+                    zerothSection,
+                    categoryPrefix,
+                    sort,
+                    out string uncertainCategory);
+
+            if (!string.IsNullOrEmpty(uncertainCategory))
+            {
+                articleText += uncertainCategory;
+            }
+        }
+
+        if (IsValidBirthCategoryYear(
+                yearstring,
+                articleText))
+        {
+            articleText +=
+                categoryPrefix +
+                yearstring +
+                " births" +
+                CatEnd(sort);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Attempts to extract a sufficiently certain birth year from an infobox
+    /// in the zeroth section.
+    /// </summary>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section containing any infobox markup.
+    /// </param>
+    /// <returns>
+    /// The extracted birth year, or an empty string when no suitable year
+    /// can be determined.
+    /// </returns>
+    private static string GetBirthYearFromInfoBox(string zerothSection)
+    {
         string fromInfoBox =
             GetInfoBoxFieldValue(
                 BirthDateBasedOnAgeAtDeath.Replace(
@@ -1207,145 +1274,235 @@ public partial class Parsers
                     ""),
                 WikiRegexes.InfoBoxDOBFields);
 
-        // ignore as of dates
-        if (AsOfText.IsMatch(fromInfoBox))
+        // Ignore "as of" dates and anything following them.
+        Match asOfMatch =
+            AsOfText.Match(
+                fromInfoBox);
+
+        if (asOfMatch.Success)
         {
             fromInfoBox =
                 fromInfoBox.Substring(
                     0,
-                    AsOfText.Match(fromInfoBox).Index);
+                    asOfMatch.Index);
         }
 
-        if (fromInfoBox.Length > 0 &&
-            !UncertainWordings.IsMatch(fromInfoBox) &&
-            !FloruitTemplate.IsMatch(fromInfoBox))
+        if (string.IsNullOrEmpty(fromInfoBox) ||
+            UncertainWordings.IsMatch(fromInfoBox) ||
+            FloruitTemplate.IsMatch(fromInfoBox))
         {
-            yearFromInfoBox =
-                YearPossiblyWithBC.Match(fromInfoBox).Value;
+            return string.Empty;
         }
 
-        // convert [[:Category to [[Category for non-mainspace Category checking
-        string checkText =
-            Namespace.IsMainSpace(articleTitle)
-                ? articleText
-                : articleText.Replace("[[:", "[[");
+        return YearPossiblyWithBC
+            .Match(fromInfoBox)
+            .Value;
+    }
 
-        // birth
-        if (!WikiRegexes.BirthsCategory.IsMatch(checkText) &&
-            (PersonYearOfBirth.Matches(zerothSection).Count == 1 ||
-             WikiRegexes.DateBirthAndAge.IsMatch(zerothSection) ||
-             WikiRegexes.DeathDateAndAge.IsMatch(zerothSection) ||
-             ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox)))
+    /// <summary>
+    /// Determines whether the article is eligible to receive a birth-year category.
+    /// </summary>
+    /// <param name="checkText">
+    /// The article text normalized for category detection.
+    /// </param>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </param>
+    /// <param name="yearFromInfoBox">
+    /// The birth year extracted from an infobox, if available.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when a birth category may be added; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool ShouldAddBirthCategory(
+        string checkText,
+        string zerothSection,
+        string yearFromInfoBox)
+    {
+        if (WikiRegexes.BirthsCategory.IsMatch(checkText))
         {
-            // look for '{{birth date...' template first
-            yearstring =
-                WikiRegexes.DateBirthAndAge
-                    .Match(articleText)
-                    .Groups[1]
-                    .Value;
+            return false;
+        }
 
-            // look for '{{death date and age' template second
-            if (String.IsNullOrEmpty(yearstring))
+        return PersonYearOfBirth.Matches(zerothSection).Count == 1 ||
+               WikiRegexes.DateBirthAndAge.IsMatch(zerothSection) ||
+               WikiRegexes.DeathDateAndAge.IsMatch(zerothSection) ||
+               ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox);
+    }
+
+    /// <summary>
+    /// Attempts to obtain a birth year from supported birth- and death-date
+    /// templates in the article.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article text.
+    /// </param>
+    /// <returns>
+    /// The detected birth year, or an empty string when no supported template
+    /// supplies one.
+    /// </returns>
+    private static string GetBirthYearFromTemplates(string articleText)
+    {
+        string yearstring =
+            WikiRegexes.DateBirthAndAge
+                .Match(articleText)
+                .Groups[1]
+                .Value;
+
+        if (!string.IsNullOrEmpty(yearstring))
+        {
+            return yearstring;
+        }
+
+        return WikiRegexes.DeathDateAndAge
+            .Match(articleText)
+            .Groups[2]
+            .Value;
+    }
+
+    /// <summary>
+    /// Attempts to extract a birth year from untemplated biographical text in
+    /// the article lead.
+    /// </summary>
+    /// <param name="articleText">
+    /// The complete article text, used when checking existing categories.
+    /// </param>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </param>
+    /// <param name="categoryPrefix">
+    /// The category-link prefix to use when constructing an uncertain-birth
+    /// category.
+    /// </param>
+    /// <param name="sort">
+    /// The category sort key to append to an uncertain-birth category.
+    /// </param>
+    /// <param name="uncertainCategory">
+    /// Receives the uncertain-birth category text when approximate birth
+    /// information is detected; otherwise, an empty string.
+    /// </param>
+    /// <returns>
+    /// The detected birth year, or an empty string when no sufficiently certain
+    /// year can be determined.
+    /// </returns>
+    private static string GetBirthYearFromLead(
+        string articleText,
+        string zerothSection,
+        string categoryPrefix,
+        string sort,
+        out string uncertainCategory)
+    {
+        uncertainCategory =
+            string.Empty;
+
+        Match birthMatch =
+            PersonYearOfBirth.Match(
+                zerothSection);
+
+        if (!birthMatch.Success)
+        {
+            return string.Empty;
+        }
+
+        // Remove text beyond a dash, death, or baptism reference.
+        string birthpart =
+            DiedOrBaptised.Replace(
+                birthMatch.Value,
+                "$1");
+
+        bool alreadyUncertain =
+            WikiRegexes.CircaTemplate.IsMatch(birthpart) ||
+            FloruitTemplate.IsMatch(birthpart);
+
+        birthpart =
+            WikiRegexes.TemplateMultiline.Replace(
+                birthpart,
+                " ");
+
+        Match deathMatch =
+            PersonYearOfDeath.Match(
+                zerothSection);
+
+        // Birth information must occur before any untemplated death information.
+        if (deathMatch.Success &&
+            birthMatch.Index > deathMatch.Index)
+        {
+            return string.Empty;
+        }
+
+        // When there is only an approximate birth year, add the appropriate
+        // category rather than a specific year-of-birth category.
+        if (UncertainWordings.IsMatch(birthpart) ||
+            alreadyUncertain)
+        {
+            if (!CategoryMatch(
+                    articleText,
+                    YearOfBirthMissingLivingPeople) &&
+                !CategoryMatch(
+                    articleText,
+                    YearOfBirthUncertain))
             {
-                yearstring =
-                    WikiRegexes.DeathDateAndAge
-                        .Match(articleText)
-                        .Groups[2]
-                        .Value;
-            }
-
-            // thirdly use yearFromInfoBox
-            if (ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox))
-            {
-                yearstring = yearFromInfoBox;
-            }
-
-            // look for '(born xxxx)'
-            if (String.IsNullOrEmpty(yearstring))
-            {
-                Match m =
-                    PersonYearOfBirth.Match(
-                        zerothSection);
-
-                // remove part beyond dash or died
-                string birthpart =
-                    DiedOrBaptised.Replace(
-                        m.Value,
-                        "$1");
-
-                if (WikiRegexes.CircaTemplate.IsMatch(birthpart) ||
-                    FloruitTemplate.IsMatch(birthpart))
-                {
-                    alreadyUncertain = true;
-                }
-
-                birthpart =
-                    WikiRegexes.TemplateMultiline.Replace(
-                        birthpart,
-                        " ");
-
-                // check born info before any untemplated died info
-                if (!(m.Index >
-                      PersonYearOfDeath.Match(zerothSection).Index) ||
-                    !PersonYearOfDeath.IsMatch(zerothSection))
-                {
-                    // when there's only an approximate birth year, add the
-                    // appropriate cat rather than the xxxx birth one
-                    if (UncertainWordings.IsMatch(birthpart) ||
-                        alreadyUncertain)
-                    {
-                        if (!CategoryMatch(
-                                articleText,
-                                YearOfBirthMissingLivingPeople) &&
-                            !CategoryMatch(
-                                articleText,
-                                YearOfBirthUncertain))
-                        {
-                            articleText +=
-                                categoryPrefix +
-                                YearOfBirthUncertain +
-                                CatEnd(sort);
-                        }
-                    }
-                    else
-                    {
-                        // after removing dashes, birthpart must still contain year
-                        // and not a year range
-                        if (!birthpart.Contains(@"?") &&
-                            Regex.IsMatch(
-                                birthpart,
-                                @"\d{3,4}") &&
-                            !Regex.IsMatch(
-                                m.Value,
-                                @"[12]\d\d\d.[12]\d\d\d"))
-                        {
-                            yearstring =
-                                m.Groups[1].Value;
-                        }
-                    }
-                }
-            }
-
-            // per [[:Category:Living people]], don't apply birth category if born
-            // > 121 years ago
-            // validate a YYYY date is not in the future
-            if (!string.IsNullOrEmpty(yearstring) &&
-                yearstring.Length > 2 &&
-                (!YearOnly.IsMatch(yearstring) ||
-                 Convert.ToInt32(yearstring) <= DateTime.Now.Year) &&
-                !(articleText.Contains(CategoryLivingPeople) &&
-                  Convert.ToInt32(yearstring) <
-                      (DateTime.Now.Year - 121)))
-            {
-                articleText +=
+                uncertainCategory =
                     categoryPrefix +
-                    yearstring +
-                    " births" +
+                    YearOfBirthUncertain +
                     CatEnd(sort);
             }
+
+            return string.Empty;
         }
 
-        return articleText;
+        // After removing dashes, birthpart must still contain a year and must
+        // not represent a year range.
+        if (birthpart.Contains(@"?") ||
+            !Regex.IsMatch(
+                birthpart,
+                @"\d{3,4}") ||
+            Regex.IsMatch(
+                birthMatch.Value,
+                @"[12]\d\d\d.[12]\d\d\d"))
+        {
+            return string.Empty;
+        }
+
+        return birthMatch.Groups[1].Value;
+    }
+
+    /// <summary>
+    /// Determines whether a detected birth year is suitable for use in a
+    /// birth-year category.
+    /// </summary>
+    /// <param name="yearstring">
+    /// The detected birth year.
+    /// </param>
+    /// <param name="articleText">
+    /// The article text used to determine whether the subject is categorized
+    /// as living.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the year is suitable for categorization;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool IsValidBirthCategoryYear(
+        string yearstring,
+        string articleText)
+    {
+        if (string.IsNullOrEmpty(yearstring) ||
+            yearstring.Length <= 2)
+        {
+            return false;
+        }
+
+        if (YearOnly.IsMatch(yearstring) &&
+            Convert.ToInt32(yearstring) > DateTime.Now.Year)
+        {
+            return false;
+        }
+
+        // Per [[Category:Living people]], do not apply a birth category when the
+        // detected birth year is more than 121 years ago.
+        return !articleText.Contains(CategoryLivingPeople) ||
+               Convert.ToInt32(yearstring) >= DateTime.Now.Year - 121;
     }
 
     /// <summary>
