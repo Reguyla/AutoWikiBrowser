@@ -987,7 +987,10 @@ public static string ChangeToDefaultSort(
             PreparePeopleCategoryZerothSection(
                 articleText);
 
-        string StartCategory = Tools.Newline(@"[[" + (Namespace.IsMainSpace(articleTitle) ? "" : ":") + @"Category:");
+        string categoryPrefix =
+            GetPeopleCategoryPrefix(
+                articleTitle);
+
         string yearstring, yearFromInfoBox = "", sort = GetCategorySort(articleText);
 
         bool alreadyUncertain = false;
@@ -1042,7 +1045,7 @@ public static string ChangeToDefaultSort(
                     if (UncertainWordings.IsMatch(birthpart) || alreadyUncertain)
                     {
                         if (!CategoryMatch(articleText, YearOfBirthMissingLivingPeople) && !CategoryMatch(articleText, YearOfBirthUncertain))
-                            articleText += StartCategory + YearOfBirthUncertain + CatEnd(sort);
+                            articleText += categoryPrefix + YearOfBirthUncertain + CatEnd(sort);
                     }
                     else // after removing dashes, birthpart must still contain year and not a year range
                         if (!birthpart.Contains(@"?") && Regex.IsMatch(birthpart, @"\d{3,4}") && !Regex.IsMatch(m.Value, @"[12]\d\d\d.[12]\d\d\d"))
@@ -1055,7 +1058,7 @@ public static string ChangeToDefaultSort(
             if (!string.IsNullOrEmpty(yearstring) && yearstring.Length > 2
                 && (!YearOnly.IsMatch(yearstring) || Convert.ToInt32(yearstring) <= DateTime.Now.Year)
                 && !(articleText.Contains(CategoryLivingPeople) && Convert.ToInt32(yearstring) < (DateTime.Now.Year - 121)))
-                articleText += StartCategory + yearstring + " births" + CatEnd(sort);
+                articleText += categoryPrefix + yearstring + " births" + CatEnd(sort);
         }
 
         // scrape any infobox
@@ -1092,7 +1095,7 @@ public static string ChangeToDefaultSort(
             // validate a YYYY date is not in the future
             if (!string.IsNullOrEmpty(yearstring) && yearstring.Length > 2
                 && (!YearOnly.IsMatch(yearstring) || Convert.ToInt32(yearstring) <= DateTime.Now.Year))
-                articleText += StartCategory + yearstring + " deaths" + CatEnd(sort);
+                articleText += categoryPrefix + yearstring + " deaths" + CatEnd(sort);
         }
 
         zerothSection = NotCircaTemplate.Replace(zerothSection, " ");
@@ -1118,15 +1121,15 @@ public static string ChangeToDefaultSort(
                 {
                     if (!UncertainWordings.IsMatch(birthpart) && !ReignedRuledUnsure.IsMatch(m.Value) && !Regex.IsMatch(birthpart, @"(?:[Dd](?:ied|\.)|baptised)")
                         && !FloruitTemplate.IsMatch(birthpart))
-                        articleText += StartCategory + birthyear + @" births" + CatEnd(sort);
+                        articleText += categoryPrefix + birthyear + @" births" + CatEnd(sort);
                     else
                         if (UncertainWordings.IsMatch(birthpart) && !CategoryMatch(articleText, YearOfBirthMissingLivingPeople) && !CategoryMatch(articleText, YearOfBirthUncertain))
-                        articleText += StartCategory + YearOfBirthUncertain + CatEnd(sort);
+                        articleText += categoryPrefix + YearOfBirthUncertain + CatEnd(sort);
                 }
 
                 if (!UncertainWordings.IsMatch(deathpart) && !ReignedRuledUnsure.IsMatch(m.Value) && !Regex.IsMatch(deathpart, @"[Bb](?:orn|\.)") && !Regex.IsMatch(birthpart, @"[Dd](?:ied|\.)")
                     && (!WikiRegexes.DeathsOrLivingCategory.IsMatch(articleText) || CategoryMatch(articleText, YearofDeathMissing)))
-                    articleText += StartCategory + deathyear + @" deaths" + CatEnd(sort);
+                    articleText += categoryPrefix + deathyear + @" deaths" + CatEnd(sort);
             }
         }
 
@@ -1250,6 +1253,29 @@ public static string ChangeToDefaultSort(
                         : match.Value);
 
         return zerothSection;
+    }
+
+    /// <summary>
+    /// Builds the category-link prefix used when adding people-related categories
+    /// to the current page.
+    /// </summary>
+    /// <param name="articleTitle">
+    /// The title of the page being processed.
+    /// </param>
+    /// <returns>
+    /// A newline followed by the appropriate category-link prefix. Mainspace pages
+    /// use <c>[[Category:</c>, while non-mainspace pages use
+    /// <c>[[:Category:</c> so the category is linked rather than applied.
+    /// </returns>
+    private static string GetPeopleCategoryPrefix(
+        string articleTitle)
+    {
+        return Tools.Newline(
+            "[[" +
+            (Namespace.IsMainSpace(articleTitle)
+                ? ""
+                : ":") +
+            "Category:");
     }
 
     private static string CatEnd(string sort)
