@@ -464,7 +464,7 @@ private static readonly Regex RegexHeadingsSeeAlso =
     /// <summary>
     /// Normalizes formatting and common naming issues within a matched heading.
     /// </summary>
-    /// <param name="m">
+    /// <param name="headingMatch">
     /// The heading match to normalize.
     /// </param>
     /// <returns>
@@ -474,52 +474,114 @@ private static readonly Regex RegexHeadingsSeeAlso =
     /// The order of the individual cleanup operations is significant and should
     /// be preserved unless behavior is covered by focused regression tests.
     /// </remarks>
-    // TODO: Consider extracting the distinct heading-cleanup stages into focused
-    // helpers during the logic-extraction pass. Candidate stages include
-    // whitespace cleanup, markup removal, standard heading-name normalization,
-    // and final empty-markup cleanup.
-    //
     // TODO: Add focused regression tests that verify replacement ordering before
     // consolidating or reordering any of the normalization operations.
     private static string FixHeadingsME(Match headingMatch)
     {
-        string hAfter = WikiRegexes.Br.Replace(headingMatch.Value, string.Empty);
-        hAfter = WikiRegexes.Big.Replace(hAfter, "$1").TrimStart(' ');
-
-        // Clean whitespace.
-        hAfter = hAfter.Replace("\t", " ");
-        while (SpaceNewLineEnd.IsMatch(hAfter))
-            hAfter = SpaceNewLineEnd.Replace(hAfter, "$1");
-
-        // Removes bold from heading - CHECKWIKI error 44.
-        hAfter = RegexHeadingsBold.Replace(hAfter, "$1$2$3");
-
-        // Removes colon at end of heading - CHECKWIKI error 57.
-        hAfter = RegexHeadingColonAtEnd.Replace(hAfter, "$1$2$3");
-
-        hAfter = RegexHeadingsExternalLink.Replace(hAfter, "$1External links$3");
-
-        hAfter = RegexHeadingsFurtherReading.Replace(hAfter, "$1Further reading$3");
-        hAfter = RegexHeadingsLife.Replace(hAfter, "$1$2 life$3");
-        hAfter = RegexHeadingsMembers.Replace(hAfter, "$1$2 members$3");
-        hAfter = RegexHeadingsTrackListing.Replace(hAfter, "$1Track listing$2");
-        hAfter = RegexHeadingsLifeCareer.Replace(hAfter, "$1Life and career$2");
-        hAfter = RegexHeadingsCareer.Replace(hAfter, "$1$2 career$3");
-        hAfter = RegexHeadingsSeeAlso.Replace(hAfter, "$1See also$2");
-
-        // Plural per [[WP:FNNR]].
-        hAfter = RegexHeadingsReferencess.Replace(
-            hAfter,
-            headingNameMatch => headingNameMatch.Groups[1].Value + "References" + headingNameMatch.Groups[2].Value);
-
-        hAfter = RegexHeadingsSources.Replace(
-            hAfter,
-           headingNameMatch => headingNameMatch.Groups[1].Value + "Sources" + headingNameMatch.Groups[2].Value);
-
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Bold_text_in_headers
-        // Removes bold from level 3 headers and below, as it makes no visible difference.
-        hAfter = RegexHeadingWithBold.Replace(hAfter, "$1");
+        string hAfter = NormalizeHeadingWhitespaceAndMarkup(headingMatch.Value);
+        hAfter = RemoveInvalidHeadingFormatting(hAfter);
+        hAfter = NormalizeHeadingNames(hAfter);
+        hAfter = RemoveNestedHeadingBold(hAfter);
 
         return WikiRegexes.EmptyBold.Replace(hAfter, string.Empty);
+    }
+
+    /// <summary>
+    /// Removes preliminary markup and normalizes whitespace before other heading
+    /// corrections are applied.
+    /// </summary>
+    /// <param name="heading">
+    /// The heading text to normalize.
+    /// </param>
+    /// <returns>
+    /// The heading text with preliminary markup and whitespace normalized.
+    /// </returns>
+    private static string NormalizeHeadingWhitespaceAndMarkup(string heading)
+    {
+        string normalizedHeading = WikiRegexes.Br.Replace(heading, string.Empty);
+        normalizedHeading = WikiRegexes.Big.Replace(normalizedHeading, "$1").TrimStart(' ');
+
+        normalizedHeading = normalizedHeading.Replace("\t", " ");
+
+        while (SpaceNewLineEnd.IsMatch(normalizedHeading))
+            normalizedHeading = SpaceNewLineEnd.Replace(normalizedHeading, "$1");
+
+        return normalizedHeading;
+    }
+
+    /// <summary>
+    /// Removes heading formatting that is not valid or necessary.
+    /// </summary>
+    /// <param name="heading">
+    /// The heading text to normalize.
+    /// </param>
+    /// <returns>
+    /// The heading text with invalid formatting removed.
+    /// </returns>
+    private static string RemoveInvalidHeadingFormatting(string heading)
+    {
+        // Removes bold from heading - CHECKWIKI error 44.
+        heading = RegexHeadingsBold.Replace(heading, "$1$2$3");
+
+        // Removes colon at end of heading - CHECKWIKI error 57.
+        heading = RegexHeadingColonAtEnd.Replace(heading, "$1$2$3");
+
+        return heading;
+    }
+
+    /// <summary>
+    /// Normalizes known heading names and capitalization variants.
+    /// </summary>
+    /// <param name="heading">
+    /// The heading text to normalize.
+    /// </param>
+    /// <returns>
+    /// The heading text with recognized heading names normalized.
+    /// </returns>
+    private static string NormalizeHeadingNames(string heading)
+    {
+        heading = RegexHeadingsExternalLink.Replace(heading, "$1External links$3");
+
+        heading = RegexHeadingsFurtherReading.Replace(heading, "$1Further reading$3");
+        heading = RegexHeadingsLife.Replace(heading, "$1$2 life$3");
+        heading = RegexHeadingsMembers.Replace(heading, "$1$2 members$3");
+        heading = RegexHeadingsTrackListing.Replace(heading, "$1Track listing$2");
+        heading = RegexHeadingsLifeCareer.Replace(heading, "$1Life and career$2");
+        heading = RegexHeadingsCareer.Replace(heading, "$1$2 career$3");
+        heading = RegexHeadingsSeeAlso.Replace(heading, "$1See also$2");
+
+        // Plural per [[WP:FNNR]].
+        heading = RegexHeadingsReferencess.Replace(
+            heading,
+            headingNameMatch =>
+                headingNameMatch.Groups[1].Value +
+                "References" +
+                headingNameMatch.Groups[2].Value);
+
+        heading = RegexHeadingsSources.Replace(
+            heading,
+            headingNameMatch =>
+                headingNameMatch.Groups[1].Value +
+                "Sources" +
+                headingNameMatch.Groups[2].Value);
+
+        return heading;
+    }
+
+    /// <summary>
+    /// Removes bold markup occurring within lower-level headings where it has no
+    /// visible effect.
+    /// </summary>
+    /// <param name="heading">
+    /// The heading text to normalize.
+    /// </param>
+    /// <returns>
+    /// The heading text with unnecessary nested bold markup removed.
+    /// </returns>
+    private static string RemoveNestedHeadingBold(string heading)
+    {
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Bold_text_in_headers
+        // Removes bold from level 3 headers and below, as it makes no visible difference.
+        return RegexHeadingWithBold.Replace(heading, "$1");
     }
 }
