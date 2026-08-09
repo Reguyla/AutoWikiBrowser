@@ -860,32 +860,32 @@ public partial class Parsers
     /// focused helpers during a later refactoring pass once their behavior and
     /// test coverage have been reviewed.
     /// </remarks>
-    private static string FixSyntaxISBN(string articleText, List<string> ssbISBN)
+    private static string FixSyntaxISBN(string articleText, List<string> isbnMarkers)
     {
         // CHECKWIKI error 69.
-        bool isbnDash =
+        bool containsIsbnDash =
             articleText.Contains("ISBN-") ||
             articleText.Contains("ISBN–");
 
-        if (isbnDash ||
+        if (containsIsbnDash ||
             articleText.Contains("ISBN:") ||
             articleText.Contains("ISBN\t") ||
             articleText.Contains("ISBN \t") ||
-            ssbISBN.Contains("[[ISBN]]"))
+            isbnMarkers.Contains("[[ISBN]]"))
         {
             articleText = SyntaxRegexISBN.Replace(articleText, "ISBN $1");
         }
 
-        if (isbnDash)
+        if (containsIsbnDash)
         {
             articleText = SyntaxRegexISBN2.Replace(articleText, "ISBN ");
             articleText = SyntaxRegexISBN2a.Replace(articleText, "ISBN-$1");
         }
 
-        if (ssbISBN.Contains("[[ISBN]]"))
+        if (isbnMarkers.Contains("[[ISBN]]"))
             articleText = SyntaxRegexISBN3.Replace(articleText, "ISBN $1");
 
-        if (ssbISBN.Contains("[[International Standard Book Number|ISBN]]"))
+        if (isbnMarkers.Contains("[[International Standard Book Number|ISBN]]"))
             articleText = SyntaxRegexISBN4.Replace(articleText, "ISBN $1");
 
         // Capitalize the ISBN-10 check digit.
@@ -894,24 +894,24 @@ public partial class Parsers
         // Replace en dashes with hyphens within ISBN numbers.
         articleText = ISBNEndash.Replace(
             articleText,
-            m => "ISBN " + m.Groups[1].Value.Replace("–", "-"));
+            match=> "ISBN " + match.Groups[1].Value.Replace("–", "-"));
 
         // Remove a redundant ISBN prefix from isbn= parameters in infoboxes.
         if (TemplateExists(GetAllTemplates(articleText), WikiRegexes.InfoBox))
         {
-            foreach (string infobox in GetAllTemplateDetail(articleText)
-                         .Where(t => WikiRegexes.InfoBox.IsMatch(t)))
+            foreach (string infoboxTemplate in GetAllTemplateDetail(articleText)
+                         .Where(template => WikiRegexes.InfoBox.IsMatch(template)))
             {
-                string isbn = Tools.GetTemplateParameterValue(infobox, "isbn");
+                string isbnValue = Tools.GetTemplateParameterValue(infoboxTemplate, "isbn");
 
-                if (isbn.StartsWith("ISBN"))
+                if (isbnValue.StartsWith("ISBN"))
                 {
                     articleText = articleText.Replace(
-                        infobox,
+                        infoboxTemplate,
                         Tools.UpdateTemplateParameterValue(
-                            infobox,
+                            infoboxTemplate,
                             "isbn",
-                            Regex.Replace(isbn, @"^ISBN\s*:?\s*", "")));
+                            Regex.Replace(isbnValue, @"^ISBN\s*:?\s*", "")));
                 }
             }
         }
