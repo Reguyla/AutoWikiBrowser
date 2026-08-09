@@ -121,18 +121,65 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// Dictionary of HTML-encoded characters that mustn't be converted by Unicodify function
+    /// Regular-expression mappings used to temporarily preserve HTML-encoded
+    /// character entities that should not be converted during Unicode
+    /// normalization.
     /// </summary>
+    /// <remarks>
+    /// The dictionary is populated during parser initialization and is used by
+    /// the Unicode conversion routines to protect specific HTML entities from
+    /// being altered.
+    /// </remarks>
     private static readonly Dictionary<Regex, string> RegexUnicode = new();
+
+    /// <summary>
+    /// Regular-expression mappings used to perform legacy template and markup
+    /// conversions.
+    /// </summary>
+    /// <remarks>
+    /// Each entry associates a regular expression with its replacement text.
+    /// These conversions are applied by <see cref="Conversions(string)"/> when
+    /// the corresponding templates or markup are present in an article.
+    /// </remarks>
     private static readonly Dictionary<Regex, string> RegexConversion = new();
 
-    private readonly HideText Hider = new HideText();
-    private readonly HideText HiderHideExtLinksImages = new HideText(true, true, true);
+    /// <summary>
+    /// Helper used to temporarily hide portions of article text while parser
+    /// operations are performed.
+    /// </summary>
+    /// <remarks>
+    /// This instance uses the default hiding behavior.
+    /// </remarks>
+    private readonly HideText Hider = new();
+
+    /// <summary>
+    /// Helper used to temporarily hide portions of article text, including
+    /// external links and images, during parser operations.
+    /// </summary>
+    /// <remarks>
+    /// This instance is configured to hide additional content types that would
+    /// otherwise interfere with specific parsing operations.
+    /// </remarks>
+    private readonly HideText HiderHideExtLinksImages = new(true, true, true);
+
+    /// <summary>
+    /// The maximum number of words an article may contain before it is no longer
+    /// considered a stub.
+    /// </summary>
+    /// <remarks>
+    /// This value is used by parser routines that evaluate or update stub-related
+    /// templates.
+    /// </remarks>
     public static int StubMaxWordCount = 500;
 
     /// <summary>
-    /// Sort interwiki link order
+    /// Gets or sets whether interwiki links are reordered into the configured
+    /// interwiki sequence.
     /// </summary>
+    /// <remarks>
+    /// This property delegates to the underlying <see cref="MetaDataSorter"/>
+    /// instance.
+    /// </remarks>
     public bool SortInterwikis
     {
         get { return Sorter.SortInterwikis; }
@@ -140,22 +187,35 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// The interwiki link order to use
+    /// Gets or sets the ordering strategy used when sorting interwiki links.
     /// </summary>
+    /// <remarks>
+    /// This property delegates to the underlying <see cref="MetaDataSorter"/>
+    /// instance.
+    /// </remarks>
     public InterWikiOrderEnum InterWikiOrder
     {
-        set { Sorter.InterWikiOrder = value; }
         get { return Sorter.InterWikiOrder; }
+        set { Sorter.InterWikiOrder = value; }
     }
 
     /// <summary>
-    /// When set to true, adds key to categories (for people only) when parsed
+    /// Backing field for the lazily initialized <see cref="Sorter"/> property.
     /// </summary>
-    //public bool AddCatKey { get; set; }
-
-    // should NOT be accessed directly, use Sorter
+    /// <remarks>
+    /// Access this field through <see cref="Sorter"/> so the metadata sorter is
+    /// created when first needed.
+    /// </remarks>
     private MetaDataSorter metaDataSorter;
 
+    /// <summary>
+    /// Gets the metadata sorter used by this parser.
+    /// </summary>
+    /// <remarks>
+    /// The sorter is created lazily on first access and reused for the lifetime
+    /// of the parser instance. Consumers should access the sorter through this
+    /// property rather than the backing field.
+    /// </remarks>
     public MetaDataSorter Sorter
     {
         get { return metaDataSorter ?? (metaDataSorter = new MetaDataSorter()); }
@@ -630,16 +690,78 @@ public partial class Parsers
         return SuperscriptMinus.Replace(articleText, "$1−");
     }
 
-    private static readonly Regex BrTwoNewlines = new Regex("(?:<br */?> *)\r\n\r\n", RegexOptions.IgnoreCase);
-    private static readonly Regex FourOrMoreNewlines = new Regex("(\r\n){4,}");
-    private static readonly Regex NewlinesBelowExternalLinks = new Regex(@"==External links==[\r\n\s]*\*");
-    private static readonly Regex HorizontalRule = new Regex("----+$");
-    private static readonly Regex MultipleTabs = new Regex("  +", RegexOptions.Compiled);
-    private static readonly Regex SpacesThenTwoNewline = new Regex(@"[ \u00a0]+\r\n\r\n", RegexOptions.Compiled);
-    private static readonly Regex WikiListWithMultipleSpaces = new Regex(@"^([\*#]+) +", RegexOptions.Compiled | RegexOptions.Multiline);
-    private static readonly Regex SpacedDashes = new Regex(" (—|&#15[01];|&mdash;|&#821[12];|&#x201[34];) ", RegexOptions.Compiled);
-    private static readonly Regex NewlinesWithinLists = new Regex(@"(\r\n\*.*)\r\n[\t ]*\r\n\*", RegexOptions.Compiled);
-    private static readonly Regex TwoLists = new Regex(@"\r\n\*.*\r\n\r\n\r\n\*");
+    /// <summary>
+    /// Matches a line break element followed by two consecutive newline sequences.
+    /// </summary>
+    private static readonly Regex BrTwoNewlines =
+        new("(?:<br */?> *)\r\n\r\n", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Matches runs of four or more consecutive newline sequences.
+    /// </summary>
+    private static readonly Regex FourOrMoreNewlines =
+        new("(\r\n){4,}");
+
+    /// <summary>
+    /// Matches the start of the External links section when followed by optional
+    /// whitespace and the first list item marker.
+    /// </summary>
+    private static readonly Regex NewlinesBelowExternalLinks =
+        new(@"==External links==[\r\n\s]*\*");
+
+    /// <summary>
+    /// Matches a horizontal rule consisting of four or more hyphens at the end
+    /// of a line.
+    /// </summary>
+    private static readonly Regex HorizontalRule =
+        new("----+$");
+
+    /// <summary>
+    /// Matches runs of two or more consecutive spaces.
+    /// </summary>
+    /// <remarks>
+    /// Despite the historical name, this expression matches spaces rather than
+    /// tab characters.
+    /// </remarks>
+    private static readonly Regex MultipleTabs =
+        new("  +", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches spaces or non-breaking spaces immediately before two consecutive
+    /// newline sequences.
+    /// </summary>
+    private static readonly Regex SpacesThenTwoNewline =
+        new(@"[ \u00a0]+\r\n\r\n", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches wiki list markers followed by multiple spaces at the beginning of
+    /// a line.
+    /// </summary>
+    private static readonly Regex WikiListWithMultipleSpaces =
+        new(@"^([\*#]+) +", RegexOptions.Compiled | RegexOptions.Multiline);
+
+    /// <summary>
+    /// Matches supported em-dash or en-dash representations surrounded by spaces.
+    /// </summary>
+    /// <remarks>
+    /// Supports literal Unicode dashes and several decimal, hexadecimal, and named
+    /// HTML entity forms.
+    /// </remarks>
+    private static readonly Regex SpacedDashes =
+        new(" (—|&#15[01];|&mdash;|&#821[12];|&#x201[34];) ", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches blank lines occurring between adjacent wiki list items.
+    /// </summary>
+    private static readonly Regex NewlinesWithinLists =
+        new(@"(\r\n\*.*)\r\n[\t ]*\r\n\*", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches two wiki list blocks separated by three consecutive newline
+    /// sequences.
+    /// </summary>
+    private static readonly Regex TwoLists =
+        new(@"\r\n\*.*\r\n\r\n\r\n\*");
 
     /// <summary>
     /// Applies/removes some excess whitespace from the article
@@ -740,7 +862,21 @@ public partial class Parsers
         return articleText.Trim();
     }
 
-    private static readonly List<string> DateFields = new List<string>(new[] { "date", "accessdate", "access-date", "archivedate", "airdate" });
+    /// <summary>
+    /// Template parameter names that are expected to contain date values.
+    /// </summary>
+    /// <remarks>
+    /// These parameter names are used by parser routines that identify or process
+    /// date-related template arguments.
+    /// </remarks>
+    private static readonly List<string> DateFields =
+    [
+        "date",
+    "accessdate",
+    "access-date",
+    "archivedate",
+    "airdate"
+    ];
 
     /// <summary>
     /// Updates dates in citation templates to use the strict predominant date format in the article (en wiki only)
@@ -988,7 +1124,16 @@ public partial class Parsers
         return articleText;
     }
 
-    private static readonly Regex TemplateArg = new Regex(@"\|([^=\|}}]+)(?:\||}})");
+    /// <summary>
+    /// Matches positional template arguments within a wiki template.
+    /// </summary>
+    /// <remarks>
+    /// Captures the argument value that follows a pipe (<c>|</c>) and precedes
+    /// either the next pipe or the closing template braces. Named parameters
+    /// containing an equals sign are intentionally excluded.
+    /// </remarks>
+    private static readonly Regex TemplateArg =
+        new(@"\|([^=\|}}]+)(?:\||}})");
 
     /// <summary>
     /// Deduplicates multiple maintenance tags. Uses earliest of date parameters, merges all other parameters.
