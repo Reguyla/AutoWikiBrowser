@@ -481,9 +481,9 @@ private static readonly Regex RegexHeadingsSeeAlso =
     //
     // TODO: Add focused regression tests that verify replacement ordering before
     // consolidating or reordering any of the normalization operations.
-    private static string FixHeadingsME(Match m)
+    private static string FixHeadingsME(Match headingMatch)
     {
-        string hAfter = WikiRegexes.Br.Replace(m.Value, string.Empty);
+        string hAfter = WikiRegexes.Br.Replace(headingMatch.Value, string.Empty);
         hAfter = WikiRegexes.Big.Replace(hAfter, "$1").TrimStart(' ');
 
         // Clean whitespace.
@@ -510,11 +510,11 @@ private static readonly Regex RegexHeadingsSeeAlso =
         // Plural per [[WP:FNNR]].
         hAfter = RegexHeadingsReferencess.Replace(
             hAfter,
-            m2 => m2.Groups[1].Value + "References" + m2.Groups[2].Value);
+            headingNameMatch => headingNameMatch.Groups[1].Value + "References" + headingNameMatch.Groups[2].Value);
 
         hAfter = RegexHeadingsSources.Replace(
             hAfter,
-            m2 => m2.Groups[1].Value + "Sources" + m2.Groups[2].Value);
+           headingNameMatch => headingNameMatch.Groups[1].Value + "Sources" + headingNameMatch.Groups[2].Value);
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Bold_text_in_headers
         // Removes bold from level 3 headers and below, as it makes no visible difference.
