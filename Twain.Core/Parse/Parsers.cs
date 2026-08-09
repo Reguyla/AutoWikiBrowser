@@ -2263,25 +2263,16 @@ public partial class Parsers
         if (WikiRegexes.DeathsOrLivingCategory.Matches(cats).Count > 1)
             return false;
 
-        if (
-            articleText.Contains(@"-bio-stub}}")
-            || articleText.Contains(@"-politician-stub}}")
-            || articleText.Contains(@"-writer-stub}}")
-            || cats.Contains(CategoryLivingPeople)
-            || WikiRegexes.PeopleInfoboxTemplates.Matches(zerothSection).Count == 1
-            || CategoryMatch(cats, YearOfBirthMissingLivingPeople)
-        )
+        if (HasStrongPersonIndicators(articleText, zerothSection, cats))
         {
             return true;
         }
 
-        // articles with bold linking to another article may be linking to the main article on the person the article is about
-        // e.g. '''military career of [[Napoleon Bonaparte]]'''
-        string zerothSectionNoTemplates = WikiRegexes.Template.Replace(zerothSection, "");
-        foreach (Match m in WikiRegexes.Bold.Matches(zerothSectionNoTemplates))
+        // Articles with bold text linking to another article may be sub-articles
+        // pointing to the primary article about the person.
+        if (HasBoldLinkToPrimaryArticle(zerothSection))
         {
-            if (WikiRegexes.WikiLink.IsMatch(m.Value))
-                return false;
+            return false;
         }
 
         int dateBirthAndAgeCount = BirthDate.Matches(zerothSection).Count;
@@ -2399,6 +2390,58 @@ public partial class Parsers
         noChange = newText.Equals(articleText);
 
         return newText;
+    }
+
+    /// <summary>
+    /// Determines whether the article contains strong indicators that it is
+    /// primarily about a person.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <param name="zerothSection">The lead section of the article.</param>
+    /// <param name="cats">The article category markup.</param>
+    /// <returns>
+    /// <see langword="true"/> when a strong person-specific indicator is present;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool HasStrongPersonIndicators(
+        string articleText,
+        string zerothSection,
+        string cats)
+    {
+        return articleText.Contains(@"-bio-stub}}")
+            || articleText.Contains(@"-politician-stub}}")
+            || articleText.Contains(@"-writer-stub}}")
+            || cats.Contains(CategoryLivingPeople)
+            || WikiRegexes.PeopleInfoboxTemplates.Matches(zerothSection).Count == 1
+            || CategoryMatch(cats, YearOfBirthMissingLivingPeople);
+    }
+
+    /// <summary>
+    /// Determines whether the lead section contains a bolded link to another
+    /// article, indicating that the current page may be a sub-article rather than
+    /// the primary article about the person.
+    /// </summary>
+    /// <param name="zerothSection">The lead section of the article.</param>
+    /// <returns>
+    /// <see langword="true"/> when a bolded wiki link is found; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool HasBoldLinkToPrimaryArticle(string zerothSection)
+    {
+        string zerothSectionNoTemplates =
+            WikiRegexes.Template.Replace(
+                zerothSection,
+                string.Empty);
+
+        foreach (Match m in WikiRegexes.Bold.Matches(zerothSectionNoTemplates))
+        {
+            if (WikiRegexes.WikiLink.IsMatch(m.Value))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
