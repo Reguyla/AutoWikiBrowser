@@ -347,61 +347,26 @@ private static readonly Regex RegexHeadingsSeeAlso =
 
     // Covered by: FormattingTests.TestFixHeadings(), incomplete
     /// <summary>
-    /// Fix ==See also== and similar section common errors. Removes unnecessary introductory headings and cleans excess whitespace (but not the optional single space at the start & end of headings).
+    /// Fix ==See also== and similar section common errors. Removes unnecessary
+    /// introductory headings and cleans excess whitespace (but not the optional
+    /// single space at the start &amp; end of headings).
     /// </summary>
     /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">the title of the article</param>
+    /// <param name="articleTitle">The title of the article.</param>
     /// <returns>The modified article text.</returns>
     public static string FixHeadings(string articleText, string articleTitle)
     {
-        // remove unnecessary general header from start of article
+        // Remove unnecessary general header from start of article.
         articleText = RegexBadHeaderStartOfArticle.Replace(articleText, string.Empty);
 
-        // remove identical duplicated headings with only whitespace in between
+        // Remove identical duplicated headings with only whitespace in between.
         articleText = DuplicatedSameLevelHeadings.Replace(articleText, "$1");
 
-        // one blank line before each heading per MOS:HEAD, but not between headings
-        // avoid special case of indented text that may be code with lots of == that matches a heading
-        if (Variables.IsWikipediaEN)
-        {
-            // Check for performance
-            if (HeadingsIncorrectWhitespaceBefore.IsMatch(articleText))
-            {
-                // list of headings that have a comment on the line before: these are correct as is
-                List<string> commentBeforeHeadings = CommentThenHeading.Matches(articleText).Cast<Match>().Select(match => match.Groups[1].Value).ToList();
+        articleText = NormalizeHeadingWhitespace(articleText);
 
-                articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(articleText, match =>
-                    {
-                        // avoid special case of indented text that may be code with lots of == that matches a heading
-                        if (match.Groups[2].Value.Contains("=="))
-                            return match.Value;
+        List<string> customHeadings = GetCustomHeadings(articleText);
 
-                        // if a sub-heading directly after a heading don't add blank line
-                        foreach (Match subHeadingMatch in HeadingSubHeading.Matches(articleText))
-                        {
-                            if (subHeadingMatch.Groups[3].Value.Contains(match.Groups[1].Value))
-                                return match.Value;
-                        }
-
-                        // if comment on the line before heading then it's correct as is
-                        if (commentBeforeHeadings.Any(heading => heading.Equals(match.Groups[2].Value)))
-                            return match.Value;
-
-                        return "\r\n\r\n" + match.Groups[1].Value;
-                    });
-
-                articleText = Anchor2NewlineHeader.Replace(articleText, match => match.Value.Replace("\r\n\r\n==", "\r\n=="));
-            }
-        }
-
-        // Get all the custom headings, ignoring normal References, External links, See also sections with correct capitalization
-        List<string> customHeadings =
-            (from Match headingMatch in WikiRegexes.Headings.Matches(articleText)
-             where !ReferencesExternalLinksSeeAlsoValid.IsMatch(headingMatch.Value)
-             select headingMatch.Value.ToLower())
-            .ToList();
-
-        // Removes level 2 heading (at start of article only) if it matches pagetitle
+        // Removes level 2 heading (at start of article only) if it matches pagetitle.
         if (customHeadings.Any(heading => heading.Contains(articleTitle.ToLower())))
         {
             articleText = Regex.Replace(
@@ -425,44 +390,193 @@ private static readonly Regex RegexHeadingsSeeAlso =
                 "$1=\r\n");
         }
 
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Section_header_level_.28WikiProject_Check_Wikipedia_.237.29
-        // CHECKWIKI error 7
-        // if no level 2 heading in article, remove a level from all headings (i.e. '===blah===' to '==blah==' etc.)
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Standard_level_2_headers
-        // don't consider the "references", "see also", or "external links" level 2 headings when counting level two headings
-        // only apply if all level 3 headings and lower are before the first of references/external links/see also
-        if (Namespace.IsMainSpace(articleTitle))
-        {
-            if (!customHeadings.Any(heading => WikiRegexes.HeadingLevelTwo.IsMatch(heading)))
+        articleText = NormalizeMainspaceHeadingLevels(
+            articleText,
+            articleTitle,
+            customHeadings);
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes whitespace immediately before headings on the English
+    /// Wikipedia while preserving known valid special cases.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to normalize.
+    /// </param>
+    /// <returns>
+    /// The article text with applicable heading whitespace normalized.
+    /// </returns>
+    private static string NormalizeHeadingWhitespace(string articleText)
+    {
+        if (!Variables.IsWikipediaEN)
+            return articleText;
+
+        // Performance: avoid the more expensive replacement unless potentially
+        // incorrect heading whitespace is present.
+        if (!HeadingsIncorrectWhitespaceBefore.IsMatch(articleText))
+            return articleText;
+
+        // List of headings that have a comment on the line before; these are
+        // correct as-is.
+        List<string> commentBeforeHeadings = CommentThenHeading
+            .Matches(articleText)
+            .Cast<Match>()
+            .Select(match => match.Groups[1].Value)
+            .ToList();
+
+        articleText = WikiRegexes.HeadingsWhitespaceBefore.Replace(
+            articleText,
+            match =>
             {
-                string articleTextWithoutStandardHeadings = articleText;
-                articleTextWithoutStandardHeadings = ReferencesExternalLinksSeeAlso.Replace(articleTextWithoutStandardHeadings, string.Empty);
+                // Avoid special case of indented text that may be code with lots
+                // of == that matches a heading.
+                if (match.Groups[2].Value.Contains("=="))
+                    return match.Value;
 
-                string previousArticleText = string.Empty;
-                while (!previousArticleText.Equals(articleText))
+                // If a sub-heading is directly after a heading, don't add a blank line.
+                foreach (Match subHeadingMatch in HeadingSubHeading.Matches(articleText))
                 {
-                    previousArticleText = articleText;
-                    if (!WikiRegexes.HeadingLevelTwo.IsMatch(articleTextWithoutStandardHeadings))
-                    {
-                        // get index of last level 3+ heading
-                        int lastHeadingToPromoteIndex = 0;
-                        foreach (Match match in RegexHeadingUpOneLevel.Matches(articleText))
-                        {
-                            if (match.Index > lastHeadingToPromoteIndex)
-                                lastHeadingToPromoteIndex = match.Index;
-                        }
+                    if (subHeadingMatch.Groups[3].Value.Contains(match.Groups[1].Value))
+                        return match.Value;
+                }
 
-                        if (!ReferencesExternalLinksSeeAlso.IsMatch(articleText) || (lastHeadingToPromoteIndex < ReferencesExternalLinksSeeAlso.Match(articleText).Index))
-                            articleText = RegexHeadingUpOneLevel.Replace(articleText, "$1$2");
-                    }
+                // If a comment is on the line before the heading, it is correct as-is.
+                if (commentBeforeHeadings.Any(
+                    heading => heading.Equals(match.Groups[2].Value)))
+                {
+                    return match.Value;
+                }
 
-                    articleTextWithoutStandardHeadings = ReferencesExternalLinksSeeAlso.Replace(articleText, string.Empty);
+                return "\r\n\r\n" + match.Groups[1].Value;
+            });
+
+        return Anchor2NewlineHeader.Replace(
+            articleText,
+            match => match.Value.Replace("\r\n\r\n==", "\r\n=="));
+    }
+
+    /// <summary>
+    /// Gets headings requiring custom heading analysis or normalization.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text containing the headings.
+    /// </param>
+    /// <returns>
+    /// Lowercase heading text excluding correctly formatted References,
+    /// External links, and See also headings.
+    /// </returns>
+    private static List<string> GetCustomHeadings(string articleText)
+    {
+        return
+            (from Match headingMatch in WikiRegexes.Headings.Matches(articleText)
+             where !ReferencesExternalLinksSeeAlsoValid.IsMatch(headingMatch.Value)
+             select headingMatch.Value.ToLower())
+            .ToList();
+    }
+
+    /// <summary>
+    /// Normalizes heading levels that require special handling in mainspace
+    /// articles.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to normalize.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="customHeadings">
+    /// The previously identified custom headings in the article.
+    /// </param>
+    /// <returns>
+    /// The article text with applicable mainspace heading levels normalized.
+    /// </returns>
+    private static string NormalizeMainspaceHeadingLevels(
+        string articleText,
+        string articleTitle,
+        List<string> customHeadings)
+    {
+        if (!Namespace.IsMainSpace(articleTitle))
+            return articleText;
+
+        // CHECKWIKI error 7.
+        // If no level 2 heading exists, remove a level from all applicable
+        // headings (i.e. '===blah===' to '==blah==' etc.).
+        //
+        // References, See also, and External links level 2 headings are excluded
+        // when determining whether another level 2 heading exists.
+        if (!customHeadings.Any(
+            heading => WikiRegexes.HeadingLevelTwo.IsMatch(heading)))
+        {
+            articleText = PromoteHeadingsWhenLevelTwoIsMissing(articleText);
+        }
+
+        // Level 1 headings to level 2 on mainspace.
+        if (customHeadings.Any(heading => HeadingLevelOne.IsMatch(heading)))
+        {
+            articleText = HeadingLevelOne.Replace(articleText, "==$1==");
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Promotes eligible headings by one level when no nonstandard level-two
+    /// heading is present.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text containing headings to evaluate.
+    /// </param>
+    /// <returns>
+    /// The article text after applicable headings have been promoted.
+    /// </returns>
+    /// <remarks>
+    /// Standard References, External links, and See also headings are ignored when
+    /// checking for another level-two heading. Promotion is limited to headings
+    /// occurring before those standard sections.
+    /// </remarks>
+    // TODO: Add focused regression tests for the iterative heading-promotion
+    // behavior before simplifying the loop or repeated regex evaluations.
+    private static string PromoteHeadingsWhenLevelTwoIsMissing(string articleText)
+    {
+        string articleTextWithoutStandardHeadings = articleText;
+        articleTextWithoutStandardHeadings =
+            ReferencesExternalLinksSeeAlso.Replace(
+                articleTextWithoutStandardHeadings,
+                string.Empty);
+
+        string previousArticleText = string.Empty;
+
+        while (!previousArticleText.Equals(articleText))
+        {
+            previousArticleText = articleText;
+
+            if (!WikiRegexes.HeadingLevelTwo.IsMatch(articleTextWithoutStandardHeadings))
+            {
+                // Get index of last level 3+ heading.
+                int lastHeadingToPromoteIndex = 0;
+
+                foreach (Match match in RegexHeadingUpOneLevel.Matches(articleText))
+                {
+                    if (match.Index > lastHeadingToPromoteIndex)
+                        lastHeadingToPromoteIndex = match.Index;
+                }
+
+                if (!ReferencesExternalLinksSeeAlso.IsMatch(articleText) ||
+                    lastHeadingToPromoteIndex <
+                    ReferencesExternalLinksSeeAlso.Match(articleText).Index)
+                {
+                    articleText = RegexHeadingUpOneLevel.Replace(
+                        articleText,
+                        "$1$2");
                 }
             }
 
-            // level 1 headings to level 2 on mainspace
-            if (Namespace.IsMainSpace(articleTitle) && customHeadings.Any(heading => HeadingLevelOne.IsMatch(heading)))
-                articleText = HeadingLevelOne.Replace(articleText, "==$1==");
+            articleTextWithoutStandardHeadings =
+                ReferencesExternalLinksSeeAlso.Replace(
+                    articleText,
+                    string.Empty);
         }
 
         return articleText;
