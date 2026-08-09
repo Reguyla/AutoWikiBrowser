@@ -876,15 +876,11 @@ public partial class Parsers
             newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
 
         // url=...archive to url=original, archive-url=archive
-        if (ArchiveOrgURL.IsMatch(theURL) && archiveurl.Length == 0)
-        {
-            newValue = Tools.SetTemplateParameterValue(newValue, "archive-url", theURL);
-            newValue = Tools.SetTemplateParameterValue(newValue, "archive-date", Regex.Replace(ArchiveOrgURL.Match(theURL).Groups[1].Value, @"(\d{4})(\d\d)(\d\d)", "$1-$2-$3"));
-            if (website.ToLower().StartsWith("archive") || website.ToLower().StartsWith("web.archive"))
-                newValue = Tools.RemoveTemplateParameter(newValue, "website");
-            theURL = ArchiveOrgURL.Replace(theURL, string.Empty);
-            newValue = Tools.UpdateTemplateParameterValue(newValue, "url", theURL);
-        }
+        newValue = NormalizeCitationArchiveUrl(
+            newValue,
+            ref theURL,
+            archiveurl,
+            website);
 
         newValue = MoveDeadLinkOutsideCitation(newValue, format, theURL);
 
@@ -903,6 +899,69 @@ public partial class Parsers
             origyear,
             TheYear,
             TheDate);
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Converts an Internet Archive URL used as the citation URL into the
+    /// citation's archive URL and restores the original URL.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="theURL">
+    /// The citation URL. Updated to the original URL when an Internet Archive
+    /// URL is converted.
+    /// </param>
+    /// <param name="archiveurl">
+    /// The existing archive URL value, if present.
+    /// </param>
+    /// <param name="website">
+    /// The citation website value, if present.
+    /// </param>
+    /// <returns>
+    /// The citation template text after applying archive URL normalization.
+    /// </returns>
+    private static string NormalizeCitationArchiveUrl(
+        string newValue,
+        ref string theURL,
+        string archiveurl,
+        string website)
+    {
+        // url=...archive to url=original, archive-url=archive
+        if (ArchiveOrgURL.IsMatch(theURL) && archiveurl.Length == 0)
+        {
+            newValue = Tools.SetTemplateParameterValue(
+                newValue,
+                "archive-url",
+                theURL);
+
+            newValue = Tools.SetTemplateParameterValue(
+                newValue,
+                "archive-date",
+                Regex.Replace(
+                    ArchiveOrgURL.Match(theURL).Groups[1].Value,
+                    @"(\d{4})(\d\d)(\d\d)",
+                    "$1-$2-$3"));
+
+            if (website.ToLower().StartsWith("archive") ||
+                website.ToLower().StartsWith("web.archive"))
+            {
+                newValue = Tools.RemoveTemplateParameter(
+                    newValue,
+                    "website");
+            }
+
+            theURL = ArchiveOrgURL.Replace(
+                theURL,
+                string.Empty);
+
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                "url",
+                theURL);
+        }
 
         return newValue;
     }
