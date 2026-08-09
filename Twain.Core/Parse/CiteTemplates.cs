@@ -917,16 +917,7 @@ public partial class Parsers
             }
         }
 
-        // format ISSN: 1234-5678 with hyphen
-        if (ISSN.Length > 0)
-        {
-            string newISSN = Regex.Replace(ISSN, @"^([0-9]{4}) *[- –]* *([0-9]{3}[0-9X])$", "$1-$2");
-
-            if (!newISSN.Equals(ISSN))
-                newValue = Tools.UpdateTemplateParameterValue(newValue, paramsFound.FirstOrDefault(p => p.Key == "ISSN" || p.Key == "issn").Key, newISSN);
-        }
-
-        newValue = NormalizeCitationIsbn(newValue, paramsFound, ISBN);
+        newValue = NormalizeCitationIssn(newValue, paramsFound, ISSN);
 
         // origyear --> year when no year/date
         if (origyear.Length == 4 && TheYear.Length == 0 && TheDate.Length == 0)
@@ -1000,6 +991,48 @@ public partial class Parsers
                     "isbn",
                     ISBN);
             }
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
+    /// Normalizes the formatting of an ISSN citation parameter.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="ISSN">
+    /// The ISSN value to normalize.
+    /// </param>
+    /// <returns>
+    /// The citation template text with the normalized ISSN value.
+    /// </returns>
+    private static string NormalizeCitationIssn(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        string ISSN)
+    {
+        if (ISSN.Length == 0)
+        {
+            return newValue;
+        }
+
+        string newISSN = Regex.Replace(
+            ISSN,
+            @"^([0-9]{4}) *[- –]* *([0-9]{3}[0-9X])$",
+            "$1-$2");
+
+        if (!newISSN.Equals(ISSN))
+        {
+            newValue = Tools.UpdateTemplateParameterValue(
+                newValue,
+                paramsFound.FirstOrDefault(
+                    p => p.Key == "ISSN" || p.Key == "issn").Key,
+                newISSN);
         }
 
         return newValue;
