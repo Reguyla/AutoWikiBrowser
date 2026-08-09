@@ -352,109 +352,95 @@ public partial class Parsers
         return string.Empty;
     }
 
-    // Covered by: UtilityFunctionTests.ChangeToDefaultSort()
-    /// <summary>
-    /// Changes an article to use defaultsort when all categories use the same sort field / cleans diacritics from defaultsort/categories
-    /// Skips pages using &lt;noinclude&gt;, &lt;includeonly&gt; etc.
-    /// </summary>
-    /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">Title of the article</param>
-    /// <param name="noChange">If there is no change (True if no Change)</param>
-    /// <param name="restrictDefaultsortChanges">Prevent insertion of a new {{DEFAULTSORT}} as AWB may not always be right for articles about people</param>
-    /// <returns>The article text possibly using defaultsort.</returns>
-    public static string ChangeToDefaultSort(string articleText, string articleTitle, out bool noChange, bool restrictDefaultsortChanges)
+// Covered by: UtilityFunctionTests.ChangeToDefaultSort()
+
+/// <summary>
+/// Normalizes, inserts, updates, or removes <c>{{DEFAULTSORT}}</c> markup based
+/// on the article's category sort keys and project-specific rules.
+/// </summary>
+/// <param name="articleText">
+/// The wiki text of the article.
+/// </param>
+/// <param name="articleTitle">
+/// The title of the article.
+/// </param>
+/// <param name="noChange">
+/// When this method returns, contains <see langword="true"/> if the article text
+/// was unchanged; otherwise, <see langword="false"/>.
+/// </param>
+/// <param name="restrictDefaultsortChanges">
+/// <see langword="true"/> to prevent insertion or modification of
+/// <c>{{DEFAULTSORT}}</c> where AWB-generated values may be inappropriate,
+/// particularly for articles about people; otherwise, <see langword="false"/>.
+/// </param>
+/// <returns>
+/// The article text after DEFAULTSORT and category sort-key processing.
+/// </returns>
+/// <remarks>
+/// This routine normalizes duplicate and existing DEFAULTSORT declarations,
+/// cleans category formatting, derives DEFAULTSORT values from category sort
+/// keys when appropriate, removes redundant explicit category sort keys, and
+/// abandons changes on pages containing include/noinclude programming elements.
+/// </remarks>
+public static string ChangeToDefaultSort(
+    string articleText,
+    string articleTitle,
+    out bool noChange,
+    bool restrictDefaultsortChanges)
     {
-        string originalArticleText = articleText;
+        string originalArticleText =
+            articleText;
+
         noChange = true;
 
-        // count categories
-        int matches;
+        MatchCollection defaultSortMatches =
+            WikiRegexes.Defaultsort.Matches(articleText);
 
-        MatchCollection ds = WikiRegexes.Defaultsort.Matches(articleText);
-        if (ds.Count > 1 || (ds.Count == 1 && !ds[0].Value.ToUpper().Contains("DEFAULTSORT")))
+        if (!TryNormalizeDuplicateDefaultSorts(
+                ref articleText,
+                ref defaultSortMatches))
         {
-            bool allsame2 = false;
-            string lastvalue = string.Empty;
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
-            // if all the defaultsorts are the same just remove all but one
-            foreach (Match m in ds)
-            {
-                if (lastvalue.Length == 0)
-                {
-                    lastvalue = m.Value;
-                    allsame2 = true;
-                }
-                else
-                    allsame2 = (m.Value == lastvalue);
-            }
-            if (allsame2)
-                articleText = WikiRegexes.Defaultsort.Replace(articleText, "", ds.Count - 1);
-            else
-                return articleText;
+            return articleText;
         }
 
-        // Performance: only apply replace and refresh if defaultsort would change
-        if (ds.Count > 0 && Variables.LangCode.Equals("en") && !DefaultsortME(ds[0]).Equals(ds[0].Value))
-        {
-            articleText = WikiRegexes.Defaultsort.Replace(articleText, DefaultsortME);
+        NormalizeExistingDefaultSort(
+            ref articleText,
+            ref defaultSortMatches);
 
-            // match again, after normalization
-            ds = WikiRegexes.Defaultsort.Matches(articleText);
-        }
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_9#AWB_didn.27t_fix_special_characters_in_a_pipe
-        articleText = FixCategories(articleText);
+        articleText =
+            FixCategories(articleText);
 
         if (!restrictDefaultsortChanges)
         {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_12#defaultsort_adding_namespace
-            articleTitle = Tools.RemoveNamespaceString(articleTitle);
+            articleTitle =
+                Tools.RemoveNamespaceString(articleTitle);
 
-            // AWB's generation of its own sortkey may be incorrect for people, provide option not to insert in this situation
-            if (ds.Count == 0)
+            if (defaultSortMatches.Count == 0)
             {
-                string sort = GetCategorySort(articleText, articleTitle, out matches);
-                // So that this does not get confused by sort keys of "*", " ", etc.
-                // MW bug: DEFAULTSORT does not treat leading spaces the same way as categories do
-                // if all existing categories use a suitable sortkey, insert that rather than generating a new one
-                // GetCatSortkey just returns articleTitle if cats do not have sortkey, so do not accept this here
-                if (sort.Length > 4 && matches > 1 && !sort.StartsWith(" "))
-                {
-                    // remove keys from categories
-                    articleText = WikiRegexes.Category.Replace(articleText, "[["
-                                                               + Variables.Namespaces[Namespace.Category] + "$1]]");
-
-                    // set the defaultsort to the existing unique category sort value
-                    // do not add a defaultsort if cat sort was the same as article title, now not case sensitive
-                    if ((sort != articleTitle && Tools.FixupDefaultSort(sort).ToLower() != articleTitle.ToLower())
-                        || (!Variables.UnicodeCategoryCollation && Tools.RemoveDiacritics(sort) != sort && !IsArticleAboutAPerson(articleText, articleTitle, false)))
-                        articleText += Tools.Newline("{{DEFAULTSORT:") + Tools.FixupDefaultSort(sort) + "}}";
-                }
-
-                // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Add_defaultsort_to_pages_with_special_letters_and_no_defaultsort
-                // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Human_DEFAULTSORT
-                articleText = DefaultsortTitlesWithDiacritics(articleText, articleTitle, matches, IsArticleAboutAPerson(articleText, articleTitle, true));
+                articleText =
+                    InsertDefaultSort(
+                        articleText,
+                        articleTitle);
             }
-            else if (ds.Count == 1) // already has DEFAULTSORT
+            else if (defaultSortMatches.Count == 1)
             {
-                string s = Tools.FixupDefaultSort(ds[0].Groups[1].Value.TrimStart('|'), (HumanDefaultSortCleanupRequired(ds[0]) && IsArticleAboutAPerson(articleText, articleTitle, true))).Trim();
-
-                // do not change DEFAULTSORT just for casing
-                if (!s.ToLower().Equals(ds[0].Groups[1].Value.ToLower()) && s.Length > 0)
-                    articleText = articleText.Replace(ds[0].Value, "{{DEFAULTSORT:" + s + "}}");
-
-                // get key value again in case replace above changed it
-                ds = WikiRegexes.Defaultsort.Matches(articleText);
-                string defaultsortKey = ds[0].Groups["key"].Value;
-
-                // Removes any explicit keys that are case insensitively the same as the default sort (To help tidy up on pages that already have defaultsort)
-                articleText = ExplicitCategorySortkeys(articleText, defaultsortKey);
+                articleText =
+                    UpdateExistingDefaultSort(
+                        articleText,
+                        articleTitle,
+                        ref defaultSortMatches);
             }
         }
 
-        noChange = originalArticleText.Equals(articleText);
+        noChange =
+            originalArticleText.Equals(articleText);
 
-        // Performance: run relatively slow NoIncludeIncludeOnlyProgrammingElement check only if needed
-        if (!noChange && NoIncludeIncludeOnlyProgrammingElement(originalArticleText))
+        // Performance: run relatively slow
+        // NoIncludeIncludeOnlyProgrammingElement check only if needed.
+        if (!noChange &&
+            NoIncludeIncludeOnlyProgrammingElement(
+                originalArticleText))
         {
             noChange = true;
             return originalArticleText;
@@ -462,6 +448,264 @@ public partial class Parsers
 
         return articleText;
     }
+
+    /// <summary>
+    /// Normalizes duplicate DEFAULTSORT declarations when they all contain the
+    /// same value.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text being processed.
+    /// </param>
+    /// <param name="defaultSortMatches">
+    /// The DEFAULTSORT matches found in <paramref name="articleText"/>. The
+    /// collection may be refreshed when normalization changes the article text.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when conflicting DEFAULTSORT declarations are found.
+    /// </returns>
+    /// <remarks>
+    /// Multiple matching DEFAULTSORT declarations are reduced to one. Conflicting
+    /// declarations are left unchanged because this routine cannot safely determine
+    /// which value should be retained.
+    /// </remarks>
+    private static bool TryNormalizeDuplicateDefaultSorts(
+        ref string articleText,
+        ref MatchCollection defaultSortMatches)
+    {
+        if (defaultSortMatches.Count <= 1 &&
+            (defaultSortMatches.Count == 0 ||
+             defaultSortMatches[0].Value
+                 .ToUpper()
+                 .Contains("DEFAULTSORT")))
+        {
+            return true;
+        }
+
+        bool allDefaultSortsMatch =
+            false;
+
+        string previousDefaultSort =
+            string.Empty;
+
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
+        foreach (Match defaultSortMatch in defaultSortMatches)
+        {
+            if (previousDefaultSort.Length == 0)
+            {
+                previousDefaultSort =
+                    defaultSortMatch.Value;
+
+                allDefaultSortsMatch = true;
+            }
+            else
+            {
+                allDefaultSortsMatch =
+                    defaultSortMatch.Value ==
+                    previousDefaultSort;
+            }
+        }
+
+        if (!allDefaultSortsMatch)
+            return false;
+
+        articleText =
+            WikiRegexes.Defaultsort.Replace(
+                articleText,
+                "",
+                defaultSortMatches.Count - 1);
+
+        defaultSortMatches =
+            WikiRegexes.Defaultsort.Matches(
+                articleText);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Normalizes an existing English-language DEFAULTSORT declaration when the
+    /// normalized value differs from the current markup.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text being processed.
+    /// </param>
+    /// <param name="defaultSortMatches">
+    /// The DEFAULTSORT matches found in the current article text. The collection is
+    /// refreshed when the text is modified.
+    /// </param>
+    private static void NormalizeExistingDefaultSort(
+        ref string articleText,
+        ref MatchCollection defaultSortMatches)
+    {
+        if (defaultSortMatches.Count == 0 ||
+            !Variables.LangCode.Equals("en") ||
+            DefaultsortME(defaultSortMatches[0])
+                .Equals(defaultSortMatches[0].Value))
+        {
+            return;
+        }
+
+        articleText =
+            WikiRegexes.Defaultsort.Replace(
+                articleText,
+                DefaultsortME);
+
+        // Match again after normalization because the article text changed.
+        defaultSortMatches =
+            WikiRegexes.Defaultsort.Matches(
+                articleText);
+    }
+
+    /// <summary>
+    /// Attempts to create a DEFAULTSORT value for an article that does not already
+    /// contain one.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text being processed.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The article title with any namespace removed.
+    /// </param>
+    /// <returns>
+    /// The article text after any appropriate DEFAULTSORT insertion or category
+    /// sort-key cleanup.
+    /// </returns>
+    private static string InsertDefaultSort(
+        string articleText,
+        string articleTitle)
+    {
+        string categorySortKey =
+            GetCategorySort(
+                articleText,
+                articleTitle,
+                out int matches);
+
+        // So that this does not get confused by sort keys of "*", " ", etc.
+        //
+        // MediaWiki bug: DEFAULTSORT does not treat leading spaces the same way as
+        // categories do.
+        //
+        // If all existing categories use a suitable sort key, insert that rather
+        // than generating a new one. GetCategorySort returns articleTitle when
+        // categories do not have a sort key, so do not accept that result here.
+        if (categorySortKey.Length > 4 &&
+            matches > 1 &&
+            !categorySortKey.StartsWith(" "))
+        {
+            articleText =
+                WikiRegexes.Category.Replace(
+                    articleText,
+                    "[[" +
+                    Variables.Namespaces[Namespace.Category] +
+                    "$1]]");
+
+            // Set DEFAULTSORT to the existing unique category sort value.
+            // Do not add a DEFAULTSORT when the category sort is effectively the
+            // same as the article title.
+            if ((categorySortKey != articleTitle &&
+                 Tools.FixupDefaultSort(categorySortKey)
+                     .ToLower() !=
+                 articleTitle.ToLower()) ||
+                (!Variables.UnicodeCategoryCollation &&
+                 Tools.RemoveDiacritics(categorySortKey) !=
+                 categorySortKey &&
+                 !IsArticleAboutAPerson(
+                     articleText,
+                     articleTitle,
+                     false)))
+            {
+                articleText +=
+                    Tools.Newline("{{DEFAULTSORT:") +
+                    Tools.FixupDefaultSort(
+                        categorySortKey) +
+                    "}}";
+            }
+        }
+
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Add_defaultsort_to_pages_with_special_letters_and_no_defaultsort
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_11#Human_DEFAULTSORT
+        return DefaultsortTitlesWithDiacritics(
+            articleText,
+            articleTitle,
+            matches,
+            IsArticleAboutAPerson(
+                articleText,
+                articleTitle,
+                true));
+    }
+
+    /// <summary>
+    /// Normalizes an existing DEFAULTSORT declaration and removes redundant
+    /// category sort keys.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text being processed.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The article title with any namespace removed.
+    /// </param>
+    /// <param name="defaultSortMatches">
+    /// The DEFAULTSORT matches found in the current article text. The collection is
+    /// refreshed after any DEFAULTSORT replacement.
+    /// </param>
+    /// <returns>
+    /// The article text after DEFAULTSORT normalization and redundant category
+    /// sort-key removal.
+    /// </returns>
+    private static string UpdateExistingDefaultSort(
+        string articleText,
+        string articleTitle,
+        ref MatchCollection defaultSortMatches)
+    {
+        string normalizedDefaultSort =
+            Tools.FixupDefaultSort(
+                    defaultSortMatches[0]
+                        .Groups[1]
+                        .Value
+                        .TrimStart('|'),
+                    HumanDefaultSortCleanupRequired(
+                        defaultSortMatches[0]) &&
+                    IsArticleAboutAPerson(
+                        articleText,
+                        articleTitle,
+                        true))
+                .Trim();
+
+        // Do not change DEFAULTSORT solely because of casing.
+        if (!normalizedDefaultSort
+                .ToLower()
+                .Equals(
+                    defaultSortMatches[0]
+                        .Groups[1]
+                        .Value
+                        .ToLower()) &&
+            normalizedDefaultSort.Length > 0)
+        {
+            articleText =
+                articleText.Replace(
+                    defaultSortMatches[0].Value,
+                    "{{DEFAULTSORT:" +
+                    normalizedDefaultSort +
+                    "}}");
+        }
+
+        // Get the key value again in case the replacement above changed it.
+        defaultSortMatches =
+            WikiRegexes.Defaultsort.Matches(
+                articleText);
+
+        string defaultSortKey =
+            defaultSortMatches[0]
+                .Groups["key"]
+                .Value;
+
+        // Remove explicit category sort keys that are case-insensitively equivalent
+        // to DEFAULTSORT.
+        return ExplicitCategorySortkeys(
+            articleText,
+            defaultSortKey);
+    }
+
 
     /// <summary>
     /// Returns whether human name defaultsort cleanup required: contains apostrophe or unspaced comma
