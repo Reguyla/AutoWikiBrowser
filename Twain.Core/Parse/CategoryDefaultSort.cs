@@ -1004,66 +1004,13 @@ public static string ChangeToDefaultSort(
                 categoryPrefix,
                 sort);
 
-        // scrape any infobox
-        string yearFromInfoBox =
-            string.Empty;
-
-        string fromInfoBox =
-            GetInfoBoxFieldValue(
-                WikiRegexes.DateBirthAndAge.Replace(
-                    zerothSection,
-                    ""),
-                WikiRegexes.InfoBoxDODFields);
-
-        if (fromInfoBox.Length > 0 &&
-            !UncertainWordings.IsMatch(fromInfoBox))
-        {
-            yearFromInfoBox =
-                YearPossiblyWithBC
-                    .Match(fromInfoBox)
-                    .Value;
-        }
-
-        string checkText =
-            Namespace.IsMainSpace(articleTitle)
-                ? articleText
-                : articleText.Replace(
-                    "[[:",
-                    "[[");
-
-        if (!WikiRegexes.DeathsOrLivingCategory.IsMatch(
-                RemoveCategory(
-                    YearofDeathMissing,
-                    checkText)) &&
-            (PersonYearOfDeath.IsMatch(zerothSection) ||
-             WikiRegexes.DeathDate.IsMatch(zerothSection) ||
-             ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox)))
-        {
-            // look for '{{death date...' template first
-            yearstring = WikiRegexes.DeathDate.Match(articleText).Groups[1].Value;
-
-            // secondly use yearFromInfoBox
-            if (ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox))
-                yearstring = yearFromInfoBox;
-
-            // look for '(died xxxx)'
-            if (string.IsNullOrEmpty(yearstring))
-            {
-                Match m = PersonYearOfDeath.Match(zerothSection);
-
-                // check died info after any untemplated born info
-                if (m.Index >= PersonYearOfBirth.Match(zerothSection).Index || !PersonYearOfBirth.IsMatch(zerothSection))
-                {
-                    if (!UncertainWordings.IsMatch(m.Value) && !m.Value.Contains(@"?"))
-                        yearstring = m.Groups[1].Value;
-                }
-            }
-
-            // validate a YYYY date is not in the future
-            if (!string.IsNullOrEmpty(yearstring) && yearstring.Length > 2
-                && (!YearOnly.IsMatch(yearstring) || Convert.ToInt32(yearstring) <= DateTime.Now.Year))
-                articleText += categoryPrefix + yearstring + " deaths" + CatEnd(sort);
-        }
+        articleText =
+            AddDeathCategory(
+                articleText,
+                articleTitle,
+                zerothSection,
+                categoryPrefix,
+                sort);
 
         zerothSection = NotCircaTemplate.Replace(zerothSection, " ");
         // birth and death combined
@@ -1428,6 +1375,124 @@ public static string ChangeToDefaultSort(
 
         return articleText;
     }
+
+    /// <summary>
+    /// Adds a death-year category when a suitable death year can be inferred from
+    /// the article lead or infobox.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </param>
+    /// <param name="categoryPrefix">
+    /// The category-link prefix to use when adding the death category.
+    /// </param>
+    /// <param name="sort">
+    /// The category sort key to append to the new category.
+    /// </param>
+    /// <returns>
+    /// The article text after any applicable death category has been added.
+    /// </returns>
+    private static string AddDeathCategory(
+        string articleText,
+        string articleTitle,
+        string zerothSection,
+        string categoryPrefix,
+        string sort)
+    {
+        string yearstring;
+        string yearFromInfoBox =
+            string.Empty;
+
+        // scrape any infobox
+        string fromInfoBox =
+            GetInfoBoxFieldValue(
+                WikiRegexes.DateBirthAndAge.Replace(
+                    zerothSection,
+                    ""),
+                WikiRegexes.InfoBoxDODFields);
+
+        if (fromInfoBox.Length > 0 &&
+            !UncertainWordings.IsMatch(fromInfoBox))
+        {
+            yearFromInfoBox =
+                YearPossiblyWithBC
+                    .Match(fromInfoBox)
+                    .Value;
+        }
+
+        string checkText =
+            Namespace.IsMainSpace(articleTitle)
+                ? articleText
+                : articleText.Replace(
+                    "[[:",
+                    "[[");
+
+        if (!WikiRegexes.DeathsOrLivingCategory.IsMatch(
+                RemoveCategory(
+                    YearofDeathMissing,
+                    checkText)) &&
+            (PersonYearOfDeath.IsMatch(zerothSection) ||
+             WikiRegexes.DeathDate.IsMatch(zerothSection) ||
+             ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox)))
+        {
+            // look for '{{death date...' template first
+            yearstring =
+                WikiRegexes.DeathDate
+                    .Match(articleText)
+                    .Groups[1]
+                    .Value;
+
+            // secondly use yearFromInfoBox
+            if (ThreeOrFourDigitNumber.IsMatch(yearFromInfoBox))
+            {
+                yearstring =
+                    yearFromInfoBox;
+            }
+
+            // look for '(died xxxx)'
+            if (string.IsNullOrEmpty(yearstring))
+            {
+                Match m =
+                    PersonYearOfDeath.Match(
+                        zerothSection);
+
+                // check died info after any untemplated born info
+                if (m.Index >=
+                        PersonYearOfBirth.Match(zerothSection).Index ||
+                    !PersonYearOfBirth.IsMatch(zerothSection))
+                {
+                    if (!UncertainWordings.IsMatch(m.Value) &&
+                        !m.Value.Contains(@"?"))
+                    {
+                        yearstring =
+                            m.Groups[1].Value;
+                    }
+                }
+            }
+
+            // validate a YYYY date is not in the future
+            if (!string.IsNullOrEmpty(yearstring) &&
+                yearstring.Length > 2 &&
+                (!YearOnly.IsMatch(yearstring) ||
+                 Convert.ToInt32(yearstring) <= DateTime.Now.Year))
+            {
+                articleText +=
+                    categoryPrefix +
+                    yearstring +
+                    " deaths" +
+                    CatEnd(sort);
+            }
+        }
+
+        return articleText;
+    }
+
     private static string CatEnd(string sort)
     {
         return ((sort.Length > 3) ? "|" + sort : "") + "]]";
