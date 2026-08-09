@@ -856,19 +856,53 @@ public partial class Parsers
     /// digits, en dashes within ISBN numbers, redundant ISBN prefixes in infobox
     /// parameters, and ISBNs incorrectly included at the end of external links.
     ///
-    /// TODO: Consider extracting the individual ISBN cleanup operations into
-    /// focused helpers during a later refactoring pass once their behavior and
-    /// test coverage have been reviewed.
-    ///
     /// TODO: Consider replacing repeated literal ISBN marker strings with named
     /// constants if this logic continues to grow.
     ///
-    /// TODO: Consider expanding tests around idempotence and infobox parameter
-    /// rewriting before any structural refactoring.
+    /// TODO: Consider expanding tests around idempotence, infobox parameter
+    /// rewriting, and external-link cleanup before any further structural
+    /// refactoring.
     /// </remarks>
     private static string FixSyntaxISBN(string articleText, List<string> isbnMarkers)
     {
         // CHECKWIKI error 69.
+        articleText = NormalizeIsbnLabelsAndLinks(articleText, isbnMarkers);
+
+        // Capitalize the ISBN-10 check digit.
+        articleText = ISBNx.Replace(articleText, "$1X");
+
+        // Replace en dashes with hyphens within ISBN numbers.
+        articleText = ISBNEndash.Replace(
+            articleText,
+            match => "ISBN " + match.Groups[1].Value.Replace("–", "-"));
+
+        articleText = RemoveRedundantInfoboxIsbnPrefix(articleText);
+        articleText = MoveTrailingIsbnOutsideExternalLinks(articleText);
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes malformed ISBN labels and legacy ISBN wiki-link forms detected
+    /// in article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="isbnMarkers">
+    /// A collection of ISBN-related strings detected during preprocessing and used
+    /// to determine whether specific ISBN cleanup rules should be applied.
+    /// </param>
+    /// <returns>
+    /// The article text with supported ISBN label and link corrections applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing sequencing of the ISBN label cleanup
+    /// regexes, including handling for dashed or colon-delimited ISBN labels and
+    /// legacy linked ISBN marker forms such as [[ISBN]].
+    /// </remarks>
+    private static string NormalizeIsbnLabelsAndLinks(string articleText, List<string> isbnMarkers)
+    {
         bool containsDashedIsbnLabel =
             articleText.Contains("ISBN-", StringComparison.Ordinal) ||
             articleText.Contains("ISBN–", StringComparison.Ordinal);
@@ -905,15 +939,26 @@ public partial class Parsers
             articleText = SyntaxRegexISBN4.Replace(articleText, "ISBN $1");
         }
 
-        // Capitalize the ISBN-10 check digit.
-        articleText = ISBNx.Replace(articleText, "$1X");
+        return articleText;
+    }
 
-        // Replace en dashes with hyphens within ISBN numbers.
-        articleText = ISBNEndash.Replace(
-            articleText,
-            match => "ISBN " + match.Groups[1].Value.Replace("–", "-"));
-
-        // Remove a redundant ISBN prefix from isbn= parameters in infoboxes.
+    /// <summary>
+    /// Removes a redundant ISBN prefix from isbn parameters in infobox templates.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <returns>
+    /// The article text with redundant ISBN prefixes removed from matching infobox
+    /// isbn parameters.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing infobox-only behavior by scanning
+    /// templates matched by <c>WikiRegexes.InfoBox</c> and stripping a leading
+    /// ISBN label from the <c>isbn</c> parameter value when present.
+    /// </remarks>
+    private static string RemoveRedundantInfoboxIsbnPrefix(string articleText)
+    {
         if (TemplateExists(GetAllTemplates(articleText), WikiRegexes.InfoBox))
         {
             foreach (string infoboxTemplate in GetAllTemplateDetail(articleText)
@@ -934,8 +979,26 @@ public partial class Parsers
             }
         }
 
-        // Move an ISBN outside an external link when it appears at the end of
-        // the link's display text.
+        return articleText;
+    }
+
+    /// <summary>
+    /// Moves a trailing ISBN outside an external link when it appears at the end
+    /// of the link display text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <returns>
+    /// The article text with supported trailing external-link ISBN cleanup
+    /// applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing repeated replacement behavior until no
+    /// additional trailing ISBN matches remain.
+    /// </remarks>
+    private static string MoveTrailingIsbnOutsideExternalLinks(string articleText)
+    {
         while (ExternalLinkEndsISBN.IsMatch(articleText))
         {
             articleText = ExternalLinkEndsISBN.Replace(articleText, "$1] $2");
@@ -943,6 +1006,7 @@ public partial class Parsers
 
         return articleText;
     }
+
 
 
     /// <summary>
