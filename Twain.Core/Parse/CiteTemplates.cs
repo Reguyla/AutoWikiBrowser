@@ -844,6 +844,63 @@ public partial class Parsers
     }
 
     /// <summary>
+    /// Removes leading zeros from citation day values and refreshes the affected
+    /// date parameter values after normalization.
+    /// </summary>
+    /// <param name="newValue">
+    /// The citation template text being processed.
+    /// </param>
+    /// <param name="paramsFound">
+    /// The citation parameters found in the template.
+    /// </param>
+    /// <param name="TheDate">
+    /// The citation date value. Updated when date normalization changes the template.
+    /// </param>
+    /// <param name="accessdate">
+    /// The citation access-date value. Updated when date normalization changes the template.
+    /// </param>
+    /// <returns>
+    /// The citation template text after removing supported leading zeros from dates.
+    /// </returns>
+    private static string NormalizeCitationDateLeadingZeros(
+        string newValue,
+        Dictionary<string, string> paramsFound,
+        ref string TheDate,
+        ref string accessdate)
+    {
+        // remove leading zero in day of month
+        if (paramsFound.Any(
+                p => p.Key.Contains("date") &&
+                     Regex.IsMatch(p.Value, @"\b0[1-9]")))
+        {
+            newValue = DateLeadingZero.Replace(
+                newValue,
+                @"$1$2$3$4$5");
+
+            newValue = DateLeadingZero.Replace(
+                newValue,
+                @"$1$2$3$4$5");
+
+            TheDate = Tools.GetTemplateParameterValue(
+                newValue,
+                "date");
+
+            accessdate = Tools.GetTemplateParameterValue(
+                newValue,
+                "accessdate");
+
+            if (accessdate.Length == 0)
+            {
+                accessdate = Tools.GetTemplateParameterValue(
+                    newValue,
+                    "access-date");
+            }
+        }
+
+        return newValue;
+    }
+
+    /// <summary>
     /// Normalizes legacy access-date components and removes a redundant
     /// <c>accessyear</c> parameter when appropriate.
     /// </summary>
