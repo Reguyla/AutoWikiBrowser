@@ -395,19 +395,35 @@ private static readonly Regex RegexHeadingsSeeAlso =
         }
 
         // Get all the custom headings, ignoring normal References, External links, See also sections with correct capitalization
-        List<string> customHeadings = (from Match m in WikiRegexes.Headings.Matches(articleText) where !ReferencesExternalLinksSeeAlsoValid.IsMatch(m.Value) select m.Value.ToLower()).ToList();
+        List<string> customHeadings =
+            (from Match headingMatch in WikiRegexes.Headings.Matches(articleText)
+             where !ReferencesExternalLinksSeeAlsoValid.IsMatch(headingMatch.Value)
+             select headingMatch.Value.ToLower())
+            .ToList();
 
         // Removes level 2 heading (at start of article only) if it matches pagetitle
-        if (customHeadings.Any(h => h.Contains(articleTitle.ToLower())))
-            articleText = Regex.Replace(articleText, @"^\s*(==) *" + Regex.Escape(articleTitle) + @" *\1\r\n", "");
+        if (customHeadings.Any(heading => heading.Contains(articleTitle.ToLower())))
+        {
+            articleText = Regex.Replace(
+                articleText,
+                @"^\s*(==) *" + Regex.Escape(articleTitle) + @" *\1\r\n",
+                "");
+        }
 
-        // Performance: apply fixes to all headings only if a custom heading matches for the bad headings words
-        if (customHeadings.Any(h => BadHeadings.Any(h.Contains)))
+        // Performance: apply fixes to all headings only if a custom heading matches
+        // one of the known normalization trigger words.
+        if (customHeadings.Any(heading => BadHeadings.Any(heading.Contains)))
+        {
             articleText = WikiRegexes.Headings.Replace(articleText, FixHeadingsME);
+        }
 
-        // CHECKWIKI error 8. Add missing = in some headers
-        if (customHeadings.Any(h => Regex.Matches(h, "=").Count == 3))
-            articleText = ReferencesExternalLinksSeeAlsoUnbalancedRight.Replace(articleText, "$1=\r\n");
+        // CHECKWIKI error 8. Add missing = in some headers.
+        if (customHeadings.Any(heading => Regex.Matches(heading, "=").Count == 3))
+        {
+            articleText = ReferencesExternalLinksSeeAlsoUnbalancedRight.Replace(
+                articleText,
+                "$1=\r\n");
+        }
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Section_header_level_.28WikiProject_Check_Wikipedia_.237.29
         // CHECKWIKI error 7
