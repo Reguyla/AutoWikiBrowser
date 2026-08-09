@@ -630,53 +630,100 @@ public partial class Parsers
     private static readonly Regex DeathDate = Tools.NestedTemplateRegex(new[] { "death date", "death-date", "dda", "death date and age", "deathdateandage", "deathdate" }, true);
 
     // Covered by: FormattingTests.TestMdashes()
+
     /// <summary>
-    /// Replaces hyphens and em-dashes with en-dashes, per [[WP:DASH]]
+    /// Normalizes dashes, ranges, ellipses, and minus signs according to supported
+    /// Wikipedia formatting rules.
     /// </summary>
+    /// <remarks>
+    /// Converts applicable hyphens and em dashes to en dashes in numeric and other
+    /// recognized ranges, synchronizes dash characters with the article title,
+    /// converts qualifying double hyphens to en or em dashes, normalizes Unicode
+    /// ellipses on English Wikipedia, and replaces applicable dash characters with
+    /// the Unicode minus sign.
+    /// </remarks>
     /// <param name="articleText">The wiki text of the article.</param>
-    /// <param name="articleTitle">The article's title</param>
-    /// <returns>The modified article text.</returns>
+    /// <param name="articleTitle">The title of the article being processed.</param>
+    /// <returns>The article text after applicable dash and symbol normalization.</returns>
     public string Mdashes(string articleText, string articleTitle)
     {
         const int backlength = 12;
-        // performance: faster to pick out end of ranges and substring than run each regex in turn
-        List<string> dashed = (from Match m in Regex.Matches(articleText, @"(?:—|-|&#8212;|&mdash;)+\s*[0-9].{0,12}")
-                               select (m.Index > backlength ? articleText.Substring(m.Index - backlength, m.Length + backlength) : articleText.Substring(0, m.Length + m.Index))).ToList();
+
+        // Performance: identify likely range fragments first so the more specific
+        // regular expressions only need to be tested against those fragments.
+        List<string> dashed =
+            (from Match m in Regex.Matches(
+                 articleText,
+                 @"(?:—|-|&#8212;|&mdash;)+\s*[0-9].{0,12}")
+             select m.Index > backlength
+                 ? articleText.Substring(
+                     m.Index - backlength,
+                     m.Length + backlength)
+                 : articleText.Substring(
+                     0,
+                     m.Length + m.Index))
+            .ToList();
 
         dashed = Tools.DeduplicateList(dashed);
 
         // replace hyphen with dash and convert Pp. to pp.
         if (dashed.Any(s => PageRangeIncorrectMdash.IsMatch(s)))
-            articleText = PageRangeIncorrectMdash.Replace(articleText, m =>
-            {
-                string pagespart = m.Groups[1].Value;
-                if (pagespart.Contains(@"Pp"))
-                    pagespart = pagespart.ToLower();
+        {
+            articleText = PageRangeIncorrectMdash.Replace(
+                articleText,
+                m =>
+                {
+                    string pagespart = m.Groups[1].Value;
 
-                return pagespart + m.Groups[2].Value + @"–" + m.Groups[3].Value;
-            });
+                    if (pagespart.Contains(@"Pp"))
+                    {
+                        pagespart = pagespart.ToLower();
+                    }
+
+                    return pagespart +
+                           m.Groups[2].Value +
+                           @"–" +
+                           m.Groups[3].Value;
+                });
+        }
 
         if (dashed.Any(s => UnitTimeRangeIncorrectMdash.IsMatch(s)))
-            articleText = UnitTimeRangeIncorrectMdash.Replace(articleText, @"$1–$2$3$4");
+        {
+            articleText =
+                UnitTimeRangeIncorrectMdash.Replace(
+                    articleText,
+                    @"$1–$2$3$4");
+        }
 
         if (dashed.Any(s => DollarAmountIncorrectMdash.IsMatch(s)))
-            articleText = DollarAmountIncorrectMdash.Replace(articleText, @"$1–$2");
+        {
+            articleText =
+                DollarAmountIncorrectMdash.Replace(
+                    articleText,
+                    @"$1–$2");
+        }
 
         if (dashed.Any(s => AMPMIncorrectMdash.IsMatch(s)))
-            articleText = AMPMIncorrectMdash.Replace(articleText, @"$1–$3");
+        {
+            articleText =
+                AMPMIncorrectMdash.Replace(
+                    articleText,
+                    @"$1–$3");
+        }
 
         if (dashed.Any(s => AgeIncorrectMdash.IsMatch(s)))
-            articleText = AgeIncorrectMdash.Replace(articleText, @"$1 $2–$3");
+        {
+            articleText =
+                AgeIncorrectMdash.Replace(
+                    articleText,
+                    @"$1 $2–$3");
+        }
 
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#Match_en_dashes.2Femdashs_from_titles_with_those_in_the_text
-        // if title has en or em dashes, apply them to strings matching article title but with hyphens
-        if (articleTitle.Contains(@"–") || articleTitle.Contains(@"—"))
-            articleText = Regex.Replace(articleText, Regex.Escape(articleTitle.Replace(@"–", @"-").Replace(@"—", @"-")), articleTitle);
+        // Match dash characters used in the article title.
+        articleText = MatchArticleTitleDashes(articleText, articleTitle);
 
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Change_--_.28two_dashes.29_to_.E2.80.94_.28em_dash.29
-        // convert two dashes to emdash if surrounded by alphanumeric characters, except convert to endash if surrounded by numbers. -- checked for performance
-        if (Namespace.Determine(articleTitle) == Namespace.Mainspace && articleText.Contains("--"))
-            articleText = SentenceClauseIncorrectMdash.Replace(articleText, m => m.Groups[1].Value + ((Regex.IsMatch(m.Groups[1].Value, @"^\d+$") && Regex.IsMatch(m.Groups[2].Value, @"^\d+$")) ? @"–" : @"—") + m.Groups[2].Value);
+        // Convert qualifying double hyphens to the appropriate dash character.
+        articleText = ConvertDoubleHyphens(articleText, articleTitle);
 
         // T337532 MOS:ELLIPSIS replace Unicode ellipsis … with 3 dots
         if (Variables.IsWikipediaEN)
@@ -688,6 +735,77 @@ public partial class Parsers
         // replace hyphen or en-dash or emdash with Unicode minus (&minus;)
         // [[Wikipedia:MOSNUM#Common_mathematical_symbols]]
         return SuperscriptMinus.Replace(articleText, "$1−");
+    }
+
+    /// <summary>
+    /// Replaces hyphenated occurrences of the article title with the title's
+    /// existing en-dash or em-dash spelling.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <param name="articleTitle">The article title containing the preferred dash characters.</param>
+    /// <returns>
+    /// The article text with matching hyphenated title occurrences normalized.
+    /// </returns>
+    private static string MatchArticleTitleDashes(
+        string articleText,
+        string articleTitle)
+    {
+        if (!articleTitle.Contains(@"–") &&
+            !articleTitle.Contains(@"—"))
+        {
+            return articleText;
+        }
+
+        string hyphenatedTitle =
+            articleTitle
+                .Replace(@"–", @"-")
+                .Replace(@"—", @"-");
+
+        return Regex.Replace(
+            articleText,
+            Regex.Escape(hyphenatedTitle),
+            articleTitle);
+    }
+
+    /// <summary>
+    /// Converts qualifying double hyphens to en dashes or em dashes.
+    /// </summary>
+    /// <remarks>
+    /// This conversion is applied only to mainspace articles. Double hyphens
+    /// separating numeric values are converted to en dashes; all other qualifying
+    /// double hyphens are converted to em dashes.
+    /// </remarks>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <returns>
+    /// The article text after applicable double-hyphen conversions have been
+    /// performed.
+    /// </returns>
+    private static string ConvertDoubleHyphens(
+        string articleText,
+        string articleTitle)
+    {
+        // Performance: skip the regex unless the article actually contains
+        // a double hyphen and is in the main namespace.
+        if (Namespace.Determine(articleTitle) != Namespace.Mainspace ||
+            !articleText.Contains("--"))
+        {
+            return articleText;
+        }
+
+        return SentenceClauseIncorrectMdash.Replace(
+            articleText,
+            m =>
+                m.Groups[1].Value +
+                (Regex.IsMatch(m.Groups[1].Value, @"^\d+$") &&
+                 Regex.IsMatch(m.Groups[2].Value, @"^\d+$")
+                    ? @"–"
+                    : @"—") +
+                m.Groups[2].Value);
     }
 
     /// <summary>
