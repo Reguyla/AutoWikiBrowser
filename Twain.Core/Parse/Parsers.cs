@@ -2238,16 +2238,9 @@ public partial class Parsers
             return false;
         }
 
-        Match m2 = IMA.Match(articleText);
-
-        if (m2.Success)
+        if (IsMusicalActRatherThanPerson(articleText))
         {
-            string MABackground =
-                Tools.GetTemplateParameterValue(m2.Value,
-                                                "Background", true);
-
-            if (MABackground.Contains("band") || MABackground.Contains("classical_ensemble") || MABackground.Contains("temporary"))
-                return false;
+            return false;
         }
 
         string zerothSection = Tools.GetZerothSection(articleText);
@@ -2348,6 +2341,30 @@ public partial class Parsers
             NotPersonInfoboxes.IsMatch(articleText) ||
             WikiRegexes.SIAs.IsMatch(articleText) ||
             WikiRegexes.PeopleInfoboxTemplates.Matches(articleText).Count > 1;
+    }
+
+    /// <summary>
+    /// Determines whether an infobox musical-artist template identifies the
+    /// subject as a band, ensemble, or temporary musical act rather than a person.
+    /// </summary>
+    private static bool IsMusicalActRatherThanPerson(string articleText)
+    {
+        Match m2 = IMA.Match(articleText);
+
+        if (!m2.Success)
+        {
+            return false;
+        }
+
+        string MABackground =
+            Tools.GetTemplateParameterValue(
+                m2.Value,
+                "Background",
+                true);
+
+        return MABackground.Contains("band") ||
+               MABackground.Contains("classical_ensemble") ||
+               MABackground.Contains("temporary");
     }
 
     /// <summary>
