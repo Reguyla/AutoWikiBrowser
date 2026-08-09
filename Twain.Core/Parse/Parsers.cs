@@ -1370,72 +1370,145 @@ public partial class Parsers
         new(@"\|([^=\|}}]+)(?:\||}})");
 
     /// <summary>
-    /// Deduplicates multiple maintenance tags. Uses earliest of date parameters, merges all other parameters.
-    /// Does nothing if parameter values other than date parameter are conflicting
+    /// Deduplicates maintenance templates that refer to the same template while
+    /// preserving compatible parameters.
     /// </summary>
-    /// <returns>The revised maintenance tags.</returns>
-    /// <param name="tags">Maintenance tags list</param>
+    /// <remarks>
+    /// Duplicate templates are merged when their parameters can be reconciled.
+    /// When duplicate date parameters differ, the earlier date is retained.
+    /// If conflicting non-date parameters or incompatible positional arguments
+    /// are encountered, the original collection is returned unchanged.
+    /// </remarks>
+    /// <param name="tags">The maintenance template strings to deduplicate.</param>
+    /// <returns>
+    /// A deduplicated list of maintenance templates, or the original list when
+    /// conflicting parameters prevent a safe merge.
+    /// </returns>
     public static List<string> DeduplicateMaintenanceTags(List<string> tags)
     {
-        // Performance: only have work to do if have some duplicate tags
-        if (Tools.DeduplicateList(tags.Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t))).ToList()).Count == tags.Count)
+        // Performance: no further processing is required when every template name
+        // is already unique.
+        List<string> templateNames =
+            tags
+                .Select(t => Tools.TurnFirstToLower(Tools.GetTemplateName(t)))
+                .ToList();
+
+        if (Tools.DeduplicateList(templateNames).Count == tags.Count)
+        {
             return tags;
+        }
 
         List<string> newtags = new();
         List<string> originalTags = tags;
 
-        // if any tag has unnamed param as first argument, sort tags with the longest part before first = to be first, so we retain the unnamed param
+        // If any template has an unnamed first argument, process templates with the
+        // longest content before the first '=' first so that argument is retained.
         if (tags.Any(t => TemplateArg.IsMatch(t)))
-            tags = tags.OrderByDescending(s => (s.Contains("=") ? s.Substring(0, s.IndexOf("=", StringComparison.Ordinal)).Length : s.Length)).ToList();
+        {
+            tags =
+                tags
+                    .OrderByDescending(
+                        s => s.Contains("=")
+                            ? s.Substring(
+                                0,
+                                s.IndexOf("=", StringComparison.Ordinal)).Length
+                            : s.Length)
+                    .ToList();
+        }
 
         foreach (string t in tags)
         {
-            string existingTag = newtags.FirstOrDefault(nt => Tools.TurnFirstToLower(Tools.GetTemplateName(nt)) == Tools.TurnFirstToLower(Tools.GetTemplateName(t)));
+            string templateName =
+                Tools.TurnFirstToLower(
+                    Tools.GetTemplateName(t));
 
-            if (existingTag != null) // so list already contains tag for same template
+            string existingTag =
+                newtags.FirstOrDefault(
+                    nt =>
+                        Tools.TurnFirstToLower(
+                            Tools.GetTemplateName(nt)) == templateName);
+
+            if (existingTag != null)
             {
-                // check for tag having conflicting first argument
-                string eParam = TemplateArg.Match(existingTag).Groups[1].Value.Trim();
-                string tParam = TemplateArg.Match(t).Groups[1].Value.Trim();
+                // Check for conflicting first positional arguments.
+                string eParam =
+                    TemplateArg
+                        .Match(existingTag)
+                        .Groups[1]
+                        .Value
+                        .Trim();
 
-                if (tParam.Length > 0 && eParam.Length > 0 && eParam != tParam)
+                string tParam =
+                    TemplateArg
+                        .Match(t)
+                        .Groups[1]
+                        .Value
+                        .Trim();
+
+                if (tParam.Length > 0 &&
+                    eParam.Length > 0 &&
+                    eParam != tParam)
+                {
                     return originalTags;
+                }
 
                 string existingTagOriginal = existingTag;
-                Dictionary<string, string> tparams = Tools.GetTemplateParameterValues(t);
+
+                Dictionary<string, string> tparams =
+                    Tools.GetTemplateParameterValues(t);
 
                 foreach (KeyValuePair<string, string> kvp in tparams)
                 {
                     if (kvp.Value.Length == 0)
+                    {
                         continue;
+                    }
 
-                    string existingParamValue = Tools.GetTemplateParameterValue(existingTag, kvp.Key);
+                    string existingParamValue =
+                        Tools.GetTemplateParameterValue(
+                            existingTag,
+                            kvp.Key);
 
-                    // positional argument and non-date named parameter, we cannot handle these, return
+                    // Positional arguments and conflicting non-date named
+                    // parameters cannot be safely merged.
                     if (eParam.Length > 0 && kvp.Key != "date")
+                    {
                         return originalTags;
+                    }
 
                     if (existingParamValue.Length == 0)
-                        existingTag = Tools.SetTemplateParameterValue(existingTag, kvp.Key, kvp.Value);
+                    {
+                        existingTag =
+                            Tools.SetTemplateParameterValue(
+                                existingTag,
+                                kvp.Key,
+                                kvp.Value);
+                    }
                     else if (!existingParamValue.Equals(kvp.Value))
                     {
-                        // conflicting parameter values
-                        // if param not date cannot handle, return
+                        // Conflicting non-date parameter values cannot be safely
+                        // reconciled.
                         if (kvp.Key != "date")
-                            return originalTags;
-
-                        // if param is date, take earlier date
-                        try
                         {
-                            DateTime existingDate = Convert.ToDateTime("1 " + existingParamValue);
-                            DateTime tagDate = Convert.ToDateTime("1 " + kvp.Value);
-
-                            if (tagDate < existingDate)
-                                existingTag = Tools.SetTemplateParameterValue(existingTag, kvp.Key, kvp.Value);
+                            return originalTags;
                         }
-                        catch
+
+                        // For conflicting date values, retain the earlier date.
+                        if (!TryCompareMaintenanceTagDates(
+                                existingParamValue,
+                                kvp.Value,
+                                out bool candidateIsEarlier))
                         {
                             return originalTags;
+                        }
+
+                        if (candidateIsEarlier)
+                        {
+                            existingTag =
+                                Tools.SetTemplateParameterValue(
+                                    existingTag,
+                                    kvp.Key,
+                                    kvp.Value);
                         }
                     }
                 }
@@ -1444,10 +1517,53 @@ public partial class Parsers
                 newtags.Add(existingTag);
             }
             else
+            {
                 newtags.Add(t);
+            }
         }
 
         return newtags;
+    }
+
+    /// <summary>
+    /// Determines whether a candidate maintenance-template date occurs before an
+    /// existing date.
+    /// </summary>
+    /// <remarks>
+    /// The legacy date parsing behavior is preserved by using
+    /// <see cref="Convert.ToDateTime(string)"/>. If either value cannot be parsed,
+    /// the comparison fails so the caller can preserve the original tags.
+    /// </remarks>
+    /// <param name="existingDateValue">The existing template date value.</param>
+    /// <param name="candidateDateValue">The candidate template date value.</param>
+    /// <param name="candidateIsEarlier">
+    /// Receives whether the candidate date occurs before the existing date.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when both date values can be parsed; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool TryCompareMaintenanceTagDates(
+        string existingDateValue,
+        string candidateDateValue,
+        out bool candidateIsEarlier)
+    {
+        try
+        {
+            DateTime existingDate =
+                Convert.ToDateTime("1 " + existingDateValue);
+
+            DateTime candidateDate =
+                Convert.ToDateTime("1 " + candidateDateValue);
+
+            candidateIsEarlier = candidateDate < existingDate;
+            return true;
+        }
+        catch
+        {
+            candidateIsEarlier = false;
+            return false;
+        }
     }
 
     /// <summary>
