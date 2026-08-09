@@ -258,6 +258,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         }
     }
 
+    /// <summary>
+    /// Moves the currently selected rule one position upward within its owning
+    /// node collection.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the button click.
+    /// </param>
     private void UpButton_Click(
         object sender,
         EventArgs e)
@@ -265,99 +275,173 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         MoveSelectedUp();
     }
 
+    /// <summary>
+    /// Moves the currently selected rule one position upward within its owning
+    /// node collection.
+    /// </summary>
     private void MoveSelectedUp()
     {
-        TreeNode tn = RulesTreeView.SelectedNode;
+        MoveSelectedNode(moveUp: true);
+    }
 
-        if (tn == null)
+    private void DownButton_Click(
+        object sender,
+        EventArgs e)
+    {
+        MoveSelectedDown();
+    }
+
+    /// <summary>
+    /// Moves the currently selected rule one position downward within its owning
+    /// node collection.
+    /// </summary>
+    private void MoveSelectedDown()
+    {
+        MoveSelectedNode(moveUp: false);
+    }
+
+    /// <summary>
+    /// Moves the currently selected rule one position within its owning node
+    /// collection.
+    /// </summary>
+    /// <param name="moveUp">
+    /// <see langword="true"/> to move the selected rule upward; otherwise,
+    /// <see langword="false"/> to move it downward.
+    /// </param>
+    /// <remarks>
+    /// The selected node remains selected after the move, and the rule editor is
+    /// restored so the UI remains synchronized with the reordered tree.
+    /// </remarks>
+    private void MoveSelectedNode(bool moveUp)
+    {
+        TreeNode selectedNode =
+            RulesTreeView.SelectedNode;
+
+        if (selectedNode == null)
             return;
 
         RulesTreeView.Select();
 
-        TreeNodeCollection col = GetOwningNodes(tn);
+        TreeNodeCollection owningNodes =
+            GetOwningNodes(selectedNode);
 
-        if (col.Count < 2)
+        if (owningNodes.Count < 2)
             return;
 
-        TreeNode p = tn.PrevNode;
-        if (p == null)
+        TreeNode adjacentNode =
+            moveUp
+                ? selectedNode.PrevNode
+                : selectedNode.NextNode;
+
+        if (adjacentNode == null)
             return;
 
         _history.Save();
 
-        col.Remove(tn);
-        int i = col.IndexOf(p);
-        col.Insert(i, tn);
+        int targetIndex =
+            owningNodes.IndexOf(adjacentNode);
 
-        RulesTreeView.SelectedNode = tn;
-        RulesTreeView.Select();
-        //RulesTreeView.ExpandAll();
+        owningNodes.Remove(selectedNode);
+        owningNodes.Insert(
+            targetIndex,
+            selectedNode);
+
+        RulesTreeView.SelectedNode =
+            selectedNode;
+
+        if (moveUp)
+        {
+            RulesTreeView.Select();
+        }
+
         RestoreSelectedRule();
     }
 
-    private TreeNodeCollection GetOwningNodes(TreeNode t)
+    /// <summary>
+    /// Gets the node collection that directly contains the specified tree node.
+    /// </summary>
+    /// <param name="treeNode">
+    /// The tree node whose owning collection should be returned.
+    /// </param>
+    /// <returns>
+    /// The parent node's child collection when <paramref name="treeNode"/> is
+    /// nested; otherwise, the root node collection of the rule tree.
+    /// </returns>
+    private TreeNodeCollection GetOwningNodes(
+        TreeNode treeNode)
     {
-        TreeNode p = t.Parent;
-        return p != null ? p.Nodes : RulesTreeView.Nodes;
+        TreeNode parentNode =
+            treeNode.Parent;
+
+        return parentNode != null
+            ? parentNode.Nodes
+            : RulesTreeView.Nodes;
     }
 
-    private void DownButton_Click(object sender, EventArgs e)
-    {
-        TreeNode tn = RulesTreeView.SelectedNode;
-
-        if (tn == null)
-            return;
-
-        RulesTreeView.Select();
-
-        TreeNodeCollection col = GetOwningNodes(tn);
-
-        if (col.Count < 2)
-            return;
-
-        TreeNode p = tn.NextNode;
-        if (p == null)
-            return;
-
-        _history.Save();
-
-        int i = col.IndexOf(p);
-        col.Remove(tn);
-        col.Insert(i, tn);
-
-        RulesTreeView.SelectedNode = tn;
-        //RulesTreeView.ExpandAll();
-        RestoreSelectedRule();
-    }
-
-    private void NewRuleButton_Click(object sender, EventArgs e)
+    private void NewRuleButton_Click(
+        object sender,
+        EventArgs e)
     {
         NewRule();
         SetTreeViewColours();
     }
 
-    private void NewSubruleButton_Click(object sender, EventArgs e)
+    private void NewSubruleButton_Click(
+        object sender,
+        EventArgs e)
     {
         NewSubrule();
         SetTreeViewColours();
     }
 
-    public void NameChanged(Control rc, string name)
+    /// <summary>
+    /// Updates the selected tree node when a rule control reports a name change.
+    /// </summary>
+    /// <param name="rc">
+    /// The rule control reporting the change.
+    /// </param>
+    /// <param name="name">
+    /// The new display name for the selected rule.
+    /// </param>
+    /// <remarks>
+    /// Empty names and values matching the current node text are ignored.
+    /// </remarks>
+    // TODO: Determine whether the rule-control parameter is required by
+    // IRuleControlOwner implementations. Remove it from the interface during a
+    // future API cleanup if no implementation uses it.
+    public void NameChanged(
+        Control rc,
+        string name)
     {
-        if (RulesTreeView.SelectedNode == null
-            || string.IsNullOrEmpty(name)
-            || RulesTreeView.SelectedNode.Text == name)
+        if (RulesTreeView.SelectedNode == null ||
+            string.IsNullOrEmpty(name) ||
+            RulesTreeView.SelectedNode.Text == name)
+        {
             return;
+        }
 
-        RulesTreeView.SelectedNode.Text = name;
+        RulesTreeView.SelectedNode.Text =
+            name;
     }
 
+    /// <summary>
+    /// Updates the enabled state of ReplaceSpecial commands and controls based on
+    /// the current rule selection and undo/redo history.
+    /// </summary>
+    /// <remarks>
+    /// Commands that operate on a rule are disabled when no rule is selected.
+    /// Undo and redo availability is determined by <see cref="RuleTreeHistory"/>.
+    /// </remarks>
     private void UpdateEnabledStates()
     {
-        bool hasSelection = RulesTreeView.SelectedNode != null;
+        bool hasSelection =
+            RulesTreeView.SelectedNode != null;
 
         if (_ruleControl != null)
-            _ruleControl.Enabled = hasSelection;
+        {
+            _ruleControl.Enabled =
+                hasSelection;
+        }
 
         DeleteButton.Enabled = hasSelection;
         UpButton.Enabled = hasSelection;
@@ -374,7 +458,11 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         NewSubruleInTemplateCallMenuItem.Enabled = hasSelection;
         NewSubruleTemplateParameterMenuItem.Enabled = hasSelection;
 
-        PasteMenuItem.Enabled = PasteContextMenuItem.Enabled = true;
+        // TODO: Determine whether Paste should be enabled only when the
+        // ReplaceSpecial clipboard contains a valid rule.
+        PasteMenuItem.Enabled =
+            PasteContextMenuItem.Enabled =
+                true;
 
         CutMenuItem.Enabled = hasSelection;
         CutContextMenuItem.Enabled = hasSelection;
@@ -386,89 +474,164 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         RedoMenuItem.Enabled = _history.CanRedo;
     }
 
-    private void DeleteButton_Click(object sender, EventArgs e)
+    private void DeleteButton_Click(
+        object sender,
+        EventArgs e)
     {
         DeleteCmd();
     }
 
+    /// <summary>
+    /// Deletes the currently selected rule from the rule tree.
+    /// </summary>
+    /// <remarks>
+    /// Before removing the node, the current rule state is saved and the tree
+    /// history is captured for undo support. If the selected rule is a child rule,
+    /// its rule object is also removed from the parent rule's
+    /// <see cref="IRule.Children"/> collection.
+    /// </remarks>
     private void DeleteCmd()
     {
-        TreeNode st = RulesTreeView.SelectedNode;
-        if (st == null)
+        TreeNode selectedNode =
+            RulesTreeView.SelectedNode;
+
+        if (selectedNode == null)
             return;
 
         SaveCurrentRule();
 
         _history.Save();
 
-        TreeNode nt = st.NextNode;
+        TreeNode nextNode =
+            selectedNode.NextNode;
 
-        TreeNode parent = st.Parent;
+        TreeNode parentNode =
+            selectedNode.Parent;
 
-        if (parent != null)
+        if (parentNode != null)
         {
-            IRule rule = (IRule)parent.Tag;
-            if (rule.Children != null)
+            IRule parentRule =
+                (IRule)parentNode.Tag;
+
+            if (parentRule.Children != null)
             {
-                rule.Children.Remove((IRule)st.Tag);
+                parentRule.Children.Remove(
+                    (IRule)selectedNode.Tag);
             }
         }
 
-        RulesTreeView.Nodes.Remove(st);
+        // TODO: Verify deletion of nested rules. The current implementation removes
+        // the selected node through RulesTreeView.Nodes even when the node belongs
+        // to a parent's Nodes collection.
+        RulesTreeView.Nodes.Remove(
+            selectedNode);
 
-        RulesTreeView.SelectedNode = nt;
+        RulesTreeView.SelectedNode =
+            nextNode;
+
         RulesTreeView.Select();
+
         RestoreSelectedRule();
         SetTreeViewColours();
     }
 
-    private void ReplaceSpecial_VisibleChanged(object sender, EventArgs e)
-    {
-        SaveCurrentRule();
-    }
-
-    private void ReplaceSpecial_Leave(object sender, EventArgs e)
-    {
-        SaveCurrentRule();
-    }
-
-    private void ReplaceSpecial_Deactivate(object sender, EventArgs e)
+    /// <summary>
+    /// Saves the current rule whenever the form's visibility changes.
+    /// </summary>
+    private void ReplaceSpecial_VisibleChanged(
+        object sender,
+        EventArgs e)
     {
         SaveCurrentRule();
     }
 
     /// <summary>
-    ///
+    /// Saves the current rule when the form loses input focus.
     /// </summary>
-    public int NoOfRules { get { return RulesTreeView.Nodes.Count; } }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public bool HasRules { get { return NoOfRules != 0; } }
-
-    /// <summary>
-    /// Applys the Replace Special Rules
-    /// </summary>
-    /// <param name="text">Article title</param>
-    /// <param name="title">Article text</param>
-    /// <returns>Amended text</returns>
-    public string ApplyRules(string text, string title)
+    private void ReplaceSpecial_Leave(
+        object sender,
+        EventArgs e)
     {
-        foreach (TreeNode tn in RulesTreeView.Nodes)
+        SaveCurrentRule();
+    }
+
+    /// <summary>
+    /// Saves the current rule when the form becomes inactive.
+    /// </summary>
+    private void ReplaceSpecial_Deactivate(
+        object sender,
+        EventArgs e)
+    {
+        SaveCurrentRule();
+    }
+
+    /// <summary>
+    /// Gets the number of top-level rules currently defined in the rule tree.
+    /// </summary>
+    /// <remarks>
+    /// Child rules are not included in this count.
+    /// </remarks>
+    public int NoOfRules =>
+        RulesTreeView.Nodes.Count;
+
+    /// <summary>
+    /// Gets a value indicating whether at least one top-level rule is currently
+    /// defined.
+    /// </summary>
+    public bool HasRules =>
+        NoOfRules != 0;
+
+    /// <summary>
+    /// Applies all configured top-level ReplaceSpecial rules to the supplied
+    /// article text.
+    /// </summary>
+    /// <param name="text">
+    /// The article text to process.
+    /// </param>
+    /// <param name="title">
+    /// The title of the article being processed.
+    /// </param>
+    /// <returns>
+    /// The article text after all configured rules have been applied.
+    /// </returns>
+    /// <remarks>
+    /// Each rule is applied in tree order, and the output of one rule becomes the
+    /// input to the next rule.
+    /// </remarks>
+    public string ApplyRules(
+        string text,
+        string title)
+    {
+        foreach (TreeNode treeNode in RulesTreeView.Nodes)
         {
-            IRule r = (IRule)tn.Tag;
-            text = r.Apply(tn, text, title);
+            IRule rule =
+                (IRule)treeNode.Tag;
+
+            text =
+                rule.Apply(
+                    treeNode,
+                    text,
+                    title);
         }
 
         return text;
     }
 
-    private void DeleteMenuItem_Click(object sender, EventArgs e)
+    private void DeleteMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         DeleteCmd();
     }
 
+    /// <summary>
+    /// Cuts the currently selected rule by copying it and then deleting it from the
+    /// rule tree.
+    /// </summary>
+    /// <remarks>
+    /// The delete operation already restores the selected-rule UI after removing
+    /// the node.
+    /// </remarks>
     private void CutCmd()
     {
         if (RulesTreeView.SelectedNode == null)
@@ -476,8 +639,12 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
 
         CopyCmd();
         DeleteCmd();
+
+        // TODO: Confirm whether this additional restore is necessary.
+        // DeleteCmd already restores the selected-rule UI after deletion.
         RestoreSelectedRule();
     }
+
 
     /// <summary>
     /// Copies the currently selected replacement rule to the clipboard.
