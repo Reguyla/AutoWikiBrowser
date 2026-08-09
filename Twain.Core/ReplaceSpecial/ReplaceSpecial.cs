@@ -44,6 +44,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
 {
     #region contextmenu
 
+    /// <summary>
+    /// Creates a new top-level rule when the corresponding context-menu command is
+    /// selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
     private void NewRuleContextMenuItem_Click(
         object sender,
         EventArgs e)
@@ -51,6 +61,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         NewRule();
     }
 
+    /// <summary>
+    /// Creates a new child rule beneath the currently selected rule when the
+    /// corresponding context-menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
     private void NewSubruleContextMenuItem_Click(
         object sender,
         EventArgs e)
@@ -58,6 +78,15 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         NewSubrule();
     }
 
+    /// <summary>
+    /// Cuts the currently selected rule when the Cut menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
     private void CutMenuItem_Click(
         object sender,
         EventArgs e)
@@ -65,6 +94,15 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         CutCmd();
     }
 
+    /// <summary>
+    /// Copies the currently selected rule when the Copy menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
     private void CopyMenuItem_Click(
         object sender,
         EventArgs e)
@@ -72,6 +110,15 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         CopyCmd();
     }
 
+    /// <summary>
+    /// Pastes the previously copied rule when the Paste menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
     private void PasteMenuItem_Click(
         object sender,
         EventArgs e)
@@ -81,13 +128,29 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
 
     #endregion
 
+    /// <summary>
+    /// Stores the rule currently selected and displayed in the rule editor.
+    /// </summary>
     private IRule _currentRule;
+
+    /// <summary>
+    /// Stores the rule-specific WinForms control currently displayed in the rule
+    /// editor area.
+    /// </summary>
     private Control _ruleControl;
+
+    /// <summary>
+    /// Tracks rule-tree changes to support undo and redo operations.
+    /// </summary>
     private readonly RuleTreeHistory _history;
 
     /// <summary>
     /// Initializes a new ReplaceSpecial rule editor.
     /// </summary>
+    /// <remarks>
+    /// Initializes the form controls, creates the rule-tree history manager, and
+    /// updates command availability for the initial selection state.
+    /// </remarks>
     public ReplaceSpecial()
     {
         InitializeComponent();
@@ -122,6 +185,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         base.Show();
     }
 
+    /// <summary>
+    /// Saves the currently active rule and hides the ReplaceSpecial form when the
+    /// OK button is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the button click.
+    /// </param>
     private void OkButton_Click(
         object sender,
         EventArgs e)
@@ -131,9 +204,19 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     }
 
     /// <summary>
-    /// Saves the active rule and hides the form instead of allowing the form
-    /// to close and be disposed.
+    /// Saves the active rule and hides the form instead of allowing the form to
+    /// close and be disposed.
     /// </summary>
+    /// <param name="sender">
+    /// The form that raised the closing event.
+    /// </param>
+    /// <param name="e">
+    /// The form-closing event data used to cancel the close operation.
+    /// </param>
+    /// <remarks>
+    /// ReplaceSpecial is intentionally retained for reuse. The close operation is
+    /// therefore cancelled and the form is hidden instead of being disposed.
+    /// </remarks>
     private void ReplaceSpecial_FormClosing(
         object sender,
         FormClosingEventArgs e)
@@ -144,6 +227,19 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         Hide();
     }
 
+    /// <summary>
+    /// Saves the previously active rule and restores the editor state for the newly
+    /// selected rule.
+    /// </summary>
+    /// <param name="sender">
+    /// The tree view that raised the selection-change event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the selected tree node.
+    /// </param>
+    /// <remarks>
+    /// No action is taken when the tree has no selected node.
+    /// </remarks>
     private void RulesTreeView_AfterSelect(
         object sender,
         TreeViewEventArgs e)
@@ -284,6 +380,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         MoveSelectedNode(moveUp: true);
     }
 
+    /// <summary>
+    /// Moves the currently selected rule one position downward within its owning
+    /// node collection when the Down button is clicked.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the button click.
+    /// </param>
     private void DownButton_Click(
         object sender,
         EventArgs e)
@@ -378,6 +484,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             : RulesTreeView.Nodes;
     }
 
+    /// <summary>
+    /// Creates a new top-level rule when the New Rule button is clicked and
+    /// refreshes the rule tree display.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the button click.
+    /// </param>
     private void NewRuleButton_Click(
         object sender,
         EventArgs e)
@@ -386,6 +502,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         SetTreeViewColours();
     }
 
+    /// <summary>
+    /// Creates a new child rule beneath the currently selected rule when the
+    /// New Subrule button is clicked and refreshes the rule tree display.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the button click.
+    /// </param>
     private void NewSubruleButton_Click(
         object sender,
         EventArgs e)
@@ -474,6 +600,15 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         RedoMenuItem.Enabled = _history.CanRedo;
     }
 
+    /// <summary>
+    /// Deletes the currently selected rule when the Delete button is clicked.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the button click.
+    /// </param>
     private void DeleteButton_Click(
         object sender,
         EventArgs e)
@@ -617,6 +752,16 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         return text;
     }
 
+    /// <summary>
+    /// Deletes the currently selected rule when the Delete menu command is
+    /// selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
     private void DeleteMenuItem_Click(
         object sender,
         EventArgs e)
@@ -721,212 +866,520 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         }
     }
 
+    /// <summary>
+    /// Creates a new standard ReplaceSpecial rule and adds it to the rule tree.
+    /// </summary>
     private void NewRule()
     {
-        AddNewRule(RuleFactory.CreateRule());
+        AddNewRule(
+            RuleFactory.CreateRule());
     }
 
-    private void NewInTemplateRuleMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Creates a new in-template rule when the corresponding menu command is
+    /// selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void NewInTemplateRuleMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        AddNewRule(RuleFactory.CreateInTemplateRule());
+        AddNewRule(
+            RuleFactory.CreateInTemplateRule());
     }
 
-    private void NewTemplateParameterRuleMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Creates a new template-parameter rule when the corresponding menu command
+    /// is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void NewTemplateParameterRuleMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        AddNewRule(RuleFactory.CreateTemplateParamRule());
+        AddNewRule(
+            RuleFactory.CreateTemplateParamRule());
     }
 
-    private static void RecurseNode(TreeNode n, IRule r)
+    /// <summary>
+    /// Rebuilds the child-rule hierarchy for the specified rule from the
+    /// corresponding tree-node hierarchy.
+    /// </summary>
+    /// <param name="treeNode">
+    /// The tree node whose child nodes should be converted into child rules.
+    /// </param>
+    /// <param name="rule">
+    /// The rule associated with <paramref name="treeNode"/>.
+    /// </param>
+    /// <remarks>
+    /// When the node has children, the rule's existing
+    /// <see cref="IRule.Children"/> collection is replaced with a new collection
+    /// reflecting the current tree structure.
+    /// </remarks>
+    private static void RecurseNode(
+        TreeNode treeNode,
+        IRule rule)
     {
-        if (n.Nodes.Count == 0) return;
+        if (treeNode.Nodes.Count == 0)
+            return;
 
-        r.Children = new List<IRule>();
-        foreach (TreeNode n1 in n.Nodes)
+        rule.Children =
+            new List<IRule>();
+
+        foreach (TreeNode childNode in treeNode.Nodes)
         {
-            IRule r1 = (IRule)n1.Tag;
-            if (n1.Nodes.Count > 0) RecurseNode(n1, r1);
-            r.Children.Add(r1);
+            IRule childRule =
+                (IRule)childNode.Tag;
+
+            if (childNode.Nodes.Count > 0)
+            {
+                RecurseNode(
+                    childNode,
+                    childRule);
+            }
+
+            rule.Children.Add(childRule);
         }
     }
 
+    /// <summary>
+    /// Gets the complete set of top-level ReplaceSpecial rules represented by the
+    /// current rule tree.
+    /// </summary>
+    /// <returns>
+    /// A list containing the top-level rules in tree order. Each returned rule's
+    /// child-rule collection is synchronized with the current tree hierarchy.
+    /// </returns>
+    /// <remarks>
+    /// This method rebuilds nested <see cref="IRule.Children"/> collections from
+    /// the WinForms tree before returning the rules.
+    /// </remarks>
     public List<IRule> GetRules()
     {
-        List<IRule> l = new List<IRule>();
+        List<IRule> rules =
+            new();
 
-        foreach (TreeNode tn in RulesTreeView.Nodes)
+        foreach (TreeNode treeNode in RulesTreeView.Nodes)
         {
-            IRule r = (IRule)tn.Tag;
-            if (tn.Nodes.Count > 0) RecurseNode(tn, r);
-            l.Add(r);
+            IRule rule =
+                (IRule)treeNode.Tag;
+
+            if (treeNode.Nodes.Count > 0)
+            {
+                RecurseNode(
+                    treeNode,
+                    rule);
+            }
+
+            rules.Add(rule);
         }
 
-        return l;
+        return rules;
     }
 
+    /// <summary>
+    /// Gets the rule associated with the currently selected tree node.
+    /// </summary>
+    /// <returns>
+    /// The selected rule with its child-rule hierarchy synchronized to the current
+    /// tree structure.
+    /// </returns>
+    /// <remarks>
+    /// The current implementation assumes that a rule tree node is selected and
+    /// that its <see cref="TreeNode.Tag"/> contains an <see cref="IRule"/>.
+    /// </remarks>
+    // TODO: Review whether callers can request the selected rule while no tree node
+    // is selected. If so, make the no-selection contract explicit rather than
+    // relying on the current TreeNode/IRule assumptions.
     public IRule GetSelectedRule()
     {
-        TreeNode tn = RulesTreeView.SelectedNode;
-        IRule r = (IRule)tn.Tag;
-        if (tn.Nodes.Count > 0) RecurseNode(tn, r);
+        TreeNode selectedNode =
+            RulesTreeView.SelectedNode;
 
-        return r;
-    }
+        IRule selectedRule =
+            (IRule)selectedNode.Tag;
 
-    public void AddNewRule(List<IRule> rules)
-    {
-        RulesTreeView.BeginUpdate();
-        RulesTreeView.Nodes.Clear();
-
-        foreach (IRule r in rules)
+        if (selectedNode.Nodes.Count > 0)
         {
-            AppendRule(r);
+            RecurseNode(
+                selectedNode,
+                selectedRule);
         }
 
-        RulesTreeView.ExpandAll();
-        RulesTreeView.EndUpdate();
+        return selectedRule;
     }
 
-    private void AddNewRule(IRule r)
+    /// <summary>
+    /// Replaces the current rule tree with the supplied rules.
+    /// </summary>
+    /// <param name="rules">
+    /// The top-level rules to load into the rule tree.
+    /// </param>
+    /// <remarks>
+    /// Child rules are added recursively by <c>AppendRule</c>, after which the
+    /// complete tree is expanded.
+    /// </remarks>
+    public void AddNewRule(
+        List<IRule> rules)
     {
-        if (r == null)
+        RulesTreeView.BeginUpdate();
+
+        try
+        {
+            RulesTreeView.Nodes.Clear();
+
+            foreach (IRule rule in rules)
+            {
+                AppendRule(rule);
+            }
+
+            RulesTreeView.ExpandAll();
+        }
+        finally
+        {
+            RulesTreeView.EndUpdate();
+        }
+    }
+
+    /// <summary>
+    /// Adds a rule to the rule tree immediately after the currently selected rule,
+    /// or at the root level when no rule is selected.
+    /// </summary>
+    /// <param name="rule">
+    /// The rule to add.
+    /// </param>
+    /// <remarks>
+    /// Existing child rules are added recursively. When the rule has no children,
+    /// the new node becomes the current tree selection and its editor is restored.
+    /// </remarks>
+    private void AddNewRule(
+        IRule rule)
+    {
+        if (rule == null)
             return;
 
         SaveCurrentRule();
         _history.Save();
 
-        TreeNode n = new TreeNode(r.Name) { Tag = r };
+        TreeNode newNode =
+            new(rule.Name)
+            {
+                Tag = rule
+            };
 
-        TreeNode s = RulesTreeView.SelectedNode;
-        if (s != null)
+        TreeNode selectedNode =
+            RulesTreeView.SelectedNode;
+
+        if (selectedNode != null)
         {
-            TreeNode p = s.Parent;
-            if (p == null)
-                RulesTreeView.Nodes.Insert(RulesTreeView.Nodes.IndexOf(s) + 1, n);
+            TreeNode parentNode =
+                selectedNode.Parent;
+
+            if (parentNode == null)
+            {
+                RulesTreeView.Nodes.Insert(
+                    RulesTreeView.Nodes.IndexOf(selectedNode) + 1,
+                    newNode);
+            }
             else
-                p.Nodes.Insert(p.Nodes.IndexOf(s) + 1, n);
+            {
+                parentNode.Nodes.Insert(
+                    parentNode.Nodes.IndexOf(selectedNode) + 1,
+                    newNode);
+            }
         }
         else
         {
-            RulesTreeView.Nodes.Add(n);
+            RulesTreeView.Nodes.Add(newNode);
         }
 
-        if (r.Children != null && r.Children.Count > 0)
+        if (rule.Children != null &&
+            rule.Children.Count > 0)
         {
-            foreach (IRule rnew in r.Children)
-                AddNewRule(rnew, n);
+            foreach (IRule childRule in rule.Children)
+            {
+                AddNewRule(
+                    childRule,
+                    newNode);
+            }
         }
         else
         {
-            RulesTreeView.SelectedNode = n;
+            RulesTreeView.SelectedNode =
+                newNode;
+
             RulesTreeView.Select();
         }
 
         RestoreSelectedRule();
-       _currentRule.SelectName();
+
+        _currentRule.SelectName();
     }
 
-    private void AddNewRule(IRule r, TreeNode tn)
+    /// <summary>
+    /// Adds the specified rule as a child of the supplied parent tree node and
+    /// recursively adds any nested child rules.
+    /// </summary>
+    /// <param name="rule">
+    /// The rule to add.
+    /// </param>
+    /// <param name="parentNode">
+    /// The tree node beneath which the rule should be added.
+    /// </param>
+    /// <remarks>
+    /// When the rule has no child rules, the newly created node becomes the current
+    /// selection.
+    /// </remarks>
+    private void AddNewRule(
+        IRule rule,
+        TreeNode parentNode)
     {
-        TreeNode n = new TreeNode(r.Name) { Tag = r };
+        TreeNode newNode =
+            new(rule.Name)
+            {
+                Tag = rule
+            };
 
-        tn.Nodes.Add(n);
+        parentNode.Nodes.Add(newNode);
 
-        if (r.Children != null && r.Children.Count > 0)
+        if (rule.Children != null &&
+            rule.Children.Count > 0)
         {
-            foreach (IRule rnew in r.Children)
-                AddNewRule(rnew, n);
+            foreach (IRule childRule in rule.Children)
+            {
+                AddNewRule(
+                    childRule,
+                    newNode);
+            }
         }
         else
         {
-            RulesTreeView.SelectedNode = n;
+            RulesTreeView.SelectedNode =
+                newNode;
+
             RulesTreeView.Select();
         }
     }
 
     /// <summary>
-    ///
+    /// Appends the specified rule to the root of the rule tree and recursively adds
+    /// any nested child rules.
     /// </summary>
-    /// <param name="r"></param>
-    private void AppendRule(IRule r)
+    /// <param name="rule">
+    /// The top-level rule to append.
+    /// </param>
+    /// <remarks>
+    /// When the rule has no child rules, the newly created node becomes the current
+    /// selection.
+    /// </remarks>
+    private void AppendRule(IRule rule)
     {
-        TreeNode n = new TreeNode(r.Name) { Tag = r };
-
-        RulesTreeView.Nodes.Add(n);
-
-        if (r.Children != null && r.Children.Count > 0)
-        {
-            foreach (IRule rnew in r.Children)
+        TreeNode newNode =
+            new(rule.Name)
             {
-                AddNewRule(rnew, n);
+                Tag = rule
+            };
+
+        RulesTreeView.Nodes.Add(newNode);
+
+        if (rule.Children != null &&
+            rule.Children.Count > 0)
+        {
+            foreach (IRule childRule in rule.Children)
+            {
+                AddNewRule(
+                    childRule,
+                    newNode);
             }
         }
         else
         {
-            RulesTreeView.SelectedNode = n;
+            RulesTreeView.SelectedNode =
+                newNode;
+
             RulesTreeView.Select();
         }
     }
 
+    /// <summary>
+    /// Creates a new standard rule as a child of the currently selected rule.
+    /// </summary>
     private void NewSubrule()
     {
-        AddNewSubrule(RuleFactory.CreateRule());
+        AddNewSubrule(
+            RuleFactory.CreateRule());
     }
 
-    private void AddNewSubrule(IRule r)
+    /// <summary>
+    /// Adds the specified rule as a child of the currently selected rule.
+    /// </summary>
+    /// <param name="rule">
+    /// The rule to add as a child.
+    /// </param>
+    /// <remarks>
+    /// The current rule is saved before the tree is modified. The new child rule
+    /// becomes selected and its editor is restored after insertion.
+    /// </remarks>
+    private void AddNewSubrule(IRule rule)
     {
         SaveCurrentRule();
 
-        TreeNode s = RulesTreeView.SelectedNode;
-        if (s == null)
+        TreeNode selectedNode =
+            RulesTreeView.SelectedNode;
+
+        if (selectedNode == null)
             return;
 
         _history.Save();
 
-        TreeNode n = new TreeNode(r.Name) { Tag = r };
+        TreeNode newNode =
+            new(rule.Name)
+            {
+                Tag = rule
+            };
 
-        s.Nodes.Add(n);
-        RulesTreeView.SelectedNode = n;
+        selectedNode.Nodes.Add(newNode);
+
+        RulesTreeView.SelectedNode =
+            newNode;
+
         RulesTreeView.Select();
 
         RestoreSelectedRule();
         _currentRule.SelectName();
     }
 
-    private void NewSubruleInTemplateCallMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Creates a new in-template rule as a child of the currently selected rule
+    /// when the corresponding menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void NewSubruleInTemplateCallMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        AddNewSubrule(RuleFactory.CreateInTemplateRule());
+        AddNewSubrule(
+            RuleFactory.CreateInTemplateRule());
     }
 
-    private void NewSubruleTemplateParameterMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Creates a new template-parameter rule as a child of the currently selected
+    /// rule when the corresponding menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void NewSubruleTemplateParameterMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
-        AddNewSubrule(RuleFactory.CreateTemplateParamRule());
+        AddNewSubrule(
+            RuleFactory.CreateTemplateParamRule());
     }
 
-    private void NewRuleMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Creates a new top-level rule when the corresponding menu command is
+    /// selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void NewRuleMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         NewRule();
     }
 
-    private void NewSubruleMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Creates a new child rule beneath the currently selected rule when the
+    /// corresponding menu command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void NewSubruleMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         NewSubrule();
     }
 
-    private void UndoMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Saves the current rule, restores the previous rule-tree state, and refreshes
+    /// the selected-rule editor.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void UndoMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         SaveCurrentRule();
         _history.Undo();
         RestoreSelectedRule();
     }
 
-    private void RedoMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Saves the current rule, reapplies the next rule-tree state, and refreshes
+    /// the selected-rule editor.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void RedoMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         SaveCurrentRule();
         _history.Redo();
         RestoreSelectedRule();
     }
 
-    private void refreshColoursToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Refreshes the visual coloring of the rule tree when the corresponding menu
+    /// command is selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void refreshColoursToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         SetTreeViewColours();
     }
@@ -1081,59 +1534,150 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
         }
     }
 
+    /// <summary>
+    /// Refreshes the background color of every rule node in the tree based on the
+    /// enabled state of its associated rule.
+    /// </summary>
     private void SetTreeViewColours()
     {
         RulesTreeView.BeginUpdate();
-        foreach (TreeNode node in RulesTreeView.Nodes)
+
+        try
         {
-            SetColours(node);
+            foreach (TreeNode treeNode in RulesTreeView.Nodes)
+            {
+                SetColours(treeNode);
+            }
         }
-        RulesTreeView.EndUpdate();
-    }
-
-    private static void SetColours(TreeNode rnode)
-    {
-        IRule temp = (IRule)rnode.Tag;
-        SetNodeColour(rnode, temp);
-
-        foreach (TreeNode node in rnode.Nodes)
+        finally
         {
-            IRule temp2 = (IRule)node.Tag;
-
-            SetNodeColour(node, temp2);
-            SetColours(node);
+            RulesTreeView.EndUpdate();
         }
     }
 
-    private static void SetNodeColour(TreeNode node, IRule rule)
+    /// <summary>
+    /// Applies enabled-state coloring to the specified rule node and all of its
+    /// descendants.
+    /// </summary>
+    /// <param name="treeNode">
+    /// The rule tree node whose color and descendant colors should be refreshed.
+    /// </param>
+    private static void SetColours(TreeNode treeNode)
     {
-        node.BackColor = rule.enabled_ ? Color.White : Color.Red;
+        IRule rule =
+            (IRule)treeNode.Tag;
+
+        SetNodeColour(
+            treeNode,
+            rule);
+
+        foreach (TreeNode childNode in treeNode.Nodes)
+        {
+            SetColours(childNode);
+        }
     }
 
-    private void ReplaceSpecial_Load(object sender, EventArgs e)
+    /// <summary>
+    /// Applies the appropriate background color to a rule tree node based on
+    /// whether the associated rule is enabled.
+    /// </summary>
+    /// <param name="treeNode">
+    /// The tree node whose background color should be updated.
+    /// </param>
+    /// <param name="rule">
+    /// The rule associated with the tree node.
+    /// </param>
+    // TODO: Replace hard-coded enabled/disabled colors with theme-aware and
+    // accessibility-friendly visual states that do not rely on color alone.
+    private static void SetNodeColour(
+        TreeNode treeNode,
+        IRule rule)
+    {
+        treeNode.BackColor =
+            rule.enabled_
+                ? Color.White
+                : Color.Red;
+    }
+
+    /// <summary>
+    /// Refreshes rule-tree coloring when the ReplaceSpecial form is loaded.
+    /// </summary>
+    /// <param name="sender">
+    /// The form that raised the load event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the form load.
+    /// </param>
+    private void ReplaceSpecial_Load(
+        object sender,
+        EventArgs e)
     {
         SetTreeViewColours();
     }
 
-    private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Expands all rule-tree nodes when the corresponding menu command is
+    /// selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void expandAllToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         Collapsed(false);
     }
 
-    private void collapseAllToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Collapses all rule-tree nodes when the corresponding menu command is
+    /// selected.
+    /// </summary>
+    /// <param name="sender">
+    /// The control that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data associated with the menu-item click.
+    /// </param>
+    private void collapseAllToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         Collapsed(true);
     }
 
+    /// <summary>
+    /// Expands or collapses all top-level rule-tree nodes.
+    /// </summary>
+    /// <param name="collapsed">
+    /// <see langword="true"/> to collapse each top-level node; otherwise,
+    /// <see langword="false"/> to expand each node and all of its descendants.
+    /// </param>
     private void Collapsed(bool collapsed)
     {
         RulesTreeView.BeginUpdate();
-        foreach (TreeNode node in RulesTreeView.Nodes)
+
+        try
         {
-            if (collapsed) node.Collapse();
-            else node.ExpandAll();
+            foreach (TreeNode treeNode in RulesTreeView.Nodes)
+            {
+                if (collapsed)
+                {
+                    treeNode.Collapse();
+                }
+                else
+                {
+                    treeNode.ExpandAll();
+                }
+            }
         }
-        RulesTreeView.EndUpdate();
+        finally
+        {
+            RulesTreeView.EndUpdate();
+        }
     }
 
     #region Serialize/Deserialize for Clipboard work
