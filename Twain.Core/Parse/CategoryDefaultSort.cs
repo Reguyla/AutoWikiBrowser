@@ -1012,40 +1012,12 @@ public static string ChangeToDefaultSort(
                 categoryPrefix,
                 sort);
 
-        zerothSection = NotCircaTemplate.Replace(zerothSection, " ");
-        // birth and death combined
-        // if not fully categorized, check it
-        if (PersonYearOfBirthAndDeath.IsMatch(zerothSection) && (!WikiRegexes.BirthsCategory.IsMatch(articleText) || !WikiRegexes.DeathsOrLivingCategory.IsMatch(articleText)))
-        {
-            Match m = PersonYearOfBirthAndDeath.Match(zerothSection);
-
-            string birthyear = m.Groups[1].Value;
-            int birthyearint = int.Parse(birthyear);
-
-            string deathyear = m.Groups[3].Value;
-            int deathyearint = int.Parse(deathyear);
-
-            // logical validation of dates
-            if (birthyearint <= (deathyearint - 2) && (deathyearint - birthyearint) <= 125)
-            {
-                string birthpart = zerothSection.Substring(m.Index, m.Groups[2].Index - m.Index),
-                deathpart = zerothSection.Substring(m.Groups[2].Index, (m.Value.Length + m.Index) - m.Groups[2].Index);
-
-                if (!WikiRegexes.BirthsCategory.IsMatch(articleText))
-                {
-                    if (!UncertainWordings.IsMatch(birthpart) && !ReignedRuledUnsure.IsMatch(m.Value) && !Regex.IsMatch(birthpart, @"(?:[Dd](?:ied|\.)|baptised)")
-                        && !FloruitTemplate.IsMatch(birthpart))
-                        articleText += categoryPrefix + birthyear + @" births" + CatEnd(sort);
-                    else
-                        if (UncertainWordings.IsMatch(birthpart) && !CategoryMatch(articleText, YearOfBirthMissingLivingPeople) && !CategoryMatch(articleText, YearOfBirthUncertain))
-                        articleText += categoryPrefix + YearOfBirthUncertain + CatEnd(sort);
-                }
-
-                if (!UncertainWordings.IsMatch(deathpart) && !ReignedRuledUnsure.IsMatch(m.Value) && !Regex.IsMatch(deathpart, @"[Bb](?:orn|\.)") && !Regex.IsMatch(birthpart, @"[Dd](?:ied|\.)")
-                    && (!WikiRegexes.DeathsOrLivingCategory.IsMatch(articleText) || CategoryMatch(articleText, YearofDeathMissing)))
-                    articleText += categoryPrefix + deathyear + @" deaths" + CatEnd(sort);
-            }
-        }
+        articleText =
+            AddCombinedBirthDeathCategories(
+                articleText,
+                zerothSection,
+                categoryPrefix,
+                sort);
 
         // do this check last as IsArticleAboutAPerson can be relatively slow
         if (!articleText.Equals(articleTextBefore) && !IsArticleAboutAPerson(articleTextBefore, articleTitle, parseTalkPage))
@@ -1487,6 +1459,134 @@ public static string ChangeToDefaultSort(
                     yearstring +
                     " deaths" +
                     CatEnd(sort);
+            }
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Adds birth- and death-year categories when both years can be inferred from
+    /// combined lifespan text in the article lead.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="zerothSection">
+    /// The cleaned zeroth section used for biographical date detection.
+    /// </param>
+    /// <param name="categoryPrefix">
+    /// The category-link prefix to use when adding birth or death categories.
+    /// </param>
+    /// <param name="sort">
+    /// The category sort key to append to newly added categories.
+    /// </param>
+    /// <returns>
+    /// The article text after any applicable birth or death categories have been
+    /// added.
+    /// </returns>
+    /// <remarks>
+    /// This helper handles combined lifespan formats such as
+    /// <c>1901–1980</c>. It validates the inferred lifespan and preserves the
+    /// existing uncertainty and biography safeguards before adding categories.
+    /// </remarks>
+    private static string AddCombinedBirthDeathCategories(
+        string articleText,
+        string zerothSection,
+        string categoryPrefix,
+        string sort)
+    {
+        zerothSection =
+            NotCircaTemplate.Replace(
+                zerothSection,
+                " ");
+
+        // Birth and death combined.
+        // If not fully categorized, check it.
+        if (PersonYearOfBirthAndDeath.IsMatch(zerothSection) &&
+            (!WikiRegexes.BirthsCategory.IsMatch(articleText) ||
+             !WikiRegexes.DeathsOrLivingCategory.IsMatch(articleText)))
+        {
+            Match m =
+                PersonYearOfBirthAndDeath.Match(
+                    zerothSection);
+
+            string birthyear =
+                m.Groups[1].Value;
+
+            int birthyearint =
+                int.Parse(birthyear);
+
+            string deathyear =
+                m.Groups[3].Value;
+
+            int deathyearint =
+                int.Parse(deathyear);
+
+            // Logical validation of dates.
+            if (birthyearint <= (deathyearint - 2) &&
+                (deathyearint - birthyearint) <= 125)
+            {
+                string birthpart =
+                    zerothSection.Substring(
+                        m.Index,
+                        m.Groups[2].Index - m.Index);
+
+                string deathpart =
+                    zerothSection.Substring(
+                        m.Groups[2].Index,
+                        (m.Value.Length + m.Index) -
+                        m.Groups[2].Index);
+
+                if (!WikiRegexes.BirthsCategory.IsMatch(articleText))
+                {
+                    if (!UncertainWordings.IsMatch(birthpart) &&
+                        !ReignedRuledUnsure.IsMatch(m.Value) &&
+                        !Regex.IsMatch(
+                            birthpart,
+                            @"(?:[Dd](?:ied|\.)|baptised)") &&
+                        !FloruitTemplate.IsMatch(birthpart))
+                    {
+                        articleText +=
+                            categoryPrefix +
+                            birthyear +
+                            @" births" +
+                            CatEnd(sort);
+                    }
+                    else if (UncertainWordings.IsMatch(birthpart) &&
+                             !CategoryMatch(
+                                 articleText,
+                                 YearOfBirthMissingLivingPeople) &&
+                             !CategoryMatch(
+                                 articleText,
+                                 YearOfBirthUncertain))
+                    {
+                        articleText +=
+                            categoryPrefix +
+                            YearOfBirthUncertain +
+                            CatEnd(sort);
+                    }
+                }
+
+                if (!UncertainWordings.IsMatch(deathpart) &&
+                    !ReignedRuledUnsure.IsMatch(m.Value) &&
+                    !Regex.IsMatch(
+                        deathpart,
+                        @"[Bb](?:orn|\.)") &&
+                    !Regex.IsMatch(
+                        birthpart,
+                        @"[Dd](?:ied|\.)") &&
+                    (!WikiRegexes.DeathsOrLivingCategory.IsMatch(articleText) ||
+                     CategoryMatch(
+                         articleText,
+                         YearofDeathMissing)))
+                {
+                    articleText +=
+                        categoryPrefix +
+                        deathyear +
+                        @" deaths" +
+                        CatEnd(sort);
+                }
             }
         }
 
