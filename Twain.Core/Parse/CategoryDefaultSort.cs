@@ -771,9 +771,43 @@ public static string ChangeToDefaultSort(
         return articleText;
     }
 
-    private static readonly Regex PersonYearOfBirth = new Regex(@"(?<='''.{0,100}?)\( *[Bb]orn[^\)\.;]{1,150}?(?<!.*(?:[Dd]ied|&[nm]dash;|—).*)([12]?\d{3}(?: BC)?)\b[^\)]{0,200}");
-    private static readonly Regex PersonYearOfDeath = new Regex(@"(?<='''.{0,100}?)\([^\(\)]*?[Dd]ied[^\)\.;]+?([12]?\d{3}(?: BC)?)\b");
-    private static readonly Regex PersonYearOfBirthAndDeath = new Regex(@"^.{0,100}?'''\s*\([^\)\r\n]*?(?<![Dd]ied)\b([12]?\d{3})\b[^\)\r\n]*?(-|–|—|&[nm]dash;)[^\)\r\n]*?([12]?\d{3})\b[^\)]{0,200}", RegexOptions.Singleline);
+    /// <summary>
+    /// Matches the birth year from the opening bolded biography line of an article
+    /// about a living person.
+    /// </summary>
+    /// <remarks>
+    /// This expression looks for a year appearing after a "Born" clause while
+    /// excluding biographies that already contain a death indicator.
+    /// </remarks>
+    private static readonly Regex PersonYearOfBirth =
+        new(
+            @"(?<='''.{0,100}?)\( *[Bb]orn[^\)\.;]{1,150}?(?<!.*(?:[Dd]ied|&[nm]dash;|—).*)([12]?\d{3}(?: BC)?)\b[^\)]{0,200}");
+
+    /// <summary>
+    /// Matches the year of death from the opening bolded biography line of an
+    /// article.
+    /// </summary>
+    /// <remarks>
+    /// This expression identifies biographies that explicitly contain a "Died"
+    /// clause and extracts the associated year.
+    /// </remarks>
+    private static readonly Regex PersonYearOfDeath =
+        new(
+            @"(?<='''.{0,100}?)\([^\(\)]*?[Dd]ied[^\)\.;]+?([12]?\d{3}(?: BC)?)\b");
+
+    /// <summary>
+    /// Matches both the birth and death years from the opening bolded biography
+    /// line of an article.
+    /// </summary>
+    /// <remarks>
+    /// Supports biography formats such as "1901–1980", "1901-1980", and MediaWiki
+    /// HTML dash entities. The first capture group contains the birth year and the
+    /// second capture group contains the death year.
+    /// </remarks>
+    private static readonly Regex PersonYearOfBirthAndDeath =
+        new(
+            @"^.{0,100}?'''\s*\([^\)\r\n]*?(?<![Dd]ied)\b([12]?\d{3})\b[^\)\r\n]*?(-|–|—|&[nm]dash;)[^\)\r\n]*?([12]?\d{3})\b[^\)]{0,200}",
+            RegexOptions.Singleline);
 
     /// <summary>
     /// Adds [[Category:XXXX births]], [[Category:XXXX deaths]] to articles about people where available, for en-wiki only
@@ -810,15 +844,102 @@ public static string ChangeToDefaultSort(
         return newText;
     }
 
-    private static readonly Regex LongWikilink = new Regex(@"\[\[[^\[\]\|]{11,}(?:\|[^\[\]]+)?\]\]");
-    private static readonly Regex YearPossiblyWithBC = new Regex(@"\d{3,4}(?![\ds])(?: BC)?");
-    private static readonly Regex ThreeOrFourDigitNumber = new Regex(@"[0-9]{3,4}");
-    private static readonly Regex DiedOrBaptised = new Regex(@"(^.*?)((?:&[nm]dash;|—|–|;|[Dd](?:ied|\.)|baptised|transitioned).*)");
-    private static readonly Regex NotCircaTemplate = new Regex(@"{{(?!(?:[Cc]irca|[Ff]l\.?))[^{]*?}}");
-    private static readonly Regex AsOfText = new Regex(@"\bas of\b");
-    private static readonly Regex FloruitTemplate = Tools.NestedTemplateRegex(new[] { "fl", "fl.", "floruit" });
-    private static readonly Regex BirthDateBasedOnAgeAtDeath = Tools.NestedTemplateRegex(new[] { "Birth date based on age at death", "Birth based on age at death" });
-    private static readonly Regex FootnoteTemplates = Tools.NestedTemplateRegex(new[] { "Efn", "Efn-ua", "Efn-lr", "Sfn", "Shortened footnote", "Shortened footnote template", "Sfnb", "Sfnp", "Sfnm", "SfnRef" });
+    /// <summary>
+    /// Matches wiki links whose target title is at least 11 characters long,
+    /// optionally including a display-text pipe.
+    /// </summary>
+    private static readonly Regex LongWikilink =
+        new(
+            @"\[\[[^\[\]\|]{11,}(?:\|[^\[\]]+)?\]\]");
+
+    /// <summary>
+    /// Matches a three- or four-digit year, optionally followed by
+    /// <c> BC</c>, while excluding values immediately followed by another digit
+    /// or the letter <c>s</c>.
+    /// </summary>
+    private static readonly Regex YearPossiblyWithBC =
+        new(
+            @"\d{3,4}(?![\ds])(?: BC)?");
+
+    /// <summary>
+    /// Matches any three- or four-digit decimal number.
+    /// </summary>
+    private static readonly Regex ThreeOrFourDigitNumber =
+        new(
+            @"[0-9]{3,4}");
+
+    /// <summary>
+    /// Splits text around a death, baptism, transition, dash, or similar
+    /// biographical separator.
+    /// </summary>
+    /// <remarks>
+    /// The first capture group contains the text preceding the separator, and the
+    /// second capture group contains the separator and the remaining text.
+    /// </remarks>
+    private static readonly Regex DiedOrBaptised =
+        new(
+            @"(^.*?)((?:&[nm]dash;|—|–|;|[Dd](?:ied|\.)|baptised|transitioned).*)");
+
+    /// <summary>
+    /// Matches a simple template while excluding <c>{{circa}}</c>,
+    /// <c>{{fl}}</c>, and <c>{{fl.}}</c> templates.
+    /// </summary>
+    private static readonly Regex NotCircaTemplate =
+        new(
+            @"{{(?!(?:[Cc]irca|[Ff]l\.?))[^{]*?}}");
+
+    /// <summary>
+    /// Matches the phrase <c>as of</c> when it appears as a complete word
+    /// sequence.
+    /// </summary>
+    private static readonly Regex AsOfText =
+        new(
+            @"\bas of\b");
+
+    /// <summary>
+    /// Matches nested floruit templates, including <c>{{fl}}</c>,
+    /// <c>{{fl.}}</c>, and <c>{{floruit}}</c>.
+    /// </summary>
+    private static readonly Regex FloruitTemplate =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "fl",
+            "fl.",
+            "floruit"
+            });
+
+    /// <summary>
+    /// Matches nested templates that derive a birth date from a person's age at
+    /// death.
+    /// </summary>
+    private static readonly Regex BirthDateBasedOnAgeAtDeath =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "Birth date based on age at death",
+            "Birth based on age at death"
+            });
+
+    /// <summary>
+    /// Matches nested short-footnote and explanatory-footnote templates used in
+    /// article text.
+    /// </summary>
+    private static readonly Regex FootnoteTemplates =
+        Tools.NestedTemplateRegex(
+            new[]
+            {
+            "Efn",
+            "Efn-ua",
+            "Efn-lr",
+            "Sfn",
+            "Shortened footnote",
+            "Shortened footnote template",
+            "Sfnb",
+            "Sfnp",
+            "Sfnm",
+            "SfnRef"
+            });
 
     /// <summary>
     /// Adds [[Category:XXXX births]], [[Category:XXXX deaths]] to articles about people where available, for en-wiki only
