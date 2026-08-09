@@ -1077,32 +1077,64 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
                 Tag = rule
             };
 
+        InsertRuleNode(newNode);
+        AddChildRulesOrSelectNode(rule, newNode);
+
+        RestoreSelectedRule();
+
+        _currentRule.SelectName();
+    }
+
+    /// <summary>
+    /// Inserts the specified rule node immediately after the currently selected
+    /// node, or at the root level when no node is selected.
+    /// </summary>
+    /// <param name="newNode">
+    /// The rule tree node to insert.
+    /// </param>
+    private void InsertRuleNode(
+        TreeNode newNode)
+    {
         TreeNode selectedNode =
             RulesTreeView.SelectedNode;
 
-        if (selectedNode != null)
-        {
-            TreeNode parentNode =
-                selectedNode.Parent;
-
-            if (parentNode == null)
-            {
-                RulesTreeView.Nodes.Insert(
-                    RulesTreeView.Nodes.IndexOf(selectedNode) + 1,
-                    newNode);
-            }
-            else
-            {
-                parentNode.Nodes.Insert(
-                    parentNode.Nodes.IndexOf(selectedNode) + 1,
-                    newNode);
-            }
-        }
-        else
+        if (selectedNode == null)
         {
             RulesTreeView.Nodes.Add(newNode);
+            return;
         }
 
+        TreeNode parentNode =
+            selectedNode.Parent;
+
+        if (parentNode == null)
+        {
+            RulesTreeView.Nodes.Insert(
+                RulesTreeView.Nodes.IndexOf(selectedNode) + 1,
+                newNode);
+
+            return;
+        }
+
+        parentNode.Nodes.Insert(
+            parentNode.Nodes.IndexOf(selectedNode) + 1,
+            newNode);
+    }
+
+    /// <summary>
+    /// Adds the supplied rule's child rules beneath the specified node, or selects
+    /// the node when the rule has no children.
+    /// </summary>
+    /// <param name="rule">
+    /// The rule whose child rules should be added.
+    /// </param>
+    /// <param name="newNode">
+    /// The tree node associated with the rule.
+    /// </param>
+    private void AddChildRulesOrSelectNode(
+        IRule rule,
+        TreeNode newNode)
+    {
         if (rule.Children != null &&
             rule.Children.Count > 0)
         {
@@ -1112,18 +1144,14 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
                     childRule,
                     newNode);
             }
-        }
-        else
-        {
-            RulesTreeView.SelectedNode =
-                newNode;
 
-            RulesTreeView.Select();
+            return;
         }
 
-        RestoreSelectedRule();
+        RulesTreeView.SelectedNode =
+            newNode;
 
-        _currentRule.SelectName();
+        RulesTreeView.Select();
     }
 
     /// <summary>
