@@ -280,7 +280,7 @@
     <value>8</value>
   </data>
   <data name="linkLabel1.Text" xml:space="preserve">
-    <value>AWB is constantly being improved by a group of dedicated developers.  If you would, please visit Phabricator to file a new task. You will need to login using your Wikimedia or Wikitech account.</value>
+    <value>Twain is constantly being improved.  If you would, please visit our GITHUB page to file a new task for any bugs, enhancements or suggestions. You will need to login using your GITHUB account.</value>
   </data>
   <data name="&gt;&gt;linkLabel1.Name" xml:space="preserve">
     <value>linkLabel1</value>

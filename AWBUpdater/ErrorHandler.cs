@@ -256,34 +256,9 @@ public partial class ErrorHandler : Form
         }
         };
 
-        handler.txtDetails.Text = CreateDiagnosticReport(ex);
         handler.txtSubject.Text = CreateDiagnosticSubject(ex);
 
         handler.ShowDialog();
-    }
-
-    /// <summary>
-    /// Creates a formatted diagnostic report for an unrecognized exception.
-    /// </summary>
-    /// <param name="ex">The exception to include in the report.</param>
-    /// <returns>
-    /// The formatted report, or a fallback representation if report generation
-    /// fails.
-    /// </returns>
-    private static string CreateDiagnosticReport(Exception ex)
-    {
-        try
-        {
-            return new BugReport(ex).PrintForPhabricator();
-        }
-        catch
-        {
-            return
-                "The formatted error report could not be generated." +
-                Environment.NewLine +
-                Environment.NewLine +
-                ex;
-        }
     }
 
     /// <summary>
@@ -386,15 +361,6 @@ public partial class ErrorHandler : Form
                 hostingApp.Version);
 
             DotNetVersion = Environment.Version.ToString();
-        }
-
-    /// <summary>
-    /// Prints a wiki formatted bug report table
-    /// </summary>
-    /// <returns>String using {{AWB bug}} for reporting bugs</returns>
-    public string PrintForPhabricator()
-        {
-            return Print(new PhabricatorBugFormatter());
         }
 
         public string Print(BugFormatter formatter)
@@ -600,41 +566,6 @@ public partial class ErrorHandler : Form
                 return true;
             }
         }
-
-        // TODO: Centralize exception handling and diagnostic reporting currently
-        // duplicated across the solution. Separate exception classification,
-        // diagnostic-data collection, report formatting, and reporting destinations.
-        // Provide dedicated Phabricator and wiki formatters for Wikimedia projects,
-        // and a Markdown-based issue formatter for Git-hosted projects such as Twain.
-        /// <summary>
-        /// Formats diagnostic report fields using markup suitable for Wikimedia
-        /// Phabricator task descriptions.
-        /// </summary>
-        public class PhabricatorBugFormatter : BugFormatter
-        {
-            /// <summary>
-            /// Returns no report header because Phabricator reports do not require
-            /// a surrounding template.
-            /// </summary>
-            public override string PrintHeader() => string.Empty;
-
-            /// <summary>
-            /// Returns no report footer because Phabricator reports do not require
-            /// a surrounding template.
-            /// </summary>
-            public override string PrintFooter() => string.Empty;
-
-            /// <summary>
-            /// Formats a diagnostic field using Phabricator-compatible Markdown.
-            /// </summary>
-            /// <param name="key">The diagnostic field name.</param>
-            /// <param name="value">The diagnostic field value.</param>
-            /// <returns>The formatted diagnostic field.</returns>
-            public override string PrintLine(string key, string value)
-            {
-                return $"**{key}**: {value}";
-            }
-        }
     }
 
     #region Static helper functions
@@ -789,41 +720,5 @@ public partial class ErrorHandler : Form
             {
                 UseShellExecute = true
             });
-    }
-
-    // TODO: Separate exception handling from diagnostic report generation.
-    // Introduce destination-specific report formatters so Wikimedia installations
-    // can use Phabricator while non-Wikimedia installations and Twain can use
-    // Git-hosted issue trackers or other reporting systems.
-    /// <summary>
-    /// The Wikimedia Phabricator task-creation URL preconfigured for the
-    /// AutoWikiBrowser project.
-    /// </summary>
-    private const string PhabricatorTaskUrl =
-        "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser";
-
-    /// <summary>
-    /// Opens the AutoWikiBrowser Phabricator task creation page.
-    /// </summary>
-    private void linkLabel1_LinkClicked(
-        object sender,
-        LinkLabelLinkClickedEventArgs e)
-    {
-        try
-        {
-            OpenUrl(PhabricatorTaskUrl);
-            linkLabel1.LinkVisited = true;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                "The Phabricator page could not be opened." +
-                Environment.NewLine +
-                Environment.NewLine +
-                ex.Message,
-                "Unable to open browser",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
     }
 }

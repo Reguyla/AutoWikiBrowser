@@ -328,18 +328,6 @@ namespace Twain.Core
             }
 
             /// <summary>
-            /// Formats the diagnostic information as a report suitable for submission to
-            /// Wikimedia Phabricator.
-            /// </summary>
-            /// <returns>
-            /// A formatted bug report containing the collected diagnostic information.
-            /// </returns>
-            public string PrintForPhabricator()
-            {
-                return Print(new PhabricatorBugFormatter());
-            }
-
-            /// <summary>
             /// Formats the collected diagnostic information using the specified bug report
             /// formatter.
             /// </summary>
@@ -558,47 +546,6 @@ namespace Twain.Core
             }
 
             /// <summary>
-            /// Formats diagnostic reports using Wikimedia Phabricator markup.
-            /// </summary>
-            public class PhabricatorBugFormatter : BugFormatter
-            {
-                /// <summary>
-                /// Returns the report header.
-                /// </summary>
-                /// <returns>
-                /// An empty string, since Phabricator reports do not require a header.
-                /// </returns>
-                public override string PrintHeader()
-                {
-                    return string.Empty;
-                }
-
-                /// <summary>
-                /// Returns the report footer.
-                /// </summary>
-                /// <returns>
-                /// An empty string, since Phabricator reports do not require a footer.
-                /// </returns>
-                public override string PrintFooter()
-                {
-                    return string.Empty;
-                }
-
-                /// <summary>
-                /// Formats a diagnostic field using Phabricator's bold-label syntax.
-                /// </summary>
-                /// <param name="key">The diagnostic field name.</param>
-                /// <param name="value">The diagnostic field value.</param>
-                /// <returns>
-                /// The formatted diagnostic field.
-                /// </returns>
-                public override string PrintLine(string key, string value)
-                {
-                    return string.Format("**{0}**: {1}", key, value);
-                }
-            }
-
-            /// <summary>
             /// Formats the supplied exception and its inner exceptions into the
             /// diagnostic stack trace used by the bug report.
             /// </summary>
@@ -804,7 +751,7 @@ namespace Twain.Core
             ErrorHandler handler,
             Exception ex)
         {
-            string errorMessage = new BugReport(ex).PrintForPhabricator();
+            string errorMessage = ex.ToString();
 
             handler.txtDetails.Text = errorMessage;
             handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
@@ -998,29 +945,6 @@ namespace Twain.Core
         }
 
         /// <summary>
-        /// Opens the Wikimedia Phabricator task creation page for AutoWikiBrowser.
-        /// </summary>
-        /// <param name="sender">The source of the link-click event.</param>
-        /// <param name="e">The event data.</param>
-        private void linkLabel1_LinkClicked(
-            object sender,
-            LinkLabelLinkClickedEventArgs e)
-        {
-            linkLabel1.LinkVisited = true;
-
-            try
-            {
-                OpenUrl(
-                    "https://phabricator.wikimedia.org/maniphest/task/create/" +
-                    "?projects=AutoWikiBrowser");
-            }
-            catch
-            {
-                // Failure to open the browser must not interrupt the error dialog.
-            }
-        }
-
-        /// <summary>
         /// Opens a URL using the operating system's default browser.
         /// </summary>
         /// <param name="url">The URL to open.</param>
@@ -1032,36 +956,6 @@ namespace Twain.Core
                     FileName = url,
                     UseShellExecute = true
                 });
-        }
-
-        // TODO: Rename generic designer-generated control and event-handler names
-        // during a dedicated ErrorHandler UI cleanup.
-        //
-        // TODO: Consider confirming that the diagnostic details were reviewed before
-        // inserting them into a public Phabricator task.
-        //
-        // TODO: Avoid placing large diagnostic reports entirely in the URL query.
-        // Consider opening a blank task and relying on clipboard copy when the report
-        // exceeds a safe URL length.
-        /// <summary>
-        /// Opens a new Wikimedia Phabricator task with the formatted diagnostic report
-        /// included in the task description.
-        /// </summary>
-        /// <param name="sender">The source of the click event.</param>
-        /// <param name="e">The event data.</param>
-        private void btnPhab_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                OpenUrl(
-                    "https://phabricator.wikimedia.org/maniphest/task/create/" +
-                    "?projects=AutoWikiBrowser&description=" +
-                    Uri.EscapeDataString(txtDetails.Text));
-            }
-            catch
-            {
-                // Failure to open the browser must not interrupt the error dialog.
-            }
         }
     }
 }

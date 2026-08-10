@@ -80,7 +80,6 @@
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.TabStop = true;
             this.linkLabel1.UseCompatibleTextRendering = true;
-            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
             // label2
             // 
@@ -93,13 +92,6 @@
             resources.ApplyResources(this.txtSubject, "txtSubject");
             this.txtSubject.Name = "txtSubject";
             this.txtSubject.ReadOnly = true;
-            // 
-            // btnPhab
-            // 
-            resources.ApplyResources(this.btnPhab, "btnPhab");
-            this.btnPhab.Name = "btnPhab";
-            this.btnPhab.UseVisualStyleBackColor = true;
-            this.btnPhab.Click += new System.EventHandler(this.btnPhab_Click);
             // 
             // ErrorHandler
             // 
