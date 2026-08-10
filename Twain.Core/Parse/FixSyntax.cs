@@ -557,60 +557,23 @@ public partial class Parsers
         // [[Category:foo}}
         articleText = CategoryCurlyBracketsEnd.Replace(articleText, @"[[$1]]");
 
-        // fixes for missing/unbalanced brackets, for performance only run if article has unbalanced templates
-        string withouttemplates = WikiRegexes.NestedTemplates.Replace(articleText, string.Empty);
+        articleText = RepairTemplateAndCitationBraces(articleText);
 
-        if (withouttemplates.IndexOf("{{", StringComparison.Ordinal) > -1 || withouttemplates.IndexOf("}}", StringComparison.Ordinal) > -1)
-        {
-            articleText = RefCitationMissingOpeningBraces.Replace(articleText, @"$1{{$2");
-            articleText = RefTemplateIncorrectBracesAtEnd.Replace(articleText, @"$1}}");
-            articleText = TemplateIncorrectBracesAtStart.Replace(articleText, @"{{$1");
-            articleText = CitationTemplateSingleBraceAtStart.Replace(articleText, @"{$1");
-            if (ReferenceTemplateQuadBracesAtEndQuick.IsMatch(articleText))
-                articleText = ReferenceTemplateQuadBracesAtEnd.Replace(articleText, @"$1");
-            articleText = CitationTemplateIncorrectBraceAtStart.Replace(articleText, @"{{$1");
-            if (CitationTemplateIncorrectBracesAtEndQuick.IsMatch(articleText))
-                articleText = CitationTemplateIncorrectBracesAtEnd.Replace(articleText, @"$1}}");
-        }
-
-        articleText = RefExternalLinkUsingBraces.Replace(articleText, @"[$1$2]$3");
-
-        // refresh if necessary
-        if (!originalArticleText.Equals(articleText))
-            ssbMc = SingleSquareBrackets.Matches(articleText);
+        articleText = RepairOrphanedSingleBrackets(
+            articleText,
+            ssbMc,
+            originalArticleText,
+            out ssbMc,
+            out string nobrackets,
+            out bool orphanedSingleBrackets);
 
         originalArticleText = articleText;
-        string nobrackets = Tools.ReplaceWithSpaces(articleText, ssbMc);
-        bool orphanedSingleBrackets = (nobrackets.Contains("[") || nobrackets.Contains("]"));
-
-        if (orphanedSingleBrackets)
-        {
-            articleText = RefExternalLinkMissingStartBracket.Replace(articleText, @"$1[$2");
-            articleText = RefExternalLinkMissingEndBracket.Replace(articleText, @"$1]$2");
-
-            // refresh
-            ssbMc = SingleSquareBrackets.Matches(articleText);
-        }
 
         // fixes for external links: internal square brackets, newlines or pipes - Partially CHECKWIKI error 80
         // Performance: filter down to matches with likely external link (contains //) and has pipe, newline or internal square brackets
         List<string> ssb = Tools.DeduplicateList((from Match m in ssbMc select m.Value).ToList());
-        List<string> ssbExternalLink = ssb.FindAll(m => m.Contains("//") && (m.Contains("|") || m.Contains("\r\n") || m.Substring(3).Contains("[") || m.Trim(']').Contains("]")));
 
-        foreach (string s in ssbExternalLink)
-        {
-            string newvalue = s;
-
-            if (newvalue.Contains("\r\n") && !newvalue.Substring(1).Contains("[") && ExternalLinksStart.IsMatch(newvalue))
-                newvalue = newvalue.Replace("\r\n", " ");
-
-            newvalue = SquareBracketsInExternalLinks.Replace(newvalue, SquareBracketsInExternalLinksME);
-
-            newvalue = PipedExternalLink.Replace(newvalue, "$1 $2");
-
-            if (!s.Equals(newvalue))
-                articleText = articleText.Replace(s, newvalue);
-        }
+        articleText = NormalizeExternalLinkCandidates(articleText, ssb);
 
         // needs to be applied after SquareBracketsInExternalLinks
         if (orphanedSingleBrackets && !SyntaxRegexFileWithHTTP.IsMatch(articleText))
@@ -1002,6 +965,175 @@ public partial class Parsers
 
         return articleText;
     }
+
+    /// <summary>
+    /// Repairs malformed template and citation brace syntax in the article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <returns>
+    /// The article text with supported template and citation brace fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing brace-repair behavior for malformed
+    /// citation, reference, and template markup, including missing opening braces,
+    /// incorrect closing braces, and selected over-braced reference-template forms.
+    /// </remarks>
+    private static string RepairTemplateAndCitationBraces(string articleText)
+    {
+        // fixes for missing/unbalanced brackets, for performance only run if article has unbalanced templates
+        string withouttemplates = WikiRegexes.NestedTemplates.Replace(articleText, string.Empty);
+
+        if (withouttemplates.IndexOf("{{", StringComparison.Ordinal) > -1 ||
+            withouttemplates.IndexOf("}}", StringComparison.Ordinal) > -1)
+        {
+            articleText = RefCitationMissingOpeningBraces.Replace(articleText, @"$1{{$2");
+            articleText = RefTemplateIncorrectBracesAtEnd.Replace(articleText, @"$1}}");
+            articleText = TemplateIncorrectBracesAtStart.Replace(articleText, @"{{$1");
+            articleText = CitationTemplateSingleBraceAtStart.Replace(articleText, @"{$1");
+
+            if (ReferenceTemplateQuadBracesAtEndQuick.IsMatch(articleText))
+            {
+                articleText = ReferenceTemplateQuadBracesAtEnd.Replace(articleText, @"$1");
+            }
+
+            articleText = CitationTemplateIncorrectBraceAtStart.Replace(articleText, @"{{$1");
+
+            if (CitationTemplateIncorrectBracesAtEndQuick.IsMatch(articleText))
+            {
+                articleText = CitationTemplateIncorrectBracesAtEnd.Replace(articleText, @"$1}}");
+            }
+        }
+
+        articleText = RefExternalLinkUsingBraces.Replace(articleText, @"[$1$2]$3");
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Repairs orphaned single-square-bracket syntax in the article text and
+    /// refreshes the single-square-bracket match collection when needed.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="ssbMc">
+    /// The current collection of single-square-bracket matches detected in the
+    /// article text.
+    /// </param>
+    /// <param name="originalArticleText">
+    /// The article text value used to determine whether the single-square-bracket
+    /// match collection needs to be refreshed before orphaned-bracket checks.
+    /// </param>
+    /// <param name="updatedSsbMc">
+    /// When this method returns, contains the current collection of
+    /// single-square-bracket matches after any required refresh.
+    /// </param>
+    /// <param name="nobrackets">
+    /// When this method returns, contains the article text with matched
+    /// single-square-bracket spans replaced by spaces for orphaned-bracket checks.
+    /// </param>
+    /// <param name="orphanedSingleBrackets">
+    /// When this method returns, indicates whether orphaned single square brackets
+    /// were detected outside matched external-link syntax.
+    /// </param>
+    /// <returns>
+    /// The article text with supported orphaned single-square-bracket fixes
+    /// applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing sequencing for refreshing the
+    /// single-square-bracket match collection, detecting orphaned square brackets
+    /// outside matched links, and repairing missing opening or closing brackets in
+    /// reference and external-link markup.
+    /// </remarks>
+    private static string RepairOrphanedSingleBrackets(
+        string articleText,
+        MatchCollection ssbMc,
+        string originalArticleText,
+        out MatchCollection updatedSsbMc,
+        out string nobrackets,
+        out bool orphanedSingleBrackets)
+    {
+        // refresh if necessary
+        if (!originalArticleText.Equals(articleText))
+        {
+            ssbMc = SingleSquareBrackets.Matches(articleText);
+        }
+
+        nobrackets = Tools.ReplaceWithSpaces(articleText, ssbMc);
+        orphanedSingleBrackets = nobrackets.Contains("[") || nobrackets.Contains("]");
+
+        if (orphanedSingleBrackets)
+        {
+            articleText = RefExternalLinkMissingStartBracket.Replace(articleText, @"$1[$2");
+            articleText = RefExternalLinkMissingEndBracket.Replace(articleText, @"$1]$2");
+
+            // refresh
+            ssbMc = SingleSquareBrackets.Matches(articleText);
+        }
+
+        updatedSsbMc = ssbMc;
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes malformed external-link candidates that contain internal square
+    /// brackets, pipes, or embedded newlines.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="ssb">
+    /// A deduplicated list of single-square-bracket matches detected in the
+    /// article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported malformed external-link candidate cleanup
+    /// applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing external-link candidate cleanup behavior
+    /// by filtering likely external links from the current single-square-bracket
+    /// matches and then normalizing embedded newlines, internal square brackets,
+    /// and pipe separators within those matches.
+    /// </remarks>
+    private static string NormalizeExternalLinkCandidates(string articleText, List<string> ssb)
+    {
+        // fixes for external links: internal square brackets, newlines or pipes - Partially CHECKWIKI error 80
+        // Performance: filter down to matches with likely external link (contains //) and has pipe, newline or internal square brackets
+        List<string> ssbExternalLink = ssb.FindAll(
+            m => m.Contains("//") &&
+                 (m.Contains("|") ||
+                  m.Contains("\r\n") ||
+                  m.Substring(3).Contains("[") ||
+                  m.Trim(']').Contains("]")));
+
+        foreach (string s in ssbExternalLink)
+        {
+            string newvalue = s;
+
+            if (newvalue.Contains("\r\n") &&
+                !newvalue.Substring(1).Contains("[") &&
+                ExternalLinksStart.IsMatch(newvalue))
+            {
+                newvalue = newvalue.Replace("\r\n", " ");
+            }
+
+            newvalue = SquareBracketsInExternalLinks.Replace(newvalue, SquareBracketsInExternalLinksME);
+            newvalue = PipedExternalLink.Replace(newvalue, "$1 $2");
+
+            if (!s.Equals(newvalue))
+            {
+                articleText = articleText.Replace(s, newvalue);
+            }
+        }
+
+        return articleText;
+    }
+
+
 
 
 
