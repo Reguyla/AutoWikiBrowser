@@ -494,94 +494,12 @@ internal sealed partial class Updater : Form
                 FileVersionInfo.GetVersionInfo(
                     Path.Combine(_awbDirectory, "AutoWikiBrowser.exe"));
 
-            RootObject updaterData =
-                System.Text.Json.JsonSerializer.Deserialize<RootObject>(
-                    json,
-                    new System.Text.Json.JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+            RootObject updaterData = DeserializeUpdateManifest(json);
 
-            if (updaterData == null)
-            {
-                throw new InvalidDataException(
-                    "The version information response did not contain valid version data.");
-            }
+            string versionToUpdateAWBTo =
+                DetermineAwbUpdate(updaterData, awbVersionInfo.FileVersion);
 
-            string versionToUpdateAWBTo = string.Empty;
-
-            if (updaterData.enabledversions.All(v => v.version != awbVersionInfo.FileVersion))
-            {
-                // The installed version is no longer enabled and must be updated.
-                _updateStatus = UpdateStatus.RequiredUpdate;
-
-                versionToUpdateAWBTo = updaterData.enabledversions
-                    .Where(x => !x.dev)
-                    .OrderByDescending(x => x.version)
-                    .First()
-                    .version;
-            }
-            else
-            {
-                var newerVersions = updaterData.enabledversions
-                    .Where(
-                        x =>
-                            !x.dev &&
-                            new Version(x.version) > new Version(awbVersionInfo.FileVersion))
-                    .OrderByDescending(x => x.version)
-                    .ToList();
-
-                if (newerVersions.Any())
-                {
-                    _updateStatus = UpdateStatus.OptionalUpdateDeclined;
-
-                    if (newerVersions.Count > 1)
-                    {
-                        using (VersionChooser chooser = new VersionChooser(newerVersions))
-                        {
-                            if (chooser.ShowDialog() == DialogResult.OK &&
-                                !string.IsNullOrEmpty(chooser.SelectedVersion))
-                            {
-                                _updateStatus = UpdateStatus.OptionalUpdate;
-                                versionToUpdateAWBTo = chooser.SelectedVersion;
-                            }
-                        }
-                    }
-                    else if (newerVersions.Count == 1 &&
-                             MessageBox.Show(
-                                 string.Format(
-                                     "There is an optional update to AutoWikiBrowser. Would you like to upgrade to {0}?",
-                                     newerVersions.First().version),
-                                 "Optional update",
-                                 MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        _updateStatus = UpdateStatus.OptionalUpdate;
-                        versionToUpdateAWBTo = newerVersions.First().version;
-                    }
-                }
-            }
-
-            if ((_updateStatus & (UpdateStatus.RequiredUpdate | UpdateStatus.OptionalUpdate)) != 0)
-            {
-                _zipName =
-                    "AutoWikiBrowser" +
-                    VersionToFileVersion(versionToUpdateAWBTo) +
-                    ".zip";
-            }
-            else if (new Version(updaterData.updaterversion) >
-                     new Version(
-                         Assembly.GetExecutingAssembly()
-                             .GetName()
-                             .Version
-                             .ToString()))
-            {
-                _zipName =
-                    "AWBUpdater" +
-                    VersionToFileVersion(updaterData.updaterversion) +
-                    ".zip";
-
-                _updateStatus = UpdateStatus.UpdaterUpdate;
-            }
+            DetermineUpdatePackage(updaterData, versionToUpdateAWBTo);
         }
         catch
         {
@@ -595,6 +513,168 @@ internal sealed partial class Updater : Form
         }
 
         progressUpdate.Value = 35;
+    }
+
+    /// <summary>
+    /// Deserializes and validates the published updater manifest.
+    /// </summary>
+    /// <param name="json">
+    /// Raw JSON returned by the update manifest endpoint.
+    /// </param>
+    /// <returns>
+    /// The deserialized updater manifest.
+    /// </returns>
+    /// <exception cref="InvalidDataException">
+    /// Thrown when the response does not contain valid updater data.
+    /// </exception>
+    private static RootObject DeserializeUpdateManifest(string json)
+    {
+        RootObject updaterData =
+            System.Text.Json.JsonSerializer.Deserialize<RootObject>(
+                json,
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+        if (updaterData == null)
+        {
+            throw new InvalidDataException(
+                "The version information response did not contain valid version data.");
+        }
+
+        return updaterData;
+    }
+
+    /// <summary>
+    /// Determines whether the installed AutoWikiBrowser version requires or may
+    /// receive an application update.
+    /// </summary>
+    /// <param name="updaterData">
+    /// Published updater manifest containing the enabled application versions.
+    /// </param>
+    /// <param name="installedVersion">
+    /// File version of the currently installed AutoWikiBrowser executable.
+    /// </param>
+    /// <returns>
+    /// The selected AutoWikiBrowser version to install, or an empty string when no
+    /// application update was selected.
+    /// </returns>
+    private string DetermineAwbUpdate(
+        RootObject updaterData,
+        string installedVersion)
+    {
+        if (updaterData.enabledversions.All(
+                version => version.version != installedVersion))
+        {
+            _updateStatus = UpdateStatus.RequiredUpdate;
+
+            return updaterData.enabledversions
+                .Where(version => !version.dev)
+                .OrderByDescending(version => version.version)
+                .First()
+                .version;
+        }
+
+        var newerVersions = updaterData.enabledversions
+            .Where(
+                version =>
+                    !version.dev &&
+                    new Version(version.version) > new Version(installedVersion))
+            .OrderByDescending(version => version.version)
+            .ToList();
+
+        if (!newerVersions.Any())
+        {
+            return string.Empty;
+        }
+
+        _updateStatus = UpdateStatus.OptionalUpdateDeclined;
+
+        return ChooseOptionalUpdate(newerVersions);
+    }
+
+    /// <summary>
+    /// Allows the user to select or approve an available optional update.
+    /// </summary>
+    /// <param name="newerVersions">
+    /// Available non-development versions newer than the installed version.
+    /// </param>
+    /// <returns>
+    /// The selected version, or an empty string if the optional update is declined.
+    /// </returns>
+    private string ChooseOptionalUpdate(List<Enabledversion> newerVersions)
+    {
+        if (newerVersions.Count > 1)
+        {
+            using (VersionChooser chooser = new VersionChooser(newerVersions))
+            {
+                if (chooser.ShowDialog() == DialogResult.OK &&
+                    !string.IsNullOrEmpty(chooser.SelectedVersion))
+                {
+                    _updateStatus = UpdateStatus.OptionalUpdate;
+                    return chooser.SelectedVersion;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        if (newerVersions.Count == 1 &&
+            MessageBox.Show(
+                string.Format(
+                    "There is an optional update to AutoWikiBrowser. Would you like to upgrade to {0}?",
+                    newerVersions.First().version),
+                "Optional update",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
+            _updateStatus = UpdateStatus.OptionalUpdate;
+            return newerVersions.First().version;
+        }
+
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// Determines the update package that should be downloaded after application
+    /// version evaluation has completed.
+    /// </summary>
+    /// <param name="updaterData">
+    /// Published updater manifest containing updater version information.
+    /// </param>
+    /// <param name="versionToUpdateAWBTo">
+    /// Selected AutoWikiBrowser version, or an empty string when no application
+    /// update was selected.
+    /// </param>
+    private void DetermineUpdatePackage(
+        RootObject updaterData,
+        string versionToUpdateAWBTo)
+    {
+        if ((_updateStatus &
+             (UpdateStatus.RequiredUpdate | UpdateStatus.OptionalUpdate)) != 0)
+        {
+            _zipName =
+                "AutoWikiBrowser" +
+                VersionToFileVersion(versionToUpdateAWBTo) +
+                ".zip";
+
+            return;
+        }
+
+        if (new Version(updaterData.updaterversion) >
+            new Version(
+                Assembly.GetExecutingAssembly()
+                    .GetName()
+                    .Version
+                    .ToString()))
+        {
+            _zipName =
+                "AWBUpdater" +
+                VersionToFileVersion(updaterData.updaterversion) +
+                ".zip";
+
+            _updateStatus = UpdateStatus.UpdaterUpdate;
+        }
     }
 
     /// <summary>
