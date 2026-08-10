@@ -629,48 +629,13 @@ public partial class Parsers
         if (ssb.Any(s => s.Contains("||")))
             articleText = DoublePipeInWikiLink.Replace(articleText, "|");
 
-        // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia#Article_with_false_.3Cbr.2F.3E_.28AutoEd.29
-        // fix incorrect <br> of <br.>, <\br> and <br\> - CHECKWIKI error 02
-        if (SimpleTagsList.Any(s => (s.Contains("br") && !s.Equals("<br>") && !s.Equals("<br/>"))))
-            articleText = IncorrectBr.Replace(articleText, "<br />");
-
-        articleText = IncorrectBr2.Replace(articleText, m =>
-        {
-            if (m.Groups[1].Value == "left")
-                return "{{clear|left}}";
-            if (m.Groups[1].Value == "right")
-                return "{{clear|right}}";
-
-            return "{{clear}}";
-        }
-        );
-        //<br style="clear:both;" clear="all" />
-        //<br style="clear:both;" />
-        articleText = IncorrectBr3.Replace(articleText, m =>
-        {
-            if (m.Groups[1].Value == "left")
-                return "{{clear|left}}";
-            if (m.Groups[1].Value == "right")
-                return "{{clear|right}}";
-
-            return "{{clear}}";
-        }
-        );
+        articleText = NormalizeBreakTagSyntax(articleText, SimpleTagsList);
 
         // CHECKWIKI errors 55, 63, 66, 77
         if (SimpleTagsList.Any(s => s.Contains("small")))
             articleText = FixSmallTags(articleText);
 
-        articleText = WordingIntoBareExternalLinks.Replace(articleText, @"$1[$3 $2]");
-
-        if (TemplateExists(alltemplates, WikiRegexes.DeadLink))
-            articleText = DeadlinkOutsideRef.Replace(articleText, @" $2$1");
-
-        if (!Variables.LangCode.Equals("zh"))
-        {
-            articleText = ExternalLinkWordSpacingBefore.Replace(articleText, " $1");
-            articleText = ExternalLinkWordSpacingAfter.Replace(articleText, "$1 $2");
-        }
+        articleText = NormalizeExternalLinkFormatting(articleText, alltemplates);
 
         // CHECKWIKI error 65: Image description ends with break – https://checkwiki.toolforge.org/cgi-bin/checkwiki.cgi?project=enwiki&view=only&id=65
         if (ssb.Any(s => s.Contains("<")))
@@ -1133,7 +1098,104 @@ public partial class Parsers
         return articleText;
     }
 
+    /// <summary>
+    /// Normalizes malformed <c>&lt;br&gt;</c> syntax and converts supported clear
+    /// break markup into clear templates.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="simpleTagsList">
+    /// A normalized list of simple HTML-like tags detected in the article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported break-tag and clear-markup fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing break-tag cleanup behavior, including
+    /// correction of malformed <c>&lt;br&gt;</c> forms and conversion of supported
+    /// clear-style break markup into <c>{{clear}}</c>, <c>{{clear|left}}</c>, or
+    /// <c>{{clear|right}}</c>.
+    /// </remarks>
+    private static string NormalizeBreakTagSyntax(string articleText, List<string> simpleTagsList)
+    {
+        // [en.wikipedia.org](https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia#Article_with_false_.3Cbr.2F.3E_.28AutoEd.29)
+        // fix incorrect <br> of <br.>, <\br> and <br\> - CHECKWIKI error 02
+        if (simpleTagsList.Any(s => s.Contains("br") && !s.Equals("<br>") && !s.Equals("<br/>")))
+        {
+            articleText = IncorrectBr.Replace(articleText, "<br />");
+        }
 
+        articleText = IncorrectBr2.Replace(articleText, m =>
+        {
+            if (m.Groups[1].Value == "left")
+            {
+                return "{{clear|left}}";
+            }
+
+            if (m.Groups[1].Value == "right")
+            {
+                return "{{clear|right}}";
+            }
+
+            return "{{clear}}";
+        });
+
+        //<br style="clear:both;" clear="all" />
+        //<br style="clear:both;" />
+        articleText = IncorrectBr3.Replace(articleText, m =>
+        {
+            if (m.Groups[1].Value == "left")
+            {
+                return "{{clear|left}}";
+            }
+
+            if (m.Groups[1].Value == "right")
+            {
+                return "{{clear|right}}";
+            }
+
+            return "{{clear}}";
+        });
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes late-stage external-link formatting issues in the article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// A collection of template names detected in the article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported late external-link formatting fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing late-stage external-link cleanup
+    /// behavior, including converting wording into bare external links, moving
+    /// dead-link templates outside references when applicable, and normalizing
+    /// spacing around external links for languages other than Chinese.
+    /// </remarks>
+    private static string NormalizeExternalLinkFormatting(string articleText, List<string> alltemplates)
+    {
+        articleText = WordingIntoBareExternalLinks.Replace(articleText, @"$1[$3 $2]");
+
+        if (TemplateExists(alltemplates, WikiRegexes.DeadLink))
+        {
+            articleText = DeadlinkOutsideRef.Replace(articleText, @" $2$1");
+        }
+
+        if (!Variables.LangCode.Equals("zh"))
+        {
+            articleText = ExternalLinkWordSpacingBefore.Replace(articleText, " $1");
+            articleText = ExternalLinkWordSpacingAfter.Replace(articleText, "$1 $2");
+        }
+
+        return articleText;
+    }
 
 
 
