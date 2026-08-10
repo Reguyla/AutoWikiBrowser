@@ -65,7 +65,6 @@ namespace AutoWikiBrowser
             this.BluemooseLink = new Twain.Core.Controls.DeveloperLinkLabel();
             this.LigulemLink = new Twain.Core.Controls.DeveloperLinkLabel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.linkPhabricator = new System.Windows.Forms.LinkLabel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.kingboykLabel = new Twain.Core.Controls.DeveloperLinkLabel();
@@ -195,17 +194,9 @@ namespace AutoWikiBrowser
             // 
             // flowLayoutPanel3
             // 
-            this.flowLayoutPanel3.Controls.Add(this.linkPhabricator);
             this.flowLayoutPanel3.Controls.Add(this.UsageStatsLabel);
             resources.ApplyResources(this.flowLayoutPanel3, "flowLayoutPanel3");
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            // 
-            // linkPhabricator
-            // 
-            resources.ApplyResources(this.linkPhabricator, "linkPhabricator");
-            this.linkPhabricator.Name = "linkPhabricator";
-            this.linkPhabricator.TabStop = true;
-            this.linkPhabricator.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkPhabricator_LinkClicked);
             // 
             // flowLayoutPanel1
             // 
@@ -308,6 +299,5 @@ namespace AutoWikiBrowser
         private Twain.Core.Controls.DeveloperLinkLabel kingboykLabel;
         private System.Windows.Forms.Label lblContribs;
         private System.Windows.Forms.TextBox txtVersions;
-        private System.Windows.Forms.LinkLabel linkPhabricator;
     }
 }

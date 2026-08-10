@@ -94,18 +94,4 @@ internal sealed partial class AboutBox : Form
         UsageStatsLabel.LinkVisited = true;
         UsageStats.OpenUsageStatsURL();
     }
-
-    /// <summary>
-    /// Opens the Wikimedia Phabricator form for creating an AutoWikiBrowser
-    /// task.
-    /// </summary>
-    private void linkPhabricator_LinkClicked(
-        object sender,
-        LinkLabelLinkClickedEventArgs e)
-    {
-        linkPhabricator.LinkVisited = true;
-
-        Tools.OpenURLInBrowser(
-            "https://phabricator.wikimedia.org/maniphest/task/create/?projects=AutoWikiBrowser");
-    }
 }

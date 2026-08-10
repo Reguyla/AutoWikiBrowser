@@ -612,36 +612,6 @@
   <data name="&gt;&gt;flwOriginalDevs.ZOrder" xml:space="preserve">
     <value>9</value>
   </data>
-  <data name="linkPhabricator.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="linkPhabricator.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 0</value>
-  </data>
-  <data name="linkPhabricator.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>8, 0, 8, 0</value>
-  </data>
-  <data name="linkPhabricator.Size" type="System.Drawing.Size, System.Drawing">
-    <value>419, 32</value>
-  </data>
-  <data name="linkPhabricator.TabIndex" type="System.Int32, mscorlib">
-    <value>14</value>
-  </data>
-  <data name="linkPhabricator.Text" xml:space="preserve">
-    <value>Phabricator (bugs and requests)</value>
-  </data>
-  <data name="&gt;&gt;linkPhabricator.Name" xml:space="preserve">
-    <value>linkPhabricator</value>
-  </data>
-  <data name="&gt;&gt;linkPhabricator.Type" xml:space="preserve">
-    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;linkPhabricator.Parent" xml:space="preserve">
-    <value>flowLayoutPanel3</value>
-  </data>
-  <data name="&gt;&gt;linkPhabricator.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
   <data name="flowLayoutPanel3.FlowDirection" type="System.Windows.Forms.FlowDirection, System.Windows.Forms">
     <value>TopDown</value>
   </data>
