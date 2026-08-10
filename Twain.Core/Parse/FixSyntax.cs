@@ -521,40 +521,14 @@ public partial class Parsers
 
         articleText = ApplyEnglishSyntaxFixes(articleText, alltemplates, ssbMc);
 
-
-        if (TemplateExists(alltemplates, WikiRegexes.MagicWordTemplates))
-            articleText = Tools.TemplateToMagicWord(articleText);
-
+        articleText = NormalizeTemplateSyntax(articleText, alltemplates, alltemplatesDetail);
+ 
         // get a list of all the simple html tags (not with properties) used in the article, so we can selectively apply HTML tag fixes below
         List<string> SimpleTagsList = GetSimpleTagsList(articleText);
 
         articleText = NormalizeSimpleHtmlTags(articleText, SimpleTagsList);
 
-        // remove unnecessary namespace
-        if (alltemplatesDetail.Any(t => Regex.IsMatch(t, Variables.NamespacesCaseInsensitive[Namespace.Template])))
-            articleText = RemoveTemplateNamespace(articleText);
-
-        // removal of Unicode non-breaking space or newlines in template name
-        List<string> templatesWithUnicodeNonBreakingSpaceOrNewline =
-            alltemplatesDetail.Where(tc =>
-            {
-                if (tc.Contains("\u00a0") || tc.Contains("\u3000"))
-                    return true;
-
-                // check template call up to first bar for newline, but if have wiki comment will be hidden so ignore if have hidetext character
-                if (tc.Contains("|"))
-                {
-                    string toFirstBar = tc.Substring(0, tc.IndexOf('|'));
-                    return toFirstBar.Trim().Length > 2 && toFirstBar.Contains("\r\n") && !toFirstBar.Contains("⌊⌊⌊⌊");
-                }
-
-                return false;
-            }).Select(tc => Tools.GetTemplateName(tc)).Where(t => t.Length > 0).ToList();
-
-        foreach (var t in templatesWithUnicodeNonBreakingSpaceOrNewline)
-            articleText = Tools.RenameTemplate(articleText, t, t, true);
-
-        if (SyntaxRegexBrNewline.IsMatch(articleText))
+         if (SyntaxRegexBrNewline.IsMatch(articleText))
         {
             // remove <br> from lists (end of list line) - CHECKWIKI error 54
             articleText = SyntaxRegexListRowBrTag.Replace(articleText, "$1");
@@ -563,27 +537,7 @@ public partial class Parsers
             articleText = SyntaxRegexListRowBrTagMiddle.Replace(articleText, "$1\r\n$2");
         }
 
-        // CHECKWIKI error 93
-        bool badHttpLinks = Tools.DeduplicateList((from Match m in HttpLinks.Matches(articleText.ToLower()) select m.Value).ToList()).Any(s => !Regex.IsMatch(s, @"^https?://[htps]*$"));
-
-        if (badHttpLinks)
-            articleText = MultipleHttpInLink.Replace(articleText, "$1");
-
-        articleText = MultipleFtpInLink.Replace(articleText, "$1");
-
-        if (badHttpLinks && TemplateExists(alltemplates, WikiRegexes.UrlTemplate))
-            articleText = WikiRegexes.UrlTemplate.Replace(articleText, m => m.Value.Replace("http://http://", "http://"));
-
-        if (badHttpLinks && !SyntaxRegexHTTPNumber.IsMatch(articleText))
-        {
-            articleText = MissingColonInHttpLink.Replace(articleText, "$1://$2");
-            articleText = SingleTripleSlashInHttpLink.Replace(articleText, "$1://$2");
-            articleText = articleText.Replace("https://http://", "https://");
-            articleText = articleText.Replace("https:// www.", "https://www.");
-            articleText = articleText.Replace("http:// www.", "http://www.");
-            articleText = articleText.Replace("[http%3A//", "[http://");
-            articleText = articleText.Replace("[https%3A//", "[https://");
-        }
+        articleText = NormalizeProtocolSyntax(articleText, alltemplates);
 
         if (CellpaddingTypoQuick.IsMatch(articleText))
             articleText = CellpaddingTypo.Replace(articleText, "$1cellpadding");
@@ -928,6 +882,127 @@ public partial class Parsers
 
         return articleText;
     }
+
+    /// <summary>
+    /// Normalizes template-related syntax issues in the article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// A collection of template names detected in the article text.
+    /// </param>
+    /// <param name="alltemplatesDetail">
+    /// A collection of detailed template calls detected in the article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported template-syntax fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing template-related cleanup behavior,
+    /// including magic-word template conversion, removal of unnecessary template
+    /// namespace prefixes, and normalization of template names containing Unicode
+    /// non-breaking spaces or embedded newlines before the first parameter.
+    /// </remarks>
+    private static string NormalizeTemplateSyntax(
+        string articleText,
+        List<string> alltemplates,
+        List<string> alltemplatesDetail)
+    {
+        if (TemplateExists(alltemplates, WikiRegexes.MagicWordTemplates))
+        {
+            articleText = Tools.TemplateToMagicWord(articleText);
+        }
+
+        // remove unnecessary namespace
+        if (alltemplatesDetail.Any(t => Regex.IsMatch(t, Variables.NamespacesCaseInsensitive[Namespace.Template])))
+        {
+            articleText = RemoveTemplateNamespace(articleText);
+        }
+
+        // removal of Unicode non-breaking space or newlines in template name
+        List<string> templatesWithUnicodeNonBreakingSpaceOrNewline =
+            alltemplatesDetail.Where(tc =>
+            {
+                if (tc.Contains("\u00a0") || tc.Contains("\u3000"))
+                {
+                    return true;
+                }
+
+                // check template call up to first bar for newline, but if have wiki comment will be hidden so ignore if have hidetext character
+                if (tc.Contains("|"))
+                {
+                    string toFirstBar = tc.Substring(0, tc.IndexOf('|'));
+                    return toFirstBar.Trim().Length > 2 &&
+                           toFirstBar.Contains("\r\n") &&
+                           !toFirstBar.Contains("⌊⌊⌊⌊");
+                }
+
+                return false;
+            }).Select(tc => Tools.GetTemplateName(tc)).Where(t => t.Length > 0).ToList();
+
+        foreach (string t in templatesWithUnicodeNonBreakingSpaceOrNewline)
+        {
+            articleText = Tools.RenameTemplate(articleText, t, t, true);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Normalizes malformed URL protocol syntax and related link-prefix issues in
+    /// the article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="alltemplates">
+    /// A collection of template names detected in the article text.
+    /// </param>
+    /// <returns>
+    /// The article text with supported protocol and URL-prefix fixes applied.
+    /// </returns>
+    /// <remarks>
+    /// This helper preserves the existing malformed-protocol cleanup behavior,
+    /// including duplicate HTTP or FTP prefixes, malformed URL-template prefixes,
+    /// missing protocol colons, incorrect slash counts, and stray spaces within
+    /// HTTP and HTTPS link prefixes.
+    /// </remarks>
+    private static string NormalizeProtocolSyntax(string articleText, List<string> alltemplates)
+    {
+        // CHECKWIKI error 93
+        bool badHttpLinks = Tools.DeduplicateList(
+            (from Match m in HttpLinks.Matches(articleText.ToLower()) select m.Value).ToList())
+            .Any(s => !Regex.IsMatch(s, @"^https?://[htps]*$"));
+
+        if (badHttpLinks)
+        {
+            articleText = MultipleHttpInLink.Replace(articleText, "$1");
+        }
+
+        articleText = MultipleFtpInLink.Replace(articleText, "$1");
+
+        if (badHttpLinks && TemplateExists(alltemplates, WikiRegexes.UrlTemplate))
+        {
+            articleText = WikiRegexes.UrlTemplate.Replace(
+                articleText,
+                m => m.Value.Replace("[http](http://http://)", "http://"));
+        }
+
+        if (badHttpLinks && !SyntaxRegexHTTPNumber.IsMatch(articleText))
+        {
+            articleText = MissingColonInHttpLink.Replace(articleText, "$1://$2");
+            articleText = SingleTripleSlashInHttpLink.Replace(articleText, "$1://$2");
+            articleText = articleText.Replace("[http](https://http://)", "https://");
+            articleText = articleText.Replace("https:// www.", "[www](https://www)");
+            articleText = articleText.Replace("http:// www.", "[www](http://www)");
+            articleText = articleText.Replace("[http%3A//", "[http://");
+            articleText = articleText.Replace("[https%3A//", "[https://");
+        }
+
+        return articleText;
+    }
+
 
 
     /// <summary>
