@@ -1062,6 +1062,25 @@ internal sealed partial class Updater : Form
     /// </remarks>
     private void CopyFiles()
     {
+        StageUpdaterReplacement();
+
+        if ((_updateStatus &
+             (UpdateStatus.OptionalUpdate | UpdateStatus.RequiredUpdate)) != 0)
+        {
+            DeleteObsoleteFiles();
+            CopyApplicationFiles();
+            RestorePluginFiles();
+        }
+
+        progressUpdate.Value = 95;
+    }
+
+    /// <summary>
+    /// Stages a replacement updater executable without overwriting the currently
+    /// running updater.
+    /// </summary>
+    private void StageUpdaterReplacement()
+    {
         string updater = Path.Combine(_tempDirectory, "AWBUpdater.exe");
 
         if ((_updateStatus & UpdateStatus.UpdaterUpdate) == UpdateStatus.UpdaterUpdate ||
@@ -1071,73 +1090,112 @@ internal sealed partial class Updater : Form
                 updater,
                 Path.Combine(_awbDirectory, "AWBUpdater.exe.new"));
         }
+    }
 
-        if ((_updateStatus & (UpdateStatus.OptionalUpdate | UpdateStatus.RequiredUpdate)) != 0)
+    /// <summary>
+    /// Removes files and plugin components that are explicitly obsolete in the
+    /// incoming AutoWikiBrowser release.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Replace this hard-coded cleanup list with manifest-driven cleanup or
+    /// a clean-installation strategy.
+    /// </remarks>
+    private void DeleteObsoleteFiles()
+    {
+        DeleteIfExists("Wikidiff2.dll");
+        DeleteIfExists("Diff.dll");
+        DeleteIfExists("Twain.Core2.dll");
+        DeleteIfExists("WPAssessmentsCatCreator.dll");
+
+        string assessmentsPluginDirectory =
+            Path.Combine(
+                _awbDirectory,
+                "Plugins\\WPAssessmentsCatCreator");
+
+        if (Directory.Exists(assessmentsPluginDirectory))
         {
-            // Explicit deletions of obsolete files from previous releases.
-            DeleteIfExists("Wikidiff2.dll");
-            DeleteIfExists("Diff.dll");
-            DeleteIfExists("Twain.Core2.dll");
-            DeleteIfExists("WPAssessmentsCatCreator.dll");
+            Directory.Delete(
+                assessmentsPluginDirectory,
+                true);
+        }
+    }
 
-            if (Directory.Exists(
-                    Path.Combine(
-                        _awbDirectory,
-                        "Plugins\\WPAssessmentsCatCreator")))
+    /// <summary>
+    /// Copies extracted application files from the temporary working directory
+    /// into the AutoWikiBrowser installation directory.
+    /// </summary>
+    /// <remarks>
+    /// Files belonging to the updater are skipped because updater replacement is
+    /// handled separately.
+    ///
+    /// TODO: Replace string-based relative-path handling with Path.GetRelativePath.
+    /// TODO: Replace the filename substring check with explicit package metadata or
+    /// a more precise updater-file exclusion rule.
+    /// </remarks>
+    private void CopyApplicationFiles()
+    {
+        foreach (string file in Directory.GetFiles(
+                     _tempDirectory,
+                     "*.*",
+                     SearchOption.AllDirectories))
+        {
+            if (file.Contains("AWBUpdater"))
             {
-                Directory.Delete(
-                    Path.Combine(
-                        _awbDirectory,
-                        "Plugins\\WPAssessmentsCatCreator"),
-                    true);
+                continue;
             }
 
-            foreach (string file in Directory.GetFiles(
-                         _tempDirectory,
-                         "*.*",
-                         SearchOption.AllDirectories))
+            CopyFile(
+                file,
+                Path.Combine(
+                    _awbDirectory,
+                    file.Replace(_tempDirectory + "\\", "")));
+        }
+    }
+
+    /// <summary>
+    /// Restores plugin files over identically named files in the application root.
+    /// </summary>
+    /// <remarks>
+    /// This preserves the legacy updater behavior of preferring plugin copies when
+    /// a plugin file has the same filename as a file in the installation root.
+    ///
+    /// TODO: Determine why this compatibility behavior is required and whether it
+    /// should be preserved by the replacement updater.
+    /// TODO: Replace filename comparison based on substring extraction with
+    /// Path.GetFileName.
+    /// </remarks>
+    private void RestorePluginFiles()
+    {
+        string[] pluginFiles = Directory.GetFiles(
+            Path.Combine(_awbDirectory, "Plugins"),
+            "*.*",
+            SearchOption.AllDirectories);
+
+        foreach (string file in Directory.GetFiles(
+                     _awbDirectory,
+                     "*.*",
+                     SearchOption.TopDirectoryOnly))
+        {
+            foreach (string pluginFile in pluginFiles)
             {
-                if (file.Contains("AWBUpdater"))
+                if (file.Substring(
+                        file.LastIndexOf(
+                            "\\",
+                            StringComparison.CurrentCulture)) ==
+                    pluginFile.Substring(
+                        pluginFile.LastIndexOf(
+                            "\\",
+                            StringComparison.CurrentCulture)))
                 {
-                    continue;
-                }
+                    File.Copy(
+                        pluginFile,
+                        file,
+                        true);
 
-                CopyFile(
-                    file,
-                    Path.Combine(
-                        _awbDirectory,
-                        file.Replace(_tempDirectory + "\\", "")));
-            }
-
-            string[] pluginFiles = Directory.GetFiles(
-                Path.Combine(_awbDirectory, "Plugins"),
-                "*.*",
-                SearchOption.AllDirectories);
-
-            foreach (string file in Directory.GetFiles(
-                         _awbDirectory,
-                         "*.*",
-                         SearchOption.TopDirectoryOnly))
-            {
-                foreach (string pluginFile in pluginFiles)
-                {
-                    if (file.Substring(
-                            file.LastIndexOf(
-                                "\\",
-                                StringComparison.CurrentCulture)) ==
-                        pluginFile.Substring(
-                            pluginFile.LastIndexOf(
-                                "\\",
-                                StringComparison.CurrentCulture)))
-                    {
-                        File.Copy(pluginFile, file, true);
-                        break;
-                    }
+                    break;
                 }
             }
         }
-
-        progressUpdate.Value = 95;
     }
 
     /// <summary>
