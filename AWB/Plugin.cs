@@ -64,7 +64,6 @@ internal static class Plugin
             "DotNetWikiBot",
             "Diff",
             "Twain.Core",
-            "Newtonsoft.Json",
             "Microsoft.mshtml"
         };
 

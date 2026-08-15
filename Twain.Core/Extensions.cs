@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections;
+﻿
+using System.Text.Json.Nodes;
 using System.Windows.Forms;
 
 namespace Twain.Core;
@@ -175,19 +175,21 @@ public static class Extensions
         string.IsNullOrEmpty(str);
 
     /// <summary>
-    /// Returns the distinct string representations of the token's immediate
+    /// Returns the distinct string representations of the node's immediate
     /// child values.
     /// </summary>
-    /// <param name="token">
-    /// The JSON token whose child values are inspected.
+    /// <param name="node">
+    /// The JSON node whose child values are inspected.
     /// </param>
     /// <returns>
-    /// A list containing the distinct string representations of the token's
+    /// A list containing the distinct string representations of the node's
     /// immediate children.
     /// </returns>
-    public static List<string> DistinctList(this JToken token) =>
-        token
-            .Select(item => item.ToString())
+    public static List<string> DistinctList(this JsonNode node) =>
+        node
+            .AsArray()
+            .Where(item => item != null)
+            .Select(item => item!.ToString())
             .Distinct()
             .ToList();
 }

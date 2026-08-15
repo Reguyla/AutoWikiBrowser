@@ -16,10 +16,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Authentication;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Windows.Forms;
 using Twain.Core.API;
 
@@ -536,7 +537,7 @@ public class Session
     }
 
     /// <summary>
-    /// Attempts to parse a JSON object using bounded reader settings and
+    /// Attempts to parse JSON text as an object using a bounded maximum depth and
     /// reports malformed or missing content through the debug log.
     /// </summary>
     /// <param name="jsonText">
@@ -550,13 +551,13 @@ public class Session
     /// succeeded; otherwise, <see langword="null"/>.
     /// </param>
     /// <returns>
-    /// <see langword="true"/> if the JSON was successfully parsed; otherwise,
-    /// <see langword="false"/>.
+    /// <see langword="true"/> if the JSON was successfully parsed as an object;
+    /// otherwise, <see langword="false"/>.
     /// </returns>
     private static bool TryParseJsonObject(
         string jsonText,
         string sourceName,
-        out JObject parsedJson)
+        [NotNullWhen(true)] out JsonObject? parsedJson)
     {
         parsedJson = null;
 
@@ -571,16 +572,25 @@ public class Session
 
         try
         {
-            using (var stringReader = new StringReader(jsonText))
-            using (var jsonReader = new JsonTextReader(stringReader)
+            JsonNode? node =
+                JsonNode.Parse(
+                    jsonText,
+                    documentOptions:
+                        new JsonDocumentOptions
+                        {
+                            MaxDepth = 32
+                        });
+
+            if (node is not JsonObject jsonObject)
             {
-                MaxDepth = 32,
-                DateParseHandling = DateParseHandling.None
-            })
-            {
-                parsedJson = JObject.Load(jsonReader);
+                Tools.WriteDebug(
+                    nameof(UpdateWikiStatus),
+                    sourceName + " did not contain a JSON object.");
+
+                return false;
             }
 
+            parsedJson = jsonObject;
             return true;
         }
         catch (JsonException ex)
@@ -607,21 +617,20 @@ public class Session
     /// </param>
     /// <returns>
     /// The Boolean property value, or <paramref name="defaultValue"/> if the
-    /// property is unavailable.
+    /// property is unavailable or is not a Boolean value.
     /// </returns>
     private static bool ReadBoolean(
-        JObject jsonObject,
+        JsonObject? jsonObject,
         string propertyName,
         bool defaultValue = false)
     {
-        if (jsonObject == null)
+        if (jsonObject?[propertyName] is not JsonValue value ||
+            !value.TryGetValue(out bool result))
+        {
             return defaultValue;
+        }
 
-        JToken token = jsonObject[propertyName];
-
-        return token?.Type == JTokenType.Boolean
-            ? token.Value<bool>()
-            : defaultValue;
+        return result;
     }
 
     /// <summary>
@@ -696,16 +705,23 @@ public class Session
     /// Non-string values, empty strings, and missing properties are ignored.
     /// </remarks>
     private static List<string> ReadStringArray(
-        JObject jsonObject,
+        JsonObject? jsonObject,
         string propertyName)
     {
-        if (jsonObject?[propertyName] is not JArray values)
-            return new List<string>();
+        if (jsonObject?[propertyName] is not JsonArray values)
+        {
+            return new();
+        }
 
         return values
-            .Where(token => token.Type == JTokenType.String)
-            .Select(token => token.Value<string>())
-            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .OfType<JsonValue>()
+            .Select(value =>
+                value.TryGetValue(out string? text)
+                    ? text
+                    : null)
+            .Where(value =>
+                !string.IsNullOrWhiteSpace(value))
+            .Select(value => value!)
             .ToList();
     }
 
@@ -825,7 +841,7 @@ public class Session
     /// otherwise, <see langword="false"/>.
     /// </returns>
     private static bool TryLoadGlobalVersionJson(
-        out JObject versionJson)
+        [NotNullWhen(true)] out JsonObject? versionJson)
     {
         return TryParseJsonObject(
             Updater.GlobalVersionPage,
@@ -845,7 +861,7 @@ public class Session
     /// otherwise, <see langword="false"/>.
     /// </returns>
     private bool TryLoadWikiConfiguration(
-        out JObject configJson)
+        [NotNullWhen(true)] out JsonObject? configJson)
     {
         string downloadedConfig = string.Empty;
 
@@ -938,8 +954,8 @@ public class Session
     /// The registration status determined from the available configuration.
     /// </returns>
     private WikiStatusResult DetermineRegistrationStatus(
-        JObject versionJson,
-        JObject configJson)
+        JsonObject versionJson,
+        JsonObject configJson)
     {
         if (string.IsNullOrEmpty(CheckPageJSONText) ||
             ReadBoolean(
@@ -953,7 +969,7 @@ public class Session
         if (!TryParseJsonObject(
                 CheckPageJSONText,
                 "The CheckPageJSON page",
-                out JObject checkPageJson))
+                out JsonObject? checkPageJson))
         {
             return WikiStatusResult.Error;
         }
@@ -1030,8 +1046,7 @@ public class Session
             ApplySiteInformation();
 
             // TODO: Move update/version-policy checks out of Session when the
-            // legacy updater is replaced. Session should consume a version
-            // policy result rather than coordinating updater execution.
+            // legacy updater is replaced.
             if (Updater.Result == Updater.AWBEnabledStatus.None)
             {
                 Updater.CheckForUpdates();
@@ -1063,7 +1078,8 @@ public class Session
             // modernization is complete.
             Editor.Maxlag = -1;
 
-            if (!TryLoadGlobalVersionJson(out JObject versionJson))
+            if (!TryLoadGlobalVersionJson(
+                    out JsonObject? versionJson))
             {
                 return WikiStatusResult.Error;
             }
@@ -1075,7 +1091,8 @@ public class Session
 
             JSONMessages(versionJson["messages"]);
 
-            if (!TryLoadWikiConfiguration(out JObject configJson))
+            if (!TryLoadWikiConfiguration(
+                    out JsonObject? configJson))
             {
                 return WikiStatusResult.Error;
             }
@@ -1121,23 +1138,22 @@ public class Session
     /// match is evaluated with a timeout and invalid expressions are ignored
     /// after being written to the debug log.
     /// </remarks>
-    private bool IsGloballyBlockedUsername(JObject versionJson)
+    private bool IsGloballyBlockedUsername(JsonObject versionJson)
     {
         if (string.IsNullOrEmpty(User.Name))
             return false;
 
-        if (versionJson["badnames"] is not JArray badNames)
+        if (versionJson["badnames"] is not JsonArray badNames)
             return false;
 
-        foreach (JToken badNameToken in badNames)
+        foreach (JsonNode? badNameNode in badNames)
         {
-            if (badNameToken.Type != JTokenType.String)
+            if (badNameNode is not JsonValue badNameValue ||
+                !badNameValue.TryGetValue(out string? badName) ||
+                string.IsNullOrWhiteSpace(badName))
+            {
                 continue;
-
-            string badName = badNameToken.Value<string>();
-
-            if (string.IsNullOrWhiteSpace(badName))
-                continue;
+            }
 
             try
             {
@@ -1179,11 +1195,12 @@ public class Session
     // TODO: Move typo-rule source selection out of Session and into the
     // dedicated typo/language-quality configuration workflow. Different wikis
     // and languages should be able to select an appropriate rule source.
-    public static void TypoLink(JObject configJson)
+    public static void TypoLink(JsonObject configJson)
     {
-        // Don't update Variables.RetfPath if typolink is empty.
-        var typoLink = configJson["typolink"].ToString();
+        string? typoLink =
+            configJson["typolink"]?.GetValue<string>();
 
+        // Don't update Variables.RetfPath if typolink is empty.
         if (!string.IsNullOrEmpty(typoLink))
         {
             Variables.RetfPath = typoLink;
@@ -1209,25 +1226,35 @@ public class Session
     /// <summary>
     /// Processes automated messages contained in a JSON message array.
     /// </summary>
-    /// <param name="messagesToken">
-    /// The JSON token expected to contain the configured message array.
+    /// <param name="messagesNode">
+    /// The JSON node expected to contain the configured message array.
     /// </param>
-    private static void JSONMessages(JToken messagesToken)
+    private static void JSONMessages(JsonNode? messagesNode)
     {
-        if (messagesToken is not JArray messages)
-            return;
-
-        foreach (JToken message in messages)
+        if (messagesNode is not JsonArray messages)
         {
-            JToken version = message["version"];
+            return;
+        }
 
-            if (version is JArray versions)
+        foreach (JsonNode? messageNode in messages)
+        {
+            if (messageNode is not JsonObject message)
             {
-                foreach (JToken item in versions)
+                continue;
+            }
+
+            JsonNode? version = message["version"];
+
+            if (version is JsonArray versions)
+            {
+                foreach (JsonNode? item in versions)
                 {
-                    JSONMessage(
-                        item.ToString(),
-                        message);
+                    if (item != null)
+                    {
+                        JSONMessage(
+                            item.ToString(),
+                            message);
+                    }
                 }
             }
             else if (version != null)
@@ -1307,16 +1334,30 @@ public class Session
     /// </param>
     private static void JSONMessage(
         string versionString,
-        JToken message)
+        JsonObject message)
     {
-        if (!MessageAppliesToVersion(versionString) ||
-            message["text"] == null)
+        if (!MessageAppliesToVersion(versionString))
         {
             return;
         }
 
-        if (message["enabled"] != null &&
-            !(bool)message["enabled"])
+        string? text =
+            message["text"]?.GetValue<string>();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        bool enabled = true;
+
+        if (message["enabled"] is JsonValue enabledValue &&
+            enabledValue.TryGetValue(out bool configuredEnabled))
+        {
+            enabled = configuredEnabled;
+        }
+
+        if (!enabled)
         {
             return;
         }
@@ -1324,7 +1365,7 @@ public class Session
         // TODO: Replace the direct MessageBox dependency with a Session
         // event handled by the application UI.
         MessageBox.Show(
-            message["text"].ToString().Trim(),
+            text.Trim(),
             "Automated message",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
@@ -1504,7 +1545,7 @@ public class Session
                 "TLS certificate and confirm that the wiki supports a compatible " +
                 "HTTPS configuration."),
 
-            Newtonsoft.Json.JsonException => (
+            JsonException => (
                 exception.Message,
                 "The wiki returned malformed or unexpected JSON while loading " +
                 "project configuration."),

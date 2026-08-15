@@ -17,10 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -537,16 +537,20 @@ public static class Tools
     /// <returns>
     /// The parsed JSON object.
     /// </returns>
-    /// <exception cref="JsonException">
-    /// The response did not contain valid JSON.
+    /// <exception cref="ArgumentException">
+    /// The response did not contain usable JSON content.
     /// </exception>
-    public static JObject GetJObjectFromUrl(string url)
+    /// <exception cref="JsonException">
+    /// The response did not contain valid JSON or did not contain a JSON object.
+    /// </exception>
+    public static JsonObject GetJObjectFromUrl(string url)
     {
-        return GetJObjectFromText(GetHTML(url));
+        return GetJObjectFromText(
+            GetHTML(url));
     }
 
     /// <summary>
-    /// Parses a JSON object using bounded reader settings.
+    /// Parses JSON text as an object using a bounded maximum depth.
     /// </summary>
     /// <param name="text">
     /// The JSON text to parse.
@@ -558,9 +562,9 @@ public static class Tools
     /// The supplied text is empty.
     /// </exception>
     /// <exception cref="JsonException">
-    /// The supplied text is not valid JSON.
+    /// The supplied text is not valid JSON or does not contain a JSON object.
     /// </exception>
-    public static JObject GetJObjectFromText(string text)
+    public static JsonObject GetJObjectFromText(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -569,15 +573,22 @@ public static class Tools
                 nameof(text));
         }
 
-        using var stringReader = new StringReader(text);
+        JsonNode? node =
+            JsonNode.Parse(
+                text,
+                documentOptions:
+                    new JsonDocumentOptions
+                    {
+                        MaxDepth = 32
+                    });
 
-        using var jsonReader = new JsonTextReader(stringReader)
+        if (node is not JsonObject jsonObject)
         {
-            MaxDepth = 32,
-            DateParseHandling = DateParseHandling.None
-        };
+            throw new JsonException(
+                "JSON text must contain an object.");
+        }
 
-        return JObject.Load(jsonReader);
+        return jsonObject;
     }
 
 #if !MONO
@@ -1853,14 +1864,19 @@ Message: {2}
     }
 
     /// <summary>
-    /// Expands (substitutes) template calls using the API
+    /// Expands (substitutes) template calls using the API.
     /// </summary>
-    /// <param name="articleText">The text of the article</param>
-    /// <param name="articleTitle">The title of the article</param>
-    /// <param name="regexes">Dictionary of templates to substitute</param>
-    /// <param name="includeComment"></param>
-    /// <returns>The updated article text</returns>
-    public static string ExpandTemplate(string articleText, string articleTitle, Dictionary<Regex, string> regexes,
+    /// <param name="articleText">The text of the article.</param>
+    /// <param name="articleTitle">The title of the article.</param>
+    /// <param name="regexes">Dictionary of templates to substitute.</param>
+    /// <param name="includeComment">
+    /// Whether the original template call should be appended as an HTML comment.
+    /// </param>
+    /// <returns>The updated article text.</returns>
+    public static string ExpandTemplate(
+        string articleText,
+        string articleTitle,
+        Dictionary<Regex, string> regexes,
         bool includeComment)
     {
         foreach (KeyValuePair<Regex, string> p in regexes)
@@ -1870,27 +1886,47 @@ Message: {2}
             while (!originalArticleText.Equals(articleText))
             {
                 originalArticleText = articleText;
-                // avoid matching on previously commented out calls
-                Match m = p.Key.Match(ReplaceWithSpaces(articleText, WikiRegexes.Comments));
-                if (!m.Success)
-                    continue;
 
-                string call = m.Value, result;
+                // Avoid matching on previously commented-out calls.
+                Match m =
+                    p.Key.Match(
+                        ReplaceWithSpaces(
+                            articleText,
+                            WikiRegexes.Comments));
+
+                if (!m.Success)
+                {
+                    continue;
+                }
+
+                string call = m.Value;
+                string result;
 
                 if (Globals.UnitTestMode)
+                {
                     result = "Expanded template test return";
+                }
                 else
                 {
-                    string expandUri = Variables.URLApi + "?action=expandtemplates&prop=wikitext&format=json&title=" +
-                        WikiEncode(articleTitle) + "&text=" + WebUtility.UrlEncode(call);
+                    string expandUri =
+                        Variables.URLApi +
+                        "?action=expandtemplates&prop=wikitext&format=json&title=" +
+                        WikiEncode(articleTitle) +
+                        "&text=" +
+                        WebUtility.UrlEncode(call);
+
                     try
                     {
-                        JObject responseJson = GetJObjectFromUrl(expandUri);
+                        JsonObject responseJson =
+                            GetJObjectFromUrl(expandUri);
 
-                        JToken wikitextToken =
+                        JsonNode? wikitextNode =
                             responseJson["expandtemplates"]?["wikitext"];
 
-                        if (wikitextToken?.Type != JTokenType.String)
+                        if (wikitextNode is not JsonValue wikitextValue ||
+                            !wikitextValue.TryGetValue(
+                                out string? wikitext) ||
+                            string.IsNullOrEmpty(wikitext))
                         {
                             Tools.WriteDebug(
                                 nameof(ExpandTemplate),
@@ -1899,8 +1935,8 @@ Message: {2}
                             continue;
                         }
 
-                        result = WebUtility.HtmlDecode(
-                            wikitextToken.Value<string>());
+                        result =
+                            WebUtility.HtmlDecode(wikitext);
                     }
                     catch (JsonException ex)
                     {
@@ -1933,12 +1969,25 @@ Message: {2}
                 }
 
                 bool skipArticle;
-                result = new Parsers().Unicodify(result, out skipArticle);
+
+                result =
+                    new Parsers().Unicodify(
+                        result,
+                        out skipArticle);
 
                 if (includeComment)
-                    result = result + "<!-- " + call + " -->";
+                {
+                    result =
+                        result +
+                        "<!-- " +
+                        call +
+                        " -->";
+                }
 
-                articleText = articleText.Replace(call, result);
+                articleText =
+                    articleText.Replace(
+                        call,
+                        result);
             }
         }
 

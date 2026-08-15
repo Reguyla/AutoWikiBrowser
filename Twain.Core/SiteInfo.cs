@@ -16,9 +16,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Xml;
 using System.Xml.Serialization;
 using Twain.Core.API;
@@ -236,64 +236,88 @@ public class SiteInfo : IXmlSerializable
     }
 
     /// <summary>
-    /// Looks to see if a tag called AWB has been defined in Special:Tags
+    /// Determines whether the current wiki defines an active edit tag named
+    /// <c>AWB</c> in Special:Tags.
     /// </summary>
+    /// <remarks>
+    /// A positive result is cached globally. Negative or unknown results are
+    /// rechecked so newly created tags can be detected without restarting the
+    /// application.
+    /// </remarks>
     private void LoadAWBTag()
     {
-        var awbTagDefined = (bool?)ObjectCache.Global.Get<bool>("AWBTagDefined:" + scriptPath);
+        bool? awbTagDefined =
+            (bool?)ObjectCache.Global.Get<bool>(
+                "AWBTagDefined:" + scriptPath);
 
-        // If it's false, we should look again incase it's been defined...
-        if (awbTagDefined == null || awbTagDefined == false)
+        // Recheck false or unknown results in case the tag has since been created.
+        if (awbTagDefined is null or false)
         {
-            string response = Editor.HttpGet(
-ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
+            string response =
+                Editor.HttpGet(
+                    ApiPath +
+                    "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
 
             if (string.IsNullOrWhiteSpace(response))
+            {
                 return;
-
-            JObject obj;
+            }
 
             try
             {
-                using (var stringReader = new StringReader(response))
-                using (var jsonReader = new JsonTextReader(stringReader)
+                using JsonDocument document =
+                    JsonDocument.Parse(
+                        response,
+                        new JsonDocumentOptions
+                        {
+                            MaxDepth = 32
+                        });
+
+                JsonElement root = document.RootElement;
+
+                if (root.TryGetProperty("error", out _))
                 {
-                    MaxDepth = 32,
-                    DateParseHandling = DateParseHandling.None
-                })
-                {
-                    obj = JObject.Load(jsonReader);
+                    return;
                 }
+
+                if (!root.TryGetProperty(
+                        "query",
+                        out JsonElement query) ||
+                    !query.TryGetProperty(
+                        "tags",
+                        out JsonElement tags) ||
+                    tags.ValueKind != JsonValueKind.Array)
+                {
+                    return;
+                }
+
+                awbTagDefined =
+                    tags.EnumerateArray()
+                        .Any(tag =>
+                            tag.ValueKind == JsonValueKind.Object &&
+                            tag.TryGetProperty(
+                                "name",
+                                out JsonElement name) &&
+                            name.ValueKind == JsonValueKind.String &&
+                            string.Equals(
+                                name.GetString(),
+                                "AWB",
+                                StringComparison.Ordinal) &&
+                            tag.TryGetProperty(
+                                "active",
+                                out _));
+
+                ObjectCache.Global.Set(
+                    "AWBTagDefined:" + scriptPath,
+                    awbTagDefined.Value);
             }
             catch (JsonException)
             {
                 return;
             }
-
-            if (obj["error"] != null)
-            {
-                return;
-            }
-
-            if (obj["query"]?["tags"] is not JArray tags)
-            {
-                return;
-            }
-
-            awbTagDefined = tags
-                .OfType<JObject>()
-                .Any(tag =>
-                    tag["name"]?.Type == JTokenType.String &&
-                    string.Equals(
-                        tag.Value<string>("name"),
-                        "AWB",
-                        StringComparison.Ordinal) &&
-                    tag["active"] != null);
-
-            ObjectCache.Global.Set("AWBTagDefined:" + scriptPath, awbTagDefined);
         }
 
-        IsAWBTagDefined = (bool)awbTagDefined;
+        IsAWBTagDefined = awbTagDefined == true;
     }
 
     public object ParseErrorFromSiteInfoOutput()
@@ -418,16 +442,19 @@ ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
             return new();
         }
 
-        string messageNames = Uri.EscapeDataString(string.Join("|", names));
+        string messageNames =
+            Uri.EscapeDataString(
+                string.Join("|", names));
 
-        string response = Editor.HttpGet(
-            $"{ApiPath}?format=json&action=query&meta=allmessages" +
-            $"&continue=&ammessages={messageNames}");
+        string response =
+            Editor.HttpGet(
+                $"{ApiPath}?format=json&action=query&meta=allmessages" +
+                $"&continue=&ammessages={messageNames}");
 
         if (!TryParseJsonObject(
                 response,
                 "The allmessages API response",
-                out JObject json))
+                out JsonObject? json))
         {
             return new();
         }
@@ -437,44 +464,53 @@ ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
             return new();
         }
 
-        if (json["query"]?["allmessages"] is not JArray messages)
+        if (json["query"] is not JsonObject query ||
+            query["allmessages"] is not JsonArray messages)
         {
             return new();
         }
 
-        return messages
-            .OfType<JObject>()
-            .Select(message => new
+        Dictionary<string, string> result = new();
+
+        foreach (JsonObject message in messages.OfType<JsonObject>())
+        {
+            string? name =
+                message["name"]?.GetValue<string>();
+
+            string? text =
+                message["*"]?.GetValue<string>();
+
+            if (string.IsNullOrEmpty(name) ||
+                text == null)
             {
-                Name = message.Value<string>("name"),
-                Text = message.Value<string>("*")
-            })
-            .Where(message =>
-                !string.IsNullOrEmpty(message.Name) &&
-                message.Text != null)
-            .ToDictionary(
-                message => message.Name!,
-                message => message.Text!);
+                continue;
+            }
+
+            result[name] = text;
+        }
+
+        return result;
     }
 
     /// <summary>
-    /// Attempts to parse a JSON object using bounded reader settings.
+    /// Attempts to parse JSON text as an object using a bounded maximum depth.
     /// </summary>
     /// <param name="jsonText">The JSON text to parse.</param>
     /// <param name="sourceName">
     /// A descriptive name for the JSON source used in debug output.
     /// </param>
     /// <param name="json">
-    /// Contains the parsed object when parsing succeeds; otherwise
+    /// Contains the parsed JSON object when parsing succeeds; otherwise
     /// <c>null</c>.
     /// </param>
     /// <returns>
-    /// <c>true</c> when parsing succeeds; otherwise <c>false</c>.
+    /// <c>true</c> when the text contains a valid JSON object; otherwise
+    /// <c>false</c>.
     /// </returns>
     private static bool TryParseJsonObject(
         string jsonText,
         string sourceName,
-        out JObject json)
+        out JsonObject? json)
     {
         json = null;
 
@@ -489,16 +525,25 @@ ApiPath + "?format=json&action=query&list=tags&tgprop=active&tglimit=max");
 
         try
         {
-            using (var stringReader = new StringReader(jsonText))
-            using (var jsonReader = new JsonTextReader(stringReader)
+            JsonNode node =
+                JsonNode.Parse(
+                    jsonText,
+                    documentOptions:
+                        new JsonDocumentOptions
+                        {
+                            MaxDepth = 32
+                        });
+
+            if (node is not JsonObject jsonObject)
             {
-                MaxDepth = 32,
-                DateParseHandling = DateParseHandling.None
-            })
-            {
-                json = JObject.Load(jsonReader);
+                Tools.WriteDebug(
+                    nameof(GetMessages),
+                    sourceName + " did not contain a JSON object.");
+
+                return false;
             }
 
+            json = jsonObject;
             return true;
         }
         catch (JsonException ex)

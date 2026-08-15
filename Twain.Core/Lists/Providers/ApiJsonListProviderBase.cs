@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 using Twain.Core.API;
 
 namespace Twain.Core.Lists.Providers;
@@ -43,22 +42,59 @@ public abstract class ApiJsonListProviderBase : IListProvider
         string responseJson = editor.QueryApiJson(url);
 
         if (string.IsNullOrWhiteSpace(responseJson))
+        {
             return [];
-
-        JObject json;
+        }
 
         try
         {
-            using StringReader stringReader = new(responseJson);
-            using JsonTextReader jsonReader = new(stringReader)
-            {
-                MaxDepth = 64,
-                DateParseHandling = DateParseHandling.None
-            };
+            using JsonDocument document =
+                JsonDocument.Parse(
+                    responseJson,
+                    new JsonDocumentOptions
+                    {
+                        MaxDepth = 64
+                    });
 
-            json = JObject.Load(jsonReader);
+            JsonElement root = document.RootElement;
+
+            if (!root.TryGetProperty(
+                    "query",
+                    out JsonElement query) ||
+                !query.TryGetProperty(
+                    "pageswithprop",
+                    out JsonElement pages) ||
+                pages.ValueKind != JsonValueKind.Array)
+            {
+                return [];
+            }
+
+            List<Article> articles = new();
+
+            foreach (JsonElement page in pages.EnumerateArray())
+            {
+                if (page.ValueKind != JsonValueKind.Object ||
+                    !page.TryGetProperty(
+                        WantedAttribute,
+                        out JsonElement value) ||
+                    value.ValueKind != JsonValueKind.String)
+                {
+                    continue;
+                }
+
+                string? articleName =
+                    value.GetString();
+
+                if (!string.IsNullOrWhiteSpace(articleName))
+                {
+                    articles.Add(
+                        new Article(articleName));
+                }
+            }
+
+            return articles;
         }
-        catch (JsonReaderException ex)
+        catch (JsonException ex)
         {
             Tools.WriteDebug(
                 nameof(ApiMakeList),
@@ -66,18 +102,6 @@ public abstract class ApiJsonListProviderBase : IListProvider
 
             return [];
         }
-
-        if (json["query"]?["pageswithprop"] is not JArray pages)
-            return [];
-
-        return pages
-            .OfType<JObject>()
-            .Select(page => page[WantedAttribute])
-            .Where(value => value?.Type == JTokenType.String)
-            .Select(value => value!.Value<string>())
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => new Article(value!))
-            .ToList();
     }
 
     public virtual bool StripUrl => false;

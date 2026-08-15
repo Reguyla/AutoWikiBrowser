@@ -69,12 +69,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
-
-    <!--
-      TODO: Review the remaining Newtonsoft.Json usage and migrate suitable
-      code to System.Text.Json before removing this dependency.
-    -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <!--
