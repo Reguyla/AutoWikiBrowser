@@ -17,14 +17,6 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DefineConstants>TRACE;RELEASE</DefineConstants>
-
-    <!--
-      TODO: Determine whether explicit serialization assembly generation still
-      provides any benefit for this .NET 10 project. Remove it separately after
-      confirming that the Release build and runtime behavior remain unchanged.
-    -->
-    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-
     <UseWinFormsOutOfProcDesigner>true</UseWinFormsOutOfProcDesigner>
   </PropertyGroup>
 
