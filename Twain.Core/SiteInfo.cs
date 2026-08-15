@@ -81,10 +81,26 @@ public class SiteInfo : IXmlSerializable
     }
 
     /// <summary>
-    /// Creates an instance of the class
+    /// Initializes a new instance of the <see cref="SiteInfo"/> class and loads
+    /// metadata for the wiki associated with the supplied API editor.
     /// </summary>
+    /// <param name="editor">
+    /// The API editor used to identify the wiki and retrieve its site metadata.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="editor"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="WikiUrlException">
+    /// The wiki could not be identified, contacted, or initialized from the
+    /// returned site information.
+    /// </exception>
+    /// <exception cref="ReadApiDeniedException">
+    /// The wiki reports that read access to the API is not permitted.
+    /// </exception>
     public SiteInfo(IApiEdit editor)
     {
+        ArgumentNullException.ThrowIfNull(editor);
+
         Editor = editor;
         ScriptPath = editor.URL;
         uri = new Uri(ScriptPath);
@@ -93,29 +109,22 @@ public class SiteInfo : IXmlSerializable
         {
             if (!LoadSiteInfo())
             {
-                var ret = ParseErrorFromSiteInfoOutput();
-                if (ret is bool && !(bool)ret)
+                WikiException? apiException =
+                    ParseErrorFromSiteInfoOutput();
+
+                if (apiException != null)
                 {
-                    throw new WikiUrlException();
+                    throw apiException;
                 }
 
-                var ex = ret as Exception;
-                if (ex != null)
-                {
-                    throw ex;
-                }
+                throw new WikiUrlException();
             }
         }
-        catch (WikiException)
-        {
-            throw;
-        }
         catch (Exception ex)
-            when (ex is WebException or HttpRequestException)
-        {
-            throw;
-        }
-        catch (UriChangedException)
+            when (ex is WikiException
+                or WebException
+                or HttpRequestException
+                or UriChangedException)
         {
             throw;
         }
@@ -126,26 +135,52 @@ public class SiteInfo : IXmlSerializable
     }
 
     /// <summary>
-    /// For object caching support
+    /// Builds the object-cache key used to store site information for a wiki.
     /// </summary>
+    /// <param name="scriptPath">
+    /// The normalized MediaWiki script path associated with the site.
+    /// </param>
+    /// <returns>
+    /// The cache key used for the corresponding <see cref="SiteInfo"/> instance.
+    /// </returns>
     private static string Key(string scriptPath)
     {
-        return "SiteInfo(" + scriptPath + ")@";
+        return $"SiteInfo({scriptPath})@";
     }
 
+    /// <summary>
+    /// Returns cached site information for the supplied API editor when a valid
+    /// cached entry exists; otherwise, retrieves and caches fresh site information.
+    /// </summary>
+    /// <param name="editor">
+    /// The API editor identifying the wiki whose site information is required.
+    /// </param>
+    /// <returns>
+    /// A valid <see cref="SiteInfo"/> instance for the editor's wiki.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="editor"/> is <see langword="null"/>.
+    /// </exception>
     public static SiteInfo CreateOrLoad(IApiEdit editor)
     {
-        SiteInfo si = (SiteInfo)ObjectCache.Global.Get<SiteInfo>(Key(editor.URL));
-        if (si != null
-            && Namespace.VerifyNamespaces(si.Namespaces))
+        ArgumentNullException.ThrowIfNull(editor);
+
+        string cacheKey = Key(editor.URL);
+
+        SiteInfo? siteInfo =
+            ObjectCache.Global.Get<SiteInfo>(cacheKey) as SiteInfo;
+
+        if (siteInfo != null &&
+            Namespace.VerifyNamespaces(siteInfo.Namespaces))
         {
-            return si;
+            return siteInfo;
         }
 
-        si = new SiteInfo(editor);
-        ObjectCache.Global[Key(editor.URL)] = si;
+        siteInfo = new SiteInfo(editor);
 
-        return si;
+        ObjectCache.Global[cacheKey] = siteInfo;
+
+        return siteInfo;
     }
 
     /// <summary>
@@ -182,90 +217,279 @@ public class SiteInfo : IXmlSerializable
     }
 
     /// <summary>
-    /// Loads siteinfo XML from network via API call
+    /// Retrieves MediaWiki site-information XML from the current wiki.
     /// </summary>
-    /// <returns><c>true</c>, if loaded from network successfully, <c>false</c> otherwise.</returns>
+    /// <returns>
+    /// <see langword="true"/> when site information was retrieved successfully;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Successful responses are cached for later reuse. A missing response or a
+    /// MediaWiki <c>readapidenied</c> error is treated as a failed load so the
+    /// caller can handle private wikis that require authentication before API
+    /// queries are permitted.
+    /// </remarks>
     private bool LoadFromNetwork()
     {
-        siteinfoOutput = Editor.HttpGet(ApiPath + "?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics|magicwords&format=xml");
+        siteinfoOutput =
+            Editor.HttpGet(
+                ApiPath +
+                "?action=query&meta=siteinfo" +
+                "&siprop=general|namespaces|namespacealiases|statistics|magicwords" +
+                "&format=xml");
 
-        // readapidenied API error check for private wikis that require login for any query
-        if (string.IsNullOrEmpty(siteinfoOutput) || siteinfoOutput.Contains("readapidenied"))
+        if (string.IsNullOrEmpty(siteinfoOutput) ||
+            siteinfoOutput.Contains(
+                "readapidenied",
+                StringComparison.OrdinalIgnoreCase))
+        {
             return false;
+        }
 
-        // cache successful result
-        ObjectCache.Global.Set("SiteInfo:" + scriptPath, siteinfoOutput);
+        ObjectCache.Global.Set(
+            "SiteInfo:" + scriptPath,
+            siteinfoOutput);
 
         return true;
     }
 
     /// <summary>
-    /// Loads SiteInfo from local cache or API call, processes data returned
+    /// Loads site information from the local cache or MediaWiki API and applies
+    /// the returned configuration to the current <see cref="SiteInfo"/> instance.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>
+    /// <see langword="true"/> when the site-information response was loaded and
+    /// parsed successfully; otherwise, <see langword="false"/>.
+    /// </returns>
     public bool LoadSiteInfo()
     {
         if (!LoadFromCache())
+        {
             LoadFromNetwork();
-
-        XmlDocument xd = new XmlDocument();
-        xd.LoadXml(siteinfoOutput);
-
-        var api = xd["api"];
-        if (api == null) return false;
-
-        var query = api["query"];
-        if (query == null) return false;
-
-        var general = query["general"];
-        if (general == null) return false;
-
-        ArticleUrl = Host + general.GetAttribute("articlepath");
-        Language = general.GetAttribute("lang");
-        IsRightToLeft = general.HasAttribute("rtl");
-        CapitalizeFirstLetter = general.GetAttribute("case") == "first-letter";
-        MediaWikiVersion = general.GetAttribute("generator").Replace("MediaWiki ", "");
-
-        CategoryCollation = general.GetAttribute("categorycollation");
-
-        if (query["namespaces"] == null || query["namespacealiases"] == null)
-            return false;
-
-        foreach (XmlNode xn in query["namespaces"].GetElementsByTagName("ns"))
-        {
-            int id = int.Parse(xn.Attributes["id"].Value, CultureInfo.InvariantCulture);
-
-            if (id != 0) namespaces[id] = xn.InnerText + ":";
         }
 
-        if (!Namespace.VerifyNamespaces(namespaces))
-            throw new Exception("Error loading namespaces from " + ApiPath);
+        XmlDocument document = new();
+        document.LoadXml(siteinfoOutput);
 
-        namespaceAliases = Variables.PrepareAliases(namespaces);
+        XmlElement? query = GetSiteInfoQueryElement(document);
 
-        foreach (XmlNode xn in query["namespacealiases"].GetElementsByTagName("ns"))
+        if (query == null)
         {
-            int id = int.Parse(xn.Attributes["id"].Value, CultureInfo.InvariantCulture);
-
-            if (id != 0 && Variables.Namespaces.ContainsKey(id)) namespaceAliases[id].Add(xn.InnerText);
+            return false;
         }
 
-        if (query["magicwords"] == null)
-            return false;
-
-        foreach (XmlNode xn in query["magicwords"].GetElementsByTagName("magicword"))
+        if (!LoadGeneralSiteInformation(query))
         {
-            List<string> alias = new();
+            return false;
+        }
 
-            foreach (XmlNode xin in xn["aliases"].GetElementsByTagName("alias"))
-            {
-                alias.Add(xin.InnerText);
-            }
+        if (!LoadNamespaces(query))
+        {
+            return false;
+        }
 
-            magicWords.Add(xn.Attributes["name"].Value, alias);
+        if (!LoadMagicWords(query))
+        {
+            return false;
         }
 
         LoadAWBTag();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Retrieves the MediaWiki <c>query</c> element from a site-information
+    /// response.
+    /// </summary>
+    /// <param name="document">
+    /// The parsed site-information XML document.
+    /// </param>
+    /// <returns>
+    /// The <c>query</c> element when the expected response structure is present;
+    /// otherwise, <see langword="null"/>.
+    /// </returns>
+    private static XmlElement? GetSiteInfoQueryElement(
+        XmlDocument document)
+    {
+        XmlElement? api = document["api"];
+
+        if (api == null)
+        {
+            return null;
+        }
+
+        return api["query"];
+    }
+
+    /// <summary>
+    /// Loads general wiki metadata from the MediaWiki site-information response.
+    /// </summary>
+    /// <param name="query">
+    /// The MediaWiki <c>query</c> element containing site information.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the required general metadata is present;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool LoadGeneralSiteInformation(
+        XmlElement query)
+    {
+        XmlElement? general = query["general"];
+
+        if (general == null)
+        {
+            return false;
+        }
+
+        ArticleUrl =
+            Host +
+            general.GetAttribute("articlepath");
+
+        Language =
+            general.GetAttribute("lang");
+
+        IsRightToLeft =
+            general.HasAttribute("rtl");
+
+        CapitalizeFirstLetter =
+            general.GetAttribute("case") == "first-letter";
+
+        MediaWikiVersion =
+            general.GetAttribute("generator")
+                .Replace(
+                    "MediaWiki ",
+                    string.Empty);
+
+        CategoryCollation =
+            general.GetAttribute("categorycollation");
+
+        return true;
+    }
+
+    /// <summary>
+    /// Loads namespace names and aliases from the MediaWiki site-information
+    /// response.
+    /// </summary>
+    /// <param name="query">
+    /// The MediaWiki <c>query</c> element containing namespace metadata.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when namespace information was loaded successfully;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// The returned namespace collection does not contain the required namespaces.
+    /// </exception>
+    private bool LoadNamespaces(
+        XmlElement query)
+    {
+        XmlElement? namespacesElement =
+            query["namespaces"];
+
+        XmlElement? aliasesElement =
+            query["namespacealiases"];
+
+        if (namespacesElement == null ||
+            aliasesElement == null)
+        {
+            return false;
+        }
+
+        foreach (XmlNode namespaceNode in
+                 namespacesElement.GetElementsByTagName("ns"))
+        {
+            int id =
+                int.Parse(
+                    namespaceNode.Attributes!["id"]!.Value,
+                    CultureInfo.InvariantCulture);
+
+            if (id != 0)
+            {
+                namespaces[id] =
+                    namespaceNode.InnerText + ":";
+            }
+        }
+
+        if (!Namespace.VerifyNamespaces(namespaces))
+        {
+            throw new Exception(
+                "Error loading namespaces from " +
+                ApiPath);
+        }
+
+        namespaceAliases =
+            Variables.PrepareAliases(namespaces);
+
+        foreach (XmlNode aliasNode in
+                 aliasesElement.GetElementsByTagName("ns"))
+        {
+            int id =
+                int.Parse(
+                    aliasNode.Attributes!["id"]!.Value,
+                    CultureInfo.InvariantCulture);
+
+            if (id != 0 &&
+                Variables.Namespaces.ContainsKey(id))
+            {
+                namespaceAliases[id].Add(
+                    aliasNode.InnerText);
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Loads MediaWiki magic-word aliases from the site-information response.
+    /// </summary>
+    /// <param name="query">
+    /// The MediaWiki <c>query</c> element containing magic-word metadata.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when magic-word information was present and loaded;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool LoadMagicWords(
+        XmlElement query)
+    {
+        XmlElement? magicWordsElement =
+            query["magicwords"];
+
+        if (magicWordsElement == null)
+        {
+            return false;
+        }
+
+        foreach (XmlNode magicWordNode in
+                 magicWordsElement.GetElementsByTagName("magicword"))
+        {
+            List<string> aliases = new();
+
+            XmlNode? aliasesNode =
+                magicWordNode["aliases"];
+
+            if (aliasesNode != null)
+            {
+                foreach (XmlNode aliasNode in
+                         aliasesNode.ChildNodes)
+                {
+                    if (aliasNode.Name == "alias")
+                    {
+                        aliases.Add(
+                            aliasNode.InnerText);
+                    }
+                }
+            }
+
+            string? name =
+                magicWordNode.Attributes?["name"]?.Value;
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                magicWords[name] = aliases;
+            }
+        }
 
         return true;
     }
@@ -298,112 +522,126 @@ public class SiteInfo : IXmlSerializable
                 return;
             }
 
-            try
-            {
-                using JsonDocument document =
-                    JsonDocument.Parse(
-                        response,
-                        new JsonDocumentOptions
-                        {
-                            MaxDepth = 32
-                        });
+            awbTagDefined =
+                IsAwbTagDefined(response);
 
-                JsonElement root = document.RootElement;
-
-                if (root.TryGetProperty("error", out _))
-                {
-                    return;
-                }
-
-                if (!root.TryGetProperty(
-                        "query",
-                        out JsonElement query) ||
-                    !query.TryGetProperty(
-                        "tags",
-                        out JsonElement tags) ||
-                    tags.ValueKind != JsonValueKind.Array)
-                {
-                    return;
-                }
-
-                awbTagDefined =
-                    tags.EnumerateArray()
-                        .Any(tag =>
-                            tag.ValueKind == JsonValueKind.Object &&
-                            tag.TryGetProperty(
-                                "name",
-                                out JsonElement name) &&
-                            name.ValueKind == JsonValueKind.String &&
-                            string.Equals(
-                                name.GetString(),
-                                "AWB",
-                                StringComparison.Ordinal) &&
-                            tag.TryGetProperty(
-                                "active",
-                                out _));
-
-                ObjectCache.Global.Set(
-                    "AWBTagDefined:" + scriptPath,
-                    awbTagDefined.Value);
-            }
-            catch (JsonException)
+            if (!awbTagDefined.HasValue)
             {
                 return;
             }
+
+            ObjectCache.Global.Set(
+                "AWBTagDefined:" + scriptPath,
+                awbTagDefined.Value);
         }
 
         IsAWBTagDefined = awbTagDefined == true;
     }
 
-    // TODO: Replace the object return type with a structured site-info error result.
-    // This method currently returns false when no recognized API error is present,
-    // true when an unclassified API error is present, or a WikiException for a
-    // recognized error code. Review all callers before changing this legacy contract.
+    /// <summary>
+    /// Parses a MediaWiki tags API response and determines whether it contains an
+    /// active edit tag named <c>AWB</c>.
+    /// </summary>
+    /// <param name="responseJson">
+    /// The JSON response returned by the MediaWiki tags API.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when an active <c>AWB</c> tag is present;
+    /// <see langword="false"/> when the response is valid but no active tag is
+    /// present; or <see langword="null"/> when the response cannot be parsed or
+    /// does not contain the expected API structure.
+    /// </returns>
+    private static bool? IsAwbTagDefined(
+        string responseJson)
+    {
+        try
+        {
+            using JsonDocument document =
+                JsonDocument.Parse(
+                    responseJson,
+                    new JsonDocumentOptions
+                    {
+                        MaxDepth = 32
+                    });
+
+            JsonElement root =
+                document.RootElement;
+
+            if (root.TryGetProperty(
+                    "error",
+                    out _))
+            {
+                return null;
+            }
+
+            if (!root.TryGetProperty(
+                    "query",
+                    out JsonElement query) ||
+                !query.TryGetProperty(
+                    "tags",
+                    out JsonElement tags) ||
+                tags.ValueKind != JsonValueKind.Array)
+            {
+                return null;
+            }
+
+            return tags.EnumerateArray()
+                .Any(tag =>
+                    tag.ValueKind == JsonValueKind.Object &&
+                    tag.TryGetProperty(
+                        "name",
+                        out JsonElement name) &&
+                    name.ValueKind == JsonValueKind.String &&
+                    string.Equals(
+                        name.GetString(),
+                        "AWB",
+                        StringComparison.Ordinal) &&
+                    tag.TryGetProperty(
+                        "active",
+                        out _));
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
-    /// Examines the stored site-information response for a MediaWiki API error.
+    /// Examines the stored site-information response for a recognized MediaWiki
+    /// API error.
     /// </summary>
     /// <returns>
-    /// <see langword="false"/> when no API error is present or the error code is
-    /// not recognized; <see langword="true"/> when an API error is present without
-    /// a recognized code; or a corresponding <see cref="WikiException"/> when the
-    /// error code maps to a known wiki error.
+    /// A corresponding <see cref="WikiException"/> when the API response contains
+    /// a recognized error code; otherwise, <see langword="null"/>.
     /// </returns>
-    public object ParseErrorFromSiteInfoOutput()
+    /// <exception cref="XmlException">
+    /// The stored site-information response is not valid XML.
+    /// </exception>
+    private WikiException? ParseErrorFromSiteInfoOutput()
     {
         if (string.IsNullOrEmpty(siteinfoOutput))
         {
-            return false;
+            return null;
         }
 
         XmlDocument document = new();
         document.LoadXml(siteinfoOutput);
 
-        XmlElement? api = document["api"];
-
-        if (api == null)
-        {
-            return false;
-        }
-
-        XmlElement? error = api["error"];
+        XmlElement? error =
+            document["api"]?["error"];
 
         if (error == null)
         {
-            return false;
+            return null;
         }
 
-        string errorCode = error.GetAttribute("code");
-
-        if (string.IsNullOrEmpty(errorCode))
-        {
-            return true;
-        }
+        string errorCode =
+            error.GetAttribute("code");
 
         return errorCode switch
         {
             "readapidenied" => new ReadApiDeniedException(),
-            _ => false
+            _ => null
         };
     }
 
