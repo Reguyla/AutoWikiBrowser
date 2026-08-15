@@ -40,7 +40,7 @@
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             Text="{Binding Document.CurrentText, Mode=TwoWay}"
             TextWrapping="Wrap"
-            Watermark="Article text" />
+            PlaceholderText="Article text" />
 
     </Grid>
 
