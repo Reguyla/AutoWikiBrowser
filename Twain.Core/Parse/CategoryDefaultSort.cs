@@ -978,8 +978,6 @@ public partial class Parsers
             GetPeopleCategoryPrefix(
                 articleTitle);
 
-        string yearstring;
-
         string sort =
             GetCategorySort(articleText);
 
