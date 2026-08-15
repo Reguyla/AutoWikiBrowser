@@ -25,6 +25,15 @@ internal static class Program
         // 0 when invoked manually.
         VelopackApp.Build().Run();
 
+        InitializeDiagnostics();
+
+        TwainDiagnostics.WriteAsync(
+            DiagnosticCategory.System,
+            "ApplicationStarted",
+            "Twain application started.")
+            .GetAwaiter()
+            .GetResult();
+
         Twain.UI.App.UpdateServiceFactory =
             static () => new VelopackUpdateService();
 
