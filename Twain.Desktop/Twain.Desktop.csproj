@@ -20,7 +20,8 @@
     <PackageReference Include="Velopack" Version="1.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Twain.UI\Twain.UI.csproj" />
-  </ItemGroup>
+<ItemGroup>
+  <ProjectReference Include="..\Twain.UI\Twain.UI.csproj" />
+  <ProjectReference Include="..\Twain.Diagnostics\Twain.Diagnostics.csproj" />
+</ItemGroup>
 </Project>

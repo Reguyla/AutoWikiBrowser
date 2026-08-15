@@ -1,4 +1,6 @@
 ﻿using Avalonia;
+using System.Diagnostics;
+using Twain.Diagnostics;
 using Twain.Desktop.Updates;
 using Velopack;
 
@@ -28,6 +30,44 @@ internal static class Program
 
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
+    }
+
+    /// <summary>
+    /// Configures local diagnostic storage for the Twain desktop application.
+    /// </summary>
+    /// <remarks>
+    /// Diagnostic events are stored in the user's local application data directory
+    /// as newline-delimited JSON. This storage is local only and does not transmit
+    /// diagnostic information to an external service.
+    ///
+    /// Diagnostic initialization is best-effort. A failure to initialize diagnostic
+    /// storage must not prevent Twain from starting.
+    /// </remarks>
+    private static void InitializeDiagnostics()
+    {
+        try
+        {
+            string diagnosticsDirectory =
+                Path.Combine(
+                    Environment.GetFolderPath(
+                        Environment.SpecialFolder.LocalApplicationData),
+                    "Twain",
+                    "Diagnostics");
+
+            string diagnosticsFile =
+                Path.Combine(
+                    diagnosticsDirectory,
+                    "diagnostics.jsonl");
+
+            TwainDiagnostics.Configure(
+                new LocalDiagnosticSink(diagnosticsFile));
+        }
+        catch (Exception ex)
+        {
+            // Diagnostics must never prevent Twain from starting.
+            Debug.WriteLine(
+                $"Unable to initialize Twain diagnostics: {ex}");
+        }
     }
 
     /// <summary>
