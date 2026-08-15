@@ -651,9 +651,9 @@ namespace Twain.Core
                 {
                     try
                     {
-                        // Use a plain URL because this context is included in Phabricator
-                        // reports. Do not use Tools.WikiEncode here, to keep this code
-                        // portable to AWBUpdater.
+                        // Build a plain article URL for diagnostic output without depending
+                        // on higher-level wiki helpers that may be unavailable during failure
+                        // handling or application startup.
                         string pageUrl =
                             Variables.URLIndex +
                             "?title=" + WebUtility.UrlEncode(CurrentPage);
@@ -674,7 +674,9 @@ namespace Twain.Core
                 }
 
                 if (!string.IsNullOrEmpty(ListMakerText))
+                {
                     return "ListMaker text was present.";
+                }
 
                 return null;
             }

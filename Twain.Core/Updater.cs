@@ -46,7 +46,6 @@ public static class Updater
         Error = 1,
         Disabled = 2,
         Enabled = 4,
-        UpdaterUpdate = 8,
         OptionalUpdate = 16,
     }
 
@@ -69,16 +68,10 @@ public static class Updater
     private const string CHECKPAGE_URL =
         "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSON&action=raw";
 
-    private const string CHECKPAGE_URL_TEST =
-        "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSONTest&action=raw";
-
     private sealed class VersionPage
     {
         [JsonProperty("enabledversions")]
         public List<EnabledVersion> EnabledVersions { get; set; } = new();
-
-        [JsonProperty("updaterversion")]
-        public string UpdaterVersion { get; set; } = string.Empty;
     }
 
     private sealed class EnabledVersion
@@ -128,8 +121,7 @@ public static class Updater
             }
 
             if (versionPage == null ||
-                versionPage.EnabledVersions == null ||
-                !Version.TryParse(versionPage.UpdaterVersion, out Version updaterVersion))
+                versionPage.EnabledVersions == null)
             {
                 return;
             }
@@ -143,17 +135,10 @@ public static class Updater
             string awbPath =
                 Path.Combine(AWBDirectory, "AutoWikiBrowser.exe");
 
-            string updaterPath =
-                Path.Combine(AWBDirectory, "AWBUpdater.exe");
-
             string awbFileVersion =
                 FileVersionInfo.GetVersionInfo(awbPath).FileVersion;
 
-            string updaterFileVersion =
-                FileVersionInfo.GetVersionInfo(updaterPath).FileVersion;
-
-            if (!Version.TryParse(awbFileVersion, out Version currentAwbVersion) ||
-                !Version.TryParse(updaterFileVersion, out Version currentUpdaterVersion))
+            if (!Version.TryParse(awbFileVersion, out Version currentAwbVersion))
             {
                 Result = AWBEnabledStatus.Error;
                 return;
@@ -172,11 +157,6 @@ public static class Updater
                         StringComparison.OrdinalIgnoreCase)))
             {
                 Result = AWBEnabledStatus.Enabled;
-            }
-
-            if (currentUpdaterVersion < updaterVersion)
-            {
-                Result |= AWBEnabledStatus.UpdaterUpdate;
             }
 
             if ((Result & AWBEnabledStatus.Disabled) ==
@@ -214,18 +194,6 @@ public static class Updater
     private static BackgroundRequest _request;
 
     /// <summary>
-    /// Checks to see if AWBUpdater.exe.new exists, if it does, replace it.
-    /// </summary>
-    public static void UpdateUpdaterFile()
-    {
-        if (File.Exists(AWBDirectory + "AWBUpdater.exe.new"))
-        {
-            File.Copy(AWBDirectory + "AWBUpdater.exe.new", AWBDirectory + "AWBUpdater.exe", true);
-            File.Delete(AWBDirectory + "AWBUpdater.exe.new");
-        }
-    }
-
-    /// <summary>
     /// Background request to check enabled state of AWB
     /// </summary>
     public static void CheckForUpdates()
@@ -253,11 +221,4 @@ public static class Updater
         _request = null;
     }
 
-    /// <summary>
-    /// Runs the Updater program
-    /// </summary>
-    public static void RunUpdater()
-    {
-        Process.Start(AWBDirectory + "AWBUpdater.exe");
-    }
 }

@@ -187,7 +187,6 @@ namespace AutoWikiBrowser
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.UsageStatsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.runUpdaterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusMain = new System.Windows.Forms.StatusStrip();
             this.MainFormProgressBar = new System.Windows.Forms.ToolStripProgressBar();
@@ -1605,7 +1604,6 @@ namespace AutoWikiBrowser
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.helpToolStripMenuItem1,
             this.UsageStatsMenuItem,
-            this.runUpdaterToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -1625,13 +1623,6 @@ namespace AutoWikiBrowser
             this.UsageStatsMenuItem.Size = new System.Drawing.Size(170, 22);
             this.UsageStatsMenuItem.Text = "Usage &statistics";
             this.UsageStatsMenuItem.Click += new System.EventHandler(this.UsageStatsMenuItem_Click);
-            // 
-            // runUpdaterToolStripMenuItem
-            // 
-            this.runUpdaterToolStripMenuItem.Name = "runUpdaterToolStripMenuItem";
-            this.runUpdaterToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.runUpdaterToolStripMenuItem.Text = "Check for &updates";
-            this.runUpdaterToolStripMenuItem.Click += new System.EventHandler(this.runUpdaterToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 

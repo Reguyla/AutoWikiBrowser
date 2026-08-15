@@ -212,10 +212,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         _diffScriptingAdapter = new JsAdapter(this);
 
-        // TODO(Twain): Remove legacy updater initialization when Twain.Updater
-        // replaces the current AWB updater workflow.
-        Updater.UpdateUpdaterFile();
-
         _splashScreen.Show(this);
         RightToLeft = System.Globalization.CultureInfo.CurrentCulture.TextInfo.IsRightToLeft
             ? RightToLeft.Yes : RightToLeft.No;
@@ -772,47 +768,26 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Prompts for or automatically applies an available AWB or updater update.
+    /// Prompts the user when a newer AWB version is available.
     /// </summary>
     /// <returns>
-    /// <see langword="true"/> when the updater was launched and AWB was closed;
-    /// otherwise, <see langword="false"/>.
+    /// <see langword="true"/> when the user chooses to open the manual update
+    /// page; otherwise, <see langword="false"/>.
     /// </returns>
     private bool HandleAvailableUpdate()
     {
-        bool optionalUpdate =
-            HasUpdaterStatus(
-                Updater.AWBEnabledStatus.OptionalUpdate);
-
-        bool updaterUpdate =
-            HasUpdaterStatus(
-                Updater.AWBEnabledStatus.UpdaterUpdate);
-
-        if (!optionalUpdate && !updaterUpdate)
+        if (!HasUpdaterStatus(
+                Updater.AWBEnabledStatus.OptionalUpdate))
         {
             return false;
         }
 
-        bool runUpdater = updaterUpdate
-            || PromptForOptionalUpdate();
-
-        if (updaterUpdate)
-        {
-            MessageBox.Show(
-                "There is an update available. Updating now.",
-                "Updater update",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-
-        if (!runUpdater)
+        if (!PromptForOptionalUpdate())
         {
             return false;
         }
 
-        Updater.RunUpdater();
-        _splashScreen.Close();
-        CloseAWB();
+        OpenManualUpdatePage();
 
         return true;
     }
@@ -6286,14 +6261,18 @@ font-size: 150%;'>No changes</h2>
     // TODO (Client Validation Architecture):
     // Return a structured client-version validation result instead of handling
     // update prompts and UI disabling directly inside MainForm.
+    //
+    // TODO (Twain Policy):
+    // Replace this legacy global AWB version-enablement check with the per-wiki
+    // Twain compatibility and policy service.
+#pragma warning disable CA1303 // Literal messages are retained until localization work is completed.
     /// <summary>
     /// Handles an unsupported or disabled AWB version by disabling editing and
-    /// offering the user automatic or manual update options.
+    /// offering the user the option to open the manual download page.
     /// </summary>
     /// <remarks>
-    /// Choosing automatic update launches the updater. Choosing manual update
-    /// opens the AWB download page. Cancelling leaves the application open with
-    /// editing disabled.
+    /// The legacy automatic updater has been removed. The user may open the manual
+    /// download page or leave the application open with editing disabled.
     /// </remarks>
     private void OldVersion()
     {
@@ -6301,27 +6280,20 @@ font-size: 150%;'>No changes</h2>
         DisableButtons();
 
         DialogResult result = MessageBox.Show(
-            "This version of AWB is not enabled, please download the newest " +
-            "version. If you have the newest version, check that Wikipedia is " +
-            "online.\r\n\r\n" +
-            "Please press \"Yes\" to run the AutoUpdater, \"No\" to load the " +
-            "download page and update manually, or \"Cancel\" to not update " +
-            "(but you will not be able to edit).",
+            "This version of AWB is not enabled. Please download the newest " +
+            "version. If you already have the newest version, check that Wikipedia " +
+            "is online.\r\n\r\n" +
+            "Would you like to open the download page?",
             "Problem",
-            MessageBoxButtons.YesNoCancel,
+            MessageBoxButtons.YesNo,
             MessageBoxIcon.Information);
 
-        switch (result)
+        if (result == DialogResult.Yes)
         {
-            case DialogResult.Yes:
-                RunUpdater();
-                break;
-
-            case DialogResult.No:
-                OpenManualUpdatePage();
-                break;
+            OpenManualUpdatePage();
         }
     }
+#pragma warning restore CA1303
 
     // TODO (Updater Modernization):
     // Move the manual update URL into the updater configuration or a centralized
@@ -11622,60 +11594,6 @@ font-size: 150%;'>No changes</h2>
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Launches the application updater.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void runUpdaterToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        RunUpdater();
-    }
-
-    /// <summary>
-    /// Launches the legacy AutoWikiBrowser updater when the updater executable
-    /// is available in the application directory.
-    /// </summary>
-    private void RunUpdater()
-    {
-        string executableDirectory =
-            Path.GetDirectoryName(Application.ExecutablePath);
-
-        if (string.IsNullOrEmpty(executableDirectory))
-        {
-            MessageBox.Show(
-                "Unable to determine the application directory.",
-                "Updater error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-
-            return;
-        }
-
-        string updaterPath =
-            Path.Combine(executableDirectory, "AWBUpdater.exe");
-
-        if (!File.Exists(updaterPath))
-        {
-            MessageBox.Show(
-                "The updater does not exist and cannot be run.",
-                "Updater unavailable",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
-            return;
-        }
-
-        // TODO(Twain): Replace the legacy AWBUpdater executable with the
-        // planned modern Twain updater and move updater launching out of MainForm.
-        Process.Start(
-            new ProcessStartInfo
-            {
-                FileName = updaterPath,
-                UseShellExecute = true
-            });
     }
 
     /// <summary>
