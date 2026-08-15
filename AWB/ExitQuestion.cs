@@ -1,6 +1,4 @@
-﻿using System.Windows.Forms;
-
-namespace AutoWikiBrowser;
+﻿namespace AutoWikiBrowser;
 
 /// <summary>
 /// Displays a confirmation dialog when the user attempts to exit

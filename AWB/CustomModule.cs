@@ -19,10 +19,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.CodeDom.Compiler;
-using System.ComponentModel;
-using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.CustomModules;
 using Twain.Core.Plugin;

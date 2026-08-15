@@ -1,5 +1,4 @@
 ﻿using mshtml;
-using System.Windows.Forms;
 
 namespace AutoWikiBrowser;
 

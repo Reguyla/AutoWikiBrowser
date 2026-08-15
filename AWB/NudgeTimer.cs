@@ -17,8 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using System.ComponentModel;
-
 namespace AutoWikiBrowser;
 
 internal sealed partial class NudgeTimer : System.Windows.Forms.Timer

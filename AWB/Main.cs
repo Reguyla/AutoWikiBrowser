@@ -26,18 +26,6 @@ using AutoWikiBrowser.Services.Diff;
 using AutoWikiBrowser.Services.Settings;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
-using System.ComponentModel;
-using System.Configuration;
-using System.Diagnostics;
-using System.Drawing;
-using System.Globalization;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.API;
 using Twain.Core.Background;
@@ -2303,10 +2291,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Event that fires when ProcessPage background thread finishes
+    /// Handles completion of the background page-processing operation and runs
+    /// the remaining skip checks on the UI thread.
     /// </summary>
-    /// <param name="req"></param>
-    private void AutomaticallyDoAnythingComplete(BackgroundRequest req)
+    /// <param name="req">
+    /// The completed background request.
+    /// </param>
+    private void AutomaticallyDoAnythingComplete(
+        BackgroundRequest req)
     {
         if (IsDisposed || Disposing)
         {
@@ -2315,7 +2307,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         if (InvokeRequired)
         {
-            BeginInvoke(new MethodInvoker(RunSkipChecks));
+            BeginInvoke(
+                new System.Windows.Forms.MethodInvoker(
+                    RunSkipChecks));
+
             return;
         }
 
@@ -9961,11 +9956,14 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Called by ReparseEditBox complete event
-    /// Calls ReparseEditBoxPart2 to update alerts etc. after re-processing page
+    /// Handles completion of the edit-box reparse operation and updates the
+    /// remaining alerts and page state on the UI thread.
     /// </summary>
-    /// <param name="req"></param>
-    private void ReparseEditBoxComplete(BackgroundRequest req)
+    /// <param name="req">
+    /// The completed background request.
+    /// </param>
+    private void ReparseEditBoxComplete(
+        BackgroundRequest req)
     {
         if (IsDisposed || Disposing)
         {
@@ -9974,7 +9972,10 @@ font-size: 150%;'>No changes</h2>
 
         if (InvokeRequired)
         {
-            BeginInvoke(new MethodInvoker(ReparseEditBoxPart2));
+            BeginInvoke(
+                new System.Windows.Forms.MethodInvoker(
+                    ReparseEditBoxPart2));
+
             return;
         }
 
@@ -13298,7 +13299,8 @@ font-size: 150%;'>No changes</h2>
         if (InvokeRequired)
         {
             BeginInvoke(
-                new MethodInvoker(StartProgressBar));
+                new System.Windows.Forms.MethodInvoker(
+                    StartProgressBar));
 
             return;
         }
@@ -13321,7 +13323,8 @@ font-size: 150%;'>No changes</h2>
         if (InvokeRequired)
         {
             BeginInvoke(
-                new MethodInvoker(StopProgressBar));
+                new System.Windows.Forms.MethodInvoker(
+                    StopProgressBar));
 
             return;
         }

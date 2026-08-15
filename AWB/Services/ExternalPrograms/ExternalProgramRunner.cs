@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Twain.Core;
+﻿using Twain.Core;
 
 namespace AutoWikiBrowser.Services.ExternalPrograms;
 

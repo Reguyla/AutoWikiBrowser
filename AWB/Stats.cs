@@ -20,10 +20,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #undef INSTASTATS // turn on here and in Main.cs to make AWB log (empty) stats at startup (The scope of a symbol created by using #define is the file in which it was defined)
 
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Net;
-using System.Net.Http;
 using System.Xml;
 using Twain.Core;
 using Twain.Core.Plugin;

@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Windows.Forms;
-
-namespace AutoWikiBrowser;
+﻿namespace AutoWikiBrowser;
 
 /// <summary>
 /// Displays a countdown before a requested shutdown-related action occurs.

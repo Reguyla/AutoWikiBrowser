@@ -20,8 +20,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Settings;
-using System.Drawing;
-using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.AWBSettings;
 using Twain.Core.Plugin;

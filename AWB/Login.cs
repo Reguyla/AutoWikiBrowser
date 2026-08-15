@@ -1,4 +1,3 @@
-using System.Windows.Forms;
 using Twain.Core;
 
 namespace AutoWikiBrowser;

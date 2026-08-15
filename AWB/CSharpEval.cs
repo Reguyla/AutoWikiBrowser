@@ -1,6 +1,4 @@
 ﻿using System.CodeDom.Compiler;
-using System.Reflection;
-using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.CustomModules;
 
