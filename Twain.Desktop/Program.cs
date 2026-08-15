@@ -18,6 +18,9 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // TODO: Investigate Velopack Setup reporting a failed install hook even though
+        // the application installs successfully and the install hook returns exit code
+        // 0 when invoked manually.
         VelopackApp.Build().Run();
 
         Twain.UI.App.UpdateServiceFactory =
