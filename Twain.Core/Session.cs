@@ -309,10 +309,10 @@ public class Session
     /// accessible <c>Project:AutoWikiBrowser/Config</c> page.
     /// </summary>
     private const string DefaultWikiConfig =
-        "{ 'typolink': '', 'allusersenabled': true, " +
-        "'allusersenabledusermode': true, 'messages': [], " +
-        "'underscoretitles': [], 'nogenfixes': [], " +
-        "'noregextypofix': [] }";
+        "{ \"typolink\": \"\", \"allusersenabled\": true, " +
+        "\"allusersenabledusermode\": true, \"messages\": [], " +
+        "\"underscoretitles\": [], \"nogenfixes\": [], " +
+        "\"noregextypofix\": [] }";
 
     private WikiStatusResult _status;
 
@@ -595,6 +595,7 @@ public class Session
         }
         catch (JsonException ex)
         {
+ 
             Tools.WriteDebug(
                 nameof(UpdateWikiStatus),
                 sourceName + " contained invalid JSON: " + ex.Message);
