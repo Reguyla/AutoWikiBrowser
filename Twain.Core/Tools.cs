@@ -1863,7 +1863,7 @@ Message: {2}
     }
 
     /// <summary>
-    /// Expands (substitutes) template calls using the API.
+    /// Expands matching template calls through the MediaWiki API.
     /// </summary>
     /// <param name="articleText">The text of the article.</param>
     /// <param name="articleTitle">The title of the article.</param>
@@ -1878,7 +1878,7 @@ Message: {2}
         Dictionary<Regex, string> regexes,
         bool includeComment)
     {
-        foreach (KeyValuePair<Regex, string> p in regexes)
+        foreach (KeyValuePair<Regex, string> entry in regexes)
         {
             string originalArticleText = string.Empty;
 
@@ -1886,112 +1886,143 @@ Message: {2}
             {
                 originalArticleText = articleText;
 
-                // Avoid matching on previously commented-out calls.
-                Match m =
-                    p.Key.Match(
+                Match match =
+                    entry.Key.Match(
                         ReplaceWithSpaces(
                             articleText,
                             WikiRegexes.Comments));
 
-                if (!m.Success)
+                if (!match.Success)
                 {
                     continue;
                 }
 
-                string call = m.Value;
-                string result;
+                string templateCall = match.Value;
 
-                if (Globals.UnitTestMode)
+                if (!TryExpandTemplateCall(
+                        templateCall,
+                        articleTitle,
+                        out string expandedText))
                 {
-                    result = "Expanded template test return";
-                }
-                else
-                {
-                    string expandUri =
-                        Variables.URLApi +
-                        "?action=expandtemplates&prop=wikitext&format=json&title=" +
-                        WikiEncode(articleTitle) +
-                        "&text=" +
-                        WebUtility.UrlEncode(call);
-
-                    try
-                    {
-                        JsonObject responseJson =
-                            GetJObjectFromUrl(expandUri);
-
-                        JsonNode? wikitextNode =
-                            responseJson["expandtemplates"]?["wikitext"];
-
-                        if (wikitextNode is not JsonValue wikitextValue ||
-                            !wikitextValue.TryGetValue(
-                                out string? wikitext) ||
-                            string.IsNullOrEmpty(wikitext))
-                        {
-                            Tools.WriteDebug(
-                                nameof(ExpandTemplate),
-                                "The expandtemplates API response did not contain a valid wikitext value.");
-
-                            continue;
-                        }
-
-                        result =
-                            WebUtility.HtmlDecode(wikitext);
-                    }
-                    catch (JsonException ex)
-                    {
-                        Tools.WriteDebug(
-                            nameof(ExpandTemplate),
-                            "The expandtemplates API returned invalid JSON: " +
-                            ex.Message);
-
-                        continue;
-                    }
-                    catch (Exception ex)
-                        when (ex is WebException or HttpRequestException)
-                    {
-                        Tools.WriteDebug(
-                            nameof(ExpandTemplate),
-                            "The expandtemplates API request failed: " +
-                            ex.Message);
-
-                        continue;
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        Tools.WriteDebug(
-                            nameof(ExpandTemplate),
-                            "The expandtemplates API returned no usable JSON content: " +
-                            ex.Message);
-
-                        continue;
-                    }
+                    continue;
                 }
 
                 bool skipArticle;
 
-                result =
+                expandedText =
                     new Parsers().Unicodify(
-                        result,
+                        expandedText,
                         out skipArticle);
 
                 if (includeComment)
                 {
-                    result =
-                        result +
+                    expandedText +=
                         "<!-- " +
-                        call +
+                        templateCall +
                         " -->";
                 }
 
                 articleText =
                     articleText.Replace(
-                        call,
-                        result);
+                        templateCall,
+                        expandedText);
             }
         }
 
         return articleText;
     }
+
+    /// <summary>
+    /// Expands a single template call through the MediaWiki
+    /// <c>expandtemplates</c> API.
+    /// </summary>
+    /// <param name="templateCall">
+    /// The complete template invocation to expand.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article used as the expansion context.
+    /// </param>
+    /// <param name="expandedText">
+    /// Contains the expanded and HTML-decoded template text when successful.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the template was expanded successfully;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool TryExpandTemplateCall(
+        string templateCall,
+        string articleTitle,
+        out string expandedText)
+    {
+        if (Globals.UnitTestMode)
+        {
+            expandedText =
+                "Expanded template test return";
+
+            return true;
+        }
+
+        string expandUri =
+            Variables.URLApi +
+            "?action=expandtemplates&prop=wikitext&format=json&title=" +
+            WikiEncode(articleTitle) +
+            "&text=" +
+            WebUtility.UrlEncode(templateCall);
+
+        try
+        {
+            JsonObject responseJson =
+                GetJObjectFromUrl(expandUri);
+
+            JsonNode? wikitextNode =
+                responseJson["expandtemplates"]?["wikitext"];
+
+            if (wikitextNode is not JsonValue wikitextValue ||
+                !wikitextValue.TryGetValue(
+                    out string? wikitext) ||
+                string.IsNullOrEmpty(wikitext))
+            {
+                Tools.WriteDebug(
+                    nameof(ExpandTemplate),
+                    "The expandtemplates API response did not contain a valid wikitext value.");
+
+                expandedText = string.Empty;
+                return false;
+            }
+
+            expandedText =
+                WebUtility.HtmlDecode(wikitext);
+
+            return true;
+        }
+        catch (JsonException ex)
+        {
+            Tools.WriteDebug(
+                nameof(ExpandTemplate),
+                "The expandtemplates API returned invalid JSON: " +
+                ex.Message);
+        }
+        catch (Exception ex)
+            when (ex is WebException or HttpRequestException)
+        {
+            Tools.WriteDebug(
+                nameof(ExpandTemplate),
+                "The expandtemplates API request failed: " +
+                ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            Tools.WriteDebug(
+                nameof(ExpandTemplate),
+                "The expandtemplates API returned no usable JSON content: " +
+                ex.Message);
+        }
+
+        expandedText = string.Empty;
+        return false;
+    }
+
+
 
     // Covered by ToolsTests.GetTitleFromURL()
     /// <summary>
