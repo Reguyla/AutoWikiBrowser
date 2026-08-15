@@ -86,21 +86,6 @@
   </ItemGroup>
 
   <!--
-    The WebView2 package currently adds its WPF assembly to WinForms projects.
-    Remove that unused reference before MSBuild resolves assembly dependencies
-    to avoid the WindowsBase 4.0/5.0 conflict.
-
-    TODO: Recheck whether this workaround remains necessary after future
-    WebView2 package updates.
-  -->
-  <Target Name="RemoveUnusedWebView2WpfReference" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="ResolvePackageAssets">
-
-    <ItemGroup>
-      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
-    </ItemGroup>
-  </Target>
-
-  <!--
     Stats.resx is kept beside Stats.cs for project organization but must not be
     compiled as a normal embedded WinForms resource.
   -->
