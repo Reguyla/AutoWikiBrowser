@@ -736,18 +736,19 @@ public class SiteInfo : IXmlSerializable
     /// </param>
     /// <returns>
     /// A dictionary keyed by message name containing the localized message text.
-    /// Returns an empty dictionary when the messages cannot be retrieved or parsed.
+    /// Returns an empty dictionary when no usable messages are returned.
     /// </returns>
     /// <remarks>
     /// This method is used only when the wiki language is not English. Localized
-    /// messages are optional during initialization, so API failures fall back to
-    /// the default English messages.
+    /// messages are optional during initialization, so missing or malformed
+    /// message data falls back to the default English messages.
     /// </remarks>
-    public Dictionary<string, string> GetMessages(params string[] names)
+    public Dictionary<string, string> GetMessages(
+        params string[] names)
     {
         if (names.Length == 0)
         {
-            return new();
+            return [];
         }
 
         string messageNames =
@@ -759,34 +760,57 @@ public class SiteInfo : IXmlSerializable
                 $"{ApiPath}?format=json&action=query&meta=allmessages" +
                 $"&continue=&ammessages={messageNames}");
 
+        return ParseMessagesResponse(response);
+    }
+
+    /// <summary>
+    /// Parses a MediaWiki <c>allmessages</c> API response into a dictionary of
+    /// localized system messages.
+    /// </summary>
+    /// <param name="response">
+    /// The JSON response returned by the MediaWiki API.
+    /// </param>
+    /// <returns>
+    /// A dictionary keyed by message name containing the localized message text.
+    /// An empty dictionary is returned when the response is empty, malformed,
+    /// contains an API error, or does not contain the expected message data.
+    /// </returns>
+    private static Dictionary<string, string> ParseMessagesResponse(
+        string response)
+    {
         if (!TryParseJsonObject(
                 response,
                 "The allmessages API response",
                 out JsonObject? json))
         {
-            return new();
+            return [];
         }
 
         if (json["error"] != null)
         {
-            return new();
+            return [];
         }
 
         if (json["query"] is not JsonObject query ||
             query["allmessages"] is not JsonArray messages)
         {
-            return new();
+            return [];
         }
 
         Dictionary<string, string> result = new();
 
-        foreach (JsonObject message in messages.OfType<JsonObject>())
+        foreach (JsonObject message in
+                 messages.OfType<JsonObject>())
         {
             string? name =
-                message["name"]?.GetValue<string>();
+                TryGetStringValue(
+                    message,
+                    "name");
 
             string? text =
-                message["*"]?.GetValue<string>();
+                TryGetStringValue(
+                    message,
+                    "*");
 
             if (string.IsNullOrEmpty(name) ||
                 text == null)
@@ -798,6 +822,30 @@ public class SiteInfo : IXmlSerializable
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Reads a string value from a JSON object when the specified property contains
+    /// a compatible JSON string value.
+    /// </summary>
+    /// <param name="jsonObject">
+    /// The JSON object containing the property.
+    /// </param>
+    /// <param name="propertyName">
+    /// The name of the property to read.
+    /// </param>
+    /// <returns>
+    /// The string value when present and valid; otherwise,
+    /// <see langword="null"/>.
+    /// </returns>
+    private static string? TryGetStringValue(
+        JsonObject jsonObject,
+        string propertyName)
+    {
+        return jsonObject[propertyName] is JsonValue value &&
+               value.TryGetValue(out string? result)
+            ? result
+            : null;
     }
 
     /// <summary>
