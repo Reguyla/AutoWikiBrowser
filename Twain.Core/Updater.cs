@@ -146,73 +146,42 @@ public static class Updater
 
         try
         {
-            string text = Tools.GetHTML(CHECKPAGE_URL);
-
-            if (string.IsNullOrWhiteSpace(text))
+            if (!TryLoadVersionPage(
+                    out string versionPageText,
+                    out VersionPage versionPage))
             {
                 return;
             }
 
-            VersionPage versionPage =
-                JsonSerializer.Deserialize<VersionPage>(text);
-
-            if (versionPage == null ||
-                versionPage.EnabledVersions == null)
+            if (!TryGetCurrentAwbVersion(
+                    out string currentVersionText,
+                    out Version currentVersion))
             {
                 return;
             }
 
-            // Only expose the downloaded JSON after it has been
-            // successfully parsed and validated.
-            GlobalVersionPage = text;
+            GlobalVersionPage = versionPageText;
 
-            Result = AWBEnabledStatus.Disabled;
+            List<EnabledVersion> validEnabledVersions =
+                GetValidEnabledVersions(
+                    versionPage.EnabledVersions);
 
-            string awbPath =
-                Path.Combine(AWBDirectory, "AutoWikiBrowser.exe");
+            Result =
+                IsCurrentVersionEnabled(
+                    validEnabledVersions,
+                    currentVersionText)
+                    ? AWBEnabledStatus.Enabled
+                    : AWBEnabledStatus.Disabled;
 
-            string awbFileVersion =
-                FileVersionInfo.GetVersionInfo(awbPath).FileVersion;
-
-            if (!Version.TryParse(
-                    awbFileVersion,
-                    out Version currentAwbVersion))
-            {
-                Result = AWBEnabledStatus.Error;
-                return;
-            }
-
-            var validEnabledVersions = versionPage.EnabledVersions
-                .Where(item =>
-                    item != null &&
-                    Version.TryParse(item.Version, out _))
-                .ToList();
-
-            if (validEnabledVersions.Any(item =>
-                    string.Equals(
-                        item.Version,
-                        awbFileVersion,
-                        StringComparison.OrdinalIgnoreCase)))
-            {
-                Result = AWBEnabledStatus.Enabled;
-            }
-
-            if ((Result & AWBEnabledStatus.Disabled) ==
-                AWBEnabledStatus.Disabled)
+            if (Result == AWBEnabledStatus.Disabled)
             {
                 return;
             }
 
-            var newerVersions = validEnabledVersions
-                .Where(item =>
-                    !item.Dev &&
-                    Version.TryParse(
-                        item.Version,
-                        out Version candidateVersion) &&
-                    candidateVersion > currentAwbVersion)
-                .Select(item => item.Version)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            List<string> newerVersions =
+                GetNewerVersions(
+                    validEnabledVersions,
+                    currentVersion);
 
             if (newerVersions.Count > 0)
             {
@@ -229,6 +198,148 @@ public static class Updater
         {
             Result = AWBEnabledStatus.Error;
         }
+    }
+
+    /// <summary>
+    /// Downloads and parses the global AWB version configuration.
+    /// </summary>
+    /// <param name="versionPageText">
+    /// Contains the downloaded JSON text when successful.
+    /// </param>
+    /// <param name="versionPage">
+    /// Contains the parsed version metadata when successful.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when valid version metadata was retrieved and parsed;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool TryLoadVersionPage(
+        out string versionPageText,
+        out VersionPage versionPage)
+    {
+        versionPageText =
+            Tools.GetHTML(CHECKPAGE_URL);
+
+        versionPage = null;
+
+        if (string.IsNullOrWhiteSpace(versionPageText))
+        {
+            return false;
+        }
+
+        versionPage =
+            JsonSerializer.Deserialize<VersionPage>(
+                versionPageText);
+
+        return versionPage != null &&
+               versionPage.EnabledVersions != null;
+    }
+
+
+    /// <summary>
+    /// Reads and parses the file version of the current AutoWikiBrowser executable.
+    /// </summary>
+    /// <param name="versionText">
+    /// Contains the executable file-version string when available.
+    /// </param>
+    /// <param name="version">
+    /// Contains the parsed application version when successful.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the current application version could be read
+    /// and parsed; otherwise, <see langword="false"/>.
+    /// </returns>
+    private static bool TryGetCurrentAwbVersion(
+        out string versionText,
+        out Version version)
+    {
+        string awbPath =
+            Path.Combine(
+                AWBDirectory,
+                "AutoWikiBrowser.exe");
+
+        versionText =
+            FileVersionInfo.GetVersionInfo(awbPath)
+                .FileVersion;
+
+        return Version.TryParse(
+            versionText,
+            out version);
+    }
+
+    /// <summary>
+    /// Returns the enabled-version entries that contain valid version identifiers.
+    /// </summary>
+    /// <param name="enabledVersions">
+    /// The configured AWB version entries.
+    /// </param>
+    /// <returns>
+    /// The entries whose version values can be parsed successfully.
+    /// </returns>
+    private static List<EnabledVersion> GetValidEnabledVersions(
+        IEnumerable<EnabledVersion> enabledVersions)
+    {
+        return enabledVersions
+            .Where(item =>
+                item != null &&
+                Version.TryParse(
+                    item.Version,
+                    out _))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Determines whether the current AWB version is present in the enabled-version
+    /// configuration.
+    /// </summary>
+    /// <param name="enabledVersions">
+    /// The validated enabled-version entries.
+    /// </param>
+    /// <param name="currentVersion">
+    /// The current application file-version string.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the current version is enabled; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool IsCurrentVersionEnabled(
+        IEnumerable<EnabledVersion> enabledVersions,
+        string currentVersion)
+    {
+        return enabledVersions.Any(item =>
+            string.Equals(
+                item.Version,
+                currentVersion,
+                StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Returns non-development AWB versions newer than the current application
+    /// version.
+    /// </summary>
+    /// <param name="enabledVersions">
+    /// The validated enabled-version entries.
+    /// </param>
+    /// <param name="currentVersion">
+    /// The current application version.
+    /// </param>
+    /// <returns>
+    /// Distinct newer version identifiers.
+    /// </returns>
+    private static List<string> GetNewerVersions(
+        IEnumerable<EnabledVersion> enabledVersions,
+        Version currentVersion)
+    {
+        return enabledVersions
+            .Where(item =>
+                !item.Dev &&
+                Version.TryParse(
+                    item.Version,
+                    out Version candidateVersion) &&
+                candidateVersion > currentVersion)
+            .Select(item => item.Version)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static BackgroundRequest _request;
