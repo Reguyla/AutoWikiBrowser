@@ -913,11 +913,24 @@ public class SiteInfo : IXmlSerializable
     }
 
     #region Helpers
+    /// <summary>
+    /// Opens the specified wiki page in the user's default web browser.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the wiki page to open.
+    /// </param>
     public void OpenPageInBrowser(string title)
     {
         Tools.OpenArticleInBrowser(title);
     }
 
+    /// <summary>
+    /// Opens the revision history for the specified wiki page in the user's
+    /// default web browser.
+    /// </summary>
+    /// <param name="title">
+    /// The title of the wiki page whose history should be opened.
+    /// </param>
     public void OpenPageHistoryInBrowser(string title)
     {
         Tools.OpenArticleHistoryInBrowser(title);
@@ -927,132 +940,164 @@ public class SiteInfo : IXmlSerializable
 
     #region IXmlSerializable Members
 
-    public System.Xml.Schema.XmlSchema GetSchema()
+    /// <summary>
+    /// Returns the XML schema associated with this type.
+    /// </summary>
+    /// <returns>
+    /// Always <see langword="null"/>, because this type does not expose a custom
+    /// XML schema.
+    /// </returns>
+    public System.Xml.Schema.XmlSchema? GetSchema()
     {
         return null;
     }
 
+    /// <summary>
+    /// Reads the XML representation of this instance.
+    /// </summary>
+    /// <param name="reader">
+    /// The XML reader positioned at the serialized representation.
+    /// </param>
+    /// <exception cref="NotSupportedException">
+    /// XML deserialization is not implemented for <see cref="SiteInfo"/>.
+    /// </exception>
     public void ReadXml(XmlReader reader)
     {
-        throw new Exception("The method or operation is not implemented.");
+        throw new NotSupportedException(
+            "XML deserialization is not implemented for SiteInfo.");
     }
 
+    /// <summary>
+    /// Writes the XML representation of this instance.
+    /// </summary>
+    /// <param name="writer">
+    /// The XML writer used to serialize the current site information.
+    /// </param>
+    /// <remarks>
+    /// The serialized data currently includes the normalized wiki script URL,
+    /// the legacy PHP5 capability flag, and the configured namespace mappings.
+    /// The surrounding object element is written by the serializer.
+    /// </remarks>
     public void WriteXml(XmlWriter writer)
     {
-        // writer.WriteStartElement("site");
         writer.WriteAttributeString("url", scriptPath);
+
         writer.WriteAttributeString("php5", Editor.PHP5 ? "1" : "0");
+
+        writer.WriteStartElement("Namespaces");
+
+        foreach (KeyValuePair<int, string> pair in namespaces)
         {
-            writer.WriteStartElement("Namespaces");
-            {
-                foreach (KeyValuePair<int, string> p in namespaces)
-                {
-                    writer.WriteStartElement("Namespace");
-                    writer.WriteAttributeString("id", p.Key.ToString());
-                    writer.WriteValue(p.Value);
-                    writer.WriteEndElement();
-                }
-            }
+            writer.WriteStartElement("Namespace");
+
+            writer.WriteAttributeString("id",
+                pair.Key.ToString(
+                    CultureInfo.InvariantCulture));
+
+            writer.WriteValue(pair.Value);
+
+            writer.WriteEndElement();
         }
-        // writer.WriteEndElement();
+
+        writer.WriteEndElement();
     }
+
     #endregion
 }
-
-/// <summary>
-/// Provides the base class for exceptions representing errors encountered
-/// while interacting with a wiki.
-/// </summary>
-public abstract class WikiException : Exception
-{
     /// <summary>
-    /// Initializes a new instance of the <see cref="WikiException"/> class
-    /// with the specified error message.
+    /// Provides the base class for exceptions representing errors encountered
+    /// while interacting with a wiki.
     /// </summary>
-    /// <param name="text">
-    /// The message that describes the error.
-    /// </param>
-    protected WikiException(string text)
-        : base(text)
+    public abstract class WikiException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WikiException"/> class
+        /// with the specified error message.
+        /// </summary>
+        /// <param name="text">
+        /// The message that describes the error.
+        /// </param>
+        protected WikiException(string text)
+            : base(text)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WikiException"/> class
+        /// with the specified error message and underlying exception.
+        /// </summary>
+        /// <param name="text">
+        /// The message that describes the error.
+        /// </param>
+        /// <param name="innerException">
+        /// The exception that caused the current exception.
+        /// </param>
+        protected WikiException(
+            string text,
+            Exception innerException)
+            : base(text, innerException)
+        {
+        }
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WikiException"/> class
-    /// with the specified error message and underlying exception.
+    /// Represents an error encountered while connecting to or resolving a
+    /// configured wiki site.
     /// </summary>
-    /// <param name="text">
-    /// The message that describes the error.
-    /// </param>
-    /// <param name="innerException">
-    /// The exception that caused the current exception.
-    /// </param>
-    protected WikiException(
-        string text,
-        Exception innerException)
-        : base(text, innerException)
+    public class WikiUrlException : WikiException
     {
-    }
-}
+        private const string ExceptionMessage =
+            "Can't connect to given wiki site.";
 
-/// <summary>
-/// Represents an error encountered while connecting to or resolving a
-/// configured wiki site.
-/// </summary>
-public class WikiUrlException : WikiException
-{
-    private const string ExceptionMessage =
-        "Can't connect to given wiki site.";
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WikiUrlException"/> class.
+        /// </summary>
+        public WikiUrlException()
+            : base(ExceptionMessage)
+        {
+        }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="WikiUrlException"/> class.
-    /// </summary>
-    public WikiUrlException()
-        : base(ExceptionMessage)
-    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WikiUrlException"/> class
+        /// with the exception that caused the connection failure.
+        /// </summary>
+        /// <param name="innerException">
+        /// The exception that caused the current exception.
+        /// </param>
+        public WikiUrlException(Exception innerException)
+            : base(ExceptionMessage, innerException)
+        {
+        }
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WikiUrlException"/> class
-    /// with the exception that caused the connection failure.
+    /// Represents an error returned when the current user does not have
+    /// permission to read from the MediaWiki API.
     /// </summary>
-    /// <param name="innerException">
-    /// The exception that caused the current exception.
-    /// </param>
-    public WikiUrlException(Exception innerException)
-        : base(ExceptionMessage, innerException)
+    public class ReadApiDeniedException : WikiException
     {
-    }
-}
+        private const string ExceptionMessage =
+            "Read permission is required to use this module.";
 
-/// <summary>
-/// Represents an error returned when the current user does not have
-/// permission to read from the MediaWiki API.
-/// </summary>
-public class ReadApiDeniedException : WikiException
-{
-    private const string ExceptionMessage =
-        "Read permission is required to use this module.";
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="ReadApiDeniedException"/> class.
+        /// </summary>
+        public ReadApiDeniedException()
+            : base(ExceptionMessage)
+        {
+        }
 
-    /// <summary>
-    /// Initializes a new instance of the
-    /// <see cref="ReadApiDeniedException"/> class.
-    /// </summary>
-    public ReadApiDeniedException()
-        : base(ExceptionMessage)
-    {
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="ReadApiDeniedException"/> class with the exception that
+        /// caused the permission failure.
+        /// </summary>
+        /// <param name="innerException">
+        /// The exception that caused the current exception.
+        /// </param>
+        public ReadApiDeniedException(Exception innerException)
+            : base(ExceptionMessage, innerException)
+        {
+        }
     }
-
-    /// <summary>
-    /// Initializes a new instance of the
-    /// <see cref="ReadApiDeniedException"/> class with the exception that
-    /// caused the permission failure.
-    /// </summary>
-    /// <param name="innerException">
-    /// The exception that caused the current exception.
-    /// </param>
-    public ReadApiDeniedException(Exception innerException)
-        : base(ExceptionMessage, innerException)
-    {
-    }
-}
