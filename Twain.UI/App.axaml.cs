@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Twain.Core.Updates;
 using Twain.UI.Shell;
 using Twain.UI.Views.Shell;
 
@@ -12,6 +13,15 @@ namespace Twain.UI;
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>
+    /// Gets or sets the factory used to create the application update service.
+    /// </summary>
+    /// <remarks>
+    /// The desktop host supplies the platform-specific implementation so the UI
+    /// depends only on the Twain update abstraction and not on Velopack.
+    /// </remarks>
+    public static Func<IUpdateService>? UpdateServiceFactory { get; set; }
+
     /// <summary>
     /// Loads the application's XAML resources and initializes the Avalonia
     /// application infrastructure.
@@ -36,9 +46,12 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            IUpdateService? updateService =
+                UpdateServiceFactory?.Invoke();
+
             desktop.MainWindow = new ShellWindow
             {
-                DataContext = new ShellViewModel(),
+                DataContext = new ShellViewModel(updateService),
             };
         }
 

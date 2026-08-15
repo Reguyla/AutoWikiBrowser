@@ -21,7 +21,36 @@
         <vm:ShellViewModel />
     </Design.DataContext>
 
-    <workspaceViews:WorkspaceView
-        DataContext="{Binding Workspace}" />
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Menu Grid.Row="0">
+            <MenuItem Header="_Help">
+                <MenuItem
+                    Header="Check for _Updates"
+                    Command="{Binding CheckForUpdatesCommand}" />
+            </MenuItem>
+        </Menu>
+
+ <Border
+    Grid.Row="1"
+    Padding="12">
+    <Grid ColumnDefinitions="*,Auto">
+        <TextBlock
+            VerticalAlignment="Center"
+            Text="{Binding UpdateStatusMessage}"
+            TextWrapping="Wrap" />
+
+        <Button
+            Grid.Column="1"
+            Margin="12,0,0,0"
+            Command="{Binding InstallUpdateCommand}"
+            Content="Update and Restart"
+            IsVisible="{Binding IsUpdateAvailable}" />
+    </Grid>
+</Border>
+
+        <workspaceViews:WorkspaceView
+            Grid.Row="2"
+            DataContext="{Binding Workspace}" />
+    </Grid>
 
 </Window>

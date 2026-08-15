@@ -1,6 +1,6 @@
 ﻿using Avalonia;
+using Twain.Desktop.Updates;
 using Velopack;
-using Velopack.Sources;
 
 namespace Twain.Desktop;
 
@@ -20,6 +20,9 @@ internal static class Program
     {
         VelopackApp.Build().Run();
 
+        Twain.UI.App.UpdateServiceFactory =
+            static () => new VelopackUpdateService();
+
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
@@ -37,23 +40,5 @@ internal static class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
-    }
-    private static async Task CheckForTestUpdateAsync()
-    {
-        var source = new GithubSource(
-            "https://github.com/Reguyla/AutoWikiBrowser", null, false);
-
-        var updateManager = new UpdateManager(source);
-
-        var update = await updateManager.CheckForUpdatesAsync();
-
-        if (update == null)
-        {
-            return;
-        }
-
-        await updateManager.DownloadUpdatesAsync(update);
-
-        updateManager.ApplyUpdatesAndRestart(update);
     }
 }
