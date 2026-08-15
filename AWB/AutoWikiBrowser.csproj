@@ -72,6 +72,29 @@
   </ItemGroup>
 
   <!--
+    Microsoft.Web.WebView2 currently contributes its WPF assembly to the
+    reference graph even though this project uses only the WinForms WebView2
+    control. Microsoft.Web.WebView2.Wpf depends on a different WindowsBase
+    assembly version and causes MSB3277 assembly-resolution warnings.
+
+    Remove the unused WPF assembly before ResolveAssemblyReferences so the
+    WinForms project resolves only the WebView2 assemblies it actually uses.
+
+    TODO: Recheck whether this workaround is still necessary after future
+    Microsoft.Web.WebView2 package updates and remove it when the upstream
+    package no longer contributes the unused WPF reference.
+  -->
+  <Target Name="RemoveUnusedWebView2WpfReference"
+          BeforeTargets="ResolveAssemblyReferences"
+          DependsOnTargets="ResolvePackageAssets">
+
+    <ItemGroup>
+      <Reference Remove="@(Reference)"
+                 Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+
+  <!--
     Stats.resx is kept beside Stats.cs for project organization but must not be
     compiled as a normal embedded WinForms resource.
   -->
