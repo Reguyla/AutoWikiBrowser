@@ -9,33 +9,6 @@
 
     <StartupObject>AutoWikiBrowser.Program</StartupObject>
     <ApplicationIcon>globe.ico</ApplicationIcon>
-
-    <!--
-      TODO: Review and remove the remaining legacy ClickOnce configuration
-      after confirming that it is no longer required by publishing,
-      installation, or update workflows.
-
-      GenerateManifests and SignManifests are currently disabled, so several
-      properties below may no longer affect normal builds.
-    -->
-    <ManifestCertificateThumbprint>
-      AC00F13177F564760CA7C93223447E28AFBED803
-    </ManifestCertificateThumbprint>
-    <ManifestKeyFile>AutoWikiBrowser_TemporaryKey.pfx</ManifestKeyFile>
-    <GenerateManifests>false</GenerateManifests>
-    <SignManifests>false</SignManifests>
-    <TargetZone>LocalIntranet</TargetZone>
-    <Install>true</Install>
-    <UpdateEnabled>true</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>3.0.6.0</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
