@@ -19,13 +19,25 @@ public abstract class ApiJsonListProviderBase : IListProvider
     protected virtual string WantedAttribute => "title";
 
     /// <summary>
-    /// Retrieves a list of pages from a MediaWiki API JSON response.
+    /// Retrieves pages from a MediaWiki <c>pageswithprop</c> API response.
     /// </summary>
-    /// <param name="url">The API request query string.</param>
+    /// <param name="url">
+    /// The MediaWiki API query parameters used to retrieve the page list.
+    /// </param>
     /// <param name="haveSoFar">
     /// The number of pages already retrieved by the current list operation.
     /// </param>
-    /// <returns>The pages returned by the API.</returns>
+    /// <returns>
+    /// A list containing the articles returned by the API. An empty list is
+    /// returned when the response contains no usable page data or cannot be
+    /// parsed.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the method is called while unit-test mode is enabled, because
+    /// unit tests must not make requests to Wikipedia or other MediaWiki sites.
+    /// </exception>
+    // TODO: Determine whether haveSoFar is still required by the list-provider
+    // contract. It is currently unused by ApiMakeList.
     public List<Article> ApiMakeList(
         string url,
         int haveSoFar)
@@ -39,13 +51,40 @@ public abstract class ApiJsonListProviderBase : IListProvider
         ApiEdit editor =
             Variables.MainForm.TheSession.Editor.SynchronousEditor;
 
-        string responseJson = editor.QueryApiJson(url);
+        string responseJson =
+            editor.QueryApiJson(url);
 
         if (string.IsNullOrWhiteSpace(responseJson))
         {
             return [];
         }
 
+        return ParsePagesWithPropResponse(
+            responseJson);
+    }
+
+    /// <summary>
+    /// Parses a MediaWiki <c>pageswithprop</c> API response into a list of
+    /// articles.
+    /// </summary>
+    /// <param name="responseJson">
+    /// The JSON response returned by the MediaWiki API.
+    /// </param>
+    /// <returns>
+    /// A list containing an <see cref="Article"/> for each valid string value
+    /// found in the configured <see cref="WantedAttribute"/> property. An empty
+    /// list is returned when the expected response structure is absent or the
+    /// JSON is malformed.
+    /// </returns>
+    /// <remarks>
+    /// The expected response structure is
+    /// <c>query.pageswithprop</c>. Entries that are not JSON objects, do not
+    /// contain <see cref="WantedAttribute"/>, or contain a non-string or empty
+    /// attribute value are ignored.
+    /// </remarks>
+    private List<Article> ParsePagesWithPropResponse(
+        string responseJson)
+    {
         try
         {
             using JsonDocument document =
