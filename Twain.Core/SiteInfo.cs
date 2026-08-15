@@ -26,24 +26,59 @@ using Twain.Core.API;
 namespace Twain.Core;
 
 /// <summary>
-/// This class holds all basic information about a wiki
+/// Stores core metadata and configuration information for a MediaWiki site.
 /// </summary>
+/// <remarks>
+/// Instances contain the site's script path, namespaces, namespace aliases,
+/// magic words, raw site-information response, and base URI. The class also
+/// supports XML serialization for legacy configuration persistence.
+/// </remarks>
 [Serializable]
 public class SiteInfo : IXmlSerializable
 {
+    /// <summary>
+    /// API editor used to retrieve site metadata.
+    /// </summary>
     private readonly IApiEdit Editor;
 
-    // path in format https://en.wikipedia.org/w/
+    /// <summary>
+    /// Base MediaWiki script path in a form such as
+    /// <c>https://en.wikipedia.org/w/</c>.
+    /// </summary>
     private string scriptPath;
+
+    /// <summary>
+    /// Maps namespace identifiers to their canonical namespace names.
+    /// </summary>
     private readonly Dictionary<int, string> namespaces = new();
+
+    /// <summary>
+    /// Maps namespace identifiers to their configured alias names.
+    /// </summary>
     private Dictionary<int, List<string>> namespaceAliases = new();
+
+    /// <summary>
+    /// Maps MediaWiki magic-word identifiers to their recognized aliases.
+    /// </summary>
     private readonly Dictionary<string, List<string>> magicWords = new();
 
+    /// <summary>
+    /// Raw site-information response used to populate the current instance.
+    /// </summary>
     private string siteinfoOutput;
 
+    /// <summary>
+    /// Base URI associated with the current wiki.
+    /// </summary>
     private readonly Uri uri;
+
+    /// <summary>
+    /// Initializes an empty <see cref="SiteInfo"/> instance for XML
+    /// deserialization.
+    /// </summary>
     internal SiteInfo()
-    { }
+    {
+    }
 
     /// <summary>
     /// Creates an instance of the class
@@ -320,51 +355,86 @@ public class SiteInfo : IXmlSerializable
         IsAWBTagDefined = awbTagDefined == true;
     }
 
+    // TODO: Replace the object return type with a structured site-info error result.
+    // This method currently returns false when no recognized API error is present,
+    // true when an unclassified API error is present, or a WikiException for a
+    // recognized error code. Review all callers before changing this legacy contract.
+
+    /// <summary>
+    /// Examines the stored site-information response for a MediaWiki API error.
+    /// </summary>
+    /// <returns>
+    /// <see langword="false"/> when no API error is present or the error code is
+    /// not recognized; <see langword="true"/> when an API error is present without
+    /// a recognized code; or a corresponding <see cref="WikiException"/> when the
+    /// error code maps to a known wiki error.
+    /// </returns>
     public object ParseErrorFromSiteInfoOutput()
     {
         if (string.IsNullOrEmpty(siteinfoOutput))
-            return false;
-
-        XmlDocument xd = new XmlDocument();
-        xd.LoadXml(siteinfoOutput);
-
-        var api = xd["api"];
-        if (api == null) return false;
-
-        var error = api["error"];
-        if (error == null) return false;
-
-        var errorCode = error.GetAttribute("code");
-        if (!string.IsNullOrEmpty(errorCode))
         {
-            switch (errorCode)
-            {
-                case "readapidenied":
-                    return new ReadApiDeniedException();
-                default:
-                    return false;
-            }
+            return false;
         }
-        return true;
+
+        XmlDocument document = new();
+        document.LoadXml(siteinfoOutput);
+
+        XmlElement? api = document["api"];
+
+        if (api == null)
+        {
+            return false;
+        }
+
+        XmlElement? error = api["error"];
+
+        if (error == null)
+        {
+            return false;
+        }
+
+        string errorCode = error.GetAttribute("code");
+
+        if (string.IsNullOrEmpty(errorCode))
+        {
+            return true;
+        }
+
+        return errorCode switch
+        {
+            "readapidenied" => new ReadApiDeniedException(),
+            _ => false
+        };
     }
 
-    // [XmlAttribute(AttributeName = "url")]
+    /// <summary>
+    /// Gets or sets the base MediaWiki script path for the current wiki.
+    /// </summary>
+    /// <value>
+    /// A normalized script path in a form such as
+    /// <c>https://en.wikipedia.org/w/</c>.
+    /// </value>
+    /// <remarks>
+    /// The setter must remain public because the legacy object-cache serializer
+    /// requires public property setters when restoring <see cref="SiteInfo"/>
+    /// instances.
+    /// </remarks>
     public string ScriptPath
     {
-        get { return scriptPath; }
-        set // Must stay public otherwise Serialiser for ObjectCache isn't happy =(
-        {
-            scriptPath = NormalizeURL(value);
-        }
+        get => scriptPath;
+        set => scriptPath = NormalizeURL(value);
     }
 
-    public string Host
-    {
-        get
-        {
-            return uri.Scheme + Uri.SchemeDelimiter + uri.Host;
-        }
-    }
+    /// <summary>
+    /// Gets the scheme and host portion of the current wiki URI.
+    /// </summary>
+    /// <value>
+    /// The wiki origin, such as <c>https://en.wikipedia.org</c>.
+    /// </value>
+    public string Host =>
+        uri.Scheme +
+        Uri.SchemeDelimiter +
+        uri.Host;
 
     /// <summary>
     /// Contains namespaces for this wiki mapped by their IDs
@@ -603,38 +673,100 @@ public class SiteInfo : IXmlSerializable
     #endregion
 }
 
+/// <summary>
+/// Provides the base class for exceptions representing errors encountered
+/// while interacting with a wiki.
+/// </summary>
 public abstract class WikiException : Exception
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WikiException"/> class
+    /// with the specified error message.
+    /// </summary>
+    /// <param name="text">
+    /// The message that describes the error.
+    /// </param>
     protected WikiException(string text)
         : base(text)
-    { }
+    {
+    }
 
-    protected WikiException(string text, Exception innerException)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WikiException"/> class
+    /// with the specified error message and underlying exception.
+    /// </summary>
+    /// <param name="text">
+    /// The message that describes the error.
+    /// </param>
+    /// <param name="innerException">
+    /// The exception that caused the current exception.
+    /// </param>
+    protected WikiException(
+        string text,
+        Exception innerException)
         : base(text, innerException)
-    { }
+    {
+    }
 }
 
+/// <summary>
+/// Represents an error encountered while connecting to or resolving a
+/// configured wiki site.
+/// </summary>
 public class WikiUrlException : WikiException
 {
-    private const string ExceptionMessage = "Can't connect to given wiki site.";
+    private const string ExceptionMessage =
+        "Can't connect to given wiki site.";
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WikiUrlException"/> class.
+    /// </summary>
     public WikiUrlException()
         : base(ExceptionMessage)
-    { }
+    {
+    }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WikiUrlException"/> class
+    /// with the exception that caused the connection failure.
+    /// </summary>
+    /// <param name="innerException">
+    /// The exception that caused the current exception.
+    /// </param>
     public WikiUrlException(Exception innerException)
         : base(ExceptionMessage, innerException)
-    { }
+    {
+    }
 }
 
+/// <summary>
+/// Represents an error returned when the current user does not have
+/// permission to read from the MediaWiki API.
+/// </summary>
 public class ReadApiDeniedException : WikiException
 {
-    private const string ExceptionMessage = "You need read permission to use this module";
+    private const string ExceptionMessage =
+        "Read permission is required to use this module.";
 
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ReadApiDeniedException"/> class.
+    /// </summary>
     public ReadApiDeniedException()
         : base(ExceptionMessage)
-    { }
+    {
+    }
 
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ReadApiDeniedException"/> class with the exception that
+    /// caused the permission failure.
+    /// </summary>
+    /// <param name="innerException">
+    /// The exception that caused the current exception.
+    /// </param>
     public ReadApiDeniedException(Exception innerException)
         : base(ExceptionMessage, innerException)
-    { }
+    {
+    }
 }
