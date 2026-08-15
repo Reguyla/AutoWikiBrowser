@@ -15,8 +15,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows.Forms;
 using Twain.Core.Background;
 
@@ -65,36 +66,80 @@ public static class Updater
     /// <value>The newer versions.</value>
     public static List<string> NewerVersions { get; private set; }
 
+    /// <summary>
+    /// URL of the legacy global AutoWikiBrowser version and policy metadata.
+    /// </summary>
+    /// <remarks>
+    /// The returned JSON identifies enabled AWB versions and supplies additional
+    /// global configuration used by the legacy client-validation workflow.
+    /// This endpoint is retained until the corresponding behavior is replaced
+    /// by the Twain policy and compatibility services.
+    /// </remarks>
     private const string CHECKPAGE_URL =
         "https://en.wikipedia.org/w/index.php?title=Wikipedia:AutoWikiBrowser/CheckPage/VersionJSON&action=raw";
 
+    /// <summary>
+    /// Represents the version-related portion of the global AWB configuration.
+    /// </summary>
     private sealed class VersionPage
     {
-        [JsonProperty("enabledversions")]
+        /// <summary>
+        /// Gets or sets the AWB versions recognized by the global configuration.
+        /// </summary>
+        [JsonPropertyName("enabledversions")]
         public List<EnabledVersion> EnabledVersions { get; set; } = new();
     }
 
+    /// <summary>
+    /// Represents metadata for an AWB version listed in the global
+    /// configuration.
+    /// </summary>
     private sealed class EnabledVersion
     {
-        [JsonProperty("version")]
+        /// <summary>
+        /// Gets or sets the application version identifier.
+        /// </summary>
+        [JsonPropertyName("version")]
         public string Version { get; set; } = string.Empty;
 
-        [JsonProperty("releasedate")]
+        /// <summary>
+        /// Gets or sets the configured release date.
+        /// </summary>
+        [JsonPropertyName("releasedate")]
         public string ReleaseDate { get; set; } = string.Empty;
 
-        [JsonProperty("dotnetversion")]
+        /// <summary>
+        /// Gets or sets the configured .NET version associated with this
+        /// application version.
+        /// </summary>
+        [JsonPropertyName("dotnetversion")]
         public string DotNetVersion { get; set; } = string.Empty;
 
-        [JsonProperty("dev")]
+        /// <summary>
+        /// Gets or sets a value indicating whether this is a development
+        /// version.
+        /// </summary>
+        [JsonPropertyName("dev")]
         public bool Dev { get; set; }
 
-        [JsonProperty("released")]
+        /// <summary>
+        /// Gets or sets a value indicating whether this version is marked as
+        /// released.
+        /// </summary>
+        [JsonPropertyName("released")]
         public bool Released { get; set; }
     }
 
     /// <summary>
-    /// Do the actual checking for enabledness etc
+    /// Checks the global AWB version configuration and determines whether the
+    /// current application version is enabled and whether a newer released
+    /// version is available.
     /// </summary>
+    /// <remarks>
+    /// The downloaded configuration is exposed through
+    /// <see cref="GlobalVersionPage"/> only after the version metadata has been
+    /// successfully parsed and validated.
+    /// </remarks>
     private static void UpdateFunc()
     {
         Result = AWBEnabledStatus.Error;
@@ -104,21 +149,12 @@ public static class Updater
             string text = Tools.GetHTML(CHECKPAGE_URL);
 
             if (string.IsNullOrWhiteSpace(text))
+            {
                 return;
-
-            VersionPage versionPage;
-
-            using (var stringReader = new StringReader(text))
-            using (var jsonReader = new JsonTextReader(stringReader)
-            {
-                MaxDepth = 32,
-                DateParseHandling = DateParseHandling.None
-            })
-            {
-                var serializer = JsonSerializer.CreateDefault();
-
-                versionPage = serializer.Deserialize<VersionPage>(jsonReader);
             }
+
+            VersionPage versionPage =
+                JsonSerializer.Deserialize<VersionPage>(text);
 
             if (versionPage == null ||
                 versionPage.EnabledVersions == null)
@@ -138,7 +174,9 @@ public static class Updater
             string awbFileVersion =
                 FileVersionInfo.GetVersionInfo(awbPath).FileVersion;
 
-            if (!Version.TryParse(awbFileVersion, out Version currentAwbVersion))
+            if (!Version.TryParse(
+                    awbFileVersion,
+                    out Version currentAwbVersion))
             {
                 Result = AWBEnabledStatus.Error;
                 return;
@@ -168,7 +206,9 @@ public static class Updater
             var newerVersions = validEnabledVersions
                 .Where(item =>
                     !item.Dev &&
-                    Version.TryParse(item.Version, out Version candidateVersion) &&
+                    Version.TryParse(
+                        item.Version,
+                        out Version candidateVersion) &&
                     candidateVersion > currentAwbVersion)
                 .Select(item => item.Version)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
