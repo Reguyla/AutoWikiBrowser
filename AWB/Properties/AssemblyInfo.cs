@@ -23,13 +23,4 @@ using System.Runtime.Versioning;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("d6768e6e-91a8-4384-805d-350273d5011a")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version
-//      Build Number
-//      Revision
-
-[assembly: AssemblyVersion("6.5.0.1")]
-[assembly: AssemblyFileVersion("6.6.0.1")]
 [assembly: CLSCompliant(true)]
