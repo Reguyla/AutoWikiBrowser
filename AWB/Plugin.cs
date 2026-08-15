@@ -502,10 +502,6 @@ internal static class Plugin
             awbPlugin.Name,
             awbPlugin);
 
-        if (afterStartup)
-        {
-            UsageStats.AddedPlugin(awbPlugin);
-        }
     }
 
     /// <summary>
@@ -542,11 +538,6 @@ internal static class Plugin
             awbBasePlugin.Name,
             awbBasePlugin);
 
-        if (afterStartup)
-        {
-            UsageStats.AddedPlugin(
-                awbBasePlugin);
-        }
     }
 
     /// <summary>
@@ -581,11 +572,6 @@ internal static class Plugin
             listMakerPlugin.Name,
             listMakerPlugin);
 
-        if (afterStartup)
-        {
-            UsageStats.AddedPlugin(
-                listMakerPlugin);
-        }
     }
 
     /// <summary>

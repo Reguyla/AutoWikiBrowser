@@ -83,14 +83,4 @@ internal sealed partial class AboutBox : Form
             false);
     }
 
-    /// <summary>
-    /// Opens the AutoWikiBrowser usage statistics page.
-    /// </summary>
-    private void UsageStatsLabel_LinkClicked(
-        object sender,
-        LinkLabelLinkClickedEventArgs e)
-    {
-        UsageStatsLabel.LinkVisited = true;
-        UsageStats.OpenUsageStatsURL();
-    }
 }

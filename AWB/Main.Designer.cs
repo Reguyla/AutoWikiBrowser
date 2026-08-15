@@ -186,7 +186,6 @@ namespace AutoWikiBrowser
             this.invalidateCacheToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.UsageStatsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusMain = new System.Windows.Forms.StatusStrip();
             this.MainFormProgressBar = new System.Windows.Forms.ToolStripProgressBar();
@@ -1570,13 +1569,6 @@ namespace AutoWikiBrowser
             this.resetEditSkippedCountToolStripMenuItem.Text = "Reset saved/skipped counts";
             this.resetEditSkippedCountToolStripMenuItem.Click += new System.EventHandler(this.resetEditSkippedCountToolStripMenuItem_Click);
             // 
-            // submitStatToolStripMenuItem
-            // 
-            this.submitStatToolStripMenuItem.Name = "submitStatToolStripMenuItem";
-            this.submitStatToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.submitStatToolStripMenuItem.Text = "Submit stats";
-            this.submitStatToolStripMenuItem.Click += new System.EventHandler(this.submitStatToolStripMenuItem_Click);
-            // 
             // toolStripSeparator29
             // 
             this.toolStripSeparator29.Name = "toolStripSeparator29";
@@ -1603,7 +1595,6 @@ namespace AutoWikiBrowser
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.helpToolStripMenuItem1,
-            this.UsageStatsMenuItem,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -1616,13 +1607,6 @@ namespace AutoWikiBrowser
             this.helpToolStripMenuItem1.Size = new System.Drawing.Size(170, 22);
             this.helpToolStripMenuItem1.Text = "&Help";
             this.helpToolStripMenuItem1.Click += new System.EventHandler(this.helpToolStripMenuItem1_Click);
-            // 
-            // UsageStatsMenuItem
-            // 
-            this.UsageStatsMenuItem.Name = "UsageStatsMenuItem";
-            this.UsageStatsMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.UsageStatsMenuItem.Text = "Usage &statistics";
-            this.UsageStatsMenuItem.Click += new System.EventHandler(this.UsageStatsMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
@@ -4565,7 +4549,6 @@ namespace AutoWikiBrowser
         private System.Windows.Forms.ToolStripMenuItem categoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator24;
         private System.Windows.Forms.TabPage tpSkip;
-        private System.Windows.Forms.ToolStripMenuItem UsageStatsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem filterOutNonMainSpaceToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeDuplicatesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator28;

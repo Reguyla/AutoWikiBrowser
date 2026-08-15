@@ -19,8 +19,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
  */
 
-#undef INSTASTATS // turn on here and in stats.cs to make AWB log (empty) stats at startup
-
 using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Diff;
 using AutoWikiBrowser.Services.Settings;
@@ -628,8 +626,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         CompleteStartup();
-
-        UsageStats.Do(false);
     }
 
     /// <summary>
@@ -5482,15 +5478,15 @@ font-size: 150%;'>No changes</h2>
 
     // TODO (Shutdown Reliability):
     // Review whether shutdown operations should be isolated so that a failure in
-    // editor cancellation, settings persistence, or usage-stat recording does not
-    // prevent the remaining cleanup steps from completing.
+    // editor cancellation or settings persistence does not prevent the remaining
+    // cleanup steps from completing.
     /// <summary>
     /// Performs the one-time application shutdown cleanup for AWB.
     /// </summary>
     /// <remarks>
     /// The method prevents duplicate shutdown processing, aborts any active editor
-    /// operation when a session is available, saves recent settings, records final
-    /// usage statistics, and disposes the notification-area icon.
+    /// operation when a session is available, saves recent settings, and disposes
+    /// the notification-area icon.
     /// </remarks>
     private void CloseDownAWB()
     {
@@ -5503,7 +5499,6 @@ font-size: 150%;'>No changes</h2>
 
         AbortActiveEditorOperation();
         SaveRecentSettingsList();
-        UsageStats.Do(true);
         DisposeTrayIcon();
     }
 
@@ -7650,8 +7645,6 @@ font-size: 150%;'>No changes</h2>
         object sender,
         EventArgs e)
     {
-        if (NumberOfEdits > 0)
-            UsageStats.Do(false);
 
         NumberOfEdits = 0;
         NumberOfIgnoredEdits = 0;
@@ -13273,18 +13266,6 @@ font-size: 150%;'>No changes</h2>
             string.Empty);
     }
 
-    // TODO: Make the usage statistics endpoint configurable to support
-    // future Twain services or self-hosted deployments.
-    /// <summary>
-    /// Opens the usage statistics website in the default web browser.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void UsageStatsMenuItem_Click(object sender, EventArgs e)
-    {
-        UsageStats.OpenUsageStatsURL();
-    }
-
     /// <summary>
     /// Starts the main progress indicator, marshaling to the UI thread when
     /// necessary.
@@ -13523,16 +13504,6 @@ font-size: 150%;'>No changes</h2>
         {
             listMaker.Clear();
         }
-    }
-
-    /// <summary>
-    /// Submits the current usage statistics to the statistics service.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void submitStatToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        UsageStats.Do(false);
     }
 
     /// <summary>

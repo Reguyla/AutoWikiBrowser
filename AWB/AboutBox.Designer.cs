@@ -54,7 +54,6 @@ namespace AutoWikiBrowser
             this.lblAWBVersion = new System.Windows.Forms.Label();
             this.lblDetails = new System.Windows.Forms.Label();
             this.lblOriginalDevs = new System.Windows.Forms.Label();
-            this.UsageStatsLabel = new System.Windows.Forms.LinkLabel();
             this.lblRevision = new System.Windows.Forms.Label();
             this.flwDevs = new System.Windows.Forms.FlowLayoutPanel();
             this.MagioladitisLabel = new Twain.Core.Controls.DeveloperLinkLabel();
@@ -123,13 +122,6 @@ namespace AutoWikiBrowser
             resources.ApplyResources(this.lblOriginalDevs, "lblOriginalDevs");
             this.lblOriginalDevs.Name = "lblOriginalDevs";
             // 
-            // UsageStatsLabel
-            // 
-            resources.ApplyResources(this.UsageStatsLabel, "UsageStatsLabel");
-            this.UsageStatsLabel.Name = "UsageStatsLabel";
-            this.UsageStatsLabel.TabStop = true;
-            this.UsageStatsLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.UsageStatsLabel_LinkClicked);
-            // 
             // lblRevision
             // 
             resources.ApplyResources(this.lblRevision, "lblRevision");
@@ -194,7 +186,6 @@ namespace AutoWikiBrowser
             // 
             // flowLayoutPanel3
             // 
-            this.flowLayoutPanel3.Controls.Add(this.UsageStatsLabel);
             resources.ApplyResources(this.flowLayoutPanel3, "flowLayoutPanel3");
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             // 
@@ -283,7 +274,6 @@ namespace AutoWikiBrowser
         private System.Windows.Forms.Label lblAWBVersion;
         private System.Windows.Forms.Label lblDevs;
         private System.Windows.Forms.Label lblOriginalDevs;
-        private System.Windows.Forms.LinkLabel UsageStatsLabel;
         private System.Windows.Forms.Label lblRevision;
         private System.Windows.Forms.FlowLayoutPanel flwDevs;
         private System.Windows.Forms.FlowLayoutPanel flwOriginalDevs;

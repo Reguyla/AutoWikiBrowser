@@ -321,36 +321,6 @@
   <data name="&gt;&gt;lblOriginalDevs.ZOrder" xml:space="preserve">
     <value>10</value>
   </data>
-  <data name="UsageStatsLabel.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="UsageStatsLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 32</value>
-  </data>
-  <data name="UsageStatsLabel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>8, 0, 8, 0</value>
-  </data>
-  <data name="UsageStatsLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>214, 32</value>
-  </data>
-  <data name="UsageStatsLabel.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
-  </data>
-  <data name="UsageStatsLabel.Text" xml:space="preserve">
-    <value>Usage statistics</value>
-  </data>
-  <data name="&gt;&gt;UsageStatsLabel.Name" xml:space="preserve">
-    <value>UsageStatsLabel</value>
-  </data>
-  <data name="&gt;&gt;UsageStatsLabel.Type" xml:space="preserve">
-    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;UsageStatsLabel.Parent" xml:space="preserve">
-    <value>flowLayoutPanel3</value>
-  </data>
-  <data name="&gt;&gt;UsageStatsLabel.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
   <data name="lblRevision.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
