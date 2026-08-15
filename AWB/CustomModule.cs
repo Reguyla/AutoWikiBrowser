@@ -170,9 +170,9 @@ internal sealed partial class CustomModule : Form
         }
     }
 
-private string _codeStart = string.Empty;
-private string _codeEnd = string.Empty;
-private string _codeExample = string.Empty;
+    private string _codeStart = string.Empty;
+    private string _codeEnd = string.Empty;
+    private string _codeExample = string.Empty;
 
     /// <summary>
     /// Provides the user interface for creating, compiling, and managing

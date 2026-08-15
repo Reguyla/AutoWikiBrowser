@@ -795,7 +795,7 @@ namespace Twain.Core
 
             return append.ToString();
         }
-    
+
         #region Static helper functions
 
         // TODO: Review this pattern against modern .NET stack trace formats,

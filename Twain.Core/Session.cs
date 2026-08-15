@@ -595,7 +595,7 @@ public class Session
         }
         catch (JsonException ex)
         {
- 
+
             Tools.WriteDebug(
                 nameof(UpdateWikiStatus),
                 sourceName + " contained invalid JSON: " + ex.Message);

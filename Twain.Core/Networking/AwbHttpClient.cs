@@ -1,5 +1,4 @@
 ﻿using System.Collections.Specialized;
-using System.Net.Http;
 using System.Threading;
 using Twain.Core.Plugin;
 

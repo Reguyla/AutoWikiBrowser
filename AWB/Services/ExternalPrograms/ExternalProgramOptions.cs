@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AutoWikiBrowser.Services.ExternalPrograms;
+﻿namespace AutoWikiBrowser.Services.ExternalPrograms;
 
 /// <summary>
 /// Contains the settings required to process article text with an external

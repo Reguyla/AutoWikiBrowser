@@ -1703,7 +1703,7 @@ public class LinkSearchSpecialPageProvider : ApiListProviderBase, ISpecialPagePr
         get { return pe; }
     }
 
-    static readonly List<string> ac = new(["exturlusage" ]);
+    static readonly List<string> ac = new(["exturlusage"]);
     protected override ICollection<string> Actions
     {
         get { return ac; }

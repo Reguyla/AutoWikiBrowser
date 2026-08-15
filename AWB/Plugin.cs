@@ -383,15 +383,15 @@ internal static class Plugin
         Exception exception)
     {
         ErrorHandler.HandleException(exception);
-    Tools.WriteDebug(
-        nameof(LoadPlugins),
-        exception.ToString());
+        Tools.WriteDebug(
+            nameof(LoadPlugins),
+            exception.ToString());
 
-    MessageBox.Show(
-        exception.Message,
-        "Problem loading plugins",
-        MessageBoxButtons.OK,
-        MessageBoxIcon.Error);
+        MessageBox.Show(
+            exception.Message,
+            "Problem loading plugins",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
     }
 
     // TODO (Plugin Modernization):

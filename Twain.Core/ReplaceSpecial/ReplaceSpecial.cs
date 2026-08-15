@@ -804,7 +804,7 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
             return;
 
         SaveCurrentRule();
-       _history.Save();
+        _history.Save();
 
         string serializedRule = Serialize(GetSelectedRule());
         Tools.CopyToClipboard(serializedRule, true);

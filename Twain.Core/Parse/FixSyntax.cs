@@ -522,13 +522,13 @@ public partial class Parsers
         articleText = ApplyEnglishSyntaxFixes(articleText, alltemplates, ssbMc);
 
         articleText = NormalizeTemplateSyntax(articleText, alltemplates, alltemplatesDetail);
- 
+
         // get a list of all the simple html tags (not with properties) used in the article, so we can selectively apply HTML tag fixes below
         List<string> SimpleTagsList = GetSimpleTagsList(articleText);
 
         articleText = NormalizeSimpleHtmlTags(articleText, SimpleTagsList);
 
-         if (SyntaxRegexBrNewline.IsMatch(articleText))
+        if (SyntaxRegexBrNewline.IsMatch(articleText))
         {
             // remove <br> from lists (end of list line) - CHECKWIKI error 54
             articleText = SyntaxRegexListRowBrTag.Replace(articleText, "$1");

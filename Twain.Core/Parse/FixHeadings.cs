@@ -25,20 +25,20 @@ namespace Twain.Core.Parse;
 public partial class Parsers
 {
 
-// TODO: Review heading regex anchoring and call sites during a future
-// regex-consolidation pass. Some expressions are line-anchored while
-// equivalent heading corrections are not.
-//
-// TODO: Standardize case-insensitive heading matching after adding focused
-// regression tests for the accepted heading variants.
+    // TODO: Review heading regex anchoring and call sites during a future
+    // regex-consolidation pass. Some expressions are line-anchored while
+    // equivalent heading corrections are not.
+    //
+    // TODO: Standardize case-insensitive heading matching after adding focused
+    // regression tests for the accepted heading variants.
 
-/// <summary>
-/// Matches common variants of the "See also" heading that should be normalized.
-/// </summary>
-private static readonly Regex RegexHeadingsSeeAlso =
-    new(
-        "^(== *)(?:see also|related topics|related articles|internal links|also see):?( *==)",
-        RegexOptions.IgnoreCase);
+    /// <summary>
+    /// Matches common variants of the "See also" heading that should be normalized.
+    /// </summary>
+    private static readonly Regex RegexHeadingsSeeAlso =
+        new(
+            "^(== *)(?:see also|related topics|related articles|internal links|also see):?( *==)",
+            RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Matches common variants of the "External links" heading that should be

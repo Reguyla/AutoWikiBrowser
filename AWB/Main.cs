@@ -43,7 +43,6 @@ using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
-using Twain.Core.DBScanner;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
@@ -877,8 +876,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void CompleteStartup()
     {
         StatusLabelText = string.Empty;
-       _splashScreen.SetProgress(100);
-       _splashScreen.Close();
+        _splashScreen.SetProgress(100);
+        _splashScreen.Close();
     }
     #endregion
 
@@ -10280,15 +10279,15 @@ font-size: 150%;'>No changes</h2>
 
             ResolveConfiguredTypoListLocation();
 
-        string message =
-            BuildTypoLoadingWarningMessage(
-                Variables.RetfPath);
+            string message =
+                BuildTypoLoadingWarningMessage(
+                    Variables.RetfPath);
 
-        MessageBox.Show(
-            message,
-            "Attention",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Warning);
+            MessageBox.Show(
+                message,
+                "Attention",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
 
             _regexTypos = new RegExTypoFix();
             _regexTypos.Complete += RegexTyposComplete;
@@ -13688,4 +13687,4 @@ font-size: 150%;'>No changes</h2>
         OpenPreferences(true);
     }
 }
-#endregion
+    #endregion

@@ -17,10 +17,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using AutoWikiBrowser.Services.ExternalPrograms;
-using ExternalProgramPrefs = Twain.Core.AWBSettings.ExternalProgramPrefs;
 using System.ComponentModel;
 using System.Windows.Forms;
 using Twain.Core;
+using ExternalProgramPrefs = Twain.Core.AWBSettings.ExternalProgramPrefs;
 
 namespace AutoWikiBrowser;
 

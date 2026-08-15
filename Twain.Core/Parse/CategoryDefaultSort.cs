@@ -47,13 +47,13 @@ public partial class Parsers
     }
 
     // Covered by: RecategorizerTests.Addition()
-        /// <summary>
-        /// Adds the category to the article.
-        /// </summary>
-        /// <param name="articleText">The wiki text of the article.</param>
-        /// <param name="newCategory">The new category.</param>
-        /// <param name="articleTitle">Title of the article</param>
-        /// <returns>The article text.</returns>
+    /// <summary>
+    /// Adds the category to the article.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <param name="newCategory">The new category.</param>
+    /// <param name="articleTitle">Title of the article</param>
+    /// <returns>The article text.</returns>
     public string AddCategory(string newCategory, string articleText, string articleTitle)
     {
         string oldText = articleText;

@@ -1,6 +1,4 @@
-﻿using Twain.Core.Workspaces;
-
-namespace Twain.Core.Workspaces.Panes;
+﻿namespace Twain.Core.Workspaces.Panes;
 
 /// <summary>
 /// Provides definitions for panes included with Twain.

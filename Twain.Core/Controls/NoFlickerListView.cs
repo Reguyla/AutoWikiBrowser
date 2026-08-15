@@ -268,16 +268,16 @@ public class NoFlickerExtendedListView : ListView, IListViewItemComparerFactory
             else
                 // Determine whether the type being compared is a DateTime type
                 if (DateTime.TryParse(sx, out firstDate) && DateTime.TryParse(sy, out secondDate))
-            {
-                // Compare the two dates.
-                returnVal = DateTime.Compare(firstDate, secondDate);
-            }
-            else
-            {
-                // If neither compared object has a valid int or date format, compare
-                // as a string.
-                returnVal = String.CompareOrdinal(sx, sy);
-            }
+                {
+                    // Compare the two dates.
+                    returnVal = DateTime.Compare(firstDate, secondDate);
+                }
+                else
+                {
+                    // If neither compared object has a valid int or date format, compare
+                    // as a string.
+                    returnVal = String.CompareOrdinal(sx, sy);
+                }
 
             // Determine whether the sort order is descending.
             if (Order == SortOrder.Descending)

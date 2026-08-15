@@ -306,16 +306,16 @@ class MainProcess
             {
                 bool sleep;
                 if (PendingArticles.Count > 0) lock (PendingArticles)
+                {
+                    if (PendingArticles.Count > 0)
                     {
-                        if (PendingArticles.Count > 0)
-                        {
-                            ArticleInfo ai = PendingArticles.Remove();
-                            ScanArticle(ai);
-                            sleep = false;
-                        }
-                        else
-                            sleep = true;
+                        ArticleInfo ai = PendingArticles.Remove();
+                        ScanArticle(ai);
+                        sleep = false;
                     }
+                    else
+                        sleep = true;
+                }
                 else
                     sleep = true;
 
