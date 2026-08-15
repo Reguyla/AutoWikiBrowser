@@ -578,7 +578,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <summary>
     /// Completes application startup after the main form has loaded, including
     /// browser initialization, logging, settings restoration, plugin loading,
-    /// updater processing, and profile login.
+    /// client-version validation, and profile login.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
@@ -624,8 +624,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             _splashScreen.SetProgress(80);
 
-            if (!HandleUpdaterResult())
+            if (!HandleVersionCheckResult())
+            {
                 return;
+            }
 
             _splashScreen.SetProgress(90);
 
@@ -640,7 +642,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         CompleteStartup();
 
-    UsageStats.Do(false);
+        UsageStats.Do(false);
     }
 
     /// <summary>
@@ -723,13 +725,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Handles the result of the startup version and updater checks.
+    /// Handles the result of the startup client-version check.
     /// </summary>
     /// <returns>
     /// <see langword="true"/> when startup should continue; otherwise,
-    /// <see langword="false"/> when AWB has been closed or disabled.
+    /// <see langword="false"/> when startup should stop because the current
+    /// version is disabled or an available update is being handled.
     /// </returns>
-    private bool HandleUpdaterResult()
+    private bool HandleVersionCheckResult()
     {
         if (HandleDisabledVersion())
         {
@@ -767,6 +770,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return true;
     }
 
+    // TODO(Twain): Rename HasUpdaterStatus and related updater-named version
+    // validation members after the legacy AWBUpdater cleanup is complete.
+    // Consider names based on version status, compatibility, or client validation,
+    // since these members no longer represent updater-executable behavior.
     /// <summary>
     /// Prompts the user when a newer AWB version is available.
     /// </summary>
@@ -6295,16 +6302,16 @@ font-size: 150%;'>No changes</h2>
     }
 #pragma warning restore CA1303
 
-    // TODO (Updater Modernization):
-    // Move the manual update URL into the updater configuration or a centralized
-    // application constant so update destinations are not embedded in MainForm.
+    // TODO(Twain): Remove this legacy AWB manual-update fallback when the
+    // AutoWikiBrowser application is retired or its remaining version-check
+    // workflow is replaced by the Twain update and policy services.
     /// <summary>
-    /// Opens the AWB download page for a manual update.
+    /// Opens the GitHub releases page for a manual application update.
     /// </summary>
     private static void OpenManualUpdatePage()
     {
         Tools.OpenURLInBrowser(
-            "https://sourceforge.net/projects/autowikibrowser/files/");
+            "https://github.com/Reguyla/AutoWikiBrowser/releases");
     }
 
     private void CategoryLeave(object sender, EventArgs e)

@@ -810,6 +810,10 @@ public class Session
         return true;
     }
 
+    // TODO(Twain Policy): Replace the dependency on Updater.GlobalVersionPage with
+    // a structured version-policy result supplied by the future per-wiki Twain
+    // compatibility and policy service. This helper currently reparses the raw
+    // global Wikipedia VersionJSON downloaded by the legacy version check.
     /// <summary>
     /// Validates and parses the downloaded global version metadata.
     /// </summary>
@@ -915,6 +919,11 @@ public class Session
         return true;
     }
 
+    // TODO(Twain Policy): Replace the dependency on global VersionJSON
+    // authorization data with the future per-wiki Twain policy and capability
+    // service. Preserve the existing enabled-user, enabled-bot, administrator,
+    // global-user, and custom-wiki behavior until equivalent policy rules have
+    // been defined and tested.
     /// <summary>
     /// Determines whether the current user is permitted to operate on the wiki
     /// and whether bot mode should be enabled.
@@ -998,6 +1007,11 @@ public class Session
         return WikiStatusResult.NotRegistered;
     }
 
+    // TODO(Twain Policy): Replace the global VersionJSON dependencies in wiki
+    // status evaluation with structured policy data from the future per-wiki
+    // Twain policy and capability service. Preserve global username blocking,
+    // configured messages, and registration behavior until equivalent policy
+    // rules have been defined and tested.
     /// <summary>
     /// Refreshes the current wiki session state and determines whether editing
     /// may proceed.

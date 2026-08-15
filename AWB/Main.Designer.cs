@@ -4560,7 +4560,6 @@ namespace AutoWikiBrowser
         private System.Windows.Forms.ToolStripMenuItem makeModuleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem externalProcessingToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
-        private System.Windows.Forms.ToolStripMenuItem runUpdaterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resetEditSkippedCountToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem categoryToolStripMenuItem;
