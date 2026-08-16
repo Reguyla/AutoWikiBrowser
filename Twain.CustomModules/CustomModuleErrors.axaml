@@ -1,0 +1,64 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Views.CustomModuleErrors"
+    Width="600"
+    Height="340"
+    MinWidth="500"
+    MinHeight="280"
+    CanResize="True"
+    WindowStartupLocation="CenterOwner"
+    Title="Custom Module Errors"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}">
+
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
+
+        <Border
+            Grid.Row="0"
+            Background="{DynamicResource TwainRaisedSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="{DynamicResource TwainBorderThickness}"
+            CornerRadius="{DynamicResource TwainPaneCornerRadius}"
+            Padding="{DynamicResource TwainPanePadding}">
+
+            <TextBox
+                x:Name="ErrorsTextBox"
+                IsReadOnly="True"
+                AcceptsReturn="True"
+                TextWrapping="NoWrap"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto"
+                Background="{DynamicResource TwainControlBackgroundBrush}"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                BorderBrush="{DynamicResource TwainBorderBrush}"
+                BorderThickness="{DynamicResource TwainBorderThickness}"
+                CornerRadius="{DynamicResource TwainControlCornerRadius}"
+                FontSize="{DynamicResource TwainFontSizeNormal}" />
+        </Border>
+
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
+
+            <Button
+                x:Name="OkButton"
+                Width="90"
+                Height="{DynamicResource TwainControlHeight}"
+                Padding="{DynamicResource TwainControlPadding}"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Background="{DynamicResource TwainAccentBrush}"
+                Foreground="{DynamicResource TwainTextOnAccentBrush}"
+                BorderBrush="{DynamicResource TwainAccentBrush}"
+                BorderThickness="{DynamicResource TwainBorderThickness}"
+                CornerRadius="{DynamicResource TwainControlCornerRadius}"
+                FontSize="{DynamicResource TwainFontSizeNormal}"
+                Content="OK"
+                Click="OkButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
