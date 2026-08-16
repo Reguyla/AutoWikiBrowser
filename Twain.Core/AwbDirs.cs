@@ -40,7 +40,7 @@ public static class AwbDirs
                 return mAppData;
 
             mAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                "AutoWikiBrowser");
+                "Twain");
             Directory.CreateDirectory(mAppData);
             return mAppData;
         }
@@ -59,7 +59,7 @@ public static class AwbDirs
             if (mUserData != null) return mUserData;
 
             mUserData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "AutoWikiBrowser");
+                "Twain");
             Directory.CreateDirectory(mUserData);
             return mUserData;
         }

@@ -6,7 +6,7 @@ namespace Twain.Core.Networking
 {
     /// <summary>
     /// Provides the centralized HTTP networking infrastructure used by
-    /// AutoWikiBrowser, including proxy configuration, request creation,
+    /// Twain, including proxy configuration, request creation,
     /// and common HTTP operations.
     /// </summary>
     internal static class AwbHttpClient

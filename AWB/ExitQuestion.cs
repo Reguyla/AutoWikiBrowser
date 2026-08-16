@@ -2,7 +2,7 @@
 
 /// <summary>
 /// Displays a confirmation dialog when the user attempts to exit
-/// AutoWikiBrowser.
+/// Twain.
 /// </summary>
 /// <remarks>
 /// The dialog summarizes the current editing session and allows the user to

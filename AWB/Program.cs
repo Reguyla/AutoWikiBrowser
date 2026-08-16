@@ -26,7 +26,7 @@ namespace AutoWikiBrowser;
 
 /// <summary>
 /// Provides the application entry point and shared process-level state for
-/// AutoWikiBrowser.
+/// Twain.
 /// </summary>
 internal static class Program
 {

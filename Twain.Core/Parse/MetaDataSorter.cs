@@ -353,7 +353,7 @@ public class MetaDataSorter
     /// </summary>
     /// <remarks>
     /// During normal operation, the ordering data is downloaded from the
-    /// AutoWikiBrowser interwiki definition page. In unit-test mode, a
+    /// Twain interwiki definition page. In unit-test mode, a
     /// predefined data set is used instead.
     /// </remarks>
     private void LoadInterWikiFromNetwork()

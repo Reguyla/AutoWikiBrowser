@@ -72,7 +72,7 @@ internal sealed class MyTrace : TraceManager, IAWBTraceListener
             MessageBoxButtons.OK,
             MessageBoxIcon.Error);
 
-        Program.AWB.Stop("AutoWikiBrowser");
+        Program.AWB.Stop("Twain");
     }
 
     /// <summary>

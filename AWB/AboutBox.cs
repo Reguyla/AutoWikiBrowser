@@ -71,7 +71,7 @@ internal sealed partial class AboutBox : Form
     }
 
     /// <summary>
-    /// Opens the AutoWikiBrowser project page on the English Wikipedia.
+    /// Opens the Twain project page on the English Wikipedia.
     /// </summary>
     private void LinkAWBPage_LinkClicked(
         object sender,

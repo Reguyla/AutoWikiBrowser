@@ -9774,7 +9774,7 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Opens the AutoWikiBrowser user manual in the default web browser.
+    /// Opens the Twain user manual in the default web browser.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
@@ -10447,7 +10447,7 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Opens the AutoWikiBrowser typo documentation page in the default
+    /// Opens the Twain typo documentation page in the default
     /// web browser.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
@@ -11838,7 +11838,7 @@ font-size: 150%;'>No changes</h2>
     // once parser configuration services are extracted.
     /// <summary>
     /// Loads the list of template redirects to bypass from the configured
-    /// AutoWikiBrowser template redirects page.
+    /// Twain template redirects page.
     /// </summary>
     private void LoadTemplateRedirects()
     {

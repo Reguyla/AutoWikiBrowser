@@ -155,7 +155,7 @@ internal sealed partial class PluginManager : Form
 
     /// <summary>
     /// Loads the most recently used plugin directory from the current user's
-    /// AutoWikiBrowser registry settings.
+    /// Twain registry settings.
     /// </summary>
     /// <remarks>
     /// Loading this optional preference is a best-effort operation. Registry
@@ -185,7 +185,7 @@ internal sealed partial class PluginManager : Form
 
     /// <summary>
     /// Saves the most recently used plugin location in the current user's
-    /// AutoWikiBrowser registry settings.
+    /// Twain registry settings.
     /// </summary>
     /// <remarks>
     /// Saving this preference is a best-effort operation. Registry access failures
