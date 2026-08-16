@@ -60,7 +60,7 @@ internal static class Program
                     MessageBoxIcon.Warning);
             }
 
-            AwbDirs.MigrateDefaultSettings();
+            ApplicationPaths.MigrateDefaultSettings();
 
             MainForm awb = new();
             AWB = awb;

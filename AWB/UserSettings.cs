@@ -136,7 +136,7 @@ partial class MainForm
         object sender,
         EventArgs e)
     {
-        if (SettingsFile != AwbDirs.DefaultSettings)
+        if (SettingsFile != ApplicationPaths.DefaultSettings)
         {
             saveXML.FileName = SettingsFile;
         }
@@ -325,7 +325,7 @@ partial class MainForm
                 StringComparison.OrdinalIgnoreCase)
             || string.Equals(
                 path,
-                AwbDirs.DefaultSettings,
+                ApplicationPaths.DefaultSettings,
                 StringComparison.OrdinalIgnoreCase));
 
         while (_recentList.Count > 5)
@@ -405,7 +405,7 @@ partial class MainForm
         object sender,
         EventArgs e)
     {
-        LoadPrefs(AwbDirs.DefaultSettings);
+        LoadPrefs(ApplicationPaths.DefaultSettings);
     }
 
     /// <summary>
@@ -413,7 +413,7 @@ partial class MainForm
     /// </summary>
     private void SavePrefs()
     {
-        SavePrefs(AwbDirs.DefaultSettings);
+        SavePrefs(ApplicationPaths.DefaultSettings);
     }
 
     /// <summary>
@@ -766,9 +766,9 @@ partial class MainForm
         {
             LoadPrefs(SettingsFile);
         }
-        else if (File.Exists(AwbDirs.DefaultSettings))
+        else if (File.Exists(ApplicationPaths.DefaultSettings))
         {
-            LoadPrefs(AwbDirs.DefaultSettings);
+            LoadPrefs(ApplicationPaths.DefaultSettings);
         }
         else
         {

@@ -72,7 +72,7 @@ namespace Twain.Core
         /// </remarks>
         static ObjectCache()
         {
-            Global = new ObjectCache(Path.Combine(AwbDirs.UserData, "ObjectCache.xml"));
+            Global = new ObjectCache(Path.Combine(ApplicationPaths.UserData, "ObjectCache.xml"));
             Global.AddType(typeof(SiteInfo), DefaultLifespan);
         }
 

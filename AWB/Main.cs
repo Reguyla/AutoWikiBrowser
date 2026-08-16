@@ -7351,7 +7351,7 @@ font-size: 150%;'>No changes</h2>
         catch (UnauthorizedAccessException)
         {
             string userDataPath =
-                Path.Combine(AwbDirs.UserData, "profiling.txt");
+                Path.Combine(ApplicationPaths.UserData, "profiling.txt");
 
             Variables.Profiler = new Profiler(userDataPath, true);
         }
@@ -8447,7 +8447,7 @@ font-size: 150%;'>No changes</h2>
         {
             Tools.WriteTextFileAbsolutePath(
                 "#[[" + TheArticle.Name + "]]\r\n",
-                Path.Combine(AwbDirs.UserData, @"False positives.txt"),
+                Path.Combine(ApplicationPaths.UserData, @"False positives.txt"),
                 true);
         }
     }

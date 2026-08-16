@@ -25,7 +25,7 @@ using System.Windows.Forms;
 /// <summary>
 /// This static class holds paths of directories needed by AWB
 /// </summary>
-public static class AwbDirs
+public static class ApplicationPaths
 {
     private static string mAppData;
 
