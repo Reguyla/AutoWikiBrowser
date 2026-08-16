@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using System.Diagnostics;
 using System.Drawing;
 
 namespace Twain.CustomModules;
@@ -155,16 +156,93 @@ public partial class CustomModule : Avalonia.Controls.Window
     {
     }
 
-    private void GuideMenuItem_Click(
+    private async void GuideMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        const string guideText =
+            "A custom module allows you to process article text using your own C# or Visual Basic code.\n\n" +
+            "Select \"Make module\" to compile and load your code into Twain.\n\n" +
+            "Twain calls the \"ProcessArticle\" method while processing each article. " +
+            "Do not change the signature of this method, as Twain uses it to communicate with your module.\n\n" +
+            "\"articleText\" contains the current article text, \"articleTitle\" contains the article title, " +
+            "and \"namespaceID\" identifies the article namespace.\n\n" +
+            "Set \"summary\" to the edit-summary text produced by your module. " +
+            "Set \"skip\" to true when Twain should skip the current article; otherwise, leave it false.\n\n" +
+            "For more detailed information, select Help > Manual.";
+
+        Window guideWindow =
+            new()
+            {
+                Title = "Guide",
+                Width = 500,
+                Height = 360,
+                MinWidth = 450,
+                MinHeight = 320,
+                CanResize = false,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Background =
+                    this.FindResource("TwainApplicationBackgroundBrush")
+                    as Avalonia.Media.IBrush
+            };
+
+        TextBlock messageText =
+            new()
+            {
+                Text = guideText,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                Foreground =
+                    this.FindResource("TwainTextPrimaryBrush")
+                    as Avalonia.Media.IBrush,
+                FontSize = 12
+            };
+
+        Button okButton =
+            new()
+            {
+                Content = "OK",
+                Width = 90,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right
+            };
+
+        Grid grid =
+            new()
+            {
+                Margin = new Avalonia.Thickness(16),
+                RowDefinitions =
+                {
+                new RowDefinition(GridLength.Star),
+                new RowDefinition(GridLength.Auto)
+                },
+                RowSpacing = 16
+            };
+
+        grid.Children.Add(messageText);
+
+        Grid.SetRow(okButton, 1);
+        grid.Children.Add(okButton);
+
+        guideWindow.Content = grid;
+
+        okButton.Click += (_, _) =>
+            guideWindow.Close();
+
+        await guideWindow.ShowDialog(this);
     }
 
     private void ManualMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        const string manualUrl =
+            "https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/Custom_Modules";
+
+        Process.Start(
+            new ProcessStartInfo
+            {
+                FileName = manualUrl,
+                UseShellExecute = true
+            });
     }
 
     private void UndoMenuItem_Click(
