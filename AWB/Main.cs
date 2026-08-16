@@ -616,11 +616,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             _splashScreen.SetProgress(80);
 
-            if (!HandleVersionCheckResult())
-            {
-                return;
-            }
-
             _splashScreen.SetProgress(90);
 
             _profiles.Login(_profileToLoad);
@@ -712,87 +707,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         lblOnlyBots.BringToFront();
 
         _splashScreen.SetProgress(22);
-    }
-
-    /// <summary>
-    /// Handles the result of the startup client-version check.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> when startup should continue; otherwise,
-    /// <see langword="false"/> when startup should stop because the current
-    /// version is disabled or an available update is being handled.
-    /// </returns>
-    private bool HandleVersionCheckResult()
-    {
-        if (HandleDisabledVersion())
-        {
-            return false;
-        }
-
-        if (HandleAvailableUpdate())
-        {
-            return false;
-        }
-
-        HandleUpdaterCheckError();
-
-        return true;
-    }
-
-    /// <summary>
-    /// Closes Twain when the current version has been disabled.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> when the disabled-version result was handled;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    private bool HandleDisabledVersion()
-    {
-        if (!HasUpdaterStatus(
-            Updater.AWBEnabledStatus.Disabled))
-        {
-            return false;
-        }
-
-        OldVersion();
-        _splashScreen.Close();
-
-        return true;
-    }
-
-    // TODO (.NET10 Modernization):
-    // Report the actual updater failure category when available. A version-check
-    // error may be caused by connectivity, HTTP, parsing, proxy, or service
-    // failures rather than only a missing Internet connection.
-    /// <summary>
-    /// Reports a failure to retrieve the startup version-check information.
-    /// </summary>
-    private void HandleUpdaterCheckError()
-    {
-        if (!HasUpdaterStatus(
-            Updater.AWBEnabledStatus.Error))
-        {
-            return;
-        }
-
-        lblUserName.BackColor = Color.Red;
-
-        MessageBox.Show(
-            this,
-            "Cannot load version check page from Wikipedia. "
-            + "Please verify that you're connected to the Internet.",
-            "Error",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error);
-    }
-
-    /// <summary>
-    /// Determines whether the updater result contains the specified status flag.
-    /// </summary>
-    private static bool HasUpdaterStatus(
-        Updater.AWBEnabledStatus status)
-    {
-        return (Updater.Result & status) == status;
     }
 
     // TODO (.NET10 Modernization):
