@@ -1,8 +1,12 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using System.CodeDom.Compiler;
 using System.Diagnostics;
+using System.Reflection;
+using System.Text;
 using Twain.Core.CustomModules;
+using Twain.Core.Plugin;
 
 namespace Twain.CustomModules;
 
@@ -132,10 +136,169 @@ public partial class CustomModule : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Compiles and loads the current custom module.
+    /// Compiles and loads the current custom module source code.
     /// </summary>
     public void MakeModule()
     {
+        try
+        {
+            CustomModuleCompiler? compiler = Compiler;
+
+            if (compiler is null)
+            {
+                Module = null;
+                return;
+            }
+
+            CompilerParameters parameters =
+                new()
+                {
+                    GenerateExecutable = false,
+                    IncludeDebugInformation = false
+                };
+
+            AddLoadedAssemblyReferences(parameters);
+
+            CompilerResults results =
+                compiler.Compile(
+                    CodeTextBox.Text ?? string.Empty,
+                    parameters);
+
+            if (!ShowCompilationMessages(results))
+            {
+                Module = null;
+                return;
+            }
+
+            Assembly compiledAssembly =
+                results.CompiledAssembly
+                ?? throw new InvalidOperationException(
+                    "The compiler did not return a compiled assembly.");
+
+            Type moduleType =
+                compiledAssembly
+                    .GetTypes()
+                    .FirstOrDefault(
+                        type =>
+                            !type.IsAbstract &&
+                            typeof(IModule).IsAssignableFrom(type))
+                ?? throw new InvalidOperationException(
+                    "The compiled assembly does not contain an IModule implementation.");
+
+            Module =
+                Activator.CreateInstance(moduleType) as IModule
+                ?? throw new InvalidOperationException(
+                    $"Unable to instantiate custom module type '{moduleType.FullName}'.");
+        }
+        catch (Exception ex)
+        {
+            Module = null;
+
+            ShowRuntimeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Adds references for assemblies currently loaded by the application so
+    /// custom modules can use Twain and framework types during compilation.
+    /// </summary>
+    /// <param name="parameters">
+    /// The compiler parameters that receive the assembly references.
+    /// </param>
+    private static void AddLoadedAssemblyReferences(
+        CompilerParameters parameters)
+    {
+        ArgumentNullException.ThrowIfNull(parameters);
+
+        HashSet<string> referencePaths =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        foreach (Assembly assembly in
+                 AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (assembly.IsDynamic)
+                continue;
+
+            if (assembly.FullName?.Contains(
+                    "Microsoft.GeneratedCode",
+                    StringComparison.OrdinalIgnoreCase) == true)
+            {
+                continue;
+            }
+
+            string location;
+
+            try
+            {
+                location = assembly.Location;
+            }
+            catch (NotSupportedException)
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(location) ||
+                !File.Exists(location))
+            {
+                continue;
+            }
+
+            if (referencePaths.Add(location))
+            {
+                parameters.ReferencedAssemblies.Add(location);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Displays compiler errors and warnings produced while building a custom module.
+    /// </summary>
+    /// <param name="results">
+    /// The results returned by the custom module compiler.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when compilation completed without errors;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    private bool ShowCompilationMessages(
+        CompilerResults results)
+    {
+        if (results.Errors.Count == 0)
+            return true;
+
+        StringBuilder messages = new();
+
+        foreach (CompilerError error in results.Errors)
+        {
+            messages.AppendLine(error.ToString());
+        }
+
+        CustomModuleErrors errorDialog =
+            new(messages.ToString());
+
+        errorDialog.Title =
+            results.Errors.HasErrors
+                ? "Custom Module Compilation Errors"
+                : "Custom Module Compilation Warnings";
+
+        _ = errorDialog.ShowDialog(this);
+
+        return !results.Errors.HasErrors;
+    }
+
+    /// <summary>
+    /// Displays an unexpected error encountered while compiling or loading
+    /// a custom module.
+    /// </summary>
+    private async void ShowRuntimeError(Exception exception)
+    {
+        CustomModuleErrors errorDialog =
+            new(exception.ToString());
+
+        errorDialog.Title =
+            "Custom Module Error";
+
+        await errorDialog.ShowDialog(this);
     }
 
     /// <summary>
@@ -155,6 +318,57 @@ public partial class CustomModule : Avalonia.Controls.Window
                 MakeModule();
             }
         }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the custom module is enabled and has been
+    /// successfully compiled and loaded.
+    /// </summary>
+    public bool ModuleUsable =>
+        ModuleEnabled && Module is not null;
+
+    private const string BuiltPrefix =
+        "Custom Module Built At: ";
+
+    private IModule? _module;
+
+    /// <summary>
+    /// Gets the currently loaded custom module instance, or
+    /// <see langword="null"/> if no module has been successfully compiled.
+    /// </summary>
+    public IModule? Module
+    {
+        get => _module;
+
+        private set
+        {
+            _module = value;
+
+            if (value is null)
+            {
+                StatusTextBlock.Text =
+                    "No module loaded";
+
+                BuiltAtTextBlock.Text =
+                    BuiltPrefix + "n/a";
+
+                return;
+            }
+
+            StatusTextBlock.Text =
+                "Module compiled and loaded";
+
+            BuiltAtTextBlock.Text =
+                BuiltPrefix + DateTime.Now;
+        }
+    }
+
+    /// <summary>
+    /// Clears the currently loaded custom module and updates the module status.
+    /// </summary>
+    public void SetModuleNotBuilt()
+    {
+        Module = null;
     }
 
     /// <summary>
@@ -261,6 +475,7 @@ public partial class CustomModule : Avalonia.Controls.Window
         object? sender,
         RoutedEventArgs e)
     {
+        MakeModule();
     }
 
     private async void GuideMenuItem_Click(
