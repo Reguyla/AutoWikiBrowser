@@ -369,7 +369,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// and deletes the configuration file when it is found to be corrupt.
     /// </summary>
     /// <remarks>
-    /// A corrupt user configuration file can prevent AWB from starting. When a
+    /// A corrupt user configuration file can prevent Twain from starting. When a
     /// <see cref="ConfigurationErrorsException"/> identifies an existing settings
     /// file, the file is deleted so that .NET can recreate it with default values.
     /// </remarks>
@@ -658,7 +658,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Restores the main window's saved location, size, and state.
     /// </summary>
     /// <remarks>
-    /// A minimized state is restored as normal because restoring AWB minimized
+    /// A minimized state is restored as normal because restoring Twain minimized
     /// may cause the diff display to lose its vertical scroll bar.
     /// </remarks>
     private void RestoreWindowState()
@@ -740,7 +740,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Closes AWB when the current version has been disabled.
+    /// Closes Twain when the current version has been disabled.
     /// </summary>
     /// <returns>
     /// <see langword="true"/> when the disabled-version result was handled;
@@ -758,67 +758,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         _splashScreen.Close();
 
         return true;
-    }
-
-    // TODO(Twain): Rename HasUpdaterStatus and related updater-named version
-    // validation members after the legacy AWBUpdater cleanup is complete.
-    // Consider names based on version status, compatibility, or client validation,
-    // since these members no longer represent updater-executable behavior.
-    /// <summary>
-    /// Prompts the user when a newer AWB version is available.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> when the user chooses to open the manual update
-    /// page; otherwise, <see langword="false"/>.
-    /// </returns>
-    private bool HandleAvailableUpdate()
-    {
-        if (!HasUpdaterStatus(
-                Updater.AWBEnabledStatus.OptionalUpdate))
-        {
-            return false;
-        }
-
-        if (!PromptForOptionalUpdate())
-        {
-            return false;
-        }
-
-        OpenManualUpdatePage();
-
-        return true;
-    }
-
-    // TODO(Twain): Determine whether the optional update prompt should display
-    // Updater.NewerVersions. The version list is currently retrieved but is not
-    // referenced by the format string.
-    /// <summary>
-    /// Prompts the user to install an optional AWB update.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> when the user chooses to update; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private static bool PromptForOptionalUpdate()
-    {
-        string newerVersions =
-            string.Join(", ", Updater.NewerVersions);
-
-        string message = string.Format(
-            CultureInfo.CurrentCulture,
-            "This version has been superseded by a newer version."
-            + "\r\n\r\n"
-            + "You may continue to use this version or update to the newest version."
-            + "\r\n\r\n"
-            + "Would you like to automatically upgrade to the newest version?",
-            newerVersions);
-
-        return MessageBox.Show(
-            message,
-            "Upgrade?",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question)
-            == DialogResult.Yes;
     }
 
     // TODO (.NET10 Modernization):
