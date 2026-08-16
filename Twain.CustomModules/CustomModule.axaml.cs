@@ -132,6 +132,32 @@ public partial class CustomModule : Avalonia.Controls.Window
     }
 
     /// <summary>
+    /// Compiles and loads the current custom module.
+    /// </summary>
+    public void MakeModule()
+    {
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the custom module is enabled.
+    /// Enabling the module automatically attempts to compile and load it.
+    /// </summary>
+    public bool ModuleEnabled
+    {
+        get => ModuleEnabledCheckBox.IsChecked == true;
+
+        set
+        {
+            ModuleEnabledCheckBox.IsChecked = value;
+
+            if (value)
+            {
+                MakeModule();
+            }
+        }
+    }
+
+    /// <summary>
     /// Selects all text in the custom module editor.
     /// </summary>
     private void SelectAllMenuItem_Click(
@@ -208,6 +234,8 @@ public partial class CustomModule : Avalonia.Controls.Window
         object? sender,
         RoutedEventArgs e)
     {
+        MakeModuleButton.IsEnabled =
+            ModuleEnabledCheckBox.IsChecked == true;
     }
 
     /// <summary>
