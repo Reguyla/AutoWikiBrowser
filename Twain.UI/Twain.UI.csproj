@@ -8,9 +8,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
-  </ItemGroup>
+<ItemGroup>
+  <ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
+  <ProjectReference Include="..\Twain.CustomModules\Twain.CustomModules.csproj" />
+</ItemGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />

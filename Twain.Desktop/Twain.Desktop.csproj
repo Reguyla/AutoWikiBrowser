@@ -21,6 +21,7 @@
   </ItemGroup>
 
 <ItemGroup>
+  <ProjectReference Include="..\Twain.CustomModules\Twain.CustomModules.csproj" />
   <ProjectReference Include="..\Twain.UI\Twain.UI.csproj" />
   <ProjectReference Include="..\Twain.Diagnostics\Twain.Diagnostics.csproj" />
 </ItemGroup>

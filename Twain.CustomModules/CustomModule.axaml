@@ -1,0 +1,265 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.CustomModules.CustomModule"
+    Width="900"
+    Height="720"
+    MinWidth="800"
+    MinHeight="620"
+    CanResize="True"
+    WindowStartupLocation="CenterOwner"
+    Title="Custom Module"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Menu -->
+        <Menu Grid.Row="0">
+            <MenuItem Header="_View">
+                <MenuItem
+                    x:Name="ShowOnlyCodeBoxMenuItem"
+                    Header="Show only code box"
+                    InputGesture="F11"
+                    ToggleType="CheckBox"
+                    Click="ShowOnlyCodeBoxMenuItem_Click" />
+            </MenuItem>
+
+            <MenuItem Header="_Help">
+                <MenuItem
+                    Header="Quick _guide"
+                    Click="GuideMenuItem_Click" />
+
+                <MenuItem
+                    Header="_Manual"
+                    Click="ManualMenuItem_Click" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Module controls -->
+        <Border
+            x:Name="ModuleControlsPanel"
+            Grid.Row="1"
+            Margin="{DynamicResource TwainWorkspacePadding}"
+            Padding="{DynamicResource TwainPanePadding}"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="{DynamicResource TwainBorderThickness}"
+            CornerRadius="{DynamicResource TwainPaneCornerRadius}">
+
+            <Grid
+                ColumnDefinitions="Auto,Auto,*,Auto,180,Auto,Auto"
+                RowDefinitions="Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <!-- Row 1 -->
+
+                <CheckBox
+                    x:Name="ModuleEnabledCheckBox"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Content="_Enabled"
+                    IsCheckedChanged="ModuleEnabledCheckBox_Changed" />
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Padding="8,4"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource TwainWarningBrush}"
+                    CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+                    <TextBlock
+                        x:Name="StatusTextBlock"
+                        Text="No module loaded"
+                        FontSize="{DynamicResource TwainFontSizeNormal}"
+                        Foreground="{DynamicResource TwainTextOnAccentBrush}" />
+                </Border>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="3"
+                    VerticalAlignment="Center"
+                    Text="_Language"
+                    FontSize="{DynamicResource TwainFontSizeNormal}" />
+
+                <ComboBox
+                    x:Name="LanguageComboBox"
+                    Grid.Row="0"
+                    Grid.Column="4"
+                    Height="{DynamicResource TwainControlHeight}"
+                    VerticalContentAlignment="Center"
+                    SelectionChanged="LanguageComboBox_SelectionChanged" />
+
+                <Button
+                    x:Name="MakeModuleButton"
+                    Grid.Row="0"
+                    Grid.Column="5"
+                    MinWidth="110"
+                    Height="{DynamicResource TwainControlHeight}"
+                    Padding="{DynamicResource TwainControlPadding}"
+                    Content="_Make module"
+                    IsEnabled="False"
+                    Background="{DynamicResource TwainAccentBrush}"
+                    Foreground="{DynamicResource TwainTextOnAccentBrush}"
+                    BorderBrush="{DynamicResource TwainAccentBrush}"
+                    BorderThickness="{DynamicResource TwainBorderThickness}"
+                    CornerRadius="{DynamicResource TwainControlCornerRadius}"
+                    Click="MakeModuleButton_Click" />
+
+                <Button
+                    x:Name="CloseButton"
+                    Grid.Row="0"
+                    Grid.Column="6"
+                    MinWidth="90"
+                    Height="{DynamicResource TwainControlHeight}"
+                    Padding="{DynamicResource TwainControlPadding}"
+                    Content="_Close"
+                    Background="{DynamicResource TwainControlBackgroundBrush}"
+                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                    BorderBrush="{DynamicResource TwainBorderBrush}"
+                    BorderThickness="{DynamicResource TwainBorderThickness}"
+                    CornerRadius="{DynamicResource TwainControlCornerRadius}"
+                    Click="CloseButton_Click" />
+
+                <!-- Row 2 -->
+
+                <CheckBox
+                    x:Name="FixedWidthFontCheckBox"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    IsChecked="True"
+                    Content="_Fixed width font"
+                    IsCheckedChanged="FixedWidthFontCheckBox_Changed" />
+
+                <TextBlock
+                    x:Name="BuiltAtTextBlock"
+                    Grid.Row="1"
+                    Grid.Column="3"
+                    Grid.ColumnSpan="4"
+                    VerticalAlignment="Center"
+                    Text="Custom Module Built At: n/a"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                    FontSize="{DynamicResource TwainFontSizeSmall}" />
+            </Grid>
+        </Border>
+
+        <!-- Code workspace -->
+        <Border
+            Grid.Row="2"
+            Margin="8,0,8,8"
+            Background="{DynamicResource TwainRaisedSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="{DynamicResource TwainBorderThickness}"
+            CornerRadius="{DynamicResource TwainPaneCornerRadius}">
+
+            <Grid
+                Margin="{DynamicResource TwainPanePadding}"
+                RowDefinitions="Auto,*,Auto"
+                RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                <!-- Generated module prefix -->
+                <TextBox
+                    x:Name="ModuleStartTextBox"
+                    Grid.Row="0"
+                    MinHeight="120"
+                    MaxHeight="220"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    FontFamily="Cascadia Mono, Consolas, Courier New"
+                    FontSize="{DynamicResource TwainFontSizeNormal}"
+                    Background="{DynamicResource TwainWorkspaceBackgroundBrush}"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                    BorderThickness="{DynamicResource TwainBorderThickness}"
+                    CornerRadius="{DynamicResource TwainControlCornerRadius}" />
+
+                <!-- User-editable module code -->
+                <TextBox
+                    x:Name="CodeTextBox"
+                    Grid.Row="1"
+                    MinHeight="220"
+                    AcceptsReturn="True"
+                    AcceptsTab="True"
+                    TextWrapping="NoWrap"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    FontFamily="Cascadia Mono, Consolas, Courier New"
+                    FontSize="{DynamicResource TwainFontSizeNormal}"
+                    Background="{DynamicResource TwainControlBackgroundBrush}"
+                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                    BorderBrush="{DynamicResource TwainBorderBrush}"
+                    BorderThickness="{DynamicResource TwainBorderThickness}"
+                    CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+                    <TextBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="_Undo"
+                                InputGesture="Ctrl+Z"
+                                Click="UndoMenuItem_Click" />
+
+                            <Separator />
+
+                            <MenuItem
+                                Header="Cu_t"
+                                InputGesture="Ctrl+X"
+                                Click="CutMenuItem_Click" />
+
+                            <MenuItem
+                                Header="_Copy"
+                                InputGesture="Ctrl+C"
+                                Click="CopyMenuItem_Click" />
+
+                            <MenuItem
+                                Header="_Paste"
+                                InputGesture="Ctrl+V"
+                                Click="PasteMenuItem_Click" />
+
+                            <Separator />
+
+                            <MenuItem
+                                Header="Select _All"
+                                InputGesture="Ctrl+A"
+                                Click="SelectAllMenuItem_Click" />
+
+                            <Separator />
+
+                            <MenuItem Header="_Go to Line">
+                                <TextBox
+                                    x:Name="GoToLineTextBox"
+                                    Width="120"
+                                    Watermark="Line number"
+                                    MaxLength="6"
+                                    KeyDown="GoToLineTextBox_KeyDown" />
+                            </MenuItem>
+                        </ContextMenu>
+                    </TextBox.ContextMenu>
+                </TextBox>
+
+                <!-- Generated module suffix -->
+                <TextBox
+                    x:Name="ModuleEndTextBox"
+                    Grid.Row="2"
+                    MinHeight="50"
+                    MaxHeight="100"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    TextWrapping="NoWrap"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    FontFamily="Cascadia Mono, Consolas, Courier New"
+                    FontSize="{DynamicResource TwainFontSizeNormal}"
+                    Background="{DynamicResource TwainWorkspaceBackgroundBrush}"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                    BorderThickness="{DynamicResource TwainBorderThickness}"
+                    CornerRadius="{DynamicResource TwainControlCornerRadius}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

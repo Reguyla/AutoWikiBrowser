@@ -46,13 +46,8 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            IUpdateService? updateService =
-                UpdateServiceFactory?.Invoke();
-
-            desktop.MainWindow = new ShellWindow
-            {
-                DataContext = new ShellViewModel(updateService),
-            };
+            desktop.MainWindow =
+                new Twain.CustomModules.CustomModule();
         }
 
         base.OnFrameworkInitializationCompleted();

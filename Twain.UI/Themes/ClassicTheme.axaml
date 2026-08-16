@@ -12,92 +12,52 @@
 
     <!-- Base colors -->
 
-    <Color x:Key="TwainColorApplicationBackground">
-        #FFF0F0F0
-    </Color>
+    <Color x:Key="TwainColorApplicationBackground">#FFF0F0F0</Color>
 
-    <Color x:Key="TwainColorWorkspaceBackground">
-        #FFE5E5E5
-    </Color>
+    <Color x:Key="TwainColorWorkspaceBackground">#FFE5E5E5</Color>
 
-    <Color x:Key="TwainColorSurface">
-        #FFF7F7F7
-    </Color>
+    <Color x:Key="TwainColorSurface">#FFF7F7F7</Color>
 
-    <Color x:Key="TwainColorRaisedSurface">
-        #FFFFFFFF
-    </Color>
+    <Color x:Key="TwainColorRaisedSurface">#FFFFFFFF</Color>
 
-    <Color x:Key="TwainColorControlBackground">
-        #FFFFFFFF
-    </Color>
+    <Color x:Key="TwainColorControlBackground">#FFFFFFFF</Color>
 
-    <Color x:Key="TwainColorControlBackgroundDisabled">
-        #FFE3E3E3
-    </Color>
+    <Color x:Key="TwainColorControlBackgroundDisabled">#FFE3E3E3</Color>
 
-    <Color x:Key="TwainColorBorder">
-        #FF9E9E9E
-    </Color>
+    <Color x:Key="TwainColorBorder">#FF9E9E9E</Color>
 
-    <Color x:Key="TwainColorBorderSubtle">
-        #FFC8C8C8
-    </Color>
+    <Color x:Key="TwainColorBorderSubtle">#FFC8C8C8</Color>
 
-    <Color x:Key="TwainColorTextPrimary">
-        #FF202020
-    </Color>
+    <Color x:Key="TwainColorTextPrimary">#FF202020</Color>
 
-    <Color x:Key="TwainColorTextSecondary">
-        #FF555555
-    </Color>
+    <Color x:Key="TwainColorTextSecondary">#FF555555</Color>
 
-    <Color x:Key="TwainColorTextDisabled">
-        #FF767676
-    </Color>
+    <Color x:Key="TwainColorTextDisabled">#FF767676</Color>
 
     <!--
     Blue is used as the primary Classic accent because it remains familiar
     to desktop users and avoids relying on red or green status distinctions.
     -->
 
-    <Color x:Key="TwainColorAccent">
-        #FF2B579A
-    </Color>
+    <Color x:Key="TwainColorAccent">#FF2B579A</Color>
 
-    <Color x:Key="TwainColorAccentHover">
-        #FF1F4E8C
-    </Color>
+    <Color x:Key="TwainColorAccentHover">#FF1F4E8C</Color>
 
-    <Color x:Key="TwainColorAccentPressed">
-        #FF173D70
-    </Color>
+    <Color x:Key="TwainColorAccentPressed">#FF173D70</Color>
 
-    <Color x:Key="TwainColorSelection">
-        #FFD9E7F7
-    </Color>
+    <Color x:Key="TwainColorSelection">#FFD9E7F7</Color>
 
-    <Color x:Key="TwainColorFocus">
-        #FF1B6AC9
-    </Color>
+    <Color x:Key="TwainColorFocus">#FF1B6AC9</Color>
 
     <!-- Accessible status colors -->
 
-    <Color x:Key="TwainColorInformation">
-        #FF005A9C
-    </Color>
+    <Color x:Key="TwainColorInformation">#FF005A9C</Color>
 
-    <Color x:Key="TwainColorSuccess">
-        #FF006D77
-    </Color>
+    <Color x:Key="TwainColorSuccess">#FF006D77</Color>
 
-    <Color x:Key="TwainColorWarning">
-        #FF8A5200
-    </Color>
+    <Color x:Key="TwainColorWarning">#FF8A5200</Color>
 
-    <Color x:Key="TwainColorError">
-        #FF7A1F5C
-    </Color>
+    <Color x:Key="TwainColorError">#FF7A1F5C</Color>
 
     <!-- Brushes -->
 

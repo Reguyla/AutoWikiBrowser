@@ -1,8 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace Twain.UI.Views;
+namespace Twain.CustomModules;
 
 /// <summary>
 /// Displays compilation or execution errors produced by a custom module.
