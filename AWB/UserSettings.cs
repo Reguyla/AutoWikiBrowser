@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Settings;
 using Twain.Core;
 using Twain.Core.AWBSettings;
@@ -169,7 +168,7 @@ partial class MainForm
 
             try
             {
-                foreach (KeyValuePair<string, IAWBPlugin> plugin in Plugin.AWBPlugins)
+                foreach (KeyValuePair<string, IAWBPlugin> plugin in Twain.Core.Plugin.PluginManager.AWBPlugins)
                 {
                     plugin.Value.Reset();
                 }
@@ -483,7 +482,7 @@ partial class MainForm
             _externalProgram.Settings,
             listMaker.SpecialFilterSettings,
             MakeToolsPrefs(),
-            Plugin.AWBPlugins)
+            Twain.Core.Plugin.PluginManager.AWBPlugins)
         {
             LoginDomain = Variables.LoginDomain
         };
@@ -1478,7 +1477,7 @@ partial class MainForm
     {
         foreach (PluginPrefs pluginPreferences in preferences)
         {
-            if (Plugin.AWBPlugins.TryGetValue(
+            if (Twain.Core.Plugin.PluginManager.AWBPlugins.TryGetValue(
                     pluginPreferences.Name,
                     out IAWBPlugin plugin))
             {

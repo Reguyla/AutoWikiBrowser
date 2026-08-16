@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-using AutoWikiBrowser.Plugins;
 using Twain.Core.Plugin;
 
 namespace AutoWikiBrowser;
@@ -148,7 +147,7 @@ internal sealed partial class PluginManager : Form
             SaveLastPluginLoadedLocation();
         }
 
-        Plugin.LoadPlugins(
+        Twain.Core.Plugin.PluginManager.LoadPlugins(
             awb,
             pluginOpen.FileNames,
             true);
@@ -268,23 +267,23 @@ internal sealed partial class PluginManager : Form
         try
         {
             AddPluginsToGroup(
-                Plugin.GetAWBPluginList(),
+                Twain.Core.Plugin.PluginManager.GetAWBPluginList(),
                 "groupAWBLoaded");
 
             AddPluginsToGroup(
-                Plugin.GetBasePluginList(),
+                Twain.Core.Plugin.PluginManager.GetBasePluginList(),
                 "groupBaseLoaded");
 
             AddPluginsToGroup(
-                Plugin.GetListMakerPluginList(),
+                Twain.Core.Plugin.PluginManager.GetListMakerPluginList(),
                 "groupLMLoaded");
 
             AddPluginsToGroup(
-                Plugin.FailedPlugins.Keys,
+                Twain.Core.Plugin.PluginManager.FailedPlugins.Keys,
                 "groupObsolete");
 
             AddPluginsToGroup(
-                Plugin.FailedAssemblies,
+                Twain.Core.Plugin.PluginManager.FailedAssemblies,
                 "groupFailed");
 
             UpdatePluginCount();
@@ -368,7 +367,7 @@ internal sealed partial class PluginManager : Form
                 lvPlugin.SelectedItems[i].Text;
         }
 
-        Plugin.LoadPlugins(
+        Twain.Core.Plugin.PluginManager.LoadPlugins(
             _awb,
             plugins,
             true);

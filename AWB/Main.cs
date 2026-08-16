@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
  */
 
-using AutoWikiBrowser.Plugins;
 using AutoWikiBrowser.Services.Diff;
 using AutoWikiBrowser.Services.Settings;
 using Microsoft.Web.WebView2.Core;
@@ -29,6 +28,7 @@ using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
+using Twain.Core.Editing;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
@@ -58,6 +58,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     // doesn't look like we can use RestoreBounds for this - any other built in way?
     private readonly ToolStripMenuItem[] _pasteMoreItems;
+
+    private readonly SessionCounters _sessionCounters = new();
 
     private readonly string[] _pasteMoreItemsPrefixes =
     {
@@ -592,7 +594,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             RestoreWindowState();
 
-            Plugin.LoadPluginsStartup(this, _splashScreen);
+            _splashScreen.SetProgress(25);
+
+            Twain.Core.Plugin.PluginManager.LoadPluginsStartup(this);
+
+            _splashScreen.SetProgress(50);
+
             LoadPrefs();
 
             InitializeBuildConfiguration();
@@ -1636,7 +1643,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         bool editSummaryRequired =
             Variables.Project != ProjectEnum.custom
-            && !Plugin.AWBPlugins.Any();
+            && !Twain.Core.Plugin.PluginManager.AWBPlugins.Any();
 
         if (editSummaryRequired
             && string.IsNullOrEmpty(cmboEditSummary.Text))
@@ -2444,7 +2451,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             SaveFinalPreParseSettings();
         }
 
-        NumberOfPagesParsed++;
+        _sessionCounters.NumberOfPagesParsed++;
 
         return true;
     }
@@ -2463,8 +2470,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         if (!autoSaveSettingsToolStripMenuItem.Checked
             || string.IsNullOrEmpty(SettingsFile)
-            || NumberOfIgnoredEdits <= 5
-            || NumberOfIgnoredEdits % 10 != 0)
+            || _sessionCounters.NumberOfIgnoredEdits <= 5
+            || _sessionCounters.NumberOfIgnoredEdits % 10 != 0)
         {
             return;
         }
@@ -2480,7 +2487,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         if (!autoSaveSettingsToolStripMenuItem.Checked
             || string.IsNullOrEmpty(SettingsFile)
-            || NumberOfIgnoredEdits % 10 == 0)
+            || _sessionCounters.NumberOfIgnoredEdits % 10 == 0)
         {
             return;
         }
@@ -3372,7 +3379,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             _restartDelay--;
         }
 
-        NumberOfEdits++;
+        _sessionCounters.NumberOfEdits++;
         _lastArticle = string.Empty;
 
         listMaker.Remove(TheArticle);
@@ -3421,7 +3428,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private bool ShouldAutoSaveSettings()
     {
         return autoSaveSettingsToolStripMenuItem.Checked
-            && NumberOfEdits % 10 == 0
+            && _sessionCounters.NumberOfEdits % 10 == 0
             && !string.IsNullOrEmpty(SettingsFile);
     }
 
@@ -3468,7 +3475,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         TheSession.Editor.Reset();
 
-        NumberOfIgnoredEdits++;
+        _sessionCounters.NumberOfIgnoredEdits++;
         StopDelayedAutoSaveTimer();
         NudgeTimer.Stop();
         txtEdit.Clear();
@@ -3784,9 +3791,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         Variables.Profiler.Profile("External Program");
 
-        if (Plugin.AWBPlugins.Any())
+        if (Twain.Core.Plugin.PluginManager.AWBPlugins.Any())
         {
-            foreach (KeyValuePair<string, IAWBPlugin> plugin in Plugin.AWBPlugins)
+            foreach (KeyValuePair<string, IAWBPlugin> plugin in Twain.Core.Plugin.PluginManager.AWBPlugins)
             {
                 article.SendPageToPlugin(plugin.Value, this);
 
@@ -4129,7 +4136,7 @@ font-size: 150%;'>No changes</h2>
     private string BuildArticleDiffHtml(Article article)
     {
         string tableHeader =
-            NumberOfEdits < 10
+            _sessionCounters.NumberOfEdits < 10
                 ? WikiDiff.TableHeader
                 : WikiDiff.TableHeaderNoMessages;
 
@@ -4623,7 +4630,7 @@ font-size: 150%;'>No changes</h2>
 
         if (!TheSession.Page.Exists)
         {
-            NumberOfNewPages++;
+            _sessionCounters.NumberOfNewPages++;
         }
 
         CorrectSectionEditSummary();
@@ -5423,7 +5430,7 @@ font-size: 150%;'>No changes</h2>
 
         using ExitQuestion dialog = new ExitQuestion(
             elapsedTime,
-            NumberOfEdits,
+            _sessionCounters.NumberOfEdits,
             string.Empty);
 
         DialogResult result = dialog.ShowDialog(this);
@@ -7646,12 +7653,12 @@ font-size: 150%;'>No changes</h2>
         EventArgs e)
     {
 
-        NumberOfEdits = 0;
-        NumberOfIgnoredEdits = 0;
-        NumberOfEditsPerMinute = 0;
-        NumberOfNewPages = 0;
-        NumberOfPagesPerMinute = 0;
-        NumberOfPagesParsed = 0;
+        _sessionCounters.NumberOfEdits = 0;
+        _sessionCounters.NumberOfIgnoredEdits = 0;
+        _sessionCounters.NumberOfEditsPerMinute = 0;
+        _sessionCounters.NumberOfNewPages = 0;
+        _sessionCounters.NumberOfPagesPerMinute = 0;
+        _sessionCounters.NumberOfPagesParsed = 0;
     }
 
     /// <summary>
@@ -8289,7 +8296,7 @@ font-size: 150%;'>No changes</h2>
         UpdateBotTimer();
 
         if (botEditsStop.Value > 0 &&
-            NumberOfEdits >= botEditsStop.Value)
+            _sessionCounters.NumberOfEdits >= botEditsStop.Value)
         {
             Stop();
 
@@ -8358,30 +8365,31 @@ font-size: 150%;'>No changes</h2>
     int _seconds, _lastEditsTotal, _lastPagesTotal;
 
     /// <summary>
-    /// Calculates the number of edits and pages processed during the previous
-    /// one-minute interval.
+    /// Calculates edit and page-processing rates for the most recent reporting
+    /// interval.
     /// </summary>
     private void GenerateEditStatistics()
     {
         // Edits completed during the last minute.
-        NumberOfEditsPerMinute =
-            NumberOfEdits - _lastEditsTotal;
+        _sessionCounters.NumberOfEditsPerMinute =
+            _sessionCounters.NumberOfEdits - _lastEditsTotal;
 
         // Pages processed during the last minute. This includes edits and
         // skipped pages in normal mode, or pages parsed in pre-parse mode.
-        NumberOfPagesPerMinute = Math.Max(
-            NumberOfEdits +
-            NumberOfIgnoredEdits +
-            NumberOfPagesParsed -
+        _sessionCounters.NumberOfPagesPerMinute = Math.Max(
+            _sessionCounters.NumberOfEdits +
+            _sessionCounters.NumberOfIgnoredEdits +
+            _sessionCounters.NumberOfPagesParsed -
             _lastPagesTotal,
             0);
 
-        _lastEditsTotal = NumberOfEdits;
+        _lastEditsTotal =
+            _sessionCounters.NumberOfEdits;
 
         _lastPagesTotal =
-            NumberOfEdits +
-            NumberOfIgnoredEdits +
-            NumberOfPagesParsed;
+            _sessionCounters.NumberOfEdits +
+            _sessionCounters.NumberOfIgnoredEdits +
+            _sessionCounters.NumberOfPagesParsed;
     }
 
     #endregion
@@ -11665,7 +11673,7 @@ font-size: 150%;'>No changes</h2>
     /// </returns>
     private static bool PluginsCancelNudge()
     {
-        foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
+        foreach (KeyValuePair<string, IAWBPlugin> a in Twain.Core.Plugin.PluginManager.AWBPlugins)
         {
             bool cancel;
             a.Value.Nudge(out cancel);
@@ -11703,7 +11711,7 @@ font-size: 150%;'>No changes</h2>
     /// </summary>
     private void NotifyPluginsNudged()
     {
-        foreach (KeyValuePair<string, IAWBPlugin> a in Plugin.AWBPlugins)
+        foreach (KeyValuePair<string, IAWBPlugin> a in Twain.Core.Plugin.PluginManager.AWBPlugins)
         {
             a.Value.Nudged(Nudges);
         }
@@ -13659,6 +13667,70 @@ font-size: 150%;'>No changes</h2>
     private void lblProject_Click(object sender, EventArgs e)
     {
         OpenPreferences(true);
+    }
+    /// <summary>
+    /// Gets the number of edits completed during the current session.
+    /// </summary>
+    public int NumberOfEdits
+    {
+        get => _sessionCounters.NumberOfEdits;
+        private set
+        {
+            _sessionCounters.NumberOfEdits = value;
+            lblEditCount.Text = $"Edits: {value}";
+        }
+    }
+
+    /// <summary>
+    /// Gets the number of new pages processed during the current session.
+    /// </summary>
+    public int NumberOfNewPages
+    {
+        get => _sessionCounters.NumberOfNewPages;
+        private set
+        {
+            _sessionCounters.NumberOfNewPages = value;
+            lblNewArticles.Text = $"New: {value}";
+        }
+    }
+
+    /// <summary>
+    /// Gets the number of edits skipped during the current session.
+    /// </summary>
+    public int NumberOfIgnoredEdits
+    {
+        get => _sessionCounters.NumberOfIgnoredEdits;
+        private set
+        {
+            _sessionCounters.NumberOfIgnoredEdits = value;
+            lblIgnoredArticles.Text = $"Skipped: {value}";
+        }
+    }
+
+    /// <summary>
+    /// Gets the current number of edits completed per minute.
+    /// </summary>
+    public int NumberOfEditsPerMinute
+    {
+        get => _sessionCounters.NumberOfEditsPerMinute;
+        private set
+        {
+            _sessionCounters.NumberOfEditsPerMinute = value;
+            lblEditsPerMin.Text = $"Edits/min: {value}";
+        }
+    }
+
+    /// <summary>
+    /// Gets the current number of pages processed per minute.
+    /// </summary>
+    public int NumberOfPagesPerMinute
+    {
+        get => _sessionCounters.NumberOfPagesPerMinute;
+        private set
+        {
+            _sessionCounters.NumberOfPagesPerMinute = value;
+            lblPagesPerMin.Text = $"Pages/min: {value}";
+        }
     }
 }
     #endregion

@@ -84,13 +84,10 @@
     Microsoft.Web.WebView2 package updates and remove it when the upstream
     package no longer contributes the unused WPF reference.
   -->
-  <Target Name="RemoveUnusedWebView2WpfReference"
-          BeforeTargets="ResolveAssemblyReferences"
-          DependsOnTargets="ResolvePackageAssets">
+  <Target Name="RemoveUnusedWebView2WpfReference" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="ResolvePackageAssets">
 
     <ItemGroup>
-      <Reference Remove="@(Reference)"
-                 Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
     </ItemGroup>
   </Target>
 
@@ -98,13 +95,6 @@
     Stats.resx is kept beside Stats.cs for project organization but must not be
     compiled as a normal embedded WinForms resource.
   -->
-  <ItemGroup>
-    <EmbeddedResource Remove="Stats.resx" />
-
-    <None Include="Stats.resx">
-      <DependentUpon>Stats.cs</DependentUpon>
-    </None>
-  </ItemGroup>
 
   <!--
     Preserve the legacy logical resource name expected by the Preferences form.

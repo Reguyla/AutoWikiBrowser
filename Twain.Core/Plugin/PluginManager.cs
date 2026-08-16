@@ -20,20 +20,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+using System.Reflection;
+using System.Windows.Forms;
 using Twain.Core;
-using Twain.Core.Plugin;
 
-namespace AutoWikiBrowser.Plugins;
+namespace Twain.Core.Plugin;
 
 /// <summary>
 /// Discovers, loads, initializes, and tracks AWB plugins.
 /// </summary>
-internal static class Plugin
+public static class PluginManager
 {
     /// <summary>
     /// Registry of loaded AWB plugins, keyed by plugin name.
     /// </summary>
-    internal static readonly Dictionary<string, IAWBPlugin> AWBPlugins = new();
+    public static readonly Dictionary<string, IAWBPlugin> AWBPlugins = new();
 
     /// <summary>
     /// Registry of loaded AWB base plugins, keyed by plugin name.
@@ -65,7 +66,7 @@ internal static class Plugin
             "Microsoft.mshtml"
         };
 
-    static Plugin()
+    static PluginManager()
     {
         ErrorHandler.AppendToErrorHandler +=
             ErrorHandlerAppendToErrorHandler;
@@ -75,39 +76,36 @@ internal static class Plugin
     /// Gets the names of all currently loaded AWB plugins.
     /// </summary>
     /// <returns>The loaded AWB plugin names.</returns>
-    internal static List<string> GetAWBPluginList() =>
+    public static List<string> GetAWBPluginList() =>
         AWBPlugins.Keys.ToList();
 
     /// <summary>
     /// Gets the names of all currently loaded AWB base plugins.
     /// </summary>
     /// <returns>The loaded AWB base plugin names.</returns>
-    internal static List<string> GetBasePluginList() =>
+    public static List<string> GetBasePluginList() =>
         AWBBasePlugins.Keys.ToList();
 
     /// <summary>
     /// Gets the names of all currently loaded ListMaker plugins.
     /// </summary>
     /// <returns>The loaded ListMaker plugin names.</returns>
-    internal static List<string> GetListMakerPluginList() =>
+    public static List<string> GetListMakerPluginList() =>
         ListMakerPlugins.Keys.ToList();
 
     /// <summary>
-    /// Loads plugins during AWB startup and updates the splash-screen
-    /// progress indicator.
+    /// Discovers and loads plugins from the application base directory during
+    /// application startup.
     /// </summary>
-    /// <param name="awb">The active AWB application instance.</param>
-    /// <param name="splash">The startup splash screen.</param>
-    internal static void LoadPluginsStartup(
-        IAutoWikiBrowser awb,
-        Splash splash)
+    /// <param name="awb">
+    /// The active application instance passed to loaded plugins.
+    /// </param>
+    public static void LoadPluginsStartup(
+        IAutoWikiBrowser awb)
     {
         ArgumentNullException.ThrowIfNull(awb);
-        ArgumentNullException.ThrowIfNull(splash);
 
-        splash.SetProgress(25);
-
-        string path = Application.StartupPath;
+        string path = AppContext.BaseDirectory;
 
         string[] pluginFiles =
             Directory.GetFiles(
@@ -118,8 +116,6 @@ internal static class Plugin
             awb,
             pluginFiles,
             false);
-
-        splash.SetProgress(50);
     }
 
     /// <summary>
@@ -136,7 +132,7 @@ internal static class Plugin
     /// <param name="afterStartup">
     /// Whether the plugins are being loaded after application startup.
     /// </param>
-    internal static void LoadPlugins(
+    public static void LoadPlugins(
         IAutoWikiBrowser awb,
         string[] plugins,
         bool afterStartup)
