@@ -3427,20 +3427,26 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         bool process = true;
         _typoStats = null;
 
+        MainProcessOptions options =
+            CreateMainProcessOptions();
+
         Variables.Profiler.Start("ProcessPage(\"" + theArticle.Name + "\")");
 
         try
         {
             // Must be performed regardless of general fixes, otherwise there may be breakage
-            theArticle.AWBChangeArticleText("Fixes for Unicode compatibility",
-                                            _parser.FixUnicode(theArticle.ArticleText),
-                                            true);
+            theArticle.AWBChangeArticleText(
+                "Fixes for Unicode compatibility",
+                _parser.FixUnicode(theArticle.ArticleText),
+                true);
 
             if (_noParse.Contains(theArticle.Name))
                 process = false;
 
-            if (!_ignoreNoBots &&
-                !Parsers.CheckNoBots(theArticle.ArticleText, TheSession.User.Name))
+            if (!options.IgnoreNoBots &&
+                !Parsers.CheckNoBots(
+                    theArticle.ArticleText,
+                    TheSession.User.Name))
             {
                 theArticle.AWBSkip("Restricted by {{bots}}/{{nobots}}");
                 return;
@@ -3457,14 +3463,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             // find and replace before general fixes
             // Do not apply skip checks when reparsing
-            if (chkFindandReplace.Checked)
+            if (options.FindAndReplaceEnabled)
             {
-                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, _replaceSpecial,
-                                                 (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), false);
+                theArticle.PerformFindAndReplace(
+                    _findAndReplace,
+                    _substTemplates,
+                    _replaceSpecial,
+                    mainProcess && options.SkipWhenNoFindAndReplace,
+                    mainProcess && options.SkipOnlyMinorFindAndReplace,
+                    false);
 
                 Variables.Profiler.Profile("F&R");
 
                 theArticle.DoFaRSkips(_findAndReplace);
+
                 if (theArticle.SkipArticle)
                     return;
             }
@@ -3478,7 +3490,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             if (process)
             {
-                if (chkGeneralFixes.Checked)
+                if (options.GeneralFixesEnabled)
                 {
                     theArticle.PerformUniversalGeneralFixes();
                     Variables.Profiler.Profile("Universal Genfixes");
@@ -3486,28 +3498,31 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
                 if (theArticle.CanDoGeneralFixes)
                 {
-                    if (chkGeneralFixes.Checked)
+                    if (options.GeneralFixesEnabled)
                     {
                         EnsureGeneralFixResourcesLoaded();
 
-                        theArticle.PerformGeneralFixes(_parser, _removeText, _skip,
-                                                       replaceReferenceTagsToolStripMenuItem.Checked,
-                                                       restrictDefaultsortChangesToolStripMenuItem.Checked,
-                                                       noMOSComplianceFixesToolStripMenuItem.Checked);
+                        theArticle.PerformGeneralFixes(
+                            _parser,
+                            _removeText,
+                            _skip,
+                            options.ReplaceReferenceTags,
+                            options.RestrictDefaultSortChanges,
+                            options.NoMosComplianceFixes);
                     }
 
                     Variables.Profiler.Profile("Mainspace Genfixes");
 
                     if (!ApplyAutoTagging(
-                        theArticle,
-                        mainProcess))
+                            theArticle,
+                            mainProcess))
                     {
                         return;
                     }
 
                     Variables.Profiler.Profile("Auto-tagger");
                 }
-                else if (chkGeneralFixes.Checked)
+                else if (options.GeneralFixesEnabled)
                 {
                     if (theArticle.NameSpaceKey == Namespace.UserTalk)
                     {
@@ -3517,35 +3532,52 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                             Variables.Profiler.Profile("loadUserTalkWarnings");
                         }
 
-                        theArticle.PerformUserTalkGeneralFixes(_removeText, _userTalkTemplatesRegex,
-                                                               _skip.SkipNoUserTalkTemplatesSubstd);
+                        theArticle.PerformUserTalkGeneralFixes(
+                            _removeText,
+                            _userTalkTemplatesRegex,
+                            _skip.SkipNoUserTalkTemplatesSubstd);
                     }
                     else if (theArticle.CanDoTalkGeneralFixes)
                     {
                         theArticle.PerformTalkGeneralFixes(_removeText);
                     }
+
                     Variables.Profiler.Profile("Talk Genfixes");
                 }
             }
 
             // RegexTypoFix
-            if (chkRegExTypo.Checked && _regexTypos != null && !BotMode && !Namespace.IsTalk(theArticle.NameSpaceKey))
+            if (options.RegexTypoFixEnabled &&
+                _regexTypos != null &&
+                !options.BotMode &&
+                !Namespace.IsTalk(theArticle.NameSpaceKey))
             {
                 if (!_noRetf.Contains(theArticle.Name))
                 {
-                    theArticle.PerformTypoFixes(_regexTypos, chkSkipIfNoRegexTypo.Checked);
+                    theArticle.PerformTypoFixes(
+                        _regexTypos,
+                        options.SkipIfNoRegexTypo);
+
                     Variables.Profiler.Profile("Typos");
-                    _typoStats = _regexTypos.GetStatistics();
+
+                    _typoStats =
+                        _regexTypos.GetStatistics();
                 }
-                else if (chkSkipIfNoRegexTypo.Checked)
-                    TheArticle.Trace.AWBSkipped("No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
+                else if (options.SkipIfNoRegexTypo)
+                {
+                    TheArticle.Trace.AWBSkipped(
+                        "No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
+                }
 
                 if (theArticle.SkipArticle)
                 {
                     if (mainProcess)
                     {
                         // update stats only if not called from e.g. 'Re-parse' than could be clicked repeatedly
-                        OverallTypoStats.UpdateStats(_typoStats, true);
+                        OverallTypoStats.UpdateStats(
+                            _typoStats,
+                            true);
+
                         UpdateTypoCount();
                     }
                 }
@@ -3553,16 +3585,22 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             // find and replace after general fixes
             // Do not apply skip checks when reparsing
-            if (chkFindandReplace.Checked)
+            if (options.FindAndReplaceEnabled)
             {
-                theArticle.PerformFindAndReplace(_findAndReplace, _substTemplates, _replaceSpecial,
-                                                 (mainProcess && chkSkipWhenNoFAR.Checked), (mainProcess && chkSkipOnlyMinorFaR.Checked), true);
+                theArticle.PerformFindAndReplace(
+                    _findAndReplace,
+                    _substTemplates,
+                    _replaceSpecial,
+                    mainProcess && options.SkipWhenNoFindAndReplace,
+                    mainProcess && options.SkipOnlyMinorFindAndReplace,
+                    true);
 
                 theArticle.DoFaRSkips(_findAndReplace);
 
                 Variables.Profiler.Profile("F&R (2nd)");
 
-                if (theArticle.SkipArticle) return;
+                if (theArticle.SkipArticle)
+                    return;
             }
 
             ApplyAppendOrPrependText(theArticle);
@@ -3586,13 +3624,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             ErrorHandler.HandleException(ex);
 
-            string stackTrace = ex.StackTrace ?? string.Empty;
+            string stackTrace =
+                ex.StackTrace ?? string.Empty;
 
             // Don't remove the page after a regular-expression error;
             // the page itself is not responsible for the failure.
             if (!stackTrace.Contains("System.Text.RegularExpressions"))
             {
-                theArticle.Trace.AWBSkipped("Exception: " + ex.Message);
+                theArticle.Trace.AWBSkipped(
+                    "Exception: " + ex.Message);
             }
             else
             {
