@@ -3736,7 +3736,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Applies the configured categorization operation to the supplied article.
+    /// Applies the current categorization settings to the supplied article.
     /// </summary>
     /// <param name="article">
     /// The article to update.
@@ -3747,34 +3747,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool ApplyCategorisationChanges(Article article)
     {
-        if (cmboCategorise.SelectedIndex == 0)
-        {
-            return true;
-        }
-
-        article.Categorisation(
+        return article.ApplyCategorisationChanges(
             (Twain.Core.Options.CategorisationOptions)
-            cmboCategorise.SelectedIndex,
+                cmboCategorise.SelectedIndex,
             _parser,
             chkSkipNoCatChange.Checked,
             txtNewCategory.Text.Trim(),
             txtNewCategory2.Text.Trim(),
-            chkRemoveSortKey.Checked);
-
-        if (article.SkipArticle)
-        {
-            return false;
-        }
-
-        if (!chkGeneralFixes.Checked)
-        {
-            article.AWBChangeArticleText(
-                "Fix categories",
-                Parsers.FixCategories(article.ArticleText),
-                true);
-        }
-
-        return true;
+            chkRemoveSortKey.Checked,
+            chkGeneralFixes.Checked);
     }
 
     /// <summary>

@@ -897,6 +897,75 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
+    /// Applies the requested categorization operation and performs category cleanup
+    /// when general fixes are not enabled.
+    /// </summary>
+    /// <param name="option">
+    /// The categorization action to perform.
+    /// </param>
+    /// <param name="parsers">
+    /// The parser used by categorization and category cleanup.
+    /// </param>
+    /// <param name="skipIfNoChange">
+    /// <see langword="true"/> to skip the article when the categorization operation
+    /// makes no changes; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="categoryText">
+    /// The category to add or remove, or the existing category when replacing.
+    /// </param>
+    /// <param name="categoryText2">
+    /// The replacement category when recategorizing.
+    /// </param>
+    /// <param name="removeSortKey">
+    /// <see langword="true"/> to remove the existing sort key during recategorization.
+    /// </param>
+    /// <param name="generalFixesEnabled">
+    /// <see langword="true"/> when general fixes will run later in the processing
+    /// pipeline; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when the article was skipped.
+    /// </returns>
+    public bool ApplyCategorisationChanges(
+        CategorisationOptions option,
+        Parsers parsers,
+        bool skipIfNoChange,
+        string categoryText,
+        string categoryText2,
+        bool removeSortKey,
+        bool generalFixesEnabled)
+    {
+        if (option == CategorisationOptions.NoAction)
+        {
+            return true;
+        }
+
+        Categorisation(
+            option,
+            parsers,
+            skipIfNoChange,
+            categoryText,
+            categoryText2,
+            removeSortKey);
+
+        if (SkipArticle)
+        {
+            return false;
+        }
+
+        if (!generalFixesEnabled)
+        {
+            AWBChangeArticleText(
+                "Fix categories",
+                Parsers.FixCategories(ArticleText),
+                true);
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Appends or prepends the specified text to the article and optionally sorts
     /// the resulting metadata.
     /// </summary>
