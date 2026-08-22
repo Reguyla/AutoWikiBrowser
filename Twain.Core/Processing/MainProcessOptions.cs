@@ -131,4 +131,15 @@ public sealed class MainProcessOptions
     public string ImageWith { get; init; } = string.Empty;
 
     public bool SkipIfNoImageChange { get; init; }
+
+    public int CategorisationOperation { get; init; }
+
+    public bool SkipIfNoCategoryChange { get; init; }
+
+    public string NewCategory { get; init; } = string.Empty;
+
+    public string NewCategory2 { get; init; } = string.Empty;
+
+    public bool RemoveCategorySortKey { get; init; }
+
 }

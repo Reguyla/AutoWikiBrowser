@@ -3484,7 +3484,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     return;
             }
 
-            if (!ApplyCategorisationChanges(theArticle))
+            if (!ApplyCategorisationChanges(
+                    theArticle,
+                    options))
             {
                 return;
             }
@@ -3711,6 +3713,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ImageReplace = txtImageReplace.Text,
             ImageWith = txtImageWith.Text,
             SkipIfNoImageChange = chkSkipNoImgChange.Checked,
+
+            CategorisationOperation = cmboCategorise.SelectedIndex,
+            SkipIfNoCategoryChange = chkSkipNoCatChange.Checked,
+            NewCategory = txtNewCategory.Text.Trim(),
+            NewCategory2 = txtNewCategory2.Text.Trim(),
+            RemoveCategorySortKey = chkRemoveSortKey.Checked,
         };
     }
 
@@ -3848,26 +3856,31 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Applies the current categorization settings to the supplied article.
+    /// Applies the configured categorization operation to the supplied article.
     /// </summary>
     /// <param name="article">
     /// The article to update.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
     /// </param>
     /// <returns>
     /// <see langword="true"/> when processing may continue; otherwise,
     /// <see langword="false"/> when categorization skips the article.
     /// </returns>
-    private bool ApplyCategorisationChanges(Article article)
+    private bool ApplyCategorisationChanges(
+        Article article,
+        MainProcessOptions options)
     {
         return article.ApplyCategorisationChanges(
             (Twain.Core.Options.CategorisationOptions)
-                cmboCategorise.SelectedIndex,
+                options.CategorisationOperation,
             _parser,
-            chkSkipNoCatChange.Checked,
-            txtNewCategory.Text.Trim(),
-            txtNewCategory2.Text.Trim(),
-            chkRemoveSortKey.Checked,
-            chkGeneralFixes.Checked);
+            options.SkipIfNoCategoryChange,
+            options.NewCategory,
+            options.NewCategory2,
+            options.RemoveCategorySortKey,
+            options.GeneralFixesEnabled);
     }
 
     /// <summary>
