@@ -3459,7 +3459,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 return;
             }
 
-            ApplyWholeArticleUnicodify(theArticle, process);
+            ApplyWholeArticleUnicodify(
+                theArticle,
+                process,
+                options);
 
             // find and replace before general fixes
             // Do not apply skip checks when reparsing
@@ -3515,7 +3518,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
                     if (!ApplyAutoTagging(
                             theArticle,
-                            mainProcess))
+                            mainProcess,
+                            options))
                     {
                         return;
                     }
@@ -3613,7 +3617,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             Variables.Profiler.Profile("Files");
 
-            if (!ApplyDisambiguation(theArticle))
+            if (!ApplyDisambiguation(
+                    theArticle,
+                    options))
             {
                 return;
             }
@@ -3854,7 +3860,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     /// <summary>
     /// Applies whole-article Unicode conversion when standard processing and the
-    /// corresponding user option are enabled.
+    /// corresponding processing option are enabled.
     /// </summary>
     /// <param name="article">
     /// The article to process.
@@ -3863,12 +3869,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <see langword="true"/> when the article is eligible for standard parsing
     /// operations; otherwise, <see langword="false"/>.
     /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
     private void ApplyWholeArticleUnicodify(
         Article article,
-        bool applyStandardProcessing)
+        bool applyStandardProcessing,
+        MainProcessOptions options)
     {
         if (!applyStandardProcessing ||
-            !chkUnicodifyWhole.Checked)
+            !options.UnicodifyWholeArticle)
         {
             return;
         }
@@ -3882,27 +3892,28 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Applies automatic maintenance tagging to the supplied article when the
-    /// feature is enabled.
+    /// Applies automatic article tagging when enabled.
     /// </summary>
     /// <param name="article">
     /// The article to process.
     /// </param>
     /// <param name="mainProcess">
-    /// <see langword="true"/> when processing as part of the normal save workflow;
-    /// otherwise, <see langword="false"/> for operations such as reparsing, where
-    /// automatic tagging should not terminate processing.
+    /// <see langword="true"/> when processing is part of the normal save workflow;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
     /// </param>
     /// <returns>
     /// <see langword="true"/> when processing may continue; otherwise,
-    /// <see langword="false"/> when automatic tagging skips the article during the
-    /// main processing workflow.
+    /// <see langword="false"/> when the article should be skipped.
     /// </returns>
     private bool ApplyAutoTagging(
-    Article article,
-    bool mainProcess)
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options)
     {
-        if (!chkAutoTagger.Checked)
+        if (!options.AutoTaggerEnabled)
         {
             return true;
         }
@@ -3910,39 +3921,43 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         article.AutoTag(
             _parser,
             _skip.SkipNoTag,
-            restrictOrphanTaggingToolStripMenuItem.Checked);
+            options.RestrictOrphanTagging);
 
         return !(mainProcess && article.SkipArticle);
     }
 
     /// <summary>
-    /// Applies the configured disambiguation processing to the supplied article.
+    /// Applies the configured disambiguation operation to the supplied article.
     /// </summary>
     /// <param name="article">
     /// The article to process.
     /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
     /// <returns>
     /// <see langword="true"/> when processing may continue; otherwise,
-    /// <see langword="false"/> when processing has been stopped because the
-    /// article was skipped or disambiguation failed.
+    /// <see langword="false"/> when disambiguation aborts or skips processing.
     /// </returns>
-    private bool ApplyDisambiguation(Article article)
+    private bool ApplyDisambiguation(
+        Article article,
+        MainProcessOptions options)
     {
-        if (preParseModeToolStripMenuItem.Checked ||
-            !chkEnableDab.Checked ||
-            txtDabLink.Text.Trim().Length == 0 ||
-            txtDabVariants.Text.Trim().Length == 0)
+        if (options.PreParseMode ||
+            !options.DisambiguationEnabled ||
+            options.DisambiguationLink.Length == 0 ||
+            options.DisambiguationVariants.Length == 0)
         {
             return true;
         }
 
         if (article.Disambiguate(
                 TheSession,
-                txtDabLink.Text.Trim(),
-                txtDabVariants.Lines,
-                BotMode,
-                (int)udContextChars.Value,
-                chkSkipNoDab.Checked))
+                options.DisambiguationLink,
+                options.DisambiguationVariants,
+                options.BotMode,
+                options.DisambiguationContextCharacters,
+                options.SkipIfNoDisambiguation))
         {
             return !article.SkipArticle;
         }
