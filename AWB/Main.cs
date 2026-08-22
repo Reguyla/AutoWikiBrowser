@@ -32,6 +32,7 @@ using Twain.Core.Editing;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
+using Twain.Core.Processing;
 using ThreadState = System.Threading.ThreadState;
 
 namespace AutoWikiBrowser;
@@ -3605,6 +3606,59 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             Variables.Profiler.Flush();
         }
+    }
+
+    /// <summary>
+    /// Captures the current user-interface processing settings for use by the
+    /// article-processing pipeline.
+    /// </summary>
+    /// <returns>
+    /// A snapshot containing the processing options currently selected in the
+    /// user interface.
+    /// </returns>
+    /// <remarks>
+    /// This method forms the boundary between MainForm controls and the processing
+    /// configuration consumed by the article-processing pipeline. Processing code
+    /// should use the returned option values rather than reading user-interface
+    /// controls directly.
+    /// </remarks>
+    private MainProcessOptions CreateMainProcessOptions()
+    {
+        return new MainProcessOptions
+        {
+            IgnoreNoBots = _ignoreNoBots,
+
+            FindAndReplaceEnabled = chkFindandReplace.Checked,
+            SkipWhenNoFindAndReplace = chkSkipWhenNoFAR.Checked,
+            SkipOnlyMinorFindAndReplace = chkSkipOnlyMinorFaR.Checked,
+
+            GeneralFixesEnabled = chkGeneralFixes.Checked,
+            ReplaceReferenceTags = replaceReferenceTagsToolStripMenuItem.Checked,
+            RestrictDefaultSortChanges =
+                restrictDefaultsortChangesToolStripMenuItem.Checked,
+            NoMosComplianceFixes =
+                noMOSComplianceFixesToolStripMenuItem.Checked,
+
+            RegexTypoFixEnabled = chkRegExTypo.Checked,
+            SkipIfNoRegexTypo = chkSkipIfNoRegexTypo.Checked,
+
+            BotMode = BotMode,
+
+            UnicodifyWholeArticle = chkUnicodifyWhole.Checked,
+
+            AutoTaggerEnabled = chkAutoTagger.Checked,
+            RestrictOrphanTagging =
+                restrictOrphanTaggingToolStripMenuItem.Checked,
+
+            PreParseMode = preParseModeToolStripMenuItem.Checked,
+
+            DisambiguationEnabled = chkEnableDab.Checked,
+            DisambiguationLink = txtDabLink.Text.Trim(),
+            DisambiguationVariants = txtDabVariants.Lines,
+            DisambiguationContextCharacters =
+                (int)udContextChars.Value,
+            SkipIfNoDisambiguation = chkSkipNoDab.Checked
+        };
     }
 
     /// <summary>
