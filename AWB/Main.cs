@@ -3687,8 +3687,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Appends or prepends the configured text to the supplied article and
-    /// optionally sorts the resulting metadata.
+    /// Applies the append/prepend settings from the current interface to the
+    /// supplied article.
     /// </summary>
     /// <param name="article">
     /// The article to update.
@@ -3700,33 +3700,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return;
         }
 
-        string newlines =
-            new('\n', (int)udNewlineChars.Value);
-
-        string message =
-            Tools.ApplyKeyWords(
-                article.Name,
-                txtAppendMessage.Text);
-
-        if (rdoAppend.Checked)
-        {
-            article.AWBChangeArticleText(
-                "Appended your message",
-                article.ArticleText + newlines + message,
-                false);
-        }
-        else
-        {
-            article.AWBChangeArticleText(
-                "Prepended your message",
-                message + newlines + article.ArticleText,
-                false);
-        }
-
-        if (chkAppendMetaDataSort.Checked)
-        {
-            article.PerformMetaDataSort(_parser);
-        }
+        article.ApplyAppendOrPrependText(
+            txtAppendMessage.Text,
+            (int)udNewlineChars.Value,
+            rdoAppend.Checked,
+            chkAppendMetaDataSort.Checked,
+            _parser);
     }
 
     /// <summary>

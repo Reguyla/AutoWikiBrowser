@@ -897,6 +897,65 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
+    /// Appends or prepends the specified text to the article and optionally sorts
+    /// the resulting metadata.
+    /// </summary>
+    /// <param name="messageText">
+    /// The text to append or prepend. Supported article keywords are expanded
+    /// before the text is applied.
+    /// </param>
+    /// <param name="newlineCount">
+    /// The number of newline characters inserted between the existing article text
+    /// and the supplied message.
+    /// </param>
+    /// <param name="append">
+    /// <see langword="true"/> to append the message to the article;
+    /// <see langword="false"/> to prepend it.
+    /// </param>
+    /// <param name="sortMetaData">
+    /// <see langword="true"/> to sort article metadata after applying the message;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="parser">
+    /// The parser used when metadata sorting is requested.
+    /// </param>
+    public void ApplyAppendOrPrependText(
+        string messageText,
+        int newlineCount,
+        bool append,
+        bool sortMetaData,
+        Parsers parser)
+    {
+        string newlines =
+            new('\n', newlineCount);
+
+        string message =
+            Tools.ApplyKeyWords(
+                Name,
+                messageText);
+
+        if (append)
+        {
+            AWBChangeArticleText(
+                "Appended your message",
+                ArticleText + newlines + message,
+                false);
+        }
+        else
+        {
+            AWBChangeArticleText(
+                "Prepended your message",
+                message + newlines + ArticleText,
+                false);
+        }
+
+        if (sortMetaData)
+        {
+            PerformMetaDataSort(parser);
+        }
+    }
+
+    /// <summary>
     /// Performs skip checks for find & replace
     /// </summary>
     /// <param name="findAndReplace"></param>
