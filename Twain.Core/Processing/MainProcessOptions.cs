@@ -142,4 +142,13 @@ public sealed class MainProcessOptions
 
     public bool RemoveCategorySortKey { get; init; }
 
+    public bool AppendEnabled { get; init; }
+
+    public string AppendText { get; init; } = string.Empty;
+
+    public int AppendNewLineCount { get; init; }
+
+    public bool AppendInsteadOfPrepend { get; init; }
+
+    public bool SortMetadataAfterAppend { get; init; }
 }

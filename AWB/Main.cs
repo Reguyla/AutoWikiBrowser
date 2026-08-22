@@ -3609,7 +3609,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     return;
             }
 
-            ApplyAppendOrPrependText(theArticle);
+            ApplyAppendOrPrependText(
+                theArticle,
+                options);
+
             Variables.Profiler.Profile("Append Text");
 
             if (!ApplyImageChanges(
@@ -3719,6 +3722,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             NewCategory = txtNewCategory.Text.Trim(),
             NewCategory2 = txtNewCategory2.Text.Trim(),
             RemoveCategorySortKey = chkRemoveSortKey.Checked,
+
+            AppendEnabled = chkAppend.Checked,
+            AppendText = txtAppendMessage.Text,
+            AppendNewLineCount = (int)udNewlineChars.Value,
+            AppendInsteadOfPrepend = rdoAppend.Checked,
+            SortMetadataAfterAppend = chkAppendMetaDataSort.Checked,
         };
     }
 
@@ -3802,24 +3811,28 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Applies the append/prepend settings from the current interface to the
-    /// supplied article.
+    /// Applies the configured append or prepend operation to the supplied article.
     /// </summary>
     /// <param name="article">
     /// The article to update.
     /// </param>
-    private void ApplyAppendOrPrependText(Article article)
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    private void ApplyAppendOrPrependText(
+        Article article,
+        MainProcessOptions options)
     {
-        if (!chkAppend.Checked)
+        if (!options.AppendEnabled)
         {
             return;
         }
 
         article.ApplyAppendOrPrependText(
-            txtAppendMessage.Text,
-            (int)udNewlineChars.Value,
-            rdoAppend.Checked,
-            chkAppendMetaDataSort.Checked,
+            options.AppendText,
+            options.AppendNewLineCount,
+            options.AppendInsteadOfPrepend,
+            options.SortMetadataAfterAppend,
             _parser);
     }
 
