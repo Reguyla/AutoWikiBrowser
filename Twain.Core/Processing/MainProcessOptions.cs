@@ -123,4 +123,12 @@ public sealed class MainProcessOptions
     /// disambiguation makes no changes.
     /// </summary>
     public bool SkipIfNoDisambiguation { get; init; }
+
+    public int ImageOperation { get; init; }
+
+    public string ImageReplace { get; init; } = string.Empty;
+
+    public string ImageWith { get; init; } = string.Empty;
+
+    public bool SkipIfNoImageChange { get; init; }
 }

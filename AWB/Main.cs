@@ -3610,7 +3610,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ApplyAppendOrPrependText(theArticle);
             Variables.Profiler.Profile("Append Text");
 
-            if (!ApplyImageChanges(theArticle))
+            if (!ApplyImageChanges(
+                    theArticle,
+                    options))
             {
                 return;
             }
@@ -3703,7 +3705,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             DisambiguationVariants = txtDabVariants.Lines,
             DisambiguationContextCharacters =
                 (int)udContextChars.Value,
-            SkipIfNoDisambiguation = chkSkipNoDab.Checked
+            SkipIfNoDisambiguation = chkSkipNoDab.Checked,
+
+            ImageOperation = cmboImages.SelectedIndex,
+            ImageReplace = txtImageReplace.Text,
+            ImageWith = txtImageWith.Text,
+            SkipIfNoImageChange = chkSkipNoImgChange.Checked,
         };
     }
 
@@ -3815,22 +3822,27 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="article">
     /// The article to update.
     /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
     /// <returns>
     /// <see langword="true"/> when processing may continue; otherwise,
     /// <see langword="false"/> when the operation skips the article.
     /// </returns>
-    private bool ApplyImageChanges(Article article)
+    private static bool ApplyImageChanges(
+        Article article,
+        MainProcessOptions options)
     {
-        if (cmboImages.SelectedIndex == 0)
+        if (options.ImageOperation == 0)
         {
             return true;
         }
 
         article.UpdateImages(
-            (Twain.Core.Options.ImageReplaceOptions)cmboImages.SelectedIndex,
-            txtImageReplace.Text,
-            txtImageWith.Text,
-            chkSkipNoImgChange.Checked);
+            (Twain.Core.Options.ImageReplaceOptions)options.ImageOperation,
+            options.ImageReplace,
+            options.ImageWith,
+            options.SkipIfNoImageChange);
 
         return !article.SkipArticle;
     }
