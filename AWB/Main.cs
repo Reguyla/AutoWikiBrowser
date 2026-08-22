@@ -3417,20 +3417,54 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Fully processes a page, applying all needed changes
+    /// Processes a page using the processing options currently selected in the
+    /// user interface.
     /// </summary>
-    /// <param name="theArticle">Page to process</param>
-    /// <param name="mainProcess">True if the page is being processed for save as usual,
-    /// otherwise (Re-parse in context menu, prefetch, etc) false</param>
-    private void ProcessPage(Article theArticle, bool mainProcess)
+    /// <param name="theArticle">
+    /// The page to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when the page is being processed for the normal save
+    /// workflow; otherwise, <see langword="false"/> for reparsing, prefetching, and
+    /// similar operations.
+    /// </param>
+    private void ProcessPage(
+        Article theArticle,
+        bool mainProcess)
+    {
+        MainProcessOptions options =
+            CreateMainProcessOptions();
+
+        ProcessPageCore(
+            theArticle,
+            mainProcess,
+            options);
+    }
+
+    /// <summary>
+    /// Fully processes a page using the supplied processing configuration.
+    /// </summary>
+    /// <param name="theArticle">
+    /// The page to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when the page is being processed for the normal save
+    /// workflow; otherwise, <see langword="false"/> for reparsing, prefetching, and
+    /// similar operations.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    private void ProcessPageCore(
+        Article theArticle,
+        bool mainProcess,
+        MainProcessOptions options)
     {
         bool process = true;
         _typoStats = null;
 
-        MainProcessOptions options =
-            CreateMainProcessOptions();
-
-        Variables.Profiler.Start("ProcessPage(\"" + theArticle.Name + "\")");
+        Variables.Profiler.Start(
+            "ProcessPage(\"" + theArticle.Name + "\")");
 
         try
         {
