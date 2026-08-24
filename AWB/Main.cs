@@ -3442,7 +3442,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             mainProcess,
             options,
             TheSession,
-            RunExtensionProcessing);
+            RunExtensionProcessing,
+            PrepareGeneralFixResources);
     }
 
     /// <summary>
@@ -3466,12 +3467,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Executes the configured custom module, external program, and plugin
     /// processing for the supplied article.
     /// </param>
+    /// <param name="prepareGeneralFixResources">
+    /// Prepares the wiki-backed resources required by the general-fix processing
+    /// path.
+    /// </param>
     private void ProcessPageCore(
         Article theArticle,
         bool mainProcess,
         MainProcessOptions options,
         Session session,
-        Func<Article, bool> runExtensionProcessing)
+        Func<Article, bool> runExtensionProcessing,
+        Action<Article, MainProcessOptions> prepareGeneralFixResources)
     {
         _typoStats = null;
 
@@ -3526,9 +3532,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             if (process)
             {
-                PrepareGeneralFixResources(
-                   theArticle,
-                   options);
+                prepareGeneralFixResources(
+                    theArticle,
+                    options);
 
                 if (!_mainProcess.ApplyGeneralFixProcessing(
                         theArticle,
