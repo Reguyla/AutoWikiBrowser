@@ -471,4 +471,28 @@ public sealed class MainProcess
 
         return true;
     }
+
+    /// <summary>
+    /// Applies universal general fixes to the supplied article when enabled.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    public static void ApplyUniversalGeneralFixes(
+        Article article,
+        MainProcessOptions options)
+    {
+        if (!options.GeneralFixesEnabled)
+        {
+            return;
+        }
+
+        article.PerformUniversalGeneralFixes();
+
+        Variables.Profiler.Profile(
+            "Universal Genfixes");
+    }
 }

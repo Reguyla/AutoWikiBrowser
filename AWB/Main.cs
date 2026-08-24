@@ -3526,11 +3526,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             if (process)
             {
-                if (options.GeneralFixesEnabled)
-                {
-                    theArticle.PerformUniversalGeneralFixes();
-                    Variables.Profiler.Profile("Universal Genfixes");
-                }
+                MainProcess.ApplyUniversalGeneralFixes(
+                    theArticle,
+                    options);
 
                 if (theArticle.CanDoGeneralFixes)
                 {
