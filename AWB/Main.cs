@@ -3560,10 +3560,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
                     Variables.Profiler.Profile("Mainspace Genfixes");
 
-                    if (!ApplyAutoTagging(
+                    if (!_mainProcess.ApplyAutoTagging(
                             theArticle,
                             mainProcess,
-                            options))
+                            options,
+                            _skip))
                     {
                         return;
                     }
@@ -3666,11 +3667,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             Variables.Profiler.Profile("Files");
 
-            if (!ApplyDisambiguation(
+            if (!MainProcess.ApplyDisambiguation(
                     theArticle,
                     options,
                     session))
             {
+                _abort = true;
+                Stop();
                 return;
             }
 
@@ -3851,84 +3854,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             LoadRenameTemplateParameters();
             Variables.Profiler.Profile("LoadRenameTemplateParameters");
         }
-    }
-
-    /// <summary>
-    /// Applies automatic article tagging when enabled.
-    /// </summary>
-    /// <param name="article">
-    /// The article to process.
-    /// </param>
-    /// <param name="mainProcess">
-    /// <see langword="true"/> when processing is part of the normal save workflow;
-    /// otherwise, <see langword="false"/>.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when processing may continue; otherwise,
-    /// <see langword="false"/> when the article should be skipped.
-    /// </returns>
-    private bool ApplyAutoTagging(
-        Article article,
-        bool mainProcess,
-        MainProcessOptions options)
-    {
-        if (!options.AutoTaggerEnabled)
-        {
-            return true;
-        }
-
-        article.AutoTag(
-            _parser,
-            _skip.SkipNoTag,
-            options.RestrictOrphanTagging);
-
-        return !(mainProcess && article.SkipArticle);
-    }
-
-    /// <summary>
-    /// Applies the configured disambiguation operation to the supplied article.
-    /// </summary>
-    /// <param name="article">
-    /// The article to process.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when processing may continue; otherwise,
-    /// <see langword="false"/> when disambiguation aborts or skips processing.
-    /// </returns>
-    private bool ApplyDisambiguation(
-        Article article,
-        MainProcessOptions options,
-        Session session)
-    {
-        if (options.PreParseMode ||
-            !options.DisambiguationEnabled ||
-            options.DisambiguationLink.Length == 0 ||
-            options.DisambiguationVariants.Length == 0)
-        {
-            return true;
-        }
-
-        if (article.Disambiguate(
-                session,
-                options.DisambiguationLink,
-                options.DisambiguationVariants,
-                options.BotMode,
-                options.DisambiguationContextCharacters,
-                options.SkipIfNoDisambiguation))
-        {
-            return !article.SkipArticle;
-        }
-
-        _abort = true;
-        Stop();
-
-        return false;
     }
 
     /// <summary>
