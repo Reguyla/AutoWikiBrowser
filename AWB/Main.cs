@@ -3445,7 +3445,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             RunExtensionProcessing,
             PrepareGeneralFixResources,
             ApplyRegexTypoProcessing,
-            AbortProcessing);
+            AbortProcessing,
+            HandleProcessingException);
     }
 
     /// <summary>
@@ -3481,6 +3482,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Aborts the current application processing workflow when requested by an
     /// article-processing operation.
     /// </param>
+    /// <param name="handleProcessingException">
+    /// Handles exceptions raised by the article-processing pipeline and updates
+    /// the application workflow state.
+    /// </param>
     private void ProcessPageCore(
         Article theArticle,
         bool mainProcess,
@@ -3489,7 +3494,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Func<Article, bool> runExtensionProcessing,
         Action<Article, MainProcessOptions> prepareGeneralFixResources,
         Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing,
-        Action abortProcessing)
+        Action abortProcessing,
+        Action<Article, Exception> handleProcessingException)
     {
         _typoStats = null;
 
@@ -3607,25 +3613,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
         catch (Exception ex)
         {
-            ErrorHandler.HandleException(ex);
-
-            string stackTrace =
-                ex.StackTrace ?? string.Empty;
-
-            // Don't remove the page after a regular-expression error;
-            // the page itself is not responsible for the failure.
-            if (!stackTrace.Contains("System.Text.RegularExpressions"))
-            {
-                theArticle.Trace.AWBSkipped(
-                    "Exception: " + ex.Message);
-            }
-            else
-            {
-                _skippable = false;
-            }
-
-            Stop();
-            StopDelayedAutoSaveTimer();
+            handleProcessingException(
+                theArticle,
+                ex);
         }
         finally
         {
@@ -3735,6 +3725,42 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             LoadUserTalkWarnings();
             Variables.Profiler.Profile("loadUserTalkWarnings");
         }
+    }
+
+    /// <summary>
+    /// Handles an exception raised during article processing and updates the
+    /// application workflow state as required.
+    /// </summary>
+    /// <param name="article">
+    /// The article being processed when the exception occurred.
+    /// </param>
+    /// <param name="exception">
+    /// The exception raised by the processing pipeline.
+    /// </param>
+    private void HandleProcessingException(
+        Article article,
+        Exception exception)
+    {
+        ErrorHandler.HandleException(exception);
+
+        string stackTrace =
+            exception.StackTrace ?? string.Empty;
+
+        // Don't remove the page after a regular-expression error;
+        // the page itself is not responsible for the failure.
+        if (!stackTrace.Contains(
+                "System.Text.RegularExpressions"))
+        {
+            article.Trace.AWBSkipped(
+                "Exception: " + exception.Message);
+        }
+        else
+        {
+            _skippable = false;
+        }
+
+        Stop();
+        StopDelayedAutoSaveTimer();
     }
 
     /// <summary>
