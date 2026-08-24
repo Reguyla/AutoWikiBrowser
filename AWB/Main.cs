@@ -3662,7 +3662,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             if (!ApplyDisambiguation(
                     theArticle,
-                    options))
+                    options,
+                    session))
             {
                 return;
             }
@@ -4015,7 +4016,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool ApplyDisambiguation(
         Article article,
-        MainProcessOptions options)
+        MainProcessOptions options,
+        Session session)
     {
         if (options.PreParseMode ||
             !options.DisambiguationEnabled ||
@@ -4026,7 +4028,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         if (article.Disambiguate(
-                TheSession,
+                session,
                 options.DisambiguationLink,
                 options.DisambiguationVariants,
                 options.BotMode,
