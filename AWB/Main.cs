@@ -3563,23 +3563,18 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
                 else if (options.GeneralFixesEnabled)
                 {
-                    if (theArticle.NameSpaceKey == Namespace.UserTalk)
+                    if (theArticle.NameSpaceKey == Namespace.UserTalk &&
+                        !_userTalkWarningsLoaded)
                     {
-                        if (!_userTalkWarningsLoaded)
-                        {
-                            LoadUserTalkWarnings();
-                            Variables.Profiler.Profile("loadUserTalkWarnings");
-                        }
+                        LoadUserTalkWarnings();
+                        Variables.Profiler.Profile("loadUserTalkWarnings");
+                    }
 
-                        theArticle.PerformUserTalkGeneralFixes(
-                            _removeText,
-                            _userTalkTemplatesRegex,
-                            _skip.SkipNoUserTalkTemplatesSubstd);
-                    }
-                    else if (theArticle.CanDoTalkGeneralFixes)
-                    {
-                        theArticle.PerformTalkGeneralFixes(_removeText);
-                    }
+                    MainProcess.ApplyTalkGeneralFixes(
+                        theArticle,
+                        _removeText,
+                        _userTalkTemplatesRegex,
+                        _skip.SkipNoUserTalkTemplatesSubstd);
 
                     Variables.Profiler.Profile("Talk Genfixes");
                 }

@@ -377,4 +377,42 @@ public sealed class MainProcess
             options.RestrictDefaultSortChanges,
             options.NoMosComplianceFixes);
     }
+
+    /// <summary>
+    /// Applies the supported talk-page general fixes to the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="removeText">
+    /// The text-hiding helper used while talk-page fixes are performed.
+    /// </param>
+    /// <param name="userTalkTemplatesRegex">
+    /// The configured user-talk template expression, when available.
+    /// </param>
+    /// <param name="skipNoUserTalkTemplatesSubstd">
+    /// <see langword="true"/> when the article should be skipped when no configured
+    /// user-talk template substitutions are made.
+    /// </param>
+    public static void ApplyTalkGeneralFixes(
+        Article article,
+        HideText removeText,
+        Regex userTalkTemplatesRegex,
+        bool skipNoUserTalkTemplatesSubstd)
+    {
+        if (article.NameSpaceKey == Namespace.UserTalk)
+        {
+            article.PerformUserTalkGeneralFixes(
+                removeText,
+                userTalkTemplatesRegex,
+                skipNoUserTalkTemplatesSubstd);
+
+            return;
+        }
+
+        if (article.CanDoTalkGeneralFixes)
+        {
+            article.PerformTalkGeneralFixes(removeText);
+        }
+    }
 }
