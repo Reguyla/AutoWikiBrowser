@@ -3541,13 +3541,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     {
                         EnsureGeneralFixResourcesLoaded();
 
-                        theArticle.PerformGeneralFixes(
-                            _parser,
-                            _removeText,
+                        _mainProcess.ApplyGeneralFixes(
+                            theArticle,
+                            options,
                             _skip,
-                            options.ReplaceReferenceTags,
-                            options.RestrictDefaultSortChanges,
-                            options.NoMosComplianceFixes);
+                            _removeText);
                     }
 
                     Variables.Profiler.Profile("Mainspace Genfixes");

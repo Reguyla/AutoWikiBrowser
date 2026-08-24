@@ -347,4 +347,34 @@ public sealed class MainProcess
 
         return null;
     }
+
+    /// <summary>
+    /// Applies the configured general fixes to the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="skip">
+    /// The skip options used by general-fix processing.
+    /// </param>
+    /// <param name="removeText">
+    /// The text-hiding helper used while general fixes are performed.
+    /// </param>
+    public void ApplyGeneralFixes(
+        Article article,
+        MainProcessOptions options,
+        ISkipOptions skip,
+        HideText removeText)
+    {
+        article.PerformGeneralFixes(
+            _parser,
+            removeText,
+            skip,
+            options.ReplaceReferenceTags,
+            options.RestrictDefaultSortChanges,
+            options.NoMosComplianceFixes);
+    }
 }
