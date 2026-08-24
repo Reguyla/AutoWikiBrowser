@@ -230,4 +230,66 @@ public sealed class MainProcess
 
         return !article.SkipArticle;
     }
+
+    /// <summary>
+    /// Runs the configured find-and-replace processing for the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when processing is part of the normal save workflow;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="findAndReplace">
+    /// The configured find-and-replace processor.
+    /// </param>
+    /// <param name="substTemplates">
+    /// The configured template-substitution processor.
+    /// </param>
+    /// <param name="replaceSpecial">
+    /// The configured advanced replacement processor.
+    /// </param>
+    /// <param name="onlyApplyAfter">
+    /// <see langword="false"/> to run the before-general-fixes pass;
+    /// <see langword="true"/> to run the after-general-fixes pass.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when the article has been skipped.
+    /// </returns>
+    public static bool ApplyFindAndReplace(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options,
+        FindandReplace findAndReplace,
+        SubstTemplates substTemplates,
+        ReplaceSpecial.ReplaceSpecial replaceSpecial,
+        bool onlyApplyAfter)
+    {
+        if (!options.FindAndReplaceEnabled)
+        {
+            return true;
+        }
+
+        article.PerformFindAndReplace(
+            findAndReplace,
+            substTemplates,
+            replaceSpecial,
+            mainProcess && options.SkipWhenNoFindAndReplace,
+            mainProcess && options.SkipOnlyMinorFindAndReplace,
+            onlyApplyAfter);
+
+        article.DoFaRSkips(findAndReplace);
+
+        Variables.Profiler.Profile(
+            onlyApplyAfter
+                ? "F&R (2nd)"
+                : "F&R");
+
+        return !article.SkipArticle;
+    }
 }

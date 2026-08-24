@@ -3506,24 +3506,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 _skip,
                 _removeText);
 
-            // find and replace before general fixes
-            // Do not apply skip checks when reparsing
-            if (options.FindAndReplaceEnabled)
-            {
-                theArticle.PerformFindAndReplace(
+            if (!MainProcess.ApplyFindAndReplace(
+                    theArticle,
+                    mainProcess,
+                    options,
                     _findAndReplace,
                     _substTemplates,
                     _replaceSpecial,
-                    mainProcess && options.SkipWhenNoFindAndReplace,
-                    mainProcess && options.SkipOnlyMinorFindAndReplace,
-                    false);
-
-                Variables.Profiler.Profile("F&R");
-
-                theArticle.DoFaRSkips(_findAndReplace);
-
-                if (theArticle.SkipArticle)
-                    return;
+                    false))
+            {
+                return;
             }
 
             if (!_mainProcess.ApplyCategorisationChanges(
@@ -3632,27 +3624,21 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-            // find and replace after general fixes
-            // Do not apply skip checks when reparsing
-            if (options.FindAndReplaceEnabled)
-            {
-                theArticle.PerformFindAndReplace(
-                    _findAndReplace,
-                    _substTemplates,
-                    _replaceSpecial,
-                    mainProcess && options.SkipWhenNoFindAndReplace,
-                    mainProcess && options.SkipOnlyMinorFindAndReplace,
-                    true);
+        // find and replace after general fixes
+        // Do not apply skip checks when reparsing
+        if (!MainProcess.ApplyFindAndReplace(
+                theArticle,
+                mainProcess,
+                options,
+                _findAndReplace,
+                _substTemplates,
+                _replaceSpecial,
+                true))
+        {
+            return;
+        }
 
-                theArticle.DoFaRSkips(_findAndReplace);
-
-                Variables.Profiler.Profile("F&R (2nd)");
-
-                if (theArticle.SkipArticle)
-                    return;
-            }
-
-            _mainProcess.ApplyAppendOrPrependText(
+        _mainProcess.ApplyAppendOrPrependText(
                 theArticle,
                 options);
 
