@@ -1,4 +1,5 @@
 ﻿using Twain.Core.Parse;
+using Twain.Core.Plugin;
 
 namespace Twain.Core.Processing;
 
@@ -105,5 +106,46 @@ public sealed class MainProcess
             options.AppendInsteadOfPrepend,
             options.SortMetadataAfterAppend,
             _parser);
+    }
+
+    /// <summary>
+    /// Applies whole-article Unicode conversion when standard processing and the
+    /// corresponding processing option are enabled.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="applyStandardProcessing">
+    /// <see langword="true"/> when the article is eligible for standard parsing
+    /// operations; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="skip">
+    /// The skip options used by article processing.
+    /// </param>
+    /// <param name="removeText">
+    /// The text-hiding helper used while Unicode conversion is performed.
+    /// </param>
+    public void ApplyWholeArticleUnicodify(
+        Article article,
+        bool applyStandardProcessing,
+        MainProcessOptions options,
+        ISkipOptions skip,
+        HideText removeText)
+    {
+        if (!applyStandardProcessing ||
+            !options.UnicodifyWholeArticle)
+        {
+            return;
+        }
+
+        article.Unicodify(
+            skip.SkipNoUnicode,
+            _parser,
+            removeText);
+
+        Variables.Profiler.Profile("Unicodify");
     }
 }

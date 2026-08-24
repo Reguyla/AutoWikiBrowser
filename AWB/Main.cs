@@ -3499,10 +3499,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 return;
             }
 
-            ApplyWholeArticleUnicodify(
+            _mainProcess.ApplyWholeArticleUnicodify(
                 theArticle,
                 process,
-                options);
+                options,
+                _skip,
+                _removeText);
 
             // find and replace before general fixes
             // Do not apply skip checks when reparsing
@@ -3849,39 +3851,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             LoadRenameTemplateParameters();
             Variables.Profiler.Profile("LoadRenameTemplateParameters");
         }
-    }
-
-    /// <summary>
-    /// Applies whole-article Unicode conversion when standard processing and the
-    /// corresponding processing option are enabled.
-    /// </summary>
-    /// <param name="article">
-    /// The article to process.
-    /// </param>
-    /// <param name="applyStandardProcessing">
-    /// <see langword="true"/> when the article is eligible for standard parsing
-    /// operations; otherwise, <see langword="false"/>.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    private void ApplyWholeArticleUnicodify(
-        Article article,
-        bool applyStandardProcessing,
-        MainProcessOptions options)
-    {
-        if (!applyStandardProcessing ||
-            !options.UnicodifyWholeArticle)
-        {
-            return;
-        }
-
-        article.Unicodify(
-            _skip.SkipNoUnicode,
-            _parser,
-            _removeText);
-
-        Variables.Profiler.Profile("Unicodify");
     }
 
     /// <summary>
