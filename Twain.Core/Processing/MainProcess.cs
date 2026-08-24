@@ -495,4 +495,83 @@ public sealed class MainProcess
         Variables.Profiler.Profile(
             "Universal Genfixes");
     }
+
+    /// <summary>
+    /// Applies the general-fix processing path appropriate for the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when processing is part of the normal save workflow;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="skip">
+    /// The skip options used by article processing.
+    /// </param>
+    /// <param name="removeText">
+    /// The text-hiding helper used during processing.
+    /// </param>
+    /// <param name="userTalkTemplatesRegex">
+    /// The configured user-talk template expression, when available.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing may continue; otherwise,
+    /// <see langword="false"/> when automatic tagging skips the article.
+    /// </returns>
+    public bool ApplyGeneralFixProcessing(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options,
+        ISkipOptions skip,
+        HideText removeText,
+        Regex userTalkTemplatesRegex)
+    {
+        ApplyUniversalGeneralFixes(
+            article,
+            options);
+
+        if (article.CanDoGeneralFixes)
+        {
+            if (options.GeneralFixesEnabled)
+            {
+                ApplyGeneralFixes(
+                    article,
+                    options,
+                    skip,
+                    removeText);
+            }
+
+            Variables.Profiler.Profile("Mainspace Genfixes");
+
+            if (!ApplyAutoTagging(
+                    article,
+                    mainProcess,
+                    options,
+                    skip))
+            {
+                return false;
+            }
+
+            Variables.Profiler.Profile("Auto-tagger");
+
+            return true;
+        }
+
+        if (options.GeneralFixesEnabled)
+        {
+            ApplyTalkGeneralFixes(
+                article,
+                removeText,
+                userTalkTemplatesRegex,
+                skip.SkipNoUserTalkTemplatesSubstd);
+
+            Variables.Profiler.Profile("Talk Genfixes");
+        }
+
+        return true;
+    }
 }

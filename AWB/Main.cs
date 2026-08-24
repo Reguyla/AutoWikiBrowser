@@ -3526,52 +3526,28 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             if (process)
             {
-                MainProcess.ApplyUniversalGeneralFixes(
-                    theArticle,
-                    options);
-
-                if (theArticle.CanDoGeneralFixes)
+                if (theArticle.CanDoGeneralFixes &&
+                    options.GeneralFixesEnabled)
                 {
-                    if (options.GeneralFixesEnabled)
-                    {
-                        EnsureGeneralFixResourcesLoaded();
-
-                        _mainProcess.ApplyGeneralFixes(
-                            theArticle,
-                            options,
-                            _skip,
-                            _removeText);
-                    }
-
-                    Variables.Profiler.Profile("Mainspace Genfixes");
-
-                    if (!_mainProcess.ApplyAutoTagging(
-                            theArticle,
-                            mainProcess,
-                            options,
-                            _skip))
-                    {
-                        return;
-                    }
-
-                    Variables.Profiler.Profile("Auto-tagger");
+                    EnsureGeneralFixResourcesLoaded();
                 }
-                else if (options.GeneralFixesEnabled)
+                else if (options.GeneralFixesEnabled &&
+                         theArticle.NameSpaceKey == Namespace.UserTalk &&
+                         !_userTalkWarningsLoaded)
                 {
-                    if (theArticle.NameSpaceKey == Namespace.UserTalk &&
-                        !_userTalkWarningsLoaded)
-                    {
-                        LoadUserTalkWarnings();
-                        Variables.Profiler.Profile("loadUserTalkWarnings");
-                    }
+                    LoadUserTalkWarnings();
+                    Variables.Profiler.Profile("loadUserTalkWarnings");
+                }
 
-                    MainProcess.ApplyTalkGeneralFixes(
+                if (!_mainProcess.ApplyGeneralFixProcessing(
                         theArticle,
+                        mainProcess,
+                        options,
+                        _skip,
                         _removeText,
-                        _userTalkTemplatesRegex,
-                        _skip.SkipNoUserTalkTemplatesSubstd);
-
-                    Variables.Profiler.Profile("Talk Genfixes");
+                        _userTalkTemplatesRegex))
+                {
+                    return;
                 }
             }
 
@@ -3599,19 +3575,19 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-                // find and replace after general fixes
-                // Do not apply skip checks when reparsing
-                if (!MainProcess.ApplyFindAndReplace(
-                    theArticle,
-                    mainProcess,
-                    options,
-                    _findAndReplace,
-                    _substTemplates,
-                    _replaceSpecial,
-                    true))
-            {
-                return;
-            }
+            // find and replace after general fixes
+            // Do not apply skip checks when reparsing
+            if (!MainProcess.ApplyFindAndReplace(
+                theArticle,
+                mainProcess,
+                options,
+                _findAndReplace,
+                _substTemplates,
+                _replaceSpecial,
+                true))
+        {
+            return;
+        }
 
             _mainProcess.ApplyAppendOrPrependText(
                     theArticle,
