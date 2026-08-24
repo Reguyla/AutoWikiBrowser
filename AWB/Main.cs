@@ -3459,6 +3459,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="options">
     /// The processing options captured when processing began.
     /// </param>
+    /// <param name="session">
+    /// The active wiki session used during article processing.
+    /// </param>
+    /// <param name="runExtensionProcessing">
+    /// Executes the configured custom module, external program, and plugin
+    /// processing for the supplied article.
+    /// </param>
     private void ProcessPageCore(
         Article theArticle,
         bool mainProcess,
@@ -3466,7 +3473,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Session session,
         Func<Article, bool> runExtensionProcessing)
     {
-        bool process = true;
         _typoStats = null;
 
         Variables.Profiler.Start(
@@ -3475,24 +3481,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         try
         {
             // Must be performed regardless of general fixes, otherwise there may be breakage
-            theArticle.AWBChangeArticleText(
-                "Fixes for Unicode compatibility",
-                _parser.FixUnicode(theArticle.ArticleText),
-                true);
-
-            if (_noParse.Contains(theArticle.Name))
-                process = false;
-
-            if (!options.IgnoreNoBots &&
-                !Parsers.CheckNoBots(
-                    theArticle.ArticleText,
-                    session.User.Name))
+            if (!_mainProcess.ApplyInitialProcessing(
+                    theArticle,
+                    options,
+                    session,
+                    _noParse,
+                    out bool process))
             {
-                theArticle.AWBSkip("Restricted by {{bots}}/{{nobots}}");
                 return;
             }
-
-            Variables.Profiler.Profile("Initial skip checks");
 
             if (!runExtensionProcessing(theArticle))
             {
@@ -3604,23 +3601,23 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-            // find and replace after general fixes
-            // Do not apply skip checks when reparsing
-            if (!MainProcess.ApplyFindAndReplace(
-                theArticle,
-                mainProcess,
-                options,
-                _findAndReplace,
-                _substTemplates,
-                _replaceSpecial,
-                true))
-        {
-            return;
-        }
+                // find and replace after general fixes
+                // Do not apply skip checks when reparsing
+                if (!MainProcess.ApplyFindAndReplace(
+                    theArticle,
+                    mainProcess,
+                    options,
+                    _findAndReplace,
+                    _substTemplates,
+                    _replaceSpecial,
+                    true))
+            {
+                return;
+            }
 
-        _mainProcess.ApplyAppendOrPrependText(
-                theArticle,
-                options);
+            _mainProcess.ApplyAppendOrPrependText(
+                    theArticle,
+                    options);
 
             Variables.Profiler.Profile("Append Text");
 

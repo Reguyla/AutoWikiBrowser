@@ -415,4 +415,60 @@ public sealed class MainProcess
             article.PerformTalkGeneralFixes(removeText);
         }
     }
+
+    /// <summary>
+    /// Applies the initial article-processing checks and determines whether standard
+    /// processing may be performed.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    /// <param name="noParse">
+    /// The collection of article titles excluded from standard processing.
+    /// </param>
+    /// <param name="applyStandardProcessing">
+    /// When this method returns, contains <see langword="true"/> when standard
+    /// processing may continue for the article; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the processing pipeline may continue; otherwise,
+    /// <see langword="false"/> when the article has been skipped.
+    /// </returns>
+    public bool ApplyInitialProcessing(
+        Article article,
+        MainProcessOptions options,
+        Session session,
+        ICollection<string> noParse,
+        out bool applyStandardProcessing)
+    {
+        article.AWBChangeArticleText(
+            "Fixes for Unicode compatibility",
+            _parser.FixUnicode(article.ArticleText),
+            true);
+
+        applyStandardProcessing =
+            !noParse.Contains(article.Name);
+
+        if (!options.IgnoreNoBots &&
+            !Parsers.CheckNoBots(
+                article.ArticleText,
+                session.User.Name))
+        {
+            article.AWBSkip(
+                "Restricted by {{bots}}/{{nobots}}");
+
+            return false;
+        }
+
+        Variables.Profiler.Profile(
+            "Initial skip checks");
+
+        return true;
+    }
 }
