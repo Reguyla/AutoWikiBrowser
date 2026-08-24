@@ -3444,7 +3444,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             TheSession,
             RunExtensionProcessing,
             PrepareGeneralFixResources,
-            ApplyRegexTypoProcessing);
+            ApplyRegexTypoProcessing,
+            AbortProcessing);
     }
 
     /// <summary>
@@ -3476,6 +3477,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Applies regular-expression typo processing and updates the associated
     /// MainForm statistics and user-interface state.
     /// </param>
+    /// <param name="abortProcessing">
+    /// Aborts the current application processing workflow when requested by an
+    /// article-processing operation.
+    /// </param>
     private void ProcessPageCore(
         Article theArticle,
         bool mainProcess,
@@ -3483,7 +3488,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Session session,
         Func<Article, bool> runExtensionProcessing,
         Action<Article, MainProcessOptions> prepareGeneralFixResources,
-        Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing)
+        Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing,
+        Action abortProcessing)
     {
         _typoStats = null;
 
@@ -3593,8 +3599,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     options,
                     session))
             {
-                _abort = true;
-                Stop();
+                abortProcessing();
                 return;
             }
 
@@ -3730,6 +3735,15 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             LoadUserTalkWarnings();
             Variables.Profiler.Profile("loadUserTalkWarnings");
         }
+    }
+
+    /// <summary>
+    /// Handles a processing request to abort the current workflow.
+    /// </summary>
+    private void AbortProcessing()
+    {
+        _abort = true;
+        Stop();
     }
 
     /// <summary>
