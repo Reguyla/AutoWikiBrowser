@@ -3526,18 +3526,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             if (process)
             {
-                if (theArticle.CanDoGeneralFixes &&
-                    options.GeneralFixesEnabled)
-                {
-                    EnsureGeneralFixResourcesLoaded();
-                }
-                else if (options.GeneralFixesEnabled &&
-                         theArticle.NameSpaceKey == Namespace.UserTalk &&
-                         !_userTalkWarningsLoaded)
-                {
-                    LoadUserTalkWarnings();
-                    Variables.Profiler.Profile("loadUserTalkWarnings");
-                }
+                PrepareGeneralFixResources(
+                   theArticle,
+                   options);
 
                 if (!_mainProcess.ApplyGeneralFixProcessing(
                         theArticle,
@@ -3556,23 +3547,23 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 mainProcess,
                 options);
 
-            // find and replace after general fixes
-            // Do not apply skip checks when reparsing
-            if (!MainProcess.ApplyFindAndReplace(
-                theArticle,
-                mainProcess,
-                options,
-                _findAndReplace,
-                _substTemplates,
-                _replaceSpecial,
-                true))
-        {
-            return;
-        }
-
-            _mainProcess.ApplyAppendOrPrependText(
+                // find and replace after general fixes
+                // Do not apply skip checks when reparsing
+                if (!MainProcess.ApplyFindAndReplace(
                     theArticle,
-                    options);
+                    mainProcess,
+                    options,
+                    _findAndReplace,
+                    _substTemplates,
+                    _replaceSpecial,
+                    true))
+            {
+                return;
+            }
+
+                _mainProcess.ApplyAppendOrPrependText(
+                        theArticle,
+                        options);
 
             Variables.Profiler.Profile("Append Text");
 
@@ -3693,6 +3684,40 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             AppendInsteadOfPrepend = rdoAppend.Checked,
             SortMetadataAfterAppend = chkAppendMetaDataSort.Checked,
         };
+    }
+
+    /// <summary>
+    /// Prepares wiki-backed resources required by the general-fix processing path.
+    /// </summary>
+    /// <param name="article">
+    /// The article that is about to enter general-fix processing.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <remarks>
+    /// General-fix resources are loaded only when they are required by the current
+    /// article and processing configuration. Resource loading and cache lifetime
+    /// remain owned by <see cref="MainForm"/>.
+    /// </remarks>
+    private void PrepareGeneralFixResources(
+        Article article,
+        MainProcessOptions options)
+    {
+        if (article.CanDoGeneralFixes &&
+            options.GeneralFixesEnabled)
+        {
+            EnsureGeneralFixResourcesLoaded();
+            return;
+        }
+
+        if (options.GeneralFixesEnabled &&
+            article.NameSpaceKey == Namespace.UserTalk &&
+            !_userTalkWarningsLoaded)
+        {
+            LoadUserTalkWarnings();
+            Variables.Profiler.Profile("loadUserTalkWarnings");
+        }
     }
 
     /// <summary>
