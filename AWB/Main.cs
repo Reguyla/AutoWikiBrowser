@@ -3438,7 +3438,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         ProcessPageCore(
             theArticle,
             mainProcess,
-            options);
+            options,
+            TheSession);
     }
 
     /// <summary>
@@ -3458,7 +3459,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void ProcessPageCore(
         Article theArticle,
         bool mainProcess,
-        MainProcessOptions options)
+        MainProcessOptions options,
+        Session session)
     {
         bool process = true;
         _typoStats = null;
@@ -3480,7 +3482,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             if (!options.IgnoreNoBots &&
                 !Parsers.CheckNoBots(
                     theArticle.ArticleText,
-                    TheSession.User.Name))
+                    session.User.Name))
             {
                 theArticle.AWBSkip("Restricted by {{bots}}/{{nobots}}");
                 return;
