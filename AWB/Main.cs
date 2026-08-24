@@ -3551,29 +3551,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-            if (options.RegexTypoFixEnabled &&
-                _regexTypos != null &&
-                !options.BotMode &&
-                !Namespace.IsTalk(theArticle.NameSpaceKey))
-            {
-                _typoStats =
-                    MainProcess.ApplyRegexTypoFixes(
-                        theArticle,
-                        options,
-                        _regexTypos,
-                        _noRetf);
-
-                if (theArticle.SkipArticle &&
-                    mainProcess)
-                {
-                    // update stats only if not called from e.g. 'Re-parse' that could be clicked repeatedly
-                    OverallTypoStats.UpdateStats(
-                        _typoStats,
-                        true);
-
-                    UpdateTypoCount();
-                }
-            }
+            ApplyRegexTypoProcessing(
+                theArticle,
+                mainProcess,
+                options);
 
             // find and replace after general fixes
             // Do not apply skip checks when reparsing
@@ -5102,6 +5083,55 @@ font-size: 150%;'>No changes</h2>
         lblOverallTypos.Text = totalTypos.ToString();
         lblNoChange.Text = selfMatches.ToString();
         lblTypoRatio.Text = OverallTypoStats.TyposPerSave;
+    }
+
+    /// <summary>
+    /// Applies regular-expression typo processing and updates skip-related typo
+    /// statistics when processing is part of the normal save workflow.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when processing is part of the normal save workflow;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    private void ApplyRegexTypoProcessing(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options)
+    {
+        if (!options.RegexTypoFixEnabled ||
+            _regexTypos == null ||
+            options.BotMode ||
+            Namespace.IsTalk(article.NameSpaceKey))
+        {
+            return;
+        }
+
+        _typoStats =
+            MainProcess.ApplyRegexTypoFixes(
+                article,
+                options,
+                _regexTypos,
+                _noRetf);
+
+        if (!article.SkipArticle ||
+            !mainProcess)
+        {
+            return;
+        }
+
+        // Update stats only during the normal processing workflow; reparsing can
+        // be invoked repeatedly and must not accumulate duplicate statistics.
+        OverallTypoStats.UpdateStats(
+            _typoStats,
+            true);
+
+        UpdateTypoCount();
     }
 
     /// <summary>
