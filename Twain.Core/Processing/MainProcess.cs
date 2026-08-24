@@ -574,4 +574,204 @@ public sealed class MainProcess
 
         return true;
     }
+
+    /// <summary>
+    /// Fully processes a page using the supplied processing configuration and
+    /// processing dependencies.
+    /// </summary>
+    /// <param name="article">
+    /// The page to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// <see langword="true"/> when the page is being processed for the normal save
+    /// workflow; otherwise, <see langword="false"/> for reparsing, prefetching, and
+    /// similar operations.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="session">
+    /// The active wiki session used during article processing.
+    /// </param>
+    /// <param name="skip">
+    /// The skip options used during article processing.
+    /// </param>
+    /// <param name="removeText">
+    /// The text-hiding helper used during article processing.
+    /// </param>
+    /// <param name="noParse">
+    /// The collection of article titles excluded from standard processing.
+    /// </param>
+    /// <param name="findAndReplace">
+    /// The configured find-and-replace processor.
+    /// </param>
+    /// <param name="substTemplates">
+    /// The configured template-substitution processor.
+    /// </param>
+    /// <param name="replaceSpecial">
+    /// The configured advanced replacement processor.
+    /// </param>
+    /// <param name="userTalkTemplatesRegex">
+    /// The configured user-talk template expression, when available.
+    /// </param>
+    /// <param name="runExtensionProcessing">
+    /// Executes the configured custom module, external program, and plugin
+    /// processing for the supplied article.
+    /// </param>
+    /// <param name="prepareGeneralFixResources">
+    /// Prepares the wiki-backed resources required by the general-fix processing
+    /// path.
+    /// </param>
+    /// <param name="applyRegexTypoProcessing">
+    /// Applies regular-expression typo processing and updates the associated
+    /// application statistics and user-interface state.
+    /// </param>
+    /// <param name="abortProcessing">
+    /// Aborts the current application processing workflow when requested by an
+    /// article-processing operation.
+    /// </param>
+    /// <param name="handleProcessingException">
+    /// Handles exceptions raised by the article-processing pipeline and updates
+    /// the application workflow state.
+    /// </param>
+    public void ProcessPageCore(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options,
+        Session session,
+        ISkipOptions skip,
+        HideText removeText,
+        ICollection<string> noParse,
+        FindandReplace findAndReplace,
+        SubstTemplates substTemplates,
+        ReplaceSpecial.ReplaceSpecial replaceSpecial,
+        Regex userTalkTemplatesRegex,
+        Func<Article, bool> runExtensionProcessing,
+        Action<Article, MainProcessOptions> prepareGeneralFixResources,
+        Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing,
+        Action abortProcessing,
+        Action<Article, Exception> handleProcessingException)
+    {
+        Variables.Profiler.Start(
+            "ProcessPage(\"" + article.Name + "\")");
+
+        try
+        {
+            if (!ApplyInitialProcessing(
+                    article,
+                    options,
+                    session,
+                    noParse,
+                    out bool process))
+            {
+                return;
+            }
+
+            if (!runExtensionProcessing(article))
+            {
+                return;
+            }
+
+            ApplyWholeArticleUnicodify(
+                article,
+                process,
+                options,
+                skip,
+                removeText);
+
+            if (!ApplyFindAndReplace(
+                    article,
+                    mainProcess,
+                    options,
+                    findAndReplace,
+                    substTemplates,
+                    replaceSpecial,
+                    false))
+            {
+                return;
+            }
+
+            if (!ApplyCategorisationChanges(
+                    article,
+                    options))
+            {
+                return;
+            }
+
+            Variables.Profiler.Profile("Categories");
+
+            if (process)
+            {
+                prepareGeneralFixResources(
+                    article,
+                    options);
+
+                if (!ApplyGeneralFixProcessing(
+                        article,
+                        mainProcess,
+                        options,
+                        skip,
+                        removeText,
+                        userTalkTemplatesRegex))
+                {
+                    return;
+                }
+            }
+
+            applyRegexTypoProcessing(
+                article,
+                mainProcess,
+                options);
+
+            // Find and replace after general fixes.
+            // Do not apply skip checks when reparsing.
+            if (!ApplyFindAndReplace(
+                    article,
+                    mainProcess,
+                    options,
+                    findAndReplace,
+                    substTemplates,
+                    replaceSpecial,
+                    true))
+            {
+                return;
+            }
+
+            ApplyAppendOrPrependText(
+                article,
+                options);
+
+            Variables.Profiler.Profile("Append Text");
+
+            if (!ApplyImageChanges(
+                    article,
+                    options))
+            {
+                return;
+            }
+
+            Variables.Profiler.Profile("Files");
+
+            if (!ApplyDisambiguation(
+                    article,
+                    options,
+                    session))
+            {
+                abortProcessing();
+                return;
+            }
+
+            Variables.Profiler.Profile("Disambiguate");
+        }
+        catch (Exception ex)
+        {
+            handleProcessingException(
+                article,
+                ex);
+        }
+        finally
+        {
+            Variables.Profiler.Flush();
+        }
+    }
 }

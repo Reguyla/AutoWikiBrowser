@@ -3434,193 +3434,28 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Article theArticle,
         bool mainProcess)
     {
+        _typoStats = null;
+
         MainProcessOptions options =
             CreateMainProcessOptions();
 
-        ProcessPageCore(
+        _mainProcess.ProcessPageCore(
             theArticle,
             mainProcess,
             options,
             TheSession,
+            _skip,
+            _removeText,
+            _noParse,
+            _findAndReplace,
+            _substTemplates,
+            _replaceSpecial,
+            _userTalkTemplatesRegex,
             RunExtensionProcessing,
             PrepareGeneralFixResources,
             ApplyRegexTypoProcessing,
             AbortProcessing,
             HandleProcessingException);
-    }
-
-    /// <summary>
-    /// Fully processes a page using the supplied processing configuration.
-    /// </summary>
-    /// <param name="theArticle">
-    /// The page to process.
-    /// </param>
-    /// <param name="mainProcess">
-    /// <see langword="true"/> when the page is being processed for the normal save
-    /// workflow; otherwise, <see langword="false"/> for reparsing, prefetching, and
-    /// similar operations.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <param name="session">
-    /// The active wiki session used during article processing.
-    /// </param>
-    /// <param name="runExtensionProcessing">
-    /// Executes the configured custom module, external program, and plugin
-    /// processing for the supplied article.
-    /// </param>
-    /// <param name="prepareGeneralFixResources">
-    /// Prepares the wiki-backed resources required by the general-fix processing
-    /// path.
-    /// </param>
-    /// <param name="applyRegexTypoProcessing">
-    /// Applies regular-expression typo processing and updates the associated
-    /// MainForm statistics and user-interface state.
-    /// </param>
-    /// <param name="abortProcessing">
-    /// Aborts the current application processing workflow when requested by an
-    /// article-processing operation.
-    /// </param>
-    /// <param name="handleProcessingException">
-    /// Handles exceptions raised by the article-processing pipeline and updates
-    /// the application workflow state.
-    /// </param>
-    private void ProcessPageCore(
-        Article theArticle,
-        bool mainProcess,
-        MainProcessOptions options,
-        Session session,
-        Func<Article, bool> runExtensionProcessing,
-        Action<Article, MainProcessOptions> prepareGeneralFixResources,
-        Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing,
-        Action abortProcessing,
-        Action<Article, Exception> handleProcessingException)
-    {
-        _typoStats = null;
-
-        Variables.Profiler.Start(
-            "ProcessPage(\"" + theArticle.Name + "\")");
-
-        try
-        {
-            // Must be performed regardless of general fixes, otherwise there may be breakage
-            if (!_mainProcess.ApplyInitialProcessing(
-                    theArticle,
-                    options,
-                    session,
-                    _noParse,
-                    out bool process))
-            {
-                return;
-            }
-
-            if (!runExtensionProcessing(theArticle))
-            {
-                return;
-            }
-
-            _mainProcess.ApplyWholeArticleUnicodify(
-                theArticle,
-                process,
-                options,
-                _skip,
-                _removeText);
-
-            if (!MainProcess.ApplyFindAndReplace(
-                    theArticle,
-                    mainProcess,
-                    options,
-                    _findAndReplace,
-                    _substTemplates,
-                    _replaceSpecial,
-                    false))
-            {
-                return;
-            }
-
-            if (!_mainProcess.ApplyCategorisationChanges(
-                    theArticle,
-                    options))
-            {
-                return;
-            }
-
-            Variables.Profiler.Profile("Categories");
-
-            if (process)
-            {
-                prepareGeneralFixResources(
-                    theArticle,
-                    options);
-
-                if (!_mainProcess.ApplyGeneralFixProcessing(
-                        theArticle,
-                        mainProcess,
-                        options,
-                        _skip,
-                        _removeText,
-                        _userTalkTemplatesRegex))
-                {
-                    return;
-                }
-            }
-
-            applyRegexTypoProcessing(
-                theArticle,
-                mainProcess,
-                options);
-
-            // find and replace after general fixes
-            // Do not apply skip checks when reparsing
-            if (!MainProcess.ApplyFindAndReplace(
-                    theArticle,
-                    mainProcess,
-                    options,
-                    _findAndReplace,
-                    _substTemplates,
-                    _replaceSpecial,
-                    true))
-            {
-                return;
-            }
-
-                _mainProcess.ApplyAppendOrPrependText(
-                        theArticle,
-                        options);
-
-            Variables.Profiler.Profile("Append Text");
-
-            if (!MainProcess.ApplyImageChanges(
-                    theArticle,
-                    options))
-            {
-                return;
-            }
-
-            Variables.Profiler.Profile("Files");
-
-            if (!MainProcess.ApplyDisambiguation(
-                    theArticle,
-                    options,
-                    session))
-            {
-                abortProcessing();
-                return;
-            }
-
-            Variables.Profiler.Profile("Disambiguate");
-        }
-        catch (Exception ex)
-        {
-            handleProcessingException(
-                theArticle,
-                ex);
-        }
-        finally
-        {
-            Variables.Profiler.Flush();
-        }
     }
 
     /// <summary>
