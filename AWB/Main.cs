@@ -3955,32 +3955,6 @@ font-size: 150%;'>No changes</h2>
     }
 
     /// <summary>
-    /// Displays the generated diff using the available platform-specific viewer.
-    /// </summary>
-    /// <param name="diffHtml">
-    /// The complete HTML diff document to display.
-    /// </param>
-    private void DisplayDiffHtml(string diffHtml)
-    {
-        // WebView2 is unavailable under Mono, so write the diff to a file.
-        // TODO (Platform Modernization):
-        // Re-evaluate the Mono diff fallback. Determine whether writing the diff to a
-        // temporary HTML file is still required, or whether Mono support should be
-        // retired in favor of a supported cross-platform rendering solution.
-        if (Globals.UsingMono)
-        {
-            Tools.WriteTextFile(
-                diffHtml,
-                "Diff.html",
-                false);
-
-            return;
-        }
-
-        RenderWebView2Diff(diffHtml);
-    }
-
-    /// <summary>
     /// Displays the generated diff using the available platform-specific viewer
     /// and waits for WebView2 navigation to complete when applicable.
     /// </summary>
