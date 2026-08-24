@@ -3439,7 +3439,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             theArticle,
             mainProcess,
             options,
-            TheSession);
+            TheSession,
+            RunExtensionProcessing);
     }
 
     /// <summary>
@@ -3460,7 +3461,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         Article theArticle,
         bool mainProcess,
         MainProcessOptions options,
-        Session session)
+        Session session,
+        Func<Article, bool> runExtensionProcessing)
     {
         bool process = true;
         _typoStats = null;
@@ -3490,7 +3492,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             Variables.Profiler.Profile("Initial skip checks");
 
-            if (!RunExtensionProcessing(theArticle))
+            if (!runExtensionProcessing(theArticle))
             {
                 return;
             }
