@@ -3443,7 +3443,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             options,
             TheSession,
             RunExtensionProcessing,
-            PrepareGeneralFixResources);
+            PrepareGeneralFixResources,
+            ApplyRegexTypoProcessing);
     }
 
     /// <summary>
@@ -3471,13 +3472,18 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Prepares the wiki-backed resources required by the general-fix processing
     /// path.
     /// </param>
+    /// <param name="applyRegexTypoProcessing">
+    /// Applies regular-expression typo processing and updates the associated
+    /// MainForm statistics and user-interface state.
+    /// </param>
     private void ProcessPageCore(
         Article theArticle,
         bool mainProcess,
         MainProcessOptions options,
         Session session,
         Func<Article, bool> runExtensionProcessing,
-        Action<Article, MainProcessOptions> prepareGeneralFixResources)
+        Action<Article, MainProcessOptions> prepareGeneralFixResources,
+        Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing)
     {
         _typoStats = null;
 
@@ -3548,14 +3554,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-            ApplyRegexTypoProcessing(
+            applyRegexTypoProcessing(
                 theArticle,
                 mainProcess,
                 options);
 
-                // find and replace after general fixes
-                // Do not apply skip checks when reparsing
-                if (!MainProcess.ApplyFindAndReplace(
+            // find and replace after general fixes
+            // Do not apply skip checks when reparsing
+            if (!MainProcess.ApplyFindAndReplace(
                     theArticle,
                     mainProcess,
                     options,
