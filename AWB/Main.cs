@@ -113,6 +113,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial _replaceSpecial =
         new();
+    private readonly MainProcess _mainProcess;
 
     private readonly Parsers _parser;
 
@@ -219,6 +220,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             try
             {
                 _parser = new Parsers(500, false);
+                _mainProcess = new MainProcess(_parser);
             }
             catch (Exception ex)
             {
@@ -3522,7 +3524,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     return;
             }
 
-            if (!ApplyCategorisationChanges(
+            if (!_mainProcess.ApplyCategorisationChanges(
                     theArticle,
                     options))
             {
@@ -3873,34 +3875,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             options.AppendInsteadOfPrepend,
             options.SortMetadataAfterAppend,
             _parser);
-    }
-
-    /// <summary>
-    /// Applies the configured categorization operation to the supplied article.
-    /// </summary>
-    /// <param name="article">
-    /// The article to update.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when processing may continue; otherwise,
-    /// <see langword="false"/> when categorization skips the article.
-    /// </returns>
-    private bool ApplyCategorisationChanges(
-        Article article,
-        MainProcessOptions options)
-    {
-        return article.ApplyCategorisationChanges(
-            (Twain.Core.Options.CategorisationOptions)
-                options.CategorisationOperation,
-            _parser,
-            options.SkipIfNoCategoryChange,
-            options.NewCategory,
-            options.NewCategory2,
-            options.RemoveCategorySortKey,
-            options.GeneralFixesEnabled);
     }
 
     /// <summary>
