@@ -3587,46 +3587,33 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 }
             }
 
-            // RegexTypoFix
             if (options.RegexTypoFixEnabled &&
                 _regexTypos != null &&
                 !options.BotMode &&
                 !Namespace.IsTalk(theArticle.NameSpaceKey))
             {
-                if (!_noRetf.Contains(theArticle.Name))
-                {
-                    theArticle.PerformTypoFixes(
+                _typoStats =
+                    MainProcess.ApplyRegexTypoFixes(
+                        theArticle,
+                        options,
                         _regexTypos,
-                        options.SkipIfNoRegexTypo);
+                        _noRetf);
 
-                    Variables.Profiler.Profile("Typos");
-
-                    _typoStats =
-                        _regexTypos.GetStatistics();
-                }
-                else if (options.SkipIfNoRegexTypo)
+                if (theArticle.SkipArticle &&
+                    mainProcess)
                 {
-                    TheArticle.Trace.AWBSkipped(
-                        "No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
-                }
+                    // update stats only if not called from e.g. 'Re-parse' that could be clicked repeatedly
+                    OverallTypoStats.UpdateStats(
+                        _typoStats,
+                        true);
 
-                if (theArticle.SkipArticle)
-                {
-                    if (mainProcess)
-                    {
-                        // update stats only if not called from e.g. 'Re-parse' than could be clicked repeatedly
-                        OverallTypoStats.UpdateStats(
-                            _typoStats,
-                            true);
-
-                        UpdateTypoCount();
-                    }
+                    UpdateTypoCount();
                 }
             }
 
-        // find and replace after general fixes
-        // Do not apply skip checks when reparsing
-        if (!MainProcess.ApplyFindAndReplace(
+            // find and replace after general fixes
+            // Do not apply skip checks when reparsing
+            if (!MainProcess.ApplyFindAndReplace(
                 theArticle,
                 mainProcess,
                 options,

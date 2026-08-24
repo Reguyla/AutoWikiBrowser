@@ -292,4 +292,59 @@ public sealed class MainProcess
 
         return !article.SkipArticle;
     }
+
+    /// <summary>
+    /// Applies regular-expression typo fixes to the supplied article when enabled
+    /// and returns the resulting typo statistics.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="regexTypos">
+    /// The configured regular-expression typo processor.
+    /// </param>
+    /// <param name="noRetf">
+    /// The collection of article titles excluded from regular-expression typo fixing.
+    /// </param>
+    /// <returns>
+    /// The typo statistics produced by the processing pass, or
+    /// <see langword="null"/> when typo processing did not run or produced no
+    /// statistics.
+    /// </returns>
+    public static List<TypoStat> ApplyRegexTypoFixes(
+        Article article,
+        MainProcessOptions options,
+        RegExTypoFix regexTypos,
+        IReadOnlyCollection<string> noRetf)
+    {
+        if (!options.RegexTypoFixEnabled ||
+            regexTypos == null ||
+            options.BotMode ||
+            Namespace.IsTalk(article.NameSpaceKey))
+        {
+            return null;
+        }
+
+        if (!noRetf.Contains(article.Name))
+        {
+            article.PerformTypoFixes(
+                regexTypos,
+                options.SkipIfNoRegexTypo);
+
+            Variables.Profiler.Profile("Typos");
+
+            return regexTypos.GetStatistics();
+        }
+
+        if (options.SkipIfNoRegexTypo)
+        {
+            article.Trace.AWBSkipped(
+                "No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
+        }
+
+        return null;
+    }
 }
