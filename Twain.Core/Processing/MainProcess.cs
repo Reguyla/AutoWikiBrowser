@@ -80,4 +80,30 @@ public sealed class MainProcess
             options.RemoveCategorySortKey,
             options.GeneralFixesEnabled);
     }
+
+    /// <summary>
+    /// Applies the configured append or prepend operation to the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to update.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    public void ApplyAppendOrPrependText(
+        Article article,
+        MainProcessOptions options)
+    {
+        if (!options.AppendEnabled)
+        {
+            return;
+        }
+
+        article.ApplyAppendOrPrependText(
+            options.AppendText,
+            options.AppendNewLineCount,
+            options.AppendInsteadOfPrepend,
+            options.SortMetadataAfterAppend,
+            _parser);
+    }
 }

@@ -3649,7 +3649,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     return;
             }
 
-            ApplyAppendOrPrependText(
+            _mainProcess.ApplyAppendOrPrependText(
                 theArticle,
                 options);
 
@@ -3849,32 +3849,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             LoadRenameTemplateParameters();
             Variables.Profiler.Profile("LoadRenameTemplateParameters");
         }
-    }
-
-    /// <summary>
-    /// Applies the configured append or prepend operation to the supplied article.
-    /// </summary>
-    /// <param name="article">
-    /// The article to update.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    private void ApplyAppendOrPrependText(
-        Article article,
-        MainProcessOptions options)
-    {
-        if (!options.AppendEnabled)
-        {
-            return;
-        }
-
-        article.ApplyAppendOrPrependText(
-            options.AppendText,
-            options.AppendNewLineCount,
-            options.AppendInsteadOfPrepend,
-            options.SortMetadataAfterAppend,
-            _parser);
     }
 
     /// <summary>
