@@ -76,4 +76,44 @@ font-size: 150%;'>No changes</h2>
             "</body>" +
             "</html>";
     }
+
+    /// <summary>
+    /// Builds the appropriate HTML diff document for the supplied article text.
+    /// </summary>
+    /// <param name="diff">
+    /// The diff generator used to compare the original and current article text.
+    /// </param>
+    /// <param name="originalText">
+    /// The original article text.
+    /// </param>
+    /// <param name="currentText">
+    /// The current article text to compare with the original.
+    /// </param>
+    /// <param name="numberOfEdits">
+    /// The number of edits completed during the current session.
+    /// </param>
+    /// <returns>
+    /// A complete HTML document containing either the generated diff or a
+    /// no-changes message.
+    /// </returns>
+    public static string BuildDiffHtml(
+        WikiDiff diff,
+        string originalText,
+        string currentText,
+        int numberOfEdits)
+    {
+        if (string.Equals(
+                originalText,
+                currentText,
+                StringComparison.Ordinal))
+        {
+            return BuildNoChangesHtml();
+        }
+
+        return BuildArticleDiffHtml(
+            diff,
+            originalText,
+            currentText,
+            numberOfEdits);
+    }
 }

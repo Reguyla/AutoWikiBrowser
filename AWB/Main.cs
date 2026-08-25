@@ -3782,12 +3782,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private string BuildDiffHtml(Article article)
     {
-        if (string.Equals(article.OriginalArticleText, txtEdit.Text, StringComparison.Ordinal))
-        {
-            return DiffHtmlBuilder.BuildNoChangesHtml();
-        }
-
-        return BuildArticleDiffHtml(article);
+        return DiffHtmlBuilder.BuildDiffHtml(
+            _diff,
+            article.OriginalArticleText,
+            txtEdit.Text,
+            _sessionCounters.NumberOfEdits);
     }
 
     /// <summary>
