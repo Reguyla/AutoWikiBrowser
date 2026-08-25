@@ -29,4 +29,51 @@ font-size: 150%;'>No changes</h2>
 </body>
 </html>";
     }
+
+    /// <summary>
+    /// Builds the HTML document containing a generated article diff.
+    /// </summary>
+    /// <param name="diff">
+    /// The diff generator used to compare the original and current article text.
+    /// </param>
+    /// <param name="originalText">
+    /// The original article text.
+    /// </param>
+    /// <param name="currentText">
+    /// The current article text to compare with the original.
+    /// </param>
+    /// <param name="numberOfEdits">
+    /// The number of edits completed during the current session.
+    /// </param>
+    /// <returns>
+    /// A complete HTML document containing the generated article diff.
+    /// </returns>
+    public static string BuildArticleDiffHtml(
+        WikiDiff diff,
+        string originalText,
+        string currentText,
+        int numberOfEdits)
+    {
+        string tableHeader =
+            numberOfEdits < 10
+                ? WikiDiff.TableHeader
+                : WikiDiff.TableHeaderNoMessages;
+
+        return
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "<meta charset=\"utf-8\">" +
+            WikiDiff.DiffHead() +
+            "</head>" +
+            "<body>" +
+            tableHeader +
+            diff.GetDiff(
+                originalText,
+                currentText,
+                2) +
+            "</table>" +
+            "</body>" +
+            "</html>";
+    }
 }

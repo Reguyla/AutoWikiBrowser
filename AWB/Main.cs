@@ -3796,29 +3796,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="article">
     /// The article whose original text is compared with the editor text.
     /// </param>
+    /// <returns>
+    /// A complete HTML document containing the generated article diff.
+    /// </returns>
     private string BuildArticleDiffHtml(Article article)
     {
-        string tableHeader =
-            _sessionCounters.NumberOfEdits < 10
-                ? WikiDiff.TableHeader
-                : WikiDiff.TableHeaderNoMessages;
-
-        return
-            "<!DOCTYPE html>" +
-            "<html>" +
-            "<head>" +
-            "<meta charset=\"utf-8\">" +
-            WikiDiff.DiffHead() +
-            "</head>" +
-            "<body>" +
-            tableHeader +
-            _diff.GetDiff(
-                article.OriginalArticleText,
-                txtEdit.Text,
-                2) +
-            "</table>" +
-            "</body>" +
-            "</html>";
+        return DiffHtmlBuilder.BuildArticleDiffHtml(
+            _diff,
+            article.OriginalArticleText,
+            txtEdit.Text,
+            _sessionCounters.NumberOfEdits);
     }
 
     /// <summary>
