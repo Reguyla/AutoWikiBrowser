@@ -3439,6 +3439,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         MainProcessOptions options =
             CreateMainProcessOptions();
 
+        MainProcessDependencies dependencies =
+            CreateMainProcessDependencies();
+
         _mainProcess.ProcessPageCore(
             theArticle,
             mainProcess,
@@ -3456,6 +3459,33 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ApplyRegexTypoProcessing,
             AbortProcessing,
             HandleProcessingException);
+    }
+
+    /// <summary>
+    /// Captures the configured processing dependencies used by the main article
+    /// processing pipeline.
+    /// </summary>
+    /// <returns>
+    /// A dependency container referencing the existing processing objects owned by
+    /// <see cref="MainForm"/>.
+    /// </returns>
+    /// <remarks>
+    /// The returned object does not create replacement processing state. It exposes
+    /// the existing configured instances so that ownership and runtime behavior
+    /// remain unchanged while processing is moved into Core.
+    /// </remarks>
+    private MainProcessDependencies CreateMainProcessDependencies()
+    {
+        return new MainProcessDependencies
+        {
+            Skip = _skip,
+            RemoveText = _removeText,
+            NoParse = _noParse,
+            FindAndReplace = _findAndReplace,
+            SubstTemplates = _substTemplates,
+            ReplaceSpecial = _replaceSpecial,
+            UserTalkTemplatesRegex = _userTalkTemplatesRegex
+        };
     }
 
     /// <summary>
