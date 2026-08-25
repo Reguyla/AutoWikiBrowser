@@ -594,50 +594,12 @@ public sealed class MainProcess
     /// <param name="session">
     /// The active wiki session used during article processing.
     /// </param>
-    /// <param name="skip">
-    /// The skip options used during article processing.
-    /// </param>
-    /// <param name="removeText">
-    /// The text-hiding helper used during article processing.
-    /// </param>
-    /// <param name="noParse">
-    /// The collection of article titles excluded from standard processing.
-    /// </param>
-    /// <param name="findAndReplace">
-    /// The configured find-and-replace processor.
-    /// </param>
-    /// <param name="substTemplates">
-    /// The configured template-substitution processor.
-    /// </param>
-    /// <param name="replaceSpecial">
-    /// The configured advanced replacement processor.
-    /// </param>
-    /// <param name="userTalkTemplatesRegex">
-    /// The configured user-talk template expression, when available.
-    /// </param>
-    /// <param name="runExtensionProcessing">
-    /// Executes the configured custom module, external program, and plugin
-    /// processing for the supplied article.
-    /// </param>
-    /// <param name="prepareGeneralFixResources">
-    /// Prepares the wiki-backed resources required by the general-fix processing
-    /// path.
-    /// </param>
-    /// <param name="applyRegexTypoProcessing">
-    /// Applies regular-expression typo processing and updates the associated
-    /// application statistics and user-interface state.
-    /// </param>
-    /// <param name="abortProcessing">
-    /// Aborts the current application processing workflow when requested by an
-    /// article-processing operation.
-    /// </param>
-    /// <param name="handleProcessingException">
-    /// Handles exceptions raised by the article-processing pipeline and updates
-    /// the application workflow state.
-    /// </param>
     /// <param name="dependencies">
     /// The configured processing dependencies used throughout the article-processing
     /// pipeline.
+    /// </param>
+    /// <param name="callbacks">
+    /// The application-owned callbacks used by the article-processing pipeline.
     /// </param>
     public void ProcessPageCore(
         Article article,
@@ -645,11 +607,7 @@ public sealed class MainProcess
         MainProcessOptions options,
         Session session,
         MainProcessDependencies dependencies,
-        Func<Article, bool> runExtensionProcessing,
-        Action<Article, MainProcessOptions> prepareGeneralFixResources,
-        Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing,
-        Action abortProcessing,
-        Action<Article, Exception> handleProcessingException)
+        MainProcessCallbacks callbacks)
     {
         Variables.Profiler.Start(
             "ProcessPage(\"" + article.Name + "\")");
@@ -666,7 +624,7 @@ public sealed class MainProcess
                 return;
             }
 
-            if (!runExtensionProcessing(article))
+            if (!callbacks.RunExtensionProcessing(article))
             {
                 return;
             }
@@ -701,7 +659,7 @@ public sealed class MainProcess
 
             if (process)
             {
-                prepareGeneralFixResources(
+                callbacks.PrepareGeneralFixResources(
                     article,
                     options);
 
@@ -717,7 +675,7 @@ public sealed class MainProcess
                 }
             }
 
-            applyRegexTypoProcessing(
+            callbacks.ApplyRegexTypoProcessing(
                 article,
                 mainProcess,
                 options);
@@ -756,7 +714,7 @@ public sealed class MainProcess
                     options,
                     session))
             {
-                abortProcessing();
+                callbacks.AbortProcessing();
                 return;
             }
 
@@ -764,7 +722,7 @@ public sealed class MainProcess
         }
         catch (Exception ex)
         {
-            handleProcessingException(
+            callbacks.HandleProcessingException(
                 article,
                 ex);
         }

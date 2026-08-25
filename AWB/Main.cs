@@ -3442,17 +3442,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         MainProcessDependencies dependencies =
             CreateMainProcessDependencies();
 
+        MainProcessCallbacks callbacks =
+            CreateMainProcessCallbacks();
+
         _mainProcess.ProcessPageCore(
             theArticle,
             mainProcess,
             options,
             TheSession,
             dependencies,
-            RunExtensionProcessing,
-            PrepareGeneralFixResources,
-            ApplyRegexTypoProcessing,
-            AbortProcessing,
-            HandleProcessingException);
+            callbacks);
 
     }
 
@@ -3480,6 +3479,26 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             SubstTemplates = _substTemplates,
             ReplaceSpecial = _replaceSpecial,
             UserTalkTemplatesRegex = _userTalkTemplatesRegex
+        };
+    }
+
+    /// <summary>
+    /// Captures the application-owned callbacks used by the Core article-processing
+    /// orchestrator.
+    /// </summary>
+    /// <returns>
+    /// A callback container that delegates application-specific processing behavior
+    /// back to <see cref="MainForm"/>.
+    /// </returns>
+    private MainProcessCallbacks CreateMainProcessCallbacks()
+    {
+        return new MainProcessCallbacks
+        {
+            RunExtensionProcessing = RunExtensionProcessing,
+            PrepareGeneralFixResources = PrepareGeneralFixResources,
+            ApplyRegexTypoProcessing = ApplyRegexTypoProcessing,
+            AbortProcessing = AbortProcessing,
+            HandleProcessingException = HandleProcessingException
         };
     }
 
