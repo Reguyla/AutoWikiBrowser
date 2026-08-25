@@ -3759,7 +3759,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         try
         {
             string diffHtml =
-                BuildDiffHtml(TheArticle);
+                DiffHtmlBuilder.BuildDiffHtml(
+                    _diff,
+                    TheArticle.OriginalArticleText,
+                    txtEdit.Text,
+                    _sessionCounters.NumberOfEdits);
 
             await DisplayDiffHtmlAsync(diffHtml);
             CompleteDiffDisplay();
@@ -3783,24 +3787,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private string BuildDiffHtml(Article article)
     {
         return DiffHtmlBuilder.BuildDiffHtml(
-            _diff,
-            article.OriginalArticleText,
-            txtEdit.Text,
-            _sessionCounters.NumberOfEdits);
-    }
-
-    /// <summary>
-    /// Builds the HTML document containing the generated article diff.
-    /// </summary>
-    /// <param name="article">
-    /// The article whose original text is compared with the editor text.
-    /// </param>
-    /// <returns>
-    /// A complete HTML document containing the generated article diff.
-    /// </returns>
-    private string BuildArticleDiffHtml(Article article)
-    {
-        return DiffHtmlBuilder.BuildArticleDiffHtml(
             _diff,
             article.OriginalArticleText,
             txtEdit.Text,
