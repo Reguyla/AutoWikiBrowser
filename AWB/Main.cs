@@ -28,6 +28,7 @@ using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
+using Twain.Core.DiffHtml;
 using Twain.Core.Editing;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Parse;
@@ -3783,32 +3784,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         if (string.Equals(article.OriginalArticleText, txtEdit.Text, StringComparison.Ordinal))
         {
-            return BuildNoChangesDiffHtml();
+            return DiffHtmlBuilder.BuildNoChangesHtml();
         }
 
         return BuildArticleDiffHtml(article);
-    }
-
-    /// <summary>
-    /// Builds the HTML displayed when the article text has not changed.
-    /// </summary>
-    private static string BuildNoChangesDiffHtml()
-    {
-        return
-            @"<!DOCTYPE html>
-<html>
-<head>
-<meta charset=""utf-8"">
-<title>AWB Diff</title>
-</head>
-<body>
-<h2 style='padding-top: .5em;
-padding-bottom: .17em;
-border-bottom: 1px solid #aaa;
-font-size: 150%;'>No changes</h2>
-<p>Press the ""Skip"" button below to skip to the next page.</p>
-</body>
-</html>";
     }
 
     /// <summary>
