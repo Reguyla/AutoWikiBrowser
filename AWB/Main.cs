@@ -31,6 +31,7 @@ using Twain.Core.Controls.Lists;
 using Twain.Core.DiffHtml;
 using Twain.Core.Editing;
 using Twain.Core.Lists.Providers;
+using Twain.Core.Navigation;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
 using Twain.Core.PreviewHtml;
@@ -3859,41 +3860,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Validates a URL before it is opened outside the embedded browser.
-    /// </summary>
-    /// <param name="url">The candidate URL.</param>
-    /// <param name="allowedUrl">
-    /// Contains the normalized URL when validation succeeds.
-    /// </param>
-    /// <returns>
-    /// <c>true</c> when the URL is an absolute HTTP or HTTPS address;
-    /// otherwise <c>false</c>.
-    /// </returns>
-    private static bool TryGetAllowedExternalUrl(
-        string url,
-        out string allowedUrl)
-    {
-        allowedUrl = null;
-
-        if (!Uri.TryCreate(
-                url,
-                UriKind.Absolute,
-                out Uri uri))
-        {
-            return false;
-        }
-
-        if (uri.Scheme != Uri.UriSchemeHttp &&
-            uri.Scheme != Uri.UriSchemeHttps)
-        {
-            return false;
-        }
-
-        allowedUrl = uri.AbsoluteUri;
-        return true;
-    }
-
-    /// <summary>
     /// Cancels popup navigation in the embedded preview browser and opens
     /// permitted web links in the user's default browser.
     /// </summary>
@@ -3905,7 +3871,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         e.Cancel = true;
 
-        if (!TryGetAllowedExternalUrl(
+        if (!ExternalUrlValidator.TryGetAllowedExternalUrl(
                 _webBrowserMouseOverUrl,
                 out string externalUrl))
         {
