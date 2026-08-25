@@ -33,6 +33,7 @@ using Twain.Core.Editing;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
+using Twain.Core.PreviewHtml;
 using Twain.Core.Processing;
 using ThreadState = System.Threading.ThreadState;
 
@@ -3929,7 +3930,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="sender">
     /// The editor that completed the preview request.
     /// </param>
-    /// <param name="result">
+    /// <param name="previewHtml">
     /// The rendered preview HTML returned by the wiki API.
     /// </param>
     /// <remarks>
@@ -3951,12 +3952,19 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         if (document == null)
         {
-            webBrowser.DocumentText = BuildPreviewHtml(sender, previewHtml);
+            webBrowser.DocumentText =
+                PreviewHtmlBuilder.BuildPreviewHtml(
+                    sender.HtmlHeaders,
+                    previewHtml);
         }
         else
         {
             document.OpenNew(false);
-            document.Write(BuildPreviewHtml(sender, previewHtml));
+
+            document.Write(
+                PreviewHtmlBuilder.BuildPreviewHtml(
+                    sender.HtmlHeaders,
+                    previewHtml));
 
             document.MouseMove -= Document_MouseMove;
             document.MouseMove += Document_MouseMove;
@@ -4039,30 +4047,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         TheSession.Editor.Preview(
             article.Name,
             txtEdit.Text);
-    }
-
-    /// <summary>
-    /// Builds the HTML document displayed by the preview browser.
-    /// </summary>
-    /// <param name="sender">
-    /// The editor providing the HTML header content required by the preview.
-    /// </param>
-    /// <param name="result">
-    /// The rendered article HTML returned by the wiki API.
-    /// </param>
-    /// <returns>
-    /// A complete HTML document containing the rendered preview.
-    /// </returns>
-    private static string BuildPreviewHtml(
-        AsyncApiEdit sender,
-        string result)
-    {
-        return
-            "<html><head>" +
-            sender.HtmlHeaders +
-            "</head><body style=\"background:white; margin:10px; text-align:left;\">" +
-            result +
-            "</body></html>";
     }
 
     /// <summary>
