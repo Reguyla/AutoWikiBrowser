@@ -3447,18 +3447,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             mainProcess,
             options,
             TheSession,
-            _skip,
-            _removeText,
-            _noParse,
-            _findAndReplace,
-            _substTemplates,
-            _replaceSpecial,
-            _userTalkTemplatesRegex,
+            dependencies,
             RunExtensionProcessing,
             PrepareGeneralFixResources,
             ApplyRegexTypoProcessing,
             AbortProcessing,
             HandleProcessingException);
+
     }
 
     /// <summary>

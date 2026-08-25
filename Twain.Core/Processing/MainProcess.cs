@@ -1,5 +1,6 @@
 ﻿using Twain.Core.Parse;
 using Twain.Core.Plugin;
+using Twain.Core.ReplaceSpecial;
 
 namespace Twain.Core.Processing;
 
@@ -634,18 +635,16 @@ public sealed class MainProcess
     /// Handles exceptions raised by the article-processing pipeline and updates
     /// the application workflow state.
     /// </param>
+    /// <param name="dependencies">
+    /// The configured processing dependencies used throughout the article-processing
+    /// pipeline.
+    /// </param>
     public void ProcessPageCore(
         Article article,
         bool mainProcess,
         MainProcessOptions options,
         Session session,
-        ISkipOptions skip,
-        HideText removeText,
-        ICollection<string> noParse,
-        FindandReplace findAndReplace,
-        SubstTemplates substTemplates,
-        ReplaceSpecial.ReplaceSpecial replaceSpecial,
-        Regex userTalkTemplatesRegex,
+        MainProcessDependencies dependencies,
         Func<Article, bool> runExtensionProcessing,
         Action<Article, MainProcessOptions> prepareGeneralFixResources,
         Action<Article, bool, MainProcessOptions> applyRegexTypoProcessing,
@@ -661,7 +660,7 @@ public sealed class MainProcess
                     article,
                     options,
                     session,
-                    noParse,
+                    dependencies.NoParse,
                     out bool process))
             {
                 return;
@@ -676,16 +675,16 @@ public sealed class MainProcess
                 article,
                 process,
                 options,
-                skip,
-                removeText);
+                dependencies.Skip,
+                dependencies.RemoveText);
 
             if (!ApplyFindAndReplace(
                     article,
                     mainProcess,
                     options,
-                    findAndReplace,
-                    substTemplates,
-                    replaceSpecial,
+                    dependencies.FindAndReplace,
+                    dependencies.SubstTemplates,
+                    dependencies.ReplaceSpecial,
                     false))
             {
                 return;
@@ -710,9 +709,9 @@ public sealed class MainProcess
                         article,
                         mainProcess,
                         options,
-                        skip,
-                        removeText,
-                        userTalkTemplatesRegex))
+                        dependencies.Skip,
+                        dependencies.RemoveText,
+                        dependencies.UserTalkTemplatesRegex))
                 {
                     return;
                 }
@@ -729,9 +728,9 @@ public sealed class MainProcess
                     article,
                     mainProcess,
                     options,
-                    findAndReplace,
-                    substTemplates,
-                    replaceSpecial,
+                    dependencies.FindAndReplace,
+                    dependencies.SubstTemplates,
+                    dependencies.ReplaceSpecial,
                     true))
             {
                 return;
