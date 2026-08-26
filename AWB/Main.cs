@@ -6072,8 +6072,13 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             EvaluateSicTagAlert(hasAlertsOn);
             EvaluateTalkAndUserNamespaceAlerts(hasAlertsOn);
 
-            MatchCollection imagesMC =
-                WikiRegexes.ImagesCountOnly.Matches(articleText);
+            lblDates.Text =
+                Dates +
+                statistics.IsoDateCount +
+                "/" +
+                statistics.InternationalDateCount +
+                "/" +
+                statistics.AmericanDateCount;
 
             lblWords.Text =
                 Words + statistics.WordCount;
@@ -6089,10 +6094,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
             lblInterLinks.Text =
                 IWLinks + statistics.InterwikiLinkCount;
-
-            UpdateDateStatistics(
-                articleText,
-                imagesMC);
 
             UpdateDuplicateWikilinks(articleText);
         }

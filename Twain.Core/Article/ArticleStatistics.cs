@@ -29,4 +29,19 @@ public sealed class ArticleStatistics
     /// Gets the number of interwiki links in the article.
     /// </summary>
     public int InterwikiLinkCount { get; init; }
+
+    /// <summary>
+    /// Gets the number of ISO-format dates in the article.
+    /// </summary>
+    public int IsoDateCount { get; init; }
+
+    /// <summary>
+    /// Gets the number of international-format dates in the article.
+    /// </summary>
+    public int InternationalDateCount { get; init; }
+
+    /// <summary>
+    /// Gets the number of American-format dates in the article.
+    /// </summary>
+    public int AmericanDateCount { get; init; }
 }

@@ -1,4 +1,6 @@
-﻿namespace Twain.Core;
+﻿using Twain.Core.Parse;
+
+namespace Twain.Core;
 
 /// <summary>
 /// Calculates basic statistics from article text.
@@ -17,6 +19,19 @@ public static class ArticleStatisticsCalculator
     public static ArticleStatistics Calculate(
         string articleText)
     {
+        MatchCollection images =
+            WikiRegexes.ImagesCountOnly.Matches(articleText);
+
+        string articleTextNoImagesUrls =
+            WikiRegexes.ExternalLinksHTTPOnlyQuick.Replace(
+                Tools.ReplaceWithSpaces(
+                    articleText,
+                    images),
+                "");
+
+        Dictionary<Parsers.DateLocale, int> dateCounts =
+            Tools.DatesCount(articleTextNoImagesUrls);
+
         return new ArticleStatistics
         {
             WordCount =
@@ -26,13 +41,22 @@ public static class ArticleStatisticsCalculator
                 WikiRegexes.Category.Matches(articleText).Count,
 
             ImageCount =
-                WikiRegexes.ImagesCountOnly.Matches(articleText).Count,
+                images.Count,
 
             LinkCount =
                 Tools.LinkCount(articleText),
 
             InterwikiLinkCount =
-                Tools.InterwikiCount(articleText)
+                Tools.InterwikiCount(articleText),
+
+            IsoDateCount =
+                dateCounts[Parsers.DateLocale.ISO],
+
+            InternationalDateCount =
+                dateCounts[Parsers.DateLocale.International],
+
+            AmericanDateCount =
+                dateCounts[Parsers.DateLocale.American]
         };
     }
 }
