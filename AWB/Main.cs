@@ -6069,10 +6069,28 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             lbAlerts.Items.AddRange(
                 basicAlerts.ToArray());
 
-            EvaluateArticleStructureAlerts(
-                articleText,
-                templates,
-                hasAlertsOn);
+            ArticleStructureAlertResult structureAlerts =
+                ArticleStructureAlertEvaluator.Evaluate(
+                    TheArticle,
+                    articleText,
+                    templates,
+                    hasAlertsOn,
+                    alertPreferences);
+
+            lbAlerts.Items.AddRange(
+                structureAlerts.Alerts.ToArray());
+
+            _unbalancedBrackets =
+                structureAlerts.UnbalancedBrackets;
+
+            _targetlessLinks =
+                structureAlerts.TargetlessLinks;
+
+            _doublePipeLinks =
+                structureAlerts.DoublePipeLinks;
+
+            _otherErrors =
+                structureAlerts.OtherErrors;
 
             EvaluateCitationAndUrlAlerts(hasAlertsOn);
             EvaluateSicTagAlert(hasAlertsOn);
@@ -6186,109 +6204,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO(Twain): Replace numeric alert identifiers with named alert types
-    // and move article-structure alert evaluation into a shared alert service.
-    //
-    // TODO: Review whether DEFAULTSORT and See also alerts should depend on
-    // the double-pipe-link alert being enabled. They are currently nested
-    // inside alert 10 processing and therefore are not evaluated independently.
-
-    /// <summary>
-    /// Evaluates article structure and reference-related alerts.
-    /// </summary>
-    /// <param name="articleText">
-    /// The current article text.
-    /// </param>
-    /// <param name="templates">
-    /// The template markup extracted from the current article.
-    /// </param>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all alerts are enabled because no
-    /// individual alert preferences are selected.
-    /// </param>
-    private void EvaluateArticleStructureAlerts(
-        string articleText,
-        string templates,
-        bool hasAlertsOn)
-    {
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                16) &&
-            TheArticle.NameSpaceKey == Namespace.Article &&
-            articleText.StartsWith("=="))
-        {
-            lbAlerts.Items.Add("Starts with heading");
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                17))
-        {
-            _unbalancedBrackets =
-                TheArticle.UnbalancedBrackets();
-
-            if (_unbalancedBrackets.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Unbalanced brackets ({_unbalancedBrackets.Count})");
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                11))
-        {
-            _targetlessLinks =
-                TheArticle.TargetlessLinks();
-
-            if (_targetlessLinks.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Links with no target ({_targetlessLinks.Count})");
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                10))
-        {
-            _doublePipeLinks =
-                TheArticle.DoublepipeLinks();
-
-            if (_doublePipeLinks.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Links with double pipes ({_doublePipeLinks.Count})");
-            }
-
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
-            if (ArticleAlertHelper.IsAlertEnabled(
-                    hasAlertsOn,
-                    alertPreferences,
-                    13) &&
-                WikiRegexes.Defaultsort.Matches(templates).Count > 1)
-            {
-                lbAlerts.Items.Add("Multiple DEFAULTSORTs");
-            }
-
-            if (ArticleAlertHelper.IsAlertEnabled(
-                    hasAlertsOn,
-                    alertPreferences,
-                    15) &&
-                TheArticle.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
-            {
-                lbAlerts.Items.Add(
-                    "See also section out of place");
-
-                AddSeeAlsoHeadingError(articleText);
-            }
-        }
-    }
-
     /// <summary>
     /// Evaluates alerts related to WikiProject banner parameters on talk pages
     /// and links to user namespaces in article content.
@@ -6350,35 +6265,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 lbAlerts.Items.Add(
                     $"Editor's signature or link to user space ({_userSignatures.Count})");
             }
-        }
-    }
-
-    /// <summary>
-    /// Locates the See also heading in the supplied article text and records
-    /// its position for editor highlighting when it has not already been added.
-    /// </summary>
-    /// <param name="articleText">
-    /// The article text to search.
-    /// </param>
-    private void AddSeeAlsoHeadingError(string articleText)
-    {
-        // Performance: fetching all headings and filtering them is faster than
-        // applying WikiRegexes.SeeAlso directly to the entire article.
-        Match seeAlsoHeading =
-            WikiRegexes.Headings
-                .Matches(articleText)
-                .OfType<Match>()
-                .FirstOrDefault(
-                    heading =>
-                        WikiRegexes.SeeAlso.IsMatch(
-                            heading.Value));
-
-        if (seeAlsoHeading != null &&
-            !_otherErrors.ContainsKey(seeAlsoHeading.Index))
-        {
-            _otherErrors.Add(
-                seeAlsoHeading.Index,
-                seeAlsoHeading.Length);
         }
     }
 
