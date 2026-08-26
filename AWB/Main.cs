@@ -6119,7 +6119,24 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             _unknownMultipleIssuesParameters =
                 citationAndUrlAlerts.UnknownMultipleIssuesParameters;
             EvaluateSicTagAlert(hasAlertsOn);
-            EvaluateTalkAndUserNamespaceAlerts(hasAlertsOn);
+
+            TalkAndUserAlertResult talkAndUserAlerts =
+                TalkAndUserAlertEvaluator.Evaluate(
+                    TheArticle,
+                    hasAlertsOn,
+                    alertPreferences);
+
+            lbAlerts.Items.AddRange(
+                talkAndUserAlerts.Alerts.ToArray());
+
+            _duplicateBannerShellParameters =
+                talkAndUserAlerts.DuplicateBannerShellParameters;
+
+            _unknownWikiProjectBannerShellParameters =
+                talkAndUserAlerts.UnknownWikiProjectBannerShellParameters;
+
+            _userSignatures =
+                talkAndUserAlerts.UserSignatures;
 
             lblDates.Text =
                 Dates +
@@ -6226,70 +6243,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         if (shouldEvaluate && TheArticle.HasSicTag)
         {
             lbAlerts.Items.Add("Contains 'sic' tag");
-        }
-    }
-
-    /// <summary>
-    /// Evaluates alerts related to WikiProject banner parameters on talk pages
-    /// and links to user namespaces in article content.
-    /// </summary>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all alerts are enabled because no
-    /// individual alert preferences are selected.
-    /// </param>
-    private void EvaluateTalkAndUserNamespaceAlerts(bool hasAlertsOn)
-    {
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                5))
-        {
-            _duplicateBannerShellParameters =
-                TheArticle.DuplicateWikiProjectBannerShellParameters();
-
-            if (_duplicateBannerShellParameters.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Duplicate parameter(s) in WPBannerShell ({_duplicateBannerShellParameters.Count})");
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                21))
-        {
-            _unknownWikiProjectBannerShellParameters =
-                TheArticle.UnknownWikiProjectBannerShellParameters();
-
-            if (_unknownWikiProjectBannerShellParameters.Count > 0)
-            {
-                string warning =
-                    $"Unknown parameters in WikiProject banner shell ({_unknownWikiProjectBannerShellParameters.Count}): " +
-                    string.Join(
-                        ", ",
-                        _unknownWikiProjectBannerShellParameters);
-
-                lbAlerts.Items.Add(warning);
-            }
-        }
-
-        // TODO(Twain): Replace numeric alert identifiers with named alert types
-        // and move alert evaluation out of MainForm into a shared alert service.
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                22) &&
-            TheArticle.NameSpaceKey == Namespace.Article)
-        {
-            _userSignatures =
-                TheArticle.UserSignature();
-
-            if (_userSignatures.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Editor's signature or link to user space ({_userSignatures.Count})");
-            }
         }
     }
 
