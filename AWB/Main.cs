@@ -6092,7 +6092,32 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             _otherErrors =
                 structureAlerts.OtherErrors;
 
-            EvaluateCitationAndUrlAlerts(hasAlertsOn);
+            CitationAndUrlAlertResult citationAndUrlAlerts =
+                CitationAndUrlAlertEvaluator.Evaluate(
+                    TheArticle,
+                    hasAlertsOn,
+                    alertPreferences);
+
+            lbAlerts.Items.AddRange(
+                citationAndUrlAlerts.Alerts.ToArray());
+
+            _deadLinks =
+                citationAndUrlAlerts.DeadLinks;
+
+            _ambiguousCiteDates =
+                citationAndUrlAlerts.AmbiguousCiteDates;
+
+            _wikilinkedHeaders =
+                citationAndUrlAlerts.WikilinkedHeaders;
+
+            _unclosedTags =
+                citationAndUrlAlerts.UnclosedTags;
+
+            _badCiteParameters =
+                citationAndUrlAlerts.BadCiteParameters;
+
+            _unknownMultipleIssuesParameters =
+                citationAndUrlAlerts.UnknownMultipleIssuesParameters;
             EvaluateSicTagAlert(hasAlertsOn);
             EvaluateTalkAndUserNamespaceAlerts(hasAlertsOn);
 
@@ -6264,146 +6289,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             {
                 lbAlerts.Items.Add(
                     $"Editor's signature or link to user space ({_userSignatures.Count})");
-            }
-        }
-    }
-
-    // TODO(Twain): Replace numeric alert identifiers with named alert types
-    // and move citation/URL alert evaluation into a shared alert service.
-
-    /// <summary>
-    /// Evaluates citation and URL-related article alerts.
-    /// </summary>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all alerts are enabled because no
-    /// individual alert preferences are selected.
-    /// </param>
-    private void EvaluateCitationAndUrlAlerts(bool hasAlertsOn)
-    {
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Some_additional_edits
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                4))
-        {
-            _deadLinks = TheArticle.DeadLinks();
-
-            if (_deadLinks.Any())
-            {
-                lbAlerts.Items.Add(
-                    $"Dead links ({_deadLinks.Count})");
-            }
-        }
-
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#.28Yet.29_more_reference_related_changes.
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                6) &&
-            TheArticle.HasRefAfterReflist)
-        {
-            lbAlerts.Items.Add(
-                @"Has a <ref> after <references/>");
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                3) &&
-            TheArticle.IsDisambiguationPageWithRefs)
-        {
-            lbAlerts.Items.Add(
-                @"DAB page with <ref>s");
-        }
-
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Format_references
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                19) &&
-            TheArticle.HasBareReferences)
-        {
-            lbAlerts.Items.Add(
-                "Unformatted references");
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                1))
-        {
-            _ambiguousCiteDates =
-                TheArticle.AmbiguousCiteTemplateDates();
-
-            if (_ambiguousCiteDates.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Ambiguous citation dates ({_ambiguousCiteDates.Count})");
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                20))
-        {
-            _unknownMultipleIssuesParameters =
-                TheArticle.UnknownMultipleIssuesParameters();
-
-            if (_unknownMultipleIssuesParameters.Count > 0)
-            {
-                string warning =
-                    $"Unknown parameters in Multiple issues ({_unknownMultipleIssuesParameters.Count}): " +
-                    string.Join(
-                        ", ",
-                        _unknownMultipleIssuesParameters);
-
-                lbAlerts.Items.Add(warning);
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                8))
-        {
-            _wikilinkedHeaders =
-                TheArticle.WikiLinkedHeaders();
-
-            if (_wikilinkedHeaders.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Header(s) with wikilinks ({_wikilinkedHeaders.Count})");
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                18))
-        {
-            _unclosedTags =
-                TheArticle.UnclosedTags();
-
-            if (_unclosedTags.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Unclosed tag(s) ({_unclosedTags.Count})");
-            }
-        }
-
-        if (ArticleAlertHelper.IsAlertEnabled(
-                hasAlertsOn,
-                alertPreferences,
-                9))
-        {
-            _badCiteParameters =
-                TheArticle.BadCiteParameters();
-
-            if (_badCiteParameters.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Invalid citation parameter(s) ({_badCiteParameters.Count})");
             }
         }
     }
