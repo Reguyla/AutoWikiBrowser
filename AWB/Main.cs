@@ -6140,6 +6140,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         UpdateDuplicateWikilinkVisibility();
     }
 
+    // TODO(Twain): Review whether ClearArticleInfoResults should also clear
+    // _unknownMultipleIssuesParameters and
+    // _unknownWikiProjectBannerShellParameters. These collections are replaced
+    // during normal article analysis but can retain results from the previous
+    // article when ArticleInfo(true) resets the display without reevaluating
+    // alerts.
     /// <summary>
     /// Clears article-analysis results left by the previous article or editor
     /// contents.
