@@ -6057,86 +6057,58 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             bool hasAlertsOn =
                 !alertPreferences.Any();
 
-            IReadOnlyList<string> basicAlerts =
-                BasicArticleAlertEvaluator.Evaluate(
+            ArticleAlertResult alerts =
+                ArticleAlertEvaluator.Evaluate(
                     TheArticle,
+                    articleText,
                     templates,
                     statistics.WordCount,
                     statistics.CategoryCount,
                     hasAlertsOn,
-                    alertPreferences);
+                    alertPreferences,
+                    chkRegExTypo.Checked);
 
             lbAlerts.Items.AddRange(
-                basicAlerts.ToArray());
-
-            ArticleStructureAlertResult structureAlerts =
-                ArticleStructureAlertEvaluator.Evaluate(
-                    TheArticle,
-                    articleText,
-                    templates,
-                    hasAlertsOn,
-                    alertPreferences);
-
-            lbAlerts.Items.AddRange(
-                structureAlerts.Alerts.ToArray());
+                alerts.Alerts.ToArray());
 
             _unbalancedBrackets =
-                structureAlerts.UnbalancedBrackets;
+                alerts.UnbalancedBrackets;
 
             _targetlessLinks =
-                structureAlerts.TargetlessLinks;
+                alerts.TargetlessLinks;
 
             _doublePipeLinks =
-                structureAlerts.DoublePipeLinks;
+                alerts.DoublePipeLinks;
 
             _otherErrors =
-                structureAlerts.OtherErrors;
-
-            CitationAndUrlAlertResult citationAndUrlAlerts =
-                CitationAndUrlAlertEvaluator.Evaluate(
-                    TheArticle,
-                    hasAlertsOn,
-                    alertPreferences);
-
-            lbAlerts.Items.AddRange(
-                citationAndUrlAlerts.Alerts.ToArray());
+                alerts.OtherErrors;
 
             _deadLinks =
-                citationAndUrlAlerts.DeadLinks;
+                alerts.DeadLinks;
 
             _ambiguousCiteDates =
-                citationAndUrlAlerts.AmbiguousCiteDates;
+                alerts.AmbiguousCiteDates;
 
             _wikilinkedHeaders =
-                citationAndUrlAlerts.WikilinkedHeaders;
+                alerts.WikilinkedHeaders;
 
             _unclosedTags =
-                citationAndUrlAlerts.UnclosedTags;
+                alerts.UnclosedTags;
 
             _badCiteParameters =
-                citationAndUrlAlerts.BadCiteParameters;
+                alerts.BadCiteParameters;
 
             _unknownMultipleIssuesParameters =
-                citationAndUrlAlerts.UnknownMultipleIssuesParameters;
-            EvaluateSicTagAlert(hasAlertsOn);
-
-            TalkAndUserAlertResult talkAndUserAlerts =
-                TalkAndUserAlertEvaluator.Evaluate(
-                    TheArticle,
-                    hasAlertsOn,
-                    alertPreferences);
-
-            lbAlerts.Items.AddRange(
-                talkAndUserAlerts.Alerts.ToArray());
+                alerts.UnknownMultipleIssuesParameters;
 
             _duplicateBannerShellParameters =
-                talkAndUserAlerts.DuplicateBannerShellParameters;
+                alerts.DuplicateBannerShellParameters;
 
             _unknownWikiProjectBannerShellParameters =
-                talkAndUserAlerts.UnknownWikiProjectBannerShellParameters;
+                alerts.UnknownWikiProjectBannerShellParameters;
 
             _userSignatures =
-                talkAndUserAlerts.UserSignatures;
+                alerts.UserSignatures;
 
             lblDates.Text =
                 Dates +
@@ -6219,31 +6191,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         btnRemove.Visible =
             hasDuplicateWikilinks;
-    }
-
-    /// <summary>
-    /// Adds an alert when the current article contains a <c>{{sic}}</c> tag or
-    /// similar markup and the corresponding alert should be evaluated.
-    /// </summary>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all article alerts are enabled because no
-    /// individual alert preferences are selected.
-    /// </param>
-    /// <remarks>
-    /// The alert is also evaluated whenever RegExTypoFix is enabled, even when
-    /// the individual <c>sic</c> alert preference is disabled.
-    /// </remarks>
-    private void EvaluateSicTagAlert(bool hasAlertsOn)
-    {
-        bool shouldEvaluate =
-            hasAlertsOn ||
-            alertPreferences.Contains(2) ||
-            chkRegExTypo.Checked;
-
-        if (shouldEvaluate && TheArticle.HasSicTag)
-        {
-            lbAlerts.Items.Add("Contains 'sic' tag");
-        }
     }
 
     // TODO (Editor Architecture):
