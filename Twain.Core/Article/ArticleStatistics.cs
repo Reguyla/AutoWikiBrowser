@@ -44,4 +44,10 @@ public sealed class ArticleStatistics
     /// Gets the number of American-format dates in the article.
     /// </summary>
     public int AmericanDateCount { get; init; }
+
+    /// <summary>
+    /// Gets the duplicate wikilinks found in the article.
+    /// </summary>
+    public IReadOnlyList<string> DuplicateWikilinks { get; init; } =
+        Array.Empty<string>();
 }

@@ -6095,7 +6095,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             lblInterLinks.Text =
                 IWLinks + statistics.InterwikiLinkCount;
 
-            UpdateDuplicateWikilinks(articleText);
+            lbDuplicateWikilinks.Items.AddRange(
+                statistics.DuplicateWikilinks.ToArray());
         }
 
         UpdateDuplicateWikilinkVisibility();
@@ -6155,20 +6156,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Finds duplicate wikilinks in the current article and displays them.
-    /// </summary>
-    /// <param name="articleText">
-    /// The article text to analyze.
-    /// </param>
-    private void UpdateDuplicateWikilinks(string articleText)
-    {
-        // Find multiple wikilinks.
-        // Get all the links, ignoring commented-out text and similar markup.
-        lbDuplicateWikilinks.Items.AddRange(
-            Tools.DuplicateWikiLinks(articleText).ToArray());
-    }
-
-    /// <summary>
     /// Adds an alert when the current article contains a <c>{{sic}}</c> tag or
     /// similar markup and the corresponding alert should be evaluated.
     /// </summary>
@@ -6191,37 +6178,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             lbAlerts.Items.Add("Contains 'sic' tag");
         }
-    }
-
-    /// <summary>
-    /// Calculates and displays the article's date format statistics.
-    /// </summary>
-    /// <param name="articleText">
-    /// The article text to analyze.
-    /// </param>
-    /// <param name="images">
-    /// The image matches that should be ignored when counting date formats.
-    /// </param>
-    private void UpdateDateStatistics(
-        string articleText,
-        MatchCollection images)
-    {
-        // For date type counts, ignore images and external URLs.
-        string articleTextNoImagesUrls =
-            WikiRegexes.ExternalLinksHTTPOnlyQuick.Replace(
-                Tools.ReplaceWithSpaces(articleText, images),
-                "");
-
-        Dictionary<Parsers.DateLocale, int> results =
-            Tools.DatesCount(articleTextNoImagesUrls);
-
-        lblDates.Text =
-            Dates +
-            results[Parsers.DateLocale.ISO] +
-            "/" +
-            results[Parsers.DateLocale.International] +
-            "/" +
-            results[Parsers.DateLocale.American];
     }
 
     /// <summary>

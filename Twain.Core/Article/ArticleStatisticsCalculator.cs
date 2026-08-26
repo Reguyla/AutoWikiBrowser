@@ -56,7 +56,10 @@ public static class ArticleStatisticsCalculator
                 dateCounts[Parsers.DateLocale.International],
 
             AmericanDateCount =
-                dateCounts[Parsers.DateLocale.American]
+                dateCounts[Parsers.DateLocale.American],
+
+            DuplicateWikilinks =
+                Tools.DuplicateWikiLinks(articleText).ToArray()
         };
     }
 }
