@@ -24,6 +24,7 @@ using AutoWikiBrowser.Services.Settings;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using Twain.Core;
+using Twain.Core.Alerts;
 using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.Controls;
@@ -6283,14 +6284,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         string templates,
         bool hasAlertsOn)
     {
-        if (IsAlertEnabled(hasAlertsOn, 16) &&
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                16) &&
             TheArticle.NameSpaceKey == Namespace.Article &&
             articleText.StartsWith("=="))
         {
             lbAlerts.Items.Add("Starts with heading");
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 17))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                17))
         {
             _unbalancedBrackets =
                 TheArticle.UnbalancedBrackets();
@@ -6302,7 +6309,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 11))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                11))
         {
             _targetlessLinks =
                 TheArticle.TargetlessLinks();
@@ -6314,7 +6324,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 10))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                10))
         {
             _doublePipeLinks =
                 TheArticle.DoublepipeLinks();
@@ -6326,19 +6339,89 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
-            if (IsAlertEnabled(hasAlertsOn, 13) &&
+            if (ArticleAlertHelper.IsAlertEnabled(
+                    hasAlertsOn,
+                    alertPreferences,
+                    13) &&
                 WikiRegexes.Defaultsort.Matches(templates).Count > 1)
             {
                 lbAlerts.Items.Add("Multiple DEFAULTSORTs");
             }
 
-            if (IsAlertEnabled(hasAlertsOn, 15) &&
+            if (ArticleAlertHelper.IsAlertEnabled(
+                    hasAlertsOn,
+                    alertPreferences,
+                    15) &&
                 TheArticle.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
             {
                 lbAlerts.Items.Add(
                     "See also section out of place");
 
                 AddSeeAlsoHeadingError(articleText);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Evaluates alerts related to WikiProject banner parameters on talk pages
+    /// and links to user namespaces in article content.
+    /// </summary>
+    /// <param name="hasAlertsOn">
+    /// <see langword="true"/> when all alerts are enabled because no
+    /// individual alert preferences are selected.
+    /// </param>
+    private void EvaluateTalkAndUserNamespaceAlerts(bool hasAlertsOn)
+    {
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                5))
+        {
+            _duplicateBannerShellParameters =
+                TheArticle.DuplicateWikiProjectBannerShellParameters();
+
+            if (_duplicateBannerShellParameters.Count > 0)
+            {
+                lbAlerts.Items.Add(
+                    $"Duplicate parameter(s) in WPBannerShell ({_duplicateBannerShellParameters.Count})");
+            }
+        }
+
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                21))
+        {
+            _unknownWikiProjectBannerShellParameters =
+                TheArticle.UnknownWikiProjectBannerShellParameters();
+
+            if (_unknownWikiProjectBannerShellParameters.Count > 0)
+            {
+                string warning =
+                    $"Unknown parameters in WikiProject banner shell ({_unknownWikiProjectBannerShellParameters.Count}): " +
+                    string.Join(
+                        ", ",
+                        _unknownWikiProjectBannerShellParameters);
+
+                lbAlerts.Items.Add(warning);
+            }
+        }
+
+        // TODO(Twain): Replace numeric alert identifiers with named alert types
+        // and move alert evaluation out of MainForm into a shared alert service.
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                22) &&
+            TheArticle.NameSpaceKey == Namespace.Article)
+        {
+            _userSignatures =
+                TheArticle.UserSignature();
+
+            if (_userSignatures.Count > 0)
+            {
+                lbAlerts.Items.Add(
+                    $"Editor's signature or link to user space ({_userSignatures.Count})");
             }
         }
     }
@@ -6385,7 +6468,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void EvaluateCitationAndUrlAlerts(bool hasAlertsOn)
     {
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Some_additional_edits
-        if (IsAlertEnabled(hasAlertsOn, 4))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                4))
         {
             _deadLinks = TheArticle.DeadLinks();
 
@@ -6397,14 +6483,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#.28Yet.29_more_reference_related_changes.
-        if (IsAlertEnabled(hasAlertsOn, 6) &&
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                6) &&
             TheArticle.HasRefAfterReflist)
         {
             lbAlerts.Items.Add(
                 @"Has a <ref> after <references/>");
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 3) &&
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                3) &&
             TheArticle.IsDisambiguationPageWithRefs)
         {
             lbAlerts.Items.Add(
@@ -6412,14 +6504,20 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Format_references
-        if (IsAlertEnabled(hasAlertsOn, 19) &&
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                19) &&
             TheArticle.HasBareReferences)
         {
             lbAlerts.Items.Add(
                 "Unformatted references");
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 1))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                1))
         {
             _ambiguousCiteDates =
                 TheArticle.AmbiguousCiteTemplateDates();
@@ -6431,7 +6529,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 20))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                20))
         {
             _unknownMultipleIssuesParameters =
                 TheArticle.UnknownMultipleIssuesParameters();
@@ -6448,7 +6549,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 8))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                8))
         {
             _wikilinkedHeaders =
                 TheArticle.WikiLinkedHeaders();
@@ -6460,7 +6564,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 18))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                18))
         {
             _unclosedTags =
                 TheArticle.UnclosedTags();
@@ -6472,7 +6579,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
         }
 
-        if (IsAlertEnabled(hasAlertsOn, 9))
+        if (ArticleAlertHelper.IsAlertEnabled(
+                hasAlertsOn,
+                alertPreferences,
+                9))
         {
             _badCiteParameters =
                 TheArticle.BadCiteParameters();
@@ -6483,81 +6593,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     $"Invalid citation parameter(s) ({_badCiteParameters.Count})");
             }
         }
-    }
-
-    /// <summary>
-    /// Evaluates alerts related to WikiProject banner parameters on talk pages
-    /// and links to user namespaces in article content.
-    /// </summary>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all alerts are enabled because no
-    /// individual alert preferences are selected.
-    /// </param>
-    private void EvaluateTalkAndUserNamespaceAlerts(bool hasAlertsOn)
-    {
-        if (IsAlertEnabled(hasAlertsOn, 5))
-        {
-            _duplicateBannerShellParameters =
-                TheArticle.DuplicateWikiProjectBannerShellParameters();
-
-            if (_duplicateBannerShellParameters.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Duplicate parameter(s) in WPBannerShell ({_duplicateBannerShellParameters.Count})");
-            }
-        }
-
-        if (IsAlertEnabled(hasAlertsOn, 21))
-        {
-            _unknownWikiProjectBannerShellParameters =
-                TheArticle.UnknownWikiProjectBannerShellParameters();
-
-            if (_unknownWikiProjectBannerShellParameters.Count > 0)
-            {
-                string warning =
-                    $"Unknown parameters in WikiProject banner shell ({_unknownWikiProjectBannerShellParameters.Count}): " +
-                    string.Join(", ", _unknownWikiProjectBannerShellParameters);
-
-                lbAlerts.Items.Add(warning);
-            }
-        }
-
-        // TODO(Twain): Replace numeric alert identifiers with named alert types
-        // and move alert evaluation out of MainForm into a shared alert service.
-        if (IsAlertEnabled(hasAlertsOn, 22) &&
-            TheArticle.NameSpaceKey == Namespace.Article)
-        {
-            _userSignatures =
-                TheArticle.UserSignature();
-
-            if (_userSignatures.Count > 0)
-            {
-                lbAlerts.Items.Add(
-                    $"Editor's signature or link to user space ({_userSignatures.Count})");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines whether the specified alert is enabled by the current alert
-    /// configuration.
-    /// </summary>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all alerts are enabled.
-    /// </param>
-    /// <param name="alertId">
-    /// The alert identifier to evaluate.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> if the alert should be evaluated; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private bool IsAlertEnabled(
-        bool hasAlertsOn,
-        int alertId)
-    {
-        return hasAlertsOn ||
-            alertPreferences.Contains(alertId);
     }
 
     // TODO (Editor Architecture):
