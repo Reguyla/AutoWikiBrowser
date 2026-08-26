@@ -6057,11 +6057,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             bool hasAlertsOn =
                 !alertPreferences.Any();
 
-            EvaluateBasicArticleAlerts(
-                templates,
-                statistics.WordCount,
-                statistics.CategoryCount,
-                hasAlertsOn);
+            IReadOnlyList<string> basicAlerts =
+                BasicArticleAlertEvaluator.Evaluate(
+                    TheArticle,
+                    templates,
+                    statistics.WordCount,
+                    statistics.CategoryCount,
+                    hasAlertsOn,
+                    alertPreferences);
+
+            lbAlerts.Items.AddRange(
+                basicAlerts.ToArray());
 
             EvaluateArticleStructureAlerts(
                 articleText,
@@ -6177,54 +6183,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         if (shouldEvaluate && TheArticle.HasSicTag)
         {
             lbAlerts.Items.Add("Contains 'sic' tag");
-        }
-    }
-
-    /// <summary>
-    /// Evaluates high-level article condition alerts, such as stub status,
-    /// missing categories, and reference template usage.
-    /// </summary>
-    /// <param name="templates">
-    /// The template markup extracted from the current article.
-    /// </param>
-    /// <param name="wordCount">
-    /// The number of words in the current article.
-    /// </param>
-    /// <param name="catCount">
-    /// The number of categories found in the current article.
-    /// </param>
-    /// <param name="hasAlertsOn">
-    /// <see langword="true"/> when all alerts are enabled because no
-    /// individual alert preferences are selected.
-    /// </param>
-    private void EvaluateBasicArticleAlerts(
-        string templates,
-        int wordCount,
-        int catCount,
-        bool hasAlertsOn)
-    {
-        if ((hasAlertsOn || alertPreferences.Contains(12))
-            && TheArticle.NameSpaceKey == Namespace.Article
-            && wordCount > Parsers.StubMaxWordCount
-            && WikiRegexes.Stub.IsMatch(templates))
-        {
-            lbAlerts.Items.Add("Long article with a stub tag.");
-        }
-
-        if ((hasAlertsOn || alertPreferences.Contains(14))
-            && catCount == 0
-            && !Namespace.IsTalk(TheArticle.Name))
-        {
-            lbAlerts.Items.Add("No category (may be one in a template)");
-        }
-
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Replace_nofootnotes_with_morefootnote_if_references_exists
-        if ((hasAlertsOn || alertPreferences.Contains(7))
-            && TheArticle.NameSpaceKey == Namespace.Article
-            && TheArticle.HasMorefootnotesAndManyReferences)
-        {
-            lbAlerts.Items.Add(
-                "Has 'No/More footnotes' template yet many references");
         }
     }
 
