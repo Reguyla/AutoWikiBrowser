@@ -6051,15 +6051,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     "",
                     Parsers.GetAllTemplateDetail(articleText).ToArray());
 
-            int wordCount = Tools.WordCount(articleText);
-            int catCount = WikiRegexes.Category.Matches(articleText).Count;
+            ArticleStatistics statistics =
+                ArticleStatisticsCalculator.Calculate(articleText);
 
-            bool hasAlertsOn = !alertPreferences.Any();
+            bool hasAlertsOn =
+                !alertPreferences.Any();
 
             EvaluateBasicArticleAlerts(
                 templates,
-                wordCount,
-                catCount,
+                statistics.WordCount,
+                statistics.CategoryCount,
                 hasAlertsOn);
 
             EvaluateArticleStructureAlerts(
@@ -6074,14 +6075,25 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             MatchCollection imagesMC =
                 WikiRegexes.ImagesCountOnly.Matches(articleText);
 
-            lblWords.Text = Words + wordCount;
-            lblCats.Text = Cats + catCount;
-            lblImages.Text = Imgs + imagesMC.Count;
-            lblLinks.Text = Links + Tools.LinkCount(articleText);
-            lblInterLinks.Text =
-                IWLinks + Tools.InterwikiCount(articleText);
+            lblWords.Text =
+                Words + statistics.WordCount;
 
-            UpdateDateStatistics(articleText, imagesMC);
+            lblCats.Text =
+                Cats + statistics.CategoryCount;
+
+            lblImages.Text =
+                Imgs + statistics.ImageCount;
+
+            lblLinks.Text =
+                Links + statistics.LinkCount;
+
+            lblInterLinks.Text =
+                IWLinks + statistics.InterwikiLinkCount;
+
+            UpdateDateStatistics(
+                articleText,
+                imagesMC);
+
             UpdateDuplicateWikilinks(articleText);
         }
 
