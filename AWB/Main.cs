@@ -30,6 +30,7 @@ using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
 using Twain.Core.DiffHtml;
 using Twain.Core.Editing;
+using Twain.Core.Links;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Navigation;
 using Twain.Core.Parse;
@@ -6713,11 +6714,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return;
         }
 
-        string selectedItem =
-            lbDuplicateWikilinks.SelectedItem?.ToString() ?? string.Empty;
+        string selectedItem = lbDuplicateWikilinks.SelectedItem?.ToString() ?? string.Empty;
 
-        string link =
-            ExtractDuplicateWikilink(selectedItem);
+        string link = DuplicateWikilinkHelper.ExtractWikilink(selectedItem);
 
         if (string.IsNullOrEmpty(link))
         {
@@ -6726,7 +6725,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         string searchPattern =
-            BuildDuplicateWikilinkSearchPattern(link);
+            DuplicateWikilinkHelper.BuildSearchPattern(
+                link);
 
         txtEdit.Find(
             searchPattern,
@@ -6738,52 +6738,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Removes the appended duplicate count from a displayed duplicate wikilink.
-    /// </summary>
-    /// <param name="selectedItem">
-    /// The duplicate-wikilink display text.
-    /// </param>
-    /// <returns>
-    /// The wikilink text without the appended duplicate count.
-    /// </returns>
-    private static string ExtractDuplicateWikilink(
-        string selectedItem)
-    {
-        return Regex.Replace(
-            selectedItem,
-            @" \(\d+\)$",
-            string.Empty);
-    }
-
-    /// <summary>
     /// Clears the duplicate-wikilink search and disables link removal.
     /// </summary>
     private void ClearDuplicateWikilinkSearch()
     {
         txtEdit.ResetFind();
         btnRemove.Enabled = false;
-    }
-
-    /// <summary>
-    /// Builds the regular expression used to locate a duplicate wikilink while
-    /// allowing the first character of the link target to differ by case.
-    /// </summary>
-    /// <param name="link">The wikilink target to locate.</param>
-    /// <returns>A regular expression matching the corresponding wikilink.</returns>
-    private static string BuildDuplicateWikilinkSearchPattern(string link)
-    {
-        string firstCharacter =
-            Regex.Escape(link[0].ToString());
-
-        string remainingCharacters =
-            Regex.Escape(link[1..]);
-
-        return
-            "\\[\\[(?i)" +
-            firstCharacter +
-            "(?-i)" +
-            remainingCharacters +
-            "(\\|.*?)?\\]\\]";
     }
 
     /// <summary>
