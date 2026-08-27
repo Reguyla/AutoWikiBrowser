@@ -1,4 +1,5 @@
-﻿using Twain.Core.AWBSettings;
+﻿using Twain.Core;
+using Twain.Core.AWBSettings;
 
 namespace AutoWikiBrowser.Services.Settings;
 
@@ -157,5 +158,66 @@ internal sealed class SettingsPersistenceService
             _ =>
                 SettingsSaveFailure.Unexpected
         };
+    }
+
+    /// <summary>
+    /// Checks whether the current per-user application configuration can be
+    /// opened and deletes the configuration file when it is corrupt.
+    /// </summary>
+    /// <remarks>
+    /// A corrupt user configuration file can prevent the application from
+    /// starting. When a <see cref="ConfigurationErrorsException"/> identifies
+    /// an existing settings file, the file is deleted so that .NET can recreate
+    /// it with default values.
+    /// </remarks>
+    public static void RemoveCorruptUserSettings()
+    {
+        try
+        {
+            ConfigurationManager.OpenExeConfiguration(
+                ConfigurationUserLevel.PerUserRoamingAndLocal);
+        }
+        catch (ConfigurationErrorsException ex)
+        {
+            string settingsFilePath =
+                ex.Filename;
+
+            if (string.IsNullOrEmpty(settingsFilePath) &&
+                ex.InnerException is ConfigurationErrorsException innerException)
+            {
+                settingsFilePath =
+                    innerException.Filename;
+            }
+
+            if (string.IsNullOrEmpty(settingsFilePath) ||
+                !File.Exists(settingsFilePath))
+            {
+                return;
+            }
+
+            FileInfo settingsFile =
+                new(settingsFilePath);
+
+            if (settingsFile.Directory == null)
+            {
+                return;
+            }
+
+            using FileSystemWatcher watcher = new(
+                settingsFile.Directory.FullName,
+                settingsFile.Name);
+
+            Tools.WriteDebug(
+                $"Deleting corrupt settings file {settingsFilePath}",
+                ex.Message);
+
+            File.Delete(settingsFilePath);
+
+            if (File.Exists(settingsFilePath))
+            {
+                watcher.WaitForChanged(
+                    WatcherChangeTypes.Deleted);
+            }
+        }
     }
 }

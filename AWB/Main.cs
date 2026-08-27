@@ -204,7 +204,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </remarks>
     public MainForm()
     {
-        CheckSettings();
+        SettingsPersistenceService.RemoveCorruptUserSettings();
 
         _diffScriptingAdapter = new JsAdapter(this);
 
@@ -369,65 +369,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         saveXML.InitialDirectory = documentsFolder;
         openXML.InitialDirectory = documentsFolder;
-    }
-
-    // TODO(Twain): Move corrupt user-settings detection and recovery into
-    // startup/settings infrastructure so MainForm is not responsible for
-    // application configuration repair.
-    /// <summary>
-    /// Checks whether the current per-user application configuration can be opened
-    /// and deletes the configuration file when it is found to be corrupt.
-    /// </summary>
-    /// <remarks>
-    /// A corrupt user configuration file can prevent Twain from starting. When a
-    /// <see cref="ConfigurationErrorsException"/> identifies an existing settings
-    /// file, the file is deleted so that .NET can recreate it with default values.
-    /// </remarks>
-    public static void CheckSettings()
-    {
-        try
-        {
-            ConfigurationManager.OpenExeConfiguration(
-                ConfigurationUserLevel.PerUserRoamingAndLocal);
-        }
-        catch (ConfigurationErrorsException ex)
-        {
-            string settingsFilePath = ex.Filename;
-
-            if (string.IsNullOrEmpty(settingsFilePath) &&
-                ex.InnerException is ConfigurationErrorsException innerException)
-            {
-                settingsFilePath = innerException.Filename;
-            }
-
-            if (string.IsNullOrEmpty(settingsFilePath) ||
-                !File.Exists(settingsFilePath))
-            {
-                return;
-            }
-
-            FileInfo settingsFile = new FileInfo(settingsFilePath);
-
-            if (settingsFile.Directory == null)
-            {
-                return;
-            }
-
-            using FileSystemWatcher watcher = new(
-                settingsFile.Directory.FullName,
-                settingsFile.Name);
-
-            Tools.WriteDebug(
-                $"Deleting corrupt settings file {settingsFilePath}",
-                ex.Message);
-
-            File.Delete(settingsFilePath);
-
-            if (File.Exists(settingsFilePath))
-            {
-                watcher.WaitForChanged(WatcherChangeTypes.Deleted);
-            }
-        }
     }
 
     // TODO(Twain): Move command-line parsing into the application host and
