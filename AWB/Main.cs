@@ -10585,9 +10585,9 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         string selectedtext = txtEdit.SelectedText;
 
-        if (!TryRemoveWikiLinkMarkup(
-            selectedtext,
-            out string replacementText))
+        if (!WikiLinkHelper.TryRemoveMarkup(
+                selectedtext,
+                out string replacementText))
         {
             MessageBox.Show(
                 "Select a link to remove either manually or by clicking " +
@@ -10606,71 +10606,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         txtEdit.SelectedText = replacementText;
         txtEdit.ResetFind();
-    }
-
-    /// <summary>
-    /// Attempts to remove wiki-link markup from the supplied text while
-    /// preserving the most appropriate display text.
-    /// </summary>
-    /// <param name="selectedtext">The selected wiki-link text to process.</param>
-    /// <param name="replacementText">
-    /// The text that should replace the original selection.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> if the supplied text represents a wiki link;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    private static bool TryRemoveWikiLinkMarkup(
-        string selectedtext,
-        out string replacementText)
-    {
-        replacementText = selectedtext;
-
-        if (!selectedtext.StartsWith("[[") ||
-            !selectedtext.EndsWith("]]"))
-        {
-            return false;
-        }
-
-        replacementText =
-            selectedtext.Trim('[').Trim(']');
-
-        if (replacementText.EndsWith("|"))
-        {
-            if (replacementText.Contains("(") &&
-                replacementText.Contains(")"))
-            {
-                replacementText = replacementText.Substring(
-                    0,
-                    replacementText.IndexOf(
-                        "(",
-                        StringComparison.Ordinal));
-            }
-
-            if (replacementText.Contains(":"))
-            {
-                replacementText = replacementText.Substring(
-                    replacementText.IndexOf(
-                        ":",
-                        StringComparison.Ordinal))
-                    .TrimEnd('|');
-            }
-
-            if (selectedtext ==
-                "[[" + replacementText + "]]")
-            {
-                replacementText = selectedtext;
-            }
-        }
-        else if (replacementText.Contains("|"))
-        {
-            replacementText = replacementText.Substring(
-                replacementText.IndexOf(
-                    "|",
-                    StringComparison.Ordinal) + 1);
-        }
-
-        return true;
     }
 
     /// <summary>
