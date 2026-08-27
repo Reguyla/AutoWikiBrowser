@@ -305,7 +305,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private void InitializeSession()
     {
         TheSession = new Session(this);
-        CreateEditor();
+        SubscribeToSessionEvents();
     }
 
     /// <summary>
@@ -870,7 +870,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // Before renaming, verify that the method is called only once per session.
     // Repeated calls could register duplicate handlers and cause events to be
     // processed more than once.
-    private void CreateEditor()
+    private void SubscribeToSessionEvents()
     {
         TheSession.PreviewComplete += PreviewComplete;
         TheSession.ExceptionCaught += ApiEditExceptionCaught;
