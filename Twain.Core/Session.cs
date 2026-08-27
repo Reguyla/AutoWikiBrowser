@@ -336,18 +336,6 @@ public class Session
         private set => _status = value;
     }
 
-    // Allows fork/rebrand development builds to continue through the normal
-    // CheckPageJSON, config, login, and registration checks even when the
-    // public AWB version page marks this AWB version as disabled.
-    //
-    // This bypass is intentionally narrow: it only bypasses the public AWB
-    // version gate. It does not bypass login, CheckPageJSON, local config,
-    // bad-name, registration, or bot/user-mode checks.
-    //
-    // TODO: Remove this legacy/fork compatibility switch when version checking
-    // is moved to the planned Twain updater/version-policy implementation.
-    private const bool AllowForkReleaseVersionGateBypass = true;
-
     /// <summary>
     /// Updates the editor and optionally loads configuration information for
     /// the currently selected wiki.
