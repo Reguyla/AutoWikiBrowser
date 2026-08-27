@@ -2700,38 +2700,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
-    // TODO (.NET10 Modernization):
-    // Harden the WebView2 diff renderer as a non-browsing display surface.
-    // Disable unused script, host-object, and web-message capabilities, and
-    // explicitly handle link navigation and new-window requests so generated
-    // diff content cannot navigate the embedded control unexpectedly.
-    //
-    // TODO (.NET10 Modernization):
-    // Replace NavigateToString() or provide a fallback for generated diff HTML
-    // approaching WebView2's 2 MB input limit. Large articles may generate diff
-    // documents that exceed the supported size.
-    /// <summary>
-    /// Attempts to render generated diff HTML in the WebView2 diff control.
-    /// </summary>
-    /// <param name="html">The complete diff HTML document.</param>
-
-    private void RenderWebView2Diff(string html)
-    {
-        if (_diffWebView == null ||
-            _diffWebView.IsDisposed ||
-            _diffWebView.CoreWebView2 == null)
-        {
-            Tools.WriteDebug(
-                nameof(RenderWebView2Diff),
-                "WebView2 was unavailable when the diff was rendered.");
-
-            return;
-        }
-
-        ShowDiffBrowser();
-
-        _diffWebView.NavigateToString(html);
-    }
 
     /// <summary>
     /// Displays the legacy browser used for article previews.
@@ -2759,6 +2727,16 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    // TODO (.NET10 Modernization):
+    // Harden the WebView2 diff renderer as a non-browsing display surface.
+    // Disable unused script, host-object, and web-message capabilities, and
+    // explicitly handle link navigation and new-window requests so generated
+    // diff content cannot navigate the embedded control unexpectedly.
+    //
+    // TODO (.NET10 Modernization):
+    // Replace NavigateToString() or provide a fallback for generated diff HTML
+    // approaching WebView2's 2 MB input limit. Large articles may generate diff
+    // documents that exceed the supported size.
     /// <summary>
     /// Renders generated diff HTML and waits for the WebView2 document to finish
     /// loading.
