@@ -10126,7 +10126,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             bool succeed =
-                TryMoveArticle(
+                ArticleActionService.TryMove(
                     TheArticle,
                     TheSession,
                     out string newTitle,
@@ -10204,48 +10204,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Attempts to move the specified article and creates a message describing
-    /// the result.
-    /// </summary>
-    /// <param name="article">The article to move.</param>
-    /// <param name="session">The session used to perform the move.</param>
-    /// <param name="newTitle">The destination title returned by the move operation.</param>
-    /// <param name="msg">The message describing the move result.</param>
-    /// <returns>
-    /// <see langword="true"/> if the move succeeds; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private static bool TryMoveArticle(
-        Article article,
-        Session session,
-        out string newTitle,
-        out string msg)
-    {
-        bool succeed =
-            article.Move(
-                session,
-                out newTitle);
-
-        if (succeed)
-        {
-            msg =
-                "Moved " +
-                article.Name +
-                " to " +
-                newTitle;
-        }
-        else
-        {
-            msg =
-                "Move of " +
-                article.Name +
-                " failed!";
-        }
-
-        return succeed;
-    }
-
-    /// <summary>
     /// Deletes the current article and updates the article list, action log,
     /// and user interface to reflect the result.
     /// </summary>
@@ -10279,7 +10237,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             bool succeed =
-                TryDeleteArticle(
+                ArticleActionService.TryDelete(
                     TheArticle,
                     TheSession,
                     out string msg);
@@ -10341,39 +10299,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Attempts to delete the specified article and creates a message describing
-    /// the result.
-    /// </summary>
-    /// <param name="article">The article to delete.</param>
-    /// <param name="session">The session used to perform the deletion.</param>
-    /// <param name="msg">The message describing the deletion result.</param>
-    /// <returns>
-    /// <see langword="true"/> if deletion succeeds; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private static bool TryDeleteArticle(
-        Article article,
-        Session session,
-        out string msg)
-    {
-        bool succeed = article.Delete(session);
-
-        if (succeed)
-        {
-            msg = "Deleted " + article.Name;
-        }
-        else
-        {
-            msg =
-                "Deletion of " +
-                article.Name +
-                " failed!";
-        }
-
-        return succeed;
-    }
-
-    /// <summary>
     /// Protects the current article and updates the action log and user
     /// interface to reflect the result.
     /// </summary>
@@ -10401,7 +10326,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             bool succeed =
-                TryProtectArticle(
+                ArticleActionService.TryProtect(
                     TheArticle,
                     TheSession,
                     out string msg);
@@ -10418,39 +10343,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             ErrorHandler.HandleException(ex);
         }
-    }
-
-    /// <summary>
-    /// Attempts to protect the specified article and creates a message describing
-    /// the result.
-    /// </summary>
-    /// <param name="article">The article to protect.</param>
-    /// <param name="session">The session used to perform the protection.</param>
-    /// <param name="msg">The message describing the protection result.</param>
-    /// <returns>
-    /// <see langword="true"/> if protection succeeds; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private static bool TryProtectArticle(
-        Article article,
-        Session session,
-        out string msg)
-    {
-        bool succeed = article.Protect(session);
-
-        if (succeed)
-        {
-            msg = "Protected " + article.Name;
-        }
-        else
-        {
-            msg =
-                "Protection of " +
-                article.Name +
-                " failed!";
-        }
-
-        return succeed;
     }
     #endregion
 
