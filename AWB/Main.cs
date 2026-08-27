@@ -3780,6 +3780,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
     }
 
+    // TODO(Twain): Separate diff-state generation from HTML rendering.
+    // UndoChangeGenericAsync rebuilds the diff solely to update the internal
+    // diff state used by ApplyDiffUndo and discards the generated HTML.
+    // Consider exposing a dedicated diff-state rebuild operation so callers
+    // do not depend on HTML generation for this side effect.
+
     /// <summary>
     /// Builds the HTML document used to display the article diff.
     /// </summary>
