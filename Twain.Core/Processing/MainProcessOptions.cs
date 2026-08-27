@@ -151,4 +151,46 @@ public sealed class MainProcessOptions
     public bool AppendInsteadOfPrepend { get; init; }
 
     public bool SortMetadataAfterAppend { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when
+    /// processing makes no changes.
+    /// </summary>
+    public bool SkipNoChanges { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when only
+    /// whitespace changes were made.
+    /// </summary>
+    public bool SkipWhitespaceChanges { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when only
+    /// casing changes were made.
+    /// </summary>
+    public bool SkipCasingChanges { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when only
+    /// minor general-fix changes were made.
+    /// </summary>
+    public bool SkipMinorGeneralFixChanges { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when only
+    /// general-fix changes were made.
+    /// </summary>
+    public bool SkipGeneralFixChanges { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when it
+    /// contains no wiki links.
+    /// </summary>
+    public bool SkipPagesWithNoLinks { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether an article should be skipped when only
+    /// cosmetic changes were made.
+    /// </summary>
+    public bool SkipCosmeticChanges { get; init; }
 }

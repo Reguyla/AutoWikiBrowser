@@ -1928,68 +1928,22 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool TrySkipBasedOnArticleChanges()
     {
-        if ((chkSkipNoChanges.Checked || BotMode)
-            && TheArticle.NoArticleTextChanged)
+        MainProcessOptions options =
+            CreateMainProcessOptions();
+
+        string? skipReason =
+            MainProcess.GetArticleChangeSkipReason(
+                TheArticle,
+                options);
+
+        if (skipReason == null)
         {
-            SkipPage("No change");
-            return true;
+            return false;
         }
 
-        if (chkSkipWhitespace.Checked
-            && chkSkipCasing.Checked
-            && TheArticle.OnlyWhiteSpaceAndCasingChanged)
-        {
-            SkipPage("Only whitespace/casing changed");
-            return true;
-        }
+        SkipPage(skipReason);
 
-        if (chkSkipWhitespace.Checked
-            && TheArticle.OnlyWhiteSpaceChanged)
-        {
-            SkipPage("Only whitespace changed");
-            return true;
-        }
-
-        if (chkSkipCasing.Checked
-            && TheArticle.OnlyCasingChanged)
-        {
-            SkipPage("Only casing changed");
-            return true;
-        }
-
-        if (chkSkipMinorGeneralFixes.Checked
-            && chkGeneralFixes.Checked
-            && TheArticle.OnlyMinorGeneralFixesChanged)
-        {
-            SkipPage("Only minor general fix changes");
-            return true;
-        }
-
-        if (chkSkipGeneralFixes.Checked
-            && chkGeneralFixes.Checked
-            && TheArticle.OnlyGeneralFixesChanged)
-        {
-            SkipPage("Only general fix changes");
-            return true;
-        }
-
-        if (chkSkipNoPageLinks.Checked
-            && !WikiRegexes.WikiLinksOnly.IsMatch(
-                TheArticle.ArticleText))
-        {
-            SkipPage("Page contains no links");
-            return true;
-        }
-
-        if (chkSkipCosmetic.Checked
-            && (TheArticle.NoArticleTextChanged
-                || TheArticle.OnlyCosmeticChanged))
-        {
-            SkipPage("Only cosmetic changes made");
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /// <summary>
@@ -3358,6 +3312,27 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             SkipIfNoRegexTypo = chkSkipIfNoRegexTypo.Checked,
 
             BotMode = BotMode,
+
+            SkipNoChanges =
+                chkSkipNoChanges.Checked,
+
+            SkipWhitespaceChanges =
+                chkSkipWhitespace.Checked,
+
+            SkipCasingChanges =
+                chkSkipCasing.Checked,
+
+            SkipMinorGeneralFixChanges =
+                chkSkipMinorGeneralFixes.Checked,
+
+            SkipGeneralFixChanges =
+                chkSkipGeneralFixes.Checked,
+
+            SkipPagesWithNoLinks =
+                chkSkipNoPageLinks.Checked,
+
+            SkipCosmeticChanges =
+                chkSkipCosmetic.Checked,
 
             UnicodifyWholeArticle = chkUnicodifyWhole.Checked,
 

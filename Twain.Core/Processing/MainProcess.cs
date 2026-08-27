@@ -731,4 +731,78 @@ public sealed class MainProcess
             Variables.Profiler.Flush();
         }
     }
+
+    /// <summary>
+    /// Determines whether the processed article should be skipped based on the
+    /// kinds of changes made during processing.
+    /// </summary>
+    /// <param name="article">
+    /// The processed article.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured from the current application state.
+    /// </param>
+    /// <returns>
+    /// The reason the article should be skipped, or <see langword="null"/> when
+    /// processing should continue.
+    /// </returns>
+    public static string? GetArticleChangeSkipReason(
+        Article article,
+        MainProcessOptions options)
+    {
+        if ((options.SkipNoChanges || options.BotMode) &&
+            article.NoArticleTextChanged)
+        {
+            return "No change";
+        }
+
+        if (options.SkipWhitespaceChanges &&
+            options.SkipCasingChanges &&
+            article.OnlyWhiteSpaceAndCasingChanged)
+        {
+            return "Only whitespace/casing changed";
+        }
+
+        if (options.SkipWhitespaceChanges &&
+            article.OnlyWhiteSpaceChanged)
+        {
+            return "Only whitespace changed";
+        }
+
+        if (options.SkipCasingChanges &&
+            article.OnlyCasingChanged)
+        {
+            return "Only casing changed";
+        }
+
+        if (options.SkipMinorGeneralFixChanges &&
+            options.GeneralFixesEnabled &&
+            article.OnlyMinorGeneralFixesChanged)
+        {
+            return "Only minor general fix changes";
+        }
+
+        if (options.SkipGeneralFixChanges &&
+            options.GeneralFixesEnabled &&
+            article.OnlyGeneralFixesChanged)
+        {
+            return "Only general fix changes";
+        }
+
+        if (options.SkipPagesWithNoLinks &&
+            !WikiRegexes.WikiLinksOnly.IsMatch(
+                article.ArticleText))
+        {
+            return "Page contains no links";
+        }
+
+        if (options.SkipCosmeticChanges &&
+            (article.NoArticleTextChanged ||
+             article.OnlyCosmeticChanged))
+        {
+            return "Only cosmetic changes made";
+        }
+
+        return null;
+    }
 }
