@@ -4245,46 +4245,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         };
     }
 
-    // TODO (Defensive Validation):
-    // Handle malformed section edit summaries that begin with "/*" but do not
-    // contain a closing "*/" marker before attempting to remove the prefix.
     /// <summary>
-    /// Removes an invalid section prefix from the edit summary when the edited
-    /// section no longer matches the section named in the summary.
+    /// Corrects the current edit summary when its section prefix no longer
+    /// matches the edited article section.
     /// </summary>
     private void CorrectSectionEditSummary()
     {
-        if (!txtReviewEditSummary.Text.StartsWith(
-                "/*",
-                StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        string sectionEditText =
-            Summary.ModifiedSection(
+        txtReviewEditSummary.Text =
+            Summary.CorrectSectionEditSummary(
+                txtReviewEditSummary.Text,
                 TheArticle.OriginalArticleText,
                 txtEdit.Text);
-
-        string expectedSectionSummary =
-            "/* " + sectionEditText + " */";
-
-        if (sectionEditText.Length > 0 &&
-            txtReviewEditSummary.Text.Contains(
-                expectedSectionSummary,
-                StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        int sectionMarkerEnd =
-            txtReviewEditSummary.Text.IndexOf(
-                "*/",
-                StringComparison.Ordinal);
-
-        txtReviewEditSummary.Text =
-            txtReviewEditSummary.Text.Substring(
-                sectionMarkerEnd + 2);
     }
 
     #endregion

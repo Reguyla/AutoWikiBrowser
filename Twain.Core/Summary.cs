@@ -142,4 +142,62 @@ public static class Summary
 
         return string.Empty;
     }
+
+    /// <summary>
+    /// Removes an invalid section prefix from an edit summary when the edited
+    /// section no longer matches the section named in the summary.
+    /// </summary>
+    /// <param name="editSummary">
+    /// The edit summary to evaluate.
+    /// </param>
+    /// <param name="originalArticleText">
+    /// The article text as originally loaded.
+    /// </param>
+    /// <param name="currentArticleText">
+    /// The current article text after editing.
+    /// </param>
+    /// <returns>
+    /// The corrected edit summary.
+    /// </returns>
+    public static string CorrectSectionEditSummary(
+        string editSummary,
+        string originalArticleText,
+        string currentArticleText)
+    {
+        if (!editSummary.StartsWith(
+                "/*",
+                StringComparison.Ordinal))
+        {
+            return editSummary;
+        }
+
+        string sectionEditText =
+            ModifiedSection(
+                originalArticleText,
+                currentArticleText);
+
+        string expectedSectionSummary =
+            "/* " + sectionEditText + " */";
+
+        if (sectionEditText.Length > 0 &&
+            editSummary.Contains(
+                expectedSectionSummary,
+                StringComparison.Ordinal))
+        {
+            return editSummary;
+        }
+
+        int sectionMarkerEnd =
+            editSummary.IndexOf(
+                "*/",
+                StringComparison.Ordinal);
+
+        if (sectionMarkerEnd < 0)
+        {
+            return editSummary;
+        }
+
+        return editSummary.Substring(
+            sectionMarkerEnd + 2);
+    }
 }
