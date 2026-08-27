@@ -371,71 +371,27 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         openXML.InitialDirectory = documentsFolder;
     }
 
-    // TODO(Twain): Move command-line parsing into the application host and
-    // return a strongly typed startup-options model instead of mutating MainForm.
     /// <summary>
-    /// Parses supported command-line arguments and applies the requested startup options.
+    /// Applies startup settings supplied by the application host.
     /// </summary>
-    /// <param name="args">
-    /// The command-line arguments supplied to the application.
+    /// <param name="settingsFile">
+    /// The settings file to load, when specified.
     /// </param>
-    /// <remarks>
-    /// Supported options are:
-    /// <list type="bullet">
-    /// <item>
-    /// <description>
-    /// <c>/s &lt;file&gt;</c> loads the specified settings file. An <c>.xml</c>
-    /// extension is added when no extension is supplied and the original path
-    /// does not exist.
-    /// </description>
-    /// </item>
-    /// <item>
-    /// <description>
-    /// <c>/u &lt;profile&gt;</c> selects the profile to load after startup.
-    /// </description>
-    /// </item>
-    /// </list>
-    /// Unsupported arguments, missing values, and settings files that cannot be
-    /// found are ignored.
-    /// </remarks>
-    public void ParseCommandLine(string[] args)
+    /// <param name="profileName">
+    /// The profile name to load, when specified.
+    /// </param>
+    internal void ApplyStartupOptions(
+        string settingsFile,
+        string profileName)
     {
-        ArgumentNullException.ThrowIfNull(args);
-
-        for (int i = 0; i < args.Length; i++)
+        if (!string.IsNullOrEmpty(settingsFile))
         {
-            string argument = args[i];
-
-            if (argument is not ("/s" or "/u") || i + 1 >= args.Length)
-            {
-                continue;
-            }
-
-            string value = args[++i];
-
-            switch (argument)
-            {
-                case "/s":
-                    string settingsFile = value;
-
-                    if (string.IsNullOrEmpty(Path.GetExtension(settingsFile)) &&
-                        !File.Exists(settingsFile))
-                    {
-                        settingsFile += ".xml";
-                    }
-
-                    if (File.Exists(settingsFile))
-                    {
-                        SettingsFile = settingsFile;
-                    }
-
-                    break;
-
-                case "/u":
-                    _profileToLoad = value;
-                    break;
-            }
+            SettingsFile =
+                settingsFile;
         }
+
+        _profileToLoad =
+            profileName;
     }
 
     /// <summary>

@@ -62,10 +62,15 @@ internal static class Program
 
             ApplicationPaths.MigrateDefaultSettings();
 
+            StartupOptions startupOptions =
+                ParseCommandLine(args);
+
             MainForm awb = new();
             AWB = awb;
 
-            awb.ParseCommandLine(args);
+            awb.ApplyStartupOptions(
+                startupOptions.SettingsFile,
+                startupOptions.ProfileName);
 
             Article.SetAddListener(
                 MyTrace.AddListener,
@@ -93,6 +98,82 @@ internal static class Program
                 ErrorHandler.HandleException(ex);
             }
         }
+    }
+
+    /// <summary>
+    /// Parses supported command-line arguments.
+    /// </summary>
+    /// <param name="args">
+    /// The command-line arguments supplied to the application.
+    /// </param>
+    /// <returns>
+    /// The parsed startup options.
+    /// </returns>
+    private static StartupOptions ParseCommandLine(
+        string[] args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+
+        StartupOptions options = new();
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            string argument = args[i];
+
+            if (argument is not ("/s" or "/u") ||
+                i + 1 >= args.Length)
+            {
+                continue;
+            }
+
+            string value = args[++i];
+
+            switch (argument)
+            {
+                case "/s":
+                    string settingsFile = value;
+
+                    if (string.IsNullOrEmpty(
+                            Path.GetExtension(settingsFile)) &&
+                        !File.Exists(settingsFile))
+                    {
+                        settingsFile += ".xml";
+                    }
+
+                    if (File.Exists(settingsFile))
+                    {
+                        options.SettingsFile =
+                            settingsFile;
+                    }
+
+                    break;
+
+                case "/u":
+                    options.ProfileName =
+                        value;
+                    break;
+            }
+        }
+
+        return options;
+    }
+
+    /// <summary>
+    /// Represents command-line startup options for the application.
+    /// </summary>
+    private sealed class StartupOptions
+    {
+        /// <summary>
+        /// Gets or sets the settings file to load, when specified.
+        /// </summary>
+        public string SettingsFile { get; set; } =
+            string.Empty;
+
+        /// <summary>
+        /// Gets or sets the profile name to load, when specified.
+        /// </summary>
+        public string ProfileName { get; set; } =
+            string.Empty;
     }
 
     /// <summary>
