@@ -2456,42 +2456,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Highlights up to the configured maximum number of collected editor errors,
-    /// then clears the active selection.
-    /// </summary>
-    /// <param name="errors">
-    /// Error positions keyed by character offset, with the associated highlight
-    /// length.
-    /// </param>
-    private void HighlightEditorErrors(
-        IEnumerable<KeyValuePair<int, int>> errors)
-    {
-        const int maximumHighlightedErrors = 100;
-
-        int highlightedCount = 0;
-
-        foreach (KeyValuePair<int, int> error in errors)
-        {
-            if (highlightedCount >= maximumHighlightedErrors)
-            {
-                break;
-            }
-
-            // TODO (.NET10 Modernization):
-            // Verify that error highlight offsets and lengths are validated before they
-            // are applied. Detection results may become stale if the editor content
-            // changes after analysis, potentially producing an invalid selection range.
-            RedSelection(error.Key, error.Value);
-            highlightedCount++;
-        }
-
-        if (highlightedCount > 0)
-        {
-            txtEdit.Select(0, 0);
-        }
-    }
-
-    /// <summary>
     /// Merges detected editor errors in category-priority order and highlights
     /// the resulting locations.
     /// </summary>
@@ -2535,6 +2499,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // TODO (.NET10 Modernization):
     // Error categories are added in priority order. When multiple categories
     // identify the same character position, the first category is retained.
+    //
+    // TODO (.NET10 Modernization):
+    // Verify that error highlight offsets and lengths are validated before they
+    // are applied. Detection results may become stale if the editor content
+    // changes after analysis, potentially producing an invalid selection range.
     /// <summary>
     /// Highlights the collected editor error locations.
     ///
@@ -2546,22 +2515,31 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// Collection of editor error positions keyed by character offset,
     /// with the associated highlight length.
     /// </param>
-    private void HighlightEditorErrors(SortedDictionary<int, int> errors)
+    private void HighlightEditorErrors(
+        SortedDictionary<int, int> errors)
     {
-        // performance: only highlight first 100 errors
-        int done = 0;
-        foreach (KeyValuePair<int, int> a in errors)
-        {
-            RedSelection(a.Key, a.Value);
-            done++;
+        const int maximumHighlightedErrors = 100;
 
-            if (done > 100)
+        int highlightedCount = 0;
+
+        foreach (KeyValuePair<int, int> error in errors)
+        {
+            if (highlightedCount >= maximumHighlightedErrors)
+            {
                 break;
+            }
+
+            RedSelection(
+                error.Key,
+                error.Value);
+
+            highlightedCount++;
         }
 
-        // If any text highlighted, don't leave last text selected
-        if (done > 0)
+        if (highlightedCount > 0)
+        {
             txtEdit.Select(0, 0);
+        }
     }
 
     private WebView2 _diffWebView;
