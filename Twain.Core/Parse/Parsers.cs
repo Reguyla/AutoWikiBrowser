@@ -3567,4 +3567,32 @@ public partial class Parsers
         return WikiRegexes.BareExternalLink.IsMatch(refsArea);
     }
     #endregion
+
+    /// <summary>
+    /// Extracts user-talk template names from the supplied configuration text.
+    /// </summary>
+    /// <param name="text">
+    /// The configuration text to parse.
+    /// </param>
+    /// <param name="userTalkTemplate">
+    /// The regular expression used to locate template entries.
+    /// </param>
+    /// <returns>
+    /// The extracted template names.
+    /// </returns>
+    public static List<string> ParseUserTalkTemplates(
+        string text,
+        Regex userTalkTemplate)
+    {
+        List<string> userTalkTemplates = new();
+
+        foreach (Match match in
+                 userTalkTemplate.Matches(text))
+        {
+            userTalkTemplates.Add(
+                match.Groups[1].Value);
+        }
+
+        return userTalkTemplates;
+    }
 }

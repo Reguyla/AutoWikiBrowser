@@ -10799,7 +10799,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             List<string> userTalkTemplates =
-                ParseUserTalkTemplates(
+                Parsers.ParseUserTalkTemplates(
                     text,
                     userTalkTemplate);
 
@@ -10814,28 +10814,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             ErrorHandler.HandleException(ex);
             _userTalkWarningsLoaded = false;
         }
-    }
-
-    /// <summary>
-    /// Extracts user talk template names from the supplied configuration text.
-    /// </summary>
-    /// <param name="text">The configuration text to parse.</param>
-    /// <param name="userTalkTemplate">
-    /// The regular expression used to locate template entries.
-    /// </param>
-    /// <returns>The extracted template names.</returns>
-    private static List<string> ParseUserTalkTemplates(
-        string text,
-        Regex userTalkTemplate)
-    {
-        List<string> userTalkTemplates = new();
-
-        foreach (Match match in userTalkTemplate.Matches(text))
-        {
-            userTalkTemplates.Add(match.Groups[1].Value);
-        }
-
-        return userTalkTemplates;
     }
 
     // TODO(Twain): Move wiki-based parser configuration loading out of MainForm
