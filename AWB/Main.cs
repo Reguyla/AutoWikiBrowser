@@ -6012,8 +6012,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// </returns>
     private bool TrySelectNextAlert(int position)
     {
-        foreach (KeyValuePair<int, int> error in
-                 _errors.OrderBy(error => error.Key))
+        foreach (KeyValuePair<int, int> error in _errors)
         {
             if (error.Key <= position ||
                 error.Key >= txtEdit.Text.Length)
@@ -6021,7 +6020,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 continue;
             }
 
-            RedSelection(error.Key, error.Value);
+            RedSelection(
+                error.Key,
+                error.Value);
+
             txtEdit.ScrollToCaret();
 
             return true;
