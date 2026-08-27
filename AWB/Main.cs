@@ -9212,7 +9212,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     #region PasteMore
-
+    // TODO(Twain): Redesign Paste More before moving it out of MainForm.
+    // The current implementation is tightly coupled to WinForms menu items,
+    // editor state, the ConfigurePasteMoreItems dialog, and the fixed ten-slot
+    // settings model. Replace the fixed slots with a collection-based,
+    // UI-independent configuration model before migrating this feature to the
+    // new UI architecture.
     /// <summary>
     /// Inserts the text stored in the selected Paste More menu item at the
     /// current editor selection and closes the context menu.
