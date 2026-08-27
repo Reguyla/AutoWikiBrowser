@@ -39,6 +39,7 @@ using Twain.Core.Parse;
 using Twain.Core.Plugin;
 using Twain.Core.PreviewHtml;
 using Twain.Core.Processing;
+using Twain.Diagnostics;
 using ThreadState = System.Threading.ThreadState;
 
 namespace AutoWikiBrowser;
@@ -11935,10 +11936,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             return;
         }
 
-        // TODO(Twain): Move typo-rule profiling into Twain.Diagnostics once
-        // diagnostic services are separated from MainForm.
         StringBuilder builder =
-            ProfileTypoRules(
+            TypoRuleProfiler.Profile(
                 typos,
                 text,
                 TheArticle.Name);
@@ -11953,63 +11952,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             "Profiling complete",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
-    }
-
-    /// <summary>
-    /// Profiles the supplied typo rules against the specified article text and
-    /// returns a formatted timing report.
-    /// </summary>
-    /// <param name="typos">The regular-expression typo rules to profile.</param>
-    /// <param name="text">The article text used for profiling.</param>
-    /// <param name="articleName">The article name included in the report.</param>
-    /// <returns>A formatted profiling report.</returns>
-    private static StringBuilder ProfileTypoRules(
-        List<KeyValuePair<Regex, string>> typos,
-        string text,
-        string articleName)
-    {
-        int iterations = 1000000 / text.Length;
-
-        if (iterations > 500)
-        {
-            iterations = 500;
-        }
-
-        List<KeyValuePair<int, string>> times = new();
-
-        foreach (KeyValuePair<Regex, string> p in typos)
-        {
-            Stopwatch watch = new();
-            watch.Start();
-
-            for (int i = 0; i < iterations; i++)
-            {
-                p.Key.IsMatch(text);
-            }
-
-            times.Add(
-                new KeyValuePair<int, string>(
-                    (int)watch.ElapsedMilliseconds,
-                    p.Key + " > " + p.Value));
-        }
-
-        times.Sort(CompareRegexPairs);
-
-        StringBuilder builder = new();
-
-        builder.AppendLine(
-            "Profiling " +
-            iterations +
-            @" iterations of """ +
-            articleName +
-            @"""");
-
-        foreach (KeyValuePair<int, string> p in times)
-        {
-            builder.AppendLine(p.ToString());
-        }
-
-        return builder;
     }
 
     /// <summary>

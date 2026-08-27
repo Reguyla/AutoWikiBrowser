@@ -65,6 +65,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
+    <ProjectReference Include="..\Twain.Diagnostics\Twain.Diagnostics.csproj" />
   </ItemGroup>
 
   <ItemGroup>
