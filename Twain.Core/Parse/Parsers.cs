@@ -3595,4 +3595,33 @@ public partial class Parsers
 
         return userTalkTemplates;
     }
+
+    /// <summary>
+    /// Adds the specified category to article text and removes any
+    /// Uncategorized maintenance template.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to update.
+    /// </param>
+    /// <param name="categoryName">
+    /// The category page name to add.
+    /// </param>
+    /// <returns>
+    /// The updated article text.
+    /// </returns>
+    public static string AddCategoryToArticleText(
+        string articleText,
+        string categoryName)
+    {
+        articleText +=
+            "\r\n\r\n[[" +
+            categoryName +
+            "]]";
+
+        // Remove any {{uncategorised}} tag now. The tagger still counts
+        // categories based on the saved page revision.
+        return WikiRegexes.Uncategorized.Replace(
+            articleText,
+            string.Empty);
+    }
 }

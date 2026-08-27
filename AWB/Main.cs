@@ -11865,23 +11865,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Compares two regular-expression entries by their integer keys in
-    /// descending order.
-    /// </summary>
-    /// <param name="x">The first regular-expression entry to compare.</param>
-    /// <param name="y">The second regular-expression entry to compare.</param>
-    /// <returns>
-    /// A value indicating the relative sort order of <paramref name="x"/>
-    /// and <paramref name="y"/>.
-    /// </returns>
-    private static int CompareRegexPairs(
-        KeyValuePair<int, string> x,
-        KeyValuePair<int, string> y)
-    {
-        return y.Key.CompareTo(x.Key);
-    }
-
-    /// <summary>
     /// Profiles the currently loaded regular-expression typo rules against the
     /// current article text and writes the timing results to a diagnostic file.
     /// </summary>
@@ -12100,7 +12083,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         txtEdit.Text =
-            AddCategoryToArticleText(
+            Parsers.AddCategoryToArticleText(
                 txtEdit.Text,
                 _catName.CategoryName);
 
@@ -12127,29 +12110,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         editor.Open(categoryName, false);
 
         return editor.Page.Exists;
-    }
-
-    /// <summary>
-    /// Adds the specified category to article text and removes any
-    /// Uncategorized maintenance template.
-    /// </summary>
-    /// <param name="articleText">The article text to update.</param>
-    /// <param name="categoryName">The category page name to add.</param>
-    /// <returns>The updated article text.</returns>
-    private static string AddCategoryToArticleText(
-        string articleText,
-        string categoryName)
-    {
-        articleText +=
-            "\r\n\r\n[[" +
-            categoryName +
-            "]]";
-
-        // Remove any {{uncategorised}} tag now. The tagger still counts
-        // categories based on the saved page revision.
-        return WikiRegexes.Uncategorized.Replace(
-            articleText,
-            string.Empty);
     }
 
     /// <summary>
