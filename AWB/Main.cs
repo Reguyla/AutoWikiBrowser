@@ -10966,7 +10966,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 WebUtility.UrlEncode(pageTitle);
 
             string url =
-                BuildHistoryUrl(
+                Tools.BuildHistoryUrl(
                     Variables.URLIndex,
                     encodedTitle);
 
@@ -11039,7 +11039,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             }
 
             string url =
-                BuildWhatLinksHereUrl(
+                Tools.BuildWhatLinksHereUrl(
                     Variables.URLIndex,
                     title);
 
@@ -11067,32 +11067,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     "<html><body><p>Unable to load What Links Here</p></body></html>");
             }
         }
-    }
-
-    /// <summary>
-    /// Builds the printable "What Links Here" URL for the specified page.
-    /// </summary>
-    /// <param name="urlIndex">
-    /// The wiki index URL.
-    /// </param>
-    /// <param name="pageTitle">
-    /// The page title.
-    /// </param>
-    /// <returns>
-    /// The printable "What Links Here" URL.
-    /// </returns>
-    private static string BuildWhatLinksHereUrl(
-        string urlIndex,
-        string pageTitle)
-    {
-        string encodedTitle =
-            WebUtility.UrlEncode(pageTitle);
-
-        return
-            urlIndex +
-            "?title=Special:WhatLinksHere/" +
-            encodedTitle +
-            "&printable=yes";
     }
 
     /// <summary>
@@ -11198,7 +11172,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         try
         {
             string url =
-                BuildHistoryUrl(
+                Tools.BuildHistoryUrl(
                     Variables.URLIndex,
                     TheArticle.URLEncodedName);
 
@@ -11222,26 +11196,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                     "<html><body><p>Unable to load history</p></body></html>");
             }
         }
-    }
-
-    // TODO(Twain): Move wiki history URL construction into the site/navigation
-    // layer so MainForm does not construct MediaWiki URLs directly.
-    /// <summary>
-    /// Builds the printable revision-history URL for the specified page.
-    /// </summary>
-    /// <param name="urlIndex">The wiki index URL.</param>
-    /// <param name="encodedPageName">
-    /// The URL-encoded page name.
-    /// </param>
-    /// <returns>The printable revision-history URL.</returns>
-    private static string BuildHistoryUrl(
-        string urlIndex,
-        string encodedPageName)
-    {
-        return urlIndex +
-            "?title=" +
-            encodedPageName +
-            "&action=history&printable=yes";
     }
 
     /// <summary>

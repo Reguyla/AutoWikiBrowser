@@ -3884,4 +3884,51 @@ Message: {2}
 
         return res.ToString();
     }
+
+    /// <summary>
+    /// Builds the printable revision-history URL for the specified page.
+    /// </summary>
+    /// <param name="urlIndex">
+    /// The wiki index URL.
+    /// </param>
+    /// <param name="encodedPageName">
+    /// The URL-encoded page name.
+    /// </param>
+    /// <returns>
+    /// The printable revision-history URL.
+    /// </returns>
+    public static string BuildHistoryUrl(
+        string urlIndex,
+        string encodedPageName)
+    {
+        return urlIndex +
+            "?title=" +
+            encodedPageName +
+            "&action=history&printable=yes";
+    }
+
+    /// <summary>
+    /// Builds the printable What Links Here URL for the specified page.
+    /// </summary>
+    /// <param name="urlIndex">
+    /// The wiki index URL.
+    /// </param>
+    /// <param name="pageTitle">
+    /// The page title.
+    /// </param>
+    /// <returns>
+    /// The printable What Links Here URL.
+    /// </returns>
+    public static string BuildWhatLinksHereUrl(
+        string urlIndex,
+        string pageTitle)
+    {
+        string encodedTitle =
+            WebUtility.UrlEncode(pageTitle);
+
+        return urlIndex +
+            "?title=Special:WhatLinksHere/" +
+            encodedTitle +
+            "&printable=yes";
+    }
 }
