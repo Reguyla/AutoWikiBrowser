@@ -32,6 +32,7 @@ using Twain.Core.Controls.Lists;
 using Twain.Core.DiffHtml;
 using Twain.Core.Disambiguation;
 using Twain.Core.Editing;
+using Twain.Core.Exceptions;
 using Twain.Core.Links;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Navigation;
@@ -986,7 +987,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         {
             SkipPage("Page is a redirect to a special page");
         }
-        else if (IsRetryableNetworkException(ex))
+        else if (ExceptionClassifier.IsRetryableNetworkException(ex))
         {
             HandleNetworkException(ex);
         }
@@ -1132,38 +1133,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Determines whether an exception represents a retryable network failure.
-    /// </summary>
-    /// <param name="exception">The exception to classify.</param>
-    /// <returns>
-    /// <see langword="true"/> when processing should be retried; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private static bool IsRetryableNetworkException(
-        Exception exception)
-    {
-        for (Exception? current = exception;
-             current != null;
-             current = current.InnerException)
-        {
-            if (current is WebException or HttpRequestException)
-            {
-                return true;
-            }
-
-            if (current is IOException
-                && current.Message.Contains(
-                    "0x2746",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
     /// Handles an edit rejected by the spam blacklist.
     /// </summary>
     /// <param name="exception">
@@ -1215,7 +1184,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         // attempted. MediaWiki currently uses 429 and 503 responses with a delay
         // expressed in seconds.
         WebException? webException =
-            FindException<WebException>(exception);
+            ExceptionClassifier.FindException<WebException>(
+                exception);
 
         if (webException?.Response is HttpWebResponse response)
         {
@@ -1229,37 +1199,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         }
 
         StartDelayedRestartTimer();
-    }
-
-    /// <summary>
-    /// Searches an exception and its inner-exception chain for the first exception
-    /// of the specified type.
-    /// </summary>
-    /// <typeparam name="TException">
-    /// The exception type to locate.
-    /// </typeparam>
-    /// <param name="exception">
-    /// The exception at the beginning of the chain to inspect.
-    /// </param>
-    /// <returns>
-    /// The first matching exception in the chain, or <see langword="null"/> when
-    /// no matching exception is found.
-    /// </returns>
-    private static TException? FindException<TException>(
-        Exception exception)
-        where TException : Exception
-    {
-        for (Exception? current = exception;
-             current != null;
-             current = current.InnerException)
-        {
-            if (current is TException matchingException)
-            {
-                return matchingException;
-            }
-        }
-
-        return null;
     }
 
     /// <summary>
