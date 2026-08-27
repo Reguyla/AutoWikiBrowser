@@ -30,6 +30,7 @@ using Twain.Core.Background;
 using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
 using Twain.Core.DiffHtml;
+using Twain.Core.Disambiguation;
 using Twain.Core.Editing;
 using Twain.Core.Links;
 using Twain.Core.Lists.Providers;
@@ -10433,6 +10434,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
     // TODO(Twain): Move disambiguation link retrieval into a shared list service
     // so MainForm only coordinates user input and displays the resulting titles.
+    // Input parsing and result formatting are now handled by
+    // DisambiguationLinkHelper.
 
     /// <summary>
     /// Loads links from the specified disambiguation page or pages and
@@ -10445,7 +10448,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         try
         {
             string[] linkTitles =
-                ParseDisambiguationLinkTitles(
+                DisambiguationLinkHelper.ParseLinkTitles(
                     txtDabLink.Text);
 
             txtDabVariants.Text = string.Empty;
@@ -10454,52 +10457,14 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
                 new LinksOnPageListProvider().MakeList(linkTitles);
 
             txtDabVariants.Text =
-                BuildDisambiguationVariantsText(articles);
+                DisambiguationLinkHelper.BuildVariantsText(
+                    articles);
+
         }
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
         }
-    }
-
-    /// <summary>
-    /// Splits the disambiguation page input into individual page titles.
-    /// </summary>
-    /// <param name="text">The disambiguation page input text.</param>
-    /// <returns>The parsed page titles.</returns>
-    private static string[] ParseDisambiguationLinkTitles(string text)
-    {
-        return text.Split(
-            new[] { '|' },
-            StringSplitOptions.RemoveEmptyEntries);
-    }
-
-    /// <summary>
-    /// Builds the disambiguation variants text from the supplied articles,
-    /// excluding likely year articles.
-    /// </summary>
-    /// <param name="articles">The articles to process.</param>
-    /// <returns>
-    /// The article titles formatted as newline-separated text.
-    /// </returns>
-    private static string BuildDisambiguationVariantsText(
-        IEnumerable<Article> articles)
-    {
-        StringBuilder builder = new();
-
-        foreach (Article article in articles)
-        {
-            // Exclude likely year articles.
-            if (uint.TryParse(article.Name, out uint year) &&
-                year < 2100)
-            {
-                continue;
-            }
-
-            builder.AppendLine(article.Name);
-        }
-
-        return builder.ToString();
     }
 
     /// <summary>
