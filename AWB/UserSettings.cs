@@ -600,7 +600,7 @@ partial class MainForm
             FindText = txtFind.Text,
             FindRegex = chkFindRegex.Checked,
             FindCaseSensitive = chkFindCaseSensitive.Checked,
-            WordWrap = wordWrapToolStripMenuItem1.Checked,
+            WordWrap = wordWrapToolStripMenuItem.Checked,
             ToolBarEnabled = EnableToolBar,
             BypassRedirect = followRedirectsToolStripMenuItem.Checked,
             AutoSaveSettings = autoSaveSettingsToolStripMenuItem.Checked,
@@ -1205,7 +1205,7 @@ partial class MainForm
     private void LoadGeneralMenuPreferences(
         GeneralPrefs preferences)
     {
-        wordWrapToolStripMenuItem1.Checked =
+        wordWrapToolStripMenuItem.Checked =
             preferences.WordWrap;
 
         EnableToolBar =

@@ -5524,9 +5524,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         chkAppendMetaDataSort.Enabled = appendEnabled;
     }
 
-    // TODO (UI Modernization):
-    // Rename wordWrapToolStripMenuItem1 to a descriptive name and verify whether
-    // duplicate word-wrap controls should share a single command or checked state.
     /// <summary>
     /// Applies the selected word-wrap setting to the article editor.
     /// </summary>
@@ -5536,12 +5533,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <param name="e">
     /// The event data associated with the menu selection.
     /// </param>
-    private void wordWrapToolStripMenuItem1_Click(
+    private void wordWrapToolStripMenuItem_Click(
         object sender,
         EventArgs e)
     {
         txtEdit.WordWrap =
-            wordWrapToolStripMenuItem1.Checked;
+            wordWrapToolStripMenuItem.Checked;
     }
 
     // TODO (Localization):

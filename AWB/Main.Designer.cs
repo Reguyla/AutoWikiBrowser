@@ -50,7 +50,7 @@ namespace AutoWikiBrowser
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mnuTextBox = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.wordWrapToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.wordWrapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -481,7 +481,7 @@ namespace AutoWikiBrowser
             // mnuTextBox
             // 
             this.mnuTextBox.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.wordWrapToolStripMenuItem1,
+            this.wordWrapToolStripMenuItem,
             this.toolStripSeparator1,
             this.undoToolStripMenuItem,
             this.cutToolStripMenuItem,
@@ -515,15 +515,15 @@ namespace AutoWikiBrowser
             this.mnuTextBox.Size = new System.Drawing.Size(296, 552);
             this.mnuTextBox.Opening += new System.ComponentModel.CancelEventHandler(this.mnuTextBox_Opening);
             // 
-            // wordWrapToolStripMenuItem1
+            // wordWrapToolStripMenuItem
             // 
-            this.wordWrapToolStripMenuItem1.Checked = true;
-            this.wordWrapToolStripMenuItem1.CheckOnClick = true;
-            this.wordWrapToolStripMenuItem1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.wordWrapToolStripMenuItem1.Name = "wordWrapToolStripMenuItem1";
-            this.wordWrapToolStripMenuItem1.Size = new System.Drawing.Size(295, 22);
-            this.wordWrapToolStripMenuItem1.Text = "Word wrap";
-            this.wordWrapToolStripMenuItem1.Click += new System.EventHandler(this.wordWrapToolStripMenuItem1_Click);
+            this.wordWrapToolStripMenuItem.Checked = true;
+            this.wordWrapToolStripMenuItem.CheckOnClick = true;
+            this.wordWrapToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.wordWrapToolStripMenuItem.Name = "wordWrapToolStripMenuItem";
+            this.wordWrapToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
+            this.wordWrapToolStripMenuItem.Text = "Word wrap";
+            this.wordWrapToolStripMenuItem.Click += new System.EventHandler(this.wordWrapToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -4365,7 +4365,7 @@ namespace AutoWikiBrowser
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator15;
         private System.Windows.Forms.ToolStripButton btntsPreview;
         private System.Windows.Forms.ToolStripButton btntsChanges;
-        private System.Windows.Forms.ToolStripMenuItem wordWrapToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem wordWrapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem humanNameDisambigTagToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator16;
         private System.Windows.Forms.ToolStripButton btntsFalsePositive;
