@@ -4748,9 +4748,10 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             $"Article.EditSummary length: {article.EditSummary?.Length ?? 0}; " +
             $"starts with: '{GetDiagnosticPrefix(article.EditSummary, 200)}'");
 
-        summary = AppendArticleEditSummary(
-            summary,
-            article.EditSummary);
+        summary =
+            Summary.AppendArticleSummary(
+                summary,
+                article.EditSummary);
 
         Tools.WriteDebug(
             nameof(MakeDefaultEditSummary),
@@ -4759,9 +4760,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
 
         if (!noSectionEditSummaryToolStripMenuItem.Checked)
         {
-            summary = AddSectionEditSummary(
-                summary,
-                article);
+            summary =
+                Summary.AddSectionEditSummary(
+                    summary,
+                    article.OriginalArticleText,
+                    txtEdit.Text);
         }
 
         ValidateEditSummary(summary);
@@ -4794,56 +4797,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         return string.IsNullOrWhiteSpace(cmboEditSummary.Text)
             ? string.Empty
             : cmboEditSummary.Text.Trim();
-    }
-
-    // TODO (Internationalization):
-    // Review whether edit-summary separators should be determined from
-    // localization data instead of maintaining a hard-coded language list.
-    /// <summary>
-    /// Appends the article-specific edit summary using the punctuation
-    /// appropriate for the current wiki language.
-    /// </summary>
-    private static string AppendArticleEditSummary(
-        string summary,
-        string articleSummary)
-    {
-        if (string.IsNullOrEmpty(articleSummary))
-        {
-            return summary;
-        }
-
-        string separator =
-            Variables.LangCode switch
-            {
-                "ar" or "arz" or "fa" => "، ",
-                _ => ", "
-            };
-
-        return summary +
-               (string.IsNullOrEmpty(summary)
-                   ? string.Empty
-                   : separator) +
-               articleSummary;
-    }
-
-    /// <summary>
-    /// Adds a section-edit prefix when the edit modifies a single level-2 section.
-    /// </summary>
-    private string AddSectionEditSummary(
-        string summary,
-        Article article)
-    {
-        string sectionEditText =
-            Summary.ModifiedSection(
-                article.OriginalArticleText,
-                txtEdit.Text);
-
-        if (string.IsNullOrEmpty(sectionEditText))
-        {
-            return summary;
-        }
-
-        return $"/* {sectionEditText} */ {summary.TrimStart()}";
     }
 
     /// <summary>

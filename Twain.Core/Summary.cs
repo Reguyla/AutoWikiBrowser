@@ -200,4 +200,74 @@ public static class Summary
         return editSummary.Substring(
             sectionMarkerEnd + 2);
     }
+
+    /// <summary>
+    /// Appends an article-specific edit summary using the punctuation appropriate
+    /// for the current wiki language.
+    /// </summary>
+    /// <param name="summary">
+    /// The existing edit summary.
+    /// </param>
+    /// <param name="articleSummary">
+    /// The article-specific summary to append.
+    /// </param>
+    /// <returns>
+    /// The combined edit summary.
+    /// </returns>
+    public static string AppendArticleSummary(
+        string summary,
+        string articleSummary)
+    {
+        if (string.IsNullOrEmpty(articleSummary))
+        {
+            return summary;
+        }
+
+        string separator =
+            Variables.LangCode switch
+            {
+                "ar" or "arz" or "fa" => "، ",
+                _ => ", "
+            };
+
+        return summary +
+               (string.IsNullOrEmpty(summary)
+                   ? string.Empty
+                   : separator) +
+               articleSummary;
+    }
+
+    /// <summary>
+    /// Adds a section-edit prefix when the edit modifies a single section.
+    /// </summary>
+    /// <param name="summary">
+    /// The edit summary to prefix.
+    /// </param>
+    /// <param name="originalArticleText">
+    /// The article text as originally loaded.
+    /// </param>
+    /// <param name="currentArticleText">
+    /// The current article text after editing.
+    /// </param>
+    /// <returns>
+    /// The edit summary with a section prefix when a single modified section can
+    /// be identified; otherwise, the original summary.
+    /// </returns>
+    public static string AddSectionEditSummary(
+        string summary,
+        string originalArticleText,
+        string currentArticleText)
+    {
+        string sectionEditText =
+            ModifiedSection(
+                originalArticleText,
+                currentArticleText);
+
+        if (string.IsNullOrEmpty(sectionEditText))
+        {
+            return summary;
+        }
+
+        return $"/* {sectionEditText} */ {summary.TrimStart()}";
+    }
 }
