@@ -34,4 +34,17 @@ public sealed class SessionCounters
     /// Gets or sets the number of pages parsed during pre-parse mode.
     /// </summary>
     public int NumberOfPagesParsed { get; set; }
+
+    /// <summary>
+    /// Resets all session activity and rate counters.
+    /// </summary>
+    public void Reset()
+    {
+        NumberOfEdits = 0;
+        NumberOfIgnoredEdits = 0;
+        NumberOfNewPages = 0;
+        NumberOfPagesParsed = 0;
+        NumberOfEditsPerMinute = 0;
+        NumberOfPagesPerMinute = 0;
+    }
 }

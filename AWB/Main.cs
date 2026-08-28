@@ -6377,8 +6377,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     }
 
     /// <summary>
-    /// Records the current usage statistics when necessary and resets the
-    /// edit, skip, page, and processing counters.
+    /// Resets the edit, skip, page, and processing counters.
     /// </summary>
     /// <param name="sender">The menu item that raised the event.</param>
     /// <param name="e">The event data.</param>
@@ -6386,13 +6385,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         object sender,
         EventArgs e)
     {
-
-        _sessionCounters.NumberOfEdits = 0;
-        _sessionCounters.NumberOfIgnoredEdits = 0;
-        _sessionCounters.NumberOfEditsPerMinute = 0;
-        _sessionCounters.NumberOfNewPages = 0;
-        _sessionCounters.NumberOfPagesPerMinute = 0;
-        _sessionCounters.NumberOfPagesParsed = 0;
+        _sessionCounters.Reset();
     }
 
     /// <summary>
