@@ -333,6 +333,32 @@ public static class Tools
         return pos < 0 ? title : title.Substring(pos + 1).Trim();
     }
 
+    /// <summary>
+    /// Normalizes a category title by removing surrounding wiki-link brackets,
+    /// removing the localized Category namespace prefix, and applying the
+    /// project's first-letter capitalization rules.
+    /// </summary>
+    /// <param name="categoryTitle">
+    /// The category title to normalize.
+    /// </param>
+    /// <returns>
+    /// The normalized category title without a Category namespace prefix.
+    /// </returns>
+    public static string NormalizeCategoryTitle(string categoryTitle)
+    {
+        string title =
+            categoryTitle.Trim('[', ']');
+
+        title =
+            Regex.Replace(
+                title,
+                "^" +
+                Variables.NamespacesCaseInsensitive[Namespace.Category],
+                "");
+
+        return TurnFirstToUpper(title);
+    }
+
     // Covered by ToolsTests.GetNamespaceString()
     /// <summary>
     /// Returns a string just including the namespace of the article

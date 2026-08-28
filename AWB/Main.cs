@@ -5445,16 +5445,27 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             "https://github.com/Reguyla/AutoWikiBrowser/releases");
     }
 
+    /// <summary>
+    /// Normalizes the category name entered in a category text box when the
+    /// control loses focus.
+    /// </summary>
+    /// <param name="sender">
+    /// The category text box that raised the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
+    /// <remarks>
+    /// The category value is normalized by removing surrounding wiki-link
+    /// brackets and the localized Category namespace prefix, then applying the
+    /// current wiki's first-letter capitalization rules.
+    /// </remarks>
     private void CategoryLeave(object sender, EventArgs e)
     {
-        TextBox cat = sender as TextBox;
-
-        if (cat != null)
+        if (sender is TextBox cat)
         {
-            string text = cat.Text.Trim('[', ']');
-
-            text = Regex.Replace(text, "^" + Variables.NamespacesCaseInsensitive[Namespace.Category], "");
-            cat.Text = Tools.TurnFirstToUpper(text);
+            cat.Text =
+                Tools.NormalizeCategoryTitle(cat.Text);
         }
     }
 
