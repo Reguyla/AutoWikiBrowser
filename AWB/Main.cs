@@ -7096,31 +7096,11 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     int _seconds, _lastEditsTotal, _lastPagesTotal;
 
     /// <summary>
-    /// Calculates edit and page-processing rates for the most recent reporting
-    /// interval.
+    /// Updates edit and page-processing rates for the current reporting interval.
     /// </summary>
     private void GenerateEditStatistics()
     {
-        // Edits completed during the last minute.
-        _sessionCounters.NumberOfEditsPerMinute =
-            _sessionCounters.NumberOfEdits - _lastEditsTotal;
-
-        // Pages processed during the last minute. This includes edits and
-        // skipped pages in normal mode, or pages parsed in pre-parse mode.
-        _sessionCounters.NumberOfPagesPerMinute = Math.Max(
-            _sessionCounters.NumberOfEdits +
-            _sessionCounters.NumberOfIgnoredEdits +
-            _sessionCounters.NumberOfPagesParsed -
-            _lastPagesTotal,
-            0);
-
-        _lastEditsTotal =
-            _sessionCounters.NumberOfEdits;
-
-        _lastPagesTotal =
-            _sessionCounters.NumberOfEdits +
-            _sessionCounters.NumberOfIgnoredEdits +
-            _sessionCounters.NumberOfPagesParsed;
+        _sessionCounters.GenerateEditStatistics();
     }
 
     #endregion
