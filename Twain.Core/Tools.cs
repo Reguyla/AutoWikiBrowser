@@ -66,12 +66,22 @@ public static class Tools
     { get { return Version.ToString(); } }
 
     /// <summary>
-    ///
+    /// Gets the default user-agent string used for HTTP requests.
     /// </summary>
     public static string DefaultUserAgentString
-    { get; private set; }
+    {
+        get;
+        private set;
+    }
+
+    /// <summary>
+    /// Gets the user-agent string used for authenticated HTTP requests.
+    /// </summary>
     public static string AuthUserAgentString
-    { get; private set; }
+    {
+        get;
+        private set;
+    }
 
     // Covered by ToolsTests.IsRedirect()
     /// <summary>
@@ -115,7 +125,11 @@ public static class Tools
         return (p != ProjectEnum.custom && p != ProjectEnum.wikia);
     }
 
-    private static readonly char[] InvalidChars = { '[', ']', '{', '}', '|', '<', '>', '#' };
+    /// <summary>
+    /// Characters that are not permitted in valid wiki page titles.
+    /// </summary>
+    private static readonly char[] InvalidChars =
+    {'[', ']', '{', '}', '|', '<', '>', '#'};
 
     // Covered by ToolsTests.IsValidTitle()
     /// <summary>
@@ -196,8 +210,20 @@ public static class Tools
         return regex.Matches(input).Count;
     }
 
-    private static readonly Regex PersonOfPlace = new Regex(@"^(?<person>\w+( +\w+)*?)(?<ordinal> [IXV]+)? of (?<place>(\w+ *)+)(?<![IVX]+)$", RegexOptions.Compiled);
-    private static readonly Regex WordsOnly = new Regex(@"^[\w ]+$");
+    /// <summary>
+    /// Matches a name in the form "Person of Place", optionally including a
+    /// Roman-numeral ordinal after the person's name.
+    /// </summary>
+    private static readonly Regex PersonOfPlace =
+        new(
+            @"^(?<person>\w+( +\w+)*?)(?<ordinal> [IXV]+)? of (?<place>(\w+ *)+)(?<![IVX]+)$",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches text containing only word characters and spaces.
+    /// </summary>
+    private static readonly Regex WordsOnly =
+        new(@"^[\w ]+$");
 
     // Covered by HumanCatKeyTests
     /// <summary>
@@ -617,19 +643,40 @@ public static class Tools
     }
 
 #if !MONO
+    /// <summary>
+    /// Flashes the specified window to notify the user.
+    /// </summary>
+    /// <param name="windowHandle">
+    /// A handle to the window to flash.
+    /// </param>
+    /// <param name="invert">
+    /// <see langword="true"/> to invert the window's active caption state;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
     [DllImport("user32.dll")]
-    private static extern void FlashWindow(IntPtr hwnd, bool bInvert);
+    private static extern void FlashWindow(
+        IntPtr windowHandle,
+        bool invert);
 
     /// <summary>
-    /// Flashes the given form in the taskbar
+    /// Flashes the specified control's window to attract the user's attention.
     /// </summary>
+    /// <param name="window">
+    /// The control whose window should be flashed.
+    /// </param>
+    // TODO(Twain): Review whether failures to flash the window should be
+    // logged or explicitly treated as an intentionally ignored UI operation.
     public static void FlashWindow(Control window)
     {
         try
         {
-            FlashWindow(window.Handle, true);
+            FlashWindow(
+                window.Handle,
+                true);
         }
-        catch { }
+        catch
+        {
+        }
     }
 #endif
 
@@ -771,8 +818,17 @@ public static class Tools
         return (string.IsNullOrEmpty(input)) ? "" : (char.ToLower(input[0]) + input.Remove(0, 1));
     }
 
-    private static readonly CultureInfo EnglishCulture = new CultureInfo("en-GB");
-    private static readonly TextInfo EnglishCultureTextInfo = EnglishCulture.TextInfo;
+    /// <summary>
+    /// English (United Kingdom) culture used for culture-specific text operations.
+    /// </summary>
+    private static readonly CultureInfo EnglishCulture =
+        new("en-GB");
+
+    /// <summary>
+    /// Text information associated with <see cref="EnglishCulture"/>.
+    /// </summary>
+    private static readonly TextInfo EnglishCultureTextInfo =
+        EnglishCulture.TextInfo;
 
     /// <summary>
     /// Returns the trimmed input string in Title Case if:
@@ -819,14 +875,31 @@ public static class Tools
         return sb.ToString();
     }
 
-    private static readonly Regex RegexWordCountTable = new Regex(@"\{\|.*?\|\}", RegexOptions.Compiled | RegexOptions.Singleline);
+    /// <summary>
+    /// Matches wiki table markup for exclusion from word-count calculations.
+    /// </summary>
+    private static readonly Regex RegexWordCountTable =
+        new(
+            @"\{\|.*?\|\}",
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
     /// <summary>
-    /// Returns word count of the string
+    /// Counts the words in the specified text.
     /// </summary>
+    /// <param name="text">
+    /// The text whose words should be counted.
+    /// </param>
+    /// <returns>
+    /// The number of words found in <paramref name="text"/>.
+    /// </returns>
+    /// <remarks>
+    /// This overload uses the default maximum word-count limit.
+    /// </remarks>
     public static int WordCount(string text)
     {
-        return WordCount(text, 999999);
+        return WordCount(
+            text,
+            999999);
     }
 
     // Covered by ToolsTests.WordCount()
@@ -877,7 +950,17 @@ public static class Tools
         return allWikiLinks.Count(s => SiteMatrix.Languages.Contains(WikiRegexes.PossibleInterwikis.Match(s + "]]").Groups[1].Value.ToLower()));
     }
 
-    private static readonly Regex TemplatesGeneratingWikilinks = NestedTemplateRegex(new[] { "flagIOC", "speciesbox", "automatic taxobox" });
+    /// <summary>
+    /// Matches templates that can generate wikilinks in their rendered output.
+    /// </summary>
+    private static readonly Regex TemplatesGeneratingWikilinks =
+        NestedTemplateRegex(
+            new[]
+            {
+            "flagIOC",
+            "speciesbox",
+            "automatic taxobox"
+            });
 
     // Covered by ToolsTests.LinkCountTests
     /// <summary>
@@ -1063,7 +1146,13 @@ public static class Tools
         return sections.ToArray();
     }
 
-    private static readonly Regex HeadingStart = new Regex(@"^==", RegexOptions.Multiline);
+    /// <summary>
+    /// Matches a level-two wiki heading at the beginning of a line.
+    /// </summary>
+    private static readonly Regex HeadingStart =
+        new(
+            @"^==",
+            RegexOptions.Multiline);
 
     /// <summary>
     /// Matches the first section of an article, if the article has sections, else the whole article
@@ -1534,7 +1623,13 @@ public static class Tools
         return Globals.UsingMono ? "/" : "\\";
     }
 
-    private static readonly Regex WholeLine = new Regex(@"^(.*)$(?<!^\s*$)", RegexOptions.Multiline);
+    /// <summary>
+    /// Matches the complete contents of each non-blank line.
+    /// </summary>
+    private static readonly Regex WholeLine =
+        new(
+            @"^(.*)$(?<!^\s*$)",
+            RegexOptions.Multiline);
 
     /// <summary>
     /// Turns an HTML list into a wiki style list using the input bullet style (with space)
@@ -1553,20 +1648,25 @@ public static class Tools
         return WholeLine.Replace(text, m => bullet + " " + m.Groups[1].Value.TrimStart());
     }
 
-    private static readonly System.Media.SoundPlayer Sound = new System.Media.SoundPlayer();
+    /// <summary>
+    /// Sound player used to play the application's notification beep.
+    /// </summary>
+    private static readonly System.Media.SoundPlayer Sound =
+        new();
 
     /// <summary>
-    /// Beeps
+    /// Plays the application's notification beep sound.
     /// </summary>
     public static void Beep()
     {
-        // public domain sounds from http://www.partnersinrhyme.com/soundfx/PDsoundfx/beep.shtml
+        // Public-domain sound from:
+        // http://www.partnersinrhyme.com/soundfx/PDsoundfx/beep.shtml
         Sound.Stream = Resources.beep1;
         Sound.Play();
     }
 
     /// <summary>
-    /// Gets or sets value whether debug is enabled
+    /// Indicates whether debug output is enabled.
     /// </summary>
     public static bool WriteDebugEnabled;
 
@@ -1704,15 +1804,23 @@ Message: {2}
         return input.Replace(Environment.NewLine, "\n");
     }
 
-    // TODO: should be replaced with SiteInfo.OpenPageInBrowser() wherever possible
+    // TODO: Replace with SiteInfo.OpenPageInBrowser() wherever possible.
+
     /// <summary>
-    ///
+    /// Opens the specified wiki article in the user's default web browser.
     /// </summary>
+    /// <param name="title">
+    /// The title of the article to open.
+    /// </param>
     public static void OpenArticleInBrowser(string title)
     {
-        OpenURLInBrowser(Variables.NonPrettifiedURL(title));
+        OpenURLInBrowser(
+            Variables.NonPrettifiedURL(title));
     }
 
+    /// <summary>
+    /// Path to the web browser executable used when running under Wine.
+    /// </summary>
     private static string WineBrowserPath;
 
     /// <summary>
@@ -2151,8 +2259,24 @@ Message: {2}
     }
     #endregion
 
-    private const char ReturnLine = '\r', NewLine = '\n';
-    private static readonly char[] Separators = { ReturnLine, NewLine };
+    /// <summary>
+    /// Carriage-return character used when processing line breaks.
+    /// </summary>
+    private const char ReturnLine = '\r';
+
+    /// <summary>
+    /// Line-feed character used when processing line breaks.
+    /// </summary>
+    private const char NewLine = '\n';
+
+    /// <summary>
+    /// Characters used to separate lines when processing text.
+    /// </summary>
+    private static readonly char[] Separators =
+    {
+    ReturnLine,
+    NewLine
+};
 
     // Covered by ToolsTests.SplitLines()
     /// <summary>
@@ -2569,12 +2693,33 @@ Message: {2}
         return ReplaceWith(input, regex.Matches(input), rwith, keepGroup);
     }
 
-    // ensure dates returned are English.
-    private static readonly CultureInfo BritishEnglish = new CultureInfo("en-GB");
-    private static readonly CultureInfo AmericanEnglish = new CultureInfo("en-US");
+    /// <summary>
+    /// British English culture used to produce English-language date values.
+    /// </summary>
+    private static readonly CultureInfo BritishEnglish =
+        new("en-GB");
 
-    private static readonly Regex YearMon = new Regex(@"^\d{4}\-[0-3]\d$", RegexOptions.Compiled);
-    private static readonly Regex MonthYear = new Regex(@"^\w+ \d{4}$", RegexOptions.Compiled);
+    /// <summary>
+    /// American English culture used to produce English-language date values.
+    /// </summary>
+    private static readonly CultureInfo AmericanEnglish =
+        new("en-US");
+
+    /// <summary>
+    /// Matches a year and numeric month in YYYY-MM format.
+    /// </summary>
+    private static readonly Regex YearMon =
+        new(
+            @"^\d{4}\-[0-3]\d$",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a month name followed by a four-digit year.
+    /// </summary>
+    private static readonly Regex MonthYear =
+        new(
+            @"^\w+ \d{4}$",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Returns the input date in the requested format (American or International). If another Locale is passed in the input date is returned. For en-wiki only.
@@ -2659,10 +2804,37 @@ Message: {2}
         return AppendParameterToTemplate(templateCall, parameter, newValue, false);
     }
 
-    private static readonly Regex Bars = new Regex(@"\|", RegexOptions.Compiled);
-    private static readonly Regex AfterSpacedBars = new Regex(@"\| ", RegexOptions.Compiled);
-    private static readonly Regex BeforeSpacedBars = new Regex(@" +\|", RegexOptions.Compiled);
-    private static readonly Regex Newlines = new Regex("\r\n", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches pipe characters.
+    /// </summary>
+    private static readonly Regex Bars =
+        new(
+            @"\|",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches a pipe character followed by a space.
+    /// </summary>
+    private static readonly Regex AfterSpacedBars =
+        new(
+            @"\| ",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches one or more spaces immediately preceding a pipe character.
+    /// </summary>
+    private static readonly Regex BeforeSpacedBars =
+        new(
+            @" +\|",
+            RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches Windows-style CRLF line breaks.
+    /// </summary>
+    private static readonly Regex Newlines =
+        new(
+            "\r\n",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Appends the input parameter and value to the input template
@@ -2883,7 +3055,18 @@ Message: {2}
         return -1;
     }
 
-    private static readonly Regex TemplateArgument = new Regex(@"\|\s*([^{}\|]*?)\s*(?=\||}}$)", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches a template argument value between pipe separators or before the
+    /// template's closing braces.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the argument text with surrounding whitespace
+    /// excluded.
+    /// </remarks>
+    private static readonly Regex TemplateArgument =
+        new(
+            @"\|\s*([^{}\|]*?)\s*(?=\||}}$)",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Returns the number of arguments to the input template call, positional if populatedparametersonly=false, and named parameters
@@ -3100,7 +3283,17 @@ Message: {2}
         return templateCall;
     }
 
-    private static readonly Regex CiteUrl = new Regex(@"\|\s*url\s*=\s*([^\[\]<>""\s]+)", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches the value of a URL parameter in a citation template.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the URL value, excluding whitespace and characters
+    /// that are not permitted by this pattern.
+    /// </remarks>
+    private static readonly Regex CiteUrl =
+        new(
+            @"\|\s*url\s*=\s*([^\[\]<>""\s]+)",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Removes duplicate named parameters from a template call.
@@ -3120,66 +3313,125 @@ Message: {2}
     }
 
     /// <summary>
-    /// Removes duplicate (same or null) named parameters from template calls
+    /// Removes duplicate named parameters with the same value or a blank value
+    /// from a template call.
     /// </summary>
-    /// <param name="templatecall">The template call to clean up</param>
-    /// <param name="templateparams">Dictionary of parameter name and value found in template call</param>
-    /// <returns>The updated template call</returns>
-    public static string RemoveDuplicateTemplateParameters(string templatecall, Dictionary<string, string> templateparams)
+    /// <param name="templateCall">
+    /// The template call to clean up.
+    /// </param>
+    /// <param name="templateParams">
+    /// Dictionary containing parameter names and values found in the template call.
+    /// </param>
+    /// <returns>
+    /// The updated template call.
+    /// </returns>
+    public static string RemoveDuplicateTemplateParameters(
+        string templateCall,
+        Dictionary<string, string> templateParams)
     {
-        string originalTemplateCall = templatecall, updatedTemplateCall = string.Empty;
+        string originalTemplateCall = templateCall;
+        string updatedTemplateCall = string.Empty;
 
-        while (!updatedTemplateCall.Equals(templatecall))
+        while (!updatedTemplateCall.Equals(templateCall))
         {
-            templateparams.Clear();
-            string pipecleanedtemplate = PipeCleanedTemplate(templatecall);
-            updatedTemplateCall = templatecall;
+            templateParams.Clear();
 
-            foreach (Match m in anyParam.Matches(pipecleanedtemplate))
+            string pipeCleanedTemplate =
+                PipeCleanedTemplate(templateCall);
+
+            updatedTemplateCall = templateCall;
+
+            foreach (Match m in AnyParam.Matches(pipeCleanedTemplate))
             {
-                string paramValue = templatecall.Substring(m.Groups[2].Index, m.Groups[2].Length).Trim(),
-                paramName = m.Groups[1].Value.Trim();
+                string paramValue =
+                    templateCall
+                        .Substring(
+                            m.Groups[2].Index,
+                            m.Groups[2].Length)
+                        .Trim();
 
-                if (!templateparams.ContainsKey(paramName))
-                    templateparams.Add(paramName, paramValue);
+                string paramName =
+                    m.Groups[1].Value.Trim();
+
+                if (!templateParams.ContainsKey(paramName))
+                {
+                    templateParams.Add(
+                        paramName,
+                        paramValue);
+                }
                 else
                 {
-                    // do not remove parameter if ends with digit (e.g. last2 parameter), more likely needs renaming (e.g. last3) than removing
+                    // Do not remove parameter if it ends with a digit
+                    // (e.g. last2); it is more likely to need renaming
+                    // (e.g. last3) than removal.
                     if (Regex.IsMatch(paramName, @".[0-9]$"))
-                        continue;
-
-                    string earlierParamValue;
-                    templateparams.TryGetValue(paramName, out earlierParamValue);
-
-                    // remove this param if equal value to earlier one, or either value blank
-                    if (paramValue.Equals(earlierParamValue) || paramValue.Length == 0 || earlierParamValue.Length == 0)
                     {
-                        bool removeLastmatch = (paramValue.Length == 0);
-                        templatecall = RemoveTemplateParameter(templatecall, paramName, removeLastmatch);
+                        continue;
+                    }
+
+                    templateParams.TryGetValue(
+                        paramName,
+                        out string earlierParamValue);
+
+                    // Remove this parameter if its value matches the earlier one,
+                    // or if either value is blank.
+                    if (paramValue.Equals(earlierParamValue) ||
+                        paramValue.Length == 0 ||
+                        earlierParamValue.Length == 0)
+                    {
+                        bool removeLastMatch =
+                            paramValue.Length == 0;
+
+                        templateCall = RemoveTemplateParameter(
+                            templateCall,
+                            paramName,
+                            removeLastMatch);
+
                         break;
                     }
                 }
             }
         }
 
-        // check for URL breakage due to unescaped pipes in URL
-        if (!templatecall.Equals(originalTemplateCall))
+        // Check for URL breakage caused by unescaped pipes in the URL.
+        if (!templateCall.Equals(originalTemplateCall))
         {
-            string originalURL = CiteUrl.Match(originalTemplateCall).Groups[1].Value.TrimEnd("|".ToCharArray());
+            string originalUrl =
+                CiteUrl
+                    .Match(originalTemplateCall)
+                    .Groups[1]
+                    .Value
+                    .TrimEnd('|');
 
-            if (originalURL.Length > 0 && !CiteUrl.Match(templatecall).Groups[1].Value.Equals(originalURL))
+            if (originalUrl.Length > 0 &&
+                !CiteUrl
+                    .Match(templateCall)
+                    .Groups[1]
+                    .Value
+                    .Equals(originalUrl))
+            {
                 return originalTemplateCall;
+            }
         }
 
-        return templatecall;
+        return templateCall;
     }
 
-    private static readonly Regex anyParam = new Regex(@"\|\s*([^{}\|<>\r\n=]+)\s*=\s*([^}|]*)(?=\||}}$)");
+    /// <summary>
+    /// Matches a named template parameter and its value.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the parameter name, and capture group 2 contains
+    /// the parameter value.
+    /// </remarks>
+    private static readonly Regex AnyParam =
+        new(
+            @"\|\s*([^{}\|<>\r\n=]+)\s*=\s*([^}|]*)(?=\||}}$)");
 
     /// <summary>
     /// Finds duplicate named parameters in a template invocation.
     /// </summary>
-    /// <param name="templatecall">
+    /// <param name="templateCall">
     /// The template invocation to inspect.
     /// </param>
     /// <returns>
@@ -3187,26 +3439,37 @@ Message: {2}
     /// length within the template invocation.
     /// </returns>
     public static Dictionary<int, int> DuplicateTemplateParameters(
-        string templatecall)
+        string templateCall)
     {
         Dictionary<int, int> duplicates = new();
         HashSet<string> parameterNames = new();
 
-        foreach (Match match in anyParam.Matches(
-                     PipeCleanedTemplate(templatecall)))
+        foreach (Match match in AnyParam.Matches(
+                     PipeCleanedTemplate(templateCall)))
         {
             string parameterName = match.Groups[1].Value.Trim();
 
             if (!parameterNames.Add(parameterName))
             {
-                duplicates.Add(match.Index, match.Length);
+                duplicates.Add(
+                    match.Index,
+                    match.Length);
             }
         }
 
         return duplicates;
     }
 
-    private static readonly Regex SpacedPipes = new Regex(@"(\|\s*)(?:\||}})");
+    /// <summary>
+    /// Matches an empty template argument or a pipe immediately before the
+    /// template's closing braces.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the preceding pipe and any whitespace that
+    /// follows it.
+    /// </remarks>
+    private static readonly Regex SpacedPipes =
+        new(@"(\|\s*)(?:\||}})");
 
     /// <summary>
     /// Removes excess pipes from template calls, any where two pipes with no value/only whitespace between
@@ -3239,28 +3502,45 @@ Message: {2}
     }
 
     /// <summary>
-    /// Checks template calls using named parameters for unknown parameters
+    /// Checks a template call that uses named parameters for unknown parameters.
     /// </summary>
-    /// <param name="templatecall">The template call to check</param>
-    /// <param name="knownParameters">List of known template parameters (should be all lowercase)</param>
-    /// <returns>List of any unknown parameters</returns>
-    public static List<string> UnknownTemplateParameters(string templatecall, List<string> knownParameters)
+    /// <param name="templateCall">
+    /// The template call to inspect.
+    /// </param>
+    /// <param name="knownParameters">
+    /// The collection of known template parameter names. Entries should be lowercase.
+    /// </param>
+    /// <returns>
+    /// A list containing any unknown parameter names found in the template call.
+    /// </returns>
+    public static List<string> UnknownTemplateParameters(
+        string templateCall,
+        List<string> knownParameters)
     {
-        List<string> Unknowns = new();
+        List<string> unknowns = new();
 
-        string pipecleanedtemplate = PipeCleanedTemplate(templatecall);
+        string pipeCleanedTemplate =
+            PipeCleanedTemplate(templateCall);
 
-        foreach (Match m in anyParam.Matches(pipecleanedtemplate))
+        foreach (Match match in AnyParam.Matches(pipeCleanedTemplate))
         {
-            string paramName = m.Groups[1].Value.Trim();
+            string paramName =
+                match.Groups[1].Value.Trim();
 
             if (!knownParameters.Contains(paramName.ToLower()))
-                Unknowns.Add(paramName);
+            {
+                unknowns.Add(paramName);
+            }
         }
-        return Unknowns;
+
+        return unknowns;
     }
 
-    private static readonly Regex StartWhitespace = new Regex(@"^\s+");
+    /// <summary>
+    /// Matches one or more whitespace characters at the beginning of a string.
+    /// </summary>
+    private static readonly Regex StartWhitespace =
+        new(@"^\s+");
 
     /// <summary>
     /// Sets the template parameter value to the new value input, only if the template already has the parameter (with or without a value)
@@ -3316,8 +3596,23 @@ Message: {2}
         return templateCall;
     }
 
+    /// <summary>
+    /// Replacement character used when temporarily masking matched text.
+    /// </summary>
     private const char RepWith = '#';
-    private static readonly Regex SingleSquareBrackets = new Regex(@"\[((?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\])", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+
+    /// <summary>
+    /// Matches text enclosed in a single pair of square brackets while allowing
+    /// nested square brackets within the matched content.
+    /// </summary>
+    /// <remarks>
+    /// Uses a balancing group named <c>DEPTH</c> to ensure nested brackets are
+    /// balanced before the closing bracket is accepted.
+    /// </remarks>
+    private static readonly Regex SingleSquareBrackets =
+        new(
+            @"\[((?>[^\[\]]+|\[(?<DEPTH>)|\](?<-DEPTH>))*(?(DEPTH)(?!))\])",
+            RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
     /// <summary>
     /// Removes pipes that are not the pipe indicating the end of the parameter's value
@@ -3489,18 +3784,43 @@ Message: {2}
         return NestedTemplateRegex(GetTemplateName(templateCall)).Replace(templateCall, m => RenameTemplateME(m, newtemplatename, keepFirstLetterCase));
     }
 
-    private static string RenameTemplateME(Match m, string newTemplateName, bool keepFirstLetterCase)
+    /// <summary>
+    /// Replaces the name of a matched template while optionally preserving the
+    /// capitalization of its first letter.
+    /// </summary>
+    /// <param name="match">
+    /// The template match containing the template name and surrounding markup.
+    /// </param>
+    /// <param name="newTemplateName">
+    /// The new name to assign to the template.
+    /// </param>
+    /// <param name="keepFirstLetterCase">
+    /// <see langword="true"/> to preserve the first-letter capitalization of the
+    /// original template name; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The template text with the template name replaced.
+    /// </returns>
+    private static string RenameTemplateME(
+        Match match,
+        string newTemplateName,
+        bool keepFirstLetterCase)
     {
-        string originalTemplateName = m.Groups[2].Value;
+        string originalTemplateName =
+            match.Groups[2].Value;
 
-        if (keepFirstLetterCase && !newTemplateName.StartsWith("subst:"))
+        if (keepFirstLetterCase &&
+            !newTemplateName.StartsWith("subst:"))
         {
-            newTemplateName = TurnFirstToUpper(originalTemplateName).Equals(originalTemplateName)
-                ? TurnFirstToUpper(newTemplateName)
-                : TurnFirstToLower(newTemplateName);
+            newTemplateName =
+                TurnFirstToUpper(originalTemplateName).Equals(originalTemplateName)
+                    ? TurnFirstToUpper(newTemplateName)
+                    : TurnFirstToLower(newTemplateName);
         }
 
-        return (m.Groups[1].Value + newTemplateName + m.Groups[3].Value);
+        return match.Groups[1].Value +
+            newTemplateName +
+            match.Groups[3].Value;
     }
 
     /// <summary>
@@ -3516,8 +3836,23 @@ Message: {2}
         return NestedTemplateRegex(templatename).Replace(articletext, "$1" + newtemplatename + "$3", count);
     }
 
-    private const string NestedTemplateRegexStart = @"({{[\s_]*)(?:";
-    private const string NestedTemplateRegexEnd = @"([\s_]*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(\|((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))))?\}\})";
+    /// <summary>
+    /// Regex fragment that matches the opening markup and name prefix of a
+    /// template when constructing a nested-template pattern.
+    /// </summary>
+    private const string NestedTemplateRegexStart =
+        @"({{[\s_]*)(?:";
+
+    /// <summary>
+    /// Regex fragment that matches the remainder of a template when constructing
+    /// a nested-template pattern, including optional parameters and nested braces.
+    /// </summary>
+    /// <remarks>
+    /// Uses the balancing group <c>DEPTH</c> to ensure that nested braces within
+    /// template parameters are balanced.
+    /// </remarks>
+    private const string NestedTemplateRegexEnd =
+        @"([\s_]*(?:<!--[^>]*?-->\s*|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋\s*)?(\|((?>[^\{\}]+|\{(?<DEPTH>)|\}(?<-DEPTH>))*(?(DEPTH)(?!))))?\}\})";
 
     /// <summary>
     /// Returns a regex to match the input template
@@ -3671,7 +4006,17 @@ Message: {2}
         return false;
     }
 
-    private static readonly Regex LowerMagicWordTemplates = Tools.NestedTemplateRegex(new[] { "namespace", "numberofarticles", "padleft" });
+    /// <summary>
+    /// Matches supported magic-word templates whose names are written in lowercase.
+    /// </summary>
+    private static readonly Regex LowerMagicWordTemplates =
+        Tools.NestedTemplateRegex(
+            [
+                "namespace",
+            "numberofarticles",
+            "padleft"
+            ]);
+
     /// <summary>
     /// Replaces magic word templates with magic words, ignores templates with no arguments
     /// </summary>
@@ -3786,22 +4131,43 @@ Message: {2}
             .Replace("&amp;", "&");
     }
 
-    public static string ReAddDiacritics(string WithDiacritics, string WithoutDiacritics)
+    /// <summary>
+    /// Restores diacritics to words in text by matching them against words from
+    /// an equivalent version of the text that contains diacritics.
+    /// </summary>
+    /// <param name="withDiacritics">
+    /// The text containing the original words with diacritics.
+    /// </param>
+    /// <param name="withoutDiacritics">
+    /// The text in which matching words should have their diacritics restored.
+    /// </param>
+    /// <returns>
+    /// The text with diacritics restored where a unique matching word can be
+    /// identified.
+    /// </returns>
+    public static string ReAddDiacritics(
+        string withDiacritics,
+        string withoutDiacritics)
     {
-        foreach (Match m in WikiRegexes.RegexWordApostrophes.Matches(WithDiacritics))
+        foreach (Match match in WikiRegexes.RegexWordApostrophes.Matches(withDiacritics))
         {
-            string withoutWord = RemoveDiacritics(m.Value);
+            string withoutWord =
+                RemoveDiacritics(match.Value);
 
-            // don't replace if multiple matches, cannot be sure which word translates
-            if (Regex.Matches(WithoutDiacritics, @"\b" + Regex.Escape(withoutWord) + @"\b").Count == 1)
-                WithoutDiacritics = Regex.Replace(
-                    WithoutDiacritics,
+            // Don't replace if there are multiple matches, as it cannot be
+            // determined which word corresponds to the original.
+            if (Regex.Matches(
+                    withoutDiacritics,
+                    @"\b" + Regex.Escape(withoutWord) + @"\b").Count == 1)
+            {
+                withoutDiacritics = Regex.Replace(
+                    withoutDiacritics,
                     @"\b" + Regex.Escape(withoutWord) + @"\b",
-                    m.Value
-                );
+                    match.Value);
+            }
         }
 
-        return WithoutDiacritics;
+        return withoutDiacritics;
     }
 
     /// <summary>
@@ -3833,24 +4199,41 @@ Message: {2}
     }
 
     /// <summary>
-    /// Gets the appropriate cookies for the supplied AWB session and URL.
+    /// Gets the cookie container associated with the supplied AWB session and URL.
     /// </summary>
-    public static CookieContainer GetCookieContainer(string url, IAutoWikiBrowser awb)
+    /// <param name="url">
+    /// The URL for which cookies are requested.
+    /// </param>
+    /// <param name="awb">
+    /// The AWB instance containing the session and editor information.
+    /// </param>
+    /// <returns>
+    /// The session editor's cookie container when the URL belongs to that editor;
+    /// otherwise, a new empty <see cref="CookieContainer"/>.
+    /// </returns>
+    public static CookieContainer GetCookieContainer(
+        string url,
+        IAutoWikiBrowser awb)
     {
-        if (awb == null || awb.TheSession == null)
+        if (awb == null ||
+            awb.TheSession == null)
+        {
             return new CookieContainer();
+        }
 
         Session session = awb.TheSession;
 
-        ApiEdit syncEditor = session.Editor != null
-            ? session.Editor.SynchronousEditor
-            : null;
+        ApiEdit syncEditor =
+            session.Editor != null
+                ? session.Editor.SynchronousEditor
+                : null;
 
         if (syncEditor != null &&
             !string.IsNullOrEmpty(syncEditor.URL) &&
             url.StartsWith(syncEditor.URL))
         {
-            return syncEditor.Cookies ?? new CookieContainer();
+            return syncEditor.Cookies ??
+                new CookieContainer();
         }
 
         return new CookieContainer();
