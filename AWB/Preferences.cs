@@ -873,16 +873,18 @@ internal sealed partial class MyPreferences : Form
         {
             alertListBox.Items.Clear();
 
-            foreach (KeyValuePair<int, string> alert in
-                Twain.Core.Alerts.ArticleAlertHelper.AlertDescriptions)
+            foreach (KeyValuePair<ArticleAlertId, string> alert in
+                ArticleAlertHelper.AlertDescriptions)
             {
+                int alertId = (int)alert.Key;
+
                 alertListBox.Items.Add(
                     new CheckedBoxItem
                     {
-                        ID = alert.Key,
+                        ID = alertId,
                         Description = alert.Value
                     },
-                    enableAllAlerts || enabledAlerts.Contains(alert.Key));
+                    enableAllAlerts || enabledAlerts.Contains(alertId));
             }
         }
         finally

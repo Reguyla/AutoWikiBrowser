@@ -103,7 +103,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                12) &&
+                ArticleAlertId.LongArticleWithStubTag) &&
             article.NameSpaceKey == Namespace.Article &&
             wordCount > Parsers.StubMaxWordCount &&
             WikiRegexes.Stub.IsMatch(templates))
@@ -115,7 +115,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                14) &&
+                ArticleAlertId.NoCategory) &&
             categoryCount == 0 &&
             !Namespace.IsTalk(article.Name))
         {
@@ -126,7 +126,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                7) &&
+                ArticleAlertId.FootnotesTemplateWithManyReferences) &&
             article.NameSpaceKey == Namespace.Article &&
             article.HasMorefootnotesAndManyReferences)
         {
@@ -149,7 +149,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                16) &&
+                ArticleAlertId.StartsWithHeading) &&
             article.NameSpaceKey == Namespace.Article &&
             articleText.StartsWith("=="))
         {
@@ -160,7 +160,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                17))
+                ArticleAlertId.UnbalancedBrackets))
         {
             result.UnbalancedBrackets =
                 article.UnbalancedBrackets();
@@ -175,7 +175,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                11))
+                ArticleAlertId.TargetlessLinks))
         {
             result.TargetlessLinks =
                 article.TargetlessLinks();
@@ -190,7 +190,7 @@ public static class ArticleAlertEvaluator
         if (!ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                10))
+                ArticleAlertId.DoublePipeLinks))
         {
             return;
         }
@@ -209,7 +209,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                13) &&
+                ArticleAlertId.MultipleDefaultSort) &&
             WikiRegexes.Defaultsort.Matches(templates).Count > 1)
         {
             result.Alerts.Add(
@@ -219,7 +219,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                15) &&
+                ArticleAlertId.SeeAlsoOutOfPlace) &&
             article.HasSeeAlsoAfterNotesReferencesOrExternalLinks)
         {
             result.Alerts.Add(
@@ -243,7 +243,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                4))
+                ArticleAlertId.DeadLinks))
         {
             result.DeadLinks =
                 article.DeadLinks();
@@ -258,7 +258,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                6) &&
+                ArticleAlertId.ReferenceAfterReferences) &&
             article.HasRefAfterReflist)
         {
             result.Alerts.Add(
@@ -268,7 +268,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                3) &&
+                ArticleAlertId.DisambiguationPageWithReferences) &&
             article.IsDisambiguationPageWithRefs)
         {
             result.Alerts.Add(
@@ -278,7 +278,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                19) &&
+                ArticleAlertId.UnformattedReferences) &&
             article.HasBareReferences)
         {
             result.Alerts.Add(
@@ -288,7 +288,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                1))
+                ArticleAlertId.AmbiguousCitationDates))
         {
             result.AmbiguousCiteDates =
                 article.AmbiguousCiteTemplateDates();
@@ -303,7 +303,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                20))
+                ArticleAlertId.UnknownMultipleIssuesParameters))
         {
             result.UnknownMultipleIssuesParameters =
                 article.UnknownMultipleIssuesParameters();
@@ -321,7 +321,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                8))
+                ArticleAlertId.WikilinkedHeaders))
         {
             result.WikilinkedHeaders =
                 article.WikiLinkedHeaders();
@@ -336,7 +336,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                18))
+                ArticleAlertId.UnclosedTags))
         {
             result.UnclosedTags =
                 article.UnclosedTags();
@@ -351,7 +351,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                9))
+                ArticleAlertId.InvalidCitationParameters))
         {
             result.BadCiteParameters =
                 article.BadCiteParameters();
@@ -376,7 +376,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                5))
+                ArticleAlertId.DuplicateBannerShellParameters))
         {
             result.DuplicateBannerShellParameters =
                 article.DuplicateWikiProjectBannerShellParameters();
@@ -391,7 +391,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                21))
+                ArticleAlertId.UnknownWikiProjectBannerShellParameters))
         {
             result.UnknownWikiProjectBannerShellParameters =
                 article.UnknownWikiProjectBannerShellParameters();
@@ -409,7 +409,7 @@ public static class ArticleAlertEvaluator
         if (ArticleAlertHelper.IsAlertEnabled(
                 allAlertsEnabled,
                 enabledAlertIds,
-                22) &&
+                ArticleAlertId.UserSignatureOrUserSpaceLink) &&
             article.NameSpaceKey == Namespace.Article)
         {
             result.UserSignatures =
