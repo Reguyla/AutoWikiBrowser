@@ -6536,7 +6536,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         ProjectEnum project)
     {
         _parser.InterWikiOrder =
-            GetInterWikiOrder(
+            MetaDataSorter.GetInterWikiOrder(
                 Variables.LangCode);
 
         if (project == ProjectEnum.commons)
@@ -6544,29 +6544,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             _parser.InterWikiOrder =
                 InterWikiOrderEnum.Alphabetical;
         }
-    }
-
-    /// <summary>
-    /// Gets the interwiki ordering appropriate for the specified language code.
-    /// </summary>
-    /// <param name="languageCode">The wiki language code.</param>
-    /// <returns>The interwiki ordering used by the parser.</returns>
-    private static InterWikiOrderEnum GetInterWikiOrder(
-        string languageCode)
-    {
-        return languageCode switch
-        {
-            "en" or "lb" or "pl" or "no" or "sv" or "simple"
-                => InterWikiOrderEnum.LocalLanguageAlpha,
-
-            "he" or "hu" or "te" or "yi"
-                => InterWikiOrderEnum.AlphabeticalEnFirst,
-
-            "ms" or "et" or "nn" or "fi" or "vi" or "ur"
-                => InterWikiOrderEnum.LocalLanguageFirstWord,
-
-            _ => InterWikiOrderEnum.Alphabetical
-        };
     }
 
     /// <summary>

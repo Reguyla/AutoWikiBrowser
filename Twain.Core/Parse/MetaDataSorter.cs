@@ -185,6 +185,33 @@ public class MetaDataSorter
     }
 
     /// <summary>
+    /// Gets the interwiki ordering appropriate for the specified language code.
+    /// </summary>
+    /// <param name="languageCode">
+    /// The wiki language code.
+    /// </param>
+    /// <returns>
+    /// The interwiki ordering used for the specified language.
+    /// </returns>
+    public static InterWikiOrderEnum GetInterWikiOrder(
+        string languageCode)
+    {
+        return languageCode switch
+        {
+            "en" or "lb" or "pl" or "no" or "sv" or "simple"
+                => InterWikiOrderEnum.LocalLanguageAlpha,
+
+            "he" or "hu" or "te" or "yi"
+                => InterWikiOrderEnum.AlphabeticalEnFirst,
+
+            "ms" or "et" or "nn" or "fi" or "vi" or "ur"
+                => InterWikiOrderEnum.LocalLanguageFirstWord,
+
+            _ => InterWikiOrderEnum.Alphabetical
+        };
+    }
+
+    /// <summary>
     /// Gets the interwiki ordering sequence associated with the specified
     /// ordering mode.
     /// </summary>
