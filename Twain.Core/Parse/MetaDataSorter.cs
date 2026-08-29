@@ -1330,10 +1330,7 @@ en, sq, ru
     {
         // Do not extract a category from redirects that target a category,
         // for example: #REDIRECT [[Category:Example]].
-        string rt = Tools.RedirectTarget(articleText);
-
-        if (rt.Length > 0 &&
-            WikiRegexes.Category.IsMatch(@"[[" + rt + @"]]"))
+        if (IsCategoryRedirect(articleText))
         {
             return string.Empty;
         }
@@ -1457,6 +1454,25 @@ en, sq, ru
             return defaultSort + ListToString(categoryList) + uncat;
 
         return uncat + defaultSort + ListToString(categoryList);
+    }
+
+    /// <summary>
+    /// Determines whether the page is a redirect to a category.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to inspect.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the page redirects to a category; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private static bool IsCategoryRedirect(string articleText)
+    {
+        string redirectTarget = Tools.RedirectTarget(articleText);
+
+        return redirectTarget.Length > 0 &&
+            WikiRegexes.Category.IsMatch(
+                "[[" + redirectTarget + "]]");
     }
 
     /// <summary>
