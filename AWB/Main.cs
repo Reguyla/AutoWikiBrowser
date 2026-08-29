@@ -7963,39 +7963,34 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
-    /// <summary>
-    /// Matches four-digit years beginning with 1 or 2.
-    /// </summary>
-    private readonly Regex RegexDates =
-        new("[12][0-9]{3}", RegexOptions.Compiled);
-
-    // TODO(Twain): Move birth/death category detection and generation into
-    // shared article metadata processing once this workflow leaves MainForm.
-    //
-    // TODO: Improve birth/death year detection so life dates are distinguished
-    // from unrelated years appearing in article text.
-
+    // TODO(Twain): Improve manual birth/death year detection so life dates are
+    // distinguished from unrelated years appearing in article text.
     /// <summary>
     /// Generates birth and death categories from the article text and inserts
     /// them at the current selection.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
-    private void birthdeathCatsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void birthdeathCatsToolStripMenuItem_Click(
+        object sender,
+        EventArgs e)
     {
         if (TheArticle == null)
             return;
 
         try
         {
-            string articleTextLocal =
-                PrepareBirthDeathCategoryText(
-                    txtEdit.Text);
+            string name =
+                Tools.MakeHumanCatKey(
+                    TheArticle.Name,
+                    TheArticle.ArticleText);
 
-            MatchCollection m =
-                RegexDates.Matches(articleTextLocal);
+            string categories =
+                Parsers.BuildManualBirthDeathCategories(
+                    txtEdit.Text,
+                    name);
 
-            if (m.Count == 0)
+            if (categories.Length == 0)
             {
                 MessageBox.Show(
                     "No four-digit year was found in the article text.",
@@ -8005,16 +8000,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
                 return;
             }
-
-            string name =
-                Tools.MakeHumanCatKey(
-                    TheArticle.Name,
-                    TheArticle.ArticleText);
-
-            string categories =
-                BuildBirthDeathCategories(
-                    m,
-                    name);
 
             txtEdit.SelectedText = categories;
 
@@ -8042,115 +8027,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
-    /// <summary>
-    /// Prepares article text for birth and death year detection by removing
-    /// content whose dates should not be considered.
-    /// </summary>
-    /// <param name="articleText">The article text to process.</param>
-    /// <returns>
-    /// Article text with file links and dated maintenance templates excluded
-    /// from year detection.
-    /// </returns>
-    private static string PrepareBirthDeathCategoryText(
-        string articleText)
-    {
-        // Ignore dates in file captions and related file-link content.
-        articleText =
-            Tools.ReplaceWithSpaces(
-                articleText,
-                WikiRegexes.FileNamespaceLink.Matches(articleText));
-
-        articleText =
-            RemoveDatedTemplates(
-                articleText,
-                WikiRegexes.NestedTemplates);
-
-        articleText =
-            RemoveDatedTemplates(
-                articleText,
-                WikiRegexes.TemplateMultiline);
-
-        return articleText;
-    }
-
-    /// <summary>
-    /// Removes templates containing a date parameter from the supplied text.
-    /// </summary>
-    /// <param name="articleText">The article text to process.</param>
-    /// <param name="templateRegex">
-    /// The regular expression used to identify candidate templates.
-    /// </param>
-    /// <returns>
-    /// The article text with dated templates removed.
-    /// </returns>
-    private static string RemoveDatedTemplates(
-        string articleText,
-        Regex templateRegex)
-    {
-        foreach (Match m2 in templateRegex.Matches(articleText))
-        {
-            if (Tools.GetTemplateParameterValue(
-                m2.Value,
-                "date").Length > 0)
-            {
-                articleText =
-                    articleText.Replace(
-                        m2.Value,
-                        string.Empty);
-            }
-        }
-
-        return articleText;
-    }
-
-    /// <summary>
-    /// Builds birth and, when appropriate, death category markup from the
-    /// detected article years.
-    /// </summary>
-    /// <param name="matches">
-    /// The detected four-digit year matches.
-    /// </param>
-    /// <param name="name">
-    /// The category sort key used for the generated categories.
-    /// </param>
-    /// <returns>The generated category markup.</returns>
-    private static string BuildBirthDeathCategories(
-        MatchCollection matches,
-        string name)
-    {
-        string births = string.Empty;
-        string deaths = string.Empty;
-
-        if (matches.Count >= 1)
-            births = matches[0].Value;
-
-        if (matches.Count >= 2)
-            deaths = matches[1].Value;
-
-        if (string.IsNullOrEmpty(deaths) ||
-            int.Parse(deaths) < int.Parse(births) + 20)
-        {
-            return
-                "[[Category:" +
-                births +
-                " births|" +
-                name +
-                "]]";
-        }
-
-        return
-            "[[Category:" +
-            births +
-            " births|" +
-            name +
-            "]]\r\n[[Category:" +
-            deaths +
-            " deaths|" +
-            name +
-            "]]";
-    }
-
-    /// <summary>
+     /// <summary>
     /// Inserts the configured stub text at the current editor selection.
     /// </summary>
     /// <param name="sender">The source of the event.</param>

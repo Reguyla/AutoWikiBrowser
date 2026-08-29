@@ -1240,6 +1240,154 @@ public partial class Parsers
     }
 
     /// <summary>
+    /// Matches four-digit years beginning with 1 or 2.
+    /// </summary>
+    private static readonly Regex BirthDeathCategoryYear =
+        new("[12][0-9]{3}", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Builds birth and death category markup from article text using the
+    /// legacy manual category-generation rules.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text to inspect for candidate birth and death years.
+    /// </param>
+    /// <param name="categorySortKey">
+    /// The sort key to use for the generated categories.
+    /// </param>
+    /// <returns>
+    /// The generated category markup, or <see cref="string.Empty"/> when no
+    /// four-digit year is detected.
+    /// </returns>
+    public static string BuildManualBirthDeathCategories(
+        string articleText,
+        string categorySortKey)
+    {
+        string preparedArticleText =
+            PrepareBirthDeathCategoryText(
+                articleText);
+
+        MatchCollection matches =
+            BirthDeathCategoryYear.Matches(
+                preparedArticleText);
+
+        if (matches.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        return BuildBirthDeathCategories(
+            matches,
+            categorySortKey);
+    }
+
+    /// <summary>
+    /// Prepares article text for birth and death year detection by removing
+    /// content whose dates should not be considered.
+    /// </summary>
+    /// <param name="articleText">The article text to process.</param>
+    /// <returns>
+    /// Article text with file links and dated maintenance templates excluded
+    /// from year detection.
+    /// </returns>
+    private static string PrepareBirthDeathCategoryText(
+        string articleText)
+    {
+        articleText =
+            Tools.ReplaceWithSpaces(
+                articleText,
+                WikiRegexes.FileNamespaceLink.Matches(articleText));
+
+        articleText =
+            RemoveDatedTemplates(
+                articleText,
+                WikiRegexes.NestedTemplates);
+
+        articleText =
+            RemoveDatedTemplates(
+                articleText,
+                WikiRegexes.TemplateMultiline);
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Removes templates containing a date parameter from the supplied text.
+    /// </summary>
+    /// <param name="articleText">The article text to process.</param>
+    /// <param name="templateRegex">
+    /// The regular expression used to identify candidate templates.
+    /// </param>
+    /// <returns>
+    /// The article text with dated templates removed.
+    /// </returns>
+    private static string RemoveDatedTemplates(
+        string articleText,
+        Regex templateRegex)
+    {
+        foreach (Match match in templateRegex.Matches(articleText))
+        {
+            if (Tools.GetTemplateParameterValue(
+                match.Value,
+                "date").Length > 0)
+            {
+                articleText =
+                    articleText.Replace(
+                        match.Value,
+                        string.Empty);
+            }
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Builds birth and, when appropriate, death category markup from the
+    /// detected article years.
+    /// </summary>
+    /// <param name="matches">
+    /// The detected four-digit year matches.
+    /// </param>
+    /// <param name="categorySortKey">
+    /// The category sort key used for the generated categories.
+    /// </param>
+    /// <returns>The generated category markup.</returns>
+    private static string BuildBirthDeathCategories(
+        MatchCollection matches,
+        string categorySortKey)
+    {
+        string births =
+            matches[0].Value;
+
+        string deaths =
+            matches.Count >= 2
+                ? matches[1].Value
+                : string.Empty;
+
+        if (string.IsNullOrEmpty(deaths) ||
+            int.Parse(deaths) < int.Parse(births) + 20)
+        {
+            return
+                "[[Category:" +
+                births +
+                " births|" +
+                categorySortKey +
+                "]]";
+        }
+
+        return
+            "[[Category:" +
+            births +
+            " births|" +
+            categorySortKey +
+            "]]\r\n[[Category:" +
+            deaths +
+            " deaths|" +
+            categorySortKey +
+            "]]";
+    }
+
+    /// <summary>
     /// Attempts to extract a sufficiently certain birth year from an infobox
     /// in the zeroth section.
     /// </summary>
