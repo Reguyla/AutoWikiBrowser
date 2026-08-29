@@ -69,4 +69,50 @@ public static class ExceptionClassifier
 
         return null;
     }
+
+    /// <summary>
+    /// Determines whether an exception or one of its inner exceptions represents
+    /// an HTTP 401 Unauthorized response.
+    /// </summary>
+    /// <param name="exception">
+    /// The exception at the beginning of the exception chain to inspect.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the exception chain contains an unauthorized
+    /// HTTP response; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Supports both the legacy <see cref="WebException"/> response model and the
+    /// modern <see cref="HttpRequestException"/> status-code model. Legacy support
+    /// can be removed after the remaining HTTP paths have been migrated from
+    /// <c>HttpWebRequest</c> to <c>HttpClient</c>.
+    /// </remarks>
+    public static bool IsUnauthorizedResponse(Exception exception)
+    {
+        for (Exception? current = exception;
+             current != null;
+             current = current.InnerException)
+        {
+            if (current is WebException
+                {
+                    Response: HttpWebResponse
+                    {
+                        StatusCode: HttpStatusCode.Unauthorized
+                    }
+                })
+            {
+                return true;
+            }
+
+            if (current is HttpRequestException
+                {
+                    StatusCode: HttpStatusCode.Unauthorized
+                })
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
