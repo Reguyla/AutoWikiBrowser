@@ -1,6 +1,5 @@
 ﻿using Twain.Core.Parse;
 using Twain.Core.Plugin;
-using Twain.Core.ReplaceSpecial;
 
 namespace Twain.Core.Processing;
 
@@ -41,13 +40,13 @@ public sealed class MainProcess
         Article article,
         MainProcessOptions options)
     {
-        if (options.ImageOperation == 0)
+        if (options.ImageOperation == ImageReplaceOptions.NoAction)
         {
             return true;
         }
 
         article.UpdateImages(
-            (Twain.Core.Options.ImageReplaceOptions)options.ImageOperation,
+            options.ImageOperation,
             options.ImageReplace,
             options.ImageWith,
             options.SkipIfNoImageChange);
@@ -73,8 +72,7 @@ public sealed class MainProcess
         MainProcessOptions options)
     {
         return article.ApplyCategorisationChanges(
-            (Twain.Core.Options.CategorisationOptions)
-                options.CategorisationOperation,
+            options.CategorisationOperation,
             _parser,
             options.SkipIfNoCategoryChange,
             options.NewCategory,

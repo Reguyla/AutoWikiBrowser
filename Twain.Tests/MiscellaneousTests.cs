@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Twain.Core;
 using Twain.Core.Controls.Lists;
 using Twain.Core.Parse;
+using Twain.Core.Processing;
 using Twain.Core.ReplaceSpecial;
 using Twain.Core.TalkPages;
 
@@ -725,10 +726,13 @@ Proin in odio. Pellentesque [[habitant]] [[morbi]] [[tristique]] senectus et net
         Article theArticle = new Article("Category:Hello", "Text [[Category:Foo]]");
         Parsers p = new Parsers(500, true);
 
-        theArticle.Categorisation((Twain.Core.Options.CategorisationOptions)
-            1, p, false,
+        theArticle.Categorisation(
+            CategorisationOptions.ReCat,
+            p,
+            false,
             "Foo",
-            "Foo2", false);
+            "Foo2",
+            false);
 
         Assert.That(theArticle.ArticleText, Is.EqualTo("Text [[Category:Foo2]]"), "Category rename operation");
     }

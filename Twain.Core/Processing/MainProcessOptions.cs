@@ -1,6 +1,58 @@
 ﻿namespace Twain.Core.Processing;
 
 /// <summary>
+/// Specifies the image operation applied during article processing.
+/// </summary>
+public enum ImageReplaceOptions
+{
+    /// <summary>
+    /// No image operation is performed.
+    /// </summary>
+    NoAction = 0,
+
+    /// <summary>
+    /// Replaces the specified image with another image.
+    /// </summary>
+    Replace = 1,
+
+    /// <summary>
+    /// Removes the specified image.
+    /// </summary>
+    Remove = 2,
+
+    /// <summary>
+    /// Comments out the specified image.
+    /// </summary>
+    Comment = 3
+}
+
+/// <summary>
+/// Specifies the category operation applied during article processing.
+/// </summary>
+public enum CategorisationOptions
+{
+    /// <summary>
+    /// No category operation is performed.
+    /// </summary>
+    NoAction = 0,
+
+    /// <summary>
+    /// Replaces one category with another.
+    /// </summary>
+    ReCat = 1,
+
+    /// <summary>
+    /// Adds a category.
+    /// </summary>
+    AddCat = 2,
+
+    /// <summary>
+    /// Removes a category.
+    /// </summary>
+    RemoveCat = 3
+}
+
+/// <summary>
 /// Represents a snapshot of the processing options used when an article is
 /// passed through the main processing pipeline.
 /// </summary>
@@ -127,7 +179,7 @@ public sealed class MainProcessOptions
     /// <summary>
     /// Gets the image or file replacement operation to apply during processing.
     /// </summary>
-    public int ImageOperation { get; init; }
+    public ImageReplaceOptions ImageOperation { get; init; }
 
     /// <summary>
     /// Gets the image or file name to replace, remove, or comment out.
@@ -149,7 +201,7 @@ public sealed class MainProcessOptions
     /// <summary>
     /// Gets the category operation to apply during processing.
     /// </summary>
-    public int CategorisationOperation { get; init; }
+    public CategorisationOptions CategorisationOperation { get; init; }
 
     /// <summary>
     /// Gets whether the article should be skipped when the configured category

@@ -28,6 +28,7 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Twain.Core;
 using Twain.Core.Parse;
+using Twain.Core.Processing;
 
 namespace Twain.Tests;
 
@@ -589,10 +590,13 @@ C.<ref name=”XXL Mag”>{{cite web|url=http://www.somesite.com/online/?p=70413
 
         // Categorization and then universal genfix
         Article ar2 = new Article("Category:Hello", " Text [[Category:Foo]]");
-        ar2.Categorisation((Twain.Core.Options.CategorisationOptions)
-            1, parser, false,
+        ar2.Categorisation(
+            CategorisationOptions.ReCat,
+            parser,
+            false,
             "Foo",
-            "Foo2", false);
+            "Foo2",
+            false);
         Assert.That(ar2.ArticleText, Is.EqualTo(" Text [[Category:Foo2]]"), "Category rename operation");
         ar2.PerformUniversalGeneralFixes();
         Assert.That(ar2.ArticleText, Is.EqualTo("Text [[Category:Foo2]]"), "Universal genfix trim");

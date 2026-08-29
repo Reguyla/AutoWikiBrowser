@@ -3150,12 +3150,12 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 (int)udContextChars.Value,
             SkipIfNoDisambiguation = chkSkipNoDab.Checked,
 
-            ImageOperation = cmboImages.SelectedIndex,
+            ImageOperation = (ImageReplaceOptions)cmboImages.SelectedIndex,
             ImageReplace = txtImageReplace.Text,
             ImageWith = txtImageWith.Text,
             SkipIfNoImageChange = chkSkipNoImgChange.Checked,
 
-            CategorisationOperation = cmboCategorise.SelectedIndex,
+            CategorisationOperation = (CategorisationOptions)cmboCategorise.SelectedIndex,
             SkipIfNoCategoryChange = chkSkipNoCatChange.Checked,
             NewCategory = txtNewCategory.Text.Trim(),
             NewCategory2 = txtNewCategory2.Text.Trim(),
