@@ -7298,8 +7298,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         listMaker.SaveList();
     }
 
-    // TODO(Twain): Replace numeric article-list preference values with a named
-    // mode and move ListComparer creation behind a shared service.
+    // TODO(Twain): Move ListComparer creation behind a shared service when
+    // auxiliary tool creation is separated from the legacy WinForms UI.
 
     /// <summary>
     /// Opens the List Comparer and optionally initializes it with the current
@@ -7374,8 +7374,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             listMaker);
     }
 
-    // TODO(Twain): Replace numeric article-list preference values with a named
-    // mode and move ListSplitter creation behind a shared service.
+    // TODO(Twain): Move ListSplitter creation behind a shared service when
+    // auxiliary tool creation is separated from the legacy WinForms UI.
 
     /// <summary>
     /// Opens the List Splitter and optionally initializes it with the current
@@ -7462,8 +7462,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         LaunchDumpSearcher();
     }
 
-    // TODO(Twain): Replace numeric article-list preference values with a named
-    // mode and move dump-searcher creation behind a shared service.
+    // TODO(Twain): Move dump-searcher creation behind a shared service when
+    // auxiliary tool creation is separated from the legacy WinForms UI.
 
     /// <summary>
     /// Opens the database dump searcher and configures whether its results
