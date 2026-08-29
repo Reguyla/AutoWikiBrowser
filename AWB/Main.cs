@@ -683,17 +683,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <summary>
     /// Tracks whether the list comparer should use the current article list.
     /// </summary>
-    private int _listComparerUseCurrentArticleList;
+    private CurrentArticleListMode _listComparerUseCurrentArticleList;
 
     /// <summary>
     /// Tracks whether the list splitter should use the current article list.
     /// </summary>
-    private int _listSplitterUseCurrentArticleList;
+    private CurrentArticleListMode _listSplitterUseCurrentArticleList;
 
     /// <summary>
     /// Tracks whether the database scanner should use the current article list.
     /// </summary>
-    private int _dbScannerUseCurrentArticleList;
+private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
     /// <summary>
     /// Indicates whether the user should be alerted by flashing the window.
@@ -7333,17 +7333,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         switch (_listComparerUseCurrentArticleList)
         {
-            case 0: // Ask
+            case CurrentArticleListMode.Ask:
                 return listMaker.Any() &&
                     MessageBox.Show(
                         "Would you like to copy your current Article List to the ListComparer?",
                         "Copy Article List?",
                         MessageBoxButtons.YesNo) == DialogResult.Yes;
 
-            case 1: // Always
+            case CurrentArticleListMode.Always:
                 return true;
 
-            case 2: // Never
+            case CurrentArticleListMode.Never:
                 return false;
 
             default:
@@ -7409,17 +7409,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         switch (_listSplitterUseCurrentArticleList)
         {
-            case 0: // Ask
+            case CurrentArticleListMode.Ask:
                 return listMaker.Any() &&
                     MessageBox.Show(
                         "Would you like to copy your current Article List to the ListSplitter?",
                         "Copy Article List?",
                         MessageBoxButtons.YesNo) == DialogResult.Yes;
 
-            case 1: // Always
+            case CurrentArticleListMode.Always:
                 return true;
 
-            case 2: // Never
+            case CurrentArticleListMode.Never:
                 return false;
 
             default:
@@ -7494,17 +7494,17 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     {
         switch (_dbScannerUseCurrentArticleList)
         {
-            case 0: // Ask
+            case CurrentArticleListMode.Ask:
                 return MessageBox.Show(
                     "Would you like the results to be added to the ListMaker Article List?",
                     "Add to ListMaker?",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question) == DialogResult.Yes;
 
-            case 1: // Always
+            case CurrentArticleListMode.Always:
                 return true;
 
-            case 2: // Never
+            case CurrentArticleListMode.Never:
                 return false;
 
             default:

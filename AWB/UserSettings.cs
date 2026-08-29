@@ -738,11 +738,13 @@ partial class MainForm
         return new ToolsPrefs
         {
             ListComparerUseCurrentArticleList =
-                _listComparerUseCurrentArticleList,
+                (int)_listComparerUseCurrentArticleList,
+
             ListSplitterUseCurrentArticleList =
-                _listSplitterUseCurrentArticleList,
+                (int)_listSplitterUseCurrentArticleList,
+
             DatabaseScannerUseCurrentArticleList =
-                _dbScannerUseCurrentArticleList
+                (int)_dbScannerUseCurrentArticleList
         };
     }
 
@@ -1453,12 +1455,15 @@ partial class MainForm
         ToolsPrefs preferences)
     {
         _listComparerUseCurrentArticleList =
+            (CurrentArticleListMode)
             preferences.ListComparerUseCurrentArticleList;
 
         _listSplitterUseCurrentArticleList =
+            (CurrentArticleListMode)
             preferences.ListSplitterUseCurrentArticleList;
 
         _dbScannerUseCurrentArticleList =
+            (CurrentArticleListMode)
             preferences.DatabaseScannerUseCurrentArticleList;
     }
 

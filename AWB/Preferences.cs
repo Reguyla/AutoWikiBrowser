@@ -23,6 +23,27 @@ using Twain.Core.Parse;
 
 namespace AutoWikiBrowser;
 
+/// <summary>
+/// Specifies whether an auxiliary tool should use the current article list.
+/// </summary>
+public enum CurrentArticleListMode
+{
+    /// <summary>
+    /// Prompts the user before using the current article list.
+    /// </summary>
+    Ask = 0,
+
+    /// <summary>
+    /// Always uses the current article list.
+    /// </summary>
+    Always = 1,
+
+    /// <summary>
+    /// Never uses the current article list.
+    /// </summary>
+    Never = 2
+}
+
 internal sealed partial class MyPreferences : Form
 {
     /// <summary>
@@ -716,39 +737,32 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public int PrefListComparerUseCurrentArticleList
+    public CurrentArticleListMode PrefListComparerUseCurrentArticleList
     {
-        get => cmboListComparer.SelectedIndex;
-        set => cmboListComparer.SelectedIndex = value;
+        get => (CurrentArticleListMode)cmboListComparer.SelectedIndex;
+        set => cmboListComparer.SelectedIndex = (int)value;
     }
+
     /// <summary>
     /// Gets or sets the List Splitter article-list source selection.
     /// </summary>
-    /// <remarks>
-    /// The value corresponds to the selected index in the List Splitter
-    /// source selector.
-    /// </remarks>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public int PrefListSplitterUseCurrentArticleList
+    public CurrentArticleListMode PrefListSplitterUseCurrentArticleList
     {
-        get => cmboListSplitter.SelectedIndex;
-        set => cmboListSplitter.SelectedIndex = value;
+        get => (CurrentArticleListMode)cmboListSplitter.SelectedIndex;
+        set => cmboListSplitter.SelectedIndex = (int)value;
     }
 
     /// <summary>
     /// Gets or sets the Database Scanner article-list source selection.
     /// </summary>
-    /// <remarks>
-    /// The value corresponds to the selected index in the Database Scanner
-    /// source selector.
-    /// </remarks>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public int PrefDBScannerUseCurrentArticleList
+    public CurrentArticleListMode PrefDBScannerUseCurrentArticleList
     {
-        get => cmboDBScanner.SelectedIndex;
-        set => cmboDBScanner.SelectedIndex = value;
+        get => (CurrentArticleListMode)cmboDBScanner.SelectedIndex;
+        set => cmboDBScanner.SelectedIndex = (int)value;
     }
 
     /// <summary>
