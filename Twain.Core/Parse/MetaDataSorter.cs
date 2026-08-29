@@ -1335,7 +1335,7 @@ en, sq, ru
             return string.Empty;
         }
 
-        List<string> categoryList = new();
+        List<string> categories = new();
         // Don't operate on pages with (incorrectly) multiple DEFAULTSORT declarations.
         // Ignore commented-out DEFAULTSORT entries.
         // Exact duplicate declarations are removed before determining whether multiple
@@ -1349,72 +1349,18 @@ en, sq, ru
             return string.Empty;
         }
 
-        bool defaultSortRemoved = false;
-
-        // allow comments between categories, and keep them in the same place, only grab any comment after the last category if on same line
-        // whitespace: remove all whitespace after, but leave a blank newline before a heading (rare case where category not in last section)
-
-        // performance: apply regex on portion of article containing category links rather than whole text
-        Match cq = WikiRegexes.CategoryQuick.Match(articleTextNoComments);
-
-        if (cq.Success)
+        // Allow comments between categories and keep them in the same place.
+        // Only grab a comment after the last category when it is on the same line.
+        // Remove trailing whitespace while preserving a blank line before a heading.
+        if (!TryExtractCategories(
+                ref articleText,
+                articleTitle,
+                articleTextNoComments,
+                ref defaultSortMatches,
+                ref categories,
+                out bool defaultSortRemoved))
         {
-            // T387084 don't apply sort where magic word behavior switches present as these can be placed anywhere in article
-            if (WikiRegexes.MagicWordBehaviourSwitches.IsMatch(articleText.Substring(cq.Index)))
-                return string.Empty;
-
-            List<string> allUnformatted =
-                WikiRegexes.UnformattedText
-                    .Matches(articleText)
-                    .Cast<Match>()
-                    .Select(m => m.Value)
-                    .ToList();
-
-            int cutoff = Math.Max(0, cq.Index - 500);
-            string cut = articleText.Substring(cutoff);
-
-            // if unformatted text is matched by the cats regex then it's a commented out category or a category comment itself containing a category, which we can handle as normal
-            List<string> catsList = WikiRegexes.RemoveCatsAllCats.Matches(cut).Cast<Match>().Select(m => m.Value).ToList();
-            allUnformatted.RemoveAll(u => catsList.Any(c => c.Contains(u)));
-
-            cut = WikiRegexes.RemoveCatsAllCats.Replace(cut, m =>
-            {
-                // don't pull cats from wiki comments/unformatted text regions
-                if (allUnformatted.Any(u => u.Contains(m.Value.Trim()) && !u.Equals(m.Value.Trim()) && !categoryList.Contains(u)))
-                    return m.Value;
-
-                if (!CatsForDeletion.IsMatch(m.Value))
-                    categoryList.Add(m.Value.Trim());
-
-                // if category not at start of line, leave newline, otherwise text on next line moved up
-                if (m.Index > 2 && !cut.Substring(m.Index - 2, 2).Trim().Equals(""))
-                    return "\r\n";
-
-                return string.Empty;
-            });
-
-            if (AddCatKey)
-                categoryList = CatKeyer(categoryList, articleTitle);
-
-            // now refresh defaultsort to pick up any comment on same line after it
-            if (defaultSortMatches.Count > 0)
-                defaultSortMatches = Regex.Matches(articleText, WikiRegexes.Defaultsort + @"(?: *<!--[^<>]*-->)?");
-
-            // remove defaultsort now if we can, faster to remove from cut than whole articleText
-            if (defaultSortMatches.Count > 0 && cut.Contains(defaultSortMatches[0].Value))
-            {
-                cut = cut.Replace(defaultSortMatches[0].Value, "");
-                defaultSortRemoved = true;
-            }
-
-            articleText = articleText.Substring(0, cutoff) + cut;
-
-            if (CatCommentRegex.IsMatch(cut))
-                articleText = CatCommentRegex.Replace(articleText, m =>
-                {
-                    categoryList.Insert(0, m.Value);
-                    return string.Empty;
-                }, 1);
+            return string.Empty;
         }
 
         string defaultSort = ExtractDefaultSort(
@@ -1434,9 +1380,9 @@ en, sq, ru
 
         // per MOS:ORDER {{Improve categories}} or {{Uncategorized}} after cats if in last section
         if (Variables.IsWikipediaEN)
-            return defaultSort + ListToString(categoryList) + uncat;
+            return defaultSort + ListToString(categories) + uncat;
 
-        return uncat + defaultSort + ListToString(categoryList);
+        return uncat + defaultSort + ListToString(categories);
     }
 
     /// <summary>
@@ -1518,6 +1464,180 @@ en, sq, ru
             "Page " + articleTitle + " has multiple DEFAULTSORTs");
 
         return false;
+    }
+
+    /// <summary>
+    /// Extracts categories and related metadata from the category-containing
+    /// portion of the article.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process. Extracted category metadata is removed from
+    /// this value.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article.
+    /// </param>
+    /// <param name="articleTextNoComments">
+    /// The article text with comments replaced by spaces.
+    /// </param>
+    /// <param name="defaultSortMatches">
+    /// The DEFAULTSORT matches associated with the article. This collection may
+    /// be refreshed to include a trailing same-line comment.
+    /// </param>
+    /// <param name="categoryList">
+    /// The collection that receives extracted category metadata.
+    /// </param>
+    /// <param name="defaultSortRemoved">
+    /// <see langword="true"/> when the DEFAULTSORT declaration is removed while
+    /// processing the category-containing portion of the article.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when category processing can continue; otherwise,
+    /// <see langword="false"/> when processing should be abandoned.
+    /// </returns>
+    private bool TryExtractCategories(
+        ref string articleText,
+        string articleTitle,
+        string articleTextNoComments,
+        ref MatchCollection defaultSortMatches,
+        ref List<string> categoryList,
+        out bool defaultSortRemoved)
+    {
+        defaultSortRemoved = false;
+        List<string> categories = categoryList;
+
+        // Performance: apply regex on portion of article containing category links
+        // rather than whole text.
+        Match categoryQuickMatch =
+            WikiRegexes.CategoryQuick.Match(articleTextNoComments);
+
+        if (!categoryQuickMatch.Success)
+        {
+            return true;
+        }
+
+        // T387084: Don't apply sort where magic word behavior switches are present,
+        // as these can be placed anywhere in the article.
+        if (WikiRegexes.MagicWordBehaviourSwitches.IsMatch(
+                articleText.Substring(categoryQuickMatch.Index)))
+        {
+            return false;
+        }
+
+        List<string> allUnformatted =
+            WikiRegexes.UnformattedText
+                .Matches(articleText)
+                .Cast<Match>()
+                .Select(m => m.Value)
+                .ToList();
+
+        int cutoff =
+            Math.Max(
+                0,
+                categoryQuickMatch.Index - 500);
+
+        string cut =
+            articleText.Substring(cutoff);
+
+        // If unformatted text is matched by the categories regex then it is a
+        // commented-out category, or a category comment itself containing a
+        // category, which can be handled as normal.
+        List<string> catsList =
+            WikiRegexes.RemoveCatsAllCats
+                .Matches(cut)
+                .Cast<Match>()
+                .Select(m => m.Value)
+                .ToList();
+
+        allUnformatted.RemoveAll(
+            u => catsList.Any(
+                c => c.Contains(u)));
+
+        cut = WikiRegexes.RemoveCatsAllCats.Replace(
+            cut,
+            m =>
+            {
+                // Don't pull categories from wiki comments/unformatted text regions.
+                if (allUnformatted.Any(
+                        u => u.Contains(m.Value.Trim()) &&
+                            !u.Equals(m.Value.Trim()) &&
+                            !categories.Contains(u)))
+                {
+                    return m.Value;
+                }
+
+                if (!CatsForDeletion.IsMatch(m.Value))
+                {
+                    categories.Add(
+                        m.Value.Trim());
+                }
+
+                // If category is not at start of line, leave newline;
+                // otherwise text on next line would move up.
+                if (m.Index > 2 &&
+                    !cut.Substring(
+                            m.Index - 2,
+                            2)
+                        .Trim()
+                        .Equals(""))
+                {
+                    return "\r\n";
+                }
+
+                return string.Empty;
+            });
+
+        if (AddCatKey)
+        {
+            categories =
+                CatKeyer(
+                    categories,
+                    articleTitle);
+        }
+
+        // Refresh DEFAULTSORT to pick up any comment on the same line after it.
+        if (defaultSortMatches.Count > 0)
+        {
+            defaultSortMatches =
+                Regex.Matches(
+                    articleText,
+                    WikiRegexes.Defaultsort + @"(?: *<!--[^<>]*-->)?");
+        }
+
+        // Remove DEFAULTSORT now if possible; this is faster than removing it
+        // from the whole articleText value.
+        if (defaultSortMatches.Count > 0 &&
+            cut.Contains(defaultSortMatches[0].Value))
+        {
+            cut = cut.Replace(
+                defaultSortMatches[0].Value,
+                "");
+
+            defaultSortRemoved = true;
+        }
+
+        articleText =
+            articleText.Substring(
+                0,
+                cutoff) +
+            cut;
+
+        if (CatCommentRegex.IsMatch(cut))
+        {
+            articleText = CatCommentRegex.Replace(
+                articleText,
+                m =>
+                {
+                    categories.Insert(
+                        0,
+                        m.Value);
+
+                    return string.Empty;
+                },
+                1);
+        }
+
+        return true;
     }
 
     /// <summary>
