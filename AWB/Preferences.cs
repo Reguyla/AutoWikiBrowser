@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using Twain.Core;
+using Twain.Core.Alerts;
 using Twain.Core.Parse;
 
 namespace AutoWikiBrowser;
@@ -854,13 +855,17 @@ internal sealed partial class MyPreferences : Form
     }
 
     /// <summary>
-    /// Rebuilds the alert list using the supplied enabled alert identifiers.
+    /// Rebuilds the alert preference list using the supplied enabled alert identifiers.
     /// </summary>
+    /// <param name="enabledAlertIds">
+    /// The identifiers of alerts that should be enabled. An empty collection
+    /// indicates that all alerts should be enabled.
+    /// </param>
     private void PopulateAlertPreferences(
         IReadOnlyCollection<int> enabledAlertIds)
     {
         bool enableAllAlerts = enabledAlertIds.Count == 0;
-        var enabledAlerts = enabledAlertIds.ToHashSet();
+        HashSet<int> enabledAlerts = enabledAlertIds.ToHashSet();
 
         alertListBox.BeginUpdate();
 
@@ -868,7 +873,8 @@ internal sealed partial class MyPreferences : Form
         {
             alertListBox.Items.Clear();
 
-            foreach (KeyValuePair<int, string> alert in _alertDescriptions)
+            foreach (KeyValuePair<int, string> alert in
+                Twain.Core.Alerts.ArticleAlertHelper.AlertDescriptions)
             {
                 alertListBox.Items.Add(
                     new CheckedBoxItem
@@ -884,35 +890,6 @@ internal sealed partial class MyPreferences : Form
             alertListBox.EndUpdate();
         }
     }
-
-    /// <summary>
-    /// Gets an alert item from the checked list.
-    /// </summary>
-    /// <param name="index">
-    /// The zero-based item index.
-    /// </param>
-    /// <returns>
-    /// The alert item at the specified index.
-    /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the checked-list item is not a
-    /// <see cref="CheckedBoxItem"/>.
-    /// </exception>
-    private CheckedBoxItem GetAlertItem(int index)
-    {
-        return alertListBox.Items[index] is CheckedBoxItem alertItem
-            ? alertItem
-            : throw new InvalidOperationException(
-                $"Alert item at index {index} is not a {nameof(CheckedBoxItem)}.");
-    }
-
-    /// <summary>
-    /// Represents an alert identifier and its selected state independently of
-    /// the Windows Forms controls.
-    /// </summary>
-    private readonly record struct AlertSelection(
-        int Id,
-        bool IsChecked);
 
     #endregion
 
@@ -1118,43 +1095,4 @@ internal sealed partial class MyPreferences : Form
     {
         UpdateDomainControls();
     }
-
-    /// <summary>
-    /// Maps article-alert identifiers to their user-facing descriptions.
-    /// </summary>
-    /// <remarks>
-    /// The numeric identifiers must remain synchronized with the alert values
-    /// used by the article-checking and preferences logic.
-    /// </remarks>
-    // TODO: Replace the numeric alert identifiers with a named enum after
-    // confirming whether these values are persisted or used outside this form.
-    //
-    // TODO: Move user-facing alert descriptions to application resources if the
-    // preferences interface is localized in the future.
-    private static readonly IReadOnlyDictionary<int, string> _alertDescriptions =
-        new Dictionary<int, string>
-        {
-        { 1, "Ambiguous citation dates" },
-        { 2, "Contains 'sic' tag" },
-        { 3, "DAB page with <ref>s" },
-        { 4, "Dead links" },
-        { 5, "Duplicate parameters in WPBannerShell" },
-        { 6, "Has <ref> after </references>" },
-        { 7, "Has 'No/More footnotes' template yet many references" },
-        { 8, "Headers with wikilinks" },
-        { 9, "Invalid citation parameters" },
-        { 10, "Links with double pipes" },
-        { 11, "Links with no target" },
-        { 12, "Long article with stub tag" },
-        { 13, "Multiple DEFAULTSORT" },
-        { 14, "No category (may be one in a template)" },
-        { 15, "See also section out of place" },
-        { 16, "Starts with heading" },
-        { 17, "Unbalanced brackets" },
-        { 18, "Unclosed tags" },
-        { 19, "Unformatted references" },
-        { 20, "Unknown parameters in multiple issues" },
-        { 21, "Unknown parameters in WikiProject banner shell" },
-        { 22, "Editor's signature or link to user space" }
-        };
 }
