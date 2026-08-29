@@ -1557,10 +1557,12 @@ en, sq, ru
             cut,
             m =>
             {
+                string categoryText = m.Value.Trim();
+
                 // Don't pull categories from wiki comments/unformatted text regions.
                 if (allUnformatted.Any(
-                        u => u.Contains(m.Value.Trim()) &&
-                            !u.Equals(m.Value.Trim()) &&
+                        u => u.Contains(categoryText) &&
+                            !u.Equals(categoryText) &&
                             !categories.Contains(u)))
                 {
                     return m.Value;
@@ -1568,18 +1570,16 @@ en, sq, ru
 
                 if (!CatsForDeletion.IsMatch(m.Value))
                 {
-                    categories.Add(
-                        m.Value.Trim());
+                    categories.Add(categoryText);
                 }
 
                 // If category is not at start of line, leave newline;
                 // otherwise text on next line would move up.
                 if (m.Index > 2 &&
-                    !cut.Substring(
+                    !string.IsNullOrWhiteSpace(
+                        cut.Substring(
                             m.Index - 2,
-                            2)
-                        .Trim()
-                        .Equals(""))
+                            2)))
                 {
                     return "\r\n";
                 }
@@ -1611,7 +1611,7 @@ en, sq, ru
         {
             cut = cut.Replace(
                 defaultSortMatches[0].Value,
-                "");
+                string.Empty);
 
             defaultSortRemoved = true;
         }
@@ -1636,6 +1636,8 @@ en, sq, ru
                 },
                 1);
         }
+
+        categoryList = categories;
 
         return true;
     }
