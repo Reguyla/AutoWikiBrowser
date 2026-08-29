@@ -8115,8 +8115,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         TheSession.Site.OpenPageHistoryInBrowser(TheArticle.Name);
     }
 
-    // TODO(Twain): Move URL-versus-wiki-page resolution into shared navigation
-    // logic so browser commands use consistent destination handling.
     /// <summary>
     /// Opens the selected editor text as either a URL or a wiki page in the
     /// default web browser.
@@ -8132,7 +8130,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         // treated as URLs rather than opened as wiki pages.
         string selectedText = txtEdit.SelectedText.Trim();
 
-        if (ShouldOpenSelectionAsUrl(selectedText))
+        if (Tools.ShouldOpenAsUrl(selectedText))
         {
             Tools.OpenURLInBrowser(selectedText);
         }
@@ -8140,23 +8138,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         {
             TheSession.Site.OpenPageInBrowser(txtEdit.SelectedText);
         }
-    }
-
-    /// <summary>
-    /// Determines whether the selected text should be opened as a URL rather
-    /// than interpreted as a wiki page title.
-    /// </summary>
-    /// <param name="selectedText">The selected text to evaluate.</param>
-    /// <returns>
-    /// <see langword="true"/> if the text should be treated as a URL;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    private static bool ShouldOpenSelectionAsUrl(string selectedText)
-    {
-        return WikiRegexes.UrlValidator.IsMatch(selectedText) ||
-            selectedText.StartsWith(
-                "http",
-                StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

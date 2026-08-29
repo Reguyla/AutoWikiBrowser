@@ -3957,4 +3957,23 @@ Message: {2}
             encodedTitle +
             "&printable=yes";
     }
+
+    /// <summary>
+    /// Determines whether the supplied text should be treated as a URL rather
+    /// than as a wiki page title.
+    /// </summary>
+    /// <param name="text">
+    /// The text to evaluate.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the text should be opened as a URL;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool ShouldOpenAsUrl(string text)
+    {
+        return WikiRegexes.UrlValidator.IsMatch(text) ||
+            text.StartsWith(
+                "http",
+                StringComparison.OrdinalIgnoreCase);
+    }
 }
