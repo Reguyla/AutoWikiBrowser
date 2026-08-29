@@ -61,7 +61,14 @@ public static class Summary
         return string.IsNullOrEmpty(heading) ? "top" : heading;
     }
 
-    private static readonly Regex SummaryTrim = new Regex(@"\s*\[\[[^\[\]\r\n]+?\]\]$", RegexOptions.Compiled);
+    /// <summary>
+    /// Matches trailing whitespace followed by a single wikilink at the end of
+    /// an edit summary.
+    /// </summary>
+    private static readonly Regex SummaryTrim =
+        new(
+            @"\s*\[\[[^\[\]\r\n]+?\]\]$",
+            RegexOptions.Compiled);
 
     // Covered by ToolsTests.TrimEditSummary()
     /// <summary>
@@ -122,21 +129,32 @@ public static class Summary
     }
 
     /// <summary>
-    ///
+    /// Truncates a string so that its UTF-8 representation does not exceed the
+    /// specified number of bytes.
     /// </summary>
-    /// <param name="input"></param>
-    /// <param name="maxLength"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// http://stackoverflow.com/questions/1225052/best-way-to-shorten-utf8-string-based-on-byte-length
-    /// </remarks>
-    private static string LimitByteLength(string input, int maxLength)
+    /// <param name="input">
+    /// The string to truncate.
+    /// </param>
+    /// <param name="maxLength">
+    /// The maximum permitted UTF-8 byte length.
+    /// </param>
+    /// <returns>
+    /// The longest leading portion of <paramref name="input"/> whose UTF-8
+    /// representation does not exceed <paramref name="maxLength"/> bytes,
+    /// or an empty string if no characters can be retained.
+    /// </returns>
+    private static string LimitByteLength(
+        string input,
+        int maxLength)
     {
         for (int i = input.Length - 1; i >= 0; i--)
         {
-            if (Encoding.UTF8.GetByteCount(input.Substring(0, i + 1)) <= maxLength)
+            if (Encoding.UTF8.GetByteCount(
+                    input.Substring(0, i + 1)) <= maxLength)
             {
-                return input.Substring(0, i + 1);
+                return input.Substring(
+                    0,
+                    i + 1);
             }
         }
 
