@@ -1341,6 +1341,8 @@ public partial class Parsers
         return articleText;
     }
 
+    // TODO(Twain): Improve manual birth/death year detection so life dates are
+    // distinguished from unrelated years appearing in article text.
     /// <summary>
     /// Builds birth and, when appropriate, death category markup from the
     /// detected article years.

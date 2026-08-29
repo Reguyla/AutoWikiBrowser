@@ -7963,8 +7963,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
-    // TODO(Twain): Improve manual birth/death year detection so life dates are
-    // distinguished from unrelated years appearing in article text.
     /// <summary>
     /// Generates birth and death categories from the article text and inserts
     /// them at the current selection.
