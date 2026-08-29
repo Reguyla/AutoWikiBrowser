@@ -124,32 +124,83 @@ public sealed class MainProcessOptions
     /// </summary>
     public bool SkipIfNoDisambiguation { get; init; }
 
+    /// <summary>
+    /// Gets the image or file replacement operation to apply during processing.
+    /// </summary>
     public int ImageOperation { get; init; }
 
+    /// <summary>
+    /// Gets the image or file name to replace, remove, or comment out.
+    /// </summary>
     public string ImageReplace { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the replacement image or comment text used by the configured image
+    /// operation.
+    /// </summary>
     public string ImageWith { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets whether the article should be skipped when the configured image
+    /// operation makes no changes.
+    /// </summary>
     public bool SkipIfNoImageChange { get; init; }
 
+    /// <summary>
+    /// Gets the category operation to apply during processing.
+    /// </summary>
     public int CategorisationOperation { get; init; }
 
+    /// <summary>
+    /// Gets whether the article should be skipped when the configured category
+    /// operation makes no changes.
+    /// </summary>
     public bool SkipIfNoCategoryChange { get; init; }
 
+    /// <summary>
+    /// Gets the primary category used by the configured category operation.
+    /// </summary>
     public string NewCategory { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the secondary category used by category operations that require an
+    /// additional category value.
+    /// </summary>
     public string NewCategory2 { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets whether an existing category sort key should be removed when the
+    /// configured category operation is applied.
+    /// </summary>
     public bool RemoveCategorySortKey { get; init; }
 
+    /// <summary>
+    /// Gets whether configured text should be appended or prepended to the
+    /// article during processing.
+    /// </summary>
     public bool AppendEnabled { get; init; }
 
+    /// <summary>
+    /// Gets the text to append or prepend to the article.
+    /// </summary>
     public string AppendText { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the number of newline characters inserted between the existing
+    /// article text and the appended or prepended text.
+    /// </summary>
     public int AppendNewLineCount { get; init; }
 
+    /// <summary>
+    /// Gets whether the configured text is appended to the article rather than
+    /// prepended.
+    /// </summary>
     public bool AppendInsteadOfPrepend { get; init; }
 
+    /// <summary>
+    /// Gets whether article metadata should be sorted after the append or
+    /// prepend operation is applied.
+    /// </summary>
     public bool SortMetadataAfterAppend { get; init; }
 
     /// <summary>
