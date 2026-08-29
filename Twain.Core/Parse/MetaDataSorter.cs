@@ -1336,34 +1336,17 @@ en, sq, ru
         }
 
         List<string> categoryList = new();
-        string articleTextNoComments = Tools.ReplaceWithSpaces(articleText, WikiRegexes.Comments.Matches(articleText));
-
         // Don't operate on pages with (incorrectly) multiple DEFAULTSORT declarations.
         // Ignore commented-out DEFAULTSORT entries.
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_12#Moving_DEFAULTSORT_in_HTML_comments
-        //
-        // Exact duplicate DEFAULTSORT declarations are removed before determining
-        // whether multiple distinct DEFAULTSORT declarations remain.
-        MatchCollection mc = WikiRegexes.Defaultsort.Matches(articleTextNoComments);
-        if (mc.Count > 1)
+        // Exact duplicate declarations are removed before determining whether multiple
+        // distinct DEFAULTSORT declarations remain.
+        if (!TryPrepareDefaultSorts(
+                ref articleText,
+                articleTitle,
+                out string articleTextNoComments,
+                out MatchCollection defaultSortMatches))
         {
-            articleText = RemoveDuplicateDefaultSorts(
-                articleText,
-                mc);
-
-            // Check count after attempted deduplication.
-            articleTextNoComments = Tools.ReplaceWithSpaces(
-                articleText,
-                WikiRegexes.Comments.Matches(articleText));
-
-            if (WikiRegexes.Defaultsort.Matches(articleTextNoComments).Count > 1)
-            {
-                Tools.WriteDebug(
-                    "RemoveCats",
-                    "Page " + articleTitle + " has multiple DEFAULTSORTs");
-
-                return string.Empty;
-            }
+            return string.Empty;
         }
 
         bool defaultSortRemoved = false;
@@ -1414,13 +1397,13 @@ en, sq, ru
                 categoryList = CatKeyer(categoryList, articleTitle);
 
             // now refresh defaultsort to pick up any comment on same line after it
-            if (mc.Count > 0)
-                mc = Regex.Matches(articleText, WikiRegexes.Defaultsort + @"(?: *<!--[^<>]*-->)?");
+            if (defaultSortMatches.Count > 0)
+                defaultSortMatches = Regex.Matches(articleText, WikiRegexes.Defaultsort + @"(?: *<!--[^<>]*-->)?");
 
             // remove defaultsort now if we can, faster to remove from cut than whole articleText
-            if (mc.Count > 0 && cut.Contains(mc[0].Value))
+            if (defaultSortMatches.Count > 0 && cut.Contains(defaultSortMatches[0].Value))
             {
-                cut = cut.Replace(mc[0].Value, "");
+                cut = cut.Replace(defaultSortMatches[0].Value, "");
                 defaultSortRemoved = true;
             }
 
@@ -1435,7 +1418,7 @@ en, sq, ru
         }
 
         string defaultSort = ExtractDefaultSort(
-            ref articleText, mc, defaultSortRemoved);
+            ref articleText, defaultSortMatches, defaultSortRemoved);
 
         // Extract any {{Uncategorized}}/{{Improve categories}} template from the
         // article's final section. Last-section detection is handled by GetLastSection().
@@ -1473,6 +1456,68 @@ en, sq, ru
         return redirectTarget.Length > 0 &&
             WikiRegexes.Category.IsMatch(
                 "[[" + redirectTarget + "]]");
+    }
+
+    /// <summary>
+    /// Prepares DEFAULTSORT metadata for category processing and rejects pages
+    /// that contain multiple distinct DEFAULTSORT declarations.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process. Exact duplicate DEFAULTSORT declarations may
+    /// be removed from this value.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article, used for diagnostic logging.
+    /// </param>
+    /// <param name="articleTextNoComments">
+    /// The article text with comments replaced by spaces.
+    /// </param>
+    /// <param name="defaultSortMatches">
+    /// The DEFAULTSORT matches found in the comment-free article text.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when DEFAULTSORT processing can continue; otherwise,
+    /// <see langword="false"/> when multiple distinct DEFAULTSORT declarations remain.
+    /// </returns>
+    private static bool TryPrepareDefaultSorts(
+        ref string articleText,
+        string articleTitle,
+        out string articleTextNoComments,
+        out MatchCollection defaultSortMatches)
+    {
+        articleTextNoComments = Tools.ReplaceWithSpaces(
+            articleText,
+            WikiRegexes.Comments.Matches(articleText));
+
+        defaultSortMatches =
+            WikiRegexes.Defaultsort.Matches(articleTextNoComments);
+
+        if (defaultSortMatches.Count <= 1)
+        {
+            return true;
+        }
+
+        articleText = RemoveDuplicateDefaultSorts(
+            articleText,
+            defaultSortMatches);
+
+        articleTextNoComments = Tools.ReplaceWithSpaces(
+            articleText,
+            WikiRegexes.Comments.Matches(articleText));
+
+        defaultSortMatches =
+            WikiRegexes.Defaultsort.Matches(articleTextNoComments);
+
+        if (defaultSortMatches.Count <= 1)
+        {
+            return true;
+        }
+
+        Tools.WriteDebug(
+            "RemoveCats",
+            "Page " + articleTitle + " has multiple DEFAULTSORTs");
+
+        return false;
     }
 
     /// <summary>
