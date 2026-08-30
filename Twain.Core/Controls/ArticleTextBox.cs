@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Drawing;
 using System.Windows.Forms;
+using Twain.Core.Editing;
 
 namespace Twain.Core.Controls;
 
@@ -259,7 +260,10 @@ public class ArticleTextBox : RichTextBox
 
         RegexOptions regOptions = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
 
-        strRegex = FormatRegex(strRegex, articleName, isRegex);
+        strRegex = ArticleSearchHelper.FormatRegex(
+            strRegex,
+            articleName,
+            isRegex);
 
         if (MatchObj == null || RegexObj == null)
         {
@@ -332,7 +336,10 @@ public class ArticleTextBox : RichTextBox
 
         string articleText = Tools.ConvertFromLocalLineEndings(RawText);
 
-        strRegex = FormatRegex(strRegex, articleName, isRegex);
+        strRegex = ArticleSearchHelper.FormatRegex(
+            strRegex,
+            articleName,
+            isRegex);
 
         RegexObj = new Regex(
             strRegex,
@@ -345,45 +352,6 @@ public class ArticleTextBox : RichTextBox
         }
 
         return found;
-    }
-
-    /// <summary>
-    /// Prepares a search expression for matching against article text.
-    /// </summary>
-    /// <param name="strRegex">
-    /// The text or regular expression to prepare.
-    /// </param>
-    /// <param name="articleName">
-    /// The current article name used when expanding AWB search keywords.
-    /// </param>
-    /// <param name="isRegex">
-    /// <see langword="true"/> when <paramref name="strRegex"/> is already a regular
-    /// expression; otherwise, <see langword="false"/>.
-    /// </param>
-    /// <returns>
-    /// The search expression after keyword expansion and any required escaping.
-    /// </returns>
-    /// <remarks>
-    /// AWB keywords are expanded before the expression is processed. Literal
-    /// searches are escaped for use as regular expressions while preserving
-    /// <c>\n</c> as a newline search sequence.
-    /// </remarks>
-    private string FormatRegex(string strRegex, string articleName, bool isRegex)
-    {
-        strRegex = Tools.ApplyKeyWords(articleName, strRegex);
-
-        // In Find, newline matching is performed against \n. Preserve an explicit
-        // \n sequence when escaping a non-regex search expression.
-        if (!isRegex)
-        {
-            bool newlines = strRegex.Contains("\\n");
-            strRegex = Regex.Escape(strRegex);
-
-            if (newlines)
-                strRegex = strRegex.Replace(@"\\n", "\n");
-        }
-
-        return strRegex;
     }
 
     /// <summary>
