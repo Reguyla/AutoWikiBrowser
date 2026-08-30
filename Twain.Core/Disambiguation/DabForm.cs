@@ -48,11 +48,6 @@ public partial class DabForm : Form
     private readonly Session Session;
 
     /// <summary>
-    /// Matches end of wikilink then {{Disambiguation needed}} template then punctuation
-    /// </summary>
-    private static readonly Regex DnPunctuationR = new Regex(@"(\]\])({{Disambiguation needed}})([.,'"":;]+)");
-
-    /// <summary>
     /// Displays a form that prompts user for disambiguation
     /// if no disambiguation needed, immediately returns
     /// </summary>
@@ -109,30 +104,22 @@ public partial class DabForm : Form
                 return articleText;
         }
 
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_22#Errors_disambiguating.2C_possibly_due_to_link_occurring_more_than_once_in_a_line
-        // to perform replace perform each replace via regex, take user's chosen link from the matching dab by index
-        int a = 0;
-        bool dnPunctuation = false;
+        List<DisambiguationProcessor.DisambiguationResult> results = Dabs
+            .Select(
+                dab => new DisambiguationProcessor.DisambiguationResult(
+                    dab.NoChange,
+                    dab.Result))
+            .ToList();
 
-        newText = Search.Replace(newText, m2 =>
-        {
-            string res = Dabs[a].NoChange ? m2.Value : Dabs[a].Result;
-
-            if (res.Contains(@"{{Disambiguation needed}}"))
-                dnPunctuation = true;
-
-            a++;
-            return res;
-        });
+        newText = DisambiguationProcessor.ApplyResults(
+            articleText,
+            Search,
+            results);
 
         if (!newText.Equals(articleText))
             skip = false;
 
-        // want ''[[link]]''{{Disambiguation needed}} rather than ''[[link]]{{Disambiguation needed}}''
-        if (dnPunctuation)
-            newText = DnPunctuationR.Replace(newText, "$1$3$2");
-
-        return Parse.Parsers.StickyLinks(newText);
+        return newText;
     }
 
     private void btnResetAll_Click(object sender, EventArgs e)
