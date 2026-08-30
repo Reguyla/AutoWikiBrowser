@@ -23,10 +23,31 @@ using System.Windows.Forms;
 namespace Twain.Core.Controls;
 
 /// <summary>
-/// Wrapped EditBox to conveniently manage the automatic summary reset conditions
+/// Provides the legacy WinForms article-editing control used to display and
+/// modify the current article text.
 /// </summary>
+/// <remarks>
+/// <para>
+/// The control extends <see cref="RichTextBox"/> with AWB-specific handling for
+/// line endings, programmatic text updates, article searching, selection
+/// management, and syntax highlighting.
+/// </para>
+/// <para>
+/// Programmatic changes to <see cref="Text"/> and <see cref="SelectedText"/>
+/// suppress <see cref="TextChanged"/> notifications so that internal editor
+/// updates are not treated as user edits.
+/// </para>
+/// </remarks>
+// TODO(Twain): Separate editor-independent behavior from this WinForms control
+// so that the same article-editing operations can be used by Monaco.
+// TODO(Twain): Move the remaining WinForms-specific editor implementation out
+// of Twain.Core once an editor abstraction has been established.
 public class ArticleTextBox : RichTextBox
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ArticleTextBox"/> class
+    /// with the legacy AWB RichTextBox configuration.
+    /// </summary>
     public ArticleTextBox()
     {
         LanguageOption = RichTextBoxLanguageOptions.DualFont;
@@ -34,8 +55,21 @@ public class ArticleTextBox : RichTextBox
         InitializeComponent();
     }
 
-    bool Locked;
+    /// <summary>
+    /// Indicates whether the control is being updated programmatically and
+    /// should temporarily suppress <see cref="TextChanged"/> notifications.
+    /// </summary>
+    private bool Locked;
 
+    /// <summary>
+    /// Gets or sets the complete article text.
+    /// </summary>
+    /// <remarks>
+    /// When running under the Windows RichTextBox implementation, line endings
+    /// are normalized from line-feed characters to carriage-return/line-feed
+    /// pairs when text is read. Programmatic assignments suppress
+    /// <see cref="TextChanged"/> notifications.
+    /// </remarks>
     public override string Text
     {
         get
@@ -43,7 +77,7 @@ public class ArticleTextBox : RichTextBox
             if (Globals.UsingMono)
                 return base.Text;
 
-            // Windows richtextbox uses \n, so convert to \r\n
+            // Windows RichTextBox uses \n internally, so convert to \r\n.
             return base.Text.Replace("\n", "\r\n");
         }
         set
@@ -54,9 +88,20 @@ public class ArticleTextBox : RichTextBox
         }
     }
 
+    /// <summary>
+    /// Gets or sets the text contained in the current editor selection.
+    /// </summary>
+    /// <remarks>
+    /// Selected text is normalized to carriage-return/line-feed line endings
+    /// when read. Programmatic replacement of the selection suppresses
+    /// <see cref="TextChanged"/> notifications.
+    /// </remarks>
     public override string SelectedText
     {
-        get { return base.SelectedText.Replace("\n", "\r\n"); }
+        get
+        {
+            return base.SelectedText.Replace("\n", "\r\n");
+        }
         set
         {
             Locked = true;
@@ -67,8 +112,8 @@ public class ArticleTextBox : RichTextBox
 
     /// <summary>
     /// Gets the underlying unformatted text stored by the base
-    /// <see cref="RichTextBox"/> without applying any AWB-specific
-    /// processing or formatting.
+    /// <see cref="RichTextBox"/> without applying AWB-specific line-ending
+    /// normalization.
     /// </summary>
     public string RawText
     {
@@ -76,32 +121,45 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Raises the <see cref="TextChanged"/> event when the user edits the
-    /// article. Programmatic updates performed while the control is locked
-    /// do not raise the event, preventing recursive processing and
-    /// unnecessary UI updates.
+    /// Raises the <see cref="TextChanged"/> event when the article text is
+    /// changed outside a programmatically locked update.
     /// </summary>
     /// <param name="e">
     /// Event data associated with the text change.
     /// </param>
+    /// <remarks>
+    /// Programmatic updates performed through <see cref="Text"/> or
+    /// <see cref="SelectedText"/> temporarily lock the control so that those
+    /// changes do not trigger edit-processing behavior intended for user edits.
+    /// </remarks>
     protected override void OnTextChanged(EventArgs e)
     {
-        // Suppress TextChanged notifications while the control is being
-        // updated programmatically. This prevents edit-processing logic
-        // from running during internal text changes.
         if (!Locked)
         {
             base.OnTextChanged(e);
         }
     }
 
+    /// <summary>
+    /// Applies RichTextBox-specific initialization after the native control
+    /// handle has been created.
+    /// </summary>
+    /// <param name="e">
+    /// Event data associated with creation of the control handle.
+    /// </param>
+    /// <remarks>
+    /// <see cref="RichTextBox.AutoWordSelection"/> is toggled after handle
+    /// creation to work around the legacy RichTextBox initialization behavior
+    /// that can otherwise leave automatic word selection enabled unexpectedly.
+    /// </remarks>
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
 
         // Work around the RichTextBox AutoWordSelection initialization bug
         // by toggling the property after the native control handle is created.
-        // Bug fix for AutoWordSelection - http://msdn.microsoft.com/en-us/library/system.windows.forms.richtextbox.autowordselection.aspx
+        // Bug fix for AutoWordSelection:
+        // http://msdn.microsoft.com/en-us/library/system.windows.forms.richtextbox.autowordselection.aspx
         if (!AutoWordSelection)
         {
             AutoWordSelection = true;
