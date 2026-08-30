@@ -72,36 +72,18 @@ public partial class DabForm : Form
 
         skip = true;
 
-        foreach (string s in dabVariants)
-        {
-            if (s.Trim().Length > 0)
-                Variants.Add(s.Trim());
-        }
+        Variants.AddRange(
+            DisambiguationProcessor.NormalizeVariants(dabVariants));
 
-        if (!Variants.Any())
+        if (Variants.Count == 0)
             return articleText;
 
         BotMode = botMode;
 
-        if (dabLink.Contains("|"))
-        {
-            string sum = dabLink.Split(new[] { '|' })
-                .Where(s => s.Trim().Length != 0)
-                .Aggregate("", (current, s) => current + ("|" + Tools.FirstLetterCaseInsensitive(Regex.Escape(s.Trim()))));
-            if (sum.Length > 0 && sum[0] == '|')
-                sum = sum.Remove(0, 1);
-            if (sum.Contains("|"))
-                sum = "(?:" + sum + ")";
-            dabLink = sum;
-        }
-        else
-            dabLink = Tools.FirstLetterCaseInsensitive(Regex.Escape(dabLink.Trim()));
+        Search = DisambiguationProcessor.CreateSearchRegex(dabLink);
 
         string newText = articleText;
         ArticleTitle = articleTitle;
-
-        Search = new Regex(@"\[\[\s*(" + dabLink +
-                           @")\s*(?:|#[^\|\]]*)(|\|[^\]]*)\]\]([\p{Ll}\p{Lu}\p{Lt}\p{Pc}\p{Lm}]*)");
 
         MatchCollection matches = Search.Matches(articleText);
 
