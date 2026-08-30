@@ -23,10 +23,29 @@
                 Grid.Row="1"
                 SelectionChanged="ChoiceComboBox_SelectionChanged" />
 
-            <TextBox
-                x:Name="CorrectionTextBox"
-                Grid.Row="2"
-                TextChanged="CorrectionTextBox_TextChanged" />
+<Grid
+    Grid.Row="2"
+    ColumnDefinitions="*,Auto,Auto"
+    ColumnSpacing="6">
+
+    <TextBox
+        x:Name="CorrectionTextBox"
+        Grid.Column="0"
+        TextChanged="CorrectionTextBox_TextChanged" />
+
+    <Button
+        x:Name="UnpipeButton"
+        Grid.Column="1"
+        Content="Unpipe"
+        Click="UnpipeButton_Click" />
+
+    <Button
+        x:Name="FlipButton"
+        Grid.Column="2"
+        Content="Flip"
+        Click="FlipButton_Click" />
+
+</Grid>
 
         </Grid>
     </Border>

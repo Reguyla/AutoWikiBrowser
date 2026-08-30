@@ -116,6 +116,11 @@ public partial class DabControl : UserControl
         }
 
         ChoiceComboBox.SelectedIndex = 0;
+
+        bool hasPipe = Result.Contains('|');
+
+        UnpipeButton.IsEnabled = hasPipe;
+        FlipButton.IsEnabled = hasPipe;
     }
 
     /// <summary>
@@ -152,6 +157,11 @@ public partial class DabControl : UserControl
                 _variants);
 
         Changed?.Invoke(this, EventArgs.Empty);
+
+        bool hasPipe = Result.Contains('|');
+
+        UnpipeButton.IsEnabled = hasPipe;
+        FlipButton.IsEnabled = hasPipe;
     }
 
     /// <summary>
@@ -162,5 +172,38 @@ public partial class DabControl : UserControl
         TextChangedEventArgs e)
     {
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Removes the displayed-text portion from the current piped wikilink.
+    /// </summary>
+    private void UnpipeButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        string currentLink = Result;
+
+        string newLink =
+            DisambiguationProcessor.UnpipeLink(currentLink);
+
+        CorrectionTextBox.Text =
+            Result.Replace(currentLink, newLink);
+    }
+
+    /// <summary>
+    /// Swaps the target and displayed-text portions of the current piped
+    /// wikilink.
+    /// </summary>
+    private void FlipButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        string currentLink = Result;
+
+        string newLink =
+            DisambiguationProcessor.FlipLink(currentLink);
+
+        CorrectionTextBox.Text =
+            Result.Replace(currentLink, newLink);
     }
 }
