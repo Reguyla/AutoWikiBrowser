@@ -120,6 +120,9 @@ public class ArticleTextBox : RichTextBox
         get { return base.Text; }
     }
 
+    // TODO(Twain): Verify whether the RichTextBox AutoWordSelection workaround is
+    // still required on supported .NET/Windows versions before carrying it into
+    // the legacy editor adapter.
     /// <summary>
     /// Raises the <see cref="TextChanged"/> event when the article text is
     /// changed outside a programmatically locked update.
@@ -173,6 +176,9 @@ public class ArticleTextBox : RichTextBox
     /// </summary>
     private bool AutoKeyboardDisabled;
 
+    // TODO(Twain): Verify whether disabling RichTextBox AutoKeyboard is still
+    // required on supported .NET/Windows versions before carrying this workaround
+    // into the legacy editor adapter.
     /// <summary>
     /// Disables the RichTextBox automatic keyboard-layout behavior when the editor
     /// first receives focus.
@@ -449,9 +455,21 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Applies syntax highlighting to the input ArticleTextBox
+    /// Applies legacy wiki-syntax highlighting to the current article text.
     /// </summary>
-    /// <returns></returns>
+    /// <remarks>
+    /// The method identifies supported wiki markup using <see cref="WikiRegexes"/>
+    /// and applies RichTextBox-specific foreground colors, background colors, and
+    /// font styles to the corresponding text ranges.
+    ///
+    /// Highlighting is applied directly to the editor selection and formatting
+    /// state. This behavior is specific to the legacy WinForms editor and should
+    /// not be used as the presentation model for the Monaco implementation.
+    /// </remarks>
+    // TODO(Twain): Separate wiki-syntax recognition from RichTextBox presentation.
+    // The editor-independent layer should describe highlighted text ranges and
+    // semantic highlight types, while each editor implementation determines how
+    // those highlights are rendered.
     public void HighlightSyntax()
     {
         // reset background color to avoid issues on re-parse
