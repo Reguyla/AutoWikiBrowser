@@ -354,4 +354,70 @@ public static class DisambiguationProcessor
         int SurroundingsStart,
         string Surroundings,
         bool StartOfSentence);
+
+    /// <summary>
+    /// Creates the replacement wikilink for a selected disambiguation choice.
+    /// </summary>
+    /// <param name="selectedIndex">
+    /// The selected disambiguation choice index.
+    /// </param>
+    /// <param name="originalMatch">
+    /// The original matched wikilink.
+    /// </param>
+    /// <param name="visibleLink">
+    /// The text displayed by the wikilink.
+    /// </param>
+    /// <param name="realLink">
+    /// The actual target of the wikilink.
+    /// </param>
+    /// <param name="linkTrail">
+    /// Any link-trail characters following the wikilink.
+    /// </param>
+    /// <param name="startOfSentence">
+    /// Whether the link occurs at the beginning of a sentence.
+    /// </param>
+    /// <param name="variants">
+    /// The available disambiguation target variants.
+    /// </param>
+    /// <returns>
+    /// The replacement text for the selected choice.
+    /// </returns>
+    public static string CreateReplacement(
+        int selectedIndex,
+        string originalMatch,
+        string visibleLink,
+        string realLink,
+        string linkTrail,
+        bool startOfSentence,
+        IReadOnlyList<string> variants)
+    {
+        switch (selectedIndex)
+        {
+            case 0:
+                return originalMatch;
+
+            case 1:
+                return visibleLink + linkTrail;
+
+            case 2:
+                return originalMatch
+                    + "{{Disambiguation needed|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}";
+
+            default:
+                string target = variants[selectedIndex - 3];
+
+                if (startOfSentence || char.IsUpper(realLink[0]))
+                    target = Tools.TurnFirstToUpper(target);
+
+                string replacement =
+                    "[[" + target + "|" + visibleLink;
+
+                if (realLink == visibleLink)
+                    replacement += linkTrail + "]]";
+                else
+                    replacement += "]]" + linkTrail;
+
+                return Parse.Parsers.SimplifyLinks(replacement);
+        }
+    }
 }

@@ -143,36 +143,14 @@ public partial class DabControl : UserControl
     {
         try
         {
-            switch (n)
-            {
-                case 0: //No change
-                    CurrentLink = Match.Value;
-                    break;
-
-                case 1: //unlink
-                    CurrentLink = VisibleLink + LinkTrail;
-                    break;
-
-                case 2: //{{Disambiguation needed}}
-                    CurrentLink = Match.Value + "{{Disambiguation needed|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}";
-                    break;
-
-                default: //everything else
-                    CurrentLink = "[[";
-                    if (StartOfSentence || char.IsUpper(RealLink[0]))
-                        CurrentLink += Tools.TurnFirstToUpper(Variants[n - 3]);
-                    else
-                        CurrentLink += Variants[n - 3];
-
-                    CurrentLink += "|" + VisibleLink;
-                    if (RealLink == VisibleLink)
-                        CurrentLink += LinkTrail + "]]";
-                    else
-                        CurrentLink += "]]" + LinkTrail;
-
-                    CurrentLink = Parse.Parsers.SimplifyLinks(CurrentLink);
-                    break;
-            }
+            CurrentLink = DisambiguationProcessor.CreateReplacement(
+                n,
+                Match.Value,
+                VisibleLink,
+                RealLink,
+                LinkTrail,
+                StartOfSentence,
+                Variants);
 
             txtCorrection.Text = CurrentLink;
 
