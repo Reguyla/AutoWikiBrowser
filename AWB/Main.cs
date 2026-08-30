@@ -2348,19 +2348,12 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         HighlightErrors();
     }
 
-    // TODO (.NET10 Modernization):
-    // Restore editor visibility with try/finally so highlighting failures cannot
-    // leave the edit control hidden.
-    //
-    // TODO (.NET10 Modernization):
-    // Review the completion workflow for robustness and exception safety.
-    // Specifically verify that:
-    // - the editor is always made visible again if processing is aborted or an
-    //   exception occurs after it has been hidden for highlighting;
-    // - the progress bar and status indicators are restored correctly on every
-    //   exit path, including bot-mode early returns;
-    // - UI cleanup is consolidated so partially completed processing cannot leave
-    //   the interface in an inconsistent state.
+    // TODO(Twain):
+    // Review the page-processing completion paths so editor visibility, progress
+    // state, status text, and other UI state are restored consistently after
+    // successful processing, aborts, bot-mode exits, and exceptions. Consolidate
+    // cleanup where practical once the processing workflow is separated from
+    // MainForm.
     /// <summary>
     /// Restores the final editor position, selects the Save button, updates the
     /// status, and stops the progress indicator.
@@ -2446,21 +2439,16 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
-    // TODO (.NET10 Modernization):
-    // Error categories are added in priority order. When multiple categories
-    // identify the same character position, the first category is retained.
-    //
-    // TODO (.NET10 Modernization):
-    // Verify that error highlight offsets and lengths are validated before they
-    // are applied. Detection results may become stale if the editor content
-    // changes after analysis, potentially producing an invalid selection range.
     /// <summary>
     /// Highlights the collected editor error locations.
-    ///
-    /// Applies highlighting for up to the first 100 error positions to
-    /// maintain editor responsiveness, then clears the active selection
-    /// so the final highlighted range is not left selected.
     /// </summary>
+    /// <remarks>
+    /// Applies highlighting for up to the first 100 error positions to maintain
+    /// editor responsiveness. When multiple error categories identify the same
+    /// character position, the first category added to the collection is retained.
+    /// The active selection is cleared after highlighting so the final highlighted
+    /// range is not left selected.
+    /// </remarks>
     /// <param name="errors">
     /// Collection of editor error positions keyed by character offset,
     /// with the associated highlight length.
@@ -2492,8 +2480,15 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
+    /// <summary>
+    /// The WebView2 control used to display the rendered article diff.
+    /// </summary>
     private WebView2 _diffWebView;
 
+    /// <summary>
+    /// Manages initialization, configuration, rendering, and visibility of the
+    /// WebView2-based diff viewer.
+    /// </summary>
     private readonly DiffWebViewService _diffWebViewService;
 
     /// <summary>
