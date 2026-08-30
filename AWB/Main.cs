@@ -1169,11 +1169,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
 
         // TODO (.NET10 Modernization):
-        // Support retry delays from HttpResponseMessage when the remaining
+        // Preserve server-provided retry delays when the remaining
         // HttpWebRequest-based request paths are migrated to HttpClient.
-        // Some HTTP responses specify a delay before another request should be
-        // attempted. MediaWiki currently uses 429 and 503 responses with a delay
-        // expressed in seconds.
+        // The current retry-delay handling reads the response from HttpWebResponse;
+        // the HttpClient path should honor the equivalent Retry-After response header
+        // before scheduling the delayed restart.
         WebException? webException =
             ExceptionClassifier.FindException<WebException>(
                 exception);
@@ -1207,8 +1207,20 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         TheSession.Editor.Open(title, followRedirects);
     }
 
+    /// <summary>
+    /// Indicates whether the current processing operation should stop.
+    /// </summary>
     private bool _stopProcessing;
+
+    /// <summary>
+    /// Indicates whether the application is currently executing the start-processing workflow.
+    /// </summary>
     private bool _inStart;
+
+    /// <summary>
+    /// Indicates whether processing should be started again after the current
+    /// start-processing workflow completes.
+    /// </summary>
     private bool _startAgain;
 
     /// <summary>
@@ -1475,12 +1487,13 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         OpenPage(title);
     }
 
-    // TODO (.NET10 Modernization):
-    // Review these error-tracking collections after the MainForm cleanup is
-    // complete. Determine whether they should remain cached fields, become
-    // method-local variables, or be replaced with a single strongly typed error
-    // reporting model. Also evaluate whether these dictionaries duplicate state
-    // already owned by Article and can be eliminated entirely.
+    // TODO(Twain):
+    // Review ownership of these article error/highlighting collections after the
+    // alert and editor pipelines have been fully separated from MainForm.
+    // Determine whether they should be produced by the parsing/alert result model,
+    // remain temporary UI highlighting state, or be eliminated where equivalent
+    // information is already available from Article or ArticleAlertEvaluator.
+
     private Dictionary<int, int> _unbalancedBrackets = new();
     private Dictionary<int, int> _badCiteParameters = new();
     private Dictionary<int, int> _duplicateBannerShellParameters = new();
@@ -1521,9 +1534,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     private static readonly Regex _unicodePrivateUseRegex =
         new(@"\p{IsPrivateUse}", RegexOptions.Compiled);
 
-    // TODO (.NET10 Modernization):
-    // Replace the remaining BackgroundRequest-based processing with the modern
-    // task-based infrastructure used elsewhere in the application.
+    // TODO(Twain):
+    // Replace the legacy BackgroundRequest-based page-processing workflow with
+    // Task-based asynchronous processing. Preserve cancellation, UI-thread
+    // marshaling, completion handling, and processing restart behavior during
+    // the migration.
     private BackgroundRequest _runProcessPageBackground;
 
     /// <summary>
@@ -1632,11 +1647,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         Text = $"{_settingsFileDisplay} – {title}";
     }
 
-    // TODO (.NET10 Modernization):
-    // Move redirect decisions, skip-rule evaluation, article validation, and
-    // Unicode content checks out of MainForm into testable page-processing
-    // components. Keep only workflow coordination and direct UI updates in the
-    // form.
+    // TODO(Twain):
+    // Move the remaining redirect-processing decisions out of MainForm so redirect
+    // skipping, loop detection, namespace filtering, and redirect-following rules
+    // can be tested independently of the UI. Keep SkipPage/SkipRedirect handling,
+    // article-list updates, and other direct workflow/UI coordination in MainForm.
 
     /// <summary>
     /// Handles redirect skipping, redirect loops, namespace filtering, and list
@@ -1760,12 +1775,10 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         return false;
     }
 
-    // TODO (.NET10 Modernization):
-    // Re-evaluate this check after replacing the legacy editor. This skip exists
-    // because the current RichTextBox-based editor cannot reliably preserve
-    // Unicode Private Use Area (PUA) characters. If the new editor fully supports
-    // these characters, remove or relax this restriction and update the user
-    // warning accordingly.
+    // TODO(Twain):
+    // Re-evaluate this restriction after the legacy RichTextBox editor has been
+    // replaced. If the new editor reliably preserves Unicode Private Use Area
+    // characters, remove or relax this skip and update the associated warning.
     /// <summary>
     /// Detects Unicode Private Use Area characters that cannot safely be edited
     /// in the current editor.
@@ -1856,11 +1869,12 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             ? "Processing page (pre-parse mode)"
             : "Processing page";
 
-        // TODO (.NET10 Modernization):
-        // Replace the global CurrentPage assignment with a scoped, thread-safe page
-        // context that is established immediately around page processing and restored
-        // afterward. Consider AsyncLocal or explicit context passing so concurrent or
-        // unrelated failures are not attributed to the wrong article.
+        // TODO(Twain):
+        // Replace the global ErrorHandler.CurrentPage state with scoped page context
+        // associated with the current processing operation. The context should flow
+        // safely through asynchronous processing and be restored or cleared when the
+        // operation completes so unrelated failures cannot be attributed to the
+        // wrong article.
         ErrorHandler.CurrentPage = TheArticle.Name;
 
         ProcessPage(TheArticle, true);
@@ -1872,10 +1886,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// </summary>
     private void RunSkipChecks()
     {
-        // TODO (.NET10 Modernization):
-        // Replace the global CurrentPage value with scoped page-processing context.
-        // The context is currently cleared before typo statistics and post-processing,
-        // so failures in those operations may lack useful page information.
+        // TODO(Twain):
+        // Replace the global ErrorHandler.CurrentPage state with scoped page context
+        // for the entire processing operation, including typo statistics, skip checks,
+        // and completion handling. Clear or restore the context only when processing
+        // of the current article has actually finished.
         ErrorHandler.CurrentPage = string.Empty;
 
         UpdateCurrentTypoStats();
@@ -2100,12 +2115,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         return true;
     }
 
-    // TODO (.NET10 Modernization):
-    // Review whether the NumberOfIgnoredEdits > 5 condition is still necessary.
-    // Combined with NumberOfIgnoredEdits % 10 == 0, the first possible save occurs
-    // at 10 ignored edits, so the greater-than-five check currently appears
-    // redundant. Verify the original intent and persisted settings behavior before
-    // removing it.
     /// <summary>
     /// Saves the current settings after each group of ten ignored edits when
     /// automatic settings saving is enabled.
@@ -2114,7 +2123,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (!autoSaveSettingsToolStripMenuItem.Checked
             || string.IsNullOrEmpty(SettingsFile)
-            || _sessionCounters.NumberOfIgnoredEdits <= 5
             || _sessionCounters.NumberOfIgnoredEdits % 10 != 0)
         {
             return;
@@ -2151,15 +2159,12 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
-    // TODO (.NET10 Modernization):
-    // Verify editor visibility when processing is aborted after the edit control
-    // has been hidden for highlighting. The abort path currently enables buttons
-    // but does not explicitly restore txtEdit.Visible.
     /// <summary>
     /// Restores the interface after page processing was aborted.
     /// </summary>
     private void RestoreInterfaceAfterAbort()
     {
+        txtEdit.Visible = true;
         EnableButtons();
         _abort = false;
     }
