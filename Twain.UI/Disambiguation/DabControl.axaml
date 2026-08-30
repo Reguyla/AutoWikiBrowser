@@ -1,0 +1,31 @@
+<UserControl
+    x:Class="Twain.UI.Disambiguation.DabControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    MinWidth="600">
+
+    <Border
+        Margin="4"
+        Padding="8"
+        BorderThickness="1"
+        CornerRadius="4">
+
+        <Grid RowDefinitions="Auto,Auto,Auto"
+              RowSpacing="6">
+
+            <TextBlock
+                x:Name="ParagraphTextBlock"
+                Grid.Row="0"
+                TextWrapping="Wrap" />
+
+            <ComboBox
+                x:Name="ChoiceComboBox"
+                Grid.Row="1" />
+
+            <TextBox
+                x:Name="CorrectionTextBox"
+                Grid.Row="2" />
+
+        </Grid>
+    </Border>
+</UserControl>

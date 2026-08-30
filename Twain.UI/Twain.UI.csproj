@@ -53,6 +53,10 @@
       <DependentUpon>DiffView.axaml</DependentUpon>
     </Compile>
 
+    <Compile Update="Disambiguation\DabControl.axaml.cs">
+      <DependentUpon>DabControl.axaml</DependentUpon>
+    </Compile>
+
     <Compile Update="Options\OptionsView.axaml.cs">
       <DependentUpon>OptionsView.axaml</DependentUpon>
     </Compile>
