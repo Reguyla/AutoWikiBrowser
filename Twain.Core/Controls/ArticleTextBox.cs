@@ -77,8 +77,7 @@ public class ArticleTextBox : RichTextBox
             if (Globals.UsingMono)
                 return base.Text;
 
-            // Windows RichTextBox uses \n internally, so convert to \r\n.
-            return base.Text.Replace("\n", "\r\n");
+            return Tools.ConvertToLocalLineEndings(base.Text);
         }
         set
         {
@@ -100,7 +99,7 @@ public class ArticleTextBox : RichTextBox
     {
         get
         {
-            return base.SelectedText.Replace("\n", "\r\n");
+            return Tools.ConvertToLocalLineEndings(base.SelectedText);
         }
         set
         {
