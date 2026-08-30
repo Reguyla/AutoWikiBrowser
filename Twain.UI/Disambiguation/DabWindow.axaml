@@ -87,6 +87,7 @@
                     Click="CancelButton_Click" />
 
                 <Button
+                    x:Name="DoneButton"
                     Content="Done"
                     IsDefault="True"
                     Click="DoneButton_Click" />

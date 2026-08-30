@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.Generic;
+using System.Linq;
 using Twain.Core.Disambiguation;
 
 namespace Twain.UI.Disambiguation;
@@ -78,9 +79,34 @@ public partial class DabWindow : Window
                     item,
                     preparation.Variants);
 
+            control.Changed += DabControl_Changed;
+
             DisambiguationItemsPanel.Children.Add(control);
             _items.Add(control);
         }
+
+        UpdateDoneButtonState();
+    }
+
+    /// <summary>
+    /// Handles changes reported by an individual disambiguation control.
+    /// </summary>
+    private void DabControl_Changed(
+        object? sender,
+        EventArgs e)
+        {
+            UpdateDoneButtonState();
+        }
+
+    /// <summary>
+    /// Updates whether the dialog can be completed based on the state
+    /// of all disambiguation controls.
+    /// </summary>
+    private void UpdateDoneButtonState()
+    {
+        DoneButton.IsEnabled =
+            _items.Count > 0 &&
+            _items.All(item => item.CanSave);
     }
 
     /// <summary>
@@ -94,22 +120,33 @@ public partial class DabWindow : Window
     }
 
     /// <summary>
-    /// Handles a request to undo changes for all disambiguation occurrences.
+    /// Restores the generated replacement for the current selection in every
+    /// disambiguation control, discarding manual correction edits.
     /// </summary>
     private void UndoAllButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        foreach (DabControl item in _items)
+        {
+            item.Undo();
+        }
+
         UndoAllRequested?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
-    /// Handles a request to reset all disambiguation occurrences.
+    /// Restores every disambiguation control to its default no-change state.
     /// </summary>
     private void ResetAllButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        foreach (DabControl item in _items)
+        {
+            item.Reset();
+        }
+
         ResetAllRequested?.Invoke(this, EventArgs.Empty);
     }
 
