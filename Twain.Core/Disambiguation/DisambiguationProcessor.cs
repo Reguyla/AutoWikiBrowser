@@ -49,16 +49,23 @@ public static class DisambiguationProcessor
     public static DisambiguationPreparation Prepare(
         string articleText,
         string dabLink,
-        IEnumerable<string> dabVariants)
+        IEnumerable<string> dabVariants,
+        int contextChars)
     {
         List<string> variants = NormalizeVariants(dabVariants);
         Regex search = CreateSearchRegex(dabLink);
         MatchCollection matches = search.Matches(articleText);
 
+        List<DisambiguationItemPreparation> items =
+            PrepareItems(
+                articleText,
+                matches,
+                contextChars);
+
         return new DisambiguationPreparation(
             variants,
             search,
-            matches);
+            items);
     }
 
     /// <summary>
@@ -147,13 +154,13 @@ public static class DisambiguationProcessor
     /// <param name="Search">
     /// The regular expression used to locate matching wikilinks.
     /// </param>
-    /// <param name="Matches">
-    /// The matching wikilinks found in the article.
+    /// <param name="Items">
+    /// The prepared disambiguation occurrences found in the article.
     /// </param>
     public sealed record DisambiguationPreparation(
         IReadOnlyList<string> Variants,
         Regex Search,
-        MatchCollection Matches);
+        IReadOnlyList<DisambiguationItemPreparation> Items);
 
     /// <summary>
     /// Creates the regular-expression pattern for the supplied

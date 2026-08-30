@@ -71,12 +71,13 @@ public partial class DabForm : Form
             DisambiguationProcessor.Prepare(
                 articleText,
                 dabLink,
-                dabVariants);
+                dabVariants,
+                contextChars);
 
         if (preparation.Variants.Count == 0)
             return articleText;
 
-        if (preparation.Matches.Count == 0)
+        if (preparation.Items.Count == 0)
             return articleText;
 
         Variants.AddRange(preparation.Variants);
@@ -85,15 +86,7 @@ public partial class DabForm : Form
         Search = preparation.Search;
         ArticleTitle = articleTitle;
 
-        MatchCollection matches = preparation.Matches;
-
-        List<DisambiguationProcessor.DisambiguationItemPreparation> items =
-            DisambiguationProcessor.PrepareItems(
-                articleText,
-                matches,
-                contextChars);
-
-        foreach (DisambiguationProcessor.DisambiguationItemPreparation item in items)
+        foreach (DisambiguationProcessor.DisambiguationItemPreparation item in preparation.Items)
         {
             DabControl c = new DabControl(
                 item,
