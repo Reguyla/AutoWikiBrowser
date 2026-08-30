@@ -313,13 +313,9 @@ public static class DisambiguationProcessor
                 posEnd - posStart);
 
         return new DisambiguationItemPreparation(
-            match,
-            posStart,
-            posEnd,
             visibleLink,
             realLink,
             linkTrail,
-            contextStart,
             surroundings,
             startOfSentence,
             match.Value,
@@ -357,13 +353,9 @@ public static class DisambiguationProcessor
     /// Whether the matched link occurs at the beginning of a sentence.
     /// </param>
     public sealed record DisambiguationItemPreparation(
-        Match Match,
-        int PositionStart,
-        int PositionEnd,
         string VisibleLink,
         string RealLink,
         string LinkTrail,
-        int SurroundingsStart,
         string Surroundings,
         bool StartOfSentence,
         string OriginalLink,
