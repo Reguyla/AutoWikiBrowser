@@ -2928,7 +2928,15 @@ Message: {2}
         return string.Empty;
     }
 
-    private static readonly Regex param = new Regex(@"\|\s*([\w0-9_ -/]+?)\s*=([^|}]*)");
+    /// <summary>
+    /// Matches a named template parameter and its value.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the parameter name, and capture group 2 contains
+    /// the parameter value.
+    /// </remarks>
+    private static readonly Regex NamedTemplateParameter =
+        new(@"\|\s*([\w0-9_ -/]+?)\s*=([^|}]*)");
 
     // TODO (parsing): Confirm that PipeCleanedTemplate preserves the length and
     // character positions of the original template call. Match indexes obtained
@@ -2952,7 +2960,7 @@ Message: {2}
         Dictionary<string, string> parametersFound =
             new(StringComparer.Ordinal);
 
-        foreach (Match match in param.Matches(
+        foreach (Match match in NamedTemplateParameter.Matches(
                      PipeCleanedTemplate(templateCall)))
         {
             string parameterName = match.Groups[1].Value;
@@ -3011,7 +3019,18 @@ Message: {2}
         return GetTemplateParametersValues(templateCall, parameters, false);
     }
 
-    private static readonly Regex arg = new Regex(@"\|\s*(.*?)\s*(?=\||}}$)", RegexOptions.Singleline);
+    /// <summary>
+    /// Matches a template argument value between pipe separators or before the
+    /// template's closing braces.
+    /// </summary>
+    /// <remarks>
+    /// Capture group 1 contains the argument text with surrounding whitespace
+    /// excluded.
+    /// </remarks>
+    private static readonly Regex MultilineTemplateArgument =
+        new(
+            @"\|\s*(.*?)\s*(?=\||}}$)",
+            RegexOptions.Singleline);
 
     /// <summary>
     /// Returns the requested argument from the input template call
@@ -3023,7 +3042,7 @@ Message: {2}
     {
         int count = 1;
 
-        foreach (Match m in arg.Matches(PipeCleanedTemplate(templateCall)))
+        foreach (Match m in MultilineTemplateArgument.Matches(PipeCleanedTemplate(templateCall)))
         {
             if (count.Equals(argument))
                 return templateCall.Substring(m.Groups[1].Index, m.Groups[1].Length);
@@ -3044,7 +3063,7 @@ Message: {2}
     {
         int count = 1;
 
-        foreach (Match m in TemplateArgument.Matches(PipeCleanedTemplate(templateCall)))
+        foreach (Match m in MultilineTemplateArgument.Matches(PipeCleanedTemplate(templateCall)))
         {
             if (count.Equals(argument))
                 return m.Index + 1;
@@ -3056,37 +3075,41 @@ Message: {2}
     }
 
     /// <summary>
-    /// Matches a template argument value between pipe separators or before the
-    /// template's closing braces.
+    /// Returns the number of template arguments that meet the requested counting
+    /// criteria.
     /// </summary>
-    /// <remarks>
-    /// Capture group 1 contains the argument text with surrounding whitespace
-    /// excluded.
-    /// </remarks>
-    private static readonly Regex TemplateArgument =
-        new(
-            @"\|\s*([^{}\|]*?)\s*(?=\||}}$)",
-            RegexOptions.Compiled);
-
-    /// <summary>
-    /// Returns the number of arguments to the input template call, positional if populatedparametersonly=false, and named parameters
-    /// </summary>
-    /// <param name="template">The template call</param>
-    /// <param name="populatedparametersonly"> </param>
-    /// <returns>The argument count</returns>
-    public static int GetTemplateArgumentCount(string template, bool populatedparametersonly)
+    /// <param name="template">
+    /// The template call whose arguments should be counted.
+    /// </param>
+    /// <param name="populatedParametersOnly">
+    /// <see langword="true"/> to count only populated named parameters;
+    /// otherwise, <see langword="false"/> to count all matched arguments.
+    /// </param>
+    /// <returns>
+    /// The number of matching template arguments.
+    /// </returns>
+    public static int GetTemplateArgumentCount(
+        string template,
+        bool populatedParametersOnly)
     {
-        int i = 0;
+        int count = 0;
 
-        foreach (Match m in (TemplateArgument.Matches(PipeCleanedTemplate(template))))
+        foreach (Match match in
+                 MultilineTemplateArgument.Matches(
+                     PipeCleanedTemplate(template)))
         {
-            if (!populatedparametersonly)
-                i++;
-            else if (m.Groups[1].Value.Contains("=") && !m.Groups[1].Value.EndsWith("="))
-                i++;
+            if (!populatedParametersOnly)
+            {
+                count++;
+            }
+            else if (match.Groups[1].Value.Contains("=") &&
+                     !match.Groups[1].Value.EndsWith("="))
+            {
+                count++;
+            }
         }
 
-        return i;
+        return count;
     }
 
     /// <summary>
@@ -3723,17 +3746,36 @@ Message: {2}
         return Regex.Replace(name, @"[\s_]+", " ").Trim();
     }
 
+    /// <summary>
+    /// Creates a regular expression that matches template names, including an
+    /// optional localized Template namespace prefix.
+    /// </summary>
+    /// <returns>
+    /// A regular expression that captures the template name in capture group 1.
+    /// </returns>
+    /// <remarks>
+    /// The localized Template namespace is used when available. Whitespace and
+    /// underscores are permitted before the namespace colon, and the pattern also
+    /// permits comments or protected placeholder markers between the template name
+    /// and its first separator.
+    /// </remarks>
     public static Regex TemplateNameRegex()
     {
-        string templateNamespace = Variables.NamespacesCaseInsensitive.ContainsKey(Namespace.Template)
-            ? Variables.NamespacesCaseInsensitive[Namespace.Template]
-            : "[Tt]emplate:";
+        string templateNamespace =
+            Variables.NamespacesCaseInsensitive.ContainsKey(Namespace.Template)
+                ? Variables.NamespacesCaseInsensitive[Namespace.Template]
+                : "[Tt]emplate:";
 
-        // allow whitespace before semicolon
-        templateNamespace = Regex.Replace(templateNamespace, @":$", @"[\s_]*:");
+        // Allow whitespace or underscores before the namespace colon.
+        templateNamespace = Regex.Replace(
+            templateNamespace,
+            @":$",
+            @"[\s_]*:");
 
-        return new Regex(@"{{\s*(?::?[\s_]*" + templateNamespace +
-                         @"[\s_]*)?([^\|{}]+?)(?:\s*(?:<!--.*?-->|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋)\s*)?\s*(?:\||:|}})");
+        return new Regex(
+            @"{{\s*(?::?[\s_]*" +
+            templateNamespace +
+            @"[\s_]*)?([^\|{}]+?)(?:\s*(?:<!--.*?-->|⌊⌊⌊⌊M?\d+⌋⌋⌋⌋)\s*)?\s*(?:\||:|}})");
     }
 
     /// <summary>

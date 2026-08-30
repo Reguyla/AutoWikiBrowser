@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 using System.Windows.Forms;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Twain.Core.API;
 using Twain.Core.Controls;
@@ -30,75 +31,228 @@ using Twain.Core.TalkPages;
 
 namespace Twain.Core;
 
-public delegate void ArticleRedirected(string oldTitle, string newTitle);
-
-public enum Exists { Yes, No, Unknown }
-
-public delegate void AddListenerDelegate(string key, IMyTraceListener listener);
+/// <summary>
+/// Represents a handler that is invoked when an article is redirected.
+/// </summary>
+/// <param name="oldTitle">
+/// The article's previous title.
+/// </param>
+/// <param name="newTitle">
+/// The article's new title.
+/// </param>
+public delegate void ArticleRedirected(
+    string oldTitle,
+    string newTitle);
 
 /// <summary>
-/// A class which represents a wiki article
+/// Indicates whether a wiki article is known to exist.
+/// </summary>
+public enum Exists
+{
+    /// <summary>
+    /// The article exists.
+    /// </summary>
+    Yes,
+
+    /// <summary>
+    /// The article does not exist.
+    /// </summary>
+    No,
+
+    /// <summary>
+    /// The article's existence has not been determined.
+    /// </summary>
+    Unknown
+}
+
+/// <summary>
+/// Represents a handler that adds a trace listener using the specified key.
+/// </summary>
+/// <param name="key">
+/// The key associated with the listener.
+/// </param>
+/// <param name="listener">
+/// The trace listener to add.
+/// </param>
+public delegate void AddListenerDelegate(
+    string key,
+    IMyTraceListener listener);
+
+/// <summary>
+/// Represents a wiki article and its associated processing state.
 /// </summary>
 public class Article : IProcessArticleEventArgs, IComparable<Article>
 {
+    /// <summary>
+    /// The log listener associated with this article.
+    /// </summary>
     protected AWBLogListener mAWBLogListener;
+
+    /// <summary>
+    /// The current article text.
+    /// </summary>
     protected string mArticleText = string.Empty;
+
+    /// <summary>
+    /// The original article text before processing or modification.
+    /// </summary>
     protected string mOriginalArticleText = string.Empty;
+
+    /// <summary>
+    /// The edit-summary text supplied by a plugin.
+    /// </summary>
     protected string mPluginEditSummary = string.Empty;
+
+    /// <summary>
+    /// Indicates whether a plugin has requested that the article be skipped.
+    /// </summary>
     protected bool mPluginSkip;
 
+    /// <summary>
+    /// Information associated with the underlying wiki page.
+    /// </summary>
     private readonly PageInfo mPage;
 
+    /// <summary>
+    /// Gets the trace listener associated with this article.
+    /// </summary>
     public virtual IAWBTraceListener Trace
-    { get { return mAWBLogListener; } }
+    {
+        get
+        {
+            return mAWBLogListener;
+        }
+    }
 
+    /// <summary>
+    /// Indicates whether the article has completed preprocessing.
+    /// </summary>
     public bool PreProcessed;
 
     #region Constructors
-    public Article()
+  /// <summary>
+/// Initializes a new instance of the <see cref="Article"/> class with an
+/// unknown existence state.
+/// </summary>
+public Article()
     {
         Exists = Exists.Unknown;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Article"/> class for the
+    /// specified article name.
+    /// </summary>
+    /// <param name="name">
+    /// The article title.
+    /// </param>
     public Article(string name)
-        : this(name, Namespace.Determine(name))
+        : this(
+            name,
+            Namespace.Determine(name))
     {
     }
 
-    public Article(string name, int nameSpaceKey)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Article"/> class for the
+    /// specified article name and namespace.
+    /// </summary>
+    /// <param name="name">
+    /// The article title.
+    /// </param>
+    /// <param name="nameSpaceKey">
+    /// The numeric namespace identifier associated with the article.
+    /// </param>
+    public Article(
+        string name,
+        int nameSpaceKey)
         : this()
     {
-        Name = name.Contains("#") ? name.Substring(0, name.IndexOf('#')) : name;
+        Name = name.Contains("#")
+            ? name.Substring(
+                0,
+                name.IndexOf('#'))
+            : name;
+
         InitialiseLogListener();
+
         NameSpaceKey = nameSpaceKey;
     }
 
-    public Article(string name, string text)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Article"/> class with the
+    /// specified article name and text.
+    /// </summary>
+    /// <param name="name">
+    /// The article title.
+    /// </param>
+    /// <param name="text">
+    /// The article text.
+    /// </param>
+    public Article(
+        string name,
+        string text)
         : this(name)
     {
-        mOriginalArticleText = mArticleText = text;
+        mOriginalArticleText =
+            mArticleText =
+                text;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Article"/> class from the
+    /// supplied page information.
+    /// </summary>
+    /// <param name="page">
+    /// The page information used to initialize the article.
+    /// </param>
     public Article(PageInfo page)
-        : this(page.Title, page.NamespaceID)
+        : this(
+            page.Title,
+            page.NamespaceID)
     {
         mPage = page;
         mArticleText = page.Text;
-        Exists = page.Exists ? Exists.Yes : Exists.No;
+        Exists = page.Exists
+            ? Exists.Yes
+            : Exists.No;
         DisplayTitle = page.DisplayTitle;
     }
 
+    /// <summary>
+    /// Event raised to register an article log listener with additional trace
+    /// infrastructure.
+    /// </summary>
     private static event AddListenerDelegate addListener;
+
+    /// <summary>
+    /// Trace manager with which newly created article log listeners are registered.
+    /// </summary>
     private static TraceManager currentTraceManager;
+
+    /// <summary>
+    /// Key used when registering article log listeners with the configured trace
+    /// infrastructure.
+    /// </summary>
     private static string whatName;
 
     /// <summary>
-    ///
+    /// Configures the listener callback and trace manager used when article log
+    /// listeners are initialized.
     /// </summary>
-    /// <param name="del"></param>
-    /// <param name="trace"></param>
-    /// <param name="what"></param>
-    public static void SetAddListener(AddListenerDelegate del, TraceManager trace, string what)
+    /// <param name="del">
+    /// The listener callback to register.
+    /// </param>
+    /// <param name="trace">
+    /// The trace manager that receives article log listeners.
+    /// </param>
+    /// <param name="what">
+    /// The key used when adding listeners to the trace manager.
+    /// </param>
+    public static void SetAddListener(
+        AddListenerDelegate del,
+        TraceManager trace,
+        string what)
     {
         addListener += del;
         currentTraceManager = trace;
@@ -106,58 +260,61 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    ///
+    /// Initializes the article's log listener and registers it with the configured
+    /// trace infrastructure.
     /// </summary>
     public void InitialiseLogListener()
     {
         if (mAWBLogListener != null)
+        {
             return;
+        }
 
-        // Initialize a Log Listener and add it to a TraceManager collection
-        mAWBLogListener = new AWBLogListener(Name);
+        // Initialize a log listener and add it to the configured trace collections.
+        mAWBLogListener =
+            new AWBLogListener(Name);
 
         if (currentTraceManager != null)
         {
-            currentTraceManager.AddListener(whatName, mAWBLogListener);
+            currentTraceManager.AddListener(
+                whatName,
+                mAWBLogListener);
         }
 
         if (addListener != null)
         {
-            addListener(whatName, mAWBLogListener);
+            addListener(
+                whatName,
+                mAWBLogListener);
         }
     }
     #endregion
 
     #region Serialisable properties
     /// <summary>
-    /// The full name of the article
+    /// Gets or sets the full title of the article, including its namespace when
+    /// applicable.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// The display name of the article in HTML syntax
+    /// Gets or sets the display title of the article in HTML syntax.
     /// </summary>
     [XmlIgnore]
     public string DisplayTitle { get; set; }
 
     /// <summary>
-    ///
+    /// Gets the article title with its namespace prefix removed.
     /// </summary>
     [XmlIgnore]
-    public string NamespacelessName
-    {
-        get
-        {
-            return Tools.RemoveNamespaceString(Name);
-        }
-    }
+    public string NamespacelessName =>
+        Tools.RemoveNamespaceString(Name);
 
     /// <summary>
-    /// The namespace of the article
+    /// Gets or sets the numeric namespace identifier of the article.
     /// </summary>
     [XmlAttribute]
-    public int NameSpaceKey
-    { get; set; }
+    public int NameSpaceKey { get; set; }
     #endregion
 
     #region Non-serialisable properties
@@ -710,7 +867,23 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         return Dupes;
     }
 
-    private static readonly List<string> WikiProjectBannerShellKnowns = new List<string>(new[] { "blp", "blpo", "activepol", "collapsed", "demo_page", "1", "living", "class", "listas", "vital" });
+    /// <summary>
+    /// Contains the parameter names recognized by the WikiProject Banner Shell
+    /// template.
+    /// </summary>
+    private static readonly List<string> WikiProjectBannerShellKnowns =
+    [
+        "blp",
+    "blpo",
+    "activepol",
+    "collapsed",
+    "demo_page",
+    "1",
+    "living",
+    "class",
+    "listas",
+    "vital"
+    ];
 
     /// <summary>
     /// Returns a list of any unknown parameters in any WikiProject banner shell template
@@ -725,7 +898,14 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         return Unknowns;
     }
 
-    private static readonly List<string> MultipleIssuesKnowns = new List<string>(new[] { "section", "collapsed" });
+    /// <summary>
+    /// Contains the parameter names recognized by the Multiple Issues template.
+    /// </summary>
+    private static readonly List<string> MultipleIssuesKnowns =
+    [
+        "section",
+    "collapsed"
+    ];
 
     /// <summary>
     /// Returns a list of any unknown parameters in any Multiple issues template
@@ -740,8 +920,17 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         return Unknowns;
     }
 
-    private static readonly Regex LinksInHeadings = new Regex(@"^((={1,4})[^\[\]\{\}\|=\r\n]*)\[\[(?:[^\[\]\{\}\|=\r\n]+\|)?([^\[\]\{\}\|\r\n]+)(?<!.*(?:File|Image):.*)\]\]([^\{\}=\r\n]*\2)", RegexOptions.Multiline);
-
+    /// <summary>
+    /// Matches wikilinks contained within wiki section headings.
+    /// </summary>
+    /// <remarks>
+    /// Captures the heading markup and the displayed link text while excluding
+    /// File and Image links.
+    /// </remarks>
+    private static readonly Regex LinksInHeadings =
+        new(
+            @"^((={1,4})[^\[\]\{\}\|=\r\n]*)\[\[(?:[^\[\]\{\}\|=\r\n]+\|)?([^\[\]\{\}\|\r\n]+)(?<!.*(?:File|Image):.*)\]\]([^\{\}=\r\n]*\2)",
+            RegexOptions.Multiline);
     /// <summary>
     /// Returns a list of any headers containing wikilinks, mainspace articles only
     /// </summary>
@@ -836,7 +1025,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             AWBChangeArticleText("File replacement applied", strTemp, false);
     }
 
-    private bool _categorisationMadeChanges = false;
+    /// <summary>
+    /// Indicates whether categorization processing has modified the article.
+    /// </summary>
+    private bool _categorisationMadeChanges;
 
     /// <summary>
     /// Add, remove or replace a specified category
@@ -1046,34 +1238,76 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
     }
 
-    enum FaRChange
-    {
-        NotRun,
-        NoChange,
-        MinorChange,
-        MajorChange
-    }
-
-    private FaRChange _before = FaRChange.NotRun, _after = FaRChange.NotRun;
-
-    private void SetFaRChange(bool after, FaRChange value)
-    {
-        if (after)
-            _after = value;
-        else
-            _before = value;
-    }
+/// <summary>
+/// Describes the degree of change made by Find and Replace processing.
+/// </summary>
+enum FaRChange
+{
+    /// <summary>
+    /// Find and Replace processing has not been run.
+    /// </summary>
+    NotRun,
 
     /// <summary>
-    /// Process a "find and replace"
+    /// Find and Replace processing made no changes.
     /// </summary>
-    /// <param name="findAndReplace">A FindandReplace object</param>
-    /// <param name="substTemplates">A SubstTemplates object</param>
-    /// <param name="replaceSpecial">An MWB ReplaceSpecial object</param>
-    /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
-    /// <param name="skipIfOnlyMinorChange"></param>
-    /// <param name="onlyApplyAfter">False if "before", true if "after"</param>
-    public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates substTemplates,
+    NoChange,
+
+    /// <summary>
+    /// Find and Replace processing made a minor change.
+    /// </summary>
+    MinorChange,
+
+    /// <summary>
+    /// Find and Replace processing made a major change.
+    /// </summary>
+    MajorChange
+}
+
+/// <summary>
+/// The Find and Replace change state recorded before the main processing stage.
+/// </summary>
+private FaRChange _before = FaRChange.NotRun;
+
+/// <summary>
+/// The Find and Replace change state recorded after the main processing stage.
+/// </summary>
+private FaRChange _after = FaRChange.NotRun;
+
+/// <summary>
+/// Records the degree of change made by Find and Replace processing.
+/// </summary>
+/// <param name="after">
+/// <see langword="true"/> to record the result for the post-processing stage;
+/// otherwise, records the result for the pre-processing stage.
+/// </param>
+/// <param name="value">
+/// The degree of change to record.
+/// </param>
+private void SetFaRChange(
+    bool after,
+    FaRChange value)
+{
+    if (after)
+    {
+        _after = value;
+    }
+    else
+    {
+        _before = value;
+    }
+}
+
+/// <summary>
+/// Process a "find and replace"
+/// </summary>
+/// <param name="findAndReplace">A FindandReplace object</param>
+/// <param name="substTemplates">A SubstTemplates object</param>
+/// <param name="replaceSpecial">An MWB ReplaceSpecial object</param>
+/// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
+/// <param name="skipIfOnlyMinorChange"></param>
+/// <param name="onlyApplyAfter">False if "before", true if "after"</param>
+public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates substTemplates,
                                       ReplaceSpecial.ReplaceSpecial replaceSpecial, bool skipIfNoChange, bool skipIfOnlyMinorChange, bool onlyApplyAfter)
     {
         // return if no find&replace rules enabled
@@ -1224,28 +1458,43 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         return anyChanges;
     }
 
-    private bool ShouldApplyGeneralConversions()
-    {
-        var pageNamespace = Namespace.Determine(Name);
+/// <summary>
+/// Determines whether general article conversions should be applied to the
+/// current page.
+/// </summary>
+/// <returns>
+/// <see langword="true"/> when general conversions should be applied;
+/// otherwise, <see langword="false"/>.
+/// </returns>
+/// <remarks>
+/// General conversions are excluded for template documentation and sandbox
+/// subpages, and for category pages on Wikimedia Commons.
+/// </remarks>
+private bool ShouldApplyGeneralConversions()
+{
+    int pageNamespace =
+        Namespace.Determine(Name);
 
-        bool isTemplateDocumentationOrSandbox =
-            pageNamespace.Equals(Namespace.Template) &&
-            (Name.EndsWith("/doc") || Name.EndsWith("/sandbox"));
+    bool isTemplateDocumentationOrSandbox =
+        pageNamespace.Equals(Namespace.Template) &&
+        (Name.EndsWith("/doc") ||
+         Name.EndsWith("/sandbox"));
 
-        bool isCommonsCategory =
-            Variables.IsCommons &&
-            pageNamespace.Equals(Namespace.Category);
+    bool isCommonsCategory =
+        Variables.IsCommons &&
+        pageNamespace.Equals(Namespace.Category);
 
-        return !isTemplateDocumentationOrSandbox && !isCommonsCategory;
-    }
+    return !isTemplateDocumentationOrSandbox &&
+        !isCommonsCategory;
+}
 
-    /// <summary>
-    /// Sets Default Sort on Article if Necessary / clean diacritics
-    /// </summary>
-    /// <param name="langCode">The wiki's language code</param>
-    /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
-    /// <param name="restrictDefaultsortAddition"></param>
-    public void SetDefaultSort(string langCode, bool skipIfNoChange, bool restrictDefaultsortAddition)
+/// <summary>
+/// Sets Default Sort on Article if Necessary / clean diacritics
+/// </summary>
+/// <param name="langCode">The wiki's language code</param>
+/// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
+/// <param name="restrictDefaultsortAddition"></param>
+public void SetDefaultSort(string langCode, bool skipIfNoChange, bool restrictDefaultsortAddition)
     {
         if ((langCode.Equals("en") || langCode.Equals("simple")) && Variables.IsWikimediaProject && !Variables.IsWikimediaMonolingualProject)
         {
@@ -1354,21 +1603,24 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             AWBChangeArticleText("Emboldened titles", strTemp, false);
     }
 
-    private bool _customModuleMadeChanges = false;
+/// <summary>
+/// Indicates whether custom module processing has modified the article.
+/// </summary>
+private bool _customModuleMadeChanges;
 
-    /// <summary>
-    /// Sends the current article to a custom module for processing and applies
-    /// the returned article text and edit summary.
-    /// </summary>
-    /// <param name="module">The custom module to execute.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="module"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the module returns invalid article text or appears to return
-    /// article content as its edit summary.
-    /// </exception>
-    public void SendPageToCustomModule(IModule module)
+/// <summary>
+/// Sends the current article to a custom module for processing and applies
+/// the returned article text and edit summary.
+/// </summary>
+/// <param name="module">The custom module to execute.</param>
+/// <exception cref="ArgumentNullException">
+/// Thrown when <paramref name="module"/> is <see langword="null"/>.
+/// </exception>
+/// <exception cref="InvalidOperationException">
+/// Thrown when the module returns invalid article text or appears to return
+/// article content as its edit summary.
+/// </exception>
+public void SendPageToCustomModule(IModule module)
     {
         if (module == null)
             throw new ArgumentNullException(nameof(module));
@@ -1634,84 +1886,201 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     {
         mArticleText = newText;
     }
-    #endregion
+#endregion
 
-    #region Misc subroutines
-    public void AppendPluginEditSummary()
+#region Misc subroutines
+/// <summary>
+/// Appends the pending plugin edit summary to the article's edit summary and
+/// clears the pending plugin summary.
+/// </summary>
+public void AppendPluginEditSummary()
+{
+    if (mPluginEditSummary.Length > 0)
     {
-        if (mPluginEditSummary.Length > 0)
+        AppendToSummary(
+            mPluginEditSummary.Trim());
+
+        mPluginEditSummary = string.Empty;
+    }
+}
+
+/// <summary>
+/// Hides supported portions of the article text from subsequent processing.
+/// </summary>
+/// <param name="removeText">
+/// The text-hiding processor to apply to the article text.
+/// </param>
+public void HideText(HideText removeText)
+{
+    mArticleText =
+        removeText.Hide(mArticleText);
+}
+
+/// <summary>
+/// Restores article text previously hidden by <see cref="HideText(HideText)"/>.
+/// </summary>
+/// <param name="removeText">
+/// The text-hiding processor used to restore the hidden article text.
+/// </param>
+public void UnHideText(HideText removeText)
+{
+    mArticleText =
+        removeText.AddBack(mArticleText);
+}
+
+/// <summary>
+/// Hides additional portions of the article text from subsequent processing.
+/// </summary>
+/// <param name="removeText">
+/// The text-hiding processor to apply to the article text.
+/// </param>
+public void HideMoreText(HideText removeText)
+{
+    mArticleText =
+        removeText.HideMore(mArticleText);
+}
+
+/// <summary>
+/// Restores article text previously hidden by
+/// <see cref="HideMoreText(HideText)"/>.
+/// </summary>
+/// <param name="removeText">
+/// The text-hiding processor used to restore the additional hidden article
+/// text.
+/// </param>
+public void UnHideMoreText(HideText removeText)
+{
+    mArticleText =
+        removeText.AddBackMore(mArticleText);
+}
+#endregion
+
+#region Overrides
+/// <summary>
+/// Returns the article's full title.
+/// </summary>
+/// <returns>
+/// The article title.
+/// </returns>
+public override string ToString()
+{
+    return Name;
+}
+
+/// <summary>
+/// Returns a hash code based on the article title.
+/// </summary>
+/// <returns>
+/// A hash code for the article.
+/// </returns>
+public override int GetHashCode()
+{
+    return Name.GetHashCode();
+}
+
+/// <summary>
+/// Determines whether this article has the same title as another article or
+/// as the supplied string.
+/// </summary>
+/// <param name="obj">
+/// The object to compare with this article.
+/// </param>
+/// <returns>
+/// <see langword="true"/> when <paramref name="obj"/> is an
+/// <see cref="Article"/> with the same title or a matching title string;
+/// otherwise, <see langword="false"/>.
+/// </returns>
+public override bool Equals(object obj)
+{
+    Article article = obj as Article;
+
+    if (article == null)
+    {
+        if (obj is string)
         {
-            AppendToSummary(mPluginEditSummary.Trim());
-            mPluginEditSummary = string.Empty;
+            return Name == obj as string;
         }
+
+        return false;
     }
 
-    public void HideText(HideText removeText)
-    { mArticleText = removeText.Hide(mArticleText); }
+    return this == article;
+}
 
-    public void UnHideText(HideText removeText)
-    { mArticleText = removeText.AddBack(mArticleText); }
+/// <summary>
+/// Determines whether this article has the same title as another article.
+/// </summary>
+/// <param name="article">
+/// The article to compare with this article.
+/// </param>
+/// <returns>
+/// <see langword="true"/> when the articles have the same title; otherwise,
+/// <see langword="false"/>.
+/// </returns>
+public bool Equals(Article article)
+{
+    return this == article;
+}
 
-    public void HideMoreText(HideText removeText)
-    { mArticleText = removeText.HideMore(mArticleText); }
+/// <summary>
+/// Compares this article with another article by title using ordinal string
+/// comparison.
+/// </summary>
+/// <param name="other">
+/// The article to compare with this article.
+/// </param>
+/// <returns>
+/// A value less than zero if this article sorts before
+/// <paramref name="other"/>, zero if their titles are equal, or a value
+/// greater than zero if this article sorts after <paramref name="other"/>.
+/// </returns>
+/// <remarks>
+/// Ordinal comparison sorts by Unicode code point to match MediaWiki's
+/// expected article-title sorting behavior.
+/// </remarks>
+public int CompareTo(Article other)
+{
+    return string.CompareOrdinal(
+        Name,
+        other.Name);
+}
 
-    public void UnHideMoreText(HideText removeText)
-    { mArticleText = removeText.AddBackMore(mArticleText); }
-    #endregion
+#endregion
 
-    #region Overrides
-    public override string ToString()
+/// <summary>
+/// Determines whether two articles have the same title.
+/// </summary>
+/// <param name="a">
+/// The first article to compare.
+/// </param>
+/// <param name="b">
+/// The second article to compare.
+/// </param>
+/// <returns>
+/// <see langword="true"/> when both references are the same instance, both
+/// are <see langword="null"/>, or their titles are equal; otherwise,
+/// <see langword="false"/>.
+/// </returns>
+public static bool operator ==(
+    Article a,
+    Article b)
+{
+    // If both are null, or both reference the same instance, return true.
+    if (ReferenceEquals(a, b))
     {
-        return Name;
+        return true;
     }
 
-    public override int GetHashCode()
+    if ((object)a == null ||
+        (object)b == null)
     {
-        return Name.GetHashCode();
+        return false;
     }
 
-    public override bool Equals(object obj)
-    {
-        Article a = obj as Article;
-        if (a == null)
-        {
-            if (obj is string)
-                return Name == obj as string;
+    return a.Name == b.Name;
+}
 
-            return false;
-        }
-        return (this == a);
-    }
-
-    public bool Equals(Article a)
-    {
-        return (this == a);
-    }
-
-    /// <summary>
-    /// Compares article name to another article name, sort based on alphabetical by Unicode code point
-    /// i.e. matches mediawiki sort order, see https://www.mediawiki.org/wiki/Help:Sorting#Sort_order
-    /// </summary>
-    public int CompareTo(Article other)
-    {
-        return String.CompareOrdinal(Name, other.Name);
-    }
-
-    #endregion
-
-    public static bool operator ==(Article a, Article b)
-    {
-        // If both are null, or both are same instance, return true.
-        if (ReferenceEquals(a, b))
-            return true;
-
-        if ((object)a == null || (object)b == null)
-            return false;
-
-        return (a.Name == b.Name);
-    }
-
-    public static bool operator !=(Article a, Article b)
+public static bool operator !=(Article a, Article b)
     {
         return !(a == b);
     }
