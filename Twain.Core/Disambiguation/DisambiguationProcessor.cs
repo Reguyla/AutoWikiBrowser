@@ -31,6 +31,37 @@ public static class DisambiguationProcessor
     }
 
     /// <summary>
+    /// Prepares the disambiguation workflow by normalizing the supplied
+    /// variants, creating the search expression, and locating matching links.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="dabLink">
+    /// The link, or pipe-separated link variants, to locate.
+    /// </param>
+    /// <param name="dabVariants">
+    /// The candidate disambiguation variants.
+    /// </param>
+    /// <returns>
+    /// The prepared disambiguation data.
+    /// </returns>
+    public static DisambiguationPreparation Prepare(
+        string articleText,
+        string dabLink,
+        IEnumerable<string> dabVariants)
+    {
+        List<string> variants = NormalizeVariants(dabVariants);
+        Regex search = CreateSearchRegex(dabLink);
+        MatchCollection matches = search.Matches(articleText);
+
+        return new DisambiguationPreparation(
+            variants,
+            search,
+            matches);
+    }
+
+    /// <summary>
     /// Creates the regular expression used to locate links requiring
     /// disambiguation.
     /// </summary>
@@ -106,6 +137,23 @@ public static class DisambiguationProcessor
 
         return Parse.Parsers.StickyLinks(newText);
     }
+
+    /// <summary>
+    /// Contains the prepared data required to begin a disambiguation operation.
+    /// </summary>
+    /// <param name="Variants">
+    /// The normalized candidate variants.
+    /// </param>
+    /// <param name="Search">
+    /// The regular expression used to locate matching wikilinks.
+    /// </param>
+    /// <param name="Matches">
+    /// The matching wikilinks found in the article.
+    /// </param>
+    public sealed record DisambiguationPreparation(
+        IReadOnlyList<string> Variants,
+        Regex Search,
+        MatchCollection Matches);
 
     /// <summary>
     /// Creates the regular-expression pattern for the supplied

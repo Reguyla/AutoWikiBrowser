@@ -67,23 +67,25 @@ public partial class DabForm : Form
 
         skip = true;
 
-        Variants.AddRange(
-            DisambiguationProcessor.NormalizeVariants(dabVariants));
+        DisambiguationProcessor.DisambiguationPreparation preparation =
+            DisambiguationProcessor.Prepare(
+                articleText,
+                dabLink,
+                dabVariants);
 
-        if (Variants.Count == 0)
+        if (preparation.Variants.Count == 0)
             return articleText;
+
+        if (preparation.Matches.Count == 0)
+            return articleText;
+
+        Variants.AddRange(preparation.Variants);
 
         BotMode = botMode;
-
-        Search = DisambiguationProcessor.CreateSearchRegex(dabLink);
-
-        string newText = articleText;
+        Search = preparation.Search;
         ArticleTitle = articleTitle;
 
-        MatchCollection matches = Search.Matches(articleText);
-
-        if (matches.Count == 0)
-            return articleText;
+        MatchCollection matches = preparation.Matches;
 
         foreach (Match m in matches)
         {
@@ -111,7 +113,7 @@ public partial class DabForm : Form
                     dab.Result))
             .ToList();
 
-        newText = DisambiguationProcessor.ApplyResults(
+        string newText = DisambiguationProcessor.ApplyResults(
             articleText,
             Search,
             results);
