@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Disambiguation;
+﻿using Twain.Core.Lists.Providers;
+
+namespace Twain.Core.Disambiguation;
 
 /// <summary>
 /// Provides helpers for parsing disambiguation-page input and formatting
@@ -53,5 +55,28 @@ public static class DisambiguationLinkHelper
         }
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// Loads disambiguation links from the supplied page input and formats the
+    /// resulting article titles as variant text.
+    /// </summary>
+    /// <param name="text">
+    /// The disambiguation-page input text.
+    /// </param>
+    /// <returns>
+    /// The resulting article titles formatted as newline-separated text,
+    /// excluding likely year articles.
+    /// </returns>
+    public static string LoadVariantsText(
+        string text)
+    {
+        string[] linkTitles =
+            ParseLinkTitles(text);
+
+        IEnumerable<Article> articles =
+            new LinksOnPageListProvider().MakeList(linkTitles);
+
+        return BuildVariantsText(articles);
     }
 }

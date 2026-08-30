@@ -9706,11 +9706,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         panelDab.Enabled = chkEnableDab.Checked;
     }
 
-    // TODO(Twain): Move disambiguation link retrieval into a shared list service
-    // so MainForm only coordinates user input and displays the resulting titles.
-    // Input parsing and result formatting are now handled by
-    // DisambiguationLinkHelper.
-
     /// <summary>
     /// Loads links from the specified disambiguation page or pages and
     /// populates the variants list, excluding likely year articles.
@@ -9721,19 +9716,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         try
         {
-            string[] linkTitles =
-                DisambiguationLinkHelper.ParseLinkTitles(
-                    txtDabLink.Text);
-
-            txtDabVariants.Text = string.Empty;
-
-            IEnumerable<Article> articles =
-                new LinksOnPageListProvider().MakeList(linkTitles);
-
             txtDabVariants.Text =
-                DisambiguationLinkHelper.BuildVariantsText(
-                    articles);
-
+                DisambiguationLinkHelper.LoadVariantsText(
+                    txtDabLink.Text);
         }
         catch (Exception ex)
         {
