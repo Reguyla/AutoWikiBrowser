@@ -420,4 +420,38 @@ public static class DisambiguationProcessor
                 return Parse.Parsers.SimplifyLinks(replacement);
         }
     }
+
+    /// <summary>
+    /// Removes the displayed-text portion from a piped wikilink.
+    /// </summary>
+    /// <param name="link">
+    /// The wikilink text to transform.
+    /// </param>
+    /// <returns>
+    /// The unpiped wikilink text.
+    /// </returns>
+    public static string UnpipeLink(string link)
+    {
+        return Regex.Replace(
+            link,
+            @"\[\[\s*([^\|\]]*)\s*\|\s*[^\]]*\s*\]\](.*)",
+            "[[$1]]$2");
+    }
+
+    /// <summary>
+    /// Swaps the target and displayed-text portions of a piped wikilink.
+    /// </summary>
+    /// <param name="link">
+    /// The wikilink text to transform.
+    /// </param>
+    /// <returns>
+    /// The wikilink with its piped portions reversed.
+    /// </returns>
+    public static string FlipLink(string link)
+    {
+        return Regex.Replace(
+            link,
+            @"\[\[(.*)\|(.*)\]\]",
+            "[[$2|$1]]");
+    }
 }

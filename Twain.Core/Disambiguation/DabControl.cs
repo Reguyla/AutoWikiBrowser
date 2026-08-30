@@ -75,8 +75,6 @@ public partial class DabControl : UserControl
 
     private string VisibleLink, RealLink, CurrentLink, LinkTrail;
 
-    private static readonly Regex UnpipeRegex = new Regex(@"\[\[\s*([^\|\]]*)\s*\|\s*[^\]]*\s*\]\](.*)", RegexOptions.Compiled);
-
     public bool CanSave
     {
         get { return !string.IsNullOrEmpty(txtCorrection.Text.Trim()); }
@@ -198,9 +196,14 @@ public partial class DabControl : UserControl
 
     private void btnUnpipe_Click(object sender, EventArgs e)
     {
-        string newLink = UnpipeRegex.Replace(CurrentLink, "[[$1]]$2");
-        txtCorrection.Text = txtCorrection.Text.Replace(CurrentLink, newLink);
+        string newLink =
+            DisambiguationProcessor.UnpipeLink(CurrentLink);
+
+        txtCorrection.Text =
+            txtCorrection.Text.Replace(CurrentLink, newLink);
+
         CurrentLink = newLink;
+
         if (Changed != null)
         {
             Changed(this, new EventArgs());
@@ -217,9 +220,15 @@ public partial class DabControl : UserControl
 
     private void btnFlip_Click(object sender, EventArgs e)
     {
-        string newLink = Regex.Replace(CurrentLink, @"\[\[(.*)\|(.*)\]\]", "[[$2|$1]]");
-        txtCorrection.Text = txtCorrection.Text.Replace(CurrentLink, newLink);
+        string newLink =
+            DisambiguationProcessor.FlipLink(CurrentLink);
+
+        txtCorrection.Text =
+            txtCorrection.Text.Replace(CurrentLink, newLink);
+
         CurrentLink = newLink;
-        if (Changed != null) Changed(this, new EventArgs());
+
+        if (Changed != null)
+            Changed(this, new EventArgs());
     }
 }
