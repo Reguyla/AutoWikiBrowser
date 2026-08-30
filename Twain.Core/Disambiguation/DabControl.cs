@@ -29,26 +29,24 @@ public partial class DabControl : UserControl
     }
 
     public DabControl(
-        string articleText,
         DisambiguationProcessor.DisambiguationItemPreparation preparation,
         List<string> variants)
     {
         try
         {
-            ArticleText = articleText;
-            Match = preparation.Match;
             Variants = variants;
 
-            PosStart = preparation.PositionStart;
-            PosEnd = preparation.PositionEnd;
+            OriginalLink = preparation.OriginalLink;
+            ParagraphText = preparation.ParagraphText;
+            MatchPosition = preparation.MatchPosition;
+            MatchLength = preparation.MatchLength;
+            SurroundingsPosition = preparation.SurroundingsPosition;
 
             VisibleLink = preparation.VisibleLink;
             RealLink = preparation.RealLink;
             LinkTrail = preparation.LinkTrail;
 
-            SurroundingsStart = preparation.SurroundingsStart;
             Surroundings = preparation.Surroundings;
-
             StartOfSentence = preparation.StartOfSentence;
         }
         catch (Exception ex)
@@ -62,13 +60,10 @@ public partial class DabControl : UserControl
     public event EventHandler Changed;
 
     // input data
-    public readonly string ArticleText;
-    public readonly Match Match;
     public readonly List<string> Variants;
 
     // output data
     public string Surroundings;
-    public int SurroundingsStart;
     public string Result
     {
         get { return txtCorrection.Text; }
@@ -82,7 +77,12 @@ public partial class DabControl : UserControl
         get { return cmboChoice.SelectedIndex == 0 && txtCorrection.Text == Surroundings; }
     }
 
-    private int PosStart, PosEnd;
+    private readonly string OriginalLink;
+    private readonly string ParagraphText;
+    private readonly int MatchPosition;
+    private readonly int MatchLength;
+    private readonly int SurroundingsPosition;
+
     private bool StartOfSentence;
 
     private string VisibleLink, RealLink, CurrentLink, LinkTrail;
@@ -110,15 +110,15 @@ public partial class DabControl : UserControl
             // prepare text boxes
             // text editable by user is the new wikilink only, not the context
             // if user could edit context, could create conflicting changes for nearby links
-            txtCorrection.Text = Match.Value;
+            txtCorrection.Text = OriginalLink;
 
-            txtViewer.Text = ArticleText.Substring(PosStart, PosEnd - PosStart);
+            txtViewer.Text = ParagraphText;
             // highlight link to disambiguate
-            txtViewer.Select(Match.Index - PosStart, Match.Length);
+            txtViewer.Select(MatchPosition, MatchLength);
             txtViewer.SelectionFont = new System.Drawing.Font(txtViewer.SelectionFont.FontFamily,
                 txtViewer.SelectionFont.Size, System.Drawing.FontStyle.Bold);
             txtViewer.SelectionBackColor = System.Drawing.Color.FromArgb(0xFFD754);
-            txtViewer.Select(SurroundingsStart - PosStart, 0);
+            txtViewer.Select(SurroundingsPosition, 0);
             txtViewer.ScrollToCaret();
             txtViewer.Select(0, 0);
 
@@ -137,7 +137,7 @@ public partial class DabControl : UserControl
         {
             CurrentLink = DisambiguationProcessor.CreateReplacement(
                 n,
-                Match.Value,
+                OriginalLink,
                 VisibleLink,
                 RealLink,
                 LinkTrail,

@@ -96,7 +96,6 @@ public partial class DabForm : Form
         foreach (DisambiguationProcessor.DisambiguationItemPreparation item in items)
         {
             DabControl c = new DabControl(
-                articleText,
                 item,
                 Variants);
 

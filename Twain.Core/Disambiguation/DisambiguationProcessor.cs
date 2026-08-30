@@ -307,6 +307,11 @@ public static class DisambiguationProcessor
         if (position == posStart)
             startOfSentence = true;
 
+        string paragraphText =
+            articleText.Substring(
+                posStart,
+                posEnd - posStart);
+
         return new DisambiguationItemPreparation(
             match,
             posStart,
@@ -316,7 +321,12 @@ public static class DisambiguationProcessor
             linkTrail,
             contextStart,
             surroundings,
-            startOfSentence);
+            startOfSentence,
+            match.Value,
+            paragraphText,
+            match.Index - posStart,
+            match.Length,
+            contextStart - posStart);
     }
 
     /// <summary>
@@ -355,7 +365,12 @@ public static class DisambiguationProcessor
         string LinkTrail,
         int SurroundingsStart,
         string Surroundings,
-        bool StartOfSentence);
+        bool StartOfSentence,
+        string OriginalLink,
+        string ParagraphText,
+        int MatchPosition,
+        int MatchLength,
+        int SurroundingsPosition);
 
     /// <summary>
     /// Creates the replacement wikilink for a selected disambiguation choice.
