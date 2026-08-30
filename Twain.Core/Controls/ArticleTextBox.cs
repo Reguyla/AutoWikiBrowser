@@ -167,13 +167,28 @@ public class ArticleTextBox : RichTextBox
         }
     }
 
-    bool AutoKeyboardDisabled;
+    /// <summary>
+    /// Indicates whether the RichTextBox automatic keyboard-layout behavior has
+    /// already been disabled for this control instance.
+    /// </summary>
+    private bool AutoKeyboardDisabled;
 
+    /// <summary>
+    /// Disables the RichTextBox automatic keyboard-layout behavior when the editor
+    /// first receives focus.
+    /// </summary>
+    /// <param name="e">
+    /// Event data associated with the control receiving input focus.
+    /// </param>
+    /// <remarks>
+    /// The RichTextBox can enable <see cref="RichTextBoxLanguageOptions.AutoKeyboard"/>
+    /// and change the user's keyboard layout automatically. This workaround removes
+    /// that option the first time the control is entered.
+    /// </remarks>
     protected override void OnEnter(EventArgs e)
     {
-        // A hack for the annoying bug with this option being mysteriously enabled to switch
-        // user's kb layout for no good reason. Probably, there is a better place for doing this,
-        // but can't figure out where.
+        // Prevent the RichTextBox from automatically changing the user's
+        // keyboard layout when the editor receives focus.
         if (!AutoKeyboardDisabled)
         {
             LanguageOption &= ~RichTextBoxLanguageOptions.AutoKeyboard;
@@ -183,11 +198,19 @@ public class ArticleTextBox : RichTextBox
         base.OnEnter(e);
     }
 
+    /// <summary>
+    /// Stores the regular expression used by the current incremental find
+    /// operation.
+    /// </summary>
     private Regex RegexObj;
+
+    /// <summary>
+    /// Stores the current match used to continue an incremental find operation.
+    /// </summary>
     private Match MatchObj;
 
     /// <summary>
-    /// Resets the Find Objects
+    /// Clears the state associated with the current incremental find operation.
     /// </summary>
     public void ResetFind()
     {
@@ -196,13 +219,34 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Finds the next match of the search regex in the page text
-    /// Applies article keywords prior to search
+    /// Finds and selects the next occurrence of the specified search expression
+    /// in the current article text.
     /// </summary>
-    /// <param name="strRegex">Search string</param>
-    /// <param name="isRegex">Whether search string is a regex</param>
-    /// <param name="caseSensitive">Whether search string is to be case sensitive</param>
-    /// <param name="articleName">Wiki page name</param>
+    /// <param name="strRegex">
+    /// The text or regular expression to search for.
+    /// </param>
+    /// <param name="isRegex">
+    /// <see langword="true"/> when <paramref name="strRegex"/> should be interpreted
+    /// as a regular expression; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="caseSensitive">
+    /// <see langword="true"/> to perform a case-sensitive search; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="articleName">
+    /// The current article name used when expanding AWB search keywords.
+    /// </param>
+    /// <remarks>
+    /// The first call begins searching at the current selection position.
+    /// Subsequent calls continue from the previous match. When no further match
+    /// exists, the selection is reset to the start of the editor and the
+    /// incremental search state is cleared.
+    ///
+    /// After processing the search, the editor receives focus and the resulting
+    /// selection is scrolled into view.
+    /// </remarks>
+    // TODO(Twain): Separate search-state and matching logic from editor navigation
+    // so that incremental search can be shared by WinForms and Monaco editors.
     public void Find(string strRegex, bool isRegex, bool caseSensitive, string articleName)
     {
         string articleText = Tools.ConvertFromLocalLineEndings(RawText);
@@ -235,19 +279,45 @@ public class ArticleTextBox : RichTextBox
                 ResetFind();
             }
         }
+
         Focus();
         ScrollToCaret();
     }
 
     /// <summary>
-    /// Finds all the matches of the search regex in the page text
-    /// Applies article keywords prior to search
+    /// Finds all occurrences of the specified search expression in the current
+    /// article text.
     /// </summary>
-    /// <param name="strRegex">Search string</param>
-    /// <param name="isRegex">Whether search string is a regex</param>
-    /// <param name="caseSensitive">Whether search string is to be case sensitive</param>
-    /// <param name="articleName">Wiki page name</param>
-    public Dictionary<int, int> FindAll(string strRegex, bool isRegex, bool caseSensitive, string articleName)
+    /// <param name="strRegex">
+    /// The text or regular expression to search for.
+    /// </param>
+    /// <param name="isRegex">
+    /// <see langword="true"/> when <paramref name="strRegex"/> should be interpreted
+    /// as a regular expression; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="caseSensitive">
+    /// <see langword="true"/> to perform a case-sensitive search; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="articleName">
+    /// The current article name used when expanding AWB search keywords.
+    /// </param>
+    /// <returns>
+    /// A dictionary containing the zero-based starting index and length of each
+    /// non-empty match. An empty dictionary is returned when the search expression
+    /// is empty or no matches are found.
+    /// </returns>
+    /// <remarks>
+    /// Article text is converted from local line endings before matching so that
+    /// search offsets correspond to the normalized text used by the search logic.
+    /// </remarks>
+    // TODO(Twain): Move editor-independent search matching out of ArticleTextBox
+    // so that the same implementation can be used by the Monaco editor.
+    public Dictionary<int, int> FindAll(
+        string strRegex,
+        bool isRegex,
+        bool caseSensitive,
+        string articleName)
     {
         Dictionary<int, int> found = new();
 
@@ -258,7 +328,10 @@ public class ArticleTextBox : RichTextBox
 
         strRegex = FormatRegex(strRegex, articleName, isRegex);
 
-        RegexObj = new Regex(strRegex, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+        RegexObj = new Regex(
+            strRegex,
+            caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+
         foreach (Match m in RegexObj.Matches(articleText))
         {
             if (m.Length > 0)
@@ -269,13 +342,32 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Applies keywords to search text, formats newlines to support \n as newline
+    /// Prepares a search expression for matching against article text.
     /// </summary>
-    /// <returns></returns>
-    string FormatRegex(string strRegex, string articleName, bool isRegex)
+    /// <param name="strRegex">
+    /// The text or regular expression to prepare.
+    /// </param>
+    /// <param name="articleName">
+    /// The current article name used when expanding AWB search keywords.
+    /// </param>
+    /// <param name="isRegex">
+    /// <see langword="true"/> when <paramref name="strRegex"/> is already a regular
+    /// expression; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// The search expression after keyword expansion and any required escaping.
+    /// </returns>
+    /// <remarks>
+    /// AWB keywords are expanded before the expression is processed. Literal
+    /// searches are escaped for use as regular expressions while preserving
+    /// <c>\n</c> as a newline search sequence.
+    /// </remarks>
+    private string FormatRegex(string strRegex, string articleName, bool isRegex)
     {
         strRegex = Tools.ApplyKeyWords(articleName, strRegex);
-        // in Find newline matching is on \n, so if not a regex ensure this isn't escaped
+
+        // In Find, newline matching is performed against \n. Preserve an explicit
+        // \n sequence when escaping a non-regex search expression.
         if (!isRegex)
         {
             bool newlines = strRegex.Contains("\\n");
@@ -289,7 +381,7 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Selects a range of text within the edit box and optionally scrolls
+    /// Selects a range of text within the article editor and optionally scrolls
     /// the selection into view.
     /// </summary>
     /// <param name="inputIndex">
@@ -299,10 +391,18 @@ public class ArticleTextBox : RichTextBox
     /// The number of characters to include in the selection.
     /// </param>
     /// <param name="scrollToCaret">
-    /// <c>true</c> to scroll the selected text into view after updating the
-    /// selection; otherwise, <c>false</c>.
+    /// <see langword="true"/> to scroll the resulting caret position into view;
+    /// otherwise, <see langword="false"/>.
     /// </param>
-    public void SetEditBoxSelection(int inputIndex, int inputLength, bool scrollToCaret)
+    /// <remarks>
+    /// The selection is changed only when the supplied range is valid and contains
+    /// at least one character. Scrolling is performed independently of whether the
+    /// selection was changed.
+    /// </remarks>
+    public void SetEditBoxSelection(
+        int inputIndex,
+        int inputLength,
+        bool scrollToCaret)
     {
         if (inputIndex >= 0 &&
             inputLength > 0 &&
