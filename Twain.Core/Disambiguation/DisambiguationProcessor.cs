@@ -308,6 +308,7 @@ public static class DisambiguationProcessor
             startOfSentence = true;
 
         return new DisambiguationItemPreparation(
+            match,
             posStart,
             posEnd,
             visibleLink,
@@ -346,6 +347,7 @@ public static class DisambiguationProcessor
     /// Whether the matched link occurs at the beginning of a sentence.
     /// </param>
     public sealed record DisambiguationItemPreparation(
+        Match Match,
         int PositionStart,
         int PositionEnd,
         string VisibleLink,
