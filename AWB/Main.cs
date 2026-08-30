@@ -777,33 +777,24 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     }
 
     /// <summary>
-    /// Gets or sets whether ignored articles are added to the log file.
+    /// Updates the ignored-article logging controls and stop-button layout.
     /// </summary>
-    /// <remarks>
-    /// Changing this value updates the stop-button layout and controls the
-    /// visibility of the false-positive actions.
-    /// </remarks>
-    // TODO (.NET10 Modernization):
-    // Replace this write-only property with a clearly named method such as
-    // UpdateIgnoredArticleControls(bool). The current implementation performs
-    // UI layout changes rather than representing state, so a method would
-    // better communicate its behavior. This requires updating all callers and
-    // should be done as a dedicated refactoring to avoid changing behavior.
-    private bool AddIgnoredToLogFile
+    /// <param name="addIgnoredToLogFile">
+    /// <see langword="true"/> to show the false-positive actions and use the
+    /// compact stop-button layout; otherwise, <see langword="false"/>.
+    /// </param>
+    private void UpdateIgnoredArticleControls(bool addIgnoredToLogFile)
     {
-        set
-        {
-            btnStop.Location = value
-                ? new Point(220, 62)
-                : new Point(156, 62);
+        btnStop.Location = addIgnoredToLogFile
+            ? new Point(220, 62)
+            : new Point(156, 62);
 
-            btnStop.Size = value
-                ? new Size(51, 23)
-                : new Size(117, 23);
+        btnStop.Size = addIgnoredToLogFile
+            ? new Size(51, 23)
+            : new Size(117, 23);
 
-            btnFalsePositive.Visible = value;
-            btntsFalsePositive.Visible = value;
-        }
+        btnFalsePositive.Visible = addIgnoredToLogFile;
+        btntsFalsePositive.Visible = addIgnoredToLogFile;
     }
 
     /// <summary>
@@ -11463,7 +11454,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     }
 
     /// <summary>
-    /// Enables or disables logging of ignored matches (false positives)
+    /// Enables or disables the ignored-article controls
     /// based on the current menu item state.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
@@ -11472,8 +11463,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         object sender,
         EventArgs e)
     {
-        AddIgnoredToLogFile =
-            displayfalsePositivesButtonToolStripMenuItem.Checked;
+        UpdateIgnoredArticleControls(
+            displayfalsePositivesButtonToolStripMenuItem.Checked);
     }
 
     /// <summary>
