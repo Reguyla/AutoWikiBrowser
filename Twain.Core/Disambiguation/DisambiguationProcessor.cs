@@ -456,4 +456,34 @@ public static class DisambiguationProcessor
             @"\[\[(.*)\|(.*)\]\]",
             "[[$2|$1]]");
     }
+
+    /// <summary>
+    /// Prepares the individual disambiguation items for all matched links.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="matches">
+    /// The matched wikilinks requiring disambiguation.
+    /// </param>
+    /// <param name="contextChars">
+    /// The approximate number of context characters to include on each side
+    /// of each matched link.
+    /// </param>
+    /// <returns>
+    /// The prepared disambiguation items.
+    /// </returns>
+    public static List<DisambiguationItemPreparation> PrepareItems(
+        string articleText,
+        IEnumerable<Match> matches,
+        int contextChars)
+    {
+        return matches
+            .Select(
+                match => PrepareItem(
+                    articleText,
+                    match,
+                    contextChars))
+            .ToList();
+    }
 }

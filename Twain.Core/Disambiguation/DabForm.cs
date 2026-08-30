@@ -87,14 +87,14 @@ public partial class DabForm : Form
 
         MatchCollection matches = preparation.Matches;
 
-        foreach (Match m in matches)
-        {
-            DisambiguationProcessor.DisambiguationItemPreparation item =
-                DisambiguationProcessor.PrepareItem(
-                    articleText,
-                    m,
-                    contextChars);
+        List<DisambiguationProcessor.DisambiguationItemPreparation> items =
+            DisambiguationProcessor.PrepareItems(
+                articleText,
+                matches,
+                contextChars);
 
+        foreach (DisambiguationProcessor.DisambiguationItemPreparation item in items)
+        {
             DabControl c = new DabControl(
                 articleText,
                 item,
