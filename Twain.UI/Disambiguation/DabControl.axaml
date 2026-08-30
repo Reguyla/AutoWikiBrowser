@@ -25,7 +25,8 @@
 
             <TextBox
                 x:Name="CorrectionTextBox"
-                Grid.Row="2" />
+                Grid.Row="2"
+                TextChanged="CorrectionTextBox_TextChanged" />
 
         </Grid>
     </Border>
