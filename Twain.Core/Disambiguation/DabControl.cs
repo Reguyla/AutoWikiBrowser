@@ -97,73 +97,23 @@ public partial class DabControl : UserControl
                 cmboChoice.Items.Add(s);
             }
 
-            //find our paragraph
-            for (PosStart = Match.Index; PosStart > 0; PosStart--)
-            {
-                if (!"\n\r".Contains(ArticleText[PosStart] + "")) continue;
-                PosStart++;
-                break;
-            }
+            DisambiguationProcessor.DisambiguationItemPreparation preparation =
+                DisambiguationProcessor.PrepareItem(
+                    ArticleText,
+                    Match,
+                    ContextChars);
 
-            PosEnd = Match.Index + Match.Value.Length;
+            PosStart = preparation.PositionStart;
+            PosEnd = preparation.PositionEnd;
 
-            if (string.IsNullOrEmpty(Match.Groups[2].Value))
-            {
-                VisibleLink = Match.Groups[1].Value.Trim();
-                RealLink = VisibleLink;
-            }
-            else
-            {
-                VisibleLink = Match.Groups[2].Value.Trim();
-                RealLink = Match.Groups[1].Value.Trim();
-            }
-            VisibleLink = VisibleLink.TrimStart(new[] { '|' });
+            VisibleLink = preparation.VisibleLink;
+            RealLink = preparation.RealLink;
+            LinkTrail = preparation.LinkTrail;
 
-            LinkTrail = Match.Groups[3].Value;
+            SurroundingsStart = preparation.SurroundingsStart;
+            Surroundings = preparation.Surroundings;
 
-            while (PosEnd < ArticleText.Length - 1 && !"\n\r".Contains(ArticleText[PosEnd] + ""))
-            {
-                PosEnd++;
-            }
-
-            // find surroundings (~ �ContextChars from link)
-            int n = Match.Index - ContextChars;
-            if (n < PosStart) n = PosStart;
-            for (; n > PosStart; n--)
-            {
-                if (!char.IsSeparator(ArticleText[n])) continue;
-                n++;
-                break;
-            }
-            SurroundingsStart = n;
-
-            n = Match.Index + Match.Length + ContextChars;
-            if (n > PosEnd) n = PosEnd;
-            for (; n < PosEnd; n++)
-            {
-                if (!char.IsSeparator(ArticleText[n])) continue;
-                //n--;
-                break;
-            }
-            Surroundings = ArticleText.Substring(SurroundingsStart, n - SurroundingsStart);
-
-            // check if the link is at the beginning of a sentence
-            for (n = Match.Index - 1; n > PosStart; --n)
-            {
-                if (ArticleText[n] == '.')
-                {
-                    StartOfSentence = true;
-                    break;
-                }
-                if (!char.IsWhiteSpace(ArticleText[n]))
-                {
-                    break;
-                }
-            }
-            if (n == PosStart)
-            {
-                StartOfSentence = true;
-            }
+            StartOfSentence = preparation.StartOfSentence;
 
             // prepare text boxes
             // text editable by user is the new wikilink only, not the context

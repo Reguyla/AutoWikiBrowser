@@ -195,4 +195,163 @@ public static class DisambiguationProcessor
     public sealed record DisambiguationResult(
         bool NoChange,
         string Result);
+
+    /// <summary>
+    /// Prepares the data required to display one disambiguation occurrence.
+    /// </summary>
+    /// <param name="articleText">
+    /// The wiki text of the article.
+    /// </param>
+    /// <param name="match">
+    /// The matched wikilink requiring disambiguation.
+    /// </param>
+    /// <param name="contextChars">
+    /// The approximate number of characters to include on each side of the
+    /// matched link when determining its surrounding context.
+    /// </param>
+    /// <returns>
+    /// The prepared data for the disambiguation occurrence.
+    /// </returns>
+    public static DisambiguationItemPreparation PrepareItem(
+        string articleText,
+        Match match,
+        int contextChars)
+    {
+        int posStart;
+
+        // Find the beginning of the paragraph containing the link.
+        for (posStart = match.Index; posStart > 0; posStart--)
+        {
+            if (!"\n\r".Contains(articleText[posStart] + ""))
+                continue;
+
+            posStart++;
+            break;
+        }
+
+        int posEnd = match.Index + match.Value.Length;
+
+        string visibleLink;
+        string realLink;
+
+        if (string.IsNullOrEmpty(match.Groups[2].Value))
+        {
+            visibleLink = match.Groups[1].Value.Trim();
+            realLink = visibleLink;
+        }
+        else
+        {
+            visibleLink = match.Groups[2].Value.Trim();
+            realLink = match.Groups[1].Value.Trim();
+        }
+
+        visibleLink = visibleLink.TrimStart('|');
+
+        string linkTrail = match.Groups[3].Value;
+
+        // Find the end of the paragraph containing the link.
+        while (posEnd < articleText.Length - 1 &&
+               !"\n\r".Contains(articleText[posEnd] + ""))
+        {
+            posEnd++;
+        }
+
+        // Find the surrounding context.
+        int contextStart = match.Index - contextChars;
+
+        if (contextStart < posStart)
+            contextStart = posStart;
+
+        for (; contextStart > posStart; contextStart--)
+        {
+            if (!char.IsSeparator(articleText[contextStart]))
+                continue;
+
+            contextStart++;
+            break;
+        }
+
+        int contextEnd =
+            match.Index + match.Length + contextChars;
+
+        if (contextEnd > posEnd)
+            contextEnd = posEnd;
+
+        for (; contextEnd < posEnd; contextEnd++)
+        {
+            if (char.IsSeparator(articleText[contextEnd]))
+                break;
+        }
+
+        string surroundings =
+            articleText.Substring(
+                contextStart,
+                contextEnd - contextStart);
+
+        // Determine whether the link occurs at the beginning of a sentence.
+        bool startOfSentence = false;
+        int position;
+
+        for (position = match.Index - 1; position > posStart; --position)
+        {
+            if (articleText[position] == '.')
+            {
+                startOfSentence = true;
+                break;
+            }
+
+            if (!char.IsWhiteSpace(articleText[position]))
+                break;
+        }
+
+        if (position == posStart)
+            startOfSentence = true;
+
+        return new DisambiguationItemPreparation(
+            posStart,
+            posEnd,
+            visibleLink,
+            realLink,
+            linkTrail,
+            contextStart,
+            surroundings,
+            startOfSentence);
+    }
+
+    /// <summary>
+    /// Contains the prepared data for one disambiguation occurrence.
+    /// </summary>
+    /// <param name="PositionStart">
+    /// The beginning of the paragraph containing the matched link.
+    /// </param>
+    /// <param name="PositionEnd">
+    /// The end of the paragraph containing the matched link.
+    /// </param>
+    /// <param name="VisibleLink">
+    /// The text displayed by the wikilink.
+    /// </param>
+    /// <param name="RealLink">
+    /// The actual target of the wikilink.
+    /// </param>
+    /// <param name="LinkTrail">
+    /// Any link-trail characters following the wikilink.
+    /// </param>
+    /// <param name="SurroundingsStart">
+    /// The starting position of the displayed surrounding context.
+    /// </param>
+    /// <param name="Surroundings">
+    /// The surrounding article text used as context for the matched link.
+    /// </param>
+    /// <param name="StartOfSentence">
+    /// Whether the matched link occurs at the beginning of a sentence.
+    /// </param>
+    public sealed record DisambiguationItemPreparation(
+        int PositionStart,
+        int PositionEnd,
+        string VisibleLink,
+        string RealLink,
+        string LinkTrail,
+        int SurroundingsStart,
+        string Surroundings,
+        bool StartOfSentence);
 }
