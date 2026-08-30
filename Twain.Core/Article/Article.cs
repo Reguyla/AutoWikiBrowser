@@ -1814,29 +1814,39 @@ public void SendPageToCustomModule(IModule module)
     }
     #endregion
 
-    #region AWB worker functions
     /// <summary>
-    /// Disambiguate
+    /// Applies the result of a disambiguation operation to the article.
     /// </summary>
-    /// <returns>True if OK to proceed, false to abort</returns>
-    public bool Disambiguate(Session session, string dabLinkText, string[] dabVariantsLines, bool botMode, int context,
-                             bool skipIfNoChange)
+    /// <param name="dabLinkText">
+    /// The disambiguation link that was processed.
+    /// </param>
+    /// <param name="articleText">
+    /// The article text produced by the disambiguation operation.
+    /// </param>
+    /// <param name="noChange">
+    /// Whether the disambiguation operation left the article unchanged.
+    /// </param>
+    /// <param name="skipIfNoChange">
+    /// Whether the article should be skipped when no disambiguation change was made.
+    /// </param>
+    public void ApplyDisambiguationResult(
+        string dabLinkText,
+        string articleText,
+        bool noChange,
+        bool skipIfNoChange)
     {
-        bool noChange;
-        Disambiguation.DabForm df = new Disambiguation.DabForm(session);
-        string strTemp = df.Disambiguate(mArticleText, Name, dabLinkText,
-                                         dabVariantsLines, context, botMode, out noChange);
-
-        if (df.Abort) return false;
-
         if (noChange && skipIfNoChange)
+        {
             Trace.AWBSkipped("No disambiguation");
+        }
         else if (!noChange)
-            AWBChangeArticleText("Disambiguated " + dabLinkText, strTemp, false);
-
-        return true;
+        {
+            AWBChangeArticleText(
+                "Disambiguated " + dabLinkText,
+                articleText,
+                false);
+        }
     }
-    #endregion
 
     #region Article text modifiers
     /// <summary>

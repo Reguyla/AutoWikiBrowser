@@ -1,4 +1,5 @@
-﻿using Twain.Core.Parse;
+﻿using Twain.Core.Disambiguation;
+using Twain.Core.Parse;
 using Twain.Core.Plugin;
 
 namespace Twain.Core.Processing;
@@ -185,49 +186,6 @@ public sealed class MainProcess
             options.RestrictOrphanTagging);
 
         return !(mainProcess && article.SkipArticle);
-    }
-
-    /// <summary>
-    /// Applies the configured disambiguation operation to the supplied article.
-    /// </summary>
-    /// <param name="article">
-    /// The article to process.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <param name="session">
-    /// The active wiki session.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when disambiguation completes normally; otherwise,
-    /// <see langword="false"/> when the disambiguation operation requests an abort.
-    /// </returns>
-    public static bool ApplyDisambiguation(
-        Article article,
-        MainProcessOptions options,
-        Session session)
-    {
-        if (options.PreParseMode ||
-            !options.DisambiguationEnabled ||
-            options.DisambiguationLink.Length == 0 ||
-            options.DisambiguationVariants.Length == 0)
-        {
-            return true;
-        }
-
-        if (!article.Disambiguate(
-                session,
-                options.DisambiguationLink,
-                options.DisambiguationVariants,
-                options.BotMode,
-                options.DisambiguationContextCharacters,
-                options.SkipIfNoDisambiguation))
-        {
-            return false;
-        }
-
-        return !article.SkipArticle;
     }
 
     /// <summary>
@@ -707,7 +665,7 @@ public sealed class MainProcess
 
             Variables.Profiler.Profile("Files");
 
-            if (!ApplyDisambiguation(
+            if (!DisambiguationProcessor.ApplyDisambiguation(
                     article,
                     options,
                     session))
