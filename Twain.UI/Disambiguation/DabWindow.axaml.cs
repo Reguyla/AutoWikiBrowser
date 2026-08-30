@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Twain.Core.Disambiguation;
 
 namespace Twain.UI.Disambiguation;
@@ -89,6 +90,18 @@ public partial class DabWindow : Window
     }
 
     /// <summary>
+    /// Gets the disambiguation results currently represented by the
+    /// controls in this window.
+    /// </summary>
+    public IReadOnlyList<DisambiguationProcessor.DisambiguationResult> Results =>
+        _items
+            .Select(
+                item => new DisambiguationProcessor.DisambiguationResult(
+                    item.NoChange,
+                    item.Result))
+            .ToList();
+
+    /// <summary>
     /// Handles changes reported by an individual disambiguation control.
     /// </summary>
     private void DabControl_Changed(
@@ -172,12 +185,57 @@ public partial class DabWindow : Window
 
     /// <summary>
     /// Closes the dialog and indicates that the selected disambiguation
-    /// changes should be applied.
+    /// changes should be applied when all entries are saveable.
     /// </summary>
     private void DoneButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        if (_items.Any(item => !item.CanSave))
+            return;
+
         Close(DabDialogResult.Done);
+    }
+
+    /// <summary>
+    /// Shows the disambiguation dialog and applies the selected results when
+    /// the user completes the dialog.
+    /// </summary>
+    /// <param name="owner">
+    /// The window that owns the disambiguation dialog.
+    /// </param>
+    /// <param name="articleText">
+    /// The original article text.
+    /// </param>
+    /// <param name="preparation">
+    /// The prepared disambiguation data for the article.
+    /// </param>
+    /// <returns>
+    /// The dialog result together with the resulting article text.
+    /// When the dialog is cancelled or aborted, the original article text
+    /// is returned unchanged.
+    /// </returns>
+    public static async Task<(DabDialogResult DialogResult, string ArticleText)> ShowAsync(
+        Window owner,
+        string articleText,
+        DisambiguationProcessor.DisambiguationPreparation preparation)
+    {
+        DabWindow window = new(preparation);
+
+        DabDialogResult result =
+            await window.ShowDialog<DabDialogResult>(owner);
+
+        if (result != DabDialogResult.Done)
+        {
+            return (result, articleText);
+        }
+
+        string newText =
+            DisambiguationProcessor.ApplyResults(
+                articleText,
+                preparation.Search,
+                window.Results);
+
+        return (result, newText);
     }
 }
