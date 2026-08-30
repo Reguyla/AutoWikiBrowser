@@ -862,12 +862,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// Connects the session editor events to their corresponding
     /// main-form event handlers.
     /// </summary>
-    // TODO (.NET10 Modernization):
-    // Rename CreateEditor() to SubscribeToSessionEvents() because the method
-    // does not create an editor; it attaches MainForm handlers to session events.
-    // Before renaming, verify that the method is called only once per session.
-    // Repeated calls could register duplicate handlers and cause events to be
-    // processed more than once.
     private void SubscribeToSessionEvents()
     {
         TheSession.PreviewComplete += PreviewComplete;
