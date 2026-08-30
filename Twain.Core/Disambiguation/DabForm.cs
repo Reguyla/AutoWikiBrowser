@@ -89,7 +89,17 @@ public partial class DabForm : Form
 
         foreach (Match m in matches)
         {
-            DabControl c = new DabControl(articleText, m, Variants, contextChars);
+            DisambiguationProcessor.DisambiguationItemPreparation item =
+                DisambiguationProcessor.PrepareItem(
+                    articleText,
+                    m,
+                    contextChars);
+
+            DabControl c = new DabControl(
+                articleText,
+                item,
+                Variants);
+
             c.Changed += OnUserInput;
             tableLayout.Controls.Add(c);
             Dabs.Add(c);

@@ -28,14 +28,28 @@ public partial class DabControl : UserControl
         InitializeComponent();
     }
 
-    public DabControl(string articleText, Match match, List<string> variants, int contextChars)
+    public DabControl(
+        string articleText,
+        DisambiguationProcessor.DisambiguationItemPreparation preparation,
+        List<string> variants)
     {
         try
         {
             ArticleText = articleText;
-            Match = match;
+            Match = preparation.Match;
             Variants = variants;
-            ContextChars = contextChars;
+
+            PosStart = preparation.PositionStart;
+            PosEnd = preparation.PositionEnd;
+
+            VisibleLink = preparation.VisibleLink;
+            RealLink = preparation.RealLink;
+            LinkTrail = preparation.LinkTrail;
+
+            SurroundingsStart = preparation.SurroundingsStart;
+            Surroundings = preparation.Surroundings;
+
+            StartOfSentence = preparation.StartOfSentence;
         }
         catch (Exception ex)
         {
@@ -68,8 +82,6 @@ public partial class DabControl : UserControl
         get { return cmboChoice.SelectedIndex == 0 && txtCorrection.Text == Surroundings; }
     }
 
-    //internal
-    private readonly int ContextChars;
     private int PosStart, PosEnd;
     private bool StartOfSentence;
 
@@ -94,24 +106,6 @@ public partial class DabControl : UserControl
             {
                 cmboChoice.Items.Add(s);
             }
-
-            DisambiguationProcessor.DisambiguationItemPreparation preparation =
-                DisambiguationProcessor.PrepareItem(
-                    ArticleText,
-                    Match,
-                    ContextChars);
-
-            PosStart = preparation.PositionStart;
-            PosEnd = preparation.PositionEnd;
-
-            VisibleLink = preparation.VisibleLink;
-            RealLink = preparation.RealLink;
-            LinkTrail = preparation.LinkTrail;
-
-            SurroundingsStart = preparation.SurroundingsStart;
-            Surroundings = preparation.Surroundings;
-
-            StartOfSentence = preparation.StartOfSentence;
 
             // prepare text boxes
             // text editable by user is the new wikilink only, not the context
