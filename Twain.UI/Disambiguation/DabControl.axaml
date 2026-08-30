@@ -20,7 +20,8 @@
 
             <ComboBox
                 x:Name="ChoiceComboBox"
-                Grid.Row="1" />
+                Grid.Row="1"
+                SelectionChanged="ChoiceComboBox_SelectionChanged" />
 
             <TextBox
                 x:Name="CorrectionTextBox"
