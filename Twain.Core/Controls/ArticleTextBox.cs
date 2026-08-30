@@ -329,29 +329,14 @@ public class ArticleTextBox : RichTextBox
         bool caseSensitive,
         string articleName)
     {
-        Dictionary<int, int> found = new();
-
-        if (string.IsNullOrEmpty(strRegex))
-            return found;
-
         string articleText = Tools.ConvertFromLocalLineEndings(RawText);
 
-        strRegex = ArticleSearchHelper.FormatRegex(
+        return ArticleSearchHelper.FindAll(
+            articleText,
             strRegex,
-            articleName,
-            isRegex);
-
-        RegexObj = new Regex(
-            strRegex,
-            caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
-
-        foreach (Match m in RegexObj.Matches(articleText))
-        {
-            if (m.Length > 0)
-                found.Add(m.Index, m.Length);
-        }
-
-        return found;
+            isRegex,
+            caseSensitive,
+            articleName);
     }
 
     /// <summary>
