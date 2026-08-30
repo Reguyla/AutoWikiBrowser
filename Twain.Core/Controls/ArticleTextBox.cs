@@ -57,10 +57,9 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Indicates whether the control is being updated programmatically and
-    /// should temporarily suppress <see cref="TextChanged"/> notifications.
+    /// Maintains the state of the current incremental article search.
     /// </summary>
-    private bool Locked;
+    private readonly ArticleSearchHelper.ArticleSearchState SearchState = new();
 
     /// <summary>
     /// Gets or sets the complete article text.
@@ -206,24 +205,18 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
-    /// Stores the regular expression used by the current incremental find
-    /// operation.
-    /// </summary>
-    private Regex RegexObj;
-
-    /// <summary>
-    /// Stores the current match used to continue an incremental find operation.
-    /// </summary>
-    private Match MatchObj;
-
-    /// <summary>
     /// Clears the state associated with the current incremental find operation.
     /// </summary>
     public void ResetFind()
     {
-        RegexObj = null;
-        MatchObj = null;
+        SearchState.Reset();
     }
+
+    /// <summary>
+    /// Indicates whether the control is being updated programmatically and
+    /// should temporarily suppress <see cref="TextChanged"/> notifications.
+    /// </summary>
+    private bool Locked;
 
     /// <summary>
     /// Finds and selects the next occurrence of the specified search expression
@@ -254,40 +247,32 @@ public class ArticleTextBox : RichTextBox
     /// </remarks>
     // TODO(Twain): Separate search-state and matching logic from editor navigation
     // so that incremental search can be shared by WinForms and Monaco editors.
-    public void Find(string strRegex, bool isRegex, bool caseSensitive, string articleName)
+    public void Find(
+        string strRegex,
+        bool isRegex,
+        bool caseSensitive,
+        string articleName)
     {
         string articleText = Tools.ConvertFromLocalLineEndings(RawText);
 
-        RegexOptions regOptions = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
-
-        strRegex = ArticleSearchHelper.FormatRegex(
+        Match match = ArticleSearchHelper.FindNext(
+            articleText,
             strRegex,
+            isRegex,
+            caseSensitive,
             articleName,
-            isRegex);
+            SelectionStart,
+            SearchState);
 
-        if (MatchObj == null || RegexObj == null)
+        if (match == null)
         {
-            int findStart = SelectionStart;
-
-            RegexObj = new Regex(strRegex, regOptions);
-            MatchObj = RegexObj.Match(articleText, findStart);
-            SelectionStart = MatchObj.Index;
-            SelectionLength = MatchObj.Length;
+            SelectionStart = 0;
+            SelectionLength = 0;
         }
         else
         {
-            if (MatchObj.NextMatch().Success)
-            {
-                MatchObj = MatchObj.NextMatch();
-                SelectionStart = MatchObj.Index;
-                SelectionLength = MatchObj.Length;
-            }
-            else
-            {
-                SelectionStart = 0;
-                SelectionLength = 0;
-                ResetFind();
-            }
+            SelectionStart = match.Index;
+            SelectionLength = match.Length;
         }
 
         Focus();
