@@ -81,9 +81,9 @@ public class ArticleTextBox : RichTextBox
         }
         set
         {
-            Locked = true;
+            _suppressTextChanged = true;
             base.Text = value;
-            Locked = false;
+            _suppressTextChanged = false;
         }
     }
 
@@ -103,9 +103,9 @@ public class ArticleTextBox : RichTextBox
         }
         set
         {
-            Locked = true;
+            _suppressTextChanged = true;
             base.SelectedText = value;
-            Locked = false;
+            _suppressTextChanged = false;
         }
     }
 
@@ -119,9 +119,7 @@ public class ArticleTextBox : RichTextBox
         get { return base.Text; }
     }
 
-    // TODO(Twain): Verify whether the RichTextBox AutoWordSelection workaround is
-    // still required on supported .NET/Windows versions before carrying it into
-    // the legacy editor adapter.
+
     /// <summary>
     /// Raises the <see cref="TextChanged"/> event when the article text is
     /// changed outside a programmatically locked update.
@@ -136,12 +134,15 @@ public class ArticleTextBox : RichTextBox
     /// </remarks>
     protected override void OnTextChanged(EventArgs e)
     {
-        if (!Locked)
+        if (!_suppressTextChanged)
         {
             base.OnTextChanged(e);
         }
     }
 
+    // TODO(Twain): Verify whether the RichTextBox AutoWordSelection workaround is
+    // still required on supported .NET/Windows versions before carrying it into
+    // the legacy editor adapter.
     /// <summary>
     /// Applies RichTextBox-specific initialization after the native control
     /// handle has been created.
@@ -215,7 +216,7 @@ public class ArticleTextBox : RichTextBox
     /// Indicates whether the control is being updated programmatically and
     /// should temporarily suppress <see cref="TextChanged"/> notifications.
     /// </summary>
-    private bool Locked;
+    private bool _suppressTextChanged;
 
     /// <summary>
     /// Finds and selects the next occurrence of the specified search expression
