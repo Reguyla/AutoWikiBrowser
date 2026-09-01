@@ -2473,7 +2473,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         if (highlightedCount > 0)
         {
-            txtEdit.Select(0, 0);
+            txtEdit.SetCaretPosition(
+                0,
+                false);
         }
     }
 
