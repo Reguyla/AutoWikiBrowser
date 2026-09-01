@@ -72,18 +72,18 @@ public class ArticleTextBox : RichTextBox
     /// </remarks>
     public override string Text
     {
-        get
-        {
-            if (Globals.UsingMono)
-                return base.Text;
-
-            return Tools.ConvertToLocalLineEndings(base.Text);
-        }
         set
         {
             _suppressTextChanged = true;
-            base.Text = value;
-            _suppressTextChanged = false;
+
+            try
+            {
+                base.Text = value;
+            }
+            finally
+            {
+                _suppressTextChanged = false;
+            }
         }
     }
 
@@ -97,15 +97,18 @@ public class ArticleTextBox : RichTextBox
     /// </remarks>
     public override string SelectedText
     {
-        get
-        {
-            return Tools.ConvertToLocalLineEndings(base.SelectedText);
-        }
         set
         {
             _suppressTextChanged = true;
-            base.SelectedText = value;
-            _suppressTextChanged = false;
+
+            try
+            {
+                base.SelectedText = value;
+            }
+            finally
+            {
+                _suppressTextChanged = false;
+            }
         }
     }
 
