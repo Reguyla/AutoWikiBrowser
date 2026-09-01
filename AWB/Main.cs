@@ -5761,9 +5761,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
             RedSelection(
                 error.Key,
-                error.Value);
-
-            txtEdit.ScrollToCaret();
+                error.Value,
+                true);
 
             return true;
         }
@@ -11446,7 +11445,10 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="length">
     /// The number of characters to highlight.
     /// </param>
-    private void RedSelection(int index, int length)
+    private void RedSelection(
+        int index,
+        int length,
+        bool scrollToCaret = false)
     {
         if (!txtEdit.Enabled)
         {
@@ -11473,7 +11475,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         txtEdit.HighlightArticleTextRange(
             index,
             length,
-            Color.Tomato);
+            Color.Tomato,
+            scrollToCaret);
     }
 
     /// <summary>

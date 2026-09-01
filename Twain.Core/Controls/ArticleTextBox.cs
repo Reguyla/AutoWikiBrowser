@@ -620,12 +620,13 @@ public class ArticleTextBox : RichTextBox
     public void HighlightArticleTextRange(
         int inputIndex,
         int inputLength,
-        Color backColor)
+        Color backColor,
+        bool scrollToCaret = false)
     {
         SetArticleTextSelection(
             inputIndex,
             inputLength,
-            false);
+            scrollToCaret);
 
         SelectionBackColor = backColor;
     }
