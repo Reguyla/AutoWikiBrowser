@@ -2029,13 +2029,13 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         Tools.WriteDebug(
             "WriteProcessedArticleToEditor",
-            "WordWrap toggled successfully. Assigning editor text.");
+            "Editor layout refreshed successfully. Assigning editor text.");
 
         txtEdit.Text = TheArticle.ArticleText;
 
         Tools.WriteDebug(
             "WriteProcessedArticleToEditor",
-            $"Editor text assigned successfully. Editor length: {txtEdit.TextLength}");
+            $"Editor text assigned successfully. Editor length: {txtEdit.Text.Length}");
 
         Variables.Profiler.Profile("Set edit box text");
 
