@@ -3956,7 +3956,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             int browserScrollPosition =
                 await GetDiffScrollPositionAsync();
 
-            int caretPosition = txtEdit.CaretPosition;
+            int caretPosition = ArticleEditor.CaretPosition;
 
             // Rebuild the internal diff state from the current editor contents.
             _ = BuildDiffHtml(TheArticle);
@@ -8029,6 +8029,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         replaceTextWithLastEditToolStripMenuItem.Enabled =
             !string.IsNullOrEmpty(_lastArticle);
     }
+
+    /// <summary>
+    /// Gets the active article editor through the editor abstraction.
+    /// </summary>
+    private IArticleEditor ArticleEditor => txtEdit;
 
     /// <summary>
     /// Opens the current article in the default web browser.
