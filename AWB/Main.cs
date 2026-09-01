@@ -4145,7 +4145,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         try
         {
             EditBoxTab.SelectedTab = tpEdit;
-            txtEdit.Select();
+            txtEdit.Focus();
 
             if (destLine < 0)
             {
