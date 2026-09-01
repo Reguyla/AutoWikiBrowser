@@ -44,7 +44,7 @@ namespace Twain.Core.Controls;
 // so that the same article-editing operations can be used by Monaco.
 // TODO(Twain): Move the remaining WinForms-specific editor implementation out
 // of Twain.Core once an editor abstraction has been established.
-public class ArticleTextBox : RichTextBox
+public class ArticleTextBox : RichTextBox, IArticleEditor
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ArticleTextBox"/> class
