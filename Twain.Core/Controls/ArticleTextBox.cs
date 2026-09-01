@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using Twain.Core.Editing;
@@ -728,5 +729,39 @@ public class ArticleTextBox : RichTextBox
                 SelectedText +
                 selectionAfter;
         }
+    }
+
+    /// <summary>
+    /// Clears the current text selection while preserving the caret position.
+    /// </summary>
+    public void ClearSelection()
+    {
+        SelectionLength = 0;
+    }
+
+    /// <summary>
+    /// Gets whether the editor currently has a text selection.
+    /// </summary>
+    public bool HasSelection => SelectionLength > 0;
+
+    /// <summary>
+    /// Gets or sets whether article text wraps within the editor.
+    /// </summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool WrapText
+    {
+        get => WordWrap;
+        set => WordWrap = value;
+    }
+
+    /// <summary>
+    /// Refreshes the editor's word-wrap layout without changing the configured
+    /// word-wrap state.
+    /// </summary>
+    public void RefreshWordWrapLayout()
+    {
+        WordWrap = !WordWrap;
+        WordWrap = !WordWrap;
     }
 }

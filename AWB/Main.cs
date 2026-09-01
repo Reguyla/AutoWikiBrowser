@@ -2023,10 +2023,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         Tools.WriteDebug(
             "WriteProcessedArticleToEditor",
-            "Toggling WordWrap off/on.");
+            "Refreshing editor word-wrap layout.");
 
-        txtEdit.WordWrap = !txtEdit.WordWrap;
-        txtEdit.WordWrap = !txtEdit.WordWrap;
+        txtEdit.RefreshWordWrapLayout();
 
         Tools.WriteDebug(
             "WriteProcessedArticleToEditor",
@@ -2257,7 +2256,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 GuiUpdateAfterProcessing();
 
                 txtEdit.Focus();
-                txtEdit.SelectionLength = 0;
+                txtEdit.ClearSelection();
                 break;
         }
     }
@@ -3411,7 +3410,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     private void CompleteDiffDisplay()
     {
         txtEdit.Focus();
-        txtEdit.SelectionLength = 0;
+        txtEdit.ClearSelection();
 
         GuiUpdateAfterProcessing();
     }
@@ -5517,7 +5516,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         object sender,
         EventArgs e)
     {
-        txtEdit.WordWrap =
+        txtEdit.WrapText =
             wordWrapToolStripMenuItem.Checked;
     }
 
@@ -9625,7 +9624,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             _regexTester = new RegexTester();
         }
 
-        if (txtEdit.SelectionLength > 0 &&
+        if (txtEdit.HasSelection &&
             MessageBox.Show(
                 "Would you like to transfer the currently selected article text to the Regex Tester?",
                 "Transfer Article Text?",
