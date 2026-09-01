@@ -344,7 +344,7 @@ public class ArticleTextBox : RichTextBox
     /// at least one character. Scrolling is performed independently of whether the
     /// selection was changed.
     /// </remarks>
-    public void SetEditBoxSelection(
+    private void SetEditBoxSelection(
         int inputIndex,
         int inputLength,
         bool scrollToCaret)
@@ -373,7 +373,7 @@ public class ArticleTextBox : RichTextBox
     /// <param name="inputLength">
     /// The number of characters to include in the selection.
     /// </param>
-    public void SetEditBoxSelection(int inputIndex, int inputLength)
+    private void SetEditBoxSelection(int inputIndex, int inputLength)
     {
         SetEditBoxSelection(inputIndex, inputLength, false);
     }
