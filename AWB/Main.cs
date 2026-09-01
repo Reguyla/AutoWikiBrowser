@@ -2314,7 +2314,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        txtEdit.SetEditBoxSelection(0, 0);
         txtEdit.Select(0, 0);
         txtEdit.ScrollToCaret();
     }
@@ -8424,7 +8423,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (!focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
-            txtEdit.SetEditBoxSelection(0, 0);
             txtEdit.Select(0, 0);
         }
         else
@@ -11491,19 +11489,23 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
     // TODO: Replace editor-specific selection highlighting with an
     // abstraction that supports both the legacy editor and Monaco.
-        /// <summary>
-        /// Highlights the specified range of text in the edit box using a yellow
-        /// background.
-        /// </summary>
-        /// <param name="index">
-        /// The zero-based starting index of the text to highlight.
-        /// </param>
-        /// <param name="length">
-        /// The number of characters to highlight.
-        /// </param>
+    /// <summary>
+    /// Highlights the specified range of text in the edit box using a yellow
+    /// background.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based starting index of the text to highlight.
+    /// </param>
+    /// <param name="length">
+    /// The number of characters to highlight.
+    /// </param>
     private void YellowSelection(int index, int length)
     {
-        txtEdit.SetEditBoxSelection(index, length);
+        txtEdit.SetArticleTextSelection(
+            index,
+            length,
+            false);
+
         txtEdit.SelectionBackColor = Color.Yellow;
     }
 
@@ -11533,7 +11535,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 match.Value);
         }
 
-        txtEdit.SetEditBoxSelection(0, 0);
         txtEdit.Select(0, 0);
         txtEdit.ScrollToCaret();
     }
