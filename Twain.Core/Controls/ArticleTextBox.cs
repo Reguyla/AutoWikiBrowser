@@ -667,4 +667,25 @@ public class ArticleTextBox : RichTextBox
             ScrollToCaret();
         }
     }
+
+    /// <summary>
+    /// Gets the current caret position expressed in normalized article-text
+    /// coordinates.
+    /// </summary>
+    public int ArticleTextCaretPosition
+    {
+        get
+        {
+            int caretPosition = SelectionStart;
+
+            string textBeforeCaret =
+                Text[..caretPosition];
+
+            int newlineOffset =
+                WikiRegexes.Newline.Matches(
+                    textBeforeCaret).Count;
+
+            return caretPosition + newlineOffset;
+        }
+    }
 }

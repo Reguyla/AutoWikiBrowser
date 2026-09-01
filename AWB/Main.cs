@@ -5708,9 +5708,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             hasDuplicateWikilinks;
     }
 
-    // TODO (Editor Architecture):
-    // Centralize conversion between editor selection positions and article-text
-    // offsets so newline normalization does not require local compensation.
     /// <summary>
     /// Moves the editor selection to the next recorded alert after the current
     /// caret position, wrapping to the first alert when no later alert exists.
@@ -5721,16 +5718,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         EditBoxTab.SelectedTab = tpEdit;
 
-        int caretPosition = txtEdit.SelectionStart;
-        string textBeforeCaret = txtEdit.Text[..caretPosition];
-
-        // Alert positions account for newline characters that are normalized by
-        // the editor control.
-        int newlineOffset =
-            WikiRegexes.Newline.Matches(textBeforeCaret).Count;
-
         int adjustedCaretPosition =
-            caretPosition + newlineOffset;
+            txtEdit.ArticleTextCaretPosition;
 
         if (TrySelectNextAlert(adjustedCaretPosition))
         {
