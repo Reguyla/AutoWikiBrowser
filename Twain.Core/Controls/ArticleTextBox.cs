@@ -638,4 +638,27 @@ public class ArticleTextBox : RichTextBox
         SelectAll();
         SelectionBackColor = Color.White;
     }
+
+    /// <summary>
+    /// Moves the editor caret to the specified position and optionally scrolls it
+    /// into view.
+    /// </summary>
+    /// <param name="position">
+    /// The zero-based editor position at which to place the caret.
+    /// </param>
+    /// <param name="scrollToCaret">
+    /// <see langword="true"/> to scroll the caret into view; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    public void SetCaretPosition(
+        int position,
+        bool scrollToCaret)
+    {
+        Select(position, 0);
+
+        if (scrollToCaret)
+        {
+            ScrollToCaret();
+        }
+    }
 }

@@ -2314,8 +2314,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        txtEdit.Select(0, 0);
-        txtEdit.ScrollToCaret();
+        txtEdit.SetCaretPosition(
+            0, true);
     }
 
     /// <summary>
@@ -2361,11 +2361,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
-            txtEdit.Select(
+            txtEdit.SetCaretPosition(
                 txtEdit.Text.Length,
-                0);
-
-            txtEdit.ScrollToCaret();
+                true);
         }
 
         btnSave.Select();
@@ -4114,11 +4112,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 caretPosition,
                 txtEdit.Text.Length);
 
-        txtEdit.Select(
+        txtEdit.SetCaretPosition(
             restoredPosition,
-            0);
-
-        txtEdit.ScrollToCaret();
+            true);
     }
 
     // TODO (Editor Modernization):
@@ -4169,11 +4165,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                     targetLine,
                     lineBreaks);
 
-            txtEdit.Select(
+            txtEdit.SetCaretPosition(
                 caretPosition,
-                0);
-
-            txtEdit.ScrollToCaret();
+                true);
         }
         catch (Exception ex)
         {
@@ -8422,16 +8416,16 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (!focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
-            txtEdit.Select(0, 0);
+            txtEdit.SetCaretPosition(
+                0,
+                true);
         }
         else
         {
-            txtEdit.Select(
+            txtEdit.SetCaretPosition(
                 txtEdit.Text.Length,
-                0);
+                true);
         }
-
-        txtEdit.ScrollToCaret();
         btnSave.Select();
     }
 
@@ -11526,8 +11520,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 match.Value);
         }
 
-        txtEdit.Select(0, 0);
-        txtEdit.ScrollToCaret();
+        txtEdit.SetCaretPosition(
+            0, true);
     }
 
     /// <summary>
