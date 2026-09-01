@@ -641,6 +641,11 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
+    /// Gets the current zero-based editor caret position.
+    /// </summary>
+    public int CaretPosition => SelectionStart;
+
+    /// <summary>
     /// Moves the editor caret to the specified position and optionally scrolls it
     /// into view.
     /// </summary>

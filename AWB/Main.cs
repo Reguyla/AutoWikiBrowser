@@ -3957,7 +3957,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             int browserScrollPosition =
                 await GetDiffScrollPositionAsync();
 
-            int caretPosition = txtEdit.SelectionStart;
+            int caretPosition = txtEdit.CaretPosition;
 
             // Rebuild the internal diff state from the current editor contents.
             _ = BuildDiffHtml(TheArticle);
