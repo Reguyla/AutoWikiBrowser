@@ -11444,8 +11444,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     }
 
     /// <summary>
-    /// Highlights a range of text in the editor using a red background,
-    /// adjusting for RichTextBox newline indexing differences.
+    /// Highlights a range of article text in the editor using a red background.
     /// </summary>
     /// <param name="index">
     /// The zero-based article-text index to highlight.
@@ -11477,13 +11476,10 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        // RichTextBox indexes differ from article-text indexes because
-        // RichTextBox stores line endings as CRLF while article text uses LF.
-        // Adjust the requested selection by accounting for newline expansion.
-        txtEdit.SetArticleTextSelection(
+        txtEdit.HighlightArticleTextRange(
             index,
             length,
-            false);
+            Color.Tomato);
     }
 
     /// <summary>
