@@ -603,4 +603,39 @@ public class ArticleTextBox : RichTextBox
             SelectionBackColor = Color.PaleGoldenrod;
         }
     }
+
+    /// <summary>
+    /// Applies a background color to a range expressed in article-text
+    /// coordinates.
+    /// </summary>
+    /// <param name="inputIndex">
+    /// The zero-based index within the article text.
+    /// </param>
+    /// <param name="inputLength">
+    /// The number of article-text characters to highlight.
+    /// </param>
+    /// <param name="backColor">
+    /// The background color to apply to the selected range.
+    /// </param>
+    public void HighlightArticleTextRange(
+        int inputIndex,
+        int inputLength,
+        Color backColor)
+    {
+        SetArticleTextSelection(
+            inputIndex,
+            inputLength,
+            false);
+
+        SelectionBackColor = backColor;
+    }
+
+    /// <summary>
+    /// Clears background highlighting from the entire article editor.
+    /// </summary>
+    public void ClearBackgroundHighlighting()
+    {
+        SelectAll();
+        SelectionBackColor = Color.White;
+    }
 }

@@ -8392,8 +8392,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         // Clear highlighting from previous alerts before applying the current
         // highlighting rules.
-        txtEdit.SelectAll();
-        txtEdit.SelectionBackColor = Color.White;
+        txtEdit.ClearBackgroundHighlighting();
 
         if (highlightAllFindToolStripMenuItem.Checked)
         {
@@ -11487,8 +11486,6 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             false);
     }
 
-    // TODO: Replace editor-specific selection highlighting with an
-    // abstraction that supports both the legacy editor and Monaco.
     /// <summary>
     /// Highlights the specified range of text in the edit box using a yellow
     /// background.
@@ -11501,12 +11498,10 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// </param>
     private void YellowSelection(int index, int length)
     {
-        txtEdit.SetArticleTextSelection(
+        txtEdit.HighlightArticleTextRange(
             index,
             length,
-            false);
-
-        txtEdit.SelectionBackColor = Color.Yellow;
+            Color.Yellow);
     }
 
     /// <summary>
