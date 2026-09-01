@@ -8018,7 +8018,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             openSelectionInBrowserToolStripMenuItem.Enabled =
             !string.IsNullOrEmpty(txtEdit.SelectedText);
 
-        undoToolStripMenuItem.Enabled = txtEdit.CanUndo;
+        undoToolStripMenuItem.Enabled = txtEdit.CanUndoEdit;
 
         openPageInBrowserToolStripMenuItem.Enabled =
             openHistoryMenuItem.Enabled =

@@ -764,4 +764,9 @@ public class ArticleTextBox : RichTextBox
         WordWrap = !WordWrap;
         WordWrap = !WordWrap;
     }
+
+    /// <summary>
+    /// Gets whether the editor currently has an action that can be undone.
+    /// </summary>
+    public bool CanUndoEdit => CanUndo;
 }
