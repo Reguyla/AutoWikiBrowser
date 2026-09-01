@@ -688,4 +688,45 @@ public class ArticleTextBox : RichTextBox
             return caretPosition + newlineOffset;
         }
     }
+
+    /// <summary>
+    /// Applies an edit-toolbar action to the current editor selection.
+    /// </summary>
+    /// <param name="noSelection">
+    /// The text inserted when no text is currently selected.
+    /// </param>
+    /// <param name="selectionStartOffset">
+    /// The number of characters to move the selection start backward after inserting
+    /// <paramref name="noSelection"/>.
+    /// </param>
+    /// <param name="selectionLength">
+    /// The length of text to select after inserting <paramref name="noSelection"/>.
+    /// </param>
+    /// <param name="selectionBefore">
+    /// The text inserted before the current selection.
+    /// </param>
+    /// <param name="selectionAfter">
+    /// The text inserted after the current selection.
+    /// </param>
+    public void ApplyToolbarEdit(
+        string noSelection,
+        int selectionStartOffset,
+        int selectionLength,
+        string selectionBefore,
+        string selectionAfter)
+    {
+        if (SelectionLength == 0)
+        {
+            SelectedText = noSelection;
+            SelectionStart -= selectionStartOffset;
+            SelectionLength = selectionLength;
+        }
+        else
+        {
+            SelectedText =
+                selectionBefore +
+                SelectedText +
+                selectionAfter;
+        }
+    }
 }

@@ -10930,16 +10930,12 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     private void EditToolBarAction(string noSelection, int selectionStartOffset, int selectionLength,
                                    string selectionBefore, string selectionAfter)
     {
-        if (txtEdit.SelectionLength == 0)
-        {
-            txtEdit.SelectedText = noSelection;
-            txtEdit.SelectionStart = txtEdit.SelectionStart - selectionStartOffset;
-            txtEdit.SelectionLength = selectionLength;
-        }
-        else
-        {
-            txtEdit.SelectedText = selectionBefore + txtEdit.SelectedText + selectionAfter;
-        }
+        txtEdit.ApplyToolbarEdit(
+            noSelection,
+            selectionStartOffset,
+            selectionLength,
+            selectionBefore,
+            selectionAfter);
     }
 
     /// <summary>
