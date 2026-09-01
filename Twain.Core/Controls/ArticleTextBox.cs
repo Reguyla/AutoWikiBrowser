@@ -396,6 +396,47 @@ public class ArticleTextBox : RichTextBox
     }
 
     /// <summary>
+    /// Converts an article-text range to the corresponding RichTextBox selection
+    /// range and selects it in the editor.
+    /// </summary>
+    /// <param name="inputIndex">
+    /// The zero-based index within the article text.
+    /// </param>
+    /// <param name="inputLength">
+    /// The number of article-text characters to select.
+    /// </param>
+    /// <param name="scrollToCaret">
+    /// <see langword="true"/> to scroll the resulting caret position into view;
+    /// otherwise, <see langword="false"/>.
+    /// </param>
+    /// <remarks>
+    /// Article text uses normalized line-feed line endings, while the public
+    /// <see cref="Text"/> representation uses local line endings. The RichTextBox
+    /// selection indexes therefore require adjustment for expanded newline
+    /// characters.
+    /// </remarks>
+    public void SetArticleTextSelection(
+        int inputIndex,
+        int inputLength,
+        bool scrollToCaret)
+    {
+        string text = Text;
+
+        int newlinesToIndex =
+            WikiRegexes.Newline.Matches(
+                text.Substring(0, inputIndex)).Count;
+
+        int newlinesInSelection =
+            WikiRegexes.Newline.Matches(
+                text.Substring(inputIndex, inputLength)).Count;
+
+        SetEditBoxSelection(
+            inputIndex - newlinesToIndex,
+            inputLength - newlinesInSelection,
+            scrollToCaret);
+    }
+
+    /// <summary>
     /// Applies legacy wiki-syntax highlighting to the current article text.
     /// </summary>
     /// <remarks>

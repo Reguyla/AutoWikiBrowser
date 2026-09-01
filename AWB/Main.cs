@@ -11483,34 +11483,24 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         // RichTextBox indexes differ from article-text indexes because
         // RichTextBox stores line endings as CRLF while article text uses LF.
         // Adjust the requested selection by accounting for newline expansion.
-        int newlinesToIndex =
-            WikiRegexes.Newline.Matches(
-                text.Substring(0, index)).Count;
-
-        int newlinesInSelection =
-            WikiRegexes.Newline.Matches(
-                text.Substring(index, length)).Count;
-
-        txtEdit.SetEditBoxSelection(
-            index - newlinesToIndex,
-            length - newlinesInSelection,
+        txtEdit.SetArticleTextSelection(
+            index,
+            length,
             false);
-
-        txtEdit.SelectionBackColor = Color.Tomato;
     }
 
     // TODO: Replace editor-specific selection highlighting with an
     // abstraction that supports both the legacy editor and Monaco.
-    /// <summary>
-    /// Highlights the specified range of text in the edit box using a yellow
-    /// background.
-    /// </summary>
-    /// <param name="index">
-    /// The zero-based starting index of the text to highlight.
-    /// </param>
-    /// <param name="length">
-    /// The number of characters to highlight.
-    /// </param>
+        /// <summary>
+        /// Highlights the specified range of text in the edit box using a yellow
+        /// background.
+        /// </summary>
+        /// <param name="index">
+        /// The zero-based starting index of the text to highlight.
+        /// </param>
+        /// <param name="length">
+        /// The number of characters to highlight.
+        /// </param>
     private void YellowSelection(int index, int length)
     {
         txtEdit.SetEditBoxSelection(index, length);
