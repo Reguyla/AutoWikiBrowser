@@ -248,8 +248,7 @@ public class ArticleTextBox : RichTextBox
     /// After processing the search, the editor receives focus and the resulting
     /// selection is scrolled into view.
     /// </remarks>
-    // TODO(Twain): Separate search-state and matching logic from editor navigation
-    // so that incremental search can be shared by WinForms and Monaco editors.
+
     public void Find(
         string strRegex,
         bool isRegex,
@@ -309,8 +308,7 @@ public class ArticleTextBox : RichTextBox
     /// Article text is converted from local line endings before matching so that
     /// search offsets correspond to the normalized text used by the search logic.
     /// </remarks>
-    // TODO(Twain): Move editor-independent search matching out of ArticleTextBox
-    // so that the same implementation can be used by the Monaco editor.
+
     public Dictionary<int, int> FindAll(
         string strRegex,
         bool isRegex,
