@@ -1329,7 +1329,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         DisableButtons();
 
         _skippable = true;
-        txtEdit.Clear();
+        ArticleEditor.Text = string.Empty;
 
         ArticleInfo(true);
     }
@@ -2786,7 +2786,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         SaveInfo saveInfo)
     {
         ClearBrowser();
-        txtEdit.Clear();
+        ArticleEditor.Text = string.Empty;
 
         // Gradually reduce the retry delay after successful saves.
         if (_restartDelay > 5)
@@ -2893,7 +2893,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         _sessionCounters.NumberOfIgnoredEdits++;
         StopDelayedAutoSaveTimer();
         NudgeTimer.Stop();
-        txtEdit.Clear();
+        ArticleEditor.Text = string.Empty;
     }
 
     /// <summary>
