@@ -8016,9 +8016,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         cutToolStripMenuItem.Enabled =
             copyToolStripMenuItem.Enabled =
             openSelectionInBrowserToolStripMenuItem.Enabled =
-            !string.IsNullOrEmpty(txtEdit.SelectedText);
+            !string.IsNullOrEmpty(ArticleEditor.SelectedText);
 
-        undoToolStripMenuItem.Enabled = txtEdit.CanUndoEdit;
+        undoToolStripMenuItem.Enabled = ArticleEditor.CanUndoEdit;
 
         openPageInBrowserToolStripMenuItem.Enabled =
             openHistoryMenuItem.Enabled =
@@ -9629,13 +9629,13 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             _regexTester = new RegexTester();
         }
 
-        if (txtEdit.HasSelection &&
-            MessageBox.Show(
+        if (ArticleEditor.HasSelection &&
+                    MessageBox.Show(
                 "Would you like to transfer the currently selected article text to the Regex Tester?",
                 "Transfer Article Text?",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            _regexTester.ArticleText = txtEdit.SelectedText;
+            _regexTester.ArticleText = ArticleEditor.SelectedText;
         }
 
         _regexTester.Show();
