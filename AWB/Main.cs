@@ -2256,7 +2256,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 GuiUpdateAfterProcessing();
 
                 txtEdit.Focus();
-                txtEdit.ClearSelection();
+                ArticleEditor.ClearSelection();
                 break;
         }
     }
@@ -2313,7 +2313,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        txtEdit.SetCaretPosition(
+        ArticleEditor.SetCaretPosition(
             0, true);
     }
 
@@ -2360,7 +2360,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
-            txtEdit.SetCaretPosition(
+            ArticleEditor.SetCaretPosition(
                 txtEdit.Text.Length,
                 true);
         }
@@ -2472,7 +2472,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         if (highlightedCount > 0)
         {
-            txtEdit.SetCaretPosition(
+            ArticleEditor.SetCaretPosition(
                 0,
                 false);
         }
@@ -3410,7 +3410,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     private void CompleteDiffDisplay()
     {
         txtEdit.Focus();
-        txtEdit.ClearSelection();
+        ArticleEditor.ClearSelection();
 
         GuiUpdateAfterProcessing();
     }
@@ -4113,7 +4113,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 caretPosition,
                 txtEdit.Text.Length);
 
-        txtEdit.SetCaretPosition(
+        ArticleEditor.SetCaretPosition(
             restoredPosition,
             true);
     }
@@ -4166,7 +4166,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                     targetLine,
                     lineBreaks);
 
-            txtEdit.SetCaretPosition(
+            ArticleEditor.SetCaretPosition(
                 caretPosition,
                 true);
         }
@@ -5718,7 +5718,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         EditBoxTab.SelectedTab = tpEdit;
 
         int adjustedCaretPosition =
-            txtEdit.ArticleTextCaretPosition;
+            ArticleEditor.ArticleTextCaretPosition;
 
         if (TrySelectNextAlert(adjustedCaretPosition))
         {
@@ -8410,13 +8410,13 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (!focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
-            txtEdit.SetCaretPosition(
+            ArticleEditor.SetCaretPosition(
                 0,
                 true);
         }
         else
         {
-            txtEdit.SetCaretPosition(
+            ArticleEditor.SetCaretPosition(
                 txtEdit.Text.Length,
                 true);
         }
@@ -11514,7 +11514,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 match.Value);
         }
 
-        txtEdit.SetCaretPosition(
+        ArticleEditor.SetCaretPosition(
             0, true);
     }
 
