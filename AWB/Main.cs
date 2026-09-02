@@ -2255,7 +2255,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
             case 2:
                 GuiUpdateAfterProcessing();
 
-                txtEdit.Focus();
+                ArticleEditor.Focus();
                 ArticleEditor.ClearSelection();
                 break;
         }
@@ -4144,7 +4144,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         try
         {
             EditBoxTab.SelectedTab = tpEdit;
-            txtEdit.Focus();
+            ArticleEditor.Focus();
 
             if (destLine < 0)
             {
@@ -6621,7 +6621,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
 
         if (cmboEditSummary.Focused)
         {
-            txtEdit.Focus();
+            ArticleEditor.Focus();
         }
 
         txtEdit.Enabled =
@@ -7703,7 +7703,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// <param name="e">The event data.</param>
     private void cutToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Cut();
+        ArticleEditor.Cut();
     }
 
     /// <summary>
@@ -7713,7 +7713,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// <param name="e">The event data.</param>
     private void copyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Copy();
+        ArticleEditor.Copy();
     }
 
     /// <summary>
@@ -7723,10 +7723,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// <param name="e">The event data.</param>
     private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        DataFormats.Format plainText =
-            DataFormats.GetFormat(DataFormats.Text);
-
-        txtEdit.Paste(plainText);
+        ArticleEditor.Paste();
     }
 
     /// <summary>
@@ -7736,7 +7733,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// <param name="e">The event data.</param>
     private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectAll();
+        ArticleEditor.SelectAll();
     }
 
     /// <summary>
@@ -7746,7 +7743,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// <param name="e">The event data.</param>
     private void undoToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Undo();
+        ArticleEditor.Undo();
     }
 
     /// <summary>
@@ -11521,7 +11518,8 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         }
 
         ArticleEditor.SetCaretPosition(
-            0, true);
+            0,
+            true);
     }
 
     /// <summary>

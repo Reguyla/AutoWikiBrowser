@@ -217,6 +217,17 @@ public class ArticleTextBox : RichTextBox, IArticleEditor
     }
 
     /// <summary>
+    /// Pastes plain text from the clipboard at the current selection.
+    /// </summary>
+    public new void Paste()
+    {
+        DataFormats.Format plainText =
+            DataFormats.GetFormat(DataFormats.Text);
+
+        base.Paste(plainText);
+    }
+
+    /// <summary>
     /// Indicates whether the control is being updated programmatically and
     /// should temporarily suppress <see cref="TextChanged"/> notifications.
     /// </summary>

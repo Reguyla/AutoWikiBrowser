@@ -144,4 +144,29 @@ public interface IArticleEditor
     /// require an explicit word-wrap layout refresh.
     /// </remarks>
     void RefreshWordWrapLayout();
+
+    /// <summary>
+    /// Cuts the current selection to the clipboard.
+    /// </summary>
+    void Cut();
+
+    /// <summary>
+    /// Copies the current selection to the clipboard.
+    /// </summary>
+    void Copy();
+
+    /// <summary>
+    /// Pastes plain text from the clipboard at the current selection.
+    /// </summary>
+    void Paste();
+
+    /// <summary>
+    /// Selects all text in the editor.
+    /// </summary>
+    void SelectAll();
+
+    /// <summary>
+    /// Undoes the most recent editor change.
+    /// </summary>
+    void Undo();
 }
