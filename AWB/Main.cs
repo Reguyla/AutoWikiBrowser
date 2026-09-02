@@ -2025,17 +2025,17 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             "WriteProcessedArticleToEditor",
             "Refreshing editor word-wrap layout.");
 
-        txtEdit.RefreshWordWrapLayout();
+        ArticleEditor.RefreshWordWrapLayout();
 
         Tools.WriteDebug(
             "WriteProcessedArticleToEditor",
             "Editor layout refreshed successfully. Assigning editor text.");
 
-        txtEdit.Text = TheArticle.ArticleText;
+        ArticleEditor.Text = TheArticle.ArticleText;
 
         Tools.WriteDebug(
             "WriteProcessedArticleToEditor",
-            $"Editor text assigned successfully. Editor length: {txtEdit.Text.Length}");
+$"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}");
 
         Variables.Profiler.Profile("Set edit box text");
 
@@ -2361,7 +2361,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         if (focusAtEndOfEditTextBoxToolStripMenuItem.Checked)
         {
             ArticleEditor.SetCaretPosition(
-                txtEdit.Text.Length,
+                ArticleEditor.Text.Length,
                 true);
         }
 
@@ -3341,7 +3341,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 DiffHtmlBuilder.BuildDiffHtml(
                     _diff,
                     TheArticle.OriginalArticleText,
-                    txtEdit.Text,
+                    ArticleEditor.Text,
                     _sessionCounters.NumberOfEdits);
 
             await DisplayDiffHtmlAsync(diffHtml);
@@ -3374,7 +3374,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         return DiffHtmlBuilder.BuildDiffHtml(
             _diff,
             article.OriginalArticleText,
-            txtEdit.Text,
+            ArticleEditor.Text,
             _sessionCounters.NumberOfEdits);
     }
 
@@ -3495,7 +3495,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         AsyncApiEdit sender,
         string previewHtml)
     {
-        _lastArticle = txtEdit.Text;
+        _lastArticle = ArticleEditor.Text;
         _skippable = false;
 
         ShowPreviewBrowser();
@@ -3598,7 +3598,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         TheSession.Editor.Preview(
             article.Name,
-            txtEdit.Text);
+            ArticleEditor.Text);
     }
 
     /// <summary>
@@ -3706,7 +3706,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// </returns>
     private bool CanSaveCurrentText()
     {
-        if (!string.IsNullOrEmpty(txtEdit.Text))
+        if (!string.IsNullOrEmpty(ArticleEditor.Text))
         {
             return true;
         }
@@ -3741,11 +3741,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 "Attempted to save page with zero length ArticleText");
         }
 
-        if (string.IsNullOrEmpty(txtEdit.Text))
+        if (string.IsNullOrEmpty(ArticleEditor.Text))
         {
             throw new InvalidOperationException(
                 messagePrefix +
-                "Attempted to save page with zero length txtEditText");
+                "Attempted to save page with zero length editor text");
         }
     }
 
@@ -3762,7 +3762,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// </remarks>
     private void SaveArticle()
     {
-        _lastArticle = txtEdit.Text;
+        _lastArticle = ArticleEditor.Text;
 
         UpdateSaveIntervalTracking();
 
@@ -3784,7 +3784,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             GetSelectedWatchOption();
 
         TheSession.Editor.Save(
-            txtEdit.Text,
+            ArticleEditor.Text,
             AppendUsingAWBSummary(txtReviewEditSummary.Text),
             markAllAsMinorToolStripMenuItem.Checked,
             watchOption);
@@ -3831,7 +3831,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             Summary.CorrectSectionEditSummary(
                 txtReviewEditSummary.Text,
                 TheArticle.OriginalArticleText,
-                txtEdit.Text);
+                ArticleEditor.Text);
     }
 
     #endregion
@@ -4054,7 +4054,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         switch (changeType)
         {
             case DiffChangeMode.Change:
-                txtEdit.Text =
+                ArticleEditor.Text =
                     _diff.UndoChange(
                         left,
                         right);
@@ -4062,7 +4062,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 break;
 
             case DiffChangeMode.Deletion:
-                txtEdit.Text =
+                ArticleEditor.Text =
                     _diff.UndoDeletion(
                         left,
                         right);
@@ -4070,7 +4070,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 break;
 
             case DiffChangeMode.Addition:
-                txtEdit.Text =
+                ArticleEditor.Text =
                     _diff.UndoAddition(right);
 
                 break;
@@ -4111,7 +4111,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         int restoredPosition =
             Math.Min(
                 caretPosition,
-                txtEdit.Text.Length);
+                ArticleEditor.Text.Length);
 
         ArticleEditor.SetCaretPosition(
             restoredPosition,
@@ -4743,7 +4743,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 Summary.AddSectionEditSummary(
                     summary,
                     article.OriginalArticleText,
-                    txtEdit.Text);
+                    ArticleEditor.Text);
         }
 
         ValidateEditSummary(summary);
@@ -5516,7 +5516,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         object sender,
         EventArgs e)
     {
-        txtEdit.WrapText =
+        ArticleEditor.WrapText =
             wordWrapToolStripMenuItem.Checked;
     }
 
@@ -5557,7 +5557,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
         else
         {
-            string articleText = txtEdit.Text;
+            string articleText = ArticleEditor.Text;
             string templates =
                 string.Join(
                     "",
@@ -5744,7 +5744,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         foreach (KeyValuePair<int, int> error in _errors)
         {
             if (error.Key <= position ||
-                error.Key >= txtEdit.Text.Length)
+                error.Key >= ArticleEditor.Text.Length)
             {
                 continue;
             }
@@ -7105,11 +7105,13 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void btnStop_Click(object sender, EventArgs e)
     {
+        string editorText = ArticleEditor.Text;
+
         // Ask for confirmation when the edit box contains manual changes that
         // differ from the current article text.
         if (TheArticle == null ||
-            TheArticle.ArticleText.Equals(txtEdit.Text) ||
-            txtEdit.Text.Length == 0 ||
+            TheArticle.ArticleText.Equals(editorText) ||
+            editorText.Length == 0 ||
             MessageBox.Show(
                 "There are manual changes to the page text in the edit box, " +
                 "are you sure you want to stop?",
@@ -7679,8 +7681,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void listToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText =
-            Tools.HTMLListToWiki(txtEdit.SelectedText, "*");
+        ArticleEditor.SelectedText =
+            Tools.HTMLListToWiki(ArticleEditor.SelectedText, "*");
     }
 
     /// <summary>
@@ -7690,8 +7692,8 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void listToolStripMenuItem1_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText =
-            Tools.HTMLListToWiki(txtEdit.SelectedText, "#");
+        ArticleEditor.SelectedText =
+            Tools.HTMLListToWiki(ArticleEditor.SelectedText, "#");
     }
 
     /// <summary>
@@ -7759,7 +7761,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (TheArticle != null)
         {
-            txtEdit.SelectedText =
+            ArticleEditor.SelectedText =
                 "{{Hndis|name=" +
                 Tools.MakeHumanCatKey(
                     TheArticle.Name,
@@ -7775,9 +7777,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void wikifyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Text =
+        ArticleEditor.Text =
             "{{Wikify|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\n"
-            + txtEdit.Text;
+            + ArticleEditor.Text;
     }
 
     /// <summary>
@@ -7787,9 +7789,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void cleanupToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.Text =
+        ArticleEditor.Text =
             "{{cleanup|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}\r\n\r\n"
-            + txtEdit.Text;
+            + ArticleEditor.Text;
     }
 
     // TODO(Twain): Move speedy deletion template generation and user-facing
@@ -7815,9 +7817,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
         if (res.OK)
         {
-            txtEdit.Text =
+            ArticleEditor.Text =
                 "{{db|" + res.Text.Trim() + "}}\r\n\r\n" +
-                txtEdit.Text;
+                ArticleEditor.Text;
         }
     }
 
@@ -7828,7 +7830,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void clearToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = "{{subst:clear}}";
+        ArticleEditor.SelectedText = "{{subst:clear}}";
     }
 
     /// <summary>
@@ -7838,7 +7840,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void disambiguationToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = "{{Disambiguation}}";
+        ArticleEditor.SelectedText = "{{Disambiguation}}";
     }
 
     /// <summary>
@@ -7849,7 +7851,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void uncategorisedToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText =
+        ArticleEditor.SelectedText =
             "{{Uncategorized|date={{subst:CURRENTMONTHNAME}} {{subst:CURRENTYEAR}}}}";
     }
 
@@ -7883,12 +7885,12 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         try
         {
             request.BypassRedirects(
-                txtEdit.Text,
+                ArticleEditor.Text,
                 TheSession.Editor.SynchronousEditor.Clone());
 
             request.Wait();
 
-            txtEdit.Text = (string)request.Result;
+            ArticleEditor.Text = (string)request.Result;
         }
         finally
         {
@@ -7904,9 +7906,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void unicodifyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        string text = txtEdit.SelectedText;
+        string text = ArticleEditor.SelectedText;
         text = _parser.Unicodify(text);
-        txtEdit.SelectedText = text;
+        ArticleEditor.SelectedText = text;
     }
 
     /// <summary>
@@ -7921,7 +7923,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (TheArticle != null)
         {
-            txtEdit.SelectedText =
+            ArticleEditor.SelectedText =
                 "{{DEFAULTSORT:" +
                 Tools.MakeHumanCatKey(
                     TheArticle.Name,
@@ -7952,7 +7954,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
             string categories =
                 Parsers.BuildManualBirthDeathCategories(
-                    txtEdit.Text,
+                    ArticleEditor.Text,
                     name);
 
             if (categories.Length == 0)
@@ -7966,13 +7968,13 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
                 return;
             }
 
-            txtEdit.SelectedText = categories;
+            ArticleEditor.SelectedText = categories;
 
             bool noChange;
 
-            txtEdit.Text =
+            ArticleEditor.Text =
                 Parsers.ChangeToDefaultSort(
-                    txtEdit.Text,
+                    ArticleEditor.Text,
                     TheArticle.Name,
                     out noChange,
                     restrictDefaultsortChangesToolStripMenuItem.Checked);
@@ -7980,9 +7982,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             // Sort metadata when DEFAULTSORT was added to ensure correct placement.
             if (!noChange)
             {
-                txtEdit.Text =
+                ArticleEditor.Text =
                     _parser.SortMetaData(
-                        txtEdit.Text,
+                        ArticleEditor.Text,
                         TheArticle.Name);
             }
         }
@@ -7992,14 +7994,14 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
     }
 
-     /// <summary>
+    /// <summary>
     /// Inserts the configured stub text at the current editor selection.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
     private void stubToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText = toolStripTextBox1.Text;
+        ArticleEditor.SelectedText = toolStripTextBox1.Text;
     }
 
     /// <summary>
@@ -8098,7 +8100,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser#Open_text_selection_in_browser
         // User feedback indicates that invalid HTTP links should still be
         // treated as URLs rather than opened as wiki pages.
-        string selectedText = txtEdit.SelectedText.Trim();
+        string selectedText = ArticleEditor.SelectedText.Trim();
 
         if (Tools.ShouldOpenAsUrl(selectedText))
         {
@@ -8106,7 +8108,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
         else
         {
-            TheSession.Site.OpenPageInBrowser(txtEdit.SelectedText);
+            TheSession.Site.OpenPageInBrowser(ArticleEditor.SelectedText);
         }
     }
 
@@ -8297,7 +8299,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         // Refresh the article text to include any manual changes from the editor.
         TheArticle.AWBChangeArticleText(
             "Reparse",
-            txtEdit.Text,
+            ArticleEditor.Text,
             false);
 
         StartReparseBackgroundRequest();
@@ -8375,7 +8377,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// </summary>
     private void RefreshReparsedEditBox()
     {
-        txtEdit.Text = TheArticle.ArticleText;
+        ArticleEditor.Text = TheArticle.ArticleText;
         txtEdit.Visible = false;
 
         // Clear highlighting from previous alerts before applying the current
@@ -8417,9 +8419,10 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         else
         {
             ArticleEditor.SetCaretPosition(
-                txtEdit.Text.Length,
+                ArticleEditor.Text.Length,
                 true);
         }
+
         btnSave.Select();
     }
 
@@ -8462,7 +8465,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         if (_lastArticle.Length > 0)
         {
-            txtEdit.Text = _lastArticle;
+            ArticleEditor.Text = _lastArticle;
 
             if (_actionOnLoad == 0)
             {
@@ -8489,7 +8492,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         if (sender is ToolStripMenuItem item &&
             item.Tag is string text)
         {
-            txtEdit.SelectedText = text;
+            ArticleEditor.SelectedText = text;
         }
 
         mnuTextBox.Hide();
@@ -8602,11 +8605,11 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         object sender,
         EventArgs e)
     {
-        string text = _removeText.Hide(txtEdit.Text);
+        string text = _removeText.Hide(ArticleEditor.Text);
 
         text = Parsers.RemoveAllWhiteSpace(text);
 
-        txtEdit.Text = _removeText.AddBack(text);
+        ArticleEditor.Text = _removeText.AddBack(text);
     }
     #endregion
 
@@ -9827,7 +9830,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     {
         EditBoxTab.SelectedTab = tpEdit;
 
-        string selectedtext = txtEdit.SelectedText;
+        string selectedtext = ArticleEditor.SelectedText;
 
         if (!WikiLinkHelper.TryRemoveMarkup(
                 selectedtext,
@@ -9848,7 +9851,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        txtEdit.SelectedText = replacementText;
+        ArticleEditor.SelectedText = replacementText;
         txtEdit.ResetFind();
     }
 
@@ -9993,7 +9996,10 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="path">The absolute path of the file to write.</param>
     private void SaveEditBoxText(string path)
     {
-        Tools.WriteTextFileAbsolutePath(txtEdit.Text, path, false);
+        Tools.WriteTextFileAbsolutePath(
+            ArticleEditor.Text,
+            path,
+            false);
     }
 
     #endregion
@@ -10164,7 +10170,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         if (TheArticle == null)
             return;
 
-        txtEdit.Text = TheArticle.OriginalArticleText;
+        ArticleEditor.Text = TheArticle.OriginalArticleText;
     }
 
     #region History
@@ -10513,7 +10519,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             !Variables.IsWikipediaEN;
 
         TheArticle = null;
-        txtEdit.Text = string.Empty;
+        ArticleEditor.Text = string.Empty;
         _templateRedirectsLoaded = false;
 
         CheckStatus(true);
@@ -10830,7 +10836,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     /// <param name="e">The event data.</param>
     private void imgHr_Click(object sender, EventArgs e)
     {
-        txtEdit.SelectedText += "\r\n----\r\n";
+        ArticleEditor.SelectedText += "\r\n----\r\n";
     }
 
     /// <summary>
@@ -10934,7 +10940,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
     private void EditToolBarAction(string noSelection, int selectionStartOffset, int selectionLength,
                                    string selectionBefore, string selectionAfter)
     {
-        txtEdit.ApplyToolbarEdit(
+        ArticleEditor.ApplyToolbarEdit(
             noSelection,
             selectionStartOffset,
             selectionLength,
@@ -11136,7 +11142,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        string text = txtEdit.Text;
+        string text = ArticleEditor.Text;
 
         if (!txtEdit.Enabled || text.Length == 0)
         {
@@ -11321,9 +11327,9 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        txtEdit.Text =
+        ArticleEditor.Text =
             Parsers.AddCategoryToArticleText(
-                txtEdit.Text,
+                ArticleEditor.Text,
                 _catName.CategoryName);
 
         ReparseEditBox();
@@ -11446,7 +11452,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
             return;
         }
 
-        string text = txtEdit.Text;
+        string text = ArticleEditor.Text;
 
         if (index < 0 ||
             length < 0 ||
@@ -11594,7 +11600,7 @@ private CurrentArticleListMode _dbScannerUseCurrentArticleList;
         }
 
         TheArticle = null;
-        txtEdit.Text = string.Empty;
+        ArticleEditor.Text = string.Empty;
 
         TheSession.Editor.Logout();
 
