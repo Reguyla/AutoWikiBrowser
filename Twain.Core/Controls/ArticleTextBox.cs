@@ -780,4 +780,15 @@ public class ArticleTextBox : RichTextBox, IArticleEditor
     /// Gets whether the editor currently has an action that can be undone.
     /// </summary>
     public bool CanUndoEdit => CanUndo;
+
+    /// <summary>
+    /// Navigates the editor to the specified one-based line number.
+    /// </summary>
+    /// <param name="lineNumber">
+    /// The one-based line number to navigate to.
+    /// </param>
+    public void GoToLine(int lineNumber)
+    {
+        ((TextBoxBase)this).GoToLine(lineNumber);
+    }
 }

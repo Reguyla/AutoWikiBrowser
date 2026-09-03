@@ -169,4 +169,12 @@ public interface IArticleEditor
     /// Undoes the most recent editor change.
     /// </summary>
     void Undo();
+
+    /// <summary>
+    /// Navigates the editor to the specified one-based line number.
+    /// </summary>
+    /// <param name="lineNumber">
+    /// The one-based line number to navigate to.
+    /// </param>
+    void GoToLine(int lineNumber);
 }

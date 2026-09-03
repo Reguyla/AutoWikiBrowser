@@ -1,7 +1,8 @@
 ﻿namespace Twain.Core.Editing;
 
 /// <summary>
-/// Provides editor-independent helpers for preparing article search expressions.
+/// Provides editor-independent article search behavior, including search
+/// expression preparation, incremental search state, and match discovery.
 /// </summary>
 internal static class ArticleSearchHelper
 {

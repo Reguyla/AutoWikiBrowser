@@ -3409,7 +3409,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// </summary>
     private void CompleteDiffDisplay()
     {
-        txtEdit.Focus();
+        ArticleEditor.Focus();
         ArticleEditor.ClearSelection();
 
         GuiUpdateAfterProcessing();
@@ -5996,7 +5996,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
                 toolStripTextBox2.Text,
                 out int lineNumber))
         {
-            txtEdit.GoToLine(lineNumber);
+            ArticleEditor.GoToLine(lineNumber);
             mnuTextBox.Hide();
         }
     }
@@ -8010,7 +8010,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// </param>
     private void mnuTextBox_Opening(object sender, CancelEventArgs e)
     {
-        txtEdit.Focus();
+        ArticleEditor.Focus();
 
         cutToolStripMenuItem.Enabled =
             copyToolStripMenuItem.Enabled =
