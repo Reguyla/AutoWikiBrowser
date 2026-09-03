@@ -14,33 +14,12 @@
         <vm:ArticleEditorViewModel />
     </Design.DataContext>
 
-    <!--
-    This text box is the initial editor implementation used to establish
-    document binding and pane integration. It will later be replaced by the
-    Monaco editor host.
-    -->
-
     <Grid>
 
-        <TextBox
-            AcceptsReturn="True"
-            AcceptsTab="True"
+        <NativeWebView
+            x:Name="EditorWebView"
             HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            VerticalContentAlignment="Top"
-            Padding="{DynamicResource TwainControlPadding}"
-            Background="{DynamicResource TwainControlBackgroundBrush}"
-            BorderBrush="{DynamicResource TwainBorderBrush}"
-            BorderThickness="{DynamicResource TwainBorderThickness}"
-            FontFamily="Consolas, Cascadia Mono, monospace"
-            FontSize="{DynamicResource TwainFontSizeNormal}"
-            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            Text="{Binding Document.CurrentText, Mode=TwoWay}"
-            TextWrapping="Wrap"
-            PlaceholderText="Article text" />
+            VerticalAlignment="Stretch" />
 
     </Grid>
 
