@@ -8365,9 +8365,10 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         StatusLabelText = "Ready to save";
     }
 
-    // TODO(Twain): Move editor highlighting and selection restoration behind
-    // the editor abstraction so reparse completion does not depend directly
-    // on WinForms editor controls.
+    // TODO(Twain): Separate wiki-syntax recognition from RichTextBox presentation.
+    // The editor-independent layer should describe highlighted text ranges and
+    // semantic highlight types, while each editor implementation determines how
+    // those highlights are rendered.
     /// <summary>
     /// Refreshes the editor with the reparsed article text and reapplies
     /// configured find, alert, and syntax highlighting.
