@@ -25,4 +25,13 @@
   <ProjectReference Include="..\Twain.UI\Twain.UI.csproj" />
   <ProjectReference Include="..\Twain.Diagnostics\Twain.Diagnostics.csproj" />
 </ItemGroup>
+
+<ItemGroup>
+  <Content Include="..\Twain.UI\Monaco\**\*">
+    <Link>Monaco\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+  </Content>
+</ItemGroup>
+
 </Project>

@@ -47,7 +47,11 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow =
-                new Twain.CustomModules.CustomModule();
+                new ShellWindow
+                {
+                    DataContext =
+                        new ShellViewModel()
+                };
         }
 
         base.OnFrameworkInitializationCompleted();
