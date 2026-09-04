@@ -19,6 +19,20 @@ public partial class ArticleEditorView : UserControl
     {
         InitializeComponent();
 
+        EditorWebView.AdapterCreated +=
+            EditorWebView_AdapterCreated;
+    }
+
+    /// <summary>
+    /// Loads Monaco after the native web view adapter has been initialized.
+    /// </summary>
+    private void EditorWebView_AdapterCreated(
+        object? sender,
+        WebViewAdapterEventArgs e)
+    {
+        EditorWebView.AdapterCreated -=
+            EditorWebView_AdapterCreated;
+
         LoadMonacoEditor();
     }
 
@@ -27,26 +41,17 @@ public partial class ArticleEditorView : UserControl
     /// </summary>
     private void LoadMonacoEditor()
     {
-        string monacoDirectory =
-            Path.Combine(
-                AppContext.BaseDirectory,
-                "Monaco");
-
         string editorPath =
             Path.Combine(
-                monacoDirectory,
+                AppContext.BaseDirectory,
+                "Monaco",
                 "MonacoEditor.html");
 
-        string html =
-            File.ReadAllText(editorPath);
-
-        Uri baseUri =
+        Uri editorUri =
             new Uri(
-                monacoDirectory +
-                Path.DirectorySeparatorChar);
+                editorPath,
+                UriKind.Absolute);
 
-        EditorWebView.NavigateToString(
-            html,
-            baseUri);
+        EditorWebView.Navigate(editorUri);
     }
 }

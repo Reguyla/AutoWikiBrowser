@@ -14,13 +14,12 @@
         <vm:ArticleEditorViewModel />
     </Design.DataContext>
 
-    <Grid>
-
-        <NativeWebView
-            x:Name="EditorWebView"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch" />
-
-    </Grid>
+<Grid>
+    <NativeWebView
+        x:Name="EditorWebView"
+        MinHeight="240"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch" />
+</Grid>
 
 </UserControl>
