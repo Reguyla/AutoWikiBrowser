@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Twain.UI.Editor;
 
@@ -21,6 +23,9 @@ public partial class ArticleEditorView : UserControl
 
         EditorWebView.AdapterCreated +=
             EditorWebView_AdapterCreated;
+
+        EditorWebView.WebMessageReceived +=
+            EditorWebView_WebMessageReceived;
     }
 
     /// <summary>
@@ -53,5 +58,58 @@ public partial class ArticleEditorView : UserControl
                 UriKind.Absolute);
 
         EditorWebView.Navigate(editorUri);
+    }
+
+    /// <summary>
+    /// Handles messages sent from the Monaco editor.
+    /// </summary>
+    private async void EditorWebView_WebMessageReceived(
+        object? sender,
+        WebMessageReceivedEventArgs e)
+    {
+        using JsonDocument message =
+            JsonDocument.Parse(e.Body);
+
+        string? messageType =
+            message.RootElement
+                .GetProperty("type")
+                .GetString();
+
+        if (messageType == "ready")
+        {
+            await LoadDocumentTextAsync();
+
+            return;
+        }
+
+        if (messageType == "textChanged" &&
+            DataContext is ArticleEditorViewModel viewModel)
+        {
+            string text =
+                message.RootElement
+                    .GetProperty("text")
+                    .GetString()
+                ?? string.Empty;
+
+            viewModel.Document.CurrentText = text;
+        }
+    }
+
+    /// <summary>
+    /// Loads the current document text into Monaco.
+    /// </summary>
+    private async Task LoadDocumentTextAsync()
+    {
+        if (DataContext is not ArticleEditorViewModel viewModel)
+        {
+            return;
+        }
+
+        string jsonText =
+            JsonSerializer.Serialize(
+                viewModel.Document.CurrentText);
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.setText({jsonText});");
     }
 }
