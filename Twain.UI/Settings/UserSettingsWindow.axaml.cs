@@ -193,6 +193,8 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         {
             ProtocolComboBox.SelectedIndex = 0;
         }
+
+        UpdateOkButtonState();
     }
 
     /// <summary>
@@ -231,5 +233,36 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
             UserSettingsHelper.SupportsCustomConnectionSettings(
                 project) &&
             UseCustomDomainCheckBox.IsChecked == true;
+    }
+
+    /// <summary>
+    /// Updates whether the current site settings contain enough information
+    /// for the dialog to be accepted.
+    /// </summary>
+    private void UpdateOkButtonState()
+    {
+        if (ProjectComboBox.SelectedItem is not ProjectEnum project)
+        {
+            OkButton.IsEnabled = false;
+            return;
+        }
+
+        OkButton.IsEnabled =
+            !UserSettingsHelper.RequiresCustomProject(project) ||
+            !string.IsNullOrWhiteSpace(CustomProjectComboBox.Text);
+    }
+
+    /// <summary>
+    /// Updates validation when the custom-project value changes.
+    /// </summary>
+    private void CustomProjectComboBox_PropertyChanged(
+        object? sender,
+        Avalonia.AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property ==
+            Avalonia.Controls.ComboBox.TextProperty)
+        {
+            UpdateOkButtonState();
+        }
     }
 }

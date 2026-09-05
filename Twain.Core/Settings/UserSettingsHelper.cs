@@ -201,4 +201,15 @@ public static class UserSettingsHelper
         return project == ProjectEnum.wikia ||
                project == ProjectEnum.fandom;
     }
+
+    /// <summary>
+    /// Determines whether the specified project requires a custom project value.
+    /// </summary>
+    public static bool RequiresCustomProject(
+        ProjectEnum project)
+    {
+        return project == ProjectEnum.custom ||
+               project == ProjectEnum.wikia ||
+               project == ProjectEnum.fandom;
+    }
 }

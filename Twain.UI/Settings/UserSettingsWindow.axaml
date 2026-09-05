@@ -56,7 +56,8 @@
                             <ComboBox x:Name="CustomProjectComboBox"
                                       Grid.Row="2"
                                       Grid.Column="1"
-                                      IsEditable="True" />
+                                      IsEditable="True"
+                                      PropertyChanged="CustomProjectComboBox_PropertyChanged" />
 
                             <TextBlock Grid.Row="3"
                                        Grid.Column="0"
