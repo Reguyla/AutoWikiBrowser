@@ -82,7 +82,8 @@
 
                                 <CheckBox x:Name="UseCustomDomainCheckBox"
                                           VerticalAlignment="Center"
-                                          Content="Use custom domain" />
+                                          Content="Use custom domain"
+                                          Click="UseCustomDomainCheckBox_Click" />
 
                                 <TextBox x:Name="DomainTextBox"
                                          Grid.Column="1" />

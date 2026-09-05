@@ -106,6 +106,8 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         ProtocolComboBox.SelectedIndex =
             UserSettingsHelper.GetProtocolSelectionIndex(
                 protocol);
+
+        UpdateProjectControls(project);
     }
 
     /// <summary>
@@ -136,7 +138,7 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Updates the available languages when the selected wiki project changes.
+    /// Updates the available site settings when the selected wiki project changes.
     /// </summary>
     private void ProjectComboBox_SelectionChanged(
         object? sender,
@@ -148,6 +150,49 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         }
 
         PopulateLanguages(project);
+        UpdateProjectControls(project);
+    }
+
+    /// <summary>
+    /// Updates project-specific control visibility and availability.
+    /// </summary>
+    private void UpdateProjectControls(
+        ProjectEnum project)
+    {
+        bool usesCustomProjectControls =
+            UserSettingsHelper.UsesCustomProjectControls(
+                project);
+
+        bool supportsCustomConnectionSettings =
+            UserSettingsHelper.SupportsCustomConnectionSettings(
+                project);
+
+        LanguageComboBox.IsVisible =
+            !usesCustomProjectControls;
+
+        CustomProjectComboBox.IsVisible =
+            usesCustomProjectControls;
+
+        ProtocolComboBox.IsVisible =
+            usesCustomProjectControls;
+
+        ProtocolComboBox.IsEnabled =
+            supportsCustomConnectionSettings;
+
+        UseCustomDomainCheckBox.IsEnabled =
+            supportsCustomConnectionSettings;
+
+        DomainTextBox.IsEnabled =
+            supportsCustomConnectionSettings &&
+            UseCustomDomainCheckBox.IsChecked == true;
+
+        SuppressAwbCheckBox.IsEnabled =
+            supportsCustomConnectionSettings;
+
+        if (UserSettingsHelper.RequiresHttps(project))
+        {
+            ProtocolComboBox.SelectedIndex = 0;
+        }
     }
 
     /// <summary>
@@ -168,5 +213,23 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         RoutedEventArgs e)
     {
         Close(false);
+    }
+
+    /// <summary>
+    /// Updates domain editing when the custom-domain option changes.
+    /// </summary>
+    private void UseCustomDomainCheckBox_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (ProjectComboBox.SelectedItem is not ProjectEnum project)
+        {
+            return;
+        }
+
+        DomainTextBox.IsEnabled =
+            UserSettingsHelper.SupportsCustomConnectionSettings(
+                project) &&
+            UseCustomDomainCheckBox.IsChecked == true;
     }
 }

@@ -171,4 +171,34 @@ public static class UserSettingsHelper
                 SiteMatrix.Languages
         };
     }
+
+    /// <summary>
+    /// Determines whether the specified project uses custom-project controls.
+    /// </summary>
+    public static bool UsesCustomProjectControls(
+        ProjectEnum project)
+    {
+        return project == ProjectEnum.custom ||
+               project == ProjectEnum.wikia ||
+               project == ProjectEnum.fandom;
+    }
+
+    /// <summary>
+    /// Determines whether the specified project allows custom connection settings.
+    /// </summary>
+    public static bool SupportsCustomConnectionSettings(
+        ProjectEnum project)
+    {
+        return project == ProjectEnum.custom;
+    }
+
+    /// <summary>
+    /// Determines whether the specified project requires HTTPS.
+    /// </summary>
+    public static bool RequiresHttps(
+        ProjectEnum project)
+    {
+        return project == ProjectEnum.wikia ||
+               project == ProjectEnum.fandom;
+    }
 }
