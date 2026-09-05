@@ -80,18 +80,6 @@ public static class UserSettingsHelper
     }
 
     /// <summary>
-    /// Determines whether AWB attribution suppression is available for the
-    /// specified project.
-    /// </summary>
-    public static bool SupportsAwbAttributionSuppression(
-        ProjectEnum project)
-    {
-        return project == ProjectEnum.custom ||
-               project == ProjectEnum.wikia ||
-               project == ProjectEnum.fandom;
-    }
-
-    /// <summary>
     /// Normalizes a custom wiki project value.
     /// </summary>
     public static string NormalizeCustomProject(
