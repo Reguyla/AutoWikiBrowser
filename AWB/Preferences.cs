@@ -253,42 +253,44 @@ internal sealed partial class MyPreferences : Form
         // TODO: Replace this enum-order comparison with an explicit determination
         // of whether the selected project supports multiple languages. The current
         // behavior depends on the numeric ordering of ProjectEnum members.
-        cmboLang.Enabled = project < ProjectEnum.species;
+        cmboLang.Enabled =
+            project < ProjectEnum.species;
 
         string selectedLanguage =
             cmboLang.SelectedItem?.ToString() ?? string.Empty;
 
         cmboLang.Items.Clear();
 
-        List<string> languages = project switch
-        {
-            ProjectEnum.wikipedia => SiteMatrix.WikipediaLanguages,
-            ProjectEnum.wiktionary => SiteMatrix.WiktionaryLanguages,
-            ProjectEnum.wikibooks => SiteMatrix.WikibooksLanguages,
-            ProjectEnum.wikinews => SiteMatrix.WikinewsLanguages,
-            ProjectEnum.wikiquote => SiteMatrix.WikiquoteLanguages,
-            ProjectEnum.wikisource => SiteMatrix.WikisourceLanguages,
-            ProjectEnum.wikiversity => SiteMatrix.WikiversityLanguages,
-            _ => SiteMatrix.Languages
-        };
+        IReadOnlyList<string> languages =
+            UserSettingsHelper.GetLanguagesForProject(
+                project);
 
-        cmboLang.Items.AddRange(languages.ToArray());
+        cmboLang.Items.AddRange(
+            languages.ToArray());
 
         if (!string.IsNullOrEmpty(selectedLanguage))
         {
             cmboLang.SelectedIndex =
-                cmboLang.Items.IndexOf(selectedLanguage);
+                cmboLang.Items.IndexOf(
+                    selectedLanguage);
         }
 
-        bool isCustomProject = project == ProjectEnum.custom;
-        bool isWikiaProject = project == ProjectEnum.wikia;
-        bool isFandomProject = project == ProjectEnum.fandom;
         bool usesCustomProjectControls =
-            isCustomProject || isWikiaProject || isFandomProject;
+            UserSettingsHelper.UsesCustomProjectControls(
+                project);
 
-        chkSupressAWB.Enabled = isCustomProject;
-        cmboProtocol.Enabled = isCustomProject;
-        DomainEnabled = isCustomProject;
+        bool supportsCustomConnectionSettings =
+            UserSettingsHelper.SupportsCustomConnectionSettings(
+                project);
+
+        chkSupressAWB.Enabled =
+            supportsCustomConnectionSettings;
+
+        cmboProtocol.Enabled =
+            supportsCustomConnectionSettings;
+
+        DomainEnabled =
+            supportsCustomConnectionSettings;
 
         if (usesCustomProjectControls)
         {
@@ -296,9 +298,9 @@ internal sealed partial class MyPreferences : Form
             cmboCustomProject.Visible = true;
             cmboLang.Visible = false;
 
-            if (isWikiaProject || isFandomProject)
+            if (UserSettingsHelper.RequiresHttps(
+                    project))
             {
-                // Wikia and Fandom projects always use HTTPS.
                 cmboProtocol.SelectedIndex = 0;
             }
 
@@ -311,7 +313,9 @@ internal sealed partial class MyPreferences : Form
 
             // TODO: Extract the reusable logic from cmboCustomProjectChanged into
             // a dedicated helper rather than invoking an event handler directly.
-            cmboCustomProjectChanged(null, null);
+            cmboCustomProjectChanged(
+                null,
+                null);
 
             return;
         }
@@ -330,16 +334,11 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private void UpdateOkButtonState()
     {
-        ProjectEnum project = Project;
-
-        bool requiresCustomProject =
-            project == ProjectEnum.custom ||
-            project == ProjectEnum.wikia ||
-            project == ProjectEnum.fandom;
-
         btnOK.Enabled =
-            !requiresCustomProject ||
-            !string.IsNullOrWhiteSpace(cmboCustomProject.Text);
+            !UserSettingsHelper.RequiresCustomProject(
+                Project) ||
+            !string.IsNullOrWhiteSpace(
+                cmboCustomProject.Text);
     }
 
     /// <summary>
