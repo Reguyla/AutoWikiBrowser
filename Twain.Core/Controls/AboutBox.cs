@@ -51,39 +51,25 @@ public partial class AboutBox : Form
     }
 
     #region Shared
-    /// <summary>
-    /// Returns a GFDL authors and copyright notice for use within AWB projects.
-    /// </summary>
-    public static string GPLNotice
-    {
-        get
-        {
-            return Resources.GPL;
-        }
-    }
 
-    /// <summary>
-    /// Extracts an assembly description (usually created by Visual Studio?)
-    /// </summary>
-    /// <returns></returns>
+    public static string GPLNotice =>
+        AboutInformation.GPLNotice;
+
     public static string AssemblyDescription(Assembly ass)
     {
-        // Get all Description attributes on this assembly
-        object[] attributes = ass.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
-        // If there aren't any Description attributes, return an empty string. If there is a Description attribute, return its value.
-        return (attributes.Length == 0) ? "" : ((AssemblyDescriptionAttribute)attributes[0]).Description;
+        return AboutInformation.AssemblyDescription(ass);
     }
 
     public static string AssemblyCopyright(Assembly ass)
     {
-        // Get all Copyright attributes on this assembly
-        object[] attributes = ass.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-        // If there aren't any Copyright attributes, return an empty string. If there is a Copyright attribute, return its value.
-        return (attributes.Length == 0) ? "" : ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
+        return AboutInformation.AssemblyCopyright(ass);
     }
 
     public static string GetDetailedMessage(Assembly ass)
-    { return AssemblyDescription(ass) + Environment.NewLine + Environment.NewLine + GPLNotice; }
+    {
+        return AboutInformation.GetDetailedMessage(ass);
+    }
+
     #endregion
 
     private void AboutBox_Load(object sender, EventArgs e)
