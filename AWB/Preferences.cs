@@ -250,11 +250,9 @@ internal sealed partial class MyPreferences : Form
     {
         ProjectEnum project = Project;
 
-        // TODO: Replace this enum-order comparison with an explicit determination
-        // of whether the selected project supports multiple languages. The current
-        // behavior depends on the numeric ordering of ProjectEnum members.
         cmboLang.Enabled =
-            project < ProjectEnum.species;
+            UserSettingsHelper.SupportsLanguageSelection(
+                project);
 
         string selectedLanguage =
             cmboLang.SelectedItem?.ToString() ?? string.Empty;

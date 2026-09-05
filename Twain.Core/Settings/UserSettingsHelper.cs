@@ -287,4 +287,21 @@ public static class UserSettingsHelper
                 customWiki,
                 StringComparison.Ordinal));
     }
+
+    /// <summary>
+    /// Determines whether the specified project supports selection from the
+    /// standard wiki language list.
+    /// </summary>
+    /// <param name="project">
+    /// The wiki project to evaluate.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the language selector should be enabled;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool SupportsLanguageSelection(
+        ProjectEnum project)
+    {
+        return project < ProjectEnum.species;
+    }
 }
