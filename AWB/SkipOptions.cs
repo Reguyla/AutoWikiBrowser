@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using Twain.Core;
 using Twain.Core.Plugin;
+using Twain.Core.Settings;
 
 namespace AutoWikiBrowser;
 
@@ -42,34 +43,6 @@ namespace AutoWikiBrowser;
 /// </remarks>
 internal sealed partial class SkipOptions : Form, ISkipOptions
 {
-    private const int BoldTitleOptionId = 1;
-    private const int BulletedExternalLinkOptionId = 2;
-    private const int BadLinksOptionId = 3;
-    private const int UnicodeOptionId = 4;
-    private const int AutoTagOptionId = 5;
-    private const int HeaderErrorOptionId = 6;
-    private const int DefaultSortOptionId = 7;
-    private const int UserTalkTemplatesOptionId = 8;
-    private const int CitationTemplateDatesOptionId = 9;
-    private const int HumanCategoriesOptionId = 10;
-
-    /// <summary>
-    /// Options displayed in the checked list box, in their intended display
-    /// order.
-    /// </summary>
-    private static readonly (int Id, string Description)[] AvailableOptions =
-    [
-        (BoldTitleOptionId, "Title boldened"),
-        (BulletedExternalLinkOptionId, "External link bulleted"),
-        (BadLinksOptionId, "Bad links fixed"),
-        (UnicodeOptionId, "Unicodification"),
-        (AutoTagOptionId, "Auto tag changes"),
-        (HeaderErrorOptionId, "Header error fixed"),
-        (DefaultSortOptionId, "{{defaultsort}} added"),
-        (UserTalkTemplatesOptionId, "User talk templates subst'd"),
-        (CitationTemplateDatesOptionId, "Citation templates dates fixed"),
-        (HumanCategoriesOptionId, "Human category changes")
-    ];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SkipOptions"/> form and
@@ -79,7 +52,8 @@ internal sealed partial class SkipOptions : Form, ISkipOptions
     {
         InitializeComponent();
 
-        foreach ((int id, string description) in AvailableOptions)
+        foreach ((int id, string description) in
+                 SkipOptionsHelper.AvailableOptions)
         {
             skipListBox.Items.Add(
                 new CheckedBoxItem
@@ -95,52 +69,62 @@ internal sealed partial class SkipOptions : Form, ISkipOptions
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoBoldTitle =>
-        IsOptionChecked(BoldTitleOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.BoldTitleOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoBulletedLink =>
-        IsOptionChecked(BulletedExternalLinkOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.BulletedExternalLinkOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoBadLink =>
-        IsOptionChecked(BadLinksOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.BadLinksOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoUnicode =>
-        IsOptionChecked(UnicodeOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.UnicodeOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoTag =>
-        IsOptionChecked(AutoTagOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.AutoTagOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoHeaderError =>
-        IsOptionChecked(HeaderErrorOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.HeaderErrorOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoDefaultSortAdded =>
-        IsOptionChecked(DefaultSortOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.DefaultSortOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoUserTalkTemplatesSubstd =>
-        IsOptionChecked(UserTalkTemplatesOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.UserTalkTemplatesOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoCiteTemplateDatesFixed =>
-        IsOptionChecked(CitationTemplateDatesOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.CitationTemplateDatesOptionId);
 
     /// <inheritdoc />
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool SkipNoPeopleCategoriesFixed =>
-        IsOptionChecked(HumanCategoriesOptionId);
+    IsOptionChecked(
+        SkipOptionsHelper.HumanCategoriesOptionId);
 
     // TODO (performance): If the number of skip options grows significantly,
     // consider converting the supplied List<int> to a HashSet<int> before
