@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.Parse;
+using Twain.Core.Settings;
 
 namespace AutoWikiBrowser;
 
@@ -109,15 +110,9 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private void InitializeLanguageSelection(string language)
     {
-        cmboLang.SelectedItem = NormalizeLanguageCode(language);
-    }
-
-    /// <summary>
-    /// Normalizes a wiki language code for selection.
-    /// </summary>
-    private static string NormalizeLanguageCode(string language)
-    {
-        return language.ToLowerInvariant();
+        cmboLang.SelectedItem =
+            UserSettingsHelper.NormalizeLanguageCode(
+                language);
     }
 
     /// <summary>
@@ -125,34 +120,15 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private void InitializeCustomProjects(string customProject)
     {
-        IReadOnlyList<string> customWikis = ParseCustomWikis(
-            Properties.Settings.Default.CustomWikis);
+        IReadOnlyList<string> customWikis =
+            UserSettingsHelper.ParseCustomWikis(
+                Properties.Settings.Default.CustomWikis);
 
         cmboCustomProject.Items.Clear();
         cmboCustomProject.Items.AddRange(
             customWikis.Cast<object>().ToArray());
 
         cmboCustomProject.Text = customProject;
-    }
-
-    /// <summary>
-    /// Parses the pipe-delimited custom wiki setting.
-    /// </summary>
-    private static IReadOnlyList<string> ParseCustomWikis(
-        string storedCustomWikis)
-    {
-        if (string.IsNullOrWhiteSpace(storedCustomWikis))
-        {
-            return Array.Empty<string>();
-        }
-
-        return storedCustomWikis
-            .Split(
-                '|',
-                StringSplitOptions.RemoveEmptyEntries |
-                StringSplitOptions.TrimEntries)
-            .Distinct(StringComparer.Ordinal)
-            .ToArray();
     }
 
     /// <summary>
@@ -164,17 +140,8 @@ internal sealed partial class MyPreferences : Form
             Properties.Settings.Default.AskForTerminate;
 
         chkPrivacy.Checked =
-            GetPrivacyCheckboxState(Properties.Settings.Default.Privacy);
-    }
-
-    /// <summary>
-    /// Converts the persisted privacy value to its checkbox representation.
-    /// </summary>
-    // TODO: Rename or migrate the persisted Privacy setting during a future
-    // settings-model redesign so its meaning is not inverted relative to the UI.
-    private static bool GetPrivacyCheckboxState(bool privacyEnabled)
-    {
-        return !privacyEnabled;
+            UserSettingsHelper.GetPrivacyCheckboxState(
+                Properties.Settings.Default.Privacy);
     }
 
     /// <summary>
@@ -198,33 +165,8 @@ internal sealed partial class MyPreferences : Form
     private void InitializeProtocolSelection(string protocol)
     {
         cmboProtocol.SelectedIndex =
-            GetProtocolSelectionIndex(protocol);
-    }
-
-    /// <summary>
-    /// Gets the protocol selector index for a protocol value.
-    /// </summary>
-    // TODO: Replace index-based protocol selection with a named value or enum so
-    // behavior is not coupled to ComboBox item ordering.
-    private static int GetProtocolSelectionIndex(string protocol)
-    {
-        return string.Equals(
-            protocol,
-            "http://",
-            StringComparison.Ordinal)
-            ? 1
-            : 0;
-    }
-
-    /// <summary>
-    /// Determines whether AWB attribution suppression is available for a project.
-    /// </summary>
-    private static bool SupportsAwbAttributionSuppression(
-        ProjectEnum project)
-    {
-        return project == ProjectEnum.custom ||
-               project == ProjectEnum.wikia ||
-               project == ProjectEnum.fandom;
+            UserSettingsHelper.GetProtocolSelectionIndex(
+                protocol);
     }
 
     #region Language and project
@@ -300,45 +242,16 @@ internal sealed partial class MyPreferences : Form
         FixCustomProject();
     }
 
-    // TODO: Investigate replacing the legacy regular-expression URL parsing with
-    // Uri.TryCreate. Preserve support for host names and paths entered without a
-    // URI scheme, and add tests for ports, localhost, IPv6, query strings, and
-    // index.php/api.php paths before changing the existing behavior.
-    /// <summary>
-    /// Matches a custom wiki URL and captures its host and optional script path,
-    /// excluding a trailing <c>index.php</c> or <c>api.php</c> filename.
-    /// </summary>
-    /// <remarks>
-    /// Text without a URI scheme does not match and is preserved by the
-    /// replacement operation.
-    /// </remarks>
-    private static readonly Regex CustomProjectRegex = new(
-        @"^.*?://(?:([\w/\.-]+?)/(?:index|api)\.php|([\w/\.-]+)).*$",
-        RegexOptions.Compiled |
-        RegexOptions.IgnoreCase |
-        RegexOptions.CultureInvariant);
-
     /// <summary>
     /// Normalizes the custom-project entry by removing its URI scheme, trimming
     /// a trailing API filename, and applying the expected trailing-slash format.
     /// </summary>
     private void FixCustomProject()
     {
-        string customProject = CustomProjectRegex.Replace(
-            cmboCustomProject.Text.Trim(),
-            "$1$2");
-
-        customProject = customProject.TrimEnd('/');
-
-        // Generic custom projects require a trailing slash. Wikia and Fandom
-        // project values retain their existing non-custom formatting.
-        if (customProject.Length > 0 &&
-            Project == ProjectEnum.custom)
-        {
-            customProject += "/";
-        }
-
-        cmboCustomProject.Text = customProject;
+        cmboCustomProject.Text =
+            UserSettingsHelper.NormalizeCustomProject(
+                cmboCustomProject.Text,
+                Project);
     }
 
     /// <summary>
@@ -1016,7 +929,9 @@ internal sealed partial class MyPreferences : Form
 
         // The persisted Privacy value has inverse semantics relative to the
         // checkbox state.
-        bool privacySetting = !chkPrivacy.Checked;
+        bool privacySetting =
+            UserSettingsHelper.GetPrivacySetting(
+                chkPrivacy.Checked);
 
         if (Properties.Settings.Default.Privacy != privacySetting)
         {
@@ -1036,13 +951,11 @@ internal sealed partial class MyPreferences : Form
     /// </returns>
     private string BuildCustomWikisSetting()
     {
-        return string.Join(
-            "|",
+        return UserSettingsHelper.BuildCustomWikisSetting(
             cmboCustomProject.Items
                 .Cast<object>()
-                .Select(item => item?.ToString())
-                .Where(item => !string.IsNullOrWhiteSpace(item))
-                .Select(item => item!.Trim()));
+                .Select(item =>
+                    item?.ToString()));
     }
 
     /// <summary>
