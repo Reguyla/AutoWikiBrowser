@@ -1,0 +1,107 @@
+<Window
+    x:Class="Twain.UI.About.AboutBoxWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="900"
+    Height="620"
+    MinWidth="700"
+    MinHeight="500"
+    CanResize="False"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    Title="About Twain">
+
+    <Grid Margin="24"
+          RowDefinitions="Auto,Auto,*,Auto"
+          RowSpacing="16">
+
+        <!-- Application identity -->
+        <StackPanel Grid.Row="0"
+                    Spacing="4">
+            <TextBlock Text="Twain"
+                       FontSize="28"
+                       FontWeight="SemiBold" />
+
+            <TextBlock x:Name="VersionText"
+                       Text="Version"
+                       FontSize="14" />
+        </StackPanel>
+
+        <!-- Project information -->
+        <StackPanel Grid.Row="1"
+                    Spacing="6">
+
+            <TextBlock Text="About Twain"
+                       FontSize="18"
+                       FontWeight="SemiBold" />
+
+            <TextBlock
+                Text="Twain is a modern, cross-platform evolution of AutoWikiBrowser."
+                TextWrapping="Wrap" />
+
+            <TextBlock
+                Text="Twain builds on the history and open-source work of the AutoWikiBrowser project while providing a modernized application architecture and user interface."
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Details -->
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*,*"
+              ColumnSpacing="16">
+
+            <StackPanel Grid.Column="0"
+                        Spacing="8">
+
+                <TextBlock Text="Environment"
+                           FontSize="16"
+                           FontWeight="SemiBold" />
+
+                <TextBlock x:Name="EnvironmentText"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Text="Project history"
+                           Margin="0,12,0,0"
+                           FontSize="16"
+                           FontWeight="SemiBold" />
+
+                <Button x:Name="AutoWikiBrowserButton"
+                        HorizontalAlignment="Left"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="AutoWikiBrowserButton_Click">
+                    <TextBlock Text="AutoWikiBrowser on Wikipedia"
+                               TextDecorations="Underline" />
+                </Button>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1"
+                        Spacing="8">
+
+                <TextBlock Text="License and details"
+                           FontSize="16"
+                           FontWeight="SemiBold" />
+
+            <ScrollViewer
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled"
+                MinHeight="280">
+
+                <TextBox x:Name="DetailsText"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap" />
+            </ScrollViewer>
+            </StackPanel>
+        </Grid>
+
+        <!-- Commands -->
+        <Button Grid.Row="3"
+                Content="_OK"
+                Width="100"
+                HorizontalAlignment="Right"
+                IsDefault="True"
+                IsCancel="True"
+                Click="OkButton_Click" />
+    </Grid>
+</Window>
