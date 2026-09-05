@@ -72,10 +72,6 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
   </ItemGroup>
 
-<ItemGroup>
-  <EmbeddedResource Remove="UserSettings.resx" />
-</ItemGroup>
-
   <!--
     Microsoft.Web.WebView2 currently contributes its WPF assembly to the
     reference graph even though this project uses only the WinForms WebView2
@@ -101,14 +97,24 @@
     compiled as a normal embedded WinForms resource.
   -->
 
-  <!--
-    Preserve the legacy logical resource name expected by the Preferences form.
-  -->
-  <ItemGroup>
-    <EmbeddedResource Update="Preferences.resx">
-      <DependentUpon>Preferences.cs</DependentUpon>
-      <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
+<!--
+  Preserve the legacy logical resource name expected by the Preferences form.
 
+  UserSettings.cs is a partial MainForm class. Its accompanying .resx file
+  must not be compiled as a normal WinForms resource because SDK resource
+  inference otherwise resolves it to AutoWikiBrowser.MainForm.resources,
+  colliding with MainForm.resx.
+-->
+<ItemGroup>
+  <EmbeddedResource Remove="UserSettings.resx" />
+
+  <EmbeddedResource Update="Preferences.resx">
+    <DependentUpon>Preferences.cs</DependentUpon>
+    <LogicalName>AutoWikiBrowser.MyPreferences.resources</LogicalName>
+  </EmbeddedResource>
+
+  <EmbeddedResource Update="ShutdownNotification.resx">
+    <DependentUpon>ShutdownNotification.cs</DependentUpon>
+  </EmbeddedResource>
+</ItemGroup>
 </Project>

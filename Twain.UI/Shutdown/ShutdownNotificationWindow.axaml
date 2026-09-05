@@ -1,0 +1,53 @@
+<Window
+    x:Class="Twain.UI.Shutdown.ShutdownNotificationWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="880"
+    Height="262"
+    CanResize="False"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterScreen"
+    Title="Shutdown notification">
+
+    <Grid
+        Margin="32,29,32,26"
+        RowDefinitions="*,Auto,Auto">
+
+        <TextBlock
+            x:Name="PromptText"
+            Grid.Row="0"
+            TextWrapping="Wrap"
+            VerticalAlignment="Top" />
+
+        <TextBlock
+            x:Name="TimerText"
+            Grid.Row="1"
+            Margin="173,8,0,16"
+            HorizontalAlignment="Left"
+            Text="Time until shutdown: 120" />
+
+        <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="16">
+
+            <Button
+                Width="200"
+                Height="55"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
+
+            <Button
+                Width="200"
+                Height="55"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
+        </StackPanel>
+
+    </Grid>
+
+</Window>
