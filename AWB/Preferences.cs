@@ -390,13 +390,10 @@ internal sealed partial class MyPreferences : Form
         {
             txtDomain.Text = value;
 
-            ProjectEnum prj = (ProjectEnum)Enum.Parse(
-                typeof(ProjectEnum),
-                cmboProject.SelectedItem.ToString());
-
             DomainEnabled =
                 !string.IsNullOrEmpty(value) &&
-                prj.Equals(ProjectEnum.custom);
+                UserSettingsHelper.SupportsCustomConnectionSettings(
+                    Project);
         }
     }
 
