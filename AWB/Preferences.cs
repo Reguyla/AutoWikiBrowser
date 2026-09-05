@@ -302,12 +302,9 @@ internal sealed partial class MyPreferences : Form
                 cmboProtocol.SelectedIndex = 0;
             }
 
-            lblPostfix.Text = project switch
-            {
-                ProjectEnum.wikia => ".wikia.com",
-                ProjectEnum.fandom => ".fandom.com",
-                _ => string.Empty
-            };
+            lblPostfix.Text =
+                UserSettingsHelper.GetProjectPostfix(
+                    project);
 
             // TODO: Extract the reusable logic from cmboCustomProjectChanged into
             // a dedicated helper rather than invoking an event handler directly.
@@ -319,7 +316,9 @@ internal sealed partial class MyPreferences : Form
         }
 
         cmboProtocol.Visible = false;
-        lblPostfix.Text = string.Empty;
+        lblPostfix.Text =
+            UserSettingsHelper.GetProjectPostfix(
+                project);
         cmboCustomProject.Visible = false;
         cmboLang.Visible = true;
         btnOK.Enabled = true;

@@ -292,4 +292,26 @@ public static class UserSettingsHelper
     {
         return project < ProjectEnum.species;
     }
+
+    /// <summary>
+    /// Gets the domain postfix displayed for projects that use a custom
+    /// project-name entry.
+    /// </summary>
+    /// <param name="project">
+    /// The wiki project to evaluate.
+    /// </param>
+    /// <returns>
+    /// The project-specific domain postfix, or an empty string when the
+    /// selected project does not use one.
+    /// </returns>
+    public static string GetProjectPostfix(
+        ProjectEnum project)
+    {
+        return project switch
+        {
+            ProjectEnum.wikia => ".wikia.com",
+            ProjectEnum.fandom => ".fandom.com",
+            _ => string.Empty
+        };
+    }
 }
