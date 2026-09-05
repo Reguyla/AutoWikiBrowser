@@ -1,0 +1,37 @@
+<Window
+    x:Class="Twain.UI.Talk.TalkMessageWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="453"
+    Height="165"
+    CanResize="False"
+    ShowInTaskbar="False"
+    Topmost="True"
+    WindowStartupLocation="CenterScreen"
+    Title="New messages">
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Margin="24">
+
+        <TextBlock
+            Grid.Row="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Text="You have new messages."
+            TextAlignment="Center" />
+
+        <Button
+            Grid.Row="1"
+            Width="259"
+            Height="55"
+            Margin="0,16,0,0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Content="_View"
+            IsDefault="True"
+            Click="ViewButton_Click" />
+
+    </Grid>
+
+</Window>

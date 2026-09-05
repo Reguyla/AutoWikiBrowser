@@ -72,6 +72,10 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
   </ItemGroup>
 
+<ItemGroup>
+  <EmbeddedResource Remove="UserSettings.resx" />
+</ItemGroup>
+
   <!--
     Microsoft.Web.WebView2 currently contributes its WPF assembly to the
     reference graph even though this project uses only the WinForms WebView2
