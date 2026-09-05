@@ -22,6 +22,7 @@ using AutoWikiBrowser.Services.Settings;
 using Twain.Core;
 using Twain.Core.AWBSettings;
 using Twain.Core.Plugin;
+using Twain.Core.Settings;
 
 namespace AutoWikiBrowser;
 

@@ -40,6 +40,7 @@ using Twain.Core.Parse;
 using Twain.Core.Plugin;
 using Twain.Core.PreviewHtml;
 using Twain.Core.Processing;
+using Twain.Core.Settings;
 using Twain.Diagnostics;
 using ThreadState = System.Threading.ThreadState;
 
