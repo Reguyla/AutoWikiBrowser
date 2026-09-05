@@ -670,13 +670,14 @@ internal sealed partial class MyPreferences : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int PrefOnLoad
     {
-        get => cmboOnLoad.SelectedIndex == 2
-            ? 0
-            : cmboOnLoad.SelectedIndex;
+        get =>
+            UserSettingsHelper.NormalizeOnLoadSelection(
+                cmboOnLoad.SelectedIndex);
 
-        set => cmboOnLoad.SelectedIndex = value == 2
-            ? 0
-            : value;
+        set =>
+            cmboOnLoad.SelectedIndex =
+                UserSettingsHelper.NormalizeOnLoadSelection(
+                    value);
     }
 
     /// <summary>

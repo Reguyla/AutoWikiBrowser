@@ -212,4 +212,25 @@ public static class UserSettingsHelper
                project == ProjectEnum.wikia ||
                project == ProjectEnum.fandom;
     }
+
+    /// <summary>
+    /// Normalizes the persisted article-load action selection.
+    /// </summary>
+    /// <remarks>
+    /// Legacy selection index 2 represented showing the edit page and is no
+    /// longer supported. It is mapped to the default action at index 0.
+    /// </remarks>
+    /// <param name="selectionIndex">
+    /// The stored or selected article-load action index.
+    /// </param>
+    /// <returns>
+    /// The supported article-load action index.
+    /// </returns>
+    public static int NormalizeOnLoadSelection(
+        int selectionIndex)
+    {
+        return selectionIndex == 2
+            ? 0
+            : selectionIndex;
+    }
 }
