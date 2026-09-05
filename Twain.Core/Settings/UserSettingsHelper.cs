@@ -255,4 +255,36 @@ public static class UserSettingsHelper
         return isEnabled &&
             !string.IsNullOrWhiteSpace(filePath);
     }
+
+    /// <summary>
+    /// Determines whether a custom wiki should be added to the stored
+    /// custom-wiki collection.
+    /// </summary>
+    /// <param name="customWiki">
+    /// The normalized custom wiki value to consider adding.
+    /// </param>
+    /// <param name="existingCustomWikis">
+    /// The custom wiki values that are already stored.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the value is nonempty and does not already
+    /// exist in the collection; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool ShouldAddCustomWiki(
+        string? customWiki,
+        IEnumerable<string?> existingCustomWikis)
+    {
+        ArgumentNullException.ThrowIfNull(existingCustomWikis);
+
+        if (string.IsNullOrWhiteSpace(customWiki))
+        {
+            return false;
+        }
+
+        return !existingCustomWikis.Any(
+            item => string.Equals(
+                item,
+                customWiki,
+                StringComparison.Ordinal));
+    }
 }

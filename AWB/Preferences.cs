@@ -857,24 +857,21 @@ internal sealed partial class MyPreferences : Form
 
         FixCustomProject();
 
-        string customProject = cmboCustomProject.Text;
+        string customProject =
+            cmboCustomProject.Text;
 
-        if (string.IsNullOrWhiteSpace(customProject))
-        {
-            return;
-        }
+        IEnumerable<string?> existingCustomWikis =
+            cmboCustomProject.Items
+                .Cast<object>()
+                .Select(item =>
+                    item?.ToString());
 
-        bool alreadyExists = cmboCustomProject.Items
-            .Cast<object>()
-            .Select(item => item?.ToString())
-            .Any(item => string.Equals(
-                item,
+        if (UserSettingsHelper.ShouldAddCustomWiki(
                 customProject,
-                StringComparison.Ordinal));
-
-        if (!alreadyExists)
+                existingCustomWikis))
         {
-            cmboCustomProject.Items.Add(customProject);
+            cmboCustomProject.Items.Add(
+                customProject);
         }
     }
 
