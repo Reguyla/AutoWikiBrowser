@@ -27,6 +27,7 @@
 
     <script>
         let editor;
+        let suppressTextChanged = false;
 
         require.config({
             paths: {
@@ -48,6 +49,10 @@
 
                 editor.onDidChangeModelContent(
                     function () {
+                        if (suppressTextChanged) {
+                            return;
+                        }
+
                         invokeCSharpAction(
                             JSON.stringify({
                                 type: "textChanged",
@@ -68,8 +73,15 @@
                         return;
                     }
 
-                    editor.setValue(
-                        text ?? "");
+                    suppressTextChanged = true;
+
+                    try {
+                        editor.setValue(
+                            text ?? "");
+                    }
+                    finally {
+                        suppressTextChanged = false;
+                    }
                 },
 
             getText:
