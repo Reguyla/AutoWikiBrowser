@@ -233,4 +233,26 @@ public static class UserSettingsHelper
             ? 0
             : selectionIndex;
     }
+
+    /// <summary>
+    /// Determines whether edit-box autosave can remain enabled for the
+    /// specified file path.
+    /// </summary>
+    /// <param name="isEnabled">
+    /// Whether autosave is currently enabled.
+    /// </param>
+    /// <param name="filePath">
+    /// The configured autosave file path.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when autosave should remain enabled;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool NormalizeAutoSaveEnabled(
+        bool isEnabled,
+        string? filePath)
+    {
+        return isEnabled &&
+            !string.IsNullOrWhiteSpace(filePath);
+    }
 }

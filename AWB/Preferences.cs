@@ -838,11 +838,10 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private void ValidateAutoSaveSettings()
     {
-        if (chkAutoSaveEdit.Checked &&
-            string.IsNullOrWhiteSpace(txtAutosave.Text))
-        {
-            chkAutoSaveEdit.Checked = false;
-        }
+        chkAutoSaveEdit.Checked =
+            UserSettingsHelper.NormalizeAutoSaveEnabled(
+                chkAutoSaveEdit.Checked,
+                txtAutosave.Text);
     }
 
     /// <summary>
