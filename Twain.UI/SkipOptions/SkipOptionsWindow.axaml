@@ -1,0 +1,103 @@
+<Window
+    x:Class="Twain.UI.SkipOptions.SkipOptionsWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="420"
+    Height="430"
+    CanResize="False"
+    ShowInTaskbar="False"
+    Title="Skip options"
+    Closing="SkipOptionsWindow_Closing">
+
+    <Grid
+        Margin="12"
+        RowDefinitions="Auto,Auto,*,Auto">
+
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,10"
+            Text="Select the changes that should cause the page to be skipped:"
+            TextWrapping="Wrap" />
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,0,0,10"
+            Orientation="Horizontal"
+            Spacing="16">
+
+            <CheckBox
+                x:Name="CheckAll"
+                Content="Check _All"
+                Click="CheckAll_Click" />
+
+            <CheckBox
+                x:Name="CheckNone"
+                Content="Check _None"
+                Click="CheckNone_Click" />
+
+        </StackPanel>
+
+        <ScrollViewer
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto">
+
+            <StackPanel Spacing="6">
+
+                <CheckBox
+                    x:Name="BoldTitleOption"
+                    Content="Title boldened" />
+
+                <CheckBox
+                    x:Name="BulletedExternalLinkOption"
+                    Content="External link bulleted" />
+
+                <CheckBox
+                    x:Name="BadLinksOption"
+                    Content="Bad links fixed" />
+
+                <CheckBox
+                    x:Name="UnicodeOption"
+                    Content="Unicodification" />
+
+                <CheckBox
+                    x:Name="AutoTagOption"
+                    Content="Auto tag changes" />
+
+                <CheckBox
+                    x:Name="HeaderErrorOption"
+                    Content="Header error fixed" />
+
+                <CheckBox
+                    x:Name="DefaultSortOption">
+                    {{defaultsort}} added
+                </CheckBox>
+
+                <CheckBox
+                    x:Name="UserTalkTemplatesOption"
+                    Content="User talk templates subst'd" />
+
+                <CheckBox
+                    x:Name="CitationTemplateDatesOption"
+                    Content="Citation templates dates fixed" />
+
+                <CheckBox
+                    x:Name="HumanCategoriesOption"
+                    Content="Human category changes" />
+
+            </StackPanel>
+
+        </ScrollViewer>
+
+        <Button
+            Grid.Row="3"
+            Width="80"
+            Margin="0,12,0,0"
+            HorizontalAlignment="Right"
+            Content="Close"
+            IsDefault="True"
+            IsCancel="True"
+            Click="CloseButton_Click" />
+
+    </Grid>
+
+</Window>
