@@ -1,0 +1,306 @@
+<Window
+    x:Class="Twain.UI.Settings.UserSettingsWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="760"
+    Height="680"
+    MinWidth="680"
+    MinHeight="560"
+    CanResize="True"
+    WindowStartupLocation="CenterOwner"
+    Title="User Settings">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <TabControl Margin="12">
+
+            <TabItem Header="Site">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12"
+                                Spacing="10">
+
+                        <TextBlock Text="Wiki"
+                                   FontWeight="SemiBold"
+                                   FontSize="16" />
+
+                        <Grid ColumnDefinitions="180,*"
+                              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                              ColumnSpacing="12"
+                              RowSpacing="8">
+
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Project:" />
+
+                            <ComboBox x:Name="ProjectComboBox"
+                                      Grid.Row="0"
+                                      Grid.Column="1" />
+
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Language:" />
+
+                            <ComboBox x:Name="LanguageComboBox"
+                                      Grid.Row="1"
+                                      Grid.Column="1"
+                                      IsEditable="False" />
+
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Custom project:" />
+
+                            <ComboBox x:Name="CustomProjectComboBox"
+                                      Grid.Row="2"
+                                      Grid.Column="1"
+                                      IsEditable="True" />
+
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Protocol:" />
+
+                            <ComboBox x:Name="ProtocolComboBox"
+                                      Grid.Row="3"
+                                      Grid.Column="1">
+                                <ComboBoxItem Content="https://" />
+                                <ComboBoxItem Content="http://" />
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="4"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Domain:" />
+
+                            <Grid Grid.Row="4"
+                                  Grid.Column="1"
+                                  ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="8">
+
+                                <CheckBox x:Name="UseCustomDomainCheckBox"
+                                          VerticalAlignment="Center"
+                                          Content="Use custom domain" />
+
+                                <TextBox x:Name="DomainTextBox"
+                                         Grid.Column="1" />
+                            </Grid>
+
+                            <CheckBox x:Name="SuppressAwbCheckBox"
+                                      Grid.Row="5"
+                                      Grid.Column="1"
+                                      Content="Suppress AutoWikiBrowser attribution" />
+                        </Grid>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="General">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12"
+                                Spacing="10">
+
+                        <TextBlock Text="Application behavior"
+                                   FontWeight="SemiBold"
+                                   FontSize="16" />
+
+                        <CheckBox x:Name="AlwaysConfirmExitCheckBox"
+                                  Content="Always confirm before exiting" />
+
+                        <CheckBox x:Name="PrivacyCheckBox"
+                                  Content="Disable usage reporting" />
+
+                        <CheckBox x:Name="LowPriorityCheckBox"
+                                  Content="Run with low thread priority" />
+
+                        <CheckBox x:Name="FlashCheckBox"
+                                  Content="Flash the application for alerts" />
+
+                        <CheckBox x:Name="BeepCheckBox"
+                                  Content="Beep for alerts" />
+
+                        <CheckBox x:Name="MinimizeCheckBox"
+                                  Content="Minimize when appropriate" />
+
+                        <CheckBox x:Name="LoggingCheckBox"
+                                  Content="Enable logging" />
+
+                        <CheckBox x:Name="SaveArticleListCheckBox"
+                                  Content="Save article list" />
+
+                        <CheckBox x:Name="IgnoreNoBotsCheckBox"
+                                  Content="Ignore {{nobots}}" />
+
+                        <CheckBox x:Name="ShowTimerCheckBox"
+                                  Content="Show processing timer" />
+
+                        <CheckBox x:Name="ClearPageListCheckBox"
+                                  Content="Clear page list when project changes" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Editor">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12"
+                                Spacing="12">
+
+                        <TextBlock Text="Editor"
+                                   FontWeight="SemiBold"
+                                   FontSize="16" />
+
+                        <Button x:Name="ChooseFontButton"
+                                HorizontalAlignment="Left"
+                                Content="Choose editor font..." />
+
+                        <Separator />
+
+                        <TextBlock Text="Automatic save"
+                                   FontWeight="SemiBold" />
+
+                        <CheckBox x:Name="AutoSaveEditCheckBox"
+                                  Content="Automatically save editor text" />
+
+                        <Grid ColumnDefinitions="180,*"
+                              RowDefinitions="Auto,Auto"
+                              ColumnSpacing="12"
+                              RowSpacing="8">
+
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Save interval:" />
+
+                            <NumericUpDown x:Name="AutoSavePeriodNumericUpDown"
+                                           Grid.Row="0"
+                                           Grid.Column="1"
+                                           Minimum="1" />
+
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Save file:" />
+
+                            <Grid Grid.Row="1"
+                                  Grid.Column="1"
+                                  ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="8">
+
+                                <TextBox x:Name="AutoSaveFileTextBox" />
+
+                                <Button x:Name="ChooseAutoSaveFileButton"
+                                        Grid.Column="1"
+                                        Content="Browse..." />
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Processing">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12"
+                                Spacing="10">
+
+                        <TextBlock Text="Article behavior"
+                                   FontWeight="SemiBold"
+                                   FontSize="16" />
+
+                        <Grid ColumnDefinitions="260,*"
+                              RowDefinitions="Auto,Auto,Auto,Auto"
+                              ColumnSpacing="12"
+                              RowSpacing="8">
+
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="List Comparer article list:" />
+
+                            <ComboBox x:Name="ListComparerModeComboBox"
+                                      Grid.Row="0"
+                                      Grid.Column="1" />
+
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="List Splitter article list:" />
+
+                            <ComboBox x:Name="ListSplitterModeComboBox"
+                                      Grid.Row="1"
+                                      Grid.Column="1" />
+
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Database Scanner article list:" />
+
+                            <ComboBox x:Name="DatabaseScannerModeComboBox"
+                                      Grid.Row="2"
+                                      Grid.Column="1" />
+
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="When an article is loaded:" />
+
+                            <ComboBox x:Name="OnLoadComboBox"
+                                      Grid.Row="3"
+                                      Grid.Column="1" />
+                        </Grid>
+
+                        <CheckBox x:Name="DiffInBotModeCheckBox"
+                                  Content="Generate diff in bot mode" />
+
+                        <CheckBox x:Name="AddUsingAwbToActionSummariesCheckBox"
+                                  Content="Add AutoWikiBrowser attribution to action summaries" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Alerts">
+                <Grid Margin="12"
+                      RowDefinitions="Auto,*,Auto"
+                      RowSpacing="10">
+
+                    <TextBlock Text="Enabled alerts"
+                               FontWeight="SemiBold"
+                               FontSize="16" />
+
+                    <ListBox x:Name="AlertsListBox"
+                             Grid.Row="1"
+                             SelectionMode="Multiple" />
+
+                    <TextBlock Grid.Row="2"
+                               Text="When no alerts are selected, all alerts are treated as enabled."
+                               TextWrapping="Wrap"
+                               Opacity="0.75" />
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <Grid Grid.Row="1"
+              Margin="12"
+              ColumnDefinitions="*,Auto,Auto"
+              ColumnSpacing="8">
+
+        <Button x:Name="OkButton"
+                Grid.Column="1"
+                MinWidth="90"
+                IsDefault="True"
+                Click="OkButton_Click"
+                Content="OK" />
+
+        <Button x:Name="CancelButton"
+                Grid.Column="2"
+                MinWidth="90"
+                IsCancel="True"
+                Click="CancelButton_Click"
+                Content="Cancel" />
+        </Grid>
+
+    </Grid>
+
+</Window>
