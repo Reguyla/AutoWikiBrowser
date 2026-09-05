@@ -99,4 +99,54 @@ public static class ArticleAlertHelper
         { ArticleAlertId.UnknownWikiProjectBannerShellParameters, "Unknown parameters in WikiProject banner shell" },
         { ArticleAlertId.UserSignatureOrUserSpaceLink, "Editor's signature or link to user space" }
         };
+
+    /// <summary>
+    /// Resolves the enabled alert identifiers from the available alerts and
+    /// the currently selected identifiers.
+    /// </summary>
+    /// <remarks>
+    /// An empty selection represents the legacy default in which all available
+    /// alerts are enabled.
+    /// </remarks>
+    /// <param name="availableAlertIds">
+    /// The identifiers of all available alerts.
+    /// </param>
+    /// <param name="selectedAlertIds">
+    /// The identifiers explicitly selected by the user.
+    /// </param>
+    /// <returns>
+    /// The identifiers that should be treated as enabled.
+    /// </returns>
+    public static List<int> ResolveEnabledAlertIds(
+        IEnumerable<int> availableAlertIds,
+        IEnumerable<int> selectedAlertIds)
+    {
+        ArgumentNullException.ThrowIfNull(availableAlertIds);
+        ArgumentNullException.ThrowIfNull(selectedAlertIds);
+
+        List<int> selected =
+            selectedAlertIds.ToList();
+
+        return selected.Count == 0
+            ? availableAlertIds.ToList()
+            : selected;
+    }
+
+    /// <summary>
+    /// Determines whether an alert should be selected from the stored alert
+    /// preference identifiers.
+    /// </summary>
+    /// <remarks>
+    /// An empty stored selection represents the legacy default in which every
+    /// available alert is enabled.
+    /// </remarks>
+    public static bool IsAlertEnabled(
+        IReadOnlyCollection<int> enabledAlertIds,
+        int alertId)
+    {
+        ArgumentNullException.ThrowIfNull(enabledAlertIds);
+
+        return enabledAlertIds.Count == 0 ||
+            enabledAlertIds.Contains(alertId);
+    }
 }

@@ -733,18 +733,24 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private List<int> GetEnabledAlertIds()
     {
-        List<CheckedBoxItem> alertItems = alertListBox.Items
-            .Cast<CheckedBoxItem>()
-            .ToList();
+        List<int> availableAlertIds =
+            alertListBox.Items
+                .Cast<CheckedBoxItem>()
+                .Select(alert => alert.ID)
+                .ToList();
 
-        bool anyChecked = Enumerable.Range(0, alertListBox.Items.Count)
-            .Any(alertListBox.GetItemChecked);
+        List<int> selectedAlertIds =
+            Enumerable.Range(
+                    0,
+                    alertListBox.Items.Count)
+                .Where(alertListBox.GetItemChecked)
+                .Select(index =>
+                    ((CheckedBoxItem)alertListBox.Items[index]).ID)
+                .ToList();
 
-        return alertItems
-            .Where((_, index) =>
-                alertListBox.GetItemChecked(index) || !anyChecked)
-            .Select(alert => alert.ID)
-            .ToList();
+        return ArticleAlertHelper.ResolveEnabledAlertIds(
+            availableAlertIds,
+            selectedAlertIds);
     }
 
     /// <summary>
@@ -757,9 +763,6 @@ internal sealed partial class MyPreferences : Form
     private void PopulateAlertPreferences(
         IReadOnlyCollection<int> enabledAlertIds)
     {
-        bool enableAllAlerts = enabledAlertIds.Count == 0;
-        HashSet<int> enabledAlerts = enabledAlertIds.ToHashSet();
-
         alertListBox.BeginUpdate();
 
         try
@@ -767,9 +770,10 @@ internal sealed partial class MyPreferences : Form
             alertListBox.Items.Clear();
 
             foreach (KeyValuePair<ArticleAlertId, string> alert in
-                ArticleAlertHelper.AlertDescriptions)
+                     ArticleAlertHelper.AlertDescriptions)
             {
-                int alertId = (int)alert.Key;
+                int alertId =
+                    (int)alert.Key;
 
                 alertListBox.Items.Add(
                     new CheckedBoxItem
@@ -777,7 +781,9 @@ internal sealed partial class MyPreferences : Form
                         ID = alertId,
                         Description = alert.Value
                     },
-                    enableAllAlerts || enabledAlerts.Contains(alertId));
+                    ArticleAlertHelper.IsAlertEnabled(
+                        enabledAlertIds,
+                        alertId));
             }
         }
         finally
