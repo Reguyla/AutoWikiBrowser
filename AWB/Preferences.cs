@@ -938,9 +938,9 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private void cmboOnLoad_SelectedIndexChanged(object sender, EventArgs e)
     {
-        // TODO: Replace the raw article-load selection index with a named enum
-        // value so this logic is not coupled to ComboBox item ordering.
-        chkDiffInBotMode.Enabled = cmboOnLoad.SelectedIndex == 0;
+        chkDiffInBotMode.Enabled =
+            UserSettingsHelper.SupportsBotModeDiff(
+                cmboOnLoad.SelectedIndex);
     }
 
     /// <summary>

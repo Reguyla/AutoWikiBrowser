@@ -314,4 +314,22 @@ public static class UserSettingsHelper
             _ => string.Empty
         };
     }
+
+    /// <summary>
+    /// Determines whether bot-mode diff options are available for the
+    /// specified article-load action.
+    /// </summary>
+    /// <param name="selectionIndex">
+    /// The selected article-load action index.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when bot-mode diff settings should be enabled;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool SupportsBotModeDiff(
+        int selectionIndex)
+    {
+        return NormalizeOnLoadSelection(
+            selectionIndex) == 0;
+    }
 }
