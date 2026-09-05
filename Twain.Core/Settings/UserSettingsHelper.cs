@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿using Twain.Core.Parse;
 
 namespace Twain.Core.Settings;
 
@@ -130,5 +130,45 @@ public static class UserSettingsHelper
                     !string.IsNullOrWhiteSpace(item))
                 .Select(item =>
                     item!.Trim()));
+    }
+
+    /// <summary>
+    /// Gets the available wiki languages for the specified project.
+    /// </summary>
+    /// <param name="project">
+    /// The wiki project whose language list should be returned.
+    /// </param>
+    /// <returns>
+    /// The languages supported by the selected project.
+    /// </returns>
+    public static IReadOnlyList<string> GetLanguagesForProject(
+        ProjectEnum project)
+    {
+        return project switch
+        {
+            ProjectEnum.wikipedia =>
+                SiteMatrix.WikipediaLanguages,
+
+            ProjectEnum.wiktionary =>
+                SiteMatrix.WiktionaryLanguages,
+
+            ProjectEnum.wikibooks =>
+                SiteMatrix.WikibooksLanguages,
+
+            ProjectEnum.wikinews =>
+                SiteMatrix.WikinewsLanguages,
+
+            ProjectEnum.wikiquote =>
+                SiteMatrix.WikiquoteLanguages,
+
+            ProjectEnum.wikisource =>
+                SiteMatrix.WikisourceLanguages,
+
+            ProjectEnum.wikiversity =>
+                SiteMatrix.WikiversityLanguages,
+
+            _ =>
+                SiteMatrix.Languages
+        };
     }
 }

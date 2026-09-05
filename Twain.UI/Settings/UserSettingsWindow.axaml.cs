@@ -95,9 +95,10 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         ProjectComboBox.SelectedItem =
             project;
 
-        LanguageComboBox.SelectedItem =
+        PopulateLanguages(
+            project,
             UserSettingsHelper.NormalizeLanguageCode(
-                language);
+                language));
 
         CustomProjectComboBox.Text =
             customProject;
@@ -105,6 +106,48 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         ProtocolComboBox.SelectedIndex =
             UserSettingsHelper.GetProtocolSelectionIndex(
                 protocol);
+    }
+
+    /// <summary>
+    /// Populates the language selector for the specified wiki project.
+    /// </summary>
+    /// <param name="project">
+    /// The selected wiki project.
+    /// </param>
+    /// <param name="selectedLanguage">
+    /// The language code to preserve when possible.
+    /// </param>
+    private void PopulateLanguages(
+        ProjectEnum project,
+        string? selectedLanguage = null)
+    {
+        selectedLanguage ??=
+            LanguageComboBox.SelectedItem?.ToString();
+
+        LanguageComboBox.ItemsSource =
+            UserSettingsHelper.GetLanguagesForProject(
+                project);
+
+        if (!string.IsNullOrEmpty(selectedLanguage))
+        {
+            LanguageComboBox.SelectedItem =
+                selectedLanguage;
+        }
+    }
+
+    /// <summary>
+    /// Updates the available languages when the selected wiki project changes.
+    /// </summary>
+    private void ProjectComboBox_SelectionChanged(
+        object? sender,
+        Avalonia.Controls.SelectionChangedEventArgs e)
+    {
+        if (ProjectComboBox.SelectedItem is not ProjectEnum project)
+        {
+            return;
+        }
+
+        PopulateLanguages(project);
     }
 
     /// <summary>

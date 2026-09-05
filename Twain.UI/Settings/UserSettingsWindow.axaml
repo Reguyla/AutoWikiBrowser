@@ -35,7 +35,8 @@
 
                             <ComboBox x:Name="ProjectComboBox"
                                       Grid.Row="0"
-                                      Grid.Column="1" />
+                                      Grid.Column="1"
+                                      SelectionChanged="ProjectComboBox_SelectionChanged" />
 
                             <TextBlock Grid.Row="1"
                                        Grid.Column="0"
