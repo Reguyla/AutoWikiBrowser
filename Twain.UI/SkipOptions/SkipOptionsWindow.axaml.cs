@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Twain.Core.Plugin;
+using Twain.Core.Settings;
 
 namespace Twain.UI.SkipOptions;
 
@@ -18,17 +18,6 @@ public partial class SkipOptionsWindow :
     Avalonia.Controls.Window,
     ISkipOptions
 {
-    private const int BoldTitleOptionId = 1;
-    private const int BulletedExternalLinkOptionId = 2;
-    private const int BadLinksOptionId = 3;
-    private const int UnicodeOptionId = 4;
-    private const int AutoTagOptionId = 5;
-    private const int HeaderErrorOptionId = 6;
-    private const int DefaultSortOptionId = 7;
-    private const int UserTalkTemplatesOptionId = 8;
-    private const int CitationTemplateDatesOptionId = 9;
-    private const int HumanCategoriesOptionId = 10;
-
     private readonly Dictionary<int, CheckBox> _optionCheckBoxes;
 
     /// <summary>
@@ -41,58 +30,87 @@ public partial class SkipOptionsWindow :
         _optionCheckBoxes =
             new Dictionary<int, CheckBox>
             {
-                [BoldTitleOptionId] = BoldTitleOption,
-                [BulletedExternalLinkOptionId] = BulletedExternalLinkOption,
-                [BadLinksOptionId] = BadLinksOption,
-                [UnicodeOptionId] = UnicodeOption,
-                [AutoTagOptionId] = AutoTagOption,
-                [HeaderErrorOptionId] = HeaderErrorOption,
-                [DefaultSortOptionId] = DefaultSortOption,
-                [UserTalkTemplatesOptionId] = UserTalkTemplatesOption,
-                [CitationTemplateDatesOptionId] = CitationTemplateDatesOption,
-                [HumanCategoriesOptionId] = HumanCategoriesOption
+                [SkipOptionsHelper.BoldTitleOptionId] =
+                    BoldTitleOption,
+
+                [SkipOptionsHelper.BulletedExternalLinkOptionId] =
+                    BulletedExternalLinkOption,
+
+                [SkipOptionsHelper.BadLinksOptionId] =
+                    BadLinksOption,
+
+                [SkipOptionsHelper.UnicodeOptionId] =
+                    UnicodeOption,
+
+                [SkipOptionsHelper.AutoTagOptionId] =
+                    AutoTagOption,
+
+                [SkipOptionsHelper.HeaderErrorOptionId] =
+                    HeaderErrorOption,
+
+                [SkipOptionsHelper.DefaultSortOptionId] =
+                    DefaultSortOption,
+
+                [SkipOptionsHelper.UserTalkTemplatesOptionId] =
+                    UserTalkTemplatesOption,
+
+                [SkipOptionsHelper.CitationTemplateDatesOptionId] =
+                    CitationTemplateDatesOption,
+
+                [SkipOptionsHelper.HumanCategoriesOptionId] =
+                    HumanCategoriesOption
             };
     }
 
     /// <inheritdoc />
     public bool SkipNoBoldTitle =>
-        IsOptionChecked(BoldTitleOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.BoldTitleOptionId);
 
     /// <inheritdoc />
     public bool SkipNoBulletedLink =>
-        IsOptionChecked(BulletedExternalLinkOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.BulletedExternalLinkOptionId);
 
     /// <inheritdoc />
     public bool SkipNoBadLink =>
-        IsOptionChecked(BadLinksOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.BadLinksOptionId);
 
     /// <inheritdoc />
     public bool SkipNoUnicode =>
-        IsOptionChecked(UnicodeOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.UnicodeOptionId);
 
     /// <inheritdoc />
     public bool SkipNoTag =>
-        IsOptionChecked(AutoTagOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.AutoTagOptionId);
 
     /// <inheritdoc />
     public bool SkipNoHeaderError =>
-        IsOptionChecked(HeaderErrorOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.HeaderErrorOptionId);
 
     /// <inheritdoc />
     public bool SkipNoDefaultSortAdded =>
-        IsOptionChecked(DefaultSortOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.DefaultSortOptionId);
 
     /// <inheritdoc />
     public bool SkipNoUserTalkTemplatesSubstd =>
-        IsOptionChecked(UserTalkTemplatesOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.UserTalkTemplatesOptionId);
 
     /// <inheritdoc />
     public bool SkipNoCiteTemplateDatesFixed =>
-        IsOptionChecked(CitationTemplateDatesOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.CitationTemplateDatesOptionId);
 
     /// <inheritdoc />
     public bool SkipNoPeopleCategoriesFixed =>
-        IsOptionChecked(HumanCategoriesOptionId);
+        IsOptionChecked(
+            SkipOptionsHelper.HumanCategoriesOptionId);
 
     /// <summary>
     /// Gets or sets the identifiers of the currently selected skip options.
