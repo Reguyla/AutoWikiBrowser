@@ -18,13 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaXaml Remove="NewFolder\**" />
-    <Compile Remove="NewFolder\**" />
-    <EmbeddedResource Remove="NewFolder\**" />
-    <None Remove="NewFolder\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="..\..\..\..\Downloads\Twainlogo.png" Link="Assets\Twainlogo.png" />
 
     <Content Include="..\..\..\..\Downloads\TwainSplash.png" Link="Assets\TwainSplash.png" />
