@@ -96,6 +96,56 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
+    /// Gets or sets the enabled alert identifiers.
+    /// </summary>
+    /// <remarks>
+    /// An empty or unspecified selection represents the legacy default in
+    /// which all available alerts are enabled.
+    /// </remarks>
+    public List<int> AlertPreferences
+    {
+        get =>
+            _alertCheckBoxes
+                .Where(item => item.Value.IsChecked == true)
+                .Select(item => item.Key)
+                .ToList();
+
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            List<int> enabledAlertIds =
+                ArticleAlertHelper.ResolveEnabledAlertIds(
+                    _alertCheckBoxes.Keys,
+                    value);
+
+            foreach (KeyValuePair<int, Avalonia.Controls.CheckBox> alert in
+                     _alertCheckBoxes)
+            {
+                alert.Value.IsChecked =
+                    ArticleAlertHelper.IsAlertEnabled(
+                        enabledAlertIds,
+                        alert.Key);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether privacy mode is enabled.
+    /// </summary>
+    public bool PrivacyEnabled
+    {
+        get =>
+            UserSettingsHelper.GetPrivacySetting(
+                PrivacyCheckBox.IsChecked == true);
+
+        set =>
+            PrivacyCheckBox.IsChecked =
+                UserSettingsHelper.GetPrivacyCheckboxState(
+                    value);
+    }
+
+    /// <summary>
     /// Populates the alert selector from the shared alert metadata.
     /// </summary>
     private void InitializeAlerts(
