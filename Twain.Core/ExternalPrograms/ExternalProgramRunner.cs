@@ -1,11 +1,12 @@
 ﻿using Twain.Core;
+using System.Diagnostics;
 
-namespace AutoWikiBrowser.Services.ExternalPrograms;
+namespace Twain.Core.ExternalPrograms;
 
 /// <summary>
 /// Executes external programs used to process AWB article text.
 /// </summary>
-internal static class ExternalProgramRunner
+public static class ExternalProgramRunner
 {
     /// <summary>
     /// Processes article text using the supplied external program settings.
@@ -22,7 +23,7 @@ internal static class ExternalProgramRunner
     /// <returns>
     /// The processed article text and resulting skip state.
     /// </returns>
-    internal static ExternalProgramResult ProcessArticle(
+    public static ExternalProgramResult ProcessArticle(
         string articleText,
         string articleTitle,
         ExternalProgramOptions options)

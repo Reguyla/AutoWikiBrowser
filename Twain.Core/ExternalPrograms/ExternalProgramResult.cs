@@ -1,9 +1,9 @@
-﻿namespace AutoWikiBrowser.Services.ExternalPrograms;
+﻿namespace Twain.Core.ExternalPrograms;
 
 /// <summary>
 /// Contains the result of processing article text with an external program.
 /// </summary>
-internal sealed class ExternalProgramResult
+public sealed class ExternalProgramResult
 {
     /// <summary>
     /// Initializes an external program processing result.
@@ -14,7 +14,7 @@ internal sealed class ExternalProgramResult
     /// <param name="skip">
     /// Whether the article should be skipped.
     /// </param>
-    internal ExternalProgramResult(
+    public ExternalProgramResult(
         string articleText,
         bool skip)
     {
@@ -27,10 +27,10 @@ internal sealed class ExternalProgramResult
     /// <summary>
     /// Gets the article text produced by the external program.
     /// </summary>
-    internal string ArticleText { get; }
+    public string ArticleText { get; }
 
     /// <summary>
     /// Gets a value indicating whether the article should be skipped.
     /// </summary>
-    internal bool Skip { get; }
+    public bool Skip { get; }
 }
