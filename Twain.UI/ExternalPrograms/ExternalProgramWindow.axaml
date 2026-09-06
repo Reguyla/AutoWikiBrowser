@@ -1,0 +1,145 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.ExternalPrograms.ExternalProgramWindow"
+    Title="External Program"
+    Width="600"
+    Height="390"
+    MinWidth="520"
+    MinHeight="350"
+    WindowStartupLocation="CenterOwner"
+    CanResize="True">
+
+    <Grid
+        Margin="16"
+        RowDefinitions="Auto,Auto,*,Auto">
+
+        <CheckBox
+            x:Name="EnabledCheckBox"
+            Grid.Row="0"
+            Content="Enable external program"
+            Click="EnabledCheckBox_Changed" />
+
+        <CheckBox
+            x:Name="SkipCheckBox"
+            Grid.Row="1"
+            Margin="0,8,0,12"
+            Content="Skip article when external processing makes no changes" />
+
+        <GroupBox
+            x:Name="ConfigurationGroup"
+            Grid.Row="2"
+            Header="External program">
+
+            <Grid
+                Margin="12"
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                ColumnDefinitions="Auto,*,Auto">
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,12,8"
+                    VerticalAlignment="Center"
+                    Text="Program:" />
+
+                <TextBox
+                    x:Name="ProgramTextBox"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0,0,8,8" />
+
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Margin="0,0,0,8"
+                    MinWidth="80"
+                    Content="Browse..."
+                    Click="BrowseProgramButton_Click" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,0,12,8"
+                    VerticalAlignment="Center"
+                    Text="Parameters:" />
+
+                <TextBox
+                    x:Name="ParametersTextBox"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="0,0,0,8" />
+
+                <StackPanel
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3"
+                    Margin="0,4,0,8"
+                    Orientation="Horizontal"
+                    Spacing="16">
+
+                <RadioButton
+                    x:Name="FileModeRadioButton"
+                    GroupName="InputMode"
+                    Content="Pass article as file"
+                    IsChecked="True"
+                    Click="InputMode_Changed" />
+
+                <RadioButton
+                    x:Name="ParameterModeRadioButton"
+                    GroupName="InputMode"
+                    Content="Pass article as parameter"
+                    Click="InputMode_Changed" />
+
+                </StackPanel>
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Text="Input/output file:" />
+
+                <TextBox
+                    x:Name="OutputFileTextBox"
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="0,0,8,0" />
+
+                <Button
+                    x:Name="BrowseOutputFileButton"
+                    Grid.Row="3"
+                    Grid.Column="2"
+                    MinWidth="80"
+                    Content="Browse..."
+                    Click="BrowseOutputFileButton_Click" />
+
+            </Grid>
+
+        </GroupBox>
+
+        <StackPanel
+            Grid.Row="3"
+            Margin="0,16,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <Button
+                MinWidth="80"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
+
+            <Button
+                MinWidth="80"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
+        </StackPanel>
+
+    </Grid>
+
+</Window>
