@@ -81,6 +81,25 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
 
         DatabaseScannerModeComboBox.ItemsSource =
             articleListModes;
+
+        OnLoadComboBox.ItemsSource =
+            new[]
+            {
+        "Show changes",
+        "Show preview"
+            };
+    }
+
+    /// <summary>
+    /// Updates processing options that depend on the selected article-load mode.
+    /// </summary>
+    private void OnLoadComboBox_SelectionChanged(
+        object? sender,
+        Avalonia.Controls.SelectionChangedEventArgs e)
+    {
+        DiffInBotModeCheckBox.IsEnabled =
+            UserSettingsHelper.SupportsBotModeDiff(
+                OnLoadComboBox.SelectedIndex);
     }
 
     /// <summary>

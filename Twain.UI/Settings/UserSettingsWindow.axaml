@@ -258,7 +258,8 @@
 
                             <ComboBox x:Name="OnLoadComboBox"
                                       Grid.Row="3"
-                                      Grid.Column="1" />
+                                      Grid.Column="1"
+                                      SelectionChanged="OnLoadComboBox_SelectionChanged" />
                         </Grid>
 
                         <CheckBox x:Name="DiffInBotModeCheckBox"
