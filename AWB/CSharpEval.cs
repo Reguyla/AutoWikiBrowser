@@ -23,21 +23,23 @@ public partial class CSharpEval : Form
 
         try
         {
-            CSharpExpressionEvaluationResult evaluation =
-                CSharpExpressionEvaluator.Evaluate(
+            CompilerResults results =
+                CSharpExpressionEvaluator.Compile(
                     textBox1.Text,
                     typeof(CSharpEval).Assembly,
                     typeof(Tools).Assembly);
 
-            if (!DisplayCompilerDiagnostics(
-                    evaluation.CompilationResults))
+            if (!DisplayCompilerDiagnostics(results))
             {
                 return;
             }
 
+            object? result =
+                CSharpExpressionEvaluator.Execute(
+                    results.CompiledAssembly);
+
             textBox2.Text =
-                evaluation.Value?.ToString()
-                ?? string.Empty;
+                result?.ToString() ?? string.Empty;
         }
         catch (Exception ex)
         {
