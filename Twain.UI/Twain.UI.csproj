@@ -20,7 +20,7 @@
   <ItemGroup>
     <Content Include="..\..\..\..\Downloads\Twainlogo.png" Link="Assets\Twainlogo.png" />
 
-    <Content Include="..\..\..\..\Downloads\TwainSplash.png" Link="Assets\TwainSplash.png" />
+    <AvaloniaResource Include="..\..\..\..\Downloads\TwainSplash.png" Link="Assets\TwainSplash.png" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,47 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Splash.SplashWindow"
+    Title="Twain"
+    Width="600"
+    Height="340"
+    CanResize="False"
+    ShowInTaskbar="False"
+    SystemDecorations="None"
+    WindowStartupLocation="CenterScreen">
+
+    <Grid RowDefinitions="*,Auto,Auto">
+
+        <Image
+            Grid.Row="0"
+            Source="avares://Twain.UI/Assets/TwainSplash.png"
+            Stretch="Uniform" />
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="16,8"
+            Spacing="4">
+
+            <TextBlock
+                x:Name="VersionTextBlock"
+                HorizontalAlignment="Center"
+                Text="Twain" />
+
+            <TextBlock
+                x:Name="StageTextBlock"
+                HorizontalAlignment="Center"
+                TextAlignment="Center" />
+
+        </StackPanel>
+
+        <ProgressBar
+            x:Name="StartupProgressBar"
+            Grid.Row="2"
+            Margin="16,0,16,16"
+            Minimum="0"
+            Maximum="100"
+            Value="0" />
+
+    </Grid>
+
+</Window>
