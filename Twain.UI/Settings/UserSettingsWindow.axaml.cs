@@ -66,12 +66,8 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         ProjectComboBox.ItemsSource =
             Enum.GetValues<ProjectEnum>();
 
-        string[] articleListModes =
-        [
-            "Ask",
-            "Always",
-            "Never"
-        ];
+        CurrentArticleListMode[] articleListModes =
+            Enum.GetValues<CurrentArticleListMode>();
 
         ListComparerModeComboBox.ItemsSource =
             articleListModes;
@@ -85,8 +81,8 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         OnLoadComboBox.ItemsSource =
             new[]
             {
-        "Show changes",
-        "Show preview"
+            "Show changes",
+            "Show preview"
             };
     }
 
