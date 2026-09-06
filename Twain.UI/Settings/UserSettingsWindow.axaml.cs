@@ -397,4 +397,25 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
 
     private readonly Dictionary<int, Avalonia.Controls.CheckBox> _alertCheckBoxes =
     new();
+
+    /// <summary>
+    /// Gets or sets the selected article-load mode.
+    /// </summary>
+    public int OnLoadSelection
+    {
+        get =>
+            UserSettingsHelper.NormalizeOnLoadSelection(
+                OnLoadComboBox.SelectedIndex);
+
+        set
+        {
+            OnLoadComboBox.SelectedIndex =
+                UserSettingsHelper.NormalizeOnLoadSelection(
+                    value);
+
+            DiffInBotModeCheckBox.IsEnabled =
+                UserSettingsHelper.SupportsBotModeDiff(
+                    OnLoadComboBox.SelectedIndex);
+        }
+    }
 }
