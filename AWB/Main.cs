@@ -8509,9 +8509,8 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         mnuTextBox.Hide();
     }
 
-    // TODO(Twain): Replace the legacy fixed ten-slot Paste More dialog contract
-    // with a collection-based UI so configuration is not tied to individually
-    // named String1 through String10 properties.
+    // TODO(Twain): Replace the legacy WinForms Paste More configuration dialog
+    // with ConfigurePasteMoreItemsWindow during Main/Avalonia integration.
     /// <summary>
     /// Opens the Paste More configuration dialog and applies any accepted
     /// text changes to the configured Paste More menu items.
