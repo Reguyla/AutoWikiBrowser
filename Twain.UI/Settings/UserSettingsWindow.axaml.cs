@@ -12,6 +12,9 @@ namespace Twain.UI.Settings;
 /// </summary>
 public partial class UserSettingsWindow : Avalonia.Controls.Window
 {
+    private readonly Dictionary<int, Avalonia.Controls.CheckBox> _alertCheckBoxes =
+        new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserSettingsWindow"/> class
     /// using preview-safe default values.
@@ -68,34 +71,6 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Populates selectors whose available values are fixed by the application.
-    /// </summary>
-    private void InitializeSelectors()
-    {
-        ProjectComboBox.ItemsSource =
-            Enum.GetValues<ProjectEnum>();
-
-        CurrentArticleListMode[] articleListModes =
-            Enum.GetValues<CurrentArticleListMode>();
-
-        ListComparerModeComboBox.ItemsSource =
-            articleListModes;
-
-        ListSplitterModeComboBox.ItemsSource =
-            articleListModes;
-
-        DatabaseScannerModeComboBox.ItemsSource =
-            articleListModes;
-
-        OnLoadComboBox.ItemsSource =
-            new[]
-            {
-            "Show changes",
-            "Show preview"
-            };
-    }
-
-    /// <summary>
     /// Gets or sets the enabled alert identifiers.
     /// </summary>
     /// <remarks>
@@ -146,6 +121,109 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
+    /// Gets or sets the selected article-load mode.
+    /// </summary>
+    public int OnLoadSelection
+    {
+        get =>
+            UserSettingsHelper.NormalizeOnLoadSelection(
+                OnLoadComboBox.SelectedIndex);
+
+        set
+        {
+            OnLoadComboBox.SelectedIndex =
+                UserSettingsHelper.NormalizeOnLoadSelection(
+                    value);
+
+            DiffInBotModeCheckBox.IsEnabled =
+                UserSettingsHelper.SupportsBotModeDiff(
+                    OnLoadComboBox.SelectedIndex);
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether differences are shown in bot mode.
+    /// </summary>
+    public bool DiffInBotMode
+    {
+        get =>
+            DiffInBotModeCheckBox.IsChecked == true;
+
+        set =>
+            DiffInBotModeCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the List Comparer article-list behavior.
+    /// </summary>
+    public CurrentArticleListMode ListComparerMode
+    {
+        get =>
+            ListComparerModeComboBox.SelectedItem is CurrentArticleListMode mode
+                ? mode
+                : CurrentArticleListMode.Ask;
+
+        set =>
+            ListComparerModeComboBox.SelectedItem = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the List Splitter article-list behavior.
+    /// </summary>
+    public CurrentArticleListMode ListSplitterMode
+    {
+        get =>
+            ListSplitterModeComboBox.SelectedItem is CurrentArticleListMode mode
+                ? mode
+                : CurrentArticleListMode.Ask;
+
+        set =>
+            ListSplitterModeComboBox.SelectedItem = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the Database Scanner article-list behavior.
+    /// </summary>
+    public CurrentArticleListMode DatabaseScannerMode
+    {
+        get =>
+            DatabaseScannerModeComboBox.SelectedItem is CurrentArticleListMode mode
+                ? mode
+                : CurrentArticleListMode.Ask;
+
+        set =>
+            DatabaseScannerModeComboBox.SelectedItem = value;
+    }
+
+    /// <summary>
+    /// Populates selectors whose available values are fixed by the application.
+    /// </summary>
+    private void InitializeSelectors()
+    {
+        ProjectComboBox.ItemsSource =
+            Enum.GetValues<ProjectEnum>();
+
+        CurrentArticleListMode[] articleListModes =
+            Enum.GetValues<CurrentArticleListMode>();
+
+        ListComparerModeComboBox.ItemsSource =
+            articleListModes;
+
+        ListSplitterModeComboBox.ItemsSource =
+            articleListModes;
+
+        DatabaseScannerModeComboBox.ItemsSource =
+            articleListModes;
+
+        OnLoadComboBox.ItemsSource =
+            new[]
+            {
+                "Show changes",
+                "Show preview"
+            };
+    }
+
+    /// <summary>
     /// Populates the alert selector from the shared alert metadata.
     /// </summary>
     private void InitializeAlerts(
@@ -187,18 +265,6 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
             AlertsPanel.Children.Add(
                 checkBox);
         }
-    }
-
-    /// <summary>
-    /// Updates processing options that depend on the selected article-load mode.
-    /// </summary>
-    private void OnLoadComboBox_SelectionChanged(
-        object? sender,
-        Avalonia.Controls.SelectionChangedEventArgs e)
-    {
-        DiffInBotModeCheckBox.IsEnabled =
-            UserSettingsHelper.SupportsBotModeDiff(
-                OnLoadComboBox.SelectedIndex);
     }
 
     /// <summary>
@@ -272,6 +338,280 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
+    /// Updates processing options that depend on the selected article-load mode.
+    /// </summary>
+    private void OnLoadComboBox_SelectionChanged(
+        object? sender,
+        Avalonia.Controls.SelectionChangedEventArgs e)
+    {
+        DiffInBotModeCheckBox.IsEnabled =
+            UserSettingsHelper.SupportsBotModeDiff(
+                OnLoadComboBox.SelectedIndex);
+    }
+
+    /// <summary>
+    /// Accepts the current settings and closes the window.
+    /// </summary>
+    private void OkButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        Close(true);
+    }
+
+    /// <summary>
+    /// Discards changes and closes the window.
+    /// </summary>
+    private void CancelButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        Close(false);
+    }
+
+    /// <summary>
+    /// Gets or sets whether AWB attribution is added to action summaries.
+    /// </summary>
+    public bool AddUsingAwbToActionSummaries
+    {
+        get =>
+            AddUsingAwbToActionSummariesCheckBox.IsChecked == true;
+
+        set =>
+            AddUsingAwbToActionSummariesCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether confirmation is required before exiting.
+    /// </summary>
+    public bool AlwaysConfirmExit
+    {
+        get => AlwaysConfirmExitCheckBox.IsChecked == true;
+        set => AlwaysConfirmExitCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the application runs at low process priority.
+    /// </summary>
+    public bool LowPriority
+    {
+        get => LowPriorityCheckBox.IsChecked == true;
+        set => LowPriorityCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the application flashes when processing completes.
+    /// </summary>
+    public bool Flash
+    {
+        get => FlashCheckBox.IsChecked == true;
+        set => FlashCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the application beeps when processing completes.
+    /// </summary>
+    public bool Beep
+    {
+        get => BeepCheckBox.IsChecked == true;
+        set => BeepCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the application minimizes after processing begins.
+    /// </summary>
+    public bool Minimize
+    {
+        get => MinimizeCheckBox.IsChecked == true;
+        set => MinimizeCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether logging is enabled.
+    /// </summary>
+    public bool LoggingEnabled
+    {
+        get => LoggingCheckBox.IsChecked == true;
+        set => LoggingCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the article list is saved.
+    /// </summary>
+    public bool SaveArticleList
+    {
+        get => SaveArticleListCheckBox.IsChecked == true;
+        set => SaveArticleListCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether no-bots restrictions are ignored.
+    /// </summary>
+    public bool IgnoreNoBots
+    {
+        get => IgnoreNoBotsCheckBox.IsChecked == true;
+        set => IgnoreNoBotsCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the processing timer is displayed.
+    /// </summary>
+    public bool ShowTimer
+    {
+        get => ShowTimerCheckBox.IsChecked == true;
+        set => ShowTimerCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether the page list is cleared when the project changes.
+    /// </summary>
+    public bool ClearPageListOnProjectChange
+    {
+        get => ClearPageListCheckBox.IsChecked == true;
+        set => ClearPageListCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether article text is automatically saved while editing.
+    /// </summary>
+    public bool AutoSaveEdit
+    {
+        get => AutoSaveEditCheckBox.IsChecked == true;
+        set => AutoSaveEditCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the autosave interval in seconds.
+    /// </summary>
+    public int AutoSavePeriod
+    {
+        get => (int)(AutoSavePeriodNumericUpDown.Value ?? 30);
+
+        set =>
+            AutoSavePeriodNumericUpDown.Value =
+                Math.Clamp(value, 30, 300);
+    }
+
+    /// <summary>
+    /// Gets or sets the file used for automatic article-text saves.
+    /// </summary>
+    public string AutoSaveFile
+    {
+        get => AutoSaveFileTextBox.Text ?? string.Empty;
+        set => AutoSaveFileTextBox.Text = value ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Gets or sets the selected wiki project.
+    /// </summary>
+    public ProjectEnum Project
+    {
+        get =>
+            ProjectComboBox.SelectedItem is ProjectEnum project
+                ? project
+                : ProjectEnum.wikipedia;
+
+        set
+        {
+            ProjectComboBox.SelectedItem = value;
+            PopulateLanguages(value);
+            UpdateProjectControls(value);
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the selected wiki language code.
+    /// </summary>
+    public string Language
+    {
+        get =>
+            LanguageComboBox.SelectedItem?.ToString() ??
+            string.Empty;
+
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            string normalizedLanguage =
+                UserSettingsHelper.NormalizeLanguageCode(
+                    value);
+
+            if (ProjectComboBox.SelectedItem is ProjectEnum project)
+            {
+                PopulateLanguages(
+                    project,
+                    normalizedLanguage);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the custom wiki project value.
+    /// </summary>
+    public string CustomProject
+    {
+        get =>
+            CustomProjectComboBox.Text ??
+            string.Empty;
+
+        set =>
+            CustomProjectComboBox.Text =
+                value ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Gets or sets the selected connection protocol.
+    /// </summary>
+    public string Protocol
+    {
+        get =>
+            ProtocolComboBox.SelectedIndex == 1
+                ? "http://"
+                : "https://";
+
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            ProtocolComboBox.SelectedIndex =
+                UserSettingsHelper.GetProtocolSelectionIndex(
+                    value);
+        }
+    }
+
+    /// <summary>
+    /// Updates domain editing when the custom-domain option changes.
+    /// </summary>
+    private void UseCustomDomainCheckBox_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (ProjectComboBox.SelectedItem is not ProjectEnum project)
+        {
+            return;
+        }
+
+        DomainTextBox.IsEnabled =
+            UserSettingsHelper.SupportsCustomConnectionSettings(
+                project) &&
+            UseCustomDomainCheckBox.IsChecked == true;
+    }
+
+    /// <summary>
+    /// Updates validation when the custom-project value changes.
+    /// </summary>
+    private void CustomProjectComboBox_PropertyChanged(
+        object? sender,
+        Avalonia.AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property ==
+            Avalonia.Controls.ComboBox.TextProperty)
+        {
+            UpdateOkButtonState();
+        }
+    }
+
+    /// <summary>
     /// Updates project-specific control visibility and availability.
     /// </summary>
     private void UpdateProjectControls(
@@ -327,44 +667,6 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Accepts the current settings and closes the window.
-    /// </summary>
-    private void OkButton_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        Close(true);
-    }
-
-    /// <summary>
-    /// Discards changes and closes the window.
-    /// </summary>
-    private void CancelButton_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        Close(false);
-    }
-
-    /// <summary>
-    /// Updates domain editing when the custom-domain option changes.
-    /// </summary>
-    private void UseCustomDomainCheckBox_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        if (ProjectComboBox.SelectedItem is not ProjectEnum project)
-        {
-            return;
-        }
-
-        DomainTextBox.IsEnabled =
-            UserSettingsHelper.SupportsCustomConnectionSettings(
-                project) &&
-            UseCustomDomainCheckBox.IsChecked == true;
-    }
-
-    /// <summary>
     /// Updates whether the current site settings contain enough information
     /// for the dialog to be accepted.
     /// </summary>
@@ -379,43 +681,5 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         OkButton.IsEnabled =
             !UserSettingsHelper.RequiresCustomProject(project) ||
             !string.IsNullOrWhiteSpace(CustomProjectComboBox.Text);
-    }
-
-    /// <summary>
-    /// Updates validation when the custom-project value changes.
-    /// </summary>
-    private void CustomProjectComboBox_PropertyChanged(
-        object? sender,
-        Avalonia.AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property ==
-            Avalonia.Controls.ComboBox.TextProperty)
-        {
-            UpdateOkButtonState();
-        }
-    }
-
-    private readonly Dictionary<int, Avalonia.Controls.CheckBox> _alertCheckBoxes =
-    new();
-
-    /// <summary>
-    /// Gets or sets the selected article-load mode.
-    /// </summary>
-    public int OnLoadSelection
-    {
-        get =>
-            UserSettingsHelper.NormalizeOnLoadSelection(
-                OnLoadComboBox.SelectedIndex);
-
-        set
-        {
-            OnLoadComboBox.SelectedIndex =
-                UserSettingsHelper.NormalizeOnLoadSelection(
-                    value);
-
-            DiffInBotModeCheckBox.IsEnabled =
-                UserSettingsHelper.SupportsBotModeDiff(
-                    OnLoadComboBox.SelectedIndex);
-        }
     }
 }
