@@ -144,4 +144,42 @@ public static class CSharpExpressionEvaluator
             }
             """;
     }
+
+    /// <summary>
+    /// Compiles and evaluates a C# expression.
+    /// </summary>
+    /// <param name="expression">
+    /// The C# expression to evaluate.
+    /// </param>
+    /// <param name="requiredAssemblies">
+    /// Assemblies that must be explicitly available to the expression.
+    /// </param>
+    /// <returns>
+    /// The compilation results together with the evaluated value when
+    /// compilation succeeds.
+    /// </returns>
+    public static CSharpExpressionEvaluationResult Evaluate(
+        string expression,
+        params Assembly[] requiredAssemblies)
+    {
+        CompilerResults results =
+            Compile(
+                expression,
+                requiredAssemblies);
+
+        if (results.Errors.HasErrors)
+        {
+            return new CSharpExpressionEvaluationResult(
+                results,
+                null);
+        }
+
+        object? value =
+            Execute(
+                results.CompiledAssembly);
+
+        return new CSharpExpressionEvaluationResult(
+            results,
+            value);
+    }
 }
