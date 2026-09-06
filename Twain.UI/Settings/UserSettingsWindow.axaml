@@ -185,9 +185,9 @@
                                        Text="Save interval:" />
 
                             <NumericUpDown x:Name="AutoSavePeriodNumericUpDown"
-                                           Grid.Row="0"
-                                           Grid.Column="1"
-                                           Minimum="1" />
+                                           Minimum="30"
+                                           Maximum="300"
+                                           Value="30" />
 
                             <TextBlock Grid.Row="1"
                                        Grid.Column="0"
