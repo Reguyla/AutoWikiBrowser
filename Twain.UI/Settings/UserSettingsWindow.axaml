@@ -53,11 +53,19 @@
                                        VerticalAlignment="Center"
                                        Text="Custom project:" />
 
-                            <ComboBox x:Name="CustomProjectComboBox"
-                                      Grid.Row="2"
-                                      Grid.Column="1"
-                                      IsEditable="True"
-                                      PropertyChanged="CustomProjectComboBox_PropertyChanged" />
+                            <Grid Grid.Row="2"
+                                  Grid.Column="1"
+                                  ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="8">
+
+                                <ComboBox x:Name="CustomProjectComboBox"
+                                          IsEditable="True"
+                                          PropertyChanged="CustomProjectComboBox_PropertyChanged" />
+
+                                <TextBlock x:Name="ProjectPostfixTextBlock"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center" />
+                            </Grid>
 
                             <TextBlock Grid.Row="3"
                                        Grid.Column="0"

@@ -167,11 +167,22 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
             UserSettingsHelper.SupportsCustomConnectionSettings(
                 project);
 
+        LanguageComboBox.IsEnabled =
+            UserSettingsHelper.SupportsLanguageSelection(
+                project);
+
         LanguageComboBox.IsVisible =
             !usesCustomProjectControls;
 
         CustomProjectComboBox.IsVisible =
             usesCustomProjectControls;
+
+        ProjectPostfixTextBlock.IsVisible =
+            usesCustomProjectControls;
+
+        ProjectPostfixTextBlock.Text =
+            UserSettingsHelper.GetProjectPostfix(
+                project);
 
         ProtocolComboBox.IsVisible =
             usesCustomProjectControls;
