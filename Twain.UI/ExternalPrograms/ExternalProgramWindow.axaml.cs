@@ -1,3 +1,7 @@
+using Avalonia.Platform.Storage;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Twain.Core.AWBSettings;
 using Twain.Core.ExternalPrograms;
 
@@ -149,16 +153,97 @@ public partial class ExternalProgramWindow : Avalonia.Controls.Window
     /// <summary>
     /// Validates and accepts the current external program settings.
     /// </summary>
-    private void OkButton_Click(
+    private async void OkButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (!ExternalProgramConfiguration.IsValid(Settings))
+        ExternalProgramPrefs settings =
+            Settings;
+
+        if (!ExternalProgramConfiguration.IsValid(settings))
         {
+            await ShowValidationWarningAsync(settings);
             return;
         }
 
         Close(true);
+    }
+
+    /// <summary>
+    /// Displays a warning describing the missing external program setting.
+    /// </summary>
+    /// <param name="settings">
+    /// The external program settings that failed validation.
+    /// </param>
+    private async Task ShowValidationWarningAsync(
+        ExternalProgramPrefs settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        string message;
+
+        if (string.IsNullOrWhiteSpace(settings.Program))
+        {
+            message =
+                "Please select the external program to run.";
+        }
+        else if (settings.PassAsFile &&
+                 string.IsNullOrWhiteSpace(settings.OutputFile))
+        {
+            message =
+                "Please specify the input/output file.";
+        }
+        else
+        {
+            message =
+                "Please specify the command-line parameters.";
+        }
+
+        Avalonia.Controls.Window warningWindow =
+            new()
+            {
+                Title = "External Program",
+                Width = 420,
+                Height = 170,
+                CanResize = false,
+                WindowStartupLocation =
+                    Avalonia.Controls.WindowStartupLocation.CenterOwner,
+
+                Content =
+                    new Avalonia.Controls.StackPanel
+                    {
+                        Margin = new Avalonia.Thickness(16),
+                        Spacing = 16,
+
+                        Children =
+                        {
+                        new Avalonia.Controls.TextBlock
+                        {
+                            Text = message,
+                            TextWrapping =
+                                Avalonia.Media.TextWrapping.Wrap
+                        },
+
+                        new Avalonia.Controls.Button
+                        {
+                            Content = "OK",
+                            HorizontalAlignment =
+                                Avalonia.Layout.HorizontalAlignment.Right,
+                            MinWidth = 80
+                        }
+                        }
+                    }
+            };
+
+        Avalonia.Controls.Button okButton =
+            (Avalonia.Controls.Button)
+            ((Avalonia.Controls.StackPanel)warningWindow.Content!)
+            .Children[1];
+
+        okButton.Click += (_, _) =>
+            warningWindow.Close();
+
+        await warningWindow.ShowDialog(this);
     }
 
     /// <summary>
@@ -171,17 +256,73 @@ public partial class ExternalProgramWindow : Avalonia.Controls.Window
         Close(false);
     }
 
-    private void BrowseProgramButton_Click(
+    /// <summary>
+    /// Opens a file picker for selecting the external program executable.
+    /// </summary>
+    private async void BrowseProgramButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        // Added in the next step.
+        IReadOnlyList<IStorageFile> files =
+            await StorageProvider.OpenFilePickerAsync(
+                new FilePickerOpenOptions
+                {
+                    Title = "Select external program",
+                    AllowMultiple = false
+                });
+
+        if (files.Count == 0)
+            return;
+
+        IStorageFile file =
+            files[0];
+
+        string? localPath =
+            file.TryGetLocalPath();
+
+        if (!string.IsNullOrWhiteSpace(localPath))
+        {
+            ProgramTextBox.Text =
+                localPath;
+        }
     }
 
-    private void BrowseOutputFileButton_Click(
+    /// <summary>
+    /// Opens a file picker for selecting the input/output file used by the
+    /// external program.
+    /// </summary>
+    private async void BrowseOutputFileButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        // Added in the next step.
+        FilePickerSaveOptions options =
+            new()
+            {
+                Title = "Select input/output file"
+            };
+
+        string currentPath =
+            OutputFileTextBox.Text ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(currentPath))
+        {
+            options.SuggestedFileName =
+                Path.GetFileName(currentPath);
+        }
+
+        IStorageFile? file =
+            await StorageProvider.SaveFilePickerAsync(options);
+
+        if (file == null)
+            return;
+
+        string? localPath =
+            file.TryGetLocalPath();
+
+        if (!string.IsNullOrWhiteSpace(localPath))
+        {
+            OutputFileTextBox.Text =
+                localPath;
+        }
     }
 }
