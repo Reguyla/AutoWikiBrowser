@@ -157,7 +157,8 @@ public partial class CustomModule : Avalonia.Controls.Window
                     IncludeDebugInformation = false
                 };
 
-            AddLoadedAssemblyReferences(parameters);
+            CustomModuleCompilationReferences.AddLoadedAssemblyReferences(
+                parameters);
 
             CompilerResults results =
                 compiler.Compile(
