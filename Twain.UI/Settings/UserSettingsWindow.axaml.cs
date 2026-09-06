@@ -667,6 +667,54 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
+    /// Gets or sets whether a custom domain is used.
+    /// </summary>
+    public bool UseCustomDomain
+    {
+        get =>
+            UseCustomDomainCheckBox.IsChecked == true;
+
+        set
+        {
+            UseCustomDomainCheckBox.IsChecked = value;
+
+            if (ProjectComboBox.SelectedItem is ProjectEnum project)
+            {
+                DomainTextBox.IsEnabled =
+                    UserSettingsHelper.SupportsCustomConnectionSettings(
+                        project) &&
+                    value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the custom domain.
+    /// </summary>
+    public string Domain
+    {
+        get =>
+            DomainTextBox.Text ??
+            string.Empty;
+
+        set =>
+            DomainTextBox.Text =
+                value ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Gets or sets whether AWB attribution is suppressed for supported custom sites.
+    /// </summary>
+    public bool SuppressAwb
+    {
+        get =>
+            SuppressAwbCheckBox.IsChecked == true;
+
+        set =>
+            SuppressAwbCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
     /// Updates whether the current site settings contain enough information
     /// for the dialog to be accepted.
     /// </summary>
