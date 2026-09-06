@@ -69,6 +69,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // doesn't look like we can use RestoreBounds for this - any other built in way?
     private readonly ToolStripMenuItem[] _pasteMoreItems;
 
+    private readonly PasteMoreConfiguration _pasteMoreConfiguration;
+
     private readonly SessionCounters _sessionCounters = new();
 
     private readonly string[] _pasteMoreItemsPrefixes =
@@ -251,6 +253,12 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
             _splashScreen.SetProgress(15);
 
             _pasteMoreItems = InitializePasteMoreItems();
+
+            _pasteMoreConfiguration =
+                new PasteMoreConfiguration(
+                    _pasteMoreItems.Select(
+                        item => item.Tag as string));
+
             InitializeFileDialogs();
         }
         catch (Exception ex)
@@ -8474,32 +8482,36 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     }
 
     #region PasteMore
-    // TODO(Twain): Redesign Paste More before moving it out of MainForm.
-    // The current implementation is tightly coupled to WinForms menu items,
-    // editor state, the ConfigurePasteMoreItems dialog, and the fixed ten-slot
-    // settings model. Replace the fixed slots with a collection-based,
-    // UI-independent configuration model before migrating this feature to the
-    // new UI architecture.
+ 
     /// <summary>
-    /// Inserts the text stored in the selected Paste More menu item at the
+    /// Inserts the configured text for the selected Paste More menu item at the
     /// current editor selection and closes the context menu.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
     private void PasteMore_Click(object sender, EventArgs e)
     {
-        if (sender is ToolStripMenuItem item &&
-            item.Tag is string text)
+        if (sender is ToolStripMenuItem item)
         {
-            ArticleEditor.SelectedText = text;
+            int index =
+                Array.IndexOf(
+                    _pasteMoreItems,
+                    item);
+
+            if (index >= 0 &&
+                index < _pasteMoreConfiguration.Count)
+            {
+                ArticleEditor.SelectedText =
+                    _pasteMoreConfiguration[index];
+            }
         }
 
         mnuTextBox.Hide();
     }
 
-    // TODO(Twain): Replace the fixed ten-item Paste More model with a collection-
-    // based configuration model so the UI is not tied to individually named slots.
-
+    // TODO(Twain): Replace the legacy fixed ten-slot Paste More dialog contract
+    // with a collection-based UI so configuration is not tied to individually
+    // named String1 through String10 properties.
     /// <summary>
     /// Opens the Paste More configuration dialog and applies any accepted
     /// text changes to the configured Paste More menu items.
@@ -8533,24 +8545,37 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     }
 
     /// <summary>
+    /// Applies the supplied Paste More text values to the current configuration
+    /// and legacy menu items.
+    /// </summary>
+    /// <param name="pasteMoreItems">
+    /// The Paste More text values to apply.
+    /// </param>
+    private void ApplyPasteMoreTexts(
+        string[] pasteMoreItems)
+    {
+        ArgumentNullException.ThrowIfNull(pasteMoreItems);
+
+        for (int i = 0;
+             i < pasteMoreItems.Length &&
+             i < _pasteMoreItems.Length;
+             i++)
+        {
+            SetPasteMoreText(
+                i,
+                pasteMoreItems[i]);
+        }
+    }
+
+    /// <summary>
     /// Gets the currently configured Paste More text values.
     /// </summary>
     /// <returns>The configured Paste More text values.</returns>
     private string[] GetPasteMoreTexts()
     {
-        return
-        [
-            (string)PasteMore1.Tag,
-        (string)PasteMore2.Tag,
-        (string)PasteMore3.Tag,
-        (string)PasteMore4.Tag,
-        (string)PasteMore5.Tag,
-        (string)PasteMore6.Tag,
-        (string)PasteMore7.Tag,
-        (string)PasteMore8.Tag,
-        (string)PasteMore9.Tag,
-        (string)PasteMore10.Tag
-        ];
+        return _pasteMoreConfiguration
+            .Items
+            .ToArray();
     }
 
     /// <summary>
@@ -8574,21 +8599,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         dialog.String9,
         dialog.String10
         ];
-    }
-
-    /// <summary>
-    /// Applies the supplied Paste More text values to the configured menu items.
-    /// </summary>
-    /// <param name="pasteMoreItems">The Paste More text values to apply.</param>
-    private void ApplyPasteMoreTexts(
-        string[] pasteMoreItems)
-    {
-        for (int i = 0; i < pasteMoreItems.Length; i++)
-        {
-            SetPasteMoreText(
-                i,
-                pasteMoreItems[i]);
-        }
     }
     #endregion
 

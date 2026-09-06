@@ -1494,13 +1494,14 @@ partial class MainForm
     }
 
     /// <summary>
-    /// Updates the text, stored value, and visibility of a Paste More menu item.
+    /// Updates a configured Paste More value and synchronizes its legacy
+    /// WinForms menu item.
     /// </summary>
     /// <param name="item">
-    /// The zero-based Paste More menu item index.
+    /// The zero-based Paste More item index.
     /// </param>
     /// <param name="text">
-    /// The text to associate with the menu item.
+    /// The text to associate with the Paste More item.
     /// </param>
     /// <remarks>
     /// Ampersands are escaped before being displayed so they appear literally
@@ -1510,18 +1511,26 @@ partial class MainForm
         int item,
         string text)
     {
-        if (item >= _pasteMoreItems.Length)
+        if (item < 0 ||
+            item >= _pasteMoreItems.Length ||
+            item >= _pasteMoreConfiguration.Count)
         {
             return;
         }
 
+        text ??= string.Empty;
+
+        _pasteMoreConfiguration[item] = text;
+
         _pasteMoreItems[item].Tag = text;
+
         _pasteMoreItems[item].Text =
             _pasteMoreItemsPrefixes[item] +
             (string.IsNullOrEmpty(text)
                 ? string.Empty
                 : text.Replace("&", "&&"));
 
-        _pasteMoreItems[item].Visible = !string.IsNullOrEmpty(text);
+        _pasteMoreItems[item].Visible =
+            !string.IsNullOrEmpty(text);
     }
 }
