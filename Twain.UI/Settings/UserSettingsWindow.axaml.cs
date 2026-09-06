@@ -1,6 +1,8 @@
-using System;
 using Avalonia.Interactivity;
+using System.Collections.Generic;
+using System.Linq;
 using Twain.Core;
+using Twain.Core.Alerts;
 using Twain.Core.Settings;
 
 namespace Twain.UI.Settings;
@@ -38,11 +40,16 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     /// <param name="protocol">
     /// The selected connection protocol.
     /// </param>
+    /// <param name="enabledAlertIds">
+    /// The stored enabled alert identifiers. An empty or unspecified collection
+    /// represents the legacy default in which all alerts are enabled.
+    /// </param>
     public UserSettingsWindow(
         string language,
         ProjectEnum project,
         string customProject,
-        string protocol)
+        string protocol,
+        IEnumerable<int>? enabledAlertIds = null)
     {
         ArgumentNullException.ThrowIfNull(language);
         ArgumentNullException.ThrowIfNull(customProject);
@@ -51,6 +58,8 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
         InitializeComponent();
 
         InitializeSelectors();
+        InitializeAlerts(enabledAlertIds);
+
         InitializeSiteSettings(
             language,
             project,
@@ -84,6 +93,50 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
             "Show changes",
             "Show preview"
             };
+    }
+
+    /// <summary>
+    /// Populates the alert selector from the shared alert metadata.
+    /// </summary>
+    private void InitializeAlerts(
+        IEnumerable<int>? selectedAlertIds)
+    {
+        AlertsPanel.Children.Clear();
+        _alertCheckBoxes.Clear();
+
+        IReadOnlyCollection<int> availableAlertIds =
+            ArticleAlertHelper.AlertDescriptions
+                .Keys
+                .Select(id => (int)id)
+                .ToArray();
+
+        IReadOnlyCollection<int> enabledAlertIds =
+            ArticleAlertHelper.ResolveEnabledAlertIds(
+                availableAlertIds,
+                selectedAlertIds ?? Array.Empty<int>());
+
+        foreach (KeyValuePair<ArticleAlertId, string> alert in
+                 ArticleAlertHelper.AlertDescriptions)
+        {
+            int alertId = (int)alert.Key;
+
+            Avalonia.Controls.CheckBox checkBox =
+                new()
+                {
+                    Content = alert.Value,
+                    IsChecked =
+                        ArticleAlertHelper.IsAlertEnabled(
+                            enabledAlertIds,
+                            alertId)
+                };
+
+            _alertCheckBoxes.Add(
+                alertId,
+                checkBox);
+
+            AlertsPanel.Children.Add(
+                checkBox);
+        }
     }
 
     /// <summary>
@@ -291,4 +344,7 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
             UpdateOkButtonState();
         }
     }
+
+    private readonly Dictionary<int, Avalonia.Controls.CheckBox> _alertCheckBoxes =
+    new();
 }

@@ -280,9 +280,10 @@
                                FontWeight="SemiBold"
                                FontSize="16" />
 
-                    <ListBox x:Name="AlertsListBox"
-                             Grid.Row="1"
-                             SelectionMode="Multiple" />
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel x:Name="AlertsPanel"
+                                    Spacing="6" />
+                    </ScrollViewer>
 
                     <TextBlock Grid.Row="2"
                                Text="When no alerts are selected, all alerts are treated as enabled."

@@ -101,21 +101,18 @@ public static class ArticleAlertHelper
         };
 
     /// <summary>
-    /// Resolves the enabled alert identifiers from the available alerts and
-    /// the currently selected identifiers.
+    /// Resolves the enabled alert identifiers from the available and stored
+    /// alert preference identifiers.
     /// </summary>
-    /// <remarks>
-    /// An empty selection represents the legacy default in which all available
-    /// alerts are enabled.
-    /// </remarks>
     /// <param name="availableAlertIds">
-    /// The identifiers of all available alerts.
+    /// The alert identifiers currently available to the application.
     /// </param>
     /// <param name="selectedAlertIds">
-    /// The identifiers explicitly selected by the user.
+    /// The stored selected alert identifiers.
     /// </param>
     /// <returns>
-    /// The identifiers that should be treated as enabled.
+    /// The explicitly enabled alert identifiers. When the stored selection is
+    /// empty, all available alerts are returned to preserve the legacy default.
     /// </returns>
     public static List<int> ResolveEnabledAlertIds(
         IEnumerable<int> availableAlertIds,
@@ -124,11 +121,18 @@ public static class ArticleAlertHelper
         ArgumentNullException.ThrowIfNull(availableAlertIds);
         ArgumentNullException.ThrowIfNull(selectedAlertIds);
 
+        List<int> available =
+            availableAlertIds
+                .Distinct()
+                .ToList();
+
         List<int> selected =
-            selectedAlertIds.ToList();
+            selectedAlertIds
+                .Distinct()
+                .ToList();
 
         return selected.Count == 0
-            ? availableAlertIds.ToList()
+            ? available
             : selected;
     }
 
