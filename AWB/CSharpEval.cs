@@ -70,35 +70,15 @@ public partial class CSharpEval : Form
             return true;
         }
 
-        bool hasErrors = false;
-        StringBuilder builder = new();
-
-        foreach (CompilerError error in results.Errors)
-        {
-            hasErrors |= !error.IsWarning;
-
-            if (error.Line > 0)
-            {
-                builder.AppendFormat(
-                    "Line {0}, col {1}: ",
-                    error.Line,
-                    error.Column);
-            }
-
-            if (!string.IsNullOrEmpty(error.ErrorNumber))
-            {
-                builder.AppendFormat(
-                    "[{0}] ",
-                    error.ErrorNumber);
-            }
-
-            builder.Append(error.ErrorText);
-            builder.AppendLine();
-        }
+        bool hasErrors =
+            CustomModuleCompilationDiagnostics.HasErrors(
+                results);
 
         using CustomModuleErrors errorDialog = new();
 
-        errorDialog.ErrorText = builder.ToString();
+        errorDialog.ErrorText =
+            CustomModuleCompilationDiagnostics.Format(
+                results);
 
         errorDialog.Text =
             "Compilation " +
