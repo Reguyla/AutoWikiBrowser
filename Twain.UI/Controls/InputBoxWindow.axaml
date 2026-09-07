@@ -1,0 +1,46 @@
+<Window
+    x:Class="Twain.UI.Controls.InputBoxWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="500"
+    Height="180"
+    MinWidth="420"
+    CanResize="False"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Input">
+
+    <Grid Margin="16"
+          RowDefinitions="Auto,Auto,Auto,Auto"
+          RowSpacing="8">
+
+        <TextBlock x:Name="PromptTextBlock"
+                   Grid.Row="0"
+                   TextWrapping="Wrap" />
+
+        <TextBox x:Name="InputTextBox"
+                 Grid.Row="1"
+                 TextChanged="InputTextBox_TextChanged" />
+
+        <TextBlock x:Name="ValidationTextBlock"
+                   Grid.Row="2"
+                   IsVisible="False"
+                   TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+
+            <Button Content="_OK"
+                    Width="90"
+                    IsDefault="True"
+                    Click="OkButton_Click" />
+
+            <Button Content="_Cancel"
+                    Width="90"
+                    IsCancel="True"
+                    Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -128,27 +128,3 @@ public partial class InputBox : Form
 
     protected InputBoxValidatingHandler Validator { get; set; }
 }
-
-/// <summary>
-/// Class used to store the result of an InputBox.Show message.
-/// </summary>
-public class InputBoxResult
-{
-    public bool OK;
-    public string Text;
-}
-
-/// <summary>
-/// EventArgs used to Validate an InputBox
-/// </summary>
-public class InputBoxValidatingArgs : EventArgs
-{
-    public string Text;
-    public string Message;
-    public bool Cancel;
-}
-
-/// <summary>
-/// Delegate used to Validate an InputBox
-/// </summary>
-public delegate void InputBoxValidatingHandler(object sender, InputBoxValidatingArgs e);
