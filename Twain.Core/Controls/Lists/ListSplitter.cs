@@ -104,23 +104,11 @@ public partial class ListSplitter : Form
 
             if (xml)
             {
-                string pathPrefix =
-                    path.Replace(".xml", " {0}.xml");
-
-                for (int i = 1; i <= noGroups; i++)
-                {
-                    _p.List.ArticleList =
-                        ListSplitterProcessor.CreateArticleGroup(
-                            articles,
-                            baseIndex,
-                            groupSize);
-
-                    baseIndex += splitValue;
-
-                    UserPrefs.SavePrefs(
-                        _p,
-                        string.Format(pathPrefix, i));
-                }
+                ListSplitterProcessor.SaveSettingsFiles(
+                    _p,
+                    articles,
+                    path,
+                    splitValue);
 
                 MessageBox.Show(
                     "Lists Saved to AWB Settings Files");

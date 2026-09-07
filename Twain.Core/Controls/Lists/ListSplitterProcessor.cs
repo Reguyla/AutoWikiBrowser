@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Controls.Lists;
+﻿using Twain.Core.AWBSettings;
+
+namespace Twain.Core.Controls.Lists;
 
 /// <summary>
 /// Provides article-list splitting operations used by the list splitter.
@@ -210,6 +212,57 @@ public static class ListSplitterProcessor
                 groupText,
                 CreateNumberedPath(path, i),
                 false);
+
+            baseIndex += articlesPerFile;
+        }
+    }
+
+    /// <summary>
+    /// Saves the supplied articles to numbered AWB settings files.
+    /// </summary>
+    /// <param name="prefs">
+    /// The user preferences used as the basis for each settings file.
+    /// </param>
+    /// <param name="articles">
+    /// The articles to save.
+    /// </param>
+    /// <param name="path">
+    /// The base output path.
+    /// </param>
+    /// <param name="articlesPerFile">
+    /// The maximum number of articles written to each settings file.
+    /// </param>
+    public static void SaveSettingsFiles(
+        UserPrefs prefs,
+        List<Article> articles,
+        string path,
+        int articlesPerFile)
+    {
+        ArgumentNullException.ThrowIfNull(prefs);
+        ArgumentNullException.ThrowIfNull(articles);
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (articlesPerFile <= 0)
+            throw new ArgumentOutOfRangeException(nameof(articlesPerFile));
+
+        int groupCount =
+            CalculateGroupCount(
+                articles.Count,
+                articlesPerFile);
+
+        int baseIndex = 0;
+
+        for (int i = 1; i <= groupCount; i++)
+        {
+            prefs.List.ArticleList =
+                CreateArticleGroup(
+                    articles,
+                    baseIndex,
+                    articlesPerFile);
+
+            UserPrefs.SavePrefs(
+                prefs,
+                CreateNumberedPath(path, i));
 
             baseIndex += articlesPerFile;
         }
