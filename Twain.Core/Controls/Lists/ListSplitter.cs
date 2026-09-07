@@ -54,9 +54,6 @@ public partial class ListSplitter : Form
         listMaker1.MakeListEnabled = true;
     }
 
-    private readonly Regex _badCharacters = new Regex(@"[""/:*?<>|.]",
-                                                           RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     private void UpdateButtons(object sender, EventArgs e)
     {
         btnSave.Enabled = btnXMLSave.Enabled = listMaker1.Count > 0;
@@ -82,68 +79,89 @@ public partial class ListSplitter : Form
 
     private string RemoveBadChars()
     {
-        string text = listMaker1.SourceText;
-        foreach (Match m in _badCharacters.Matches(listMaker1.SourceText))
-        {
-            text = text.Replace(m.Value, "");
-        }
-        return text;
+        return ListSplitterProcessor.CreateFileName(listMaker1.SourceText);
     }
 
     private void Save(string path, bool xml)
     {
         listMaker1.AlphaSortList();
         listMaker1.BeginUpdate();
+
         try
         {
-            int noA = listMaker1.Count;
-
-            int roundlimit = Convert.ToInt32(numSplitAmount.Value / 2);
-
-            if ((noA % numSplitAmount.Value) <= roundlimit)
-                noA += roundlimit;
+            int splitValue = (int)numSplitAmount.Value;
 
             int noGroups =
-                Convert.ToInt32(Math.Round(noA / numSplitAmount.Value));
+                ListSplitterProcessor.CalculateGroupCount(
+                    listMaker1.Count,
+                    splitValue);
 
             int baseIndex = 0;
-            int splitValue = (int)numSplitAmount.Value;
+
             var articles = listMaker1.GetArticleList();
-            int minValueCount = Math.Min(splitValue, articles.Count);
+
+            int minValueCount =
+                Math.Min(splitValue, articles.Count);
+
             if (xml)
             {
                 string pathPrefix = path.Replace(".xml", " {0}.xml");
 
                 for (int i = 1; i <= noGroups; i++)
                 {
-                    _p.List.ArticleList = articles.GetRange(baseIndex, minValueCount);
+                    _p.List.ArticleList =
+                        articles.GetRange(baseIndex, minValueCount);
+
                     baseIndex += splitValue;
-                    UserPrefs.SavePrefs(_p, string.Format(pathPrefix, i));
+
+                    UserPrefs.SavePrefs(
+                        _p,
+                        string.Format(pathPrefix, i));
                 }
-                MessageBox.Show("Lists Saved to AWB Settings Files");
+
+                MessageBox.Show(
+                    "Lists Saved to AWB Settings Files");
             }
             else
             {
-                string pathPrefix = path.Replace(".txt", " {0}.txt");
+                string pathPrefix =
+                    path.Replace(".txt", " {0}.txt");
+
                 for (int i = 1; i <= noGroups; i++)
                 {
-                    StringBuilder strList = new StringBuilder();
-                    foreach (Article a in articles.GetRange(baseIndex, Math.Min(articles.Count - baseIndex, minValueCount)))
+                    StringBuilder strList =
+                        new StringBuilder();
+
+                    foreach (Article a in articles.GetRange(
+                                 baseIndex,
+                                 Math.Min(
+                                     articles.Count - baseIndex,
+                                     minValueCount)))
                     {
                         strList.AppendLine(a.ToString());
                     }
-                    Tools.WriteTextFileAbsolutePath(strList.ToString().TrimEnd(), string.Format(pathPrefix, i),
-                                                    false);
+
+                    Tools.WriteTextFileAbsolutePath(
+                        strList.ToString().TrimEnd(),
+                        string.Format(pathPrefix, i),
+                        false);
+
                     baseIndex += splitValue;
                 }
-                MessageBox.Show("Lists saved to text files");
+
+                MessageBox.Show(
+                    "Lists saved to text files");
             }
 
             listMaker1.Clear();
         }
         catch (IOException ex)
         {
-            MessageBox.Show(ex.Message, "Save error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                ex.Message,
+                "Save error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
         catch (Exception ex)
         {
