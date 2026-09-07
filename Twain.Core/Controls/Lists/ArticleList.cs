@@ -143,4 +143,61 @@ public sealed class ArticleList
         _articles.Clear();
         _articles.AddRange(articles);
     }
+
+    /// <summary>
+    /// Gets the article at the specified position.
+    /// </summary>
+    /// <param name="index">
+    /// The zero-based index of the article to retrieve.
+    /// </param>
+    public Article this[int index] => _articles[index];
+
+    /// <summary>
+    /// Determines whether the specified article is contained in the list.
+    /// </summary>
+    /// <param name="article">
+    /// The article to locate.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the article is contained in the list;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public bool Contains(Article article)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+
+        return _articles.Contains(article);
+    }
+
+    /// <summary>
+    /// Returns the zero-based index of the specified article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to locate.
+    /// </param>
+    /// <returns>
+    /// The zero-based index of the article when found; otherwise, -1.
+    /// </returns>
+    public int IndexOf(Article article)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+
+        return _articles.IndexOf(article);
+    }
+
+    /// <summary>
+    /// Copies the articles to the specified array, starting at the supplied index.
+    /// </summary>
+    /// <param name="array">
+    /// The destination array.
+    /// </param>
+    /// <param name="arrayIndex">
+    /// The zero-based index in the destination array at which copying begins.
+    /// </param>
+    public void CopyTo(Article[] array, int arrayIndex)
+    {
+        ArgumentNullException.ThrowIfNull(array);
+
+        _articles.CopyTo(array, arrayIndex);
+    }
 }

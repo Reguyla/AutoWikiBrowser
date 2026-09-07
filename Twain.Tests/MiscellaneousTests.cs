@@ -2308,21 +2308,11 @@ public class ListMakerTests : RequiresInitialization
     [Test]
     public void GetArticleList()
     {
-        ListMaker LMaker = new();
-        LMaker.Add("A");
-        LMaker.Add("B");
+        ListMaker listMaker = new();
+        listMaker.Add("A");
+        listMaker.Add("B");
 
-        Assert.That(LMaker.GetArticleList().Count, Is.EqualTo(2));
-
-        LMaker.Items.SetSelected(0, true);
-        LMaker.Items.SetSelected(1, true);
-
-        Assert.That(LMaker.GetSelectedArticleList().Count, Is.EqualTo(2));
-
-        LMaker.Items.SetSelected(1, false);
-
-        Assert.That(LMaker.GetSelectedArticleList().Count, Is.EqualTo(1));
-        Assert.That(LMaker.GetArticleList().Count, Is.EqualTo(2));
+        Assert.That(listMaker.GetArticleList().Count, Is.EqualTo(2));
     }
 }
 

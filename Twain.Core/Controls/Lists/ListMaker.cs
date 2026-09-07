@@ -246,7 +246,7 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public bool Contains(Article item)
     {
-        return lbArticles.Items.Contains(item);
+        return _articleList.Contains(item);
     }
 
     /// <summary>
@@ -259,7 +259,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
     public void CopyTo(Article[] array, int arrayIndex)
     {
-        lbArticles.Items.CopyTo(array, arrayIndex);
+        _articleList.CopyTo(array, arrayIndex);
     }
 
     /// <summary>
@@ -341,7 +341,7 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public int IndexOf(Article item)
     {
-        return lbArticles.Items.IndexOf(item);
+        return _articleList.IndexOf(item);
     }
 
     /// <summary>
@@ -399,7 +399,7 @@ public partial class ListMaker : UserControl, IList<Article>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Article this[int index]
     {
-        get { return (Article)lbArticles.Items[index]; }
+        get { return _articleList[index]; }
 
         set
         {
@@ -575,12 +575,6 @@ public partial class ListMaker : UserControl, IList<Article>
     #region Properties
 
     /// <summary>
-    /// Gets the ListBox that holds the list of articles
-    /// </summary>
-    public ListBox Items
-    { get { return lbArticles; } }
-
-    /// <summary>
     /// Gets or sets the selected list-provider type.
     /// </summary>
     /// <remarks>
@@ -653,7 +647,7 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public int NumberOfArticles
     {
-        get { return lbArticles.Items.Count; }
+        get { return _articleList.Count; }
     }
 
     string _status = string.Empty;
