@@ -1,0 +1,70 @@
+<Window
+    x:Class="Twain.UI.Templates.SubstTemplatesWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="520"
+    Height="520"
+    MinWidth="420"
+    MinHeight="420"
+    CanResize="True"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Substitute Templates">
+
+    <Grid Margin="16"
+          RowDefinitions="Auto,*,Auto,Auto"
+          RowSpacing="12">
+
+        <TextBlock Grid.Row="0"
+                   Text="Templates to substitute"
+                   FontWeight="SemiBold" />
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+
+            <TextBox x:Name="TemplatesTextBox"
+                     AcceptsReturn="True"
+                     TextWrapping="NoWrap" />
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2"
+                    Spacing="8">
+
+            <CheckBox x:Name="IgnoreUnformattedCheckBox"
+                      Content="Ignore unformatted text" />
+
+            <CheckBox x:Name="ExpandRecursivelyCheckBox"
+                      Content="Expand templates recursively"
+                      Click="ExpandRecursivelyCheckBox_Changed" />
+
+            <CheckBox x:Name="IncludeCommentsCheckBox"
+                      Content="Include comments" />
+        </StackPanel>
+
+        <Grid Grid.Row="3"
+              ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+              ColumnSpacing="8">
+
+            <Button Grid.Column="0"
+                    Content="_Clear"
+                    Click="ClearButton_Click" />
+
+            <Button Grid.Column="1"
+                    Content="_Reset"
+                    Click="ResetButton_Click" />
+
+            <Button Grid.Column="3"
+                    Content="_OK"
+                    Width="90"
+                    IsDefault="True"
+                    Click="OkButton_Click" />
+
+            <Button Grid.Column="4"
+                    Content="_Cancel"
+                    Width="90"
+                    IsCancel="True"
+                    Click="CancelButton_Click" />
+        </Grid>
+    </Grid>
+</Window>
