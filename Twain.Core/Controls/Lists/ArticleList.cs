@@ -1,9 +1,11 @@
-﻿namespace Twain.Core.Lists;
+﻿using System.Collections;
+
+namespace Twain.Core.Lists;
 
 /// <summary>
 /// Maintains the articles contained in a generated or manually managed page list.
 /// </summary>
-public sealed class ArticleList
+public sealed class ArticleList : IEnumerable<Article>
 {
     private readonly List<Article> _articles = new();
 
@@ -199,5 +201,21 @@ public sealed class ArticleList
         ArgumentNullException.ThrowIfNull(array);
 
         _articles.CopyTo(array, arrayIndex);
+    }
+
+    /// <summary>
+    /// Returns an enumerator that iterates through the articles.
+    /// </summary>
+    public IEnumerator<Article> GetEnumerator()
+    {
+        return _articles.GetEnumerator();
+    }
+
+    /// <summary>
+    /// Returns an enumerator that iterates through the articles.
+    /// </summary>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

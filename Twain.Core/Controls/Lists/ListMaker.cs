@@ -192,28 +192,15 @@ public partial class ListMaker : UserControl, IList<Article>
     {
     }
 
-    #region Enumerator
     public IEnumerator<Article> GetEnumerator()
     {
-        int i = 0;
-        while (i < lbArticles.Items.Count)
-        {
-            yield return (Article)lbArticles.Items[i];
-            i++;
-        }
+        return _articleList.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        int i = 0;
-        while (i < lbArticles.Items.Count)
-        {
-            yield return lbArticles.Items[i];
-            i++;
-        }
+        return _articleList.GetEnumerator();
     }
-
-    #endregion
 
     #region ICollection<Article> Members
 
@@ -286,7 +273,7 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public bool Remove(Article item)
     {
-        if (!lbArticles.Items.Contains(item))
+        if (!_articleList.Contains(item))
             return false;
 
         // set last used article
@@ -305,7 +292,7 @@ public partial class ListMaker : UserControl, IList<Article>
             // otherwise if article to be removed isn't the single selected one, there may be duplicates of the article
             // so remove first instance and avoid scrolling
             // if replacing the second instance of the article in the list maker avoid jumping selected article to the first
-            int intPosition = lbArticles.Items.IndexOf(item);
+            int intPosition = _articleList.IndexOf(item);
 
             while (lbArticles.SelectedItems.Count > 0)
                 lbArticles.SetSelected(lbArticles.SelectedIndex, false);
@@ -464,8 +451,8 @@ public partial class ListMaker : UserControl, IList<Article>
         //Get the item
         int nIdx = lbArticles.IndexFromPoint(e.Location);
 
-        if ((nIdx >= 0) && (nIdx < lbArticles.Items.Count))
-            strTip = lbArticles.Items[nIdx].ToString();
+        if ((nIdx >= 0) && (nIdx < _articleList.Count))
+            strTip = _articleList[nIdx].ToString();
 
         if (strTip != tooltip.GetToolTip(lbArticles))
             tooltip.SetToolTip(lbArticles, strTip);
@@ -526,7 +513,7 @@ public partial class ListMaker : UserControl, IList<Article>
         // Single page
         specialFilterToolStripMenuItem.Enabled =
             sortAlphaMenuItem.Enabled = sortReverseAlphaMenuItem.Enabled =
-            (lbArticles.Items.Count > 1);
+            (_articleList.Count > 1);
 
         // No pages
         selectMnu.Enabled =
@@ -534,7 +521,7 @@ public partial class ListMaker : UserControl, IList<Article>
             convertToTalkPagesToolStripMenuItem.Enabled =
             convertFromTalkPagesToolStripMenuItem.Enabled =
             saveListToFileToolStripMenuItem.Enabled =
-            (lbArticles.Items.Count > 0);
+            (_articleList.Count > 0);
     }
 
     private void txtNewArticle_DoubleClick(object sender, EventArgs e)
@@ -701,8 +688,8 @@ public partial class ListMaker : UserControl, IList<Article>
     {
         ((Article)lbArticles.SelectedItem).PreProcessed = true;
 
-        if (lbArticles.Items.Count == lbArticles.SelectedIndex + 1 ||
-            (lbArticles.Items.Count == 1 && lbArticles.SelectedIndex == 0))
+        if (_articleList.Count == lbArticles.SelectedIndex + 1 ||
+            (_articleList.Count == 1 && lbArticles.SelectedIndex == 0))
             return false;
 
         lbArticles.SelectedIndex++;
@@ -826,13 +813,13 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Returns only those distinct articles in the input list that do not already exist in the list box
+    /// Returns only those distinct articles in the input list that do not already exist in the current article list.
     /// </summary>
-    /// <returns>The duplicate.</returns>
-    /// <param name="l">L.</param>
+    /// <returns>The articles that are not already present in the list.</returns>
+    /// <param name="l">The articles to evaluate.</param>
     private List<Article> DeDuplicate(List<Article> l)
     {
-        List<Article> articles = lbArticles.Items.Cast<Article>().ToList();
+        List<Article> articles = _articleList.ToList();
 
         return l.Except(articles).ToList();
     }
@@ -1116,7 +1103,7 @@ public partial class ListMaker : UserControl, IList<Article>
             return;
         }
 
-        List<Article> articles = new List<Article>(lbArticles);
+        List<Article> articles = _articleList.ToList();
         List<Article> toberemoved =
             articles.FindAll(a => a.NameSpaceKey != Namespace.Article);
 
@@ -1182,7 +1169,7 @@ public partial class ListMaker : UserControl, IList<Article>
         if (lbArticles.SelectedItems.Count == 1 && lbArticles.SelectedItems.Contains(oldArticle))
             intPos = lbArticles.SelectedIndex;
         else
-            intPos = lbArticles.Items.IndexOf(oldArticle);
+            intPos = _articleList.IndexOf(oldArticle);
 
         _articleList.Set(intPos, newArticle);
 
@@ -1216,16 +1203,17 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void UpdateNumberOfArticles(bool sortneeded)
     {
-        lblNumOfPages.Text = lbArticles.Items.Count + " page";
-        if (lbArticles.Items.Count != 1)
+        lblNumOfPages.Text = _articleList.Count + " page";
+        if (_articleList.Count != 1)
             lblNumOfPages.Text += "s";
+
         if (NoOfArticlesChanged != null)
             NoOfArticlesChanged(null, null);
 
         if (sortneeded && AutoAlpha)
             AlphaSortList();
 
-        btnFilter.Enabled = lbArticles.Items.Count > 0;
+        btnFilter.Enabled = _articleList.Count > 0;
         btnRemove.Enabled = lbArticles.SelectedItems.Count > 0;
     }
 
@@ -1241,7 +1229,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
         Add(Tools.ConvertToTalk(list));
 
-        if (lbArticles.Items.Count == 0)
+        if (_articleList.Count == 0)
             lbArticles.HorizontalExtent = 0;
     }
 
@@ -1386,7 +1374,7 @@ public partial class ListMaker : UserControl, IList<Article>
     {
         lbArticles.BeginUpdate();
 
-        for (int i = 0; i < lbArticles.Items.Count; i++)
+        for (int i = 0; i < _articleList.Count; i++)
             lbArticles.SetSelected(i, !lbArticles.GetSelected(i));
 
         lbArticles.EndUpdate();
@@ -1420,7 +1408,7 @@ public partial class ListMaker : UserControl, IList<Article>
         // so use slower SetSelected if on Linux
         if (Globals.UsingLinux)
         {
-            for (int i = 0; i < lbArticles.Items.Count; i++)
+            for (int i = 0; i < _articleList.Count; i++)
                 lbArticles.SetSelected(i, true);
         }
         else
@@ -1442,10 +1430,12 @@ public partial class ListMaker : UserControl, IList<Article>
 
     private void clearToolStripMenuItem1_Click(object sender, EventArgs e)
     {
-        if (lbArticles.Items.Count <= 100 || (MessageBox.Show(
+        if (_articleList.Count <= 100 || (MessageBox.Show(
             "Are you sure you want to clear the large list?", "Clear?", MessageBoxButtons.YesNo)
-                                              == DialogResult.Yes))
+                                                  == DialogResult.Yes))
+        {
             Clear();
+        }
     }
 
     private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1504,7 +1494,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
     private void moveToBottomToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        MoveSelectedItems(lbArticles.Items.Count - 1);
+        MoveSelectedItems(_articleList.Count - 1);
     }
 
     /// <summary>
@@ -1598,7 +1588,7 @@ public partial class ListMaker : UserControl, IList<Article>
         if (e.Index < 0)
             return;
 
-        Article a = (Article)lbArticles.Items[e.Index];
+        Article a = _articleList[e.Index];
 
         bool selected = ((e.State & DrawItemState.Selected) == DrawItemState.Selected);
 
@@ -1675,16 +1665,19 @@ public partial class ListMaker : UserControl, IList<Article>
 
         // using "DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed" to enable rich formatting above means
         // we need to set the horizontal width ourselves so that a horizontal scrollbar is shown when needed
-        if (lbArticles.Items.Count != lastItemCount)
+        if (_articleList.Count != lastItemCount)
         {
-            lastItemCount = lbArticles.Items.Count;
+            lastItemCount = _articleList.Count;
             string longestName = String.Empty;
-            foreach (Article ar in lbArticles.Items)
+
+            foreach (Article article in _articleList)
             {
-                if (ar.Name.Length > longestName.Length)
-                    longestName = ar.Name;
+                if (article.Name.Length > longestName.Length)
+                    longestName = article.Name;
             }
-            lbArticles.HorizontalExtent = TextRenderer.MeasureText(longestName, e.Font).Width;
+
+            lbArticles.HorizontalExtent =
+                TextRenderer.MeasureText(longestName, e.Font).Width;
         }
 
         e.DrawFocusRectangle();
