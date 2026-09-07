@@ -1,0 +1,43 @@
+<Window
+    x:Class="Twain.UI.Controls.LevelNumberWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="360"
+    Height="160"
+    CanResize="False"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Select number">
+
+    <Grid Margin="16"
+          RowDefinitions="Auto,Auto,Auto"
+          RowSpacing="12">
+
+        <TextBlock x:Name="PromptTextBlock"
+                   Grid.Row="0"
+                   Text="Number of levels:" />
+
+        <NumericUpDown x:Name="LevelNumericUpDown"
+                       Grid.Row="1"
+                       Minimum="1"
+                       Maximum="1000"
+                       Value="1"
+                       Increment="1" />
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+
+            <Button Content="_OK"
+                    Width="90"
+                    IsDefault="True"
+                    Click="OkButton_Click" />
+
+            <Button Content="_Cancel"
+                    Width="90"
+                    IsCancel="True"
+                    Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
