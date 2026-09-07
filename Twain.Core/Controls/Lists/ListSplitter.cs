@@ -100,8 +100,7 @@ public partial class ListSplitter : Form
 
             var articles = listMaker1.GetArticleList();
 
-            int minValueCount =
-                Math.Min(splitValue, articles.Count);
+            int groupSize = splitValue;
 
             if (xml)
             {
@@ -110,7 +109,10 @@ public partial class ListSplitter : Form
                 for (int i = 1; i <= noGroups; i++)
                 {
                     _p.List.ArticleList =
-                        articles.GetRange(baseIndex, minValueCount);
+                        ListSplitterProcessor.CreateArticleGroup(
+                            articles,
+                            baseIndex,
+                            groupSize);
 
                     baseIndex += splitValue;
 
@@ -129,20 +131,14 @@ public partial class ListSplitter : Form
 
                 for (int i = 1; i <= noGroups; i++)
                 {
-                    StringBuilder strList =
-                        new StringBuilder();
-
-                    foreach (Article a in articles.GetRange(
-                                 baseIndex,
-                                 Math.Min(
-                                     articles.Count - baseIndex,
-                                     minValueCount)))
-                    {
-                        strList.AppendLine(a.ToString());
-                    }
+                    string groupText =
+                        ListSplitterProcessor.CreateTextGroup(
+                            articles,
+                            baseIndex,
+                            groupSize);
 
                     Tools.WriteTextFileAbsolutePath(
-                        strList.ToString().TrimEnd(),
+                        groupText,
                         string.Format(pathPrefix, i),
                         false);
 

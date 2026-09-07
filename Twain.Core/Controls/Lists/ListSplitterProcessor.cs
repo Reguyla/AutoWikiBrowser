@@ -28,17 +28,17 @@ public static class ListSplitterProcessor
     }
 
     /// <summary>
-    /// Calculates the number of output groups produced by the legacy list
-    /// splitter algorithm.
+    /// Calculates the number of output groups required for the supplied
+    /// article count and group size.
     /// </summary>
     /// <param name="articleCount">
     /// The number of articles to split.
     /// </param>
     /// <param name="articlesPerFile">
-    /// The requested maximum number of articles per output file.
+    /// The maximum number of articles per output file.
     /// </param>
     /// <returns>
-    /// The number of output groups.
+    /// The number of output groups required.
     /// </returns>
     public static int CalculateGroupCount(
         int articleCount,
@@ -50,14 +50,88 @@ public static class ListSplitterProcessor
         if (articlesPerFile <= 0)
             throw new ArgumentOutOfRangeException(nameof(articlesPerFile));
 
-        int adjustedArticleCount = articleCount;
-        int roundLimit = articlesPerFile / 2;
+        if (articleCount == 0)
+            return 0;
 
-        if ((articleCount % articlesPerFile) <= roundLimit)
-            adjustedArticleCount += roundLimit;
+        return (articleCount + articlesPerFile - 1) / articlesPerFile;
+    }
 
-        return Convert.ToInt32(
-            Math.Round(
-                (decimal)adjustedArticleCount / articlesPerFile));
+    /// <summary>
+    /// Creates the text content for a group of articles from a split list.
+    /// </summary>
+    /// <param name="articles">
+    /// The complete article list.
+    /// </param>
+    /// <param name="startIndex">
+    /// The zero-based index at which the group begins.
+    /// </param>
+    /// <param name="maximumCount">
+    /// The maximum number of articles to include in the group.
+    /// </param>
+    /// <returns>
+    /// The article titles for the group, separated by line breaks.
+    /// </returns>
+    public static string CreateTextGroup(
+        List<Article> articles,
+        int startIndex,
+        int maximumCount)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+
+        if (startIndex < 0 || startIndex > articles.Count)
+            throw new ArgumentOutOfRangeException(nameof(startIndex));
+
+        if (maximumCount < 0)
+            throw new ArgumentOutOfRangeException(nameof(maximumCount));
+
+        int count =
+            Math.Min(
+                articles.Count - startIndex,
+                maximumCount);
+
+        StringBuilder text = new();
+
+        foreach (Article article in articles.GetRange(startIndex, count))
+        {
+            text.AppendLine(article.ToString());
+        }
+
+        return text.ToString().TrimEnd();
+    }
+
+    /// <summary>
+    /// Creates an article group from a split list.
+    /// </summary>
+    /// <param name="articles">
+    /// The complete article list.
+    /// </param>
+    /// <param name="startIndex">
+    /// The zero-based index at which the group begins.
+    /// </param>
+    /// <param name="maximumCount">
+    /// The maximum number of articles to include in the group.
+    /// </param>
+    /// <returns>
+    /// The requested article group.
+    /// </returns>
+    public static List<Article> CreateArticleGroup(
+        List<Article> articles,
+        int startIndex,
+        int maximumCount)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+
+        if (startIndex < 0 || startIndex > articles.Count)
+            throw new ArgumentOutOfRangeException(nameof(startIndex));
+
+        if (maximumCount < 0)
+            throw new ArgumentOutOfRangeException(nameof(maximumCount));
+
+        int count =
+            Math.Min(
+                articles.Count - startIndex,
+                maximumCount);
+
+        return articles.GetRange(startIndex, count);
     }
 }
