@@ -35,7 +35,6 @@ public partial class DatabaseScanner : Form
 {
     private MainProcess Main;
     private TimeSpan StartTime;
-    private readonly ListBox AWBListbox;
     private readonly ListMaker LMaker;
 
     private readonly ListFilterForm SpecialFilter;
@@ -65,10 +64,6 @@ public partial class DatabaseScanner : Form
         : this()
     {
         LMaker = lm;
-        if (lm != null)
-        {
-            AWBListbox = lm.Items;
-        }
     }
 
     private void DatabaseScanner_Load(object sender, EventArgs e)
@@ -287,8 +282,8 @@ public partial class DatabaseScanner : Form
         Article a = new Article(article);
         lbArticles.Items.Add(a);
 
-        if (AWBListbox != null)
-            AWBListbox.Items.Add(a);
+        if (LMaker != null)
+            LMaker.AddWithoutUpdate(a);
 
         Matches++;
 
@@ -340,12 +335,12 @@ public partial class DatabaseScanner : Form
         if (LMaker != null) LMaker.UpdateNumberOfArticles();
     }
 
-    private void RemoveDBScannerListItemsFromAWBListbox()
+    private void RemoveDBScannerListItemsFromListMaker()
     {
-        if (AWBListbox != null)
+        if (LMaker != null)
         {
-            foreach (Article a in lbArticles)
-                AWBListbox.Items.Remove(a);
+            foreach (Article article in lbArticles)
+                LMaker.RemoveWithoutUpdate(article);
         }
     }
 
@@ -514,18 +509,20 @@ public partial class DatabaseScanner : Form
 
     private void btnFilter_Click(object sender, EventArgs e)
     {
-        if (AWBListbox != null)
+        if (LMaker != null)
         {
-            AWBListbox.BeginUpdate();
-            RemoveDBScannerListItemsFromAWBListbox();
+            LMaker.BeginUpdate();
+            RemoveDBScannerListItemsFromListMaker();
         }
 
         SpecialFilter.ShowDialog(this);
 
-        if (AWBListbox != null)
+        if (LMaker != null)
         {
-            AWBListbox.Items.AddRange(lbArticles.Items);
-            AWBListbox.EndUpdate();
+            foreach (Article article in lbArticles.Items)
+                LMaker.AddWithoutUpdate(article);
+
+            LMaker.EndUpdate();
         }
 
         UpdateDBScannerArticleCount();
@@ -562,14 +559,14 @@ public partial class DatabaseScanner : Form
 
     private void removeToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (AWBListbox != null)
+        if (LMaker != null)
         {
-            AWBListbox.BeginUpdate();
+            LMaker.BeginUpdate();
 
-            foreach (Article a in lbArticles.SelectedItems)
-                AWBListbox.Items.Remove(a);
+            foreach (Article article in lbArticles.SelectedItems)
+                LMaker.RemoveWithoutUpdate(article);
 
-            AWBListbox.EndUpdate();
+            LMaker.EndUpdate();
         }
 
         lbArticles.RemoveSelected(true);
@@ -796,8 +793,9 @@ public partial class DatabaseScanner : Form
         {
             locked = true;
             lbArticles.BeginUpdate();
-            if (AWBListbox != null)
-                AWBListbox.BeginUpdate();
+
+            if (LMaker != null)
+                LMaker.BeginUpdate();
         }
 
         while (Queue.Count > 0)
@@ -808,8 +806,9 @@ public partial class DatabaseScanner : Form
         if (locked)
         {
             lbArticles.EndUpdate();
-            if (AWBListbox != null)
-                AWBListbox.EndUpdate();
+
+            if (LMaker != null)
+                LMaker.EndUpdate();
         }
 
         lblCount.Text = Matches.ToString();

@@ -40,7 +40,7 @@ public partial class ListMaker : UserControl, IList<Article>
 {
     private static readonly BindingList<IListProvider> DefaultProviders = new BindingList<IListProvider>();
     private readonly ListFilterForm _specialFilter;
-
+    private readonly ArticleList _articleList = new();
     private readonly BindingList<IListProvider> _listProviders;
 
     //used to keep easy track of providers for add/remove/(re)use in code
@@ -222,7 +222,10 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void Add(Article item)
     {
+        _articleList.Add(item);
+
         lbArticles.Items.Add(item);
+
         UpdateNumberOfArticles();
     }
 
@@ -231,7 +234,10 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void Clear()
     {
+        _articleList.Clear();
+
         lbArticles.Items.Clear();
+
         UpdateNumberOfArticles(false);
     }
 
@@ -260,7 +266,9 @@ public partial class ListMaker : UserControl, IList<Article>
     /// Returns the length of the list
     /// </summary>
     public int Count
-    { get { return lbArticles.Items.Count; } }
+    {
+        get { return _articleList.Count; }
+    }
 
     public bool IsReadOnly
     { get { return false; } }
@@ -317,6 +325,9 @@ public partial class ListMaker : UserControl, IList<Article>
             }
         }
 
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
+
         UpdateNumberOfArticles(false);
         return true;
     }
@@ -346,16 +357,23 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void Insert(int index, Article item)
     {
+        _articleList.Insert(index, item);
+
         lbArticles.Items.Insert(index, item);
+
         UpdateNumberOfArticles();
     }
 
     /// <summary>
-    /// Inserts the given article at a specific index
+    /// Inserts the given article at a specific index.
     /// </summary>
     public void Insert(int index, string item)
     {
-        lbArticles.Items.Insert(index, new Article(item));
+        Article article = new(item);
+
+        _articleList.Insert(index, article);
+        lbArticles.Items.Insert(index, article);
+
         UpdateNumberOfArticles();
     }
 
@@ -364,7 +382,9 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void RemoveAt(int index)
     {
+        _articleList.RemoveAt(index);
         lbArticles.Items.RemoveAt(index);
+
         UpdateNumberOfArticles(false);
     }
 
@@ -380,7 +400,12 @@ public partial class ListMaker : UserControl, IList<Article>
     public Article this[int index]
     {
         get { return (Article)lbArticles.Items[index]; }
-        set { lbArticles.Items[index] = value; }
+
+        set
+        {
+            _articleList.Set(index, value);
+            lbArticles.Items[index] = value;
+        }
     }
 
     #endregion
@@ -746,6 +771,7 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     private delegate void AddToListDel(string s);
+
     /// <summary>
     /// Adds the given string to the list, first turning it into an Article
     /// </summary>
@@ -772,7 +798,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
     private delegate void AddDel(List<Article> l);
     /// <summary>
-    /// Adds the article list to the list
+    /// Adds the article list to the list.
     /// </summary>
     public void Add(List<Article> l)
     {
@@ -788,12 +814,15 @@ public partial class ListMaker : UserControl, IList<Article>
         if (FilterNonMainAuto)
             l = l.FindAll(a => a.NameSpaceKey == Namespace.Article);
 
-        // if deduplicating, only add items not already in the list, rather than adding all and deduplicating entire list again
+        // if deduplicating, only add items not already in the list, rather than
+        // adding all and deduplicating entire list again
         if (FilterDuplicates)
             l = DeDuplicate(l);
 
         if (l.Any())
         {
+            _articleList.AddRange(l);
+
             lbArticles.BeginUpdate();
             lbArticles.Items.AddRange(l.ToArray());
             lbArticles.EndUpdate();
@@ -819,7 +848,7 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public List<Article> GetArticleList()
     {
-        return lbArticles.Items.Cast<Article>().ToList();
+        return _articleList.ToList();
     }
 
     /// <summary>
@@ -1029,24 +1058,31 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    ///
+    /// Removes the currently selected articles from the list.
     /// </summary>
     private void RemoveSelectedArticle()
     {
         lbArticles.RemoveSelected(FilterDuplicates);
+
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
+
         UpdateNumberOfArticles(false);
     }
 
     /// <summary>
-    /// Opens the dialog to filter out articles
+    /// Opens the dialog to filter articles from the list.
     /// </summary>
     public void Filter()
     {
         _specialFilter.ShowDialog(this);
+
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
     }
 
     /// <summary>
-    /// Removes all duplicates from the list
+    /// Removes duplicate articles from the list.
     /// </summary>
     public void RemoveListDuplicates()
     {
@@ -1058,6 +1094,9 @@ public partial class ListMaker : UserControl, IList<Article>
 
         _specialFilter.Clear();
         _specialFilter.RemoveDuplicates();
+
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
 
         UpdateNumberOfArticles(false);
     }
@@ -1073,7 +1112,7 @@ public partial class ListMaker : UserControl, IList<Article>
     private delegate void GenericDelegate();
 
     /// <summary>
-    /// Filters out articles that are not in the main namespace
+    /// Filters out articles that are not in the main namespace.
     /// </summary>
     public void FilterNonMainArticles()
     {
@@ -1084,13 +1123,18 @@ public partial class ListMaker : UserControl, IList<Article>
         }
 
         List<Article> articles = new List<Article>(lbArticles);
-        List<Article> toberemoved = articles.FindAll(a => a.NameSpaceKey != Namespace.Article);
+        List<Article> toberemoved =
+            articles.FindAll(a => a.NameSpaceKey != Namespace.Article);
 
         if (toberemoved.Any())
         {
+            _articleList.RemoveAll(
+                a => a.NameSpaceKey != Namespace.Article);
+
             // performance: AddRange performs at about 100 articles per millisecond, Remove takes about 1 millisecond per article
             // so if removing < 1% of articles it's faster to Remove each one, otherwise faster to clear and AddRange the remainder back
             lbArticles.BeginUpdate();
+
             if (toberemoved.Count < (int)articles.Count / 100)
             {
                 foreach (Article a in toberemoved)
@@ -1098,33 +1142,42 @@ public partial class ListMaker : UserControl, IList<Article>
             }
             else
             {
-                articles.RemoveAll(a => a.NameSpaceKey != Namespace.Article);
+                articles.RemoveAll(
+                    a => a.NameSpaceKey != Namespace.Article);
+
                 lbArticles.Items.Clear();
                 lbArticles.Items.AddRange(articles.ToArray());
             }
+
             lbArticles.EndUpdate();
             UpdateNumberOfArticles(false);
         }
     }
 
     /// <summary>
-    /// Alphabetically sorts the list
+    /// Alphabetically sorts the list.
     /// </summary>
     public void AlphaSortList()
     {
         lbArticles.Sort();
+
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
     }
 
     /// <summary>
-    /// Reverse Alphabetically sorts the list
+    /// Reverse alphabetically sorts the list.
     /// </summary>
     public void ReverseAlphaSortList()
     {
         lbArticles.ReverseSort();
+
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
     }
 
     /// <summary>
-    /// Replaces one article in the list with another, in the same place
+    /// Replaces one article in the list with another, in the same place.
     /// </summary>
     public void ReplaceArticle(Article oldArticle, Article newArticle)
     {
@@ -1136,6 +1189,8 @@ public partial class ListMaker : UserControl, IList<Article>
             intPos = lbArticles.SelectedIndex;
         else
             intPos = lbArticles.Items.IndexOf(oldArticle);
+
+        _articleList.Set(intPos, newArticle);
 
         lbArticles.Items.Remove(oldArticle);
         lbArticles.ClearSelected();
@@ -1181,12 +1236,15 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Converts the list to equivalent talk page
+    /// Converts the list to equivalent talk page.
     /// </summary>
     public void ConvertToTalkPages()
     {
         List<Article> list = GetArticleList();
+
+        _articleList.Clear();
         lbArticles.Items.Clear();
+
         Add(Tools.ConvertToTalk(list));
 
         if (lbArticles.Items.Count == 0)
@@ -1194,12 +1252,15 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Converts the list to equivalent non-talk page
+    /// Converts the list to equivalent non-talk page.
     /// </summary>
     public void ConvertFromTalkPages()
     {
         List<Article> list = GetArticleList();
+
+        _articleList.Clear();
         lbArticles.Items.Clear();
+
         Add(Tools.ConvertFromTalk(list));
     }
     #endregion
@@ -1453,9 +1514,9 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Moves the currently selected page(s) in the listbox to the position selected
+    /// Moves the currently selected page(s) in the listbox to the position selected.
     /// </summary>
-    /// <param name="toIndex">Index to move items to</param>
+    /// <param name="toIndex">Index to move items to.</param>
     private void MoveSelectedItems(int toIndex)
     {
         bool toTop = (toIndex == 0);
@@ -1478,7 +1539,11 @@ public partial class ListMaker : UserControl, IList<Article>
             if (toTop)
                 toIndex++;
         }
+
         lbArticles.EndUpdate();
+
+        _articleList.ReplaceWith(
+            lbArticles.Items.Cast<Article>());
     }
 
     /// <summary>
@@ -1629,6 +1694,38 @@ public partial class ListMaker : UserControl, IList<Article>
         }
 
         e.DrawFocusRectangle();
+    }
+
+    /// <summary>
+    /// Adds an article to the list without updating list status or raising
+    /// article-count notifications.
+    /// </summary>
+    /// <remarks>
+    /// This method is intended for callers that batch multiple list changes
+    /// and call <see cref="UpdateNumberOfArticles()"/> when the batch completes.
+    /// </remarks>
+    internal void AddWithoutUpdate(Article article)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+
+        _articleList.Add(article);
+        lbArticles.Items.Add(article);
+    }
+
+    /// <summary>
+    /// Removes an article from the list without updating list status or raising
+    /// article-count notifications.
+    /// </summary>
+    /// <remarks>
+    /// This method is intended for callers that batch multiple list changes
+    /// and call <see cref="UpdateNumberOfArticles()"/> when the batch completes.
+    /// </remarks>
+    internal void RemoveWithoutUpdate(Article article)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+
+        _articleList.Remove(article);
+        lbArticles.Items.Remove(article);
     }
 
     /// <summary>
