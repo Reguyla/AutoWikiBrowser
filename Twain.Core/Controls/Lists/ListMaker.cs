@@ -703,7 +703,7 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Extracts wiki page title from wiki page URL, including diff and revision history URLs
+    /// Extracts wiki page title from wiki page URL, including diff and revision history URLs.
     /// </summary>
     /// <param name="s">The wiki page URL.</param>
     /// <returns>The normalized wiki page title.</returns>
@@ -712,43 +712,15 @@ public partial class ListMaker : UserControl, IList<Article>
         return NormalizeTitleCore(s);
     }
 
-    private const string DiffEditURL = @"/w(?:(?:iki)?/index\.php5?\?|/\?)title=(.*?)(?:&(?:action|diff|oldid|pe|offset|curid|redirect|type)=.*|$)";
     /// <summary>
-    /// Extracts wiki page title from wiki page URL, including diff and revision history URLs
-    /// Use this to execute the logic without creating a ListMaker object
+    /// Extracts wiki page title from wiki page URL, including diff and revision history URLs.
+    /// Use this to execute the logic without creating a ListMaker object.
     /// </summary>
     /// <param name="s">The wiki page URL.</param>
     /// <returns>The normalized wiki page title.</returns>
     public static string NormalizeTitleCore(string s)
-
     {
-        // https://en.wikipedia.org/w/index.php?title=...&action=history
-        // https://en.wikipedia.org/w/index.php?title=...&diff=
-        string originals = s;
-        string escaped = Regex.Escape(Variables.URL);
-
-        Regex HistoryDiff = new Regex(Regex.Replace(escaped, @"https?://", @"(?:https?://|//)?") + DiffEditURL);
-        s = HistoryDiff.Replace(s, m => m.Groups[1].Value.Replace('+', '_'));
-
-        // Assumsuption flaw: that all wikis use /wiki/ as the default path
-        string url = Variables.URL + "/wiki/";
-        if (Variables.URL.Contains("https:"))
-            s = s.Replace("http://", "https://"); // support HTTP and HTTPS links
-
-        s = s.Replace(url, "").Trim();
-
-        // clean section links
-        if (s.IndexOf("#", StringComparison.Ordinal) > 0)
-            s = s.Substring(0, s.IndexOf("#", StringComparison.Ordinal));
-
-        if (!originals.Equals(s))
-            s = Tools.WikiDecode(s);
-
-        //Remove Left-to-right marks from title
-        //https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_21#Doesn.27t_skip_pages_with_left-to-right_marks
-        s = s.Replace("‎", "").Trim();
-
-        return s;
+        return ListGenerationProcessor.NormalizeTitle(s);
     }
 
     private delegate void AddToListDel(string s);
@@ -895,12 +867,10 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void MakeList()
     {
-        // Pipe character is a separator for standard searches e.g. foo|bar to search for foo or bar by doing two searches
-        // However in a source search like insource:/\|last=Smitherson/ the pipe isn't a search separator, so don't split on | for insource
-        if (UserInputTextBox.Text.Contains("|") && !(UserInputTextBox.Text.Contains("insource:/")))
-            MakeList((IListProvider)cmboSourceSelect.SelectedItem, UserInputTextBox.Text.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
-        else
-            MakeList((IListProvider)cmboSourceSelect.SelectedItem, new[] { UserInputTextBox.Text });
+        MakeList(
+            (IListProvider)cmboSourceSelect.SelectedItem,
+            ListGenerationProcessor.ParseSourceValues(
+                UserInputTextBox.Text));
     }
 
     /// <summary>
@@ -915,15 +885,10 @@ public partial class ListMaker : UserControl, IList<Article>
 
         _providerToRun = provider;
 
-        if (_providerToRun.StripUrl)
-        {
-            for (int i = 0; i < sourceValues.Length; i++)
-            {
-                sourceValues[i] = NormalizeTitle(sourceValues[i]);
-            }
-        }
-
-        _source = sourceValues;
+        _source =
+            ListGenerationProcessor.PrepareSourceValues(
+                _providerToRun,
+                sourceValues);
 
         if (_providerToRun.RunOnSeparateThread)
         {
@@ -955,6 +920,13 @@ public partial class ListMaker : UserControl, IList<Article>
     {
         StartProgressBar();
 
+        ListGenerationPostProcessing postProcessing =
+            new()
+            {
+                FilterNonMainArticles = FilterNonMainAuto,
+                RemoveDuplicates = FilterDuplicates
+            };
+
         List<Article> articles = null;
 
         try
@@ -962,43 +934,23 @@ public partial class ListMaker : UserControl, IList<Article>
             if (_stopRequested)
                 return;
 
-            articles = _providerToRun.MakeList(
-                _providerToRun.UserInputTextBoxEnabled
-                    ? _source
-                    : Array.Empty<string>());
+            ListGenerationResult result =
+                ListGenerationProcessor.Generate(
+                    _providerToRun,
+                    _source);
+
+            if (!result.Succeeded)
+            {
+                ShowGenerationFailure(result);
+                return;
+            }
+
+            articles = result.Articles;
 
             if (_stopRequested)
                 return;
 
             Add(articles);
-        }
-        catch (FeatureDisabledException fde)
-        {
-            DisabledListProvider(fde);
-        }
-        catch (LoggedOffException)
-        {
-            UserLoggedOff();
-        }
-        catch (ApiErrorException aee)
-        {
-            if (aee.ErrorCode == "eiinvalidtitle")
-            {
-                MessageBox.Show("An invalid title of \"" + aee.GetErrorVariable() + "\" was passed to the API.",
-                                "Invalid Title");
-            }
-        }
-        catch (ArgumentException ae)
-        {
-            MessageBox.Show(ae.Message, "Invalid Parameter passed to List Maker");
-        }
-        catch (InterwikiException iwe)
-        {
-            MessageBox.Show(iwe.Message, "Interwiki title passed to List Maker");
-        }
-        catch (InvalidTitleException ite)
-        {
-            MessageBox.Show(ite.Message, "Invalid title passed to List Maker");
         }
         catch (Exception ex)
         {
@@ -1014,21 +966,82 @@ public partial class ListMaker : UserControl, IList<Article>
             }
             else
             {
-                if (FilterNonMainAuto)
-                    FilterNonMainArticles();
-
-                if (FilterDuplicates)
-                    RemoveListDuplicates();
+                ApplyGenerationPostProcessing(postProcessing);
 
                 StopProgressBar(articles?.Count ?? 0);
             }
         }
     }
 
-    private void DisabledListProvider(FeatureDisabledException fde)
+    /// <summary>
+    /// Displays the appropriate message for a known list-generation failure.
+    /// </summary>
+    /// <param name="result">
+    /// The failed list-generation result.
+    /// </param>
+    private void ShowGenerationFailure(
+        ListGenerationResult result)
     {
-        MessageBox.Show(
-            "Unable to generate lists using " + _providerToRun.DisplayText, fde.ApiErrorMessage);
+        switch (result.Failure)
+        {
+            case ListGenerationFailure.FeatureDisabled:
+                MessageBox.Show(
+                    "Unable to generate lists using " + _providerToRun.DisplayText,
+                    result.ErrorMessage);
+                break;
+
+            case ListGenerationFailure.LoggedOff:
+                UserLoggedOff();
+                break;
+
+            case ListGenerationFailure.InvalidTitle:
+                MessageBox.Show(
+                    "An invalid title of \"" + result.ErrorVariable + "\" was passed to the API.",
+                    "Invalid Title");
+                break;
+
+            case ListGenerationFailure.ApiError:
+                break;
+
+            case ListGenerationFailure.InvalidParameter:
+                MessageBox.Show(
+                    result.ErrorMessage,
+                    "Invalid Parameter passed to List Maker");
+                break;
+
+            case ListGenerationFailure.InterwikiTitle:
+                MessageBox.Show(
+                    result.ErrorMessage,
+                    "Interwiki title passed to List Maker");
+                break;
+
+            case ListGenerationFailure.InvalidArticleTitle:
+                MessageBox.Show(
+                    result.ErrorMessage,
+                    "Invalid title passed to List Maker");
+                break;
+
+            case ListGenerationFailure.None:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Applies the configured post-processing operations to the generated list.
+    /// </summary>
+    /// <param name="postProcessing">
+    /// The post-processing operations to apply.
+    /// </param>
+    private void ApplyGenerationPostProcessing(
+        ListGenerationPostProcessing postProcessing)
+    {
+        ArgumentNullException.ThrowIfNull(postProcessing);
+
+        if (postProcessing.FilterNonMainArticles)
+            FilterNonMainArticles();
+
+        if (postProcessing.RemoveDuplicates)
+            RemoveListDuplicates();
     }
 
     private void UserLoggedOff()
