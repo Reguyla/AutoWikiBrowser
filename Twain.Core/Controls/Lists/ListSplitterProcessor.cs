@@ -134,4 +134,84 @@ public static class ListSplitterProcessor
 
         return articles.GetRange(startIndex, count);
     }
+
+    /// <summary>
+    /// Creates a numbered output path for a split file.
+    /// </summary>
+    /// <param name="path">
+    /// The original output path selected by the user.
+    /// </param>
+    /// <param name="index">
+    /// The one-based output file index.
+    /// </param>
+    /// <returns>
+    /// The numbered output path.
+    /// </returns>
+    public static string CreateNumberedPath(
+        string path,
+        int index)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (index <= 0)
+            throw new ArgumentOutOfRangeException(nameof(index));
+
+        string extension = Path.GetExtension(path);
+        string directory = Path.GetDirectoryName(path) ?? string.Empty;
+        string fileName = Path.GetFileNameWithoutExtension(path);
+
+        string numberedFileName =
+            $"{fileName} {index}{extension}";
+
+        return string.IsNullOrEmpty(directory)
+            ? numberedFileName
+            : Path.Combine(directory, numberedFileName);
+    }
+
+    /// <summary>
+    /// Saves the supplied articles to numbered text files.
+    /// </summary>
+    /// <param name="articles">
+    /// The articles to save.
+    /// </param>
+    /// <param name="path">
+    /// The base output path.
+    /// </param>
+    /// <param name="articlesPerFile">
+    /// The maximum number of articles written to each file.
+    /// </param>
+    public static void SaveTextFiles(
+        List<Article> articles,
+        string path,
+        int articlesPerFile)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (articlesPerFile <= 0)
+            throw new ArgumentOutOfRangeException(nameof(articlesPerFile));
+
+        int groupCount =
+            CalculateGroupCount(
+                articles.Count,
+                articlesPerFile);
+
+        int baseIndex = 0;
+
+        for (int i = 1; i <= groupCount; i++)
+        {
+            string groupText =
+                CreateTextGroup(
+                    articles,
+                    baseIndex,
+                    articlesPerFile);
+
+            Tools.WriteTextFileAbsolutePath(
+                groupText,
+                CreateNumberedPath(path, i),
+                false);
+
+            baseIndex += articlesPerFile;
+        }
+    }
 }

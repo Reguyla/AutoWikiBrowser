@@ -104,7 +104,8 @@ public partial class ListSplitter : Form
 
             if (xml)
             {
-                string pathPrefix = path.Replace(".xml", " {0}.xml");
+                string pathPrefix =
+                    path.Replace(".xml", " {0}.xml");
 
                 for (int i = 1; i <= noGroups; i++)
                 {
@@ -126,24 +127,10 @@ public partial class ListSplitter : Form
             }
             else
             {
-                string pathPrefix =
-                    path.Replace(".txt", " {0}.txt");
-
-                for (int i = 1; i <= noGroups; i++)
-                {
-                    string groupText =
-                        ListSplitterProcessor.CreateTextGroup(
-                            articles,
-                            baseIndex,
-                            groupSize);
-
-                    Tools.WriteTextFileAbsolutePath(
-                        groupText,
-                        string.Format(pathPrefix, i),
-                        false);
-
-                    baseIndex += splitValue;
-                }
+                ListSplitterProcessor.SaveTextFiles(
+                    articles,
+                    path,
+                    splitValue);
 
                 MessageBox.Show(
                     "Lists saved to text files");
