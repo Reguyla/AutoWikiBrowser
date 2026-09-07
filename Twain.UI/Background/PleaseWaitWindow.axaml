@@ -1,0 +1,39 @@
+<Window
+    x:Class="Twain.UI.Background.PleaseWaitWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="460"
+    Height="190"
+    CanResize="False"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Please wait">
+
+    <Grid Margin="16"
+          RowDefinitions="Auto,Auto,Auto"
+          RowSpacing="12">
+
+        <TextBlock x:Name="StatusTextBlock"
+                   Grid.Row="0"
+                   TextWrapping="Wrap" />
+
+        <GroupBox x:Name="ProgressGroupBox"
+                  Grid.Row="1"
+                  Header="Progress">
+
+            <ProgressBar x:Name="ProgressBar"
+                         Minimum="0"
+                         Maximum="1"
+                         Value="0"
+                         Height="18"
+                         Margin="8" />
+        </GroupBox>
+
+        <Button Grid.Row="2"
+                Content="_Cancel"
+                Width="90"
+                HorizontalAlignment="Right"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+    </Grid>
+</Window>
