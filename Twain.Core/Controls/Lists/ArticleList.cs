@@ -218,4 +218,49 @@ public sealed class ArticleList : IEnumerable<Article>
     {
         return GetEnumerator();
     }
+
+    /// <summary>
+    /// Removes articles that are not in the main namespace.
+    /// </summary>
+    /// <returns>
+    /// The articles removed from the list.
+    /// </returns>
+    public List<Article> RemoveNonMainArticles()
+    {
+        List<Article> removed =
+            _articles.FindAll(
+                article =>
+                    article.NameSpaceKey != Namespace.Article);
+
+        if (removed.Count > 0)
+        {
+            _articles.RemoveAll(
+                article =>
+                    article.NameSpaceKey != Namespace.Article);
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Removes duplicate articles while preserving the first occurrence
+    /// of each article.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when one or more duplicate articles were removed;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public bool RemoveDuplicates()
+    {
+        List<Article> distinct =
+            _articles.Distinct().ToList();
+
+        if (distinct.Count == _articles.Count)
+            return false;
+
+        _articles.Clear();
+        _articles.AddRange(distinct);
+
+        return true;
+    }
 }

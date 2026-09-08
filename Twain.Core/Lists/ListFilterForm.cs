@@ -95,14 +95,10 @@ namespace Twain.Core.Lists
         /// <summary>
         /// Removes duplicate articles from the listbox
         /// </summary>
-        public void RemoveDuplicates()
+        private void RemoveDuplicates()
         {
-            RemoveDuplicatesNew();
-        }
-
-        private void RemoveDuplicatesNew()
-        {
-            ClearAndAdd(_destListBox.Distinct().ToArray());
+            ClearAndAdd(
+                _destListBox.Distinct().ToArray());
         }
 
         private void ClearAndAdd(Article[] newlist)

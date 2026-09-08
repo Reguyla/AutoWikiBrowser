@@ -1086,11 +1086,14 @@ public partial class ListMaker : UserControl, IList<Article>
             return;
         }
 
-        _specialFilter.Clear();
-        _specialFilter.RemoveDuplicates();
-
-        _articleList.ReplaceWith(
-            lbArticles.Items.Cast<Article>());
+        if (_articleList.RemoveDuplicates())
+        {
+            lbArticles.BeginUpdate();
+            lbArticles.Items.Clear();
+            lbArticles.Items.AddRange(
+                _articleList.ToList().ToArray());
+            lbArticles.EndUpdate();
+        }
 
         UpdateNumberOfArticles(false);
     }
@@ -1118,13 +1121,10 @@ public partial class ListMaker : UserControl, IList<Article>
 
         List<Article> articles = _articleList.ToList();
         List<Article> toberemoved =
-            articles.FindAll(a => a.NameSpaceKey != Namespace.Article);
+            _articleList.RemoveNonMainArticles();
 
-        if (toberemoved.Any())
+        if (toberemoved.Count > 0)
         {
-            _articleList.RemoveAll(
-                a => a.NameSpaceKey != Namespace.Article);
-
             // performance: AddRange performs at about 100 articles per millisecond, Remove takes about 1 millisecond per article
             // so if removing < 1% of articles it's faster to Remove each one, otherwise faster to clear and AddRange the remainder back
             lbArticles.BeginUpdate();
