@@ -19,7 +19,7 @@
     </Application.DataTemplates>
 
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme DensityStyle="Compact" />
     </Application.Styles>
 
 </Application>
