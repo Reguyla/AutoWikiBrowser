@@ -115,12 +115,13 @@ namespace Twain.Core.Lists
 
         private void FilterNamespace()
         {
-            List<int> selectedNS = pageNamespaces.GetSelectedNamespaces();
+            List<int> selectedNamespaces =
+                pageNamespaces.GetSelectedNamespaces();
 
-            if (!selectedNS.Any())
-                return;
-
-            _list.RemoveAll(a => !selectedNS.Contains(a.NameSpaceKey));
+            _list =
+                ArticleListFilterProcessor.FilterByNamespace(
+                    _list,
+                    selectedNamespaces);
         }
 
         private void FilterMatches(bool does, bool doesnot)
@@ -130,18 +131,14 @@ namespace Twain.Core.Lists
 
             try
             {
-                Regex match = null, notMatch = null;
-
-                if (does)
-                    match = new Regex(!chkIsRegex.Checked ? Regex.Escape(txtContains.Text) : txtContains.Text,
-                                      RegexOptions.Compiled);
-
-                if (doesnot)
-                    notMatch = new Regex(
-                        !chkIsRegex.Checked ? Regex.Escape(txtDoesNotContain.Text) : txtDoesNotContain.Text,
-                        RegexOptions.Compiled);
-
-                _list.RemoveAll(a => (does && match.IsMatch(a.Name) || doesnot && !notMatch.IsMatch(a.Name)));
+                _list =
+                    ArticleListFilterProcessor.FilterByTitle(
+                        _list,
+                        txtContains.Text,
+                        txtDoesNotContain.Text,
+                        does,
+                        doesnot,
+                        chkIsRegex.Checked);
             }
             catch (Exception ex)
             {
@@ -151,29 +148,11 @@ namespace Twain.Core.Lists
 
         private void FilterList()
         {
-            FilterListNew();
-        }
-
-        private void FilterListNew()
-        {
-            List<Article> remove = new List<Article>(lbRemove);
-
-            HashSet<Article> list = new HashSet<Article>(_list);
-
-            if (cbOpType.SelectedIndex == 0)
-            {
-                /* The symmetric difference of two sets is the set of elements which are in either
-                 * of the sets and not in their intersection. For example, the symmetric difference
-                 * of the sets {1,2,3} and {3,4} is {1,2,4}.
-                 */
-                list.ExceptWith(remove);
-            }
-            else
-            {
-                // find intersection
-                list.IntersectWith(remove);
-            }
-            _list = new List<Article>(list);
+            _list =
+                ArticleListFilterProcessor.FilterByArticleSet(
+                    _list,
+                    lbRemove.Cast<Article>(),
+                    cbOpType.SelectedIndex != 0);
         }
 
         /// <summary>

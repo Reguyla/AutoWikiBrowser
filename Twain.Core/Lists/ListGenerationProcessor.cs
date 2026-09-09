@@ -21,18 +21,16 @@ public static class ListGenerationProcessor
     /// The result of the list-generation operation.
     /// </returns>
     public static ListGenerationResult Generate(
-        IListProvider provider,
-        string[] sourceValues)
+        ListGenerationRequest request)
     {
-        ArgumentNullException.ThrowIfNull(provider);
-        ArgumentNullException.ThrowIfNull(sourceValues);
+        ArgumentNullException.ThrowIfNull(request);
 
         try
         {
             List<Article> articles =
-                provider.MakeList(
-                    provider.UserInputTextBoxEnabled
-                        ? sourceValues
+                request.Provider.MakeList(
+                    request.Provider.UserInputTextBoxEnabled
+                        ? request.SourceValues
                         : Array.Empty<string>());
 
             return new ListGenerationResult(articles);

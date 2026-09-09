@@ -263,4 +263,22 @@ public sealed class ArticleList : IEnumerable<Article>
 
         return true;
     }
+
+    /// <summary>
+    /// Sorts the articles by title in ascending ordinal order.
+    /// </summary>
+    public void SortAscending()
+    {
+        _articles.Sort();
+    }
+
+    /// <summary>
+    /// Sorts the articles by title in descending ordinal order.
+    /// </summary>
+    public void SortDescending()
+    {
+        _articles.Sort(
+            static (left, right) =>
+                right.CompareTo(left));
+    }
 }

@@ -883,14 +883,14 @@ public partial class ListMaker : UserControl, IList<Article>
         _stopRequested = false;
         btnStop.Visible = true;
 
-        _providerToRun = provider;
+        _generationRequest =
+            new ListGenerationRequest(
+                provider,
+                ListGenerationProcessor.PrepareSourceValues(
+                    provider,
+                    sourceValues));
 
-        _source =
-            ListGenerationProcessor.PrepareSourceValues(
-                _providerToRun,
-                sourceValues);
-
-        if (_providerToRun.RunOnSeparateThread)
+        if (_generationRequest.Provider.RunOnSeparateThread)
         {
             _listerThread = new Thread(MakeTheListThreaded)
             {
@@ -906,14 +906,16 @@ public partial class ListMaker : UserControl, IList<Article>
         }
     }
 
-    private string[] _source;
-    private IListProvider _providerToRun;
+    private ListGenerationRequest _generationRequest;
 
     private void MakeTheListThreaded()
     {
-        Thread.CurrentThread.Name = "ListMaker (" + _providerToRun.GetType().Name + ": "
-            + UserInputTextBox.Text + ")";
-        MakeTheList();
+        Thread.CurrentThread.Name =
+            "ListMaker (" +
+            _generationRequest.Provider.GetType().Name +
+            ": " +
+            UserInputTextBox.Text +
+            ")";
     }
 
     private void MakeTheList()
@@ -936,8 +938,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
             ListGenerationResult result =
                 ListGenerationProcessor.Generate(
-                    _providerToRun,
-                    _source);
+                    _generationRequest);
 
             if (!result.Succeeded)
             {
@@ -986,7 +987,8 @@ public partial class ListMaker : UserControl, IList<Article>
         {
             case ListGenerationFailure.FeatureDisabled:
                 MessageBox.Show(
-                    "Unable to generate lists using " + _providerToRun.DisplayText,
+                        "Unable to generate lists using " +
+                        _generationRequest.Provider.DisplayText,
                     result.ErrorMessage);
                 break;
 
@@ -1047,7 +1049,9 @@ public partial class ListMaker : UserControl, IList<Article>
     private void UserLoggedOff()
     {
         MessageBox.Show(
-            "User must be logged in to use \"" + _providerToRun.DisplayText + "\". Please login and try again.",
+            "User must be logged in to use \"" +
+            _generationRequest.Provider.DisplayText +
+            "\". Please login and try again.",
             "User logged out");
     }
 
@@ -1153,10 +1157,13 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void AlphaSortList()
     {
-        lbArticles.Sort();
+        _articleList.SortAscending();
 
-        _articleList.ReplaceWith(
-            lbArticles.Items.Cast<Article>());
+        lbArticles.BeginUpdate();
+        lbArticles.Items.Clear();
+        lbArticles.Items.AddRange(
+            _articleList.ToList().ToArray());
+        lbArticles.EndUpdate();
     }
 
     /// <summary>
@@ -1164,10 +1171,13 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public void ReverseAlphaSortList()
     {
-        lbArticles.ReverseSort();
+        _articleList.SortDescending();
 
-        _articleList.ReplaceWith(
-            lbArticles.Items.Cast<Article>());
+        lbArticles.BeginUpdate();
+        lbArticles.Items.Clear();
+        lbArticles.Items.AddRange(
+            _articleList.ToList().ToArray());
+        lbArticles.EndUpdate();
     }
 
     /// <summary>
