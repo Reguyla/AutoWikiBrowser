@@ -1,0 +1,184 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Lists.ListFilterWindow"
+    Title="Filter List"
+    Width="720"
+    Height="620"
+    MinWidth="620"
+    MinHeight="520"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid
+        Margin="16"
+        RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
+        RowSpacing="12">
+
+<GroupBox Header="Namespaces">
+    <Grid
+        ColumnDefinitions="*,*"
+        ColumnSpacing="12">
+
+        <StackPanel Spacing="6">
+            <CheckBox
+                x:Name="ContentNamespacesCheckBox"
+                Content="Content namespaces"
+                Click="ContentNamespacesCheckBox_Click" />
+
+            <ListBox
+                x:Name="ContentNamespaceList"
+                MinHeight="120"
+                SelectionMode="Multiple" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Column="1"
+            Spacing="6">
+
+            <CheckBox
+                x:Name="TalkNamespacesCheckBox"
+                Content="Talk namespaces"
+                Click="TalkNamespacesCheckBox_Click" />
+
+            <ListBox
+                x:Name="TalkNamespaceList"
+                MinHeight="120"
+                SelectionMode="Multiple" />
+        </StackPanel>
+    </Grid>
+</GroupBox>
+
+        <GroupBox
+            Grid.Row="1"
+            Header="Title filters">
+
+            <Grid
+                ColumnDefinitions="Auto,*"
+                RowDefinitions="Auto,Auto,Auto"
+                ColumnSpacing="8"
+                RowSpacing="8">
+
+                <CheckBox
+                    x:Name="ContainsCheckBox"
+                    Content="Contains"
+                    Click="ContainsCheckBox_Click" />
+
+                <TextBox
+                    x:Name="ContainsTextBox"
+                    Grid.Column="1"
+                    IsEnabled="False" />
+
+                <CheckBox
+                    x:Name="DoesNotContainCheckBox"
+                    Grid.Row="1"
+                    Content="Does not contain"
+                    Click="DoesNotContainCheckBox_Click" />
+
+                <TextBox
+                    x:Name="DoesNotContainTextBox"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    IsEnabled="False" />
+
+                <CheckBox
+                    x:Name="RegexCheckBox"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2"
+                    Content="Use regular expressions"
+                    IsEnabled="False" />
+            </Grid>
+        </GroupBox>
+
+ <GroupBox
+    Grid.Row="2"
+    Header="Compare with another list">
+
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        RowSpacing="8">
+
+        <Grid
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="8">
+
+            <ComboBox
+                x:Name="OperationComboBox"
+                Width="200"
+                SelectedIndex="0">
+
+                <ComboBoxItem Content="Remove matching articles" />
+                <ComboBoxItem Content="Keep matching articles" />
+            </ComboBox>
+
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Text="Articles in the comparison list" />
+        </Grid>
+
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,Auto,Auto"
+            ColumnSpacing="8">
+
+            <TextBox
+                x:Name="ComparisonTitleTextBox"
+                Watermark="Article title" />
+
+            <Button
+                Grid.Column="1"
+                Content="Add"
+                Click="AddComparisonTitleButton_Click" />
+
+            <Button
+                Grid.Column="2"
+                Content="Remove selected"
+                Click="RemoveComparisonTitleButton_Click" />
+        </Grid>
+
+        <ListBox
+            x:Name="ComparisonList"
+            Grid.Row="2"
+            MinHeight="120"
+            SelectionMode="Multiple" />
+    </Grid>
+</GroupBox>
+
+        <StackPanel
+            Grid.Row="3"
+            Orientation="Horizontal"
+            Spacing="16">
+
+            <CheckBox
+                x:Name="RemoveDuplicatesCheckBox"
+                Content="Remove duplicates" />
+
+            <CheckBox
+                x:Name="SortCheckBox"
+                Content="Sort A–Z" />
+        </StackPanel>
+
+        <TextBlock
+            Grid.Row="4"
+            VerticalAlignment="Top"
+            Text="List management controls will be connected during ListMaker integration."
+            TextWrapping="Wrap" />
+
+        <StackPanel
+            Grid.Row="5"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="8">
+
+            <Button
+                Content="Apply"
+                IsDefault="True"
+                Click="ApplyButton_Click" />
+
+            <Button
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
