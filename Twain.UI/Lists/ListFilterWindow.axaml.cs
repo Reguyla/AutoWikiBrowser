@@ -1,6 +1,9 @@
+using Avalonia.Platform.Storage;
 using System.Collections.Generic;
 using System.Linq;
+using Twain.Core;
 using Twain.Core.Lists;
+using Twain.Core.Lists.Providers;
 
 namespace Twain.UI.Lists;
 
@@ -13,6 +16,8 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
 
     private List<string> _comparisonArticleTitles = new();
 
+    private string _project = Variables.URL;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ListFilterWindow"/> class
     /// with a new filter configuration.
@@ -21,6 +26,14 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     {
         InitializeComponent();
 
+        PopulateNamespaces();
+    }
+
+    /// <summary>
+    /// Populates the content and talk namespace lists for the active wiki.
+    /// </summary>
+    private void PopulateNamespaces()
+    {
         _namespaceItems =
             NamespaceFilterHelper.GetAvailableNamespaces();
 
@@ -184,20 +197,8 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
         ComparisonList.ItemsSource =
             _comparisonArticleTitles;
 
-        ContentNamespaceList.SelectedItems.Clear();
-        TalkNamespaceList.SelectedItems.Clear();
-
-        foreach (NamespaceFilterItem item in _contentNamespaceItems)
-        {
-            if (Configuration.NamespaceIds.Contains(item.Id))
-                ContentNamespaceList.SelectedItems.Add(item);
-        }
-
-        foreach (NamespaceFilterItem item in _talkNamespaceItems)
-        {
-            if (Configuration.NamespaceIds.Contains(item.Id))
-                TalkNamespaceList.SelectedItems.Add(item);
-        }
+        SelectNamespaces(
+            Configuration.NamespaceIds);
 
         UpdateTitleFilterControls();
     }
@@ -231,19 +232,10 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
         Configuration.IntersectComparisonList =
             OperationComboBox.SelectedIndex != 0;
 
+
         Configuration.NamespaceIds.Clear();
-
-        foreach (NamespaceFilterItem item in
-            ContentNamespaceList.SelectedItems.Cast<NamespaceFilterItem>())
-        {
-            Configuration.NamespaceIds.Add(item.Id);
-        }
-
-        foreach (NamespaceFilterItem item in
-            TalkNamespaceList.SelectedItems.Cast<NamespaceFilterItem>())
-        {
-            Configuration.NamespaceIds.Add(item.Id);
-        }
+        Configuration.NamespaceIds.AddRange(
+            GetSelectedNamespaceIds());
 
         Configuration.NamespaceIds.Sort();
 
@@ -253,7 +245,7 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Adds the entered article title to the comparison list.
+    /// Removes all article titles from the comparison list.
     /// </summary>
     /// <param name="sender">
     /// The source of the event.
@@ -261,29 +253,20 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     /// <param name="e">
     /// The event data.
     /// </param>
-    private void AddComparisonTitleButton_Click(
+    private void ClearComparisonListButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        string title =
-            ComparisonTitleTextBox.Text?.Trim()
-            ?? string.Empty;
-
-        if (title.Length == 0)
-            return;
-
-        _comparisonArticleTitles.Add(title);
+        _comparisonArticleTitles.Clear();
 
         ComparisonList.ItemsSource = null;
         ComparisonList.ItemsSource =
             _comparisonArticleTitles;
-
-        ComparisonTitleTextBox.Clear();
-        ComparisonTitleTextBox.Focus();
     }
 
     /// <summary>
-    /// Removes the selected article titles from the comparison list.
+    /// Opens a file picker and adds article titles from the selected text files
+    /// to the comparison list.
     /// </summary>
     /// <param name="sender">
     /// The source of the event.
@@ -291,20 +274,53 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     /// <param name="e">
     /// The event data.
     /// </param>
-    private void RemoveComparisonTitleButton_Click(
+    private async void GetComparisonListButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        List<string> selectedTitles =
-            ComparisonList.SelectedItems
-                .Cast<string>()
-                .ToList();
+        IReadOnlyList<IStorageFile> files =
+            await StorageProvider.OpenFilePickerAsync(
+                new FilePickerOpenOptions
+                {
+                    Title = "Open article list",
+                    AllowMultiple = true,
+                    FileTypeFilter =
+                    [
+                        new FilePickerFileType("Text files")
+                    {
+                        Patterns = ["*.txt"]
+                    },
+                    FilePickerFileTypes.All
+                    ]
+                });
 
-        if (selectedTitles.Count == 0)
+        if (files.Count == 0)
             return;
 
-        foreach (string title in selectedTitles)
-            _comparisonArticleTitles.Remove(title);
+        List<string> fileNames = new();
+
+        foreach (IStorageFile file in files)
+        {
+            string? fileName =
+                file.TryGetLocalPath();
+
+            if (!string.IsNullOrEmpty(fileName))
+                fileNames.Add(fileName);
+        }
+
+        if (fileNames.Count == 0)
+            return;
+
+        TextFileListProviderUFT8 provider = new();
+
+        List<Article> articles =
+            provider.MakeList(
+                fileNames,
+                validateTitles:
+                    ValidateComparisonTitlesCheckBox.IsChecked == true);
+
+        foreach (Article article in articles)
+            _comparisonArticleTitles.Add(article.Name);
 
         ComparisonList.ItemsSource = null;
         ComparisonList.ItemsSource =
@@ -335,5 +351,82 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
 
         foreach (NamespaceFilterItem item in _talkNamespaceItems)
             TalkNamespaceList.SelectedItems.Add(item);
+    }
+
+    /// <summary>
+    /// Refreshes the available namespaces when the active wiki has changed.
+    /// </summary>
+    /// <param name="sender">
+    /// The source of the event.
+    /// </param>
+    /// <param name="e">
+    /// The event data.
+    /// </param>
+    private void ListFilterWindow_Opened(
+        object? sender,
+        EventArgs e)
+    {
+        if (_project == Variables.URL)
+            return;
+
+        List<int> selectedNamespaceIds =
+            GetSelectedNamespaceIds();
+
+        _project = Variables.URL;
+
+        PopulateNamespaces();
+        SelectNamespaces(selectedNamespaceIds);
+    }
+
+    /// <summary>
+    /// Gets the currently selected namespace identifiers.
+    /// </summary>
+    /// <returns>
+    /// The selected namespace identifiers in ascending order.
+    /// </returns>
+    private List<int> GetSelectedNamespaceIds()
+    {
+        List<int> namespaceIds = new();
+
+        foreach (NamespaceFilterItem item in
+            ContentNamespaceList.SelectedItems.Cast<NamespaceFilterItem>())
+        {
+            namespaceIds.Add(item.Id);
+        }
+
+        foreach (NamespaceFilterItem item in
+            TalkNamespaceList.SelectedItems.Cast<NamespaceFilterItem>())
+        {
+            namespaceIds.Add(item.Id);
+        }
+
+        namespaceIds.Sort();
+
+        return namespaceIds;
+    }
+
+    /// <summary>
+    /// Selects the namespaces having the specified identifiers.
+    /// </summary>
+    /// <param name="namespaceIds">
+    /// The namespace identifiers to select.
+    /// </param>
+    private void SelectNamespaces(
+        ICollection<int> namespaceIds)
+    {
+        ContentNamespaceList.SelectedItems.Clear();
+        TalkNamespaceList.SelectedItems.Clear();
+
+        foreach (NamespaceFilterItem item in _contentNamespaceItems)
+        {
+            if (namespaceIds.Contains(item.Id))
+                ContentNamespaceList.SelectedItems.Add(item);
+        }
+
+        foreach (NamespaceFilterItem item in _talkNamespaceItems)
+        {
+            if (namespaceIds.Contains(item.Id))
+                TalkNamespaceList.SelectedItems.Add(item);
+        }
     }
 }

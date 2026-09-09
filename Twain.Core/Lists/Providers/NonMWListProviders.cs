@@ -349,6 +349,59 @@ public class TextFileListProviderUFT8 : IListProvider
     }
 
     /// <summary>
+    /// Creates an article list from the specified text files.
+    /// </summary>
+    /// <param name="fileNames">
+    /// The text files to load.
+    /// </param>
+    /// <param name="validateTitles">
+    /// <see langword="true"/> to validate article titles and extract wiki links;
+    /// otherwise, each non-empty line is treated as an article title.
+    /// </param>
+    /// <returns>
+    /// The articles loaded from the specified files.
+    /// </returns>
+    public List<Article> MakeList(
+        IEnumerable<string> fileNames,
+        bool validateTitles)
+    {
+        ArgumentNullException.ThrowIfNull(fileNames);
+
+        List<Article> list = new();
+
+        try
+        {
+            foreach (string fileName in fileNames)
+            {
+                string pageText =
+                    File.ReadAllText(
+                        fileName,
+                        TargetEncoding);
+
+                if (validateTitles)
+                {
+                    AddValidatedTitles(
+                        list,
+                        pageText);
+                }
+                else
+                {
+                    AddUnvalidatedLines(
+                        list,
+                        pageText);
+                }
+            }
+
+            return list;
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+            return list;
+        }
+    }
+
+    /// <summary>
     /// Opens the file-selection dialog and creates an article list from
     /// the selected files.
     /// </summary>
@@ -357,11 +410,10 @@ public class TextFileListProviderUFT8 : IListProvider
         MakeList(Array.Empty<string>());
 
     /// <inheritdoc />
+    /// <inheritdoc />
     public List<Article> MakeList(
         params string[] searchCriteria)
     {
-        List<Article> list = new();
-
         try
         {
             if (searchCriteria.Length == 0 &&
@@ -370,37 +422,17 @@ public class TextFileListProviderUFT8 : IListProvider
                 searchCriteria = OpenListDialog.FileNames;
             }
 
-            foreach (string fileName in searchCriteria)
-            {
-                string pageText =
-                    File.ReadAllText(
-                        fileName,
-                        TargetEncoding);
+            bool validateTitles =
+                OpenListDialog.FilterIndex != 2;
 
-                switch (OpenListDialog.FilterIndex)
-                {
-                    case 2:
-                        AddUnvalidatedLines(
-                            list,
-                            pageText);
-                        break;
-
-                    default:
-                        AddValidatedTitles(
-                            list,
-                            pageText);
-                        break;
-                }
-            }
-
-            return list;
+            return MakeList(
+                searchCriteria,
+                validateTitles);
         }
         catch (Exception ex)
         {
-            // Preserve the existing behavior of reporting the error and
-            // returning any articles that were loaded successfully.
             ErrorHandler.HandleException(ex);
-            return list;
+            return new List<Article>();
         }
     }
 
