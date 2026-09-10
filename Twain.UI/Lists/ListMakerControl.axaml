@@ -1,0 +1,46 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Lists.ListMakerControl">
+
+    <Grid
+        RowDefinitions="*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+    <ListBox
+        x:Name="ArticleListBox"
+        SelectionMode="Multiple"
+        SelectionChanged="ArticleListBox_SelectionChanged"
+        ScrollViewer.VerticalScrollBarVisibility="Auto"
+        ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,Auto"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                x:Name="ArticleCountText"
+                VerticalAlignment="Center"
+                Text="0 pages" />
+
+            <StackPanel
+                Grid.Column="1"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource TwainSpacingMedium}">
+
+            <Button
+                x:Name="RemoveButton"
+                Content="Remove"
+                IsEnabled="False"
+                Click="RemoveButton_Click" />
+
+            <Button
+                x:Name="FilterButton"
+                Content="Filter"
+                IsEnabled="False"
+                Click="FilterButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
