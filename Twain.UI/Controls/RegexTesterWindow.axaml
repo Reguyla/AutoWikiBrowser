@@ -1,0 +1,213 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Class="Twain.UI.Controls.RegexTesterWindow"
+    mc:Ignorable="d"
+    d:DesignWidth="760"
+    d:DesignHeight="560"
+    Width="760"
+    Height="560"
+    MinWidth="600"
+    MinHeight="420"
+    WindowStartupLocation="CenterOwner"
+    Title="Regex Tester">
+
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+        <!-- Find, replace, and options -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="Auto,*,Auto"
+            RowDefinitions="Auto,Auto"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+            RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                VerticalAlignment="Top"
+                Margin="0,5,0,0"
+                Text="Find:" />
+
+            <TextBox
+                x:Name="FindTextBox"
+                Grid.Row="0"
+                Grid.Column="1"
+                MinHeight="72"
+                AcceptsReturn="True"
+                TextWrapping="NoWrap"
+                FontFamily="Consolas"
+                TextChanged="ConditionsChanged"
+                ToolTip.Tip="The regular expression to find" />
+
+            <GroupBox
+                Grid.Row="0"
+                Grid.Column="2"
+                Grid.RowSpan="2"
+                Header="Regex options">
+
+                <Grid
+                    ColumnDefinitions="Auto,Auto"
+                    RowDefinitions="Auto,Auto"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                    <CheckBox
+                        x:Name="MultilineCheckBox"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Content="Multiline"
+                        ToolTip.Tip="Changes ^ and $ so they match the beginning and end of each line." />
+
+                    <CheckBox
+                        x:Name="SinglelineCheckBox"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Content="Singleline"
+                        ToolTip.Tip="Changes . so it matches every character, including newlines." />
+
+                    <CheckBox
+                        x:Name="IgnoreCaseCheckBox"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Content="Ignore case"
+                        ToolTip.Tip="Performs case-insensitive matching." />
+
+                    <CheckBox
+                        x:Name="ExplicitCaptureCheckBox"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Content="Explicit capture"
+                        ToolTip.Tip="Only named or explicitly numbered groups capture substrings." />
+                </Grid>
+            </GroupBox>
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="Replace:" />
+
+            <Grid
+                Grid.Row="1"
+                Grid.Column="1"
+                ColumnDefinitions="*,Auto,Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingSmall}">
+
+                <TextBox
+                    x:Name="ReplaceTextBox"
+                    Grid.Column="0"
+                    FontFamily="Consolas"
+                    TextChanged="ConditionsChanged"
+                    ToolTip.Tip="The replacement expression" />
+
+                <Button
+                    x:Name="FindButton"
+                    Grid.Column="1"
+                    Width="80"
+                    Content="Find"
+                    IsEnabled="False"
+                    Click="FindButton_Click" />
+
+                <Button
+                    x:Name="ReplaceButton"
+                    Grid.Column="2"
+                    Width="80"
+                    Content="Replace"
+                    IsEnabled="False"
+                    Click="ReplaceButton_Click" />
+
+                <Button
+                    x:Name="HelpButton"
+                    Grid.Column="3"
+                    Width="80"
+                    Content="Help"
+                    Click="HelpButton_Click" />
+            </Grid>
+        </Grid>
+
+        <!-- Input and output -->
+        <Grid
+            Grid.Row="1"
+            RowDefinitions="*,Auto,*"
+            RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Top"
+                    Text="Text to&#10;search:" />
+
+                <TextBox
+                    x:Name="InputTextBox"
+                    Grid.Column="1"
+                    AcceptsReturn="True"
+                    TextWrapping="NoWrap"
+                    FontFamily="Consolas"
+                    TextChanged="ConditionsChanged"
+                    ToolTip.Tip="Enter or paste the text to be searched here" />
+            </Grid>
+
+            <GridSplitter
+                Grid.Row="1"
+                Height="6"
+                HorizontalAlignment="Stretch"
+                ResizeDirection="Rows" />
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Top"
+                    Text="Result:" />
+
+                <Grid
+                    Grid.Column="1">
+
+                    <TreeView
+                        x:Name="CapturesTreeView"
+                        IsVisible="True"
+                        ToolTip.Tip="Displays regular-expression matches and captures" />
+
+                    <TextBox
+                        x:Name="ResultTextBox"
+                        IsVisible="False"
+                        IsReadOnly="True"
+                        AcceptsReturn="True"
+                        TextWrapping="NoWrap"
+                        FontFamily="Consolas" />
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Status -->
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <ProgressBar
+                x:Name="ProgressBar"
+                Width="100"
+                Height="16"
+                IsIndeterminate="False" />
+
+            <TextBlock
+                x:Name="StatusText"
+                Grid.Column="1"
+                VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>
