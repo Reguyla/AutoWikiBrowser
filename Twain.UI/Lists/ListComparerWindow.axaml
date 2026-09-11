@@ -76,6 +76,16 @@
                             <ListBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem
+                                        Header="Transfer to ListMaker 1"
+                                        Click="TransferToListMaker1_Click" />
+
+                                    <MenuItem
+                                        Header="Transfer to ListMaker 2"
+                                        Click="TransferToListMaker2_Click" />
+
+                                    <Separator />
+
+                                    <MenuItem
                                         Header="Remove selected"
                                         Click="RemoveOnlyList1Selected_Click" />
 
@@ -133,6 +143,16 @@
 
                             <ListBox.ContextMenu>
                                 <ContextMenu>
+                                    <MenuItem
+                                        Header="Transfer to ListMaker 1"
+                                        Click="TransferToListMaker1_Click" />
+
+                                    <MenuItem
+                                        Header="Transfer to ListMaker 2"
+                                        Click="TransferToListMaker2_Click" />
+
+                                    <Separator />
+
                                     <MenuItem
                                         Header="Remove selected"
                                         Click="RemoveCommonSelected_Click" />
@@ -192,6 +212,16 @@
                             <ListBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem
+                                        Header="Transfer to ListMaker 1"
+                                        Click="TransferToListMaker1_Click" />
+
+                                    <MenuItem
+                                        Header="Transfer to ListMaker 2"
+                                        Click="TransferToListMaker2_Click" />
+
+                                    <Separator />
+
+                                    <MenuItem
                                         Header="Remove selected"
                                         Click="RemoveOnlyList2Selected_Click" />
 
@@ -200,8 +230,8 @@
                                         Click="CopyOnlyList2Selected_Click" />
 
                                     <MenuItem
-                                    Header="Open in browser"
-                                    Click="OpenOnlyList2InBrowser_Click" />
+                                        Header="Open in browser"
+                                        Click="OpenOnlyList2InBrowser_Click" />
 
                                     <MenuItem
                                         Header="Select all"
@@ -229,6 +259,28 @@
                         </StackPanel>
                     </Grid>
                 </Grid>
+
+                <StackPanel
+                    Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    Spacing="{DynamicResource TwainSpacingSmall}">
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="Save format:" />
+
+                    <ComboBox
+                        x:Name="SaveFormatComboBox"
+                        Width="180"
+                        SelectedIndex="0">
+
+                        <ComboBoxItem Content="Wiki text" />
+                        <ComboBoxItem Content="Plain text" />
+                        <ComboBoxItem Content="CSV" />
+                        <ComboBoxItem Content="CSV with Wikitext" />
+                    </ComboBox>
+                </StackPanel>
 
                 <Button
                     x:Name="ClearButton"
