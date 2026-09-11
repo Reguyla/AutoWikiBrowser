@@ -1,0 +1,243 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lists="using:Twain.UI.Lists"
+    x:Class="Twain.UI.Controls.Lists.ListComparerWindow"
+    mc:Ignorable="d"
+    d:DesignWidth="1000"
+    d:DesignHeight="520"
+    Width="1000"
+    Height="520"
+    MinWidth="800"
+    MinHeight="420"
+    WindowStartupLocation="CenterOwner"
+    Title="List comparer">
+
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        ColumnDefinitions="*,Auto,*,2*"
+        ColumnSpacing="{DynamicResource TwainSpacingLarge}">
+
+        <GroupBox Header="List 1">
+            <lists:ListMakerControl
+                x:Name="ListMaker1"
+                NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
+        </GroupBox>
+
+        <Button
+            x:Name="CompareButton"
+            Grid.Column="1"
+            Width="80"
+            VerticalAlignment="Center"
+            Content="Compare"
+            IsEnabled="False"
+            Click="CompareButton_Click" />
+
+        <GroupBox
+            Grid.Column="2"
+            Header="List 2">
+
+            <lists:ListMakerControl
+                x:Name="ListMaker2"
+                NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
+        </GroupBox>
+
+        <GroupBox
+            Grid.Column="3"
+            Header="Results">
+
+            <Grid
+                RowDefinitions="*,Auto"
+                RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <Grid
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                    <Grid
+                        RowDefinitions="Auto,Auto,*,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock
+                            Text="Unique in List 1:" />
+
+                        <TextBlock
+                            x:Name="OnlyList1CountText"
+                            Grid.Row="1"
+                            Text="0 pages" />
+
+                        <ListBox
+                            x:Name="OnlyList1ListBox"
+                            Grid.Row="2"
+                            SelectionMode="Multiple">
+
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Header="Remove selected"
+                                        Click="RemoveOnlyList1Selected_Click" />
+
+                                    <MenuItem
+                                        Header="Copy selected"
+                                        Click="CopyOnlyList1Selected_Click" />
+
+                                    <MenuItem
+                                        Header="Open in browser"
+                                        Click="OpenOnlyList1InBrowser_Click" />
+
+                                    <MenuItem
+                                        Header="Select all"
+                                        Click="SelectAllOnlyList1_Click" />
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
+
+                        <StackPanel
+                            Grid.Row="3"
+                            Orientation="Horizontal"
+                            Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <Button
+                                x:Name="SaveOnlyList1Button"
+                                Content="Save list"
+                                IsEnabled="False"
+                                Click="SaveOnlyList1Button_Click" />
+
+                            <Button
+                                x:Name="UseOnlyList1Button"
+                                Content="Use list"
+                                IsEnabled="False"
+                                Click="UseOnlyList1Button_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid
+                        Grid.Column="1"
+                        RowDefinitions="Auto,Auto,*,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock
+                            Text="Common:" />
+
+                        <TextBlock
+                            x:Name="CommonCountText"
+                            Grid.Row="1"
+                            Text="0 pages" />
+
+                        <ListBox
+                            x:Name="CommonListBox"
+                            Grid.Row="2"
+                            SelectionMode="Multiple">
+
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Header="Remove selected"
+                                        Click="RemoveCommonSelected_Click" />
+
+                                    <MenuItem
+                                        Header="Copy selected"
+                                        Click="CopyCommonSelected_Click" />
+
+                                    <MenuItem
+                                        Header="Open in browser"
+                                        Click="OpenCommonInBrowser_Click" />
+
+                                    <MenuItem
+                                        Header="Select all"
+                                        Click="SelectAllCommon_Click" />
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
+
+                        <StackPanel
+                            Grid.Row="3"
+                            Orientation="Horizontal"
+                            Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <Button
+                                x:Name="SaveCommonButton"
+                                Content="Save list"
+                                IsEnabled="False"
+                                Click="SaveCommonButton_Click" />
+
+                            <Button
+                                x:Name="UseCommonButton"
+                                Content="Use list"
+                                IsEnabled="False"
+                                Click="UseCommonButton_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid
+                        Grid.Column="2"
+                        RowDefinitions="Auto,Auto,*,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock
+                            Text="Unique in List 2:" />
+
+                        <TextBlock
+                            x:Name="OnlyList2CountText"
+                            Grid.Row="1"
+                            Text="0 pages" />
+
+                        <ListBox
+                            x:Name="OnlyList2ListBox"
+                            Grid.Row="2"
+                            SelectionMode="Multiple">
+
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Header="Remove selected"
+                                        Click="RemoveOnlyList2Selected_Click" />
+
+                                    <MenuItem
+                                        Header="Copy selected"
+                                        Click="CopyOnlyList2Selected_Click" />
+
+                                    <MenuItem
+                                    Header="Open in browser"
+                                    Click="OpenOnlyList2InBrowser_Click" />
+
+                                    <MenuItem
+                                        Header="Select all"
+                                        Click="SelectAllOnlyList2_Click" />
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
+
+                        <StackPanel
+                            Grid.Row="3"
+                            Orientation="Horizontal"
+                            Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <Button
+                                x:Name="SaveOnlyList2Button"
+                                Content="Save list"
+                                IsEnabled="False"
+                                Click="SaveOnlyList2Button_Click" />
+
+                            <Button
+                                x:Name="UseOnlyList2Button"
+                                Content="Use list"
+                                IsEnabled="False"
+                                Click="UseOnlyList2Button_Click" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <Button
+                    x:Name="ClearButton"
+                    Grid.Row="1"
+                    HorizontalAlignment="Right"
+                    Content="Clear all"
+                    IsEnabled="False"
+                    Click="ClearButton_Click" />
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>

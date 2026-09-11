@@ -70,7 +70,19 @@ public partial class ListComparer : Form
     /// </summary>
     private void CompareLists()
     {
-        CompareLists(listMaker1.GetArticleList(), listMaker2.GetArticleList(), lbNo1, lbNo2, lbBoth);
+        ListComparisonResult result =
+            ListComparerProcessor.Compare(
+                listMaker1.GetArticleList(),
+                listMaker2.GetArticleList());
+
+        lbNo1.Items.AddRange(
+            result.OnlyInList1.ToArray());
+
+        lbNo2.Items.AddRange(
+            result.OnlyInList2.ToArray());
+
+        lbBoth.Items.AddRange(
+            result.Common.ToArray());
 
         UpdateCounts();
     }
@@ -84,24 +96,45 @@ public partial class ListComparer : Form
     /// <param name="lb1">List Box where unique items from list1 should go</param>
     /// <param name="lb2">List Box where unique items from list2 should go</param>
     /// <param name="lb3">List Box where the duplicates should go</param>
-    public static void CompareLists(IList<Article> list1, List<Article> list2, ListBox lb1, ListBox lb2, ListBox lb3)
+    public static void CompareLists(
+        IList<Article> list1,
+        List<Article> list2,
+        ListBox lb1,
+        ListBox lb2,
+        ListBox lb3)
     {
-        CompareListsNew(list1, list2, lb1, lb2, lb3);
-    }
+        ArgumentNullException.ThrowIfNull(list1);
+        ArgumentNullException.ThrowIfNull(list2);
+        ArgumentNullException.ThrowIfNull(lb1);
+        ArgumentNullException.ThrowIfNull(lb2);
+        ArgumentNullException.ThrowIfNull(lb3);
 
-    private static void CompareListsNew(IList<Article> list1, List<Article> list2, ListBox lb1, ListBox lb2, ListBox lb3)
-    {
+        ListComparisonResult result =
+            ListComparerProcessor.Compare(
+                list1,
+                list2);
+
         lb1.BeginUpdate();
         lb2.BeginUpdate();
         lb3.BeginUpdate();
 
-        lb1.Items.AddRange(list1.Except(list2).ToArray());
-        lb2.Items.AddRange(list2.Except(list1).ToArray());
-        lb3.Items.AddRange(list1.Intersect(list2).ToArray());
+        try
+        {
+            lb1.Items.AddRange(
+                result.OnlyInList1.ToArray());
 
-        lb1.EndUpdate();
-        lb2.EndUpdate();
-        lb3.EndUpdate();
+            lb2.Items.AddRange(
+                result.OnlyInList2.ToArray());
+
+            lb3.Items.AddRange(
+                result.Common.ToArray());
+        }
+        finally
+        {
+            lb1.EndUpdate();
+            lb2.EndUpdate();
+            lb3.EndUpdate();
+        }
     }
 
     private void btnGo_Click(object sender, EventArgs e)
