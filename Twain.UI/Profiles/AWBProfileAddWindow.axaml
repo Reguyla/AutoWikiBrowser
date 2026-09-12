@@ -1,0 +1,115 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Class="Twain.UI.Profiles.AWBProfileAddWindow"
+    mc:Ignorable="d"
+    d:DesignWidth="520"
+    d:DesignHeight="420"
+    Width="520"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Add New Profile">
+
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+        <Grid
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="Username:" />
+
+            <TextBox
+                x:Name="UsernameTextBox"
+                Grid.Column="1" />
+        </Grid>
+
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="Password:" />
+
+            <TextBox
+                x:Name="PasswordTextBox"
+                Grid.Column="1"
+                PasswordChar="●"
+                IsEnabled="False" />
+        </Grid>
+
+        <CheckBox
+            x:Name="SavePasswordCheckBox"
+            Grid.Row="2"
+            Content="Save password"
+            Click="SavePasswordCheckBox_Click" />
+
+        <StackPanel
+            Grid.Row="3"
+            Spacing="{DynamicResource TwainSpacingSmall}">
+
+            <CheckBox
+                x:Name="DefaultSettingsCheckBox"
+                Content="Use default settings file"
+                Click="DefaultSettingsCheckBox_Click" />
+
+            <Grid
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingSmall}">
+
+                <TextBox
+                    x:Name="DefaultSettingsPathTextBox"
+                    IsEnabled="False" />
+
+                <Button
+                    x:Name="BrowseButton"
+                    Grid.Column="1"
+                    Width="90"
+                    Content="Browse..."
+                    IsEnabled="False"
+                    Click="BrowseButton_Click" />
+            </Grid>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="4"
+            Spacing="{DynamicResource TwainSpacingSmall}">
+
+            <TextBlock Text="Notes:" />
+
+            <TextBox
+                x:Name="NotesTextBox"
+                MinHeight="100"
+                AcceptsReturn="True"
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="5"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="{DynamicResource TwainSpacingSmall}">
+
+            <Button
+                Width="90"
+                Content="Save"
+                IsDefault="True"
+                Click="SaveButton_Click" />
+
+            <Button
+                Width="90"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

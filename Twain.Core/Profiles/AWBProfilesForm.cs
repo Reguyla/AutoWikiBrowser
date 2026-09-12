@@ -789,7 +789,7 @@ public partial class AWBProfilesForm : Form
                 profile.Password = password;
             }
 
-            AWBProfiles.AddEditProfile(profile);
+            AWBProfiles.SaveProfile(profile);
         }
 
         AWBProfiles.LastUsedAccount = user;

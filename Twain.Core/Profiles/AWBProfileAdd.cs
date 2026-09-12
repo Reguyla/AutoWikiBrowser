@@ -199,7 +199,7 @@ public partial class AWBProfileAdd : Form
             Notes = txtNotes.Text
         };
 
-        AWBProfiles.AddEditProfile(profile);
+        AWBProfiles.SaveProfile(profile);
 
         DialogResult = DialogResult.Yes;
     }

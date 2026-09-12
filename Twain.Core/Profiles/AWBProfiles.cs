@@ -222,10 +222,12 @@ public static class AWBProfiles
     }
 
     /// <summary>
-    /// Writes a new or modified profile to the registry.
+    /// Saves a new or modified profile.
     /// </summary>
-    /// <param name="profile">The profile to save.</param>
-    internal static void AddEditProfile(
+    /// <param name="profile">
+    /// The profile to save.
+    /// </param>
+    public static void SaveProfile(
         AWBProfile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
@@ -261,7 +263,7 @@ public static class AWBProfiles
         catch (Exception ex)
         {
             Tools.WriteDebug(
-                nameof(AddEditProfile),
+                nameof(SaveProfile),
                 ex.ToString());
         }
     }
