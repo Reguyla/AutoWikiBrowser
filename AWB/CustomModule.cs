@@ -27,15 +27,31 @@ namespace AutoWikiBrowser;
 
 internal sealed partial class CustomModule : Form
 {
-    private readonly CustomModuleState _state = new();
-
+    private readonly CustomModuleState _state;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CustomModule"/> form and
     /// loads the available custom module compilers.
     /// </summary>
     public CustomModule()
+        : this(new CustomModuleState())
     {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CustomModule"/> form using
+    /// the supplied custom-module state.
+    /// </summary>
+    /// <param name="state">
+    /// The custom-module state shared with the application.
+    /// </param>
+    internal CustomModule(
+        CustomModuleState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        _state = state;
+
         InitializeComponent();
 
         cmboLang.Items.Clear();
@@ -215,7 +231,8 @@ internal sealed partial class CustomModule : Form
                     IncludeDebugInformation = false
                 };
 
-            AddLoadedAssemblyReferences(parameters);
+            CustomModuleCompilationReferences.AddLoadedAssemblyReferences(
+                parameters);
 
             CompilerResults results =
                 Compiler.Compile(
@@ -234,79 +251,18 @@ internal sealed partial class CustomModule : Form
                     "The compiler did not return a compiled assembly.");
 
             Type moduleType =
-                compiledAssembly
-                    .GetTypes()
-                    .FirstOrDefault(
-                        type =>
-                            !type.IsAbstract &&
-                            typeof(IModule).IsAssignableFrom(type))
-                ?? throw new InvalidOperationException(
-                    "The compiled assembly does not contain an IModule implementation.");
+                CustomModuleCompiler.FindModuleType(
+                    compiledAssembly);
 
             Module =
-                Activator.CreateInstance(
+                CustomModuleCompiler.CreateModule(
                     moduleType,
-                    Program.AWB) as IModule
-                ?? throw new InvalidOperationException(
-                    $"Unable to instantiate custom module type '{moduleType.FullName}'.");
+                    Program.AWB);
         }
         catch (Exception ex)
         {
             Module = null;
             ErrorHandler.HandleException(ex);
-        }
-    }
-
-    /// <summary>
-    /// Adds references for assemblies currently loaded by the application
-    /// so custom modules can use AWB and framework types during compilation.
-    /// </summary>
-    /// <param name="parameters">
-    /// The compiler parameters that receive the assembly references.
-    /// </param>
-    private static void AddLoadedAssemblyReferences(
-        CompilerParameters parameters)
-    {
-        ArgumentNullException.ThrowIfNull(parameters);
-
-        HashSet<string> referencePaths = new(StringComparer.OrdinalIgnoreCase);
-
-        foreach (Assembly assembly in
-                 AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (assembly.IsDynamic)
-            {
-                continue;
-            }
-
-            if (assembly.FullName?.Contains(
-                    "Microsoft.GeneratedCode",
-                    StringComparison.OrdinalIgnoreCase) == true)
-            {
-                continue;
-            }
-
-            string location;
-
-            try
-            {
-                location = assembly.Location;
-            }
-            catch (NotSupportedException)
-            {
-                continue;
-            }
-
-            if (string.IsNullOrWhiteSpace(location) ||
-                !File.Exists(location))
-            {
-                continue;
-            }
-
-            if (referencePaths.Add(location))
-            {
-                parameters.ReferencedAssemblies.Add(location);
-            }
         }
     }
 
@@ -652,5 +608,41 @@ For more detailed information, click Help -> Manual on the Custom Module window.
         Tools.OpenENArticleInBrowser(
             "Wikipedia:AutoWikiBrowser/Custom_Modules",
             false);
+    }
+
+    /// <summary>
+    /// Applies the configured custom-module settings to the form and shared state.
+    /// </summary>
+    /// <param name="language">
+    /// The configured custom-module language.
+    /// </param>
+    /// <param name="code">
+    /// The configured custom-module source code.
+    /// </param>
+    /// <param name="enabled">
+    /// Whether the custom module should be enabled.
+    /// </param>
+    public void ApplySettings(
+        string language,
+        string code,
+        bool enabled)
+    {
+        Language = language;
+        Code = code;
+        ModuleEnabled = enabled;
+
+        if (!enabled)
+        {
+            SetModuleNotBuilt();
+        }
+    }
+
+    /// <summary>
+    /// Disables the custom module and clears any compiled module instance.
+    /// </summary>
+    public void DisableModule()
+    {
+        ModuleEnabled = false;
+        SetModuleNotBuilt();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Twain.Core.Plugin;
 
 namespace Twain.Core.CustomModules;
 
@@ -119,6 +120,71 @@ public abstract class CustomModuleCompiler
             sourceCode,
             Environment.NewLine,
             CodeEnd);
+    }
+
+    /// <summary>
+    /// Finds the concrete <see cref="IModule"/> implementation contained in a
+    /// compiled custom-module assembly.
+    /// </summary>
+    /// <param name="assembly">
+    /// The compiled custom-module assembly to inspect.
+    /// </param>
+    /// <returns>
+    /// The concrete type that implements <see cref="IModule"/>.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the assembly does not contain a usable
+    /// <see cref="IModule"/> implementation.
+    /// </exception>
+    public static Type FindModuleType(
+        Assembly assembly)
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
+
+        return assembly
+            .GetTypes()
+            .FirstOrDefault(
+                type =>
+                    !type.IsAbstract &&
+                    typeof(IModule).IsAssignableFrom(type))
+            ?? throw new InvalidOperationException(
+                "The compiled assembly does not contain an IModule implementation.");
+    }
+
+    /// <summary>
+    /// Creates an instance of a compiled custom-module type using the supplied
+    /// constructor arguments.
+    /// </summary>
+    /// <param name="moduleType">
+    /// The concrete type implementing <see cref="IModule"/>.
+    /// </param>
+    /// <param name="constructorArguments">
+    /// The arguments supplied to the custom module constructor.
+    /// </param>
+    /// <returns>
+    /// The instantiated custom module.
+    /// </returns>
+    public static IModule CreateModule(
+        Type moduleType,
+        params object?[] constructorArguments)
+    {
+        ArgumentNullException.ThrowIfNull(moduleType);
+        ArgumentNullException.ThrowIfNull(constructorArguments);
+
+        if (moduleType.IsAbstract ||
+            !typeof(IModule).IsAssignableFrom(moduleType))
+        {
+            throw new ArgumentException(
+                $"Type '{moduleType.FullName}' is not a concrete " +
+                $"{nameof(IModule)} implementation.",
+                nameof(moduleType));
+        }
+
+        return Activator.CreateInstance(
+                moduleType,
+                constructorArguments) as IModule
+            ?? throw new InvalidOperationException(
+                $"Unable to instantiate custom module type '{moduleType.FullName}'.");
     }
 
     #region Helpers

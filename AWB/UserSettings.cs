@@ -186,7 +186,7 @@ partial class MainForm
                     MessageBoxIcon.Warning);
             }
 
-            _customModule.ModuleEnabled = false;
+            _customModule.DisableModule();
             Text = Program.Name;
             StatusLabelText = "Default settings loaded.";
         }
@@ -722,9 +722,9 @@ partial class MainForm
     {
         return new ModulePrefs
         {
-            Enabled = _customModule.ModuleEnabled,
-            Language = _customModule.Language,
-            Code = _customModule.Code
+            Enabled = _customModuleState.ModuleEnabled,
+            Language = _customModuleState.Language,
+            Code = _customModuleState.Code
         };
     }
 
@@ -1399,19 +1399,11 @@ partial class MainForm
     private void LoadModulePreferences(
         ModulePrefs preferences)
     {
-        _customModule.Language =
-            preferences.Language;
-
-        _customModule.Code = NormalizeLineEndings(
-            preferences.Code);
-
-        _customModule.ModuleEnabled =
-            preferences.Enabled;
-
-        if (!_customModule.ModuleEnabled)
-        {
-            _customModule.SetModuleNotBuilt();
-        }
+        _customModule.ApplySettings(
+            preferences.Language,
+            NormalizeLineEndings(
+                preferences.Code),
+            preferences.Enabled);
     }
 
     /// <summary>

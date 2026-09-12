@@ -29,6 +29,7 @@ using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.Controls;
 using Twain.Core.Controls.Lists;
+using Twain.Core.CustomModules;
 using Twain.Core.DiffHtml;
 using Twain.Core.Disambiguation;
 using Twain.Core.Editing;
@@ -143,7 +144,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // External Components
     // --------------------------------------------------------------------
 
-    private readonly CustomModule _customModule = new();
+    private readonly CustomModuleState _customModuleState = new();
+    private readonly CustomModule _customModule;
     private readonly ExternalProgram _externalProgram = new();
 
     private RegexTester _regexTester;
@@ -215,6 +217,8 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
         _splashScreen.SetProgress(1);
 
         InitializeComponent();
+
+        _customModule = new CustomModule(_customModuleState);
 
         Control diffBrowserParent =
             webBrowser.Parent
@@ -3253,9 +3257,9 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// </returns>
     private bool RunExtensionProcessing(Article article)
     {
-        if (_customModule.ModuleUsable)
+        if (_customModuleState.ModuleUsable)
         {
-            article.SendPageToCustomModule(_customModule.Module);
+            article.SendPageToCustomModule(_customModuleState.Module);
 
             if (article.SkipArticle)
             {

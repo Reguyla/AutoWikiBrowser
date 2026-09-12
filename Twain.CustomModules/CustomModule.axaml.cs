@@ -22,12 +22,57 @@ public partial class CustomModule : Avalonia.Controls.Window
     private static readonly Avalonia.Media.FontFamily DefaultFont =
         Avalonia.Media.FontFamily.Default;
 
+    private readonly IAutoWikiBrowser? _host;
+
+    private readonly CustomModuleState _state;
+
     /// <summary>
     /// Initializes the custom module window.
     /// </summary>
     public CustomModule()
+        : this(
+            new CustomModuleState(),
+            null)
     {
+    }
+
+    /// <summary>
+    /// Initializes the custom module window using the supplied application host.
+    /// </summary>
+    /// <param name="host">
+    /// The application interface supplied to custom modules when they are created.
+    /// </param>
+    public CustomModule(
+        IAutoWikiBrowser? host)
+        : this(
+            new CustomModuleState(),
+            host)
+    {
+    }
+
+    /// <summary>
+    /// Initializes the custom module window using the supplied state and
+    /// application host.
+    /// </summary>
+    /// <param name="state">
+    /// The custom-module state shared with the application.
+    /// </param>
+    /// <param name="host">
+    /// The application interface supplied to custom modules when they are created.
+    /// </param>
+    public CustomModule(
+        CustomModuleState state,
+        IAutoWikiBrowser? host)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        _state = state;
+        _host = host;
+
         InitializeComponent();
+
+        CodeTextBox.TextChanged +=
+            CodeTextBox_TextChanged;
 
         LoadLanguages();
     }
@@ -99,12 +144,28 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// </summary>
     public string Code
     {
-        get => CodeTextBox.Text ?? string.Empty;
+        get => _state.Code;
 
-        set =>
-            CodeTextBox.Text =
+        set
+        {
+            string normalizedCode =
                 (value ?? string.Empty)
                     .Replace("\r\n\r\n", "\r\n");
+
+            _state.Code = normalizedCode;
+            CodeTextBox.Text = normalizedCode;
+        }
+    }
+
+    /// <summary>
+    /// Updates the shared custom-module state when the source code changes.
+    /// </summary>
+    private void CodeTextBox_TextChanged(
+        object? sender,
+        TextChangedEventArgs e)
+    {
+        _state.Code =
+            CodeTextBox.Text ?? string.Empty;
     }
 
     /// <summary>
@@ -112,7 +173,7 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// </summary>
     public string Language
     {
-        get => Compiler?.ToString() ?? string.Empty;
+        get => _state.Language;
 
         set
         {
@@ -124,6 +185,7 @@ public partial class CustomModule : Avalonia.Controls.Window
                     continue;
                 }
 
+                _state.Language = compiler.ToString();
                 LanguageComboBox.SelectedItem = compiler;
                 return;
             }
@@ -131,8 +193,34 @@ public partial class CustomModule : Avalonia.Controls.Window
             if (LanguageComboBox.ItemCount > 0)
             {
                 LanguageComboBox.SelectedIndex = 0;
+
+                if (Compiler is not null)
+                {
+                    _state.Language = Compiler.ToString();
+                }
             }
         }
+    }
+
+    /// <summary>
+    /// Updates the custom module template when the selected language changes.
+    /// </summary>
+    private void LanguageComboBox_SelectionChanged(
+        object? sender,
+        SelectionChangedEventArgs e)
+    {
+        CustomModuleCompiler? compiler = Compiler;
+
+        if (compiler is null)
+        {
+            return;
+        }
+
+        _state.Language = compiler.ToString();
+
+        ModuleStartTextBox.Text = compiler.CodeStart;
+        CodeTextBox.Text = compiler.CodeExample;
+        ModuleEndTextBox.Text = compiler.CodeEnd;
     }
 
     /// <summary>
@@ -162,7 +250,7 @@ public partial class CustomModule : Avalonia.Controls.Window
 
             CompilerResults results =
                 compiler.Compile(
-                    CodeTextBox.Text ?? string.Empty,
+                    _state.Code,
                     parameters);
 
             if (!ShowCompilationMessages(results))
@@ -177,19 +265,16 @@ public partial class CustomModule : Avalonia.Controls.Window
                     "The compiler did not return a compiled assembly.");
 
             Type moduleType =
-                compiledAssembly
-                    .GetTypes()
-                    .FirstOrDefault(
-                        type =>
-                            !type.IsAbstract &&
-                            typeof(IModule).IsAssignableFrom(type))
-                ?? throw new InvalidOperationException(
-                    "The compiled assembly does not contain an IModule implementation.");
+                CustomModuleCompiler.FindModuleType(
+                    compiledAssembly);
 
             Module =
-                Activator.CreateInstance(moduleType) as IModule
-                ?? throw new InvalidOperationException(
-                    $"Unable to instantiate custom module type '{moduleType.FullName}'.");
+                _host is null
+                    ? CustomModuleCompiler.CreateModule(
+                        moduleType)
+                    : CustomModuleCompiler.CreateModule(
+                        moduleType,
+                        _host);
         }
         catch (Exception ex)
         {
@@ -256,10 +341,11 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// </summary>
     public bool ModuleEnabled
     {
-        get => ModuleEnabledCheckBox.IsChecked == true;
+        get => _state.ModuleEnabled;
 
         set
         {
+            _state.ModuleEnabled = value;
             ModuleEnabledCheckBox.IsChecked = value;
 
             if (value)
@@ -269,17 +355,26 @@ public partial class CustomModule : Avalonia.Controls.Window
         }
     }
 
+    private void ModuleEnabledCheckBox_Changed(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        bool enabled =
+            ModuleEnabledCheckBox.IsChecked == true;
+
+        _state.ModuleEnabled = enabled;
+        MakeModuleButton.IsEnabled = enabled;
+    }
+
     /// <summary>
     /// Gets a value indicating whether the custom module is enabled and has been
     /// successfully compiled and loaded.
     /// </summary>
     public bool ModuleUsable =>
-        ModuleEnabled && Module is not null;
+        _state.ModuleUsable;
 
     private const string BuiltPrefix =
         "Custom Module Built At: ";
-
-    private IModule? _module;
 
     /// <summary>
     /// Gets the currently loaded custom module instance, or
@@ -287,14 +382,14 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// </summary>
     public IModule? Module
     {
-        get => _module;
+        get => _state.Module;
 
         private set
         {
-            _module = value;
-
             if (value is null)
             {
+                _state.SetModuleNotBuilt();
+
                 StatusTextBlock.Text =
                     "No module loaded";
 
@@ -303,6 +398,8 @@ public partial class CustomModule : Avalonia.Controls.Window
 
                 return;
             }
+
+            _state.SetModule(value);
 
             StatusTextBlock.Text =
                 "Module compiled and loaded";
@@ -384,33 +481,6 @@ public partial class CustomModule : Avalonia.Controls.Window
 
         CodeTextBox.CaretIndex = position;
         CodeTextBox.Focus();
-    }
-
-    private void ModuleEnabledCheckBox_Changed(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        MakeModuleButton.IsEnabled =
-            ModuleEnabledCheckBox.IsChecked == true;
-    }
-
-    /// <summary>
-    /// Updates the custom module template when the selected language changes.
-    /// </summary>
-    private void LanguageComboBox_SelectionChanged(
-        object? sender,
-        SelectionChangedEventArgs e)
-    {
-        CustomModuleCompiler? compiler = Compiler;
-
-        if (compiler is null)
-        {
-            return;
-        }
-
-        ModuleStartTextBox.Text = compiler.CodeStart;
-        CodeTextBox.Text = compiler.CodeExample;
-        ModuleEndTextBox.Text = compiler.CodeEnd;
     }
 
     private void MakeModuleButton_Click(
