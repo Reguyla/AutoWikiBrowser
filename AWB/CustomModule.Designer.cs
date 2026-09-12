@@ -322,6 +322,7 @@
             txtCode.TabIndex = 10;
             txtCode.TabStop = false;
             txtCode.WordWrap = false;
+            txtCode.TextChanged += txtCode_TextChanged;
             // 
             // lblEnd
             // 

@@ -27,6 +27,9 @@ namespace AutoWikiBrowser;
 
 internal sealed partial class CustomModule : Form
 {
+    private readonly CustomModuleState _state = new();
+
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CustomModule"/> form and
     /// loads the available custom module compilers.
@@ -38,7 +41,15 @@ internal sealed partial class CustomModule : Form
         cmboLang.Items.Clear();
         cmboLang.Items.AddRange(CustomModuleCompiler.GetList());
         cmboLang.SelectedIndex = 0;
-        txtCode.Text = _codeExample;
+        Code = _codeExample;
+    }
+
+    private void txtCode_TextChanged(
+    object sender,
+    EventArgs e)
+    {
+        _state.Code =
+            txtCode.Text;
     }
 
     /// <summary>
@@ -54,8 +65,17 @@ internal sealed partial class CustomModule : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Code
     {
-        get => txtCode.Text;
-        set => txtCode.Text = value.Replace("\r\n\r\n", "\r\n");
+        get => _state.Code;
+
+        set
+        {
+            _state.Code =
+                (value ?? string.Empty)
+                    .Replace("\r\n\r\n", "\r\n");
+
+            txtCode.Text =
+                _state.Code;
+        }
     }
 
     /// <summary>
@@ -64,13 +84,13 @@ internal sealed partial class CustomModule : Form
     /// <remarks>
     /// Older settings that do not contain a recognized language name default
     /// to the first compiler, historically the C# compiler. This property wraps
-    /// the selected item of the internal language combo box and should not be
-    /// serialized independently by the Windows Forms designer.
+    /// the selected compiler while storing the selected language independently
+    /// of the user interface.
     /// </remarks>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Language
     {
-        get => cmboLang.SelectedItem!.ToString()!;
+        get => _state.Language;
 
         set
         {
@@ -82,12 +102,18 @@ internal sealed partial class CustomModule : Form
                 }
 
                 cmboLang.SelectedItem = compiler;
+                _state.Language = compiler.ToString();
                 return;
             }
 
             // Older configurations that stored an index rather than a
             // language name could only have selected C#.
             cmboLang.SelectedIndex = 0;
+
+            if (cmboLang.SelectedItem is CustomModuleCompiler defaultCompiler)
+            {
+                _state.Language = defaultCompiler.ToString();
+            }
         }
     }
 
@@ -109,18 +135,22 @@ internal sealed partial class CustomModule : Form
     /// Enabling the module automatically attempts to compile and load it.
     /// </summary>
     /// <remarks>
-    /// This property wraps the enabled checkbox and may trigger runtime module
-    /// compilation. It must not be invoked or serialized by the Windows Forms
-    /// designer.
+    /// The enabled state is stored independently of the user interface while
+    /// the legacy form continues to trigger compilation when enabled.
     /// </remarks>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool ModuleEnabled
     {
-        get => chkModuleEnabled.Checked;
+        get => _state.ModuleEnabled;
 
         set
         {
-            chkModuleEnabled.Checked = value;
+            _state.ModuleEnabled = value;
+
+            if (chkModuleEnabled.Checked != value)
+            {
+                chkModuleEnabled.Checked = value;
+            }
 
             if (value)
             {
@@ -134,11 +164,9 @@ internal sealed partial class CustomModule : Form
     /// successfully compiled and loaded.
     /// </summary>
     public bool ModuleUsable =>
-        ModuleEnabled && Module is not null;
+        _state.ModuleUsable;
 
     private const string BuiltPrefix = "Custom Module Built At: ";
-
-    private IModule? _m;
 
     /// <summary>
     /// Gets the currently loaded custom module instance, or
@@ -146,19 +174,21 @@ internal sealed partial class CustomModule : Form
     /// </summary>
     public IModule? Module
     {
-        get => _m;
+        get => _state.Module;
 
         private set
         {
-            _m = value;
-
             if (value is null)
             {
+                _state.SetModuleNotBuilt();
+
                 lblStatus.Text = "No module loaded";
                 lblStatus.BackColor = Color.Orange;
                 lblBuilt.Text = BuiltPrefix + "n/a";
                 return;
             }
+
+            _state.SetModule(value);
 
             lblStatus.Text = "Module compiled and loaded";
             lblStatus.BackColor = Color.LightGreen;
@@ -393,6 +423,9 @@ internal sealed partial class CustomModule : Form
     {
         CustomModuleCompiler compiler = Compiler;
 
+        _state.Language =
+            compiler.ToString();
+
         _codeStart = compiler.CodeStart;
         _codeExample = compiler.CodeExample;
         _codeEnd = compiler.CodeEnd;
@@ -429,9 +462,15 @@ For more detailed information, click Help -> Manual on the Custom Module window.
     /// </summary>
     /// <param name="sender">The control that raised the event.</param>
     /// <param name="e">The event data.</param>
-    private void chkModuleEnabled_CheckedChanged(object sender, EventArgs e)
+    private void chkModuleEnabled_CheckedChanged(
+        object sender,
+        EventArgs e)
     {
-        btnMake.Enabled = chkModuleEnabled.Checked;
+        _state.ModuleEnabled =
+            chkModuleEnabled.Checked;
+
+        btnMake.Enabled =
+            _state.ModuleEnabled;
     }
 
     /// <summary>
