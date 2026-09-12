@@ -200,58 +200,6 @@ public partial class CustomModule : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Adds references for assemblies currently loaded by the application so
-    /// custom modules can use Twain and framework types during compilation.
-    /// </summary>
-    /// <param name="parameters">
-    /// The compiler parameters that receive the assembly references.
-    /// </param>
-    private static void AddLoadedAssemblyReferences(
-        CompilerParameters parameters)
-    {
-        ArgumentNullException.ThrowIfNull(parameters);
-
-        HashSet<string> referencePaths =
-            new(StringComparer.OrdinalIgnoreCase);
-
-        foreach (Assembly assembly in
-                 AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (assembly.IsDynamic)
-                continue;
-
-            if (assembly.FullName?.Contains(
-                    "Microsoft.GeneratedCode",
-                    StringComparison.OrdinalIgnoreCase) == true)
-            {
-                continue;
-            }
-
-            string location;
-
-            try
-            {
-                location = assembly.Location;
-            }
-            catch (NotSupportedException)
-            {
-                continue;
-            }
-
-            if (string.IsNullOrWhiteSpace(location) ||
-                !File.Exists(location))
-            {
-                continue;
-            }
-
-            if (referencePaths.Add(location))
-            {
-                parameters.ReferencedAssemblies.Add(location);
-            }
-        }
-    }
-
-    /// <summary>
     /// Displays compiler errors and warnings produced while building a custom module.
     /// </summary>
     /// <param name="results">
@@ -438,13 +386,6 @@ public partial class CustomModule : Avalonia.Controls.Window
         CodeTextBox.Focus();
     }
 
-    /*
-     * The handlers below are intentionally left as integration points.
-     *
-     * Their existing business logic should be moved from the WinForms
-     * CustomModule class rather than duplicated in the Avalonia view.
-     */
-
     private void ModuleEnabledCheckBox_Changed(
         object? sender,
         RoutedEventArgs e)
@@ -568,27 +509,43 @@ public partial class CustomModule : Avalonia.Controls.Window
             });
     }
 
+    /// <summary>
+    /// Undoes the most recent change in the custom module editor.
+    /// </summary>
     private void UndoMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        CodeTextBox.Undo();
     }
 
+    /// <summary>
+    /// Cuts the selected text from the custom module editor.
+    /// </summary>
     private void CutMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        CodeTextBox.Cut();
     }
 
+    /// <summary>
+    /// Copies the selected text from the custom module editor.
+    /// </summary>
     private void CopyMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        CodeTextBox.Copy();
     }
 
+    /// <summary>
+    /// Pastes clipboard text into the custom module editor.
+    /// </summary>
     private void PasteMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        CodeTextBox.Paste();
     }
 }
