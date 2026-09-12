@@ -26,6 +26,8 @@ public partial class CustomModule : Avalonia.Controls.Window
 
     private readonly CustomModuleState _state;
 
+    private bool _isInitializing;
+
     /// <summary>
     /// Initializes the custom module window.
     /// </summary>
@@ -69,12 +71,17 @@ public partial class CustomModule : Avalonia.Controls.Window
         _state = state;
         _host = host;
 
+        _isInitializing = true;
+
         InitializeComponent();
 
         CodeTextBox.TextChanged +=
             CodeTextBox_TextChanged;
 
         LoadLanguages();
+        InitializeControlsFromState();
+
+        _isInitializing = false;
     }
 
     /// <summary>
@@ -93,6 +100,42 @@ public partial class CustomModule : Avalonia.Controls.Window
         {
             LanguageComboBox.SelectedIndex = 0;
         }
+    }
+
+    /// <summary>
+    /// Initializes the custom-module controls from the shared application state.
+    /// </summary>
+    private void InitializeControlsFromState()
+    {
+        bool hasConfiguredState =
+            !string.IsNullOrWhiteSpace(_state.Language) ||
+            !string.IsNullOrEmpty(_state.Code) ||
+            _state.ModuleEnabled;
+
+        if (!string.IsNullOrWhiteSpace(_state.Language))
+        {
+            Language = _state.Language;
+        }
+        else if (Compiler is not null)
+        {
+            _state.Language = Compiler.ToString();
+        }
+
+        if (hasConfiguredState)
+        {
+            CodeTextBox.Text = _state.Code;
+        }
+        else if (Compiler is not null)
+        {
+            _state.Code = Compiler.CodeExample;
+            CodeTextBox.Text = _state.Code;
+        }
+
+        ModuleEnabledCheckBox.IsChecked =
+            _state.ModuleEnabled;
+
+        MakeModuleButton.IsEnabled =
+            _state.ModuleEnabled;
     }
 
     /// <summary>
@@ -164,6 +207,11 @@ public partial class CustomModule : Avalonia.Controls.Window
         object? sender,
         TextChangedEventArgs e)
     {
+        if (_isInitializing)
+        {
+            return;
+        }
+
         _state.Code =
             CodeTextBox.Text ?? string.Empty;
     }
@@ -213,6 +261,13 @@ public partial class CustomModule : Avalonia.Controls.Window
 
         if (compiler is null)
         {
+            return;
+        }
+
+        if (_isInitializing)
+        {
+            ModuleStartTextBox.Text = compiler.CodeStart;
+            ModuleEndTextBox.Text = compiler.CodeEnd;
             return;
         }
 
@@ -415,6 +470,33 @@ public partial class CustomModule : Avalonia.Controls.Window
     public void SetModuleNotBuilt()
     {
         Module = null;
+    }
+
+    /// <summary>
+    /// Applies the configured custom-module settings to the window and shared state.
+    /// </summary>
+    public void ApplySettings(
+        string language,
+        string code,
+        bool enabled)
+    {
+        Language = language;
+        Code = code;
+        ModuleEnabled = enabled;
+
+        if (!enabled)
+        {
+            SetModuleNotBuilt();
+        }
+    }
+
+    /// <summary>
+    /// Disables the custom module and clears any compiled module instance.
+    /// </summary>
+    public void DisableModule()
+    {
+        ModuleEnabled = false;
+        SetModuleNotBuilt();
     }
 
     /// <summary>
