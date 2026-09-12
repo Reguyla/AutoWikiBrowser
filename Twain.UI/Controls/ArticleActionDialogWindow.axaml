@@ -1,0 +1,166 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Class="Twain.UI.Controls.ArticleActionDialogWindow"
+    mc:Ignorable="d"
+    d:DesignWidth="520"
+    d:DesignHeight="360"
+    Width="520"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Enter details">
+
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+        <Grid
+            x:Name="NewTitlePanel"
+            Grid.Row="0"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="New title:" />
+
+            <TextBox
+                x:Name="NewTitleTextBox"
+                Grid.Column="1" />
+        </Grid>
+
+        <Grid
+            x:Name="ExpiryPanel"
+            Grid.Row="1"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+            IsVisible="False">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="Expiry:" />
+
+            <TextBox
+                x:Name="ExpiryTextBox"
+                Grid.Column="1" />
+        </Grid>
+
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="Summary:" />
+
+            <ComboBox
+                x:Name="SummaryComboBox"
+                Grid.Column="1"
+                IsEditable="True" />
+        </Grid>
+
+        <StackPanel
+            x:Name="ProtectionPanel"
+            Grid.Row="3"
+            Spacing="{DynamicResource TwainSpacingMedium}"
+            IsVisible="False">
+
+            <Grid
+                ColumnDefinitions="*,*"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <StackPanel
+                    Grid.Column="0"
+                    Spacing="{DynamicResource TwainSpacingSmall}">
+
+                    <TextBlock
+                        Text="Create/Edit" />
+
+                    <ListBox
+                        x:Name="EditProtectionListBox"
+                        Height="90"
+                        SelectionChanged="EditProtectionSelectionChanged" />
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Column="1"
+                    Spacing="{DynamicResource TwainSpacingSmall}">
+
+                    <TextBlock
+                        Text="Move" />
+
+                    <ListBox
+                        x:Name="MoveProtectionListBox"
+                        Height="90"
+                        IsEnabled="False"
+                        SelectionChanged="MoveProtectionSelectionChanged" />
+                </StackPanel>
+            </Grid>
+
+            <CheckBox
+                x:Name="UnlockMovePermissionsCheckBox"
+                Content="Unlock move permissions"
+                Click="UnlockMovePermissionsCheckBox_Click" />
+
+            <CheckBox
+                x:Name="CascadingProtectionCheckBox"
+                Content="Cascading protection"
+                IsEnabled="False"
+                ToolTip.Tip="Automatically protect any pages transcluded in this page" />
+
+            <CheckBox
+                x:Name="AutoProtectAllCheckBox"
+                Content="Auto Protect All"
+                IsVisible="False" />
+        </StackPanel>
+
+        <Grid
+            Grid.Row="4"
+            RowDefinitions="Auto,Auto"
+            RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <StackPanel
+                x:Name="MoveOptionsPanel"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Spacing="{DynamicResource TwainSpacingMedium}"
+                IsVisible="False">
+
+                <CheckBox
+                    x:Name="DealWithAssociatedTalkPageCheckBox"
+                    Content="Move associated talk page" />
+
+                <CheckBox
+                    x:Name="NoRedirectCheckBox"
+                    Content="No Redirect" />
+
+                <CheckBox
+                    x:Name="WatchCheckBox"
+                    Content="Watch" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="1"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="{DynamicResource TwainSpacingSmall}">
+
+                <Button
+                    x:Name="OkButton"
+                    Width="90"
+                    Content="OK"
+                    Click="OkButton_Click" />
+
+                <Button
+                    Width="90"
+                    Content="Cancel"
+                    Click="CancelButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

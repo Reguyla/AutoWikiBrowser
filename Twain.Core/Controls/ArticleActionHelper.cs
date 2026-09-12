@@ -152,4 +152,26 @@ public static class ArticleActionHelper
             _ => string.Empty
         };
     }
+
+    /// <summary>
+    /// Gets the protection levels available for the current wiki.
+    /// </summary>
+    public static IReadOnlyList<ProtectionLevel> GetProtectionLevels()
+    {
+        return ProtectionLevelHelper.GetLevels(
+            Variables.LangCode);
+    }
+
+    /// <summary>
+    /// Determines whether cascading protection is available for the
+    /// selected edit and move protection levels.
+    /// </summary>
+    public static bool IsCascadingProtectionAvailable(
+        int editSelectedIndex,
+        int moveSelectedIndex)
+    {
+        return ProtectionLevelHelper.IsCascadingEnabled(
+            editSelectedIndex,
+            moveSelectedIndex);
+    }
 }

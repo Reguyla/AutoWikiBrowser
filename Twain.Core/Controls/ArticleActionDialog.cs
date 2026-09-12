@@ -22,13 +22,6 @@ using System.Windows.Forms;
 
 namespace Twain.Core.Controls;
 
-public enum ArticleAction
-{
-    Move,
-    Delete,
-    Protect
-}
-
 public partial class ArticleActionDialog : Form
 {
     private readonly ArticleAction CurrentAction;

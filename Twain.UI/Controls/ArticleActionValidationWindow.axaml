@@ -1,0 +1,27 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Controls.ArticleActionValidationWindow"
+    Width="420"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+    Title="Validation error">
+
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
+
+        <TextBlock
+            x:Name="MessageTextBlock"
+            TextWrapping="Wrap" />
+
+        <Button
+            Grid.Row="1"
+            Width="90"
+            HorizontalAlignment="Right"
+            Content="OK"
+            Click="OkButton_Click" />
+    </Grid>
+</Window>
