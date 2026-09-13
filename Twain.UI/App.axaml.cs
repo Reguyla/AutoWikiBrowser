@@ -1,8 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using Twain.Core;
 using Twain.Core.Updates;
+using Twain.UI.ErrorHandling;
 using Twain.UI.Shell;
+using Twain.UI.ErrorHandling;
 using Twain.UI.Views.Shell;
 
 namespace Twain.UI;
@@ -52,8 +56,50 @@ public partial class App : Application
                     DataContext =
                         new ShellViewModel()
                 };
-        }
 
-        base.OnFrameworkInitializationCompleted();
+            ErrorHandler.ShowErrorDialog =
+                content =>
+                    ShowErrorDialog(
+                        desktop,
+                        content);
+        }
     }
+
+        /// <summary>
+        /// Displays unhandled exception information using the Avalonia error window.
+        /// </summary>
+        /// <param name="desktop">
+        /// The active desktop application lifetime.
+        /// </param>
+        /// <param name="content">
+        /// The error information to display.
+        /// </param>
+        private static void ShowErrorDialog(
+            IClassicDesktopStyleApplicationLifetime desktop,
+            ErrorHandler.ErrorDialogContent content)
+            {
+                void Show()
+                {
+                    ErrorHandlerWindow window =
+                        new(content);
+
+                    if (desktop.MainWindow is not null)
+                    {
+                        _ = window.ShowDialog(
+                            desktop.MainWindow);
+
+                        return;
+                    }
+
+                    window.Show();
+                }
+
+                if (Dispatcher.UIThread.CheckAccess())
+                {
+                    Show();
+                    return;
+                }
+
+                Dispatcher.UIThread.Post(Show);
+            }
 }

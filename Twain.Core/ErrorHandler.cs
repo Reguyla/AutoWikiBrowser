@@ -20,6 +20,11 @@ namespace Twain.Core
         public static event ErrorHandlerAddition AppendToErrorHandler;
 
         /// <summary>
+        /// Gets or sets the action used to display unhandled exception information.
+        /// </summary>
+        public static Action<ErrorDialogContent>? ShowErrorDialog { get; set; }
+
+        /// <summary>
         /// Title of the page currently being processed
         /// </summary>
         public static string CurrentPage;
@@ -246,11 +251,14 @@ namespace Twain.Core
                 return;
 
             // Record a safe high-level event before writing the local report.
-            DiagnosticSession.Record("Error", "Handling exception: " + ex.GetType().FullName);
+            DiagnosticSession.Record(
+                "Error",
+                "Handling exception: " + ex.GetType().FullName);
 
             // Write the local report before older diagnostic code such as
             // HandleKnownExceptions or Tools.WriteDebug can fail.
-            string diagnosticReportPath = LocalDiagnosticReport.TryWrite(ex);
+            string diagnosticReportPath =
+                LocalDiagnosticReport.TryWrite(ex);
 
             if (HandleKnownExceptions(ex))
                 return;
@@ -258,19 +266,58 @@ namespace Twain.Core
             // Show a report-ready dialog for exceptions not handled as known conditions.
             // The user may review, copy, or manually submit the details as a bug report.
 
+            ErrorDialogContent content =
+                BuildErrorDialogContent(
+                    ex,
+                    diagnosticReportPath);
+
+            TryWriteDebug(
+                "HandleException",
+                content.Details);
+
+            if (ShowErrorDialog is not null)
+            {
+                ShowErrorDialog(content);
+                return;
+            }
+
             ErrorHandler handler = new ErrorHandler
             {
                 txtError =
-                {
-                    Text = BuildErrorSummary(ex, diagnosticReportPath)
-                }
-            };
+            {
+                Text = content.Summary
+            },
 
-            string errorMessage = PopulateErrorDialog(handler, ex);
+                        txtSubject =
+            {
+                Text = content.Subject
+            },
 
-            TryWriteDebug("HandleException", errorMessage);
+                        txtDetails =
+            {
+                Text = content.Details
+            }
+         };
+
             handler.ShowDialog();
         }
+
+        /// <summary>
+        /// Contains the user-facing information displayed for an unhandled exception.
+        /// </summary>
+        /// <param name="Summary">
+        /// The short error summary shown to the user.
+        /// </param>
+        /// <param name="Subject">
+        /// The suggested bug-report subject.
+        /// </param>
+        /// <param name="Details">
+        /// The detailed exception information.
+        /// </param>
+        public sealed record ErrorDialogContent(
+            string Summary,
+            string Subject,
+            string Details);
 
         class BugReport
         {
@@ -742,23 +789,34 @@ namespace Twain.Core
         }
 
         /// <summary>
-        /// Populates the error dialog with the formatted bug report and subject line.
+        /// Builds the detailed error report and subject line for the error dialog.
         /// </summary>
-        /// <param name="handler">The error dialog to populate.</param>
         /// <param name="ex">The exception being reported.</param>
+        /// <param name="subject">The generated subject line.</param>
         /// <returns>
-        /// The formatted bug report text used for both the dialog details and debug output.
+        /// The formatted error report text used for both the dialog details and debug output.
         /// </returns>
-        private static string PopulateErrorDialog(
-            ErrorHandler handler,
-            Exception ex)
+        private static ErrorDialogContent BuildErrorDialogContent(
+            Exception ex,
+            string diagnosticReportPath)
         {
-            string errorMessage = ex.ToString();
+            string summary =
+                BuildErrorSummary(
+                    ex,
+                    diagnosticReportPath);
 
-            handler.txtDetails.Text = errorMessage;
-            handler.txtSubject.Text = ex.GetType().Name + " in " + Thrower(ex);
+            string subject =
+                ex.GetType().Name +
+                " in " +
+                Thrower(ex);
 
-            return errorMessage;
+            string details =
+                ex.ToString();
+
+            return new ErrorDialogContent(
+                summary,
+                subject,
+                details);
         }
 
         /// <summary>

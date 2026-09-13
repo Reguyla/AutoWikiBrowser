@@ -1,0 +1,76 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.ErrorHandling.ErrorHandlerWindow"
+    Title="Twain"
+    Width="760"
+    Height="720"
+    MinWidth="600"
+    MinHeight="500"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid
+        Margin="16"
+        RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
+        RowSpacing="12">
+
+        <TextBlock
+            Grid.Row="0"
+            Text="The program has encountered the following problem:"
+            FontWeight="SemiBold" />
+
+        <TextBox
+            x:Name="ErrorTextBox"
+            Grid.Row="1"
+            IsReadOnly="True"
+            AcceptsReturn="True"
+            TextWrapping="Wrap"
+            MinHeight="90" />
+
+        <TextBlock
+            Grid.Row="2"
+            TextWrapping="Wrap"
+            Text="Twain is constantly being improved. If you are able to, please visit our GitHub page to file a new issue for any bugs, enhancements, or suggestions." />
+
+        <Grid
+            Grid.Row="3"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="8">
+
+            <TextBlock
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="Heading:" />
+
+            <TextBox
+                x:Name="SubjectTextBox"
+                Grid.Column="1"
+                IsReadOnly="True" />
+        </Grid>
+
+            <TextBox
+                x:Name="DetailsTextBox"
+                Grid.Row="4"
+                IsReadOnly="True"
+                AcceptsReturn="True"
+                TextWrapping="NoWrap"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+
+        <Grid
+            Grid.Row="5"
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="8">
+
+            <Button
+                Grid.Column="0"
+                Content="Copy to clipboard"
+                Click="CopyButton_Click" />
+
+            <Button
+                Grid.Column="2"
+                Content="Continue working"
+                Click="CloseButton_Click" />
+        </Grid>
+    </Grid>
+</Window>
