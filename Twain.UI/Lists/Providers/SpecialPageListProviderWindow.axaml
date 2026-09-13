@@ -1,0 +1,75 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Lists.Providers.SpecialPageListProviderWindow"
+    Title="Special Pages"
+    Width="420"
+    Height="220"
+    MinWidth="360"
+    MinHeight="220"
+    CanResize="True"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid
+        Margin="16"
+        RowDefinitions="Auto,Auto,Auto,*,Auto"
+        ColumnDefinitions="Auto,*"
+        RowSpacing="10"
+        ColumnSpacing="12">
+
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="_Source:" />
+
+        <ComboBox
+            x:Name="SourceComboBox"
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch"
+            SelectionChanged="SourceComboBox_SelectionChanged" />
+
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="_Pages:" />
+
+        <TextBox
+            x:Name="PagesTextBox"
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch" />
+
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="_Namespace:" />
+
+        <ComboBox
+            x:Name="NamespaceComboBox"
+            Grid.Row="2"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch" />
+
+        <StackPanel
+            Grid.Row="4"
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="8">
+
+            <Button
+                MinWidth="90"
+                Content="OK"
+                Click="OkButton_Click" />
+
+            <Button
+                MinWidth="90"
+                Content="Cancel"
+                Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

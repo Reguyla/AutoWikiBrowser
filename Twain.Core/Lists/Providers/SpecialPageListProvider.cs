@@ -27,34 +27,85 @@ namespace Twain.Core.Lists.Providers;
 /// </summary>
 public partial class SpecialPageListProvider : Form, IListProvider
 {
-    private static readonly BindingList<IListProvider> ListItems = new();
+    private readonly BindingList<IListProvider> _listItems = new();
+
+    private void SpecialPageListProvider_Load(
+        object sender,
+        EventArgs e)
+    {
+        int currentSelected =
+            cboNamespace.SelectedIndex;
+
+        cboNamespace.Items.Clear();
+
+        foreach (string namespaceName in GetNamespaceItems())
+        {
+            cboNamespace.Items.Add(
+                namespaceName);
+        }
+
+        if (currentSelected >= 0 &&
+            currentSelected < cboNamespace.Items.Count)
+        {
+            cboNamespace.SelectedIndex =
+                currentSelected;
+        }
+    }
+
+    private void EnsureDefaultProviders()
+    {
+        if (_listItems.Count > 0)
+        {
+            return;
+        }
+
+        _listItems.Add(new PrefixIndexSpecialPageProvider());
+        _listItems.Add(new AllPagesSpecialPageProvider());
+        _listItems.Add(new AllPagesNoRedirectsSpecialPageProvider());
+        _listItems.Add(new AllCategoriesSpecialPageProvider());
+        _listItems.Add(new AllFilesSpecialPageProvider());
+        _listItems.Add(new AllRedirectsSpecialPageProvider());
+        _listItems.Add(new RecentChangesSpecialPageProvider());
+        _listItems.Add(new LinkSearchSpecialPageProvider());
+        _listItems.Add(new RandomRedirectsSpecialPageProvider());
+        _listItems.Add(new PagesWithoutLanguageLinksSpecialPageProvider());
+        _listItems.Add(new PagesWithoutLanguageLinksNoRedirectsSpecialPageProvider());
+        _listItems.Add(new ProtectedPagesSpecialPageProvider());
+        _listItems.Add(new GalleryNewFilesSpecialPageProvider());
+        _listItems.Add(new DisambiguationPagesSpecialPageProvider());
+        _listItems.Add(new AllUsersSpecialPageProvider());
+    }
 
     public SpecialPageListProvider()
     {
         InitializeComponent();
 
-        if (ListItems.Count == 0)
-        {
-            ListItems.Add(new PrefixIndexSpecialPageProvider());
-            ListItems.Add(new AllPagesSpecialPageProvider());
-            ListItems.Add(new AllPagesNoRedirectsSpecialPageProvider());
-            ListItems.Add(new AllCategoriesSpecialPageProvider());
-            ListItems.Add(new AllFilesSpecialPageProvider());
-            ListItems.Add(new AllRedirectsSpecialPageProvider());
-            ListItems.Add(new RecentChangesSpecialPageProvider());
-            ListItems.Add(new LinkSearchSpecialPageProvider());
-            ListItems.Add(new RandomRedirectsSpecialPageProvider());
-            ListItems.Add(new PagesWithoutLanguageLinksSpecialPageProvider());
-            ListItems.Add(new PagesWithoutLanguageLinksNoRedirectsSpecialPageProvider());
-            ListItems.Add(new ProtectedPagesSpecialPageProvider());
-            ListItems.Add(new GalleryNewFilesSpecialPageProvider());
-            ListItems.Add(new DisambiguationPagesSpecialPageProvider());
-            ListItems.Add(new AllUsersSpecialPageProvider());
-        }
+        EnsureDefaultProviders();
 
-        cmboSourceSelect.DataSource = ListItems;
+        cmboSourceSelect.DataSource = _listItems;
         cmboSourceSelect.DisplayMember = "DisplayText";
         cmboSourceSelect.ValueMember = "DisplayText";
+    }
+
+    /// <summary>
+    /// Creates presentation models for the available special-page providers.
+    /// </summary>
+    /// <returns>
+    /// A read-only list containing the display name and input capabilities of each
+    /// available special-page provider.
+    /// </returns>
+    public IReadOnlyList<SpecialPageProviderOption> GetProviderOptions()
+    {
+        return _listItems
+            .OfType<ISpecialPageProvider>()
+            .Select(
+                (provider, index) =>
+                    new SpecialPageProviderOption(
+                        index,
+                        provider.DisplayText,
+                        provider.UserInputTextBoxEnabled,
+                        provider.NamespacesEnabled))
+            .ToList();
     }
 
     public SpecialPageListProvider(params IListProvider[] providers)
@@ -62,12 +113,28 @@ public partial class SpecialPageListProvider : Form, IListProvider
     {
         if (!Globals.UsingMono)
         {
-            foreach (IListProvider prov in providers)
+            foreach (IListProvider provider in providers)
             {
-                if (prov is ISpecialPageProvider)
-                    ListItems.Add(prov);
+                if (provider is ISpecialPageProvider)
+                {
+                    _listItems.Add(provider);
+                }
             }
         }
+    }
+
+    private static List<string> GetNamespaceItems()
+    {
+        List<string> namespaces =
+            new()
+            {
+                "Main:"
+            };
+
+        namespaces.AddRange(
+            Variables.Namespaces.Values);
+
+        return namespaces;
     }
 
     /// <summary>
@@ -104,12 +171,35 @@ public partial class SpecialPageListProvider : Form, IListProvider
             return new List<Article>();
         }
 
+        if (provider.PagesNeeded &&
+            string.IsNullOrWhiteSpace(txtPages.Text))
+        {
+            MessageBox.Show(
+                "Pages needed!",
+                "Special page list",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            return new List<Article>();
+        }
+
+        return MakeSpecialPageList(
+            provider,
+            cboNamespace.Text,
+            txtPages.Text);
+    }
+
+    private static List<Article> MakeSpecialPageList(
+    ISpecialPageProvider provider,
+    string namespaceText,
+    string pagesText)
+    {
         int namespaceKey =
             Namespace.Determine(
-                cboNamespace.Text);
+                namespaceText);
 
         string[] enteredPages =
-            txtPages.Text.Split(
+            pagesText.Split(
                 '|',
                 StringSplitOptions.RemoveEmptyEntries |
                 StringSplitOptions.TrimEntries);
@@ -123,12 +213,6 @@ public partial class SpecialPageListProvider : Form, IListProvider
 
         if (provider.PagesNeeded)
         {
-            MessageBox.Show(
-                "Pages needed!",
-                "Special page list",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
             return new List<Article>();
         }
 
@@ -174,25 +258,39 @@ public partial class SpecialPageListProvider : Form, IListProvider
     /// </summary>
     public virtual bool StripUrl => false;
 
-    private void SpecialPageListProvider_Load(object sender, EventArgs e)
+    private void cmboSourceSelect_SelectedIndexChanged(
+        object sender,
+        EventArgs e)
     {
-        int currentSelected = cboNamespace.SelectedIndex;
-        cboNamespace.Items.Clear();
-        cboNamespace.Items.Add("Main:");
-        foreach (string name in Variables.Namespaces.Values)
+        if (DesignMode ||
+            cmboSourceSelect.SelectedItem is not
+                ISpecialPageProvider provider)
         {
-            cboNamespace.Items.Add(name);
+            return;
         }
-        cboNamespace.SelectedIndex = currentSelected;
+
+        (
+            bool pagesEnabled,
+            bool namespacesEnabled) =
+            GetProviderCapabilities(provider);
+
+        txtPages.Enabled =
+            pagesEnabled;
+
+        cboNamespace.Enabled =
+            namespacesEnabled;
     }
 
-    private void cmboSourceSelect_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (DesignMode) return;
+    private static (
+        bool PagesEnabled,
+        bool NamespacesEnabled)
+        GetProviderCapabilities(
+            ISpecialPageProvider provider)
+        {
+            ArgumentNullException.ThrowIfNull(provider);
 
-        ISpecialPageProvider prov = (ISpecialPageProvider)cmboSourceSelect.SelectedItem;
-
-        txtPages.Enabled = prov.UserInputTextBoxEnabled;
-        cboNamespace.Enabled = prov.NamespacesEnabled;
-    }
+            return (
+                provider.UserInputTextBoxEnabled,
+                provider.NamespacesEnabled);
+        }
 }
