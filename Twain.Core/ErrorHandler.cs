@@ -1,7 +1,6 @@
 ﻿using System.Configuration;
 using System.Reflection;
 using System.Threading;
-using System.Windows.Forms;
 using Twain.Core.API;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +14,7 @@ namespace Twain.Core
     /// <summary>
     /// This class provides helper functions for handling errors and displaying them to users
     /// </summary>
-    public partial class ErrorHandler : Form
+    public static class ErrorHandler
     {
         public static event ErrorHandlerAddition AppendToErrorHandler;
 
@@ -969,62 +968,5 @@ namespace Twain.Core
         };
 
         #endregion
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorHandler"/> dialog.
-        /// </summary>
-        protected ErrorHandler()
-        {
-            InitializeComponent();
-        }
-
-        /// <summary>
-        /// Initializes the error dialog title when the form is loaded.
-        /// </summary>
-        /// <param name="sender">The source of the load event.</param>
-        /// <param name="e">The event data.</param>
-        private void ErrorHandler_Load(object sender, EventArgs e)
-        {
-            Text = Application.ProductName;
-        }
-
-        /// <summary>
-        /// Copies the formatted diagnostic report to the system clipboard.
-        /// </summary>
-        /// <param name="sender">The source of the click event.</param>
-        /// <param name="e">The event data.</param>
-        private void btnCopy_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Clipboard.Clear();
-
-                // Allow the clipboard clear operation to complete before writing the
-                // diagnostic report.
-                // TODO: Replace the fixed UI-thread delay with bounded clipboard retry logic.
-                Thread.Sleep(50);
-
-                Clipboard.SetText(txtDetails.Text);
-            }
-            catch
-            {
-                // Clipboard access can fail when it is temporarily locked by another
-                // process. Copy failure must not close or interrupt the error dialog.
-            }
-        }
-
-        /// <summary>
-        /// Opens a URL using the operating system's default browser.
-        /// </summary>
-        /// <param name="url">The URL to open.</param>
-        private static void OpenUrl(string url)
-        {
-            System.Diagnostics.Process.Start(
-                new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-        }
     }
 }
