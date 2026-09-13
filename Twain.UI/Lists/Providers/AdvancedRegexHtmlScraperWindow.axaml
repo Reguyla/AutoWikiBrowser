@@ -23,11 +23,20 @@
             VerticalAlignment="Center"
             Text="Regex:" />
 
-        <TextBox
-            x:Name="RegexTextBox"
+        <StackPanel
             Grid.Row="0"
             Grid.Column="1"
-            HorizontalAlignment="Stretch" />
+            Spacing="6">
+
+            <TextBox
+                x:Name="RegexTextBox"
+                HorizontalAlignment="Stretch" />
+
+            <Button
+                HorizontalAlignment="Left"
+                Content="Open in Regex Tester"
+                Click="OpenRegexTesterButton_Click" />
+        </StackPanel>
 
         <TextBlock
             Grid.Row="1"

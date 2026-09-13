@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Twain.Core.Lists.Providers;
+using Twain.UI.Controls;
 using Twain.UI.Lists.Providers;
 
 namespace Twain.UI.Lists.Providers;
@@ -46,6 +47,48 @@ public partial class AdvancedRegexHtmlScraperWindow : Window
             CaseSensitiveCheckBox.IsChecked == true,
             SingleLineCheckBox.IsChecked == true,
             MultiLineCheckBox.IsChecked == true);
+    }
+
+    private async void OpenRegexTesterButton_Click(
+    object? sender,
+    RoutedEventArgs e)
+    {
+        RegexTesterWindow tester =
+            new(true)
+            {
+                Find =
+                    RegexTextBox.Text ??
+                    string.Empty,
+
+                IgnoreCase =
+                    CaseSensitiveCheckBox.IsChecked != true,
+
+                Multiline =
+                    MultiLineCheckBox.IsChecked == true,
+
+                Singleline =
+                    SingleLineCheckBox.IsChecked == true
+            };
+
+        await tester.ShowDialog(
+            this);
+
+        if (tester.ApplyChangesResult != true)
+        {
+            return;
+        }
+
+        RegexTextBox.Text =
+            tester.Find;
+
+        CaseSensitiveCheckBox.IsChecked =
+            !tester.IgnoreCase;
+
+        MultiLineCheckBox.IsChecked =
+            tester.Multiline;
+
+        SingleLineCheckBox.IsChecked =
+            tester.Singleline;
     }
 
     private void OkButton_Click(
