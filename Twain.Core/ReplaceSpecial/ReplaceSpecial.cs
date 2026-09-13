@@ -521,22 +521,15 @@ public partial class ReplaceSpecial : Form, IRuleControlOwner
     }
 
     /// <summary>
-    /// Updates the selected tree node when a rule control reports a name change.
+    /// Updates the selected tree node when a rule editor reports a name change.
     /// </summary>
-    /// <param name="rc">
-    /// The rule control reporting the change.
-    /// </param>
     /// <param name="name">
     /// The new display name for the selected rule.
     /// </param>
     /// <remarks>
     /// Empty names and values matching the current node text are ignored.
     /// </remarks>
-    // TODO: Determine whether the rule-control parameter is required by
-    // IRuleControlOwner implementations. Remove it from the interface during a
-    // future API cleanup if no implementation uses it.
     public void NameChanged(
-        Control rc,
         string name)
     {
         if (RulesTreeView.SelectedNode == null ||

@@ -144,9 +144,7 @@ public partial class InTemplateRuleControl : UserControl
     /// </param>
     private void NameTextbox_TextChanged(object sender, EventArgs e)
     {
-        Owner.NameChanged(
-            this,
-            NameTextbox.Text.Trim());
+        Owner.NameChanged(NameTextbox.Text.Trim());
     }
 
     /// <summary>

@@ -67,6 +67,6 @@ public partial class TemplateParamRuleControl : UserControl
 
     private void NameTextbox_TextChanged(object sender, EventArgs e)
     {
-        owner_.NameChanged(this, NameTextbox.Text.Trim());
+        owner_.NameChanged(NameTextbox.Text.Trim());
     }
 }
