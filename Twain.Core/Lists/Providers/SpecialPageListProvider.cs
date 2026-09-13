@@ -153,6 +153,16 @@ public partial class SpecialPageListProvider : Form, IListProvider
         string PagesText);
 
     /// <summary>
+    /// Gets or sets the asynchronous presenter used to display the special-page
+    /// selection dialog.
+    /// </summary>
+    public static Func<
+        DialogRequest,
+        Task<DialogSelection?>>?
+        ShowDialogAsync
+    { get; set; }
+
+    /// <summary>
     /// Creates the data required to display the special-page list dialog.
     /// </summary>
     public DialogRequest CreateDialogRequest()
