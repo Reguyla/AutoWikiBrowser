@@ -173,55 +173,37 @@ public partial class SpecialPageListProvider : Form, IListProvider
     }
 
     /// <summary>
-    /// Displays the special-page list dialog and creates an article list using
-    /// the selected provider and namespace.
+    /// Displays the special-page selection dialog and creates the requested
+    /// article list.
     /// </summary>
     /// <param name="searchCriteria">
-    /// Initial search criteria supplied by the caller. The current dialog
-    /// implementation replaces these values with the page text entered by the
-    /// user.
+    /// Unused source values supplied by the list-provider interface.
     /// </param>
     /// <returns>
-    /// The articles created by the selected provider, or an empty list when the
-    /// dialog is already visible, is cancelled, or cannot produce a list.
+    /// The generated articles, or an empty list when the dialog is cancelled
+    /// or no dialog presenter is available.
     /// </returns>
     public List<Article> MakeList(
         params string[] searchCriteria)
     {
-        if (Visible)
+        if (ShowDialogAsync is null)
         {
             return new List<Article>();
         }
 
-        txtPages.Clear();
+        DialogSelection? selection =
+            ShowDialogAsync(
+                    CreateDialogRequest())
+                .GetAwaiter()
+                .GetResult();
 
-        if (ShowDialog() != DialogResult.OK)
+        if (selection is null)
         {
             return new List<Article>();
         }
 
-        if (cmboSourceSelect.SelectedItem is not
-            ISpecialPageProvider provider)
-        {
-            return new List<Article>();
-        }
-
-        if (provider.PagesNeeded &&
-            string.IsNullOrWhiteSpace(txtPages.Text))
-        {
-            MessageBox.Show(
-                "Pages needed!",
-                "Special page list",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
-            return new List<Article>();
-        }
-
-        return MakeSpecialPageList(
-            provider,
-            cboNamespace.Text,
-            txtPages.Text);
+        return MakeList(
+            selection);
     }
 
     /// <summary>
