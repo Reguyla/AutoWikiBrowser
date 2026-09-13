@@ -1,0 +1,92 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Lists.Providers.AdvancedRegexHtmlScraperWindow"
+    Title="Advanced Regex HTML Scraper"
+    Width="500"
+    Height="260"
+    MinWidth="440"
+    MinHeight="240"
+    CanResize="True"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid
+        Margin="16"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+        ColumnDefinitions="Auto,*"
+        RowSpacing="10"
+        ColumnSpacing="12">
+
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Regex:" />
+
+        <TextBox
+            x:Name="RegexTextBox"
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch" />
+
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Group:" />
+
+        <NumericUpDown
+            x:Name="GroupNumberInput"
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Left"
+            Width="100"
+            Minimum="0"
+            Maximum="1000"
+            Increment="1" />
+
+        <CheckBox
+            x:Name="CaseSensitiveCheckBox"
+            Grid.Row="2"
+            Grid.Column="1"
+            Content="Case Sensitive" />
+
+        <CheckBox
+            x:Name="SingleLineCheckBox"
+            Grid.Row="3"
+            Grid.Column="1"
+            Content="SingleLine" />
+
+        <CheckBox
+            x:Name="MultiLineCheckBox"
+            Grid.Row="4"
+            Grid.Column="1"
+            VerticalAlignment="Top"
+            Content="MultiLine" />
+
+        <TextBlock
+            x:Name="ValidationMessageTextBlock"
+            Grid.Row="5"
+            Grid.ColumnSpan="2"
+            IsVisible="False"
+            TextWrapping="Wrap" />
+
+        <StackPanel
+            Grid.Row="6"
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="8">
+
+            <Button
+                MinWidth="90"
+                Content="OK"
+                Click="OkButton_Click" />
+
+            <Button
+                MinWidth="90"
+                Content="Cancel"
+                Click="CancelButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

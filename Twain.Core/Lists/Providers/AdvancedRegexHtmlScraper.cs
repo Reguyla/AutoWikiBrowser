@@ -27,9 +27,119 @@ namespace Twain.Core.Lists.Providers;
 /// </summary>
 public partial class AdvancedRegexHtmlScraper : Form, IListProvider
 {
-    private Regex _regexToUse;
+    private ScraperSettings? _settings;
 
-    private int _groupNumber;
+    /// <summary>
+    /// Describes the regex configuration used by the advanced HTML scraper.
+    /// </summary>
+    public sealed record ScraperSettings(
+        string Pattern,
+        int GroupNumber,
+        bool CaseSensitive,
+        bool SingleLine,
+        bool MultiLine);
+
+    /// <summary>
+    /// Gets or sets the asynchronous presenter used to configure the advanced
+    /// regex HTML scraper.
+    /// </summary>
+    public static Func<
+        ScraperSettings?,
+        Task<ScraperSettings?>>?
+        ShowDialogAsync
+    { get; set; }
+
+    /// <summary>
+    /// Creates the compiled regular expression used by the HTML scraper.
+    /// </summary>
+    /// <param name="settings">
+    /// The regex pattern and options selected by the user.
+    /// </param>
+    /// <returns>
+    /// The compiled regular expression.
+    /// </returns>
+    private static Regex CreateRegex(
+        ScraperSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        RegexOptions options =
+            RegexOptions.Compiled;
+
+        if (!settings.CaseSensitive)
+        {
+            options |= RegexOptions.IgnoreCase;
+        }
+
+        if (settings.SingleLine)
+        {
+            options |= RegexOptions.Singleline;
+        }
+
+        if (settings.MultiLine)
+        {
+            options |= RegexOptions.Multiline;
+        }
+
+        return new Regex(
+            settings.Pattern,
+            options);
+    }
+
+    /// <summary>
+    /// Validates the supplied scraper settings.
+    /// </summary>
+    /// <param name="settings">
+    /// The scraper settings to validate.
+    /// </param>
+    /// <param name="errorMessage">
+    /// Receives the regex validation error when validation fails; otherwise,
+    /// an empty string.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the settings contain a valid regular
+    /// expression; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool TryValidateSettings(
+        ScraperSettings settings,
+        out string errorMessage)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        try
+        {
+            _ = CreateRegex(
+                settings);
+
+            errorMessage =
+                string.Empty;
+
+            return true;
+        }
+        catch (ArgumentException exception)
+        {
+            errorMessage =
+                exception.Message;
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Reads the current scraper settings from the dialog controls.
+    /// </summary>
+    /// <returns>
+    /// The scraper configuration selected by the user.
+    /// </returns>
+    private ScraperSettings GetScraperSettings()
+    {
+        return new ScraperSettings(
+            RegexTextBox.Text,
+            (int)GroupNumber.Value,
+            CaseSensitiveCheckBox.Checked,
+            SingleLineCheckBox.Checked,
+            MultiLineCheckBox.Checked);
+    }
 
     public AdvancedRegexHtmlScraper()
     {
@@ -45,24 +155,75 @@ public partial class AdvancedRegexHtmlScraper : Form, IListProvider
     /// </param>
     /// <returns>
     /// A list of articles created from matching values, or an empty list when the
-    /// dialog is already visible, is cancelled, or no matches are found.
+    /// dialog is cancelled, no presenter is available, or no matches are found.
     /// </returns>
     public List<Article> MakeList(
         params string[] searchCriteria)
     {
-        if (Visible)
+        ArgumentNullException.ThrowIfNull(searchCriteria);
+
+        if (ShowDialogAsync is null)
         {
             return new List<Article>();
         }
 
-        ArgumentNullException.ThrowIfNull(searchCriteria);
+        ScraperSettings? settings =
+            ShowDialogAsync(
+                    _settings)
+                .GetAwaiter()
+                .GetResult();
 
-        List<Article> articles = new();
-
-        if (ShowDialog() != DialogResult.OK)
+        if (settings is null)
         {
-            return articles;
+            return new List<Article>();
         }
+
+        if (!TryValidateSettings(
+                settings,
+                out _))
+        {
+            return new List<Article>();
+        }
+
+        Regex regex =
+            CreateRegex(
+                settings);
+
+        _settings =
+            settings;
+
+        return ScrapeArticles(
+            searchCriteria,
+            regex,
+            settings.GroupNumber);
+    }
+
+    /// <summary>
+    /// Downloads HTML from the supplied locations and creates articles from
+    /// values matched by the configured regular expression.
+    /// </summary>
+    /// <param name="searchCriteria">
+    /// The URLs or host names whose HTML content should be searched.
+    /// </param>
+    /// <param name="regex">
+    /// The regular expression used to locate article names.
+    /// </param>
+    /// <param name="groupNumber">
+    /// The capture group containing the article name.
+    /// </param>
+    /// <returns>
+    /// The articles created from matching values.
+    /// </returns>
+    private static List<Article> ScrapeArticles(
+        IEnumerable<string> searchCriteria,
+        Regex regex,
+        int groupNumber)
+    {
+        ArgumentNullException.ThrowIfNull(searchCriteria);
+        ArgumentNullException.ThrowIfNull(regex);
+
+        List<Article> articles =
+            new();
 
         foreach (string searchLocation in searchCriteria)
         {
@@ -84,10 +245,10 @@ public partial class AdvancedRegexHtmlScraper : Form, IListProvider
             string html =
                 Tools.GetHTML(url);
 
-            foreach (Match match in _regexToUse.Matches(html))
+            foreach (Match match in regex.Matches(html))
             {
                 Group articleNameGroup =
-                    match.Groups[_groupNumber];
+                    match.Groups[groupNumber];
 
                 if (!articleNameGroup.Success ||
                     articleNameGroup.Length == 0)
@@ -176,34 +337,30 @@ public partial class AdvancedRegexHtmlScraper : Form, IListProvider
         }
     }
 
-    private void AdvancedRegexHtmlScraper_FormClosing(object sender, FormClosingEventArgs e)
+    private void AdvancedRegexHtmlScraper_FormClosing(
+        object sender,
+        FormClosingEventArgs e)
     {
-        RegexOptions opts = RegexOptions.Compiled;
+        ScraperSettings settings =
+            GetScraperSettings();
 
-        if (CaseSensitiveCheckBox.Checked)
-            opts |= RegexOptions.IgnoreCase;
-
-        if (SingleLineCheckBox.Checked)
-            opts |= RegexOptions.Singleline;
-
-        if (MultiLineCheckBox.Checked)
-            opts |= RegexOptions.Multiline;
-
-        if (_regexToUse == null || _regexToUse.ToString() != RegexTextBox.Text || _regexToUse.Options != opts)
+        try
         {
-            try
-            {
-                _regexToUse = new Regex(RegexTextBox.Text, opts);
-            }
-            catch (ArgumentException ae)
-            {
-                _regexToUse = null;
-                e.Cancel = true;
-                MessageBox.Show(ae.Message, "Bad Regex");
-            }
-        }
+            _ = CreateRegex(
+                settings);
 
-        _groupNumber = (int)GroupNumber.Value;
+            _settings =
+                settings;
+        }
+        catch (ArgumentException exception)
+        {
+            _settings = null;
+            e.Cancel = true;
+
+            MessageBox.Show(
+                exception.Message,
+                "Bad Regex");
+        }
     }
 
     private void OkButton_Click(object sender, EventArgs e)

@@ -77,6 +77,12 @@ public partial class App : Application
                     ShowSpecialPageDialogAsync(
                         desktop,
                         request);
+
+            AdvancedRegexHtmlScraper.ShowDialogAsync =
+                settings =>
+                    ShowAdvancedRegexHtmlScraperDialogAsync(
+                        desktop,
+                        settings);
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -241,5 +247,84 @@ public partial class App : Application
         }
 
         Dispatcher.UIThread.Post(Show);
+    }
+
+    /// <summary>
+    /// Displays the Advanced Regex HTML Scraper dialog using Avalonia.
+    /// </summary>
+    /// <param name="desktop">
+    /// The active desktop application lifetime.
+    /// </param>
+    /// <param name="settings">
+    /// The current scraper settings, if any.
+    /// </param>
+    /// <returns>
+    /// The selected scraper settings, or <see langword="null"/> when the dialog
+    /// is cancelled or no visible owner window is available.
+    /// </returns>
+    private static Task<AdvancedRegexHtmlScraper.ScraperSettings?>
+        ShowAdvancedRegexHtmlScraperDialogAsync(
+            IClassicDesktopStyleApplicationLifetime desktop,
+            AdvancedRegexHtmlScraper.ScraperSettings? settings)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            return ShowAdvancedRegexHtmlScraperDialogOnUiThreadAsync(
+                desktop,
+                settings);
+        }
+
+        TaskCompletionSource<
+            AdvancedRegexHtmlScraper.ScraperSettings?> completion =
+            new(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+        Dispatcher.UIThread.Post(
+            async () =>
+            {
+                try
+                {
+                    AdvancedRegexHtmlScraper.ScraperSettings? result =
+                        await ShowAdvancedRegexHtmlScraperDialogOnUiThreadAsync(
+                            desktop,
+                            settings);
+
+                    completion.SetResult(
+                        result);
+                }
+                catch (Exception exception)
+                {
+                    completion.SetException(
+                        exception);
+                }
+            });
+
+        return completion.Task;
+    }
+
+    /// <summary>
+    /// Displays the Advanced Regex HTML Scraper dialog on the Avalonia UI thread.
+    /// </summary>
+    private static async Task<
+        AdvancedRegexHtmlScraper.ScraperSettings?>
+        ShowAdvancedRegexHtmlScraperDialogOnUiThreadAsync(
+            IClassicDesktopStyleApplicationLifetime desktop,
+            AdvancedRegexHtmlScraper.ScraperSettings? settings)
+    {
+        if (desktop.MainWindow is not { IsVisible: true } owner)
+        {
+            return null;
+        }
+
+        AdvancedRegexHtmlScraperWindow window =
+            new(settings);
+
+        bool accepted =
+            await window.ShowDialog<bool>(
+                owner);
+
+        return accepted
+            ? window.CreateSettings()
+            : null;
     }
 }
