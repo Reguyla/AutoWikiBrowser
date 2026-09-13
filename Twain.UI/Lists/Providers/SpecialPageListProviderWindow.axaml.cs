@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.Generic;
-using System.Linq;
 using Twain.Core.Lists.Providers;
 
 namespace Twain.UI.Lists.Providers;
@@ -25,6 +24,39 @@ public partial class SpecialPageListProviderWindow : Window
     public SpecialPageProviderOption? SelectedProvider =>
         SourceComboBox.SelectedItem as SpecialPageProviderOption;
 
+    public SpecialPageListProviderWindow(
+    SpecialPageListProvider.DialogRequest request)
+    : this()
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        SetProviders(
+            request.Providers);
+
+        SetNamespaces(
+            request.Namespaces);
+    }
+
+    /// <summary>
+    /// Creates the dialog selection represented by the current control values.
+    /// </summary>
+    /// <returns>
+    /// The selected provider, namespace, and page criteria, or
+    /// <see langword="null"/> when no provider is selected.
+    /// </returns>
+    public SpecialPageListProvider.DialogSelection? CreateSelection()
+    {
+        if (SelectedProvider is not { } provider)
+        {
+            return null;
+        }
+
+        return new SpecialPageListProvider.DialogSelection(
+            provider.Index,
+            NamespaceText,
+            PagesText);
+    }
+
     /// <summary>
     /// Gets the page criteria entered by the user.
     /// </summary>
@@ -45,12 +77,12 @@ public partial class SpecialPageListProviderWindow : Window
     /// The provider options available for selection.
     /// </param>
     public void SetProviders(
-        IEnumerable<SpecialPageProviderOption> providers)
+        IReadOnlyList<SpecialPageProviderOption> providers)
     {
         ArgumentNullException.ThrowIfNull(providers);
 
         SourceComboBox.ItemsSource =
-            providers.ToList();
+            providers;
 
         if (SourceComboBox.ItemCount > 0)
         {
@@ -65,12 +97,12 @@ public partial class SpecialPageListProviderWindow : Window
     /// The namespace names available for selection.
     /// </param>
     public void SetNamespaces(
-        IEnumerable<string> namespaces)
+        IReadOnlyList<string> namespaces)
     {
         ArgumentNullException.ThrowIfNull(namespaces);
 
         NamespaceComboBox.ItemsSource =
-            namespaces.ToList();
+            namespaces;
 
         if (NamespaceComboBox.ItemCount > 0)
         {

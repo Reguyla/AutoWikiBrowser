@@ -138,6 +138,31 @@ public partial class SpecialPageListProvider : Form, IListProvider
     }
 
     /// <summary>
+    /// Contains the data required to display the special-page list dialog.
+    /// </summary>
+    public sealed record DialogRequest(
+        IReadOnlyList<SpecialPageProviderOption> Providers,
+        IReadOnlyList<string> Namespaces);
+
+    /// <summary>
+    /// Contains the values selected in the special-page list dialog.
+    /// </summary>
+    public sealed record DialogSelection(
+        int ProviderIndex,
+        string NamespaceText,
+        string PagesText);
+
+    /// <summary>
+    /// Creates the data required to display the special-page list dialog.
+    /// </summary>
+    public DialogRequest CreateDialogRequest()
+    {
+        return new DialogRequest(
+            GetProviderOptions(),
+            GetNamespaceItems());
+    }
+
+    /// <summary>
     /// Displays the special-page list dialog and creates an article list using
     /// the selected provider and namespace.
     /// </summary>
@@ -187,6 +212,38 @@ public partial class SpecialPageListProvider : Form, IListProvider
             provider,
             cboNamespace.Text,
             txtPages.Text);
+    }
+
+    /// <summary>
+    /// Creates an article list from the values selected in the special-page dialog.
+    /// </summary>
+    /// <param name="selection">
+    /// The provider, namespace, and page criteria selected by the user.
+    /// </param>
+    /// <returns>
+    /// The articles created by the selected provider, or an empty list when the
+    /// selected provider cannot be resolved.
+    /// </returns>
+    private List<Article> MakeList(
+        DialogSelection selection)
+    {
+        ArgumentNullException.ThrowIfNull(selection);
+
+        ISpecialPageProvider? provider =
+            _listItems
+                .OfType<ISpecialPageProvider>()
+                .ElementAtOrDefault(
+                    selection.ProviderIndex);
+
+        if (provider is null)
+        {
+            return new List<Article>();
+        }
+
+        return MakeSpecialPageList(
+            provider,
+            selection.NamespaceText,
+            selection.PagesText);
     }
 
     private static List<Article> MakeSpecialPageList(
