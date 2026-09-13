@@ -631,19 +631,39 @@ namespace Twain.Core
             /// <returns>The formatted version description.</returns>
             private static string BuildVersionInformation()
             {
-                AssemblyName hostingApp = Assembly.GetExecutingAssembly().GetName();
+                Assembly assembly =
+                    Assembly.GetEntryAssembly() ??
+                    Assembly.GetExecutingAssembly();
 
-                string version = string.Format(
-                    "{0} ({1}), {2} ({3})",
-                    Application.ProductName,
-                    Application.ProductVersion,
-                    hostingApp.Name,
-                    hostingApp.Version);
+                AssemblyName application =
+                    assembly.GetName();
+
+                string productName =
+                    assembly
+                        .GetCustomAttribute<AssemblyProductAttribute>()?
+                        .Product ??
+                    application.Name ??
+                    "Twain";
+
+                string productVersion =
+                    assembly
+                        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                        .InformationalVersion ??
+                    application.Version?.ToString() ??
+                    "unknown";
+
+                string version =
+                    string.Format(
+                        "{0} ({1})",
+                        productName,
+                        productVersion);
 
                 // Suppress failures when Variables has not completed initialization.
                 try
                 {
-                    version += ", revision " + Variables.Revision;
+                    version +=
+                        ", revision " +
+                        Variables.Revision;
                 }
                 catch
                 {
