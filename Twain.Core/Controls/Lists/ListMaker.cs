@@ -916,6 +916,8 @@ public partial class ListMaker : UserControl, IList<Article>
             ": " +
             UserInputTextBox.Text +
             ")";
+
+        MakeTheList();
     }
 
     private void MakeTheList()
