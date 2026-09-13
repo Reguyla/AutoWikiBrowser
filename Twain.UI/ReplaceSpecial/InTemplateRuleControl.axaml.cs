@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using System.Collections.Generic;
+using System.Linq;
 using Twain.Core.ReplaceSpecial;
 
 namespace Twain.UI.ReplaceSpecial;
@@ -11,6 +13,7 @@ public partial class InTemplateRuleControl : UserControl
 {
     private InTemplateRule? _rule;
     private bool _loadingRule;
+    private readonly IRuleControlOwner? _owner;
 
     /// <summary>
     /// Initializes a new instance of the
@@ -30,8 +33,42 @@ public partial class InTemplateRuleControl : UserControl
     /// </param>
     public InTemplateRuleControl(
         InTemplateRule rule)
+        : this(
+            rule,
+            null)
+    {
+    }
+
+    /// <summary>
+    /// Selects the complete rule name when the name text box is double-clicked.
+    /// </summary>
+    private void NameTextBox_DoubleTapped(
+        object? sender,
+        Avalonia.Input.TappedEventArgs e)
+    {
+        NameTextBox.SelectAll();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="InTemplateRuleControl"/> class for the specified rule
+    /// and owner.
+    /// </summary>
+    /// <param name="rule">
+    /// The rule edited by this control.
+    /// </param>
+    /// <param name="owner">
+    /// The owner that receives notifications when the rule name changes.
+    /// </param>
+    public InTemplateRuleControl(
+        InTemplateRule rule,
+        IRuleControlOwner? owner)
         : this()
     {
+        ArgumentNullException.ThrowIfNull(rule);
+
+        _owner = owner;
+
         LoadRule(rule);
     }
 
@@ -44,80 +81,20 @@ public partial class InTemplateRuleControl : UserControl
     public void LoadRule(
         InTemplateRule rule)
     {
-        ArgumentNullException.ThrowIfNull(rule);
-
-        _rule = rule;
-        _loadingRule = true;
-
-        try
-        {
-            NameTextBox.Text =
-                rule.Name;
-
-            EnabledCheckBox.IsChecked =
-                rule.enabled_;
-
-            AliasesListBox.Items.Clear();
-
-            foreach (string alias in rule.TemplateNames_)
-            {
-                AliasesListBox.Items.Add(alias);
-            }
-
-            ReplaceCheckBox.IsChecked =
-                rule.DoReplace_;
-
-            ReplaceWithTextBox.Text =
-                rule.ReplaceWith_;
-
-            UpdateEnabledStates();
-        }
-        finally
-        {
-            _loadingRule = false;
-        }
+        RestoreFromRule(rule);
     }
 
     private void ReplaceCheckBox_Changed(
-    object? sender,
-    Avalonia.Interactivity.RoutedEventArgs e)
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (_loadingRule ||
-            _rule is null)
-        {
-            return;
-        }
-
-        _rule.DoReplace_ =
-            ReplaceCheckBox.IsChecked == true;
-
         UpdateEnabledStates();
     }
 
-    private void ReplaceWithTextBox_TextChanged(
-        object? sender,
-        TextChangedEventArgs e)
-    {
-        if (_loadingRule ||
-            _rule is null)
-        {
-            return;
-        }
-
-        _rule.ReplaceWith_ =
-            ReplaceWithTextBox.Text?.Trim() ??
-            string.Empty;
-    }
-
     private void AddButton_Click(
-    object? sender,
-    Avalonia.Interactivity.RoutedEventArgs e)
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (_rule is null)
-        {
-            return;
-        }
-
         string alias =
             AliasTextBox.Text ?? string.Empty;
 
@@ -128,8 +105,21 @@ public partial class InTemplateRuleControl : UserControl
 
         if (!AliasesListBox.Items.Contains(alias))
         {
-            AliasesListBox.Items.Add(alias);
-            _rule.TemplateNames_.Add(alias);
+            List<string> aliases =
+                AliasesListBox.Items
+                    .OfType<string>()
+                    .Append(alias)
+                    .OrderBy(
+                        value => value,
+                        StringComparer.CurrentCulture)
+                    .ToList();
+
+            AliasesListBox.Items.Clear();
+
+            foreach (string value in aliases)
+            {
+                AliasesListBox.Items.Add(value);
+            }
         }
 
         AliasTextBox.Text =
@@ -144,8 +134,7 @@ public partial class InTemplateRuleControl : UserControl
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (_rule is null ||
-            AliasesListBox.SelectedItem is not string alias)
+        if (AliasesListBox.SelectedItem is not string alias)
         {
             return;
         }
@@ -154,7 +143,6 @@ public partial class InTemplateRuleControl : UserControl
             AliasesListBox.SelectedIndex;
 
         AliasesListBox.Items.Remove(alias);
-        _rule.TemplateNames_.Remove(alias);
 
         int count =
             AliasesListBox.ItemCount;
@@ -197,31 +185,94 @@ public partial class InTemplateRuleControl : UserControl
         object? sender,
         TextChangedEventArgs e)
     {
-        if (_loadingRule ||
-            _rule is null)
+        if (_loadingRule)
         {
             return;
         }
 
-        _rule.Name =
+        _owner?.NameChanged(
             NameTextBox.Text?.Trim() ??
-            string.Empty;
+            string.Empty);
     }
 
     /// <summary>
-    /// Updates the rule enabled state when the check box changes.
+    /// Saves the values currently displayed by the control to the specified rule.
     /// </summary>
-    private void EnabledCheckBox_Changed(
-        object? sender,
-        Avalonia.Interactivity.RoutedEventArgs e)
+    /// <param name="rule">
+    /// The rule to update.
+    /// </param>
+    public void SaveToRule(
+        InTemplateRule rule)
     {
-        if (_loadingRule ||
-            _rule is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(rule);
 
-        _rule.enabled_ =
+        rule.enabled_ =
             EnabledCheckBox.IsChecked == true;
+
+        rule.Name =
+            NameTextBox.Text?.Trim() ??
+            string.Empty;
+
+        rule.ReplaceWith_ =
+            ReplaceWithTextBox.Text?.Trim() ??
+            string.Empty;
+
+        rule.DoReplace_ =
+            ReplaceCheckBox.IsChecked == true;
+
+        rule.TemplateNames_.Clear();
+
+        foreach (object? item in AliasesListBox.Items)
+        {
+            if (item is string alias)
+            {
+                rule.TemplateNames_.Add(alias);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Restores the specified rule values to the editor.
+    /// </summary>
+    /// <param name="rule">
+    /// The rule whose values should be displayed.
+    /// </param>
+    public void RestoreFromRule(
+        InTemplateRule rule)
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+
+        _rule = rule;
+        _loadingRule = true;
+
+        try
+        {
+            NameTextBox.Text =
+                rule.Name;
+
+            EnabledCheckBox.IsChecked =
+                rule.enabled_;
+
+            ReplaceWithTextBox.Text =
+                rule.ReplaceWith_;
+
+            ReplaceCheckBox.IsChecked =
+                rule.DoReplace_;
+
+            AliasesListBox.Items.Clear();
+
+            foreach (string alias in rule.TemplateNames_.OrderBy(
+                         alias => alias,
+                         StringComparer.CurrentCulture))
+            {
+                AliasesListBox.Items.Add(alias);
+            }
+
+            UpdateEnabledStates();
+        }
+        finally
+        {
+            _loadingRule = false;
+        }
     }
 }

@@ -19,14 +19,14 @@
             x:Name="NameTextBox"
             Grid.Row="0"
             Grid.Column="1"
+            DoubleTapped="NameTextBox_DoubleTapped"
             TextChanged="NameTextBox_TextChanged" />
 
         <CheckBox
             x:Name="EnabledCheckBox"
             Grid.Row="1"
             Grid.Column="1"
-            Content="Enabled"
-            IsCheckedChanged="EnabledCheckBox_Changed" />
+            Content="Enabled" />
 
         <TextBlock
             Grid.Row="2"
@@ -92,8 +92,7 @@
 
             <TextBox
                 x:Name="ReplaceWithTextBox"
-                Grid.Column="1"
-                TextChanged="ReplaceWithTextBox_TextChanged" />
+                Grid.Column="1" />
 
         </Grid>
 
