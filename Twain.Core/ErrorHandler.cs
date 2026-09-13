@@ -25,6 +25,11 @@ namespace Twain.Core
         public static Action<ErrorDialogContent>? ShowErrorDialog { get; set; }
 
         /// <summary>
+        /// Gets or sets the action used to display a user-facing error message.
+        /// </summary>
+        public static Action<string, string>? ShowErrorMessage { get; set; }
+
+        /// <summary>
         /// Title of the page currently being processed
         /// </summary>
         public static string CurrentPage;
@@ -69,56 +74,46 @@ namespace Twain.Core
 
             if (IsInvalidRegularExpression(ex, stackTrace))
             {
-                MessageBox.Show(
+                DisplayKnownError(
                     ex.Message,
-                    "Invalid regular expression",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    "Invalid regular expression");
 
                 return true;
             }
 
             if (IsUnsupportedCulture(ex))
             {
-                MessageBox.Show(
+                DisplayKnownError(
                     "Microsoft unfortunately doesn't support your locale culture. " +
                     "Please try a more commonly supported culture.",
-                    "Unsupported culture",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    "Unsupported culture");
 
                 return true;
             }
 
             if (IsNetworkException(ex))
             {
-                MessageBox.Show(
+                DisplayKnownError(
                     GetNetworkErrorMessage(ex),
-                    "Network access error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    "Network access error");
 
                 return true;
             }
 
             if (ex is OutOfMemoryException)
             {
-                MessageBox.Show(
+                DisplayKnownError(
                     ex.Message,
-                    "Out of Memory error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    "Out of Memory error");
 
                 return true;
             }
 
             if (IsIoException(ex))
             {
-                MessageBox.Show(
+                DisplayKnownError(
                     ex.Message,
-                    "I/O error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    "I/O error");
 
                 return true;
             }
@@ -127,6 +122,24 @@ namespace Twain.Core
                 return true;
 
             return false;
+        }
+
+        /// <summary>
+        /// Displays a recognized error condition using the active user interface.
+        /// </summary>
+        /// <param name="message">
+        /// The message to display.
+        /// </param>
+        /// <param name="title">
+        /// The dialog title.
+        /// </param>
+        private static void DisplayKnownError(
+            string message,
+            string title)
+        {
+            ShowErrorMessage?.Invoke(
+                message,
+                title);
         }
 
         /// <summary>
@@ -275,31 +288,7 @@ namespace Twain.Core
                 "HandleException",
                 content.Details);
 
-            if (ShowErrorDialog is not null)
-            {
-                ShowErrorDialog(content);
-                return;
-            }
-
-            ErrorHandler handler = new ErrorHandler
-            {
-                txtError =
-            {
-                Text = content.Summary
-            },
-
-                        txtSubject =
-            {
-                Text = content.Subject
-            },
-
-                        txtDetails =
-            {
-                Text = content.Details
-            }
-         };
-
-            handler.ShowDialog();
+            ShowErrorDialog?.Invoke(content);
         }
 
         /// <summary>

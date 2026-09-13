@@ -1,0 +1,30 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.ErrorHandling.ErrorMessageWindow"
+    Width="520"
+    Height="220"
+    MinWidth="420"
+    MinHeight="180"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid
+        Margin="16"
+        RowDefinitions="*,Auto"
+        RowSpacing="16">
+
+        <TextBlock
+            x:Name="MessageTextBlock"
+            Grid.Row="0"
+            TextWrapping="Wrap"
+            VerticalAlignment="Center" />
+
+        <Button
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            MinWidth="90"
+            Content="OK"
+            Click="OkButton_Click" />
+    </Grid>
+</Window>

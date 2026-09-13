@@ -6,7 +6,6 @@ using Twain.Core;
 using Twain.Core.Updates;
 using Twain.UI.ErrorHandling;
 using Twain.UI.Shell;
-using Twain.UI.ErrorHandling;
 using Twain.UI.Views.Shell;
 
 namespace Twain.UI;
@@ -62,44 +61,97 @@ public partial class App : Application
                     ShowErrorDialog(
                         desktop,
                         content);
+
+            ErrorHandler.ShowErrorMessage =
+                (message, title) =>
+                    ShowErrorMessage(
+                        desktop,
+                        message,
+                        title);
         }
+
+        base.OnFrameworkInitializationCompleted();
     }
 
-        /// <summary>
-        /// Displays unhandled exception information using the Avalonia error window.
-        /// </summary>
-        /// <param name="desktop">
-        /// The active desktop application lifetime.
-        /// </param>
-        /// <param name="content">
-        /// The error information to display.
-        /// </param>
-        private static void ShowErrorDialog(
-            IClassicDesktopStyleApplicationLifetime desktop,
-            ErrorHandler.ErrorDialogContent content)
+    /// <summary>
+    /// Displays unhandled exception information using the Avalonia error window.
+    /// </summary>
+    /// <param name="desktop">
+    /// The active desktop application lifetime.
+    /// </param>
+    /// <param name="content">
+    /// The error information to display.
+    /// </param>
+    private static void ShowErrorDialog(
+        IClassicDesktopStyleApplicationLifetime desktop,
+        ErrorHandler.ErrorDialogContent content)
+    {
+        void Show()
+        {
+            ErrorHandlerWindow window =
+                new(content);
+
+            if (desktop.MainWindow is { IsVisible: true })
             {
-                void Show()
-                {
-                    ErrorHandlerWindow window =
-                        new(content);
+                _ = window.ShowDialog(
+                    desktop.MainWindow);
 
-                    if (desktop.MainWindow is not null)
-                    {
-                        _ = window.ShowDialog(
-                            desktop.MainWindow);
-
-                        return;
-                    }
-
-                    window.Show();
-                }
-
-                if (Dispatcher.UIThread.CheckAccess())
-                {
-                    Show();
-                    return;
-                }
-
-                Dispatcher.UIThread.Post(Show);
+                return;
             }
+
+            window.Show();
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            Show();
+            return;
+        }
+
+        Dispatcher.UIThread.Post(Show);
+    }
+
+    /// <summary>
+    /// Displays a simple user-facing error message using Avalonia.
+    /// </summary>
+    /// <param name="desktop">
+    /// The active desktop application lifetime.
+    /// </param>
+    /// <param name="message">
+    /// The message to display.
+    /// </param>
+    /// <param name="title">
+    /// The window title.
+    /// </param>
+    private static void ShowErrorMessage(
+        IClassicDesktopStyleApplicationLifetime desktop,
+        string message,
+        string title)
+    {
+        void Show()
+        {
+            ErrorMessageWindow window =
+                new(
+                    title,
+                    message);
+
+            if (desktop.MainWindow is { IsVisible: true })
+            {
+                _ = window.ShowDialog(
+                    desktop.MainWindow);
+
+                return;
+            }
+
+            window.Show();
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            Show();
+            return;
+        }
+
+        Dispatcher.UIThread.Post(Show);
+    }
 }
