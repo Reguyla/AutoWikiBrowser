@@ -32,6 +32,99 @@ namespace Twain.Core
         private readonly Parse.TemplateSubstitutionProcessor _processor = new();
 
         /// <summary>
+        /// Describes the template-substitution settings presented to a user interface.
+        /// </summary>
+        public sealed record DialogRequest(
+            string[] TemplateList,
+            bool ExpandRecursively,
+            bool IgnoreUnformatted,
+            bool IncludeComments);
+
+        /// <summary>
+        /// Describes template-substitution settings returned by a user interface.
+        /// </summary>
+        public sealed record DialogSelection(
+            string[] TemplateList,
+            bool ExpandRecursively,
+            bool IgnoreUnformatted,
+            bool IncludeComments);
+
+        /// <summary>
+        /// Gets or sets the application-provided presenter used to edit template
+        /// substitution settings.
+        /// </summary>
+        public static Func<
+            DialogRequest,
+            Task<DialogSelection?>>?
+            ShowDialogAsync  { get; set; }
+
+        /// <summary>
+        /// Creates a snapshot of the current template-substitution settings for
+        /// presentation by a user interface.
+        /// </summary>
+        private DialogRequest CreateDialogRequest()
+        {
+            return new DialogRequest(
+                [.. TemplateList],
+                ExpandRecursively,
+                IgnoreUnformatted,
+                IncludeComments);
+        }
+
+        /// <summary>
+        /// Applies template-substitution settings returned by a user interface.
+        /// </summary>
+        /// <param name="selection">
+        /// The settings selected by the user.
+        /// </param>
+        private void ApplyDialogSelection(
+            DialogSelection selection)
+        {
+            ArgumentNullException.ThrowIfNull(selection);
+
+            TemplateList =
+                [.. selection.TemplateList];
+
+            ExpandRecursively =
+                selection.ExpandRecursively;
+
+            IgnoreUnformatted =
+                selection.IgnoreUnformatted;
+
+            IncludeComments =
+                selection.IncludeComments;
+        }
+
+        /// <summary>
+        /// Displays the application-provided template-substitution settings editor.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> when the user accepts the edited settings;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        public async Task<bool> ShowConfigurationDialogAsync()
+        {
+            if (ShowDialogAsync is null)
+            {
+                return false;
+            }
+
+            DialogSelection? selection =
+                await ShowDialogAsync(
+                    CreateDialogRequest());
+
+            if (selection is null)
+            {
+                return false;
+            }
+
+            ApplyDialogSelection(
+                selection);
+
+            return true;
+        }
+
+        /// <summary>
         /// Gets or sets the list of templates to substitute.
         /// </summary>
         /// <remarks>

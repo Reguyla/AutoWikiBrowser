@@ -9,6 +9,7 @@ using Twain.Core.Updates;
 using Twain.UI.ErrorHandling;
 using Twain.UI.Lists.Providers;
 using Twain.UI.Shell;
+using Twain.UI.Templates;
 using Twain.UI.Views.Shell;
 
 namespace Twain.UI;
@@ -83,7 +84,13 @@ public partial class App : Application
                     ShowAdvancedRegexHtmlScraperDialogAsync(
                         desktop,
                         settings);
-        }
+
+            SubstTemplates.ShowDialogAsync =
+                request =>
+                    ShowSubstTemplatesDialogAsync(
+                        desktop,
+                        request);
+                    }
 
         base.OnFrameworkInitializationCompleted();
     }
@@ -326,5 +333,95 @@ public partial class App : Application
         return accepted
             ? window.CreateSettings()
             : null;
+    }
+
+    /// <summary>
+    /// Displays the template-substitution settings dialog using Avalonia.
+    /// </summary>
+    /// <param name="desktop">
+    /// The active desktop application lifetime.
+    /// </param>
+    /// <param name="request">
+    /// The current template-substitution settings.
+    /// </param>
+    /// <returns>
+    /// The settings selected by the user, or <see langword="null"/> when the
+    /// dialog is cancelled or no visible owner window is available.
+    /// </returns>
+    private static Task<SubstTemplates.DialogSelection?>
+        ShowSubstTemplatesDialogAsync(
+            IClassicDesktopStyleApplicationLifetime desktop,
+            SubstTemplates.DialogRequest request)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            return ShowSubstTemplatesDialogOnUiThreadAsync(
+                desktop,
+                request);
+        }
+
+        TaskCompletionSource<
+            SubstTemplates.DialogSelection?> completion =
+            new(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+        Dispatcher.UIThread.Post(
+            async () =>
+            {
+                try
+                {
+                    SubstTemplates.DialogSelection? selection =
+                        await ShowSubstTemplatesDialogOnUiThreadAsync(
+                            desktop,
+                            request);
+
+                    completion.SetResult(
+                        selection);
+                }
+                catch (Exception exception)
+                {
+                    completion.SetException(
+                        exception);
+                }
+            });
+
+        return completion.Task;
+    }
+
+    /// <summary>
+    /// Displays the template-substitution settings dialog on the Avalonia UI
+    /// thread.
+    /// </summary>
+    private static async Task<SubstTemplates.DialogSelection?>
+        ShowSubstTemplatesDialogOnUiThreadAsync(
+            IClassicDesktopStyleApplicationLifetime desktop,
+            SubstTemplates.DialogRequest request)
+    {
+        if (desktop.MainWindow is not { IsVisible: true } owner)
+        {
+            return null;
+        }
+
+        SubstTemplatesWindow window =
+            new(
+                request.TemplateList,
+                request.ExpandRecursively,
+                request.IgnoreUnformatted,
+                request.IncludeComments);
+
+        bool accepted =
+            await window.ShowDialog<bool>(
+                owner);
+
+        if (!accepted)
+        {
+            return null;
+        }
+
+        return new SubstTemplates.DialogSelection(
+            [.. window.TemplateList],
+            window.ExpandRecursively,
+            window.IgnoreUnformatted,
+            window.IncludeComments);
     }
 }

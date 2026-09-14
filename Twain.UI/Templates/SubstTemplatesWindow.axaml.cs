@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Twain.UI.Templates;
 
 /// <summary>
@@ -194,6 +196,11 @@ public partial class SubstTemplatesWindow : Avalonia.Controls.Window
     {
         string text =
             TemplatesTextBox.Text ?? string.Empty;
+
+        if (text.Length == 0)
+        {
+            return [];
+        }
 
         return text.Replace(
                 "\r\n",
