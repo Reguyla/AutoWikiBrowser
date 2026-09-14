@@ -1,0 +1,54 @@
+<UserControl
+    x:Class="Twain.UI.ReplaceSpecial.TemplateParamRuleControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid
+        RowDefinitions="Auto,Auto,Auto,Auto"
+        ColumnDefinitions="Auto,*"
+        ColumnSpacing="8"
+        RowSpacing="8">
+
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Name:" />
+
+        <TextBox
+            x:Name="NameTextBox"
+            Grid.Row="0"
+            Grid.Column="1"
+            TextChanged="NameTextBox_TextChanged" />
+
+        <CheckBox
+            x:Name="EnabledCheckBox"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Enabled" />
+
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Parameter name:" />
+
+        <TextBox
+            x:Name="ParamNameTextBox"
+            Grid.Row="2"
+            Grid.Column="1" />
+
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Change name to:" />
+
+        <TextBox
+            x:Name="ChangeNameToTextBox"
+            Grid.Row="3"
+            Grid.Column="1" />
+
+    </Grid>
+
+</UserControl>
