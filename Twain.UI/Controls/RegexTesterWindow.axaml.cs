@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Controls;
+using Twain.UI.Controls;
 
 namespace Twain.UI.Controls;
 

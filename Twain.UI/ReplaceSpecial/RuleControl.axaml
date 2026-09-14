@@ -1,0 +1,261 @@
+<UserControl
+    x:Class="Twain.UI.ReplaceSpecial.RuleControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        ColumnDefinitions="Auto,*,Auto"
+        ColumnSpacing="8"
+        RowSpacing="8">
+
+        <!-- Rule name -->
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Name:" />
+
+        <TextBox
+            x:Name="NameTextBox"
+            Grid.Row="0"
+            Grid.Column="1"
+            DoubleTapped="NameTextBox_DoubleTapped"
+            TextChanged="NameTextBox_TextChanged" />
+
+        <CheckBox
+            x:Name="RuleEnabledCheckBox"
+            Grid.Row="0"
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Content="Enabled" />
+
+        <!-- Rule type -->
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Type:" />
+
+        <ComboBox
+            x:Name="RuleTypeComboBox"
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            SelectedIndex="0">
+
+            <ComboBoxItem Content="Entire text" />
+            <ComboBoxItem Content="Inside templates {{..}}" />
+
+        </ComboBox>
+
+        <!-- Find / If editors -->
+        <TabControl
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="3">
+
+            <!-- Find tab -->
+            <TabItem Header="Find">
+
+                <Grid
+                    RowDefinitions="*,Auto,*,Auto,Auto"
+                    ColumnDefinitions="*,*,Auto"
+                    ColumnSpacing="8"
+                    RowSpacing="8">
+
+                    <TextBox
+                        x:Name="ReplaceTextBox"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        AcceptsReturn="True"
+                        TextWrapping="NoWrap"
+                        MinHeight="100" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Text="Replace with:" />
+
+                    <TextBox
+                        x:Name="WithTextBox"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        AcceptsReturn="True"
+                        TextWrapping="NoWrap"
+                        MinHeight="100" />
+
+                    <StackPanel
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="8">
+
+                    <CheckBox
+                        x:Name="ReplaceIsRegexCheckBox"
+                        Content="Regular expression"
+                        IsCheckedChanged="ReplaceIsRegexCheckBox_IsCheckedChanged" />
+
+                        <CheckBox
+                            x:Name="ReplaceIsMultilineCheckBox"
+                            Content="Multiline" />
+
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="8">
+
+                        <CheckBox
+                            x:Name="ReplaceIsCaseSensitiveCheckBox"
+                            Content="Case sensitive" />
+
+                        <CheckBox
+                            x:Name="ReplaceIsSinglelineCheckBox"
+                            Content="Singleline" />
+
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Row="3"
+                        Grid.RowSpan="2"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Spacing="4">
+
+                        <TextBlock
+                            Text="Apply No. of times" />
+
+                        <NumericUpDown
+                            x:Name="NumberOfTimesUpDown"
+                            Minimum="0"
+                            Maximum="100"
+                            Value="1"
+                            Width="80"
+                            HorizontalAlignment="Left" />
+
+                    </StackPanel>
+
+                    <Button
+                        x:Name="TestFindButton"
+                        Grid.Row="3"
+                        Grid.RowSpan="2"
+                        Grid.Column="2"
+                        VerticalAlignment="Bottom"
+                        Content="Test..."
+                        IsEnabled="False" />
+
+                </Grid>
+
+            </TabItem>
+
+            <!-- If tab -->
+            <TabItem Header="If">
+
+                <Grid
+                    RowDefinitions="Auto,*,Auto,*,Auto,Auto"
+                    ColumnDefinitions="*,*,Auto"
+                    ColumnSpacing="8"
+                    RowSpacing="8">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Text="Contains" />
+
+                    <TextBox
+                        x:Name="IfContainsTextBox"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        AcceptsReturn="True"
+                        TextWrapping="NoWrap"
+                        MinHeight="100" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Text="Not contains" />
+
+                    <TextBox
+                        x:Name="IfNotContainsTextBox"
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        AcceptsReturn="True"
+                        TextWrapping="NoWrap"
+                        MinHeight="100" />
+
+                    <StackPanel
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="8">
+
+                    <CheckBox
+                        x:Name="IfIsRegexCheckBox"
+                        Content="Regular expression"
+                        IsCheckedChanged="IfIsRegexCheckBox_IsCheckedChanged" />
+
+                        <CheckBox
+                            x:Name="IfIsMultilineCheckBox"
+                            Content="Multiline" />
+
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="8">
+
+                        <CheckBox
+                            x:Name="IfIsCaseSensitiveCheckBox"
+                            Content="Case sensitive" />
+
+                        <CheckBox
+                            x:Name="IfIsSinglelineCheckBox"
+                            Content="Singleline" />
+
+                    </StackPanel>
+
+                    <Button
+                        x:Name="TestIfButton"
+                        Grid.Row="4"
+                        Grid.RowSpan="2"
+                        Grid.Column="2"
+                        VerticalAlignment="Bottom"
+                        Content="Test..."
+                        IsEnabled="False"
+                        Click="TestIfButton_Click">
+
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem
+                                    Header="Test if contains..."
+                                    Click="TestIfContainsMenuItem_Click" />
+
+                                <MenuItem
+                                    Header="Test if not contains..."
+                                    Click="TestIfNotContainsMenuItem_Click" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+
+                    </Button>
+
+                </Grid>
+
+            </TabItem>
+
+        </TabControl>
+
+    </Grid>
+
+</UserControl>
