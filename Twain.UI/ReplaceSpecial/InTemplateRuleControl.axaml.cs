@@ -11,7 +11,6 @@ namespace Twain.UI.ReplaceSpecial;
 /// </summary>
 public partial class InTemplateRuleControl : UserControl
 {
-    private InTemplateRule? _rule;
     private bool _loadingRule;
     private readonly IRuleControlOwner? _owner;
 
@@ -46,7 +45,7 @@ public partial class InTemplateRuleControl : UserControl
         object? sender,
         Avalonia.Input.TappedEventArgs e)
     {
-        NameTextBox.SelectAll();
+        SelectName();
     }
 
     /// <summary>
@@ -89,6 +88,28 @@ public partial class InTemplateRuleControl : UserControl
         Avalonia.Interactivity.RoutedEventArgs e)
     {
         UpdateEnabledStates();
+    }
+
+    /// <summary>
+    /// Sets the name displayed in the rule name text box.
+    /// </summary>
+    /// <param name="name">
+    /// The rule name to display.
+    /// </param>
+    public void SetName(
+        string name)
+    {
+        NameTextBox.Text =
+            name;
+    }
+
+    /// <summary>
+    /// Selects all text in the rule name text box.
+    /// </summary>
+    public void SelectName()
+    {
+        NameTextBox.Focus();
+        NameTextBox.SelectAll();
     }
 
     private void AddButton_Click(
@@ -242,7 +263,6 @@ public partial class InTemplateRuleControl : UserControl
     {
         ArgumentNullException.ThrowIfNull(rule);
 
-        _rule = rule;
         _loadingRule = true;
 
         try
