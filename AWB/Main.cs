@@ -9626,9 +9626,11 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data.</param>
-    private void btnSubst_Click(object sender, EventArgs e)
+    private async void btnSubst_Click(
+        object sender,
+        EventArgs e)
     {
-        _substTemplates.ShowDialog();
+        await _substTemplates.ShowConfigurationDialogAsync();
     }
 
     /// <summary>
