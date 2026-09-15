@@ -71,37 +71,57 @@ public partial class FindandReplace : Form
         }
     }
 
-    private static Replacement RowToReplacement(DataGridViewRow dataGridRow)
+    private static Replacement RowToReplacement(
+        DataGridViewRow dataGridRow)
     {
-        Replacement rep = new Replacement
+        ReplacementEditorRow row =
+            ReadEditorRow(dataGridRow);
+
+        return CreateReplacement(
+            row.Find,
+            row.Replace,
+            row.Enabled,
+            row.Minor,
+            row.IsRegex,
+            row.BeforeOrAfter,
+            row.CaseSensitive,
+            row.Multiline,
+            row.Singleline,
+            row.Comment);
+    }
+
+    /// <summary>
+    /// Creates a replacement entry from the supplied configuration.
+    /// </summary>
+    private static Replacement CreateReplacement(
+        string find,
+        string replace,
+        bool enabled,
+        bool minor,
+        bool isRegex,
+        bool beforeOrAfter,
+        bool caseSensitive,
+        bool multiline,
+        bool singleline,
+        string comment)
+    {
+        return new Replacement
         {
-            Enabled = ((bool)dataGridRow.Cells["enabled"].FormattedValue),
-            Minor = ((bool)dataGridRow.Cells["minor"].FormattedValue),
-            IsRegex = ((bool)dataGridRow.Cells["regex"].FormattedValue),
-            BeforeOrAfter = ((bool)dataGridRow.Cells["BeforeOrAfter"].FormattedValue)
+            Enabled = enabled,
+            Minor = minor,
+            IsRegex = isRegex,
+            BeforeOrAfter = beforeOrAfter,
+            Find = PrepareFindText(
+                find,
+                isRegex),
+            Replace = Encode(
+                replace),
+            RegularExpressionOptions = CreateRegexOptions(
+                caseSensitive,
+                multiline,
+                singleline),
+            Comment = comment
         };
-
-        if (dataGridRow.Cells["replace"].Value == null)
-            dataGridRow.Cells["replace"].Value = string.Empty;
-
-        rep.Find =
-            PrepareFindText(
-                dataGridRow.Cells["find"].Value.ToString(),
-                rep.IsRegex);
-
-        rep.Replace =
-            Encode(
-                dataGridRow.Cells["replace"].Value.ToString());
-
-        rep.RegularExpressionOptions =
-            CreateRegexOptions(
-                (bool)dataGridRow.Cells["casesensitive"].FormattedValue,
-                (bool)dataGridRow.Cells["multi"].FormattedValue,
-                (bool)dataGridRow.Cells["single"].FormattedValue);
-
-        rep.Comment = (string)dataGridRow.Cells["comment"].FormattedValue ?? "";
-
-        return rep;
     }
 
     /// <summary>
@@ -186,6 +206,36 @@ public partial class FindandReplace : Form
         }
 
         return options;
+    }
+
+    /// <summary>
+    /// Determines whether a replacement uses case-sensitive matching.
+    /// </summary>
+    private static bool IsCaseSensitive(
+        Replacement replacement)
+    {
+        return (replacement.RegularExpressionOptions & RegexOptions.IgnoreCase) !=
+            RegexOptions.IgnoreCase;
+    }
+
+    /// <summary>
+    /// Determines whether a replacement uses multiline regular expression behavior.
+    /// </summary>
+    private static bool IsMultiline(
+        Replacement replacement)
+    {
+        return (replacement.RegularExpressionOptions & RegexOptions.Multiline) ==
+            RegexOptions.Multiline;
+    }
+
+    /// <summary>
+    /// Determines whether a replacement uses single-line regular expression behavior.
+    /// </summary>
+    private static bool IsSingleline(
+        Replacement replacement)
+    {
+        return (replacement.RegularExpressionOptions & RegexOptions.Singleline) ==
+            RegexOptions.Singleline;
     }
 
     /// <summary>
@@ -530,33 +580,90 @@ public partial class FindandReplace : Form
     #region loading/saving
 
     /// <summary>
-    /// Loads a single replacement entry into the find and replace data grid
+    /// Prepares replacement find text for display in an editor.
     /// </summary>
-    /// <param name="r"></param>
-    public void AddNew(Replacement r)
+    /// <param name="replacement">
+    /// The replacement entry being displayed.
+    /// </param>
+    /// <param name="decodeRequired">
+    /// Whether encoded newline characters should be decoded.
+    /// </param>
+    /// <returns>
+    /// The find text to display.
+    /// </returns>
+    private static string PrepareFindTextForEditor(
+        Replacement replacement,
+        bool decodeRequired)
     {
-        AddNew(r, true);
+        if (decodeRequired)
+        {
+            string find =
+                Decode(replacement.Find);
+
+            return replacement.IsRegex
+                ? find
+                : Regex.Unescape(find);
+        }
+
+        return replacement.IsRegex
+            ? replacement.Find
+            : Regex.Unescape(replacement.Find);
     }
 
     /// <summary>
-    /// Loads a single replacement entry into the find and replace data grid
+    /// Prepares replacement text for display in an editor.
     /// </summary>
-    /// <param name="r">The red component.</param>
-    /// <param name="decodeRequired">Whether decoding of newlines in find and replace text required. Required when loading settings from XML. NOT required when restoring from backup after Cancel</param>
-    public void AddNew(Replacement r, bool decodeRequired)
+    /// <param name="replacement">
+    /// The replacement entry being displayed.
+    /// </param>
+    /// <param name="decodeRequired">
+    /// Whether encoded newline characters should be decoded.
+    /// </param>
+    /// <returns>
+    /// The replacement text to display.
+    /// </returns>
+    private static string PrepareReplaceTextForEditor(
+        Replacement replacement,
+        bool decodeRequired)
     {
-        bool caseSens = (r.RegularExpressionOptions & RegexOptions.IgnoreCase) != RegexOptions.IgnoreCase;
-        bool multiline = (r.RegularExpressionOptions & RegexOptions.Multiline) == RegexOptions.Multiline;
-        bool singleLine = (r.RegularExpressionOptions & RegexOptions.Singleline) == RegexOptions.Singleline;
+        return decodeRequired
+            ? Decode(replacement.Replace)
+            : replacement.Replace;
+    }
 
-        if (decodeRequired)
-            dataGridView1.Rows.Add(r.IsRegex ? Decode(r.Find) : Regex.Unescape(Decode(r.Find)), Decode(r.Replace),
-                               caseSens, r.IsRegex, multiline, singleLine, r.Minor, r.BeforeOrAfter, r.Enabled, r.Comment);
-        else
-            dataGridView1.Rows.Add(r.IsRegex ? r.Find : Regex.Unescape(r.Find), r.Replace,
-                caseSens, r.IsRegex, multiline, singleLine, r.Minor, r.BeforeOrAfter, r.Enabled, r.Comment);
+    /// <summary>
+    /// Loads a single replacement entry into the find and replace data grid.
+    /// </summary>
+    /// <param name="r">The replacement entry.</param>
+    /// <param name="decodeRequired">
+    /// Whether decoding of newlines in find and replace text is required.
+    /// Required when loading settings from XML and not required when restoring
+    /// from backup after Cancel.
+    /// </param>
+    public void AddNew(
+        Replacement r,
+        bool decodeRequired)
+    {
+        ReplacementEditorRow row =
+            CreateEditorRow(
+                r,
+                decodeRequired);
+
+        AddEditorRowToGrid(row);
 
         AddReplacement(r);
+    }
+
+    /// <summary>
+    /// Loads a single replacement entry into the find and replace data grid.
+    /// </summary>
+    /// <param name="r">The replacement entry.</param>
+    public void AddNew(
+        Replacement r)
+    {
+        AddNew(
+            r,
+            true);
     }
 
     /// <summary>
@@ -569,6 +676,102 @@ public partial class FindandReplace : Form
         {
             AddNew(r);
         }
+    }
+
+    /// <summary>
+    /// Creates editable row values from a replacement entry.
+    /// </summary>
+    /// <param name="replacement">
+    /// The replacement entry to convert.
+    /// </param>
+    /// <param name="decodeRequired">
+    /// Whether encoded newline characters should be decoded.
+    /// </param>
+    /// <returns>
+    /// The editable values for the replacement entry.
+    /// </returns>
+    private static ReplacementEditorRow CreateEditorRow(
+        Replacement replacement,
+        bool decodeRequired)
+    {
+        return new ReplacementEditorRow(
+            PrepareFindTextForEditor(
+                replacement,
+                decodeRequired),
+            PrepareReplaceTextForEditor(
+                replacement,
+                decodeRequired),
+            IsCaseSensitive(replacement),
+            replacement.IsRegex,
+            IsMultiline(replacement),
+            IsSingleline(replacement),
+            replacement.Minor,
+            replacement.BeforeOrAfter,
+            replacement.Enabled,
+            replacement.Comment);
+    }
+
+    /// <summary>
+    /// Adds editable replacement values to the legacy data grid.
+    /// </summary>
+    /// <param name="row">
+    /// The editable replacement values to add.
+    /// </param>
+    private void AddEditorRowToGrid(
+        ReplacementEditorRow row)
+    {
+        dataGridView1.Rows.Add(
+            row.Find,
+            row.Replace,
+            row.CaseSensitive,
+            row.IsRegex,
+            row.Multiline,
+            row.Singleline,
+            row.Minor,
+            row.BeforeOrAfter,
+            row.Enabled,
+            row.Comment);
+    }
+
+    /// <summary>
+    /// Represents the editable values for a find and replace entry independently
+    /// of the user interface used to edit them.
+    /// </summary>
+    private sealed record ReplacementEditorRow(
+        string Find,
+        string Replace,
+        bool CaseSensitive,
+        bool IsRegex,
+        bool Multiline,
+        bool Singleline,
+        bool Minor,
+        bool BeforeOrAfter,
+        bool Enabled,
+        string Comment);
+
+    /// <summary>
+    /// Reads editable replacement values from a legacy data grid row.
+    /// </summary>
+    private static ReplacementEditorRow ReadEditorRow(
+        DataGridViewRow dataGridRow)
+    {
+        if (dataGridRow.Cells["replace"].Value == null)
+        {
+            dataGridRow.Cells["replace"].Value =
+                string.Empty;
+        }
+
+        return new ReplacementEditorRow(
+            dataGridRow.Cells["find"].Value.ToString(),
+            dataGridRow.Cells["replace"].Value.ToString(),
+            (bool)dataGridRow.Cells["casesensitive"].FormattedValue,
+            (bool)dataGridRow.Cells["regex"].FormattedValue,
+            (bool)dataGridRow.Cells["multi"].FormattedValue,
+            (bool)dataGridRow.Cells["single"].FormattedValue,
+            (bool)dataGridRow.Cells["minor"].FormattedValue,
+            (bool)dataGridRow.Cells["BeforeOrAfter"].FormattedValue,
+            (bool)dataGridRow.Cells["enabled"].FormattedValue,
+            (string)dataGridRow.Cells["comment"].FormattedValue ?? "");
     }
 
     /// <summary>
