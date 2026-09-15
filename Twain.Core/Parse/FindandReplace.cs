@@ -298,14 +298,9 @@ public partial class FindandReplace : Form
         ReplacedSummary = string.Empty;
         RemovedSummary = string.Empty;
 
-        if (IgnoreMore)
-        {
-            articleText = _remove.HideMore(articleText);
-        }
-        else if (IgnoreLinks)
-        {
-            articleText = _remove.Hide(articleText);
-        }
+        articleText =
+            HideIgnoredText(
+                articleText);
 
         foreach (Replacement rep in _replacementList)
         {
@@ -321,78 +316,76 @@ public partial class FindandReplace : Form
             }
         }
 
+        articleText =
+            RestoreIgnoredText(
+                articleText);
+
+        if (AppendToSummary)
+        {
+            editSummary =
+                FindReplace.AppendEditSummary(
+                    editSummary,
+                    ReplacedSummary,
+                    RemovedSummary,
+                    Variables.LangCode);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Hides article content that should be excluded from find and replace processing.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to prepare.
+    /// </param>
+    /// <returns>
+    /// The article text with configured content hidden.
+    /// </returns>
+    private string HideIgnoredText(
+        string articleText)
+    {
+        if (IgnoreMore)
+        {
+            return _remove.HideMore(
+                articleText);
+        }
+
+        if (IgnoreLinks)
+        {
+            return _remove.Hide(
+                articleText);
+        }
+
+        return articleText;
+    }
+
+    /// <summary>
+    /// Restores article content hidden before find and replace processing.
+    /// </summary>
+    /// <param name="articleText">
+    /// The processed article text.
+    /// </param>
+    /// <returns>
+    /// The article text with previously hidden content restored.
+    /// </returns>
+    private string RestoreIgnoredText(
+        string articleText)
+    {
         if (IgnoreMore)
         {
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_24#FormatException_in_HideText.AddBackMore
             // FIXME: Usages of IgnoreMore with number (or M) replacement done in the FindAndReplace can cause corruption
             // e.g. Replacing 2 with "" ⌊⌊⌊⌊M2⌋⌋⌋⌋ becomes ⌊⌊⌊⌊M⌋⌋⌋⌋
             // This cannot then be added back
-            articleText = _remove.AddBackMore(articleText);
-        }
-        else if (IgnoreLinks)
-        {
-            articleText = _remove.AddBack(articleText);
+            return _remove.AddBackMore(
+                articleText);
         }
 
-        if (AppendToSummary)
+        if (IgnoreLinks)
         {
-            if (!string.IsNullOrEmpty(ReplacedSummary))
-                if (Variables.LangCode.Equals("ar"))
-                    editSummary = "استبدل: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("arz"))
-                    editSummary = "غير: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("be"))
-                    editSummary = "перанесена: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("el"))
-                    editSummary = "αντικατέστησε: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("eo"))
-                    editSummary = "anstataŭigis: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("fa"))
-                    editSummary = "جایگزین شد: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("fr"))
-                    editSummary = "remplacement: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("hy"))
-                    editSummary = "փոխարինվեց: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("sq"))
-                    editSummary = "zëvendësova: " + ReplacedSummary.Trim();
-                else if (Variables.LangCode.Equals("tr"))
-                    editSummary = "değiştirildi: " + ReplacedSummary.Trim();
-                else
-                    editSummary += "replaced: " + ReplacedSummary.Trim();
-
-            if (!string.IsNullOrEmpty(RemovedSummary))
-            {
-                if (!string.IsNullOrEmpty(editSummary))
-                {
-                    if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
-                        editSummary += "، ";
-                    else
-                        editSummary += ", ";
-                }
-
-                if (Variables.LangCode.Equals("ar"))
-                    editSummary += "أزال: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("arz"))
-                    editSummary += "شال: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("be"))
-                    editSummary += "выдалена: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("el"))
-                    editSummary += "αφαίρεσε: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("eo"))
-                    editSummary += "forigis: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("fa"))
-                    editSummary += "حذف شده: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("fr"))
-                    editSummary += "retrait: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("hy"))
-                    editSummary += "ջնջվեց: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("sq"))
-                    editSummary += "hoqa: " + RemovedSummary.Trim();
-                else if (Variables.LangCode.Equals("tr"))
-                    editSummary += "çıkartıldı:" + RemovedSummary.Trim();
-                else
-                    editSummary += "removed: " + RemovedSummary.Trim();
-            }
+            return _remove.AddBack(
+                articleText);
         }
 
         return articleText;
