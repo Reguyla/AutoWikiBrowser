@@ -40,6 +40,9 @@ public partial class FindandReplace : Form
 
     private List<Replacement> _replacementList = new();
     private List<Replacement> replacementBackup;
+    private bool _ignoreLinks;
+    private bool _ignoreMore;
+    private bool _appendToSummary = true;
 
     private bool _applyDefault;
     private bool ApplyDefaultFormatting
@@ -81,30 +84,20 @@ public partial class FindandReplace : Form
         if (dataGridRow.Cells["replace"].Value == null)
             dataGridRow.Cells["replace"].Value = string.Empty;
 
-        string f = Encode(dataGridRow.Cells["find"].Value.ToString());
-        string r = Encode(dataGridRow.Cells["replace"].Value.ToString());
+        rep.Find =
+            PrepareFindText(
+                dataGridRow.Cells["find"].Value.ToString(),
+                rep.IsRegex);
 
-        // in F&R newline matching is on \n, so if not a regex ensure this isn't escaped
-        if (!rep.IsRegex)
-        {
-            bool newlines = f.Contains("\\n");
-            f = Regex.Escape(f);
+        rep.Replace =
+            Encode(
+                dataGridRow.Cells["replace"].Value.ToString());
 
-            if (newlines)
-                f = f.Replace(@"\\n", "\n");
-        }
-
-        rep.Find = f;
-        rep.Replace = r;
-
-        if (!(bool)dataGridRow.Cells["casesensitive"].FormattedValue)
-            rep.RegularExpressionOptions |= RegexOptions.IgnoreCase;
-
-        if ((bool)dataGridRow.Cells["multi"].FormattedValue)
-            rep.RegularExpressionOptions |= RegexOptions.Multiline;
-
-        if ((bool)dataGridRow.Cells["single"].FormattedValue)
-            rep.RegularExpressionOptions |= RegexOptions.Singleline;
+        rep.RegularExpressionOptions =
+            CreateRegexOptions(
+                (bool)dataGridRow.Cells["casesensitive"].FormattedValue,
+                (bool)dataGridRow.Cells["multi"].FormattedValue,
+                (bool)dataGridRow.Cells["single"].FormattedValue);
 
         rep.Comment = (string)dataGridRow.Cells["comment"].FormattedValue ?? "";
 
@@ -112,18 +105,114 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Builds backup list of find and replace entries in case user later wants to restore them
+    /// Prepares find text for use by a replacement entry.
+    /// </summary>
+    /// <param name="find">
+    /// The encoded find text.
+    /// </param>
+    /// <param name="isRegex">
+    /// Whether the find text is a regular expression.
+    /// </param>
+    /// <returns>
+    /// The prepared find expression.
+    /// </returns>
+    private static string PrepareFindText(
+        string find,
+        bool isRegex)
+    {
+        string preparedFind =
+            Encode(find);
+
+        // In F&R newline matching is on \n, so if not a regex ensure this isn't escaped.
+        if (!isRegex)
+        {
+            bool newlines =
+                preparedFind.Contains("\\n");
+
+            preparedFind =
+                Regex.Escape(preparedFind);
+
+            if (newlines)
+            {
+                preparedFind =
+                    preparedFind.Replace(
+                        @"\\n",
+                        "\n");
+            }
+        }
+
+        return preparedFind;
+    }
+
+    /// <summary>
+    /// Creates the regular expression options for a replacement entry.
+    /// </summary>
+    /// <param name="caseSensitive">
+    /// Whether matching is case-sensitive.
+    /// </param>
+    /// <param name="multiline">
+    /// Whether multiline regular expression behavior is enabled.
+    /// </param>
+    /// <param name="singleline">
+    /// Whether single-line regular expression behavior is enabled.
+    /// </param>
+    /// <returns>
+    /// The configured regular expression options.
+    /// </returns>
+    private static RegexOptions CreateRegexOptions(
+        bool caseSensitive,
+        bool multiline,
+        bool singleline)
+    {
+        RegexOptions options =
+            RegexOptions.None;
+
+        if (!caseSensitive)
+        {
+            options |=
+                RegexOptions.IgnoreCase;
+        }
+
+        if (multiline)
+        {
+            options |=
+                RegexOptions.Multiline;
+        }
+
+        if (singleline)
+        {
+            options |=
+                RegexOptions.Singleline;
+        }
+
+        return options;
+    }
+
+    /// <summary>
+    /// Builds backup list of find and replace entries in case user later wants to restore them.
     /// </summary>
     public void MakeList()
     {
-        dataGridView1.EndEdit(); _replacementList.Clear();
+        dataGridView1.EndEdit();
 
-        foreach (DataGridViewRow dataGridRow in dataGridView1.Rows)
+        RebuildReplacementListFromGrid();
+    }
+
+    /// <summary>
+    /// Rebuilds the configured replacement list from the legacy editor grid.
+    /// </summary>
+    private void RebuildReplacementListFromGrid()
+    {
+        ClearReplacementList();
+
+        foreach (DataGridViewRow row in dataGridView1.Rows)
         {
-            if (dataGridRow.IsNewRow || dataGridRow.Cells["find"].Value == null)
-                continue;
-
-            _replacementList.Add(RowToReplacement(dataGridRow));
+            if (!row.IsNewRow &&
+                row.Cells["find"].Value is not null)
+            {
+                AddReplacement(
+                    RowToReplacement(row));
+            }
         }
     }
 
@@ -189,11 +278,11 @@ public partial class FindandReplace : Form
         ReplacedSummary = string.Empty;
         RemovedSummary = string.Empty;
 
-        if (chkIgnoreMore.Checked)
+        if (IgnoreMore)
         {
             articleText = _remove.HideMore(articleText);
         }
-        else if (chkIgnoreLinks.Checked)
+        else if (IgnoreLinks)
         {
             articleText = _remove.Hide(articleText);
         }
@@ -212,7 +301,7 @@ public partial class FindandReplace : Form
             }
         }
 
-        if (chkIgnoreMore.Checked)
+        if (IgnoreMore)
         {
             // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_24#FormatException_in_HideText.AddBackMore
             // FIXME: Usages of IgnoreMore with number (or M) replacement done in the FindAndReplace can cause corruption
@@ -220,12 +309,12 @@ public partial class FindandReplace : Form
             // This cannot then be added back
             articleText = _remove.AddBackMore(articleText);
         }
-        else if (chkIgnoreLinks.Checked)
+        else if (IgnoreLinks)
         {
             articleText = _remove.AddBack(articleText);
         }
 
-        if (chkAddToSummary.Checked)
+        if (AppendToSummary)
         {
             if (!string.IsNullOrEmpty(ReplacedSummary))
                 if (Variables.LangCode.Equals("ar"))
@@ -390,12 +479,34 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Clears the set replacements.
+    /// Clears the configured replacement entries and the legacy editor grid.
     /// </summary>
     public void Clear()
     {
-        _replacementList.Clear();
+        ClearReplacementList();
         dataGridView1.Rows.Clear();
+    }
+
+    /// <summary>
+    /// Clears the configured replacement entries.
+    /// </summary>
+    private void ClearReplacementList()
+    {
+        _replacementList.Clear();
+    }
+
+    /// <summary>
+    /// Adds a replacement entry to the configured replacement list.
+    /// </summary>
+    /// <param name="replacement">
+    /// The replacement entry to add.
+    /// </param>
+    private void AddReplacement(
+        Replacement replacement)
+    {
+        ArgumentNullException.ThrowIfNull(replacement);
+
+        _replacementList.Add(replacement);
     }
 
     /// <summary>
@@ -445,7 +556,7 @@ public partial class FindandReplace : Form
             dataGridView1.Rows.Add(r.IsRegex ? r.Find : Regex.Unescape(r.Find), r.Replace,
                 caseSens, r.IsRegex, multiline, singleLine, r.Minor, r.BeforeOrAfter, r.Enabled, r.Comment);
 
-        _replacementList.Add(r);
+        AddReplacement(r);
     }
 
     /// <summary>
@@ -461,11 +572,14 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Gets the find and replace settings.
+    /// Gets a copy of the configured find and replace entries.
     /// </summary>
+    /// <returns>
+    /// A new list containing the configured replacements.
+    /// </returns>
     public List<Replacement> GetList()
     {
-        return _replacementList;
+        return [.. _replacementList];
     }
 
     /// <summary>
@@ -474,8 +588,12 @@ public partial class FindandReplace : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IgnoreLinks
     {
-        get { return chkIgnoreLinks.Checked; }
-        set { chkIgnoreLinks.Checked = value; }
+        get => _ignoreLinks;
+        set
+        {
+            _ignoreLinks = value;
+            chkIgnoreLinks.Checked = value;
+        }
     }
 
     /// <summary>
@@ -485,8 +603,46 @@ public partial class FindandReplace : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IgnoreMore
     {
-        get { return chkIgnoreMore.Checked; }
-        set { chkIgnoreMore.Checked = value; }
+        get => _ignoreMore;
+        set
+        {
+            _ignoreMore = value;
+            chkIgnoreMore.Checked = value;
+        }
+    }
+
+    private void chkIgnoreLinks_CheckedChanged(
+    object sender,
+    EventArgs e)
+    {
+        _ignoreLinks =
+            chkIgnoreLinks.Checked;
+    }
+
+    private void chkIgnoreMore_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        _ignoreMore =
+            chkIgnoreMore.Checked;
+
+        if (chkIgnoreMore.Checked)
+        {
+            chkIgnoreLinks.Checked = true;
+            chkIgnoreLinks.Enabled = false;
+        }
+        else
+        {
+            chkIgnoreLinks.Enabled = true;
+        }
+    }
+
+    private void chkAddToSummary_CheckedChanged(
+        object sender,
+        EventArgs e)
+    {
+        _appendToSummary =
+            chkAddToSummary.Checked;
     }
 
     /// <summary>
@@ -495,8 +651,12 @@ public partial class FindandReplace : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool AppendToSummary
     {
-        get { return chkAddToSummary.Checked; }
-        set { chkAddToSummary.Checked = value; }
+        get => _appendToSummary;
+        set
+        {
+            _appendToSummary = value;
+            chkAddToSummary.Checked = value;
+        }
     }
 
     #endregion
@@ -662,17 +822,6 @@ public partial class FindandReplace : Form
         }
     }
     #endregion
-
-    private void chkIgnoreMore_CheckedChanged(object sender, EventArgs e)
-    {
-        if (chkIgnoreMore.Checked)
-        {
-            chkIgnoreLinks.Checked = true;
-            chkIgnoreLinks.Enabled = false;
-        }
-        else
-            chkIgnoreLinks.Enabled = true;
-    }
 
     private void txtSearch_TextChanged(object sender, EventArgs e)
     {

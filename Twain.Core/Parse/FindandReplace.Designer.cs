@@ -499,6 +499,7 @@ namespace Twain.Core.Parse
             this.toolTip1.SetToolTip(this.chkIgnoreLinks, "Find and replacements will not be made in external/interwiki links, images, <nowi" +
         "ki>. <math>, <chem> and <!-- comments -->");
             this.chkIgnoreLinks.UseVisualStyleBackColor = true;
+            this.chkIgnoreLinks.CheckedChanged += new System.EventHandler(this.chkIgnoreLinks_CheckedChanged);
             // 
             // chkAddToSummary
             // 
@@ -513,6 +514,7 @@ namespace Twain.Core.Parse
             this.chkAddToSummary.Text = "Add &replacements to edit summary";
             this.toolTip1.SetToolTip(this.chkAddToSummary, "Appends information about replacements made to the edit summary");
             this.chkAddToSummary.UseVisualStyleBackColor = true;
+            this.chkAddToSummary.CheckedChanged += new System.EventHandler(this.chkAddToSummary_CheckedChanged);
             // 
             // chkIgnoreMore
             // 
