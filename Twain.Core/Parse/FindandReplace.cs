@@ -74,7 +74,7 @@ public partial class FindandReplace : Form
     private static Replacement RowToReplacement(
         DataGridViewRow dataGridRow)
     {
-        ReplacementEditorRow row =
+        FindReplace.EditorRow row =
             ReadEditorRow(dataGridRow);
 
         return CreateReplacement(
@@ -206,36 +206,6 @@ public partial class FindandReplace : Form
         }
 
         return options;
-    }
-
-    /// <summary>
-    /// Determines whether a replacement uses case-sensitive matching.
-    /// </summary>
-    private static bool IsCaseSensitive(
-        Replacement replacement)
-    {
-        return (replacement.RegularExpressionOptions & RegexOptions.IgnoreCase) !=
-            RegexOptions.IgnoreCase;
-    }
-
-    /// <summary>
-    /// Determines whether a replacement uses multiline regular expression behavior.
-    /// </summary>
-    private static bool IsMultiline(
-        Replacement replacement)
-    {
-        return (replacement.RegularExpressionOptions & RegexOptions.Multiline) ==
-            RegexOptions.Multiline;
-    }
-
-    /// <summary>
-    /// Determines whether a replacement uses single-line regular expression behavior.
-    /// </summary>
-    private static bool IsSingleline(
-        Replacement replacement)
-    {
-        return (replacement.RegularExpressionOptions & RegexOptions.Singleline) ==
-            RegexOptions.Singleline;
     }
 
     /// <summary>
@@ -644,7 +614,7 @@ public partial class FindandReplace : Form
         Replacement r,
         bool decodeRequired)
     {
-        ReplacementEditorRow row =
+        FindReplace.EditorRow row =
             CreateEditorRow(
                 r,
                 decodeRequired);
@@ -687,24 +657,24 @@ public partial class FindandReplace : Form
     /// <param name="decodeRequired">
     /// Whether encoded newline characters should be decoded.
     /// </param>
-    /// <returns>
+    /// <returns>FindReplace.
     /// The editable values for the replacement entry.
     /// </returns>
-    private static ReplacementEditorRow CreateEditorRow(
+    private static FindReplace.EditorRow CreateEditorRow(
         Replacement replacement,
         bool decodeRequired)
     {
-        return new ReplacementEditorRow(
+        return new FindReplace.EditorRow(
             PrepareFindTextForEditor(
                 replacement,
                 decodeRequired),
             PrepareReplaceTextForEditor(
                 replacement,
                 decodeRequired),
-            IsCaseSensitive(replacement),
+            FindReplace.IsCaseSensitive(replacement),
             replacement.IsRegex,
-            IsMultiline(replacement),
-            IsSingleline(replacement),
+            FindReplace.IsMultiline(replacement),
+            FindReplace.IsSingleline(replacement),
             replacement.Minor,
             replacement.BeforeOrAfter,
             replacement.Enabled,
@@ -718,7 +688,7 @@ public partial class FindandReplace : Form
     /// The editable replacement values to add.
     /// </param>
     private void AddEditorRowToGrid(
-        ReplacementEditorRow row)
+        FindReplace.EditorRow row)
     {
         dataGridView1.Rows.Add(
             row.Find,
@@ -752,7 +722,7 @@ public partial class FindandReplace : Form
     /// <summary>
     /// Reads editable replacement values from a legacy data grid row.
     /// </summary>
-    private static ReplacementEditorRow ReadEditorRow(
+    private static FindReplace.EditorRow ReadEditorRow(
         DataGridViewRow dataGridRow)
     {
         if (dataGridRow.Cells["replace"].Value == null)
@@ -761,7 +731,7 @@ public partial class FindandReplace : Form
                 string.Empty;
         }
 
-        return new ReplacementEditorRow(
+        return new FindReplace.EditorRow(
             dataGridRow.Cells["find"].Value.ToString(),
             dataGridRow.Cells["replace"].Value.ToString(),
             (bool)dataGridRow.Cells["casesensitive"].FormattedValue,
