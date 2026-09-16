@@ -325,7 +325,8 @@ class TypoGroup
                 {
                     count++;
                     if (1 == count)
-                        summary += (summary.Length > 0 ? comma : "") + m.Value + FindandReplace.Arrow + res;
+                        summary += (summary.Length > 0 ? comma : "") + m.Value + FindReplace.GetSummaryArrow(
+                            Variables.RTL) + res;
                 }
             }
             if (count > 1)

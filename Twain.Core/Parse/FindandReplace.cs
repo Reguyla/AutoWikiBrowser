@@ -55,157 +55,15 @@ public partial class FindandReplace : Form
         }
     }
 
-    /// <summary>
-    /// Returns the replacement-summary arrow appropriate for the current wiki's
-    /// writing direction.
-    /// </summary>
-    /// <remarks>
-    /// Right-to-left wikis use a left-pointing arrow; other wikis use a
-    /// right-pointing arrow.
-    /// </remarks>
-    public static string Arrow
-    {
-        get
-        {
-            return Variables.RTL ? " ← " : " → ";
-        }
-    }
-
     private static Replacement RowToReplacement(
         DataGridViewRow dataGridRow)
     {
         FindReplace.EditorRow row =
-            ReadEditorRow(dataGridRow);
+            ReadEditorRow(
+                dataGridRow);
 
-        return CreateReplacement(
-            row.Find,
-            row.Replace,
-            row.Enabled,
-            row.Minor,
-            row.IsRegex,
-            row.BeforeOrAfter,
-            row.CaseSensitive,
-            row.Multiline,
-            row.Singleline,
-            row.Comment);
-    }
-
-    /// <summary>
-    /// Creates a replacement entry from the supplied configuration.
-    /// </summary>
-    private static Replacement CreateReplacement(
-        string find,
-        string replace,
-        bool enabled,
-        bool minor,
-        bool isRegex,
-        bool beforeOrAfter,
-        bool caseSensitive,
-        bool multiline,
-        bool singleline,
-        string comment)
-    {
-        return new Replacement
-        {
-            Enabled = enabled,
-            Minor = minor,
-            IsRegex = isRegex,
-            BeforeOrAfter = beforeOrAfter,
-            Find = PrepareFindText(
-                find,
-                isRegex),
-            Replace = Encode(
-                replace),
-            RegularExpressionOptions = CreateRegexOptions(
-                caseSensitive,
-                multiline,
-                singleline),
-            Comment = comment
-        };
-    }
-
-    /// <summary>
-    /// Prepares find text for use by a replacement entry.
-    /// </summary>
-    /// <param name="find">
-    /// The encoded find text.
-    /// </param>
-    /// <param name="isRegex">
-    /// Whether the find text is a regular expression.
-    /// </param>
-    /// <returns>
-    /// The prepared find expression.
-    /// </returns>
-    private static string PrepareFindText(
-        string find,
-        bool isRegex)
-    {
-        string preparedFind =
-            Encode(find);
-
-        // In F&R newline matching is on \n, so if not a regex ensure this isn't escaped.
-        if (!isRegex)
-        {
-            bool newlines =
-                preparedFind.Contains("\\n");
-
-            preparedFind =
-                Regex.Escape(preparedFind);
-
-            if (newlines)
-            {
-                preparedFind =
-                    preparedFind.Replace(
-                        @"\\n",
-                        "\n");
-            }
-        }
-
-        return preparedFind;
-    }
-
-    /// <summary>
-    /// Creates the regular expression options for a replacement entry.
-    /// </summary>
-    /// <param name="caseSensitive">
-    /// Whether matching is case-sensitive.
-    /// </param>
-    /// <param name="multiline">
-    /// Whether multiline regular expression behavior is enabled.
-    /// </param>
-    /// <param name="singleline">
-    /// Whether single-line regular expression behavior is enabled.
-    /// </param>
-    /// <returns>
-    /// The configured regular expression options.
-    /// </returns>
-    private static RegexOptions CreateRegexOptions(
-        bool caseSensitive,
-        bool multiline,
-        bool singleline)
-    {
-        RegexOptions options =
-            RegexOptions.None;
-
-        if (!caseSensitive)
-        {
-            options |=
-                RegexOptions.IgnoreCase;
-        }
-
-        if (multiline)
-        {
-            options |=
-                RegexOptions.Multiline;
-        }
-
-        if (singleline)
-        {
-            options |=
-                RegexOptions.Singleline;
-        }
-
-        return options;
+        return FindReplace.CreateReplacement(
+            row);
     }
 
     /// <summary>
@@ -435,7 +293,8 @@ public partial class FindandReplace : Form
                 ReplacedSummary,
                 RemovedSummary,
                 summarySeparator,
-                Arrow);
+                FindReplace.GetSummaryArrow(
+                    Variables.RTL));
 
         ReplacedSummary =
             summaries.ReplacedSummary;
@@ -506,77 +365,8 @@ public partial class FindandReplace : Form
         _replacementList.Add(replacement);
     }
 
-    /// <summary>
-    /// Encode the specified text, replacing \r\n text with actual CRLF newline
-    /// </summary>
-    /// <param name="text">Text.</param>
-    private static string Encode(string text)
-    {
-        return text.Replace("\\r\\n", "\r\n");
-    }
-
-    /// <summary>
-    /// Decode the specified text, replacing LF newline with \r\n text
-    /// </summary>
-    /// <param name="text">Text.</param>
-    private static string Decode(string text)
-    {
-        return text.Replace("\n", "\\r\\n");
-    }
-
     #region loading/saving
 
-    /// <summary>
-    /// Prepares replacement find text for display in an editor.
-    /// </summary>
-    /// <param name="replacement">
-    /// The replacement entry being displayed.
-    /// </param>
-    /// <param name="decodeRequired">
-    /// Whether encoded newline characters should be decoded.
-    /// </param>
-    /// <returns>
-    /// The find text to display.
-    /// </returns>
-    private static string PrepareFindTextForEditor(
-        Replacement replacement,
-        bool decodeRequired)
-    {
-        if (decodeRequired)
-        {
-            string find =
-                Decode(replacement.Find);
-
-            return replacement.IsRegex
-                ? find
-                : Regex.Unescape(find);
-        }
-
-        return replacement.IsRegex
-            ? replacement.Find
-            : Regex.Unescape(replacement.Find);
-    }
-
-    /// <summary>
-    /// Prepares replacement text for display in an editor.
-    /// </summary>
-    /// <param name="replacement">
-    /// The replacement entry being displayed.
-    /// </param>
-    /// <param name="decodeRequired">
-    /// Whether encoded newline characters should be decoded.
-    /// </param>
-    /// <returns>
-    /// The replacement text to display.
-    /// </returns>
-    private static string PrepareReplaceTextForEditor(
-        Replacement replacement,
-        bool decodeRequired)
-    {
-        return decodeRequired
-            ? Decode(replacement.Replace)
-            : replacement.Replace;
-    }
 
     /// <summary>
     /// Loads a single replacement entry into the find and replace data grid.
@@ -592,7 +382,7 @@ public partial class FindandReplace : Form
         bool decodeRequired)
     {
         FindReplace.EditorRow row =
-            CreateEditorRow(
+            FindReplace.CreateEditorRow(
                 r,
                 decodeRequired);
 
@@ -626,39 +416,6 @@ public partial class FindandReplace : Form
     }
 
     /// <summary>
-    /// Creates editable row values from a replacement entry.
-    /// </summary>
-    /// <param name="replacement">
-    /// The replacement entry to convert.
-    /// </param>
-    /// <param name="decodeRequired">
-    /// Whether encoded newline characters should be decoded.
-    /// </param>
-    /// <returns>FindReplace.
-    /// The editable values for the replacement entry.
-    /// </returns>
-    private static FindReplace.EditorRow CreateEditorRow(
-        Replacement replacement,
-        bool decodeRequired)
-    {
-        return new FindReplace.EditorRow(
-            PrepareFindTextForEditor(
-                replacement,
-                decodeRequired),
-            PrepareReplaceTextForEditor(
-                replacement,
-                decodeRequired),
-            FindReplace.IsCaseSensitive(replacement),
-            replacement.IsRegex,
-            FindReplace.IsMultiline(replacement),
-            FindReplace.IsSingleline(replacement),
-            replacement.Minor,
-            replacement.BeforeOrAfter,
-            replacement.Enabled,
-            replacement.Comment);
-    }
-
-    /// <summary>
     /// Adds editable replacement values to the legacy data grid.
     /// </summary>
     /// <param name="row">
@@ -680,21 +437,6 @@ public partial class FindandReplace : Form
             row.Comment);
     }
 
-    /// <summary>
-    /// Represents the editable values for a find and replace entry independently
-    /// of the user interface used to edit them.
-    /// </summary>
-    private sealed record ReplacementEditorRow(
-        string Find,
-        string Replace,
-        bool CaseSensitive,
-        bool IsRegex,
-        bool Multiline,
-        bool Singleline,
-        bool Minor,
-        bool BeforeOrAfter,
-        bool Enabled,
-        string Comment);
 
     /// <summary>
     /// Reads editable replacement values from a legacy data grid row.

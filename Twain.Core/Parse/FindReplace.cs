@@ -428,4 +428,238 @@ public static class FindReplace
             find,
             replace);
     }
+
+    /// <summary>
+    /// Creates the regular expression options for a replacement entry.
+    /// </summary>
+    public static RegexOptions CreateRegexOptions(
+        bool caseSensitive,
+        bool multiline,
+        bool singleline)
+    {
+        RegexOptions options =
+            RegexOptions.None;
+
+        if (!caseSensitive)
+        {
+            options |=
+                RegexOptions.IgnoreCase;
+        }
+
+        if (multiline)
+        {
+            options |=
+                RegexOptions.Multiline;
+        }
+
+        if (singleline)
+        {
+            options |=
+                RegexOptions.Singleline;
+        }
+
+        return options;
+    }
+
+    /// <summary>
+    /// Prepares encoded find text for use by a replacement entry.
+    /// </summary>
+    public static string PrepareFindText(
+        string find,
+        bool isRegex)
+    {
+        string preparedFind =
+            find;
+
+        // In F&R newline matching is on \n, so if not a regex ensure this isn't escaped.
+        if (!isRegex)
+        {
+            bool newlines =
+                preparedFind.Contains("\\n");
+
+            preparedFind =
+                Regex.Escape(preparedFind);
+
+            if (newlines)
+            {
+                preparedFind =
+                    preparedFind.Replace(
+                        @"\\n",
+                        "\n");
+            }
+        }
+
+        return preparedFind;
+    }
+
+    /// <summary>
+    /// Creates a replacement entry from editable replacement values.
+    /// </summary>
+    public static Replacement CreateReplacement(
+        string find,
+        string replace,
+        bool enabled,
+        bool minor,
+        bool isRegex,
+        bool beforeOrAfter,
+        bool caseSensitive,
+        bool multiline,
+        bool singleline,
+        string comment)
+    {
+        return new Replacement
+        {
+            Enabled = enabled,
+            Minor = minor,
+            IsRegex = isRegex,
+            BeforeOrAfter = beforeOrAfter,
+            Find = PrepareFindText(
+                find,
+                isRegex),
+            Replace = replace,
+            RegularExpressionOptions = CreateRegexOptions(
+                caseSensitive,
+                multiline,
+                singleline),
+            Comment = comment
+        };
+    }
+
+    /// <summary>
+    /// Encodes replacement editor text by converting escaped CRLF sequences
+    /// to actual CRLF characters.
+    /// </summary>
+    public static string Encode(
+        string text)
+    {
+        return text.Replace(
+            "\\r\\n",
+            "\r\n");
+    }
+
+    /// <summary>
+    /// Decodes replacement text for display by converting LF characters
+    /// to escaped CRLF sequences.
+    /// </summary>
+    public static string Decode(
+        string text)
+    {
+        return text.Replace(
+            "\n",
+            "\\r\\n");
+    }
+
+    /// <summary>
+    /// Prepares replacement find text for display in an editor.
+    /// </summary>
+    public static string PrepareFindTextForEditor(
+        Replacement replacement,
+        bool decodeRequired)
+    {
+        if (decodeRequired)
+        {
+            string find =
+                Decode(
+                    replacement.Find);
+
+            return replacement.IsRegex
+                ? find
+                : Regex.Unescape(find);
+        }
+
+        return replacement.IsRegex
+            ? replacement.Find
+            : Regex.Unescape(
+                replacement.Find);
+    }
+
+    /// <summary>
+    /// Prepares replacement text for display in an editor.
+    /// </summary>
+    public static string PrepareReplaceTextForEditor(
+        Replacement replacement,
+        bool decodeRequired)
+    {
+        return decodeRequired
+            ? Decode(
+                replacement.Replace)
+            : replacement.Replace;
+    }
+
+    /// <summary>
+    /// Creates editable row values from a replacement entry.
+    /// </summary>
+    public static EditorRow CreateEditorRow(
+        Replacement replacement,
+        bool decodeRequired)
+    {
+        ArgumentNullException.ThrowIfNull(
+            replacement);
+
+        return new EditorRow(
+            PrepareFindTextForEditor(
+                replacement,
+                decodeRequired),
+            PrepareReplaceTextForEditor(
+                replacement,
+                decodeRequired),
+            IsCaseSensitive(
+                replacement),
+            replacement.IsRegex,
+            IsMultiline(
+                replacement),
+            IsSingleline(
+                replacement),
+            replacement.Minor,
+            replacement.BeforeOrAfter,
+            replacement.Enabled,
+            replacement.Comment);
+    }
+
+    /// <summary>
+    /// Creates a replacement entry from editable row values.
+    /// </summary>
+    /// <param name="row">
+    /// The editable replacement values to convert.
+    /// </param>
+    /// <returns>
+    /// The configured replacement entry.
+    /// </returns>
+    public static Replacement CreateReplacement(
+        EditorRow row)
+    {
+        ArgumentNullException.ThrowIfNull(row);
+
+        return CreateReplacement(
+            Encode(
+                row.Find),
+            Encode(
+                row.Replace),
+            row.Enabled,
+            row.Minor,
+            row.IsRegex,
+            row.BeforeOrAfter,
+            row.CaseSensitive,
+            row.Multiline,
+            row.Singleline,
+            row.Comment);
+    }
+
+    /// <summary>
+    /// Returns the replacement-summary arrow for the specified writing direction.
+    /// </summary>
+    /// <param name="rightToLeft">
+    /// Whether the wiki uses right-to-left text.
+    /// </param>
+    /// <returns>
+    /// A left-pointing arrow for right-to-left text; otherwise, a
+    /// right-pointing arrow.
+    /// </returns>
+    public static string GetSummaryArrow(
+        bool rightToLeft)
+    {
+        return rightToLeft
+            ? " ← "
+            : " → ";
+    }
 }
