@@ -193,6 +193,16 @@ public static class FindReplace
     }
 
     /// <summary>
+    /// Contains the result of processing a single find and replace rule,
+    /// including the updated replacement summaries.
+    /// </summary>
+    public sealed record ProcessReplacementResult(
+        string Text,
+        string ReplacedSummary,
+        string RemovedSummary,
+        bool ChangeMade);
+
+    /// <summary>
     /// Contains the updated find and replace summary values.
     /// </summary>
     public sealed record SummaryResult(
@@ -759,5 +769,251 @@ public static class FindReplace
         }
 
         return articleText;
+    }
+
+    /// <summary>
+    /// Processes a single find and replace rule and updates the accumulated
+    /// replacement summaries.
+    /// </summary>
+    /// <param name="replacement">
+    /// The replacement rule to process.
+    /// </param>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article being processed.
+    /// </param>
+    /// <param name="replacedSummary">
+    /// The accumulated replacement summary.
+    /// </param>
+    /// <param name="removedSummary">
+    /// The accumulated removal summary.
+    /// </param>
+    /// <param name="languageCode">
+    /// The current wiki language code.
+    /// </param>
+    /// <param name="rightToLeft">
+    /// Whether the current wiki uses right-to-left text.
+    /// </param>
+    /// <returns>
+    /// The processed text, updated summaries, and whether the rule changed the text.
+    /// </returns>
+    public static ProcessReplacementResult ProcessReplacement(
+        Replacement replacement,
+        string articleText,
+        string articleTitle,
+        string replacedSummary,
+        string removedSummary,
+        string languageCode,
+        bool rightToLeft)
+    {
+        ArgumentNullException.ThrowIfNull(replacement);
+
+        PreparedReplacement prepared =
+            PrepareReplacement(
+                replacement,
+                articleTitle);
+
+        ReplacementResult result =
+            ExecuteReplacement(
+                articleText,
+                prepared.Find,
+                prepared.Replace,
+                replacement.RegularExpressionOptions);
+
+        SummaryResult summaries =
+            UpdateSummaries(
+                result,
+                replacedSummary,
+                removedSummary,
+                GetSummarySeparator(
+                    languageCode),
+                GetSummaryArrow(
+                    rightToLeft));
+
+        return new ProcessReplacementResult(
+            result.Text,
+            summaries.ReplacedSummary,
+            summaries.RemovedSummary,
+            result.ChangeMade);
+    }
+
+    /// <summary>
+    /// Contains the result of processing a collection of find and replace rules.
+    /// </summary>
+    public sealed record ProcessReplacementsResult(
+        string Text,
+        string ReplacedSummary,
+        string RemovedSummary,
+        bool MajorChangesMade);
+
+    /// <summary>
+    /// Processes the applicable find and replace rules against article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article being processed.
+    /// </param>
+    /// <param name="replacements">
+    /// The configured replacement rules.
+    /// </param>
+    /// <param name="beforeOrAfter">
+    /// False to process rules configured for before processing; true for after processing.
+    /// </param>
+    /// <param name="languageCode">
+    /// The current wiki language code.
+    /// </param>
+    /// <param name="rightToLeft">
+    /// Whether the current wiki uses right-to-left text.
+    /// </param>
+    /// <returns>
+    /// The processed text, accumulated summaries, and whether a non-minor
+    /// replacement changed the text.
+    /// </returns>
+    public static ProcessReplacementsResult ProcessReplacements(
+        string articleText,
+        string articleTitle,
+        IEnumerable<Replacement> replacements,
+        bool beforeOrAfter,
+        string languageCode,
+        bool rightToLeft)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        string replacedSummary =
+            string.Empty;
+
+        string removedSummary =
+            string.Empty;
+
+        bool majorChangesMade =
+            false;
+
+        foreach (Replacement replacement in replacements)
+        {
+            if (!replacement.Enabled ||
+                replacement.BeforeOrAfter != beforeOrAfter)
+            {
+                continue;
+            }
+
+            ProcessReplacementResult result =
+                ProcessReplacement(
+                    replacement,
+                    articleText,
+                    articleTitle,
+                    replacedSummary,
+                    removedSummary,
+                    languageCode,
+                    rightToLeft);
+
+            articleText =
+                result.Text;
+
+            replacedSummary =
+                result.ReplacedSummary;
+
+            removedSummary =
+                result.RemovedSummary;
+
+            if (result.ChangeMade &&
+                !replacement.Minor)
+            {
+                majorChangesMade =
+                    true;
+            }
+        }
+
+        return new ProcessReplacementsResult(
+            articleText,
+            replacedSummary,
+            removedSummary,
+            majorChangesMade);
+    }
+
+    /// <summary>
+    /// Contains the result of applying configured find and replace rules to
+    /// prepared article text.
+    /// </summary>
+    public sealed record ProcessArticleResult(
+        string Text,
+        string ReplacedSummary,
+        string RemovedSummary,
+        bool MajorChangesMade);
+
+    /// <summary>
+    /// Applies configured find and replace rules to article text, including
+    /// hiding and restoring content excluded from replacement processing.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article being processed.
+    /// </param>
+    /// <param name="replacements">
+    /// The configured replacement rules.
+    /// </param>
+    /// <param name="beforeOrAfter">
+    /// False to process rules configured for before processing; true for after processing.
+    /// </param>
+    /// <param name="ignoreLinks">
+    /// Whether external links and images should be excluded from processing.
+    /// </param>
+    /// <param name="ignoreMore">
+    /// Whether the extended set of protected content should be excluded from processing.
+    /// </param>
+    /// <param name="languageCode">
+    /// The current wiki language code.
+    /// </param>
+    /// <param name="rightToLeft">
+    /// Whether the current wiki uses right-to-left text.
+    /// </param>
+    /// <returns>
+    /// The processed article text, accumulated summaries, and whether a non-minor
+    /// replacement changed the text.
+    /// </returns>
+    public static ProcessArticleResult ProcessArticle(
+        string articleText,
+        string articleTitle,
+        IEnumerable<Replacement> replacements,
+        bool beforeOrAfter,
+        bool ignoreLinks,
+        bool ignoreMore,
+        string languageCode,
+        bool rightToLeft)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        PreparedArticleText preparedArticle =
+            PrepareArticleText(
+                articleText,
+                ignoreLinks,
+                ignoreMore);
+
+        ProcessReplacementsResult result =
+            ProcessReplacements(
+                preparedArticle.Text,
+                articleTitle,
+                replacements,
+                beforeOrAfter,
+                languageCode,
+                rightToLeft);
+
+        string restoredText =
+            RestoreArticleText(
+                result.Text,
+                preparedArticle,
+                ignoreLinks,
+                ignoreMore);
+
+        return new ProcessArticleResult(
+            restoredText,
+            result.ReplacedSummary,
+            result.RemovedSummary,
+            result.MajorChangesMade);
     }
 }

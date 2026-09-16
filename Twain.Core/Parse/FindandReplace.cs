@@ -135,45 +135,37 @@ public partial class FindandReplace : Form
     /// <param name="beforeOrAfter">False if "before", true if "after"</param>
     /// <param name="majorChangesMade"></param>
     /// <returns>The modified article text.</returns>
-    public string MultipleFindAndReplace(string articleText, string strTitle, bool beforeOrAfter, ref string editSummary, out bool majorChangesMade)
+    public string MultipleFindAndReplace(
+        string articleText,
+        string strTitle,
+        bool beforeOrAfter,
+        ref string editSummary,
+        out bool majorChangesMade)
     {
         majorChangesMade = false;
 
         if (!HasReplacements)
             return articleText;
 
-        ReplacedSummary = string.Empty;
-        RemovedSummary = string.Empty;
-
-        FindReplace.PreparedArticleText preparedArticle =
-            FindReplace.PrepareArticleText(
+        FindReplace.ProcessArticleResult result =
+            FindReplace.ProcessArticle(
                 articleText,
+                strTitle,
+                _replacementList,
+                beforeOrAfter,
                 IgnoreLinks,
-                IgnoreMore);
+                IgnoreMore,
+                Variables.LangCode,
+                Variables.RTL);
 
-        articleText =
-            preparedArticle.Text;
+        ReplacedSummary =
+            result.ReplacedSummary;
 
-        foreach (Replacement rep in _replacementList)
-        {
-            if (!rep.Enabled || rep.BeforeOrAfter != beforeOrAfter)
-                continue;
+        RemovedSummary =
+            result.RemovedSummary;
 
-            bool changeMade;
-            articleText = PerformFindAndReplace(rep, articleText, strTitle, out changeMade);
-
-            if (changeMade && !rep.Minor)
-            {
-                majorChangesMade = true;
-            }
-        }
-
-        articleText =
-            FindReplace.RestoreArticleText(
-                articleText,
-                preparedArticle,
-                IgnoreLinks,
-                IgnoreMore);
+        majorChangesMade =
+            result.MajorChangesMade;
 
         if (AppendToSummary)
         {
@@ -185,7 +177,7 @@ public partial class FindandReplace : Form
                     Variables.LangCode);
         }
 
-        return articleText;
+        return result.Text;
     }
 
     public string RemovedSummary { get; private set; }
@@ -217,38 +209,21 @@ public partial class FindandReplace : Form
         string articleTitle,
         out bool changeMade)
     {
-        ArgumentNullException.ThrowIfNull(rep);
-
-        FindReplace.PreparedReplacement prepared =
-            FindReplace.PrepareReplacement(
+        FindReplace.ProcessReplacementResult result =
+            FindReplace.ProcessReplacement(
                 rep,
-                articleTitle);
-
-        FindReplace.ReplacementResult result =
-            FindReplace.ExecuteReplacement(
                 articleText,
-                prepared.Find,
-                prepared.Replace,
-                rep.RegularExpressionOptions);
-
-        string summarySeparator =
-            FindReplace.GetSummarySeparator(
-                Variables.LangCode);
-
-        FindReplace.SummaryResult summaries =
-            FindReplace.UpdateSummaries(
-                result,
+                articleTitle,
                 ReplacedSummary,
                 RemovedSummary,
-                summarySeparator,
-                FindReplace.GetSummaryArrow(
-                    Variables.RTL));
+                Variables.LangCode,
+                Variables.RTL);
 
         ReplacedSummary =
-            summaries.ReplacedSummary;
+            result.ReplacedSummary;
 
         RemovedSummary =
-            summaries.RemovedSummary;
+            result.RemovedSummary;
 
         changeMade =
             result.ChangeMade;

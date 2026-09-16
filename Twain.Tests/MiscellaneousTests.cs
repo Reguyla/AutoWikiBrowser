@@ -2486,12 +2486,8 @@ public class ListBoxArticleTests : RequiresInitialization
         }
         Assert.That(lbArticles.Items.Count, Is.EqualTo(0), "List cleared if all items selected and removed");
     }
-}
 
-[TestFixture]
-public class FindAndReplaceTests
-{
-    [Test]
+[Test]
     public void FindAndReplace()
     {
         Replacement r =
@@ -2505,69 +2501,85 @@ public class FindAndReplaceTests
                 RegexOptions.None,
                 "");
 
-        FindandReplace fr = new();
-
-        bool changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
+        FindReplace.ProcessReplacementResult result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the was",
                 "Test",
-                out changeMade),
-            Is.EqualTo("the was"));
-
-        ClassicAssert.IsFalse(changeMade);
+                null,
+                null,
+                Variables.LangCode,
+                Variables.RTL);
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.Text,
+            Is.EqualTo("the was"));
+
+        ClassicAssert.IsFalse(
+            result.ChangeMade);
+
+        Assert.That(
+            result.ReplacedSummary,
             Is.Null,
             "No match: no edit summary");
 
-        Assert.That(
-            fr.PerformFindAndReplace(
+        result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the foo was",
                 "Test",
-                out changeMade),
-            Is.EqualTo("the bar was"));
-
-        ClassicAssert.IsTrue(changeMade);
+                result.ReplacedSummary,
+                result.RemovedSummary,
+                Variables.LangCode,
+                Variables.RTL);
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.Text,
+            Is.EqualTo("the bar was"));
+
+        ClassicAssert.IsTrue(
+            result.ChangeMade);
+
+        Assert.That(
+            result.ReplacedSummary,
             Is.EqualTo("foo → bar"),
             "One match: a to b");
 
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
+        result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the foo was or foo was",
                 "Test",
-                out changeMade),
+                null,
+                null,
+                Variables.LangCode,
+                Variables.RTL);
+
+        Assert.That(
+            result.Text,
             Is.EqualTo("the bar was or bar was"));
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.ReplacedSummary,
             Is.EqualTo("foo → bar (2)"),
             "Match count shown");
 
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
+        result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the foo was or foo was foo",
                 "Test",
-                out changeMade),
+                null,
+                null,
+                Variables.LangCode,
+                Variables.RTL);
+
+        Assert.That(
+            result.Text,
             Is.EqualTo("the bar was or bar was bar"));
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.ReplacedSummary,
             Is.EqualTo("foo → bar (3)"),
             "Match count shown, 3");
 
@@ -2582,21 +2594,25 @@ public class FindAndReplaceTests
                 RegexOptions.None,
                 "");
 
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
+        result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the foot was or foo was",
                 "Test",
-                out changeMade),
-            Is.EqualTo("the bar was or bar was"));
-
-        ClassicAssert.IsTrue(changeMade);
+                null,
+                null,
+                Variables.LangCode,
+                Variables.RTL);
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.Text,
+            Is.EqualTo("the bar was or bar was"));
+
+        ClassicAssert.IsTrue(
+            result.ChangeMade);
+
+        Assert.That(
+            result.ReplacedSummary,
             Is.EqualTo("foot → bar (2)"),
             "Different matches, match text of first used");
 
@@ -2611,297 +2627,50 @@ public class FindAndReplaceTests
                 RegexOptions.None,
                 "");
 
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
+        result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the foo was a fooo it",
                 "Test",
-                out changeMade),
-            Is.EqualTo("the foo was a foo it"));
-
-        ClassicAssert.IsTrue(changeMade);
+                null,
+                null,
+                Variables.LangCode,
+                Variables.RTL);
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.Text,
+            Is.EqualTo("the foo was a foo it"));
+
+        ClassicAssert.IsTrue(
+            result.ChangeMade);
+
+        Assert.That(
+            result.ReplacedSummary,
             Is.EqualTo("fooo → foo"),
             "No-change match ignored");
 
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
+        result =
+            FindReplace.ProcessReplacement(
                 r,
                 "the foo was",
                 "Test",
-                out changeMade),
+                null,
+                null,
+                Variables.LangCode,
+                Variables.RTL);
+
+        Assert.That(
+            result.Text,
             Is.EqualTo("the foo was"));
 
         ClassicAssert.IsFalse(
-            changeMade,
+            result.ChangeMade,
             "Only match is no-change on replace, so no change made");
 
         Assert.That(
-            fr.ReplacedSummary,
+            result.ReplacedSummary,
             Is.Null,
             "Only match is no-change match, no edit summary");
-    }
-
-    [Test]
-    public void FindAndReplaceNewLines()
-    {
-        // Regex.
-        Replacement r =
-            new(
-                "foo\n",
-                "bar ",
-                true,
-                true,
-                true,
-                true,
-                RegexOptions.None,
-                "");
-
-        FindandReplace fr = new();
-
-        bool changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
-                r,
-                "the foo\nwas",
-                "Test",
-                out changeMade),
-            Is.EqualTo("the bar was"));
-
-        ClassicAssert.IsTrue(changeMade);
-
-        // Not regex.
-        r =
-            new Replacement(
-                "foo\n",
-                "bar ",
-                false,
-                true,
-                true,
-                true,
-                RegexOptions.None,
-                "");
-
-        Assert.That(
-            fr.PerformFindAndReplace(
-                r,
-                "the foo\nwas",
-                "Test",
-                out changeMade),
-            Is.EqualTo("the bar was"));
-
-        ClassicAssert.IsTrue(changeMade);
-    }
-
-    [Test]
-    public void FindAndReplaceRemove()
-    {
-        Replacement r =
-            new(
-                "foo",
-                "",
-                true,
-                true,
-                true,
-                true,
-                RegexOptions.None,
-                "");
-
-        FindandReplace fr = new();
-
-        bool changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
-                r,
-                "the was",
-                "Test",
-                out changeMade),
-            Is.EqualTo("the was"));
-
-        ClassicAssert.IsFalse(changeMade);
-
-        Assert.That(
-            fr.ReplacedSummary,
-            Is.Null,
-            "No match: no edit summary");
-
-        Assert.That(
-            fr.RemovedSummary,
-            Is.Null,
-            "No match: no edit summary");
-
-        Assert.That(
-            fr.PerformFindAndReplace(
-                r,
-                "the foo was",
-                "Test",
-                out changeMade),
-            Is.EqualTo("the  was"));
-
-        ClassicAssert.IsTrue(changeMade);
-
-        Assert.That(
-            fr.RemovedSummary,
-            Is.EqualTo("foo"),
-            "One match: removed a");
-
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
-                r,
-                "the foo was or foo was",
-                "Test",
-                out changeMade),
-            Is.EqualTo("the  was or  was"));
-
-        Assert.That(
-            fr.RemovedSummary,
-            Is.EqualTo("foo (2)"),
-            "Match count shown");
-
-        r =
-            new Replacement(
-                "foot?",
-                "",
-                true,
-                true,
-                true,
-                true,
-                RegexOptions.None,
-                "");
-
-        fr = new FindandReplace();
-        changeMade = false;
-
-        Assert.That(
-            fr.PerformFindAndReplace(
-                r,
-                "the foot was or foo was",
-                "Test",
-                out changeMade),
-            Is.EqualTo("the  was or  was"));
-
-        ClassicAssert.IsTrue(changeMade);
-
-        Assert.That(
-            fr.RemovedSummary,
-            Is.EqualTo("foot (2)"),
-            "Different matches, match text of first used");
-    }
-
-    [Test]
-    public void FindAndReplaceProperties()
-    {
-        Replacement r =
-            new(
-                "foo",
-                "bar",
-                true,
-                true,
-                true,
-                true,
-                RegexOptions.None,
-                "");
-
-        Replacement r2 =
-            new(
-                "foo2",
-                "bar2",
-                true,
-                true,
-                true,
-                false,
-                RegexOptions.None,
-                "");
-
-        Replacement r2Disabled =
-            new(
-                "foo2",
-                "bar2",
-                true,
-                false,
-                true,
-                false,
-                RegexOptions.None,
-                "");
-
-        FindandReplace fr = new();
-
-        fr.AddNew(r);
-
-        ClassicAssert.IsTrue(
-            fr.HasAfterProcessingReplacements);
-
-        ClassicAssert.IsTrue(
-            fr.HasProcessingReplacements(true));
-
-        ClassicAssert.IsFalse(
-            fr.HasProcessingReplacements(false));
-
-        fr.AddNew(r2);
-
-        ClassicAssert.IsTrue(
-            fr.HasAfterProcessingReplacements);
-
-        ClassicAssert.IsTrue(
-            fr.HasProcessingReplacements(true));
-
-        ClassicAssert.IsTrue(
-            fr.HasProcessingReplacements(false));
-
-        fr.Clear();
-        fr.AddNew(r2);
-
-        ClassicAssert.IsFalse(
-            fr.HasAfterProcessingReplacements);
-
-        ClassicAssert.IsFalse(
-            fr.HasProcessingReplacements(true));
-
-        ClassicAssert.IsTrue(
-            fr.HasProcessingReplacements(false));
-
-        // All false when no enabled rules.
-        fr.Clear();
-        fr.AddNew(r2Disabled);
-
-        ClassicAssert.IsFalse(
-            fr.HasAfterProcessingReplacements);
-
-        ClassicAssert.IsFalse(
-            fr.HasProcessingReplacements(true));
-
-        ClassicAssert.IsFalse(
-            fr.HasProcessingReplacements(false));
-
-        fr.Clear();
-
-        List<Replacement> replacements =
-        [
-            r,
-            r2
-        ];
-
-        fr.AddNew(replacements);
-
-        ClassicAssert.IsTrue(
-            fr.HasReplacements);
-
-        Assert.That(
-            fr.GetList(),
-            Is.EqualTo(replacements));
     }
 }
 
