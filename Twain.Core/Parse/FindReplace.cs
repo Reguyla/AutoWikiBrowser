@@ -662,4 +662,102 @@ public static class FindReplace
             ? " ← "
             : " → ";
     }
+
+    /// <summary>
+    /// Contains article text prepared for find and replace processing together
+    /// with the state required to restore hidden content afterward.
+    /// </summary>
+    public sealed record PreparedArticleText(
+        string Text,
+        HideText HiddenText);
+
+    /// <summary>
+    /// Prepares article text for find and replace processing by hiding content
+    /// that should be excluded from replacements.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to prepare.
+    /// </param>
+    /// <param name="ignoreLinks">
+    /// Whether external links and images should be hidden.
+    /// </param>
+    /// <param name="ignoreMore">
+    /// Whether headings, internal link targets, templates, refs, and other
+    /// protected content should be hidden.
+    /// </param>
+    /// <returns>
+    /// The prepared article text and the state required to restore hidden content.
+    /// </returns>
+    public static PreparedArticleText PrepareArticleText(
+        string articleText,
+        bool ignoreLinks,
+        bool ignoreMore)
+    {
+        HideText hiddenText =
+            new(
+                true,
+                false,
+                true);
+
+        if (ignoreMore)
+        {
+            articleText =
+                hiddenText.HideMore(
+                    articleText);
+        }
+        else if (ignoreLinks)
+        {
+            articleText =
+                hiddenText.Hide(
+                    articleText);
+        }
+
+        return new PreparedArticleText(
+            articleText,
+            hiddenText);
+    }
+
+    /// <summary>
+    /// Restores content hidden while preparing article text for find and replace
+    /// processing.
+    /// </summary>
+    /// <param name="articleText">
+    /// The processed article text.
+    /// </param>
+    /// <param name="prepared">
+    /// The preparation state returned by <see cref="PrepareArticleText"/>.
+    /// </param>
+    /// <param name="ignoreLinks">
+    /// Whether external links and images were hidden.
+    /// </param>
+    /// <param name="ignoreMore">
+    /// Whether the extended set of protected content was hidden.
+    /// </param>
+    /// <returns>
+    /// The article text with hidden content restored.
+    /// </returns>
+    public static string RestoreArticleText(
+        string articleText,
+        PreparedArticleText prepared,
+        bool ignoreLinks,
+        bool ignoreMore)
+    {
+        ArgumentNullException.ThrowIfNull(prepared);
+
+        if (ignoreMore)
+        {
+            // FIXME: Usages of IgnoreMore with number (or M) replacement done in
+            // FindAndReplace can cause corruption of HideText placeholders.
+            return prepared.HiddenText.AddBackMore(
+                articleText);
+        }
+
+        if (ignoreLinks)
+        {
+            return prepared.HiddenText.AddBack(
+                articleText);
+        }
+
+        return articleText;
+    }
 }

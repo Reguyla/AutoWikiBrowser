@@ -36,8 +36,6 @@ public partial class FindandReplace : Form
         InitializeComponent();
     }
 
-    private readonly HideText _remove = new HideText(true, false, true);
-
     private List<Replacement> _replacementList = new();
     private List<Replacement> replacementBackup;
     private bool _ignoreLinks;
@@ -147,9 +145,14 @@ public partial class FindandReplace : Form
         ReplacedSummary = string.Empty;
         RemovedSummary = string.Empty;
 
+        FindReplace.PreparedArticleText preparedArticle =
+            FindReplace.PrepareArticleText(
+                articleText,
+                IgnoreLinks,
+                IgnoreMore);
+
         articleText =
-            HideIgnoredText(
-                articleText);
+            preparedArticle.Text;
 
         foreach (Replacement rep in _replacementList)
         {
@@ -166,8 +169,11 @@ public partial class FindandReplace : Form
         }
 
         articleText =
-            RestoreIgnoredText(
-                articleText);
+            FindReplace.RestoreArticleText(
+                articleText,
+                preparedArticle,
+                IgnoreLinks,
+                IgnoreMore);
 
         if (AppendToSummary)
         {
@@ -177,64 +183,6 @@ public partial class FindandReplace : Form
                     ReplacedSummary,
                     RemovedSummary,
                     Variables.LangCode);
-        }
-
-        return articleText;
-    }
-
-    /// <summary>
-    /// Hides article content that should be excluded from find and replace processing.
-    /// </summary>
-    /// <param name="articleText">
-    /// The article text to prepare.
-    /// </param>
-    /// <returns>
-    /// The article text with configured content hidden.
-    /// </returns>
-    private string HideIgnoredText(
-        string articleText)
-    {
-        if (IgnoreMore)
-        {
-            return _remove.HideMore(
-                articleText);
-        }
-
-        if (IgnoreLinks)
-        {
-            return _remove.Hide(
-                articleText);
-        }
-
-        return articleText;
-    }
-
-    /// <summary>
-    /// Restores article content hidden before find and replace processing.
-    /// </summary>
-    /// <param name="articleText">
-    /// The processed article text.
-    /// </param>
-    /// <returns>
-    /// The article text with previously hidden content restored.
-    /// </returns>
-    private string RestoreIgnoredText(
-        string articleText)
-    {
-        if (IgnoreMore)
-        {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_24#FormatException_in_HideText.AddBackMore
-            // FIXME: Usages of IgnoreMore with number (or M) replacement done in the FindAndReplace can cause corruption
-            // e.g. Replacing 2 with "" ⌊⌊⌊⌊M2⌋⌋⌋⌋ becomes ⌊⌊⌊⌊M⌋⌋⌋⌋
-            // This cannot then be added back
-            return _remove.AddBackMore(
-                articleText);
-        }
-
-        if (IgnoreLinks)
-        {
-            return _remove.AddBack(
-                articleText);
         }
 
         return articleText;
