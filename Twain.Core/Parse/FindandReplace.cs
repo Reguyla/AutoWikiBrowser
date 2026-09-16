@@ -236,15 +236,6 @@ public partial class FindandReplace : Form
         }
     }
 
-    private static readonly Regex NewlineRegex = new Regex(@"(?<!\\)\\n", RegexOptions.Compiled),
-        TabulationRegex = new Regex(@"(?<!\\)\\t", RegexOptions.Compiled);
-
-    private static string PrepareReplacePart(string replace)
-    {
-        replace = NewlineRegex.Replace(replace, "\n");
-        return TabulationRegex.Replace(replace, "\t");
-    }
-
     /// <summary>
     /// Returns the number of replacements (enabled and disabled)
     /// </summary>
@@ -395,74 +386,67 @@ public partial class FindandReplace : Form
     public string ReplacedSummary { get; private set; }
 
     /// <summary>
-    /// Executes a single find & replace rule against the article text. First applies keywords to the find and replace portions of the rule, then executes the rule.
-    /// Edit summary is generated from the first match of the rule that changes the article text on replacement. Count of changes is replacements affecting article, not total matches
-    /// i.e. no-change replacements are not counted in the edit summary
+    /// Executes a single find &amp; replace rule against the article text.
+    /// First applies keywords to the find and replace portions of the rule,
+    /// then executes the rule.
     /// </summary>
-    /// <param name="rep">F&amp;R rule to execute</param>
-    /// <param name="articleText">The article text</param>
-    /// <param name="articleTitle">The article title</param>
-    /// <param name="changeMade">Whether the F&amp;R rule caused changes to the article text</param>
-    /// <returns>The updated article text</returns>
-    public string PerformFindAndReplace(Replacement rep, string articleText, string articleTitle, out bool changeMade)
+    /// <param name="rep">
+    /// The find and replace rule to execute.
+    /// </param>
+    /// <param name="articleText">
+    /// The article text.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The article title.
+    /// </param>
+    /// <param name="changeMade">
+    /// Whether the find and replace rule caused changes to the article text.
+    /// </param>
+    /// <returns>
+    /// The updated article text.
+    /// </returns>
+    public string PerformFindAndReplace(
+        Replacement rep,
+        string articleText,
+        string articleTitle,
+        out bool changeMade)
     {
-        if (rep == null) throw new ArgumentNullException("rep");
+        ArgumentNullException.ThrowIfNull(rep);
 
-        string findThis = Tools.ApplyKeyWords(articleTitle, rep.Find, true), replaceWith = Tools.ApplyKeyWords(articleTitle, PrepareReplacePart(rep.Replace));
+        FindReplace.PreparedReplacement prepared =
+            FindReplace.PrepareReplacement(
+                rep,
+                articleTitle);
 
-        string comma = @", ";
-        if (Variables.LangCode.Equals("ar") || Variables.LangCode.Equals("arz") || Variables.LangCode.Equals("fa"))
-            comma = @"، ";
+        FindReplace.ReplacementResult result =
+            FindReplace.ExecuteReplacement(
+                articleText,
+                prepared.Find,
+                prepared.Replace,
+                rep.RegularExpressionOptions);
 
-        // T350636 1-minute timeout to guard against regex backtracking
-        Regex findRegex = new Regex(findThis, rep.RegularExpressionOptions, TimeSpan.FromSeconds(60));
+        string summarySeparator =
+            FindReplace.GetSummarySeparator(
+                Variables.LangCode);
 
-        int Repcount = 0, Remcount = 0;
+        FindReplace.SummaryResult summaries =
+            FindReplace.UpdateSummaries(
+                result,
+                ReplacedSummary,
+                RemovedSummary,
+                summarySeparator,
+                Arrow);
 
-        // use first replace that changes article text to generate edit summary
-        string res = findRegex.Replace(articleText, m =>
-        {
-            string mres = m.Result(replaceWith);
+        ReplacedSummary =
+            summaries.ReplacedSummary;
 
-            if (!m.Value.Equals(mres))
-            {
-                if (!string.IsNullOrEmpty(mres))
-                {
-                    if (Repcount == 0)
-                    {
-                        if (!string.IsNullOrEmpty(ReplacedSummary)) //Add comma before next replaced
-                            ReplacedSummary += comma;
+        RemovedSummary =
+            summaries.RemovedSummary;
 
-                        ReplacedSummary += m.Value + Arrow + mres;
-                    }
-                    Repcount++;
-                }
-                else
-                {
-                    if (Remcount == 0)
-                    {
-                        if (!string.IsNullOrEmpty(RemovedSummary)) //Add comma before next removed
-                            RemovedSummary += comma;
+        changeMade =
+            result.ChangeMade;
 
-                        RemovedSummary += m.Value;
-                    }
-                    Remcount++;
-                }
-            }
-
-            return mres;
-        });
-
-        // update summaries with count of changes
-        if (Repcount > 1)
-            ReplacedSummary += " (" + Repcount + ")";
-
-        if (Remcount > 1)
-            RemovedSummary += " (" + Remcount + ")";
-
-        changeMade = (Repcount + Remcount > 0);
-
-        return res;
+        return result.Text;
     }
 
     private void btnDone_Click(object sender, EventArgs e)

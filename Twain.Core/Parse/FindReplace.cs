@@ -6,6 +6,11 @@
 /// </summary>
 public static class FindReplace
 {
+
+    private static readonly Regex NewlineRegex = new Regex(@"(?<!\\)\\n", RegexOptions.Compiled),
+    TabulationRegex = new Regex(@"(?<!\\)\\t", RegexOptions.Compiled);
+
+
     /// <summary>
     /// Represents the editable values for a find and replace entry independently
     /// of the user interface used to edit them.
@@ -144,5 +149,283 @@ public static class FindReplace
         }
 
         return editSummary;
+    }
+
+    /// <summary>
+    /// Returns the separator used between find and replace summary entries
+    /// for the specified wiki language.
+    /// </summary>
+    /// <param name="languageCode">
+    /// The current wiki language code.
+    /// </param>
+    /// <returns>
+    /// The language-appropriate summary separator.
+    /// </returns>
+    public static string GetSummarySeparator(
+        string languageCode)
+    {
+        if (languageCode.Equals("ar") ||
+            languageCode.Equals("arz") ||
+            languageCode.Equals("fa"))
+        {
+            return "، ";
+        }
+
+        return ", ";
+    }
+
+    /// <summary>
+    /// Contains the result of executing a single find and replace rule.
+    /// </summary>
+    public sealed record ReplacementResult(
+        string Text,
+        int ReplacementCount,
+        int RemovalCount,
+        string FirstReplacementOriginal,
+        string FirstReplacementResult,
+        string FirstRemoval)
+    {
+        /// <summary>
+        /// Gets whether the replacement changed the article text.
+        /// </summary>
+        public bool ChangeMade =>
+            ReplacementCount + RemovalCount > 0;
+    }
+
+    /// <summary>
+    /// Contains the updated find and replace summary values.
+    /// </summary>
+    public sealed record SummaryResult(
+        string ReplacedSummary,
+        string RemovedSummary);
+
+    /// <summary>
+    /// Updates the accumulated find and replace summaries from the result
+    /// of executing a replacement rule.
+    /// </summary>
+    /// <param name="result">
+    /// The result of the replacement operation.
+    /// </param>
+    /// <param name="replacedSummary">
+    /// The existing replacement summary.
+    /// </param>
+    /// <param name="removedSummary">
+    /// The existing removal summary.
+    /// </param>
+    /// <param name="summarySeparator">
+    /// The separator to place between summary entries.
+    /// </param>
+    /// <param name="arrow">
+    /// The separator displayed between the original and replacement text.
+    /// </param>
+    /// <returns>
+    /// The updated replacement and removal summaries.
+    /// </returns>
+    public static SummaryResult UpdateSummaries(
+        ReplacementResult result,
+        string replacedSummary,
+        string removedSummary,
+        string summarySeparator,
+        string arrow)
+    {
+        if (result.ReplacementCount > 0)
+        {
+            if (!string.IsNullOrEmpty(replacedSummary))
+            {
+                replacedSummary +=
+                    summarySeparator;
+            }
+
+            replacedSummary +=
+                result.FirstReplacementOriginal +
+                arrow +
+                result.FirstReplacementResult;
+
+            if (result.ReplacementCount > 1)
+            {
+                replacedSummary +=
+                    " (" +
+                    result.ReplacementCount +
+                    ")";
+            }
+        }
+
+        if (result.RemovalCount > 0)
+        {
+            if (!string.IsNullOrEmpty(removedSummary))
+            {
+                removedSummary +=
+                    summarySeparator;
+            }
+
+            removedSummary +=
+                result.FirstRemoval;
+
+            if (result.RemovalCount > 1)
+            {
+                removedSummary +=
+                    " (" +
+                    result.RemovalCount +
+                    ")";
+            }
+        }
+
+        return new SummaryResult(
+            replacedSummary,
+            removedSummary);
+    }
+
+    /// <summary>
+    /// Executes a prepared regular expression replacement and records the
+    /// changes needed to generate an edit summary.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text to process.
+    /// </param>
+    /// <param name="findThis">
+    /// The prepared regular expression pattern.
+    /// </param>
+    /// <param name="replaceWith">
+    /// The prepared replacement expression.
+    /// </param>
+    /// <param name="options">
+    /// The regular expression options to use.
+    /// </param>
+    /// <returns>
+    /// The processed text and information about replacements and removals.
+    /// </returns>
+    public static ReplacementResult ExecuteReplacement(
+        string articleText,
+        string findThis,
+        string replaceWith,
+        RegexOptions options)
+    {
+        // T350636 1-minute timeout to guard against regex backtracking
+        Regex findRegex =
+            new(
+                findThis,
+                options,
+                TimeSpan.FromSeconds(60));
+
+        int replacementCount = 0;
+        int removalCount = 0;
+        string firstReplacementOriginal = string.Empty;
+        string firstReplacementResult = string.Empty;
+        string firstRemoval = string.Empty;
+
+        string result =
+            findRegex.Replace(
+                articleText,
+                match =>
+                {
+                    string replacementResult =
+                        match.Result(
+                            replaceWith);
+
+                    if (match.Value.Equals(replacementResult))
+                    {
+                        return replacementResult;
+                    }
+
+                    if (!string.IsNullOrEmpty(replacementResult))
+                    {
+                        if (replacementCount == 0)
+                        {
+                            firstReplacementOriginal =
+                                match.Value;
+
+                            firstReplacementResult =
+                                replacementResult;
+                        }
+
+                        replacementCount++;
+                    }
+                    else
+                    {
+                        if (removalCount == 0)
+                        {
+                            firstRemoval =
+                                match.Value;
+                        }
+
+                        removalCount++;
+                    }
+
+                    return replacementResult;
+                });
+
+        return new ReplacementResult(
+            result,
+            replacementCount,
+            removalCount,
+            firstReplacementOriginal,
+            firstReplacementResult,
+            firstRemoval);
+    }
+
+    /// <summary>
+    /// Converts escaped newline and tab sequences in replacement text
+    /// to their corresponding characters.
+    /// </summary>
+    /// <param name="replace">
+    /// The replacement text to prepare.
+    /// </param>
+    /// <returns>
+    /// The prepared replacement text.
+    /// </returns>
+    public static string PrepareReplacePart(
+        string replace)
+    {
+        replace =
+            NewlineRegex.Replace(
+                replace,
+                "\n");
+
+        return TabulationRegex.Replace(
+            replace,
+            "\t");
+    }
+
+    /// <summary>
+    /// Contains the prepared find and replacement expressions for a rule.
+    /// </summary>
+    public sealed record PreparedReplacement(
+        string Find,
+        string Replace);
+
+    /// <summary>
+    /// Prepares the find and replacement expressions for a replacement rule,
+    /// including article-specific keyword expansion.
+    /// </summary>
+    /// <param name="replacement">
+    /// The replacement rule to prepare.
+    /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article being processed.
+    /// </param>
+    /// <returns>
+    /// The prepared find and replacement expressions.
+    /// </returns>
+    public static PreparedReplacement PrepareReplacement(
+        Replacement replacement,
+        string articleTitle)
+    {
+        ArgumentNullException.ThrowIfNull(replacement);
+
+        string find =
+            Tools.ApplyKeyWords(
+                articleTitle,
+                replacement.Find,
+                true);
+
+        string replace =
+            Tools.ApplyKeyWords(
+                articleTitle,
+                PrepareReplacePart(
+                    replacement.Replace));
+
+        return new PreparedReplacement(
+            find,
+            replace);
     }
 }
