@@ -53,17 +53,6 @@ public partial class FindandReplace : Form
         }
     }
 
-    private static Replacement RowToReplacement(
-        DataGridViewRow dataGridRow)
-    {
-        FindReplace.EditorRow row =
-            ReadEditorRow(
-                dataGridRow);
-
-        return FindReplace.CreateReplacement(
-            row);
-    }
-
     /// <summary>
     /// Builds backup list of find and replace entries in case user later wants to restore them.
     /// </summary>
@@ -79,28 +68,36 @@ public partial class FindandReplace : Form
     /// </summary>
     private void RebuildReplacementListFromGrid()
     {
-        ClearReplacementList();
+        List<FindReplace.EditorRow> rows = new();
 
         foreach (DataGridViewRow row in dataGridView1.Rows)
         {
             if (!row.IsNewRow &&
                 row.Cells["find"].Value is not null)
             {
-                AddReplacement(
-                    RowToReplacement(row));
+                rows.Add(
+                    ReadEditorRow(row));
             }
         }
+
+        _replacementList =
+            FindReplace.CreateReplacements(
+                rows);
     }
 
     /// <summary>
     /// Returns the number of replacements (enabled and disabled)
     /// </summary>
-    public int NoOfReplacements { get { return _replacementList.Count; } }
+    public int NoOfReplacements =>
+    FindReplace.GetReplacementCount(
+        _replacementList);
 
     /// <summary>
     /// Returns whether there are any replacements (enabled and disabled)
     /// </summary>
-    public bool HasReplacements { get { return NoOfReplacements != 0; } }
+    public bool HasReplacements =>
+    FindReplace.HasReplacements(
+        _replacementList);
 
     /// <summary>
     /// Returns whether any of the enabled find & replace entries are specified to be run 'after processing'
@@ -116,14 +113,12 @@ public partial class FindandReplace : Form
     /// <summary>
     /// Returns whether any of the enabled find & replace entries are specified to be run at before/after as input
     /// </summary>
-    public bool HasProcessingReplacements(bool after)
+    public bool HasProcessingReplacements(
+        bool after)
     {
-        foreach (Replacement rep in _replacementList)
-        {
-            if (rep.Enabled && ((after && rep.BeforeOrAfter) || (!after && !rep.BeforeOrAfter)))
-                return true;
-        }
-        return false;
+        return FindReplace.HasProcessingReplacements(
+            _replacementList,
+            after);
     }
 
     /// <summary>
@@ -262,30 +257,8 @@ public partial class FindandReplace : Form
     /// </summary>
     public void Clear()
     {
-        ClearReplacementList();
-        dataGridView1.Rows.Clear();
-    }
-
-    /// <summary>
-    /// Clears the configured replacement entries.
-    /// </summary>
-    private void ClearReplacementList()
-    {
         _replacementList.Clear();
-    }
-
-    /// <summary>
-    /// Adds a replacement entry to the configured replacement list.
-    /// </summary>
-    /// <param name="replacement">
-    /// The replacement entry to add.
-    /// </param>
-    private void AddReplacement(
-        Replacement replacement)
-    {
-        ArgumentNullException.ThrowIfNull(replacement);
-
-        _replacementList.Add(replacement);
+        dataGridView1.Rows.Clear();
     }
 
     #region loading/saving
@@ -296,9 +269,8 @@ public partial class FindandReplace : Form
     /// </summary>
     /// <param name="r">The replacement entry.</param>
     /// <param name="decodeRequired">
-    /// Whether decoding of newlines in find and replace text is required.
-    /// Required when loading settings from XML and not required when restoring
-    /// from backup after Cancel.
+    /// Whether encoded newlines in the find and replace text should be decoded
+    /// before the values are displayed in the editor grid.
     /// </param>
     public void AddNew(
         Replacement r,
@@ -311,7 +283,7 @@ public partial class FindandReplace : Form
 
         AddEditorRowToGrid(row);
 
-        AddReplacement(r);
+        _replacementList.Add(r);
     }
 
     /// <summary>
@@ -394,7 +366,8 @@ public partial class FindandReplace : Form
     /// </returns>
     public List<Replacement> GetList()
     {
-        return [.. _replacementList];
+        return FindReplace.GetReplacements(
+            _replacementList);
     }
 
     /// <summary>
@@ -508,19 +481,28 @@ public partial class FindandReplace : Form
     {
         ApplyDefaultFormatting = false;
         Hide();
-        if (replacementBackup != null && DialogResult == DialogResult.Cancel)
+        if (replacementBackup != null &&
+            DialogResult == DialogResult.Cancel)
         {
             dataGridView1.Rows.Clear();
-            foreach (Replacement r in replacementBackup)
+
+            foreach (Replacement replacement in replacementBackup)
             {
-                AddNew(r, false);
+                FindReplace.EditorRow row =
+                    FindReplace.CreateEditorRow(
+                        replacement,
+                        false);
+
+                AddEditorRowToGrid(row);
             }
-            _replacementList.Clear();
-            _replacementList = replacementBackup;
+
+            _replacementList =
+                replacementBackup;
+
             replacementBackup = null;
+
             return;
         }
-        MakeList();
     }
 
     #endregion
@@ -624,6 +606,8 @@ public partial class FindandReplace : Form
             t.Singleline = (bool)row.Cells["single"].FormattedValue;
             t.IgnoreCase = !(bool)row.Cells["casesensitive"].FormattedValue;
 
+            // TODO(Twain): Replace the legacy MainForm/EditBox dependency when the
+            // Avalonia find-and-replace UI is connected to the active editing session.
             if (Variables.MainForm != null && Variables.MainForm.EditBox.Enabled)
                 t.ArticleText = Variables.MainForm.EditBox.Text;
 
@@ -823,11 +807,15 @@ public partial class FindandReplace : Form
         ChangeChecked("minor", false);
     }
 
-    private void FindandReplace_VisibleChanged(object sender, EventArgs e)
+    private void FindandReplace_VisibleChanged(
+        object sender,
+        EventArgs e)
     {
         if (Visible)
         {
-            replacementBackup = _replacementList.ConvertAll(repl => new Replacement(repl));
+            replacementBackup =
+                FindReplace.CloneReplacements(
+                    _replacementList);
         }
     }
 

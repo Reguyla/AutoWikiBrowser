@@ -1016,4 +1016,121 @@ public static class FindReplace
             result.RemovedSummary,
             result.MajorChangesMade);
     }
+
+    /// <summary>
+    /// Determines whether the collection contains an enabled replacement
+    /// configured for the requested processing stage.
+    /// </summary>
+    /// <param name="replacements">
+    /// The replacement rules to inspect.
+    /// </param>
+    /// <param name="after">
+    /// <see langword="true"/> to check for after-processing replacements;
+    /// otherwise, checks for before-processing replacements.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when at least one enabled replacement is configured
+    /// for the requested processing stage; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool HasProcessingReplacements(
+        IEnumerable<Replacement> replacements,
+        bool after)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        return replacements.Any(
+            replacement =>
+                replacement.Enabled &&
+                replacement.BeforeOrAfter == after);
+    }
+
+    /// <summary>
+    /// Creates an independent copy of a collection of replacement rules.
+    /// </summary>
+    /// <param name="replacements">
+    /// The replacement rules to copy.
+    /// </param>
+    /// <returns>
+    /// A new list containing copies of the supplied replacement rules.
+    /// </returns>
+    public static List<Replacement> CloneReplacements(
+        IEnumerable<Replacement> replacements)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        return replacements
+            .Select(replacement => new Replacement(replacement))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Returns the number of configured replacement rules.
+    /// </summary>
+    /// <param name="replacements">
+    /// The replacement rules to count.
+    /// </param>
+    /// <returns>
+    /// The number of replacement rules.
+    /// </returns>
+    public static int GetReplacementCount(
+        IEnumerable<Replacement> replacements)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        return replacements.Count();
+    }
+
+    /// <summary>
+    /// Determines whether any replacement rules are configured.
+    /// </summary>
+    /// <param name="replacements">
+    /// The replacement rules to inspect.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when at least one replacement rule is configured;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool HasReplacements(
+        IEnumerable<Replacement> replacements)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        return replacements.Any();
+    }
+
+    /// <summary>
+    /// Creates a new list containing the supplied replacement rules.
+    /// </summary>
+    /// <param name="replacements">
+    /// The replacement rules to copy into the new list.
+    /// </param>
+    /// <returns>
+    /// A new list containing the supplied replacement rules.
+    /// </returns>
+    public static List<Replacement> GetReplacements(
+        IEnumerable<Replacement> replacements)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        return [.. replacements];
+    }
+
+    /// <summary>
+    /// Creates replacement rules from editable replacement rows.
+    /// </summary>
+    /// <param name="rows">
+    /// The editable replacement rows to convert.
+    /// </param>
+    /// <returns>
+    /// A new list containing the replacement rules represented by the supplied rows.
+    /// </returns>
+    public static List<Replacement> CreateReplacements(
+        IEnumerable<EditorRow> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+
+        return rows
+            .Select(CreateReplacement)
+            .ToList();
+    }
 }
