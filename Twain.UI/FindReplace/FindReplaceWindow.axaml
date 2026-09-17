@@ -24,6 +24,7 @@
         <DataGrid
             Grid.Row="1"
             ItemsSource="{ReflectionBinding Rows}"
+            SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
             AutoGenerateColumns="False"
             CanUserReorderColumns="True"
             CanUserResizeColumns="True"
@@ -40,6 +41,39 @@
                     Header="Replace"
                     Width="*"
                     Binding="{ReflectionBinding Replace, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="Enabled"
+                    Binding="{ReflectionBinding Enabled, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="Regex"
+                    Binding="{ReflectionBinding IsRegex, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="Case sensitive"
+                    Binding="{ReflectionBinding CaseSensitive, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="Multiline"
+                    Binding="{ReflectionBinding Multiline, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="Singleline"
+                    Binding="{ReflectionBinding Singleline, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="Minor"
+                    Binding="{ReflectionBinding Minor, Mode=TwoWay}" />
+
+                <DataGridCheckBoxColumn
+                    Header="After"
+                    Binding="{ReflectionBinding BeforeOrAfter, Mode=TwoWay}" />
+
+                <DataGridTextColumn
+                    Header="Comment"
+                    Width="200"
+                    Binding="{ReflectionBinding Comment, Mode=TwoWay}" />
             </DataGrid.Columns>
 
         </DataGrid>
@@ -55,6 +89,21 @@
                 MinWidth="90"
                 Command="{Binding AddRuleCommand}"
                 Content="Add rule" />
+
+            <Button
+                MinWidth="90"
+                Command="{Binding RemoveRuleCommand}"
+                Content="Remove rule" />
+
+            <Button
+                MinWidth="90"
+                Command="{Binding MoveRuleUpCommand}"
+                Content="Move up" />
+
+            <Button
+                MinWidth="90"
+                Command="{Binding MoveRuleDownCommand}"
+                Content="Move down" />
 
             <Button
                 MinWidth="90"
