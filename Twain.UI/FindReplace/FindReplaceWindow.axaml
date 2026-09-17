@@ -11,8 +11,8 @@
     MinHeight="500"
     WindowStartupLocation="CenterOwner">
 
-    <Grid RowDefinitions="Auto,*,Auto"
-          Margin="12">
+        <Grid RowDefinitions="Auto,Auto,*,Auto"
+              Margin="12">
 
         <TextBlock
             Grid.Row="0"
@@ -21,8 +21,29 @@
             FontWeight="SemiBold"
             Text="Find and Replace" />
 
-        <DataGrid
+        <StackPanel
             Grid.Row="1"
+            Margin="0,0,0,12"
+            Orientation="Horizontal"
+            Spacing="16">
+
+            <CheckBox
+                Content="Ignore links"
+                IsChecked="{Binding IgnoreLinks, Mode=TwoWay}"
+                IsEnabled="{Binding CanChangeIgnoreLinks}" />
+
+            <CheckBox
+                Content="Ignore more"
+                IsChecked="{Binding IgnoreMore, Mode=TwoWay}" />
+
+            <CheckBox
+                Content="Append to summary"
+                IsChecked="{Binding AppendToSummary, Mode=TwoWay}" />
+
+        </StackPanel>
+
+        <DataGrid
+            Grid.Row="2"
             ItemsSource="{ReflectionBinding Rows}"
             SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
             AutoGenerateColumns="False"
@@ -79,7 +100,7 @@
         </DataGrid>
 
         <StackPanel
-            Grid.Row="2"
+            Grid.Row="3"
             Margin="0,12,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal"

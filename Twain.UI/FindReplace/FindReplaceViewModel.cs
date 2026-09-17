@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CoreFindReplace = Twain.Core.Parse.FindReplace;
+using CoreReplacement = Twain.Core.Parse.Replacement;
+
 
 namespace Twain.UI.FindReplace;
 
@@ -34,6 +36,32 @@ public partial class FindReplaceViewModel : ObservableObject
     private FindReplaceRowViewModel? _selectedRow;
 
     /// <summary>
+    /// Gets or sets whether links should be ignored during replacement processing.
+    /// </summary>
+    [ObservableProperty]
+    private bool _ignoreLinks;
+
+    /// <summary>
+    /// Gets or sets whether additional protected article content should be ignored
+    /// during replacement processing.
+    /// </summary>
+    [ObservableProperty]
+    private bool _ignoreMore;
+
+    /// <summary>
+    /// Gets or sets whether find and replace changes should be appended to the
+    /// edit summary.
+    /// </summary>
+    [ObservableProperty]
+    private bool _appendToSummary = true;
+
+    /// <summary>
+    /// Gets whether the Ignore Links option can be changed independently.
+    /// </summary>
+    public bool CanChangeIgnoreLinks =>
+        !IgnoreMore;
+
+    /// <summary>
     /// Adds a new empty find and replace rule.
     /// </summary>
     [RelayCommand]
@@ -58,6 +86,21 @@ public partial class FindReplaceViewModel : ObservableObject
 
         Rows.Remove(SelectedRow);
         SelectedRow = null;
+    }
+
+    /// <summary>
+    /// Updates dependent ignore options when Ignore More changes.
+    /// </summary>
+    partial void OnIgnoreMoreChanged(
+        bool value)
+    {
+        if (value)
+        {
+            IgnoreLinks = true;
+        }
+
+        OnPropertyChanged(
+            nameof(CanChangeIgnoreLinks));
     }
 
     /// <summary>
@@ -175,5 +218,35 @@ public partial class FindReplaceViewModel : ObservableObject
             .ToList();
     }
 
+    /// <summary>
+    /// Loads replacement rules into the editable collection.
+    /// </summary>
+    /// <param name="replacements">
+    /// The replacement rules to load.
+    /// </param>
+    public void LoadReplacements(
+        IEnumerable<CoreReplacement> replacements)
+    {
+        ArgumentNullException.ThrowIfNull(replacements);
+
+        LoadRows(
+            replacements.Select(
+                replacement =>
+                    CoreFindReplace.CreateEditorRow(
+                        replacement,
+                        false)));
+    }
+
+    /// <summary>
+    /// Gets the current editable rules as replacement models.
+    /// </summary>
+    /// <returns>
+    /// The current replacement rules.
+    /// </returns>
+    public List<CoreReplacement> GetReplacements()
+    {
+        return CoreFindReplace.CreateReplacements(
+            GetRows());
+    }
 
 }
