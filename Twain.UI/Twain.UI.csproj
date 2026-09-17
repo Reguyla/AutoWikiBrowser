@@ -20,19 +20,16 @@
   <ItemGroup>
     <Content Include="..\..\..\..\Downloads\Twainlogo.png" Link="Assets\Twainlogo.png" />
 
-    <AvaloniaResource Include="..\..\..\..\Downloads\TwainSplash.png" Link="Assets\TwainSplash.png" />
+    <Content Include="..\..\..\..\Downloads\TwainSplash.png" Link="Assets\TwainSplash.png" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.2" />
     <PackageReference Include="Avalonia.Controls.WebView" Version="12.1.0" />
-
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.1" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
-
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
-
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
-
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">
         None
@@ -44,6 +41,16 @@
 
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
+
+<ItemGroup>
+  <Content Include="Monaco\MonacoEditor.html">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+
+  <Content Include="Monaco\Assets\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
 
   <ItemGroup>
     <Compile Update="ArticleList\ArticleListView.axaml.cs">

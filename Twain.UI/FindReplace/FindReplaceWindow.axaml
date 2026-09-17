@@ -1,0 +1,70 @@
+<Window
+    x:Class="Twain.UI.FindReplace.FindReplaceWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.FindReplace"
+    x:DataType="vm:FindReplaceViewModel"
+    Title="Find and Replace"
+    Width="1000"
+    Height="650"
+    MinWidth="800"
+    MinHeight="500"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="12">
+
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,12"
+            FontSize="18"
+            FontWeight="SemiBold"
+            Text="Find and Replace" />
+
+        <DataGrid
+            Grid.Row="1"
+            ItemsSource="{ReflectionBinding Rows}"
+            AutoGenerateColumns="False"
+            CanUserReorderColumns="True"
+            CanUserResizeColumns="True"
+            CanUserSortColumns="False"
+            GridLinesVisibility="All">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Header="Find"
+                    Width="*"
+                    Binding="{ReflectionBinding Find, Mode=TwoWay}" />
+
+                <DataGridTextColumn
+                    Header="Replace"
+                    Width="*"
+                    Binding="{ReflectionBinding Replace, Mode=TwoWay}" />
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <Button
+                MinWidth="90"
+                Command="{Binding AddRuleCommand}"
+                Content="Add rule" />
+
+            <Button
+                MinWidth="90"
+                Content="Cancel" />
+
+            <Button
+                MinWidth="90"
+                Content="OK" />
+
+        </StackPanel>
+
+    </Grid>
+</Window>
