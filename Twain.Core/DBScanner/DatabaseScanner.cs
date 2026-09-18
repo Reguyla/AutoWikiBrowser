@@ -96,7 +96,6 @@ public partial class DatabaseScanner : Form
 
             UpdateControls(true);
 
-            txtStartFrom.Text = Tools.TurnFirstToUpper(txtStartFrom.Text);
             Start();
 
             timerProgessUpdate.Enabled = true;
@@ -109,162 +108,96 @@ public partial class DatabaseScanner : Form
         }
     }
 
-    private Regex TitleDoesRegex, TitleDoesNotRegex;
-    private Regex ArticleDoesContain, ArticleDoesNotContain;
-    private readonly List<int> Namespaces = new();
-
     private readonly CrossThreadQueue<string> Queue = new CrossThreadQueue<string>();
 
-    private void MakePatterns()
+    /// <summary>
+    /// Captures the current database scanner settings from the user interface.
+    /// </summary>
+    private DatabaseScannerOptions CreateOptions()
     {
-        RegexOptions articleRegOptions = RegexOptions.Compiled;
-
-        if (!chkArticleCaseSensitive.Checked)
-            articleRegOptions |= RegexOptions.IgnoreCase;
-
-        string articleContains = Convert(txtArticleDoesContain.Text);
-        string articleDoesNotContain = Convert(txtArticleDoesNotContain.Text);
-
-        if (!chkArticleRegex.Checked)
+        return new DatabaseScannerOptions
         {
-            articleContains = Regex.Escape(articleContains);
-            articleDoesNotContain = Regex.Escape(articleDoesNotContain);
-        }
-        else
-        {
-            if (chkMulti.Checked)
-                articleRegOptions |= RegexOptions.Multiline;
-            if (chkSingle.Checked)
-                articleRegOptions |= RegexOptions.Singleline;
-        }
+            FileName = FileName,
+            StartFrom = Tools.TurnFirstToUpper(txtStartFrom.Text),
 
-        ArticleDoesContain = new Regex(articleContains, articleRegOptions);
-        ArticleDoesNotContain = new Regex(articleDoesNotContain, articleRegOptions);
+            Priority = Priority,
+            ResultLimit = (int)nudLimitResults.Value,
 
-        string titleNotContain = Convert(txtTitleNotContains.Text);
-        string titleContains = Convert(txtTitleContains.Text);
+            IgnoreRedirects = chkIgnoreRedirects.Checked,
+            IgnoreComments = chkIgnoreComments.Checked,
 
-        if (!chkTitleRegex.Checked)
-        {
-            titleContains = Regex.Escape(titleContains);
-            titleNotContain = Regex.Escape(titleNotContain);
-        }
+            Namespaces = pageNamespaces.GetSelectedNamespaces().ToList(),
 
-        RegexOptions titleRegOptions = RegexOptions.Compiled;
+            TitleContainsEnabled = chkTitleContains.Checked,
+            TitleContains = txtTitleContains.Text,
+            TitleDoesNotContainEnabled = chkTitleDoesNotContain.Checked,
+            TitleDoesNotContain = txtTitleNotContains.Text,
+            TitleRegex = chkTitleRegex.Checked,
+            TitleCaseSensitive = chkTitleCaseSensitive.Checked,
 
-        if (!chkTitleCaseSensitive.Checked)
-            titleRegOptions = titleRegOptions | RegexOptions.IgnoreCase;
+            ArticleContainsEnabled = chkArticleDoesContain.Checked,
+            ArticleContains = txtArticleDoesContain.Text,
+            ArticleDoesNotContainEnabled = chkArticleDoesNotContain.Checked,
+            ArticleDoesNotContain = txtArticleDoesNotContain.Text,
+            ArticleRegex = chkArticleRegex.Checked,
+            ArticleCaseSensitive = chkArticleCaseSensitive.Checked,
+            ArticleRegexMultiline = chkMulti.Checked,
+            ArticleRegexSingleline = chkSingle.Checked,
 
-        TitleDoesRegex = new Regex(titleContains, titleRegOptions);
-        TitleDoesNotRegex = new Regex(titleNotContain, titleRegOptions);
+            SearchDates = chkSearchDates.Checked,
+            DateFrom = dtpFrom.Value,
+            DateTo = dtpTo.Value,
 
-        Namespaces.Clear();
-        Namespaces.AddRange(pageNamespaces.GetSelectedNamespaces());
+            CheckProtection = chkProtection.Checked,
+            EditProtectionLevel = MoveDelete.EditProtectionLevel,
+            MoveProtectionLevel = MoveDelete.MoveProtectionLevel,
+
+            LengthComparison = cmboLength.SelectedIndex,
+            Length = (int)nudLength.Value,
+
+            LinkComparison = cmboLinks.SelectedIndex,
+            Links = (int)nudLinks.Value,
+
+            WordComparison = cmboWords.SelectedIndex,
+            Words = (int)nudWords.Value,
+
+            CheckBadLinks = chkBadLinks.Checked,
+            CheckNoBoldTitle = chkNoBold.Checked,
+            CheckCiteTemplateDates = chkCiteTemplateDates.Checked,
+            CheckReorderReferences = chkReorderReferences.Checked,
+            CheckPeopleCategories = chkPeopleCategories.Checked,
+            CheckUnbalancedBrackets = chkUnbalancedBrackets.Checked,
+            CheckSimpleLinks = chkSimpleLinks.Checked,
+            CheckHtmlEntities = chkHasHTML.Checked,
+            CheckSectionErrors = chkHeaderError.Checked,
+            CheckUnbulletedLinks = chkUnbulletedLinks.Checked,
+            CheckTypos = chkTypo.Checked,
+            CheckMissingDefaultSort = chkDefaultSort.Checked
+        };
     }
 
     private void Start()
     {
-        MakePatterns();
+        DatabaseScannerOptions options = CreateOptions();
 
-        StartTime = new TimeSpan(DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second,
-                                 DateTime.Now.Millisecond);
-        Limit = (int)nudLimitResults.Value;
+        StartTime = new TimeSpan(
+            DateTime.Now.Day,
+            DateTime.Now.Hour,
+            DateTime.Now.Minute,
+            DateTime.Now.Second,
+            DateTime.Now.Millisecond);
 
-        List<Scan> s = new();
+        Limit = options.ResultLimit;
 
-        // First set of checks: article namespace and title contains/not contains checks
-        if (Namespaces.Count > 0)
-            s.Add(new CheckNamespace(Namespaces));
+        List<Scan> scanners =
+            DatabaseScannerProcessor.CreateScanners(options);
 
-        if (chkTitleContains.Checked)
-            s.Add(new TitleContains(TitleDoesRegex));
-
-        if (chkTitleDoesNotContain.Checked)
-            s.Add(new TitleDoesNotContain(TitleDoesNotRegex));
-
-        // Second set of checks: redirects, article contains/not contains checks
-        if (chkIgnoreRedirects.Checked)
-            s.Add(new IsNotRedirect());
-
-        if (chkArticleDoesContain.Checked)
-            s.Add(new TextContainsRegex(ArticleDoesContain));
-
-        if (chkArticleDoesNotContain.Checked)
-            s.Add(new TextDoesNotContainRegex(ArticleDoesNotContain));
-
-        if (chkSearchDates.Checked)
-            s.Add(new DateRange(dtpFrom.Value, dtpTo.Value));
-
-        if (chkProtection.Checked)
-            s.Add(new Restriction(MoveDelete.EditProtectionLevel, MoveDelete.MoveProtectionLevel));
-
-        switch (cmboLength.SelectedIndex)
-        {
-            case 1:
-                s.Add(new CountCharacters(MoreLessThan.MoreThan, (int)nudLength.Value));
-                break;
-            case 2:
-                s.Add(new CountCharacters(MoreLessThan.LessThan, (int)nudLength.Value));
-                break;
-        }
-
-        switch (cmboLinks.SelectedIndex)
-        {
-            case 1:
-                s.Add(new CountLinks(MoreLessThan.MoreThan, (int)nudLinks.Value));
-                break;
-            case 2:
-                s.Add(new CountLinks(MoreLessThan.LessThan, (int)nudLinks.Value));
-                break;
-        }
-
-        switch (cmboWords.SelectedIndex)
-        {
-            case 1:
-                s.Add(new CountWords(MoreLessThan.MoreThan, (int)nudWords.Value));
-                break;
-            case 2:
-                s.Add(new CountWords(MoreLessThan.LessThan, (int)nudWords.Value));
-                break;
-        }
-
-        if (chkBadLinks.Checked)
-            s.Add(new HasBadLinks());
-
-        if (chkNoBold.Checked)
-            s.Add(new HasNoBoldTitle());
-
-        if (chkCiteTemplateDates.Checked)
-            s.Add(new CiteTemplateDates());
-
-        if (chkReorderReferences.Checked)
-            s.Add(new ReorderReferences());
-
-        if (chkPeopleCategories.Checked)
-            s.Add(new PeopleCategories());
-
-        if (chkUnbalancedBrackets.Checked)
-            s.Add(new UnbalancedBrackets());
-
-        if (chkSimpleLinks.Checked)
-            s.Add(new HasSimpleLinks());
-
-        if (chkHasHTML.Checked)
-            s.Add(new HasHTMLEntities());
-
-        if (chkHeaderError.Checked)
-            s.Add(new HasSectionError());
-
-        if (chkUnbulletedLinks.Checked)
-            s.Add(new HasUnbulletedLinks());
-
-        if (chkTypo.Checked)
-            s.Add(new Typo());
-
-        if (chkDefaultSort.Checked)
-            s.Add(new MissingDefaultsort());
-
-        Main = new MainProcess(s, FileName, Priority, chkIgnoreComments.Checked, txtStartFrom.Text)
+        Main = new MainProcess(
+            scanners,
+            options.FileName,
+            options.Priority,
+            options.IgnoreComments,
+            options.StartFrom)
         {
             OutputQueue = Queue
         };
