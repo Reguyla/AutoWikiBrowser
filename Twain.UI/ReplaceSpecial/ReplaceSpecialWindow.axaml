@@ -41,6 +41,22 @@
 
                 <MenuItem Header="_Delete"
                             Command="{Binding DeleteRuleCommand}" />
+
+                <Button Content="New Rule">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Find and replace"
+                                      Command="{Binding AddRuleCommand}" />
+
+                            <MenuItem Header="In template call"
+                                      Command="{Binding AddInTemplateRuleCommand}" />
+
+                            <MenuItem Header="Template parameter"
+                                      Command="{Binding AddTemplateParamRuleCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+
             </MenuItem>
 
             <MenuItem Header="_Rule">
