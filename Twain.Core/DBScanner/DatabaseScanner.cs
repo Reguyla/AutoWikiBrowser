@@ -279,70 +279,20 @@ public partial class DatabaseScanner : Form
 
     #endregion
 
-    # region other
+    #region other
 
     private void WikifyToList()
     {
-        StringBuilder strbList = new StringBuilder();
-        string s, l = string.Empty;
-        int intHeadingSpace = System.Convert.ToInt32(nudHeadingSpace.Value);
+        List<Article> articles = lbArticles.Items
+            .Cast<Article>()
+            .ToList();
 
-        string strBullet = rdoHash.Checked ? "#" : "*";
-
-        if (chkHeading.Checked)
-        {
-            int intSection = 0, intSectionNumber = 0, i = 0;
-
-            strbList.AppendLine("==0==");
-            intSectionNumber++;
-
-            foreach (Article a in lbArticles.Items)
-            {
-                i++;
-                s = a.ToString().Replace("&amp;", "&");
-                if (a.NameSpaceKey == Namespace.File)
-                {
-                    s = ":" + s; //images should be inlined
-                }
-
-                strbList.AppendLine(strBullet + " [[" + s + "]]");
-
-                intSection++;
-                if (intSection == intHeadingSpace && i != lbArticles.Items.Count)
-                {
-                    strbList.AppendLine("\r\n==" + intSectionNumber + "==");
-                    intSectionNumber++;
-                    intSection = 0;
-                }
-            }
-        }
-        else if (chkABCHeader.Checked)
-        {
-            foreach (Article a in lbArticles.Items)
-            {
-                s = a.ToString().Replace("&amp;", "&");
-
-                string sr = (s.Length > 1) ? s.Remove(1) : s;
-
-                sr = Tools.RemoveDiacritics(sr);
-
-                if (sr != l)
-                    strbList.AppendLine("\r\n== " + sr + " ==");
-
-                strbList.AppendLine(strBullet + " [[" + s + "]]");
-
-                l = sr;
-            }
-        }
-        else
-        {
-            foreach (Article a in lbArticles.Items)
-            {
-                strbList.AppendLine(strBullet + " [[" + a.ToString().Replace("&amp;", "&") + "]]");
-            }
-        }
-
-        txtList.Text = strbList.ToString().Trim();
+        txtList.Text = DatabaseScannerProcessor.CreateWikiList(
+            articles,
+            rdoHash.Checked,
+            chkHeading.Checked,
+            System.Convert.ToInt32(nudHeadingSpace.Value),
+            chkABCHeader.Checked);
     }
 
     private string File = string.Empty;
@@ -753,36 +703,50 @@ public partial class DatabaseScanner : Form
     }
 
     /// <summary>
-    /// Updates progress bar, detailed % reading (3 dp) and ETC to indicate progress through scan
+    /// Updates progress bar, detailed % reading (3 dp) and ETC to indicate progress through scan.
     /// </summary>
     private void UpdateProgressBar()
     {
-        double matchesByLimit = ((double)Matches / Limit), completion = 0, newValue;
+        double completion = 0;
 
         if (Main != null)
             completion = Main.PercentageComplete;
 
-        /* indicate progress based on either fraction of matches compared to user-requested match limit
-         or overall fraction of file scanned, whichever is greater */
-        if (matchesByLimit > completion)
-            newValue = matchesByLimit * progressBar.Maximum;
-        else
-            newValue = completion * progressBar.Maximum;
+        double progress =
+            DatabaseScannerProcessor.CalculateProgress(
+                Matches,
+                Limit,
+                completion);
 
-        // show progress bar to nearest %, and detailed percentage to 3 dp
-        progressBar.Value = ((int)newValue < progressBar.Maximum) ? (int)newValue : progressBar.Maximum;
-        lblPercentageComplete.Text = string.Format("{0:f3}", newValue / 2) + "%"; // show percentage progress to 3 dp
+        progressBar.Value =
+            (int)(progress * progressBar.Maximum);
 
-        // estimate an ETC. based on elapsed time and scan progress so far
+        lblPercentageComplete.Text =
+            string.Format("{0:f3}", progress * 100) + "%";
+
+        // Estimate an ETC based on elapsed time and scan progress so far.
         if (completion > 0.001)
         {
-            TimeSpan elapsedtime = new TimeSpan(DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute,
-                                DateTime.Now.Second, DateTime.Now.Millisecond).Subtract(StartTime);
+            TimeSpan elapsedTime =
+                new TimeSpan(
+                    DateTime.Now.Day,
+                    DateTime.Now.Hour,
+                    DateTime.Now.Minute,
+                    DateTime.Now.Second,
+                    DateTime.Now.Millisecond)
+                .Subtract(StartTime);
 
-            int minutesLeft = (int)(((elapsedtime.Ticks * (1 / completion)) - elapsedtime.Ticks) / TimeSpan.TicksPerMinute);
+            int minutesLeft =
+                (int)(
+                    ((elapsedTime.Ticks * (1 / completion)) -
+                     elapsedTime.Ticks) /
+                    TimeSpan.TicksPerMinute);
 
             if (minutesLeft > 0)
-                lblPercentageComplete.Text += " ETC: " + minutesLeft + " mins,";
+            {
+                lblPercentageComplete.Text +=
+                    " ETC: " + minutesLeft + " mins,";
+            }
         }
     }
 
@@ -790,87 +754,64 @@ public partial class DatabaseScanner : Form
     {
         try
         {
-            if (openXMLDialog.ShowDialog() == DialogResult.OK)
+            if (openXMLDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            string fileName = openXMLDialog.FileName;
+            string extension = Path.GetExtension(fileName);
+
+            if (extension != null &&
+                extension.ToLower() != ".xml")
             {
-                var fileName = openXMLDialog.FileName;
-                var extension = Path.GetExtension(fileName);
+                MessageBox.Show(
+                    "The Database Scanner works with XML dump files. Please extract any compressed files (gz, bz2, 7z) and try again using the XML file from archive",
+                    "Wrong extension");
 
-                if (extension != null && extension.ToLower() != ".xml")
-                {
-                    MessageBox.Show("The Database Scanner works with XML dump files. Please extract any compressed files (gz, bz2, 7z) and try again using the XML file from archive", "Wrong extension");
-                    return;
-                }
+                return;
+            }
 
-                if (new FileInfo(fileName).Length == 0)
-                {
-                    MessageBox.Show("The file you are trying to open seems to be empty. Is it still being downloaded?", "Empty File?");
-                    return;
-                }
+            if (new FileInfo(fileName).Length == 0)
+            {
+                MessageBox.Show(
+                    "The file you are trying to open seems to be empty. Is it still being downloaded?",
+                    "Empty File?");
 
-                int dataFound = 0;
-                using (XmlTextReader reader = new XmlTextReader(fileName))
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.Name.Length == 0)
-                        {
-                            continue;
-                        }
+                return;
+            }
 
-                        if (reader.Name == "sitename")
-                        {
-                            txtSitename.Text = reader.ReadString();
-                            dataFound++;
-                        }
-                        else if (reader.Name == "base")
-                        {
-                            lnkBase.Text = reader.ReadString();
-                            dataFound++;
-                        }
-                        else if (reader.Name == "generator")
-                        {
-                            txtGenerator.Text = reader.ReadString();
-                            dataFound++;
-                        }
-                        else if (reader.Name == "case")
-                        {
-                            txtCase.Text = reader.ReadString();
-                            dataFound++;
-                        }
+            DatabaseDumpMetadata metadata =
+                DatabaseScannerProcessor.ReadDumpMetadata(fileName);
 
-                        if (dataFound == 4)
-                        {
-                            break;
-                        }
-                        if (dataFound > 100)
-                        {
-                            MessageBox.Show("This doesn't look like an XML dump from MediaWiki");
-                            return;
-                        }
-                    }
-                }
+            txtSitename.Text = metadata.SiteName;
+            lnkBase.Text = metadata.BaseUrl;
+            txtGenerator.Text = metadata.Generator;
+            txtCase.Text = metadata.Case;
 
-                FileName = fileName;
-                txtDumpLocation.Text = fileName;
+            FileName = fileName;
+            txtDumpLocation.Text = fileName;
 
-                try
-                {
-                    if (new Uri(lnkBase.Text).Host != Variables.Host)
-                    {
-                        MessageBox.Show(
-                            "The project of the loaded dump doesn't match the project AWB is currently setup for.\r\nIt is recommended you change the current project to that of the database dump.\r\nThis will ensure the namespaces are correct.",
-                            "Project mismatch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-                catch (UriFormatException)
+            try
+            {
+                if (new Uri(lnkBase.Text).Host != Variables.Host)
                 {
                     MessageBox.Show(
-                        "Apparent error with the host URI.\r\nChances are that probably means you're loading the wrong file type. Is it a MediaWiki XML Dump?",
-                        "Invalid Document Uri");
+                        "The project of the loaded dump doesn't match the project AWB is currently setup for.\r\nIt is recommended you change the current project to that of the database dump.\r\nThis will ensure the namespaces are correct.",
+                        "Project mismatch",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                 }
             }
+            catch (UriFormatException)
+            {
+                MessageBox.Show(
+                    "Apparent error with the host URI.\r\nChances are that probably means you're loading the wrong file type. Is it a MediaWiki XML Dump?",
+                    "Invalid Document Uri");
+            }
         }
-        catch (Exception ex) { ErrorHandler.HandleException(ex); }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
     }
 
     private void lnkGenDump_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

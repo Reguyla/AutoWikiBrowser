@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.DBScanner;
+﻿using System.Xml;
+
+namespace Twain.Core.DBScanner;
 
 /// <summary>
 /// Creates the database scan pipeline from scanner options.
@@ -216,5 +218,190 @@ public static class DatabaseScannerProcessor
     private static string ConvertLineEndings(string text)
     {
         return text.Replace("\r\n", "\n");
+    }
+
+    /// <summary>
+    /// Creates a wiki-formatted list from database scanner results.
+    /// </summary>
+    /// <param name="articles">
+    /// The articles to include in the list.
+    /// </param>
+    /// <param name="useNumberedList">
+    /// Whether to use numbered list items instead of bullet points.
+    /// </param>
+    /// <param name="useNumberedHeadings">
+    /// Whether to divide the results into numbered sections.
+    /// </param>
+    /// <param name="articlesPerSection">
+    /// The number of articles to include in each numbered section.
+    /// </param>
+    /// <param name="useAlphabeticalHeadings">
+    /// Whether to divide the results using alphabetical headings.
+    /// </param>
+    /// <returns>
+    /// The wiki-formatted article list.
+    /// </returns>
+    public static string CreateWikiList(
+        IEnumerable<Article> articles,
+        bool useNumberedList,
+        bool useNumberedHeadings,
+        int articlesPerSection,
+        bool useAlphabeticalHeadings)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+
+        List<Article> articleList = articles.ToList();
+
+        StringBuilder result = new();
+        string bullet = useNumberedList ? "#" : "*";
+
+        if (useNumberedHeadings)
+        {
+            int sectionCount = 0;
+            int sectionNumber = 0;
+            int articleCount = 0;
+
+            result.AppendLine("==0==");
+            sectionNumber++;
+
+            foreach (Article article in articleList)
+            {
+                articleCount++;
+
+                string title = article
+                    .ToString()
+                    .Replace("&amp;", "&");
+
+                if (article.NameSpaceKey == Namespace.File)
+                    title = ":" + title;
+
+                result.AppendLine($"{bullet} [[{title}]]");
+
+                sectionCount++;
+
+                if (sectionCount == articlesPerSection &&
+                    articleCount != articleList.Count)
+                {
+                    result.AppendLine($"\r\n=={sectionNumber}==");
+
+                    sectionNumber++;
+                    sectionCount = 0;
+                }
+            }
+        }
+        else if (useAlphabeticalHeadings)
+        {
+            string previousLetter = string.Empty;
+
+            foreach (Article article in articleList)
+            {
+                string title = article
+                    .ToString()
+                    .Replace("&amp;", "&");
+
+                string currentLetter =
+                    title.Length > 1
+                        ? title.Remove(1)
+                        : title;
+
+                currentLetter =
+                    Tools.RemoveDiacritics(currentLetter);
+
+                if (currentLetter != previousLetter)
+                    result.AppendLine($"\r\n== {currentLetter} ==");
+
+                result.AppendLine($"{bullet} [[{title}]]");
+
+                previousLetter = currentLetter;
+            }
+        }
+        else
+        {
+            foreach (Article article in articleList)
+            {
+                string title = article
+                    .ToString()
+                    .Replace("&amp;", "&");
+
+                result.AppendLine($"{bullet} [[{title}]]");
+            }
+        }
+
+        return result.ToString().Trim();
+    }
+
+    /// <summary>
+    /// Reads the site metadata from a MediaWiki XML database dump.
+    /// </summary>
+    /// <param name="fileName">
+    /// The path to the database dump.
+    /// </param>
+    /// <returns>
+    /// The metadata stored in the dump header.
+    /// </returns>
+    public static DatabaseDumpMetadata ReadDumpMetadata(string fileName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+
+        DatabaseDumpMetadata metadata = new();
+
+        using XmlTextReader reader = new(fileName);
+
+        while (reader.Read())
+        {
+            if (reader.NodeType != XmlNodeType.Element)
+                continue;
+
+            switch (reader.Name)
+            {
+                case "sitename":
+                    metadata.SiteName = reader.ReadString();
+                    break;
+
+                case "base":
+                    metadata.BaseUrl = reader.ReadString();
+                    break;
+
+                case "generator":
+                    metadata.Generator = reader.ReadString();
+                    break;
+
+                case "case":
+                    metadata.Case = reader.ReadString();
+                    return metadata;
+            }
+        }
+
+        return metadata;
+    }
+
+    /// <summary>
+    /// Calculates the overall progress of a database scan.
+    /// </summary>
+    /// <param name="matches">
+    /// The number of matching articles found so far.
+    /// </param>
+    /// <param name="resultLimit">
+    /// The maximum number of matching articles requested.
+    /// </param>
+    /// <param name="scanCompletion">
+    /// The fraction of the database dump that has been scanned, ranging from 0 to 1.
+    /// </param>
+    /// <returns>
+    /// The overall scan progress as a fraction ranging from 0 to 1.
+    /// </returns>
+    public static double CalculateProgress(
+        int matches,
+        int resultLimit,
+        double scanCompletion)
+    {
+        double matchesByLimit =
+            resultLimit > 0
+                ? (double)matches / resultLimit
+                : 0;
+
+        return Math.Min(
+            1,
+            Math.Max(matchesByLimit, scanCompletion));
     }
 }
