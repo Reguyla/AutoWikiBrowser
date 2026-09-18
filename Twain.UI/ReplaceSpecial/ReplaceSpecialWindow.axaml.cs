@@ -49,6 +49,8 @@ public partial class ReplaceSpecialWindow :
     /// </summary>
     public List<IRule> GetRules()
     {
+        SaveCurrentRule();
+
         return ViewModel.GetRules();
     }
 
@@ -155,5 +157,16 @@ public partial class ReplaceSpecialWindow :
 
         RuleEditorHost.Children.Add(
             _currentRuleControl);
+    }
+
+    /// <summary>
+    /// Closes the Replace Special window.
+    /// </summary>
+    private void Close_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        SaveCurrentRule();
+        Close();
     }
 }

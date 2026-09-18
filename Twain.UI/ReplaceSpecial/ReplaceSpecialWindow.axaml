@@ -14,9 +14,11 @@
     <Grid RowDefinitions="Auto,*"
           ColumnDefinitions="*">
 
-        <Menu Grid.Row="0">
+          <Menu Grid.Row="0">
             <MenuItem Header="_File">
-                <MenuItem Header="_Close" />
+                <MenuItem
+                    Header="_Close"
+                    Click="Close_Click" />
             </MenuItem>
 
             <MenuItem Header="_Edit">
