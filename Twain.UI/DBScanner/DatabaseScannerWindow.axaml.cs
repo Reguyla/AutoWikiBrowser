@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Twain.Core.DBScanner;
 
 namespace Twain.UI.DBScanner;
 
@@ -108,5 +109,134 @@ public partial class DatabaseScannerWindow : Window
     {
         ProtectionControl.IsEnabled =
             CheckProtectionCheckBox.IsChecked == true;
+    }
+
+    private DatabaseScannerOptions CreateOptions()
+    {
+        return new DatabaseScannerOptions
+        {
+            FileName =
+                DumpLocationTextBox.Text ?? string.Empty,
+
+            ResultLimit =
+                (int)(ResultLimitNumericUpDown.Value ?? 30000),
+
+            Namespaces =
+                NamespacesControl.GetSelectedNamespaces(),
+
+            TitleContainsEnabled =
+                TitleContainsCheckBox.IsChecked == true,
+
+            TitleContains =
+                TitleContainsTextBox.Text ?? string.Empty,
+
+            TitleDoesNotContainEnabled =
+                TitleDoesNotContainCheckBox.IsChecked == true,
+
+            TitleDoesNotContain =
+                TitleDoesNotContainTextBox.Text ?? string.Empty,
+
+            TitleRegex =
+                TitleRegexCheckBox.IsChecked == true,
+
+            TitleCaseSensitive =
+                TitleCaseSensitiveCheckBox.IsChecked == true,
+
+            ArticleContainsEnabled =
+                ArticleContainsCheckBox.IsChecked == true,
+
+            ArticleContains =
+                ArticleContainsTextBox.Text ?? string.Empty,
+
+            ArticleDoesNotContainEnabled =
+                ArticleDoesNotContainCheckBox.IsChecked == true,
+
+            ArticleDoesNotContain =
+                ArticleDoesNotContainTextBox.Text ?? string.Empty,
+
+            ArticleRegex =
+                ArticleRegexCheckBox.IsChecked == true,
+
+            ArticleCaseSensitive =
+                ArticleCaseSensitiveCheckBox.IsChecked == true,
+
+            ArticleRegexMultiline =
+                ArticleMultilineCheckBox.IsChecked == true,
+
+            ArticleRegexSingleline =
+                ArticleSinglelineCheckBox.IsChecked == true,
+
+            SearchDates =
+                SearchDatesCheckBox.IsChecked == true,
+
+            DateFrom =
+               DateFromPicker.SelectedDate ?? DateTime.MinValue,
+
+            DateTo =
+               DateToPicker.SelectedDate ?? DateTime.MaxValue,
+
+            CheckProtection =
+                CheckProtectionCheckBox.IsChecked == true,
+
+            EditProtectionLevel =
+                ProtectionControl.EditProtectionLevel,
+
+            MoveProtectionLevel =
+                ProtectionControl.MoveProtectionLevel,
+
+            LengthComparison =
+                LengthComparisonComboBox.SelectedIndex,
+
+            Length =
+                (int)(LengthNumericUpDown.Value ?? 1000),
+
+            LinkComparison =
+                LinksComparisonComboBox.SelectedIndex,
+
+            Links =
+                (int)(LinksNumericUpDown.Value ?? 5),
+
+            WordComparison =
+                WordsComparisonComboBox.SelectedIndex,
+
+            Words =
+                (int)(WordsNumericUpDown.Value ?? 200),
+
+            CheckBadLinks =
+                BadLinksCheckBox.IsChecked == true,
+
+            CheckNoBoldTitle =
+                NoBoldTitleCheckBox.IsChecked == true,
+
+            CheckCiteTemplateDates =
+                CiteTemplateDatesCheckBox.IsChecked == true,
+
+            CheckReorderReferences =
+                ReorderReferencesCheckBox.IsChecked == true,
+
+            CheckPeopleCategories =
+                PeopleCategoriesCheckBox.IsChecked == true,
+
+            CheckUnbalancedBrackets =
+                UnbalancedBracketsCheckBox.IsChecked == true,
+
+            CheckSimpleLinks =
+                SimpleLinksCheckBox.IsChecked == true,
+
+            CheckHtmlEntities =
+                HtmlEntitiesCheckBox.IsChecked == true,
+
+            CheckSectionErrors =
+                SectionErrorsCheckBox.IsChecked == true,
+
+            CheckUnbulletedLinks =
+                UnbulletedLinksCheckBox.IsChecked == true,
+
+            CheckTypos =
+               TypoCheckBox.IsChecked == true,
+
+            CheckMissingDefaultSort =
+                MissingDefaultSortCheckBox.IsChecked == true
+        };
     }
 }

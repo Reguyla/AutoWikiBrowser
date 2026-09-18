@@ -145,11 +145,14 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Namespaces">
-                <Grid Margin="12">
-                    <TextBlock Text="Namespace options will be added here." />
-                </Grid>
-            </TabItem>
+                <TabItem Header="Namespaces">
+                    <Grid Margin="12">
+                        <controls:NamespacesControl
+                            Name="NamespacesControl"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top" />
+                    </Grid>
+                </TabItem>
 
             <TabItem Header="Revision">
                 <Grid Margin="12"
