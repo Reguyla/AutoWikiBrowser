@@ -71,6 +71,8 @@ public partial class FindReplaceViewModel : ObservableObject
 
         Rows.Add(row);
         SelectedRow = row;
+
+        UpdateRuleCommandStates();
     }
 
     /// <summary>
@@ -86,6 +88,8 @@ public partial class FindReplaceViewModel : ObservableObject
 
         Rows.Remove(SelectedRow);
         SelectedRow = null;
+
+        UpdateRuleCommandStates();
     }
 
     /// <summary>
@@ -131,8 +135,7 @@ public partial class FindReplaceViewModel : ObservableObject
 
         Rows.Move(index, index - 1);
 
-        MoveRuleUpCommand.NotifyCanExecuteChanged();
-        MoveRuleDownCommand.NotifyCanExecuteChanged();
+        UpdateRuleCommandStates();
     }
 
     /// <summary>
@@ -156,8 +159,27 @@ public partial class FindReplaceViewModel : ObservableObject
 
         Rows.Move(index, index + 1);
 
-        MoveRuleUpCommand.NotifyCanExecuteChanged();
-        MoveRuleDownCommand.NotifyCanExecuteChanged();
+        UpdateRuleCommandStates();
+    }
+
+    /// <summary>
+    /// Clears all find and replace rules.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanClearRules))]
+    private void ClearRules()
+    {
+        Rows.Clear();
+        SelectedRow = null;
+
+        UpdateRuleCommandStates();
+    }
+
+    /// <summary>
+    /// Determines whether any find and replace rules can be cleared.
+    /// </summary>
+    private bool CanClearRules()
+    {
+        return Rows.Count > 0;
     }
 
     /// <summary>
@@ -203,6 +225,9 @@ public partial class FindReplaceViewModel : ObservableObject
             Rows.Add(
                 FindReplaceRowViewModel.FromEditorRow(row));
         }
+
+        SelectedRow = null;
+        UpdateRuleCommandStates();
     }
 
     /// <summary>
@@ -249,4 +274,15 @@ public partial class FindReplaceViewModel : ObservableObject
             GetRows());
     }
 
+    /// <summary>
+    /// Refreshes commands whose availability depends on the current rule collection
+    /// or selected rule.
+    /// </summary>
+    private void UpdateRuleCommandStates()
+    {
+        RemoveRuleCommand.NotifyCanExecuteChanged();
+        MoveRuleUpCommand.NotifyCanExecuteChanged();
+        MoveRuleDownCommand.NotifyCanExecuteChanged();
+        ClearRulesCommand.NotifyCanExecuteChanged();
+    }
 }

@@ -42,15 +42,15 @@
 
         </StackPanel>
 
-        <DataGrid
-            Grid.Row="2"
-            ItemsSource="{ReflectionBinding Rows}"
-            SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-            AutoGenerateColumns="False"
-            CanUserReorderColumns="True"
-            CanUserResizeColumns="True"
-            CanUserSortColumns="False"
-            GridLinesVisibility="All">
+            <DataGrid
+                Grid.Row="2"
+                ItemsSource="{ReflectionBinding Rows}"
+                SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                AutoGenerateColumns="False"
+                CanUserReorderColumns="True"
+                CanUserResizeColumns="True"
+                CanUserSortColumns="False"
+                GridLinesVisibility="All">
 
             <DataGrid.Columns>
                 <DataGridTextColumn
@@ -125,6 +125,11 @@
                 MinWidth="90"
                 Command="{Binding MoveRuleDownCommand}"
                 Content="Move down" />
+
+            <Button
+                MinWidth="90"
+                Command="{Binding ClearRulesCommand}"
+                Content="Clear all" />
 
             <Button
                 MinWidth="90"
