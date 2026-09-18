@@ -1,0 +1,66 @@
+<UserControl
+    x:Class="Twain.UI.Controls.NamespacesControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="360"
+    Height="280">
+
+    <Grid ColumnDefinitions="*,*"
+          ColumnSpacing="12">
+
+        <Grid Grid.Column="0"
+              RowDefinitions="Auto,*"
+              RowSpacing="4">
+
+            <CheckBox Name="SubjectCheckBox"
+                      Content="Subject"
+                      FontSize="13"
+                      Padding="2"
+                      IsCheckedChanged="SubjectCheckBox_IsCheckedChanged" />
+
+            <Border Grid.Row="1"
+                    BorderThickness="1"
+                    CornerRadius="2"
+                    Padding="4">
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+
+                    <StackPanel Name="SubjectPanel"
+                                Spacing="0" />
+
+                </ScrollViewer>
+
+            </Border>
+
+        </Grid>
+
+        <Grid Grid.Column="1"
+              RowDefinitions="Auto,*"
+              RowSpacing="4">
+
+            <CheckBox Name="TalkCheckBox"
+                      Content="Talk"
+                      FontSize="13"
+                      Padding="2"
+                      IsCheckedChanged="TalkCheckBox_IsCheckedChanged" />
+
+            <Border Grid.Row="1"
+                    BorderThickness="1"
+                    CornerRadius="2"
+                    Padding="4">
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+
+                    <StackPanel Name="TalkPanel"
+                                Spacing="0" />
+
+                </ScrollViewer>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+</UserControl>
