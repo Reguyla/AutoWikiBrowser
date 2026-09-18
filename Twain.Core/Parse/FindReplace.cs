@@ -1133,4 +1133,82 @@ public static class FindReplace
             .Select(CreateReplacement)
             .ToList();
     }
+
+    /// <summary>
+    /// Identifies a matching value in a find and replace editor row.
+    /// </summary>
+    /// <param name="RowIndex">
+    /// The zero-based index of the matching row.
+    /// </param>
+    /// <param name="ColumnIndex">
+    /// The zero-based editable column index, where 0 is Find and 1 is Replace.
+    /// </param>
+    public sealed record EditorSearchResult(
+        int RowIndex,
+        int ColumnIndex);
+
+    /// <summary>
+    /// Finds the next editor row containing the supplied search text.
+    /// </summary>
+    /// <param name="rows">
+    /// The find and replace editor rows to search.
+    /// </param>
+    /// <param name="searchText">
+    /// The text to locate in the Find or Replace values.
+    /// </param>
+    /// <param name="currentRowIndex">
+    /// The currently selected row, or -1 when no row is selected.
+    /// </param>
+    /// <returns>
+    /// The next matching row and column, wrapping to the first match when no
+    /// matching row follows the current row; otherwise, <see langword="null"/>.
+    /// </returns>
+    public static EditorSearchResult? FindNextEditorMatch(
+        IReadOnlyList<EditorRow> rows,
+        string searchText,
+        int currentRowIndex)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        ArgumentNullException.ThrowIfNull(searchText);
+
+        if (searchText.Length == 0)
+            return null;
+
+        List<EditorSearchResult> matches = new();
+
+        for (int rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+        {
+            EditorRow row = rows[rowIndex];
+
+            if (row.Find.Contains(searchText))
+            {
+                matches.Add(
+                    new EditorSearchResult(
+                        rowIndex,
+                        0));
+            }
+
+            if (row.Replace.Contains(searchText))
+            {
+                matches.Add(
+                    new EditorSearchResult(
+                        rowIndex,
+                        1));
+            }
+        }
+
+        if (matches.Count == 0)
+            return null;
+
+        if (currentRowIndex < 0)
+            return matches[0];
+
+        foreach (EditorSearchResult match in matches)
+        {
+            if (match.RowIndex > currentRowIndex)
+                return match;
+        }
+
+        return matches[0];
+    }
 }

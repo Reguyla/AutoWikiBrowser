@@ -55,6 +55,10 @@ public partial class FindReplaceViewModel : ObservableObject
     [ObservableProperty]
     private bool _appendToSummary = true;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
+    private string _searchText = string.Empty;
+
     /// <summary>
     /// Gets whether the Ignore Links option can be changed independently.
     /// </summary>
@@ -174,6 +178,81 @@ public partial class FindReplaceViewModel : ObservableObject
         UpdateRuleCommandStates();
     }
 
+    [RelayCommand(CanExecute = nameof(CanSearch))]
+    private void Search()
+    {
+        int currentRowIndex =
+            SelectedRow is null
+                ? -1
+                : Rows.IndexOf(SelectedRow);
+
+        CoreFindReplace.EditorSearchResult? result =
+            CoreFindReplace.FindNextEditorMatch(
+                GetRows(),
+                SearchText,
+                currentRowIndex);
+
+        if (result is null)
+            return;
+
+        SelectedRow =
+            Rows[result.RowIndex];
+    }
+
+    private bool CanSearch()
+    {
+        return !string.IsNullOrEmpty(SearchText);
+    }
+
+    /// <summary>
+    /// Moves the selected find and replace rule to the top of the collection.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanMoveRuleUp))]
+    private void MoveRuleToTop()
+    {
+        if (SelectedRow is null)
+        {
+            return;
+        }
+
+        int index = Rows.IndexOf(SelectedRow);
+
+        if (index <= 0)
+        {
+            return;
+        }
+
+        Rows.Move(index, 0);
+
+        UpdateRuleCommandStates();
+    }
+
+    /// <summary>
+    /// Moves the selected find and replace rule to the bottom of the collection.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanMoveRuleDown))]
+    private void MoveRuleToBottom()
+    {
+        if (SelectedRow is null)
+        {
+            return;
+        }
+
+        int index = Rows.IndexOf(SelectedRow);
+
+        if (index < 0 ||
+            index >= Rows.Count - 1)
+        {
+            return;
+        }
+
+        Rows.Move(
+            index,
+            Rows.Count - 1);
+
+        UpdateRuleCommandStates();
+    }
+
     /// <summary>
     /// Determines whether any find and replace rules can be cleared.
     /// </summary>
@@ -274,6 +353,12 @@ public partial class FindReplaceViewModel : ObservableObject
             GetRows());
     }
 
+    partial void OnSelectedRowChanged(
+    FindReplaceRowViewModel? value)
+    {
+        UpdateRuleCommandStates();
+    }
+
     /// <summary>
     /// Refreshes commands whose availability depends on the current rule collection
     /// or selected rule.
@@ -283,6 +368,103 @@ public partial class FindReplaceViewModel : ObservableObject
         RemoveRuleCommand.NotifyCanExecuteChanged();
         MoveRuleUpCommand.NotifyCanExecuteChanged();
         MoveRuleDownCommand.NotifyCanExecuteChanged();
+        MoveRuleToTopCommand.NotifyCanExecuteChanged();
+        MoveRuleToBottomCommand.NotifyCanExecuteChanged();
         ClearRulesCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand]
+    private void EnableAll()
+    {
+        ChangeAllRules(row => row.Enabled = true);
+    }
+
+    [RelayCommand]
+    private void DisableAll()
+    {
+        ChangeAllRules(row => row.Enabled = false);
+    }
+
+    [RelayCommand]
+    private void CheckAllRegex()
+    {
+        ChangeAllRules(row => row.IsRegex = true);
+    }
+
+    [RelayCommand]
+    private void UncheckAllRegex()
+    {
+        ChangeAllRules(row => row.IsRegex = false);
+    }
+
+    [RelayCommand]
+    private void CheckAllCaseSensitive()
+    {
+        ChangeAllRules(row => row.CaseSensitive = true);
+    }
+
+    [RelayCommand]
+    private void UncheckAllCaseSensitive()
+    {
+        ChangeAllRules(row => row.CaseSensitive = false);
+    }
+
+    [RelayCommand]
+    private void CheckAllMultiline()
+    {
+        ChangeAllRules(row => row.Multiline = true);
+    }
+
+    [RelayCommand]
+    private void UncheckAllMultiline()
+    {
+        ChangeAllRules(row => row.Multiline = false);
+    }
+
+    [RelayCommand]
+    private void CheckAllSingleline()
+    {
+        ChangeAllRules(row => row.Singleline = true);
+    }
+
+    [RelayCommand]
+    private void UncheckAllSingleline()
+    {
+        ChangeAllRules(row => row.Singleline = false);
+    }
+
+    [RelayCommand]
+    private void CheckAllMinor()
+    {
+        ChangeAllRules(row => row.Minor = true);
+    }
+
+    [RelayCommand]
+    private void UncheckAllMinor()
+    {
+        ChangeAllRules(row => row.Minor = false);
+    }
+
+    [RelayCommand]
+    private void CheckAllAfter()
+    {
+        ChangeAllRules(row => row.BeforeOrAfter = true);
+    }
+
+    [RelayCommand]
+    private void UncheckAllAfter()
+    {
+        ChangeAllRules(row => row.BeforeOrAfter = false);
+    }
+
+    private void ChangeAllRules(
+    Action<FindReplaceRowViewModel> update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+
+        foreach (FindReplaceRowViewModel row in Rows)
+        {
+            update(row);
+        }
     }
 }

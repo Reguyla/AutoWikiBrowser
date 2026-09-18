@@ -11,8 +11,9 @@
     MinHeight="500"
     WindowStartupLocation="CenterOwner">
 
-        <Grid RowDefinitions="Auto,Auto,*,Auto"
-              Margin="12">
+    <Grid
+        Margin="12"
+        RowDefinitions="Auto,Auto,Auto,*,Auto">
 
         <TextBlock
             Grid.Row="0"
@@ -42,17 +43,106 @@
 
         </StackPanel>
 
-            <DataGrid
-                Grid.Row="2"
-                ItemsSource="{ReflectionBinding Rows}"
-                SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                AutoGenerateColumns="False"
-                CanUserReorderColumns="True"
-                CanUserResizeColumns="True"
-                CanUserSortColumns="False"
-                GridLinesVisibility="All">
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,0,0,12"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <TextBox
+                Width="250"
+                Watermark="Search Find and Replace"
+                Text="{Binding SearchText, Mode=TwoWay}" />
+
+            <Button
+                MinWidth="90"
+                Command="{Binding SearchCommand}"
+                Content="Search" />
+
+        </StackPanel>
+
+        <DataGrid
+            Grid.Row="3"
+            ItemsSource="{ReflectionBinding Rows}"
+            SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+            AutoGenerateColumns="False"
+            CanUserReorderColumns="True"
+            CanUserResizeColumns="True"
+            CanUserSortColumns="False"
+            GridLinesVisibility="All"
+            IsReadOnly="False">
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+
+                    <MenuItem Header="Enabled">
+                        <MenuItem
+                            Header="Enable all"
+                            Command="{Binding EnableAllCommand}" />
+                        <MenuItem
+                            Header="Disable all"
+                            Command="{Binding DisableAllCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="Regular expressions">
+                        <MenuItem
+                            Header="Check all"
+                            Command="{Binding CheckAllRegexCommand}" />
+                        <MenuItem
+                            Header="Uncheck all"
+                            Command="{Binding UncheckAllRegexCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="Case sensitive">
+                        <MenuItem
+                            Header="Check all"
+                            Command="{Binding CheckAllCaseSensitiveCommand}" />
+                        <MenuItem
+                            Header="Uncheck all"
+                            Command="{Binding UncheckAllCaseSensitiveCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="Multiline">
+                        <MenuItem
+                            Header="Check all"
+                            Command="{Binding CheckAllMultilineCommand}" />
+                        <MenuItem
+                            Header="Uncheck all"
+                            Command="{Binding UncheckAllMultilineCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="Singleline">
+                        <MenuItem
+                            Header="Check all"
+                            Command="{Binding CheckAllSinglelineCommand}" />
+                        <MenuItem
+                            Header="Uncheck all"
+                            Command="{Binding UncheckAllSinglelineCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="Minor">
+                        <MenuItem
+                            Header="Check all"
+                            Command="{Binding CheckAllMinorCommand}" />
+                        <MenuItem
+                            Header="Uncheck all"
+                            Command="{Binding UncheckAllMinorCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="After processing">
+                        <MenuItem
+                            Header="Check all"
+                            Command="{Binding CheckAllAfterCommand}" />
+                        <MenuItem
+                            Header="Uncheck all"
+                            Command="{Binding UncheckAllAfterCommand}" />
+                    </MenuItem>
+
+                </ContextMenu>
+            </DataGrid.ContextMenu>
 
             <DataGrid.Columns>
+
                 <DataGridTextColumn
                     Header="Find"
                     Width="*"
@@ -95,12 +185,13 @@
                     Header="Comment"
                     Width="200"
                     Binding="{ReflectionBinding Comment, Mode=TwoWay}" />
+
             </DataGrid.Columns>
 
         </DataGrid>
 
         <StackPanel
-            Grid.Row="3"
+            Grid.Row="4"
             Margin="0,12,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
@@ -128,6 +219,16 @@
 
             <Button
                 MinWidth="90"
+                Command="{Binding MoveRuleToTopCommand}"
+                Content="Move to top" />
+
+            <Button
+                MinWidth="90"
+                Command="{Binding MoveRuleToBottomCommand}"
+                Content="Move to bottom" />
+
+            <Button
+                MinWidth="90"
                 Command="{Binding ClearRulesCommand}"
                 Content="Clear all" />
 
@@ -142,4 +243,5 @@
         </StackPanel>
 
     </Grid>
+
 </Window>
