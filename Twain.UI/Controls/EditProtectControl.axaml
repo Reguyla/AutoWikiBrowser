@@ -1,0 +1,41 @@
+<UserControl
+    x:Class="Twain.UI.Controls.EditProtectControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid RowDefinitions="Auto,Auto"
+          ColumnDefinitions="*,*"
+          ColumnSpacing="8"
+          RowSpacing="6">
+
+        <StackPanel Grid.Row="0"
+                    Grid.Column="0"
+                    Spacing="4">
+
+            <TextBlock Text="Create/Edit" />
+
+            <ListBox Name="EditProtectionListBox"
+                     Height="70"
+                     SelectionChanged="EditProtectionListBox_SelectionChanged" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="0"
+                    Grid.Column="1"
+                    Spacing="4">
+
+            <TextBlock Text="Move" />
+
+            <ListBox Name="MoveProtectionListBox"
+                     Height="70"
+                     IsEnabled="False"
+                     SelectionChanged="MoveProtectionListBox_SelectionChanged" />
+        </StackPanel>
+
+        <CheckBox Grid.Row="1"
+                  Grid.Column="1"
+                  Name="UnlockMoveCheckBox"
+                  Content="Unlock move permissions"
+                  IsCheckedChanged="UnlockMoveCheckBox_IsCheckedChanged" />
+
+    </Grid>
+</UserControl>

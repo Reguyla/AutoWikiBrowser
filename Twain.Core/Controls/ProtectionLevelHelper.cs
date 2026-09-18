@@ -3,7 +3,7 @@
 /// <summary>
 /// Provides the protection levels available for the current wiki.
 /// </summary>
-internal static class ProtectionLevelHelper
+public static class ProtectionLevelHelper
 {
     /// <summary>
     /// Gets the protection levels available for the specified language.
