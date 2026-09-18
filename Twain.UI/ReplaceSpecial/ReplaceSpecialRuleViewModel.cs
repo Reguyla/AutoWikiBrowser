@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using Twain.Core.ReplaceSpecial;
 
@@ -76,4 +77,5 @@ public partial class ReplaceSpecialRuleViewModel : ObservableObject
             OnPropertyChanged();
         }
     }
+
 }

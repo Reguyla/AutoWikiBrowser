@@ -1,5 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Twain.Core.ReplaceSpecial;
 
 namespace Twain.UI.ReplaceSpecial;
@@ -160,6 +162,106 @@ public partial class ReplaceSpecialWindow :
     }
 
     /// <summary>
+    /// Copies the currently selected replacement rule to the clipboard.
+    /// </summary>
+    private async void Copy_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        await CopySelectedRuleAsync();
+    }
+
+    /// <summary>
+    /// Copies the currently selected replacement rule to the clipboard.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the rule was copied; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    private async Task<bool> CopySelectedRuleAsync()
+    {
+        if (ViewModel.SelectedRule is null)
+            return false;
+
+        SaveCurrentRule();
+
+        IRule? rule =
+            ViewModel.GetSelectedRule();
+
+        if (rule is null)
+            return false;
+
+        string serializedRule =
+            RuleSerialization.Serialize(
+                rule);
+
+        var clipboard =
+            TopLevel.GetTopLevel(this)?.Clipboard;
+
+        if (clipboard is null)
+            return false;
+
+        await clipboard.SetTextAsync(
+            serializedRule);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Cuts the currently selected replacement rule to the clipboard.
+    /// </summary>
+    private async void Cut_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (!await CopySelectedRuleAsync())
+            return;
+
+        ViewModel.DeleteRule();
+    }
+
+    /// <summary>
+    /// Pastes a replacement rule from the clipboard.
+    /// </summary>
+    private async void Paste_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        var clipboard =
+            TopLevel.GetTopLevel(this)?.Clipboard;
+
+        if (clipboard is null)
+            return;
+
+        string? serializedRule =
+            await clipboard.TryGetTextAsync();
+
+        if (string.IsNullOrWhiteSpace(
+            serializedRule))
+        {
+            return;
+        }
+
+        IRule rule;
+
+        try
+        {
+            rule =
+                RuleSerialization.Deserialize(
+                    serializedRule);
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        SaveCurrentRule();
+
+        ViewModel.AddPastedRule(
+            rule);
+    }
+
+    /// <summary>
     /// Closes the Replace Special window.
     /// </summary>
     private void Close_Click(
@@ -169,4 +271,5 @@ public partial class ReplaceSpecialWindow :
         SaveCurrentRule();
         Close();
     }
+
 }

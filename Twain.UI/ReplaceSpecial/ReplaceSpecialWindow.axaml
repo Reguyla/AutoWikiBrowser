@@ -14,7 +14,7 @@
     <Grid RowDefinitions="Auto,*"
           ColumnDefinitions="*">
 
-          <Menu Grid.Row="0">
+        <Menu Grid.Row="0">
             <MenuItem Header="_File">
                 <MenuItem
                     Header="_Close"
@@ -30,8 +30,17 @@
 
                 <Separator />
 
+                <MenuItem Header="_Cut"
+                            Click="Cut_Click" />
+
+                <MenuItem Header="_Copy"
+                            Click="Copy_Click" />
+
+                <MenuItem Header="_Paste"
+                            Click="Paste_Click" />
+
                 <MenuItem Header="_Delete"
-                          Command="{Binding DeleteRuleCommand}" />
+                            Command="{Binding DeleteRuleCommand}" />
             </MenuItem>
 
             <MenuItem Header="_Rule">

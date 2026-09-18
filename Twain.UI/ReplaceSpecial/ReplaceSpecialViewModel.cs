@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -142,6 +143,39 @@ public partial class ReplaceSpecialViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Gets the currently selected replacement rule with its child hierarchy
+    /// synchronized to the Avalonia rule tree.
+    /// </summary>
+    /// <returns>
+    /// The selected rule, or <see langword="null"/> when no rule is selected.
+    /// </returns>
+    public IRule? GetSelectedRule()
+    {
+        if (SelectedRule is null)
+            return null;
+
+        SynchronizeChildren(
+            SelectedRule);
+
+        return SelectedRule.Rule;
+    }
+
+    /// <summary>
+    /// Adds a deserialized replacement rule to the rule tree.
+    /// </summary>
+    /// <param name="rule">
+    /// The replacement rule to add.
+    /// </param>
+    public void AddPastedRule(
+        IRule rule)
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+
+        AddTopLevelRule(
+            rule);
+    }
+
+    /// <summary>
     /// Creates a new top-level find and replace rule.
     /// </summary>
     [RelayCommand]
@@ -149,6 +183,20 @@ public partial class ReplaceSpecialViewModel : ObservableObject
     {
         AddTopLevelRule(
             new Rule());
+    }
+
+    /// <summary>
+    /// Adds an existing replacement rule to the top-level rule collection.
+    /// </summary>
+    /// <param name="rule">
+    /// The replacement rule to add.
+    /// </param>
+    public void AddRule(
+        IRule rule)
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+
+        AddTopLevelRule(rule);
     }
 
     /// <summary>
@@ -421,7 +469,6 @@ public partial class ReplaceSpecialViewModel : ObservableObject
         _history.Save(
             GetRules());
 
-        NotifyHistoryCommands();
 
         ReplaceSpecialRuleViewModel ruleViewModel =
             new(rule);
