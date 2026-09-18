@@ -101,4 +101,12 @@ public partial class DatabaseScannerWindow : Window
         WordsNumericUpDown.IsEnabled =
             WordsComparisonComboBox.SelectedIndex != 0;
     }
+
+    private void CheckProtectionCheckBox_IsCheckedChanged(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        ProtectionControl.IsEnabled =
+            CheckProtectionCheckBox.IsChecked == true;
+    }
 }

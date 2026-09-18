@@ -2,6 +2,7 @@
     x:Class="Twain.UI.DBScanner.DatabaseScannerWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Twain.UI.Controls"
     Title="Wiki Database Scanner"
     Width="1000"
     Height="700"
@@ -189,6 +190,23 @@
                                         Width="180" />
 
                 </Grid>
+            </TabItem>
+
+            <TabItem Header="Protection">
+                <StackPanel Margin="12"
+                            Spacing="10"
+                            MaxWidth="500"
+                            HorizontalAlignment="Left">
+
+                    <CheckBox Name="CheckProtectionCheckBox"
+                              Content="Check page protection"
+                              IsCheckedChanged="CheckProtectionCheckBox_IsCheckedChanged" />
+
+                    <controls:EditProtectControl
+                        Name="ProtectionControl"
+                        IsEnabled="False" />
+
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="Properties">
