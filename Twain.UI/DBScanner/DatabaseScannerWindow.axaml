@@ -1,0 +1,391 @@
+<Window
+    x:Class="Twain.UI.DBScanner.DatabaseScannerWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Wiki Database Scanner"
+    Width="1000"
+    Height="700"
+    MinWidth="850"
+    MinHeight="600"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="12">
+
+        <!-- Dump selection -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*,Auto"
+              ColumnSpacing="8"
+              Margin="0,0,0,12">
+
+            <TextBlock Grid.Column="0"
+                       Text="Database dump:"
+                       VerticalAlignment="Center" />
+
+            <TextBox Grid.Column="1"
+                     Name="DumpLocationTextBox"
+                     IsReadOnly="True" />
+
+            <Button Grid.Column="2"
+                    Name="BrowseButton"
+                    Content="Browse..." />
+        </Grid>
+
+        <!-- Scanner configuration -->
+        <TabControl Grid.Row="1"
+                    Name="ScannerTabs">
+
+        <TabItem Header="Text">
+            <Grid Margin="12"
+                    RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                    ColumnDefinitions="Auto,*,Auto"
+                    ColumnSpacing="10"
+                    RowSpacing="10">
+
+                <CheckBox Grid.Row="0"
+                            Grid.Column="0"
+                            Name="ArticleContainsCheckBox"
+                            Content="Contains:"
+                            VerticalAlignment="Center"
+                            IsCheckedChanged="ArticleContainsCheckBox_IsCheckedChanged" />
+
+                <TextBox Grid.Row="0"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Name="ArticleContainsTextBox"
+                            IsEnabled="False" />
+
+                <CheckBox Grid.Row="1"
+                            Grid.Column="0"
+                            Name="ArticleDoesNotContainCheckBox"
+                            Content="Not contains:"
+                            VerticalAlignment="Center"
+                            IsCheckedChanged="ArticleDoesNotContainCheckBox_IsCheckedChanged" />
+
+                <TextBox Grid.Row="1"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Name="ArticleDoesNotContainTextBox"
+                            IsEnabled="False" />
+
+                <CheckBox Grid.Row="2"
+                            Grid.Column="1"
+                            Name="ArticleRegexCheckBox"
+                            Content="Regex"
+                            IsCheckedChanged="ArticleRegexCheckBox_IsCheckedChanged" />
+
+                <CheckBox Grid.Row="2"
+                            Grid.Column="2"
+                            Name="ArticleSinglelineCheckBox"
+                            Content="Singleline"
+                            IsEnabled="False" />
+
+                <CheckBox Grid.Row="3"
+                            Grid.Column="1"
+                            Name="ArticleCaseSensitiveCheckBox"
+                            Content="Case sensitive" />
+
+                <CheckBox Grid.Row="3"
+                            Grid.Column="2"
+                            Name="ArticleMultilineCheckBox"
+                            Content="Multiline"
+                            IsEnabled="False" />
+
+                <CheckBox Grid.Row="4"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Name="IgnoreCommentsCheckBox"
+                            Content="Ignore &lt;!-- comments --&gt;" />
+
+            </Grid>
+        </TabItem>
+
+            <TabItem Header="Title">
+                <Grid Margin="12"
+                      RowDefinitions="Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="Auto,*"
+                      ColumnSpacing="10"
+                      RowSpacing="10">
+
+                    <CheckBox Grid.Row="0"
+                              Grid.Column="0"
+                              Name="TitleContainsCheckBox"
+                              Content="Contains:"
+                              VerticalAlignment="Center"
+                              IsCheckedChanged="TitleContainsCheckBox_IsCheckedChanged" />
+
+                    <TextBox Grid.Row="0"
+                             Grid.Column="1"
+                             Name="TitleContainsTextBox"
+                             IsEnabled="False" />
+
+                    <CheckBox Grid.Row="1"
+                              Grid.Column="0"
+                              Name="TitleDoesNotContainCheckBox"
+                              Content="Not contains:"
+                              VerticalAlignment="Center"
+                              IsCheckedChanged="TitleDoesNotContainCheckBox_IsCheckedChanged" />
+
+                    <TextBox Grid.Row="1"
+                             Grid.Column="1"
+                             Name="TitleDoesNotContainTextBox"
+                             IsEnabled="False" />
+
+                    <CheckBox Grid.Row="2"
+                              Grid.Column="1"
+                              Name="TitleRegexCheckBox"
+                              Content="Regex" />
+
+                    <CheckBox Grid.Row="3"
+                              Grid.Column="1"
+                              Name="TitleCaseSensitiveCheckBox"
+                              Content="Case sensitive" />
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Namespaces">
+                <Grid Margin="12">
+                    <TextBlock Text="Namespace options will be added here." />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Revision">
+                <Grid Margin="12"
+                      RowDefinitions="Auto,Auto,Auto"
+                      ColumnDefinitions="Auto,*"
+                      ColumnSpacing="10"
+                      RowSpacing="10">
+
+                    <CheckBox Grid.Row="0"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              Name="SearchDatesCheckBox"
+                              Content="Search revision dates"
+                              IsCheckedChanged="SearchDatesCheckBox_IsCheckedChanged" />
+
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Text="From:"
+                               VerticalAlignment="Center" />
+
+                    <CalendarDatePicker Grid.Row="1"
+                                        Grid.Column="1"
+                                        Name="DateFromPicker"
+                                        IsEnabled="False"
+                                        HorizontalAlignment="Left"
+                                        Width="180" />
+
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="To:"
+                               VerticalAlignment="Center" />
+
+                    <CalendarDatePicker Grid.Row="2"
+                                        Grid.Column="1"
+                                        Name="DateToPicker"
+                                        IsEnabled="False"
+                                        HorizontalAlignment="Left"
+                                        Width="180" />
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Properties">
+                <Grid Margin="12"
+                      RowDefinitions="Auto,Auto,Auto"
+                      ColumnDefinitions="Auto,Auto,Auto"
+                      ColumnSpacing="10"
+                      RowSpacing="10">
+
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Text="Characters:"
+                               VerticalAlignment="Center" />
+
+                    <ComboBox Grid.Row="0"
+                              Grid.Column="1"
+                              Name="LengthComparisonComboBox"
+                              SelectedIndex="0"
+                              Width="120">
+                        <ComboBoxItem Content="not counted" />
+                        <ComboBoxItem Content="at least" />
+                        <ComboBoxItem Content="at most" />
+                    </ComboBox>
+
+                    <NumericUpDown Grid.Row="0"
+                                   Grid.Column="2"
+                                   Name="LengthNumericUpDown"
+                                   Minimum="1"
+                                   Maximum="10000000"
+                                   Increment="500"
+                                   Value="1000"
+                                   Width="100"
+                                   IsEnabled="False" />
+
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Text="Links:"
+                               VerticalAlignment="Center" />
+
+                    <ComboBox Grid.Row="1"
+                              Grid.Column="1"
+                              Name="LinksComparisonComboBox"
+                              SelectedIndex="0"
+                              Width="120">
+                        <ComboBoxItem Content="not counted" />
+                        <ComboBoxItem Content="at least" />
+                        <ComboBoxItem Content="at most" />
+                    </ComboBox>
+
+                    <NumericUpDown Grid.Row="1"
+                                   Grid.Column="2"
+                                   Name="LinksNumericUpDown"
+                                   Minimum="1"
+                                   Maximum="1000"
+                                   Value="5"
+                                   Width="100"
+                                   IsEnabled="False" />
+
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="Words:"
+                               VerticalAlignment="Center" />
+
+                    <ComboBox Grid.Row="2"
+                              Grid.Column="1"
+                              Name="WordsComparisonComboBox"
+                              SelectedIndex="0"
+                              Width="120">
+                        <ComboBoxItem Content="not counted" />
+                        <ComboBoxItem Content="at least" />
+                        <ComboBoxItem Content="at most" />
+                    </ComboBox>
+
+                    <NumericUpDown Grid.Row="2"
+                                   Grid.Column="2"
+                                   Name="WordsNumericUpDown"
+                                   Minimum="0"
+                                   Maximum="1000000"
+                                   Increment="100"
+                                   Value="200"
+                                   Width="100"
+                                   IsEnabled="False" />
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="AWB checks">
+                <ScrollViewer>
+                    <WrapPanel Margin="12"
+                                Orientation="Horizontal">
+
+                        <CheckBox Name="NoBoldTitleCheckBox"
+                                    Content="Has title AWB will embolden"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="PeopleCategoriesCheckBox"
+                                    Content="Human birth/death cats"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="UnbalancedBracketsCheckBox"
+                                    Content="Unbalanced brackets"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="SimpleLinksCheckBox"
+                                    Content="Has simple links"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="ReorderReferencesCheckBox"
+                                    Content="References to reorder"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="BadLinksCheckBox"
+                                    Content="Has bad links AWB will fix"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="HtmlEntitiesCheckBox"
+                                    Content="Has HTML entities"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="SectionErrorsCheckBox"
+                                    Content="Section error"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="UnbulletedLinksCheckBox"
+                                    Content="Unbulleted links"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="CiteTemplateDatesCheckBox"
+                                    Content="Citation dates AWB will fix"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="TypoCheckBox"
+                                    Content="Typos AWB will fix"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                        <CheckBox Name="MissingDefaultSortCheckBox"
+                                    Content="Missing DEFAULTSORT"
+                                    Width="240"
+                                    Margin="0,0,12,10" />
+
+                    </WrapPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Results">
+                <Grid Margin="12">
+                    <TextBlock Text="Database scanner results will be added here." />
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- Scanner controls -->
+        <Grid Grid.Row="2"
+              ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+              ColumnSpacing="8"
+              Margin="0,12,0,0">
+
+            <Button Grid.Column="0"
+                    Name="ResetButton"
+                    Content="Reset" />
+
+            <Button Grid.Column="1"
+                    Name="FilterButton"
+                    Content="Filter..." />
+
+            <StackPanel Grid.Column="3"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        VerticalAlignment="Center">
+
+                <TextBlock Text="Limit:"
+                           VerticalAlignment="Center" />
+
+                <NumericUpDown Name="ResultLimitNumericUpDown"
+                               Minimum="1"
+                               Maximum="100000"
+                               Value="30000"
+                               Width="150" />
+            </StackPanel>
+
+            <Button Grid.Column="4"
+                    Name="StartButton"
+                    Content="Start"
+                    MinWidth="90" />
+        </Grid>
+
+    </Grid>
+</Window>
