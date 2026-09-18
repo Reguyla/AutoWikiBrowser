@@ -171,8 +171,35 @@ public partial class ReplaceSpecialViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(rule);
 
-        AddTopLevelRule(
-            rule);
+        _history.Save(
+            GetRules());
+
+        NotifyHistoryCommands();
+
+        ReplaceSpecialRuleViewModel ruleViewModel =
+            new(rule);
+
+        if (SelectedRule is not null &&
+            TryGetContainingCollection(
+                SelectedRule,
+                out ObservableCollection<ReplaceSpecialRuleViewModel>? collection))
+        {
+            int index =
+                collection.IndexOf(
+                    SelectedRule);
+
+            collection.Insert(
+                index + 1,
+                ruleViewModel);
+        }
+        else
+        {
+            Rules.Add(
+                ruleViewModel);
+        }
+
+        SelectedRule =
+            ruleViewModel;
     }
 
     /// <summary>

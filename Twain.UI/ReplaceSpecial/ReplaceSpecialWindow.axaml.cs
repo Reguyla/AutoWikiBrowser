@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
+using Avalonia.VisualTree;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Twain.Core.ReplaceSpecial;
@@ -205,6 +207,71 @@ public partial class ReplaceSpecialWindow :
             serializedRule);
 
         return true;
+    }
+
+    /// <summary>
+    /// Expands all rule nodes in the rule tree.
+    /// </summary>
+    private void ExpandAll_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        SetAllRuleNodesExpanded(
+            true);
+    }
+
+    /// <summary>
+    /// Collapses all rule nodes in the rule tree.
+    /// </summary>
+    private void CollapseAll_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        SetAllRuleNodesExpanded(
+            false);
+    }
+
+    /// <summary>
+    /// Sets the expansion state of all rule nodes.
+    /// </summary>
+    /// <param name="isExpanded">
+    /// Whether the rule nodes should be expanded.
+    /// </param>
+    private void SetAllRuleNodesExpanded(
+        bool isExpanded)
+    {
+        SetRuleNodesExpanded(
+            RulesTreeView,
+            isExpanded);
+    }
+
+    /// <summary>
+    /// Recursively sets the expansion state of realized tree items.
+    /// </summary>
+    /// <param name="control">
+    /// The control whose visual children should be searched.
+    /// </param>
+    /// <param name="isExpanded">
+    /// Whether tree items should be expanded.
+    /// </param>
+    private static void SetRuleNodesExpanded(
+        Control control,
+        bool isExpanded)
+    {
+        foreach (Control child in
+                 control.GetVisualChildren()
+                     .OfType<Control>())
+        {
+            if (child is TreeViewItem treeViewItem)
+            {
+                treeViewItem.IsExpanded =
+                    isExpanded;
+            }
+
+            SetRuleNodesExpanded(
+                child,
+                isExpanded);
+        }
     }
 
     /// <summary>
