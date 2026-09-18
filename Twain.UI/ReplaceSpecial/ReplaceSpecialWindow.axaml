@@ -1,0 +1,118 @@
+<Window
+    x:Class="Twain.UI.ReplaceSpecial.ReplaceSpecialWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.ReplaceSpecial"
+    x:DataType="vm:ReplaceSpecialViewModel"
+    Title="Replace Special"
+    Width="900"
+    Height="600"
+    MinWidth="700"
+    MinHeight="450"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto,*"
+          ColumnDefinitions="*">
+
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Close" />
+            </MenuItem>
+
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo"
+                          Command="{Binding UndoCommand}" />
+
+                <MenuItem Header="_Redo"
+                          Command="{Binding RedoCommand}" />
+
+                <Separator />
+
+                <MenuItem Header="_Delete"
+                          Command="{Binding DeleteRuleCommand}" />
+            </MenuItem>
+
+            <MenuItem Header="_Rule">
+                <MenuItem Header="_New">
+                    <MenuItem Header="Find and replace"
+                              Command="{Binding AddRuleCommand}" />
+
+                    <MenuItem Header="In template call"
+                              Command="{Binding AddInTemplateRuleCommand}" />
+
+                    <MenuItem Header="Template parameter"
+                              Command="{Binding AddTemplateParamRuleCommand}" />
+                </MenuItem>
+
+                <MenuItem Header="New _subrule">
+                    <MenuItem Header="Find and replace"
+                              Command="{Binding AddSubruleCommand}" />
+
+                    <MenuItem Header="In template call"
+                              Command="{Binding AddInTemplateSubruleCommand}" />
+
+                    <MenuItem Header="Template parameter"
+                              Command="{Binding AddTemplateParamSubruleCommand}" />
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="1"
+              Margin="8"
+              ColumnDefinitions="300,Auto,*">
+
+            <Grid Grid.Column="0"
+                  RowDefinitions="*,Auto">
+
+                <TreeView
+                    ItemsSource="{Binding Rules}"
+                    SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
+
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate
+                            DataType="vm:ReplaceSpecialRuleViewModel"
+                            ItemsSource="{Binding Children}">
+
+                            <TextBlock Text="{Binding Name}" />
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+
+                <StackPanel Grid.Row="1"
+                            Margin="0,8,0,0"
+                            Orientation="Horizontal"
+                            Spacing="8">
+
+                    <Button Content="Up"
+                            Command="{Binding MoveRuleUpCommand}" />
+
+                    <Button Content="Down"
+                            Command="{Binding MoveRuleDownCommand}" />
+
+                    <Button Content="Delete"
+                            Command="{Binding DeleteRuleCommand}" />
+                </StackPanel>
+            </Grid>
+
+            <GridSplitter
+                Grid.Column="1"
+                Width="6"
+                Margin="6,0"
+                ResizeDirection="Columns" />
+
+            <Border Grid.Column="2"
+                    Padding="12">
+
+                <Grid x:Name="RuleEditorHost">
+
+                    <TextBlock
+                        x:Name="NoRuleSelectedText"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Text="Select a rule to edit it." />
+
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
