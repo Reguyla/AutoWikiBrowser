@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Controls.Lists
+﻿using Twain.Core.Lists;
+
+namespace Twain.Core.Controls.Lists
 {
     partial class ListMaker
     {
@@ -15,7 +17,7 @@
         {
             if (disposing)
             {
-                ListProviderAdded -= ProviderAdded;
+                ListProviderRegistry.ProviderAdded -= ProviderAdded;
 
                 if (components != null)
                     components.Dispose();

@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Twain.Core;
+using Twain.Core.Lists;
 using Twain.Core.Lists.Providers;
 
 namespace Twain.UI.ViewModels.Lists;
@@ -82,5 +84,22 @@ public partial class MakeListViewModel : ObservableObject
 
         SourcePrompt = value.UserInputTextBoxText;
         IsSourceTextEnabled = value.UserInputTextBoxEnabled;
+    }
+
+    public MakeListViewModel()
+    {
+        foreach (IListProvider provider in ListProviderRegistry.Providers)
+            Providers.Add(provider);
+
+        ListProviderRegistry.ProviderAdded += OnProviderAdded;
+
+        SelectedProvider = Providers.FirstOrDefault(
+            provider => provider.GetType().Name == "CategoryListProvider");
+    }
+
+    private void OnProviderAdded(IListProvider provider)
+    {
+        if (!Providers.Contains(provider))
+            Providers.Add(provider);
     }
 }

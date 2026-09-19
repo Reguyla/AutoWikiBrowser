@@ -27,6 +27,7 @@ public static class ListProviderRegistry
         ArgumentNullException.ThrowIfNull(provider);
 
         RegisteredProviders.Add(provider);
+        ProviderAdded?.Invoke(provider);
     }
 
     private static List<IListProvider> CreateBuiltInProviders()
@@ -92,4 +93,9 @@ public static class ListProviderRegistry
             pagesWithProvider
         ];
     }
+
+    /// <summary>
+    /// Occurs when a list provider is registered at runtime.
+    /// </summary>
+    public static event Action<IListProvider>? ProviderAdded;
 }

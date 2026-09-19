@@ -34,8 +34,6 @@ namespace Twain.Core.Controls.Lists;
 
 public delegate void ListMakerEventHandler(object sender, EventArgs e);
 
-public delegate void ListMakerProviderAdded(IListProvider provider);
-
 public partial class ListMaker : UserControl, IList<Article>
 {
     private readonly ListFilterForm _specialFilter;
@@ -69,16 +67,11 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public event ListMakerEventHandler ListFinished;
 
-    /// <summary>
-    ///
-    /// </summary>
-    public static event ListMakerProviderAdded ListProviderAdded;
-
     public ListMaker()
     {
         InitializeComponent();
 
-        ListProviderAdded += ProviderAdded;
+        ListProviderRegistry.ProviderAdded += ProviderAdded;
 
         _specialFilter = new ListFilterForm(lbArticles);
 
@@ -1537,8 +1530,6 @@ public partial class ListMaker : UserControl, IList<Article>
     public static void AddProvider(IListProvider provider)
     {
         ListProviderRegistry.Add(provider);
-
-        ListProviderAdded?.Invoke(provider);
     }
 
     /// <summary>
