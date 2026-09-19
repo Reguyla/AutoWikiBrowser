@@ -471,16 +471,41 @@
                       RowSpacing="8">
 
                     <ListBox Grid.Row="0"
-                             Name="ResultsListBox" />
+                             Name="ResultsListBox"
+                             SelectionMode="Multiple" />
 
                     <Grid Grid.Row="1"
-                          ColumnDefinitions="Auto,*,Auto"
+                          ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
                           ColumnSpacing="12">
 
                         <TextBlock Grid.Column="0"
                                    Name="ResultCountTextBlock"
                                    Text="0 matches"
                                    VerticalAlignment="Center" />
+
+                        <Button Grid.Column="3"
+                            Name="ClearResultsButton"
+                            Content="Clear"
+                            MinWidth="70"
+                            Click="ClearResultsButton_Click" />
+
+                        <Button Grid.Column="4"
+                            Name="SaveResultsButton"
+                            Content="Save list..."
+                            MinWidth="80"
+                            Click="SaveResultsButton_Click" />
+
+                        <Button Grid.Column="5"
+                            Name="RemoveSelectedButton"
+                            Content="Remove selected"
+                            MinWidth="110"
+                            Click="RemoveSelectedButton_Click" />
+
+                        <Button Grid.Column="6"
+                            Name="CopySelectedButton"
+                            Content="Copy selected"
+                            MinWidth="100"
+                            Click="CopySelectedButton_Click" />
 
                         <ProgressBar Grid.Column="1"
                                      Name="ScanProgressBar"
@@ -507,9 +532,9 @@
               ColumnSpacing="8"
               Margin="0,12,0,0">
 
-            <Button Grid.Column="0"
-                    Name="ResetButton"
-                    Content="Reset" />
+            <Button Name="ResetButton"
+                    Content="Reset"
+                    Click="ResetButton_Click" />
 
             <Button Grid.Column="1"
                     Name="FilterButton"

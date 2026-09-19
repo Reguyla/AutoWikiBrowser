@@ -1,8 +1,10 @@
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Twain.Core.Background;
 using Twain.Core.DBScanner;
@@ -476,5 +478,168 @@ public partial class DatabaseScannerWindow : Window
 
         StartButton.Content =
             isScanning ? "Stop" : "Start";
+    }
+
+    private void ResetButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        ArticleContainsCheckBox.IsChecked = false;
+        ArticleContainsTextBox.Text = string.Empty;
+
+        ArticleDoesNotContainCheckBox.IsChecked = false;
+        ArticleDoesNotContainTextBox.Text = string.Empty;
+
+        ArticleRegexCheckBox.IsChecked = false;
+        ArticleCaseSensitiveCheckBox.IsChecked = false;
+        ArticleSinglelineCheckBox.IsChecked = false;
+        ArticleMultilineCheckBox.IsChecked = false;
+
+        TitleContainsCheckBox.IsChecked = false;
+        TitleContainsTextBox.Text = string.Empty;
+
+        TitleDoesNotContainCheckBox.IsChecked = false;
+        TitleDoesNotContainTextBox.Text = string.Empty;
+
+        TitleRegexCheckBox.IsChecked = false;
+        TitleCaseSensitiveCheckBox.IsChecked = false;
+
+        SearchDatesCheckBox.IsChecked = false;
+        DateFromPicker.SelectedDate = null;
+        DateToPicker.SelectedDate = null;
+
+        CheckProtectionCheckBox.IsChecked = false;
+        ProtectionControl.Reset();
+
+        LengthComparisonComboBox.SelectedIndex = 0;
+        LengthNumericUpDown.Value = 1000;
+
+        LinksComparisonComboBox.SelectedIndex = 0;
+        LinksNumericUpDown.Value = 5;
+
+        WordsComparisonComboBox.SelectedIndex = 0;
+        WordsNumericUpDown.Value = 200;
+
+        NoBoldTitleCheckBox.IsChecked = false;
+        PeopleCategoriesCheckBox.IsChecked = false;
+        UnbalancedBracketsCheckBox.IsChecked = false;
+        SimpleLinksCheckBox.IsChecked = false;
+        ReorderReferencesCheckBox.IsChecked = false;
+        BadLinksCheckBox.IsChecked = false;
+        HtmlEntitiesCheckBox.IsChecked = false;
+        SectionErrorsCheckBox.IsChecked = false;
+        UnbulletedLinksCheckBox.IsChecked = false;
+        CiteTemplateDatesCheckBox.IsChecked = false;
+        TypoCheckBox.IsChecked = false;
+        MissingDefaultSortCheckBox.IsChecked = false;
+
+        NamespacesControl.Reset();
+
+        StartFromTextBox.Text = string.Empty;
+        IgnoreRedirectsCheckBox.IsChecked = true;
+        IgnoreCommentsCheckBox.IsChecked = false;
+        PriorityComboBox.SelectedIndex = 2;
+
+        ResultLimitNumericUpDown.Value = 30000;
+    }
+
+    private void ClearResultsButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        ResultsListBox.Items.Clear();
+
+        ResultCountTextBlock.Text = "0 matches";
+    }
+
+    private async void SaveResultsButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (ResultsListBox.ItemCount == 0)
+            return;
+
+        Avalonia.Platform.Storage.IStorageFile? file =
+            await StorageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title = "Save article list",
+                    SuggestedFileName = "DatabaseScannerResults.txt",
+                    DefaultExtension = "txt",
+                    FileTypeChoices =
+                    [
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                        "Text file")
+                    {
+                        Patterns = ["*.txt"]
+                    }
+                    ]
+                });
+
+        if (file is null)
+            return;
+
+        string? fileName =
+            file.TryGetLocalPath();
+
+        if (string.IsNullOrEmpty(fileName))
+            return;
+
+        IEnumerable<string> results =
+            ResultsListBox.Items
+                .OfType<string>();
+
+        File.WriteAllLines(
+            fileName,
+            results);
+    }
+
+    private void RemoveSelectedButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        List<object?> selectedItems =
+            ResultsListBox.SelectedItems?
+                .Cast<object?>()
+                .ToList()
+            ?? [];
+
+        foreach (object? item in selectedItems)
+        {
+            ResultsListBox.Items.Remove(item);
+        }
+
+        int matchCount =
+            ResultsListBox.ItemCount;
+
+        ResultCountTextBlock.Text =
+            $"{matchCount} matches";
+    }
+
+    private async void CopySelectedButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        List<string> selectedItems =
+            ResultsListBox.SelectedItems?
+                .OfType<string>()
+                .ToList()
+            ?? [];
+
+        if (selectedItems.Count == 0)
+            return;
+
+        string text =
+            string.Join(
+                Environment.NewLine,
+                selectedItems);
+
+        Avalonia.Input.Platform.IClipboard? clipboard =
+            TopLevel.GetTopLevel(this)?.Clipboard;
+
+        if (clipboard is null)
+            return;
+
+        await clipboard.SetTextAsync(text);
     }
 }
