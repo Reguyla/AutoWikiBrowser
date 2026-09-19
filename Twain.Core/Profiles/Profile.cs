@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Twain.Core.Profiles;
 
-public class AWBProfile
+public class Profile
 {
     public int ID = -1;
     public string DefaultSettings, Notes;

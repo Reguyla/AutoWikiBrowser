@@ -26,7 +26,7 @@ namespace Twain.Core.Profiles;
 /// <summary>
 /// Provides registry-backed storage and retrieval for AWB user profiles.
 /// </summary>
-public static class AWBProfiles
+public static class ProfileManager
 {
     private const string ProfileRegistryString = "Profiles\\";
 
@@ -48,7 +48,7 @@ public static class AWBProfiles
             LegacyPassPhrase,
             LegacySalt);
 
-    static AWBProfiles()
+    static ProfileManager()
     {
         ResetTempPassword();
     }
@@ -57,7 +57,7 @@ public static class AWBProfiles
     /// Gets all saved profiles from the registry.
     /// </summary>
     /// <returns>The saved profiles that could be loaded successfully.</returns>
-    public static List<AWBProfile> GetProfiles() =>
+    public static List<Profile> GetProfiles() =>
         GetProfileIDs()
             .Select(GetProfile)
             .Where(profile => profile != null)
@@ -70,9 +70,9 @@ public static class AWBProfiles
     /// <returns>
     /// The requested profile, or <c>null</c> if it could not be loaded.
     /// </returns>
-    public static AWBProfile GetProfile(int id)
+    public static Profile GetProfile(int id)
     {
-        AWBProfile profile = new()
+        Profile profile = new()
         {
             ID = id
         };
@@ -152,7 +152,7 @@ public static class AWBProfiles
     /// <returns>
     /// The matching profile, or <c>null</c> if no profile matches.
     /// </returns>
-    public static AWBProfile GetProfile(string userName)
+    public static Profile GetProfile(string userName)
     {
         ArgumentNullException.ThrowIfNull(userName);
 
@@ -228,7 +228,7 @@ public static class AWBProfiles
     /// The profile to save.
     /// </param>
     public static void SaveProfile(
-        AWBProfile profile)
+        Profile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
 

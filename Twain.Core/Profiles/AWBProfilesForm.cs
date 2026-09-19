@@ -87,7 +87,7 @@ public partial class AWBProfilesForm : Form
             LoadProfiles();
         }
 
-        string lastUsedAccount = AWBProfiles.LastUsedAccount;
+        string lastUsedAccount = ProfileManager.LastUsedAccount;
 
         if (string.IsNullOrEmpty(lastUsedAccount))
         {
@@ -102,7 +102,7 @@ public partial class AWBProfilesForm : Form
             return;
         }
 
-        AWBProfile? profile = AWBProfiles.GetProfile(id);
+        Profile? profile = ProfileManager.GetProfile(id);
 
         if (profile is null)
         {
@@ -170,7 +170,7 @@ public partial class AWBProfilesForm : Form
         {
             lvAccounts.Items.Clear();
 
-            foreach (AWBProfile profile in AWBProfiles.GetProfiles())
+            foreach (Profile profile in ProfileManager.GetProfiles())
             {
                 ListViewItem item = new(profile.ID.ToString());
                 item.SubItems.Add(profile.Username);
@@ -275,7 +275,7 @@ public partial class AWBProfilesForm : Form
             {
                 return;
             }
-            AWBProfiles.DeleteProfile(SelectedItem);
+            ProfileManager.DeleteProfile(SelectedItem);
             LoadProfiles();
         }
         finally
@@ -317,7 +317,7 @@ public partial class AWBProfilesForm : Form
             return;
         }
 
-        AWBProfiles.SetPassword(
+        ProfileManager.SetPassword(
             profileId,
             password.GetPassword);
 
@@ -351,7 +351,7 @@ public partial class AWBProfilesForm : Form
             return;
         }
 
-        AWBProfile? profile = AWBProfiles.GetProfile(profileId);
+        Profile? profile = ProfileManager.GetProfile(profileId);
 
         if (profile is null)
         {
@@ -477,7 +477,7 @@ public partial class AWBProfilesForm : Form
             return;
         }
 
-        string username = AWBProfiles.GetUsername(profileId);
+        string username = ProfileManager.GetUsername(profileId);
 
         PerformLogin(username, password);
     }
@@ -614,7 +614,7 @@ public partial class AWBProfilesForm : Form
             if (item.SubItems[2].Text == "Yes")
             {
                 string password =
-                    AWBProfiles.GetPassword(selectedProfileId);
+                    ProfileManager.GetPassword(selectedProfileId);
 
                 PerformLogin(password);
             }
@@ -631,7 +631,7 @@ public partial class AWBProfilesForm : Form
                 }
             }
 
-            AWBProfiles.LastUsedAccount = item.Text;
+            ProfileManager.LastUsedAccount = item.Text;
         }
         catch (Exception ex)
         {
@@ -662,15 +662,15 @@ public partial class AWBProfilesForm : Form
 
         try
         {
-            AWBProfile? startupProfile;
+            Profile? startupProfile;
 
             if (int.TryParse(profileIdOrName, out int profileId))
             {
-                startupProfile = AWBProfiles.GetProfile(profileId);
+                startupProfile = ProfileManager.GetProfile(profileId);
             }
             else
             {
-                startupProfile = AWBProfiles.GetProfile(profileIdOrName);
+                startupProfile = ProfileManager.GetProfile(profileIdOrName);
             }
 
             if (startupProfile is null)
@@ -767,7 +767,7 @@ public partial class AWBProfilesForm : Form
 
         if (chkSaveProfile.Checked)
         {
-            if (AWBProfiles.GetProfile(user) is not null)
+            if (ProfileManager.GetProfile(user) is not null)
             {
                 MessageBox.Show(
                     this,
@@ -779,7 +779,7 @@ public partial class AWBProfilesForm : Form
                 return;
             }
 
-            AWBProfile profile = new()
+            Profile profile = new()
             {
                 Username = user
             };
@@ -789,10 +789,10 @@ public partial class AWBProfilesForm : Form
                 profile.Password = password;
             }
 
-            AWBProfiles.SaveProfile(profile);
+            ProfileManager.SaveProfile(profile);
         }
 
-        AWBProfiles.LastUsedAccount = user;
+        ProfileManager.LastUsedAccount = user;
         PerformLogin(user, password);
     }
 

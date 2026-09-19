@@ -34,7 +34,7 @@ public partial class AWBProfileAddWindow : Avalonia.Controls.Window
     /// The profile whose values should be displayed for editing.
     /// </param>
     public AWBProfileAddWindow(
-        AWBProfile profile)
+        Profile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
 
@@ -154,7 +154,7 @@ public partial class AWBProfileAddWindow : Avalonia.Controls.Window
         }
 
         if (_editId == -1 &&
-            AWBProfiles.GetProfile(username) is not null)
+            ProfileManager.GetProfile(username) is not null)
         {
             bool useDuplicate =
                 await ConfirmDuplicateUsernameAsync(
@@ -164,7 +164,7 @@ public partial class AWBProfileAddWindow : Avalonia.Controls.Window
                 return;
         }
 
-        AWBProfile profile = new()
+        Profile profile = new()
         {
             ID = _editId,
             Username = username,
@@ -182,7 +182,7 @@ public partial class AWBProfileAddWindow : Avalonia.Controls.Window
                 string.Empty
         };
 
-        AWBProfiles.SaveProfile(
+        ProfileManager.SaveProfile(
             profile);
 
         Close(true);

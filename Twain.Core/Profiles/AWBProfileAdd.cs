@@ -48,7 +48,7 @@ public partial class AWBProfileAdd : Form
     /// <param name="profile">
     /// The profile whose values should be displayed for editing.
     /// </param>
-    public AWBProfileAdd(AWBProfile profile)
+    public AWBProfileAdd(Profile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
 
@@ -170,7 +170,7 @@ public partial class AWBProfileAdd : Form
         // Warn when a new profile uses a username that is already assigned
         // to another saved profile.
         if (Editid == -1 &&
-            AWBProfiles.GetProfile(txtUsername.Text) is not null)
+            ProfileManager.GetProfile(txtUsername.Text) is not null)
         {
             DialogResult result = MessageBox.Show(
                 this,
@@ -186,7 +186,7 @@ public partial class AWBProfileAdd : Form
             }
         }
 
-        AWBProfile profile = new()
+        Profile profile = new()
         {
             ID = Editid,
             Username = txtUsername.Text,
@@ -199,7 +199,7 @@ public partial class AWBProfileAdd : Form
             Notes = txtNotes.Text
         };
 
-        AWBProfiles.SaveProfile(profile);
+        ProfileManager.SaveProfile(profile);
 
         DialogResult = DialogResult.Yes;
     }
