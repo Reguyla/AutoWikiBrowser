@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 using Microsoft.Win32;
-using System.Windows.Forms;
 using Twain.Core.Encryption;
 
 namespace Twain.Core.Profiles;
@@ -89,17 +88,6 @@ public static class ProfileManager
             Tools.WriteDebug(
                 nameof(GetProfile),
                 ex.ToString());
-
-            DialogResult result = MessageBox.Show(
-                "Profile corrupt. Would you like to delete this profile?",
-                "Delete corrupt profile?",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                DeleteProfile(id);
-            }
 
             return null;
         }

@@ -19,10 +19,33 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Twain.Core.Profiles;
 
+/// <summary>
+/// Represents a saved user profile.
+/// </summary>
 public class Profile
 {
-    public int ID = -1;
-    public string DefaultSettings, Notes;
+    /// <summary>
+    /// Gets or sets the profile identifier.
+    /// </summary>
+    public int ID { get; set; } = -1;
 
-    public string Username, Password;
+    /// <summary>
+    /// Gets or sets the username associated with the profile.
+    /// </summary>
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the saved password associated with the profile.
+    /// </summary>
+    public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the default settings profile associated with the account.
+    /// </summary>
+    public string DefaultSettings { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the notes associated with the profile.
+    /// </summary>
+    public string Notes { get; set; } = string.Empty;
 }
