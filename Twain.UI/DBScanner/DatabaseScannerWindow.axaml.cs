@@ -1,7 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using Twain.Core.Background;
 using Twain.Core.DBScanner;
 
 namespace Twain.UI.DBScanner;
@@ -11,6 +14,15 @@ namespace Twain.UI.DBScanner;
 /// </summary>
 public partial class DatabaseScannerWindow : Window
 {
+    private MainProcess? _mainProcess;
+    private bool _manualStop;
+    private bool _resultLimitReached;
+
+    private readonly CrossThreadQueue<string> _outputQueue =
+        new();
+
+    private readonly DispatcherTimer _progressTimer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseScannerWindow"/> class.
     /// </summary>
@@ -26,6 +38,51 @@ public partial class DatabaseScannerWindow : Window
 
         WordsComparisonComboBox.SelectionChanged +=
             WordsComparisonComboBox_SelectionChanged;
+
+        _progressTimer =
+            new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(500)
+            };
+
+        _progressTimer.Tick += ProgressTimer_Tick;
+    }
+
+    private void ProgressTimer_Tick(
+        object? sender,
+        EventArgs e)
+    {
+        DrainOutputQueue();
+
+        if (_mainProcess is null)
+            return;
+
+        int matchCount =
+            ResultsListBox.ItemCount;
+
+        int resultLimit =
+            (int)(ResultLimitNumericUpDown.Value ?? 30000);
+
+        double progress =
+            DatabaseScannerProcessor.CalculateProgress(
+                matchCount,
+                resultLimit,
+                _mainProcess.PercentageComplete);
+
+        double percentage =
+            progress * 100;
+
+        ScanProgressBar.Value =
+            percentage;
+
+        ProgressTextBlock.Text =
+            $"{percentage:0}%";
+
+        if (matchCount >= resultLimit)
+        {
+            _resultLimitReached = true;
+            _mainProcess.Stop();
+        }
     }
 
     private void ArticleContainsCheckBox_IsCheckedChanged(
@@ -262,6 +319,26 @@ public partial class DatabaseScannerWindow : Window
         };
     }
 
+    private MainProcess CreateMainProcess(
+    DatabaseScannerOptions options)
+    {
+        List<Scan> scanners =
+            DatabaseScannerProcessor.CreateScanners(options);
+
+        MainProcess mainProcess =
+            new(
+                scanners,
+                options.FileName,
+                options.Priority,
+                options.IgnoreComments,
+                options.StartFrom)
+            {
+                OutputQueue = _outputQueue
+            };
+
+        return mainProcess;
+    }
+
     private async void BrowseButton_Click(
     object? sender,
     Avalonia.Interactivity.RoutedEventArgs e)
@@ -291,6 +368,113 @@ public partial class DatabaseScannerWindow : Window
         if (string.IsNullOrEmpty(fileName))
             return;
 
+        FileInfo fileInfo =
+            new(fileName);
+
+        if (!fileInfo.Exists ||
+            fileInfo.Length == 0)
+        {
+            return;
+        }
+
         DumpLocationTextBox.Text = fileName;
+
+        DatabaseDumpMetadata metadata =
+            DatabaseScannerProcessor.ReadDumpMetadata(fileName);
+
+        DumpSiteNameTextBox.Text =
+            metadata.SiteName;
+
+        DumpBaseUrlTextBox.Text =
+            metadata.BaseUrl;
+
+        DumpGeneratorTextBox.Text =
+            metadata.Generator;
+
+        DumpCaseTextBox.Text =
+            metadata.Case;
+    }
+
+    private void MainProcess_Stopped()
+    {
+        _progressTimer.Stop();
+
+        DrainOutputQueue();
+
+        if (!_manualStop &&
+            !_resultLimitReached)
+        {
+            ScanProgressBar.Value = 100;
+            ProgressTextBlock.Text = "100%";
+        }
+
+        _mainProcess = null;
+
+        SetScanningState(false);
+    }
+
+    private void DrainOutputQueue()
+    {
+        while (_outputQueue.Count > 0)
+        {
+            string articleTitle =
+                _outputQueue.Remove();
+
+            ResultsListBox.Items.Add(articleTitle);
+        }
+
+        int matchCount =
+            ResultsListBox.ItemCount;
+
+        ResultCountTextBlock.Text =
+            $"{matchCount} matches";
+    }
+
+    private void StartButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (_mainProcess is not null)
+        {
+            _manualStop = true;
+            _mainProcess.Stop();
+            return;
+        }
+
+        DatabaseScannerOptions options =
+            CreateOptions();
+
+        if (string.IsNullOrWhiteSpace(options.FileName))
+            return;
+
+        ResultsListBox.Items.Clear();
+        ResultCountTextBlock.Text = "0 matches";
+        ScanProgressBar.Value = 0;
+        ProgressTextBlock.Text = "0%";
+
+        _mainProcess =
+            CreateMainProcess(options);
+
+        _mainProcess.StoppedEvent += MainProcess_Stopped;
+
+        SetScanningState(true);
+
+        _progressTimer.Start();
+        _mainProcess.Start();
+    }
+
+    private void SetScanningState(bool isScanning)
+    {
+        ScannerTabs.IsEnabled = !isScanning;
+
+        DumpLocationTextBox.IsEnabled = !isScanning;
+        BrowseButton.IsEnabled = !isScanning;
+        StartFromTextBox.IsEnabled = !isScanning;
+        IgnoreRedirectsCheckBox.IsEnabled = !isScanning;
+        PriorityComboBox.IsEnabled = !isScanning;
+        ResultLimitNumericUpDown.IsEnabled = !isScanning;
+
+        StartButton.Content =
+            isScanning ? "Stop" : "Start";
     }
 }

@@ -79,6 +79,62 @@
         <TabControl Grid.Row="1"
                     Name="ScannerTabs">
         
+        <TabItem Header="Dump information">
+            <Grid Margin="12"
+                  RowDefinitions="Auto,Auto,Auto,Auto"
+                  ColumnDefinitions="Auto,*"
+                  ColumnSpacing="12"
+                  RowSpacing="10"
+                  MaxWidth="700"
+                  HorizontalAlignment="Left">
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="Site name:"
+                           VerticalAlignment="Center" />
+
+                <TextBox Grid.Row="0"
+                         Grid.Column="1"
+                         Name="DumpSiteNameTextBox"
+                         Width="500"
+                         IsReadOnly="True" />
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           Text="Base URL:"
+                           VerticalAlignment="Center" />
+
+                <TextBox Grid.Row="1"
+                         Grid.Column="1"
+                         Name="DumpBaseUrlTextBox"
+                         Width="500"
+                         IsReadOnly="True" />
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Text="Generator:"
+                           VerticalAlignment="Center" />
+
+                <TextBox Grid.Row="2"
+                         Grid.Column="1"
+                         Name="DumpGeneratorTextBox"
+                         Width="500"
+                         IsReadOnly="True" />
+
+                <TextBlock Grid.Row="3"
+                           Grid.Column="0"
+                           Text="Case:"
+                           VerticalAlignment="Center" />
+
+                <TextBox Grid.Row="3"
+                         Grid.Column="1"
+                         Name="DumpCaseTextBox"
+                         Width="500"
+                         IsReadOnly="True" />
+
+            </Grid>
+        </TabItem>
+
         <TabItem Header="Text">
 
             <Grid Margin="12"
@@ -410,8 +466,36 @@
             </TabItem>
 
             <TabItem Header="Results">
-                <Grid Margin="12">
-                    <TextBlock Text="Database scanner results will be added here." />
+                <Grid Margin="12"
+                      RowDefinitions="*,Auto"
+                      RowSpacing="8">
+
+                    <ListBox Grid.Row="0"
+                             Name="ResultsListBox" />
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="12">
+
+                        <TextBlock Grid.Column="0"
+                                   Name="ResultCountTextBlock"
+                                   Text="0 matches"
+                                   VerticalAlignment="Center" />
+
+                        <ProgressBar Grid.Column="1"
+                                     Name="ScanProgressBar"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="0"
+                                     VerticalAlignment="Center" />
+
+                        <TextBlock Grid.Column="2"
+                                   Name="ProgressTextBlock"
+                                   Text="0%"
+                                   VerticalAlignment="Center" />
+
+                    </Grid>
+
                 </Grid>
             </TabItem>
 
@@ -449,7 +533,8 @@
             <Button Grid.Column="4"
                     Name="StartButton"
                     Content="Start"
-                    MinWidth="90" />
+                    MinWidth="90"
+                    Click="StartButton_Click" />
         </Grid>
 
     </Grid>

@@ -40,7 +40,7 @@ public class ArticleInfo
     }
 }
 
-class MainProcess
+public class MainProcess
 {
     public event StopDel StoppedEvent;
     public CrossThreadQueue<string> OutputQueue;
