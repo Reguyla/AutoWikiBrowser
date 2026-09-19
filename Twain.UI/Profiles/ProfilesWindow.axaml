@@ -53,12 +53,14 @@
 
             <Button x:Name="AddButton"
                     Content="Add"
-                    MinWidth="80" />
+                    MinWidth="80"
+                    Click="AddButton_Click" />
 
             <Button x:Name="EditButton"
                     Content="Edit"
                     MinWidth="80"
-                    IsEnabled="False" />
+                    IsEnabled="False"
+                    Click="EditButton_Click" />
 
             <Button x:Name="DeleteButton"
                     Content="Delete"
@@ -69,7 +71,8 @@
             <Button x:Name="LoginButton"
                     Content="Login"
                     MinWidth="80"
-                    IsEnabled="False" />
+                    IsEnabled="False"
+                    Click="LoginButton_Click" />
 
             <Button Content="Close"
                     MinWidth="80"

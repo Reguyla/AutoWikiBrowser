@@ -1,0 +1,77 @@
+<Window
+    x:Class="Twain.UI.Profiles.ProfileEditorWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Profile"
+    Width="440"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="16"
+          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+          ColumnDefinitions="Auto,*"
+          ColumnSpacing="12"
+          RowSpacing="10">
+
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Username:" />
+
+        <TextBox x:Name="UsernameTextBox"
+                 Grid.Row="0"
+                 Grid.Column="1"
+                 MinWidth="280" />
+
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Password:" />
+
+        <TextBox x:Name="PasswordTextBox"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 PasswordChar="●" />
+
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Default settings:" />
+
+        <TextBox x:Name="DefaultSettingsTextBox"
+                 Grid.Row="2"
+                 Grid.Column="1" />
+
+        <TextBlock Grid.Row="3"
+                   Grid.Column="0"
+                   VerticalAlignment="Top"
+                   Text="Notes:" />
+
+        <TextBox x:Name="NotesTextBox"
+                 Grid.Row="3"
+                 Grid.Column="1"
+                 MinHeight="70"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="4"
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,6,0,0"
+                    Spacing="8">
+
+            <Button Content="Cancel"
+                    MinWidth="80"
+                    Click="CancelButton_Click" />
+
+            <Button Content="Save"
+                    MinWidth="80"
+                    IsDefault="True"
+                    Click="SaveButton_Click" />
+
+        </StackPanel>
+
+    </Grid>
+</Window>

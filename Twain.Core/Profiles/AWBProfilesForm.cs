@@ -494,52 +494,34 @@ public partial class AWBProfilesForm : Form
     /// </param>
     private void PerformLogin(string username, string password)
     {
-        if (TheSession.IsBusy)
-        {
-            MessageBox.Show(
-                this,
-                "Cannot log in because the session is busy.\r\n\r\n" +
-                "Please wait for the current page-saving operation to complete.",
-                "Session busy",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-
-            return;
-        }
-
         bool loginSucceeded = false;
 
         try
         {
-            // TODO: Review after the AsyncApiEdit migration. This profile-login
-            // path remains synchronous because it depends on local login exception
-            // handling and the LoginDomain overload.
-            TheSession.Editor.SynchronousEditor.Login(
-                username,
-                password,
-                Variables.LoginDomain);
+            ProfileLoginService.LoginResult result =
+                ProfileLoginService.Login(
+                    TheSession,
+                    username,
+                    password,
+                    Variables.LoginDomain);
 
-            loginSucceeded = true;
-        }
-        catch (UriChangedException ex)
-        {
-            // TODO: Offer to change the configured protocol to match the response
-            // URI scheme and retry the login after user confirmation.
-            MessageBox.Show(
-                this,
-                ex.Message,
-                ex.Header,
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-        catch (LoginException ex)
-        {
-            MessageBox.Show(
-                this,
-                ex.Message,
-                "Login failed",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            switch (result.Status)
+            {
+                case ProfileLoginService.LoginStatus.Success:
+                    loginSucceeded = true;
+                    break;
+
+                case ProfileLoginService.LoginStatus.SessionBusy:
+                case ProfileLoginService.LoginStatus.UriChanged:
+                case ProfileLoginService.LoginStatus.LoginFailed:
+                    MessageBox.Show(
+                        this,
+                        result.Message,
+                        result.Title,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    break;
+            }
         }
         catch (Exception ex)
         {
