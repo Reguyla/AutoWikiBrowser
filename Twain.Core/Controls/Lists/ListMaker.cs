@@ -38,27 +38,26 @@ public delegate void ListMakerProviderAdded(IListProvider provider);
 
 public partial class ListMaker : UserControl, IList<Article>
 {
-    private static readonly BindingList<IListProvider> DefaultProviders = new BindingList<IListProvider>();
     private readonly ListFilterForm _specialFilter;
     private readonly ArticleList _articleList = new();
     private readonly BindingList<IListProvider> _listProviders;
 
     //used to keep easy track of providers for add/remove/(re)use in code
     #region ListProviders
+    // These providers are available as primary list sources but are intentionally
+    // excluded from the "Add selected to list from..." provider collection.
+    private static readonly IListProvider HtmlScraperLProvider =
+        new HTMLPageScraperListProvider();
 
-    private static readonly IListProvider RedirectLProvider = new RedirectsListProvider(),
-    WhatLinksHereLProvider = new WhatLinksHereListProvider(),
-    WhatTranscludesLProvider = new WhatTranscludesPageListProvider(),
-    CategoriesOnPageLProvider = new CategoriesOnPageListProvider(),
-    NewPagesLProvider = new NewPagesListProvider(),
-    RandomPagesLProvider = new RandomPagesSpecialPageProvider(),
-    HtmlScraperLProvider = new HTMLPageScraperListProvider(),
-    AdvHtmlScraperLProvider = new AdvancedRegexHtmlScraper(),
-    CheckWikiLProvider = new CheckWikiListProvider(),
-    CheckWikiWithNumberLProvider = new CheckWikiWithNumberListProvider(),
-    UserContribLProvider = new UserContribsListProvider(),
-    PagesWithProvider = new PagesWithPropListProvider(),
-    WikiSearchProvider = new WikiSearchListProvider();
+    private static readonly IListProvider AdvHtmlScraperLProvider =
+        new AdvancedRegexHtmlScraper();
+
+    private static readonly IListProvider CheckWikiLProvider =
+        new CheckWikiListProvider();
+
+    private static readonly IListProvider CheckWikiWithNumberLProvider =
+        new CheckWikiWithNumberListProvider();
+
     #endregion
 
     public event ListMakerEventHandler StatusTextChanged,
@@ -75,55 +74,6 @@ public partial class ListMaker : UserControl, IList<Article>
     /// </summary>
     public static event ListMakerProviderAdded ListProviderAdded;
 
-    static ListMaker()
-    {
-        if (!DefaultProviders.Any())
-        {
-            DefaultProviders.Add(new PagesWithPropJsonListProvider());
-            DefaultProviders.Add(new CategoryListProvider());
-            DefaultProviders.Add(new CategoryRecursiveListProvider());
-            DefaultProviders.Add(new CategoryRecursiveOneLevelListProvider());
-            DefaultProviders.Add(new CategoryRecursiveUserDefinedLevelListProvider());
-            DefaultProviders.Add(CategoriesOnPageLProvider);
-            DefaultProviders.Add(new CategoriesOnPageOnlyHiddenListProvider());
-            DefaultProviders.Add(new CategoriesOnPageNoHiddenListProvider());
-            DefaultProviders.Add(WhatLinksHereLProvider);
-            DefaultProviders.Add(new WhatLinksHereAllNSListProvider());
-            DefaultProviders.Add(new WhatLinksHereAndToRedirectsListProvider());
-            DefaultProviders.Add(new WhatLinksHereAndToRedirectsAllNSListProvider());
-            DefaultProviders.Add(new WhatLinksHereExcludingPageRedirectsListProvider());
-            DefaultProviders.Add(new WhatLinksHereAndPageRedirectsExcludingTheRedirectsListProvider());
-            DefaultProviders.Add(WhatTranscludesLProvider);
-            DefaultProviders.Add(new WhatTranscludesPageAllNSListProvider());
-            DefaultProviders.Add(new LinksOnPageListProvider());
-            DefaultProviders.Add(new LinksOnPageOnlyBlueListProvider());
-            DefaultProviders.Add(new LinksOnPageOnlyRedListProvider());
-            DefaultProviders.Add(new FilesOnPageListProvider());
-            DefaultProviders.Add(new TransclusionsOnPageListProvider());
-            DefaultProviders.Add(new TextFileListProviderUFT8());
-            DefaultProviders.Add(new TextFileListProviderWindows1252());
-            DefaultProviders.Add(new GoogleSearchListProvider());
-            DefaultProviders.Add(UserContribLProvider);
-            DefaultProviders.Add(new UserContribUserDefinedNumberListProvider());
-            DefaultProviders.Add(new SpecialPageListProvider(WhatLinksHereLProvider, NewPagesLProvider,
-                                                             CategoriesOnPageLProvider, RandomPagesLProvider,
-                                                             WhatTranscludesLProvider, RedirectLProvider,
-                                                             UserContribLProvider, PagesWithProvider,
-                                                             WikiSearchProvider));
-            DefaultProviders.Add(new ImageFileLinksListProvider());
-            DefaultProviders.Add(new MyWatchlistListProvider());
-            DefaultProviders.Add(WikiSearchProvider);
-            DefaultProviders.Add(new WikiSearchAllNSListProvider());
-            DefaultProviders.Add(new WikiTitleSearchListProvider());
-            DefaultProviders.Add(new WikiTitleSearchAllNSListProvider());
-            DefaultProviders.Add(RandomPagesLProvider);
-            DefaultProviders.Add(RedirectLProvider);
-            DefaultProviders.Add(new RedirectsAllNSListProvider());
-            DefaultProviders.Add(NewPagesLProvider);
-            DefaultProviders.Add(PagesWithProvider);
-        }
-    }
-
     public ListMaker()
     {
         InitializeComponent();
@@ -132,7 +82,7 @@ public partial class ListMaker : UserControl, IList<Article>
 
         _specialFilter = new ListFilterForm(lbArticles);
 
-        foreach (IListProvider prov in DefaultProviders)
+        foreach (IListProvider prov in ListProviderRegistry.Providers)
         {
             if (!prov.UserInputTextBoxEnabled) continue;
 
@@ -154,7 +104,7 @@ public partial class ListMaker : UserControl, IList<Article>
             AdvHtmlScraperLProvider
         };
 
-        foreach (IListProvider lvi in DefaultProviders)
+        foreach (IListProvider lvi in ListProviderRegistry.Providers)
         {
             _listProviders.Add(lvi);
         }
@@ -1579,15 +1529,16 @@ public partial class ListMaker : UserControl, IList<Article>
     }
 
     /// <summary>
-    /// Add a <see cref="IListProvider"/> or a <see cref="IListMakerPlugin"/> to all ListMakers
+    /// Add a <see cref="IListProvider"/> or a <see cref="IListMakerPlugin"/> to all ListMakers.
     /// </summary>
-    /// <param name="provider"><see cref="IListProvider"/>/<see cref="IListMakerPlugin"/> to add</param>
+    /// <param name="provider">
+    /// <see cref="IListProvider"/>/<see cref="IListMakerPlugin"/> to add.
+    /// </param>
     public static void AddProvider(IListProvider provider)
     {
-        DefaultProviders.Add(provider);
+        ListProviderRegistry.Add(provider);
 
-        if (ListProviderAdded != null)
-            ListProviderAdded(provider);
+        ListProviderAdded?.Invoke(provider);
     }
 
     /// <summary>
