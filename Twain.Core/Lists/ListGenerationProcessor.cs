@@ -199,4 +199,28 @@ public static class ListGenerationProcessor
 
         return source;
     }
+
+    /// <summary>
+    /// Prepares an article title for addition to an article list.
+    /// </summary>
+    /// <param name="source">
+    /// The article title or wiki page URL to prepare.
+    /// </param>
+    /// <returns>
+    /// The normalized article title with wiki syntax removed and the current
+    /// wiki's capitalization rules applied.
+    /// </returns>
+    public static string PrepareArticleTitle(string source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        string title = NormalizeTitle(source);
+
+        title = Tools.RemoveSyntax(title);
+
+        if (Variables.CapitalizeFirstLetter)
+            title = Tools.TurnFirstToUpper(title);
+
+        return title;
+    }
 }

@@ -682,10 +682,7 @@ public partial class ListMaker : UserControl, IList<Article>
             return;
         }
 
-        s = Tools.RemoveSyntax(s);
-
-        if (Variables.CapitalizeFirstLetter)
-            s = Tools.TurnFirstToUpper(s);
+        s = ListGenerationProcessor.PrepareArticleTitle(s);
 
         List<Article> l = new List<Article> { new Article(s) };
 
@@ -1302,28 +1299,24 @@ public partial class ListMaker : UserControl, IList<Article>
                 if (title.Length == 0)
                     continue;
 
-                title = NormalizeTitle(title);
-                title = Tools.RemoveSyntax(title);
-
-                if (Variables.CapitalizeFirstLetter)
-                    title = Tools.TurnFirstToUpper(title);
+                title = ListGenerationProcessor.PrepareArticleTitle(title);
 
                 if (title.Length > 0)
                     newArticles.Add(new Article(title));
-            }
 
-            if (newArticles.Count == 0)
-                return;
+                if (newArticles.Count == 0)
+                    return;
 
-            lbArticles.BeginUpdate();
+                lbArticles.BeginUpdate();
 
-            try
-            {
-                Add(newArticles);
-            }
-            finally
-            {
-                lbArticles.EndUpdate();
+                try
+                {
+                    Add(newArticles);
+                }
+                finally
+                {
+                    lbArticles.EndUpdate();
+                }
             }
         }
         catch (ExternalException)

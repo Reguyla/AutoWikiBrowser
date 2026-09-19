@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Twain.Core;
@@ -27,6 +28,7 @@ public partial class MakeListViewModel : ObservableObject
     /// Gets or sets the title entered for manual addition to the article list.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(AddArticleCommand))]
     private string _manualArticleTitle = string.Empty;
 
     /// <summary>
@@ -101,5 +103,25 @@ public partial class MakeListViewModel : ObservableObject
     {
         if (!Providers.Contains(provider))
             Providers.Add(provider);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAddArticle))]
+    private void AddArticle()
+    {
+        string title =
+            ListGenerationProcessor.PrepareArticleTitle(
+                ManualArticleTitle);
+
+        if (title.Length == 0)
+            return;
+
+        Articles.Add(new Article(title));
+
+        ManualArticleTitle = string.Empty;
+    }
+
+    private bool CanAddArticle()
+    {
+        return !string.IsNullOrWhiteSpace(ManualArticleTitle);
     }
 }
