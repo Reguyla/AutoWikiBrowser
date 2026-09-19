@@ -1,4 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using System.Collections.Generic;
+using System.Threading;
 using Twain.Core.DBScanner;
 
 namespace Twain.UI.DBScanner;
@@ -117,6 +120,25 @@ public partial class DatabaseScannerWindow : Window
         {
             FileName =
                 DumpLocationTextBox.Text ?? string.Empty,
+
+            StartFrom =
+                StartFromTextBox.Text ?? string.Empty,
+
+            IgnoreRedirects =
+                IgnoreRedirectsCheckBox.IsChecked == true,
+
+            IgnoreComments =
+                IgnoreCommentsCheckBox.IsChecked == true,
+
+             Priority =
+                PriorityComboBox.SelectedIndex switch
+                {
+                    0 => ThreadPriority.Highest,
+                    1 => ThreadPriority.AboveNormal,
+                    3 => ThreadPriority.BelowNormal,
+                    4 => ThreadPriority.Lowest,
+                    _ => ThreadPriority.Normal
+                },
 
             ResultLimit =
                 (int)(ResultLimitNumericUpDown.Value ?? 30000),
@@ -238,5 +260,37 @@ public partial class DatabaseScannerWindow : Window
             CheckMissingDefaultSort =
                 MissingDefaultSortCheckBox.IsChecked == true
         };
+    }
+
+    private async void BrowseButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        IReadOnlyList<Avalonia.Platform.Storage.IStorageFile> files =
+            await StorageProvider.OpenFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerOpenOptions
+                {
+                    Title = "Open MediaWiki XML database dump",
+                    AllowMultiple = false,
+                    FileTypeFilter =
+                    [
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                        "XML database dump")
+                    {
+                        Patterns = ["*.xml"]
+                    }
+                    ]
+                });
+
+        if (files.Count == 0)
+            return;
+
+        string? fileName =
+            files[0].TryGetLocalPath();
+
+        if (string.IsNullOrEmpty(fileName))
+            return;
+
+        DumpLocationTextBox.Text = fileName;
     }
 }

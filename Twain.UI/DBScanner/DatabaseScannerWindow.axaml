@@ -10,33 +10,77 @@
     MinHeight="600"
     WindowStartupLocation="CenterOwner">
 
-    <Grid RowDefinitions="Auto,*,Auto"
+      <Grid RowDefinitions="Auto,*,Auto"
           Margin="12">
-
         <!-- Dump selection -->
         <Grid Grid.Row="0"
+              RowDefinitions="Auto,Auto"
               ColumnDefinitions="Auto,*,Auto"
               ColumnSpacing="8"
+              RowSpacing="8"
               Margin="0,0,0,12">
 
-            <TextBlock Grid.Column="0"
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
                        Text="Database dump:"
                        VerticalAlignment="Center" />
 
-            <TextBox Grid.Column="1"
+            <TextBox Grid.Row="0"
+                     Grid.Column="1"
                      Name="DumpLocationTextBox"
                      IsReadOnly="True" />
 
-            <Button Grid.Column="2"
+            <Button Grid.Row="0"
+                    Grid.Column="2"
                     Name="BrowseButton"
-                    Content="Browse..." />
+                    Content="Browse..."
+                    Click="BrowseButton_Click" />
+
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Text="Start from:"
+                       VerticalAlignment="Center" />
+
+            <Grid Grid.Row="1"
+                  Grid.Column="1"
+                  Grid.ColumnSpan="2"
+                  ColumnDefinitions="*,Auto,Auto,150"
+                  ColumnSpacing="10">
+
+                <TextBox Grid.Column="0"
+                         Name="StartFromTextBox"
+                         Watermark="Article title" />
+
+                <CheckBox Grid.Column="1"
+                          Name="IgnoreRedirectsCheckBox"
+                          Content="Ignore redirects"
+                          IsChecked="True"
+                          VerticalAlignment="Center" />
+
+                <TextBlock Grid.Column="2"
+                           Text="Priority:"
+                           VerticalAlignment="Center" />
+
+                <ComboBox Grid.Column="3"
+                          Name="PriorityComboBox"
+                          SelectedIndex="2">
+                    <ComboBoxItem Content="Highest" />
+                    <ComboBoxItem Content="Above normal" />
+                    <ComboBoxItem Content="Normal" />
+                    <ComboBoxItem Content="Below normal" />
+                    <ComboBoxItem Content="Lowest" />
+                </ComboBox>
+
+            </Grid>
+
         </Grid>
 
         <!-- Scanner configuration -->
         <TabControl Grid.Row="1"
                     Name="ScannerTabs">
-
+        
         <TabItem Header="Text">
+
             <Grid Margin="12"
                     RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                     ColumnDefinitions="Auto,*,Auto"
