@@ -9,6 +9,8 @@ using System.Threading;
 using Twain.Core;
 using Twain.Core.Background;
 using Twain.Core.DBScanner;
+using Twain.Core.Lists;
+using Twain.UI.Lists;
 
 namespace Twain.UI.DBScanner;
 
@@ -25,6 +27,9 @@ public partial class DatabaseScannerWindow : Window
         new();
 
     private readonly DispatcherTimer _progressTimer;
+
+    private readonly ArticleListFilterConfiguration _filterConfiguration =
+        new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseScannerWindow"/> class.
@@ -749,5 +754,58 @@ public partial class DatabaseScannerWindow : Window
         await File.WriteAllTextAsync(
             fileName,
             text);
+    }
+
+    private async void FilterButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (!ResultsListBox.Items.OfType<string>().Any())
+            return;
+
+        ListFilterWindow filterWindow =
+            new(_filterConfiguration);
+
+        bool? result =
+            await filterWindow.ShowDialog<bool?>(this);
+
+        if (result != true)
+            return;
+
+        List<Article> articles =
+            ResultsListBox.Items
+                .OfType<string>()
+                .Select(title => new Article(title))
+                .ToList();
+
+        List<Article> comparisonArticles =
+            _filterConfiguration.ComparisonArticleTitles
+                .Select(title => new Article(title))
+                .ToList();
+
+        List<Article> filteredArticles =
+            ArticleListFilterProcessor.Apply(
+                articles,
+                comparisonArticles,
+                _filterConfiguration.NamespaceIds,
+                _filterConfiguration.ContainsText,
+                _filterConfiguration.DoesNotContainText,
+                _filterConfiguration.FilterTitlesThatContain &&
+                    !string.IsNullOrEmpty(_filterConfiguration.ContainsText),
+                _filterConfiguration.FilterTitlesThatDoNotContain &&
+                    !string.IsNullOrEmpty(_filterConfiguration.DoesNotContainText),
+                _filterConfiguration.UseRegex,
+                _filterConfiguration.RemoveDuplicates,
+                comparisonArticles.Count > 0,
+                _filterConfiguration.IntersectComparisonList,
+                _filterConfiguration.SortAscending);
+
+        ResultsListBox.ItemsSource =
+            filteredArticles
+                .Select(article => article.Name)
+                .ToList();
+
+        ResultCountTextBlock.Text =
+            $"{filteredArticles.Count} matches";
     }
 }

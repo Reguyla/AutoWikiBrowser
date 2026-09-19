@@ -142,4 +142,109 @@ public static class ArticleListFilterProcessor
 
         return result.ToList();
     }
+
+    /// <summary>
+    /// Applies the configured list filters to an article collection.
+    /// </summary>
+    /// <param name="articles">
+    /// The articles to filter.
+    /// </param>
+    /// <param name="filterArticles">
+    /// The articles used by the optional set operation.
+    /// </param>
+    /// <param name="selectedNamespaces">
+    /// The namespaces to retain.
+    /// </param>
+    /// <param name="containsText">
+    /// Text used to remove matching article titles.
+    /// </param>
+    /// <param name="doesNotContainText">
+    /// Text used to retain matching article titles.
+    /// </param>
+    /// <param name="filterContains">
+    /// Whether titles matching <paramref name="containsText"/> should be removed.
+    /// </param>
+    /// <param name="filterDoesNotContain">
+    /// Whether titles not matching <paramref name="doesNotContainText"/> should be removed.
+    /// </param>
+    /// <param name="useRegex">
+    /// Whether the title filter values are regular expressions.
+    /// </param>
+    /// <param name="removeDuplicates">
+    /// Whether duplicate articles should be removed.
+    /// </param>
+    /// <param name="applySetFilter">
+    /// Whether the article-set operation should be applied.
+    /// </param>
+    /// <param name="intersect">
+    /// Whether the set operation is an intersection rather than a difference.
+    /// </param>
+    /// <param name="sortAlphabetically">
+    /// Whether the resulting articles should be sorted alphabetically.
+    /// </param>
+    /// <returns>
+    /// The filtered article list.
+    /// </returns>
+    public static List<Article> Apply(
+        IEnumerable<Article> articles,
+        IEnumerable<Article> filterArticles,
+        IEnumerable<int> selectedNamespaces,
+        string containsText,
+        string doesNotContainText,
+        bool filterContains,
+        bool filterDoesNotContain,
+        bool useRegex,
+        bool removeDuplicates,
+        bool applySetFilter,
+        bool intersect,
+        bool sortAlphabetically)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+        ArgumentNullException.ThrowIfNull(filterArticles);
+        ArgumentNullException.ThrowIfNull(selectedNamespaces);
+
+        List<Article> result =
+            articles.ToList();
+
+        if (removeDuplicates)
+        {
+            result =
+                result
+                    .Distinct()
+                    .ToList();
+        }
+
+        if (applySetFilter)
+        {
+            result =
+                FilterByArticleSet(
+                    result,
+                    filterArticles,
+                    intersect);
+        }
+
+        result =
+            FilterByTitle(
+                result,
+                containsText,
+                doesNotContainText,
+                filterContains,
+                filterDoesNotContain,
+                useRegex);
+
+        result =
+            FilterByNamespace(
+                result,
+                selectedNamespaces);
+
+        if (sortAlphabetically)
+        {
+            result =
+                result
+                    .OrderBy(article => article.Name)
+                    .ToList();
+        }
+
+        return result;
+    }
 }

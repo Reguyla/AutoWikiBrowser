@@ -46,113 +46,62 @@ namespace Twain.Core.Lists
         private List<Article> _list = new();
         private static AWBSettings.SpecialFilterPrefs _prefs;
 
-        private void btnApply_Click(object sender, EventArgs e)
+        private void btnApply_Click(
+            object sender,
+            EventArgs e)
         {
             try
             {
-                if (chkRemoveDups.Checked)
-                    RemoveDuplicates();
+                bool filterContains =
+                    chkContains.Checked &&
+                    !string.IsNullOrEmpty(txtContains.Text);
+
+                bool filterDoesNotContain =
+                    chkNotContains.Checked &&
+                    !string.IsNullOrEmpty(txtDoesNotContain.Text);
+
+                List<Article> result =
+                    ArticleListFilterProcessor.Apply(
+                        _destListBox.Cast<Article>(),
+                        lbRemove.Cast<Article>(),
+                        pageNamespaces.GetSelectedNamespaces(),
+                        txtContains.Text,
+                        txtDoesNotContain.Text,
+                        filterContains,
+                        filterDoesNotContain,
+                        chkIsRegex.Checked,
+                        chkRemoveDups.Checked,
+                        lbRemove.Items.Count > 0,
+                        cbOpType.SelectedIndex != 0,
+                        chkSortAZ.Checked);
 
                 _list.Clear();
+                _list.AddRange(result);
 
-                _list.AddRange(_destListBox);
-
-                bool does = (chkContains.Checked && !string.IsNullOrEmpty(txtContains.Text));
-                bool doesnot = (chkNotContains.Checked && !string.IsNullOrEmpty(txtDoesNotContain.Text));
-
-                if (lbRemove.Items.Count > 0)
-                    FilterList();
-
-                if (does || doesnot)
-                    FilterMatches(does, doesnot);
-
-                if (_destListBox.Items.Count > 0 && _destListBox.Items[0] is Article)
-                    FilterNamespace();
-
-                if (_list.Count != _destListBox.Items.Count)
+                if (_list.Count != _destListBox.Items.Count ||
+                    !_list.SequenceEqual(_destListBox.Cast<Article>()))
                 {
                     _destListBox.BeginUpdate();
                     _destListBox.Items.Clear();
-                    _destListBox.Items.AddRange(_list.ToArray());
+                    _destListBox.Items.AddRange(
+                        _list.ToArray());
                     _destListBox.EndUpdate();
                 }
 
-                if (chkSortAZ.Checked)
-                    _destListBox.Sort();
-
-                //Only try to update number of articles using listmaker method IF the parent is indeed a listmaker
-                //Causes exception on DBScanner otherwise
-                if (_destListBox.Parent is ListMaker)
-                    (_destListBox.Parent as ListMaker).UpdateNumberOfArticles();
+                // Only try to update number of articles using ListMaker
+                // when the parent is actually a ListMaker.
+                if (_destListBox.Parent is ListMaker listMaker)
+                {
+                    listMaker.UpdateNumberOfArticles();
+                }
             }
             catch (Exception ex)
             {
                 ErrorHandler.HandleException(ex);
             }
-            DialogResult = DialogResult.OK;
-        }
 
-        /// <summary>
-        /// Removes duplicate articles from the listbox
-        /// </summary>
-        private void RemoveDuplicates()
-        {
-            ClearAndAdd(
-                _destListBox.Distinct().ToArray());
-        }
-
-        private void ClearAndAdd(Article[] newlist)
-        {
-            // Avoid performance penalty of AddRange if deduplication didn't remove any articles
-            if (_destListBox.Items.Count != newlist.Length)
-            {
-                _destListBox.BeginUpdate();
-                _destListBox.Items.Clear();
-                _destListBox.Items.AddRange(newlist);
-                _destListBox.EndUpdate();
-            }
-        }
-
-        private void FilterNamespace()
-        {
-            List<int> selectedNamespaces =
-                pageNamespaces.GetSelectedNamespaces();
-
-            _list =
-                ArticleListFilterProcessor.FilterByNamespace(
-                    _list,
-                    selectedNamespaces);
-        }
-
-        private void FilterMatches(bool does, bool doesnot)
-        {
-            if (!does && !doesnot)
-                return;
-
-            try
-            {
-                _list =
-                    ArticleListFilterProcessor.FilterByTitle(
-                        _list,
-                        txtContains.Text,
-                        txtDoesNotContain.Text,
-                        does,
-                        doesnot,
-                        chkIsRegex.Checked);
-            }
-            catch (Exception ex)
-            {
-                ErrorHandler.HandleException(ex);
-            }
-        }
-
-        private void FilterList()
-        {
-            _list =
-                ArticleListFilterProcessor.FilterByArticleSet(
-                    _list,
-                    lbRemove.Cast<Article>(),
-                    cbOpType.SelectedIndex != 0);
+            DialogResult =
+                DialogResult.OK;
         }
 
         /// <summary>
