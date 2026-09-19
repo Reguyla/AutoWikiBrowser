@@ -48,4 +48,10 @@ public class Profile
     /// Gets or sets the notes associated with the profile.
     /// </summary>
     public string Notes { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets whether the profile has a saved password.
+    /// </summary>
+    public bool HasSavedPassword =>
+        !string.IsNullOrEmpty(Password);
 }
