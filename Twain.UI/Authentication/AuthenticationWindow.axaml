@@ -1,0 +1,53 @@
+<Window
+    x:Class="Twain.UI.Authentication.AuthenticationWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Authentication Required"
+    Width="420"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="16"
+          RowDefinitions="Auto,Auto,Auto,Auto"
+          ColumnDefinitions="Auto,*"
+          ColumnSpacing="12"
+          RowSpacing="10">
+
+        <TextBlock Grid.Row="0"
+                   Grid.ColumnSpan="2"
+                   Margin="0,0,0,6"
+                   Text="Enter the HTTP authentication credentials for this site."
+                   TextWrapping="Wrap" />
+
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Username:" />
+
+        <TextBox x:Name="UsernameTextBox"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 MinWidth="260" />
+
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Password:" />
+
+        <TextBox x:Name="PasswordTextBox"
+                 Grid.Row="2"
+                 Grid.Column="1"
+                 PasswordChar="●" />
+
+        <Button Grid.Row="3"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                MinWidth="90"
+                Margin="0,6,0,0"
+                Content="Login"
+                IsDefault="True"
+                Click="LoginButton_Click" />
+
+    </Grid>
+</Window>
