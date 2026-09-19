@@ -465,63 +465,134 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Results">
-                <Grid Margin="12"
-                      RowDefinitions="*,Auto"
-                      RowSpacing="8">
+             <TabItem Header="Results">
+                <TabControl Margin="12">
 
-                    <ListBox Grid.Row="0"
-                             Name="ResultsListBox"
-                             SelectionMode="Multiple" />
+                    <TabItem Header="Articles">
+                        <Grid Margin="12"
+                              RowDefinitions="*,Auto"
+                              RowSpacing="8">
 
-                    <Grid Grid.Row="1"
-                          ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="12">
+                            <ListBox Grid.Row="0"
+                                     Name="ResultsListBox"
+                                     SelectionMode="Multiple" />
 
-                        <TextBlock Grid.Column="0"
-                                   Name="ResultCountTextBlock"
-                                   Text="0 matches"
-                                   VerticalAlignment="Center" />
+                            <Grid Grid.Row="1"
+                                  ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
+                                  ColumnSpacing="12">
 
-                        <Button Grid.Column="3"
-                            Name="ClearResultsButton"
-                            Content="Clear"
-                            MinWidth="70"
-                            Click="ClearResultsButton_Click" />
+                                <TextBlock Grid.Column="0"
+                                           Name="ResultCountTextBlock"
+                                           Text="0 matches"
+                                           VerticalAlignment="Center" />
 
-                        <Button Grid.Column="4"
-                            Name="SaveResultsButton"
-                            Content="Save list..."
-                            MinWidth="80"
-                            Click="SaveResultsButton_Click" />
+                                <ProgressBar Grid.Column="1"
+                                             Name="ScanProgressBar"
+                                             Minimum="0"
+                                             Maximum="100"
+                                             Value="0"
+                                             VerticalAlignment="Center" />
 
-                        <Button Grid.Column="5"
-                            Name="RemoveSelectedButton"
-                            Content="Remove selected"
-                            MinWidth="110"
-                            Click="RemoveSelectedButton_Click" />
+                                <TextBlock Grid.Column="2"
+                                           Name="ProgressTextBlock"
+                                           Text="0%"
+                                           VerticalAlignment="Center" />
 
-                        <Button Grid.Column="6"
-                            Name="CopySelectedButton"
-                            Content="Copy selected"
-                            MinWidth="100"
-                            Click="CopySelectedButton_Click" />
+                                <Button Grid.Column="3"
+                                        Name="ClearResultsButton"
+                                        Content="Clear"
+                                        MinWidth="70"
+                                        Click="ClearResultsButton_Click" />
 
-                        <ProgressBar Grid.Column="1"
-                                     Name="ScanProgressBar"
-                                     Minimum="0"
-                                     Maximum="100"
-                                     Value="0"
-                                     VerticalAlignment="Center" />
+                                <Button Grid.Column="4"
+                                        Name="SaveResultsButton"
+                                        Content="Save list..."
+                                        MinWidth="80"
+                                        Click="SaveResultsButton_Click" />
 
-                        <TextBlock Grid.Column="2"
-                                   Name="ProgressTextBlock"
-                                   Text="0%"
-                                   VerticalAlignment="Center" />
+                                <Button Grid.Column="5"
+                                        Name="RemoveSelectedButton"
+                                        Content="Remove selected"
+                                        MinWidth="110"
+                                        Click="RemoveSelectedButton_Click" />
 
-                    </Grid>
+                                <Button Grid.Column="6"
+                                        Name="CopySelectedButton"
+                                        Content="Copy selected"
+                                        MinWidth="100"
+                                        Click="CopySelectedButton_Click" />
 
-                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Wiki list">
+                        <Grid Margin="12"
+                              RowDefinitions="Auto,*,Auto"
+                              RowSpacing="8">
+
+                            <StackPanel Grid.Row="0"
+                                        Orientation="Horizontal"
+                                        Spacing="12">
+
+                            <CheckBox Name="WikiHeadingCheckBox"
+                                      Content="Headings"
+                                      IsCheckedChanged="WikiHeadingCheckBox_IsCheckedChanged" />
+
+                                <TextBlock Text="Every:"
+                                           VerticalAlignment="Center" />
+
+                                <NumericUpDown Name="WikiHeadingSpacingNumericUpDown"
+                                               Width="80"
+                                               Minimum="1"
+                                               Maximum="1000"
+                                               Value="25"
+                                               IsEnabled="False" />
+
+                                <CheckBox Name="WikiAlphabeticalHeaderCheckBox"
+                                          Content="Alphabetical headers" />
+
+                                <CheckBox Name="WikiNumberedListCheckBox"
+                                          Content="Numbered list"
+                                          IsChecked="True" />
+
+                                <Button Name="GenerateWikiListButton"
+                                        Content="Generate"
+                                        Click="GenerateWikiListButton_Click" />
+
+                            </StackPanel>
+
+                            <TextBox Grid.Row="1"
+                                     Name="WikiListTextBox"
+                                     AcceptsReturn="True"
+                                     TextWrapping="NoWrap"
+                                     IsReadOnly="True"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        Spacing="8">
+
+                                <Button Name="ClearWikiListButton"
+                                        Content="Clear"
+                                        Click="ClearWikiListButton_Click" />
+
+                                <Button Name="CopyWikiListButton"
+                                        Content="Copy"
+                                        Click="CopyWikiListButton_Click" />
+
+                                <Button Name="SaveWikiListButton"
+                                        Content="Save..."
+                                        Click="SaveWikiListButton_Click" />
+
+                            </StackPanel>
+
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
             </TabItem>
 
         </TabControl>

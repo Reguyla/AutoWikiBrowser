@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Twain.Core;
 using Twain.Core.Background;
 using Twain.Core.DBScanner;
 
@@ -535,10 +536,23 @@ public partial class DatabaseScannerWindow : Window
 
         NamespacesControl.Reset();
 
+        WikiHeadingCheckBox.IsChecked = false;
+        WikiHeadingSpacingNumericUpDown.Value = 25;
+        WikiAlphabeticalHeaderCheckBox.IsChecked = false;
+        WikiNumberedListCheckBox.IsChecked = true;
+
+        WikiListTextBox.Text = string.Empty;
+
         StartFromTextBox.Text = string.Empty;
         IgnoreRedirectsCheckBox.IsChecked = true;
         IgnoreCommentsCheckBox.IsChecked = false;
         PriorityComboBox.SelectedIndex = 2;
+
+        DumpLocationTextBox.Text = string.Empty;
+        DumpSiteNameTextBox.Text = string.Empty;
+        DumpBaseUrlTextBox.Text = string.Empty;
+        DumpGeneratorTextBox.Text = string.Empty;
+        DumpCaseTextBox.Text = string.Empty;
 
         ResultLimitNumericUpDown.Value = 30000;
     }
@@ -641,5 +655,99 @@ public partial class DatabaseScannerWindow : Window
             return;
 
         await clipboard.SetTextAsync(text);
+    }
+
+    private void GenerateWikiListButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        List<Article> articles =
+            ResultsListBox.Items
+                .OfType<string>()
+                .Select(title => new Article(title))
+                .ToList();
+
+        WikiListTextBox.Text =
+            DatabaseScannerProcessor.CreateWikiList(
+                articles,
+                WikiNumberedListCheckBox.IsChecked == true,
+                WikiHeadingCheckBox.IsChecked == true,
+                (int)(WikiHeadingSpacingNumericUpDown.Value ?? 25),
+                WikiAlphabeticalHeaderCheckBox.IsChecked == true);
+    }
+
+    private void WikiHeadingCheckBox_IsCheckedChanged(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        WikiHeadingSpacingNumericUpDown.IsEnabled =
+            WikiHeadingCheckBox.IsChecked == true;
+    }
+
+    private void ClearWikiListButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        WikiListTextBox.Text = string.Empty;
+    }
+
+    private async void CopyWikiListButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        string text =
+            WikiListTextBox.Text ?? string.Empty;
+
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        var clipboard =
+            TopLevel.GetTopLevel(this)?.Clipboard;
+
+        if (clipboard is null)
+            return;
+
+        await clipboard.SetTextAsync(text);
+    }
+
+    private async void SaveWikiListButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        string text =
+            WikiListTextBox.Text ?? string.Empty;
+
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        Avalonia.Platform.Storage.IStorageFile? file =
+            await StorageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title = "Save wiki list",
+                    SuggestedFileName = "DatabaseScannerWikiList.txt",
+                    DefaultExtension = "txt",
+                    FileTypeChoices =
+                    [
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                        "Text file")
+                    {
+                        Patterns = ["*.txt"]
+                    }
+                    ]
+                });
+
+        if (file is null)
+            return;
+
+        string? fileName =
+            file.TryGetLocalPath();
+
+        if (string.IsNullOrEmpty(fileName))
+            return;
+
+        await File.WriteAllTextAsync(
+            fileName,
+            text);
     }
 }
