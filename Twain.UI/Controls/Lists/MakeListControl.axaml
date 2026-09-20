@@ -37,13 +37,14 @@
 
         <!-- Article list -->
         <ListBox
-            Grid.Row="2"
+            x:Name="ArticleListBox"
+            Grid.Row="3"
             ItemsSource="{Binding Articles}"
             SelectionMode="Multiple" />
 
         <!-- Manual article entry -->
-        <Grid Grid.Row="3"
-              ColumnDefinitions="*,Auto"
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*,Auto,Auto"
               ColumnSpacing="8">
 
             <TextBox
@@ -54,6 +55,11 @@
                 Grid.Column="1"
                 Content="Add"
                 Command="{Binding AddArticleCommand}" />
+
+            <Button
+                Grid.Column="2"
+                Content="Remove"
+                Click="RemoveButton_Click" />
         </Grid>
     </Grid>
 

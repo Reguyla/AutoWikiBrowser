@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Twain.Core;
@@ -133,6 +134,16 @@ public partial class MakeListViewModel : ObservableObject
     private bool CanAddArticle()
     {
         return !string.IsNullOrWhiteSpace(ManualArticleTitle);
+    }
+
+    [RelayCommand]
+    private void RemoveArticles(IEnumerable<Article>? articles)
+    {
+        if (articles is null)
+            return;
+
+        foreach (Article article in articles.ToList())
+            Articles.Remove(article);
     }
 
     [RelayCommand(CanExecute = nameof(CanMakeList))]

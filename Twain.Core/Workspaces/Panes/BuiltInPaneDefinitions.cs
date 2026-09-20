@@ -20,11 +20,11 @@ public static class BuiltInPaneDefinitions
         true);
 
     /// <summary>
-    /// Gets the built-in article-list pane definition.
+    /// Gets the built-in Make list pane definition.
     /// </summary>
     public static PaneDefinition ArticleList { get; } = new(
         BuiltInPaneIds.ArticleList,
-        "Article List",
+        "Make List",
         PaneKind.Navigation,
         WorkspaceRegion.Left,
         PaneCapabilities.Closable |
