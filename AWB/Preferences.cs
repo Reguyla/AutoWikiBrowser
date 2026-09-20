@@ -250,21 +250,19 @@ internal sealed partial class MyPreferences : Form
     {
         ProjectEnum project = Project;
 
+        UserSettingsHelper.ProjectSettingsState state =
+            UserSettingsHelper.GetProjectSettingsState(project);
+
         cmboLang.Enabled =
-            UserSettingsHelper.SupportsLanguageSelection(
-                project);
+            state.SupportsLanguageSelection;
 
         string selectedLanguage =
             cmboLang.SelectedItem?.ToString() ?? string.Empty;
 
         cmboLang.Items.Clear();
 
-        IReadOnlyList<string> languages =
-            UserSettingsHelper.GetLanguagesForProject(
-                project);
-
         cmboLang.Items.AddRange(
-            languages.ToArray());
+            state.Languages.ToArray());
 
         if (!string.IsNullOrEmpty(selectedLanguage))
         {
@@ -273,52 +271,39 @@ internal sealed partial class MyPreferences : Form
                     selectedLanguage);
         }
 
-        bool usesCustomProjectControls =
-            UserSettingsHelper.UsesCustomProjectControls(
-                project);
-
-        bool supportsCustomConnectionSettings =
-            UserSettingsHelper.SupportsCustomConnectionSettings(
-                project);
-
         chkSupressAWB.Enabled =
-            supportsCustomConnectionSettings;
+            state.SupportsCustomConnectionSettings;
 
         cmboProtocol.Enabled =
-            supportsCustomConnectionSettings;
+            state.SupportsCustomConnectionSettings;
 
         DomainEnabled =
-            supportsCustomConnectionSettings;
+            state.SupportsCustomConnectionSettings;
 
-        if (usesCustomProjectControls)
+        if (state.UsesCustomProjectControls)
         {
             cmboProtocol.Visible = true;
             cmboCustomProject.Visible = true;
             cmboLang.Visible = false;
 
-            if (UserSettingsHelper.RequiresHttps(
-                    project))
+            if (state.RequiresHttps)
             {
                 cmboProtocol.SelectedIndex = 0;
             }
 
             lblPostfix.Text =
-                UserSettingsHelper.GetProjectPostfix(
-                    project);
+                state.ProjectPostfix;
 
-            // TODO: Extract the reusable logic from cmboCustomProjectChanged into
-            // a dedicated helper rather than invoking an event handler directly.
-            cmboCustomProjectChanged(
-                null,
-                null);
+            UpdateOkButtonState();
 
             return;
         }
 
         cmboProtocol.Visible = false;
+
         lblPostfix.Text =
-            UserSettingsHelper.GetProjectPostfix(
-                project);
+            state.ProjectPostfix;
+
         cmboCustomProject.Visible = false;
         cmboLang.Visible = true;
         btnOK.Enabled = true;

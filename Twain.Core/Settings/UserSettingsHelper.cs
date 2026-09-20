@@ -14,6 +14,18 @@ public static class UserSettingsHelper
         RegexOptions.CultureInvariant);
 
     /// <summary>
+    /// Describes the settings-interface capabilities of a wiki project.
+    /// </summary>
+    public sealed record ProjectSettingsState(
+        bool SupportsLanguageSelection,
+        IReadOnlyList<string> Languages,
+        bool UsesCustomProjectControls,
+        bool SupportsCustomConnectionSettings,
+        bool RequiresHttps,
+        bool RequiresCustomProject,
+        string ProjectPostfix);
+
+    /// <summary>
     /// Normalizes a wiki language code for selection.
     /// </summary>
     public static string NormalizeLanguageCode(
@@ -118,6 +130,28 @@ public static class UserSettingsHelper
                     !string.IsNullOrWhiteSpace(item))
                 .Select(item =>
                     item!.Trim()));
+    }
+
+    /// <summary>
+    /// Gets the settings-interface capabilities for the specified wiki project.
+    /// </summary>
+    /// <param name="project">
+    /// The wiki project to evaluate.
+    /// </param>
+    /// <returns>
+    /// The settings state associated with the selected project.
+    /// </returns>
+    public static ProjectSettingsState GetProjectSettingsState(
+        ProjectEnum project)
+    {
+        return new ProjectSettingsState(
+            SupportsLanguageSelection(project),
+            GetLanguagesForProject(project),
+            UsesCustomProjectControls(project),
+            SupportsCustomConnectionSettings(project),
+            RequiresHttps(project),
+            RequiresCustomProject(project),
+            GetProjectPostfix(project));
     }
 
     /// <summary>
