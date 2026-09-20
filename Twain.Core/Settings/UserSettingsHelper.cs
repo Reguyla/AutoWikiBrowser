@@ -332,4 +332,46 @@ public static class UserSettingsHelper
         return NormalizeOnLoadSelection(
             selectionIndex) == 0;
     }
+
+    /// <summary>
+    /// Normalizes a custom wiki value and determines whether it should be added
+    /// to the stored custom-wiki collection.
+    /// </summary>
+    /// <param name="customWiki">
+    /// The custom wiki value entered by the user.
+    /// </param>
+    /// <param name="project">
+    /// The currently selected wiki project.
+    /// </param>
+    /// <param name="existingCustomWikis">
+    /// The custom wiki values that are already stored.
+    /// </param>
+    /// <returns>
+    /// The normalized custom wiki when it should be added; otherwise,
+    /// <see langword="null"/>.
+    /// </returns>
+    public static string? GetCustomWikiToAdd(
+        string? customWiki,
+        ProjectEnum project,
+        IEnumerable<string?> existingCustomWikis)
+    {
+        ArgumentNullException.ThrowIfNull(existingCustomWikis);
+
+        if (project != ProjectEnum.custom ||
+            string.IsNullOrWhiteSpace(customWiki))
+        {
+            return null;
+        }
+
+        string normalized =
+            NormalizeCustomProject(
+                customWiki,
+                project);
+
+        return ShouldAddCustomWiki(
+                normalized,
+                existingCustomWikis)
+            ? normalized
+            : null;
+    }
 }

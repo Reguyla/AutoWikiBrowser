@@ -842,30 +842,25 @@ internal sealed partial class MyPreferences : Form
     /// </summary>
     private void AddCurrentCustomProject()
     {
-        if (Project != ProjectEnum.custom ||
-            string.IsNullOrWhiteSpace(cmboCustomProject.Text))
-        {
-            return;
-        }
-
-        FixCustomProject();
-
-        string customProject =
-            cmboCustomProject.Text;
-
         IEnumerable<string?> existingCustomWikis =
             cmboCustomProject.Items
                 .Cast<object>()
                 .Select(item =>
                     item?.ToString());
 
-        if (UserSettingsHelper.ShouldAddCustomWiki(
-                customProject,
-                existingCustomWikis))
+        string? customProject =
+            UserSettingsHelper.GetCustomWikiToAdd(
+                cmboCustomProject.Text,
+                Project,
+                existingCustomWikis);
+
+        if (customProject is null)
         {
-            cmboCustomProject.Items.Add(
-                customProject);
+            return;
         }
+
+        cmboCustomProject.Text = customProject;
+        cmboCustomProject.Items.Add(customProject);
     }
 
     // TODO: Move preferences persistence into a dedicated settings service or
