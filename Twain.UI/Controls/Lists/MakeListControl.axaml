@@ -24,7 +24,7 @@
             <Button
                 Grid.Column="1"
                 Content="Make List"
-                IsEnabled="{Binding !IsBusy}" />
+                Command="{Binding MakeListCommand}" />
         </Grid>
 
         <!-- Source input -->

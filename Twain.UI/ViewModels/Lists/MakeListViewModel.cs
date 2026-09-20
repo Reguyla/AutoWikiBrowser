@@ -22,6 +22,7 @@ public partial class MakeListViewModel : ObservableObject
     /// Gets or sets the source text used by the selected list provider.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(MakeListCommand))]
     private string _sourceText = string.Empty;
 
     /// <summary>
@@ -35,6 +36,7 @@ public partial class MakeListViewModel : ObservableObject
     /// Gets or sets a value indicating whether list generation is in progress.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(MakeListCommand))]
     private bool _isBusy;
 
     /// <summary>
@@ -79,6 +81,7 @@ public partial class MakeListViewModel : ObservableObject
         {
             SourcePrompt = string.Empty;
             IsSourceTextEnabled = false;
+            MakeListCommand.NotifyCanExecuteChanged();
             return;
         }
 
@@ -86,6 +89,8 @@ public partial class MakeListViewModel : ObservableObject
 
         SourcePrompt = value.UserInputTextBoxText;
         IsSourceTextEnabled = value.UserInputTextBoxEnabled;
+
+        MakeListCommand.NotifyCanExecuteChanged();
     }
 
     public MakeListViewModel()
@@ -123,5 +128,65 @@ public partial class MakeListViewModel : ObservableObject
     private bool CanAddArticle()
     {
         return !string.IsNullOrWhiteSpace(ManualArticleTitle);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMakeList))]
+    private void MakeList()
+    {
+        if (SelectedProvider is null)
+            return;
+
+        IsBusy = true;
+        StatusText = "Generating list...";
+
+        try
+        {
+            string[] sourceValues =
+                ListGenerationProcessor.ParseSourceValues(SourceText);
+
+            sourceValues =
+                ListGenerationProcessor.PrepareSourceValues(
+                    SelectedProvider,
+                    sourceValues);
+
+            ListGenerationRequest request =
+                new(
+                    SelectedProvider,
+                    sourceValues);
+
+            ListGenerationResult result =
+                ListGenerationProcessor.Generate(request);
+
+            if (!result.Succeeded)
+            {
+                StatusText =
+                    string.IsNullOrWhiteSpace(result.ErrorMessage)
+                        ? $"Unable to generate list: {result.Failure}"
+                        : result.ErrorMessage;
+
+                return;
+            }
+
+            Articles.Clear();
+
+            foreach (Article article in result.Articles)
+                Articles.Add(article);
+
+            StatusText =
+                $"{Articles.Count} article{(Articles.Count == 1 ? string.Empty : "s")}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private bool CanMakeList()
+    {
+        if (IsBusy || SelectedProvider is null)
+            return false;
+
+        return !SelectedProvider.UserInputTextBoxEnabled ||
+               !string.IsNullOrWhiteSpace(SourceText);
     }
 }

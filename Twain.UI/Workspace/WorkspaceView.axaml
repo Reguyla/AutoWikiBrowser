@@ -11,24 +11,20 @@
     d:DesignHeight="700"
     mc:Ignorable="d">
 
-    <Design.DataContext>
-        <vm:WorkspaceViewModel />
-    </Design.DataContext>
+    <UserControl.Resources>
 
- <UserControl.Resources>
+        <!--
+        Hosts each workspace pane through the shared pane presentation control.
+        -->
+        <DataTemplate
+            x:Key="WorkspacePaneTemplate"
+            x:DataType="vm:PaneViewModel">
 
-    <!--
-    Hosts each workspace pane through the shared pane presentation control.
-    -->
-    <DataTemplate
-        x:Key="WorkspacePaneTemplate"
-        x:DataType="vm:PaneViewModel">
+            <workspaceControls:WorkspacePaneHost />
 
-        <workspaceControls:WorkspacePaneHost />
+        </DataTemplate>
 
-    </DataTemplate>
-
-</UserControl.Resources>
+    </UserControl.Resources>
 
     <Grid
         Margin="{DynamicResource TwainWorkspacePadding}"

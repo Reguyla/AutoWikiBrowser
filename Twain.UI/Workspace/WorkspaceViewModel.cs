@@ -10,6 +10,7 @@ using Twain.UI.ArticleList;
 using Twain.UI.Diff;
 using Twain.UI.Editor;
 using Twain.UI.Options;
+using Twain.UI.ViewModels.Lists;
 
 namespace Twain.UI.ViewModels.Workspaces;
 
@@ -50,7 +51,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 FindState(
                     layout,
                     BuiltInPaneIds.ArticleList),
-                new ArticleListViewModel()),
+                new MakeListViewModel()),
 
             CreatePane(
                 BuiltInPaneDefinitions.Options,

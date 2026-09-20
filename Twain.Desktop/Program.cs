@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using System.Diagnostics;
+using System.Text;
 using Twain.Diagnostics;
 using Twain.Desktop.Updates;
 using Velopack;
@@ -20,6 +21,8 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
         // TODO: Investigate Velopack Setup reporting a failed install hook even though
         // the application installs successfully and the install hook returns exit code
         // 0 when invoked manually.

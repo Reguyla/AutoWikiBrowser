@@ -5,6 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
+    xmlns:listControls="using:Twain.UI.Controls.Lists"
+    xmlns:listViewModels="using:Twain.UI.ViewModels.Lists"
     x:DataType="vm:PaneViewModel"
     d:DesignWidth="400"
     d:DesignHeight="300"
@@ -54,10 +56,20 @@
                 BorderThickness="{DynamicResource TwainBorderThickness}"
                 CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-                <ContentControl
-                    HorizontalContentAlignment="Stretch"
-                    VerticalContentAlignment="Stretch"
-                    Content="{Binding Content}" />
+            <ContentControl
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Content="{Binding Content}">
+
+                <ContentControl.DataTemplates>
+
+                    <DataTemplate DataType="listViewModels:MakeListViewModel">
+                        <listControls:MakeListControl />
+                    </DataTemplate>
+
+                </ContentControl.DataTemplates>
+
+            </ContentControl>
 
             </Border>
 
