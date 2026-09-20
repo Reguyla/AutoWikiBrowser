@@ -19,6 +19,7 @@
             <ComboBox
                 ItemsSource="{Binding Providers}"
                 SelectedItem="{Binding SelectedProvider}"
+                DisplayMemberBinding="{Binding DisplayText}"
                 HorizontalAlignment="Stretch" />
 
             <Button

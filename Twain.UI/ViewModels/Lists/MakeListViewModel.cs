@@ -95,8 +95,13 @@ public partial class MakeListViewModel : ObservableObject
 
     public MakeListViewModel()
     {
-        foreach (IListProvider provider in ListProviderRegistry.Providers)
+        foreach (IListProvider provider in
+                 ListProviderRegistry.Providers
+                     .OrderBy(provider => provider.DisplayText,
+                         StringComparer.CurrentCultureIgnoreCase))
+        {
             Providers.Add(provider);
+        }
 
         ListProviderRegistry.ProviderAdded += OnProviderAdded;
 
