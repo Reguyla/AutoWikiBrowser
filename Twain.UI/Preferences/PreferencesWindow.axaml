@@ -1,0 +1,170 @@
+<Window
+    x:Class="Twain.UI.Preferences.PreferencesWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Preferences"
+    Width="640"
+    Height="560"
+    MinWidth="600"
+    MinHeight="500"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <TabControl
+            x:Name="PreferencesTabs"
+            Grid.Row="0"
+            Margin="12">
+
+            <TabItem Header="General">
+                <Grid Margin="12">
+                    <!-- General preferences will be added next. -->
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Site">
+                <Grid
+                    Margin="12"
+                    ColumnDefinitions="Auto,*"
+                    RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                    ColumnSpacing="12"
+                    RowSpacing="10">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="Project:" />
+
+                    <ComboBox
+                        x:Name="ProjectComboBox"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        MinWidth="240"
+                        SelectionChanged="ProjectComboBox_SelectionChanged" />
+
+                    <TextBlock
+                        x:Name="LanguageLabel"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="Language:" />
+
+                    <ComboBox
+                        x:Name="LanguageComboBox"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        MinWidth="240" />
+
+                    <TextBlock
+                        x:Name="CustomProjectLabel"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="Custom project:" />
+
+                    <ComboBox
+                        x:Name="CustomProjectComboBox"
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        MinWidth="240"
+                        IsEditable="True"
+                        LostFocus="CustomProjectComboBox_LostFocus" />
+
+                    <TextBlock
+                        x:Name="ProtocolLabel"
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="Protocol:" />
+
+                    <ComboBox
+                        x:Name="ProtocolComboBox"
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        MinWidth="160">
+                        <ComboBoxItem Content="https://" />
+                        <ComboBoxItem Content="http://" />
+                    </ComboBox>
+
+                    <TextBlock
+                        x:Name="PostfixLabel"
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        VerticalAlignment="Center" />
+
+                    <CheckBox
+                        x:Name="DomainCheckBox"
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Content="Domain"
+                        IsCheckedChanged="DomainCheckBox_IsCheckedChanged" />
+
+                    <TextBox
+                        x:Name="DomainTextBox"
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        MinWidth="240" />
+
+                    <CheckBox
+                        x:Name="SuppressAwbCheckBox"
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Content="Suppress AWB identification" />
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Editing">
+                <Grid Margin="12">
+                    <!-- Editing preferences will be added incrementally. -->
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Tools">
+                <Grid Margin="12">
+                    <!-- Tool preferences will be added incrementally. -->
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Privacy">
+                <Grid Margin="12">
+                    <!-- Privacy preferences will be added incrementally. -->
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Alerts">
+                <Grid Margin="12">
+                    <!-- Alert preferences will be added incrementally. -->
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="12,0,12,12"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <Button
+                x:Name="OkButton"
+                MinWidth="90"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
+
+            <Button
+                x:Name="CancelButton"
+                MinWidth="90"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
+        </StackPanel>
+
+    </Grid>
+</Window>
