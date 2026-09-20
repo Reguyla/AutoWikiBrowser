@@ -43,7 +43,30 @@
 
             <MenuItem Header="Options" />
 
-            <MenuItem Header="Tools" />
+            <MenuItem Header="Tools">
+                <MenuItem
+                    Header="Make Module..."
+                    Click="MakeModuleMenuItem_Click" />
+                <MenuItem
+                    Header="External Processing..."
+                    Click="ExternalProcessingMenuItem_Click" />
+
+                <Separator />
+
+                <MenuItem
+                    Header="Regex Tester..."
+                    Click="RegexTesterMenuItem_Click" />
+                <MenuItem
+                    Header="Database Scanner..."
+                    Click="DatabaseScannerMenuItem_Click" />
+                <MenuItem
+                    Header="List Comparer..."
+                    Click="ListComparerMenuItem_Click" />
+                <MenuItem
+                    Header="List Splitter..."
+                    Click="ListSplitterMenuItem_Click" />
+
+            </MenuItem>
 
             <MenuItem Header="Help">
                 <MenuItem
