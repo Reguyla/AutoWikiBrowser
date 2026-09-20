@@ -22,13 +22,25 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,Auto,*">
-        <Menu Grid.Row="0">
-            <MenuItem Header="_Help">
-                <MenuItem
-                    Header="Check for _Updates"
-                    Command="{Binding CheckForUpdatesCommand}" />
-            </MenuItem>
-        </Menu>
+<Menu Grid.Row="0">
+    <MenuItem Header="File">
+        <MenuItem
+            Header="Login / Profiles..."
+            Click="LoginProfilesMenuItem_Click" />
+
+        <Separator />
+
+        <MenuItem
+            Header="Exit"
+            Click="ExitMenuItem_Click" />
+    </MenuItem>
+
+    <MenuItem Header="Help">
+        <MenuItem
+            Header="Check for Updates"
+            Command="{Binding CheckForUpdatesCommand}" />
+    </MenuItem>
+</Menu>
 
  <Border
     Grid.Row="1"

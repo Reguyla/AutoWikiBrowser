@@ -115,18 +115,28 @@ public class Session
 
     #endregion
 
-    private readonly Control _parentControl;
+    private readonly Control? _parentControl;
+
+    /// <summary>
+    /// Initializes a new editing session without a WinForms parent control.
+    /// </summary>
+    public Session()
+    {
+        UpdateProject(true);
+    }
 
     /// <summary>
     /// Initializes a new editing session associated with the specified parent
     /// control.
     /// </summary>
     /// <param name="parentControl">
-    /// The UI control used as the owner for session-related dialogs and editor
-    /// operations.
+    /// The UI control used as the owner for legacy session-related dialogs and
+    /// editor operations.
     /// </param>
     public Session(Control parentControl)
     {
+        ArgumentNullException.ThrowIfNull(parentControl);
+
         _parentControl = parentControl;
         UpdateProject(true);
     }
@@ -142,10 +152,12 @@ public class Session
     /// </returns>
     private AsyncApiEdit CreateEditor(string wikiUrl)
     {
-        AsyncApiEdit edit = new(wikiUrl, _parentControl)
-        {
-            NewMessageThrows = false
-        };
+        AsyncApiEdit edit =
+            _parentControl is null
+                ? new AsyncApiEdit(wikiUrl)
+                : new AsyncApiEdit(wikiUrl, _parentControl);
+
+        edit.NewMessageThrows = false;
 
         edit.OpenComplete += OnOpenComplete;
         edit.SaveComplete += OnSaveComplete;

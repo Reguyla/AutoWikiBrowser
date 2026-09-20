@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
+using Twain.Core;
 using Twain.Core.Updates;
 using Twain.UI.ViewModels.Workspaces;
 
@@ -28,6 +29,11 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// Gets the active workspace.
     /// </summary>
     public WorkspaceViewModel Workspace { get; } = new();
+
+    /// <summary>
+    /// Gets the active wiki session for the application.
+    /// </summary>
+    public Session Session { get; } = new();
 
     /// <summary>
     /// Gets or sets whether an application update is currently available.

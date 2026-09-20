@@ -1,4 +1,7 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Twain.UI.Profiles;
+using Twain.UI.Shell;
 
 namespace Twain.UI.Views.Shell;
 
@@ -13,5 +16,25 @@ public partial class ShellWindow : Window
     public ShellWindow()
     {
         InitializeComponent();
+    }
+
+    private async void LoginProfilesMenuItem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (DataContext is not ShellViewModel viewModel)
+            return;
+
+        ProfilesWindow window =
+            new(viewModel.Session);
+
+        await window.ShowDialog<bool>(this);
+    }
+
+    private void ExitMenuItem_Click(
+    object? sender,
+    RoutedEventArgs e)
+    {
+        Close();
     }
 }
