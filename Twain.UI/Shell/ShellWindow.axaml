@@ -41,7 +41,11 @@
 
             <MenuItem Header="Plugins" />
 
-            <MenuItem Header="Options" />
+            <MenuItem Header="Options">
+                <MenuItem
+                    Header="Preferences..."
+                    Click="PreferencesMenuItem_Click" />
+            </MenuItem>
 
             <MenuItem Header="Tools">
                 <MenuItem

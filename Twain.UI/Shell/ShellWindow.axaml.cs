@@ -5,6 +5,7 @@ using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
 using Twain.UI.ExternalPrograms;
+using Twain.UI.Preferences;
 using Twain.UI.Profiles;
 using Twain.UI.Shell;
 
@@ -96,4 +97,16 @@ public partial class ShellWindow : Window
 
             await window.ShowDialog(this);
         }
+
+    /// <summary>
+    /// Opens the application preferences window.
+    /// </summary>
+    private async void PreferencesMenuItem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        PreferencesWindow window = new();
+
+        await window.ShowDialog<bool?>(this);
+    }
 }
