@@ -228,6 +228,31 @@
                         </Grid>
                     </Grid>
 
+                    <Separator Margin="0,4" />
+
+                    <Grid
+                        ColumnDefinitions="Auto,*,Auto"
+                        ColumnSpacing="12">
+
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Editor font:" />
+
+                        <TextBlock
+                            x:Name="EditorFontTextBlock"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Text="Default" />
+
+                        <Button
+                            x:Name="ChooseEditorFontButton"
+                            Grid.Column="2"
+                            Content="Choose..."
+                            IsEnabled="False" />
+
+                    </Grid>
+
                     <Grid
                         ColumnDefinitions="Auto,Auto,*"
                         ColumnSpacing="8">
@@ -257,15 +282,82 @@
             </TabItem>
 
             <TabItem Header="Tools">
-                <Grid Margin="12">
-                    <!-- Tool preferences will be added incrementally. -->
-                </Grid>
-            </TabItem>
+                <StackPanel
+                    Margin="12"
+                    Spacing="12">
 
-            <TabItem Header="Privacy">
-                <Grid Margin="12">
-                    <!-- Privacy preferences will be added incrementally. -->
-                </Grid>
+                    <TextBlock
+                        Text="Current article list"
+                        FontWeight="SemiBold" />
+
+                    <TextBlock
+                        Text="Choose how each tool handles the current article list."
+                        TextWrapping="Wrap" />
+
+                    <Grid
+                        ColumnDefinitions="*,Auto"
+                        RowDefinitions="Auto,Auto,Auto"
+                        ColumnSpacing="12"
+                        RowSpacing="10">
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="List Comparer:" />
+
+                        <ComboBox
+                            x:Name="ListComparerArticleListComboBox"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MinWidth="180"
+                            SelectedIndex="0">
+    
+                            <ComboBoxItem Content="Ask" />
+                            <ComboBoxItem Content="Use current list" />
+                            <ComboBoxItem Content="Do not use current list" />
+
+                        </ComboBox>
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="List Splitter:" />
+
+                        <ComboBox
+                            x:Name="ListSplitterArticleListComboBox"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            MinWidth="180"
+                            SelectedIndex="0">
+
+                            <ComboBoxItem Content="Ask" />
+                            <ComboBoxItem Content="Use current list" />
+                            <ComboBoxItem Content="Do not use current list" />
+                        </ComboBox>
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Database Scanner:" />
+
+                        <ComboBox
+                            x:Name="DatabaseScannerArticleListComboBox"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            MinWidth="180"
+                            SelectedIndex="0">
+
+                            <ComboBoxItem Content="Ask" />
+                            <ComboBoxItem Content="Use current list" />
+                            <ComboBoxItem Content="Do not use current list" />
+                        </ComboBox>
+
+                    </Grid>
+
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="Alerts">

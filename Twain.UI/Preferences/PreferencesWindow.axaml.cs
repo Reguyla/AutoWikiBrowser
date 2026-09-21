@@ -623,4 +623,31 @@ public partial class PreferencesWindow : Window
         PrefAutoSaveEditBoxFile =
             file.Path.LocalPath;
     }
+
+    /// <summary>
+    /// Gets or sets how List Comparer uses the current article list.
+    /// </summary>
+    public int PrefListComparerUseCurrentArticleList
+    {
+        get => ListComparerArticleListComboBox.SelectedIndex;
+        set => ListComparerArticleListComboBox.SelectedIndex = value;
+    }
+
+    /// <summary>
+    /// Gets or sets how List Splitter uses the current article list.
+    /// </summary>
+    public int PrefListSplitterUseCurrentArticleList
+    {
+        get => ListSplitterArticleListComboBox.SelectedIndex;
+        set => ListSplitterArticleListComboBox.SelectedIndex = value;
+    }
+
+    /// <summary>
+    /// Gets or sets how Database Scanner uses the current article list.
+    /// </summary>
+    public int PrefDBScannerUseCurrentArticleList
+    {
+        get => DatabaseScannerArticleListComboBox.SelectedIndex;
+        set => DatabaseScannerArticleListComboBox.SelectedIndex = value;
+    }
 }
