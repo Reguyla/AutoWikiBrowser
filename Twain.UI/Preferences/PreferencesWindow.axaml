@@ -17,9 +17,64 @@
             Margin="12">
 
             <TabItem Header="General">
-                <Grid Margin="12">
-                    <!-- General preferences will be added next. -->
-                </Grid>
+                <StackPanel
+                    Margin="12"
+                    Spacing="10">
+
+                    <CheckBox
+                        x:Name="LoggingCheckBox"
+                        Content="Enable logging" />
+
+                    <CheckBox
+                        x:Name="MinimizeCheckBox"
+                        Content="Minimize to system tray" />
+
+                    <CheckBox
+                        x:Name="LowThreadPriorityCheckBox"
+                        Content="Run with low thread priority" />
+
+                    <CheckBox
+                        x:Name="SaveArticleListCheckBox"
+                        Content="Save article list" />
+
+                    <CheckBox
+                        x:Name="ConfirmExitCheckBox"
+                        Content="Confirm before exiting" />
+
+                    <CheckBox
+                        x:Name="ClearPageListOnProjectChangeCheckBox"
+                        Content="Clear page list when project changes" />
+
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="12"
+                        Margin="0,8,0,0">
+
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="On startup:" />
+
+                        <ComboBox
+                            x:Name="OnLoadComboBox"
+                            Grid.Column="1"
+                            MinWidth="240"
+                            SelectionChanged="OnLoadComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Show main window" />
+                            <ComboBoxItem Content="Start bot mode" />
+                        </ComboBox>
+
+                    </Grid>
+
+                    <CheckBox
+                        x:Name="DiffInBotModeCheckBox"
+                        Content="Show differences in bot mode" />
+
+                    <CheckBox
+                        x:Name="ShowTimerCheckBox"
+                        Content="Show timer" />
+
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="Site">
@@ -118,9 +173,87 @@
             </TabItem>
 
             <TabItem Header="Editing">
-                <Grid Margin="12">
-                    <!-- Editing preferences will be added incrementally. -->
-                </Grid>
+                <StackPanel
+                    Margin="12"
+                    Spacing="10">
+
+                    <CheckBox
+                        x:Name="AddUsingAwbCheckBox"
+                        Content="Add AWB identification on article actions" />
+
+                    <CheckBox
+                        x:Name="IgnoreNoBotsCheckBox"
+                        Content="Ignore {{nobots}} and {{bots}} restrictions" />
+
+                    <CheckBox
+                        x:Name="FlashCheckBox"
+                        Content="Flash window when attention is required" />
+
+                    <CheckBox
+                        x:Name="BeepCheckBox"
+                        Content="Beep when attention is required" />
+
+                    <Separator Margin="0,4" />
+
+                    <CheckBox
+                        x:Name="AutoSaveEditCheckBox"
+                        Content="Automatically save edit box"
+                        IsCheckedChanged="AutoSaveEditCheckBox_IsCheckedChanged" />
+
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="12">
+
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Autosave file:" />
+
+                        <Grid
+                            Grid.Column="1"
+                            ColumnDefinitions="*,Auto"
+                            ColumnSpacing="8">
+
+                            <TextBox
+                                x:Name="AutoSaveFileTextBox"
+                                Grid.Column="0"
+                                MinWidth="260" />
+
+                            <Button
+                                x:Name="SetAutoSaveFileButton"
+                                Grid.Column="1"
+                                Content="Browse..."
+                                Click="SetAutoSaveFileButton_Click" />
+
+                        </Grid>
+                    </Grid>
+
+                    <Grid
+                        ColumnDefinitions="Auto,Auto,*"
+                        ColumnSpacing="8">
+
+                        <TextBlock
+                            x:Name="AutoSavePeriodLabel"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Autosave every:" />
+
+                        <NumericUpDown
+                            x:Name="AutoSavePeriodNumericUpDown"
+                            Grid.Column="1"
+                            Width="90"
+                            Minimum="1"
+                            Maximum="1440"
+                            Value="5" />
+
+                        <TextBlock
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Text="minutes" />
+
+                    </Grid>
+
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="Tools">
