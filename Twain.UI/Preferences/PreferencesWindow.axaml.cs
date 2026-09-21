@@ -1,8 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using System.Collections.Generic;
 using System.Linq;
 using Twain.Core;
+using Twain.Core.Alerts;
 using Twain.Core.Settings;
 
 namespace Twain.UI.Preferences;
@@ -12,12 +14,15 @@ namespace Twain.UI.Preferences;
 /// </summary>
 public partial class PreferencesWindow : Window
 {
+    private readonly Dictionary<int, CheckBox> _alertCheckBoxes = new();
+
     /// <summary>
     /// Initializes a new preferences window.
     /// </summary>
     public PreferencesWindow()
     {
         InitializeComponent();
+        PopulateAlertControls();
     }
 
     /// <summary>
@@ -85,6 +90,7 @@ public partial class PreferencesWindow : Window
         ArgumentNullException.ThrowIfNull(protocol);
 
         InitializeComponent();
+        PopulateAlertControls();
 
         InitializeProjectSelection(project);
         InitializeLanguageSelection(language);
@@ -649,5 +655,72 @@ public partial class PreferencesWindow : Window
     {
         get => DatabaseScannerArticleListComboBox.SelectedIndex;
         set => DatabaseScannerArticleListComboBox.SelectedIndex = value;
+    }
+
+    /// <summary>
+    /// Populates the alert preference controls from the alerts defined by Core.
+    /// </summary>
+    private void PopulateAlertControls()
+    {
+        AlertCheckBoxPanel.Children.Clear();
+        _alertCheckBoxes.Clear();
+
+        foreach (KeyValuePair<ArticleAlertId, string> alert in
+                 ArticleAlertHelper.AlertDescriptions)
+        {
+            int alertId = (int)alert.Key;
+
+            CheckBox checkBox = new()
+            {
+                Content = alert.Value,
+                IsChecked = true
+            };
+
+            _alertCheckBoxes.Add(
+                alertId,
+                checkBox);
+
+            AlertCheckBoxPanel.Children.Add(checkBox);
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the enabled alert identifiers.
+    /// </summary>
+    /// <remarks>
+    /// An empty collection represents the legacy default where all alerts are enabled.
+    /// </remarks>
+    public List<int> AlertPreferences
+    {
+        get
+        {
+            List<int> availableAlertIds =
+                _alertCheckBoxes.Keys.ToList();
+
+            List<int> selectedAlertIds =
+                _alertCheckBoxes
+                    .Where(alert =>
+                        alert.Value.IsChecked == true)
+                    .Select(alert => alert.Key)
+                    .ToList();
+
+            return ArticleAlertHelper.ResolveEnabledAlertIds(
+                availableAlertIds,
+                selectedAlertIds);
+        }
+
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            foreach (KeyValuePair<int, CheckBox> alert in
+                     _alertCheckBoxes)
+            {
+                alert.Value.IsChecked =
+                    ArticleAlertHelper.IsAlertEnabled(
+                        value,
+                        alert.Key);
+            }
+        }
     }
 }

@@ -361,8 +361,26 @@
             </TabItem>
 
             <TabItem Header="Alerts">
-                <Grid Margin="12">
-                    <!-- Alert preferences will be added incrementally. -->
+                <Grid
+                    Margin="12"
+                    RowDefinitions="Auto,*"
+                    RowSpacing="10">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Text="Select the alerts that should be enabled."
+                        TextWrapping="Wrap" />
+
+                    <ScrollViewer
+                        Grid.Row="1"
+                        VerticalScrollBarVisibility="Auto">
+
+                        <StackPanel
+                            x:Name="AlertCheckBoxPanel"
+                            Spacing="6" />
+
+                    </ScrollViewer>
+
                 </Grid>
             </TabItem>
 
