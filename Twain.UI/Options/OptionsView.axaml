@@ -10,16 +10,24 @@
     d:DesignHeight="500"
     mc:Ignorable="d">
 
-    <TabControl>
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch">
+
+        <TabControl
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
 
         <!-- Options -->
         <TabItem Header="Options">
             <ScrollViewer
-                HorizontalScrollBarVisibility="Disabled"
+                HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto">
 
                 <StackPanel
+                    MaxWidth="460"
                     Margin="12"
+                    HorizontalAlignment="Left"
                     Spacing="{DynamicResource TwainSpacingLarge}">
 
                     <TextBlock
@@ -126,11 +134,13 @@
         <!-- More -->
         <TabItem Header="More">
             <ScrollViewer
-                HorizontalScrollBarVisibility="Disabled"
+                HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto">
 
                 <StackPanel
+                    MaxWidth="460"
                     Margin="12"
+                    HorizontalAlignment="Left"
                     Spacing="{DynamicResource TwainSpacingLarge}">
 
                     <TextBlock
@@ -313,11 +323,13 @@
             <!-- Disambig -->
             <TabItem Header="Disambig">
                 <ScrollViewer
-                    HorizontalScrollBarVisibility="Disabled"
+                    HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
 
                     <StackPanel
+                        MaxWidth="460"
                         Margin="12"
+                        HorizontalAlignment="Left"
                         Spacing="{DynamicResource TwainSpacingLarge}">
 
                         <CheckBox
@@ -390,11 +402,13 @@
             <!-- Skip -->
             <TabItem Header="Skip">
                 <ScrollViewer
-                    HorizontalScrollBarVisibility="Disabled"
+                    HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
 
                     <StackPanel
+                        MaxWidth="460"
                         Margin="12"
+                        HorizontalAlignment="Left"
                         Spacing="{DynamicResource TwainSpacingLarge}">
 
                         <TextBlock
@@ -581,11 +595,13 @@
             <!-- Start -->
             <TabItem Header="Start">
                 <ScrollViewer
-                    HorizontalScrollBarVisibility="Disabled"
+                    HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
 
                     <StackPanel
+                        MaxWidth="460"
                         Margin="12"
+                        HorizontalAlignment="Left"
                         Spacing="{DynamicResource TwainSpacingLarge}">
 
                         <Grid
@@ -867,6 +883,8 @@
                 </ScrollViewer>
             </TabItem>
 
-    </TabControl>
+        </TabControl>
+
+    </Grid>
 
 </UserControl>

@@ -12,7 +12,7 @@ public static class BuiltInPaneDefinitions
         BuiltInPaneIds.ArticleEditor,
         "Article Editor",
         PaneKind.Document,
-        WorkspaceRegion.Document,
+        WorkspaceRegion.Bottom,
         PaneCapabilities.Closable |
         PaneCapabilities.Movable |
         PaneCapabilities.Resizable |
@@ -40,7 +40,7 @@ public static class BuiltInPaneDefinitions
         BuiltInPaneIds.Diff,
         "Diff",
         PaneKind.Tool,
-        WorkspaceRegion.Bottom,
+        WorkspaceRegion.Document,
         PaneCapabilities.Closable |
         PaneCapabilities.Movable |
         PaneCapabilities.Resizable |

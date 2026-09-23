@@ -57,27 +57,70 @@
         <!--
         Initial built-in editing workspace.
 
-        The layout is intentionally fixed for now. Future changes will
-        allow the user to move, resize, dock, float, hide, and restore panes.
+        The diff occupies the primary workspace above the configuration
+        and editing panes.
+
+        The lower region contains Make List, Options, and the Article Editor.
         -->
 
         <Grid
             Grid.Row="1"
             ColumnDefinitions="260,8,300,8,*"
-            RowDefinitions="*,8,260">
+            RowDefinitions="2*,8,*">
 
-            <!-- Left region: article navigation and queue-related panes. -->
+            <!--
+            Upper document region: diff and comparison output.
+            -->
 
             <ItemsControl
                 Grid.Row="0"
-                Grid.RowSpan="3"
                 Grid.Column="0"
+                Grid.ColumnSpan="5"
                 ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-                ItemsSource="{Binding LeftPanes}" />
+                ItemsSource="{Binding DocumentPanes}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+            </ItemsControl>
+
+            <!--
+            Horizontal splitter between the diff and the lower workspace.
+            -->
 
             <GridSplitter
-                Grid.Row="0"
-                Grid.RowSpan="3"
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="5"
+                Height="8"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource TwainBorderSubtleBrush}"
+                ResizeDirection="Rows"
+                ResizeBehavior="PreviousAndNext" />
+
+            <!--
+            Lower-left region: article navigation and queue-related panes.
+            -->
+
+            <ItemsControl
+                Grid.Row="2"
+                Grid.Column="0"
+                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+                ItemsSource="{Binding LeftPanes}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+            </ItemsControl>
+
+            <GridSplitter
+                Grid.Row="2"
                 Grid.Column="1"
                 Width="8"
                 HorizontalAlignment="Stretch"
@@ -85,18 +128,26 @@
                 ResizeDirection="Columns"
                 ResizeBehavior="PreviousAndNext" />
 
-            <!-- Center region: options and job-configuration panes. -->
+            <!--
+            Lower-center region: options and job configuration.
+            -->
 
             <ItemsControl
-                Grid.Row="0"
-                Grid.RowSpan="3"
+                Grid.Row="2"
                 Grid.Column="2"
                 ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-                ItemsSource="{Binding CenterPanes}" />
+                ItemsSource="{Binding CenterPanes}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+            </ItemsControl>
 
             <GridSplitter
-                Grid.Row="0"
-                Grid.RowSpan="3"
+                Grid.Row="2"
                 Grid.Column="3"
                 Width="8"
                 HorizontalAlignment="Stretch"
@@ -104,30 +155,23 @@
                 ResizeDirection="Columns"
                 ResizeBehavior="PreviousAndNext" />
 
-            <!-- Upper-right document region: primary article editor. -->
-
-            <ItemsControl
-                Grid.Row="0"
-                Grid.Column="4"
-                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-                ItemsSource="{Binding DocumentPanes}" />
-
-            <GridSplitter
-                Grid.Row="1"
-                Grid.Column="4"
-                Height="8"
-                VerticalAlignment="Stretch"
-                Background="{DynamicResource TwainBorderSubtleBrush}"
-                ResizeDirection="Rows"
-                ResizeBehavior="PreviousAndNext" />
-
-            <!-- Lower-right results region: diff and preview tools. -->
+            <!--
+            Lower-right region: article editor.
+            -->
 
             <ItemsControl
                 Grid.Row="2"
                 Grid.Column="4"
                 ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-                ItemsSource="{Binding BottomPanes}" />
+                ItemsSource="{Binding BottomPanes}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+            </ItemsControl>
 
         </Grid>
 
