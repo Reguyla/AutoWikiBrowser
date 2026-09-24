@@ -411,4 +411,71 @@ public sealed partial class OptionsViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _templateSubstitutionIncludeComments;
+
+    /// <summary>
+    /// Gets whether the file name to replace can be edited for the
+    /// selected file operation.
+    /// </summary>
+    public bool IsFileReplaceEnabled =>
+        FileOperation is 1 or 2 or 3;
+
+    /// <summary>
+    /// Gets whether the replacement file or comment can be edited for the
+    /// selected file operation.
+    /// </summary>
+    public bool IsFileWithEnabled =>
+        FileOperation is 1 or 3;
+
+    /// <summary>
+    /// Gets whether the skip-if-no-file-change option is available for the
+    /// selected file operation.
+    /// </summary>
+    public bool IsSkipIfNoFileChangeEnabled =>
+        FileOperation is 1 or 2 or 3;
+
+    partial void OnFileOperationChanged(int value)
+    {
+        OnPropertyChanged(nameof(IsFileReplaceEnabled));
+        OnPropertyChanged(nameof(IsFileWithEnabled));
+        OnPropertyChanged(nameof(IsSkipIfNoFileChangeEnabled));
+        OnPropertyChanged(nameof(FileWithLabel));
+    }
+
+    /// <summary>
+    /// Gets the label displayed for the secondary file-operation value.
+    /// </summary>
+    public string FileWithLabel =>
+        FileOperation switch
+        {
+            1 => "With File:",
+            3 => "Comment:",
+            _ => string.Empty
+        };
+
+    /// <summary>
+    /// Gets whether category controls are available for the selected operation.
+    /// </summary>
+    public bool IsCategoryEnabled =>
+        CategoryOperation > 0;
+
+    /// <summary>
+    /// Gets whether replacement-specific category controls are available.
+    /// </summary>
+    public bool IsCategoryReplacementEnabled =>
+        CategoryOperation == 1;
+
+    /// <summary>
+    /// Gets the label displayed for the replacement category.
+    /// </summary>
+    public string CategoryReplacementLabel =>
+        CategoryOperation == 1
+            ? "with Category:"
+            : string.Empty;
+
+    partial void OnCategoryOperationChanged(int value)
+    {
+        OnPropertyChanged(nameof(IsCategoryEnabled));
+        OnPropertyChanged(nameof(IsCategoryReplacementEnabled));
+        OnPropertyChanged(nameof(CategoryReplacementLabel));
+    }
 }

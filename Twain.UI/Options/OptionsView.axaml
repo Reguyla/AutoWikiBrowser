@@ -172,159 +172,175 @@
                         <RadioButton
                             Content="Append"
                             GroupName="AppendPrepend"
-                            IsChecked="{Binding AppendText}" />
+                            IsChecked="{Binding AppendText}"
+                            IsEnabled="{Binding AppendPrependEnabled}" />
 
                         <RadioButton
                             Content="Prepend"
-                            GroupName="AppendPrepend" />
+                            GroupName="AppendPrepend"
+                            IsEnabled="{Binding AppendPrependEnabled}" />
 
                     </StackPanel>
 
                     <TextBox
                         AcceptsReturn="True"
                         MinHeight="80"
+                        IsEnabled="{Binding AppendPrependEnabled}"
                         Text="{Binding AppendPrependText}"
                         TextWrapping="Wrap"
                         Watermark="Message, including title in wiki format" />
 
-                        <StackPanel
-                            Margin="20,0,0,0"
-                            Orientation="Horizontal"
-                            Spacing="{DynamicResource TwainSpacingSmall}">
+                    <StackPanel
+                        Margin="20,0,0,0"
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
                         <TextBlock
                             VerticalAlignment="Center"
+                            IsEnabled="{Binding AppendPrependEnabled}"
                             Text="Use" />
 
                         <NumericUpDown
-                            Width="70"
+                            Width="110"
                             Minimum="0"
                             Maximum="3"
+                            IsEnabled="{Binding AppendPrependEnabled}"
                             Value="{Binding AppendNewlineCount}" />
+
+                         <CheckBox
+                            Margin="20,0,0,0"
+                            Content="Sort meta data after"
+                            IsChecked="{Binding SortMetadataAfterAppend}"
+                            IsEnabled="{Binding AppendPrependEnabled}" />
 
                         <TextBlock
                             VerticalAlignment="Center"
+                            IsEnabled="{Binding AppendPrependEnabled}"
                             Text="newlines" />
 
                     </StackPanel>
 
                     <Separator />
 
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Files" />
+                    <TextBlock
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="Files" />
 
-                        <ComboBox
-                            SelectedIndex="{Binding FileOperation}">
-                            <ComboBoxItem Content="Choose a task..." />
-                            <ComboBoxItem Content="Replace file:" />
-                            <ComboBoxItem Content="Remove file:" />
-                            <ComboBoxItem Content="Comment out file:" />
-                        </ComboBox>
+                    <ComboBox
+                        SelectedIndex="{Binding FileOperation}">
+                        <ComboBoxItem Content="Choose a task..." />
+                        <ComboBoxItem Content="Replace file:" />
+                        <ComboBoxItem Content="Remove file:" />
+                        <ComboBoxItem Content="Comment out file:" />
+                    </ComboBox>
 
-                        <Grid
-                            ColumnDefinitions="Auto,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                            RowDefinitions="Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Text="File:" />
-
-                            <TextBox
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Text="{Binding FileReplace}" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Text="With File:" />
-
-                            <TextBox
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding FileWith}" />
-
-                        </Grid>
-
-                        <CheckBox
-                            Margin="20,0,0,0"
-                            Content="Skip if no file changed"
-                            IsChecked="{Binding SkipIfNoFileChange}" />
-
-                    <Separator />
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowDefinitions="Auto,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
 
                         <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Categories" />
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="File:" />
 
-                        <ComboBox
-                            SelectedIndex="{Binding CategoryOperation}">
-                            <ComboBoxItem Content="Choose a task..." />
-                            <ComboBoxItem Content="Replace category:" />
-                            <ComboBoxItem Content="Add category:" />
-                            <ComboBoxItem Content="Remove category:" />
-                        </ComboBox>
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            IsEnabled="{Binding IsFileReplaceEnabled}"
+                            Text="{Binding FileReplace}" />
 
-                        <Grid
-                            ColumnDefinitions="Auto,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                            RowDefinitions="Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingSmall}">
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsFileWithEnabled}"
+                            Text="{Binding FileWithLabel}" />
 
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Text="Category:" />
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            IsEnabled="{Binding IsFileWithEnabled}"
+                            Text="{Binding FileWith}" />
 
-                            <TextBox
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Text="{Binding Category}" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Text="With:" />
-
-                            <TextBox
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding CategoryReplacement}" />
-
-                        </Grid>
-
-                        <StackPanel
-                            Margin="20,0,0,0"
-                            Orientation="Horizontal"
-                            Spacing="{DynamicResource TwainSpacingLarge}">
-
-                            <CheckBox
-                                Content="Skip if no cat changed"
-                                IsChecked="{Binding SkipIfNoCategoryChange}" />
-
-                            <CheckBox
-                                Content="Remove sortkey"
-                                IsChecked="{Binding RemoveCategorySortKey}" />
-
-                        </StackPanel>
-
+                    </Grid>
 
                     <CheckBox
                         Margin="20,0,0,0"
-                        Content="Sort meta data after"
-                        IsChecked="{Binding SortMetadataAfterAppend}" />
+                        Content="Skip if no file changed"
+                        IsChecked="{Binding SkipIfNoFileChange}"
+                        IsEnabled="{Binding IsSkipIfNoFileChangeEnabled}" />
+
+                    <Separator />
+
+                    <TextBlock
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="Categories" />
+
+                    <ComboBox
+                        SelectedIndex="{Binding CategoryOperation}">
+                        <ComboBoxItem Content="Choose a task..." />
+                        <ComboBoxItem Content="Replace category:" />
+                        <ComboBoxItem Content="Add category:" />
+                        <ComboBoxItem Content="Remove category:" />
+                    </ComboBox>
+
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowDefinitions="Auto,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsCategoryEnabled}"
+                            Text="Category:" />
+
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            IsEnabled="{Binding IsCategoryEnabled}"
+                            Text="{Binding Category}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsCategoryReplacementEnabled}"
+                            Text="{Binding CategoryReplacementLabel}" />
+
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            IsEnabled="{Binding IsCategoryReplacementEnabled}"
+                            Text="{Binding CategoryReplacement}" />
+
+                    </Grid>
+
+                    <StackPanel
+                        Margin="20,0,0,0"
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingLarge}">
+
+                        <CheckBox
+                            Content="Skip if no cat changed"
+                            IsChecked="{Binding SkipIfNoCategoryChange}"
+                            IsEnabled="{Binding IsCategoryEnabled}" />
+
+                        <CheckBox
+                            Content="Remove sortkey"
+                            IsChecked="{Binding RemoveCategorySortKey}"
+                            IsEnabled="{Binding IsCategoryReplacementEnabled}" />
+
+                    </StackPanel>
 
                 </StackPanel>
 
