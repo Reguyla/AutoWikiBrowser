@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Twain.UI.FindReplace;
+using Twain.UI.Templates;
 
 namespace Twain.UI.Options;
 
@@ -392,4 +394,21 @@ public sealed partial class OptionsViewModel : ViewModelBase
     /// Gets the alerts reported for the current article.
     /// </summary>
     public ObservableCollection<string> Alerts { get; } = [];
+
+    /// <summary>
+    /// Gets the editable find and replace configuration for the current workspace.
+    /// </summary>
+    public FindReplaceViewModel FindReplace { get; } = new();
+
+    [ObservableProperty]
+    private string[] _templateSubstitutionTemplates = [];
+
+    [ObservableProperty]
+    private bool _templateSubstitutionExpandRecursively = true;
+
+    [ObservableProperty]
+    private bool _templateSubstitutionIgnoreUnformatted;
+
+    [ObservableProperty]
+    private bool _templateSubstitutionIncludeComments;
 }

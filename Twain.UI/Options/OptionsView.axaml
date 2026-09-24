@@ -15,6 +15,7 @@
         VerticalAlignment="Stretch">
 
         <TabControl
+            x:Name="OptionsTabControl"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch">
 
@@ -58,11 +59,12 @@
 
                         </StackPanel>
 
-                        <Button
-                            x:Name="AutoChangesSkipOptionsButton"
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Content="Auto changes&#10;skip options" />
+                            <Button
+                                x:Name="AutoChangesSkipOptionsButton"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Click="AutoChangesSkipOptionsButton_Click"
+                                Content="Auto changes&#10;skip options" />
 
                     </Grid>
 
@@ -82,32 +84,40 @@
                             Margin="20,0,0,0"
                             Spacing="{DynamicResource TwainSpacingSmall}">
 
-                            <Button
-                                x:Name="FindReplaceNormalSettingsButton"
-                                HorizontalAlignment="Stretch"
-                                Content="Normal settings" />
+                        <Button
+                            x:Name="FindReplaceNormalSettingsButton"
+                            HorizontalAlignment="Stretch"
+                            Click="FindReplaceNormalSettingsButton_Click"
+                            Content="Normal settings"
+                            IsEnabled="{Binding FindAndReplaceEnabled}" />
 
-                            <Button
-                                x:Name="FindReplaceAdvancedSettingsButton"
-                                HorizontalAlignment="Stretch"
-                                Content="Advanced settings" />
+                        <Button
+                            x:Name="FindReplaceAdvancedSettingsButton"
+                            HorizontalAlignment="Stretch"
+                            Click="FindReplaceAdvancedSettingsButton_Click"
+                            Content="Advanced settings"
+                            IsEnabled="{Binding FindAndReplaceEnabled}" />
 
-                            <Button
-                                x:Name="TemplateSubstitutionButton"
-                                HorizontalAlignment="Stretch"
-                                Content="Template substitution" />
+                        <Button
+                            x:Name="TemplateSubstitutionButton"
+                            HorizontalAlignment="Stretch"
+                            Click="TemplateSubstitutionButton_Click"
+                            Content="Template substitution"
+                            IsEnabled="{Binding FindAndReplaceEnabled}" />
 
                         </StackPanel>
 
-                    <CheckBox
-                        Margin="20,0,0,0"
-                        Content="Skip if no replacement is made"
-                        IsChecked="{Binding SkipIfNoReplacement}" />
+                        <CheckBox
+                            Margin="20,0,0,0"
+                            Content="Skip if no replacement is made"
+                            IsChecked="{Binding SkipIfNoReplacement}"
+                            IsEnabled="{Binding FindAndReplaceEnabled}" />
 
-                    <CheckBox
-                        Margin="20,0,0,0"
-                        Content="Skip if only minor replacements are made"
-                        IsChecked="{Binding SkipIfOnlyMinorReplacement}" />
+                        <CheckBox
+                            Margin="20,0,0,0"
+                            Content="Skip if only minor replacements are made"
+                            IsChecked="{Binding SkipIfOnlyMinorReplacement}"
+                            IsEnabled="{Binding FindAndReplaceEnabled}" />
 
                     <Separator Margin="0,4" />
 
@@ -124,7 +134,8 @@
                     <CheckBox
                         Margin="20,0,0,0"
                         Content="Skip if no typo fixed"
-                        IsChecked="{Binding SkipIfNoRegexTypo}" />
+                        IsChecked="{Binding SkipIfNoRegexTypo}"
+                        IsEnabled="{Binding EnableTypoCorrection}" />
 
                 </StackPanel>
 
