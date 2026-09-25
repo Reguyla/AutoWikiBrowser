@@ -478,4 +478,43 @@ public sealed partial class OptionsViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsCategoryReplacementEnabled));
         OnPropertyChanged(nameof(CategoryReplacementLabel));
     }
+
+    /// <summary>
+    /// Gets whether disambiguation links can be loaded from the current page name.
+    /// </summary>
+    public bool CanLoadDisambiguationLinks =>
+        DisambiguationEnabled &&
+        !string.IsNullOrWhiteSpace(DisambiguationLink);
+
+    partial void OnDisambiguationEnabledChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanLoadDisambiguationLinks));
+    }
+
+    partial void OnDisambiguationLinkChanged(string value)
+    {
+        OnPropertyChanged(nameof(CanLoadDisambiguationLinks));
+    }
+
+    /// <summary>
+    /// Gets or sets the source used to populate an empty disambiguation link.
+    /// </summary>
+    public Func<string>? DisambiguationSourceProvider { get; set; }
+
+    /// <summary>
+    /// Populates the disambiguation link from the current list source when
+    /// the link has not already been entered.
+    /// </summary>
+    public void PopulateDisambiguationLinkFromSource()
+    {
+        if (DisambiguationLink.Length != 0)
+        {
+            return;
+        }
+
+        DisambiguationLink =
+            DisambiguationSourceProvider?.Invoke() ??
+            string.Empty;
+    }
+
 }

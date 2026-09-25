@@ -347,21 +347,26 @@
             </ScrollViewer>
         </TabItem>
 
-            <!-- Disambig -->
-            <TabItem Header="Disambig">
-                <ScrollViewer
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
+        <!-- Disambig -->
+        <TabItem Header="Disambig">
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
+
+                <StackPanel
+                    MaxWidth="460"
+                    Margin="12"
+                    HorizontalAlignment="Left"
+                    Spacing="{DynamicResource TwainSpacingLarge}">
+
+                    <CheckBox
+                        Content="Enable disambiguation"
+                        IsChecked="{Binding DisambiguationEnabled}" />
 
                     <StackPanel
-                        MaxWidth="460"
-                        Margin="12"
-                        HorizontalAlignment="Left"
+                        Margin="20,0,0,0"
+                        IsEnabled="{Binding DisambiguationEnabled}"
                         Spacing="{DynamicResource TwainSpacingLarge}">
-
-                        <CheckBox
-                            Content="Enable disambiguation"
-                            IsChecked="{Binding DisambiguationEnabled}" />
 
                         <TextBlock
                             FontSize="{DynamicResource TwainFontSizeMedium}"
@@ -373,14 +378,18 @@
                             ColumnDefinitions="*,Auto"
                             ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                            <TextBox
-                                Grid.Column="0"
-                                Text="{Binding DisambiguationLink}" />
+                        <TextBox
+                            Grid.Column="0"
+                            GotFocus="DisambiguationLinkTextBox_GotFocus"
+                            KeyDown="DisambiguationLinkTextBox_KeyDown"
+                            Text="{Binding DisambiguationLink}" />
 
                             <Button
                                 x:Name="LoadDisambiguationLinksButton"
                                 Grid.Column="1"
-                                Content="Load links" />
+                                Click="LoadDisambiguationLinksButton_Click"
+                                Content="Load links"
+                                IsEnabled="{Binding CanLoadDisambiguationLinks}" />
 
                         </Grid>
 
@@ -411,7 +420,7 @@
                                 Text="Use ±" />
 
                             <NumericUpDown
-                                Width="75"
+                                Width="110"
                                 Minimum="10"
                                 Value="{Binding DisambiguationContextCharacters}" />
 
@@ -423,8 +432,10 @@
 
                     </StackPanel>
 
-                </ScrollViewer>
-            </TabItem>
+                </StackPanel>
+
+            </ScrollViewer>
+        </TabItem>
 
             <!-- Skip -->
             <TabItem Header="Skip">

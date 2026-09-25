@@ -1,5 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Twain.Core;
+using Twain.Core.Disambiguation;
 using Twain.UI.FindReplace;
 using Twain.UI.ReplaceSpecial;
 using Twain.UI.Templates;
@@ -161,5 +164,62 @@ public partial class OptionsView : UserControl
 
         viewModel.TemplateSubstitutionIncludeComments =
             window.IncludeComments;
+    }
+
+    /// <summary>
+    /// Loads the available variants for the configured disambiguation page.
+    /// </summary>
+    private void LoadDisambiguationLinksButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (DataContext is not OptionsViewModel viewModel)
+        {
+            return;
+        }
+
+        try
+        {
+            viewModel.DisambiguationVariants =
+                DisambiguationLinkHelper.LoadVariantsText(
+                    viewModel.DisambiguationLink);
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Loads disambiguation variants when Enter is pressed in the
+    /// disambiguation page field.
+    /// </summary>
+    private void DisambiguationLinkTextBox_KeyDown(
+        object? sender,
+        KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+        {
+            return;
+        }
+
+        e.Handled = true;
+
+        LoadDisambiguationLinksButton_Click(
+            LoadDisambiguationLinksButton,
+            new RoutedEventArgs());
+    }
+
+    /// <summary>
+    /// Initializes an empty disambiguation link from the current Make List source.
+    /// </summary>
+    private void DisambiguationLinkTextBox_GotFocus(
+        object? sender,
+        FocusChangedEventArgs e)
+    {
+        if (DataContext is OptionsViewModel viewModel)
+        {
+            viewModel.PopulateDisambiguationLinkFromSource();
+        }
     }
 }

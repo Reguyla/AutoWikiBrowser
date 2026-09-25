@@ -37,6 +37,15 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArticleDocumentViewModel document = new(
             editingSession);
 
+        MakeList =
+            new MakeListViewModel();
+
+        Options =
+            new OptionsViewModel();
+
+        Options.DisambiguationSourceProvider =
+            () => MakeList.SourceText;
+
         Panes =
         [
             CreatePane(
@@ -51,14 +60,14 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 FindState(
                     layout,
                     BuiltInPaneIds.ArticleList),
-                new MakeListViewModel()),
+                MakeList),
 
             CreatePane(
                 BuiltInPaneDefinitions.Options,
                 FindState(
                     layout,
                     BuiltInPaneIds.Options),
-                new OptionsViewModel()),
+                Options),
 
             CreatePane(
                 BuiltInPaneDefinitions.Diff,
@@ -193,4 +202,14 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             state,
             content);
     }
+
+    /// <summary>
+    /// Gets the view model for the article-list pane.
+    /// </summary>
+    public MakeListViewModel MakeList { get; }
+
+    /// <summary>
+    /// Gets the view model for the options pane.
+    /// </summary>
+    public OptionsViewModel Options { get; }
 }
