@@ -222,4 +222,20 @@ public partial class OptionsView : UserControl
             viewModel.PopulateDisambiguationLinkFromSource();
         }
     }
+
+    private void PageExistenceRadioButton_IsCheckedChanged(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (DataContext is not OptionsViewModel viewModel
+            || sender is not RadioButton radioButton
+            || radioButton.IsChecked != true
+            || radioButton.Tag is not string tag
+            || !int.TryParse(tag, out int value))
+        {
+            return;
+        }
+
+        viewModel.PageExistenceSkip = value;
+    }
 }

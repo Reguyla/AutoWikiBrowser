@@ -517,4 +517,18 @@ public sealed partial class OptionsViewModel : ViewModelBase
             string.Empty;
     }
 
+    [ObservableProperty]
+    private bool _skipIfContainsAfterProcessing;
+
+    [ObservableProperty]
+    private bool _skipIfNotContainsAfterProcessing;
+
+    partial void OnSkipGeneralFixChangesChanged(bool value)
+    {
+        if (value)
+        {
+            SkipMinorGeneralFixChanges = false;
+        }
+    }
+
 }

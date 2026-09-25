@@ -437,198 +437,224 @@
             </ScrollViewer>
         </TabItem>
 
-            <!-- Skip -->
-            <TabItem Header="Skip">
-                <ScrollViewer
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
+        <!-- Skip -->
+        <TabItem Header="Skip">
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
+
+                <StackPanel
+                    MaxWidth="460"
+                    Margin="12"
+                    HorizontalAlignment="Left"
+                    Spacing="{DynamicResource TwainSpacingLarge}">
+
+                    <TextBlock
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="Text" />
+
+                    <Grid
+                        ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowDefinitions="Auto,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+                        <!-- Contains -->
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Content="Contains"
+                            IsChecked="{Binding SkipIfContainsEnabled}" />
+
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            IsEnabled="{Binding SkipIfContainsEnabled}"
+                            Text="{Binding SkipIfContainsText}" />
+
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            Content="Regex"
+                            IsChecked="{Binding SkipIfContainsRegex}"
+                            IsEnabled="{Binding SkipIfContainsEnabled}" />
+
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="3"
+                            Content="Case sensitive"
+                            IsChecked="{Binding SkipIfContainsCaseSensitive}"
+                            IsEnabled="{Binding SkipIfContainsEnabled}" />
+
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="4"
+                            Content="After processing"
+                            IsChecked="{Binding SkipIfContainsAfterProcessing}"
+                            IsEnabled="{Binding SkipIfContainsEnabled}" />
+
+                        <!-- Doesn't contain -->
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Content="Doesn't contain"
+                            IsChecked="{Binding SkipIfNotContainsEnabled}" />
+
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            IsEnabled="{Binding SkipIfNotContainsEnabled}"
+                            Text="{Binding SkipIfNotContainsText}" />
+
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            Content="Regex"
+                            IsChecked="{Binding SkipIfNotContainsRegex}"
+                            IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="3"
+                            Content="Case sensitive"
+                            IsChecked="{Binding SkipIfNotContainsCaseSensitive}"
+                            IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="4"
+                            Content="After processing"
+                            IsChecked="{Binding SkipIfNotContainsAfterProcessing}"
+                            IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                    </Grid>
+
+                    <Separator />
+
+                    <TextBlock
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="General skip options" />
+
+                    <Grid
+                        ColumnDefinitions="*,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingLarge}"
+                        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Content="Page is in use"
+                            IsChecked="{Binding SkipIfInUse}" />
+
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Content="Edit blocked by spam filter"
+                            IsChecked="{Binding SkipIfSpamFilterBlocked}" />
+
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Content="Page contains no links"
+                            IsChecked="{Binding SkipPagesWithNoLinks}" />
+
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Content="No changes are made"
+                            IsChecked="{Binding SkipNoChanges}" />
+
+                        <CheckBox
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Margin="18,0,0,0"
+                            Content="Only whitespace"
+                            IsChecked="{Binding SkipWhitespaceChanges}" />
+
+                        <CheckBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Content="Only casing"
+                            IsChecked="{Binding SkipCasingChanges}" />
+
+                        <CheckBox
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Margin="18,0,0,0"
+                            Content="Only genfixes"
+                            IsChecked="{Binding SkipGeneralFixChanges}" />
+
+                        <CheckBox
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Content="Only minor genfixes"
+                            IsChecked="{Binding SkipMinorGeneralFixChanges}"
+                            IsEnabled="{Binding !SkipGeneralFixChanges}" />
+
+                        <CheckBox
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            Content="Page is redirect"
+                            IsChecked="{Binding SkipRedirects}" />
+
+                        <CheckBox
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Content="No alerts"
+                            IsChecked="{Binding SkipIfNoAlerts}" />
+
+                        <CheckBox
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            Content="Only cosmetic changes"
+                            IsChecked="{Binding SkipCosmeticChanges}" />
+
+                    </Grid>
+
+                    <Separator />
+
+                    <TextBlock
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="Page existence" />
 
                     <StackPanel
-                        MaxWidth="460"
-                        Margin="12"
-                        HorizontalAlignment="Left"
-                        Spacing="{DynamicResource TwainSpacingLarge}">
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Text" />
+                    <RadioButton
+                        Content="Exists"
+                        GroupName="PageExistence"
+                        Tag="0"
+                        IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
 
-                        <Grid
-                            ColumnDefinitions="Auto,*,Auto,Auto"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                            RowDefinitions="Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingMedium}">
+                    <RadioButton
+                        Content="Doesn't exist"
+                        GroupName="PageExistence"
+                        IsChecked="True"
+                        Tag="1"
+                        IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
 
-                            <CheckBox
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Content="Contains"
-                                IsChecked="{Binding SkipIfContainsEnabled}" />
-
-                            <TextBox
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Text="{Binding SkipIfContainsText}" />
-
-                            <CheckBox
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Content="Regex"
-                                IsChecked="{Binding SkipIfContainsRegex}" />
-
-                            <CheckBox
-                                Grid.Row="0"
-                                Grid.Column="3"
-                                Content="Case sensitive"
-                                IsChecked="{Binding SkipIfContainsCaseSensitive}" />
-
-                            <CheckBox
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Content="Doesn't contain"
-                                IsChecked="{Binding SkipIfNotContainsEnabled}" />
-
-                            <TextBox
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding SkipIfNotContainsText}" />
-
-                            <CheckBox
-                                Grid.Row="1"
-                                Grid.Column="2"
-                                Content="Regex"
-                                IsChecked="{Binding SkipIfNotContainsRegex}" />
-
-                            <CheckBox
-                                Grid.Row="1"
-                                Grid.Column="3"
-                                Content="Case sensitive"
-                                IsChecked="{Binding SkipIfNotContainsCaseSensitive}" />
-
-                        </Grid>
+                    <RadioButton
+                        Content="Don't care"
+                        GroupName="PageExistence"
+                        Tag="2"
+                        IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
 
                         <Separator />
-
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="General skip options" />
-
-                        <Grid
-                            ColumnDefinitions="*,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingLarge}"
-                            RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                            <CheckBox
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Content="Page is in use"
-                                IsChecked="{Binding SkipIfInUse}" />
-
-                            <CheckBox
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Content="Edit blocked by spam filter"
-                                IsChecked="{Binding SkipIfSpamFilterBlocked}" />
-
-                            <CheckBox
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Content="Page contains no links"
-                                IsChecked="{Binding SkipPagesWithNoLinks}" />
-
-                            <CheckBox
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Content="No changes are made"
-                                IsChecked="{Binding SkipNoChanges}" />
-
-                            <CheckBox
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Margin="18,0,0,0"
-                                Content="Only whitespace"
-                                IsChecked="{Binding SkipWhitespaceChanges}" />
-
-                            <CheckBox
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Content="Only casing"
-                                IsChecked="{Binding SkipCasingChanges}" />
-
-                            <CheckBox
-                                Grid.Row="3"
-                                Grid.Column="0"
-                                Margin="18,0,0,0"
-                                Content="Only genfixes"
-                                IsChecked="{Binding SkipGeneralFixChanges}" />
-
-                            <CheckBox
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Content="Only minor genfixes"
-                                IsChecked="{Binding SkipMinorGeneralFixChanges}" />
-
-                            <CheckBox
-                                Grid.Row="4"
-                                Grid.Column="0"
-                                Content="Page is redirect"
-                                IsChecked="{Binding SkipRedirects}" />
-
-                            <CheckBox
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Content="No alerts"
-                                IsChecked="{Binding SkipIfNoAlerts}" />
-
-                            <CheckBox
-                                Grid.Row="5"
-                                Grid.Column="0"
-                                Content="Only cosmetic changes"
-                                IsChecked="{Binding SkipCosmeticChanges}" />
-
-                        </Grid>
-
-                        <Separator />
-
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Page existence" />
-
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="{DynamicResource TwainSpacingMedium}">
-
-                            <RadioButton
-                                Content="Exists"
-                                GroupName="PageExistence"
-                                Tag="0" />
-
-                            <RadioButton
-                                Content="Doesn't exist"
-                                GroupName="PageExistence"
-                                IsChecked="True"
-                                Tag="1" />
-
-                            <RadioButton
-                                Content="Don't care"
-                                GroupName="PageExistence"
-                                Tag="2" />
-
-                            <Separator />
-
-                        </StackPanel>
 
                     </StackPanel>
 
-                </ScrollViewer>
-            </TabItem>
+                </StackPanel>
+
+            </ScrollViewer>
+        </TabItem>
 
             <!-- Start -->
             <TabItem Header="Start">
