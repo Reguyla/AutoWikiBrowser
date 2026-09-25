@@ -1,4 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
+using System.Linq;
+using Twain.Core.Plugin;
+using Twain.Core.Settings;
 using Twain.UI.FindReplace;
 using Twain.UI.Templates;
 
@@ -12,7 +16,7 @@ namespace Twain.UI.Options;
 /// contract. Persistent settings and article-processing behavior will later
 /// be provided by services in Twain.Core.
 /// </remarks>
-public sealed partial class OptionsViewModel : ViewModelBase
+public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
 {
     /// <summary>
     /// Gets or sets whether automatic tagging is enabled.
@@ -529,6 +533,99 @@ public sealed partial class OptionsViewModel : ViewModelBase
         {
             SkipMinorGeneralFixChanges = false;
         }
+    }
+
+    public partial class AutoChangeSkipOptionViewModel
+    : ObservableObject
+    {
+        public AutoChangeSkipOptionViewModel(
+            int id,
+            string description)
+        {
+            Id = id;
+            Description = description;
+        }
+
+        public int Id { get; }
+
+        public string Description { get; }
+
+        [ObservableProperty]
+        private bool _isSelected;
+    }
+
+    public ObservableCollection<AutoChangeSkipOptionViewModel>
+    AutoChangeSkipOptions{ get; } = new(
+        SkipOptionsHelper.AvailableOptions.Select(
+            option => new AutoChangeSkipOptionViewModel(
+                option.Id,
+                option.Description)));
+
+    public List<int> SelectedAutoChangeSkipOptions
+    {
+        get => AutoChangeSkipOptions
+            .Where(option => option.IsSelected)
+            .Select(option => option.Id)
+            .ToList();
+
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            foreach (AutoChangeSkipOptionViewModel option in AutoChangeSkipOptions)
+            {
+                option.IsSelected =
+                    SkipOptionsHelper.IsSelected(value, option.Id);
+            }
+        }
+    }
+
+    public bool SkipNoUnicode =>
+    IsAutoChangeSkipOptionSelected(
+        SkipOptionsHelper.UnicodeOptionId);
+
+    public bool SkipNoTag =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.AutoTagOptionId);
+
+    public bool SkipNoHeaderError =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.HeaderErrorOptionId);
+
+    public bool SkipNoBoldTitle =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.BoldTitleOptionId);
+
+    public bool SkipNoBulletedLink =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.BulletedExternalLinkOptionId);
+
+    public bool SkipNoBadLink =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.BadLinksOptionId);
+
+    public bool SkipNoDefaultSortAdded =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.DefaultSortOptionId);
+
+    public bool SkipNoUserTalkTemplatesSubstd =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.UserTalkTemplatesOptionId);
+
+    public bool SkipNoCiteTemplateDatesFixed =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.CitationTemplateDatesOptionId);
+
+    public bool SkipNoPeopleCategoriesFixed =>
+        IsAutoChangeSkipOptionSelected(
+            SkipOptionsHelper.HumanCategoriesOptionId);
+
+    private bool IsAutoChangeSkipOptionSelected(int optionId)
+    {
+        return AutoChangeSkipOptions.Any(
+            option =>
+                option.Id == optionId &&
+                option.IsSelected);
     }
 
 }

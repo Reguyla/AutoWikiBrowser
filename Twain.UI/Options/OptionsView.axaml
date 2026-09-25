@@ -651,6 +651,25 @@
 
                     </StackPanel>
 
+                    <Separator />
+
+                    <TextBlock
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="Auto changes skip options" />
+
+                    <ItemsControl ItemsSource="{Binding AutoChangeSkipOptions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Margin="0,2"
+                                    Content="{Binding Description}"
+                                    IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
                 </StackPanel>
 
             </ScrollViewer>
