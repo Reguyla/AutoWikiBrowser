@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using Twain.Core;
+using Twain.Core.DiffHtml;
 using Twain.UI.Editor;
 
 namespace Twain.UI.Diff;
@@ -9,6 +11,8 @@ namespace Twain.UI.Diff;
 public sealed class DiffViewModel : ViewModelBase
 {
     private readonly ArticleDocumentViewModel _document;
+
+    private readonly WikiDiff _diff = new();
 
     /// <summary>
     /// Initializes the diff pane for the supplied article document.
@@ -53,5 +57,16 @@ public sealed class DiffViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(UpdatedText));
+        OnPropertyChanged(nameof(DiffHtml));
     }
+
+    /// <summary>
+    /// Gets the rendered HTML representation of the current article diff.
+    /// </summary>
+    public string DiffHtml =>
+        DiffHtmlBuilder.BuildDiffHtml(
+            _diff,
+            _document.OriginalText,
+            _document.CurrentText,
+            0);
 }

@@ -10,70 +10,11 @@
     d:DesignHeight="300"
     mc:Ignorable="d">
 
-    <Grid
-        ColumnDefinitions="*,8,*"
-        RowDefinitions="Auto,*">
-
-        <TextBlock
-            Grid.Row="0"
-            Grid.Column="0"
-            Margin="0,0,0,8"
-            FontSize="{DynamicResource TwainFontSizeMedium}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-            Text="Original" />
-
-        <TextBlock
-            Grid.Row="0"
-            Grid.Column="2"
-            Margin="0,0,0,8"
-            FontSize="{DynamicResource TwainFontSizeMedium}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-            Text="Updated" />
-
-        <TextBox
-            Grid.Row="1"
-            Grid.Column="0"
-            AcceptsReturn="True"
-            Background="{DynamicResource TwainControlBackgroundBrush}"
-            BorderBrush="{DynamicResource TwainBorderBrush}"
-            BorderThickness="{DynamicResource TwainBorderThickness}"
-            FontFamily="Consolas, Cascadia Mono, monospace"
-            FontSize="{DynamicResource TwainFontSizeNormal}"
-            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-            IsReadOnly="True"
-            Text="{Binding OriginalText}"
-            TextWrapping="Wrap"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            ScrollViewer.VerticalScrollBarVisibility="Auto" />
-
-        <GridSplitter
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            Grid.Column="1"
-            Width="8"
+    <Grid>
+        <NativeWebView
+            x:Name="DiffWebView"
             HorizontalAlignment="Stretch"
-            Background="{DynamicResource TwainBorderSubtleBrush}"
-            ResizeDirection="Columns"
-            ResizeBehavior="PreviousAndNext" />
-
-        <TextBox
-            Grid.Row="1"
-            Grid.Column="2"
-            AcceptsReturn="True"
-            Background="{DynamicResource TwainControlBackgroundBrush}"
-            BorderBrush="{DynamicResource TwainBorderBrush}"
-            BorderThickness="{DynamicResource TwainBorderThickness}"
-            FontFamily="Consolas, Cascadia Mono, monospace"
-            FontSize="{DynamicResource TwainFontSizeNormal}"
-            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-            IsReadOnly="True"
-            Text="{Binding UpdatedText}"
-            TextWrapping="Wrap"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            ScrollViewer.VerticalScrollBarVisibility="Auto" />
-
+            VerticalAlignment="Stretch" />
     </Grid>
 
 </UserControl>
