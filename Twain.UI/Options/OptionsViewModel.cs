@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
 using Twain.Core;
@@ -811,4 +812,20 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     /// </summary>
     [ObservableProperty]
     private bool _showFalsePositiveAction;
+
+    /// <summary>
+    /// Gets or sets the action invoked when the user requests the next
+    /// editor search match.
+    /// </summary>
+    public Action? FindNextRequested { get; set; }
+
+    /// <summary>
+    /// Requests navigation to the next match in the article editor.
+    /// </summary>
+    [RelayCommand]
+    private void FindNext()
+    {
+        FindNextRequested?.Invoke();
+    }
+
 }

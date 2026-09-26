@@ -1,4 +1,6 @@
-﻿namespace Twain.UI.Editor;
+﻿using System.Threading.Tasks;
+
+namespace Twain.UI.Editor;
 
 /// <summary>
 /// Provides presentation state for the article editor pane.
@@ -42,4 +44,15 @@ public sealed class ArticleEditorViewModel : ViewModelBase
     /// Gets the article document edited by this pane.
     /// </summary>
     public ArticleDocumentViewModel Document { get; }
+
+    /// <summary>
+    /// Gets or sets the action used to request navigation to the next
+    /// search match in the article editor.
+    /// </summary>
+    public Func<
+        string,
+        bool,
+        bool,
+        string,
+        Task>? FindNextRequested { get; set; }
 }

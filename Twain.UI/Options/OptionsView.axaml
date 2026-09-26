@@ -854,6 +854,7 @@
                                 x:Name="FindButton"
                                 Grid.Row="0"
                                 Grid.Column="1"
+                                Command="{Binding FindNextCommand}"
                                 Content="Find"
                                 IsEnabled="{Binding CanFind}" />
 

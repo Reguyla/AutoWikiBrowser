@@ -218,9 +218,11 @@ public partial class ArticleEditorView : UserControl
         if (DataContext is ArticleEditorViewModel viewModel)
         {
             _subscribedDocument = viewModel.Document;
-
             _subscribedDocument.PropertyChanged +=
                 Document_PropertyChanged;
+
+            viewModel.FindNextRequested =
+                FindNextAsync;
         }
 
         base.OnDataContextChanged(e);

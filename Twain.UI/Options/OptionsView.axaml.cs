@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using CommunityToolkit.Mvvm.Input;
 using Twain.Core;
 using Twain.Core.Disambiguation;
 using Twain.UI.FindReplace;
@@ -238,4 +239,5 @@ public partial class OptionsView : UserControl
 
         viewModel.PageExistenceSkip = value;
     }
+
 }

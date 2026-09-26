@@ -21,6 +21,12 @@ namespace Twain.UI.ViewModels.Workspaces;
 public sealed partial class WorkspaceViewModel : ObservableObject
 {
     /// <summary>
+    /// Gets or sets the title of the article currently loaded in the workspace.
+    /// </summary>
+    [ObservableProperty]
+    private string _currentArticleName = string.Empty;
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel()
@@ -38,6 +44,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArticleDocumentViewModel document = new(
             editingSession);
 
+        Editor = new ArticleEditorViewModel(
+           document);
+
         MakeList = new MakeListViewModel();
         Options = new OptionsViewModel();
 
@@ -50,6 +59,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Options.DisambiguationSourceProvider =
             () => MakeList.SourceText;
 
+        Options.FindNextRequested =
+            FindNext;
+
         Panes =
         [
             CreatePane(
@@ -57,7 +69,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 FindState(
                     layout,
                     BuiltInPaneIds.ArticleEditor),
-                new ArticleEditorViewModel(document)),
+                        Editor),
 
             CreatePane(
                 BuiltInPaneDefinitions.ArticleList,
@@ -91,6 +103,24 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         Options.CanStartProcessing =
             MakeList.ArticleCount > 0;
+    }
+
+    /// <summary>
+    /// Requests navigation to the next matching search result in the
+    /// active article editor.
+    /// </summary>
+    private async void FindNext()
+    {
+        if (Editor.FindNextRequested is null)
+        {
+            return;
+        }
+
+        await Editor.FindNextRequested(
+            Options.FindText,
+            Options.FindRegex,
+            Options.FindCaseSensitive,
+            CurrentArticleName);
     }
 
     /// <summary>
@@ -227,4 +257,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// Gets the view model for the options pane.
     /// </summary>
     public OptionsViewModel Options { get; }
+
+    /// <summary>
+    /// Gets the view model for the article editor pane.
+    /// </summary>
+    public ArticleEditorViewModel Editor { get; }
+
+
 }
