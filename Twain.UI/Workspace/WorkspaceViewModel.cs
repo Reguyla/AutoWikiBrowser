@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
+using Twain.Core;
 using Twain.Core.Editing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
@@ -28,6 +29,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private string _currentArticleName = string.Empty;
 
     /// <summary>
+    /// Gets the active wiki session used by the workspace.
+    /// </summary>
+    public Session Session { get; }
+
+    /// <summary>
     /// Gets the view model for the diff pane.
     /// </summary>
     public DiffViewModel Diff { get; }
@@ -35,8 +41,13 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
-    public WorkspaceViewModel()
+    public WorkspaceViewModel(
+        Session session)
     {
+        ArgumentNullException.ThrowIfNull(session);
+
+        Session = session;
+
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
 

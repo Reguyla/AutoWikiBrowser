@@ -69,7 +69,6 @@
                 <MenuItem
                     Header="List Splitter..."
                     Click="ListSplitterMenuItem_Click" />
-
             </MenuItem>
 
             <MenuItem Header="Help">
@@ -79,23 +78,30 @@
             </MenuItem>
         </Menu>
 
- <Border
-    Grid.Row="1"
-    Padding="12">
-    <Grid ColumnDefinitions="*,Auto">
-        <TextBlock
-            VerticalAlignment="Center"
-            Text="{Binding UpdateStatusMessage}"
-            TextWrapping="Wrap" />
+        <Border
+            Grid.Row="1"
+            Padding="12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock
+                    Margin="0,0,16,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding LoggedInUsername}"
+                    IsVisible="{Binding IsLoggedIn}" />
 
-        <Button
-            Grid.Column="1"
-            Margin="12,0,0,0"
-            Command="{Binding InstallUpdateCommand}"
-            Content="Update and Restart"
-            IsVisible="{Binding IsUpdateAvailable}" />
-    </Grid>
-</Border>
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Text="{Binding UpdateStatusMessage}"
+                    TextWrapping="Wrap" />
+
+                <Button
+                    Grid.Column="2"
+                    Margin="12,0,0,0"
+                    Command="{Binding InstallUpdateCommand}"
+                    Content="Update and Restart"
+                    IsVisible="{Binding IsUpdateAvailable}" />
+            </Grid>
+        </Border>
 
         <workspaceViews:WorkspaceView
             Grid.Row="2"

@@ -29,12 +29,22 @@ public partial class ShellWindow : Window
         RoutedEventArgs e)
     {
         if (DataContext is not ShellViewModel viewModel)
+        {
             return;
+        }
 
         ProfilesWindow window =
             new(viewModel.Session);
 
-        await window.ShowDialog<bool>(this);
+        bool loggedIn =
+            await window.ShowDialog<bool>(this);
+
+        if (!loggedIn)
+        {
+            return;
+        }
+
+        viewModel.LoginCompleted();
     }
 
     private void ExitMenuItem_Click(

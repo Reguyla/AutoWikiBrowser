@@ -20,20 +20,51 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// <param name="updateService">
     /// Optional service used to check for, download, and apply Twain updates.
     /// </param>
-    public ShellViewModel(IUpdateService? updateService = null)
+    public ShellViewModel(
+        IUpdateService? updateService = null)
     {
         _updateService = updateService;
+
+        Session = new Session();
+
+        Workspace =
+            new WorkspaceViewModel(
+                Session);
     }
 
     /// <summary>
-    /// Gets the active workspace.
+    /// Updates application state after the active wiki session
+    /// has successfully authenticated.
     /// </summary>
-    public WorkspaceViewModel Workspace { get; } = new();
+    public void LoginCompleted()
+    {
+        OnPropertyChanged(nameof(IsLoggedIn));
+        OnPropertyChanged(nameof(LoggedInUsername));
+    }
+
+    /// <summary>
+    /// Gets whether the active wiki session is authenticated.
+    /// </summary>
+    public bool IsLoggedIn =>
+        Session.User.IsLoggedIn;
+
+    /// <summary>
+    /// Gets the username of the authenticated wiki user.
+    /// </summary>
+    public string LoggedInUsername =>
+        IsLoggedIn
+            ? Session.User.Name
+            : string.Empty;
 
     /// <summary>
     /// Gets the active wiki session for the application.
     /// </summary>
-    public Session Session { get; } = new();
+    public Session Session { get; }
+
+    /// <summary>
+    /// Gets the active workspace.
+    /// </summary>
+    public WorkspaceViewModel Workspace { get; }
 
     /// <summary>
     /// Gets or sets whether an application update is currently available.
