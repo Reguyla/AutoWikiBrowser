@@ -675,47 +675,54 @@
             </ScrollViewer>
         </TabItem>
 
-            <!-- Start -->
-            <TabItem Header="Start">
-                <ScrollViewer
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
+        <!-- Start -->
+        <TabItem Header="Start">
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
+
+                <StackPanel
+                    MaxWidth="460"
+                    Margin="12"
+                    HorizontalAlignment="Left"
+                    Spacing="{DynamicResource TwainSpacingLarge}">
+
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Default Summary" />
+
+                        <ComboBox
+                            Grid.Column="1"
+                            IsEditable="True"
+                            IsVisible="{Binding !EditSummaryLocked}"
+                            Text="{Binding EditSummary}" />
+
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding EditSummaryLocked}"
+                            Text="{Binding EditSummary}" />
+
+                    </Grid>
 
                     <StackPanel
-                        MaxWidth="460"
-                        Margin="12"
-                        HorizontalAlignment="Left"
+                        Orientation="Horizontal"
                         Spacing="{DynamicResource TwainSpacingLarge}">
 
-                        <Grid
-                            ColumnDefinitions="Auto,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                        <CheckBox
+                            Content="Lock"
+                            IsChecked="{Binding EditSummaryLocked}" />
 
-                            <TextBlock
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Text="Default Summary" />
+                        <CheckBox
+                            Content="Minor edit"
+                            IsChecked="{Binding MinorEdit}" />
 
-                            <ComboBox
-                                Grid.Column="1"
-                                IsEditable="True"
-                                Text="{Binding EditSummary}" />
-
-                        </Grid>
-
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="{DynamicResource TwainSpacingLarge}">
-
-                            <CheckBox
-                                Content="Lock"
-                                IsChecked="{Binding EditSummaryLocked}" />
-
-                            <CheckBox
-                                Content="Minor edit"
-                                IsChecked="{Binding MinorEdit}" />
-
-                        </StackPanel>
+                    </StackPanel>
 
                         <Separator />
 
@@ -842,7 +849,8 @@
                                 x:Name="FindButton"
                                 Grid.Row="0"
                                 Grid.Column="1"
-                                Content="Find" />
+                                Content="Find"
+                                IsEnabled="{Binding CanFind}" />
 
                             <StackPanel
                                 Grid.Row="1"

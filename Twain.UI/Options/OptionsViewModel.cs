@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
+using Twain.Core;
 using Twain.Core.Plugin;
 using Twain.Core.Settings;
 using Twain.UI.FindReplace;
@@ -628,4 +629,50 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
                 option.IsSelected);
     }
 
+    /// <summary>
+    /// Updates the displayed statistics for the current article.
+    /// </summary>
+    /// <param name="statistics">
+    /// The calculated article statistics.
+    /// </param>
+    public void UpdateArticleStatistics(
+        ArticleStatistics statistics)
+    {
+        ArgumentNullException.ThrowIfNull(statistics);
+
+        WordCount = statistics.WordCount;
+        LinkCount = statistics.LinkCount;
+        ImageCount = statistics.ImageCount;
+        CategoryCount = statistics.CategoryCount;
+        InterwikiLinkCount = statistics.InterwikiLinkCount;
+        IsoDateCount = statistics.IsoDateCount;
+        InternationalDateCount = statistics.InternationalDateCount;
+        AmericanDateCount = statistics.AmericanDateCount;
+    }
+
+    /// <summary>
+    /// Clears the displayed statistics for the current article.
+    /// </summary>
+    public void ResetArticleStatistics()
+    {
+        WordCount = 0;
+        LinkCount = 0;
+        ImageCount = 0;
+        CategoryCount = 0;
+        InterwikiLinkCount = 0;
+        IsoDateCount = 0;
+        InternationalDateCount = 0;
+        AmericanDateCount = 0;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a Find operation can be requested.
+    /// </summary>
+    public bool CanFind =>
+        !string.IsNullOrEmpty(FindText);
+
+    partial void OnFindTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(CanFind));
+    }
 }
