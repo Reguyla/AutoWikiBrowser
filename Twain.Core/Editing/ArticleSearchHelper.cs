@@ -25,7 +25,7 @@ public static class ArticleSearchHelper
         /// <summary>
         /// Clears the current incremental search state.
         /// </summary>
-        internal void Reset()
+        public void Reset()
         {
             Regex = null;
             Match = null;

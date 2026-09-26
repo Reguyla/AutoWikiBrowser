@@ -2,7 +2,9 @@ using Avalonia.Controls;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Twain.Core;
 using Twain.Core.Editing;
 
 namespace Twain.UI.Editor;
@@ -18,6 +20,11 @@ public partial class ArticleEditorView : UserControl
 {
     private ArticleDocumentViewModel? _subscribedDocument;
     private readonly ArticleSearchHelper.ArticleSearchState _searchState = new();
+    private string _lastSearchText = string.Empty;
+    private bool _lastSearchIsRegex;
+    private bool _lastSearchCaseSensitive;
+    private string _lastSearchArticleName = string.Empty;
+    private bool _updatingDocumentFromMonaco;
 
     /// <summary>
     /// Initializes the article editor view.
@@ -96,7 +103,16 @@ public partial class ArticleEditorView : UserControl
                     .GetString()
                 ?? string.Empty;
 
-            viewModel.Document.CurrentText = text;
+            _updatingDocumentFromMonaco = true;
+
+            try
+            {
+                viewModel.Document.CurrentText = text;
+            }
+            finally
+            {
+                _updatingDocumentFromMonaco = false;
+            }
         }
     }
 
@@ -223,6 +239,78 @@ public partial class ArticleEditorView : UserControl
             return;
         }
 
+        ResetFind();
+
+        if (_updatingDocumentFromMonaco)
+        {
+            return;
+        }
+
         await LoadDocumentTextAsync();
+    }
+
+    /// <summary>
+    /// Clears the state associated with the current incremental find operation.
+    /// </summary>
+    public void ResetFind()
+    {
+        _searchState.Reset();
+    }
+
+    /// <summary>
+    /// Finds and selects the next occurrence of the specified search expression
+    /// in the current article text.
+    /// </summary>
+    /// <param name="searchText">
+    /// The text or regular expression to search for.
+    /// </param>
+    /// <param name="isRegex">
+    /// <see langword="true"/> when <paramref name="searchText"/> should be
+    /// interpreted as a regular expression; otherwise, <see langword="false"/>.
+    /// </param>
+    /// <param name="caseSensitive">
+    /// <see langword="true"/> to perform a case-sensitive search; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    /// <param name="articleName">
+    /// The current article name used when expanding AWB search keywords.
+    /// </param>
+    public async Task FindNextAsync(
+        string searchText,
+        bool isRegex,
+        bool caseSensitive,
+        string articleName)
+    {
+        if (DataContext is not ArticleEditorViewModel viewModel)
+        {
+            return;
+        }
+
+        string articleText =
+            Tools.ConvertFromLocalLineEndings(
+                viewModel.Document.CurrentText);
+
+        int selectionStart =
+            await GetSelectionStartAsync();
+
+        Match? match =
+            ArticleSearchHelper.FindNext(
+                articleText,
+                searchText,
+                isRegex,
+                caseSensitive,
+                articleName,
+                selectionStart,
+                _searchState);
+
+        if (match is null)
+        {
+            await SelectTextAsync(0, 0);
+            return;
+        }
+
+        await SelectTextAsync(
+            match.Index,
+            match.Length);
     }
 }
