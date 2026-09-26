@@ -92,4 +92,41 @@ public sealed class DiffViewModel : ViewModelBase
 
         return GoToLineRequested(line);
     }
+
+    /// <summary>
+    /// Restores a changed line to its original contents.
+    /// </summary>
+    public void UndoChange(
+        int leftLine,
+        int rightLine)
+    {
+        _document.CurrentText =
+            _diff.UndoChange(
+                leftLine,
+                rightLine);
+    }
+
+    /// <summary>
+    /// Removes a line that was added to the edited article.
+    /// </summary>
+    public void UndoAddition(
+        int rightLine)
+    {
+        _document.CurrentText =
+            _diff.UndoAddition(
+                rightLine);
+    }
+
+    /// <summary>
+    /// Restores a line that was deleted from the edited article.
+    /// </summary>
+    public void UndoDeletion(
+        int leftLine,
+        int rightLine)
+    {
+        _document.CurrentText =
+            _diff.UndoDeletion(
+                leftLine,
+                rightLine);
+    }
 }
