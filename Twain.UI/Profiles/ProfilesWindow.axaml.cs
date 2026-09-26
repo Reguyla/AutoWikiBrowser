@@ -261,6 +261,21 @@ public partial class ProfilesWindow : Window
         if (profile is null)
             return;
 
+        try
+        {
+            ProfileManager.ApplyDefaultSettings(
+                _session,
+                profile);
+        }
+        catch (Exception ex)
+        {
+            await ShowMessageAsync(
+                "Settings load failed",
+                $"The default settings for {profile.Username} could not be loaded.\r\n\r\n{ex.Message}");
+
+            return;
+        }
+
         ProfileLoginService.LoginResult result =
             ProfileLoginService.Login(
                 _session,
@@ -322,5 +337,131 @@ public partial class ProfilesWindow : Window
         };
 
         await dialog.ShowDialog(this);
+    }
+
+    /// <summary>
+    /// Updates the quick-login controls when the username or password changes.
+    /// </summary>
+    private void QuickLoginCredentials_TextChanged(
+        object? sender,
+        TextChangedEventArgs e)
+    {
+        UpdateQuickLoginState();
+    }
+
+    /// <summary>
+    /// Updates the quick-login controls when profile saving is enabled or disabled.
+    /// </summary>
+    private void SaveQuickLoginProfileCheckBox_IsCheckedChanged(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        UpdateQuickLoginState();
+    }
+
+    /// <summary>
+    /// Updates the enabled state of the quick-login controls.
+    /// </summary>
+    private void UpdateQuickLoginState()
+    {
+        QuickLoginButton.IsEnabled =
+            !string.IsNullOrWhiteSpace(
+                QuickLoginUsernameTextBox.Text) &&
+            !string.IsNullOrEmpty(
+                QuickLoginPasswordTextBox.Text);
+
+        bool saveProfile =
+            SaveQuickLoginProfileCheckBox.IsChecked == true;
+
+        SaveQuickLoginPasswordCheckBox.IsEnabled =
+            saveProfile;
+
+        if (!saveProfile)
+        {
+            SaveQuickLoginPasswordCheckBox.IsChecked =
+                false;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to authenticate using the credentials entered in the
+    /// quick-login controls and optionally saves them as a profile.
+    /// </summary>
+    private async void QuickLoginButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (_session is null)
+            return;
+
+        string username =
+            QuickLoginUsernameTextBox.Text?.Trim() ??
+            string.Empty;
+
+        string password =
+            QuickLoginPasswordTextBox.Text ??
+            string.Empty;
+
+        if (string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrEmpty(password))
+        {
+            return;
+        }
+
+        ProfileLoginService.LoginResult result =
+            ProfileLoginService.Login(
+                _session,
+                username,
+                password,
+                Variables.LoginDomain);
+
+        switch (result.Status)
+        {
+            case ProfileLoginService.LoginStatus.Success:
+                SaveQuickLoginProfile(
+                    username,
+                    password);
+
+                Close(true);
+                break;
+
+            case ProfileLoginService.LoginStatus.SessionBusy:
+            case ProfileLoginService.LoginStatus.UriChanged:
+            case ProfileLoginService.LoginStatus.LoginFailed:
+                await ShowMessageAsync(
+                    result.Title,
+                    result.Message);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Saves the quick-login account when requested by the user.
+    /// </summary>
+    private void SaveQuickLoginProfile(
+        string username,
+        string password)
+    {
+        if (SaveQuickLoginProfileCheckBox.IsChecked != true)
+            return;
+
+        Profile? existingProfile =
+            ProfileManager.GetProfile(username);
+
+        if (existingProfile is not null)
+            return;
+
+        Profile profile = new()
+        {
+            Username = username,
+            Password =
+                SaveQuickLoginPasswordCheckBox.IsChecked == true
+                    ? password
+                    : string.Empty,
+            DefaultSettings = string.Empty,
+            Notes = string.Empty
+        };
+
+        ProfileManager.SaveProfile(profile);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Profiles;
+﻿using Twain.Core.AWBSettings;
+
+namespace Twain.Core.Profiles;
 
 /// <summary>
 /// Provides access to saved user profiles.
@@ -85,4 +87,38 @@ public static class ProfileManager
     /// <returns>The profile password.</returns>
     public static string GetPassword(int id) =>
         _profileStore.GetPassword(id);
+
+    /// <summary>
+    /// Applies the wiki connection settings associated with the specified profile.
+    /// </summary>
+    /// <param name="session">
+    /// The wiki session to update after applying the profile settings.
+    /// </param>
+    /// <param name="profile">
+    /// The profile whose default settings should be applied.
+    /// </param>
+    public static void ApplyDefaultSettings(
+        Session session,
+        Profile profile)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(profile);
+
+        if (string.IsNullOrWhiteSpace(profile.DefaultSettings))
+            return;
+
+        UserPrefs preferences =
+            UserPrefs.LoadPrefs(profile.DefaultSettings);
+
+        Variables.SetProject(
+            preferences.LanguageCode,
+            preferences.Project,
+            preferences.CustomProject,
+            preferences.Protocol);
+
+        Variables.LoginDomain =
+            preferences.LoginDomain;
+
+        session.UpdateProject(true);
+    }
 }
