@@ -10,10 +10,6 @@
     d:DesignHeight="300"
     mc:Ignorable="d">
 
-    <Design.DataContext>
-        <vm:DiffViewModel />
-    </Design.DataContext>
-
     <Grid
         ColumnDefinitions="*,8,*"
         RowDefinitions="Auto,*">

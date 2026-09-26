@@ -27,6 +27,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private string _currentArticleName = string.Empty;
 
     /// <summary>
+    /// Gets the view model for the diff pane.
+    /// </summary>
+    public DiffViewModel Diff { get; }
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel()
@@ -45,6 +50,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             editingSession);
 
         Editor = new ArticleEditorViewModel(
+           document);
+
+        Diff = new DiffViewModel(
            document);
 
         MakeList = new MakeListViewModel();
@@ -90,7 +98,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 FindState(
                     layout,
                     BuiltInPaneIds.Diff),
-                new DiffViewModel())
+                Diff)
         ];
     }
 

@@ -1,35 +1,57 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.ComponentModel;
+using Twain.UI.Editor;
 
 namespace Twain.UI.Diff;
 
 /// <summary>
 /// Provides presentation state for the diff pane.
 /// </summary>
-/// <remarks>
-/// This initial implementation supplies temporary source and updated text.
-/// Real diff generation will later be provided by Twain.Core.
-/// </remarks>
-public sealed partial class DiffViewModel : ViewModelBase
+public sealed class DiffViewModel : ViewModelBase
 {
-    /// <summary>
-    /// Gets or sets the original article text.
-    /// </summary>
-    [ObservableProperty]
-    private string _originalText =
-        """
-        This is the original article text.
-
-        The sample demonstrates the source side of the diff.
-        """;
+    private readonly ArticleDocumentViewModel _document;
 
     /// <summary>
-    /// Gets or sets the updated article text.
+    /// Initializes the diff pane for the supplied article document.
     /// </summary>
-    [ObservableProperty]
-    private string _updatedText =
-        """
-        This is the updated article text.
+    /// <param name="document">
+    /// The article document displayed by the editor.
+    /// </param>
+    public DiffViewModel(
+        ArticleDocumentViewModel document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
 
-        The sample demonstrates the revised side of the diff.
-        """;
+        _document = document;
+
+        _document.PropertyChanged +=
+            Document_PropertyChanged;
+    }
+
+    /// <summary>
+    /// Gets the article text as originally loaded.
+    /// </summary>
+    public string OriginalText =>
+        _document.OriginalText;
+
+    /// <summary>
+    /// Gets the current edited article text.
+    /// </summary>
+    public string UpdatedText =>
+        _document.CurrentText;
+
+    /// <summary>
+    /// Updates the diff presentation when the current article text changes.
+    /// </summary>
+    private void Document_PropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName !=
+            nameof(ArticleDocumentViewModel.CurrentText))
+        {
+            return;
+        }
+
+        OnPropertyChanged(nameof(UpdatedText));
+    }
 }
