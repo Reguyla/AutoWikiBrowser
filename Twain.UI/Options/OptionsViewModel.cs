@@ -401,6 +401,17 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public ObservableCollection<string> Alerts { get; } = [];
 
     /// <summary>
+    /// Gets the duplicate wikilinks detected in the current article.
+    /// </summary>
+    public ObservableCollection<string> DuplicateWikilinks { get; } = [];
+
+    /// <summary>
+    /// Gets a value indicating whether duplicate wikilinks are available.
+    /// </summary>
+    public bool HasDuplicateWikilinks =>
+        DuplicateWikilinks.Count > 0;
+
+    /// <summary>
     /// Gets the editable find and replace configuration for the current workspace.
     /// </summary>
     public FindReplaceViewModel FindReplace { get; } = new();
@@ -648,6 +659,14 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
         IsoDateCount = statistics.IsoDateCount;
         InternationalDateCount = statistics.InternationalDateCount;
         AmericanDateCount = statistics.AmericanDateCount;
+        DuplicateWikilinks.Clear();
+
+        foreach (string duplicateWikilink in statistics.DuplicateWikilinks)
+        {
+            DuplicateWikilinks.Add(duplicateWikilink);
+        }
+
+        OnPropertyChanged(nameof(HasDuplicateWikilinks));
     }
 
     /// <summary>
@@ -663,16 +682,133 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
         IsoDateCount = 0;
         InternationalDateCount = 0;
         AmericanDateCount = 0;
+        DuplicateWikilinks.Clear();
+
+        OnPropertyChanged(nameof(HasDuplicateWikilinks));
+    }
+
+    /// <summary>
+    /// Updates the alerts displayed for the current article.
+    /// </summary>
+    /// <param name="alerts">
+    /// The alert descriptions to display.
+    /// </param>
+    public void UpdateAlerts(IEnumerable<string> alerts)
+    {
+        ArgumentNullException.ThrowIfNull(alerts);
+
+        Alerts.Clear();
+
+        foreach (string alert in alerts)
+        {
+            Alerts.Add(alert);
+        }
+    }
+
+    /// <summary>
+    /// Clears the alerts displayed for the current article.
+    /// </summary>
+    public void ResetAlerts()
+    {
+        Alerts.Clear();
     }
 
     /// <summary>
     /// Gets a value indicating whether a Find operation can be requested.
     /// </summary>
     public bool CanFind =>
+        AreArticleProcessingControlsEnabled &&
         !string.IsNullOrEmpty(FindText);
 
     partial void OnFindTextChanged(string value)
     {
         OnPropertyChanged(nameof(CanFind));
     }
+
+    /// <summary>
+    /// Gets or sets whether article processing is currently active.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isProcessing;
+
+    /// <summary>
+    /// Gets or sets whether the article list contains an article that can be started.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canStartProcessing;
+
+    /// <summary>
+    /// Gets a value indicating whether processing can be started.
+    /// </summary>
+    public bool IsStartEnabled =>
+        CanStartProcessing && !IsProcessing;
+
+    /// <summary>
+    /// Gets a value indicating whether processing can be stopped.
+    /// </summary>
+    public bool IsStopEnabled =>
+        IsProcessing;
+
+    partial void OnCanStartProcessingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsStartEnabled));
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether controls that operate on the current
+    /// processed article are available.
+    /// </summary>
+    public bool AreArticleProcessingControlsEnabled =>
+        IsProcessing;
+
+    partial void OnIsProcessingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsStartEnabled));
+        OnPropertyChanged(nameof(IsStopEnabled));
+        OnPropertyChanged(nameof(AreArticleProcessingControlsEnabled));
+        OnPropertyChanged(nameof(CanFind));
+        OnPropertyChanged(nameof(IsSaveEnabled));
+    }
+
+    /// <summary>
+    /// Gets or sets whether the current article is available for saving.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canSaveCurrentArticle;
+
+    /// <summary>
+    /// Gets a value indicating whether the current article can be saved.
+    /// </summary>
+    public bool IsSaveEnabled =>
+        AreArticleProcessingControlsEnabled &&
+        CanSaveCurrentArticle;
+
+    partial void OnCanSaveCurrentArticleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsSaveEnabled));
+    }
+
+    /// <summary>
+    /// Gets or sets whether the current page can be protected.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canProtectCurrentPage;
+
+    /// <summary>
+    /// Gets or sets whether the current page can be moved.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canMoveCurrentPage;
+
+    /// <summary>
+    /// Gets or sets whether the current page can be deleted.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canDeleteCurrentPage;
+
+    /// <summary>
+    /// Gets or sets whether the false-positive action is displayed.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showFalsePositiveAction;
 }

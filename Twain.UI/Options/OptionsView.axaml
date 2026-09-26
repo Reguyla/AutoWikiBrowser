@@ -773,21 +773,24 @@
                                 Grid.Row="3"
                                 Grid.Column="0"
                                 HorizontalAlignment="Stretch"
-                                Content="Delete" />
+                                Content="Delete"
+                                IsEnabled="{Binding CanDeleteCurrentPage}" />
 
                             <Button
                                 x:Name="MoveButton"
                                 Grid.Row="3"
                                 Grid.Column="1"
                                 HorizontalAlignment="Stretch"
-                                Content="Move" />
+                                Content="Move"
+                                IsEnabled="{Binding CanMoveCurrentPage}" />
 
                             <Button
                                 x:Name="ProtectButton"
                                 Grid.Row="4"
                                 Grid.Column="0"
                                 HorizontalAlignment="Stretch"
-                                Content="Protect" />
+                                Content="Protect"
+                                IsEnabled="{Binding CanProtectCurrentPage}" />
 
                             <Button
                                 x:Name="WatchButton"
@@ -801,7 +804,8 @@
                                 Grid.Row="5"
                                 Grid.Column="0"
                                 HorizontalAlignment="Stretch"
-                                Content="False Positive" />
+                                Content="False Positive"
+                                IsVisible="{Binding ShowFalsePositiveAction}" />
 
                         </Grid>
 
@@ -821,7 +825,8 @@
                                 Grid.Column="1"
                                 HorizontalAlignment="Stretch"
                                 FontWeight="SemiBold"
-                                Content="Save" />
+                                Content="Save"
+                                IsEnabled="{Binding IsSaveEnabled}" />
 
                         </Grid>
                      
@@ -968,6 +973,26 @@
                                 x:Name="AlertsListBox"
                                 MinHeight="100"
                                 ItemsSource="{Binding Alerts}" />
+
+                            <StackPanel
+                                IsVisible="{Binding HasDuplicateWikilinks}"
+                                Spacing="{DynamicResource TwainSpacingSmall}">
+
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Text="Duplicate wikilinks" />
+
+                                <ListBox
+                                    x:Name="DuplicateWikilinksListBox"
+                                    MinHeight="80"
+                                    ItemsSource="{Binding DuplicateWikilinks}" />
+
+                                <Button
+                                    x:Name="RemoveWikilinkButton"
+                                    HorizontalAlignment="Left"
+                                    Content="Delink" />
+
+                            </StackPanel>
 
                     </StackPanel>
 
