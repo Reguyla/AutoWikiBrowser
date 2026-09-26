@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using Twain.Core.Editing;
 using Twain.Core.Workspaces;
@@ -37,11 +38,14 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArticleDocumentViewModel document = new(
             editingSession);
 
-        MakeList =
-            new MakeListViewModel();
+        MakeList = new MakeListViewModel();
+        Options = new OptionsViewModel();
 
-        Options =
-            new OptionsViewModel();
+        MakeList.Articles.CollectionChanged +=
+            MakeListArticles_CollectionChanged;
+
+        Options.CanStartProcessing =
+            MakeList.ArticleCount > 0;
 
         Options.DisambiguationSourceProvider =
             () => MakeList.SourceText;
@@ -76,6 +80,17 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                     BuiltInPaneIds.Diff),
                 new DiffViewModel())
         ];
+    }
+
+    /// <summary>
+    /// Updates processing availability when the article list changes.
+    /// </summary>
+    private void MakeListArticles_CollectionChanged(
+        object? sender,
+        NotifyCollectionChangedEventArgs e)
+    {
+        Options.CanStartProcessing =
+            MakeList.ArticleCount > 0;
     }
 
     /// <summary>
