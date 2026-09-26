@@ -4,13 +4,13 @@
 /// Provides editor-independent article search behavior, including search
 /// expression preparation, incremental search state, and match discovery.
 /// </summary>
-internal static class ArticleSearchHelper
+public static class ArticleSearchHelper
 {
 
     /// <summary>
     /// Maintains the state of an incremental article search.
     /// </summary>
-    internal sealed class ArticleSearchState
+    public sealed class ArticleSearchState
     {
         /// <summary>
         /// Gets or sets the regular expression used by the current search.

@@ -91,6 +91,70 @@
                     }
 
                     return editor.getValue();
+                },
+
+            selectText:
+                function (start, length) {
+                    if (!editor) {
+                        return;
+                    }
+
+                    const model = editor.getModel();
+
+                    if (!model) {
+                        return;
+                    }
+
+                    const startPosition =
+                        model.getPositionAt(start);
+
+                    const endPosition =
+                        model.getPositionAt(start + length);
+
+                    editor.setSelection({
+                        startLineNumber: startPosition.lineNumber,
+                        startColumn: startPosition.column,
+                        endLineNumber: endPosition.lineNumber,
+                        endColumn: endPosition.column
+                    });
+
+                    editor.revealRangeInCenter(
+                        editor.getSelection());
+
+                    editor.focus();
+                },
+
+            getCaretOffset:
+                function () {
+                    if (!editor) {
+                        return 0;
+                    }
+
+                    const model = editor.getModel();
+                    const position = editor.getPosition();
+
+                    if (!model || !position) {
+                        return 0;
+                    }
+
+                    return model.getOffsetAt(position);
+                },
+
+            getSelectionStart:
+                function () {
+                    if (!editor) {
+                        return 0;
+                    }
+
+                    const model = editor.getModel();
+                    const selection = editor.getSelection();
+
+                    if (!model || !selection) {
+                        return 0;
+                    }
+
+                    return model.getOffsetAt(
+                        selection.getStartPosition());
                 }
         };
     </script>

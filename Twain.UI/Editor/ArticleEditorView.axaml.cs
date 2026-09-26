@@ -1,7 +1,9 @@
 using Avalonia.Controls;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Twain.Core.Editing;
 
 namespace Twain.UI.Editor;
 
@@ -14,6 +16,9 @@ namespace Twain.UI.Editor;
 /// </remarks>
 public partial class ArticleEditorView : UserControl
 {
+    private ArticleDocumentViewModel? _subscribedDocument;
+    private readonly ArticleSearchHelper.ArticleSearchState _searchState = new();
+
     /// <summary>
     /// Initializes the article editor view.
     /// </summary>
@@ -111,5 +116,113 @@ public partial class ArticleEditorView : UserControl
 
         await EditorWebView.InvokeScript(
             $"window.twainEditor.setText({jsonText});");
+    }
+
+    /// <summary>
+    /// Selects the specified range of article text in the Monaco editor.
+    /// </summary>
+    /// <param name="start">
+    /// The zero-based character offset at which the selection begins.
+    /// </param>
+    /// <param name="length">
+    /// The number of characters to select.
+    /// </param>
+    public async Task SelectTextAsync(
+        int start,
+        int length)
+    {
+        if (start < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(start));
+        }
+
+        if (length < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(length));
+        }
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.selectText({start}, {length});");
+    }
+
+    /// <summary>
+    /// Gets the current zero-based caret offset in the Monaco editor.
+    /// </summary>
+    /// <returns>
+    /// The current character offset within the article text.
+    /// </returns>
+    public async Task<int> GetCaretOffsetAsync()
+    {
+        string result =
+            await EditorWebView.InvokeScript(
+                "window.twainEditor.getCaretOffset();");
+
+        return int.TryParse(
+            result,
+            out int offset)
+                ? offset
+                : 0;
+    }
+
+    /// <summary>
+    /// Gets the zero-based starting offset of the current Monaco selection.
+    /// </summary>
+    /// <returns>
+    /// The character offset at which the current selection begins.
+    /// </returns>
+    public async Task<int> GetSelectionStartAsync()
+    {
+        string result =
+            await EditorWebView.InvokeScript(
+                "window.twainEditor.getSelectionStart();");
+
+        return int.TryParse(
+            result,
+            out int offset)
+                ? offset
+                : 0;
+    }
+
+    /// <summary>
+    /// Updates the document subscription when the editor data context changes.
+    /// </summary>
+    protected override void OnDataContextChanged(
+        EventArgs e)
+    {
+        if (_subscribedDocument is not null)
+        {
+            _subscribedDocument.PropertyChanged -=
+                Document_PropertyChanged;
+        }
+
+        _subscribedDocument = null;
+
+        if (DataContext is ArticleEditorViewModel viewModel)
+        {
+            _subscribedDocument = viewModel.Document;
+
+            _subscribedDocument.PropertyChanged +=
+                Document_PropertyChanged;
+        }
+
+        base.OnDataContextChanged(e);
+    }
+
+    /// <summary>
+    /// Synchronizes document text changes to the Monaco editor.
+    /// </summary>
+    private async void Document_PropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName !=
+            nameof(ArticleDocumentViewModel.CurrentText))
+        {
+            return;
+        }
+
+        await LoadDocumentTextAsync();
     }
 }
