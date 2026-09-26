@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.DiffHtml;
 using Twain.UI.Editor;
@@ -13,6 +14,12 @@ public sealed class DiffViewModel : ViewModelBase
     private readonly ArticleDocumentViewModel _document;
 
     private readonly WikiDiff _diff = new();
+
+    /// <summary>
+    /// Gets or sets the action used to request navigation to a line
+    /// in the article editor.
+    /// </summary>
+    public Func<int, Task>? GoToLineRequested { get; set; }
 
     /// <summary>
     /// Initializes the diff pane for the supplied article document.
@@ -69,4 +76,20 @@ public sealed class DiffViewModel : ViewModelBase
             _document.OriginalText,
             _document.CurrentText,
             0);
+
+    /// <summary>
+    /// Requests navigation to the specified zero-based line in the
+    /// article editor.
+    /// </summary>
+    public Task GoToLineAsync(
+        int line)
+    {
+        if (line < 0 ||
+            GoToLineRequested is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return GoToLineRequested(line);
+    }
 }

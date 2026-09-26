@@ -55,4 +55,10 @@ public sealed class ArticleEditorViewModel : ViewModelBase
         bool,
         string,
         Task>? FindNextRequested { get; set; }
+
+    /// <summary>
+    /// Gets or sets the action used to navigate the article editor
+    /// to a zero-based line number.
+    /// </summary>
+    public Func<int, Task>? GoToLineRequested { get; set; }
 }

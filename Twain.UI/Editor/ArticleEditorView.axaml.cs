@@ -223,6 +223,9 @@ public partial class ArticleEditorView : UserControl
 
             viewModel.FindNextRequested =
                 FindNextAsync;
+
+            viewModel.GoToLineRequested =
+                GoToLineAsync;
         }
 
         base.OnDataContextChanged(e);
@@ -314,5 +317,23 @@ public partial class ArticleEditorView : UserControl
         await SelectTextAsync(
             match.Index,
             match.Length);
+    }
+
+    /// <summary>
+    /// Moves the editor caret to the specified zero-based article line.
+    /// </summary>
+    /// <param name="line">
+    /// The zero-based line number to navigate to.
+    /// </param>
+    public async Task GoToLineAsync(
+        int line)
+    {
+        if (line < 0)
+        {
+            return;
+        }
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.goToLine({line});");
     }
 }

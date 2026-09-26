@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 using Twain.Core.Editing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
@@ -54,6 +55,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Diff = new DiffViewModel(
            document);
+
+        Diff.GoToLineRequested =
+           GoToDiffLineAsync;
 
         MakeList = new MakeListViewModel();
         Options = new OptionsViewModel();
@@ -271,5 +275,17 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     public ArticleEditorViewModel Editor { get; }
 
+    /// <summary>
+    /// Navigates the article editor to a line selected in the diff.
+    /// </summary>
+    private Task GoToDiffLineAsync(
+        int line)
+    {
+        if (Editor.GoToLineRequested is null)
+        {
+            return Task.CompletedTask;
+        }
 
+        return Editor.GoToLineRequested(line);
+    }
 }

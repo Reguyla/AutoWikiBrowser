@@ -155,6 +155,32 @@
 
                     return model.getOffsetAt(
                         selection.getStartPosition());
+                },
+
+            goToLine:
+                function (line) {
+                    if (!editor) {
+                        return;
+                    }
+
+                    const model = editor.getModel();
+
+                    if (!model) {
+                        return;
+                    }
+
+                    const lineNumber =
+                        Math.min(
+                            Math.max(line + 1, 1),
+                            model.getLineCount());
+
+                    editor.setPosition({
+                        lineNumber: lineNumber,
+                        column: 1
+                    });
+
+                    editor.revealLineInCenter(lineNumber);
+                    editor.focus();
                 }
         };
     </script>
