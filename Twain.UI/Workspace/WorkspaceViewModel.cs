@@ -9,7 +9,7 @@ using Twain.Core.Editing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
-using Twain.UI.ArticleList;
+using Twain.Core.API;
 using Twain.UI.Diff;
 using Twain.UI.Editor;
 using Twain.UI.Options;
@@ -39,6 +39,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     public DiffViewModel Diff { get; }
 
     /// <summary>
+    /// Gets the article currently loaded for processing.
+    /// </summary>
+    [ObservableProperty]
+    private Article? _currentArticle;
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel(
@@ -47,6 +53,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(session);
 
         Session = session;
+
+        Session.Editor.OpenComplete +=
+           Editor_OpenComplete;
 
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
@@ -87,6 +96,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Options.FindNextRequested =
             FindNext;
 
+        Options.StartProcessingRequested =
+           StartProcessing;
+
         Panes =
         [
             CreatePane(
@@ -117,6 +129,47 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                     BuiltInPaneIds.Diff),
                 Diff)
         ];
+    }
+
+    /// <summary>
+    /// Begins processing the first article in the current article list.
+    /// </summary>
+    private void StartProcessing()
+    {
+        Article? article =
+            MakeList.Articles.FirstOrDefault();
+
+        if (article is null ||
+            Session.IsBusy)
+        {
+            return;
+        }
+
+        CurrentArticleName =
+            article.Name;
+
+        Options.IsProcessing = true;
+
+        Session.Editor.Open(
+            article.Name,
+            true);
+    }
+
+    /// <summary>
+    /// Loads a successfully opened wiki page into the active article document.
+    /// </summary>
+    private void Editor_OpenComplete(
+        AsyncApiEdit editor,
+        PageInfo page)
+    {
+        CurrentArticle =
+            new Article(page);
+
+        CurrentArticleName =
+            CurrentArticle.Name;
+
+        Editor.Document.CurrentText =
+            CurrentArticle.ArticleText;
     }
 
     /// <summary>

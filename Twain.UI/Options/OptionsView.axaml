@@ -738,13 +738,15 @@
                             RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                             RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-                            <Button
-                                x:Name="StartButton"
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="2"
-                                HorizontalAlignment="Stretch"
-                                Content="Start" />
+                        <Button
+                            x:Name="StartButton"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding StartProcessingCommand}"
+                            Content="Start"
+                            IsEnabled="{Binding IsStartEnabled}" />
 
                             <Button
                                 x:Name="StopButton"

@@ -820,6 +820,20 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public Action? FindNextRequested { get; set; }
 
     /// <summary>
+    /// Gets or sets the action invoked when article processing is started.
+    /// </summary>
+    public Action? StartProcessingRequested { get; set; }
+
+    /// <summary>
+    /// Requests that article processing begin.
+    /// </summary>
+    [RelayCommand]
+    private void StartProcessing()
+    {
+        StartProcessingRequested?.Invoke();
+    }
+
+    /// <summary>
     /// Requests navigation to the next match in the article editor.
     /// </summary>
     [RelayCommand]
