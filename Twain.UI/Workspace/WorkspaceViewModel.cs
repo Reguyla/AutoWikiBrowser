@@ -70,7 +70,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Diff.GoToLineRequested =
            GoToDiffLineAsync;
 
-        MakeList = new MakeListViewModel();
+        MakeList = new MakeListViewModel(
+            Session);
+
         Options = new OptionsViewModel();
 
         MakeList.Articles.CollectionChanged +=

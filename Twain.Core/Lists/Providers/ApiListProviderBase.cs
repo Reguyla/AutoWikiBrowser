@@ -53,6 +53,18 @@ public abstract class ApiListProviderBase : IListProvider
     /// </summary>
     protected string WantedAttribute = "title";
 
+    private Session? _session;
+
+    /// <summary>
+    /// Sets the wiki session used for API requests.
+    /// </summary>
+    public void SetSession(Session session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        _session = session;
+    }
+
     /// <summary>
     /// Retrieves pages from the MediaWiki API, following continuation
     /// responses until the configured limit is reached.
@@ -70,8 +82,17 @@ public abstract class ApiListProviderBase : IListProvider
 
         List<Article> articles = new();
 
+        Session? session =
+            _session ?? Variables.MainForm?.TheSession;
+
+        if (session == null)
+        {
+            throw new InvalidOperationException(
+                "A wiki session is required to generate API lists.");
+        }
+
         ApiEdit editor =
-            Variables.MainForm.TheSession.Editor.SynchronousEditor;
+            session.Editor.SynchronousEditor;
 
         string continuationPostfix = string.Empty;
 

@@ -75,6 +75,8 @@ public partial class MakeListViewModel : ObservableObject
     [ObservableProperty]
     private bool _isSourceTextEnabled;
 
+    private readonly Session _session;
+
     partial void OnSelectedProviderChanged(IListProvider? value)
     {
         if (value is null)
@@ -94,12 +96,22 @@ public partial class MakeListViewModel : ObservableObject
     }
 
     public MakeListViewModel()
+        : this(new Session())
     {
+    }
+
+    public MakeListViewModel(Session session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        _session = session;
+
         foreach (IListProvider provider in
                  ListProviderRegistry.Providers
                      .OrderBy(provider => provider.DisplayText,
                          StringComparer.CurrentCultureIgnoreCase))
         {
+            ConfigureProvider(provider);
             Providers.Add(provider);
         }
 
@@ -109,8 +121,18 @@ public partial class MakeListViewModel : ObservableObject
             provider => provider.GetType().Name == "CategoryListProvider");
     }
 
+    private void ConfigureProvider(IListProvider provider)
+    {
+        if (provider is ApiListProviderBase apiProvider)
+        {
+            apiProvider.SetSession(_session);
+        }
+    }
+
     private void OnProviderAdded(IListProvider provider)
     {
+        ConfigureProvider(provider);
+
         if (!Providers.Contains(provider))
             Providers.Add(provider);
     }
