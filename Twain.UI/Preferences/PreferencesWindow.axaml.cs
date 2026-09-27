@@ -564,7 +564,7 @@ public partial class PreferencesWindow : Window
     }
 
     /// <summary>
-    /// Gets or sets the autosave interval in minutes.
+    /// Gets or sets the autosave interval in seconds.
     /// </summary>
     public int PrefAutoSaveEditBoxPeriod
     {
