@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Twain.Core;
 using Twain.Core.Alerts;
+using Twain.Core.AWBSettings;
 using Twain.Core.Settings;
 
 namespace Twain.UI.Preferences;
@@ -96,6 +97,68 @@ public partial class PreferencesWindow : Window
         InitializeLanguageSelection(language);
         InitializeCustomProject(customProject);
         InitializeProtocolSelection(protocol);
+    }
+
+    /// <summary>
+    /// Populates the preferences window from the supplied user settings.
+    /// </summary>
+    /// <param name="preferences">
+    /// The user settings to display.
+    /// </param>
+    public void LoadPreferences(UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        PrefDomain = preferences.LoginDomain;
+
+        GeneralPrefs general =
+            preferences.General;
+
+        PrefMinimize = general.Minimize;
+        LowThreadPriority = general.LowThreadPriority;
+        PrefSaveArticleList = general.SaveArticleList;
+        PrefClearPageListOnProjectChange =
+            general.ClearPageListOnProjectChange;
+
+        PrefOnLoad = general.OnLoadAction;
+        PrefDiffInBotMode = general.DiffInBotMode;
+        PrefShowTimer = general.TimerEnabled;
+
+        PrefAddUsingAWBOnArticleAction =
+            general.AddUsingAWBToActionSummaries;
+
+        PrefIgnoreNoBots = general.IgnoreNoBots;
+        PrefFlash = general.Flash;
+        PrefBeep = general.Beep;
+        PrefSuppressUsingAWB = general.SuppressUsingAWB;
+
+        PrefAutoSaveEditBoxEnabled =
+            general.AutoSaveEdit.Enabled;
+
+        PrefAutoSaveEditBoxFile =
+            general.AutoSaveEdit.SaveFile;
+
+        PrefAutoSaveEditBoxPeriod =
+            Convert.ToInt32(
+                general.AutoSaveEdit.SavePeriod);
+
+        EnableLogging =
+            general.LoggingEnabled;
+
+        ToolsPrefs tools =
+           preferences.Tool;
+
+        PrefListComparerUseCurrentArticleList =
+            tools.ListComparerUseCurrentArticleList;
+
+        PrefListSplitterUseCurrentArticleList =
+            tools.ListSplitterUseCurrentArticleList;
+
+        PrefDBScannerUseCurrentArticleList =
+            tools.DatabaseScannerUseCurrentArticleList;
+
+        AlertPreferences =
+            general.AlertPreferences;
     }
 
     /// <summary>
