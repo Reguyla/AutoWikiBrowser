@@ -242,6 +242,73 @@ public partial class PreferencesWindow : Window
     }
 
     /// <summary>
+    /// Applies the values currently displayed by the preferences window
+    /// to the supplied application preferences.
+    /// </summary>
+    /// <param name="preferences">
+    /// The preferences object to update.
+    /// </param>
+    public void ApplyPreferences(
+        UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        preferences.LanguageCode = Language;
+        preferences.Project = Project;
+        preferences.CustomProject = CustomProject;
+        preferences.Protocol = Protocol;
+        preferences.LoginDomain = PrefDomain;
+
+        GeneralPrefs general =
+            preferences.General;
+
+        general.Minimize = PrefMinimize;
+        general.LowThreadPriority = LowThreadPriority;
+        general.SaveArticleList = PrefSaveArticleList;
+        general.ClearPageListOnProjectChange =
+            PrefClearPageListOnProjectChange;
+
+        general.OnLoadAction = PrefOnLoad;
+        general.DiffInBotMode = PrefDiffInBotMode;
+        general.TimerEnabled = PrefShowTimer;
+
+        general.AddUsingAWBToActionSummaries =
+            PrefAddUsingAWBOnArticleAction;
+
+        general.IgnoreNoBots = PrefIgnoreNoBots;
+        general.Flash = PrefFlash;
+        general.Beep = PrefBeep;
+        general.SuppressUsingAWB = PrefSuppressUsingAWB;
+
+        general.AutoSaveEdit.Enabled =
+            PrefAutoSaveEditBoxEnabled;
+
+        general.AutoSaveEdit.SaveFile =
+            PrefAutoSaveEditBoxFile;
+
+        general.AutoSaveEdit.SavePeriod =
+            PrefAutoSaveEditBoxPeriod;
+
+        general.LoggingEnabled =
+            EnableLogging;
+
+        general.AlertPreferences =
+            AlertPreferences;
+
+        ToolsPrefs tools =
+            preferences.Tool;
+
+        tools.ListComparerUseCurrentArticleList =
+            PrefListComparerUseCurrentArticleList;
+
+        tools.ListSplitterUseCurrentArticleList =
+            PrefListSplitterUseCurrentArticleList;
+
+        tools.DatabaseScannerUseCurrentArticleList =
+            PrefDBScannerUseCurrentArticleList;
+    }
+
+    /// <summary>
     /// Updates project-specific controls when the selected wiki project changes.
     /// </summary>
     private void ProjectComboBox_SelectionChanged(

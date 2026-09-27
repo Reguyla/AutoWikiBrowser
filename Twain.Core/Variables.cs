@@ -747,6 +747,34 @@ public static partial class Variables
     public static Regex SectStubRegex;
 
     /// <summary>
+    /// Sets the current project using the supplied wiki session for
+    /// project-specific site information.
+    /// </summary>
+    /// <param name="session">
+    /// The session used to load project-specific site information.
+    /// </param>
+    /// <param name="langCode">The project language code.</param>
+    /// <param name="projectName">The project type.</param>
+    /// <param name="customProject">The custom project URL or identifier.</param>
+    /// <param name="protocol">The protocol used to access the project.</param>
+    public static void SetProject(
+        Session session,
+        string langCode,
+        ProjectEnum projectName,
+        string customProject,
+        string protocol)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        SetProject(
+            langCode,
+            projectName,
+            customProject,
+            protocol,
+            session);
+    }
+
+    /// <summary>
     /// Configures the current project using its language code and project family.
     /// </summary>
     /// <param name="langCode">
@@ -877,6 +905,21 @@ public static partial class Variables
         string customProject,
         string protocol)
     {
+        SetProject(
+            langCode,
+            projectName,
+            customProject,
+            protocol,
+            MainForm?.TheSession);
+    }
+
+    private static void SetProject(
+        string langCode,
+        ProjectEnum projectName,
+        string customProject,
+        string protocol,
+        Session? session)
+    {
         bool typoReloadNeeded =
             IsTypoReloadNeeded(
                 langCode,
@@ -907,6 +950,7 @@ public static partial class Variables
         RefreshProxy();
 
         if (!TryInitializeProjectSession(
+                session,
                 langCode,
                 projectName,
                 customProject))
@@ -1168,6 +1212,7 @@ public static partial class Variables
     /// authentication.
     /// </returns>
     private static bool TryInitializeProjectSession(
+        Session? session,
         string langCode,
         ProjectEnum projectName,
         string customProject)
@@ -1180,15 +1225,14 @@ public static partial class Variables
         // TODO: Separate project-state configuration from MainForm/session
         // coordination so project switching can be validated and tested without UI
         // coupling.
-        if (MainForm == null ||
-            MainForm.TheSession == null)
+        if (session == null)
         {
             return true;
         }
 
         try
         {
-            if (!MainForm.TheSession.UpdateProject(false))
+            if (!session.UpdateProject(false))
             {
                 LangCode = "en";
                 Project = ProjectEnum.wikipedia;

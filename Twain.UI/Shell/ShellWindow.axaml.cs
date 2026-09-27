@@ -115,8 +115,30 @@ public partial class ShellWindow : Window
         object? sender,
         RoutedEventArgs e)
     {
-        PreferencesWindow window = new();
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
 
-        await window.ShowDialog<bool?>(this);
+        PreferencesWindow window =
+            new(
+                viewModel.Preferences.LanguageCode,
+                viewModel.Preferences.Project,
+                viewModel.Preferences.CustomProject,
+                viewModel.Preferences.Protocol);
+
+        window.LoadPreferences(
+            viewModel.Preferences);
+
+        bool? result =
+            await window.ShowDialog<bool?>(this);
+
+        if (result == true)
+        {
+            window.ApplyPreferences(
+                viewModel.Preferences);
+
+            viewModel.ApplySitePreferences();
+        }
     }
 }

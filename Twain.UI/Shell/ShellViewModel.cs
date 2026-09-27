@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using Twain.Core;
+using Twain.Core.AWBSettings;
 using Twain.Core.Updates;
 using Twain.UI.ViewModels.Workspaces;
 
@@ -26,6 +27,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         _updateService = updateService;
 
         Session = new Session();
+
+        Preferences = new UserPrefs();
 
         Workspace =
             new WorkspaceViewModel(
@@ -65,6 +68,11 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// Gets the active workspace.
     /// </summary>
     public WorkspaceViewModel Workspace { get; }
+
+    /// <summary>
+    /// Gets the active application preferences.
+    /// </summary>
+    public UserPrefs Preferences { get; }
 
     /// <summary>
     /// Gets or sets whether an application update is currently available.
@@ -144,5 +152,14 @@ public sealed partial class ShellViewModel : ViewModelBase
             UpdateStatusMessage =
                 $"Unable to install the update: {ex.Message}";
         }
+    }
+
+    /// <summary>
+    /// Applies the active site preferences to the current wiki session.
+    /// </summary>
+    public void ApplySitePreferences()
+    {
+        Variables.LoginDomain =
+            Preferences.LoginDomain;
     }
 }
