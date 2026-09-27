@@ -161,5 +161,12 @@ public sealed partial class ShellViewModel : ViewModelBase
     {
         Variables.LoginDomain =
             Preferences.LoginDomain;
+
+        Variables.SetProject(
+            Session,
+            Preferences.LanguageCode,
+            Preferences.Project,
+            Preferences.CustomProject,
+            Preferences.Protocol);
     }
 }
