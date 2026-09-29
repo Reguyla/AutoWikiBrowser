@@ -78,30 +78,86 @@
             </MenuItem>
         </Menu>
 
-        <Border
-            Grid.Row="1"
-            Padding="12">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <TextBlock
-                    Margin="0,0,16,0"
-                    VerticalAlignment="Center"
-                    Text="{Binding LoggedInUsername}"
-                    IsVisible="{Binding IsLoggedIn}" />
+<Border
+    Grid.Row="1"
+    Padding="12,8"
+    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+    BorderThickness="0,0,0,1">
 
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Text="{Binding UpdateStatusMessage}"
-                    TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="Auto,*,Auto">
 
-                <Button
-                    Grid.Column="2"
-                    Margin="12,0,0,0"
-                    Command="{Binding InstallUpdateCommand}"
-                    Content="Update and Restart"
-                    IsVisible="{Binding IsUpdateAvailable}" />
-            </Grid>
-        </Border>
+        <!-- Primary article workflow actions. -->
+
+        <StackPanel
+            Grid.Column="0"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <Button
+                MinWidth="88"
+                Command="{Binding Workspace.Options.StartProcessingCommand}"
+                Content="Start"
+                IsEnabled="{Binding Workspace.Options.IsStartEnabled}" />
+
+            <Button
+                MinWidth="88"
+                Content="Stop"
+                IsEnabled="{Binding Workspace.Options.IsStopEnabled}" />
+
+            <Button
+                MinWidth="88"
+                Content="Save" />
+
+            <Button
+                MinWidth="88"
+                Content="Preview" />
+
+            <Button
+                MinWidth="88"
+                Content="Diff" />
+
+            <Button
+                MinWidth="88"
+                Content="Skip" />
+
+        </StackPanel>
+
+        <!-- Update status remains available in the center of the toolbar. -->
+
+        <TextBlock
+            Grid.Column="1"
+            Margin="16,0"
+            VerticalAlignment="Center"
+            Text="{Binding UpdateStatusMessage}"
+            TextWrapping="Wrap" />
+
+        <!-- Authentication is separated from article actions. -->
+
+        <StackPanel
+            Grid.Column="2"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                Text="{Binding LoginStatusText}" />
+
+            <Button
+                Click="LoginProfilesMenuItem_Click"
+                Content="Login" />
+
+            <Button
+                Margin="8,0,0,0"
+                Command="{Binding InstallUpdateCommand}"
+                Content="Update and Restart"
+                IsVisible="{Binding IsUpdateAvailable}" />
+
+        </StackPanel>
+
+    </Grid>
+
+</Border>
 
         <workspaceViews:WorkspaceView
             Grid.Row="2"

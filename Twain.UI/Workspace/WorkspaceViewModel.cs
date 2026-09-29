@@ -132,20 +132,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Requests that the application shell display the login workflow.
-    /// </summary>
-    public Action? LoginRequested { get; set; }
-
-    /// <summary>
-    /// Requests authentication for the active wiki session.
-    /// </summary>
-    [RelayCommand]
-    private void Login()
-    {
-        LoginRequested?.Invoke();
-    }
-
-    /// <summary>
     /// Begins processing the first article in the current article list.
     /// </summary>
     private void StartProcessing()

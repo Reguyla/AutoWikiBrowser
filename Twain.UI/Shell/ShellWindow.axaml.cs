@@ -54,19 +54,6 @@ public partial class ShellWindow : Window
         await ShowLoginAsync();
     }
 
-    /// <inheritdoc />
-    protected override void OnDataContextChanged(
-        EventArgs e)
-    {
-        base.OnDataContextChanged(e);
-
-        if (DataContext is ShellViewModel viewModel)
-        {
-            viewModel.LoginRequested =
-                () => _ = ShowLoginAsync();
-        }
-    }
-
     private void ExitMenuItem_Click(
         object? sender,
         RoutedEventArgs e)

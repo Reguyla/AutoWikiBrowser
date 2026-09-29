@@ -16,11 +16,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     private readonly IUpdateService? _updateService;
 
     /// <summary>
-    /// Requests that the application shell display the login workflow.
-    /// </summary>
-    public Action? LoginRequested { get; set; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="ShellViewModel"/> class.
     /// </summary>
     /// <param name="updateService">
@@ -38,9 +33,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         Workspace =
             new WorkspaceViewModel(
                 Session);
-
-        Workspace.LoginRequested =
-           () => LoginRequested?.Invoke();
 
     }
 
