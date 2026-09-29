@@ -820,6 +820,20 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public Action? FindNextRequested { get; set; }
 
     /// <summary>
+    /// Requests that the application shell display the login workflow.
+    /// </summary>
+    public Action? LoginRequested { get; set; }
+
+    /// <summary>
+    /// Requests authentication for the active wiki session.
+    /// </summary>
+    [RelayCommand]
+    private void Login()
+    {
+        LoginRequested?.Invoke();
+    }
+
+    /// <summary>
     /// Gets or sets the action invoked when article processing is started.
     /// </summary>
     public Action? StartProcessingRequested { get; set; }

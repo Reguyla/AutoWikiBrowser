@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
+using System.Threading.Tasks;
 using Twain.CustomModules;
 using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
@@ -24,9 +25,10 @@ public partial class ShellWindow : Window
         InitializeComponent();
     }
 
-    private async void LoginProfilesMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
+    /// <summary>
+    /// Displays the profile login workflow for the active session.
+    /// </summary>
+    private async Task ShowLoginAsync()
     {
         if (DataContext is not ShellViewModel viewModel)
         {
@@ -39,12 +41,30 @@ public partial class ShellWindow : Window
         bool loggedIn =
             await window.ShowDialog<bool>(this);
 
-        if (!loggedIn)
+        if (loggedIn)
         {
-            return;
+            viewModel.LoginCompleted();
         }
+    }
 
-        viewModel.LoginCompleted();
+    private async void LoginProfilesMenuItem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        await ShowLoginAsync();
+    }
+
+    /// <inheritdoc />
+    protected override void OnDataContextChanged(
+        EventArgs e)
+    {
+        base.OnDataContextChanged(e);
+
+        if (DataContext is ShellViewModel viewModel)
+        {
+            viewModel.LoginRequested =
+                () => _ = ShowLoginAsync();
+        }
     }
 
     private void ExitMenuItem_Click(

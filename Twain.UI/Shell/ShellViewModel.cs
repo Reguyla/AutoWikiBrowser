@@ -16,6 +16,11 @@ public sealed partial class ShellViewModel : ViewModelBase
     private readonly IUpdateService? _updateService;
 
     /// <summary>
+    /// Requests that the application shell display the login workflow.
+    /// </summary>
+    public Action? LoginRequested { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ShellViewModel"/> class.
     /// </summary>
     /// <param name="updateService">
@@ -33,6 +38,10 @@ public sealed partial class ShellViewModel : ViewModelBase
         Workspace =
             new WorkspaceViewModel(
                 Session);
+
+        Workspace.LoginRequested =
+           () => LoginRequested?.Invoke();
+
     }
 
     /// <summary>
@@ -43,6 +52,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(LoggedInUsername));
+        OnPropertyChanged(nameof(LoginStatusText));
     }
 
     /// <summary>
@@ -58,6 +68,14 @@ public sealed partial class ShellViewModel : ViewModelBase
         IsLoggedIn
             ? Session.User.Name
             : string.Empty;
+
+    /// <summary>
+    /// Gets the authentication status displayed in the application shell.
+    /// </summary>
+    public string LoginStatusText =>
+        IsLoggedIn
+            ? LoggedInUsername
+            : "Not logged in";
 
     /// <summary>
     /// Gets the active wiki session for the application.

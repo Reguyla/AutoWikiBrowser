@@ -26,87 +26,287 @@
 
     </UserControl.Resources>
 
-    <Grid
-        Margin="{DynamicResource TwainWorkspacePadding}"
-        Background="{DynamicResource TwainWorkspaceBackgroundBrush}"
-        RowDefinitions="Auto,*">
+<Grid
+    Background="{DynamicResource TwainWorkspaceBackgroundBrush}"
+    ColumnDefinitions="220,8,*"
+    RowDefinitions="Auto,8,*,Auto">
 
-        <!-- Workspace heading and temporary pane-restoration command. -->
+    <!--
+    Left navigation.
 
-        <StackPanel
-            Grid.Row="0"
-            Margin="0,0,0,12"
-            Orientation="Horizontal"
-            Spacing="{DynamicResource TwainSpacingMedium}">
+    This will replace the traditional File/Edit/View/Tools/Help menu
+    structure and provide access to editing, options, settings, tools,
+    plugins, diagnostics, and help.
+    -->
+
+    <Border
+        Grid.Row="0"
+        Grid.RowSpan="4"
+        Grid.Column="0"
+        Padding="12"
+        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+        BorderThickness="0,0,1,0">
+
+        <StackPanel Spacing="8">
 
             <TextBlock
-                VerticalAlignment="Center"
+                Margin="4,4,4,12"
                 FontSize="{DynamicResource TwainFontSizeLarge}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                Text="Workspace" />
+                Text="Twain" />
 
             <Button
-                MinHeight="{DynamicResource TwainControlHeight}"
-                Padding="{DynamicResource TwainControlPadding}"
-                Command="{Binding ShowAllPanesCommand}"
-                Content="Show all panes" />
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Editing" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Article List" />
+
+            <TextBlock
+                Margin="4,12,4,4"
+                FontWeight="SemiBold"
+                Text="Options" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="General" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="More" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Disambiguation" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Skip Rules" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Start Options" />
+
+            <Separator Margin="0,8" />
+
+            <TextBlock
+                Margin="4,0,4,4"
+                FontWeight="SemiBold"
+                Text="User Settings" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Profiles" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Preferences" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Bot Settings" />
+
+            <Separator Margin="0,8" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Custom Modules" />
+
+            <TextBlock
+                Margin="4,8,4,4"
+                FontWeight="SemiBold"
+                Text="Tools" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="List Tools" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Database Scanner" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Regex Tester" />
+
+            <Separator Margin="0,8" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Plugins" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Logging &amp; Diagnostics" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="About" />
+
+        </StackPanel>
+
+    </Border>
+
+    <!-- Separator between navigation and workspace. -->
+
+    <GridSplitter
+        Grid.Row="0"
+        Grid.RowSpan="4"
+        Grid.Column="1"
+        Width="8"
+        HorizontalAlignment="Stretch"
+        Background="{DynamicResource TwainBorderSubtleBrush}"
+        ResizeDirection="Columns"
+        ResizeBehavior="PreviousAndNext" />
+
+    <!--
+    Primary article workflow toolbar.
+    -->
+
+    <Grid
+        Grid.Row="0"
+        Grid.Column="2"
+        Margin="12,8,12,0"
+        ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto">
+
+        <StackPanel
+            Grid.Column="0"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <Button
+                MinWidth="88"
+                Command="{Binding Options.StartProcessingCommand}"
+                Content="Start"
+                IsEnabled="{Binding Options.IsStartEnabled}" />
+
+            <Button
+                MinWidth="88"
+                Content="Stop"
+                IsEnabled="{Binding Options.IsStopEnabled}" />
+
+            <Button
+                MinWidth="88"
+                Content="Save" />
+
+            <Button
+                MinWidth="88"
+                Content="Preview" />
+
+            <Button
+                MinWidth="88"
+                Content="Diff" />
+
+            <Button
+                MinWidth="88"
+                Content="Skip" />
 
         </StackPanel>
 
         <!--
-        Initial built-in editing workspace.
-
-        The diff occupies the primary workspace above the configuration
-        and editing panes.
-
-        The lower region contains Make List, Options, and the Article Editor.
+        Login/logout is intentionally separated from editing actions.
         -->
 
-        <Grid
+        <StackPanel
+            Grid.Column="7"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                Text="Not logged in" />
+
+            <Button
+                Command="{Binding LoginCommand}"
+                Content="Login" />
+
+        </StackPanel>
+
+    </Grid>
+
+    <GridSplitter
+        Grid.Row="1"
+        Grid.Column="2"
+        Height="8"
+        VerticalAlignment="Stretch"
+        Background="{DynamicResource TwainBorderSubtleBrush}"
+        ResizeDirection="Rows"
+        ResizeBehavior="PreviousAndNext" />
+
+    <!--
+    Editing workspace.
+
+    Diff occupies the entire upper region.
+    Article List, Monaco, and Article Alerts occupy the lower region.
+    -->
+
+    <Grid
+        Grid.Row="2"
+        Grid.Column="2"
+        Margin="12,0,12,8"
+        RowDefinitions="*,8,*">
+
+        <!-- Diff -->
+
+        <ItemsControl
+            Grid.Row="0"
+            ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+            ItemsSource="{Binding DocumentPanes}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+        </ItemsControl>
+
+        <GridSplitter
             Grid.Row="1"
-            ColumnDefinitions="260,8,300,8,*"
-            RowDefinitions="2*,8,*">
+            Height="8"
+            VerticalAlignment="Stretch"
+            Background="{DynamicResource TwainBorderSubtleBrush}"
+            ResizeDirection="Rows"
+            ResizeBehavior="PreviousAndNext" />
 
-            <!--
-            Upper document region: diff and comparison output.
-            -->
+        <!-- Article list / editor / alerts -->
 
-            <ItemsControl
-                Grid.Row="0"
-                Grid.Column="0"
-                Grid.ColumnSpan="5"
-                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-                ItemsSource="{Binding DocumentPanes}">
-
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-
-            </ItemsControl>
-
-            <!--
-            Horizontal splitter between the diff and the lower workspace.
-            -->
-
-            <GridSplitter
-                Grid.Row="1"
-                Grid.Column="0"
-                Grid.ColumnSpan="5"
-                Height="8"
-                VerticalAlignment="Stretch"
-                Background="{DynamicResource TwainBorderSubtleBrush}"
-                ResizeDirection="Rows"
-                ResizeBehavior="PreviousAndNext" />
-
-            <!--
-            Lower-left region: article navigation and queue-related panes.
-            -->
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="260,8,*,8,240">
 
             <ItemsControl
-                Grid.Row="2"
                 Grid.Column="0"
                 ItemTemplate="{StaticResource WorkspacePaneTemplate}"
                 ItemsSource="{Binding LeftPanes}">
@@ -120,7 +320,6 @@
             </ItemsControl>
 
             <GridSplitter
-                Grid.Row="2"
                 Grid.Column="1"
                 Width="8"
                 HorizontalAlignment="Stretch"
@@ -128,40 +327,8 @@
                 ResizeDirection="Columns"
                 ResizeBehavior="PreviousAndNext" />
 
-            <!--
-            Lower-center region: options and job configuration.
-            -->
-
             <ItemsControl
-                Grid.Row="2"
                 Grid.Column="2"
-                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-                ItemsSource="{Binding CenterPanes}">
-
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-
-            </ItemsControl>
-
-            <GridSplitter
-                Grid.Row="2"
-                Grid.Column="3"
-                Width="8"
-                HorizontalAlignment="Stretch"
-                Background="{DynamicResource TwainBorderSubtleBrush}"
-                ResizeDirection="Columns"
-                ResizeBehavior="PreviousAndNext" />
-
-            <!--
-            Lower-right region: article editor.
-            -->
-
-            <ItemsControl
-                Grid.Row="2"
-                Grid.Column="4"
                 ItemTemplate="{StaticResource WorkspacePaneTemplate}"
                 ItemsSource="{Binding BottomPanes}">
 
@@ -173,8 +340,128 @@
 
             </ItemsControl>
 
+            <GridSplitter
+                Grid.Column="3"
+                Width="8"
+                HorizontalAlignment="Stretch"
+                Background="{DynamicResource TwainBorderSubtleBrush}"
+                ResizeDirection="Columns"
+                ResizeBehavior="PreviousAndNext" />
+
+<!--
+Article alerts for the currently processed article.
+-->
+
+<Border
+    Grid.Column="4"
+    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+    BorderThickness="1"
+    CornerRadius="4">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Border
+            Grid.Row="0"
+            Padding="12,10"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,0,0,1">
+
+            <Grid ColumnDefinitions="*,Auto">
+
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                    Text="Article Alerts" />
+
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                    Text="{Binding Options.Alerts.Count}" />
+
+            </Grid>
+
+        </Border>
+
+        <ScrollViewer
+            Grid.Row="1"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+
+            <ItemsControl
+                Margin="8"
+                ItemsSource="{Binding Options.Alerts}">
+
+                <ItemsControl.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,0,0,6"
+                            Padding="10"
+                            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4">
+
+                            <TextBlock
+                                Text="{Binding}"
+                                TextWrapping="Wrap" />
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+        </ScrollViewer>
+
+    </Grid>
+
+</Border>
+
         </Grid>
 
     </Grid>
+
+    <!--
+    Workspace status bar.
+    -->
+
+    <Border
+        Grid.Row="3"
+        Grid.Column="2"
+        Padding="12,6"
+        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+        BorderThickness="0,1,0,0">
+
+        <Grid ColumnDefinitions="Auto,*,Auto">
+
+            <TextBlock
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="Ready" />
+
+            <StackPanel
+                Grid.Column="2"
+                Orientation="Horizontal"
+                Spacing="20">
+
+                <TextBlock Text="Articles: 0" />
+                <TextBlock Text="Processing: 0" />
+                <TextBlock Text="Completed: 0" />
+                <TextBlock Text="Skipped: 0" />
+                <TextBlock Text="Errors: 0" />
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+
+</Grid>
 
 </UserControl>
