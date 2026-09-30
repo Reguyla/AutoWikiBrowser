@@ -167,6 +167,21 @@ public partial class MakeListViewModel : ObservableObject
             Articles.Remove(article);
     }
 
+    /// <summary>
+    /// Removes the specified article from the current article list.
+    /// </summary>
+    /// <param name="article">The article to remove.</param>
+    /// <returns>
+    /// <see langword="true"/> when the article was removed; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    public bool RemoveArticle(Article article)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+
+        return Articles.Remove(article);
+    }
+
     [RelayCommand(CanExecute = nameof(CanMakeList))]
     private void MakeList()
     {

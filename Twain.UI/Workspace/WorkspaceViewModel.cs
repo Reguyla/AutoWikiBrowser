@@ -156,6 +156,51 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Stops the active article-processing workflow.
+    /// </summary>
+    [RelayCommand]
+    private void StopProcessing()
+    {
+        if (!Options.IsProcessing)
+        {
+            return;
+        }
+
+        Session.Editor.Abort();
+
+        Options.IsProcessing = false;
+    }
+
+    /// <summary>
+    /// Skips the current article and continues processing the next article.
+    /// </summary>
+    [RelayCommand]
+    private void SkipProcessing()
+    {
+        if (!Options.IsProcessing || CurrentArticle is null)
+        {
+            return;
+        }
+
+        CurrentArticle.Trace.UserSkipped();
+
+        Session.Editor.Reset();
+
+        if (!MakeList.RemoveArticle(CurrentArticle))
+        {
+            StopProcessing();
+            return;
+        }
+
+        CurrentArticle = null;
+        CurrentArticleName = string.Empty;
+
+        Editor.Document.CurrentText = string.Empty;
+
+        StartProcessing();
+    }
+
+    /// <summary>
     /// Loads a successfully opened wiki page into the active article document.
     /// </summary>
     private void Editor_OpenComplete(

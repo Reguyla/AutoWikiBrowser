@@ -101,6 +101,7 @@
 
             <Button
                 MinWidth="88"
+                Command="{Binding Workspace.StopProcessingCommand}"
                 Content="Stop"
                 IsEnabled="{Binding Workspace.Options.IsStopEnabled}" />
 
@@ -118,6 +119,8 @@
 
             <Button
                 MinWidth="88"
+                IsEnabled="{Binding Workspace.Options.AreArticleProcessingControlsEnabled}"
+                Command="{Binding Workspace.SkipProcessingCommand}"
                 Content="Skip" />
 
         </StackPanel>
