@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -54,8 +55,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Session = session;
 
-        Session.Editor.OpenComplete +=
-           Editor_OpenComplete;
+        Session.OpenComplete +=
+            Editor_OpenComplete;
 
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
@@ -207,14 +208,17 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         AsyncApiEdit editor,
         PageInfo page)
     {
-        CurrentArticle =
-            new Article(page);
+        Dispatcher.UIThread.Post(() =>
+        {
+            CurrentArticle =
+                new Article(page);
 
-        CurrentArticleName =
-            CurrentArticle.Name;
+            CurrentArticleName =
+                CurrentArticle.Name;
 
-        Editor.Document.CurrentText =
-            CurrentArticle.ArticleText;
+            Editor.Document.CurrentText =
+                CurrentArticle.ArticleText;
+        });
     }
 
     /// <summary>
