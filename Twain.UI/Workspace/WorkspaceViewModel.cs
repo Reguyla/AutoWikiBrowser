@@ -201,9 +201,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         StartProcessing();
     }
 
-    /// <summary>
-    /// Loads a successfully opened wiki page into the active article document.
-    /// </summary>
     private void Editor_OpenComplete(
         AsyncApiEdit editor,
         PageInfo page)
