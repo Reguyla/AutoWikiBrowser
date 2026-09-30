@@ -4,15 +4,17 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twain.Core;
+using Twain.Core.API;
 using Twain.Core.Editing;
 using Twain.Core.Parse;
+using Twain.Core.Plugin;
 using Twain.Core.Processing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
-using Twain.Core.API;
 using Twain.UI.Diff;
 using Twain.UI.Editor;
 using Twain.UI.Options;
@@ -48,6 +50,22 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private Article? _currentArticle;
 
     private readonly MainProcess _mainProcess;
+
+    private readonly HideText _removeText =
+    new(false, true, true);
+
+    private readonly List<string> _noParse = new();
+
+    private readonly FindandReplace _findAndReplace =
+        new();
+
+    private readonly SubstTemplates _substTemplates =
+        new();
+
+    private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial
+        _replaceSpecial = new();
+
+    private Regex? _userTalkTemplatesRegex;
 
     /// <summary>
     /// Initializes the standard Twain editing workspace.
@@ -162,6 +180,27 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Session.Editor.Open(
             article.Name,
             true);
+    }
+
+    /// <summary>
+    /// Captures the configured dependencies used by the Core article-processing
+    /// pipeline.
+    /// </summary>
+    /// <returns>
+    /// The dependencies associated with the current workspace processing state.
+    /// </returns>
+    private MainProcessDependencies CreateMainProcessDependencies()
+    {
+        return new MainProcessDependencies
+        {
+            Skip = Options,
+            RemoveText = _removeText,
+            NoParse = _noParse,
+            FindAndReplace = _findAndReplace,
+            SubstTemplates = _substTemplates,
+            ReplaceSpecial = _replaceSpecial,
+            UserTalkTemplatesRegex = _userTalkTemplatesRegex
+        };
     }
 
     /// <summary>

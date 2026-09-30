@@ -44,5 +44,5 @@ public sealed class MainProcessDependencies
     /// <summary>
     /// Gets or initializes the configured user-talk template expression.
     /// </summary>
-    public Regex UserTalkTemplatesRegex { get; init; }
+    public Regex? UserTalkTemplatesRegex { get; init; }
 }
