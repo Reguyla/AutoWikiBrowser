@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Editing;
+using Twain.Core.Parse;
+using Twain.Core.Processing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
@@ -45,6 +47,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private Article? _currentArticle;
 
+    private readonly MainProcess _mainProcess;
+
     /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
@@ -54,6 +58,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(session);
 
         Session = session;
+
+        _mainProcess =
+            new MainProcess(
+                new Parsers());
 
         Session.OpenComplete +=
             Editor_OpenComplete;

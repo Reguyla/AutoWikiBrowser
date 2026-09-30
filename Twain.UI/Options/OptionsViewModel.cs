@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Twain.Core;
 using Twain.Core.Plugin;
+using Twain.Core.Processing;
 using Twain.Core.Settings;
 using Twain.UI.FindReplace;
 using Twain.UI.Templates;
@@ -854,6 +855,123 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     private void FindNext()
     {
         FindNextRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Creates a snapshot of the current article-processing options.
+    /// </summary>
+    /// <returns>
+    /// The processing options represented by the current workspace state.
+    /// </returns>
+    public MainProcessOptions CreateMainProcessOptions()
+    {
+        return new MainProcessOptions
+        {
+            FindAndReplaceEnabled =
+                FindAndReplaceEnabled,
+
+            SkipWhenNoFindAndReplace =
+                SkipIfNoReplacement,
+
+            SkipOnlyMinorFindAndReplace =
+                SkipIfOnlyMinorReplacement,
+
+            GeneralFixesEnabled =
+                ApplyGeneralFixes,
+
+            RegexTypoFixEnabled =
+                EnableTypoCorrection,
+
+            SkipIfNoRegexTypo =
+                SkipIfNoRegexTypo,
+
+            SkipNoChanges =
+                SkipNoChanges,
+
+            SkipWhitespaceChanges =
+                SkipWhitespaceChanges,
+
+            SkipCasingChanges =
+                SkipCasingChanges,
+
+            SkipMinorGeneralFixChanges =
+                SkipMinorGeneralFixChanges,
+
+            SkipGeneralFixChanges =
+                SkipGeneralFixChanges,
+
+            SkipPagesWithNoLinks =
+                SkipPagesWithNoLinks,
+
+            SkipCosmeticChanges =
+                SkipCosmeticChanges,
+
+            UnicodifyWholeArticle =
+                UnicodifyWholePage,
+
+            AutoTaggerEnabled =
+                AutoTag,
+
+            DisambiguationEnabled =
+                DisambiguationEnabled,
+
+            DisambiguationLink =
+                DisambiguationLink.Trim(),
+
+            DisambiguationVariants =
+                DisambiguationVariants
+                    .Split(
+                        ['\r', '\n'],
+                        StringSplitOptions.RemoveEmptyEntries),
+
+            DisambiguationContextCharacters =
+                DisambiguationContextCharacters,
+
+            SkipIfNoDisambiguation =
+                SkipIfNoDisambiguation,
+
+            ImageOperation =
+                (ImageReplaceOptions)FileOperation,
+
+            ImageReplace =
+                FileReplace,
+
+            ImageWith =
+                FileWith,
+
+            SkipIfNoImageChange =
+                SkipIfNoFileChange,
+
+            CategorisationOperation =
+                (CategorisationOptions)CategoryOperation,
+
+            SkipIfNoCategoryChange =
+                SkipIfNoCategoryChange,
+
+            NewCategory =
+                Category.Trim(),
+
+            NewCategory2 =
+                CategoryReplacement.Trim(),
+
+            RemoveCategorySortKey =
+                RemoveCategorySortKey,
+
+            AppendEnabled =
+                AppendPrependEnabled,
+
+            AppendText =
+                AppendPrependText,
+
+            AppendNewLineCount =
+                AppendNewlineCount,
+
+            AppendInsteadOfPrepend =
+                AppendText,
+
+            SortMetadataAfterAppend =
+                SortMetadataAfterAppend
+        };
     }
 
 }
