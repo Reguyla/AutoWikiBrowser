@@ -40,9 +40,4 @@ public sealed class MainProcessDependencies
     /// Gets or initializes the configured advanced replacement processor.
     /// </summary>
     public required ReplaceSpecial.ReplaceSpecial ReplaceSpecial { get; init; }
-
-    /// <summary>
-    /// Gets or initializes the configured user-talk template expression.
-    /// </summary>
-    public Regex? UserTalkTemplatesRegex { get; init; }
 }

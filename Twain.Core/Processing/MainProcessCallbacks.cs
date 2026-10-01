@@ -18,14 +18,6 @@ public sealed class MainProcessCallbacks
     public required Func<Article, bool> RunExtensionProcessing { get; init; }
 
     /// <summary>
-    /// Gets or initializes the callback that prepares wiki-backed resources
-    /// required by the general-fix processing path.
-    /// </summary>
-    public required Action<Article, MainProcessOptions>
-        PrepareGeneralFixResources
-    { get; init; }
-
-    /// <summary>
     /// Gets or initializes the callback that applies regular-expression typo
     /// processing and updates application-owned statistics and UI state.
     /// </summary>

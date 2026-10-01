@@ -3050,7 +3050,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
             FindAndReplace = _findAndReplace,
             SubstTemplates = _substTemplates,
             ReplaceSpecial = _replaceSpecial,
-            UserTalkTemplatesRegex = _userTalkTemplatesRegex
         };
     }
 
@@ -3067,7 +3066,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         return new MainProcessCallbacks
         {
             RunExtensionProcessing = RunExtensionProcessing,
-            PrepareGeneralFixResources = PrepareGeneralFixResources,
             ApplyRegexTypoProcessing = ApplyRegexTypoProcessing,
             AbortProcessing = AbortProcessing,
             HandleProcessingException = HandleProcessingException

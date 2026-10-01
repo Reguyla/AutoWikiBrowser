@@ -66,8 +66,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly Twain.Core.ReplaceSpecial.ReplaceSpecial
         _replaceSpecial = new();
 
-    private Regex? _userTalkTemplatesRegex;
-
     /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
@@ -199,8 +197,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             NoParse = _noParse,
             FindAndReplace = _findAndReplace,
             SubstTemplates = _substTemplates,
-            ReplaceSpecial = _replaceSpecial,
-            UserTalkTemplatesRegex = _userTalkTemplatesRegex
+            ReplaceSpecial = _replaceSpecial
         };
     }
 

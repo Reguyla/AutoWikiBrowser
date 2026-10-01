@@ -12,6 +12,15 @@ public sealed class MainProcess
 {
     private readonly Parsers _parser;
 
+    private bool _templateRedirectsLoaded;
+
+    private bool _datedTemplatesLoaded;
+
+    private bool _renamedTemplateParametersLoaded;
+
+    private bool _userTalkWarningsLoaded;
+    private Regex? _userTalkTemplatesRegex;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MainProcess"/> class.
     /// </summary>
@@ -615,9 +624,45 @@ public sealed class MainProcess
 
             if (process)
             {
-                callbacks.PrepareGeneralFixResources(
-                    article,
-                    options);
+                if (article.CanDoGeneralFixes &&
+                    options.GeneralFixesEnabled &&
+                    !_templateRedirectsLoaded)
+                {
+                    LoadTemplateRedirects(session);
+
+                    Variables.Profiler.Profile(
+                        "LoadTemplateRedirects");
+                }
+
+                if (article.CanDoGeneralFixes &&
+                    options.GeneralFixesEnabled &&
+                    !_datedTemplatesLoaded)
+                {
+                    LoadDatedTemplates(session);
+
+                    Variables.Profiler.Profile(
+                        "LoadDatedTemplates");
+                }
+
+                if (article.CanDoGeneralFixes &&
+                    options.GeneralFixesEnabled &&
+                    !_renamedTemplateParametersLoaded)
+                {
+                    LoadRenameTemplateParameters(session);
+
+                    Variables.Profiler.Profile(
+                        "LoadRenameTemplateParameters");
+                }
+
+                if (options.GeneralFixesEnabled &&
+                    article.NameSpaceKey == Namespace.UserTalk &&
+                    !_userTalkWarningsLoaded)
+                {
+                    LoadUserTalkWarnings(session);
+
+                    Variables.Profiler.Profile(
+                        "loadUserTalkWarnings");
+                }
 
                 if (!ApplyGeneralFixProcessing(
                         article,
@@ -625,7 +670,7 @@ public sealed class MainProcess
                         options,
                         dependencies.Skip,
                         dependencies.RemoveText,
-                        dependencies.UserTalkTemplatesRegex))
+                        _userTalkTemplatesRegex))
                 {
                     return;
                 }
@@ -685,6 +730,71 @@ public sealed class MainProcess
         finally
         {
             Variables.Profiler.Flush();
+        }
+    }
+
+    /// <summary>
+    /// Invalidates wiki-specific processing resources so they will be
+    /// reloaded for the active project when next required.
+    /// </summary>
+    public void ResetProjectResources()
+    {
+        _userTalkWarningsLoaded = false;
+        _userTalkTemplatesRegex = null;
+
+        _templateRedirectsLoaded = false;
+        _datedTemplatesLoaded = false;
+        _renamedTemplateParametersLoaded = false;
+    }
+
+    /// <summary>
+    /// Loads the configured user-talk templates and builds the regular
+    /// expression used by general-fix processing.
+    /// </summary>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    private void LoadUserTalkWarnings(
+        Session session)
+    {
+        Regex userTalkTemplate = new(
+            @"# ?\[\[" +
+            Variables.NamespacesCaseInsensitive[Namespace.Template] +
+            @"(.*?)\]\]");
+
+        _userTalkTemplatesRegex = null;
+        _userTalkWarningsLoaded = true;
+
+        try
+        {
+            string text =
+                LoadWikiConfigurationText(
+                    session,
+                    "Project:AutoWikiBrowser/User talk templates",
+                    "LoadUserTalkWarnings",
+                    "Unable to load user talk templates: ");
+
+            if (text.Length == 0)
+            {
+                return;
+            }
+
+            List<string> userTalkTemplates =
+                Parsers.ParseUserTalkTemplates(
+                    text,
+                    userTalkTemplate);
+
+            if (userTalkTemplates.Any())
+            {
+                _userTalkTemplatesRegex =
+                    Tools.NestedTemplateRegex(
+                        userTalkTemplates);
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+            _userTalkWarningsLoaded = false;
         }
     }
 
@@ -760,5 +870,126 @@ public sealed class MainProcess
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Loads the configured template redirects used by the general-fix
+    /// processing pipeline.
+    /// </summary>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    private void LoadTemplateRedirects(
+        Session session)
+    {
+        _templateRedirectsLoaded = true;
+
+        string text =
+            LoadWikiConfigurationText(
+                session,
+                "Project:AutoWikiBrowser/Template redirects",
+                "LoadTemplateRedirects",
+                "Unable to load template redirects: ");
+
+        // Always update the parser state, even when no text was loaded.
+        // This clears redirects left over from a previously selected project.
+        WikiRegexes.TemplateRedirects =
+            Parsers.LoadTemplateRedirects(text);
+    }
+
+    /// <summary>
+    /// Loads the configured dated-template definitions used by the
+    /// general-fix processing pipeline.
+    /// </summary>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    private void LoadDatedTemplates(
+        Session session)
+    {
+        _datedTemplatesLoaded = true;
+
+        string text =
+            LoadWikiConfigurationText(
+                session,
+                "Project:AutoWikiBrowser/Dated templates",
+                "LoadDatedTemplates",
+                "Unable to load dated templates: ");
+
+        if (text.Length > 0)
+        {
+            WikiRegexes.DatedTemplates =
+                Parsers.LoadDatedTemplates(text);
+        }
+    }
+
+    /// <summary>
+    /// Loads renamed template-parameter definitions used by the
+    /// general-fix processing pipeline.
+    /// </summary>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    private void LoadRenameTemplateParameters(
+        Session session)
+    {
+        _renamedTemplateParametersLoaded = true;
+
+        string text =
+            LoadWikiConfigurationText(
+                session,
+                "Project:AutoWikiBrowser/Rename template parameters",
+                "LoadRenameTemplateParameters",
+                "Unable to load renamed template parameters: ");
+
+        if (text.Length > 0)
+        {
+            WikiRegexes.RenamedTemplateParameters =
+                Parsers.LoadRenamedTemplateParameters(text);
+        }
+    }
+
+    /// <summary>
+    /// Loads configuration text from the specified wiki page.
+    /// </summary>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    /// <param name="pageTitle">
+    /// The wiki page containing the configuration text.
+    /// </param>
+    /// <param name="logSource">
+    /// The source name used for debug logging.
+    /// </param>
+    /// <param name="errorMessage">
+    /// The message prefix used when loading fails.
+    /// </param>
+    /// <returns>
+    /// The loaded configuration text, or an empty string when the page
+    /// cannot be loaded.
+    /// </returns>
+    private static string LoadWikiConfigurationText(
+        Session session,
+        string pageTitle,
+        string logSource,
+        string errorMessage)
+    {
+        try
+        {
+            return session.Editor
+                .SynchronousEditor
+                .Clone()
+                .Open(
+                    pageTitle,
+                    true);
+        }
+        catch (Exception ex)
+        {
+            Tools.WriteDebug(
+                logSource,
+                errorMessage + ex.Message);
+
+            return string.Empty;
+        }
     }
 }
