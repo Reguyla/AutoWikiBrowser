@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.API;
 using Twain.Core.Editing;
+using Twain.Core.Exceptions;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
 using Twain.Core.Processing;
@@ -217,6 +218,46 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Session.Editor.Abort();
 
         Options.IsProcessing = false;
+    }
+
+    /// <summary>
+    /// Handles a request from the Core processing pipeline to abort the
+    /// current article-processing workflow.
+    /// </summary>
+    private void AbortProcessing()
+    {
+        StopProcessing();
+    }
+
+    /// <summary>
+    /// Handles an exception raised by the Core article-processing pipeline.
+    /// </summary>
+    /// <param name="article">
+    /// The article being processed when the exception occurred.
+    /// </param>
+    /// <param name="exception">
+    /// The exception raised by the processing pipeline.
+    /// </param>
+    private void HandleProcessingException(
+        Article article,
+        Exception exception)
+    {
+        ErrorHandler.HandleException(exception);
+
+        string stackTrace =
+            exception.StackTrace ?? string.Empty;
+
+        // A regular-expression failure is a processing/configuration problem,
+        // rather than a problem with the article itself.
+        if (!stackTrace.Contains(
+                "System.Text.RegularExpressions",
+                StringComparison.Ordinal))
+        {
+            article.Trace.AWBSkipped(
+                "Exception: " + exception.Message);
+        }
+
+        AbortProcessing();
     }
 
     /// <summary>
