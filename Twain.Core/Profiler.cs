@@ -151,6 +151,11 @@ public class Profiler
     /// </summary>
     public void Flush()
     {
+        if (string.IsNullOrWhiteSpace(_fileName))
+        {
+            return;
+        }
+
         _profilerSemaphore.WaitOne();
 
         try

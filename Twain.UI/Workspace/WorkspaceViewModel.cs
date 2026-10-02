@@ -57,6 +57,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
     private readonly List<string> _noParse = new();
 
+    private readonly List<string> _noRetf = new();
+
     private readonly FindandReplace _findAndReplace =
         new();
 
@@ -197,8 +199,71 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             NoParse = _noParse,
             FindAndReplace = _findAndReplace,
             SubstTemplates = _substTemplates,
-            ReplaceSpecial = _replaceSpecial
+            ReplaceSpecial = _replaceSpecial,
+            NoRetf = _noRetf
         };
+    }
+
+    /// <summary>
+    /// Captures the callbacks used by the Core article-processing pipeline.
+    /// </summary>
+    /// <returns>
+    /// The callbacks associated with the current workspace processing lifecycle.
+    /// </returns>
+    private MainProcessCallbacks CreateMainProcessCallbacks()
+    {
+        return new MainProcessCallbacks
+        {
+            RunExtensionProcessing =
+                RunExtensionProcessing,
+
+            ApplyRegexTypoProcessing =
+                ApplyRegexTypoProcessing,
+
+            AbortProcessing =
+                AbortProcessing,
+
+            HandleProcessingException =
+                HandleProcessingException
+        };
+    }
+
+    /// <summary>
+    /// Runs extension processing for the supplied article.
+    /// </summary>
+    /// <param name="article">
+    /// The article being processed.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when processing should continue.
+    /// </returns>
+    private bool RunExtensionProcessing(
+        Article article)
+    {
+        // Custom modules, external programs, and plugins are not yet connected
+        // to the Twain workspace processing lifecycle.
+        return true;
+    }
+
+    /// <summary>
+    /// Handles the results produced by regular-expression typo processing.
+    /// </summary>
+    /// <param name="article">
+    /// The article that was processed.
+    /// </param>
+    /// <param name="mainProcess">
+    /// Whether processing is part of the normal article workflow.
+    /// </param>
+    /// <param name="typoStats">
+    /// The typo statistics produced by Core processing, when available.
+    /// </param>
+    private void ApplyRegexTypoProcessing(
+        Article article,
+        bool mainProcess,
+        List<TypoStat>? typoStats)
+    {
+        // Typo statistics are not yet displayed by the Twain workspace.
+        // Core processing has already been applied before this callback runs.
     }
 
     /// <summary>
@@ -297,6 +362,23 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
             CurrentArticleName =
                 CurrentArticle.Name;
+
+            MainProcessOptions options =
+                Options.CreateMainProcessOptions();
+
+            MainProcessDependencies dependencies =
+                CreateMainProcessDependencies();
+
+            MainProcessCallbacks callbacks =
+                CreateMainProcessCallbacks();
+
+            _mainProcess.ProcessPageCore(
+                CurrentArticle,
+                true,
+                options,
+                Session,
+                dependencies,
+                callbacks);
 
             Editor.Document.CurrentText =
                 CurrentArticle.ArticleText;

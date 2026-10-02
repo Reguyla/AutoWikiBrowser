@@ -676,10 +676,22 @@ public sealed class MainProcess
                 }
             }
 
+            List<TypoStat>? typoStats = null;
+
+            if (dependencies.RegexTypos is not null)
+            {
+                typoStats =
+                    ApplyRegexTypoFixes(
+                        article,
+                        options,
+                        dependencies.RegexTypos,
+                        dependencies.NoRetf);
+            }
+
             callbacks.ApplyRegexTypoProcessing(
                 article,
                 mainProcess,
-                options);
+                typoStats);
 
             // Find and replace after general fixes.
             // Do not apply skip checks when reparsing.

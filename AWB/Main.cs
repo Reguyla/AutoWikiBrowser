@@ -3050,6 +3050,8 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
             FindAndReplace = _findAndReplace,
             SubstTemplates = _substTemplates,
             ReplaceSpecial = _replaceSpecial,
+            NoRetf = _noRetf,
+            RegexTypos = _regexTypos
         };
     }
 
@@ -4523,25 +4525,13 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     private void ApplyRegexTypoProcessing(
         Article article,
         bool mainProcess,
-        MainProcessOptions options)
+        List<TypoStat>? typoStats)
     {
-        if (!options.RegexTypoFixEnabled ||
-            _regexTypos == null ||
-            options.BotMode ||
-            Namespace.IsTalk(article.NameSpaceKey))
-        {
-            return;
-        }
-
-        _typoStats =
-            MainProcess.ApplyRegexTypoFixes(
-                article,
-                options,
-                _regexTypos,
-                _noRetf);
+        _typoStats = typoStats;
 
         if (!article.SkipArticle ||
-            !mainProcess)
+            !mainProcess ||
+            _typoStats is null)
         {
             return;
         }

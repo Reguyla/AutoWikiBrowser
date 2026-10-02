@@ -40,4 +40,8 @@ public sealed class MainProcessDependencies
     /// Gets or initializes the configured advanced replacement processor.
     /// </summary>
     public required ReplaceSpecial.ReplaceSpecial ReplaceSpecial { get; init; }
+
+    public RegExTypoFix? RegexTypos { get; init; }
+
+    public required IReadOnlyCollection<string> NoRetf { get; init; }
 }

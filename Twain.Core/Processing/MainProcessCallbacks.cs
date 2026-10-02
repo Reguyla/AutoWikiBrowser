@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Processing;
+﻿using Twain.Core.Parse;
+
+namespace Twain.Core.Processing;
 
 /// <summary>
 /// Contains application-owned callbacks used by the Core article-processing
@@ -21,9 +23,8 @@ public sealed class MainProcessCallbacks
     /// Gets or initializes the callback that applies regular-expression typo
     /// processing and updates application-owned statistics and UI state.
     /// </summary>
-    public required Action<Article, bool, MainProcessOptions>
-        ApplyRegexTypoProcessing
-    { get; init; }
+    public required Action<Article, bool, List<TypoStat>?>
+        ApplyRegexTypoProcessing { get; init; }
 
     /// <summary>
     /// Gets or initializes the callback that aborts the current application
@@ -36,6 +37,5 @@ public sealed class MainProcessCallbacks
     /// article-processing pipeline.
     /// </summary>
     public required Action<Article, Exception>
-        HandleProcessingException
-    { get; init; }
+        HandleProcessingException { get; init; }
 }
