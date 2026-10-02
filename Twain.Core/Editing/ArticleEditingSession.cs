@@ -20,10 +20,26 @@ public sealed class ArticleEditingSession
     /// <summary>
     /// Gets the article text originally loaded into the session.
     /// </summary>
-    public string OriginalText { get; }
+    public string OriginalText { get; private set; }
+
+    /// <summary>
+    /// Starts a new editing session using the supplied article text.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text loaded from the wiki.
+    /// </param>
+    public void LoadArticle(
+        string articleText)
+    {
+        ArgumentNullException.ThrowIfNull(articleText);
+
+        OriginalText = articleText;
+        CurrentText = articleText;
+    }
 
     /// <summary>
     /// Gets or sets the article text currently being edited.
     /// </summary>
     public string CurrentText { get; set; }
+
 }

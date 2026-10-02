@@ -62,6 +62,27 @@ public sealed partial class ArticleDocumentViewModel : ObservableObject
             CurrentText,
             StringComparison.Ordinal);
 
+    /// <summary>
+    /// Loads a new article into the document and establishes its original
+    /// editing baseline.
+    /// </summary>
+    /// <param name="articleText">
+    /// The article text loaded from the wiki.
+    /// </param>
+    public void LoadArticle(
+        string articleText)
+    {
+        ArgumentNullException.ThrowIfNull(articleText);
+
+        _session.LoadArticle(articleText);
+
+        _currentText = articleText;
+
+        OnPropertyChanged(nameof(OriginalText));
+        OnPropertyChanged(nameof(CurrentText));
+        OnPropertyChanged(nameof(HasChanges));
+    }
+
     partial void OnCurrentTextChanged(
         string value)
     {

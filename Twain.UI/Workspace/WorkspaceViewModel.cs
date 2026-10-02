@@ -363,6 +363,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             CurrentArticleName =
                 CurrentArticle.Name;
 
+            Editor.Document.LoadArticle(
+                CurrentArticle.ArticleText);
+
             MainProcessOptions options =
                 Options.CreateMainProcessOptions();
 
