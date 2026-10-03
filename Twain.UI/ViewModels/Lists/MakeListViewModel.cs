@@ -19,6 +19,12 @@ public partial class MakeListViewModel : ObservableObject
     public ObservableCollection<Article> Articles { get; } = new();
 
     /// <summary>
+    /// Gets or sets the article currently selected in the Make List region.
+    /// </summary>
+    [ObservableProperty]
+    private Article? _selectedArticle;
+
+    /// <summary>
     /// Gets or sets the source text used by the selected list provider.
     /// </summary>
     [ObservableProperty]
@@ -180,6 +186,33 @@ public partial class MakeListViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(article);
 
         return Articles.Remove(article);
+    }
+
+    /// <summary>
+    /// Removes the article with the specified title from the current article list.
+    /// </summary>
+    /// <param name="articleName">
+    /// The title of the article to remove.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the article was found and removed; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    public bool RemoveArticle(
+        string articleName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(articleName);
+
+        Article? article =
+            Articles.FirstOrDefault(
+                item =>
+                    string.Equals(
+                        item.Name,
+                        articleName,
+                        StringComparison.Ordinal));
+
+        return article is not null &&
+               Articles.Remove(article);
     }
 
     [RelayCommand(CanExecute = nameof(CanMakeList))]

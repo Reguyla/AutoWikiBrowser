@@ -165,6 +165,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private void StartProcessing()
     {
         Article? article =
+            MakeList.SelectedArticle ??
             MakeList.Articles.FirstOrDefault();
 
         if (article is null ||
@@ -337,7 +338,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Session.Editor.Reset();
 
-        if (!MakeList.RemoveArticle(CurrentArticle))
+        if (!MakeList.RemoveArticle(CurrentArticle.Name))
         {
             StopProcessing();
             return;
