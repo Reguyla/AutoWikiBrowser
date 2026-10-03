@@ -21,43 +21,10 @@
         <vm:ShellViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,*">
-        <Menu Grid.Row="0">
-            <MenuItem Header="File">
-                <MenuItem
-                    Header="Login / Profiles..."
-                    Click="LoginProfilesMenuItem_Click" />
-
-                <Separator />
-
-                <MenuItem
-                    Header="Exit"
-                    Click="ExitMenuItem_Click" />
-            </MenuItem>
-
-            <MenuItem Header="Tools">
-
-                <MenuItem
-                    Header="External Processing..."
-                    Click="ExternalProcessingMenuItem_Click" />
-
-            </MenuItem>
-
-            <MenuItem Header="Help">
-                <MenuItem
-                    Header="Check for Updates"
-                    Command="{Binding CheckForUpdatesCommand}" />
-
-                <Separator />
-
-                <MenuItem
-                    Header="About Twain..."
-                    Click="AboutMenuItem_Click" />
-            </MenuItem>
-        </Menu>
+    <Grid RowDefinitions="Auto,*">
 
 <Border
-    Grid.Row="1"
+    Grid.Row="0"
     Padding="12,8"
     BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
     BorderThickness="0,0,0,1">
@@ -142,7 +109,7 @@
 </Border>
 
         <workspaceViews:WorkspaceView
-            Grid.Row="2"
+            Grid.Row="1"
             DataContext="{Binding Workspace}" />
     </Grid>
 

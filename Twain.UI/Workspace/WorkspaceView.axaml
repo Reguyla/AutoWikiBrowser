@@ -85,6 +85,7 @@
             <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="ProfilesButton_Click"
                 Content="Profiles" />
 
             <Button
@@ -152,6 +153,7 @@
              <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="ExitButton_Click"
                 Content="Exit" />
 
         </StackPanel>

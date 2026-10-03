@@ -151,4 +151,19 @@ public partial class WorkspaceView : UserControl
 
         shell.OpenExternalProcessing();
     }
+
+    /// <summary>
+    /// Exits Twain through the application shell.
+    /// </summary>
+    private void ExitButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        shell.ExitApplication();
+    }
 }

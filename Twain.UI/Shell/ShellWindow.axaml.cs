@@ -55,12 +55,20 @@ public partial class ShellWindow : Window
         await ShowLoginAsync();
     }
 
+    /// <summary>
+    /// Closes the Twain application window.
+    /// </summary>
+    public void ExitApplication()
+    {
+        Close();
+    }
+
     private void ExitMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            Close();
-        }
+    {
+        ExitApplication();
+    }
 
     /// <summary>
     /// Opens the custom module window.
