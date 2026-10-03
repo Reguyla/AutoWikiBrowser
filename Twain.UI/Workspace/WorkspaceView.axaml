@@ -144,7 +144,15 @@
                 Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
-                Content="List Tools" />
+                Click="ListComparerButton_Click"
+                Content="List Comparer" />
+
+            <Button
+                Margin="16,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Click="ListSplitterButton_Click"
+                Content="List Splitter" />
 
             <Button
                 Margin="16,0,0,0"
@@ -165,16 +173,7 @@
             <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
-                Content="Plugins" />
-
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="Logging &amp; Diagnostics" />
-
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
+                Click="AboutButton_Click"
                 Content="About" />
 
         </StackPanel>

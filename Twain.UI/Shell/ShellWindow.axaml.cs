@@ -2,6 +2,7 @@
 using Avalonia.Interactivity;
 using System.Threading.Tasks;
 using Twain.CustomModules;
+using Twain.UI.About;
 using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
@@ -121,23 +122,39 @@ public partial class ShellWindow : Window
         OpenDatabaseScanner();
     }
 
-    private async void ListComparerMenuItem_Click(
+    /// <summary>
+    /// Opens the list comparer window.
+    /// </summary>
+    public async void OpenListComparer()
+    {
+        ListComparerWindow window = new();
+
+        await window.ShowDialog(this);
+    }
+
+    private void ListComparerMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            ListComparerWindow window = new();
+    {
+        OpenListComparer();
+    }
 
-            await window.ShowDialog(this);
-        }
+    /// <summary>
+    /// Opens the list splitter window.
+    /// </summary>
+    public async void OpenListSplitter()
+    {
+        ListSplitterWindow window = new();
 
-    private async void ListSplitterMenuItem_Click(
+        await window.ShowDialog(this);
+    }
+
+    private void ListSplitterMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            ListSplitterWindow window = new();
-
-            await window.ShowDialog(this);
-        }
+    {
+        OpenListSplitter();
+    }
 
     /// <summary>
     /// Opens the application preferences window.
@@ -179,5 +196,22 @@ public partial class ShellWindow : Window
         RoutedEventArgs e)
     {
         OpenPreferences();
+    }
+
+    /// <summary>
+    /// Opens the About Twain window.
+    /// </summary>
+    public async void OpenAbout()
+    {
+        AboutBoxWindow window = new();
+
+        await window.ShowDialog(this);
+    }
+
+    private void AboutMenuItem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        OpenAbout();
     }
 }

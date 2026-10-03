@@ -75,6 +75,12 @@
                 <MenuItem
                     Header="Check for Updates"
                     Command="{Binding CheckForUpdatesCommand}" />
+
+                <Separator />
+
+                <MenuItem
+                    Header="About Twain..."
+                    Click="AboutMenuItem_Click" />
             </MenuItem>
         </Menu>
 

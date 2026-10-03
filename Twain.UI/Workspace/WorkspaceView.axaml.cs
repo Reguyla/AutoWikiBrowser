@@ -91,4 +91,49 @@ public partial class WorkspaceView : UserControl
 
         shell.OpenDatabaseScanner();
     }
+
+    /// <summary>
+    /// Opens the list comparer through the shell.
+    /// </summary>
+    private void ListComparerButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        shell.OpenListComparer();
+    }
+
+    /// <summary>
+    /// Opens the list splitter through the shell.
+    /// </summary>
+    private void ListSplitterButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        shell.OpenListSplitter();
+    }
+
+    /// <summary>
+    /// Opens the About Twain window through the shell.
+    /// </summary>
+    private void AboutButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        shell.OpenAbout();
+    }
 }
