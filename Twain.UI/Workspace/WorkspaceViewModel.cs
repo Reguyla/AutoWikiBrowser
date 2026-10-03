@@ -35,6 +35,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private string _currentArticleName = string.Empty;
 
     /// <summary>
+    /// Gets or sets the edit summary used when saving the current article.
+    /// </summary>
+    [ObservableProperty]
+    private string _editSummary = string.Empty;
+
+    /// <summary>
     /// Gets the active wiki session used by the workspace.
     /// </summary>
     public Session Session { get; }
@@ -84,6 +90,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Session.OpenComplete +=
             Editor_OpenComplete;
+
+        Session.SaveComplete +=
+            Editor_SaveComplete;
+
+        Session.ExceptionCaught +=
+            Editor_ExceptionCaught;
 
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
@@ -265,6 +277,121 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         // Typo statistics are not yet displayed by the Twain workspace.
         // Core processing has already been applied before this callback runs.
+    }
+
+    /// <summary>
+    /// Handles completion of a successful article save.
+    /// </summary>
+    private void Editor_SaveComplete(
+        AsyncApiEdit editor,
+        SaveInfo saveInfo)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (CurrentArticle is null)
+            {
+                StopProcessing();
+                return;
+            }
+
+            int currentIndex =
+                MakeList.Articles
+                    .Select(
+                        (article, index) =>
+                            new
+                            {
+                                article,
+                                index
+                            })
+                    .Where(
+                        item =>
+                            string.Equals(
+                                item.article.Name,
+                                CurrentArticle.Name,
+                                StringComparison.Ordinal))
+                    .Select(item => item.index)
+                    .DefaultIfEmpty(-1)
+                    .First();
+
+            if (currentIndex < 0 ||
+                !MakeList.RemoveArticle(CurrentArticle.Name))
+            {
+                StopProcessing();
+                return;
+            }
+
+            Article? nextArticle =
+                currentIndex < MakeList.Articles.Count
+                    ? MakeList.Articles[currentIndex]
+                    : null;
+
+            CurrentArticle = null;
+            CurrentArticleName = string.Empty;
+
+            Editor.Document.CurrentText =
+                string.Empty;
+
+            if (nextArticle is null)
+            {
+                StopProcessing();
+                return;
+            }
+
+            MakeList.SelectedArticle =
+                nextArticle;
+
+            StartProcessing();
+        });
+    }
+
+    /// <summary>
+    /// Handles an exception reported by the active API editor.
+    /// </summary>
+    private void Editor_ExceptionCaught(
+        AsyncApiEdit editor,
+        Exception exception)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            ErrorHandler.HandleException(exception);
+        });
+    }
+
+    /// <summary>
+    /// Saves the current article text to the active wiki.
+    /// </summary>
+    [RelayCommand]
+    private void SaveProcessing()
+    {
+        if (!Options.IsProcessing ||
+            CurrentArticle is null ||
+            Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        if (!string.Equals(
+                CurrentArticle.Name,
+                Session.Page.Title,
+                StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "Attempted to save a page that does not match the active session page.");
+        }
+
+        string articleText =
+            Editor.Document.CurrentText;
+
+        if (string.IsNullOrEmpty(articleText))
+        {
+            return;
+        }
+
+        Session.Editor.Save(
+            articleText,
+            EditSummary,
+            false,
+            WatchOptions.NoChange);
     }
 
     /// <summary>

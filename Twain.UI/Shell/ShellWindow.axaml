@@ -107,7 +107,8 @@
 
             <Button
                 MinWidth="88"
-                Content="Save" />
+                Content="Save"
+                Command="{Binding Workspace.SaveProcessingCommand}" />
 
             <Button
                 MinWidth="88"
