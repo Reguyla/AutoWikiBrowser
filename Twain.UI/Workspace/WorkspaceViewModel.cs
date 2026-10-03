@@ -41,6 +41,37 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private string _editSummary = string.Empty;
 
     /// <summary>
+    /// Gets or sets whether the workspace is displaying its options.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    private bool _isOptionsVisible;
+
+    /// <summary>
+    /// Gets whether the primary editing workspace is visible.
+    /// </summary>
+    public bool IsEditingVisible =>
+        !IsOptionsVisible;
+
+    /// <summary>
+    /// Displays the primary article editing workspace.
+    /// </summary>
+    [RelayCommand]
+    private void ShowEditing()
+    {
+        IsOptionsVisible = false;
+    }
+
+    /// <summary>
+    /// Displays the article processing options.
+    /// </summary>
+    [RelayCommand]
+    private void ShowOptions()
+    {
+        IsOptionsVisible = true;
+    }
+
+    /// <summary>
     /// Gets the active wiki session used by the workspace.
     /// </summary>
     public Session Session { get; }

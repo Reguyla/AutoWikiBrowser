@@ -1,11 +1,13 @@
 <UserControl
     x:Class="Twain.UI.Views.Workspaces.WorkspaceView"
+    x:Name="WorkspaceRoot"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
     xmlns:workspaceControls="using:Twain.UI.Controls.Workspaces"
+    xmlns:optionsViews="using:Twain.UI.Options"
     x:DataType="vm:WorkspaceViewModel"
     d:DesignWidth="1100"
     d:DesignHeight="700"
@@ -56,15 +58,17 @@
                 Foreground="{DynamicResource TwainTextPrimaryBrush}"
                 Text="Twain" />
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="Editing" />
+        <Button
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Left"
+            Command="{Binding ShowEditingCommand}"
+            Content="Editing" />
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="Options" />
+        <Button
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Left"
+            Command="{Binding ShowOptionsCommand}"
+            Content="Options" />
 
             <Separator Margin="0,8" />
 
@@ -157,11 +161,12 @@
     Article List, Monaco, and Article Alerts occupy the lower region.
     -->
 
-    <Grid
-        Grid.Row="0"
-        Grid.Column="2"
-        Margin="12,0,12,8"
-        RowDefinitions="*,8,*">
+        <Grid
+            Grid.Row="0"
+            Grid.Column="2"
+            Margin="12,0,12,8"
+            RowDefinitions="*,8,*"
+            IsVisible="{Binding IsEditingVisible}">
 
         <!-- Diff -->
 
@@ -312,6 +317,15 @@ Article alerts for the currently processed article.
         </Grid>
 
     </Grid>
+
+    <!-- Processing options workspace. -->
+
+    <optionsViews:OptionsView
+        Grid.Row="0"
+        Grid.Column="2"
+        Margin="12,0,12,8"
+        DataContext="{Binding Options}"
+        IsVisible="{Binding #WorkspaceRoot.DataContext.IsOptionsVisible}" />
 
     <!--
     Workspace status bar.
