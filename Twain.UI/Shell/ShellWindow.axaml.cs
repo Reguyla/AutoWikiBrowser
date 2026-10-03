@@ -28,7 +28,7 @@ public partial class ShellWindow : Window
     /// <summary>
     /// Displays the profile login workflow for the active session.
     /// </summary>
-    private async Task ShowLoginAsync()
+    public async Task ShowLoginAsync()
     {
         if (DataContext is not ShellViewModel viewModel)
         {
@@ -61,14 +61,22 @@ public partial class ShellWindow : Window
             Close();
         }
 
-    private async void MakeModuleMenuItem_Click(
+    /// <summary>
+    /// Opens the custom module window.
+    /// </summary>
+    public async void OpenCustomModules()
+    {
+        CustomModule window = new();
+
+        await window.ShowDialog(this);
+    }
+
+    private void MakeModuleMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            CustomModule window = new();
-
-            await window.ShowDialog(this);
-        }
+    {
+        OpenCustomModules();
+    }
 
     private async void ExternalProcessingMenuItem_Click(
         object? sender,
@@ -79,23 +87,39 @@ public partial class ShellWindow : Window
             await window.ShowDialog<bool>(this);
         }
 
-    private async void RegexTesterMenuItem_Click(
+    /// <summary>
+    /// Opens the regular expression tester window.
+    /// </summary>
+    public async void OpenRegexTester()
+    {
+        RegexTesterWindow window = new();
+
+        await window.ShowDialog(this);
+    }
+
+    private void RegexTesterMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            RegexTesterWindow window = new();
+    {
+        OpenRegexTester();
+    }
 
-            await window.ShowDialog(this);
-        }
+    /// <summary>
+    /// Opens the database scanner window.
+    /// </summary>
+    public async void OpenDatabaseScanner()
+    {
+        DatabaseScannerWindow window = new();
 
-    private async void DatabaseScannerMenuItem_Click(
+        await window.ShowDialog(this);
+    }
+
+    private void DatabaseScannerMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            DatabaseScannerWindow window = new();
-
-            await window.ShowDialog(this);
-        }
+    {
+        OpenDatabaseScanner();
+    }
 
     private async void ListComparerMenuItem_Click(
         object? sender,
@@ -118,9 +142,7 @@ public partial class ShellWindow : Window
     /// <summary>
     /// Opens the application preferences window.
     /// </summary>
-    private async void PreferencesMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
+    public async void OpenPreferences()
     {
         if (DataContext is not ShellViewModel viewModel)
         {
@@ -147,5 +169,15 @@ public partial class ShellWindow : Window
 
             viewModel.ApplySitePreferences();
         }
+    }
+
+    /// <summary>
+    /// Opens the application preferences window from the main menu.
+    /// </summary>
+    private void PreferencesMenuItem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        OpenPreferences();
     }
 }

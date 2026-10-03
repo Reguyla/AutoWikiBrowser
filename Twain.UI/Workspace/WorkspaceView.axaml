@@ -118,6 +118,7 @@
                 Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="PreferencesButton_Click"
                 Content="Preferences" />
 
             <Button
@@ -131,6 +132,7 @@
             <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="CustomModulesButton_Click"
                 Content="Custom Modules" />
 
             <TextBlock
@@ -148,12 +150,14 @@
                 Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="DatabaseScannerButton_Click"
                 Content="Database Scanner" />
 
             <Button
                 Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="RegexTesterButton_Click"
                 Content="Regex Tester" />
 
             <Separator Margin="0,8" />
