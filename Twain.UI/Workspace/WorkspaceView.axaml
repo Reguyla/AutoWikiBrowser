@@ -64,42 +64,7 @@
             <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
-                Content="Article List" />
-
-            <TextBlock
-                Margin="4,12,4,4"
-                FontWeight="SemiBold"
-                Text="Options" />
-
-            <Button
-                Margin="16,0,0,0"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="General" />
-
-            <Button
-                Margin="16,0,0,0"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="More" />
-
-            <Button
-                Margin="16,0,0,0"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="Disambiguation" />
-
-            <Button
-                Margin="16,0,0,0"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="Skip Rules" />
-
-            <Button
-                Margin="16,0,0,0"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Content="Start Options" />
+                Content="Options" />
 
             <Separator Margin="0,8" />
 
@@ -109,20 +74,17 @@
                 Text="User Settings" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Content="Profiles" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Click="PreferencesButton_Click"
                 Content="Preferences" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Content="Bot Settings" />
@@ -141,28 +103,24 @@
                 Text="Tools" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Click="ListComparerButton_Click"
                 Content="List Comparer" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Click="ListSplitterButton_Click"
                 Content="List Splitter" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Click="DatabaseScannerButton_Click"
                 Content="Database Scanner" />
 
             <Button
-                Margin="16,0,0,0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Click="RegexTesterButton_Click"
