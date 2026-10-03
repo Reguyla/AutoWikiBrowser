@@ -42,7 +42,8 @@
 
                         <CheckBox
                             Content="Auto save"
-                            IsChecked="{Binding AutoSaveEnabled}" />
+                            IsChecked="{Binding AutoSaveEnabled}"
+                            IsEnabled="{Binding CanUseBotMode}" />
 
                         <Grid
                             ColumnDefinitions="Auto,120,*"

@@ -4,18 +4,16 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.API;
 using Twain.Core.Editing;
-using Twain.Core.Exceptions;
 using Twain.Core.Parse;
-using Twain.Core.Plugin;
 using Twain.Core.Processing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
+using Twain.UI.BotSettings;
 using Twain.UI.Diff;
 using Twain.UI.Editor;
 using Twain.UI.Options;
@@ -72,6 +70,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Gets the bot processing settings for the current workspace.
+    /// </summary>
+    public BotSettingsViewModel BotSettings { get; } = new();
+
+    /// <summary>
     /// Gets the active wiki session used by the workspace.
     /// </summary>
     public Session Session { get; }
@@ -114,6 +117,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(session);
 
         Session = session;
+
+        BotSettings.CanUseBotMode =
+            Session.IsBot || Session.IsSysop;
 
         _mainProcess =
             new MainProcess(

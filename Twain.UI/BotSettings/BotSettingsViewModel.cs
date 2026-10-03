@@ -83,5 +83,18 @@ public sealed partial class BotSettingsViewModel : ObservableObject
     private void ResetNudgeCount()
     {
         NudgeCount = 0;
+        CurrentArticleNudgeCount = 0;
     }
+
+    /// <summary>
+    /// Gets or sets the number of nudges attempted for the current article.
+    /// </summary>
+    [ObservableProperty]
+    private int _currentArticleNudgeCount;
+
+    /// <summary>
+    /// Gets or sets whether the current account is permitted to use bot mode.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canUseBotMode;
 }

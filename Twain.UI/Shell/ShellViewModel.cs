@@ -42,6 +42,9 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// </summary>
     public void LoginCompleted()
     {
+        Workspace.BotSettings.CanUseBotMode =
+            Session.IsBot || Session.IsSysop;
+
         OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(LoggedInUsername));
         OnPropertyChanged(nameof(LoginStatusText));

@@ -177,11 +177,14 @@ public partial class ShellWindow : Window
     /// </summary>
     public async Task OpenBotSettingsAsync()
     {
-        var viewModel = new BotSettingsViewModel();
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
 
         var window = new BotSettingsWindow
         {
-            DataContext = viewModel
+            DataContext = viewModel.Workspace.BotSettings
         };
 
         await window.ShowDialog<bool>(this);
