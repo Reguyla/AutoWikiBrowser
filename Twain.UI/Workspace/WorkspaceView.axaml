@@ -58,11 +58,16 @@
                 Foreground="{DynamicResource TwainTextPrimaryBrush}"
                 Text="Twain" />
 
+        <TextBlock
+                Margin="4,0,4,4"
+                FontWeight="SemiBold"
+                Text="Editing Options" />
+
         <Button
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Left"
             Command="{Binding ShowEditingCommand}"
-            Content="Editing" />
+            Content="Editing View" />
 
         <Button
             HorizontalAlignment="Stretch"
@@ -95,16 +100,16 @@
 
             <Separator Margin="0,8" />
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="CustomModulesButton_Click"
-                Content="Custom Modules" />
-
             <TextBlock
                 Margin="4,8,4,4"
                 FontWeight="SemiBold"
                 Text="Tools" />
+
+             <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Click="CustomModulesButton_Click"
+                Content="Custom Modules" />
 
             <Button
                 HorizontalAlignment="Stretch"
@@ -127,6 +132,12 @@
             <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="ExternalProcessingButton_Click"
+                Content="External Processing" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
                 Click="RegexTesterButton_Click"
                 Content="Regex Tester" />
 
@@ -137,6 +148,11 @@
                 HorizontalContentAlignment="Left"
                 Click="AboutButton_Click"
                 Content="About" />
+
+             <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Exit" />
 
         </StackPanel>
 

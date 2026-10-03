@@ -136,4 +136,19 @@ public partial class WorkspaceView : UserControl
 
         shell.OpenAbout();
     }
+
+    /// <summary>
+    /// Opens the external processing window through the shell.
+    /// </summary>
+    private void ExternalProcessingButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        shell.OpenExternalProcessing();
+    }
 }

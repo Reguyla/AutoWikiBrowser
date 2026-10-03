@@ -79,14 +79,21 @@ public partial class ShellWindow : Window
         OpenCustomModules();
     }
 
-    private async void ExternalProcessingMenuItem_Click(
+    /// <summary>
+    /// Opens the external processing window.
+    /// </summary>
+    public async void OpenExternalProcessing()
+    {
+        ExternalProgramWindow window = new();
+        await window.ShowDialog<bool>(this);
+    }
+
+    private void ExternalProcessingMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
-        {
-            ExternalProgramWindow window = new();
-
-            await window.ShowDialog<bool>(this);
-        }
+    {
+        OpenExternalProcessing();
+    }
 
     /// <summary>
     /// Opens the regular expression tester window.
@@ -214,4 +221,5 @@ public partial class ShellWindow : Window
     {
         OpenAbout();
     }
+
 }
