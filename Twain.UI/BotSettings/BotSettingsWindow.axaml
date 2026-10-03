@@ -1,0 +1,219 @@
+<Window
+    x:Class="Twain.UI.BotSettings.BotSettingsWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Twain.UI.BotSettings"
+    x:DataType="vm:BotSettingsViewModel"
+    Width="520"
+    Height="600"
+    MinWidth="460"
+    MinHeight="520"
+    Title="Bot Settings"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:BotSettingsViewModel />
+    </Design.DataContext>
+
+    <Grid
+        Margin="16"
+        RowDefinitions="*,Auto">
+
+        <ScrollViewer>
+            <StackPanel Spacing="16">
+
+                <!-- Automatic saving -->
+
+                <Border
+                    Padding="12"
+                    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+
+                    <StackPanel Spacing="10">
+
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Automatic saving" />
+
+                        <CheckBox
+                            Content="Auto save"
+                            IsChecked="{Binding AutoSaveEnabled}" />
+
+                        <Grid
+                            ColumnDefinitions="Auto,120,*"
+                            IsEnabled="{Binding AutoSaveEnabled}">
+
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="Delay" />
+
+                            <NumericUpDown
+                                Grid.Column="1"
+                                Margin="8,0"
+                                Minimum="0"
+                                Value="{Binding AutoSaveDelay}" />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Text="seconds between edits" />
+
+                        </Grid>
+
+                        <Grid
+                            ColumnDefinitions="Auto,120,*"
+                            IsEnabled="{Binding AutoSaveEnabled}">
+
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="Maximum edits" />
+
+                            <NumericUpDown
+                                Grid.Column="1"
+                                Margin="8,0"
+                                Minimum="0"
+                                Value="{Binding MaximumEdits}" />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Text="0 = no limit" />
+
+                        </Grid>
+
+                        <CheckBox
+                            Content="Suppress &quot;using Twain&quot; in edit summary"
+                            IsChecked="{Binding SuppressUsingTwain}" />
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- Nudge behavior -->
+
+                <Border
+                    Padding="12"
+                    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+
+                    <StackPanel Spacing="10">
+
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Nudge timer" />
+
+                        <CheckBox
+                            Content="Resave if processing becomes stuck"
+                            IsChecked="{Binding NudgeEnabled}" />
+
+                        <CheckBox
+                            Margin="20,0,0,0"
+                            Content="Skip page after repeated nudge failures"
+                            IsChecked="{Binding SkipAfterRepeatedNudge}"
+                            IsEnabled="{Binding NudgeEnabled}" />
+
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="12">
+
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="{Binding NudgeCount, StringFormat='Total nudges: {0}'}" />
+
+                        <Button
+                            Command="{Binding ResetNudgeCountCommand}"
+                            Content="Reset counter"
+                            IsEnabled="{Binding AutoSaveEnabled}" />
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- Completion action -->
+
+                <Border
+                    Padding="12"
+                    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+
+                    <StackPanel Spacing="10">
+
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="After processing" />
+
+                        <CheckBox
+                            Content="Perform a system action when processing completes"
+                            IsChecked="{Binding AutomaticShutdownEnabled}" />
+
+                        <StackPanel
+                            Margin="20,0,0,0"
+                            IsEnabled="{Binding AutomaticShutdownEnabled}"
+                            Spacing="6">
+
+                        <RadioButton
+                            x:Name="ShutdownRadioButton"
+                            Click="ShutdownRadioButton_Click"
+                            Content="Shutdown"
+                            GroupName="ShutdownAction" />
+
+                        <RadioButton
+                            x:Name="StandbyRadioButton"
+                            Click="StandbyRadioButton_Click"
+                            Content="Standby"
+                            GroupName="ShutdownAction" />
+
+                        <RadioButton
+                            x:Name="RestartRadioButton"
+                            Click="RestartRadioButton_Click"
+                            Content="Restart"
+                            GroupName="ShutdownAction" />
+
+                        <RadioButton
+                            x:Name="HibernateRadioButton"
+                            Click="HibernateRadioButton_Click"
+                            Content="Hibernate"
+                            GroupName="ShutdownAction" />
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,16,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+
+            <Button
+                MinWidth="88"
+                Click="CancelButton_Click"
+                Content="Cancel" />
+
+            <Button
+                MinWidth="88"
+                Click="OkButton_Click"
+                Content="OK" />
+
+        </StackPanel>
+
+    </Grid>
+
+</Window>

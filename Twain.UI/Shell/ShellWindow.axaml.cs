@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using System.Threading.Tasks;
 using Twain.CustomModules;
 using Twain.UI.About;
+using Twain.UI.BotSettings;
 using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
@@ -169,6 +170,21 @@ public partial class ShellWindow : Window
         RoutedEventArgs e)
     {
         OpenListSplitter();
+    }
+
+    /// <summary>
+    /// Opens the bot processing settings window.
+    /// </summary>
+    public async Task OpenBotSettingsAsync()
+    {
+        var viewModel = new BotSettingsViewModel();
+
+        var window = new BotSettingsWindow
+        {
+            DataContext = viewModel
+        };
+
+        await window.ShowDialog<bool>(this);
     }
 
     /// <summary>

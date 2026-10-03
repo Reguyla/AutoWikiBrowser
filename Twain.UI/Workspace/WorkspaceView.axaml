@@ -97,6 +97,7 @@
             <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="BotSettingsButton_Click"
                 Content="Bot Settings" />
 
             <Separator Margin="0,8" />

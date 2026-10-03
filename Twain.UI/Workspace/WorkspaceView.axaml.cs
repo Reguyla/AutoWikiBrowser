@@ -166,4 +166,16 @@ public partial class WorkspaceView : UserControl
 
         shell.ExitApplication();
     }
+
+    private async void BotSettingsButton_Click(
+    object? sender,
+    RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        await shell.OpenBotSettingsAsync();
+    }
 }
