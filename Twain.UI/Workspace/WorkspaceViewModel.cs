@@ -389,7 +389,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Session.Editor.Save(
             articleText,
-            EditSummary,
+            Editor.EditSummary,
             false,
             WatchOptions.NoChange);
     }

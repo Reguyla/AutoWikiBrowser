@@ -14,11 +14,32 @@
         <vm:ArticleEditorViewModel />
     </Design.DataContext>
 
-    <Grid>
+    <Grid RowDefinitions="Auto,*">
+
+        <Grid
+            Grid.Row="0"
+            Margin="0,0,0,8"
+            ColumnDefinitions="Auto,*">
+
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,0,8,0"
+                VerticalAlignment="Center"
+                Text="Edit summary:" />
+
+            <TextBox
+                Grid.Column="1"
+                Text="{Binding EditSummary, Mode=TwoWay}"
+                Watermark="Describe your changes" />
+
+        </Grid>
+
         <NativeWebView
             x:Name="EditorWebView"
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />
+
     </Grid>
 
 </UserControl>

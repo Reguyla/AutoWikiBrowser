@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Twain.UI.Editor;
 
@@ -61,4 +62,25 @@ public sealed class ArticleEditorViewModel : ViewModelBase
     /// to a zero-based line number.
     /// </summary>
     public Func<int, Task>? GoToLineRequested { get; set; }
+
+    private string _editSummary = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the edit summary used when saving the current article.
+    /// </summary>
+    public string EditSummary
+    {
+        get => _editSummary;
+
+        set
+        {
+            if (_editSummary == value)
+            {
+                return;
+            }
+
+            _editSummary = value;
+            OnPropertyChanged();
+        }
+    }
 }
