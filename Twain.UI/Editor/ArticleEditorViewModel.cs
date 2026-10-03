@@ -83,4 +83,24 @@ public sealed class ArticleEditorViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+    private bool _isMinorEdit;
+
+    /// <summary>
+    /// Gets or sets whether the current article should be saved as a minor edit.
+    /// </summary>
+    public bool IsMinorEdit
+    {
+        get => _isMinorEdit;
+
+        set
+        {
+            if (_isMinorEdit == value)
+            {
+                return;
+            }
+
+            _isMinorEdit = value;
+            OnPropertyChanged();
+        }
+    }
 }
