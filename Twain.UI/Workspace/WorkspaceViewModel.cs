@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
@@ -123,6 +124,14 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// Cancels the pending nudge timer for the current article.
     /// </summary>
     private CancellationTokenSource? _nudgeCancellation;
+
+    /// <summary>
+    /// Requests confirmation before performing the configured
+    /// after-processing action.
+    /// </summary>
+    public Func<BotShutdownAction, Task<bool>>?
+        ConfirmShutdownRequested
+    { get; set; }
 
     /// <summary>
     /// Initializes the standard Twain editing workspace.
@@ -412,7 +421,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
             if (nextArticle is null)
             {
-                StopProcessing();
+                CompleteProcessing();
                 return;
             }
 
@@ -499,6 +508,32 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Session.Editor.Abort();
 
         Options.IsProcessing = false;
+    }
+
+    /// <summary>
+    /// Completes article processing after the article queue has been exhausted.
+    /// </summary>
+    private async void CompleteProcessing()
+    {
+        StopProcessing();
+
+        if (!BotSettings.AutomaticShutdownEnabled ||
+            ConfirmShutdownRequested is null)
+        {
+            return;
+        }
+
+        bool confirmed =
+            await ConfirmShutdownRequested(
+                BotSettings.ShutdownAction);
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        // The platform-specific after-processing action will be
+        // invoked here once shutdown handling is connected.
     }
 
     /// <summary>

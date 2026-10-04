@@ -25,6 +25,24 @@ public partial class ShellWindow : Window
     public ShellWindow()
     {
         InitializeComponent();
+
+        DataContextChanged += ShellWindow_DataContextChanged;
+    }
+
+    /// <summary>
+    /// Connects shell-owned UI services to the active workspace.
+    /// </summary>
+    private void ShellWindow_DataContextChanged(
+        object? sender,
+        EventArgs e)
+    {
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.Workspace.ConfirmShutdownRequested =
+            ConfirmShutdownAsync;
     }
 
     /// <summary>
@@ -188,6 +206,26 @@ public partial class ShellWindow : Window
         };
 
         await window.ShowDialog<bool>(this);
+    }
+
+    /// <summary>
+    /// Confirms the configured action after article processing completes.
+    /// </summary>
+    /// <param name="shutdownAction">
+    /// The configured action to confirm.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the user confirms the action;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public async Task<bool> ConfirmShutdownAsync(
+        BotShutdownAction shutdownAction)
+    {
+        var window =
+            new ShutdownNotificationWindow(
+                shutdownAction);
+
+        return await window.ShowDialog<bool>(this);
     }
 
     /// <summary>
