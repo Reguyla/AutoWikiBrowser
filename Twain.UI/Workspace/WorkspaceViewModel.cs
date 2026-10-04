@@ -115,6 +115,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _replaceSpecial = new();
 
     /// <summary>
+    /// Tracks activity completed during the current processing session.
+    /// </summary>
+    private readonly SessionCounters _sessionCounters = new();
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel(
@@ -366,6 +371,16 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
             if (currentIndex < 0 ||
                 !MakeList.RemoveArticle(CurrentArticle.Name))
+            {
+                StopProcessing();
+                return;
+            }
+
+            _sessionCounters.NumberOfEdits++;
+
+            if (BotSettings.AutoSaveEnabled &&
+                BotSettings.MaximumEdits > 0 &&
+                _sessionCounters.NumberOfEdits >= BotSettings.MaximumEdits)
             {
                 StopProcessing();
                 return;
