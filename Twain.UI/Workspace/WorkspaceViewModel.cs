@@ -120,6 +120,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly SessionCounters _sessionCounters = new();
 
     /// <summary>
+    /// Cancels the pending nudge timer for the current article.
+    /// </summary>
+    private CancellationTokenSource? _nudgeCancellation;
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel(
@@ -246,6 +251,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             article.Name;
 
         Options.IsProcessing = true;
+
+        if (BotSettings.AutoSaveEnabled &&
+            BotSettings.NudgeEnabled)
+        {
+            _ = ScheduleNudgeAsync();
+        }
 
         Session.Editor.Open(
             article.Name,
@@ -378,6 +389,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
             _sessionCounters.NumberOfEdits++;
 
+            BotSettings.CurrentArticleNudgeCount = 0;
+
             if (BotSettings.AutoSaveEnabled &&
                 BotSettings.MaximumEdits > 0 &&
                 _sessionCounters.NumberOfEdits >= BotSettings.MaximumEdits)
@@ -479,6 +492,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _autoSaveCancellation?.Dispose();
         _autoSaveCancellation = null;
 
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+        _nudgeCancellation = null;
+
         Session.Editor.Abort();
 
         Options.IsProcessing = false;
@@ -560,6 +577,80 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Waits for the current article operation to time out and records a nudge.
+    /// </summary>
+    private async Task ScheduleNudgeAsync()
+    {
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+
+        _nudgeCancellation =
+            new CancellationTokenSource();
+
+        CancellationToken cancellationToken =
+            _nudgeCancellation.Token;
+
+        try
+        {
+            await Task.Delay(
+                TimeSpan.FromSeconds(30),
+                cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested ||
+                !BotSettings.AutoSaveEnabled ||
+                !BotSettings.NudgeEnabled)
+            {
+                return;
+            }
+
+            ProcessNudge();
+        }
+        catch (OperationCanceledException)
+        {
+            // The pending nudge was intentionally cancelled.
+        }
+    }
+
+    /// <summary>
+    /// Handles expiration of the nudge timer for the current article.
+    /// </summary>
+    private async void ProcessNudge()
+    {
+        if (!Options.IsProcessing ||
+            !BotSettings.AutoSaveEnabled ||
+            !BotSettings.NudgeEnabled)
+        {
+            return;
+        }
+
+        BotSettings.NudgeCount++;
+
+        if (BotSettings.SkipAfterRepeatedNudge &&
+            BotSettings.CurrentArticleNudgeCount > 0)
+        {
+            BotSettings.CurrentArticleNudgeCount = 0;
+            SkipProcessing();
+            return;
+        }
+
+        BotSettings.CurrentArticleNudgeCount++;
+
+        Session.Editor.Abort();
+
+        while (Session.IsBusy)
+        {
+            await Task.Delay(50);
+        }
+
+        if (!Options.IsProcessing)
+        {
+            return;
+        }
+
+        StartProcessing();
+    }
+
+    /// <summary>
     /// Skips the current article and continues processing the next article.
     /// </summary>
     [RelayCommand]
@@ -574,6 +665,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _autoSaveCancellation?.Dispose();
         _autoSaveCancellation = null;
 
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+        _nudgeCancellation = null;
+
         CurrentArticle.Trace.UserSkipped();
 
         Session.Editor.Reset();
@@ -583,6 +678,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             StopProcessing();
             return;
         }
+
+        BotSettings.CurrentArticleNudgeCount = 0;
 
         CurrentArticle = null;
         CurrentArticleName = string.Empty;
@@ -598,6 +695,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         Dispatcher.UIThread.Post(() =>
         {
+            _nudgeCancellation?.Cancel();
+            _nudgeCancellation?.Dispose();
+            _nudgeCancellation = null;
+
             CurrentArticle =
                 new Article(page);
 
