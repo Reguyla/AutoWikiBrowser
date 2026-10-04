@@ -532,8 +532,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
-        // The platform-specific after-processing action will be
-        // invoked here once shutdown handling is connected.
+        App.SystemPowerAction?.Invoke(
+            BotSettings.ShutdownAction);
     }
 
     /// <summary>

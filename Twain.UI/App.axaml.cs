@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Lists.Providers;
 using Twain.Core.Updates;
+using Twain.UI.BotSettings;
 using Twain.UI.ErrorHandling;
 using Twain.UI.Lists.Providers;
 using Twain.UI.Shell;
@@ -28,6 +29,16 @@ public partial class App : Application
     /// depends only on the Twain update abstraction and not on Velopack.
     /// </remarks>
     public static Func<IUpdateService>? UpdateServiceFactory { get; set; }
+
+    /// <summary>
+    /// Gets or sets the host-supplied action used to perform a system
+    /// power operation after article processing completes.
+    /// </summary>
+    /// <remarks>
+    /// The desktop host supplies the platform-specific implementation so
+    /// the UI does not depend on operating-system-specific APIs.
+    /// </remarks>
+    public static Action<BotShutdownAction>? SystemPowerAction { get; set; }
 
     /// <summary>
     /// Loads the application's XAML resources and initializes the Avalonia

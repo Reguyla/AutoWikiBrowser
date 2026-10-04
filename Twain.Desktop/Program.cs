@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using Twain.Diagnostics;
 using Twain.Desktop.Updates;
+using Twain.UI.BotSettings;
 using Velopack;
 
 namespace Twain.Desktop;
@@ -39,6 +40,9 @@ internal static class Program
 
         Twain.UI.App.UpdateServiceFactory =
             static () => new VelopackUpdateService();
+
+        Twain.UI.App.SystemPowerAction =
+           ExecuteSystemPowerAction;
 
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
@@ -79,6 +83,67 @@ internal static class Program
             // Diagnostics must never prevent Twain from starting.
             Debug.WriteLine(
                 $"Unable to initialize Twain diagnostics: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Performs the requested operating-system power action.
+    /// </summary>
+    /// <param name="shutdownAction">
+    /// The power action requested by the Twain user interface.
+    /// </param>
+    private static void ExecuteSystemPowerAction(
+        BotShutdownAction shutdownAction)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        ProcessStartInfo startInfo =
+            shutdownAction switch
+            {
+                BotShutdownAction.Shutdown =>
+                    new ProcessStartInfo(
+                        "shutdown.exe",
+                        "/s /t 0"),
+
+                BotShutdownAction.Restart =>
+                    new ProcessStartInfo(
+                        "shutdown.exe",
+                        "/r /t 0"),
+
+                BotShutdownAction.Standby =>
+                    new ProcessStartInfo(
+                        "rundll32.exe",
+                        "powrprof.dll,SetSuspendState 0,1,0"),
+
+                BotShutdownAction.Hibernate =>
+                    new ProcessStartInfo(
+                        "rundll32.exe",
+                        "powrprof.dll,SetSuspendState Hibernate"),
+
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(shutdownAction),
+                    shutdownAction,
+                    "Unsupported system power action.")
+            };
+
+        startInfo.UseShellExecute = false;
+        startInfo.CreateNoWindow = true;
+
+        try
+        {
+            Process.Start(startInfo);
+        }
+        catch (Exception ex)
+        {
+            TwainDiagnostics.WriteAsync(
+                DiagnosticCategory.System,
+                "SystemPowerActionFailed",
+                $"Unable to perform system power action '{shutdownAction}': {ex}")
+                .GetAwaiter()
+                .GetResult();
         }
     }
 
