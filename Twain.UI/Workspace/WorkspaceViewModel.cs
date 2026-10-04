@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.API;
@@ -89,6 +90,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private Article? _currentArticle;
+
+    /// <summary>
+    /// Cancels a pending delayed automatic save.
+    /// </summary>
+    private CancellationTokenSource? _autoSaveCancellation;
 
     private readonly MainProcess _mainProcess;
 
@@ -220,6 +226,14 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         if (article is null ||
             Session.IsBusy)
         {
+            return;
+        }
+
+        if (BotSettings.AutoSaveEnabled &&
+            (!Session.User.IsLoggedIn ||
+             (!Session.IsBot && !Session.IsSysop)))
+        {
+            BotSettings.AutoSaveEnabled = false;
             return;
         }
 
@@ -388,6 +402,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         AsyncApiEdit editor,
         Exception exception)
     {
+        _autoSaveCancellation?.Cancel();
+        _autoSaveCancellation?.Dispose();
+        _autoSaveCancellation = null;
+
         Dispatcher.UIThread.Post(() =>
         {
             ErrorHandler.HandleException(exception);
@@ -442,6 +460,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
+        _autoSaveCancellation?.Cancel();
+        _autoSaveCancellation?.Dispose();
+        _autoSaveCancellation = null;
+
         Session.Editor.Abort();
 
         Options.IsProcessing = false;
@@ -488,6 +510,41 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Waits for the configured bot delay and then saves the current article.
+    /// </summary>
+    private async Task ScheduleAutoSaveAsync()
+    {
+        _autoSaveCancellation?.Cancel();
+        _autoSaveCancellation?.Dispose();
+
+        _autoSaveCancellation =
+            new CancellationTokenSource();
+
+        CancellationToken cancellationToken =
+            _autoSaveCancellation.Token;
+
+        try
+        {
+            await Task.Delay(
+                TimeSpan.FromSeconds(
+                    BotSettings.AutoSaveDelay),
+                cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested ||
+                !BotSettings.AutoSaveEnabled)
+            {
+                return;
+            }
+
+            SaveProcessing();
+        }
+        catch (OperationCanceledException)
+        {
+            // A pending automatic save was intentionally cancelled.
+        }
+    }
+
+    /// <summary>
     /// Skips the current article and continues processing the next article.
     /// </summary>
     [RelayCommand]
@@ -497,6 +554,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         {
             return;
         }
+
+        _autoSaveCancellation?.Cancel();
+        _autoSaveCancellation?.Dispose();
+        _autoSaveCancellation = null;
 
         CurrentArticle.Trace.UserSkipped();
 
@@ -550,6 +611,18 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
             Editor.Document.CurrentText =
                 CurrentArticle.ArticleText;
+
+            if (BotSettings.AutoSaveEnabled)
+            {
+                if (BotSettings.AutoSaveDelay == 0)
+                {
+                    SaveProcessing();
+                }
+                else
+                {
+                    _ = ScheduleAutoSaveAsync();
+                }
+            }
         });
     }
 
