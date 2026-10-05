@@ -83,6 +83,14 @@ public partial class MakeListViewModel : ObservableObject
 
     private readonly Session _session;
 
+    [ObservableProperty]
+    private bool _formatDisplayTitles;
+
+    public void RefreshArticleDisplay()
+    {
+        OnPropertyChanged(nameof(FormatDisplayTitles));
+    }
+
     partial void OnSelectedProviderChanged(IListProvider? value)
     {
         if (value is null)
@@ -146,14 +154,8 @@ public partial class MakeListViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAddArticle))]
     private void AddArticle()
     {
-        string title =
-            ListGenerationProcessor.PrepareArticleTitle(
-                ManualArticleTitle);
-
-        if (title.Length == 0)
-            return;
-
-        Articles.Add(new Article(title));
+        AddArticleTitles(
+            [ManualArticleTitle]);
 
         ManualArticleTitle = string.Empty;
     }
@@ -161,6 +163,33 @@ public partial class MakeListViewModel : ObservableObject
     private bool CanAddArticle()
     {
         return !string.IsNullOrWhiteSpace(ManualArticleTitle);
+    }
+
+    /// <summary>
+    /// Adds the supplied article titles to the current article list.
+    /// </summary>
+    /// <param name="titles">
+    /// The article titles to add.
+    /// </param>
+    public void AddArticleTitles(
+        IEnumerable<string> titles)
+    {
+        ArgumentNullException.ThrowIfNull(titles);
+
+        foreach (string value in titles)
+        {
+            string title =
+                ListGenerationProcessor.PrepareArticleTitle(
+                    value);
+
+            if (title.Length == 0)
+            {
+                continue;
+            }
+
+            Articles.Add(
+                new Article(title));
+        }
     }
 
     [RelayCommand]
@@ -273,5 +302,221 @@ public partial class MakeListViewModel : ObservableObject
 
         return !SelectedProvider.UserInputTextBoxEnabled ||
                !string.IsNullOrWhiteSpace(SourceText);
+    }
+
+    /// <summary>
+    /// Opens the currently selected article in the default web browser.
+    /// </summary>
+    [RelayCommand]
+    private void OpenSelectedArticle()
+    {
+        if (SelectedArticle is null)
+        {
+            return;
+        }
+
+        _session.Site.OpenPageInBrowser(
+            SelectedArticle.Name);
+    }
+
+    /// <summary>
+    /// Opens the revision history of the currently selected article
+    /// in the default web browser.
+    /// </summary>
+    [RelayCommand]
+    private void OpenSelectedArticleHistory()
+    {
+        if (SelectedArticle is null)
+        {
+            return;
+        }
+
+        _session.Site.OpenPageHistoryInBrowser(
+            SelectedArticle.Name);
+    }
+
+    /// <summary>
+    /// Opens the talk page associated with the currently selected
+    /// article in the default web browser.
+    /// </summary>
+    [RelayCommand]
+    private void OpenSelectedArticleTalk()
+    {
+        if (SelectedArticle is null)
+        {
+            return;
+        }
+
+        _session.Site.OpenPageInBrowser(
+            Tools.ConvertToTalk(SelectedArticle));
+    }
+
+    [RelayCommand]
+    private void MoveArticlesToTop(
+    IEnumerable<Article>? articles)
+    {
+        if (articles is null)
+        {
+            return;
+        }
+
+        List<Article> selectedArticles =
+            articles
+                .Where(Articles.Contains)
+                .OrderBy(Articles.IndexOf)
+                .ToList();
+
+        if (selectedArticles.Count == 0)
+        {
+            return;
+        }
+
+        foreach (Article article in selectedArticles)
+        {
+            Articles.Remove(article);
+        }
+
+        for (int index = 0;
+             index < selectedArticles.Count;
+             index++)
+        {
+            Articles.Insert(
+                index,
+                selectedArticles[index]);
+        }
+    }
+
+    [RelayCommand]
+    private void MoveArticlesToBottom(
+        IEnumerable<Article>? articles)
+    {
+        if (articles is null)
+        {
+            return;
+        }
+
+        List<Article> selectedArticles =
+            articles
+                .Where(Articles.Contains)
+                .OrderBy(Articles.IndexOf)
+                .ToList();
+
+        if (selectedArticles.Count == 0)
+        {
+            return;
+        }
+
+        foreach (Article article in selectedArticles)
+        {
+            Articles.Remove(article);
+        }
+
+        foreach (Article article in selectedArticles)
+        {
+            Articles.Add(article);
+        }
+    }
+
+    /// <summary>
+    /// Converts the current article list to the corresponding talk pages.
+    /// </summary>
+    [RelayCommand]
+    private void ConvertToTalkPages()
+    {
+        if (Articles.Count == 0)
+        {
+            return;
+        }
+
+        List<Article> convertedArticles =
+            Tools.ConvertToTalk(
+                Articles.ToList());
+
+        Articles.Clear();
+
+        foreach (Article article in convertedArticles)
+        {
+            Articles.Add(article);
+        }
+    }
+
+    /// <summary>
+    /// Converts talk pages in the current list to their corresponding
+    /// non-talk pages.
+    /// </summary>
+    [RelayCommand]
+    private void ConvertFromTalkPages()
+    {
+        if (Articles.Count == 0)
+        {
+            return;
+        }
+
+        List<Article> convertedArticles =
+            Tools.ConvertFromTalk(
+                Articles.ToList());
+
+        Articles.Clear();
+
+        foreach (Article article in convertedArticles)
+        {
+            Articles.Add(article);
+        }
+    }
+
+    /// <summary>
+    /// Sorts the current article list alphabetically by page title.
+    /// </summary>
+    [RelayCommand]
+    private void SortAscending()
+    {
+        List<Article> sortedArticles =
+            Articles
+                .OrderBy(
+                    article => article.Name,
+                    StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+        Articles.Clear();
+
+        foreach (Article article in sortedArticles)
+        {
+            Articles.Add(article);
+        }
+    }
+
+    /// <summary>
+    /// Sorts the current article list in reverse alphabetical order
+    /// by page title.
+    /// </summary>
+    [RelayCommand]
+    private void SortDescending()
+    {
+        List<Article> sortedArticles =
+            Articles
+                .OrderByDescending(
+                    article => article.Name,
+                    StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+        Articles.Clear();
+
+        foreach (Article article in sortedArticles)
+        {
+            Articles.Add(article);
+        }
+    }
+
+    public string GetArticleDisplayText(Article article)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+
+        if (!FormatDisplayTitles ||
+            string.IsNullOrWhiteSpace(article.DisplayTitle))
+        {
+            return article.Name;
+        }
+
+        return article.DisplayTitle;
     }
 }

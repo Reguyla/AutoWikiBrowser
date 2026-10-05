@@ -5,10 +5,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.ViewModels.Lists"
+    xmlns:converters="using:Twain.UI.Converters"
     x:DataType="vm:MakeListViewModel"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto"
+    <UserControl.Resources>
+        <converters:ArticleDisplayTitleConverter
+            x:Key="ArticleDisplayTitleConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*"
           RowSpacing="8">
 
         <!-- List source -->
@@ -35,32 +41,138 @@
             Watermark="{Binding SourcePrompt}"
             IsEnabled="{Binding IsSourceTextEnabled}" />
 
-        <!-- Article list -->
-        <ListBox
-            x:Name="ArticleListBox"
-            Grid.Row="3"
-            ItemsSource="{Binding Articles}"
-            SelectedItem="{Binding SelectedArticle, Mode=TwoWay}"
-            SelectionMode="Multiple" />
-
-        <!-- Manual article entry -->
+        <!-- Article list and manual entry -->
         <Grid Grid.Row="2"
-              ColumnDefinitions="*,Auto,Auto"
-              ColumnSpacing="8">
+              RowDefinitions="Auto,*"
+              RowSpacing="8">
 
-            <TextBox
-                Text="{Binding ManualArticleTitle}"
-                Watermark="Article title" />
+            <!-- Article list -->
+            <ListBox
+                x:Name="ArticleListBox"
+                Grid.Row="1"
+                ItemsSource="{Binding Articles}"
+                SelectedItem="{Binding SelectedArticle, Mode=TwoWay}"
+                SelectionMode="Multiple"
+                DoubleTapped="ArticleListBox_DoubleTapped"
+                KeyDown="ArticleListBox_KeyDown">
 
-            <Button
-                Grid.Column="1"
-                Content="Add"
-                Command="{Binding AddArticleCommand}" />
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding
+                                    Converter="{StaticResource ArticleDisplayTitleConverter}">
+                                    <Binding />
+                                    <Binding
+                                        Path="#ArticleListBox.DataContext.FormatDisplayTitles" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
 
-            <Button
-                Grid.Column="2"
-                Content="Remove"
-                Click="RemoveButton_Click" />
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem
+                            Header="Open in Browser"
+                            Command="{Binding OpenSelectedArticleCommand}" />
+
+                        <MenuItem
+                            Header="Open History in Browser"
+                            Command="{Binding OpenSelectedArticleHistoryCommand}" />
+
+                        <MenuItem
+                            Header="Open Talk Page in Browser"
+                            Command="{Binding OpenSelectedArticleTalkCommand}" />
+
+                        <Separator />
+
+                        <MenuItem
+                            Header="Cut"
+                            Click="CutMenuItem_Click" />
+
+                        <MenuItem
+                            Header="Copy"
+                            Click="CopyMenuItem_Click" />
+
+                        <MenuItem
+                            Header="Paste"
+                            Click="PasteMenuItem_Click" />
+
+                        <Separator />
+
+                        <MenuItem
+                            Header="Select All"
+                            Click="SelectAllMenuItem_Click" />
+
+                        <MenuItem
+                            Header="Remove"
+                            Click="RemoveMenuItem_Click" />
+
+                        <Separator />
+
+                        <MenuItem
+                            Header="Move to Top"
+                            Click="MoveToTopMenuItem_Click" />
+
+                        <MenuItem
+                            Header="Move to Bottom"
+                            Click="MoveToBottomMenuItem_Click" />
+
+                        <Separator />
+
+                        <MenuItem
+                            Header="Convert to Talk Pages"
+                            Command="{Binding ConvertToTalkPagesCommand}" />
+
+                        <MenuItem
+                            Header="Convert from Talk Pages"
+                            Command="{Binding ConvertFromTalkPagesCommand}" />
+
+                        <Separator />
+
+                        <MenuItem
+                            Header="Sort A–Z"
+                            Command="{Binding SortAscendingCommand}" />
+
+                        <MenuItem
+                            Header="Sort Z–A"
+                            Command="{Binding SortDescendingCommand}" />
+
+                        <Separator />
+
+                        <MenuItem
+                            Header="Format page titles per displaytitle"
+                            ToggleType="CheckBox"
+                            IsChecked="{Binding FormatDisplayTitles, Mode=TwoWay}" />
+
+                        <MenuItem
+                            Header="Save List..."
+                            Click="SaveListMenuItem_Click" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+
+            <!-- Manual article entry -->
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="*,Auto,Auto"
+                  ColumnSpacing="8">
+
+                <TextBox
+                    Text="{Binding ManualArticleTitle}"
+                    Watermark="Article title" />
+
+                <Button
+                    Grid.Column="1"
+                    Content="Add"
+                    Command="{Binding AddArticleCommand}" />
+
+                <Button
+                    Grid.Column="2"
+                    Content="Remove"
+                    Click="RemoveButton_Click" />
+            </Grid>
+
         </Grid>
     </Grid>
 

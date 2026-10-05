@@ -737,6 +737,20 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             CurrentArticle =
                 new Article(page);
 
+            Article? queuedArticle =
+                MakeList.Articles.FirstOrDefault(
+                    article =>
+                        string.Equals(
+                            article.Name,
+                            CurrentArticle.Name,
+                            StringComparison.Ordinal));
+
+            if (queuedArticle is not null)
+            {
+                queuedArticle.DisplayTitle =
+                    CurrentArticle.DisplayTitle;
+            }
+
             CurrentArticleName =
                 CurrentArticle.Name;
 
