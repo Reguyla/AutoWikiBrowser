@@ -1,10 +1,13 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
+using Twain.Core.Lists;
+using Twain.UI.Lists;
 using Twain.UI.ViewModels.Lists;
 
 namespace Twain.UI.Controls.Lists;
@@ -366,5 +369,52 @@ public partial class MakeListControl : UserControl
         {
             await writer.WriteLineAsync(article.Name);
         }
+    }
+
+    private async void FilterMenuItem_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (DataContext is not MakeListViewModel viewModel ||
+            viewModel.Articles.Count < 2)
+        {
+            return;
+        }
+
+        ArticleListFilterConfiguration configuration = new();
+
+        ListFilterWindow window =
+            new(configuration);
+
+        if (TopLevel.GetTopLevel(this) is not Window owner)
+            return;
+
+        bool applied =
+            await window.ShowDialog<bool>(owner);
+
+        if (!applied)
+            return;
+
+        List<Article> comparisonArticles =
+            configuration.ComparisonArticleTitles
+                .Select(title => new Article(title))
+                .ToList();
+
+        List<Article> filteredArticles =
+            ArticleListFilterProcessor.Apply(
+                viewModel.Articles,
+                comparisonArticles,
+                configuration.NamespaceIds,
+                configuration.ContainsText,
+                configuration.DoesNotContainText,
+                configuration.FilterTitlesThatContain,
+                configuration.FilterTitlesThatDoNotContain,
+                configuration.UseRegex,
+                configuration.RemoveDuplicates,
+                configuration.ComparisonArticleTitles.Count > 0,
+                configuration.IntersectComparisonList,
+                configuration.SortAscending);
+
+        viewModel.ReplaceArticles(filteredArticles);
     }
 }

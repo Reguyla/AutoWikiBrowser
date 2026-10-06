@@ -519,4 +519,28 @@ public partial class MakeListViewModel : ObservableObject
 
         return article.DisplayTitle;
     }
+
+    public void ReplaceArticles(
+    IEnumerable<Article> articles)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+
+        Article? selectedArticle = SelectedArticle;
+
+        Articles.Clear();
+
+        foreach (Article article in articles)
+            Articles.Add(article);
+
+        if (selectedArticle is not null)
+        {
+            SelectedArticle =
+                Articles.FirstOrDefault(
+                    article =>
+                        string.Equals(
+                            article.Name,
+                            selectedArticle.Name,
+                            StringComparison.Ordinal));
+        }
+    }
 }

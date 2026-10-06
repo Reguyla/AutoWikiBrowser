@@ -146,6 +146,12 @@
                             ToggleType="CheckBox"
                             IsChecked="{Binding FormatDisplayTitles, Mode=TwoWay}" />
 
+                        <Separator />
+
+                        <MenuItem
+                            Header="Filter..."
+                            Click="FilterMenuItem_Click" />
+
                         <MenuItem
                             Header="Save List..."
                             Click="SaveListMenuItem_Click" />
