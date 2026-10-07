@@ -86,6 +86,14 @@ public partial class MakeListViewModel : ObservableObject
     [ObservableProperty]
     private bool _formatDisplayTitles;
 
+    /// <summary>
+    /// Gets the list providers that can generate additional articles
+    /// from selected article titles.
+    /// </summary>
+    public IEnumerable<IListProvider> AddFromSelectedProviders =>
+        Providers.Where(
+            provider => provider.UserInputTextBoxEnabled);
+
     public void RefreshArticleDisplay()
     {
         OnPropertyChanged(nameof(FormatDisplayTitles));
@@ -149,6 +157,8 @@ public partial class MakeListViewModel : ObservableObject
 
         if (!Providers.Contains(provider))
             Providers.Add(provider);
+
+        OnPropertyChanged(nameof(AddFromSelectedProviders));
     }
 
     [RelayCommand(CanExecute = nameof(CanAddArticle))]
@@ -200,6 +210,64 @@ public partial class MakeListViewModel : ObservableObject
 
         foreach (Article article in articles.ToList())
             Articles.Remove(article);
+    }
+
+    /// <summary>
+    /// Removes all articles from the current list.
+    /// </summary>
+    [RelayCommand]
+    private void RemoveAllArticles()
+    {
+        Articles.Clear();
+        SelectedArticle = null;
+    }
+
+    /// <summary>
+    /// Removes duplicate article titles while preserving
+    /// the first occurrence and original list order.
+    /// </summary>
+    [RelayCommand]
+    private void RemoveDuplicateArticles()
+    {
+        HashSet<string> seen = new(
+            StringComparer.OrdinalIgnoreCase);
+
+        Article[] uniqueArticles = Articles
+            .Where(article => seen.Add(article.Name))
+            .ToArray();
+
+        int removedCount = Articles.Count - uniqueArticles.Length;
+
+        if (removedCount == 0)
+            return;
+
+        ReplaceArticles(uniqueArticles);
+
+        StatusText =
+            $"{removedCount} duplicate article(s) removed.";
+    }
+
+    /// <summary>
+    /// Removes articles outside the main namespace.
+    /// </summary>
+    [RelayCommand]
+    private void RemoveNonMainSpaceArticles()
+    {
+        Article[] mainSpaceArticles = Articles
+            .Where(article =>
+                article.NameSpaceKey == Namespace.Article)
+            .ToArray();
+
+        int removedCount =
+            Articles.Count - mainSpaceArticles.Length;
+
+        if (removedCount == 0)
+            return;
+
+        ReplaceArticles(mainSpaceArticles);
+
+        StatusText =
+            $"{removedCount} non-main space article(s) removed.";
     }
 
     /// <summary>
@@ -282,6 +350,68 @@ public partial class MakeListViewModel : ObservableObject
             }
 
             Articles.Clear();
+
+            foreach (Article article in result.Articles)
+                Articles.Add(article);
+
+            StatusText =
+                $"{Articles.Count} article{(Articles.Count == 1 ? string.Empty : "s")}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Generates additional articles from the supplied source articles
+    /// using the specified list provider and appends the results to the
+    /// current article list.
+    /// </summary>
+    public void AddFromSelectedArticles(
+        IListProvider provider,
+        IEnumerable<Article> sourceArticles)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        ArgumentNullException.ThrowIfNull(sourceArticles);
+
+        string[] sourceValues =
+            sourceArticles
+                .Select(article => article.Name)
+                .ToArray();
+
+        if (sourceValues.Length == 0)
+            return;
+
+        IsBusy = true;
+        StatusText = "Generating list...";
+
+        try
+        {
+            ConfigureProvider(provider);
+
+            sourceValues =
+                ListGenerationProcessor.PrepareSourceValues(
+                    provider,
+                    sourceValues);
+
+            ListGenerationRequest request =
+                new(
+                    provider,
+                    sourceValues);
+
+            ListGenerationResult result =
+                ListGenerationProcessor.Generate(request);
+
+            if (!result.Succeeded)
+            {
+                StatusText =
+                    string.IsNullOrWhiteSpace(result.ErrorMessage)
+                        ? $"Unable to generate list: {result.Failure}"
+                        : result.ErrorMessage;
+
+                return;
+            }
 
             foreach (Article article in result.Articles)
                 Articles.Add(article);

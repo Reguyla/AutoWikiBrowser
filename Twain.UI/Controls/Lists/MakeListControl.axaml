@@ -105,9 +105,35 @@
                             Header="Select All"
                             Click="SelectAllMenuItem_Click" />
 
+                        <MenuItem Header="Remove">
+                            <MenuItem
+                                Header="Selected"
+                                Click="RemoveMenuItem_Click" />
+
+                            <MenuItem
+                                Header="All"
+                                Command="{Binding RemoveAllArticlesCommand}" />
+
+                            <MenuItem
+                                Header="Duplicates"
+                                Command="{Binding RemoveDuplicateArticlesCommand}" />
+
+                            <MenuItem
+                                Header="Non-main space"
+                                Command="{Binding RemoveNonMainSpaceArticlesCommand}" />
+                        </MenuItem>
+
                         <MenuItem
-                            Header="Remove"
-                            Click="RemoveMenuItem_Click" />
+                            Header="Add Selected to list from..."
+                            ItemsSource="{Binding AddFromSelectedProviders}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem
+                                        Header="{Binding DisplayText}"
+                                        Click="AddSelectedFromProviderMenuItem_Click" />
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
 
                         <Separator />
 

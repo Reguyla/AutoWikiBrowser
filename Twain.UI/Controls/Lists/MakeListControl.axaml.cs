@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Lists;
+using Twain.Core.Lists.Providers;
 using Twain.UI.Lists;
 using Twain.UI.ViewModels.Lists;
 
@@ -369,6 +370,28 @@ public partial class MakeListControl : UserControl
         {
             await writer.WriteLineAsync(article.Name);
         }
+    }
+
+    private void AddSelectedFromProviderMenuItem_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (DataContext is not MakeListViewModel viewModel ||
+            sender is not MenuItem menuItem ||
+            menuItem.DataContext is not IListProvider provider)
+        {
+            return;
+        }
+
+        Article[] selectedArticles =
+            GetSelectedArticles();
+
+        if (selectedArticles.Length == 0)
+            return;
+
+        viewModel.AddFromSelectedArticles(
+            provider,
+            selectedArticles);
     }
 
     private async void FilterMenuItem_Click(
