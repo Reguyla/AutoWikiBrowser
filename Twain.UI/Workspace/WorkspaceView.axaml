@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
+    xmlns:preview="using:Twain.UI.Preview"
     xmlns:workspaceControls="using:Twain.UI.Controls.Workspaces"
     xmlns:optionsViews="using:Twain.UI.Options"
     x:DataType="vm:WorkspaceViewModel"
@@ -187,20 +188,34 @@
             RowDefinitions="*,8,*"
             IsVisible="{Binding IsEditingVisible}">
 
-        <!-- Diff -->
+        <!-- Shared Diff / Preview output region -->
 
-        <ItemsControl
-            Grid.Row="0"
-            ItemTemplate="{StaticResource WorkspacePaneTemplate}"
-            ItemsSource="{Binding DocumentPanes}">
+        <Grid Grid.Row="0">
 
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Grid />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            <!-- Existing Diff viewer -->
 
-        </ItemsControl>
+            <ItemsControl
+                Grid.Row="1"
+                IsVisible="{Binding IsDiffVisible}"
+                ItemTemplate="{StaticResource WorkspacePaneTemplate}"
+                ItemsSource="{Binding DocumentPanes}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+            </ItemsControl>
+
+            <!-- Rendered MediaWiki preview -->
+
+            <preview:PreviewView
+                Grid.Row="1"
+                IsVisible="{Binding IsPreviewVisible}" />
+
+        </Grid>
+
 
         <GridSplitter
             Grid.Row="1"

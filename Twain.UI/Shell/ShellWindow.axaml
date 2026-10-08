@@ -57,11 +57,13 @@
 
             <Button
                 MinWidth="88"
-                Content="Preview" />
+                Content="Preview"
+                Command="{Binding Workspace.ShowPreviewCommand}" />
 
             <Button
                 MinWidth="88"
-                Content="Diff" />
+                Content="Diff"
+                Command="{Binding Workspace.ShowDiffCommand}" />
 
             <Button
                 MinWidth="88"

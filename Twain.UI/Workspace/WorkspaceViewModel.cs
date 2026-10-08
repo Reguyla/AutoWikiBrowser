@@ -134,6 +134,70 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the upper document region
+    /// is displaying the rendered article preview.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDiffVisible))]
+    private bool _isPreviewVisible;
+
+    /// <summary>
+    /// Gets whether the upper document region
+    /// should display the diff viewer.
+    /// </summary>
+    public bool IsDiffVisible => !IsPreviewVisible;
+
+    /// <summary>
+    /// Switches the upper document region to the diff viewer.
+    /// </summary>
+    [RelayCommand]
+    private void ShowDiff()
+    {
+        IsPreviewVisible = false;
+    }
+
+    /// <summary>
+    /// Gets or sets the rendered HTML returned by the
+    /// MediaWiki preview API.
+    /// </summary>
+    [ObservableProperty]
+    private string _previewHtml = string.Empty;
+
+    /// <summary>
+    /// Gets or sets whether a preview request is running.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isPreviewLoading;
+
+    /// <summary>
+    /// Gets or sets a message describing a preview failure.
+    /// </summary>
+    [ObservableProperty]
+    private string _previewError = string.Empty;
+
+    /// <summary>
+    /// Requests a rendered preview of the current editor contents.
+    /// </summary>
+    [RelayCommand]
+    private void ShowPreview()
+    {
+        if (CurrentArticle is null ||
+            Session.Editor.IsActive ||
+            IsPreviewLoading)
+        {
+            return;
+        }
+
+        PreviewError = string.Empty;
+        PreviewHtml = string.Empty;
+        IsPreviewLoading = true;
+
+        Session.Editor.Preview(
+            CurrentArticle.Name,
+            Editor.Document.CurrentText);
+    }
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel(
@@ -155,6 +219,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Session.SaveComplete +=
             Editor_SaveComplete;
+
+        Session.PreviewComplete +=
+           Editor_PreviewComplete;
 
         Session.ExceptionCaught +=
             Editor_ExceptionCaught;
@@ -429,6 +496,22 @@ public sealed partial class WorkspaceViewModel : ObservableObject
                 nextArticle;
 
             StartProcessing();
+        });
+    }
+
+    /// <summary>
+    /// Handles completion of a MediaWiki preview request.
+    /// </summary>
+    private void Editor_PreviewComplete(
+        AsyncApiEdit editor,
+        string html)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            PreviewHtml = html;
+            PreviewError = string.Empty;
+            IsPreviewLoading = false;
+            IsPreviewVisible = true;
         });
     }
 
