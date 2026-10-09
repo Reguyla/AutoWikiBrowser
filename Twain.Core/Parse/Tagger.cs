@@ -77,7 +77,12 @@ public partial class Parsers
     /// <param name="restrictOrphanTagging"></param>
     /// <param name="summary"></param>
     /// <returns>The tagged article.</returns>
-    public string Tagger(string articleText, string articleTitle, bool restrictOrphanTagging, ref string summary)
+    public string Tagger(
+        string articleText,
+        string articleTitle,
+        bool restrictOrphanTagging,
+        ref string summary,
+        Session? session = null)
     {
         if (!TaggerPermitted(articleText, articleTitle))
             return articleText;
@@ -197,8 +202,23 @@ public partial class Parsers
             totalCategories = RegularCategories(commentsStripped, false).Count;
 
             // templates may add categories to page that are not [[Category...]] links, so use API call for accurate Category count
-            if (totalCategories == 0)
-                totalCategories = RegularCategories(CategoryProv.MakeList(new[] { articleTitle })).Count;
+            if (session is not null)
+            {
+                var categoryProvider = new CategoriesOnPageNoHiddenListProvider
+                {
+                    Limit = 10
+                };
+
+                categoryProvider.SetSession(session);
+
+                totalCategories = RegularCategories(
+                    categoryProvider.MakeList(new[] { articleTitle })).Count;
+            }
+            else
+            {
+                totalCategories = RegularCategories(
+                    CategoryProv.MakeList(new[] { articleTitle })).Count;
+            }
         }
 
         // remove dead end if > 0 explicit wikilinks on page (don't count any links transcluded from templates)
@@ -467,8 +487,22 @@ public partial class Parsers
             int apilinks = 0;
 
             if (!Globals.UnitTestMode)
-                apilinks = LinksOnPageProv.MakeList(articleTitle)
-                    .Count(l => (l.NameSpaceKey == Namespace.Mainspace));
+            {
+                if (session is not null)
+                {
+                    var linksProvider = new LinksOnPageListProvider();
+
+                    linksProvider.SetSession(session);
+
+                    apilinks = linksProvider.MakeList(articleTitle)
+                        .Count(l => l.NameSpaceKey == Namespace.Mainspace);
+                }
+                else
+                {
+                    apilinks = LinksOnPageProv.MakeList(articleTitle)
+                        .Count(l => l.NameSpaceKey == Namespace.Mainspace);
+                }
+            }
 
             // for dead end addition, use API call to get wikilink count (filter to mainspace links only), so we do count any links transcluded from templates
             if (apilinks == 0)
@@ -1290,6 +1324,39 @@ public partial class Parsers
 
     private static readonly Regex CommonPunctuation =
         new Regex(@"[""',\.;:`!\(\)\[\]\?\-–/]", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Applies automatic tagging using the supplied wiki session.
+    /// </summary>
+    /// <param name="articleText">The article text.</param>
+    /// <param name="articleTitle">The article title.</param>
+    /// <param name="restrictOrphanTagging">Whether orphan tagging is restricted.</param>
+    /// <param name="noChange">Whether tagging left the article unchanged.</param>
+    /// <param name="summary">The edit summary.</param>
+    /// <param name="session">The active wiki session.</param>
+    /// <returns>The tagged article text.</returns>
+    public string Tagger(
+        string articleText,
+        string articleTitle,
+        bool restrictOrphanTagging,
+        out bool noChange,
+        ref string summary,
+        Session session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        string newText = Tagger(
+            articleText,
+            articleTitle,
+            restrictOrphanTagging,
+            ref summary,
+            session);
+
+        newText = TagUpdater(newText);
+        noChange = newText.Equals(articleText);
+
+        return newText;
+    }
 
     /// <summary>
     /// For en-wiki tags redirect pages with one or more of the templates from [[Wikipedia:Template messages/Redirect pages]]

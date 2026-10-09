@@ -1404,6 +1404,45 @@ public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates 
     }
 
     /// <summary>
+    /// Applies automatic tagging using the supplied wiki session.
+    /// </summary>
+    /// <param name="parsers">An initialized Parsers object.</param>
+    /// <param name="skipIfNoChange">Whether to skip when no tags change.</param>
+    /// <param name="restrictOrphanTagging">Whether orphan tagging is restricted.</param>
+    /// <param name="session">The active wiki session.</param>
+    public void AutoTag(
+        Parsers parsers,
+        bool skipIfNoChange,
+        bool restrictOrphanTagging,
+        Session session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        string tmpEditSummary = string.Empty;
+        bool noChange;
+
+        string strTemp = parsers.Tagger(
+            mArticleText,
+            Name,
+            restrictOrphanTagging,
+            out noChange,
+            ref tmpEditSummary,
+            session);
+
+        if (skipIfNoChange && noChange)
+            Trace.AWBSkipped("No Tag changed");
+        else if (!noChange)
+        {
+            AWBChangeArticleText(
+                "Auto tagger changes applied " + tmpEditSummary,
+                strTemp,
+                false);
+
+            AppendToSummary(tmpEditSummary);
+        }
+    }
+
+    /// <summary>
     /// Fixes some crap
     /// </summary>
     /// <param name="langCode">The wiki's language code</param>

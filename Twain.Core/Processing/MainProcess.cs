@@ -182,7 +182,8 @@ public sealed class MainProcess
         Article article,
         bool mainProcess,
         MainProcessOptions options,
-        ISkipOptions skip)
+        ISkipOptions skip,
+        Session session)
     {
         if (!options.AutoTaggerEnabled)
         {
@@ -192,7 +193,8 @@ public sealed class MainProcess
         article.AutoTag(
             _parser,
             skip.SkipNoTag,
-            options.RestrictOrphanTagging);
+            options.RestrictOrphanTagging,
+            session);
 
         return !(mainProcess && article.SkipArticle);
     }
@@ -484,6 +486,9 @@ public sealed class MainProcess
     /// <param name="userTalkTemplatesRegex">
     /// The configured user-talk template expression, when available.
     /// </param>
+    /// <param name="session">
+    /// The active wiki session used during article processing.
+    /// </param>
     /// <returns>
     /// <see langword="true"/> when processing may continue; otherwise,
     /// <see langword="false"/> when automatic tagging skips the article.
@@ -494,7 +499,8 @@ public sealed class MainProcess
         MainProcessOptions options,
         ISkipOptions skip,
         HideText removeText,
-        Regex userTalkTemplatesRegex)
+        Regex userTalkTemplatesRegex,
+        Session session)
     {
         ApplyUniversalGeneralFixes(
             article,
@@ -517,7 +523,8 @@ public sealed class MainProcess
                     article,
                     mainProcess,
                     options,
-                    skip))
+                    skip,
+                    session))
             {
                 return false;
             }
@@ -670,7 +677,8 @@ public sealed class MainProcess
                         options,
                         dependencies.Skip,
                         dependencies.RemoveText,
-                        _userTalkTemplatesRegex))
+                        _userTalkTemplatesRegex,
+                        session))
                 {
                     return;
                 }
