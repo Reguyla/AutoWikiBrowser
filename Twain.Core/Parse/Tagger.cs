@@ -252,7 +252,9 @@ public partial class Parsers
             }
         }
 
-        if (length <= 300 && !WikiRegexes.Stub.IsMatch(commentsCategoriesStripped) &&
+        if (!string.IsNullOrWhiteSpace(lengthtext) &&
+            length <= 300 &&
+               !WikiRegexes.Stub.IsMatch(commentsCategoriesStripped) &&
             !WikiRegexes.Disambigs.IsMatch(commentsCategoriesStripped) &&
             !WikiRegexes.SIAs.IsMatch(commentsCategoriesStripped) &&
             !WikiRegexes.SoftRedirectTemplates.IsMatch(commentsCategoriesStripped) &&
