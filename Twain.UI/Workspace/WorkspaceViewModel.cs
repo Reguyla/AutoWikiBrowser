@@ -528,6 +528,13 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(() =>
         {
+            if (IsPreviewLoading)
+            {
+                IsPreviewLoading = false;
+                PreviewError = exception.Message;
+                IsPreviewVisible = false;
+            }
+
             ErrorHandler.HandleException(exception);
         });
     }
@@ -819,6 +826,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
             CurrentArticle =
                 new Article(page);
+
+            // Reset the previous article's preview.
+            IsPreviewVisible = false;
+            PreviewHtml = string.Empty;
+            PreviewError = string.Empty;
+            IsPreviewLoading = false;
 
             Article? queuedArticle =
                 MakeList.Articles.FirstOrDefault(
