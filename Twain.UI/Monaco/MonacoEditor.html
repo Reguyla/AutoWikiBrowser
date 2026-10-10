@@ -26,272 +26,296 @@
     <script src="Assets/vs/loader.js"></script>
 
     <script>
-        let editor;
-        let suppressTextChanged = false;
-        let pasteMoreItems = [];
-        let pasteMoreActions = [];
+                let editor;
+                let suppressTextChanged = false;
+                let pasteMoreItems = [];
+                let pasteMoreContextKeys = [];
 
-        require.config({
-            paths: {
-                vs: "Assets/vs"
-            }
-        });
+                require.config({
+                    paths: {
+                        vs: "Assets/vs"
+                    }
+                });
 
-        require(
-            ["vs/editor/editor.main"],
-            function () {
-                editor =
-                    monaco.editor.create(
-                        document.getElementById("editor"),
-                        {
-                            value: "",
-                            language: "plaintext",
-                            automaticLayout: true,
-                            contextmenu: true,
-                            wordWrap: "on",
-                            minimap: {
-                                enabled: false
+                require(
+                    ["vs/editor/editor.main"],
+                    function () {
+                        editor =
+                            monaco.editor.create(
+                                document.getElementById("editor"),
+                                {
+                                    value: "",
+                                    language: "plaintext",
+                                    automaticLayout: true,
+                                    contextmenu: true,
+                                    wordWrap: "on",
+                                    minimap: {
+                                        enabled: false
+                                    }
+                                });
+
+                        editor.addAction({
+                            id: "twain.toggleWordWrap",
+                            label: "Word Wrap",
+                            contextMenuGroupId: "1_modification",
+                            contextMenuOrder: 0,
+
+                            run: function (activeEditor) {
+                                const currentWrap =
+                                    activeEditor.getOption(
+                                        monaco.editor.EditorOption.wordWrap);
+
+                                activeEditor.updateOptions({
+                                    wordWrap: currentWrap === "on"
+                                        ? "off"
+                                        : "on"
+                                });
                             }
                         });
 
-                editor.addAction({
-                    id: "twain.toggleWordWrap",
-                    label: "Word Wrap",
-                    contextMenuGroupId: "1_modification",
-                    contextMenuOrder: 0,
+                        editor.addAction({
+                            id: "twain.undo",
+                            label: "Undo",
+                            contextMenuGroupId: "2_editing",
+                            contextMenuOrder: 1,
 
-                    run: function (activeEditor) {
-                        const currentWrap =
-                            activeEditor.getOption(
-                                monaco.editor.EditorOption.wordWrap);
-
-                        activeEditor.updateOptions({
-                            wordWrap: currentWrap === "on"
-                                ? "off"
-                                : "on"
+                            run: function (activeEditor) {
+                                activeEditor.trigger(
+                                    "twain.contextMenu",
+                                    "undo",
+                                    null);
+                            }
                         });
-                    }
-                });
 
-                editor.addAction({
-                    id: "twain.undo",
-                    label: "Undo",
-                    contextMenuGroupId: "2_editing",
-                    contextMenuOrder: 1,
+                        editor.addAction({
+                            id: "twain.selectAll",
+                            label: "Select All",
+                            contextMenuGroupId: "2_editing",
+                            contextMenuOrder: 5,
 
-                    run: function (activeEditor) {
-                        activeEditor.trigger(
-                            "twain.contextMenu",
-                            "undo",
-                            null);
-                    }
-                });
+                            run: function (activeEditor) {
+                                activeEditor.trigger(
+                                    "twain.contextMenu",
+                                    "editor.action.selectAll",
+                                    null);
+                            }
+                        });
 
-                editor.addAction({
-                    id: "twain.selectAll",
-                    label: "Select All",
-                    contextMenuGroupId: "2_editing",
-                    contextMenuOrder: 5,
+                        editor.addAction({
+                            id: "twain.configurePasteMore",
+                            label: "Configure Paste More...",
+                            contextMenuGroupId: "3_pasteMore",
+                            contextMenuOrder: 20,
 
-                    run: function (activeEditor) {
-                        activeEditor.trigger(
-                            "twain.contextMenu",
-                            "editor.action.selectAll",
-                            null);
-                    }
-                });
+                            run: function () {
+                                invokeCSharpAction(
+                                    JSON.stringify({
+                                        type: "configurePasteMore"
+                                    }));
+                            }
+                        });
 
-                editor.addAction({
-                    id: "twain.configurePasteMore",
-                    label: "Configure Paste More...",
-                    contextMenuGroupId: "3_pasteMore",
-                    contextMenuOrder: 20,
+                        // Register one action for each configurable Paste More slot.
+                        for (let index = 0; index < 10; index++) {
+                            const slot = index + 1;
+                            const contextKey = editor.createContextKey(
+                                "twainPasteMoreSlot" + slot,
+                                false
+                            );
 
-                    run: function () {
+                            pasteMoreContextKeys.push(contextKey);
+
+                            editor.addAction({
+                                id: "twain.pasteMore.item" + slot,
+                                label: "Paste More " + slot,
+                                contextMenuGroupId: "3_pasteMore",
+                                contextMenuOrder: slot,
+                                precondition: "twainPasteMoreSlot" + slot,
+
+                                run: function (activeEditor) {
+                                    const text = pasteMoreItems[index];
+
+                                    if (typeof text !== "string" ||
+                                        text.trim().length === 0) {
+                                        return;
+                                    }
+
+                                    const selection = activeEditor.getSelection();
+
+                                    if (!selection) {
+                                        return;
+                                    }
+
+                                    activeEditor.pushUndoStop();
+                                    activeEditor.executeEdits(
+                                        "twain.pasteMore",
+                                        [{
+                                            range: selection,
+                                            text: text,
+                                            forceMoveMarkers: true
+                                        }]
+                                    );
+                                    activeEditor.pushUndoStop();
+                                    activeEditor.focus();
+                                }
+                            });
+                        }
+
+                        editor.onDidChangeModelContent(
+                            function () {
+                                if (suppressTextChanged) {
+                                    return;
+                                }
+
+                                invokeCSharpAction(
+                                    JSON.stringify({
+                                        type: "textChanged",
+                                        text: editor.getValue()
+                                    }));
+                            });
+
                         invokeCSharpAction(
                             JSON.stringify({
-                                type: "configurePasteMore"
-                            }));
-                    }
-                });
-
-                editor.onDidChangeModelContent(
-                    function () {
-                        if (suppressTextChanged) {
-                            return;
-                        }
-
-                        invokeCSharpAction(
-                            JSON.stringify({
-                                type: "textChanged",
-                                text: editor.getValue()
+                                type: "ready"
                             }));
                     });
 
-                invokeCSharpAction(
-                    JSON.stringify({
-                        type: "ready"
-                    }));
-            });
+                window.twainEditor = {
+                    setPasteMoreItems:
+                        function (items) {
+                            pasteMoreItems =
+                                Array.isArray(items)
+                                    ? items.slice(0, 10)
+                                    : [];
 
-            window.twainEditor = {
-                setPasteMoreItems:
-                    function (items) {
-                pasteMoreItems =
-                    Array.isArray(items)
-                        ? items.slice(0, 10)
-                        : [];
+                            for (let index = 0; index < 10; index++) {
+                                const text = pasteMoreItems[index];
+                                const hasValue =
+                                    typeof text === "string" &&
+                                    text.trim().length > 0;
 
-                if (!editor) {
-                    return;
-                }
+                                if (pasteMoreContextKeys[index]) {
+                                    pasteMoreContextKeys[index].set(hasValue);
+                                }
+                            }
+                        },
 
-                // Remove previously registered Paste More commands.
-                pasteMoreActions.forEach(function (action) {
-                    action.dispose();
-                });
+                        setText:
+                            function (text) {
+                                if (!editor) {
+                                    return;
+                                }
 
-                pasteMoreActions = [];
+                                suppressTextChanged = true;
 
-                // Register a command for each nonempty configured slot.
-                pasteMoreItems.forEach(function (text, index) {
-                    if (typeof text !== "string" ||
-                        text.trim().length === 0) {
-                        return;
-                    }
+                                try {
+                                    editor.setValue(
+                                        text ?? "");
+                                }
+                                finally {
+                                    suppressTextChanged = false;
+                                }
+                            },
 
-                    const action = editor.addAction({
-                        id: "twain.pasteMore.item" + (index + 1),
-                        label: "Paste More " + (index + 1) +
-                            ": " + text.replace(/\s+/g, " ").slice(0, 45),
-                        contextMenuGroupId: "3_pasteMore",
-                        contextMenuOrder: index + 1,
+                    getText:
+                        function () {
+                            if (!editor) {
+                                return "";
+                            }
 
-                        run: function () {
-                            // Insertion will be connected in the next step.
+                            return editor.getValue();
+                        },
+
+                    selectText:
+                        function (start, length) {
+                            if (!editor) {
+                                return;
+                            }
+
+                            const model = editor.getModel();
+
+                            if (!model) {
+                                return;
+                            }
+
+                            const startPosition =
+                                model.getPositionAt(start);
+
+                            const endPosition =
+                                model.getPositionAt(start + length);
+
+                            editor.setSelection({
+                                startLineNumber: startPosition.lineNumber,
+                                startColumn: startPosition.column,
+                                endLineNumber: endPosition.lineNumber,
+                                endColumn: endPosition.column
+                            });
+
+                            editor.revealRangeInCenter(
+                                editor.getSelection());
+
+                            editor.focus();
+                        },
+
+                    getCaretOffset:
+                        function () {
+                            if (!editor) {
+                                return 0;
+                            }
+
+                            const model = editor.getModel();
+                            const position = editor.getPosition();
+
+                            if (!model || !position) {
+                                return 0;
+                            }
+
+                            return model.getOffsetAt(position);
+                        },
+
+                    getSelectionStart:
+                        function () {
+                            if (!editor) {
+                                return 0;
+                            }
+
+                            const model = editor.getModel();
+                            const selection = editor.getSelection();
+
+                            if (!model || !selection) {
+                                return 0;
+                            }
+
+                            return model.getOffsetAt(
+                                selection.getStartPosition());
+                        },
+
+                    goToLine:
+                        function (line) {
+                            if (!editor) {
+                                return;
+                            }
+
+                            const model = editor.getModel();
+
+                            if (!model) {
+                                return;
+                            }
+
+                            const lineNumber =
+                                Math.min(
+                                    Math.max(line + 1, 1),
+                                    model.getLineCount());
+
+                            editor.setPosition({
+                                lineNumber: lineNumber,
+                                column: 1
+                            });
+
+                            editor.revealLineInCenter(lineNumber);
+                            editor.focus();
                         }
-                    });
-
-                    pasteMoreActions.push(action);
-                });
-            },
-
-                setText:
-                    function (text) {
-                        if (!editor) {
-                            return;
-                        }
-
-                        suppressTextChanged = true;
-
-                        try {
-                            editor.setValue(
-                                text ?? "");
-                        }
-                        finally {
-                            suppressTextChanged = false;
-                        }
-                    },
-
-            getText:
-                function () {
-                    if (!editor) {
-                        return "";
-                    }
-
-                    return editor.getValue();
-                },
-
-            selectText:
-                function (start, length) {
-                    if (!editor) {
-                        return;
-                    }
-
-                    const model = editor.getModel();
-
-                    if (!model) {
-                        return;
-                    }
-
-                    const startPosition =
-                        model.getPositionAt(start);
-
-                    const endPosition =
-                        model.getPositionAt(start + length);
-
-                    editor.setSelection({
-                        startLineNumber: startPosition.lineNumber,
-                        startColumn: startPosition.column,
-                        endLineNumber: endPosition.lineNumber,
-                        endColumn: endPosition.column
-                    });
-
-                    editor.revealRangeInCenter(
-                        editor.getSelection());
-
-                    editor.focus();
-                },
-
-            getCaretOffset:
-                function () {
-                    if (!editor) {
-                        return 0;
-                    }
-
-                    const model = editor.getModel();
-                    const position = editor.getPosition();
-
-                    if (!model || !position) {
-                        return 0;
-                    }
-
-                    return model.getOffsetAt(position);
-                },
-
-            getSelectionStart:
-                function () {
-                    if (!editor) {
-                        return 0;
-                    }
-
-                    const model = editor.getModel();
-                    const selection = editor.getSelection();
-
-                    if (!model || !selection) {
-                        return 0;
-                    }
-
-                    return model.getOffsetAt(
-                        selection.getStartPosition());
-                },
-
-            goToLine:
-                function (line) {
-                    if (!editor) {
-                        return;
-                    }
-
-                    const model = editor.getModel();
-
-                    if (!model) {
-                        return;
-                    }
-
-                    const lineNumber =
-                        Math.min(
-                            Math.max(line + 1, 1),
-                            model.getLineCount());
-
-                    editor.setPosition({
-                        lineNumber: lineNumber,
-                        column: 1
-                    });
-
-                    editor.revealLineInCenter(lineNumber);
-                    editor.focus();
-                }
-        };
+                };
     </script>
 </body>
 </html>
