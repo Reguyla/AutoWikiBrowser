@@ -17,13 +17,20 @@ public partial class ConfigurePasteMoreItemsWindow : Avalonia.Controls.Window
     {
         ArgumentNullException.ThrowIfNull(items);
 
+        string[] configuredItems =
+            items
+                .Take(10)
+                .Concat(Enumerable.Repeat(string.Empty, 10))
+                .Take(10)
+                .ToArray();
+
         Rows =
             new ObservableCollection<PasteMoreItemRow>(
-                items.Select(
+                configuredItems.Select(
                     (text, index) =>
                         new PasteMoreItemRow(
                             index + 1,
-                            text ?? string.Empty)));
+                            text)));
 
         InitializeComponent();
 

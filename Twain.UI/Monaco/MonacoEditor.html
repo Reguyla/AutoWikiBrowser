@@ -28,6 +28,8 @@
     <script>
         let editor;
         let suppressTextChanged = false;
+        let pasteMoreItems = [];
+        let pasteMoreActions = [];
 
         require.config({
             paths: {
@@ -99,6 +101,20 @@
                     }
                 });
 
+                editor.addAction({
+                    id: "twain.configurePasteMore",
+                    label: "Configure Paste More...",
+                    contextMenuGroupId: "3_pasteMore",
+                    contextMenuOrder: 20,
+
+                    run: function () {
+                        invokeCSharpAction(
+                            JSON.stringify({
+                                type: "configurePasteMore"
+                            }));
+                    }
+                });
+
                 editor.onDidChangeModelContent(
                     function () {
                         if (suppressTextChanged) {
@@ -118,23 +134,64 @@
                     }));
             });
 
-        window.twainEditor = {
-            setText:
-                function (text) {
-                    if (!editor) {
+            window.twainEditor = {
+                setPasteMoreItems:
+                    function (items) {
+                pasteMoreItems =
+                    Array.isArray(items)
+                        ? items.slice(0, 10)
+                        : [];
+
+                if (!editor) {
+                    return;
+                }
+
+                // Remove previously registered Paste More commands.
+                pasteMoreActions.forEach(function (action) {
+                    action.dispose();
+                });
+
+                pasteMoreActions = [];
+
+                // Register a command for each nonempty configured slot.
+                pasteMoreItems.forEach(function (text, index) {
+                    if (typeof text !== "string" ||
+                        text.trim().length === 0) {
                         return;
                     }
 
-                    suppressTextChanged = true;
+                    const action = editor.addAction({
+                        id: "twain.pasteMore.item" + (index + 1),
+                        label: "Paste More " + (index + 1) +
+                            ": " + text.replace(/\s+/g, " ").slice(0, 45),
+                        contextMenuGroupId: "3_pasteMore",
+                        contextMenuOrder: index + 1,
 
-                    try {
-                        editor.setValue(
-                            text ?? "");
-                    }
-                    finally {
-                        suppressTextChanged = false;
-                    }
-                },
+                        run: function () {
+                            // Insertion will be connected in the next step.
+                        }
+                    });
+
+                    pasteMoreActions.push(action);
+                });
+            },
+
+                setText:
+                    function (text) {
+                        if (!editor) {
+                            return;
+                        }
+
+                        suppressTextChanged = true;
+
+                        try {
+                            editor.setValue(
+                                text ?? "");
+                        }
+                        finally {
+                            suppressTextChanged = false;
+                        }
+                    },
 
             getText:
                 function () {

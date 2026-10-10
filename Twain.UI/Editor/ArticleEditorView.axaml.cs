@@ -1,4 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.VisualTree;
+using Twain.Core.Editing;
+using Twain.UI.PasteMore;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
@@ -25,6 +28,7 @@ public partial class ArticleEditorView : UserControl
     private bool _lastSearchCaseSensitive;
     private string _lastSearchArticleName = string.Empty;
     private bool _updatingDocumentFromMonaco;
+    private readonly PasteMoreConfiguration _pasteMore = new();
 
     /// <summary>
     /// Initializes the article editor view.
@@ -90,6 +94,13 @@ public partial class ArticleEditorView : UserControl
         if (messageType == "ready")
         {
             await LoadDocumentTextAsync();
+
+            return;
+        }
+
+        if (messageType == "configurePasteMore")
+        {
+            await ConfigurePasteMoreAsync();
 
             return;
         }
@@ -335,5 +346,38 @@ public partial class ArticleEditorView : UserControl
 
         await EditorWebView.InvokeScript(
             $"window.twainEditor.goToLine({line});");
+    }
+
+    /// <summary>
+    /// Opens the Paste More configuration dialog and applies accepted changes.
+    /// </summary>
+    private async Task ConfigurePasteMoreAsync()
+    {
+        Window? owner =
+            TopLevel.GetTopLevel(this) as Window;
+
+        if (owner is null)
+        {
+            return;
+        }
+
+        ConfigurePasteMoreItemsWindow window =
+            new(_pasteMore);
+
+        bool accepted =
+            await window.ShowDialog<bool>(owner);
+
+        if (!accepted)
+        {
+            return;
+        }
+
+        _pasteMore.Replace(window.Items);
+
+        string itemsJson =
+            JsonSerializer.Serialize(_pasteMore.Items);
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.setPasteMoreItems({itemsJson})");
     }
 }
