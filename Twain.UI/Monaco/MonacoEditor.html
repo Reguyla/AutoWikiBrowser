@@ -45,10 +45,59 @@
                             value: "",
                             language: "plaintext",
                             automaticLayout: true,
+                            contextmenu: true,
+                            wordWrap: "on",
                             minimap: {
                                 enabled: false
                             }
                         });
+
+                editor.addAction({
+                    id: "twain.toggleWordWrap",
+                    label: "Word Wrap",
+                    contextMenuGroupId: "1_modification",
+                    contextMenuOrder: 0,
+
+                    run: function (activeEditor) {
+                        const currentWrap =
+                            activeEditor.getOption(
+                                monaco.editor.EditorOption.wordWrap);
+
+                        activeEditor.updateOptions({
+                            wordWrap: currentWrap === "on"
+                                ? "off"
+                                : "on"
+                        });
+                    }
+                });
+
+                editor.addAction({
+                    id: "twain.undo",
+                    label: "Undo",
+                    contextMenuGroupId: "2_editing",
+                    contextMenuOrder: 1,
+
+                    run: function (activeEditor) {
+                        activeEditor.trigger(
+                            "twain.contextMenu",
+                            "undo",
+                            null);
+                    }
+                });
+
+                editor.addAction({
+                    id: "twain.selectAll",
+                    label: "Select All",
+                    contextMenuGroupId: "2_editing",
+                    contextMenuOrder: 5,
+
+                    run: function (activeEditor) {
+                        activeEditor.trigger(
+                            "twain.contextMenu",
+                            "editor.action.selectAll",
+                            null);
+                    }
+                });
 
                 editor.onDidChangeModelContent(
                     function () {
