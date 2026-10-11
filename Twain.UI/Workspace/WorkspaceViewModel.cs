@@ -405,20 +405,24 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Runs extension processing for the supplied article.
+    /// Runs the enabled custom module for the supplied article.
     /// </summary>
-    /// <param name="article">
-    /// The article being processed.
-    /// </param>
     /// <returns>
-    /// <see langword="true"/> when processing should continue.
+    /// True when article processing should continue; otherwise false.
     /// </returns>
-    private bool RunExtensionProcessing(
-        Article article)
+    private bool RunExtensionProcessing(Article article)
     {
-        // Custom modules, external programs, and plugins are not yet connected
-        // to the Twain workspace processing lifecycle.
-        return true;
+        if (!CustomModuleState.ModuleUsable)
+            return true;
+
+        IModule? module = CustomModuleState.Module;
+
+        if (module is null)
+            return true;
+
+        article.SendPageToCustomModule(module);
+
+        return !article.SkipArticle;
     }
 
     /// <summary>

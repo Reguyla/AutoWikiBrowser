@@ -131,6 +131,23 @@ public partial class CustomModule : Avalonia.Controls.Window
 
         MakeModuleButton.IsEnabled =
             _state.ModuleEnabled;
+
+        if (_state.Module is not null)
+        {
+            StatusTextBlock.Text =
+                "Module compiled and loaded";
+
+            BuiltAtTextBlock.Text =
+                BuiltPrefix + "Loaded in current session";
+        }
+        else
+        {
+            StatusTextBlock.Text =
+                "No module loaded";
+
+            BuiltAtTextBlock.Text =
+                BuiltPrefix + "n/a";
+        }
     }
 
     /// <summary>
