@@ -29,6 +29,24 @@ public sealed class CustomModuleState
     public IModule? Module { get; private set; }
 
     /// <summary>
+    /// Gets the most recent compilation and loading status.
+    /// </summary>
+    public CustomModuleCompilationStatus CompilationStatus
+    {
+        get;
+        private set;
+    } = CustomModuleCompilationStatus.NotCompiled;
+
+    /// <summary>
+    /// Gets the time the current module was successfully compiled and loaded.
+    /// </summary>
+    public DateTimeOffset? LastCompiledAt
+    {
+        get;
+        private set;
+    }
+
+    /// <summary>
     /// Gets a value indicating whether the custom module is enabled and has
     /// a compiled module available for processing.
     /// </summary>
@@ -36,21 +54,40 @@ public sealed class CustomModuleState
         ModuleEnabled && Module is not null;
 
     /// <summary>
-    /// Stores the successfully compiled custom module.
+    /// Stores the successfully compiled custom module and its compilation status.
     /// </summary>
     public void SetModule(
-        IModule module)
+        IModule module,
+        bool hasWarnings = false)
     {
         ArgumentNullException.ThrowIfNull(module);
 
         Module = module;
+
+        CompilationStatus = hasWarnings
+            ? CustomModuleCompilationStatus.Warning
+            : CustomModuleCompilationStatus.Success;
+
+        LastCompiledAt = DateTimeOffset.Now;
     }
 
     /// <summary>
-    /// Clears the currently compiled custom module.
+    /// Clears the currently compiled module and resets its status.
     /// </summary>
     public void SetModuleNotBuilt()
     {
         Module = null;
+        CompilationStatus = CustomModuleCompilationStatus.NotCompiled;
+        LastCompiledAt = null;
+    }
+
+    /// <summary>
+    /// Records a compilation or module-loading failure.
+    /// </summary>
+    public void SetCompilationFailed()
+    {
+        Module = null;
+        CompilationStatus = CustomModuleCompilationStatus.Failed;
+        LastCompiledAt = null;
     }
 }

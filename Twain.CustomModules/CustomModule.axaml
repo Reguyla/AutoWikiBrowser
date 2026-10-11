@@ -18,7 +18,7 @@
             <MenuItem Header="_View">
                 <MenuItem
                     x:Name="ShowOnlyCodeBoxMenuItem"
-                    Header="Show only code box"
+                    Header="Hide generated wrapper"
                     InputGesture="F11"
                     ToggleType="CheckBox"
                     Click="ShowOnlyCodeBoxMenuItem_Click" />
@@ -63,11 +63,12 @@
                     IsCheckedChanged="ModuleEnabledCheckBox_Changed" />
 
                 <Border
+                    x:Name="CompilationStatusBorder"
                     Grid.Row="0"
                     Grid.Column="1"
                     Padding="8,4"
                     VerticalAlignment="Center"
-                    Background="{DynamicResource TwainWarningBrush}"
+                    Background="{DynamicResource TwainBorderBrush}"
                     CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
                     <TextBlock

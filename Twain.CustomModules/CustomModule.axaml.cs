@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
@@ -132,22 +133,7 @@ public partial class CustomModule : Avalonia.Controls.Window
         MakeModuleButton.IsEnabled =
             _state.ModuleEnabled;
 
-        if (_state.Module is not null)
-        {
-            StatusTextBlock.Text =
-                "Module compiled and loaded";
-
-            BuiltAtTextBlock.Text =
-                BuiltPrefix + "Loaded in current session";
-        }
-        else
-        {
-            StatusTextBlock.Text =
-                "No module loaded";
-
-            BuiltAtTextBlock.Text =
-                BuiltPrefix + "n/a";
-        }
+        UpdateCompilationStatus();
     }
 
     /// <summary>
@@ -167,18 +153,18 @@ public partial class CustomModule : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Shows or hides the controls surrounding the code editor.
+    /// Shows or hides the generated module wrapper while keeping
+    /// the module controls and editable code visible.
     /// </summary>
     private void ShowOnlyCodeBoxMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        bool showOnlyCode =
+        bool hideWrapper =
             ShowOnlyCodeBoxMenuItem.IsChecked;
 
-        ModuleControlsPanel.IsVisible = !showOnlyCode;
-        ModuleStartTextBox.IsVisible = !showOnlyCode;
-        ModuleEndTextBox.IsVisible = !showOnlyCode;
+        ModuleStartTextBox.IsVisible = !hideWrapper;
+        ModuleEndTextBox.IsVisible = !hideWrapper;
     }
 
     /// <summary>
@@ -322,7 +308,8 @@ public partial class CustomModule : Avalonia.Controls.Window
 
             if (!ShowCompilationMessages(results))
             {
-                Module = null;
+                _state.SetCompilationFailed();
+                UpdateCompilationStatus();
                 return;
             }
 
@@ -335,20 +322,65 @@ public partial class CustomModule : Avalonia.Controls.Window
                 CustomModuleCompiler.FindModuleType(
                     compiledAssembly);
 
-            Module =
+            IModule module =
                 _host is null
-                    ? CustomModuleCompiler.CreateModule(
-                        moduleType)
-                    : CustomModuleCompiler.CreateModule(
-                        moduleType,
-                        _host);
+                    ? CustomModuleCompiler.CreateModule(moduleType)
+                    : CustomModuleCompiler.CreateModule(moduleType, _host);
+
+            _state.SetModule(
+                module,
+                results.Errors.HasWarnings);
+
+            UpdateCompilationStatus();
         }
         catch (Exception ex)
         {
-            Module = null;
+            _state.SetCompilationFailed();
+            UpdateCompilationStatus();
 
             ShowRuntimeError(ex);
         }
+    }
+
+    /// <summary>
+    /// Updates the compilation status displayed in the custom module editor.
+    /// </summary>
+    private void UpdateCompilationStatus()
+    {
+        StatusTextBlock.Text =
+            _state.CompilationStatus switch
+            {
+                CustomModuleCompilationStatus.Success =>
+                    "Module compiled and loaded",
+
+                CustomModuleCompilationStatus.Warning =>
+                    "Module loaded with warnings",
+
+                CustomModuleCompilationStatus.Failed =>
+                    "Module compilation failed",
+
+                _ => "No module loaded"
+            };
+
+        CompilationStatusBorder.Background =
+            _state.CompilationStatus switch
+            {
+                CustomModuleCompilationStatus.Success =>
+                    Brushes.ForestGreen,
+
+                CustomModuleCompilationStatus.Warning =>
+                    Brushes.Goldenrod,
+
+                CustomModuleCompilationStatus.Failed =>
+                    Brushes.Firebrick,
+
+                _ => Brushes.DimGray
+            };
+
+        BuiltAtTextBlock.Text =
+            _state.LastCompiledAt is { } compiledAt
+                ? BuiltPrefix + compiledAt.ToLocalTime().ToString("g")
+                : BuiltPrefix + "n/a";
     }
 
     /// <summary>
@@ -444,8 +476,7 @@ public partial class CustomModule : Avalonia.Controls.Window
         "Custom Module Built At: ";
 
     /// <summary>
-    /// Gets the currently loaded custom module instance, or
-    /// <see langword="null"/> if no module has been successfully compiled.
+    /// Gets or sets the currently loaded custom module.
     /// </summary>
     public IModule? Module
     {
@@ -456,23 +487,13 @@ public partial class CustomModule : Avalonia.Controls.Window
             if (value is null)
             {
                 _state.SetModuleNotBuilt();
-
-                StatusTextBlock.Text =
-                    "No module loaded";
-
-                BuiltAtTextBlock.Text =
-                    BuiltPrefix + "n/a";
-
-                return;
+            }
+            else
+            {
+                _state.SetModule(value);
             }
 
-            _state.SetModule(value);
-
-            StatusTextBlock.Text =
-                "Module compiled and loaded";
-
-            BuiltAtTextBlock.Text =
-                BuiltPrefix + DateTime.Now;
+            UpdateCompilationStatus();
         }
     }
 
