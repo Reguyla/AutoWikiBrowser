@@ -22,7 +22,7 @@ public partial class CustomModule : Avalonia.Controls.Window
     private static readonly Avalonia.Media.FontFamily DefaultFont =
         Avalonia.Media.FontFamily.Default;
 
-    private readonly IAutoWikiBrowser? _host;
+    private readonly ITwainHost? _host;
 
     private readonly CustomModuleState _state;
 
@@ -32,9 +32,7 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// Initializes the custom module window.
     /// </summary>
     public CustomModule()
-        : this(
-            new CustomModuleState(),
-            null)
+        : this(new CustomModuleState(), null)
     {
     }
 
@@ -44,11 +42,8 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// <param name="host">
     /// The application interface supplied to custom modules when they are created.
     /// </param>
-    public CustomModule(
-        IAutoWikiBrowser? host)
-        : this(
-            new CustomModuleState(),
-            host)
+    public CustomModule(ITwainHost? host)
+        : this(new CustomModuleState(), host)
     {
     }
 
@@ -64,7 +59,7 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// </param>
     public CustomModule(
         CustomModuleState state,
-        IAutoWikiBrowser? host)
+        ITwainHost? host)
     {
         ArgumentNullException.ThrowIfNull(state);
 

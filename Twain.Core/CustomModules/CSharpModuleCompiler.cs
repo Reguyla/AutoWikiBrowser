@@ -44,11 +44,11 @@ namespace AutoWikiBrowser.CustomModules
 {
     public class CustomModule : Twain.Core.Plugin.IModule
     {
-        private readonly Twain.Core.Plugin.IAutoWikiBrowser awb;
+        private readonly Twain.Core.Plugin.ITwainHost host;
 
-        public CustomModule(Twain.Core.Plugin.IAutoWikiBrowser awb)
+        public CustomModule(Twain.Core.Plugin.ITwainHost host)
         {
-            this.awb = awb;
+            this.host = host;
         }
 ";
 

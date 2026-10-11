@@ -75,8 +75,8 @@ internal static class VisualBasicRoslynCompiler
 
         VisualBasicCompilation compilation =
             VisualBasicCompilation.Create(
-                assemblyName:
-                    $"AWB.VisualBasicCustomModule.{Guid.NewGuid():N}",
+            assemblyName:
+                $"Twain.VisualBasicCustomModule.{Guid.NewGuid():N}",
                 syntaxTrees:
                 [
                     syntaxTree
@@ -174,7 +174,7 @@ internal static class VisualBasicRoslynCompiler
     }
 
     /// <summary>
-    /// Adds assemblies already loaded by the current AWB process.
+    /// Adds assemblies already loaded by the current Twain process.
     /// </summary>
     private static void AddLoadedAssemblyReferences(
         ISet<string> referencePaths)

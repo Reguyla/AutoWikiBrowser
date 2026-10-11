@@ -40,16 +40,6 @@ public abstract class CustomModuleCompiler
     public abstract string CodeExample { get; }
 
     /// <summary>
-    /// Gets or sets the CodeDOM provider used by legacy compiler
-    /// implementations.
-    /// </summary>
-    /// <remarks>
-    /// C# compilation overrides <see cref="Compile"/> and uses Roslyn.
-    /// This property remains temporarily for other language compilers.
-    /// </remarks>
-    protected CodeDomProvider? Compiler { get; set; }
-
-    /// <summary>
     /// Determines whether this compiler can compile the specified language.
     /// </summary>
     /// <param name="language">The language name to check.</param>

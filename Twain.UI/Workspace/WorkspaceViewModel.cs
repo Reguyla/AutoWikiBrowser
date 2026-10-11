@@ -9,8 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.API;
+using Twain.Core.CustomModules;
 using Twain.Core.Editing;
 using Twain.Core.Parse;
+using Twain.Core.Plugin;
 using Twain.Core.Processing;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
@@ -80,6 +82,17 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// Gets the active wiki session used by the workspace.
     /// </summary>
     public Session Session { get; }
+
+    /// <summary>
+    /// Holds the active custom module and its editor state
+    /// for the lifetime of the workspace.
+    /// </summary>
+    public CustomModuleState CustomModuleState { get; } = new();
+
+    /// <summary>
+    /// Gets the application host exposed to custom modules.
+    /// </summary>
+    public ITwainHost TwainHost { get; }
 
     /// <summary>
     /// Gets the view model for the diff pane.
@@ -175,6 +188,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private string _previewError = string.Empty;
 
+
     /// <summary>
     /// Requests a rendered preview of the current editor contents.
     /// </summary>
@@ -206,6 +220,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(session);
 
         Session = session;
+
+        TwainHost = new TwainHost(
+            Session,
+            () => Options.IsProcessing,
+            () => StopProcessing(),
+            message => System.Diagnostics.Debug.WriteLine(message));
 
         BotSettings.CanUseBotMode =
             Session.IsBot || Session.IsSysop;

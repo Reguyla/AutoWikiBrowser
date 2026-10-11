@@ -16,19 +16,18 @@ Imports System.Collections.Generic
 Imports System.Text
 Imports System.Text.RegularExpressions
 Imports Microsoft.VisualBasic
-Imports WikiFunctions
+Imports Twain.Core
 
 Namespace AutoWikiBrowser.CustomModules
     Public Class CustomModule
         Implements Twain.Core.Plugin.IModule
 
-        Private awb As Twain.Core.Plugin.IAutoWikiBrowser
+        Private ReadOnly host As Twain.Core.Plugin.ITwainHost
 
-        Public Sub New(ByRef _awb As Twain.Core.Plugin.IAutoWikiBrowser)
-            awb = _awb
+        Public Sub New(host As Twain.Core.Plugin.ITwainHost)
+            Me.host = host
         End Sub
 ";
-
     /// <inheritdoc />
     public override string CodeEnd =>
         @"    End Class
