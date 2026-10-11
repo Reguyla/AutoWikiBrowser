@@ -105,6 +105,12 @@ public partial class ArticleEditorView : UserControl
             return;
         }
 
+        if (messageType == "saveTextToFile")
+        {
+            await SaveTextToFileAsync();
+            return;
+        }
+
         if (messageType == "textChanged" &&
             DataContext is ArticleEditorViewModel viewModel)
         {
@@ -379,5 +385,55 @@ public partial class ArticleEditorView : UserControl
 
         await EditorWebView.InvokeScript(
             $"window.twainEditor.setPasteMoreItems({itemsJson})");
+    }
+
+    /// <summary>
+    /// Saves the current article text to a local text file.
+    /// </summary>
+    private async Task SaveTextToFileAsync()
+    {
+        if (DataContext is not ArticleEditorViewModel viewModel)
+        {
+            return;
+        }
+
+        TopLevel? topLevel =
+            TopLevel.GetTopLevel(this);
+
+        if (topLevel is null)
+        {
+            return;
+        }
+
+        var file =
+            await topLevel.StorageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title = "Save Article Text",
+                    SuggestedFileName = "Article.txt",
+                    DefaultExtension = "txt",
+                    FileTypeChoices =
+                    [
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                        "Text files")
+                    {
+                        Patterns = ["*.txt"]
+                    }
+                    ]
+                });
+
+        if (file is null)
+        {
+            return;
+        }
+
+        await using Stream stream =
+            await file.OpenWriteAsync();
+
+        await using StreamWriter writer =
+            new(stream);
+
+        await writer.WriteAsync(
+            viewModel.Document.CurrentText);
     }
 }

@@ -115,6 +115,22 @@
                             }
                         });
 
+
+                        editor.addAction({
+                            id: "twain.saveTextToFile",
+                            label: "Save Text to File...",
+                            contextMenuGroupId: "4_file",
+                            contextMenuOrder: 1,
+
+                            run: function () {
+                                invokeCSharpAction(
+                                    JSON.stringify({
+                                        type: "saveTextToFile"
+                                    })
+                                );
+                            }
+                        });
+
                         // Register one action for each configurable Paste More slot.
                         for (let index = 0; index < 10; index++) {
                             const slot = index + 1;
