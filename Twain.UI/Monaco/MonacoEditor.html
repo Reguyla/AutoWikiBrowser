@@ -131,6 +131,21 @@
                             }
                         });
 
+                        editor.addAction({
+                            id: "twain.goToLine",
+                            label: "Go to Line...",
+                            contextMenuGroupId: "4_file",
+                            contextMenuOrder: 2,
+
+                            run: function (activeEditor) {
+                                activeEditor.trigger(
+                                    "twain.contextMenu",
+                                    "editor.action.gotoLine",
+                                    null
+                                );
+                            }
+                        });
+
                         // Register one action for each configurable Paste More slot.
                         for (let index = 0; index < 10; index++) {
                             const slot = index + 1;
