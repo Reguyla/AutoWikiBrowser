@@ -55,25 +55,6 @@
                                 });
 
                         editor.addAction({
-                            id: "twain.toggleWordWrap",
-                            label: "Word Wrap",
-                            contextMenuGroupId: "1_modification",
-                            contextMenuOrder: 0,
-
-                            run: function (activeEditor) {
-                                const currentWrap =
-                                    activeEditor.getOption(
-                                        monaco.editor.EditorOption.wordWrap);
-
-                                activeEditor.updateOptions({
-                                    wordWrap: currentWrap === "on"
-                                        ? "off"
-                                        : "on"
-                                });
-                            }
-                        });
-
-                        editor.addAction({
                             id: "twain.undo",
                             label: "Undo",
                             contextMenuGroupId: "2_editing",
@@ -259,6 +240,22 @@
                                 fontFamily: enabled
                                     ? "Cascadia Mono, Consolas, Courier New, monospace"
                                     : "Arial, sans-serif"
+                            });
+                        },
+
+                        setAppearance: function (settings) {
+                            if (!editor || !settings) {
+                                return;
+                            }
+
+                            const fontFamily = settings.fontFamily || "Courier New";
+                            const fontSize = Number(settings.fontSize) || 14;
+
+                            editor.updateOptions({
+                                fontFamily: fontFamily,
+                                fontSize: fontSize,
+                                wordWrap: settings.wordWrap ? "on" : "off",
+                                lineNumbers: settings.lineNumbers ? "on" : "off"
                             });
                         },
 

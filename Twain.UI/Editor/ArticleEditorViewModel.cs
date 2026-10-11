@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Twain.Core.AWBSettings;
 
 namespace Twain.UI.Editor;
 
@@ -34,17 +34,24 @@ public sealed class ArticleEditorViewModel : ViewModelBase
     /// The article document edited by this pane.
     /// </param>
     public ArticleEditorViewModel(
-        ArticleDocumentViewModel document)
+        ArticleDocumentViewModel document,
+        UserPrefs? preferences = null)
     {
         ArgumentNullException.ThrowIfNull(document);
 
         Document = document;
+        Preferences = preferences;
     }
 
     /// <summary>
     /// Gets the article document edited by this pane.
     /// </summary>
     public ArticleDocumentViewModel Document { get; }
+
+    /// <summary>
+    /// Gets the application preferences used by the editor.
+    /// </summary>
+    public UserPrefs? Preferences { get; }
 
     /// <summary>
     /// Gets or sets the action used to request navigation to the next

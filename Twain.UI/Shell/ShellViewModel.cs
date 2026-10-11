@@ -32,7 +32,8 @@ public sealed partial class ShellViewModel : ViewModelBase
 
         Workspace =
             new WorkspaceViewModel(
-                Session);
+                Session,
+                Preferences);
 
     }
 

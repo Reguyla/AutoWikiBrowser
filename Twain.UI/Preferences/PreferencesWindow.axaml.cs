@@ -97,6 +97,8 @@ public partial class PreferencesWindow : Window
         InitializeLanguageSelection(language);
         InitializeCustomProject(customProject);
         InitializeProtocolSelection(protocol);
+
+        UpdateOkButtonState();
     }
 
     /// <summary>
@@ -112,7 +114,18 @@ public partial class PreferencesWindow : Window
         PrefDomain = preferences.LoginDomain;
 
         GeneralPrefs general =
-            preferences.General;
+           preferences.General;
+
+        EditorFontComboBox.Text = general.TextBoxFont;
+
+        EditorFontSizeNumericUpDown.Value =
+            general.TextBoxSize;
+
+        EditorWordWrapCheckBox.IsChecked =
+            general.WordWrap;
+
+        EditorLineNumbersCheckBox.IsChecked =
+            general.EditorLineNumbers;
 
         PrefMinimize = general.Minimize;
         LowThreadPriority = general.LowThreadPriority;
@@ -261,6 +274,21 @@ public partial class PreferencesWindow : Window
 
         GeneralPrefs general =
             preferences.General;
+
+        general.TextBoxFont =
+            string.IsNullOrWhiteSpace(EditorFontComboBox.Text)
+                ? "Courier New"
+                : EditorFontComboBox.Text.Trim();
+
+        general.TextBoxSize =
+            Convert.ToInt32(
+                EditorFontSizeNumericUpDown.Value ?? 10);
+
+        general.WordWrap =
+            EditorWordWrapCheckBox.IsChecked == true;
+
+        general.EditorLineNumbers =
+            EditorLineNumbersCheckBox.IsChecked == true;
 
         general.Minimize = PrefMinimize;
         general.LowThreadPriority = LowThreadPriority;

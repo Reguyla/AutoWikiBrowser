@@ -94,6 +94,7 @@ public partial class ArticleEditorView : UserControl
         if (messageType == "ready")
         {
             await LoadDocumentTextAsync();
+            await ApplyEditorAppearanceAsync();
 
             return;
         }
@@ -131,6 +132,33 @@ public partial class ArticleEditorView : UserControl
                 _updatingDocumentFromMonaco = false;
             }
         }
+    }
+
+    /// <summary>
+    /// Applies the shared editor appearance preferences to Monaco.
+    /// </summary>
+    private async Task ApplyEditorAppearanceAsync()
+    {
+        if (DataContext is not ArticleEditorViewModel viewModel ||
+            viewModel.Preferences is null)
+        {
+            return;
+        }
+
+        var general = viewModel.Preferences.General;
+
+        var appearance = new
+        {
+            fontFamily = general.TextBoxFont,
+            fontSize = general.TextBoxSize,
+            wordWrap = general.WordWrap,
+            lineNumbers = general.EditorLineNumbers
+        };
+
+        string json = JsonSerializer.Serialize(appearance);
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.setAppearance({json});");
     }
 
     /// <summary>

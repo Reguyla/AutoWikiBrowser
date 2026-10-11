@@ -249,28 +249,65 @@
 
                     <Separator Margin="0,4" />
 
+                <StackPanel Spacing="10">
+
+                    <TextBlock
+                        Text="Editor appearance"
+                        FontWeight="SemiBold" />
+
                     <Grid
-                        ColumnDefinitions="Auto,*,Auto"
-                        ColumnSpacing="12">
+                        ColumnDefinitions="Auto,*"
+                        RowDefinitions="Auto,Auto"
+                        ColumnSpacing="12"
+                        RowSpacing="10">
 
                         <TextBlock
+                            Grid.Row="0"
                             Grid.Column="0"
                             VerticalAlignment="Center"
-                            Text="Editor font:" />
+                            Text="Font family:" />
+
+                        <ComboBox
+                            x:Name="EditorFontComboBox"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MinWidth="200"
+                            IsEditable="True">
+                            <ComboBoxItem Content="Cascadia Mono" />
+                            <ComboBoxItem Content="Cascadia Code" />
+                            <ComboBoxItem Content="Consolas" />
+                            <ComboBoxItem Content="Courier New" />
+                            <ComboBoxItem Content="Arial" />
+                        </ComboBox>
 
                         <TextBlock
-                            x:Name="EditorFontTextBlock"
-                            Grid.Column="1"
+                            Grid.Row="1"
+                            Grid.Column="0"
                             VerticalAlignment="Center"
-                            Text="Default" />
+                            Text="Font size:" />
 
-                        <Button
-                            x:Name="ChooseEditorFontButton"
-                            Grid.Column="2"
-                            Content="Choose..."
-                            IsEnabled="False" />
+                        <NumericUpDown
+                            x:Name="EditorFontSizeNumericUpDown"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Width="120"
+                            HorizontalAlignment="Left"
+                            Minimum="8"
+                            Maximum="36"
+                            Increment="1"
+                            Value="10" />
 
                     </Grid>
+
+                    <CheckBox
+                        x:Name="EditorWordWrapCheckBox"
+                        Content="Enable word wrap" />
+
+                    <CheckBox
+                        x:Name="EditorLineNumbersCheckBox"
+                        Content="Show line numbers" />
+
+                </StackPanel>
 
                     <Grid
                         ColumnDefinitions="Auto,Auto,*"
@@ -412,12 +449,13 @@
             Orientation="Horizontal"
             Spacing="8">
 
-            <Button
-                x:Name="OkButton"
-                MinWidth="90"
-                Content="OK"
-                IsDefault="True"
-                Click="OkButton_Click" />
+        <Button
+            x:Name="OkButton"
+            MinWidth="90"
+            Content="OK"
+            IsEnabled="True"
+            IsDefault="True"
+            Click="OkButton_Click" />
 
             <Button
                 x:Name="CancelButton"

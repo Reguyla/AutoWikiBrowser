@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.API;
+using Twain.Core.AWBSettings;
 using Twain.Core.CustomModules;
 using Twain.Core.Editing;
 using Twain.Core.Parse;
@@ -63,6 +64,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         IsOptionsVisible = false;
     }
+
+    /// <summary>
+    /// Gets the application preferences shared with the shell.
+    /// </summary>
+    public UserPrefs Preferences { get; }
 
     /// <summary>
     /// Displays the article processing options.
@@ -215,11 +221,13 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel(
-        Session session)
+        Session session,
+        UserPrefs preferences)
     {
         ArgumentNullException.ThrowIfNull(session);
 
         Session = session;
+        Preferences = preferences;
 
         TwainHost = new TwainHost(
             Session,
@@ -260,7 +268,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             editingSession);
 
         Editor = new ArticleEditorViewModel(
-           document);
+            document,
+            Preferences);
 
         Diff = new DiffViewModel(
            document);
