@@ -180,67 +180,12 @@
                     CornerRadius="{DynamicResource TwainControlCornerRadius}" />
 
                 <!-- User-editable module code -->
-                <TextBox
-                    x:Name="CodeTextBox"
+                  <NativeWebView
+                    x:Name="CodeEditorWebView"
                     Grid.Row="1"
                     MinHeight="220"
-                    AcceptsReturn="True"
-                    AcceptsTab="True"
-                    TextWrapping="NoWrap"
-                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    FontFamily="Cascadia Mono, Consolas, Courier New"
-                    FontSize="{DynamicResource TwainFontSizeNormal}"
-                    Background="{DynamicResource TwainControlBackgroundBrush}"
-                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                    BorderBrush="{DynamicResource TwainBorderBrush}"
-                    BorderThickness="{DynamicResource TwainBorderThickness}"
-                    CornerRadius="{DynamicResource TwainControlCornerRadius}">
-
-                    <TextBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem
-                                Header="_Undo"
-                                InputGesture="Ctrl+Z"
-                                Click="UndoMenuItem_Click" />
-
-                            <Separator />
-
-                            <MenuItem
-                                Header="Cu_t"
-                                InputGesture="Ctrl+X"
-                                Click="CutMenuItem_Click" />
-
-                            <MenuItem
-                                Header="_Copy"
-                                InputGesture="Ctrl+C"
-                                Click="CopyMenuItem_Click" />
-
-                            <MenuItem
-                                Header="_Paste"
-                                InputGesture="Ctrl+V"
-                                Click="PasteMenuItem_Click" />
-
-                            <Separator />
-
-                            <MenuItem
-                                Header="Select _All"
-                                InputGesture="Ctrl+A"
-                                Click="SelectAllMenuItem_Click" />
-
-                            <Separator />
-
-                            <MenuItem Header="_Go to Line">
-                                <TextBox
-                                    x:Name="GoToLineTextBox"
-                                    Width="120"
-                                    Watermark="Line number"
-                                    MaxLength="6"
-                                    KeyDown="GoToLineTextBox_KeyDown" />
-                            </MenuItem>
-                        </ContextMenu>
-                    </TextBox.ContextMenu>
-                </TextBox>
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
 
                 <!-- Generated module suffix -->
                 <TextBox

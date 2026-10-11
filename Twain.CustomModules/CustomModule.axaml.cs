@@ -1,11 +1,14 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Controls;
 using Avalonia.Media;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using Twain.Core.CustomModules;
 using Twain.Core.Plugin;
 
@@ -17,12 +20,6 @@ namespace Twain.CustomModules;
 /// </summary>
 public partial class CustomModule : Avalonia.Controls.Window
 {
-    private static readonly Avalonia.Media.FontFamily FixedWidthFont =
-        new("Cascadia Mono, Consolas, Courier New");
-
-    private static readonly Avalonia.Media.FontFamily DefaultFont =
-        Avalonia.Media.FontFamily.Default;
-
     private readonly ITwainHost? _host;
 
     private readonly CustomModuleState _state;
@@ -36,6 +33,8 @@ public partial class CustomModule : Avalonia.Controls.Window
         : this(new CustomModuleState(), null)
     {
     }
+
+    private bool _monacoReady;
 
     /// <summary>
     /// Initializes the custom module window using the supplied application host.
@@ -71,13 +70,150 @@ public partial class CustomModule : Avalonia.Controls.Window
 
         InitializeComponent();
 
-        CodeTextBox.TextChanged +=
-            CodeTextBox_TextChanged;
+        CodeEditorWebView.AdapterCreated +=
+           CodeEditorWebView_AdapterCreated;
+
+        CodeEditorWebView.WebMessageReceived +=
+            CodeEditorWebView_WebMessageReceived;
 
         LoadLanguages();
         InitializeControlsFromState();
 
         _isInitializing = false;
+    }
+
+    /// <summary>
+    /// Loads the Monaco editor into the CustomModules WebView.
+    /// </summary>
+    private void LoadMonacoEditor()
+    {
+        string editorPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Monaco",
+            "MonacoEditor.html");
+
+        Uri editorUri = new Uri(
+            editorPath,
+            UriKind.Absolute);
+
+        CodeEditorWebView.Navigate(editorUri);
+    }
+
+    /// <summary>
+    /// Loads Monaco when the native WebView adapter is ready.
+    /// </summary>
+    private void CodeEditorWebView_AdapterCreated(
+        object? sender,
+        WebViewAdapterEventArgs e)
+    {
+        CodeEditorWebView.AdapterCreated -=
+            CodeEditorWebView_AdapterCreated;
+
+        LoadMonacoEditor();
+    }
+
+    /// <summary>
+    /// Handles messages received from the Monaco code editor.
+    /// </summary>
+    private void CodeEditorWebView_WebMessageReceived(
+        object? sender,
+        WebMessageReceivedEventArgs e)
+    {
+        try
+        {
+            using JsonDocument document =
+                JsonDocument.Parse(e.Body);
+
+            JsonElement root = document.RootElement;
+
+            if (!root.TryGetProperty("type", out JsonElement type))
+            {
+                return;
+            }
+
+            switch (type.GetString())
+            {
+                case "ready":
+                    _monacoReady = true;
+                    UpdateMonacoCode();
+                    FixedWidthFontCheckBox_Changed(this, new RoutedEventArgs());
+                    break;
+
+                case "textChanged":
+                    if (root.TryGetProperty(
+                        "text",
+                        out JsonElement text))
+                    {
+                        _state.Code =
+                            text.GetString() ?? string.Empty;
+                    }
+                    break;
+
+                case "saveTextToFile":
+                    _ = SaveCodeToFileAsync();
+                    break;
+            }
+        }
+        catch (JsonException)
+        {
+            // Ignore messages that are not valid JSON.
+        }
+    }
+
+    /// <summary>
+    /// Saves the current custom-module source code to a local file.
+    /// </summary>
+    private async Task SaveCodeToFileAsync()
+    {
+        var file = await StorageProvider.SaveFilePickerAsync(
+            new Avalonia.Platform.Storage.FilePickerSaveOptions
+            {
+                Title = "Save Custom Module Source",
+                SuggestedFileName =
+                    Compiler?.ToString()?.Contains(
+                        "Visual Basic",
+                        StringComparison.OrdinalIgnoreCase) == true
+                        ? "CustomModule.vb"
+                        : "CustomModule.cs",
+                FileTypeChoices =
+                [
+                    new Avalonia.Platform.Storage.FilePickerFileType(
+                    "Source files")
+                {
+                    Patterns = ["*.cs", "*.vb"]
+                }
+                ]
+            });
+
+        if (file is null)
+        {
+            return;
+        }
+
+        await using Stream stream =
+            await file.OpenWriteAsync();
+
+        await using StreamWriter writer =
+            new(stream);
+
+        await writer.WriteAsync(_state.Code);
+    }
+
+    /// <summary>
+    /// Updates Monaco with the current custom module source code.
+    /// </summary>
+    private void UpdateMonacoCode()
+    {
+        if (!_monacoReady)
+        {
+            return;
+        }
+
+        string codeJson =
+            JsonSerializer.Serialize(_state.Code);
+
+        CodeEditorWebView.InvokeScript(
+            $"window.twainEditor.setText({codeJson});");
     }
 
     /// <summary>
@@ -117,14 +253,9 @@ public partial class CustomModule : Avalonia.Controls.Window
             _state.Language = Compiler.ToString();
         }
 
-        if (hasConfiguredState)
-        {
-            CodeTextBox.Text = _state.Code;
-        }
-        else if (Compiler is not null)
+        if (!hasConfiguredState && Compiler is not null)
         {
             _state.Code = Compiler.CodeExample;
-            CodeTextBox.Text = _state.Code;
         }
 
         ModuleEnabledCheckBox.IsChecked =
@@ -168,16 +299,22 @@ public partial class CustomModule : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Changes the code editor between fixed-width and default fonts.
+    /// Changes the Monaco editor font based on the selected option.
     /// </summary>
-    private void FixedWidthFontCheckBox_Changed(
+    private async void FixedWidthFontCheckBox_Changed(
         object? sender,
         RoutedEventArgs e)
     {
-        CodeTextBox.FontFamily =
-            FixedWidthFontCheckBox.IsChecked == true
-                ? FixedWidthFont
-                : DefaultFont;
+        if (!_monacoReady)
+        {
+            return;
+        }
+
+        bool fixedWidth =
+            FixedWidthFontCheckBox.IsChecked == true;
+
+        await CodeEditorWebView.InvokeScript(
+            $"window.twainEditor.setFixedWidthFont({fixedWidth.ToString().ToLowerInvariant()});");
     }
 
     /// <summary>
@@ -194,24 +331,8 @@ public partial class CustomModule : Avalonia.Controls.Window
                     .Replace("\r\n\r\n", "\r\n");
 
             _state.Code = normalizedCode;
-            CodeTextBox.Text = normalizedCode;
+            UpdateMonacoCode();
         }
-    }
-
-    /// <summary>
-    /// Updates the shared custom-module state when the source code changes.
-    /// </summary>
-    private void CodeTextBox_TextChanged(
-        object? sender,
-        TextChangedEventArgs e)
-    {
-        if (_isInitializing)
-        {
-            return;
-        }
-
-        _state.Code =
-            CodeTextBox.Text ?? string.Empty;
     }
 
     /// <summary>
@@ -272,8 +393,10 @@ public partial class CustomModule : Avalonia.Controls.Window
         _state.Language = compiler.ToString();
 
         ModuleStartTextBox.Text = compiler.CodeStart;
-        CodeTextBox.Text = compiler.CodeExample;
+        _state.Code = compiler.CodeExample;
         ModuleEndTextBox.Text = compiler.CodeEnd;
+
+        UpdateMonacoCode();
     }
 
     /// <summary>
@@ -532,72 +655,6 @@ public partial class CustomModule : Avalonia.Controls.Window
         SetModuleNotBuilt();
     }
 
-    /// <summary>
-    /// Selects all text in the custom module editor.
-    /// </summary>
-    private void SelectAllMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        CodeTextBox.SelectAll();
-    }
-
-    /// <summary>
-    /// Moves the caret to the requested line.
-    /// </summary>
-    private void GoToLineTextBox_KeyDown(
-        object? sender,
-        KeyEventArgs e)
-    {
-        if (e.Key != Key.Enter)
-            return;
-
-        if (!int.TryParse(
-                GoToLineTextBox.Text,
-                out int requestedLine))
-        {
-            return;
-        }
-
-        GoToLine(requestedLine);
-
-        e.Handled = true;
-    }
-
-    /// <summary>
-    /// Moves the code editor caret to the specified one-based line number.
-    /// </summary>
-    private void GoToLine(int lineNumber)
-    {
-        if (lineNumber < 1)
-            return;
-
-        string text =
-            CodeTextBox.Text ?? string.Empty;
-
-        int currentLine = 1;
-        int position = 0;
-
-        while (currentLine < lineNumber &&
-               position < text.Length)
-        {
-            int nextLine =
-                text.IndexOf('\n', position);
-
-            if (nextLine < 0)
-                return;
-
-            position = nextLine + 1;
-            currentLine++;
-        }
-
-        if (currentLine != lineNumber)
-            return;
-
-        CodeTextBox.CaretIndex = position;
-        CodeTextBox.Focus();
-    }
-
     private void MakeModuleButton_Click(
         object? sender,
         RoutedEventArgs e)
@@ -694,43 +751,4 @@ public partial class CustomModule : Avalonia.Controls.Window
             });
     }
 
-    /// <summary>
-    /// Undoes the most recent change in the custom module editor.
-    /// </summary>
-    private void UndoMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        CodeTextBox.Undo();
-    }
-
-    /// <summary>
-    /// Cuts the selected text from the custom module editor.
-    /// </summary>
-    private void CutMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        CodeTextBox.Cut();
-    }
-
-    /// <summary>
-    /// Copies the selected text from the custom module editor.
-    /// </summary>
-    private void CopyMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        CodeTextBox.Copy();
-    }
-
-    /// <summary>
-    /// Pastes clipboard text into the custom module editor.
-    /// </summary>
-    private void PasteMenuItem_Click(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        CodeTextBox.Paste();
-    }
 }

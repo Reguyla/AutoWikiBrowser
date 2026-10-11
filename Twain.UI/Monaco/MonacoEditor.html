@@ -231,6 +231,37 @@
                             }
                         },
 
+                        undo: function () {
+                            editor.trigger("twain", "undo", null);
+                        },
+
+                        cut: function () {
+                            editor.focus();
+                            editor.trigger("twain", "editor.action.clipboardCutAction", null);
+                        },
+
+                        copy: function () {
+                            editor.focus();
+                            editor.trigger("twain", "editor.action.clipboardCopyAction", null);
+                        },
+
+                        paste: function () {
+                            editor.focus();
+                            editor.trigger("twain", "editor.action.clipboardPasteAction", null);
+                        },
+
+                        setFixedWidthFont: function (enabled) {
+                            if (!editor) {
+                                return;
+                            }
+
+                            editor.updateOptions({
+                                fontFamily: enabled
+                                    ? "Cascadia Mono, Consolas, Courier New, monospace"
+                                    : "Arial, sans-serif"
+                            });
+                        },
+
                         setText:
                             function (text) {
                                 if (!editor) {
