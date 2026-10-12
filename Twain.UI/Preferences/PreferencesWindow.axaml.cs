@@ -290,13 +290,6 @@ public partial class PreferencesWindow : Window
         general.EditorLineNumbers =
             EditorLineNumbersCheckBox.IsChecked == true;
 
-        System.Diagnostics.Debug.WriteLine(
-    $"Preferences applied: " +
-    $"Font={general.TextBoxFont}, " +
-    $"Size={general.TextBoxSize}, " +
-    $"Wrap={general.WordWrap}, " +
-    $"Lines={general.EditorLineNumbers}");
-
         general.Minimize = PrefMinimize;
         general.LowThreadPriority = LowThreadPriority;
         general.SaveArticleList = PrefSaveArticleList;
