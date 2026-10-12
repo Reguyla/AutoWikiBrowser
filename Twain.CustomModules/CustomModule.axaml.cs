@@ -9,6 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Twain.Core.AWBSettings;
 using Twain.Core.CustomModules;
 using Twain.Core.Plugin;
 
@@ -47,6 +48,8 @@ public partial class CustomModule : Avalonia.Controls.Window
     {
     }
 
+    private readonly UserPrefs? _preferences;
+
     /// <summary>
     /// Initializes the custom module window using the supplied state and
     /// application host.
@@ -59,12 +62,14 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// </param>
     public CustomModule(
         CustomModuleState state,
-        ITwainHost? host)
+        ITwainHost? host,
+        UserPrefs? preferences = null)
     {
         ArgumentNullException.ThrowIfNull(state);
 
         _state = state;
         _host = host;
+        _preferences = preferences;
 
         _isInitializing = true;
 
@@ -80,6 +85,32 @@ public partial class CustomModule : Avalonia.Controls.Window
         InitializeControlsFromState();
 
         _isInitializing = false;
+    }
+
+    /// <summary>
+    /// Applies the shared editor appearance preferences to Monaco.
+    /// </summary>
+    private async Task ApplyEditorAppearanceAsync()
+    {
+        if (!_monacoReady || _preferences is null)
+        {
+            return;
+        }
+
+        var general = _preferences.General;
+
+        var appearance = new
+        {
+            fontFamily = general.TextBoxFont,
+            fontSize = general.TextBoxSize,
+            wordWrap = general.WordWrap,
+            lineNumbers = general.EditorLineNumbers
+        };
+
+        string json = JsonSerializer.Serialize(appearance);
+
+        await CodeEditorWebView.InvokeScript(
+            $"window.twainEditor.setAppearance({json});");
     }
 
     /// <summary>
@@ -136,7 +167,7 @@ public partial class CustomModule : Avalonia.Controls.Window
                 case "ready":
                     _monacoReady = true;
                     UpdateMonacoCode();
-                    FixedWidthFontCheckBox_Changed(this, new RoutedEventArgs());
+                    _ = ApplyEditorAppearanceAsync();
                     break;
 
                 case "textChanged":

@@ -147,6 +147,13 @@ public partial class ArticleEditorView : UserControl
 
         var general = viewModel.Preferences.General;
 
+        System.Diagnostics.Debug.WriteLine(
+    $"Monaco appearance: " +
+    $"Font={general.TextBoxFont}, " +
+    $"Size={general.TextBoxSize}, " +
+    $"Wrap={general.WordWrap}, " +
+    $"Lines={general.EditorLineNumbers}");
+
         var appearance = new
         {
             fontFamily = general.TextBoxFont,
@@ -271,6 +278,9 @@ public partial class ArticleEditorView : UserControl
 
             viewModel.GoToLineRequested =
                 GoToLineAsync;
+
+            viewModel.ApplyAppearanceRequested =
+                ApplyEditorAppearanceAsync;
         }
 
         base.OnDataContextChanged(e);

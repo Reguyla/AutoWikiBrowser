@@ -49,6 +49,11 @@ public sealed class ArticleEditorViewModel : ViewModelBase
     public ArticleDocumentViewModel Document { get; }
 
     /// <summary>
+    /// Requests that the active Monaco editor refresh its appearance.
+    /// </summary>
+    public Func<Task>? ApplyAppearanceRequested { get; set; }
+
+    /// <summary>
     /// Gets the application preferences used by the editor.
     /// </summary>
     public UserPrefs? Preferences { get; }

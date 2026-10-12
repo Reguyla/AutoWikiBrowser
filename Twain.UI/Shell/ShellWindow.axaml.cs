@@ -102,7 +102,8 @@ public partial class ShellWindow : Window
         CustomModule window =
             new(
                 viewModel.Workspace.CustomModuleState,
-                viewModel.Workspace.TwainHost);
+                viewModel.Workspace.TwainHost,
+                viewModel.Preferences);
 
         await window.ShowDialog(this);
     }
@@ -265,6 +266,12 @@ public partial class ShellWindow : Window
                 viewModel.Preferences);
 
             viewModel.ApplySitePreferences();
+
+            if (viewModel.Workspace.Editor.ApplyAppearanceRequested
+                is { } applyAppearance)
+            {
+                await applyAppearance();
+            }
         }
     }
 
