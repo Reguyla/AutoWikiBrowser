@@ -1,6 +1,8 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using System.Threading.Tasks;
+using Twain.Core.AWBSettings;
 using Twain.CustomModules;
 using Twain.UI.About;
 using Twain.UI.BotSettings;
@@ -300,6 +302,54 @@ public partial class ShellWindow : Window
         RoutedEventArgs e)
     {
         OpenAbout();
+    }
+
+    /// <summary>
+    /// Opens an AWB-compatible XML settings file.
+    /// </summary>
+    public async Task OpenSettingsAsync()
+    {
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title = "Open Twain Settings",
+                AllowMultiple = false,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("AWB/Twain Settings")
+                {
+                    Patterns = ["*.xml", "*.awb"]
+                }
+                ]
+            });
+
+        if (files.Count == 0)
+        {
+            return;
+        }
+
+        string? path = files[0].TryGetLocalPath();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            viewModel.LoadSettings(path);
+        }
+        catch (Exception ex)
+        {
+            // Temporary until the shared Avalonia error dialog is wired here.
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to open settings: {ex}");
+        }
     }
 
 }

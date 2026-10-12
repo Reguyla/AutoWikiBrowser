@@ -89,6 +89,47 @@ public sealed partial class ShellViewModel : ViewModelBase
     public UserPrefs Preferences { get; }
 
     /// <summary>
+    /// Gets the path of the currently opened or saved settings file.
+    /// </summary>
+    public string? CurrentSettingsFile { get; private set; }
+
+    /// <summary>
+    /// Loads an AWB-compatible XML settings file into
+    /// the existing shared preferences instance.
+    /// </summary>
+    /// <param name="file">The settings file to load.</param>
+    public void LoadSettings(string file)
+    {
+        UserPrefs loaded = UserPrefs.LoadPrefs(file);
+
+        Preferences.Project = loaded.Project;
+        Preferences.LanguageCode = loaded.LanguageCode;
+        Preferences.CustomProject = loaded.CustomProject;
+        Preferences.Protocol = loaded.Protocol;
+        Preferences.LoginDomain = loaded.LoginDomain;
+
+        Preferences.List = loaded.List;
+        Preferences.FindAndReplace = loaded.FindAndReplace;
+        Preferences.Editprefs = loaded.Editprefs;
+        Preferences.General = loaded.General;
+        Preferences.SkipOptions = loaded.SkipOptions;
+        Preferences.Module = loaded.Module;
+        Preferences.ExternalProgram = loaded.ExternalProgram;
+        Preferences.Disambiguation = loaded.Disambiguation;
+        Preferences.Special = loaded.Special;
+        Preferences.Tool = loaded.Tool;
+        Preferences.Plugin = loaded.Plugin;
+
+        // Refresh the workspace controls from the loaded preferences.
+        Workspace.ApplyLoadedSettings();
+
+        // Apply the loaded wiki configuration to the active session.
+        ApplySitePreferences();
+
+        CurrentSettingsFile = file;
+    }
+
+    /// <summary>
     /// Gets or sets whether an application update is currently available.
     /// </summary>
     [ObservableProperty]

@@ -50,6 +50,14 @@
         BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
         BorderThickness="0,0,1,0">
 
+        <Border.Styles>
+            <Style Selector="Button">
+                <Setter Property="MaxWidth" Value="200" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Style>
+        </Border.Styles>
+
         <StackPanel Spacing="8">
 
             <TextBlock
@@ -99,7 +107,23 @@
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
                 Click="BotSettingsButton_Click"
-                Content="Bot Settings" />
+                Content="Bot settings" />
+
+            <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Click="OpenSettingsButton_Click"
+                Content="Open settings" />
+
+              <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Save settings" />
+
+               <Button
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Content="Save settings as..." />
 
             <Separator Margin="0,8" />
 

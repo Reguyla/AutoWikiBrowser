@@ -2,8 +2,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.Generic;
 using Twain.Core;
 using Twain.Core.Disambiguation;
+using Twain.Core.ReplaceSpecial;
 using Twain.UI.FindReplace;
 using Twain.UI.ReplaceSpecial;
 using Twain.UI.Templates;
@@ -89,9 +91,17 @@ public partial class OptionsView : UserControl
         object? sender,
         RoutedEventArgs e)
     {
+        if (DataContext is not OptionsViewModel viewModel)
+        {
+            return;
+        }
+
         if (_replaceSpecialWindow is null)
         {
             _replaceSpecialWindow = new ReplaceSpecialWindow();
+
+            _replaceSpecialWindow.LoadRules(
+                viewModel.AdvancedFindReplaceRules);
 
             _replaceSpecialWindow.Closed +=
                 ReplaceSpecialWindow_Closed;
@@ -116,6 +126,13 @@ public partial class OptionsView : UserControl
         object? sender,
         EventArgs e)
     {
+        if (_replaceSpecialWindow is not null &&
+            DataContext is OptionsViewModel viewModel)
+        {
+            viewModel.AdvancedFindReplaceRules =
+                _replaceSpecialWindow.GetRules();
+        }
+
         _replaceSpecialWindow = null;
     }
 

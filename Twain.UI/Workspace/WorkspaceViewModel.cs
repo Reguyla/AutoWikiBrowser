@@ -1102,4 +1102,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         return Editor.GoToLineRequested(line);
     }
+
+    /// <summary>
+    /// Refreshes workspace controls after preferences are loaded.
+    /// </summary>
+    public void ApplyLoadedSettings()
+    {
+        Options.LoadFromPreferences(Preferences);
+    }
 }

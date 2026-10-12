@@ -137,6 +137,16 @@ public partial class WorkspaceView : UserControl
         shell.OpenAbout();
     }
 
+    private async void OpenSettingsButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+        {
+            if (TopLevel.GetTopLevel(this) is ShellWindow shell)
+            {
+                await shell.OpenSettingsAsync();
+            }
+        }
+
     /// <summary>
     /// Opens the external processing window through the shell.
     /// </summary>

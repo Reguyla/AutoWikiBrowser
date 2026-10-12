@@ -135,13 +135,8 @@ public class UserPrefs
 
         if (string.IsNullOrWhiteSpace(settings))
         {
-            MessageBox.Show(
-                $"The settings file {file} is empty.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Exclamation);
-
-            return new UserPrefs();
+            throw new InvalidDataException(
+                $"The settings file '{file}' is empty.");
         }
 
         settings = Regex.Replace(
@@ -161,34 +156,27 @@ public class UserPrefs
     }
 
     /// <summary>
-    /// Saves the UserPrefs to the specified file
+    /// Saves user preferences to an AWB-compatible XML settings file.
     /// </summary>
-    /// <param name="prefs">UserPrefs object to save</param>
-    /// <param name="file">File to save to</param>
+    /// <param name="prefs">The preferences to save.</param>
+    /// <param name="file">The destination file path.</param>
     public static void SavePrefs(UserPrefs prefs, string file)
     {
-        try
-        {
-            using (StreamWriter fStream = new StreamWriter(file, false, Encoding.UTF8))
-            {
-                List<Type> types = SavePluginSettings(prefs);
+        ArgumentNullException.ThrowIfNull(prefs);
+        ArgumentException.ThrowIfNullOrWhiteSpace(file);
 
-                XmlSerializer xs = new XmlSerializer(typeof(UserPrefs), types.ToArray());
-                xs.Serialize(fStream, prefs);
-            }
-        }
-        catch (Exception ex)
-        {
-            // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_22#InvalidOperationException_in_UserPrefs.LoadPrefs_.2F_UserPrefs.SavePrefs
-            // Saving settings will fail if permissions problems, so handle this
-            if (ex is InvalidOperationException && ex.Message.Contains("CS0016"))
-            {
-                MessageBox.Show("Saving settings failed due to insufficient permissions.", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-                ErrorHandler.HandleException(ex);
-        }
+        List<Type> types = SavePluginSettings(prefs);
+
+        var serializer = new XmlSerializer(
+            typeof(UserPrefs),
+            types.ToArray());
+
+        using var writer = new StreamWriter(
+            file,
+            false,
+            Encoding.UTF8);
+
+        serializer.Serialize(writer, prefs);
     }
 
     /// <summary>
