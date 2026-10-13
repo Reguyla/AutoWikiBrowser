@@ -1109,6 +1109,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     public void ApplyLoadedSettings()
     {
         Options.LoadFromPreferences(Preferences);
+        MakeList.LoadFromPreferences(Preferences);
     }
 
     /// <summary>
@@ -1117,5 +1118,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     public void UpdatePreferencesForSave()
     {
         Options.SaveToPreferences(Preferences);
+        MakeList.SaveToPreferences(Preferences);
     }
 }

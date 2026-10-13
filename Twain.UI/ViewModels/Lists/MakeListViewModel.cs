@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
 using Twain.Core;
+using Twain.Core.AWBSettings;
 using Twain.Core.Lists;
 using Twain.Core.Lists.Providers;
 
@@ -672,5 +673,43 @@ public partial class MakeListViewModel : ObservableObject
                             selectedArticle.Name,
                             StringComparison.Ordinal));
         }
+    }
+
+    /// <summary>
+    /// Restores the Make List state from AWB preferences.
+    /// </summary>
+    public void LoadFromPreferences(UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        SourceText = preferences.List.ListSource;
+
+        SelectedProvider = Providers.FirstOrDefault(
+            provider => string.Equals(
+                provider.GetType().Name,
+                preferences.List.SelectedProvider,
+                StringComparison.Ordinal));
+
+        ReplaceArticles(preferences.List.ArticleList);
+        SelectedArticle = null;
+    }
+
+    /// <summary>
+    /// Copies the current Make List state into AWB preferences.
+    /// </summary>
+    public void SaveToPreferences(UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        preferences.List.ListSource = SourceText;
+
+        preferences.List.SelectedProvider =
+            SelectedProvider?.GetType().Name
+            ?? preferences.List.SelectedProvider;
+
+        preferences.List.ArticleList =
+            preferences.General.SaveArticleList
+                ? Articles.ToList()
+                : new List<Article>();
     }
 }
