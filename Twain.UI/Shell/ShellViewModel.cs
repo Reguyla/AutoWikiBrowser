@@ -130,6 +130,40 @@ public sealed partial class ShellViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Saves the current workspace preferences to the active
+    /// AWB-compatible XML settings file.
+    /// </summary>
+    public void SaveSettings()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentSettingsFile))
+        {
+            throw new InvalidOperationException(
+                "No settings file is currently selected. Use Save As.");
+        }
+
+        SaveSettingsAs(CurrentSettingsFile);
+    }
+
+    /// <summary>
+    /// Saves the current workspace preferences to the specified
+    /// AWB-compatible XML settings file.
+    /// </summary>
+    /// <param name="file">The destination settings file.</param>
+    public void SaveSettingsAs(string file)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(file);
+
+        // Copy the current Avalonia workspace settings into UserPrefs.
+        Workspace.UpdatePreferencesForSave();
+
+        // Serialize the shared preferences using the existing AWB format.
+        UserPrefs.SavePrefs(Preferences, file);
+
+        // Only update the active filename after saving succeeds.
+        CurrentSettingsFile = file;
+    }
+
+    /// <summary>
     /// Gets or sets whether an application update is currently available.
     /// </summary>
     [ObservableProperty]

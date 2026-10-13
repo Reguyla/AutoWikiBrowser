@@ -352,4 +352,82 @@ public partial class ShellWindow : Window
         }
     }
 
+    /// <summary>
+    /// Saves the current AWB-compatible settings file.
+    /// Opens Save As if no settings file has been selected.
+    /// </summary>
+    public async Task SaveSettingsAsync()
+    {
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(viewModel.CurrentSettingsFile))
+        {
+            await SaveSettingsAsAsync();
+            return;
+        }
+
+        try
+        {
+            viewModel.SaveSettings();
+        }
+        catch (Exception ex)
+        {
+            // Temporary until the shared Avalonia error dialog is wired here.
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to save settings: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Prompts for a destination and saves the current
+    /// AWB-compatible XML settings.
+    /// </summary>
+    public async Task SaveSettingsAsAsync()
+    {
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
+
+        var file = await StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "Save Twain Settings As",
+                SuggestedFileName = "TwainSettings.xml",
+                DefaultExtension = "xml",
+                FileTypeChoices =
+                [
+                    new FilePickerFileType("AWB/Twain Settings")
+                {
+                    Patterns = ["*.xml"]
+                }
+                ]
+            });
+
+        if (file == null)
+        {
+            return;
+        }
+
+        string? path = file.TryGetLocalPath();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            viewModel.SaveSettingsAs(path);
+        }
+        catch (Exception ex)
+        {
+            // Temporary until the shared Avalonia error dialog is wired here.
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to save settings: {ex}");
+        }
+    }
 }

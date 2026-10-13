@@ -115,14 +115,16 @@
                 Click="OpenSettingsButton_Click"
                 Content="Open settings" />
 
-              <Button
+            <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="SaveSettingsButton_Click"
                 Content="Save settings" />
 
-               <Button
+            <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                Click="SaveSettingsAsButton_Click"
                 Content="Save settings as..." />
 
             <Separator Margin="0,8" />

@@ -148,6 +148,36 @@ public partial class WorkspaceView : UserControl
         }
 
     /// <summary>
+    /// Saves the current settings through the application shell.
+    /// </summary>
+    private async void SaveSettingsButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        await shell.SaveSettingsAsync();
+    }
+
+    /// <summary>
+    /// Opens Save As through the application shell.
+    /// </summary>
+    private async void SaveSettingsAsButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        await shell.SaveSettingsAsAsync();
+    }
+
+    /// <summary>
     /// Opens the external processing window through the shell.
     /// </summary>
     private void ExternalProcessingButton_Click(

@@ -1110,4 +1110,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         Options.LoadFromPreferences(Preferences);
     }
+
+    /// <summary>
+    /// Copies the current workspace options into the shared AWB preferences.
+    /// </summary>
+    public void UpdatePreferencesForSave()
+    {
+        Options.SaveToPreferences(Preferences);
+    }
 }
