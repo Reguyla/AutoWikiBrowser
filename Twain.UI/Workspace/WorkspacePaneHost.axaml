@@ -24,27 +24,18 @@
 
             <!-- Pane title bar. -->
 
-            <Grid
-                Grid.Row="0"
-                ColumnDefinitions="*,Auto"
-                Margin="0,0,0,8">
+        <Grid
+            Grid.Row="0"
+            Margin="0,0,0,8">
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontSize="{DynamicResource TwainFontSizeMedium}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                    Text="{Binding Title}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="{DynamicResource TwainFontSizeMedium}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                Text="{Binding Title}" />
 
-                <Button
-                    Grid.Column="1"
-                    MinHeight="{DynamicResource TwainCompactControlHeight}"
-                    Padding="{DynamicResource TwainControlPadding}"
-                    Command="{Binding CloseCommand}"
-                    Content="Close"
-                    IsVisible="{Binding CanClose}" />
-
-            </Grid>
+        </Grid>
 
             <!-- Pane-specific content host. -->
 
