@@ -6,11 +6,11 @@
 public static class BuiltInPaneDefinitions
 {
     /// <summary>
-    /// Gets the built-in article editor pane definition.
+    /// Gets the built-in page editor pane definition.
     /// </summary>
     public static PaneDefinition ArticleEditor { get; } = new(
         BuiltInPaneIds.ArticleEditor,
-        "Article Editor",
+        "Page Editor",
         PaneKind.Document,
         WorkspaceRegion.Bottom,
         PaneCapabilities.Closable |
