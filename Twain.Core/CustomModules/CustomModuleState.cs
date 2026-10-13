@@ -1,4 +1,5 @@
-﻿using Twain.Core.Plugin;
+﻿using Twain.Core.AWBSettings;
+using Twain.Core.Plugin;
 
 namespace Twain.Core.CustomModules;
 
@@ -89,5 +90,33 @@ public sealed class CustomModuleState
         Module = null;
         CompilationStatus = CustomModuleCompilationStatus.Failed;
         LastCompiledAt = null;
+    }
+
+    /// <summary>
+    /// Restores custom module settings from AWB preferences.
+    /// </summary>
+    public void LoadFromPreferences(UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        Code = preferences.Module.Code;
+        Language = preferences.Module.Language;
+        ModuleEnabled = preferences.Module.Enabled;
+
+        // Previously compiled code must not remain active
+        // after loading a different settings file.
+        SetModuleNotBuilt();
+    }
+
+    /// <summary>
+    /// Copies the current custom module settings into AWB preferences.
+    /// </summary>
+    public void SaveToPreferences(UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        preferences.Module.Code = Code;
+        preferences.Module.Language = Language;
+        preferences.Module.Enabled = ModuleEnabled;
     }
 }

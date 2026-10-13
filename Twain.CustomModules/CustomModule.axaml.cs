@@ -295,7 +295,16 @@ public partial class CustomModule : Avalonia.Controls.Window
         MakeModuleButton.IsEnabled =
             _state.ModuleEnabled;
 
-        UpdateCompilationStatus();
+        if (_state.ModuleEnabled &&
+            _state.Module is null &&
+            !string.IsNullOrWhiteSpace(_state.Code))
+        {
+            MakeModule();
+        }
+        else
+        {
+            UpdateCompilationStatus();
+        }
     }
 
     /// <summary>
