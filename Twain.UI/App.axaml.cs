@@ -11,6 +11,7 @@ using Twain.UI.ErrorHandling;
 using Twain.UI.Lists.Providers;
 using Twain.UI.Shell;
 using Twain.UI.Templates;
+using Twain.UI.Themes;
 using Twain.UI.Views.Shell;
 
 namespace Twain.UI;
@@ -62,6 +63,7 @@ public partial class App : Application
     /// </remarks>
     public override void OnFrameworkInitializationCompleted()
     {
+        ThemeManager.ApplyTheme(TwainTheme.Classic);
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow =
@@ -101,7 +103,7 @@ public partial class App : Application
                     ShowSubstTemplatesDialogAsync(
                         desktop,
                         request);
-                    }
+         }
 
         base.OnFrameworkInitializationCompleted();
     }
