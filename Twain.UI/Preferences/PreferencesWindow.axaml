@@ -21,52 +21,78 @@
                     Margin="12"
                     Spacing="10">
 
-<CheckBox
-    x:Name="MinimizeCheckBox"
-    Content="Minimize to notification area (systray)" />
+                <TextBlock
+                    Text="Application processing"
+                    FontWeight="SemiBold" />
 
-<CheckBox
-    x:Name="ConfirmExitCheckBox"
-    Content="Warn on exit" />
+                <CheckBox
+                    x:Name="MinimizeCheckBox"
+                    Content="Minimize to notification area (systray)" />
 
-<CheckBox
-    x:Name="SaveArticleListCheckBox"
-    Content="Save page list with settings" />
+                <CheckBox
+                    x:Name="ConfirmExitCheckBox"
+                    Content="Warn on exit" />
 
-<CheckBox
-    x:Name="LowThreadPriorityCheckBox"
-    Content="Low thread priority (works better in background)" />
+                <CheckBox
+                    x:Name="ShowTimerCheckBox"
+                    Content="Display moving average timer" />
 
-<Grid
-    ColumnDefinitions="Auto,*"
-    ColumnSpacing="12"
-    Margin="0,4,0,0">
+                <CheckBox
+                    x:Name="ClearPageListOnProjectChangeCheckBox"
+                    Grid.Row="8"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Content="Empty page list on project change" />
 
-    <TextBlock
-        Grid.Column="0"
-        VerticalAlignment="Center"
-        Text="On load:" />
+                <CheckBox
+                    x:Name="LowThreadPriorityCheckBox"
+                    Content="Low thread priority (works better in background)" />
 
-    <ComboBox
-        x:Name="OnLoadComboBox"
-        Grid.Column="1"
-        MinWidth="240"
-        SelectionChanged="OnLoadComboBox_SelectionChanged">
+                <Grid
+                    ColumnDefinitions="Auto,*"
+                    ColumnSpacing="12"
+                    Margin="0,4,0,0">
 
-        <ComboBoxItem Content="Show changes" />
-        <ComboBoxItem Content="Start bot mode" />
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="On load:" />
 
-    </ComboBox>
+                    <ComboBox
+                        x:Name="OnLoadComboBox"
+                        Grid.Column="1"
+                        MinWidth="240"
+                        SelectionChanged="OnLoadComboBox_SelectionChanged">
 
-</Grid>
+                        <ComboBoxItem Content="Show changes" />
+                        <ComboBoxItem Content="Start bot mode" />
 
-<CheckBox
-    x:Name="DiffInBotModeCheckBox"
-    Content="Preview the Diff in Bot Mode" />
+                    </ComboBox>
 
-<CheckBox
-    x:Name="LoggingCheckBox"
-    Content="Enable Logging" />
+                </Grid>
+                
+                 <TextBlock
+                    Text="Bot processing"
+                    FontWeight="SemiBold" />
+
+                <CheckBox
+                    x:Name="DiffInBotModeCheckBox"
+                    Content="Preview the Diff in Bot Mode" />
+
+                <CheckBox
+                    x:Name="IgnoreNoBotsCheckBox"
+                    Grid.Row="7"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Content="Ignore {{bots}} and {{nobots}} restrictions" />
+
+                 <TextBlock
+                    Text="Logging"
+                    FontWeight="SemiBold" />
+
+                <CheckBox
+                    x:Name="LoggingCheckBox"
+                    Content="Enable Logging" />
 
                 </StackPanel>
             </TabItem>
@@ -156,27 +182,6 @@
                         Grid.Column="1"
                         MinWidth="240" />
 
-                    <CheckBox
-                        x:Name="SuppressAwbCheckBox"
-                        Grid.Row="6"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
-                        Content="Suppress AWB identification" />
-
-                    <CheckBox
-                        x:Name="IgnoreNoBotsCheckBox"
-                        Grid.Row="7"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
-                        Content="Ignore {{bots}} and {{nobots}} restrictions" />
-
-                    <CheckBox
-                        x:Name="ClearPageListOnProjectChangeCheckBox"
-                        Grid.Row="8"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
-                        Content="Empty page list on project change" />
-
                 </Grid>
             </TabItem>
 
@@ -185,34 +190,31 @@
                     Margin="12"
                     Spacing="10">
 
-                    <CheckBox
-                        x:Name="AddUsingAwbCheckBox"
-                        Content="Add &quot;using AWB&quot; when deleting or protecting pages" />
-
-                    <CheckBox
-                        x:Name="ShowTimerCheckBox"
-                        Content="Display moving average timer" />
-
                     <TextBlock
                         Margin="0,4,0,0"
-                        Text="When ready to save:"
+                        Text="Edit summary settings"
                         FontWeight="SemiBold" />
 
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Spacing="16">
+                    <CheckBox
+                        x:Name="AddUsingAwbCheckBox"
+                        Content="Add &quot;using Twain&quot; when deleting or protecting pages" />
 
-                        <CheckBox
-                            x:Name="FlashCheckBox"
-                            Content="Flash" />
-
-                        <CheckBox
-                            x:Name="BeepCheckBox"
-                            Content="Beep" />
-
-                    </StackPanel>
+                <CheckBox
+                    x:Name="SuppressAwbCheckBox"
+                    Grid.Row="6"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Content="Suppress &quot;using Twain&quot; in edit summary" />
 
                     <Separator Margin="0,4" />
+
+                     <TextBlock
+                        Text="Save settings"
+                        FontWeight="SemiBold" />
+                    
+                    <CheckBox
+                        x:Name="SaveArticleListCheckBox"
+                        Content="Save page list with settings" />
 
                     <CheckBox
                         x:Name="AutoSaveEditCheckBox"
@@ -246,6 +248,25 @@
 
                         </Grid>
                     </Grid>
+
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Text="When ready to save:"
+                        FontWeight="SemiBold" />
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="16">
+
+                        <CheckBox
+                            x:Name="FlashCheckBox"
+                            Content="Flash" />
+
+                        <CheckBox
+                            x:Name="BeepCheckBox"
+                            Content="Beep" />
+
+                    </StackPanel>
 
                     <Separator Margin="0,4" />
 
