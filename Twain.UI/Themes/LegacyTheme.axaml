@@ -1,0 +1,194 @@
+
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+    Legacy Theme
+
+    A polished interpretation of the traditional
+    AutoWikiBrowser interface.
+
+    Uses classic blue-gray colors with cleaner
+    surfaces, borders, and visual hierarchy.
+    -->
+
+    <!-- Base colors -->
+
+    <Color x:Key="TwainColorApplicationBackground">#FFE8EFF7</Color>
+    <Color x:Key="TwainColorWorkspaceBackground">#FFDCE7F3</Color>
+    <Color x:Key="TwainColorSurface">#FFF4F7FB</Color>
+    <Color x:Key="TwainColorRaisedSurface">#FFFFFFFF</Color>
+
+    <Color x:Key="TwainColorControlBackground">#FFFFFFFF</Color>
+    <Color x:Key="TwainColorControlBackgroundDisabled">#FFE2E8F0</Color>
+
+    <!-- Borders -->
+
+    <Color x:Key="TwainColorBorder">#FF91ABC7</Color>
+    <Color x:Key="TwainColorBorderSubtle">#FFC2D2E3</Color>
+
+    <!-- Text -->
+
+    <Color x:Key="TwainColorTextPrimary">#FF172638</Color>
+    <Color x:Key="TwainColorTextSecondary">#FF53667C</Color>
+    <Color x:Key="TwainColorTextDisabled">#FF8795A5</Color>
+
+    <!-- Accent colors -->
+
+    <Color x:Key="TwainColorAccent">#FF347DCE</Color>
+    <Color x:Key="TwainColorAccentHover">#FF286CB8</Color>
+    <Color x:Key="TwainColorAccentPressed">#FF205796</Color>
+
+    <Color x:Key="TwainColorSelection">#FFC6DFF8</Color>
+    <Color x:Key="TwainColorFocus">#FF347DCE</Color>
+
+    <!-- Status colors -->
+
+    <Color x:Key="TwainColorInformation">#FF005A9C</Color>
+    <Color x:Key="TwainColorSuccess">#FF006D77</Color>
+    <Color x:Key="TwainColorWarning">#FF8A5200</Color>
+    <Color x:Key="TwainColorError">#FF7A1F5C</Color>
+
+    <!-- Application chrome -->
+
+    <Color x:Key="TwainColorPaneHeader">#FFBDD5EE</Color>
+    <Color x:Key="TwainColorToolbar">#FFEDF2F8</Color>
+    <Color x:Key="TwainColorStatusBar">#FFE0EAF5</Color>
+
+    <!-- Main brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainApplicationBackgroundBrush"
+        Color="{DynamicResource TwainColorApplicationBackground}" />
+
+    <SolidColorBrush
+        x:Key="TwainWorkspaceBackgroundBrush"
+        Color="{DynamicResource TwainColorWorkspaceBackground}" />
+
+    <SolidColorBrush
+        x:Key="TwainSurfaceBrush"
+        Color="{DynamicResource TwainColorSurface}" />
+
+    <SolidColorBrush
+        x:Key="TwainRaisedSurfaceBrush"
+        Color="{DynamicResource TwainColorRaisedSurface}" />
+
+    <SolidColorBrush
+        x:Key="TwainControlBackgroundBrush"
+        Color="{DynamicResource TwainColorControlBackground}" />
+
+    <SolidColorBrush
+        x:Key="TwainControlBackgroundDisabledBrush"
+        Color="{DynamicResource TwainColorControlBackgroundDisabled}" />
+
+    <!-- Border brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainBorderBrush"
+        Color="{DynamicResource TwainColorBorder}" />
+
+    <SolidColorBrush
+        x:Key="TwainBorderSubtleBrush"
+        Color="{DynamicResource TwainColorBorderSubtle}" />
+
+    <!-- Text brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainTextPrimaryBrush"
+        Color="{DynamicResource TwainColorTextPrimary}" />
+
+    <SolidColorBrush
+        x:Key="TwainTextSecondaryBrush"
+        Color="{DynamicResource TwainColorTextSecondary}" />
+
+    <SolidColorBrush
+        x:Key="TwainTextDisabledBrush"
+        Color="{DynamicResource TwainColorTextDisabled}" />
+
+    <!-- Accent brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainAccentBrush"
+        Color="{DynamicResource TwainColorAccent}" />
+
+    <SolidColorBrush
+        x:Key="TwainAccentHoverBrush"
+        Color="{DynamicResource TwainColorAccentHover}" />
+
+    <SolidColorBrush
+        x:Key="TwainAccentPressedBrush"
+        Color="{DynamicResource TwainColorAccentPressed}" />
+
+    <SolidColorBrush
+        x:Key="TwainSelectionBrush"
+        Color="{DynamicResource TwainColorSelection}" />
+
+    <SolidColorBrush
+        x:Key="TwainFocusBrush"
+        Color="{DynamicResource TwainColorFocus}" />
+
+    <!-- Status brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainInformationBrush"
+        Color="{DynamicResource TwainColorInformation}" />
+
+    <SolidColorBrush
+        x:Key="TwainSuccessBrush"
+        Color="{DynamicResource TwainColorSuccess}" />
+
+    <SolidColorBrush
+        x:Key="TwainWarningBrush"
+        Color="{DynamicResource TwainColorWarning}" />
+
+    <SolidColorBrush
+        x:Key="TwainErrorBrush"
+        Color="{DynamicResource TwainColorError}" />
+
+    <!-- Application chrome brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainPaneHeaderBrush"
+        Color="{DynamicResource TwainColorPaneHeader}" />
+
+    <SolidColorBrush
+        x:Key="TwainToolbarBrush"
+        Color="{DynamicResource TwainColorToolbar}" />
+
+    <SolidColorBrush
+        x:Key="TwainStatusBarBrush"
+        Color="{DynamicResource TwainColorStatusBar}" />
+
+    <!-- Shared sizing and spacing -->
+
+    <x:Double x:Key="TwainSpacingExtraSmall">2</x:Double>
+    <x:Double x:Key="TwainSpacingSmall">4</x:Double>
+    <x:Double x:Key="TwainSpacingMedium">8</x:Double>
+    <x:Double x:Key="TwainSpacingLarge">12</x:Double>
+    <x:Double x:Key="TwainSpacingExtraLarge">16</x:Double>
+
+    <x:Double x:Key="TwainControlHeight">28</x:Double>
+    <x:Double x:Key="TwainCompactControlHeight">24</x:Double>
+    <x:Double x:Key="TwainPaneHeaderHeight">32</x:Double>
+
+    <!-- Typography -->
+
+    <x:Double x:Key="TwainFontSizeSmall">11</x:Double>
+    <x:Double x:Key="TwainFontSizeNormal">12</x:Double>
+    <x:Double x:Key="TwainFontSizeMedium">14</x:Double>
+    <x:Double x:Key="TwainFontSizeLarge">18</x:Double>
+    <x:Double x:Key="TwainFontSizeTitle">24</x:Double>
+
+    <!-- Geometry -->
+
+    <CornerRadius x:Key="TwainControlCornerRadius">4</CornerRadius>
+    <CornerRadius x:Key="TwainPaneCornerRadius">5</CornerRadius>
+
+    <Thickness x:Key="TwainBorderThickness">1</Thickness>
+    <Thickness x:Key="TwainControlPadding">10,4</Thickness>
+    <Thickness x:Key="TwainPanePadding">10</Thickness>
+    <Thickness x:Key="TwainContentPadding">16</Thickness>
+    <Thickness x:Key="TwainWorkspacePadding">10</Thickness>
+
+</ResourceDictionary>
