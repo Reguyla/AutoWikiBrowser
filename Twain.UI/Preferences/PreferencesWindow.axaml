@@ -249,6 +249,32 @@
                         </Grid>
                     </Grid>
 
+                        <Grid
+                            ColumnDefinitions="Auto,Auto,*"
+                            ColumnSpacing="8">
+
+                            <TextBlock
+                                x:Name="AutoSavePeriodLabel"
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Text="Autosave every:" />
+
+                            <NumericUpDown
+                                x:Name="AutoSavePeriodNumericUpDown"
+                                Grid.Column="1"
+                                Width="120"
+                                Minimum="1"
+                                Maximum="86400"
+                                Value="60" />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Text="seconds" />
+
+                        </Grid>
+
+
                     <TextBlock
                         Margin="0,4,0,0"
                         Text="When ready to save:"
@@ -328,32 +354,7 @@
                         x:Name="EditorLineNumbersCheckBox"
                         Content="Show line numbers" />
 
-                </StackPanel>
-
-                    <Grid
-                        ColumnDefinitions="Auto,Auto,*"
-                        ColumnSpacing="8">
-
-                        <TextBlock
-                            x:Name="AutoSavePeriodLabel"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="Autosave every:" />
-
-                        <NumericUpDown
-                            x:Name="AutoSavePeriodNumericUpDown"
-                            Grid.Column="1"
-                            Width="120"
-                            Minimum="1"
-                            Maximum="86400"
-                            Value="60" />
-
-                        <TextBlock
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            Text="seconds" />
-
-                    </Grid>
+                    </StackPanel>
 
                 </StackPanel>
             </TabItem>
