@@ -428,7 +428,7 @@ public class GeneralPrefs
     public bool FocusAtEndOfEditBox = false;
     public bool scrollToUnbalancedBrackets = false;
 
-    public int TextBoxSize = 10;
+    public int TextBoxSize = 15;
     public string TextBoxFont = "Courier New";
     public bool EditorLineNumbers = true;
     public bool LowThreadPriority = false;
