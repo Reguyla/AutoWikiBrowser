@@ -20,6 +20,11 @@ public enum BotShutdownAction
 public sealed partial class BotSettingsViewModel : ObservableObject
 {
     /// <summary>
+    /// Optional callback for resetting the active processing counters.
+    /// </summary>
+    public Action? ResetLiveNudgeCounters { get; set; }
+
+    /// <summary>
     /// Gets or sets whether automatic article saving is enabled.
     /// </summary>
     [ObservableProperty]
@@ -77,11 +82,17 @@ public sealed partial class BotSettingsViewModel : ObservableObject
     private BotShutdownAction _shutdownAction = BotShutdownAction.Shutdown;
 
     /// <summary>
-    /// Resets the current session nudge count.
+    /// Resets the active session nudge counters when available.
     /// </summary>
     [RelayCommand]
     private void ResetNudgeCount()
     {
+        if (ResetLiveNudgeCounters is not null)
+        {
+            ResetLiveNudgeCounters();
+            return;
+        }
+
         NudgeCount = 0;
         CurrentArticleNudgeCount = 0;
     }

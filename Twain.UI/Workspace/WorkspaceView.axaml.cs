@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia;
+using Twain.UI.BotSettings;
 using Twain.UI.Profiles;
 using Twain.UI.Shell;
 using Twain.UI.ViewModels.Workspaces;
@@ -14,6 +14,8 @@ namespace Twain.UI.Views.Workspaces;
 /// </summary>
 public partial class WorkspaceView : UserControl
 {
+    private BotSettingsViewModel? _editingBotSettings;
+
     /// <summary>
     /// Opens the application preferences window through the shell.
     /// </summary>
@@ -22,6 +24,26 @@ public partial class WorkspaceView : UserControl
         RoutedEventArgs e)
     {
         OpenEmbeddedPreferences();
+    }
+
+    public WorkspaceView()
+    {
+        InitializeComponent();
+
+        ProfilesView.Completed += ProfilesView_Completed;
+        PreferencesView.Completed += PreferencesView_Completed;
+        BotSettingsView.Completed += BotSettingsView_Completed;
+
+        PreferencesView.PropertyChanged += PreferencesView_PropertyChanged;
+        BotSettingsView.PropertyChanged += BotSettingsView_PropertyChanged;
+
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is WorkspaceViewModel viewModel)
+            {
+                ProfilesView.SetSession(viewModel.Session);
+            }
+        };
     }
 
     /// <summary>
@@ -58,22 +80,94 @@ public partial class WorkspaceView : UserControl
         }
     }
 
-    public WorkspaceView()
+    /// <summary>
+    /// Applies accepted bot settings or discards canceled changes.
+    /// </summary>
+    private void BotSettingsView_Completed(
+        object? sender,
+        bool accepted)
     {
-        InitializeComponent();
-
-        ProfilesView.Completed += ProfilesView_Completed;
-        PreferencesView.Completed += PreferencesView_Completed;
-
-        PreferencesView.PropertyChanged += PreferencesView_PropertyChanged;
-
-        DataContextChanged += (_, _) =>
+        if (DataContext is not WorkspaceViewModel workspace)
         {
-            if (DataContext is WorkspaceViewModel viewModel)
-            {
-                ProfilesView.SetSession(viewModel.Session);
-            }
+            return;
+        }
+
+        if (accepted && _editingBotSettings is not null)
+        {
+            BotSettingsViewModel source = _editingBotSettings;
+            BotSettingsViewModel target = workspace.BotSettings;
+
+            target.AutoSaveEnabled = source.AutoSaveEnabled;
+            target.AutoSaveDelay = source.AutoSaveDelay;
+            target.MaximumEdits = source.MaximumEdits;
+            target.SuppressUsingTwain = source.SuppressUsingTwain;
+            target.NudgeEnabled = source.NudgeEnabled;
+            target.SkipAfterRepeatedNudge = source.SkipAfterRepeatedNudge;
+            target.AutomaticShutdownEnabled = source.AutomaticShutdownEnabled;
+            target.ShutdownAction = source.ShutdownAction;
+        }
+
+        _editingBotSettings = null;
+        BotSettingsView.DataContext = null;
+
+        workspace.ShowEditingCommand.Execute(null);
+    }
+
+    /// <summary>
+    /// Discards unaccepted bot settings when leaving the embedded view.
+    /// </summary>
+    private void BotSettingsView_PropertyChanged(
+        object? sender,
+        Avalonia.AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == Avalonia.Visual.IsVisibleProperty &&
+            !BotSettingsView.IsVisible)
+        {
+            _editingBotSettings = null;
+            BotSettingsView.DataContext = null;
+        }
+    }
+
+    /// <summary>
+    /// Opens an editable copy of the current bot settings.
+    /// </summary>
+    public void OpenEmbeddedBotSettings()
+    {
+        if (DataContext is not WorkspaceViewModel workspace)
+        {
+            return;
+        }
+
+        BotSettingsViewModel current = workspace.BotSettings;
+
+        _editingBotSettings = new BotSettingsViewModel
+        {
+            AutoSaveEnabled = current.AutoSaveEnabled,
+            AutoSaveDelay = current.AutoSaveDelay,
+            MaximumEdits = current.MaximumEdits,
+            SuppressUsingTwain = current.SuppressUsingTwain,
+            NudgeEnabled = current.NudgeEnabled,
+            SkipAfterRepeatedNudge = current.SkipAfterRepeatedNudge,
+            NudgeCount = current.NudgeCount,
+            CurrentArticleNudgeCount = current.CurrentArticleNudgeCount,
+            AutomaticShutdownEnabled = current.AutomaticShutdownEnabled,
+            ShutdownAction = current.ShutdownAction,
+            CanUseBotMode = current.CanUseBotMode
         };
+
+        // Reset the actual processing counters, not just the editable copy.
+        _editingBotSettings.ResetLiveNudgeCounters = () =>
+        {
+            current.ResetNudgeCountCommand.Execute(null);
+
+            _editingBotSettings.NudgeCount = current.NudgeCount;
+            _editingBotSettings.CurrentArticleNudgeCount =
+                current.CurrentArticleNudgeCount;
+        };
+
+        BotSettingsView.DataContext = _editingBotSettings;
+
+        workspace.ShowBotSettingsCommand.Execute(null);
     }
 
     /// <summary>

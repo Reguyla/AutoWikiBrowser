@@ -50,6 +50,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
     private bool _isOptionsVisible;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    private bool _isBotSettingsVisible;
+
     /// <summary>
     /// Gets or sets whether the workspace is displaying profiles.
     /// </summary>
@@ -67,7 +71,17 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     public bool IsEditingVisible =>
         !IsOptionsVisible &&
         !IsProfilesVisible &&
-        !IsPreferencesVisible;
+        !IsPreferencesVisible &&
+        !IsBotSettingsVisible;
+
+    [RelayCommand]
+    private void ShowBotSettings()
+    {
+        IsOptionsVisible = false;
+        IsProfilesVisible = false;
+        IsPreferencesVisible = false;
+        IsBotSettingsVisible = true;
+    }
 
     /// <summary>
     /// Displays the primary article editing workspace.
@@ -78,6 +92,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsOptionsVisible = false;
         IsProfilesVisible = false;
         IsPreferencesVisible = false;
+        IsBotSettingsVisible = false;
     }
 
     /// <summary>
@@ -94,6 +109,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsProfilesVisible = false;
         IsPreferencesVisible = false;
         IsOptionsVisible = true;
+        IsBotSettingsVisible = false;
     }
 
     /// <summary>
@@ -105,6 +121,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsOptionsVisible = false;
         IsPreferencesVisible = false;
         IsProfilesVisible = true;
+        IsBotSettingsVisible = false;
     }
 
     [RelayCommand]
@@ -113,6 +130,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsOptionsVisible = false;
         IsProfilesVisible = false;
         IsPreferencesVisible = true;
+        IsBotSettingsVisible = false;
     }
 
     /// <summary>

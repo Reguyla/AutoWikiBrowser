@@ -1,4 +1,5 @@
-<Window
+<UserControl
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
     x:Class="Twain.UI.BotSettings.BotSettingsWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,12 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.BotSettings"
     x:DataType="vm:BotSettingsViewModel"
-    Width="520"
-    Height="600"
-    MinWidth="460"
-    MinHeight="520"
-    Title="Bot Settings"
-    WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
 
     <Design.DataContext>
@@ -19,8 +14,12 @@
     </Design.DataContext>
 
     <Grid
-        Margin="16"
+        Background="{DynamicResource TwainApplicationBackgroundBrush}"
         RowDefinitions="*,Auto">
+
+        <Grid
+            Margin="16"
+            RowDefinitions="*,Auto">
 
         <ScrollViewer>
             <StackPanel Spacing="16">
@@ -216,5 +215,6 @@
         </StackPanel>
 
     </Grid>
+</Grid>
 
-</Window>
+</UserControl>

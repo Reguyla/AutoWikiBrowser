@@ -204,19 +204,14 @@ public partial class ShellWindow : Window
     /// <summary>
     /// Opens the bot processing settings window.
     /// </summary>
-    public async Task OpenBotSettingsAsync()
+    /// <summary>
+    /// Opens bot processing settings inside the workspace.
+    /// </summary>
+    public Task OpenBotSettingsAsync()
     {
-        if (DataContext is not ShellViewModel viewModel)
-        {
-            return;
-        }
+        MainWorkspaceView.OpenEmbeddedBotSettings();
 
-        var window = new BotSettingsWindow
-        {
-            DataContext = viewModel.Workspace.BotSettings
-        };
-
-        await window.ShowDialog<bool>(this);
+        return Task.CompletedTask;
     }
 
     /// <summary>

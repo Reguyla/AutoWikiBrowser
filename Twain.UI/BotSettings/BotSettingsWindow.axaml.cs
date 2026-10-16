@@ -5,8 +5,13 @@ namespace Twain.UI.BotSettings;
 /// <summary>
 /// Displays settings used for automatic bot processing.
 /// </summary>
-public partial class BotSettingsWindow : Avalonia.Controls.Window
+public partial class BotSettingsWindow : Avalonia.Controls.UserControl
 {
+    /// <summary>
+    /// Raised when the user accepts or cancels bot settings.
+    /// </summary>
+    public event EventHandler<bool>? Completed;
+
     /// <summary>
     /// Initializes the bot settings window.
     /// </summary>
@@ -22,14 +27,14 @@ public partial class BotSettingsWindow : Avalonia.Controls.Window
         object? sender,
         RoutedEventArgs e)
     {
-        Close(true);
+        Completed?.Invoke(this, true);
     }
 
     private void CancelButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        Close(false);
+        Completed?.Invoke(this, false);
     }
 
     private void UpdateShutdownActionSelection()
