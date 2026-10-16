@@ -1,8 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Twain.UI.Profiles;
-using Twain.UI.Views.Shell;
+using Twain.UI.Shell;
 using Twain.UI.ViewModels.Workspaces;
+using Twain.UI.Views.Shell;
 
 namespace Twain.UI.Views.Workspaces;
 
@@ -18,12 +19,28 @@ public partial class WorkspaceView : UserControl
         object? sender,
         RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        OpenEmbeddedPreferences();
+    }
+
+    /// <summary>
+    /// Opens Preferences using the current application settings.
+    /// </summary>
+    public void OpenEmbeddedPreferences()
+    {
+        if (DataContext is not WorkspaceViewModel workspace)
         {
             return;
         }
 
-        shell.OpenPreferences();
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell ||
+            shell.DataContext is not ShellViewModel shellViewModel)
+        {
+            return;
+        }
+
+        PreferencesView.BeginEditing(shellViewModel.Preferences);
+
+        workspace.ShowPreferencesCommand.Execute(null);
     }
 
     /// <summary>
@@ -44,6 +61,7 @@ public partial class WorkspaceView : UserControl
         InitializeComponent();
 
         ProfilesView.Completed += ProfilesView_Completed;
+        PreferencesView.Completed += PreferencesView_Completed;
 
         DataContextChanged += (_, _) =>
         {
@@ -52,6 +70,45 @@ public partial class WorkspaceView : UserControl
                 ProfilesView.SetSession(viewModel.Session);
             }
         };
+    }
+
+    /// <summary>
+    /// Applies accepted preferences or discards canceled changes.
+    /// </summary>
+    private async void PreferencesView_Completed(
+        object? sender,
+        bool accepted)
+    {
+        if (DataContext is not WorkspaceViewModel workspace)
+        {
+            return;
+        }
+
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell ||
+            shell.DataContext is not ShellViewModel shellViewModel)
+        {
+            return;
+        }
+
+        if (accepted)
+        {
+            PreferencesView.ApplyPreferences(
+                shellViewModel.Preferences);
+
+            shellViewModel.ApplySitePreferences();
+
+            if (workspace.Editor.ApplyAppearanceRequested
+                is { } applyAppearance)
+            {
+                await applyAppearance();
+            }
+        }
+        else
+        {
+            PreferencesView.CancelChanges();
+        }
+
+        workspace.ShowEditingCommand.Execute(null);
     }
 
     private void ProfilesView_Completed(

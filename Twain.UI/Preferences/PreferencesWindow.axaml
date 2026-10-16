@@ -1,13 +1,9 @@
-<Window
+<UserControl
     x:Class="Twain.UI.Preferences.PreferencesWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Preferences"
-    Width="640"
-    Height="560"
-    MinWidth="600"
-    MinHeight="500"
-    WindowStartupLocation="CenterOwner">
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid RowDefinitions="*,Auto">
 
@@ -49,6 +45,8 @@
 
 
                 </Grid>
+                
+                <Separator Margin="0,4" />
 
                 <TextBlock
                     Text="Application processing"
@@ -99,6 +97,8 @@
                     </ComboBox>
 
                 </Grid>
+
+                <Separator Margin="0,4" />
                 
                  <TextBlock
                     Text="Bot processing"
@@ -115,6 +115,7 @@
                     Grid.ColumnSpan="2"
                     Content="Ignore {{bots}} and {{nobots}} restrictions" />
 
+                <Separator Margin="0,4" />
                  <TextBlock
                     Text="Logging"
                     FontWeight="SemiBold" />
@@ -518,4 +519,4 @@
         </StackPanel>
 
     </Grid>
-</Window>
+</UserControl>

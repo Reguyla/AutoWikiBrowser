@@ -13,6 +13,7 @@ using Twain.UI.ExternalPrograms;
 using Twain.UI.Preferences;
 using Twain.UI.Profiles;
 using Twain.UI.Shell;
+using Twain.UI.Views.Workspaces;
 
 namespace Twain.UI.Views.Shell;
 
@@ -239,41 +240,16 @@ public partial class ShellWindow : Window
     }
 
     /// <summary>
-    /// Opens the application preferences window.
+    /// Opens application preferences inside the workspace.
     /// </summary>
-    public async void OpenPreferences()
+    public void OpenPreferences()
     {
         if (DataContext is not ShellViewModel viewModel)
         {
             return;
         }
 
-        PreferencesWindow window =
-            new(
-                viewModel.Preferences.LanguageCode,
-                viewModel.Preferences.Project,
-                viewModel.Preferences.CustomProject,
-                viewModel.Preferences.Protocol);
-
-        window.LoadPreferences(
-            viewModel.Preferences);
-
-        bool? result =
-            await window.ShowDialog<bool?>(this);
-
-        if (result == true)
-        {
-            window.ApplyPreferences(
-                viewModel.Preferences);
-
-            viewModel.ApplySitePreferences();
-
-            if (viewModel.Workspace.Editor.ApplyAppearanceRequested
-                is { } applyAppearance)
-            {
-                await applyAppearance();
-            }
-        }
+        viewModel.Workspace.ShowPreferencesCommand.Execute(null);
     }
 
     /// <summary>

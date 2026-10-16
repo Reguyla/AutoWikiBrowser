@@ -15,7 +15,7 @@ namespace Twain.UI.Preferences;
 /// <summary>
 /// Displays and edits application preferences.
 /// </summary>
-public partial class PreferencesWindow : Window
+public partial class PreferencesWindow : UserControl
 {
     private readonly Dictionary<int, CheckBox> _alertCheckBoxes = new();
 
@@ -23,6 +23,10 @@ public partial class PreferencesWindow : Window
     private bool _initializingTheme = true;
     private bool _themeAccepted;
 
+    /// <summary>
+    /// Raised when the user accepts or cancels preferences.
+    /// </summary>
+    public event EventHandler<bool>? Completed;
 
     /// <summary>
     /// Initializes a new preferences window.
@@ -110,26 +114,21 @@ public partial class PreferencesWindow : Window
 
 
         _themeAccepted = true;
-        Close(true);
+        Completed?.Invoke(this, true);
 
     }
 
-
     /// <summary>
-    /// Restores the previous theme when preferences are dismissed
-    /// without accepting changes.
+    /// Restores the theme that was active when preferences opened.
     /// </summary>
-    protected override void OnClosed(EventArgs e)
+    public void CancelChanges()
     {
         if (!_themeAccepted &&
             ThemeManager.CurrentTheme != _originalTheme)
         {
             ThemeManager.ApplyTheme(_originalTheme);
         }
-
-        base.OnClosed(e);
     }
-
 
     /// <summary>
     /// Cancels preference changes and closes the window.
@@ -138,7 +137,8 @@ public partial class PreferencesWindow : Window
         object? sender,
         RoutedEventArgs e)
     {
-        Close(false);
+        CancelChanges();
+        Completed?.Invoke(this, false);
     }
 
     /// <summary>
@@ -840,8 +840,15 @@ public partial class PreferencesWindow : Window
         object? sender,
         RoutedEventArgs e)
     {
+        TopLevel? topLevel = TopLevel.GetTopLevel(this);
+
+        if (topLevel is null)
+        {
+            return;
+        }
+
         IStorageFile? file =
-            await StorageProvider.SaveFilePickerAsync(
+            await topLevel.StorageProvider.SaveFilePickerAsync(
                 new FilePickerSaveOptions
                 {
                     Title = "Select autosave file",
@@ -864,6 +871,28 @@ public partial class PreferencesWindow : Window
 
         PrefAutoSaveEditBoxFile =
             file.Path.LocalPath;
+    }
+
+    /// <summary>
+    /// Initializes preferences for a new editing session.
+    /// </summary>
+    public void BeginEditing(
+        UserPrefs preferences)
+    {
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        _themeAccepted = false;
+
+        InitializeThemeSelection();
+
+        InitializeProjectSelection(preferences.Project);
+        InitializeLanguageSelection(preferences.LanguageCode);
+        InitializeCustomProject(preferences.CustomProject);
+        InitializeProtocolSelection(preferences.Protocol);
+
+        LoadPreferences(preferences);
+
+        UpdateOkButtonState();
     }
 
     /// <summary>

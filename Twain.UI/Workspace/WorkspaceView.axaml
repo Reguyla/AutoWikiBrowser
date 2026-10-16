@@ -10,6 +10,7 @@
     xmlns:workspaceControls="using:Twain.UI.Controls.Workspaces"
     xmlns:optionsViews="using:Twain.UI.Options"
     xmlns:profiles="using:Twain.UI.Profiles"
+    xmlns:preferences="using:Twain.UI.Preferences"
     x:DataType="vm:WorkspaceViewModel"
     d:DesignWidth="1100"
     d:DesignHeight="700"
@@ -395,6 +396,15 @@ Article alerts for the currently processed article.
         Grid.Column="2"
         Margin="12,0,12,8"
         IsVisible="{Binding IsProfilesVisible}" />
+
+    <!-- Processing Preferences workspace. -->
+    <preferences:PreferencesWindow
+        x:Name="PreferencesView"
+        Grid.Row="0"
+        Grid.Column="2"
+        Margin="12,0,12,8"
+        IsVisible="{Binding IsPreferencesVisible}" />
+
     <!--
     Workspace status bar.
     -->

@@ -57,11 +57,17 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
     private bool _isProfilesVisible;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    private bool _isPreferencesVisible;
+
     /// <summary>
     /// Gets whether the primary editing workspace is visible.
     /// </summary>
     public bool IsEditingVisible =>
-        !IsOptionsVisible && !IsProfilesVisible;
+        !IsOptionsVisible &&
+        !IsProfilesVisible &&
+        !IsPreferencesVisible;
 
     /// <summary>
     /// Displays the primary article editing workspace.
@@ -71,6 +77,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         IsOptionsVisible = false;
         IsProfilesVisible = false;
+        IsPreferencesVisible = false;
     }
 
     /// <summary>
@@ -85,6 +92,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private void ShowOptions()
     {
         IsProfilesVisible = false;
+        IsPreferencesVisible = false;
         IsOptionsVisible = true;
     }
 
@@ -95,7 +103,16 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private void ShowProfiles()
     {
         IsOptionsVisible = false;
+        IsPreferencesVisible = false;
         IsProfilesVisible = true;
+    }
+
+    [RelayCommand]
+    private void ShowPreferences()
+    {
+        IsOptionsVisible = false;
+        IsProfilesVisible = false;
+        IsPreferencesVisible = true;
     }
 
     /// <summary>
