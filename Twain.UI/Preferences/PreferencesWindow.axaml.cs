@@ -7,6 +7,8 @@ using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.AWBSettings;
 using Twain.Core.Settings;
+using Twain.UI.Themes;
+
 
 namespace Twain.UI.Preferences;
 
@@ -17,6 +19,11 @@ public partial class PreferencesWindow : Window
 {
     private readonly Dictionary<int, CheckBox> _alertCheckBoxes = new();
 
+    private TwainTheme _originalTheme;
+    private bool _initializingTheme = true;
+    private bool _themeAccepted;
+
+
     /// <summary>
     /// Initializes a new preferences window.
     /// </summary>
@@ -24,7 +31,56 @@ public partial class PreferencesWindow : Window
     {
         InitializeComponent();
         PopulateAlertControls();
+        InitializeThemeSelection();
+
     }
+
+
+    /// <summary>
+    /// Initializes the theme selector with the currently active theme.
+    /// </summary>
+    private void InitializeThemeSelection()
+    {
+        _initializingTheme = true;
+
+        _originalTheme = ThemeManager.CurrentTheme;
+
+        ThemeComboBox.SelectedIndex =
+            _originalTheme switch
+            {
+                TwainTheme.Legacy => 1,
+                _ => 0
+            };
+
+        _initializingTheme = false;
+    }
+
+    /// <summary>
+    /// Previews the selected application theme immediately.
+    /// </summary>
+    private void ThemeComboBox_SelectionChanged(
+        object? sender,
+        SelectionChangedEventArgs e)
+    {
+        if (_initializingTheme)
+        {
+            return;
+        }
+
+        TwainTheme selectedTheme =
+            ThemeComboBox.SelectedIndex switch
+            {
+                0 => TwainTheme.Classic,
+                1 => TwainTheme.Legacy,
+                _ => ThemeManager.CurrentTheme
+            };
+
+        if (selectedTheme != ThemeManager.CurrentTheme)
+        {
+            ThemeManager.ApplyTheme(selectedTheme);
+        }
+    }
+
 
     /// <summary>
     /// Accepts the current preferences and closes the window.
@@ -52,8 +108,28 @@ public partial class PreferencesWindow : Window
             return;
         }
 
+
+        _themeAccepted = true;
         Close(true);
+
     }
+
+
+    /// <summary>
+    /// Restores the previous theme when preferences are dismissed
+    /// without accepting changes.
+    /// </summary>
+    protected override void OnClosed(EventArgs e)
+    {
+        if (!_themeAccepted &&
+            ThemeManager.CurrentTheme != _originalTheme)
+        {
+            ThemeManager.ApplyTheme(_originalTheme);
+        }
+
+        base.OnClosed(e);
+    }
+
 
     /// <summary>
     /// Cancels preference changes and closes the window.
@@ -92,6 +168,8 @@ public partial class PreferencesWindow : Window
 
         InitializeComponent();
         PopulateAlertControls();
+        InitializeThemeSelection();
+
 
         InitializeProjectSelection(project);
         InitializeLanguageSelection(language);

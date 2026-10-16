@@ -1,14 +1,10 @@
-<Window
+<UserControl
     x:Class="Twain.UI.Profiles.ProfilesWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:profiles="clr-namespace:Twain.UI.Profiles"
-    Title="Profiles"
-    Width="760"
-    Height="520"
-    MinWidth="600"
-    MinHeight="440"
-    WindowStartupLocation="CenterOwner">
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="16"
@@ -165,4 +161,4 @@
         </StackPanel>
 
     </Grid>
-</Window>
+</UserControl>

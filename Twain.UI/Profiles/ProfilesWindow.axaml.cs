@@ -13,7 +13,7 @@ namespace Twain.UI.Profiles;
 /// <summary>
 /// Displays and manages saved user profiles.
 /// </summary>
-public partial class ProfilesWindow : Window
+public partial class ProfilesWindow : UserControl
 {
     public ProfilesWindow()
     {
@@ -21,13 +21,35 @@ public partial class ProfilesWindow : Window
         LoadProfiles();
     }
 
-    private readonly Session? _session;
+    private Session? _session;
+
+    /// <summary>
+    /// Raised when the user requests to leave the Profiles view.
+    /// The boolean indicates whether login succeeded.
+    /// </summary>
+    public event EventHandler<bool>? Completed;
+
+    /// <summary>
+    /// Notifies the workspace that the Profiles view is finished.
+    /// </summary>
+    private void Complete(bool loggedIn)
+    {
+        Completed?.Invoke(this, loggedIn);
+    }
 
     /// <summary>
     /// Gets the currently selected profile list item.
     /// </summary>
     private ProfileListItem? SelectedProfile =>
         ProfilesDataGrid.SelectedItem as ProfileListItem;
+
+    /// <summary>
+    /// Gets the window hosting this Profiles control.
+    /// </summary>
+    private Window? GetOwnerWindow()
+    {
+        return TopLevel.GetTopLevel(this) as Window;
+    }
 
     /// <summary>
     /// Loads the saved profiles into the profile list.
@@ -67,7 +89,7 @@ public partial class ProfilesWindow : Window
         object? sender,
         RoutedEventArgs e)
     {
-        Close();
+        Complete(false);
     }
 
     private async void DeleteButton_Click(
@@ -156,7 +178,14 @@ public partial class ProfilesWindow : Window
                 }
             };
 
-        await confirmationWindow.ShowDialog(this);
+        Window? owner = GetOwnerWindow();
+
+        if (owner is null)
+        {
+            return false;
+        }
+
+        await confirmationWindow.ShowDialog(owner);
 
         return confirmed;
     }
@@ -170,8 +199,15 @@ public partial class ProfilesWindow : Window
             Title = "Add Profile"
         };
 
+        Window? owner = GetOwnerWindow();
+
+        if (owner is null)
+        {
+            return;
+        }
+
         bool saved =
-            await editor.ShowDialog<bool>(this);
+            await editor.ShowDialog<bool>(owner);
 
         if (!saved)
             return;
@@ -209,8 +245,15 @@ public partial class ProfilesWindow : Window
             Title = "Edit Profile"
         };
 
+        Window? owner = GetOwnerWindow();
+
+        if (owner is null)
+        {
+            return;
+        }
+
         bool saved =
-            await editor.ShowDialog<bool>(this);
+            await editor.ShowDialog<bool>(owner);
 
         if (!saved)
             return;
@@ -286,7 +329,7 @@ public partial class ProfilesWindow : Window
         switch (result.Status)
         {
             case ProfileLoginService.LoginStatus.Success:
-                Close(true);
+                Complete(true);
                 break;
 
             case ProfileLoginService.LoginStatus.SessionBusy:
@@ -336,7 +379,20 @@ public partial class ProfilesWindow : Window
         }
         };
 
-        await dialog.ShowDialog(this);
+        Window? owner = GetOwnerWindow();
+
+        if (owner is null)
+        {
+            return;
+        }
+
+        await dialog.ShowDialog(owner);
+    }
+
+    public void SetSession(Session session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        _session = session;
     }
 
     /// <summary>
@@ -422,7 +478,7 @@ public partial class ProfilesWindow : Window
                     username,
                     password);
 
-                Close(true);
+                Complete(true);
                 break;
 
             case ProfileLoginService.LoginStatus.SessionBusy:

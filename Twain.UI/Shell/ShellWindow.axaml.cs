@@ -50,20 +50,19 @@ public partial class ShellWindow : Window
     /// <summary>
     /// Displays the profile login workflow for the active session.
     /// </summary>
-    public async Task ShowLoginAsync()
+    public Task ShowLoginAsync()
     {
-        if (DataContext is not ShellViewModel viewModel)
+        if (DataContext is ShellViewModel viewModel)
         {
-            return;
+            viewModel.Workspace.ShowProfilesCommand.Execute(null);
         }
 
-        ProfilesWindow window =
-            new(viewModel.Session);
+        return Task.CompletedTask;
+    }
 
-        bool loggedIn =
-            await window.ShowDialog<bool>(this);
-
-        if (loggedIn)
+    public void NotifyLoginCompleted()
+    {
+        if (DataContext is ShellViewModel viewModel)
         {
             viewModel.LoginCompleted();
         }

@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Twain.UI.Profiles;
 using Twain.UI.Views.Shell;
+using Twain.UI.ViewModels.Workspaces;
 
 namespace Twain.UI.Views.Workspaces;
 
@@ -9,14 +11,6 @@ namespace Twain.UI.Views.Workspaces;
 /// </summary>
 public partial class WorkspaceView : UserControl
 {
-    /// <summary>
-    /// Initializes the workspace view.
-    /// </summary>
-    public WorkspaceView()
-    {
-        InitializeComponent();
-    }
-
     /// <summary>
     /// Opens the application preferences window through the shell.
     /// </summary>
@@ -35,16 +29,47 @@ public partial class WorkspaceView : UserControl
     /// <summary>
     /// Opens the saved profiles and login window through the shell.
     /// </summary>
-    private async void ProfilesButton_Click(
+    private void ProfilesButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        if (DataContext is WorkspaceViewModel viewModel)
+        {
+            viewModel.ShowProfilesCommand.Execute(null);
+        }
+    }
+
+    public WorkspaceView()
+    {
+        InitializeComponent();
+
+        ProfilesView.Completed += ProfilesView_Completed;
+
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is WorkspaceViewModel viewModel)
+            {
+                ProfilesView.SetSession(viewModel.Session);
+            }
+        };
+    }
+
+    private void ProfilesView_Completed(
+        object? sender,
+        bool loggedIn)
+    {
+        if (DataContext is not WorkspaceViewModel viewModel)
         {
             return;
         }
 
-        await shell.ShowLoginAsync();
+        if (loggedIn &&
+            TopLevel.GetTopLevel(this) is ShellWindow shell)
+        {
+            shell.NotifyLoginCompleted();
+        }
+
+        viewModel.ShowEditingCommand.Execute(null);
     }
 
     /// <summary>

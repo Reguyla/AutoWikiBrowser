@@ -9,6 +9,7 @@
     xmlns:preview="using:Twain.UI.Preview"
     xmlns:workspaceControls="using:Twain.UI.Controls.Workspaces"
     xmlns:optionsViews="using:Twain.UI.Options"
+    xmlns:profiles="using:Twain.UI.Profiles"
     x:DataType="vm:WorkspaceViewModel"
     d:DesignWidth="1100"
     d:DesignHeight="700"
@@ -387,6 +388,13 @@ Article alerts for the currently processed article.
         DataContext="{Binding Options}"
         IsVisible="{Binding #WorkspaceRoot.DataContext.IsOptionsVisible}" />
 
+    <!-- Processing Profiles workspace. -->
+    <profiles:ProfilesWindow
+        x:Name="ProfilesView"
+        Grid.Row="0"
+        Grid.Column="2"
+        Margin="12,0,12,8"
+        IsVisible="{Binding IsProfilesVisible}" />
     <!--
     Workspace status bar.
     -->
