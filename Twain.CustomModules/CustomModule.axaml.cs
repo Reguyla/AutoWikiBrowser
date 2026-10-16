@@ -19,8 +19,13 @@ namespace Twain.CustomModules;
 /// Provides the user interface for creating, compiling, and enabling
 /// custom modules.
 /// </summary>
-public partial class CustomModule : Avalonia.Controls.Window
+public partial class CustomModule : Avalonia.Controls.UserControl
 {
+    /// <summary>
+    /// Raised when the user requests to leave the custom module editor.
+    /// </summary>
+    public event EventHandler? CloseRequested;
+
     private readonly ITwainHost? _host;
 
     private readonly CustomModuleState _state;
@@ -194,10 +199,17 @@ public partial class CustomModule : Avalonia.Controls.Window
     /// <summary>
     /// Saves the current custom-module source code to a local file.
     /// </summary>
-    private async Task SaveCodeToFileAsync()
-    {
-        var file = await StorageProvider.SaveFilePickerAsync(
-            new Avalonia.Platform.Storage.FilePickerSaveOptions
+        private async Task SaveCodeToFileAsync()
+        {
+            var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+
+            if (storageProvider is null)
+            {
+                return;
+            }
+
+            var file = await storageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
             {
                 Title = "Save Custom Module Source",
                 SuggestedFileName =
@@ -320,7 +332,7 @@ public partial class CustomModule : Avalonia.Controls.Window
         object? sender,
         RoutedEventArgs e)
     {
-        Close();
+        CloseRequested?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -577,7 +589,10 @@ public partial class CustomModule : Avalonia.Controls.Window
                 ? "Custom Module Compilation Errors"
                 : "Custom Module Compilation Warnings";
 
-        _ = errorDialog.ShowDialog(this);
+        if (TopLevel.GetTopLevel(this) is Window owner)
+            {
+                _ = errorDialog.ShowDialog(owner);
+            }
 
         return !results.Errors.HasErrors;
     }
@@ -594,7 +609,10 @@ public partial class CustomModule : Avalonia.Controls.Window
         errorDialog.Title =
             "Custom Module Error";
 
-        await errorDialog.ShowDialog(this);
+        if (TopLevel.GetTopLevel(this) is Window owner)
+            {
+                await errorDialog.ShowDialog(owner);
+            }
     }
 
     /// <summary>
@@ -773,7 +791,10 @@ public partial class CustomModule : Avalonia.Controls.Window
         okButton.Click += (_, _) =>
             guideWindow.Close();
 
-        await guideWindow.ShowDialog(this);
+        if (TopLevel.GetTopLevel(this) is Window owner)
+            {
+                await guideWindow.ShowDialog(owner);
+            }
     }
 
     private void ManualMenuItem_Click(

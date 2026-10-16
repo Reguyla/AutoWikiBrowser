@@ -29,13 +29,17 @@ namespace Twain.UI.ViewModels.Workspaces;
 /// <summary>
 /// Provides presentation state and commands for the active workspace.
 /// </summary>
-public sealed partial class WorkspaceViewModel : ObservableObject
+public partial class WorkspaceViewModel : ObservableObject
 {
     /// <summary>
     /// Gets or sets the title of the article currently loaded in the workspace.
     /// </summary>
     [ObservableProperty]
     private string _currentArticleName = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    private bool _isCustomModulesVisible;
 
     /// <summary>
     /// Gets or sets the edit summary used when saving the current article.
@@ -72,7 +76,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         !IsOptionsVisible &&
         !IsProfilesVisible &&
         !IsPreferencesVisible &&
-        !IsBotSettingsVisible;
+        !IsBotSettingsVisible &&
+        !IsCustomModulesVisible;
 
     [RelayCommand]
     private void ShowBotSettings()
@@ -81,6 +86,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsProfilesVisible = false;
         IsPreferencesVisible = false;
         IsBotSettingsVisible = true;
+        IsCustomModulesVisible = false;
     }
 
     /// <summary>
@@ -93,6 +99,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsProfilesVisible = false;
         IsPreferencesVisible = false;
         IsBotSettingsVisible = false;
+        IsCustomModulesVisible = false;
     }
 
     /// <summary>
@@ -110,6 +117,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsPreferencesVisible = false;
         IsOptionsVisible = true;
         IsBotSettingsVisible = false;
+        IsCustomModulesVisible = false;
     }
 
     /// <summary>
@@ -122,6 +130,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsPreferencesVisible = false;
         IsProfilesVisible = true;
         IsBotSettingsVisible = false;
+        IsCustomModulesVisible = false;
     }
 
     [RelayCommand]
@@ -131,6 +140,21 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IsProfilesVisible = false;
         IsPreferencesVisible = true;
         IsBotSettingsVisible = false;
+        IsCustomModulesVisible = false;
+    }
+
+    /// <summary>
+    /// Displays the embedded Custom Modules editor.
+    /// </summary>
+    [RelayCommand]
+    private void ShowCustomModules()
+    {
+        IsOptionsVisible = false;
+        IsProfilesVisible = false;
+        IsPreferencesVisible = false;
+        IsBotSettingsVisible = false;
+
+        IsCustomModulesVisible = true;
     }
 
     /// <summary>

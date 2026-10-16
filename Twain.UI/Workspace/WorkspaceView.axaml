@@ -12,6 +12,7 @@
     xmlns:profiles="using:Twain.UI.Profiles"
     xmlns:preferences="using:Twain.UI.Preferences"
     xmlns:botSettings="using:Twain.UI.BotSettings"
+    xmlns:customModules="clr-namespace:Twain.CustomModules;assembly=Twain.CustomModules"
     x:DataType="vm:WorkspaceViewModel"
     d:DesignWidth="1100"
     d:DesignHeight="700"
@@ -413,6 +414,13 @@ Article alerts for the currently processed article.
         Grid.Column="2"
         Margin="12,0,12,8"
         IsVisible="{Binding #WorkspaceRoot.DataContext.IsBotSettingsVisible}" />
+
+    <ContentControl
+        x:Name="CustomModulesHost"
+        Grid.Row="0"
+        Grid.Column="2"
+        Margin="12,0,12,8"
+        IsVisible="{Binding #WorkspaceRoot.DataContext.IsCustomModulesVisible}" />
 
     <!--
     Workspace status bar.

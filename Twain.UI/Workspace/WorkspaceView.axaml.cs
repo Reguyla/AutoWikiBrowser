@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Twain.CustomModules;
 using Twain.UI.BotSettings;
 using Twain.UI.Profiles;
 using Twain.UI.Shell;
@@ -15,6 +16,7 @@ namespace Twain.UI.Views.Workspaces;
 public partial class WorkspaceView : UserControl
 {
     private BotSettingsViewModel? _editingBotSettings;
+    private CustomModule? _customModuleView;
 
     /// <summary>
     /// Opens the application preferences window through the shell.
@@ -44,6 +46,41 @@ public partial class WorkspaceView : UserControl
                 ProfilesView.SetSession(viewModel.Session);
             }
         };
+    }
+
+    /// <summary>
+    /// Initializes the embedded Custom Modules editor using the
+    /// active workspace state, host, and shared preferences.
+    /// </summary>
+    private void InitializeCustomModules()
+    {
+        if (_customModuleView is not null)
+        {
+            return;
+        }
+
+        if (DataContext is not WorkspaceViewModel workspace)
+        {
+            return;
+        }
+
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell ||
+            shell.DataContext is not ShellViewModel shellViewModel)
+        {
+            return;
+        }
+
+        _customModuleView = new CustomModule(
+            workspace.CustomModuleState,
+            workspace.TwainHost,
+            shellViewModel.Preferences);
+
+        _customModuleView.CloseRequested += (_, _) =>
+        {
+            workspace.ShowEditingCommand.Execute(null);
+        };
+
+        CustomModulesHost.Content = _customModuleView;
     }
 
     /// <summary>
@@ -243,18 +280,33 @@ public partial class WorkspaceView : UserControl
     }
 
     /// <summary>
-    /// Opens the custom module window through the shell.
+    /// Opens the embedded Custom Modules editor.
     /// </summary>
     private void CustomModulesButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        OpenEmbeddedCustomModules();
+    }
+
+    /// <summary>
+    /// Opens the embedded Custom Modules editor.
+    /// </summary>
+    public void OpenEmbeddedCustomModules()
+    {
+        if (DataContext is not WorkspaceViewModel workspace)
         {
             return;
         }
 
-        shell.OpenCustomModules();
+        InitializeCustomModules();
+
+        if (_customModuleView is null)
+        {
+            return;
+        }
+
+        workspace.ShowCustomModulesCommand.Execute(null);
     }
 
     /// <summary>

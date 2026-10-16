@@ -1,14 +1,7 @@
-<Window
+<UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="Twain.CustomModules.CustomModule"
-    Width="900"
-    Height="720"
-    MinWidth="800"
-    MinHeight="620"
-    CanResize="True"
-    WindowStartupLocation="CenterOwner"
-    Title="Custom Module"
     Background="{DynamicResource TwainApplicationBackgroundBrush}">
 
     <Grid RowDefinitions="Auto,Auto,*">
@@ -208,4 +201,4 @@
             </Grid>
         </Border>
     </Grid>
-</Window>
+</UserControl>

@@ -92,29 +92,20 @@ public partial class ShellWindow : Window
     }
 
     /// <summary>
-    /// Opens the custom module window using the active Twain workspace.
+    /// Opens Custom Modules inside the workspace.
     /// </summary>
-    public async void OpenCustomModules()
+    public Task OpenCustomModuleAsync()
     {
-        if (DataContext is not ShellViewModel viewModel)
-        {
-            return;
-        }
+        MainWorkspaceView.OpenEmbeddedCustomModules();
 
-        CustomModule window =
-            new(
-                viewModel.Workspace.CustomModuleState,
-                viewModel.Workspace.TwainHost,
-                viewModel.Preferences);
-
-        await window.ShowDialog(this);
+        return Task.CompletedTask;
     }
 
-    private void MakeModuleMenuItem_Click(
+    private async void MakeModuleMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        OpenCustomModules();
+        await OpenCustomModuleAsync();
     }
 
     /// <summary>
