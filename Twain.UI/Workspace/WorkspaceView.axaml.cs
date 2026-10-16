@@ -1,5 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia;
 using Twain.UI.Profiles;
 using Twain.UI.Shell;
 using Twain.UI.ViewModels.Workspaces;
@@ -63,6 +65,8 @@ public partial class WorkspaceView : UserControl
         ProfilesView.Completed += ProfilesView_Completed;
         PreferencesView.Completed += PreferencesView_Completed;
 
+        PreferencesView.PropertyChanged += PreferencesView_PropertyChanged;
+
         DataContextChanged += (_, _) =>
         {
             if (DataContext is WorkspaceViewModel viewModel)
@@ -70,6 +74,21 @@ public partial class WorkspaceView : UserControl
                 ProfilesView.SetSession(viewModel.Session);
             }
         };
+    }
+
+    /// <summary>
+    /// Restores the original theme when Preferences is hidden
+    /// without the user accepting the changes.
+    /// </summary>
+    private void PreferencesView_PropertyChanged(
+        object? sender,
+        AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == Visual.IsVisibleProperty &&
+            !PreferencesView.IsVisible)
+        {
+            PreferencesView.CancelChanges();
+        }
     }
 
     /// <summary>

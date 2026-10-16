@@ -244,12 +244,7 @@ public partial class ShellWindow : Window
     /// </summary>
     public void OpenPreferences()
     {
-        if (DataContext is not ShellViewModel viewModel)
-        {
-            return;
-        }
-
-        viewModel.Workspace.ShowPreferencesCommand.Execute(null);
+        MainWorkspaceView.OpenEmbeddedPreferences();
     }
 
     /// <summary>

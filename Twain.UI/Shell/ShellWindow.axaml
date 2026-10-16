@@ -110,9 +110,11 @@
 
 </Border>
 
-        <workspaceViews:WorkspaceView
-            Grid.Row="1"
-            DataContext="{Binding Workspace}" />
+    <workspaceViews:WorkspaceView
+        x:Name="MainWorkspaceView"
+        Grid.Row="1"
+        DataContext="{Binding Workspace}" />
+
     </Grid>
 
 </Window>
