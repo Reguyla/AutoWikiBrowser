@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.Controls.Workspaces.WorkspacePaneHost"
     xmlns="https://github.com/avaloniaui"
@@ -12,55 +13,59 @@
     d:DesignHeight="300"
     mc:Ignorable="d">
 
+    <!-- Shared pane frame. -->
     <Border
-        Padding="{DynamicResource TwainPanePadding}"
         Background="{DynamicResource TwainSurfaceBrush}"
         BorderBrush="{DynamicResource TwainBorderBrush}"
         BorderThickness="{DynamicResource TwainBorderThickness}"
         CornerRadius="{DynamicResource TwainPaneCornerRadius}"
+        ClipToBounds="True"
         IsVisible="{Binding IsVisible}">
 
         <Grid RowDefinitions="Auto,*">
 
-            <!-- Pane title bar. -->
+            <!-- Shared pane title bar. -->
+            <Border
+                Grid.Row="0"
+                MinHeight="{DynamicResource TwainPaneHeaderHeight}"
+                Padding="12,6"
+                Background="{DynamicResource TwainSelectionBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="0,0,0,1">
 
-        <Grid
-            Grid.Row="0"
-            Margin="0,0,0,8">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="{DynamicResource TwainFontSizeMedium}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                    Text="{Binding Title}" />
 
-            <TextBlock
-                VerticalAlignment="Center"
-                FontSize="{DynamicResource TwainFontSizeMedium}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                Text="{Binding Title}" />
-
-        </Grid>
+            </Border>
 
             <!-- Pane-specific content host. -->
-
             <Border
                 Grid.Row="1"
-                Padding="{DynamicResource TwainContentPadding}"
+                Margin="4"
+                Padding="{DynamicResource TwainPanePadding}"
                 Background="{DynamicResource TwainRaisedSurfaceBrush}"
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
                 BorderThickness="{DynamicResource TwainBorderThickness}"
                 CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-            <ContentControl
-                HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Stretch"
-                Content="{Binding Content}">
+                <ContentControl
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="{Binding Content}">
 
-                <ContentControl.DataTemplates>
+                    <ContentControl.DataTemplates>
 
-                    <DataTemplate DataType="listViewModels:MakeListViewModel">
-                        <listControls:MakeListControl />
-                    </DataTemplate>
+                        <DataTemplate DataType="listViewModels:MakeListViewModel">
+                            <listControls:MakeListControl />
+                        </DataTemplate>
 
-                </ContentControl.DataTemplates>
+                    </ContentControl.DataTemplates>
 
-            </ContentControl>
+                </ContentControl>
 
             </Border>
 
