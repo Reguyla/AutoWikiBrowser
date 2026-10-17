@@ -37,6 +37,20 @@ public partial class WorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private string _currentArticleName = string.Empty;
 
+    /// <summary>Whether the navigation uses its compact icon-only layout.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNavigationExpanded))]
+    private bool _isNavigationCollapsed;
+
+    /// <summary>Whether navigation labels and section headings are visible.</summary>
+    public bool IsNavigationExpanded => !IsNavigationCollapsed;
+
+    [RelayCommand]
+    private void ToggleNavigation()
+    {
+        IsNavigationCollapsed = !IsNavigationCollapsed;
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
     private bool _isCustomModulesVisible;

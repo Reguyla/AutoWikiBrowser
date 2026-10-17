@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using System.ComponentModel;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
 using Twain.UI.Profiles;
@@ -17,6 +18,7 @@ public partial class WorkspaceView : UserControl
 {
     private BotSettingsViewModel? _editingBotSettings;
     private CustomModule? _customModuleView;
+    private WorkspaceViewModel? _navigationViewModel;
 
     /// <summary>
     /// Opens the application preferences window through the shell.
@@ -41,11 +43,41 @@ public partial class WorkspaceView : UserControl
 
         DataContextChanged += (_, _) =>
         {
-            if (DataContext is WorkspaceViewModel viewModel)
+            if (_navigationViewModel is not null)
             {
-                ProfilesView.SetSession(viewModel.Session);
+                _navigationViewModel.PropertyChanged -= Navigation_PropertyChanged;
             }
+
+            _navigationViewModel = DataContext as WorkspaceViewModel;
+
+            if (_navigationViewModel is not null)
+            {
+                ProfilesView.SetSession(_navigationViewModel.Session);
+                _navigationViewModel.PropertyChanged += Navigation_PropertyChanged;
+            }
+
+            UpdateNavigationLayout();
         };
+    }
+
+    private void Navigation_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(WorkspaceViewModel.IsNavigationCollapsed))
+        {
+            UpdateNavigationLayout();
+        }
+    }
+
+    private void UpdateNavigationLayout()
+    {
+        bool collapsed =
+            _navigationViewModel?.IsNavigationCollapsed == true;
+
+        WorkspaceLayoutGrid.ColumnDefinitions[0].Width =
+            new GridLength(collapsed ? 48 : 220);
+
+        NavigationBorder.Padding =
+            new Thickness(collapsed ? 4 : 12);
     }
 
     /// <summary>
@@ -331,7 +363,7 @@ public partial class WorkspaceView : UserControl
         object? sender,
         RoutedEventArgs e)
     {
-        if(TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
         {
             return;
         }
@@ -387,12 +419,12 @@ public partial class WorkspaceView : UserControl
     private async void OpenSettingsButton_Click(
         object? sender,
         RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is ShellWindow shell)
         {
-            if (TopLevel.GetTopLevel(this) is ShellWindow shell)
-            {
-                await shell.OpenSettingsAsync();
-            }
+            await shell.OpenSettingsAsync();
         }
+    }
 
     /// <summary>
     /// Saves the current settings through the application shell.

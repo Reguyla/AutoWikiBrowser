@@ -1,5 +1,4 @@
-﻿
-<Window
+﻿<Window
     x:Class="Twain.UI.Views.Shell.ShellWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -25,17 +24,46 @@
     <Grid RowDefinitions="Auto,*">
 
         <!-- Main toolbar -->
-
         <Border
             Grid.Row="0"
             Padding="12,8"
+            Background="{DynamicResource TwainSurfaceBrush}"
             BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
             BorderThickness="0,0,0,1">
+
+            <Border.Styles>
+                <!-- Styles are scoped to the six primary workflow buttons. -->
+                <Style Selector="Button.workflow-action">
+                    <Setter Property="MinWidth" Value="110" />
+                    <Setter Property="Height" Value="44" />
+                    <Setter Property="Padding" Value="12,6" />
+                    <Setter Property="Background" Value="{DynamicResource TwainRaisedSurfaceBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="CornerRadius" Value="{DynamicResource TwainControlCornerRadius}" />
+                    <Setter Property="Foreground" Value="{DynamicResource TwainTextPrimaryBrush}" />
+                </Style>
+
+                <Style Selector="Button.workflow-action:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentHoverBrush}" />
+                </Style>
+
+                <Style Selector="Button.workflow-action:pressed">
+                    <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentPressedBrush}" />
+                </Style>
+
+                <Style Selector="Button.workflow-action:disabled">
+                    <Setter Property="Background" Value="{DynamicResource TwainControlBackgroundDisabledBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource TwainTextDisabledBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}" />
+                </Style>
+            </Border.Styles>
 
             <Grid ColumnDefinitions="Auto,*,Auto">
 
                 <!-- Primary article workflow actions -->
-
                 <StackPanel
                     Grid.Column="0"
                     Orientation="Horizontal"
@@ -43,8 +71,7 @@
 
                     <!-- Start -->
                     <Button
-                        MinWidth="110"
-                        Height="44"
+                        Classes="workflow-action"
                         Command="{Binding Workspace.Options.StartProcessingCommand}"
                         IsEnabled="{Binding Workspace.Options.IsStartEnabled}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
@@ -54,7 +81,6 @@
                                 VerticalAlignment="Center"
                                 Foreground="ForestGreen"
                                 Data="M 5,2 L 19,12 L 5,22 Z" />
-
                             <TextBlock
                                 Text="Start"
                                 FontWeight="SemiBold"
@@ -64,11 +90,9 @@
 
                     <!-- Stop -->
                     <Button
-                        MinWidth="110"
-                        Height="44"
+                        Classes="workflow-action"
                         Command="{Binding Workspace.StopProcessingCommand}"
                         IsEnabled="{Binding Workspace.Options.IsStopEnabled}">
-
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon
                                 Width="20"
@@ -76,7 +100,6 @@
                                 VerticalAlignment="Center"
                                 Foreground="{DynamicResource TwainTextSecondaryBrush}"
                                 Data="M 4,4 L 20,4 L 20,20 L 4,20 Z" />
-
                             <TextBlock
                                 Text="Stop"
                                 FontWeight="SemiBold"
@@ -86,17 +109,14 @@
 
                     <!-- Save -->
                     <Button
-                        MinWidth="110"
-                        Height="44"
+                        Classes="workflow-action"
                         Command="{Binding Workspace.SaveProcessingCommand}">
-
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon
                                 Width="20"
                                 Height="20"
                                 VerticalAlignment="Center"
                                 Data="M 4,3 L 18,3 L 21,6 L 21,21 L 3,21 L 3,3 Z M 7,3 L 7,10 L 17,10 L 17,3 M 7,21 L 7,13 L 17,13 L 17,21" />
-
                             <TextBlock
                                 Text="Save"
                                 FontWeight="SemiBold"
@@ -106,17 +126,14 @@
 
                     <!-- Preview -->
                     <Button
-                        MinWidth="110"
-                        Height="44"
+                        Classes="workflow-action"
                         Command="{Binding Workspace.ShowPreviewCommand}">
-
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon
                                 Width="20"
                                 Height="20"
                                 VerticalAlignment="Center"
                                 Data="M 10,3 A 7,7 0 1 1 10,17 A 7,7 0 1 1 10,3 M 15,15 L 22,22" />
-
                             <TextBlock
                                 Text="Preview"
                                 FontWeight="SemiBold"
@@ -126,17 +143,14 @@
 
                     <!-- Diff -->
                     <Button
-                        MinWidth="110"
-                        Height="44"
+                        Classes="workflow-action"
                         Command="{Binding Workspace.ShowDiffCommand}">
-
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon
                                 Width="20"
                                 Height="20"
                                 VerticalAlignment="Center"
                                 Data="M 3,7 L 21,7 M 16,3 L 21,7 L 16,11 M 21,17 L 3,17 M 8,13 L 3,17 L 8,21" />
-
                             <TextBlock
                                 Text="Diff"
                                 FontWeight="SemiBold"
@@ -146,18 +160,15 @@
 
                     <!-- Skip -->
                     <Button
-                        MinWidth="110"
-                        Height="44"
+                        Classes="workflow-action"
                         Command="{Binding Workspace.SkipProcessingCommand}"
                         IsEnabled="{Binding Workspace.Options.AreArticleProcessingControlsEnabled}">
-
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon
                                 Width="20"
                                 Height="20"
                                 VerticalAlignment="Center"
                                 Data="M 3,4 L 13,12 L 3,20 Z M 12,4 L 22,12 L 12,20 Z" />
-
                             <TextBlock
                                 Text="Skip"
                                 FontWeight="SemiBold"
@@ -168,7 +179,6 @@
                 </StackPanel>
 
                 <!-- Update status -->
-
                 <TextBlock
                     Grid.Column="1"
                     Margin="16,0"
@@ -177,7 +187,6 @@
                     TextWrapping="Wrap" />
 
                 <!-- Authentication controls -->
-
                 <StackPanel
                     Grid.Column="2"
                     Orientation="Horizontal"
@@ -201,11 +210,9 @@
                 </StackPanel>
 
             </Grid>
-
         </Border>
 
         <!-- Main workspace -->
-
         <workspaceViews:WorkspaceView
             x:Name="MainWorkspaceView"
             Grid.Row="1"
