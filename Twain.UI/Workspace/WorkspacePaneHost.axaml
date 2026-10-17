@@ -19,7 +19,6 @@
         BorderBrush="{DynamicResource TwainBorderBrush}"
         BorderThickness="{DynamicResource TwainBorderThickness}"
         CornerRadius="{DynamicResource TwainPaneCornerRadius}"
-        ClipToBounds="True"
         IsVisible="{Binding IsVisible}">
 
         <Grid RowDefinitions="Auto,*">
@@ -42,15 +41,18 @@
 
             </Border>
 
-            <!-- Pane-specific content host. -->
+            <!--
+                Pane-specific content host.
+
+                Avoid additional margin, padding, and clipping
+                around the content. NativeWebView needs the
+                available space for the Diff presentation.
+            -->
             <Border
                 Grid.Row="1"
-                Margin="4"
-                Padding="{DynamicResource TwainPanePadding}"
                 Background="{DynamicResource TwainRaisedSurfaceBrush}"
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                BorderThickness="{DynamicResource TwainBorderThickness}"
-                CornerRadius="{DynamicResource TwainControlCornerRadius}">
+                BorderThickness="0">
 
                 <ContentControl
                     HorizontalContentAlignment="Stretch"
@@ -59,8 +61,11 @@
 
                     <ContentControl.DataTemplates>
 
-                        <DataTemplate DataType="listViewModels:MakeListViewModel">
+                        <DataTemplate
+                            DataType="listViewModels:MakeListViewModel">
+
                             <listControls:MakeListControl />
+
                         </DataTemplate>
 
                     </ContentControl.DataTemplates>
