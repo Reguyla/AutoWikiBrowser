@@ -53,6 +53,7 @@ public partial class WorkspaceViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    [NotifyPropertyChangedFor(nameof(IsEditingSelected))]
     private bool _isCustomModulesVisible;
 
     /// <summary>
@@ -66,10 +67,12 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    [NotifyPropertyChangedFor(nameof(IsEditingSelected))]
     private bool _isOptionsVisible;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    [NotifyPropertyChangedFor(nameof(IsEditingSelected))]
     private bool _isBotSettingsVisible;
 
     /// <summary>
@@ -77,21 +80,25 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    [NotifyPropertyChangedFor(nameof(IsEditingSelected))]
     private bool _isProfilesVisible;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditingVisible))]
+    [NotifyPropertyChangedFor(nameof(IsEditingSelected))]
     private bool _isPreferencesVisible;
 
     /// <summary>
     /// Gets whether the primary editing workspace is visible.
     /// </summary>
     public bool IsEditingVisible =>
-        !IsOptionsVisible &&
         !IsProfilesVisible &&
         !IsPreferencesVisible &&
         !IsBotSettingsVisible &&
         !IsCustomModulesVisible;
+
+    /// <summary>Whether Editing should be highlighted in navigation.</summary>
+    public bool IsEditingSelected => IsEditingVisible && !IsOptionsVisible;
 
     [RelayCommand]
     private void ShowBotSettings()

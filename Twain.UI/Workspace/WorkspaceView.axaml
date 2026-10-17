@@ -161,7 +161,7 @@
                 Text="Editing Options" />
 
             <ToggleButton Command="{Binding ShowEditingCommand}"
-                ToolTip.Tip="Editing View" IsChecked="{Binding IsEditingVisible, Mode=OneWay}">
+                ToolTip.Tip="Editing View" IsChecked="{Binding IsEditingSelected, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon Data="M 4,4 L 20,4 L 20,20 L 4,20 Z M 8,8 L 16,8 M 8,12 L 16,12 M 8,16 L 13,16" />
                     <TextBlock IsVisible="{Binding IsNavigationExpanded}" VerticalAlignment="Center" Text="Editing View" />
@@ -315,6 +315,30 @@
         Grid.Column="1"
         Background="{DynamicResource TwainBorderSubtleBrush}" />
 
+    <!-- Options and editing share the workspace without changing its internal panes. -->
+    <Grid x:Name="OptionsSidebarGrid"
+          Grid.Row="0"
+          Grid.Column="2"
+          ColumnDefinitions="0,0,*">
+
+        <Border Grid.Column="0"
+                Margin="12,0,0,8"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                IsVisible="{Binding IsOptionsVisible}">
+            <optionsViews:OptionsView
+                DataContext="{Binding Options}" />
+        </Border>
+
+        <GridSplitter Grid.Column="1"
+                      Width="8"
+                      HorizontalAlignment="Stretch"
+                      Background="{DynamicResource TwainBorderSubtleBrush}"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"
+                      IsVisible="{Binding IsOptionsVisible}" />
+
     <!--
     Editing workspace.
 
@@ -325,7 +349,7 @@
         <Grid
             Grid.Row="0"
             Grid.Column="2"
-            Margin="12,0,12,8"
+            Margin="0,0,12,8"
             RowDefinitions="*,8,*"
             IsVisible="{Binding IsEditingVisible}">
 
@@ -493,14 +517,7 @@ Article alerts for the currently processed article.
 
     </Grid>
 
-    <!-- Processing options workspace. -->
-
-    <optionsViews:OptionsView
-        Grid.Row="0"
-        Grid.Column="2"
-        Margin="12,0,12,8"
-        DataContext="{Binding Options}"
-        IsVisible="{Binding #WorkspaceRoot.DataContext.IsOptionsVisible}" />
+    </Grid>
 
     <!-- Processing Profiles workspace. -->
     <profiles:ProfilesWindow

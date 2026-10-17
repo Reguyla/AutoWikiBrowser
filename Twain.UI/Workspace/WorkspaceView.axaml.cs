@@ -19,6 +19,7 @@ public partial class WorkspaceView : UserControl
     private BotSettingsViewModel? _editingBotSettings;
     private CustomModule? _customModuleView;
     private WorkspaceViewModel? _navigationViewModel;
+    private GridLength _optionsSidebarWidth = new(340);
 
     /// <summary>
     /// Opens the application preferences window through the shell.
@@ -57,6 +58,7 @@ public partial class WorkspaceView : UserControl
             }
 
             UpdateNavigationLayout();
+            UpdateOptionsSidebarLayout();
         };
     }
 
@@ -65,6 +67,10 @@ public partial class WorkspaceView : UserControl
         if (e.PropertyName == nameof(WorkspaceViewModel.IsNavigationCollapsed))
         {
             UpdateNavigationLayout();
+        }
+        else if (e.PropertyName == nameof(WorkspaceViewModel.IsOptionsVisible))
+        {
+            UpdateOptionsSidebarLayout();
         }
     }
 
@@ -78,6 +84,25 @@ public partial class WorkspaceView : UserControl
 
         NavigationBorder.Padding =
             new Thickness(collapsed ? 4 : 12);
+    }
+
+    /// <summary>
+    /// Shows or hides the resizable Options column without rebuilding its view.
+    /// </summary>
+    private void UpdateOptionsSidebarLayout()
+    {
+        bool visible = _navigationViewModel?.IsOptionsVisible == true;
+
+        if (!visible && OptionsSidebarGrid.ColumnDefinitions[0].Width.Value > 0)
+        {
+            _optionsSidebarWidth = OptionsSidebarGrid.ColumnDefinitions[0].Width;
+        }
+
+        OptionsSidebarGrid.ColumnDefinitions[0].Width =
+            visible ? _optionsSidebarWidth : new GridLength(0);
+
+        OptionsSidebarGrid.ColumnDefinitions[1].Width =
+            new GridLength(visible ? 8 : 0);
     }
 
     /// <summary>
