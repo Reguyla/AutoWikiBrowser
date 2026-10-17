@@ -1,4 +1,5 @@
-﻿<Window
+﻿
+<Window
     x:Class="Twain.UI.Views.Shell.ShellWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -23,97 +24,192 @@
 
     <Grid RowDefinitions="Auto,*">
 
-<Border
-    Grid.Row="0"
-    Padding="12,8"
-    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-    BorderThickness="0,0,0,1">
+        <!-- Main toolbar -->
 
-    <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border
+            Grid.Row="0"
+            Padding="12,8"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,0,0,1">
 
-        <!-- Primary article workflow actions. -->
+            <Grid ColumnDefinitions="Auto,*,Auto">
 
-        <StackPanel
-            Grid.Column="0"
-            Orientation="Horizontal"
-            Spacing="8">
+                <!-- Primary article workflow actions -->
 
-            <Button
-                MinWidth="88"
-                Command="{Binding Workspace.Options.StartProcessingCommand}"
-                Content="Start"
-                IsEnabled="{Binding Workspace.Options.IsStartEnabled}" />
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    Spacing="8">
 
-            <Button
-                MinWidth="88"
-                Command="{Binding Workspace.StopProcessingCommand}"
-                Content="Stop"
-                IsEnabled="{Binding Workspace.Options.IsStopEnabled}" />
+                    <!-- Start -->
+                    <Button
+                        MinWidth="110"
+                        Height="44"
+                        Command="{Binding Workspace.Options.StartProcessingCommand}"
+                        IsEnabled="{Binding Workspace.Options.IsStartEnabled}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon
+                                Width="20"
+                                Height="20"
+                                VerticalAlignment="Center"
+                                Foreground="ForestGreen"
+                                Data="M 5,2 L 19,12 L 5,22 Z" />
 
-            <Button
-                MinWidth="88"
-                Content="Save"
-                Command="{Binding Workspace.SaveProcessingCommand}" />
+                            <TextBlock
+                                Text="Start"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
-            <Button
-                MinWidth="88"
-                Content="Preview"
-                Command="{Binding Workspace.ShowPreviewCommand}" />
+                    <!-- Stop -->
+                    <Button
+                        MinWidth="110"
+                        Height="44"
+                        Command="{Binding Workspace.StopProcessingCommand}"
+                        IsEnabled="{Binding Workspace.Options.IsStopEnabled}">
 
-            <Button
-                MinWidth="88"
-                Content="Diff"
-                Command="{Binding Workspace.ShowDiffCommand}" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon
+                                Width="20"
+                                Height="20"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                Data="M 4,4 L 20,4 L 20,20 L 4,20 Z" />
 
-            <Button
-                MinWidth="88"
-                IsEnabled="{Binding Workspace.Options.AreArticleProcessingControlsEnabled}"
-                Command="{Binding Workspace.SkipProcessingCommand}"
-                Content="Skip" />
+                            <TextBlock
+                                Text="Stop"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
-        </StackPanel>
+                    <!-- Save -->
+                    <Button
+                        MinWidth="110"
+                        Height="44"
+                        Command="{Binding Workspace.SaveProcessingCommand}">
 
-        <!-- Update status remains available in the center of the toolbar. -->
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon
+                                Width="20"
+                                Height="20"
+                                VerticalAlignment="Center"
+                                Data="M 4,3 L 18,3 L 21,6 L 21,21 L 3,21 L 3,3 Z M 7,3 L 7,10 L 17,10 L 17,3 M 7,21 L 7,13 L 17,13 L 17,21" />
 
-        <TextBlock
-            Grid.Column="1"
-            Margin="16,0"
-            VerticalAlignment="Center"
-            Text="{Binding UpdateStatusMessage}"
-            TextWrapping="Wrap" />
+                            <TextBlock
+                                Text="Save"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
-        <!-- Authentication is separated from article actions. -->
+                    <!-- Preview -->
+                    <Button
+                        MinWidth="110"
+                        Height="44"
+                        Command="{Binding Workspace.ShowPreviewCommand}">
 
-        <StackPanel
-            Grid.Column="2"
-            Orientation="Horizontal"
-            Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon
+                                Width="20"
+                                Height="20"
+                                VerticalAlignment="Center"
+                                Data="M 10,3 A 7,7 0 1 1 10,17 A 7,7 0 1 1 10,3 M 15,15 L 22,22" />
 
-            <TextBlock
-                VerticalAlignment="Center"
-                Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                Text="{Binding LoginStatusText}" />
+                            <TextBlock
+                                Text="Preview"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
-            <Button
-                Click="LoginProfilesMenuItem_Click"
-                Content="Login" />
+                    <!-- Diff -->
+                    <Button
+                        MinWidth="110"
+                        Height="44"
+                        Command="{Binding Workspace.ShowDiffCommand}">
 
-            <Button
-                Margin="8,0,0,0"
-                Command="{Binding InstallUpdateCommand}"
-                Content="Update and Restart"
-                IsVisible="{Binding IsUpdateAvailable}" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon
+                                Width="20"
+                                Height="20"
+                                VerticalAlignment="Center"
+                                Data="M 3,7 L 21,7 M 16,3 L 21,7 L 16,11 M 21,17 L 3,17 M 8,13 L 3,17 L 8,21" />
 
-        </StackPanel>
+                            <TextBlock
+                                Text="Diff"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
-    </Grid>
+                    <!-- Skip -->
+                    <Button
+                        MinWidth="110"
+                        Height="44"
+                        Command="{Binding Workspace.SkipProcessingCommand}"
+                        IsEnabled="{Binding Workspace.Options.AreArticleProcessingControlsEnabled}">
 
-</Border>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon
+                                Width="20"
+                                Height="20"
+                                VerticalAlignment="Center"
+                                Data="M 3,4 L 13,12 L 3,20 Z M 12,4 L 22,12 L 12,20 Z" />
 
-    <workspaceViews:WorkspaceView
-        x:Name="MainWorkspaceView"
-        Grid.Row="1"
-        DataContext="{Binding Workspace}" />
+                            <TextBlock
+                                Text="Skip"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+
+                <!-- Update status -->
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="16,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding UpdateStatusMessage}"
+                    TextWrapping="Wrap" />
+
+                <!-- Authentication controls -->
+
+                <StackPanel
+                    Grid.Column="2"
+                    Orientation="Horizontal"
+                    Spacing="8">
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="{Binding LoginStatusText}" />
+
+                    <Button
+                        Click="LoginProfilesMenuItem_Click"
+                        Content="Login" />
+
+                    <Button
+                        Margin="8,0,0,0"
+                        Command="{Binding InstallUpdateCommand}"
+                        Content="Update and Restart"
+                        IsVisible="{Binding IsUpdateAvailable}" />
+
+                </StackPanel>
+
+            </Grid>
+
+        </Border>
+
+        <!-- Main workspace -->
+
+        <workspaceViews:WorkspaceView
+            x:Name="MainWorkspaceView"
+            Grid.Row="1"
+            DataContext="{Binding Workspace}" />
 
     </Grid>
 
