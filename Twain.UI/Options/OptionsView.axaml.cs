@@ -45,7 +45,7 @@ public partial class OptionsView : UserControl
         object? sender,
         RoutedEventArgs e)
     {
-        OptionsTabControl.SelectedIndex = 3;
+        SkipExpander.IsExpanded = true;
     }
 
     /// <summary>

@@ -1,1009 +1,403 @@
-<UserControl
-    x:Class="Twain.UI.Options.OptionsView"
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="using:Twain.UI.Options"
-    x:DataType="vm:OptionsViewModel"
-    d:DesignWidth="320"
-    d:DesignHeight="500"
-    mc:Ignorable="d">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:Twain.UI.Options" x:Class="Twain.UI.Options.OptionsView" x:DataType="vm:OptionsViewModel" d:DesignWidth="320" d:DesignHeight="500" mc:Ignorable="d">
 
-    <Grid
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch">
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
-        <TabControl
-            x:Name="OptionsTabControl"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"><StackPanel Spacing="6" Margin="8"><Expander Header="Start" HorizontalAlignment="Stretch" IsExpanded="True"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Options -->
-        <TabItem Header="Options">
-            <ScrollViewer
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                <StackPanel
-                    MaxWidth="460"
-                    Margin="12"
-                    HorizontalAlignment="Left"
-                    Spacing="{DynamicResource TwainSpacingLarge}">
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Default Summary"/>
 
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Automatic changes" />
+                        <ComboBox Grid.Column="1" IsEditable="True" IsVisible="{Binding !EditSummaryLocked}" Text="{Binding EditSummary}"/>
 
-                    <Grid
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                        <StackPanel
-                            Grid.Column="0"
-                            Spacing="{DynamicResource TwainSpacingSmall}">
-
-                            <CheckBox
-                                Content="Auto tag"
-                                IsChecked="{Binding AutoTag}" />
-
-                            <CheckBox
-                                Content="Apply general fixes"
-                                IsChecked="{Binding ApplyGeneralFixes}" />
-
-                            <CheckBox
-                                Content="Unicodify whole page"
-                                IsChecked="{Binding UnicodifyWholePage}" />
-
-                        </StackPanel>
-
-                            <Button
-                                x:Name="AutoChangesSkipOptionsButton"
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                Click="AutoChangesSkipOptionsButton_Click"
-                                Content="Auto changes&#10;skip options" />
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" IsVisible="{Binding EditSummaryLocked}" Text="{Binding EditSummary}"/>
 
                     </Grid>
 
-                    <Separator Margin="0,4" />
+                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingLarge}">
 
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Find and replace" />
+                        <CheckBox Content="Lock" IsChecked="{Binding EditSummaryLocked}"/>
 
-                    <CheckBox
-                        Content="Enable find and replace"
-                        IsChecked="{Binding FindAndReplaceEnabled}" />
-
-                        <StackPanel
-                            Margin="20,0,0,0"
-                            Spacing="{DynamicResource TwainSpacingSmall}">
-
-                        <Button
-                            x:Name="FindReplaceNormalSettingsButton"
-                            HorizontalAlignment="Stretch"
-                            Click="FindReplaceNormalSettingsButton_Click"
-                            Content="Normal settings"
-                            IsEnabled="{Binding FindAndReplaceEnabled}" />
-
-                        <Button
-                            x:Name="FindReplaceAdvancedSettingsButton"
-                            HorizontalAlignment="Stretch"
-                            Click="FindReplaceAdvancedSettingsButton_Click"
-                            Content="Advanced settings"
-                            IsEnabled="{Binding FindAndReplaceEnabled}" />
-
-                        <Button
-                            x:Name="TemplateSubstitutionButton"
-                            HorizontalAlignment="Stretch"
-                            Click="TemplateSubstitutionButton_Click"
-                            Content="Template substitution"
-                            IsEnabled="{Binding FindAndReplaceEnabled}" />
-
-                        </StackPanel>
-
-                        <CheckBox
-                            Margin="20,0,0,0"
-                            Content="Skip if no replacement is made"
-                            IsChecked="{Binding SkipIfNoReplacement}"
-                            IsEnabled="{Binding FindAndReplaceEnabled}" />
-
-                        <CheckBox
-                            Margin="20,0,0,0"
-                            Content="Skip if only minor replacements are made"
-                            IsChecked="{Binding SkipIfOnlyMinorReplacement}"
-                            IsEnabled="{Binding FindAndReplaceEnabled}" />
-
-                    <Separator Margin="0,4" />
-
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Regex typo fixing" />
-
-                    <CheckBox
-                        Content="Enable regex typo fixing"
-                        IsChecked="{Binding EnableTypoCorrection}" />
-
-                    <CheckBox
-                        Margin="20,0,0,0"
-                        Content="Skip if no typo fixed"
-                        IsChecked="{Binding SkipIfNoRegexTypo}"
-                        IsEnabled="{Binding EnableTypoCorrection}" />
-
-                </StackPanel>
-
-            </ScrollViewer>
-        </TabItem>
-
-        <!-- More -->
-        <TabItem Header="More">
-            <ScrollViewer
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto">
-
-                <StackPanel
-                    MaxWidth="460"
-                    Margin="12"
-                    HorizontalAlignment="Left"
-                    Spacing="{DynamicResource TwainSpacingLarge}">
-
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Append/Prepend" />
-
-                    <CheckBox
-                        Content="Enabled"
-                        IsChecked="{Binding AppendPrependEnabled}" />
-
-                    <StackPanel
-                        Margin="20,0,0,0"
-                        Orientation="Horizontal"
-                        Spacing="{DynamicResource TwainSpacingLarge}">
-
-                        <RadioButton
-                            Content="Append"
-                            GroupName="AppendPrepend"
-                            IsChecked="{Binding AppendText}"
-                            IsEnabled="{Binding AppendPrependEnabled}" />
-
-                        <RadioButton
-                            Content="Prepend"
-                            GroupName="AppendPrepend"
-                            IsEnabled="{Binding AppendPrependEnabled}" />
+                        <CheckBox Content="Minor edit" IsChecked="{Binding MinorEdit}"/>
 
                     </StackPanel>
 
-                    <TextBox
-                        AcceptsReturn="True"
-                        MinHeight="80"
-                        IsEnabled="{Binding AppendPrependEnabled}"
-                        Text="{Binding AppendPrependText}"
-                        TextWrapping="Wrap"
-                        Watermark="Message, including title in wiki format" />
+                        <Separator/>
 
-                    <StackPanel
-                        Margin="20,0,0,0"
-                        Orientation="Horizontal"
-                        Spacing="{DynamicResource TwainSpacingSmall}">
+                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Processing"/>
 
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            IsEnabled="{Binding AppendPrependEnabled}"
-                            Text="Use" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-                        <NumericUpDown
-                            Width="110"
-                            Minimum="0"
-                            Maximum="3"
-                            IsEnabled="{Binding AppendPrependEnabled}"
-                            Value="{Binding AppendNewlineCount}" />
+                        <Button x:Name="StartButton" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Command="{Binding StartProcessingCommand}" Content="Start" IsEnabled="{Binding IsStartEnabled}"/>
 
-                         <CheckBox
-                            Margin="20,0,0,0"
-                            Content="Sort meta data after"
-                            IsChecked="{Binding SortMetadataAfterAppend}"
-                            IsEnabled="{Binding AppendPrependEnabled}" />
+                            <Button x:Name="StopButton" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Content="Stop"/>
 
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            IsEnabled="{Binding AppendPrependEnabled}"
-                            Text="newlines" />
+                            <Button x:Name="PreviewButton" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" Content="Preview"/>
 
-                    </StackPanel>
+                            <Button x:Name="DiffButton" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" Content="Diff"/>
 
-                    <Separator />
+                            <Button x:Name="DeleteButton" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" Content="Delete" IsEnabled="{Binding CanDeleteCurrentPage}"/>
 
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Files" />
+                            <Button x:Name="MoveButton" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" Content="Move" IsEnabled="{Binding CanMoveCurrentPage}"/>
 
-                    <ComboBox
-                        SelectedIndex="{Binding FileOperation}">
-                        <ComboBoxItem Content="Choose a task..." />
-                        <ComboBoxItem Content="Replace file:" />
-                        <ComboBoxItem Content="Remove file:" />
-                        <ComboBoxItem Content="Comment out file:" />
-                    </ComboBox>
+                            <Button x:Name="ProtectButton" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Stretch" Content="Protect" IsEnabled="{Binding CanProtectCurrentPage}"/>
 
-                    <Grid
-                        ColumnDefinitions="Auto,*"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                        RowDefinitions="Auto,Auto"
-                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+                            <Button x:Name="WatchButton" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch" Content="Watch"/>
 
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="File:" />
-
-                        <TextBox
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            IsEnabled="{Binding IsFileReplaceEnabled}"
-                            Text="{Binding FileReplace}" />
-
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            IsEnabled="{Binding IsFileWithEnabled}"
-                            Text="{Binding FileWithLabel}" />
-
-                        <TextBox
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            IsEnabled="{Binding IsFileWithEnabled}"
-                            Text="{Binding FileWith}" />
-
-                    </Grid>
-
-                    <CheckBox
-                        Margin="20,0,0,0"
-                        Content="Skip if no file changed"
-                        IsChecked="{Binding SkipIfNoFileChange}"
-                        IsEnabled="{Binding IsSkipIfNoFileChangeEnabled}" />
-
-                    <Separator />
-
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Categories" />
-
-                    <ComboBox
-                        SelectedIndex="{Binding CategoryOperation}">
-                        <ComboBoxItem Content="Choose a task..." />
-                        <ComboBoxItem Content="Replace category:" />
-                        <ComboBoxItem Content="Add category:" />
-                        <ComboBoxItem Content="Remove category:" />
-                    </ComboBox>
-
-                    <Grid
-                        ColumnDefinitions="Auto,*"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                        RowDefinitions="Auto,Auto"
-                        RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            IsEnabled="{Binding IsCategoryEnabled}"
-                            Text="Category:" />
-
-                        <TextBox
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            IsEnabled="{Binding IsCategoryEnabled}"
-                            Text="{Binding Category}" />
-
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            IsEnabled="{Binding IsCategoryReplacementEnabled}"
-                            Text="{Binding CategoryReplacementLabel}" />
-
-                        <TextBox
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            IsEnabled="{Binding IsCategoryReplacementEnabled}"
-                            Text="{Binding CategoryReplacement}" />
-
-                    </Grid>
-
-                    <StackPanel
-                        Margin="20,0,0,0"
-                        Orientation="Horizontal"
-                        Spacing="{DynamicResource TwainSpacingLarge}">
-
-                        <CheckBox
-                            Content="Skip if no cat changed"
-                            IsChecked="{Binding SkipIfNoCategoryChange}"
-                            IsEnabled="{Binding IsCategoryEnabled}" />
-
-                        <CheckBox
-                            Content="Remove sortkey"
-                            IsChecked="{Binding RemoveCategorySortKey}"
-                            IsEnabled="{Binding IsCategoryReplacementEnabled}" />
-
-                    </StackPanel>
-
-                </StackPanel>
-
-            </ScrollViewer>
-        </TabItem>
-
-        <!-- Disambig -->
-        <TabItem Header="Disambig">
-            <ScrollViewer
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto">
-
-                <StackPanel
-                    MaxWidth="460"
-                    Margin="12"
-                    HorizontalAlignment="Left"
-                    Spacing="{DynamicResource TwainSpacingLarge}">
-
-                    <CheckBox
-                        Content="Enable disambiguation"
-                        IsChecked="{Binding DisambiguationEnabled}" />
-
-                    <StackPanel
-                        Margin="20,0,0,0"
-                        IsEnabled="{Binding DisambiguationEnabled}"
-                        Spacing="{DynamicResource TwainSpacingLarge}">
-
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Link to disambiguate" />
-
-                        <Grid
-                            ColumnDefinitions="*,Auto"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                        <TextBox
-                            Grid.Column="0"
-                            GotFocus="DisambiguationLinkTextBox_GotFocus"
-                            KeyDown="DisambiguationLinkTextBox_KeyDown"
-                            Text="{Binding DisambiguationLink}" />
-
-                            <Button
-                                x:Name="LoadDisambiguationLinksButton"
-                                Grid.Column="1"
-                                Click="LoadDisambiguationLinksButton_Click"
-                                Content="Load links"
-                                IsEnabled="{Binding CanLoadDisambiguationLinks}" />
+                            <Button x:Name="FalsePositiveButton" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Stretch" Content="False Positive" IsVisible="{Binding ShowFalsePositiveAction}"/>
 
                         </Grid>
 
-                        <Separator />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Variants" />
+                            <Button x:Name="SkipButton" Grid.Column="0" HorizontalAlignment="Stretch" FontWeight="SemiBold" Content="Skip"/>
 
-                        <TextBox
-                            AcceptsReturn="True"
-                            MinHeight="180"
-                            Text="{Binding DisambiguationVariants}"
-                            TextWrapping="NoWrap" />
+                            <Button x:Name="SaveButton" Grid.Column="1" HorizontalAlignment="Stretch" FontWeight="SemiBold" Content="Save" IsEnabled="{Binding IsSaveEnabled}"/>
 
-                        <CheckBox
-                            Content="Skip page when no disambiguations made"
-                            IsChecked="{Binding SkipIfNoDisambiguation}" />
+                        </Grid>
+                     
+                        <Separator/>
 
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="{DynamicResource TwainSpacingSmall}">
+                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Find"/>
 
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="Use ±" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-                            <NumericUpDown
-                                Width="110"
-                                Minimum="10"
-                                Value="{Binding DisambiguationContextCharacters}" />
+                            <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding FindText}" Watermark="Text to find"/>
 
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="characters for context" />
+                            <Button x:Name="FindButton" Grid.Row="0" Grid.Column="1" Command="{Binding FindNextCommand}" Content="Find" IsEnabled="{Binding CanFind}"/>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingLarge}">
+
+                                <CheckBox Content="Regex" IsChecked="{Binding FindRegex}"/>
+
+                                <CheckBox Content="Case sensitive" IsChecked="{Binding FindCaseSensitive}"/>
+
+                            </StackPanel>
+
+                        </Grid>
+
+                        <Separator/>
+
+                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page statistics"/>
+
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Words:"/>
+
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding WordCount}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Links:"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LinkCount}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Images:"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ImageCount}"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Categories:"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CategoryCount}"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Interwiki links:"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding InterwikiLinkCount}"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Dates O/I/A:"/>
+
+                            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingSmall}">
+
+                                <TextBlock Text="{Binding IsoDateCount}"/>
+                                <TextBlock Text="/"/>
+                                <TextBlock Text="{Binding InternationalDateCount}"/>
+                                <TextBlock Text="/"/>
+                                <TextBlock Text="{Binding AmericanDateCount}"/>
+
+                            </StackPanel>
+
+                           </Grid>
+
+                           <Separator/>
+
+                            <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Alerts"/>
+
+                            <ListBox x:Name="AlertsListBox" MinHeight="100" ItemsSource="{Binding Alerts}"/>
+
+                            <StackPanel IsVisible="{Binding HasDuplicateWikilinks}" Spacing="{DynamicResource TwainSpacingSmall}">
+
+                                <TextBlock FontWeight="SemiBold" Text="Duplicate wikilinks"/>
+
+                                <ListBox x:Name="DuplicateWikilinksListBox" MinHeight="80" ItemsSource="{Binding DuplicateWikilinks}"/>
+
+                                <Button x:Name="RemoveWikilinkButton" HorizontalAlignment="Left" Content="Delink"/>
+
+                            </StackPanel>
+
+                    </StackPanel>
+
+                </Expander><Expander Header="Options" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
+
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Automatic changes"/>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                        <StackPanel Grid.Column="0" Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <CheckBox Content="Auto tag" IsChecked="{Binding AutoTag}"/>
+
+                            <CheckBox Content="Apply general fixes" IsChecked="{Binding ApplyGeneralFixes}"/>
+
+                            <CheckBox Content="Unicodify whole page" IsChecked="{Binding UnicodifyWholePage}"/>
 
                         </StackPanel>
 
-                    </StackPanel>
+                            <Button x:Name="AutoChangesSkipOptionsButton" Grid.Column="1" VerticalAlignment="Center" Click="AutoChangesSkipOptionsButton_Click" Content="Auto changes&#10;skip options"/>
+
+                    </Grid>
+
+                    <Separator Margin="0,4"/>
+
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Find and replace"/>
+
+                    <CheckBox Content="Enable find and replace" IsChecked="{Binding FindAndReplaceEnabled}"/>
+
+                        <StackPanel Margin="20,0,0,0" Spacing="{DynamicResource TwainSpacingSmall}">
+
+                        <Button x:Name="FindReplaceNormalSettingsButton" HorizontalAlignment="Stretch" Click="FindReplaceNormalSettingsButton_Click" Content="Normal settings" IsEnabled="{Binding FindAndReplaceEnabled}"/>
+
+                        <Button x:Name="FindReplaceAdvancedSettingsButton" HorizontalAlignment="Stretch" Click="FindReplaceAdvancedSettingsButton_Click" Content="Advanced settings" IsEnabled="{Binding FindAndReplaceEnabled}"/>
+
+                        <Button x:Name="TemplateSubstitutionButton" HorizontalAlignment="Stretch" Click="TemplateSubstitutionButton_Click" Content="Template substitution" IsEnabled="{Binding FindAndReplaceEnabled}"/>
+
+                        </StackPanel>
+
+                        <CheckBox Margin="20,0,0,0" Content="Skip if no replacement is made" IsChecked="{Binding SkipIfNoReplacement}" IsEnabled="{Binding FindAndReplaceEnabled}"/>
+
+                        <CheckBox Margin="20,0,0,0" Content="Skip if only minor replacements are made" IsChecked="{Binding SkipIfOnlyMinorReplacement}" IsEnabled="{Binding FindAndReplaceEnabled}"/>
+
+                    <Separator Margin="0,4"/>
+
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Regex typo fixing"/>
+
+                    <CheckBox Content="Enable regex typo fixing" IsChecked="{Binding EnableTypoCorrection}"/>
+
+                    <CheckBox Margin="20,0,0,0" Content="Skip if no typo fixed" IsChecked="{Binding SkipIfNoRegexTypo}" IsEnabled="{Binding EnableTypoCorrection}"/>
 
                 </StackPanel>
 
-            </ScrollViewer>
-        </TabItem>
+            </Expander><Expander Header="Skip" HorizontalAlignment="Stretch" IsExpanded="False" x:Name="SkipExpander"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Skip -->
-        <TabItem Header="Skip">
-            <ScrollViewer
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto">
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Text"/>
 
-                <StackPanel
-                    MaxWidth="460"
-                    Margin="12"
-                    HorizontalAlignment="Left"
-                    Spacing="{DynamicResource TwainSpacingLarge}">
-
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Text" />
-
-                    <Grid
-                        ColumnDefinitions="Auto,*,Auto,Auto,Auto"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                        RowDefinitions="Auto,Auto"
-                        RowSpacing="{DynamicResource TwainSpacingMedium}">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                         <!-- Contains -->
-                        <CheckBox
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Content="Contains"
-                            IsChecked="{Binding SkipIfContainsEnabled}" />
+                        <CheckBox Grid.Row="0" Grid.Column="0" Content="Contains" IsChecked="{Binding SkipIfContainsEnabled}"/>
 
-                        <TextBox
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            IsEnabled="{Binding SkipIfContainsEnabled}"
-                            Text="{Binding SkipIfContainsText}" />
+                        <TextBox Grid.Row="0" Grid.Column="1" IsEnabled="{Binding SkipIfContainsEnabled}" Text="{Binding SkipIfContainsText}"/>
 
-                        <CheckBox
-                            Grid.Row="0"
-                            Grid.Column="2"
-                            Content="Regex"
-                            IsChecked="{Binding SkipIfContainsRegex}"
-                            IsEnabled="{Binding SkipIfContainsEnabled}" />
+                        <CheckBox Grid.Row="0" Grid.Column="2" Content="Regex" IsChecked="{Binding SkipIfContainsRegex}" IsEnabled="{Binding SkipIfContainsEnabled}"/>
 
-                        <CheckBox
-                            Grid.Row="0"
-                            Grid.Column="3"
-                            Content="Case sensitive"
-                            IsChecked="{Binding SkipIfContainsCaseSensitive}"
-                            IsEnabled="{Binding SkipIfContainsEnabled}" />
+                        <CheckBox Grid.Row="0" Grid.Column="3" Content="Case sensitive" IsChecked="{Binding SkipIfContainsCaseSensitive}" IsEnabled="{Binding SkipIfContainsEnabled}"/>
 
-                        <CheckBox
-                            Grid.Row="0"
-                            Grid.Column="4"
-                            Content="After processing"
-                            IsChecked="{Binding SkipIfContainsAfterProcessing}"
-                            IsEnabled="{Binding SkipIfContainsEnabled}" />
+                        <CheckBox Grid.Row="0" Grid.Column="4" Content="After processing" IsChecked="{Binding SkipIfContainsAfterProcessing}" IsEnabled="{Binding SkipIfContainsEnabled}"/>
 
                         <!-- Doesn't contain -->
-                        <CheckBox
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            Content="Doesn't contain"
-                            IsChecked="{Binding SkipIfNotContainsEnabled}" />
+                        <CheckBox Grid.Row="1" Grid.Column="0" Content="Doesn't contain" IsChecked="{Binding SkipIfNotContainsEnabled}"/>
 
-                        <TextBox
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            IsEnabled="{Binding SkipIfNotContainsEnabled}"
-                            Text="{Binding SkipIfNotContainsText}" />
+                        <TextBox Grid.Row="1" Grid.Column="1" IsEnabled="{Binding SkipIfNotContainsEnabled}" Text="{Binding SkipIfNotContainsText}"/>
 
-                        <CheckBox
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Content="Regex"
-                            IsChecked="{Binding SkipIfNotContainsRegex}"
-                            IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+                        <CheckBox Grid.Row="1" Grid.Column="2" Content="Regex" IsChecked="{Binding SkipIfNotContainsRegex}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
 
-                        <CheckBox
-                            Grid.Row="1"
-                            Grid.Column="3"
-                            Content="Case sensitive"
-                            IsChecked="{Binding SkipIfNotContainsCaseSensitive}"
-                            IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+                        <CheckBox Grid.Row="1" Grid.Column="3" Content="Case sensitive" IsChecked="{Binding SkipIfNotContainsCaseSensitive}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
 
-                        <CheckBox
-                            Grid.Row="1"
-                            Grid.Column="4"
-                            Content="After processing"
-                            IsChecked="{Binding SkipIfNotContainsAfterProcessing}"
-                            IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+                        <CheckBox Grid.Row="1" Grid.Column="4" Content="After processing" IsChecked="{Binding SkipIfNotContainsAfterProcessing}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
 
                     </Grid>
 
-                    <Separator />
+                    <Separator/>
 
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="General skip options" />
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="General skip options"/>
 
-                    <Grid
-                        ColumnDefinitions="*,*"
-                        ColumnSpacing="{DynamicResource TwainSpacingLarge}"
-                        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                        RowSpacing="{DynamicResource TwainSpacingSmall}">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingLarge}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-                        <CheckBox
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Content="Page is in use"
-                            IsChecked="{Binding SkipIfInUse}" />
+                        <CheckBox Grid.Row="0" Grid.Column="0" Content="Page is in use" IsChecked="{Binding SkipIfInUse}"/>
 
-                        <CheckBox
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Content="Edit blocked by spam filter"
-                            IsChecked="{Binding SkipIfSpamFilterBlocked}" />
+                        <CheckBox Grid.Row="0" Grid.Column="1" Content="Edit blocked by spam filter" IsChecked="{Binding SkipIfSpamFilterBlocked}"/>
 
-                        <CheckBox
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            Content="Page contains no links"
-                            IsChecked="{Binding SkipPagesWithNoLinks}" />
+                        <CheckBox Grid.Row="1" Grid.Column="0" Content="Page contains no links" IsChecked="{Binding SkipPagesWithNoLinks}"/>
 
-                        <CheckBox
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Content="No changes are made"
-                            IsChecked="{Binding SkipNoChanges}" />
+                        <CheckBox Grid.Row="1" Grid.Column="1" Content="No changes are made" IsChecked="{Binding SkipNoChanges}"/>
 
-                        <CheckBox
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            Margin="18,0,0,0"
-                            Content="Only whitespace"
-                            IsChecked="{Binding SkipWhitespaceChanges}" />
+                        <CheckBox Grid.Row="2" Grid.Column="0" Margin="18,0,0,0" Content="Only whitespace" IsChecked="{Binding SkipWhitespaceChanges}"/>
 
-                        <CheckBox
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Content="Only casing"
-                            IsChecked="{Binding SkipCasingChanges}" />
+                        <CheckBox Grid.Row="2" Grid.Column="1" Content="Only casing" IsChecked="{Binding SkipCasingChanges}"/>
 
-                        <CheckBox
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            Margin="18,0,0,0"
-                            Content="Only genfixes"
-                            IsChecked="{Binding SkipGeneralFixChanges}" />
+                        <CheckBox Grid.Row="3" Grid.Column="0" Margin="18,0,0,0" Content="Only genfixes" IsChecked="{Binding SkipGeneralFixChanges}"/>
 
-                        <CheckBox
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Content="Only minor genfixes"
-                            IsChecked="{Binding SkipMinorGeneralFixChanges}"
-                            IsEnabled="{Binding !SkipGeneralFixChanges}" />
+                        <CheckBox Grid.Row="3" Grid.Column="1" Content="Only minor genfixes" IsChecked="{Binding SkipMinorGeneralFixChanges}" IsEnabled="{Binding !SkipGeneralFixChanges}"/>
 
-                        <CheckBox
-                            Grid.Row="4"
-                            Grid.Column="0"
-                            Content="Page is redirect"
-                            IsChecked="{Binding SkipRedirects}" />
+                        <CheckBox Grid.Row="4" Grid.Column="0" Content="Page is redirect" IsChecked="{Binding SkipRedirects}"/>
 
-                        <CheckBox
-                            Grid.Row="4"
-                            Grid.Column="1"
-                            Content="No alerts"
-                            IsChecked="{Binding SkipIfNoAlerts}" />
+                        <CheckBox Grid.Row="4" Grid.Column="1" Content="No alerts" IsChecked="{Binding SkipIfNoAlerts}"/>
 
-                        <CheckBox
-                            Grid.Row="5"
-                            Grid.Column="0"
-                            Content="Only cosmetic changes"
-                            IsChecked="{Binding SkipCosmeticChanges}" />
+                        <CheckBox Grid.Row="5" Grid.Column="0" Content="Only cosmetic changes" IsChecked="{Binding SkipCosmeticChanges}"/>
 
                     </Grid>
 
-                    <Separator />
+                    <Separator/>
 
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Page existence" />
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page existence"/>
 
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Spacing="{DynamicResource TwainSpacingMedium}">
+                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingMedium}">
 
-                    <RadioButton
-                        Content="Exists"
-                        GroupName="PageExistence"
-                        Tag="0"
-                        IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
+                    <RadioButton Content="Exists" GroupName="PageExistence" Tag="0" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
 
-                    <RadioButton
-                        Content="Doesn't exist"
-                        GroupName="PageExistence"
-                        IsChecked="True"
-                        Tag="1"
-                        IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
+                    <RadioButton Content="Doesn't exist" GroupName="PageExistence" IsChecked="True" Tag="1" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
 
-                    <RadioButton
-                        Content="Don't care"
-                        GroupName="PageExistence"
-                        Tag="2"
-                        IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
+                    <RadioButton Content="Don't care" GroupName="PageExistence" Tag="2" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
 
-                        <Separator />
+                        <Separator/>
 
                     </StackPanel>
 
-                    <Separator />
+                    <Separator/>
 
-                    <TextBlock
-                        FontSize="{DynamicResource TwainFontSizeMedium}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="Auto changes skip options" />
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Auto changes skip options"/>
 
                     <ItemsControl ItemsSource="{Binding AutoChangeSkipOptions}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <CheckBox
-                                    Margin="0,2"
-                                    Content="{Binding Description}"
-                                    IsChecked="{Binding IsSelected}" />
+                                <CheckBox Margin="0,2" Content="{Binding Description}" IsChecked="{Binding IsSelected}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
                 </StackPanel>
 
-            </ScrollViewer>
-        </TabItem>
+            </Expander><Expander Header="More" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Start -->
-        <TabItem Header="Start">
-            <ScrollViewer
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto">
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Append/Prepend"/>
 
-                <StackPanel
-                    MaxWidth="460"
-                    Margin="12"
-                    HorizontalAlignment="Left"
-                    Spacing="{DynamicResource TwainSpacingLarge}">
+                    <CheckBox Content="Enabled" IsChecked="{Binding AppendPrependEnabled}"/>
 
-                    <Grid
-                        ColumnDefinitions="Auto,*"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                    <StackPanel Margin="20,0,0,0" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingLarge}">
 
-                        <TextBlock
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="Default Summary" />
+                        <RadioButton Content="Append" GroupName="AppendPrepend" IsChecked="{Binding AppendText}" IsEnabled="{Binding AppendPrependEnabled}"/>
 
-                        <ComboBox
-                            Grid.Column="1"
-                            IsEditable="True"
-                            IsVisible="{Binding !EditSummaryLocked}"
-                            Text="{Binding EditSummary}" />
+                        <RadioButton Content="Prepend" GroupName="AppendPrepend" IsEnabled="{Binding AppendPrependEnabled}"/>
 
-                        <TextBlock
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            IsVisible="{Binding EditSummaryLocked}"
-                            Text="{Binding EditSummary}" />
+                    </StackPanel>
+
+                    <TextBox AcceptsReturn="True" MinHeight="80" IsEnabled="{Binding AppendPrependEnabled}" Text="{Binding AppendPrependText}" TextWrapping="Wrap" Watermark="Message, including title in wiki format"/>
+
+                    <StackPanel Margin="20,0,0,0" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock VerticalAlignment="Center" IsEnabled="{Binding AppendPrependEnabled}" Text="Use"/>
+
+                        <NumericUpDown Width="110" Minimum="0" Maximum="3" IsEnabled="{Binding AppendPrependEnabled}" Value="{Binding AppendNewlineCount}"/>
+
+                         <CheckBox Margin="20,0,0,0" Content="Sort meta data after" IsChecked="{Binding SortMetadataAfterAppend}" IsEnabled="{Binding AppendPrependEnabled}"/>
+
+                        <TextBlock VerticalAlignment="Center" IsEnabled="{Binding AppendPrependEnabled}" Text="newlines"/>
+
+                    </StackPanel>
+
+                    <Separator/>
+
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Files"/>
+
+                    <ComboBox SelectedIndex="{Binding FileOperation}">
+                        <ComboBoxItem Content="Choose a task..."/>
+                        <ComboBoxItem Content="Replace file:"/>
+                        <ComboBoxItem Content="Remove file:"/>
+                        <ComboBoxItem Content="Comment out file:"/>
+                    </ComboBox>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="File:"/>
+
+                        <TextBox Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsFileReplaceEnabled}" Text="{Binding FileReplace}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" IsEnabled="{Binding IsFileWithEnabled}" Text="{Binding FileWithLabel}"/>
+
+                        <TextBox Grid.Row="1" Grid.Column="1" IsEnabled="{Binding IsFileWithEnabled}" Text="{Binding FileWith}"/>
 
                     </Grid>
 
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Spacing="{DynamicResource TwainSpacingLarge}">
+                    <CheckBox Margin="20,0,0,0" Content="Skip if no file changed" IsChecked="{Binding SkipIfNoFileChange}" IsEnabled="{Binding IsSkipIfNoFileChangeEnabled}"/>
 
-                        <CheckBox
-                            Content="Lock"
-                            IsChecked="{Binding EditSummaryLocked}" />
+                    <Separator/>
 
-                        <CheckBox
-                            Content="Minor edit"
-                            IsChecked="{Binding MinorEdit}" />
+                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Categories"/>
 
-                    </StackPanel>
+                    <ComboBox SelectedIndex="{Binding CategoryOperation}">
+                        <ComboBoxItem Content="Choose a task..."/>
+                        <ComboBoxItem Content="Replace category:"/>
+                        <ComboBoxItem Content="Add category:"/>
+                        <ComboBoxItem Content="Remove category:"/>
+                    </ComboBox>
 
-                        <Separator />
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Processing" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" IsEnabled="{Binding IsCategoryEnabled}" Text="Category:"/>
 
-                        <Grid
-                            ColumnDefinitions="*,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                            RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingSmall}">
+                        <TextBox Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsCategoryEnabled}" Text="{Binding Category}"/>
 
-                        <Button
-                            x:Name="StartButton"
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Grid.ColumnSpan="2"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding StartProcessingCommand}"
-                            Content="Start"
-                            IsEnabled="{Binding IsStartEnabled}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" IsEnabled="{Binding IsCategoryReplacementEnabled}" Text="{Binding CategoryReplacementLabel}"/>
 
-                            <Button
-                                x:Name="StopButton"
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="2"
-                                HorizontalAlignment="Stretch"
-                                Content="Stop" />
+                        <TextBox Grid.Row="1" Grid.Column="1" IsEnabled="{Binding IsCategoryReplacementEnabled}" Text="{Binding CategoryReplacement}"/>
 
-                            <Button
-                                x:Name="PreviewButton"
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                Content="Preview" />
+                    </Grid>
 
-                            <Button
-                                x:Name="DiffButton"
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                HorizontalAlignment="Stretch"
-                                Content="Diff" />
+                    <StackPanel Margin="20,0,0,0" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingLarge}">
 
-                            <Button
-                                x:Name="DeleteButton"
-                                Grid.Row="3"
-                                Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                Content="Delete"
-                                IsEnabled="{Binding CanDeleteCurrentPage}" />
+                        <CheckBox Content="Skip if no cat changed" IsChecked="{Binding SkipIfNoCategoryChange}" IsEnabled="{Binding IsCategoryEnabled}"/>
 
-                            <Button
-                                x:Name="MoveButton"
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                HorizontalAlignment="Stretch"
-                                Content="Move"
-                                IsEnabled="{Binding CanMoveCurrentPage}" />
-
-                            <Button
-                                x:Name="ProtectButton"
-                                Grid.Row="4"
-                                Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                Content="Protect"
-                                IsEnabled="{Binding CanProtectCurrentPage}" />
-
-                            <Button
-                                x:Name="WatchButton"
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                HorizontalAlignment="Stretch"
-                                Content="Watch" />
-
-                            <Button
-                                x:Name="FalsePositiveButton"
-                                Grid.Row="5"
-                                Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                Content="False Positive"
-                                IsVisible="{Binding ShowFalsePositiveAction}" />
-
-                        </Grid>
-
-                        <Grid
-                            ColumnDefinitions="*,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                            <Button
-                                x:Name="SkipButton"
-                                Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                FontWeight="SemiBold"
-                                Content="Skip" />
-
-                            <Button
-                                x:Name="SaveButton"
-                                Grid.Column="1"
-                                HorizontalAlignment="Stretch"
-                                FontWeight="SemiBold"
-                                Content="Save"
-                                IsEnabled="{Binding IsSaveEnabled}" />
-
-                        </Grid>
-                     
-                        <Separator />
-
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Find" />
-
-                        <Grid
-                            ColumnDefinitions="*,Auto"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                            RowDefinitions="Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                            <TextBox
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Text="{Binding FindText}"
-                                Watermark="Text to find" />
-
-                            <Button
-                                x:Name="FindButton"
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Command="{Binding FindNextCommand}"
-                                Content="Find"
-                                IsEnabled="{Binding CanFind}" />
-
-                            <StackPanel
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="2"
-                                Orientation="Horizontal"
-                                Spacing="{DynamicResource TwainSpacingLarge}">
-
-                                <CheckBox
-                                    Content="Regex"
-                                    IsChecked="{Binding FindRegex}" />
-
-                                <CheckBox
-                                    Content="Case sensitive"
-                                    IsChecked="{Binding FindCaseSensitive}" />
-
-                            </StackPanel>
-
-                        </Grid>
-
-                        <Separator />
-
-                        <TextBlock
-                            FontSize="{DynamicResource TwainFontSizeMedium}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="Page statistics" />
-
-                        <Grid
-                            ColumnDefinitions="Auto,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                            RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                            RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Text="Words:" />
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Text="{Binding WordCount}" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="Links:" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding LinkCount}" />
-
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Text="Images:" />
-
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Text="{Binding ImageCount}" />
-
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="0"
-                                Text="Categories:" />
-
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Text="{Binding CategoryCount}" />
-
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="0"
-                                Text="Interwiki links:" />
-
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Text="{Binding InterwikiLinkCount}" />
-
-                            <TextBlock
-                                Grid.Row="5"
-                                Grid.Column="0"
-                                Text="Dates O/I/A:" />
-
-                            <StackPanel
-                                Grid.Row="5"
-                                Grid.Column="1"
-                                Orientation="Horizontal"
-                                Spacing="{DynamicResource TwainSpacingSmall}">
-
-                                <TextBlock Text="{Binding IsoDateCount}" />
-                                <TextBlock Text="/" />
-                                <TextBlock Text="{Binding InternationalDateCount}" />
-                                <TextBlock Text="/" />
-                                <TextBlock Text="{Binding AmericanDateCount}" />
-
-                            </StackPanel>
-
-                           </Grid>
-
-                           <Separator />
-
-                            <TextBlock
-                                FontSize="{DynamicResource TwainFontSizeMedium}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                                Text="Alerts" />
-
-                            <ListBox
-                                x:Name="AlertsListBox"
-                                MinHeight="100"
-                                ItemsSource="{Binding Alerts}" />
-
-                            <StackPanel
-                                IsVisible="{Binding HasDuplicateWikilinks}"
-                                Spacing="{DynamicResource TwainSpacingSmall}">
-
-                                <TextBlock
-                                    FontWeight="SemiBold"
-                                    Text="Duplicate wikilinks" />
-
-                                <ListBox
-                                    x:Name="DuplicateWikilinksListBox"
-                                    MinHeight="80"
-                                    ItemsSource="{Binding DuplicateWikilinks}" />
-
-                                <Button
-                                    x:Name="RemoveWikilinkButton"
-                                    HorizontalAlignment="Left"
-                                    Content="Delink" />
-
-                            </StackPanel>
+                        <CheckBox Content="Remove sortkey" IsChecked="{Binding RemoveCategorySortKey}" IsEnabled="{Binding IsCategoryReplacementEnabled}"/>
 
                     </StackPanel>
 
-                </ScrollViewer>
-            </TabItem>
+                </StackPanel>
 
-        </TabControl>
+            </Expander><Expander Header="Disambig" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
-    </Grid>
+                    <CheckBox Content="Enable disambiguation" IsChecked="{Binding DisambiguationEnabled}"/>
+
+                    <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
+
+                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Link to disambiguate"/>
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                        <TextBox Grid.Column="0" GotFocus="DisambiguationLinkTextBox_GotFocus" KeyDown="DisambiguationLinkTextBox_KeyDown" Text="{Binding DisambiguationLink}"/>
+
+                            <Button x:Name="LoadDisambiguationLinksButton" Grid.Column="1" Click="LoadDisambiguationLinksButton_Click" Content="Load links" IsEnabled="{Binding CanLoadDisambiguationLinks}"/>
+
+                        </Grid>
+
+                        <Separator/>
+
+                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Variants"/>
+
+                        <TextBox AcceptsReturn="True" MinHeight="180" Text="{Binding DisambiguationVariants}" TextWrapping="NoWrap"/>
+
+                        <CheckBox Content="Skip page when no disambiguations made" IsChecked="{Binding SkipIfNoDisambiguation}"/>
+
+                        <StackPanel Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <TextBlock VerticalAlignment="Center" Text="Use ±"/>
+
+                            <NumericUpDown Width="110" Minimum="10" Value="{Binding DisambiguationContextCharacters}"/>
+
+                            <TextBlock VerticalAlignment="Center" Text="characters for context"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </StackPanel>
+
+            </Expander></StackPanel></ScrollViewer></Grid>
 
 </UserControl>
