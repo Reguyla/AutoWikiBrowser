@@ -38,31 +38,83 @@
     ColumnDefinitions="220,8,*"
     RowDefinitions="*,Auto" >
 
-    <!--
-    Left navigation.
 
-    This will replace the traditional File/Edit/View/Tools/Help menu
-    structure and provide access to editing, options, settings, tools,
-    plugins, diagnostics, and help.
-    -->
+<!-- Left navigation -->
 
-    <Border
-        Grid.Row="0"
-        Grid.RowSpan="2"
-        Grid.Column="0"
-        Padding="12"
-        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-        BorderThickness="0,0,1,0">
+<Border
+    Grid.Row="0"
+    Grid.RowSpan="2"
+    Grid.Column="0"
+    Padding="12"
+    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+    BorderThickness="0,0,1,0">
 
-        <Border.Styles>
-            <Style Selector="Button">
-                <Setter Property="MaxWidth" Value="200" />
-                <Setter Property="HorizontalAlignment" Value="Stretch" />
-                <Setter Property="HorizontalContentAlignment" Value="Left" />
-            </Style>
-        </Border.Styles>
 
-        <StackPanel Spacing="8">
+    <Border.Styles>
+
+        <!-- Standard navigation buttons -->
+        <Style Selector="Button">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
+
+        <!-- Selectable navigation buttons -->
+        <Style Selector="ToggleButton">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!-- Hover: subtle surface highlight -->
+        <Style Selector="ToggleButton:pointerover">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainSurfaceBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainBorderBrush}" />
+        </Style>
+
+        <!-- Pressed: stronger accent -->
+        <Style Selector="ToggleButton:pressed">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainAccentPressedBrush}" />
+        </Style>
+
+        <!-- Selected: persistent navigation highlight -->
+        <Style Selector="ToggleButton:checked">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainAccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!-- Selected and hovered: preserve selection -->
+        <Style Selector="ToggleButton:checked:pointerover">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainAccentHoverBrush}" />
+        </Style>
+
+        <!-- Shared navigation icons -->
+        <Style Selector="PathIcon">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+    </Border.Styles>
+
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+
+        <StackPanel Spacing="6">
 
             <TextBlock
                 Margin="4,4,4,12"
@@ -71,126 +123,160 @@
                 Foreground="{DynamicResource TwainTextPrimaryBrush}"
                 Text="Twain" />
 
-        <TextBlock
-                Margin="4,0,4,4"
+            <!-- Editing Options -->
+
+            <TextBlock
+                Margin="4,4,4,6"
                 FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
                 Text="Editing Options" />
 
-        <Button
-            HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Left"
-            Command="{Binding ShowEditingCommand}"
-            Content="Editing View" />
+            <ToggleButton Command="{Binding ShowEditingCommand}"
+                IsChecked="{Binding IsEditingVisible, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,4 L 20,4 L 20,20 L 4,20 Z M 8,8 L 16,8 M 8,12 L 16,12 M 8,16 L 13,16" />
+                    <TextBlock VerticalAlignment="Center" Text="Editing View" />
+                </StackPanel>
+            </ToggleButton>
 
-        <Button
-            HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Left"
-            Command="{Binding ShowOptionsCommand}"
-            Content="Options" />
+            <ToggleButton Command="{Binding ShowOptionsCommand}"
+                IsChecked="{Binding IsOptionsVisible, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,6 L 20,6 M 4,12 L 20,12 M 4,18 L 20,18 M 9,3 L 9,9 M 15,9 L 15,15 M 9,15 L 9,21" />
+                    <TextBlock VerticalAlignment="Center" Text="Options" />
+                </StackPanel>
+            </ToggleButton>
 
             <Separator Margin="0,8" />
 
+            <!-- User Settings -->
+
             <TextBlock
-                Margin="4,0,4,4"
+                Margin="4,0,4,6"
                 FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
                 Text="User Settings" />
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="ProfilesButton_Click"
-                Content="Profiles" />
+            <ToggleButton Click="ProfilesButton_Click"
+                IsChecked="{Binding IsProfilesVisible, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 12,3 A 4,4 0 1 1 12,11 A 4,4 0 1 1 12,3 M 4,21 L 4,18 C 4,13 20,13 20,18 L 20,21 Z" />
+                    <TextBlock VerticalAlignment="Center" Text="Profiles" />
+                </StackPanel>
+            </ToggleButton>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="PreferencesButton_Click"
-                Content="Preferences" />
+            <ToggleButton Click="PreferencesButton_Click"
+                IsChecked="{Binding IsPreferencesVisible, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 12,3 L 14,6 L 18,5 L 19,9 L 22,12 L 19,15 L 18,19 L 14,18 L 12,21 L 10,18 L 6,19 L 5,15 L 2,12 L 5,9 L 6,5 L 10,6 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9" />
+                    <TextBlock VerticalAlignment="Center" Text="Preferences" />
+                </StackPanel>
+            </ToggleButton>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="BotSettingsButton_Click"
-                Content="Bot settings" />
+            <ToggleButton Click="BotSettingsButton_Click"
+                IsChecked="{Binding IsBotSettingsVisible, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 5,7 L 19,7 L 19,19 L 5,19 Z M 12,3 L 12,7 M 8,11 L 10,11 L 10,13 L 8,13 Z M 14,11 L 16,11 L 16,13 L 14,13 Z M 9,16 L 15,16" />
+                    <TextBlock VerticalAlignment="Center" Text="Bot settings" />
+                </StackPanel>
+            </ToggleButton>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="OpenSettingsButton_Click"
-                Content="Open settings" />
+            <Button Click="OpenSettingsButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,3 L 15,3 L 20,8 L 20,21 L 4,21 Z M 14,3 L 14,9 L 20,9 M 8,14 L 16,14 M 8,18 L 16,18" />
+                    <TextBlock VerticalAlignment="Center" Text="Open settings" />
+                </StackPanel>
+            </Button>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="SaveSettingsButton_Click"
-                Content="Save settings" />
+            <Button Click="SaveSettingsButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,3 L 18,3 L 21,6 L 21,21 L 3,21 L 3,3 Z M 7,3 L 7,10 L 17,10 L 17,3 M 7,21 L 7,13 L 17,13 L 17,21" />
+                    <TextBlock VerticalAlignment="Center" Text="Save settings" />
+                </StackPanel>
+            </Button>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="SaveSettingsAsButton_Click"
-                Content="Save settings as..." />
+            <Button Click="SaveSettingsAsButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 3,3 L 18,3 L 21,6 L 21,21 L 3,21 Z M 7,3 L 7,10 L 17,10 L 17,3 M 7,21 L 7,13 L 17,13 L 17,21 M 16,12 L 22,18" />
+                    <TextBlock VerticalAlignment="Center" Text="Save settings as..." />
+                </StackPanel>
+            </Button>
 
             <Separator Margin="0,8" />
+
+            <!-- Tools -->
 
             <TextBlock
-                Margin="4,8,4,4"
+                Margin="4,0,4,6"
                 FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
                 Text="Tools" />
 
-             <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="CustomModulesButton_Click"
-                Content="Custom Modules" />
+            <ToggleButton Click="CustomModulesButton_Click"
+                IsChecked="{Binding IsCustomModulesVisible, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 8,5 L 3,12 L 8,19 M 16,5 L 21,12 L 16,19 M 14,3 L 10,21" />
+                    <TextBlock VerticalAlignment="Center" Text="Custom Modules" />
+                </StackPanel>
+            </ToggleButton>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="ListComparerButton_Click"
-                Content="List Comparer" />
+            <Button Click="ListComparerButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 3,4 L 10,4 L 10,20 L 3,20 Z M 14,4 L 21,4 L 21,20 L 14,20 Z M 5,9 L 8,9 M 16,9 L 19,9 M 5,14 L 8,14 M 16,14 L 19,14" />
+                    <TextBlock VerticalAlignment="Center" Text="List Comparer" />
+                </StackPanel>
+            </Button>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="ListSplitterButton_Click"
-                Content="List Splitter" />
+            <Button Click="ListSplitterButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,3 L 20,3 L 20,21 L 4,21 Z M 7,8 L 17,8 M 12,8 L 12,18 M 7,18 L 17,18" />
+                    <TextBlock VerticalAlignment="Center" Text="List Splitter" />
+                </StackPanel>
+            </Button>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="DatabaseScannerButton_Click"
-                Content="Database Scanner" />
+            <Button Click="DatabaseScannerButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,5 C 4,2 20,2 20,5 L 20,19 C 20,22 4,22 4,19 Z M 4,5 C 4,9 20,9 20,5 M 4,12 C 4,16 20,16 20,12" />
+                    <TextBlock VerticalAlignment="Center" Text="Database Scanner" />
+                </StackPanel>
+            </Button>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="ExternalProcessingButton_Click"
-                Content="External Processing" />
+            <Button Click="ExternalProcessingButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 4,5 L 14,5 L 14,9 M 4,19 L 14,19 L 14,15 M 11,12 L 21,12 M 17,8 L 21,12 L 17,16" />
+                    <TextBlock VerticalAlignment="Center" Text="External Processing" />
+                </StackPanel>
+            </Button>
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="RegexTesterButton_Click"
-                Content="Regex Tester" />
+            <Button Click="RegexTesterButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 5,5 L 19,5 L 19,19 L 5,19 Z M 8,10 L 11,13 L 8,16 M 13,16 L 17,16" />
+                    <TextBlock VerticalAlignment="Center" Text="Regex Tester" />
+                </StackPanel>
+            </Button>
 
             <Separator Margin="0,8" />
 
-            <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="AboutButton_Click"
-                Content="About" />
+            <!-- Application -->
 
-             <Button
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Left"
-                Click="ExitButton_Click"
-                Content="Exit" />
+            <Button Click="AboutButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 12,2 A 10,10 0 1 1 12,22 A 10,10 0 1 1 12,2 M 12,10 L 12,17 M 12,6 L 12,8" />
+                    <TextBlock VerticalAlignment="Center" Text="About" />
+                </StackPanel>
+            </Button>
+
+            <Button Click="ExitButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="M 10,4 L 4,4 L 4,20 L 10,20 M 13,7 L 19,12 L 13,17 M 8,12 L 19,12" />
+                    <TextBlock VerticalAlignment="Center" Text="Exit" />
+                </StackPanel>
+            </Button>
 
         </StackPanel>
+    </ScrollViewer>
+</Border>
 
-    </Border>
 
     <!-- Separator between navigation and workspace. -->
 
