@@ -62,6 +62,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(LoggedInUsername));
         OnPropertyChanged(nameof(LoginStatusText));
+        OnPropertyChanged(nameof(ActiveWikiText));
+        OnPropertyChanged(nameof(LoginButtonText));
     }
 
     /// <summary>
@@ -83,8 +85,45 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// </summary>
     public string LoginStatusText =>
         IsLoggedIn
-            ? LoggedInUsername
+            ? $"Logged in as {LoggedInUsername}"
             : "Not logged in";
+
+    /// <summary>
+    /// Gets the label for the authentication button.
+    /// </summary>
+    public string LoginButtonText =>
+        IsLoggedIn ? "Logout" : "Login";
+
+    /// <summary>
+    /// Gets the wiki associated with the authenticated session.
+    /// </summary>
+    public string ActiveWikiText
+    {
+        get
+        {
+            if (!IsLoggedIn)
+            {
+                return string.Empty;
+            }
+
+            string? wikiUrl = Session.Editor?.URL;
+
+            if (string.IsNullOrWhiteSpace(wikiUrl))
+            {
+                return string.Empty;
+            }
+
+            if (Uri.TryCreate(
+                    wikiUrl,
+                    UriKind.Absolute,
+                    out Uri? uri))
+            {
+                return uri.Authority;
+            }
+
+            return wikiUrl;
+        }
+    }
 
     /// <summary>
     /// Gets the active wiki session for the application.
@@ -270,6 +309,13 @@ public sealed partial class ShellViewModel : ViewModelBase
             Preferences.Project,
             Preferences.CustomProject,
             Preferences.Protocol);
+
+        Session.UpdateProject(true);
+
+        OnPropertyChanged(nameof(ActiveWikiText));
+        OnPropertyChanged(nameof(IsLoggedIn));
+        OnPropertyChanged(nameof(LoggedInUsername));
+        OnPropertyChanged(nameof(LoginStatusText));
     }
 
     /// <summary>

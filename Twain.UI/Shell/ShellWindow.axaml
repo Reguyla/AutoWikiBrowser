@@ -203,14 +203,54 @@
                     Orientation="Horizontal"
                     Spacing="8">
 
-                    <TextBlock
+                <StackPanel
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Spacing="8">
+
+                <!-- Authentication status indicator -->
+                <TextBlock
+                    x:Name="AuthenticationIndicator"
+                    Classes.logged-in="{Binding IsLoggedIn}"
+                    VerticalAlignment="Center"
+                    FontSize="18"
+                    FontWeight="Bold">
+
+                    <TextBlock.Styles>
+                        <Style Selector="TextBlock">
+                            <Setter Property="Text" Value="✕" />
+                            <Setter Property="Foreground" Value="#C62828" />
+                        </Style>
+
+                        <Style Selector="TextBlock.logged-in">
+                            <Setter Property="Text" Value="✓" />
+                            <Setter Property="Foreground" Value="#2E7D32" />
+                        </Style>
+                    </TextBlock.Styles>
+
+                </TextBlock>
+
+                    <!-- Existing authentication information -->
+                    <StackPanel
                         VerticalAlignment="Center"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Text="{Binding LoginStatusText}" />
+                        Spacing="2">
+
+                        <TextBlock
+                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                            Text="{Binding LoginStatusText}" />
+
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                            Text="{Binding ActiveWikiText}" />
+
+                    </StackPanel>
+
+                </StackPanel>
 
                     <Button
                         Click="LoginProfilesMenuItem_Click"
-                        Content="Login" />
+                        Content="{Binding LoginButtonText}" />
 
                     <Button
                         Margin="8,0,0,0"
