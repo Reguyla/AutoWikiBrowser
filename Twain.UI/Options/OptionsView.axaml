@@ -58,26 +58,6 @@
                      
                         <Separator/>
 
-                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Find"/>
-
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                            <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding FindText}" Watermark="Text to find"/>
-
-                            <Button x:Name="FindButton" Grid.Row="0" Grid.Column="1" Command="{Binding FindNextCommand}" Content="Find" IsEnabled="{Binding CanFind}"/>
-
-                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingLarge}">
-
-                                <CheckBox Content="Regex" IsChecked="{Binding FindRegex}"/>
-
-                                <CheckBox Content="Case sensitive" IsChecked="{Binding FindCaseSensitive}"/>
-
-                            </StackPanel>
-
-                        </Grid>
-
-                        <Separator/>
-
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page statistics"/>
 
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
@@ -117,10 +97,6 @@
                            </Grid>
 
                            <Separator/>
-
-                            <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Alerts"/>
-
-                            <ListBox x:Name="AlertsListBox" MinHeight="100" ItemsSource="{Binding Alerts}"/>
 
                             <StackPanel IsVisible="{Binding HasDuplicateWikilinks}" Spacing="{DynamicResource TwainSpacingSmall}">
 
