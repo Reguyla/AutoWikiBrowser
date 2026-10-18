@@ -744,10 +744,18 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     private bool _canStartProcessing;
 
     /// <summary>
+    /// Gets or sets whether the active wiki session is authenticated.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isWikiAuthenticated;
+
+    /// <summary>
     /// Gets a value indicating whether processing can be started.
     /// </summary>
     public bool IsStartEnabled =>
-        CanStartProcessing && !IsProcessing;
+        CanStartProcessing &&
+        !IsProcessing &&
+        IsWikiAuthenticated;
 
     /// <summary>
     /// Gets a value indicating whether processing can be stopped.
@@ -756,6 +764,11 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
         IsProcessing;
 
     partial void OnCanStartProcessingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsStartEnabled));
+    }
+
+    partial void OnIsWikiAuthenticatedChanged(bool value)
     {
         OnPropertyChanged(nameof(IsStartEnabled));
     }
@@ -849,6 +862,11 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     [RelayCommand]
     private void StartProcessing()
     {
+        if (!IsStartEnabled)
+        {
+            return;
+        }
+
         StartProcessingRequested?.Invoke();
     }
 

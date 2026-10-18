@@ -433,6 +433,19 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void StartProcessing()
     {
+        // Verify the actual session before starting an API operation.
+        if (!Session.User.IsLoggedIn)
+        {
+            Options.IsWikiAuthenticated = false;
+
+            if (Options.IsProcessing)
+            {
+                StopProcessing();
+            }
+
+            return;
+        }
+
         Article? article =
             MakeList.SelectedArticle ??
             MakeList.Articles.FirstOrDefault();

@@ -48,7 +48,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             new WorkspaceViewModel(
                 Session,
                 Preferences);
-
+        Workspace.Options.IsWikiAuthenticated = IsLoggedIn;
     }
 
     /// <summary>
@@ -64,6 +64,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     {
         Workspace.BotSettings.CanUseBotMode =
             Session.IsBot || Session.IsSysop;
+
+        Workspace.Options.IsWikiAuthenticated = IsLoggedIn;
 
         OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(LoggedInUsername));
