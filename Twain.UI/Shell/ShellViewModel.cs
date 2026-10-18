@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using Twain.Core;
@@ -35,6 +36,11 @@ public sealed partial class ShellViewModel : ViewModelBase
            AppearanceSettings.ShowProcessingToolbar;
 
         Session = new Session();
+
+        Session.LoggedOff += _ =>
+        {
+            Dispatcher.UIThread.Post(LoginCompleted);
+        };
 
         Preferences = new UserPrefs();
 
@@ -93,6 +99,43 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// </summary>
     public string LoginButtonText =>
         IsLoggedIn ? "Logout" : "Login";
+
+    /// <summary>
+    /// Logs out of the active wiki and refreshes authentication status.
+    /// </summary>
+    public async Task LogoutAsync()
+    {
+        if (!IsLoggedIn)
+        {
+            return;
+        }
+
+        var editor = Session.Editor;
+
+        if (editor.IsActive)
+        {
+            await Task.Run(editor.Abort);
+        }
+
+        editor.Logout();
+
+        await Task.Run(editor.Wait);
+
+        if (editor.State !=
+            Twain.Core.API.AsyncApiEdit.EditState.Ready)
+        {
+            throw new InvalidOperationException(
+                "The wiki logout operation did not complete successfully.");
+        }
+
+        if (Session.User.IsLoggedIn)
+        {
+            throw new InvalidOperationException(
+                "The wiki still reports an authenticated session after logout.");
+        }
+
+        LoginCompleted();
+    }
 
     /// <summary>
     /// Gets the wiki associated with the authenticated session.
@@ -316,6 +359,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(LoggedInUsername));
         OnPropertyChanged(nameof(LoginStatusText));
+        OnPropertyChanged(nameof(LoginButtonText));
     }
 
     /// <summary>

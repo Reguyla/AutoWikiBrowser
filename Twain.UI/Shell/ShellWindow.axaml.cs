@@ -69,11 +69,35 @@ public partial class ShellWindow : Window
         }
     }
 
+    /// <summary>
+    /// Opens Profiles or logs out of the active wiki session.
+    /// </summary>
     private async void LoginProfilesMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        await ShowLoginAsync();
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
+
+        if (!viewModel.IsLoggedIn)
+        {
+            await ShowLoginAsync();
+            return;
+        }
+
+        try
+        {
+            await viewModel.LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to log out: {ex}");
+
+            viewModel.LoginCompleted();
+        }
     }
 
     /// <summary>
