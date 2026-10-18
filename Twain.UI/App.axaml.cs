@@ -9,6 +9,7 @@ using Twain.Core.Updates;
 using Twain.UI.BotSettings;
 using Twain.UI.ErrorHandling;
 using Twain.UI.Lists.Providers;
+using Twain.UI.Settings;
 using Twain.UI.Shell;
 using Twain.UI.Templates;
 using Twain.UI.Themes;
@@ -63,14 +64,25 @@ public partial class App : Application
     /// </remarks>
     public override void OnFrameworkInitializationCompleted()
     {
-        ThemeManager.ApplyTheme(TwainTheme.Classic);
+        ApplicationAppearanceSettings appearanceSettings =
+        ApplicationAppearanceSettingsStore.Load();
+
+        // Only apply themes currently supported by Twain.
+        if (appearanceSettings.Theme is not
+            (TwainTheme.Classic or TwainTheme.Legacy))
+        {
+            appearanceSettings.Theme = TwainTheme.Classic;
+        }
+
+        ThemeManager.ApplyTheme(appearanceSettings.Theme);
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow =
                 new ShellWindow
                 {
                     DataContext =
-                        new ShellViewModel()
+                        new ShellViewModel(
+                            appearanceSettings: appearanceSettings)
                 };
 
             ErrorHandler.ShowErrorDialog =

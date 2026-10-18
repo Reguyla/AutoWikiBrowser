@@ -61,11 +61,22 @@
                 </Style>
             </Border.Styles>
 
-            <Grid ColumnDefinitions="Auto,*,Auto">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+
+                <!-- Always-visible processing toolbar toggle -->
+                <Button
+                    Grid.Column="0"
+                    MinWidth="36"
+                    Padding="8,6"
+                    VerticalAlignment="Center"
+                    Command="{Binding ToggleToolbarCommand}"
+                    Content="{Binding ToolbarToggleText}"
+                    ToolTip.Tip="Show or hide processing buttons" />
 
                 <!-- Primary article workflow actions -->
                 <StackPanel
-                    Grid.Column="0"
+                    Grid.Column="1"
+                    IsVisible="{Binding IsToolbarExpanded}"
                     Orientation="Horizontal"
                     Spacing="8">
 
@@ -180,7 +191,7 @@
 
                 <!-- Update status -->
                 <TextBlock
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Margin="16,0"
                     VerticalAlignment="Center"
                     Text="{Binding UpdateStatusMessage}"
@@ -188,7 +199,7 @@
 
                 <!-- Authentication controls -->
                 <StackPanel
-                    Grid.Column="2"
+                    Grid.Column="3"
                     Orientation="Horizontal"
                     Spacing="8">
 

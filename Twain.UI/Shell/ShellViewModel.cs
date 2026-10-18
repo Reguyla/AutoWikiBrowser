@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.AWBSettings;
 using Twain.Core.Updates;
+using Twain.UI.Settings;
 using Twain.UI.ViewModels.Workspaces;
 
 namespace Twain.UI.Shell;
@@ -22,9 +23,16 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// Optional service used to check for, download, and apply Twain updates.
     /// </param>
     public ShellViewModel(
-        IUpdateService? updateService = null)
+        IUpdateService? updateService = null,
+        ApplicationAppearanceSettings? appearanceSettings = null)
     {
         _updateService = updateService;
+
+        AppearanceSettings =
+           appearanceSettings ?? new ApplicationAppearanceSettings();
+
+        IsToolbarExpanded =
+           AppearanceSettings.ShowProcessingToolbar;
 
         Session = new Session();
 
@@ -36,6 +44,11 @@ public sealed partial class ShellViewModel : ViewModelBase
                 Preferences);
 
     }
+
+    /// <summary>
+    /// Gets the application-wide appearance settings.
+    /// </summary>
+    public ApplicationAppearanceSettings AppearanceSettings { get; }
 
     /// <summary>
     /// Updates application state after the active wiki session
@@ -257,5 +270,25 @@ public sealed partial class ShellViewModel : ViewModelBase
             Preferences.Project,
             Preferences.CustomProject,
             Preferences.Protocol);
+    }
+
+    /// <summary>
+    /// Controls the temporary visibility of the six processing buttons.
+    /// The Login control is independent of this setting.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ToolbarToggleText))]
+    private bool _isToolbarExpanded = true;
+
+    /// <summary>
+    /// Text for the always-visible toolbar toggle.
+    /// </summary>
+    public string ToolbarToggleText =>
+        IsToolbarExpanded ? "Hide toolbar" : "Show toolbar";
+
+    [RelayCommand]
+    private void ToggleToolbar()
+    {
+        IsToolbarExpanded = !IsToolbarExpanded;
     }
 }

@@ -46,6 +46,12 @@
 
                 </Grid>
                 
+                <CheckBox
+                    x:Name="ShowProcessingToolbarCheckBox"
+                    Content="Show processing toolbar"
+                    IsChecked="True"
+                    Margin="0,8,0,0" />
+
                 <Separator Margin="0,4" />
 
                 <TextBlock

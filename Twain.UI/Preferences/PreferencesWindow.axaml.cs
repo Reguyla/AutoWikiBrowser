@@ -7,6 +7,7 @@ using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.AWBSettings;
 using Twain.Core.Settings;
+using Twain.UI.Settings;
 using Twain.UI.Themes;
 
 
@@ -39,6 +40,33 @@ public partial class PreferencesWindow : UserControl
 
     }
 
+    /// <summary>
+    /// Initializes the application-wide appearance controls.
+    /// </summary>
+    public void LoadAppearanceSettings(
+        ApplicationAppearanceSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        ShowProcessingToolbarCheckBox.IsChecked =
+            settings.ShowProcessingToolbar;
+    }
+
+    /// <summary>
+    /// Gets whether the processing toolbar should be displayed.
+    /// </summary>
+    public bool ShowProcessingToolbar =>
+        ShowProcessingToolbarCheckBox.IsChecked == true;
+
+    /// <summary>
+    /// Gets the theme currently selected in Preferences.
+    /// </summary>
+    public TwainTheme SelectedTheme =>
+        ThemeComboBox.SelectedIndex switch
+        {
+            1 => TwainTheme.Legacy,
+            _ => TwainTheme.Classic
+        };
 
     /// <summary>
     /// Initializes the theme selector with the currently active theme.

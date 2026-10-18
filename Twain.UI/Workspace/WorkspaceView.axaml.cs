@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
 using Twain.UI.Profiles;
+using Twain.UI.Settings;
 using Twain.UI.Shell;
 using Twain.UI.ViewModels.Workspaces;
 using Twain.UI.Views.Shell;
@@ -158,6 +159,9 @@ public partial class WorkspaceView : UserControl
 
         PreferencesView.BeginEditing(shellViewModel.Preferences);
 
+        PreferencesView.LoadAppearanceSettings(
+            shellViewModel.AppearanceSettings);
+
         workspace.ShowPreferencesCommand.Execute(null);
     }
 
@@ -303,6 +307,24 @@ public partial class WorkspaceView : UserControl
                 shellViewModel.Preferences);
 
             shellViewModel.ApplySitePreferences();
+
+            // Save the accepted application appearance preference.
+            bool showToolbar =
+                PreferencesView.ShowProcessingToolbar;
+
+            shellViewModel.AppearanceSettings.ShowProcessingToolbar =
+                showToolbar;
+
+            // Remember the theme accepted in Preferences.
+            shellViewModel.AppearanceSettings.Theme =
+                PreferencesView.SelectedTheme;
+
+            // Persist both appearance preferences together.
+            ApplicationAppearanceSettingsStore.Save(
+                shellViewModel.AppearanceSettings);
+
+            // Apply the accepted preference to the current shell.
+            shellViewModel.IsToolbarExpanded = showToolbar;
 
             if (workspace.Editor.ApplyAppearanceRequested
                 is { } applyAppearance)
