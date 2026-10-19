@@ -1,8 +1,22 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:Twain.UI.Options" x:Class="Twain.UI.Options.OptionsView" x:DataType="vm:OptionsViewModel" d:DesignWidth="320" d:DesignHeight="500" mc:Ignorable="d">
 
+    <UserControl.Styles>
+        <Style Selector="Border.start-section">
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </UserControl.Styles>
+
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"><StackPanel Spacing="6" Margin="8"><Expander Header="Start" HorizontalAlignment="Stretch" IsExpanded="True"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
+
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                            <TextBlock Text="Editing" FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
@@ -22,8 +36,11 @@
 
                     </StackPanel>
 
-                        <Separator/>
+                        </StackPanel>
+                    </Border>
 
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Processing"/>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
@@ -56,8 +73,11 @@
 
                         </Grid>
                      
-                        <Separator/>
+                        </StackPanel>
+                    </Border>
 
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page statistics"/>
 
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
@@ -96,9 +116,11 @@
 
                            </Grid>
 
-                           <Separator/>
+                        </StackPanel>
+                    </Border>
 
-                            <StackPanel IsVisible="{Binding HasDuplicateWikilinks}" Spacing="{DynamicResource TwainSpacingSmall}">
+                    <Border Classes="start-section" IsVisible="{Binding HasDuplicateWikilinks}">
+                            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
                                 <TextBlock FontWeight="SemiBold" Text="Duplicate wikilinks"/>
 
@@ -107,11 +129,15 @@
                                 <Button x:Name="RemoveWikilinkButton" HorizontalAlignment="Left" Content="Delink"/>
 
                             </StackPanel>
+                    </Border>
 
                     </StackPanel>
 
                 </Expander><Expander Header="Options" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
+
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Automatic changes"/>
 
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
@@ -129,9 +155,11 @@
                             <Button x:Name="AutoChangesSkipOptionsButton" Grid.Column="1" VerticalAlignment="Center" Click="AutoChangesSkipOptionsButton_Click" Content="Auto changes&#10;skip options"/>
 
                     </Grid>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator Margin="0,4"/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Find and replace"/>
 
                     <CheckBox Content="Enable find and replace" IsChecked="{Binding FindAndReplaceEnabled}"/>
@@ -149,19 +177,25 @@
                         <CheckBox Margin="20,0,0,0" Content="Skip if no replacement is made" IsChecked="{Binding SkipIfNoReplacement}" IsEnabled="{Binding FindAndReplaceEnabled}"/>
 
                         <CheckBox Margin="20,0,0,0" Content="Skip if only minor replacements are made" IsChecked="{Binding SkipIfOnlyMinorReplacement}" IsEnabled="{Binding FindAndReplaceEnabled}"/>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator Margin="0,4"/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Regex typo fixing"/>
 
                     <CheckBox Content="Enable regex typo fixing" IsChecked="{Binding EnableTypoCorrection}"/>
 
                     <CheckBox Margin="20,0,0,0" Content="Skip if no typo fixed" IsChecked="{Binding SkipIfNoRegexTypo}" IsEnabled="{Binding EnableTypoCorrection}"/>
-
-                </StackPanel>
+                        </StackPanel>
+                    </Border>
+            </StackPanel>
 
             </Expander><Expander Header="Skip" HorizontalAlignment="Stretch" IsExpanded="False" x:Name="SkipExpander"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
+
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Text"/>
 
                     <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingMedium}">
@@ -189,9 +223,11 @@
                         <CheckBox Grid.Row="1" Grid.Column="4" Content="After processing" IsChecked="{Binding SkipIfNotContainsAfterProcessing}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
 
                     </Grid>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="General skip options"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingLarge}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
@@ -219,9 +255,11 @@
                         <CheckBox Grid.Row="5" Grid.Column="0" Content="Only cosmetic changes" IsChecked="{Binding SkipCosmeticChanges}"/>
 
                     </Grid>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page existence"/>
 
                     <StackPanel Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingMedium}">
@@ -232,12 +270,12 @@
 
                     <RadioButton Content="Don't care" GroupName="PageExistence" Tag="2" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
 
-                        <Separator/>
-
                     </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Auto changes skip options"/>
 
                     <ItemsControl ItemsSource="{Binding AutoChangeSkipOptions}">
@@ -247,11 +285,15 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
-                </StackPanel>
+                        </StackPanel>
+                    </Border>
+            </StackPanel>
 
             </Expander><Expander Header="More" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
+
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Append/Prepend"/>
 
                     <CheckBox Content="Enabled" IsChecked="{Binding AppendPrependEnabled}"/>
@@ -277,9 +319,11 @@
                         <TextBlock VerticalAlignment="Center" IsEnabled="{Binding AppendPrependEnabled}" Text="newlines"/>
 
                     </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Files"/>
 
                     <ComboBox SelectedIndex="{Binding FileOperation}">
@@ -302,9 +346,11 @@
                     </Grid>
 
                     <CheckBox Margin="20,0,0,0" Content="Skip if no file changed" IsChecked="{Binding SkipIfNoFileChange}" IsEnabled="{Binding IsSkipIfNoFileChangeEnabled}"/>
+                        </StackPanel>
+                    </Border>
 
-                    <Separator/>
-
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Categories"/>
 
                     <ComboBox SelectedIndex="{Binding CategoryOperation}">
@@ -333,16 +379,22 @@
                         <CheckBox Content="Remove sortkey" IsChecked="{Binding RemoveCategorySortKey}" IsEnabled="{Binding IsCategoryReplacementEnabled}"/>
 
                     </StackPanel>
-
-                </StackPanel>
+                        </StackPanel>
+                    </Border>
+            </StackPanel>
 
             </Expander><Expander Header="Disambig" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
                     <CheckBox Content="Enable disambiguation" IsChecked="{Binding DisambiguationEnabled}"/>
 
-                    <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
+                    
 
-                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Link to disambiguate"/>
+                        
+            <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
+            <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Link to disambiguate"/>
 
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
@@ -354,6 +406,14 @@
 
                         <Separator/>
 
+
+            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="start-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+            <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Variants"/>
 
                         <TextBox AcceptsReturn="True" MinHeight="180" Text="{Binding DisambiguationVariants}" TextWrapping="NoWrap"/>
@@ -370,9 +430,13 @@
 
                         </StackPanel>
 
-                    </StackPanel>
+                    
 
-                </StackPanel>
+                
+            </StackPanel>
+                        </StackPanel>
+                    </Border>
+            </StackPanel>
 
             </Expander></StackPanel></ScrollViewer></Grid>
 
