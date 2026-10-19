@@ -399,6 +399,19 @@ public partial class WorkspaceViewModel : ObservableObject
         Diff = new DiffViewModel(
            document);
 
+        document.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName !=
+                nameof(ArticleDocumentViewModel.CurrentText))
+            {
+                return;
+            }
+
+            Options.UpdateArticleStatistics(
+                ArticleStatisticsCalculator.Calculate(
+                    document.CurrentText));
+        };
+
         Diff.GoToLineRequested =
            GoToDiffLineAsync;
 
@@ -669,6 +682,8 @@ public partial class WorkspaceViewModel : ObservableObject
 
             Editor.Document.CurrentText =
                 string.Empty;
+
+            Options.ResetArticleStatistics();
 
             if (nextArticle is null)
             {
@@ -997,6 +1012,8 @@ public partial class WorkspaceViewModel : ObservableObject
         CurrentArticleName = string.Empty;
 
         Editor.Document.CurrentText = string.Empty;
+
+        Options.ResetArticleStatistics();
 
         StartProcessing();
     }

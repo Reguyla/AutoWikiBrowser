@@ -573,7 +573,8 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     }
 
     public ObservableCollection<AutoChangeSkipOptionViewModel>
-    AutoChangeSkipOptions{ get; } = new(
+    AutoChangeSkipOptions
+    { get; } = new(
         SkipOptionsHelper.AvailableOptions.Select(
             option => new AutoChangeSkipOptionViewModel(
                 option.Id,
