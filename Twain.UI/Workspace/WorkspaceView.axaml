@@ -573,11 +573,23 @@ Article alerts for the currently processed article.
                 Orientation="Horizontal"
                 Spacing="20">
 
-                <TextBlock Text="Articles: 0" />
-                <TextBlock Text="Processing: 0" />
-                <TextBlock Text="Completed: 0" />
-                <TextBlock Text="Skipped: 0" />
-                <TextBlock Text="Errors: 0" />
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="Pages/min:" />
+                    <TextBlock Text="{Binding PagesPerMinute}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="Edits/min:" />
+                    <TextBlock Text="{Binding EditsPerMinute}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="Total edits:" />
+                    <TextBlock Text="{Binding TotalEdits}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="Skipped:" />
+                    <TextBlock Text="{Binding SkippedArticles}" />
+                </StackPanel>
 
             </StackPanel>
 

@@ -63,6 +63,11 @@ public partial class WorkspaceViewModel : ObservableObject
     private string _editSummary = string.Empty;
 
     /// <summary>
+    /// Gets the number of successfully saved edits in this session.
+    /// </summary>
+    public int TotalEdits => _sessionCounters.NumberOfEdits;
+
+    /// <summary>
     /// Gets or sets whether the workspace is displaying its options.
     /// </summary>
     [ObservableProperty]
@@ -293,6 +298,27 @@ public partial class WorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private string _previewError = string.Empty;
 
+    /// <summary>
+    /// Gets the number of articles skipped during this session.
+    /// </summary>
+    public int SkippedArticles => _sessionCounters.NumberOfIgnoredEdits;
+
+    /// <summary>
+    /// Gets the number of pages processed during the last minute.
+    /// </summary>
+    public int PagesPerMinute =>
+        _sessionCounters.NumberOfPagesPerMinute;
+
+    /// <summary>
+    /// Gets the number of edits completed during the last minute.
+    /// </summary>
+    public int EditsPerMinute =>
+        _sessionCounters.NumberOfEditsPerMinute;
+
+    /// <summary>
+    /// Updates the displayed session rates once per minute.
+    /// </summary>
+    private readonly DispatcherTimer _statisticsTimer = new();
 
     /// <summary>
     /// Requests a rendered preview of the current editor contents.
@@ -380,6 +406,18 @@ public partial class WorkspaceViewModel : ObservableObject
             Session);
 
         Options = new OptionsViewModel();
+
+        _statisticsTimer.Interval = TimeSpan.FromMinutes(1);
+
+        _statisticsTimer.Tick += (_, _) =>
+        {
+            _sessionCounters.GenerateEditStatistics();
+
+            OnPropertyChanged(nameof(PagesPerMinute));
+            OnPropertyChanged(nameof(EditsPerMinute));
+        };
+
+        _statisticsTimer.Start();
 
         MakeList.Articles.CollectionChanged +=
             MakeListArticles_CollectionChanged;
@@ -609,6 +647,7 @@ public partial class WorkspaceViewModel : ObservableObject
             }
 
             _sessionCounters.NumberOfEdits++;
+            OnPropertyChanged(nameof(TotalEdits));
 
             BotSettings.CurrentArticleNudgeCount = 0;
 
@@ -948,6 +987,9 @@ public partial class WorkspaceViewModel : ObservableObject
             StopProcessing();
             return;
         }
+
+        _sessionCounters.NumberOfIgnoredEdits++;
+        OnPropertyChanged(nameof(SkippedArticles));
 
         BotSettings.CurrentArticleNudgeCount = 0;
 
