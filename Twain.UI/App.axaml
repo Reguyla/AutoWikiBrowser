@@ -13,11 +13,15 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
-    <Application.Styles>
-        <FluentTheme DensityStyle="Compact" />
+<Application.Styles>
+    <FluentTheme DensityStyle="Compact" />
 
-        <StyleInclude
-            Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
-    </Application.Styles>
+    <StyleInclude
+        Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+
+    <!-- Shared Twain form styles -->
+    <StyleInclude
+        Source="avares://Twain.UI/Themes/Styles/TwainFormStyles.axaml" />
+</Application.Styles>
 
 </Application>

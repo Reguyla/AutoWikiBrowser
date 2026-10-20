@@ -1,20 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:Twain.UI.Options" x:Class="Twain.UI.Options.OptionsView" x:DataType="vm:OptionsViewModel" d:DesignWidth="320" d:DesignHeight="500" mc:Ignorable="d">
 
-    <UserControl.Styles>
-        <Style Selector="Border.start-section">
-            <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
-        </Style>
-    </UserControl.Styles>
-
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"><StackPanel Spacing="6" Margin="8"><Expander Header="Start" HorizontalAlignment="Stretch" IsExpanded="True"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                             <TextBlock Text="Editing" FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}"/>
 
@@ -39,7 +29,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Processing"/>
 
@@ -76,7 +66,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page statistics"/>
 
@@ -119,7 +109,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section" IsVisible="{Binding HasDuplicateWikilinks}">
+                    <Border Classes="twain-section" IsVisible="{Binding HasDuplicateWikilinks}">
                             <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
                                 <TextBlock FontWeight="SemiBold" Text="Duplicate wikilinks"/>
@@ -136,7 +126,7 @@
                 </Expander><Expander Header="Options" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Automatic changes"/>
 
@@ -158,7 +148,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Find and replace"/>
 
@@ -180,7 +170,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Regex typo fixing"/>
 
@@ -194,7 +184,7 @@
             </Expander><Expander Header="Skip" HorizontalAlignment="Stretch" IsExpanded="False" x:Name="SkipExpander"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Text"/>
 
@@ -226,7 +216,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="General skip options"/>
 
@@ -258,7 +248,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page existence"/>
 
@@ -274,7 +264,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Auto changes skip options"/>
 
@@ -292,7 +282,7 @@
             </Expander><Expander Header="More" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Append/Prepend"/>
 
@@ -322,7 +312,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Files"/>
 
@@ -349,7 +339,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Categories"/>
 
@@ -385,7 +375,7 @@
 
             </Expander><Expander Header="Disambig" HorizontalAlignment="Stretch" IsExpanded="False"><StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 
                     <CheckBox Content="Enable disambiguation" IsChecked="{Binding DisambiguationEnabled}"/>
@@ -411,7 +401,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="start-section">
+                    <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
             <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
                         <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Variants"/>
