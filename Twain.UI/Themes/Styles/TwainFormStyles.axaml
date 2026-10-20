@@ -1,0 +1,23 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Shared styling for grouped sections in Twain forms. -->
+
+    <Style Selector="Border.twain-section">
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderSubtleBrush}" />
+
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource TwainBorderThickness}" />
+
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource TwainControlCornerRadius}" />
+
+        <Setter Property="Padding"
+                Value="{DynamicResource TwainPanePadding}" />
+
+        <Setter Property="Margin"
+                Value="0,0,0,8" />
+    </Style>
+
+</Styles>
