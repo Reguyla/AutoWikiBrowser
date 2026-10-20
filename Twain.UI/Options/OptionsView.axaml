@@ -185,34 +185,96 @@
 
 
                     <Border Classes="twain-section">
-                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Text"/>
+                        <StackPanel Spacing="{DynamicResource TwainSpacingLarge}">
 
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource TwainSpacingMedium}">
+                            <!-- Contains -->
+                            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
-                        <!-- Contains -->
-                        <CheckBox Grid.Row="0" Grid.Column="0" Content="Contains" IsChecked="{Binding SkipIfContainsEnabled}"/>
+                                <Grid ColumnDefinitions="Auto,*"
+                                      ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBox Grid.Row="0" Grid.Column="1" IsEnabled="{Binding SkipIfContainsEnabled}" Text="{Binding SkipIfContainsText}"/>
+                                    <CheckBox
+                                        Grid.Column="0"
+                                        Content="Contains"
+                                        IsChecked="{Binding SkipIfContainsEnabled}" />
 
-                        <CheckBox Grid.Row="0" Grid.Column="2" Content="Regex" IsChecked="{Binding SkipIfContainsRegex}" IsEnabled="{Binding SkipIfContainsEnabled}"/>
+                                    <TextBox
+                                        Grid.Column="1"
+                                        MinWidth="0"
+                                        IsEnabled="{Binding SkipIfContainsEnabled}"
+                                        Text="{Binding SkipIfContainsText}" />
 
-                        <CheckBox Grid.Row="0" Grid.Column="3" Content="Case sensitive" IsChecked="{Binding SkipIfContainsCaseSensitive}" IsEnabled="{Binding SkipIfContainsEnabled}"/>
+                                </Grid>
 
-                        <CheckBox Grid.Row="0" Grid.Column="4" Content="After processing" IsChecked="{Binding SkipIfContainsAfterProcessing}" IsEnabled="{Binding SkipIfContainsEnabled}"/>
+                                <WrapPanel
+                                    Orientation="Horizontal"
+                                    Margin="20,0,0,0"
+                                    ItemSpacing="12"
+                                    LineSpacing="6">
 
-                        <!-- Doesn't contain -->
-                        <CheckBox Grid.Row="1" Grid.Column="0" Content="Doesn't contain" IsChecked="{Binding SkipIfNotContainsEnabled}"/>
+                                    <CheckBox
+                                        Content="Regex"
+                                        IsChecked="{Binding SkipIfContainsRegex}"
+                                        IsEnabled="{Binding SkipIfContainsEnabled}" />
 
-                        <TextBox Grid.Row="1" Grid.Column="1" IsEnabled="{Binding SkipIfNotContainsEnabled}" Text="{Binding SkipIfNotContainsText}"/>
+                                    <CheckBox
+                                        Content="Case sensitive"
+                                        IsChecked="{Binding SkipIfContainsCaseSensitive}"
+                                        IsEnabled="{Binding SkipIfContainsEnabled}" />
 
-                        <CheckBox Grid.Row="1" Grid.Column="2" Content="Regex" IsChecked="{Binding SkipIfNotContainsRegex}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
+                                    <CheckBox
+                                        Content="After processing"
+                                        IsChecked="{Binding SkipIfContainsAfterProcessing}"
+                                        IsEnabled="{Binding SkipIfContainsEnabled}" />
 
-                        <CheckBox Grid.Row="1" Grid.Column="3" Content="Case sensitive" IsChecked="{Binding SkipIfNotContainsCaseSensitive}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
+                                </WrapPanel>
 
-                        <CheckBox Grid.Row="1" Grid.Column="4" Content="After processing" IsChecked="{Binding SkipIfNotContainsAfterProcessing}" IsEnabled="{Binding SkipIfNotContainsEnabled}"/>
+                            </StackPanel>
 
-                    </Grid>
+                            <!-- Doesn't contain -->
+                            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
+
+                                <Grid ColumnDefinitions="Auto,*"
+                                      ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                                    <CheckBox
+                                        Grid.Column="0"
+                                        Content="Doesn't contain"
+                                        IsChecked="{Binding SkipIfNotContainsEnabled}" />
+
+                                    <TextBox
+                                        Grid.Column="1"
+                                        MinWidth="0"
+                                        IsEnabled="{Binding SkipIfNotContainsEnabled}"
+                                        Text="{Binding SkipIfNotContainsText}" />
+
+                                </Grid>
+
+                                <WrapPanel
+                                    Orientation="Horizontal"
+                                    Margin="20,0,0,0"
+                                    ItemSpacing="12"
+                                    LineSpacing="6">
+
+                                    <CheckBox
+                                        Content="Regex"
+                                        IsChecked="{Binding SkipIfNotContainsRegex}"
+                                        IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                                    <CheckBox
+                                        Content="Case sensitive"
+                                        IsChecked="{Binding SkipIfNotContainsCaseSensitive}"
+                                        IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                                    <CheckBox
+                                        Content="After processing"
+                                        IsChecked="{Binding SkipIfNotContainsAfterProcessing}"
+                                        IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                                </WrapPanel>
+
+                            </StackPanel>
+
                         </StackPanel>
                     </Border>
 
@@ -252,15 +314,31 @@
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page existence"/>
 
-                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingMedium}">
+                        <WrapPanel
+                            Orientation="Horizontal"
+                            ItemWidth="125"
+                            HorizontalAlignment="Stretch">
 
-                    <RadioButton Content="Exists" GroupName="PageExistence" Tag="0" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
+                            <RadioButton
+                                Content="Exists"
+                                GroupName="PageExistence"
+                                Tag="0"
+                                IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
 
-                    <RadioButton Content="Doesn't exist" GroupName="PageExistence" IsChecked="True" Tag="1" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
+                            <RadioButton
+                                Content="Doesn't exist"
+                                GroupName="PageExistence"
+                                IsChecked="True"
+                                Tag="1"
+                                IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
 
-                    <RadioButton Content="Don't care" GroupName="PageExistence" Tag="2" IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged"/>
+                            <RadioButton
+                                Content="Don't care"
+                                GroupName="PageExistence"
+                                Tag="2"
+                                IsCheckedChanged="PageExistenceRadioButton_IsCheckedChanged" />
 
-                    </StackPanel>
+                        </WrapPanel>
                         </StackPanel>
                     </Border>
 
@@ -298,15 +376,37 @@
 
                     <TextBox AcceptsReturn="True" MinHeight="80" IsEnabled="{Binding AppendPrependEnabled}" Text="{Binding AppendPrependText}" TextWrapping="Wrap" Watermark="Message, including title in wiki format"/>
 
-                    <StackPanel Margin="20,0,0,0" Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingSmall}">
+                    <StackPanel
+                        Margin="20,0,0,0"
+                        Spacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock VerticalAlignment="Center" IsEnabled="{Binding AppendPrependEnabled}" Text="Use"/>
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="{DynamicResource TwainSpacingSmall}">
 
-                        <NumericUpDown Width="110" Minimum="0" Maximum="3" IsEnabled="{Binding AppendPrependEnabled}" Value="{Binding AppendNewlineCount}"/>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                IsEnabled="{Binding AppendPrependEnabled}"
+                                Text="Use"/>
 
-                         <CheckBox Margin="20,0,0,0" Content="Sort meta data after" IsChecked="{Binding SortMetadataAfterAppend}" IsEnabled="{Binding AppendPrependEnabled}"/>
+                            <NumericUpDown
+                                Width="110"
+                                Minimum="0"
+                                Maximum="3"
+                                IsEnabled="{Binding AppendPrependEnabled}"
+                                Value="{Binding AppendNewlineCount}"/>
 
-                        <TextBlock VerticalAlignment="Center" IsEnabled="{Binding AppendPrependEnabled}" Text="newlines"/>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                IsEnabled="{Binding AppendPrependEnabled}"
+                                Text="newlines"/>
+
+                        </StackPanel>
+
+                        <CheckBox
+                            Content="Sort meta data after"
+                            IsChecked="{Binding SortMetadataAfterAppend}"
+                            IsEnabled="{Binding AppendPrependEnabled}"/>
 
                     </StackPanel>
                         </StackPanel>

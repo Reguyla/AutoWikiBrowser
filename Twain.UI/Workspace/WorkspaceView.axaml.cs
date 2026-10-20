@@ -20,7 +20,7 @@ public partial class WorkspaceView : UserControl
     private BotSettingsViewModel? _editingBotSettings;
     private CustomModule? _customModuleView;
     private WorkspaceViewModel? _navigationViewModel;
-    private GridLength _optionsSidebarWidth = new(340);
+    private GridLength _optionsSidebarWidth = new(425);
 
     /// <summary>
     /// Opens the application preferences window through the shell.
