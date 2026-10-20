@@ -49,6 +49,12 @@
 
     <Color x:Key="TwainColorFocus">#FF1B6AC9</Color>
 
+    <!-- Application chrome -->
+
+    <Color x:Key="TwainColorPaneHeader">#FFD9E7F7</Color>
+    <Color x:Key="TwainColorToolbar">#FFF7F7F7</Color>
+    <Color x:Key="TwainColorStatusBar">#FFE5E5E5</Color>
+
     <!-- Accessible status colors -->
 
     <Color x:Key="TwainColorInformation">#FF005A9C</Color>
@@ -140,6 +146,20 @@
     <SolidColorBrush
         x:Key="TwainErrorBrush"
         Color="{DynamicResource TwainColorError}" />
+
+    <!-- Application chrome brushes -->
+
+    <SolidColorBrush
+        x:Key="TwainPaneHeaderBrush"
+        Color="{DynamicResource TwainColorPaneHeader}" />
+
+    <SolidColorBrush
+        x:Key="TwainToolbarBrush"
+        Color="{DynamicResource TwainColorToolbar}" />
+
+    <SolidColorBrush
+        x:Key="TwainStatusBarBrush"
+        Color="{DynamicResource TwainColorStatusBar}" />
 
     <!-- Spacing -->
 
