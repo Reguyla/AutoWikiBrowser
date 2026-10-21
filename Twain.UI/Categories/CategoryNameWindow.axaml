@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Categories.CategoryNameWindow"
     xmlns="https://github.com/avaloniaui"
@@ -7,31 +8,38 @@
     Height="150"
     CanResize="False"
     ShowInTaskbar="False"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid Margin="16"
-          RowDefinitions="Auto,Auto"
-          ColumnDefinitions="Auto,*"
-          RowSpacing="16"
-          ColumnSpacing="4">
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto"
+        ColumnDefinitions="Auto,*"
+        RowSpacing="{DynamicResource TwainSpacingMedium}"
+        ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
-        <TextBlock x:Name="CategoryNamespaceTextBlock"
-                   Grid.Row="0"
-                   Grid.Column="0"
-                   VerticalAlignment="Center" />
+        <TextBlock
+            x:Name="CategoryNamespaceTextBlock"
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Center" />
 
-        <TextBox x:Name="CategoryNameTextBox"
-                 Grid.Row="0"
-                 Grid.Column="1"
-                 VerticalAlignment="Center" />
+        <TextBox
+            x:Name="CategoryNameTextBox"
+            Grid.Row="0"
+            Grid.Column="1"
+            VerticalAlignment="Center" />
 
-        <Button Grid.Row="1"
-                Grid.Column="0"
-                Grid.ColumnSpan="2"
-                HorizontalAlignment="Right"
-                MinWidth="80"
-                Content="OK"
-                IsDefault="True"
-                Click="OkButton_Click" />
+        <Button
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Right"
+            MinWidth="80"
+            Content="OK"
+            IsDefault="True"
+            Click="OkButton_Click" />
+
     </Grid>
 </Window>
