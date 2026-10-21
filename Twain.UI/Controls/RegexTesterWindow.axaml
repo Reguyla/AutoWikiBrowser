@@ -12,7 +12,9 @@
     MinWidth="600"
     MinHeight="420"
     WindowStartupLocation="CenterOwner"
-    Title="Regex Tester">
+    Title="Regex Tester"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
@@ -45,11 +47,18 @@
                 TextChanged="ConditionsChanged"
                 ToolTip.Tip="The regular expression to find" />
 
-            <GroupBox
+            <Border
                 Grid.Row="0"
                 Grid.Column="2"
                 Grid.RowSpan="2"
-                Header="Regex options">
+                Classes="twain-section"
+                Margin="0">
+
+                <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+                    <TextBlock
+                        Classes="twain-section-heading"
+                        Text="Regex options" />
 
                 <Grid
                     ColumnDefinitions="Auto,Auto"
@@ -85,7 +94,8 @@
                         Content="Explicit capture"
                         ToolTip.Tip="Only named or explicitly numbered groups capture substrings." />
                 </Grid>
-            </GroupBox>
+                </StackPanel>
+                </Border>
 
             <TextBlock
                 Grid.Row="1"
