@@ -6,7 +6,9 @@
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
-    Title="Validation error">
+    Title="Validation error"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
