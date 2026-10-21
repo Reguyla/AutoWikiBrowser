@@ -7,11 +7,14 @@
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
-    Title="Select number">
+    Title="Select number"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid Margin="16"
-          RowDefinitions="Auto,Auto,Auto"
-          RowSpacing="12">
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <TextBlock x:Name="PromptTextBlock"
                    Grid.Row="0"
@@ -24,10 +27,11 @@
                        Value="1"
                        Increment="1" />
 
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8">
+        <StackPanel
+            Grid.Row="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <Button Content="_OK"
                     Width="90"
