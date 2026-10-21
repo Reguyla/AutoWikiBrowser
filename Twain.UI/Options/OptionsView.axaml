@@ -6,7 +6,9 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                            <TextBlock Text="Editing" FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}"/>
+                            <TextBlock
+                                Classes="twain-section-heading"
+                                Text="Editing" />
 
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
@@ -31,7 +33,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Processing"/>
+                        <TextBlock Classes="twain-section-heading" Text="Processing"/>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
@@ -68,7 +70,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page statistics"/>
+                        <TextBlock Classes="twain-section-heading" Text="Page statistics"/>
 
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
@@ -112,7 +114,7 @@
                     <Border Classes="twain-section" IsVisible="{Binding HasDuplicateWikilinks}">
                             <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
-                                <TextBlock FontWeight="SemiBold" Text="Duplicate wikilinks"/>
+                                <TextBlock Classes="twain-section-heading" Text="Duplicate wikilinks"/>
 
                                 <ListBox x:Name="DuplicateWikilinksListBox" MinHeight="80" ItemsSource="{Binding DuplicateWikilinks}"/>
 
@@ -128,7 +130,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Automatic changes"/>
+                    <TextBlock Classes="twain-section-heading" Text="Automatic changes"/>
 
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
@@ -150,7 +152,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Find and replace"/>
+                    <TextBlock Classes="twain-section-heading" Text="Find and replace"/>
 
                     <CheckBox Content="Enable find and replace" IsChecked="{Binding FindAndReplaceEnabled}"/>
 
@@ -172,7 +174,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Regex typo fixing"/>
+                    <TextBlock Classes="twain-section-heading" Text="Regex typo fixing"/>
 
                     <CheckBox Content="Enable regex typo fixing" IsChecked="{Binding EnableTypoCorrection}"/>
 
@@ -185,102 +187,102 @@
 
 
                     <Border Classes="twain-section">
-                        <StackPanel Spacing="{DynamicResource TwainSpacingLarge}">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingLarge}">
 
-                            <!-- Contains -->
-                            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
+                        <!-- Contains -->
+                        <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
-                                <Grid ColumnDefinitions="Auto,*"
-                                      ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                                    <CheckBox
-                                        Grid.Column="0"
-                                        Content="Contains"
-                                        IsChecked="{Binding SkipIfContainsEnabled}" />
+                                <CheckBox
+                                    Grid.Column="0"
+                                    Content="Contains"
+                                    IsChecked="{Binding SkipIfContainsEnabled}" />
 
-                                    <TextBox
-                                        Grid.Column="1"
-                                        MinWidth="0"
-                                        IsEnabled="{Binding SkipIfContainsEnabled}"
-                                        Text="{Binding SkipIfContainsText}" />
+                                <TextBox
+                                    Grid.Column="1"
+                                    MinWidth="0"
+                                    IsEnabled="{Binding SkipIfContainsEnabled}"
+                                    Text="{Binding SkipIfContainsText}" />
 
-                                </Grid>
+                            </Grid>
 
-                                <WrapPanel
-                                    Orientation="Horizontal"
-                                    Margin="20,0,0,0"
-                                    ItemSpacing="12"
-                                    LineSpacing="6">
+                            <WrapPanel
+                                Orientation="Horizontal"
+                                Margin="20,0,0,0"
+                                ItemSpacing="12"
+                                LineSpacing="6">
 
-                                    <CheckBox
-                                        Content="Regex"
-                                        IsChecked="{Binding SkipIfContainsRegex}"
-                                        IsEnabled="{Binding SkipIfContainsEnabled}" />
+                                <CheckBox
+                                    Content="Regex"
+                                    IsChecked="{Binding SkipIfContainsRegex}"
+                                    IsEnabled="{Binding SkipIfContainsEnabled}" />
 
-                                    <CheckBox
-                                        Content="Case sensitive"
-                                        IsChecked="{Binding SkipIfContainsCaseSensitive}"
-                                        IsEnabled="{Binding SkipIfContainsEnabled}" />
+                                <CheckBox
+                                    Content="Case sensitive"
+                                    IsChecked="{Binding SkipIfContainsCaseSensitive}"
+                                    IsEnabled="{Binding SkipIfContainsEnabled}" />
 
-                                    <CheckBox
-                                        Content="After processing"
-                                        IsChecked="{Binding SkipIfContainsAfterProcessing}"
-                                        IsEnabled="{Binding SkipIfContainsEnabled}" />
+                                <CheckBox
+                                    Content="After processing"
+                                    IsChecked="{Binding SkipIfContainsAfterProcessing}"
+                                    IsEnabled="{Binding SkipIfContainsEnabled}" />
 
-                                </WrapPanel>
-
-                            </StackPanel>
-
-                            <!-- Doesn't contain -->
-                            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
-
-                                <Grid ColumnDefinitions="Auto,*"
-                                      ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                                    <CheckBox
-                                        Grid.Column="0"
-                                        Content="Doesn't contain"
-                                        IsChecked="{Binding SkipIfNotContainsEnabled}" />
-
-                                    <TextBox
-                                        Grid.Column="1"
-                                        MinWidth="0"
-                                        IsEnabled="{Binding SkipIfNotContainsEnabled}"
-                                        Text="{Binding SkipIfNotContainsText}" />
-
-                                </Grid>
-
-                                <WrapPanel
-                                    Orientation="Horizontal"
-                                    Margin="20,0,0,0"
-                                    ItemSpacing="12"
-                                    LineSpacing="6">
-
-                                    <CheckBox
-                                        Content="Regex"
-                                        IsChecked="{Binding SkipIfNotContainsRegex}"
-                                        IsEnabled="{Binding SkipIfNotContainsEnabled}" />
-
-                                    <CheckBox
-                                        Content="Case sensitive"
-                                        IsChecked="{Binding SkipIfNotContainsCaseSensitive}"
-                                        IsEnabled="{Binding SkipIfNotContainsEnabled}" />
-
-                                    <CheckBox
-                                        Content="After processing"
-                                        IsChecked="{Binding SkipIfNotContainsAfterProcessing}"
-                                        IsEnabled="{Binding SkipIfNotContainsEnabled}" />
-
-                                </WrapPanel>
-
-                            </StackPanel>
+                            </WrapPanel>
 
                         </StackPanel>
+
+                        <!-- Doesn't contain -->
+                        <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                                <CheckBox
+                                    Grid.Column="0"
+                                    Content="Doesn't contain"
+                                    IsChecked="{Binding SkipIfNotContainsEnabled}" />
+
+                                <TextBox
+                                    Grid.Column="1"
+                                    MinWidth="0"
+                                    IsEnabled="{Binding SkipIfNotContainsEnabled}"
+                                    Text="{Binding SkipIfNotContainsText}" />
+
+                            </Grid>
+
+                            <WrapPanel
+                                Orientation="Horizontal"
+                                Margin="20,0,0,0"
+                                ItemSpacing="12"
+                                LineSpacing="6">
+
+                                <CheckBox
+                                    Content="Regex"
+                                    IsChecked="{Binding SkipIfNotContainsRegex}"
+                                    IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                                <CheckBox
+                                    Content="Case sensitive"
+                                    IsChecked="{Binding SkipIfNotContainsCaseSensitive}"
+                                    IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                                <CheckBox
+                                    Content="After processing"
+                                    IsChecked="{Binding SkipIfNotContainsAfterProcessing}"
+                                    IsEnabled="{Binding SkipIfNotContainsEnabled}" />
+
+                            </WrapPanel>
+
+                        </StackPanel>
+
+                    </StackPanel>
                     </Border>
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="General skip options"/>
+                    <TextBlock Classes="twain-section-heading" Text="General skip options"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingLarge}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
 
@@ -312,7 +314,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Page existence"/>
+                    <TextBlock Classes="twain-section-heading" Text="Page existence"/>
 
                         <WrapPanel
                             Orientation="Horizontal"
@@ -344,7 +346,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Auto changes skip options"/>
+                    <TextBlock Classes="twain-section-heading" Text="Auto changes skip options"/>
 
                     <ItemsControl ItemsSource="{Binding AutoChangeSkipOptions}">
                         <ItemsControl.ItemTemplate>
@@ -362,7 +364,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Append/Prepend"/>
+                    <TextBlock Classes="twain-section-heading" Text="Append/Prepend"/>
 
                     <CheckBox Content="Enabled" IsChecked="{Binding AppendPrependEnabled}"/>
 
@@ -414,7 +416,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Files"/>
+                    <TextBlock Classes="twain-section-heading" Text="Files"/>
 
                     <ComboBox SelectedIndex="{Binding FileOperation}">
                         <ComboBoxItem Content="Choose a task..."/>
@@ -441,7 +443,7 @@
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Categories"/>
+                    <TextBlock Classes="twain-section-heading" Text="Categories"/>
 
                     <ComboBox SelectedIndex="{Binding CategoryOperation}">
                         <ComboBoxItem Content="Choose a task..."/>
@@ -484,7 +486,7 @@
 
                         
             <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
-            <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Link to disambiguate"/>
+            <TextBlock Classes="twain-section-heading" Text="Link to disambiguate"/>
 
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
@@ -504,7 +506,7 @@
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
             <StackPanel Margin="20,0,0,0" IsEnabled="{Binding DisambiguationEnabled}" Spacing="{DynamicResource TwainSpacingLarge}">
-                        <TextBlock FontSize="{DynamicResource TwainFontSizeMedium}" FontWeight="SemiBold" Foreground="{DynamicResource TwainTextPrimaryBrush}" Text="Variants"/>
+                        <TextBlock Classes="twain-section-heading" Text="Variants"/>
 
                         <TextBox AcceptsReturn="True" MinHeight="180" Text="{Binding DisambiguationVariants}" TextWrapping="NoWrap"/>
 
