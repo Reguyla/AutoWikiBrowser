@@ -8,11 +8,14 @@
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
-    Title="Input">
+    Title="Input"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid Margin="16"
-          RowDefinitions="Auto,Auto,Auto,Auto"
-          RowSpacing="8">
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <TextBlock x:Name="PromptTextBlock"
                    Grid.Row="0"
@@ -27,10 +30,11 @@
                    IsVisible="False"
                    TextWrapping="Wrap" />
 
-        <StackPanel Grid.Row="3"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8">
+        <StackPanel
+            Grid.Row="3"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <Button Content="_OK"
                     Width="90"
