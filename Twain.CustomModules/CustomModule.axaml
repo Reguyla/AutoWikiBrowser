@@ -32,12 +32,8 @@
         <Border
             x:Name="ModuleControlsPanel"
             Grid.Row="1"
-            Margin="{DynamicResource TwainWorkspacePadding}"
-            Padding="{DynamicResource TwainPanePadding}"
-            Background="{DynamicResource TwainSurfaceBrush}"
-            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-            BorderThickness="{DynamicResource TwainBorderThickness}"
-            CornerRadius="{DynamicResource TwainPaneCornerRadius}">
+            Classes="twain-section"
+            Background="{DynamicResource TwainSurfaceBrush}">
 
             <Grid
                 ColumnDefinitions="Auto,Auto,*,Auto,180,Auto,Auto"
