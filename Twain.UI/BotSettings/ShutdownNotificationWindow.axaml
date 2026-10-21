@@ -6,7 +6,9 @@
     Height="180"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
-    Title="Processing complete">
+    Title="Processing complete"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="20"
