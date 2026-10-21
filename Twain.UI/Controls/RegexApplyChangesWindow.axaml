@@ -6,7 +6,9 @@
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
-    Title="Regex Tester">
+    Title="Regex Tester"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
@@ -36,6 +38,7 @@
             <Button
                 Width="80"
                 Content="Cancel"
+                IsCancel="True"
                 Click="CancelButton_Click" />
         </StackPanel>
     </Grid>
