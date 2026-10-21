@@ -9,17 +9,18 @@
 
         <TabControl
             x:Name="PreferencesTabs"
+            Classes="twain-tabs"
             Grid.Row="0"
             Margin="12">
 
-            <TabItem Header="General">
+           <TabItem Classes="twain-tab" Header="General">
                 <StackPanel
                     Margin="12"
                     Spacing="10">
 
-                <TextBlock
-                    Text="Appearance"
-                    FontWeight="SemiBold" />
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+                <TextBlock Classes="twain-section-heading" Text="Appearance" />
 
                 <Grid
                     ColumnDefinitions="Auto,*"
@@ -51,12 +52,12 @@
                     Content="Show processing toolbar"
                     IsChecked="True"
                     Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
 
-                <Separator Margin="0,4" />
-
-                <TextBlock
-                    Text="Application processing"
-                    FontWeight="SemiBold" />
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+<TextBlock Classes="twain-section-heading" Text="Application processing" />
 
                 <CheckBox
                     x:Name="MinimizeCheckBox"
@@ -103,12 +104,12 @@
                     </ComboBox>
 
                 </Grid>
+                    </StackPanel>
+                </Border>
 
-                <Separator Margin="0,4" />
-                
-                 <TextBlock
-                    Text="Bot processing"
-                    FontWeight="SemiBold" />
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+<TextBlock Classes="twain-section-heading" Text="Bot processing" />
 
                 <CheckBox
                     x:Name="DiffInBotModeCheckBox"
@@ -120,22 +121,25 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
                     Content="Ignore {{bots}} and {{nobots}} restrictions" />
+                    </StackPanel>
+                </Border>
 
-                <Separator Margin="0,4" />
-                 <TextBlock
-                    Text="Logging"
-                    FontWeight="SemiBold" />
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+<TextBlock Classes="twain-section-heading" Text="Logging" />
 
                 <CheckBox
                     x:Name="LoggingCheckBox"
                     Content="Enable Logging" />
+                    </StackPanel>
+                </Border>
 
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Site">
+            <TabItem Classes="twain-tab" Header="Site">
+                <Border Classes="twain-section" Margin="12">
                 <Grid
-                    Margin="12"
                     ColumnDefinitions="Auto,*"
                     RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                     ColumnSpacing="12"
@@ -219,17 +223,17 @@
                         MinWidth="240" />
 
                 </Grid>
+                </Border>
             </TabItem>
 
-            <TabItem Header="Editing">
+            <TabItem Classes="twain-tab" Header="Editing">
                 <StackPanel
                     Margin="12"
                     Spacing="10">
 
-                    <TextBlock
-                        Margin="0,4,0,0"
-                        Text="Edit summary settings"
-                        FontWeight="SemiBold" />
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+                    <TextBlock Classes="twain-section-heading" Text="Edit summary settings" />
 
                     <CheckBox
                         x:Name="AddUsingAwbCheckBox"
@@ -241,12 +245,11 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
                     Content="Suppress &quot;using Twain&quot; in edit summary" />
-
-                    <Separator Margin="0,4" />
-
-                     <TextBlock
-                        Text="Save settings"
-                        FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+                <TextBlock Classes="twain-section-heading" Text="Save settings" />
                     
                     <CheckBox
                         x:Name="SaveArticleListCheckBox"
@@ -311,10 +314,7 @@
                         </Grid>
 
 
-                    <TextBlock
-                        Margin="0,4,0,0"
-                        Text="When ready to save:"
-                        FontWeight="SemiBold" />
+                    <TextBlock Classes="twain-section-heading" Text="When ready to save:" />
 
                     <StackPanel
                         Orientation="Horizontal"
@@ -329,14 +329,13 @@
                             Content="Beep" />
 
                     </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+<StackPanel Spacing="10">
 
-                    <Separator Margin="0,4" />
-
-                <StackPanel Spacing="10">
-
-                    <TextBlock
-                        Text="Editor appearance"
-                        FontWeight="SemiBold" />
+                    <TextBlock Classes="twain-section-heading" Text="Editor appearance" />
 
                     <Grid
                         ColumnDefinitions="Auto,*"
@@ -391,18 +390,20 @@
                         Content="Show line numbers" />
 
                     </StackPanel>
+                    </StackPanel>
+                </Border>
 
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Tools">
+            <TabItem Classes="twain-tab" Header="Tools">
                 <StackPanel
                     Margin="12"
                     Spacing="12">
 
-                    <TextBlock
-                        Text="Current article list"
-                        FontWeight="SemiBold" />
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="10">
+                    <TextBlock Classes="twain-section-heading" Text="Current article list" />
 
                     <TextBlock
                         Text="Choose how each tool handles the current article list."
@@ -470,13 +471,15 @@
                         </ComboBox>
 
                     </Grid>
+                    </StackPanel>
+                </Border>
 
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Alerts">
+            <TabItem Classes="twain-tab" Header="Alerts">
+                <Border Classes="twain-section" Margin="12">
                 <Grid
-                    Margin="12"
                     RowDefinitions="Auto,*"
                     RowSpacing="10">
 
@@ -496,6 +499,7 @@
                     </ScrollViewer>
 
                 </Grid>
+                </Border>
             </TabItem>
 
         </TabControl>

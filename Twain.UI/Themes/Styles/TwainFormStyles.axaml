@@ -35,4 +35,16 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
+    <!-- Shared tab container styling. -->
+    <Style Selector="TabControl.twain-tabs">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- Shared tab header typography. -->
+    <Style Selector="TabItem.twain-tab">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+    </Style>
 </Styles>
