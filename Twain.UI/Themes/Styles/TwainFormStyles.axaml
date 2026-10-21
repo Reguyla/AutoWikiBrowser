@@ -30,4 +30,9 @@
                 Value="{DynamicResource TwainTextPrimaryBrush}" />
     </Style>
 
+    <!-- Shared styling for expandable form groups. -->
+    <Style Selector="Expander.twain-expander">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
 </Styles>
