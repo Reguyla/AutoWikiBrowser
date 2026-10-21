@@ -14,13 +14,15 @@
             x:Key="ArticleDisplayTitleConverter" />
     </UserControl.Resources>
 
-    <Grid RowDefinitions="Auto,Auto,*"
-          RowSpacing="8">
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        RowSpacing="{DynamicResource TwainSpacingSmall}">
 
         <!-- List source -->
-        <Grid Grid.Row="0"
-              ColumnDefinitions="*,Auto"
-              ColumnSpacing="8">
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="*,Auto"
+            ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
             <ComboBox
                 ItemsSource="{Binding Providers}"
@@ -42,9 +44,10 @@
             IsEnabled="{Binding IsSourceTextEnabled}" />
 
         <!-- Article list and manual entry -->
-        <Grid Grid.Row="2"
-              RowDefinitions="Auto,*"
-              RowSpacing="8">
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="Auto,*"
+            RowSpacing="{DynamicResource TwainSpacingSmall}">
 
             <!-- Article list -->
             <ListBox
@@ -186,9 +189,10 @@
             </ListBox>
 
             <!-- Manual article entry -->
-            <Grid Grid.Row="0"
-                  ColumnDefinitions="*,Auto,Auto"
-                  ColumnSpacing="8">
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                 <TextBox
                     Text="{Binding ManualArticleTitle}"
