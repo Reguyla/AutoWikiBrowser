@@ -10,7 +10,9 @@
     Width="420"
     SizeToContent="Height"
     CanResize="False"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
