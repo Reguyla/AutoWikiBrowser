@@ -11,7 +11,9 @@
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
-    Title="Enter details">
+    Title="Enter details"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
@@ -78,8 +80,9 @@
                     Grid.Column="0"
                     Spacing="{DynamicResource TwainSpacingSmall}">
 
-                    <TextBlock
-                        Text="Create/Edit" />
+                <TextBlock
+                    Classes="twain-section-heading"
+                    Text="Create/Edit" />
 
                     <ListBox
                         x:Name="EditProtectionListBox"
@@ -91,8 +94,9 @@
                     Grid.Column="1"
                     Spacing="{DynamicResource TwainSpacingSmall}">
 
-                    <TextBlock
-                        Text="Move" />
+                <TextBlock
+                    Classes="twain-section-heading"
+                    Text="Move" />
 
                     <ListBox
                         x:Name="MoveProtectionListBox"
