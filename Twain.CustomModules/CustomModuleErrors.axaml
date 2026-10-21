@@ -18,11 +18,9 @@
 
         <Border
             Grid.Row="0"
-            Background="{DynamicResource TwainRaisedSurfaceBrush}"
-            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-            BorderThickness="{DynamicResource TwainBorderThickness}"
-            CornerRadius="{DynamicResource TwainPaneCornerRadius}"
-            Padding="{DynamicResource TwainPanePadding}">
+            Classes="twain-section"
+            Margin="0"
+            Background="{DynamicResource TwainRaisedSurfaceBrush}">
 
             <TextBox
                 x:Name="ErrorsTextBox"
