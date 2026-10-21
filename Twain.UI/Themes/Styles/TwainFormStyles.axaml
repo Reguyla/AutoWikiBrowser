@@ -47,4 +47,17 @@
         <Setter Property="Foreground"
                 Value="{DynamicResource TwainTextPrimaryBrush}" />
     </Style>
+
+    <!-- Shared styling for DataGrid column headers. -->
+    <Style Selector="DataGrid.twain-datagrid DataGridColumnHeader">
+    <Setter Property="Background"
+            Value="{DynamicResource TwainPaneHeaderBrush}" />
+    <Setter Property="Foreground"
+            Value="{DynamicResource TwainTextPrimaryBrush}" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="BorderBrush"
+            Value="{DynamicResource TwainBorderSubtleBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,1" />
+</Style>
 </Styles>

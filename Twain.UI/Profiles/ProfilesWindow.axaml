@@ -7,150 +7,172 @@
     Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="16"
-        RowDefinitions="*,Auto,Auto,Auto"
-        RowSpacing="12">
+        Margin="12"
+        RowDefinitions="*,Auto,Auto"
+        RowSpacing="8">
 
         <!-- Saved profiles -->
-        <DataGrid
-            x:Name="ProfilesDataGrid"
+        <Border
             Grid.Row="0"
-            AutoGenerateColumns="False"
-            IsReadOnly="True"
-            SelectionMode="Single"
-            GridLinesVisibility="Horizontal"
-            SelectionChanged="ProfilesDataGrid_SelectionChanged">
+            Classes="twain-section"
+            Margin="0"
+            MinHeight="0">
 
-            <DataGrid.Columns>
-                <DataGridTextColumn
-                    Header="ID"
-                    Binding="{Binding ID, x:DataType=profiles:ProfileListItem}"
-                    Width="Auto" />
+            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+                <TextBlock
+                    Grid.Row="0"
+                    Classes="twain-section-heading"
+                    Text="Saved profiles" />
 
-                <DataGridTextColumn
-                    Header="Username"
-                    Binding="{Binding Username, x:DataType=profiles:ProfileListItem}"
-                    Width="2*" />
+                <DataGrid
+                    x:Name="ProfilesDataGrid"
+                    Classes="twain-datagrid"
+                    Grid.Row="1"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    SelectionMode="Single"
+                    GridLinesVisibility="Horizontal"
+                    SelectionChanged="ProfilesDataGrid_SelectionChanged">
 
-                <DataGridTextColumn
-                    Header="Password saved?"
-                    Binding="{Binding PasswordSaved, x:DataType=profiles:ProfileListItem}"
-                    Width="*" />
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Header="ID"
+                            Binding="{Binding ID, x:DataType=profiles:ProfileListItem}"
+                            Width="Auto" />
 
-                <DataGridTextColumn
-                    Header="Default settings"
-                    Binding="{Binding DefaultSettings, x:DataType=profiles:ProfileListItem}"
-                    Width="2*" />
+                        <DataGridTextColumn
+                            Header="Username"
+                            Binding="{Binding Username, x:DataType=profiles:ProfileListItem}"
+                            Width="2*" />
 
-                <DataGridTextColumn
-                    Header="Notes"
-                    Binding="{Binding Notes, x:DataType=profiles:ProfileListItem}"
-                    Width="2*" />
-            </DataGrid.Columns>
-        </DataGrid>
+                        <DataGridTextColumn
+                            Header="Password saved?"
+                            Binding="{Binding PasswordSaved, x:DataType=profiles:ProfileListItem}"
+                            Width="*" />
 
-        <!-- Saved profile actions -->
-        <StackPanel
-            Grid.Row="1"
-            Orientation="Horizontal"
-            Spacing="8">
+                        <DataGridTextColumn
+                            Header="Default settings"
+                            Binding="{Binding DefaultSettings, x:DataType=profiles:ProfileListItem}"
+                            Width="2*" />
 
-            <Button
-                x:Name="LoginButton"
-                Content="Login"
-                MinWidth="80"
-                IsEnabled="False"
-                Click="LoginButton_Click" />
+                        <DataGridTextColumn
+                            Header="Notes"
+                            Binding="{Binding Notes, x:DataType=profiles:ProfileListItem}"
+                            Width="2*" />
+                    </DataGrid.Columns>
+                </DataGrid>
 
-            <Button
-                x:Name="AddButton"
-                Content="Add..."
-                MinWidth="80"
-                Click="AddButton_Click" />
+                <!-- Saved profile actions -->
+                <StackPanel
+                    Grid.Row="2"
+                    Orientation="Horizontal"
+                    Spacing="8">
 
-            <Button
-                x:Name="EditButton"
-                Content="Edit..."
-                MinWidth="80"
-                IsEnabled="False"
-                Click="EditButton_Click" />
+                    <Button
+                        x:Name="LoginButton"
+                        Content="Login"
+                        MinWidth="80"
+                        IsEnabled="False"
+                        Click="LoginButton_Click" />
 
-            <Button
-                x:Name="DeleteButton"
-                Content="Delete"
-                MinWidth="80"
-                IsEnabled="False"
-                Click="DeleteButton_Click" />
-        </StackPanel>
+                    <Button
+                        x:Name="AddButton"
+                        Content="Add..."
+                        MinWidth="80"
+                        Click="AddButton_Click" />
+
+                    <Button
+                        x:Name="EditButton"
+                        Content="Edit..."
+                        MinWidth="80"
+                        IsEnabled="False"
+                        Click="EditButton_Click" />
+
+                    <Button
+                        x:Name="DeleteButton"
+                        Content="Delete"
+                        MinWidth="80"
+                        IsEnabled="False"
+                        Click="DeleteButton_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- Quick login -->
-        <GroupBox
-            Grid.Row="2"
-            Header="Quick login">
+        <Border
+            Grid.Row="1"
+            Classes="twain-section"
+            Margin="0">
 
-            <Grid
-                Margin="8"
-                ColumnDefinitions="Auto,*,Auto"
-                RowDefinitions="Auto,Auto,Auto"
-                ColumnSpacing="8"
-                RowSpacing="8">
-
+            <StackPanel Spacing="10">
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Text="Username:" />
+                    Classes="twain-section-heading"
+                    Text="Quick login" />
 
-                <TextBox
-                    x:Name="QuickLoginUsernameTextBox"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Grid.ColumnSpan="2"
-                    TextChanged="QuickLoginCredentials_TextChanged" />
+                <Grid
+                    Margin="8"
+                    ColumnDefinitions="Auto,*,Auto"
+                    RowDefinitions="Auto,Auto,Auto"
+                    ColumnSpacing="8"
+                    RowSpacing="8">
 
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Text="Password:" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="Username:" />
 
-                <TextBox
-                    x:Name="QuickLoginPasswordTextBox"
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    PasswordChar="●"
-                    TextChanged="QuickLoginCredentials_TextChanged" />
+                    <TextBox
+                        x:Name="QuickLoginUsernameTextBox"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        TextChanged="QuickLoginCredentials_TextChanged" />
 
-                <Button
-                    x:Name="QuickLoginButton"
-                    Grid.Row="1"
-                    Grid.Column="2"
-                    MinWidth="80"
-                    Content="Login"
-                    IsEnabled="False"
-                    Click="QuickLoginButton_Click" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="Password:" />
 
-                <CheckBox
-                    x:Name="SaveQuickLoginProfileCheckBox"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    HorizontalAlignment="Left"
-                    Content="Save this account"
-                    IsCheckedChanged="SaveQuickLoginProfileCheckBox_IsCheckedChanged" />
+                    <TextBox
+                        x:Name="QuickLoginPasswordTextBox"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        PasswordChar="●"
+                        TextChanged="QuickLoginCredentials_TextChanged" />
 
-                <CheckBox
-                    x:Name="SaveQuickLoginPasswordCheckBox"
-                    Grid.Row="2"
-                    Grid.Column="2"
-                    HorizontalAlignment="Left"
-                    Content="Save password"
-                    IsEnabled="False" />
-            </Grid>
-        </GroupBox>
+                    <Button
+                        x:Name="QuickLoginButton"
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        MinWidth="80"
+                        Content="Login"
+                        IsEnabled="False"
+                        Click="QuickLoginButton_Click" />
+
+                    <CheckBox
+                        x:Name="SaveQuickLoginProfileCheckBox"
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        Content="Save this account"
+                        IsCheckedChanged="SaveQuickLoginProfileCheckBox_IsCheckedChanged" />
+
+                    <CheckBox
+                        x:Name="SaveQuickLoginPasswordCheckBox"
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        HorizontalAlignment="Left"
+                        Content="Save password"
+                        IsEnabled="False" />
+                </Grid>
+            </StackPanel>
+        </Border>
 
         <!-- Window actions -->
         <StackPanel
-            Grid.Row="3"
+            Grid.Row="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right">
 
@@ -159,6 +181,5 @@
                 MinWidth="80"
                 Click="CloseButton_Click" />
         </StackPanel>
-
     </Grid>
 </UserControl>
