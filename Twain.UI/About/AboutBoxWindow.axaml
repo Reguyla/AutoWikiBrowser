@@ -9,11 +9,14 @@
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
-    Title="About Twain">
+    Title="About Twain"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid Margin="24"
-          RowDefinitions="Auto,Auto,*,Auto"
-          RowSpacing="16">
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
         <!-- Application identity -->
         <StackPanel Grid.Row="0"
@@ -52,17 +55,16 @@
             <StackPanel Grid.Column="0"
                         Spacing="8">
 
-                <TextBlock Text="Environment"
-                           FontSize="16"
-                           FontWeight="SemiBold" />
+            <TextBlock
+                Classes="twain-section-heading"
+                Text="Environment" />
 
                 <TextBlock x:Name="EnvironmentText"
                            TextWrapping="Wrap" />
 
-                <TextBlock Text="Project history"
-                           Margin="0,12,0,0"
-                           FontSize="16"
-                           FontWeight="SemiBold" />
+                <TextBlock
+                    Classes="twain-section-heading"
+                    Text="Project history" />
 
                 <Button x:Name="AutoWikiBrowserButton"
                         HorizontalAlignment="Left"
@@ -78,9 +80,9 @@
             <StackPanel Grid.Column="1"
                         Spacing="8">
 
-                <TextBlock Text="License and details"
-                           FontSize="16"
-                           FontWeight="SemiBold" />
+            <TextBlock
+                Classes="twain-section-heading"
+                Text="License and details" />
 
             <ScrollViewer
                 VerticalScrollBarVisibility="Auto"
