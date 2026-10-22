@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.Disambiguation.DabControl"
     xmlns="https://github.com/avaloniaui"
@@ -5,48 +6,51 @@
     MinWidth="600">
 
     <Border
-        Margin="4"
-        Padding="8"
-        BorderThickness="1"
-        CornerRadius="4">
+        Classes="twain-section"
+        Margin="4">
 
-        <Grid RowDefinitions="Auto,Auto,Auto"
-              RowSpacing="6">
+        <Grid
+            RowDefinitions="Auto,Auto,Auto"
+            RowSpacing="{DynamicResource TwainSpacingSmall}">
 
+            <!-- Paragraph context -->
             <TextBlock
                 x:Name="ParagraphTextBlock"
                 Grid.Row="0"
                 TextWrapping="Wrap" />
 
+            <!-- Disambiguation choice -->
             <ComboBox
                 x:Name="ChoiceComboBox"
                 Grid.Row="1"
                 SelectionChanged="ChoiceComboBox_SelectionChanged" />
 
-<Grid
-    Grid.Row="2"
-    ColumnDefinitions="*,Auto,Auto"
-    ColumnSpacing="6">
+            <!-- Correction and editing commands -->
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="*,Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
-    <TextBox
-        x:Name="CorrectionTextBox"
-        Grid.Column="0"
-        TextChanged="CorrectionTextBox_TextChanged" />
+                <TextBox
+                    x:Name="CorrectionTextBox"
+                    Grid.Column="0"
+                    TextChanged="CorrectionTextBox_TextChanged" />
 
-    <Button
-        x:Name="UnpipeButton"
-        Grid.Column="1"
-        Content="Unpipe"
-        Click="UnpipeButton_Click" />
+                <Button
+                    x:Name="UnpipeButton"
+                    Grid.Column="1"
+                    Classes="twain-command-button"
+                    Content="Unpipe"
+                    Click="UnpipeButton_Click" />
 
-    <Button
-        x:Name="FlipButton"
-        Grid.Column="2"
-        Content="Flip"
-        Click="FlipButton_Click" />
+                <Button
+                    x:Name="FlipButton"
+                    Grid.Column="2"
+                    Classes="twain-command-button"
+                    Content="Flip"
+                    Click="FlipButton_Click" />
 
-</Grid>
-
+            </Grid>
         </Grid>
     </Border>
 </UserControl>
