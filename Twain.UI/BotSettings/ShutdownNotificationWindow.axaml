@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.BotSettings.ShutdownNotificationWindow"
     xmlns="https://github.com/avaloniaui"
@@ -11,29 +12,32 @@
     Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="20"
-        RowDefinitions="*,Auto">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- Notification message -->
         <TextBlock
             x:Name="MessageTextBlock"
+            Grid.Row="0"
             VerticalAlignment="Center"
             FontSize="15"
             TextWrapping="Wrap" />
 
+        <!-- Commands -->
         <StackPanel
             Grid.Row="1"
-            Margin="0,20,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
             <Button
-                Width="90"
+                Classes="twain-command-button"
                 Click="CancelButton_Click"
                 Content="Cancel" />
 
             <Button
-                Width="90"
+                Classes="twain-primary-button"
                 Click="ContinueButton_Click"
                 Content="Continue" />
 
