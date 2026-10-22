@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,15 +9,18 @@
     MinWidth="440"
     MinHeight="240"
     CanResize="True"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="16"
+        Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
         ColumnDefinitions="Auto,*"
-        RowSpacing="10"
-        ColumnSpacing="12">
+        RowSpacing="{DynamicResource TwainSpacingMedium}"
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Regular expression -->
         <TextBlock
             Grid.Row="0"
             Grid.Column="0"
@@ -26,18 +30,21 @@
         <StackPanel
             Grid.Row="0"
             Grid.Column="1"
-            Spacing="6">
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <TextBox
                 x:Name="RegexTextBox"
                 HorizontalAlignment="Stretch" />
 
             <Button
+                Classes="twain-command-button"
                 HorizontalAlignment="Left"
                 Content="Open in Regex Tester"
                 Click="OpenRegexTesterButton_Click" />
+
         </StackPanel>
 
+        <!-- Capture group -->
         <TextBlock
             Grid.Row="1"
             Grid.Column="0"
@@ -54,6 +61,7 @@
             Maximum="1000"
             Increment="1" />
 
+        <!-- Regex options -->
         <CheckBox
             x:Name="CaseSensitiveCheckBox"
             Grid.Row="2"
@@ -73,6 +81,7 @@
             VerticalAlignment="Top"
             Content="MultiLine" />
 
+        <!-- Validation message -->
         <TextBlock
             x:Name="ValidationMessageTextBlock"
             Grid.Row="5"
@@ -80,22 +89,25 @@
             IsVisible="False"
             TextWrapping="Wrap" />
 
+        <!-- Commands -->
         <StackPanel
             Grid.Row="6"
             Grid.ColumnSpan="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <Button
-                MinWidth="90"
+                Classes="twain-primary-button"
                 Content="OK"
                 Click="OkButton_Click" />
 
             <Button
-                MinWidth="90"
+                Classes="twain-command-button"
                 Content="Cancel"
                 Click="CancelButton_Click" />
+
         </StackPanel>
+
     </Grid>
 </Window>
