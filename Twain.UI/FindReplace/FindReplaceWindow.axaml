@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.FindReplace.FindReplaceWindow"
     xmlns="https://github.com/avaloniaui"
@@ -9,24 +10,26 @@
     Height="650"
     MinWidth="800"
     MinHeight="500"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="12"
-        RowDefinitions="Auto,Auto,Auto,*,Auto">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,Auto,*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Heading -->
         <TextBlock
             Grid.Row="0"
-            Margin="0,0,0,12"
-            FontSize="18"
-            FontWeight="SemiBold"
+            Classes="twain-section-heading"
             Text="Find and Replace" />
 
+        <!-- Find and replace options -->
         <StackPanel
             Grid.Row="1"
-            Margin="0,0,0,12"
             Orientation="Horizontal"
-            Spacing="16">
+            Spacing="{DynamicResource TwainSpacingLarge}">
 
             <CheckBox
                 Content="Ignore links"
@@ -43,11 +46,11 @@
 
         </StackPanel>
 
+        <!-- Search -->
         <StackPanel
             Grid.Row="2"
-            Margin="0,0,0,12"
             Orientation="Horizontal"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <TextBox
                 Width="250"
@@ -55,12 +58,13 @@
                 Text="{Binding SearchText, Mode=TwoWay}" />
 
             <Button
-                MinWidth="90"
+                Classes="twain-command-button"
                 Command="{Binding SearchCommand}"
                 Content="Search" />
 
         </StackPanel>
-        
+
+        <!-- Replacement rules -->
         <DataGrid
             Grid.Row="3"
             Classes="twain-datagrid"
@@ -191,59 +195,77 @@
 
         </DataGrid>
 
-        <WrapPanel
+
+        <!-- Rule management and completion commands -->
+        <Grid
             Grid.Row="4"
-            Margin="0,12,0,0"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal"
-            ItemSpacing="8"
-            LineSpacing="8">
+            RowDefinitions="Auto,Auto"
+            RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-            <Button
-                MinWidth="90"
-                Command="{Binding AddRuleCommand}"
-                Content="Add rule" />
+            <!-- Rule management -->
+            <WrapPanel
+                Grid.Row="0"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal"
+                ItemSpacing="{DynamicResource TwainSpacingSmall}"
+                LineSpacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button
-                MinWidth="90"
-                Command="{Binding RemoveRuleCommand}"
-                Content="Remove rule" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding AddRuleCommand}"
+                    Content="Add rule" />
 
-            <Button
-                MinWidth="90"
-                Command="{Binding MoveRuleUpCommand}"
-                Content="Move up" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding RemoveRuleCommand}"
+                    Content="Remove rule" />
 
-            <Button
-                MinWidth="90"
-                Command="{Binding MoveRuleDownCommand}"
-                Content="Move down" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding MoveRuleUpCommand}"
+                    Content="Move up" />
 
-            <Button
-                MinWidth="90"
-                Command="{Binding MoveRuleToTopCommand}"
-                Content="Move to top" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding MoveRuleDownCommand}"
+                    Content="Move down" />
 
-            <Button
-                MinWidth="90"
-                Command="{Binding MoveRuleToBottomCommand}"
-                Content="Move to bottom" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding MoveRuleToTopCommand}"
+                    Content="Move to top" />
 
-            <Button
-                MinWidth="90"
-                Command="{Binding ClearRulesCommand}"
-                Content="Clear all" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding MoveRuleToBottomCommand}"
+                    Content="Move to bottom" />
 
-            <Button
-                MinWidth="90"
-                Content="Cancel" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding ClearRulesCommand}"
+                    Content="Clear all" />
 
-            <Button
-                MinWidth="90"
-                Content="OK" />
+            </WrapPanel>
 
-        </WrapPanel>
+            <!-- Completion commands -->
+            <StackPanel
+                Grid.Row="1"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource TwainSpacingSmall}">
+
+                <Button
+                    Classes="twain-command-button"
+                    Content="Cancel" />
+
+                <Button
+                    Classes="twain-primary-button"
+                    Content="OK" />
+
+            </StackPanel>
+
+        </Grid>
 
     </Grid>
-
 </Window>
+
