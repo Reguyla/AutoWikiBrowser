@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Controls.InputBoxWindow"
     xmlns="https://github.com/avaloniaui"
@@ -17,34 +18,44 @@
         RowDefinitions="Auto,Auto,Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <TextBlock x:Name="PromptTextBlock"
-                   Grid.Row="0"
-                   TextWrapping="Wrap" />
+        <!-- Prompt -->
+        <TextBlock
+            x:Name="PromptTextBlock"
+            Grid.Row="0"
+            TextWrapping="Wrap" />
 
-        <TextBox x:Name="InputTextBox"
-                 Grid.Row="1"
-                 TextChanged="InputTextBox_TextChanged" />
+        <!-- User input -->
+        <TextBox
+            x:Name="InputTextBox"
+            Grid.Row="1"
+            TextChanged="InputTextBox_TextChanged" />
 
-        <TextBlock x:Name="ValidationTextBlock"
-                   Grid.Row="2"
-                   IsVisible="False"
-                   TextWrapping="Wrap" />
+        <!-- Validation message -->
+        <TextBlock
+            x:Name="ValidationTextBlock"
+            Grid.Row="2"
+            IsVisible="False"
+            TextWrapping="Wrap" />
 
+        <!-- Commands -->
         <StackPanel
             Grid.Row="3"
             Orientation="Horizontal"
             HorizontalAlignment="Right"
             Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button Content="_OK"
-                    Width="90"
-                    IsDefault="True"
-                    Click="OkButton_Click" />
+            <Button
+                Classes="twain-primary-button"
+                Content="_OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
 
-            <Button Content="_Cancel"
-                    Width="90"
-                    IsCancel="True"
-                    Click="CancelButton_Click" />
+            <Button
+                Classes="twain-command-button"
+                Content="_Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
         </StackPanel>
     </Grid>
 </Window>

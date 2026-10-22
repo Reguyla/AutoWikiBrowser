@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Controls.LevelNumberWindow"
     xmlns="https://github.com/avaloniaui"
@@ -16,32 +17,40 @@
         RowDefinitions="Auto,Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <TextBlock x:Name="PromptTextBlock"
-                   Grid.Row="0"
-                   Text="Number of levels:" />
+        <!-- Prompt -->
+        <TextBlock
+            x:Name="PromptTextBlock"
+            Grid.Row="0"
+            Text="Number of levels:" />
 
-        <NumericUpDown x:Name="LevelNumericUpDown"
-                       Grid.Row="1"
-                       Minimum="1"
-                       Maximum="1000"
-                       Value="1"
-                       Increment="1" />
+        <!-- Number selection -->
+        <NumericUpDown
+            x:Name="LevelNumericUpDown"
+            Grid.Row="1"
+            Minimum="1"
+            Maximum="1000"
+            Value="1"
+            Increment="1" />
 
+        <!-- Commands -->
         <StackPanel
             Grid.Row="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right"
             Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button Content="_OK"
-                    Width="90"
-                    IsDefault="True"
-                    Click="OkButton_Click" />
+            <Button
+                Classes="twain-primary-button"
+                Content="_OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
 
-            <Button Content="_Cancel"
-                    Width="90"
-                    IsCancel="True"
-                    Click="CancelButton_Click" />
+            <Button
+                Classes="twain-command-button"
+                Content="_Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
         </StackPanel>
     </Grid>
 </Window>

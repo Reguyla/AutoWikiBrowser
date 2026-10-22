@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,15 +16,18 @@
         RowDefinitions="Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- Validation message -->
         <TextBlock
             x:Name="MessageTextBlock"
             TextWrapping="Wrap" />
 
+        <!-- Commands -->
         <Button
             Grid.Row="1"
-            Width="90"
+            Classes="twain-command-button"
             HorizontalAlignment="Right"
             Content="OK"
             Click="OkButton_Click" />
+
     </Grid>
 </Window>

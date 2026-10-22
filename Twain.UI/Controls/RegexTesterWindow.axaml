@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -47,6 +48,7 @@
                 TextChanged="ConditionsChanged"
                 ToolTip.Tip="The regular expression to find" />
 
+            <!-- Regex options -->
             <Border
                 Grid.Row="0"
                 Grid.Column="2"
@@ -54,48 +56,49 @@
                 Classes="twain-section"
                 Margin="0">
 
-                <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                <StackPanel
+                    Spacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock
                         Classes="twain-section-heading"
                         Text="Regex options" />
 
-                <Grid
-                    ColumnDefinitions="Auto,Auto"
-                    RowDefinitions="Auto,Auto"
-                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                    RowSpacing="{DynamicResource TwainSpacingSmall}">
+                    <Grid
+                        ColumnDefinitions="Auto,Auto"
+                        RowDefinitions="Auto,Auto"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-                    <CheckBox
-                        x:Name="MultilineCheckBox"
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        Content="Multiline"
-                        ToolTip.Tip="Changes ^ and $ so they match the beginning and end of each line." />
+                        <CheckBox
+                            x:Name="MultilineCheckBox"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Content="Multiline"
+                            ToolTip.Tip="Changes ^ and $ so they match the beginning and end of each line." />
 
-                    <CheckBox
-                        x:Name="SinglelineCheckBox"
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Content="Singleline"
-                        ToolTip.Tip="Changes . so it matches every character, including newlines." />
+                        <CheckBox
+                            x:Name="SinglelineCheckBox"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Content="Singleline"
+                            ToolTip.Tip="Changes . so it matches every character, including newlines." />
 
-                    <CheckBox
-                        x:Name="IgnoreCaseCheckBox"
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Content="Ignore case"
-                        ToolTip.Tip="Performs case-insensitive matching." />
+                        <CheckBox
+                            x:Name="IgnoreCaseCheckBox"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Content="Ignore case"
+                            ToolTip.Tip="Performs case-insensitive matching." />
 
-                    <CheckBox
-                        x:Name="ExplicitCaptureCheckBox"
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Content="Explicit capture"
-                        ToolTip.Tip="Only named or explicitly numbered groups capture substrings." />
-                </Grid>
+                        <CheckBox
+                            x:Name="ExplicitCaptureCheckBox"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Content="Explicit capture"
+                            ToolTip.Tip="Only named or explicitly numbered groups capture substrings." />
+                    </Grid>
                 </StackPanel>
-                </Border>
+            </Border>
 
             <TextBlock
                 Grid.Row="1"
@@ -119,7 +122,7 @@
                 <Button
                     x:Name="FindButton"
                     Grid.Column="1"
-                    Width="80"
+                    Classes="twain-command-button"
                     Content="Find"
                     IsEnabled="False"
                     Click="FindButton_Click" />
@@ -127,7 +130,7 @@
                 <Button
                     x:Name="ReplaceButton"
                     Grid.Column="2"
-                    Width="80"
+                    Classes="twain-command-button"
                     Content="Replace"
                     IsEnabled="False"
                     Click="ReplaceButton_Click" />
@@ -135,7 +138,7 @@
                 <Button
                     x:Name="HelpButton"
                     Grid.Column="3"
-                    Width="80"
+                    Classes="twain-command-button"
                     Content="Help"
                     Click="HelpButton_Click" />
             </Grid>
@@ -147,6 +150,7 @@
             RowDefinitions="*,Auto,*"
             RowSpacing="{DynamicResource TwainSpacingSmall}">
 
+            <!-- Input text -->
             <Grid
                 Grid.Row="0"
                 ColumnDefinitions="Auto,*"
@@ -167,12 +171,14 @@
                     ToolTip.Tip="Enter or paste the text to be searched here" />
             </Grid>
 
+            <!-- Resizable divider -->
             <GridSplitter
                 Grid.Row="1"
                 Height="6"
                 HorizontalAlignment="Stretch"
                 ResizeDirection="Rows" />
 
+            <!-- Results -->
             <Grid
                 Grid.Row="2"
                 ColumnDefinitions="Auto,*"
@@ -183,8 +189,7 @@
                     VerticalAlignment="Top"
                     Text="Result:" />
 
-                <Grid
-                    Grid.Column="1">
+                <Grid Grid.Column="1">
 
                     <TreeView
                         x:Name="CapturesTreeView"

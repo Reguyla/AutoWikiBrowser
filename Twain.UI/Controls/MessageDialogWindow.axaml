@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -19,10 +20,12 @@
         RowDefinitions="Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- Dialog message -->
         <TextBlock
             x:Name="MessageTextBlock"
             TextWrapping="Wrap" />
 
+        <!-- Commands -->
         <StackPanel
             x:Name="ButtonsPanel"
             Grid.Row="1"
@@ -32,24 +35,25 @@
 
             <Button
                 x:Name="YesButton"
-                Width="90"
+                Classes="twain-primary-button"
                 Content="Yes"
                 IsVisible="False"
                 Click="YesButton_Click" />
 
             <Button
                 x:Name="NoButton"
-                Width="90"
+                Classes="twain-command-button"
                 Content="No"
                 IsVisible="False"
                 Click="NoButton_Click" />
 
             <Button
                 x:Name="OkButton"
-                Width="90"
+                Classes="twain-command-button"
                 Content="OK"
                 IsDefault="True"
                 Click="OkButton_Click" />
+
         </StackPanel>
     </Grid>
 </Window>
