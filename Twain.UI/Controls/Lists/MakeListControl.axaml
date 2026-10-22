@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.Controls.Lists.MakeListControl"
     xmlns="https://github.com/avaloniaui"
@@ -32,6 +33,7 @@
 
             <Button
                 Grid.Column="1"
+                Classes="twain-primary-button"
                 Content="Make List"
                 Command="{Binding MakeListCommand}" />
         </Grid>
@@ -200,11 +202,13 @@
 
                 <Button
                     Grid.Column="1"
+                    Classes="twain-command-button"
                     Content="Add"
                     Command="{Binding AddArticleCommand}" />
 
                 <Button
                     Grid.Column="2"
+                    Classes="twain-command-button"
                     Content="Remove"
                     Click="RemoveButton_Click" />
             </Grid>
