@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.Editor.ArticleEditorView"
     xmlns="https://github.com/avaloniaui"
@@ -14,16 +15,18 @@
         <vm:ArticleEditorViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid
+        RowDefinitions="Auto,*"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Edit summary and options -->
         <Grid
             Grid.Row="0"
-            Margin="0,0,0,8"
-            ColumnDefinitions="Auto,*,Auto">
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
                 Grid.Column="0"
-                Margin="0,0,8,0"
                 VerticalAlignment="Center"
                 Text="Edit summary:" />
 
@@ -34,13 +37,13 @@
 
             <CheckBox
                 Grid.Column="2"
-                Margin="12,0,0,0"
                 VerticalAlignment="Center"
                 Content="Minor edit"
                 IsChecked="{Binding IsMinorEdit, Mode=TwoWay}" />
 
         </Grid>
 
+        <!-- Monaco article editor -->
         <NativeWebView
             x:Name="EditorWebView"
             Grid.Row="1"
