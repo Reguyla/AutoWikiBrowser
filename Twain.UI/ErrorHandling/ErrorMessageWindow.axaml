@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,24 +8,29 @@
     MinWidth="420"
     MinHeight="180"
     CanResize="False"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="16"
+        Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="*,Auto"
-        RowSpacing="16">
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- Error message -->
         <TextBlock
             x:Name="MessageTextBlock"
             Grid.Row="0"
             TextWrapping="Wrap"
             VerticalAlignment="Center" />
 
+        <!-- Acknowledgment -->
         <Button
             Grid.Row="1"
+            Classes="twain-command-button"
             HorizontalAlignment="Right"
-            MinWidth="90"
             Content="OK"
             Click="OkButton_Click" />
+
     </Grid>
 </Window>

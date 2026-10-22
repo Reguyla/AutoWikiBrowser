@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,18 +8,22 @@
     Height="720"
     MinWidth="600"
     MinHeight="500"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="16"
+        Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
-        RowSpacing="12">
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Error heading -->
         <TextBlock
             Grid.Row="0"
-            Text="The program has encountered the following problem:"
-            FontWeight="SemiBold" />
+            Classes="twain-section-heading"
+            Text="The program has encountered the following problem:" />
 
+        <!-- Error message -->
         <TextBox
             x:Name="ErrorTextBox"
             Grid.Row="1"
@@ -27,15 +32,17 @@
             TextWrapping="Wrap"
             MinHeight="90" />
 
+        <!-- Reporting information -->
         <TextBlock
             Grid.Row="2"
             TextWrapping="Wrap"
             Text="Twain is constantly being improved. If you are able to, please visit our GitHub page to file a new issue for any bugs, enhancements, or suggestions." />
 
+        <!-- Issue heading -->
         <Grid
             Grid.Row="3"
             ColumnDefinitions="Auto,*"
-            ColumnSpacing="8">
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
                 Grid.Column="0"
@@ -48,29 +55,34 @@
                 IsReadOnly="True" />
         </Grid>
 
-            <TextBox
-                x:Name="DetailsTextBox"
-                Grid.Row="4"
-                IsReadOnly="True"
-                AcceptsReturn="True"
-                TextWrapping="NoWrap"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+        <!-- Error details -->
+        <TextBox
+            x:Name="DetailsTextBox"
+            Grid.Row="4"
+            IsReadOnly="True"
+            AcceptsReturn="True"
+            TextWrapping="NoWrap"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto" />
 
+        <!-- Commands -->
         <Grid
             Grid.Row="5"
             ColumnDefinitions="Auto,*,Auto"
-            ColumnSpacing="8">
+            ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
             <Button
                 Grid.Column="0"
+                Classes="twain-command-button"
                 Content="Copy to clipboard"
                 Click="CopyButton_Click" />
 
             <Button
                 Grid.Column="2"
+                Classes="twain-primary-button"
                 Content="Continue working"
                 Click="CloseButton_Click" />
+
         </Grid>
     </Grid>
 </Window>
