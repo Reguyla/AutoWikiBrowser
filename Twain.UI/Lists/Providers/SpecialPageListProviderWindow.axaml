@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,20 +9,23 @@
     MinWidth="360"
     MinHeight="220"
     CanResize="True"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="16"
+        Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="Auto,Auto,Auto,*,Auto"
         ColumnDefinitions="Auto,*"
-        RowSpacing="10"
-        ColumnSpacing="12">
+        RowSpacing="{DynamicResource TwainSpacingMedium}"
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Source selection -->
         <TextBlock
             Grid.Row="0"
             Grid.Column="0"
             VerticalAlignment="Center"
-            Text="_Source:" />
+            Text="Source:" />
 
         <ComboBox
             x:Name="SourceComboBox"
@@ -30,11 +34,12 @@
             HorizontalAlignment="Stretch"
             SelectionChanged="SourceComboBox_SelectionChanged" />
 
+        <!-- Page count -->
         <TextBlock
             Grid.Row="1"
             Grid.Column="0"
             VerticalAlignment="Center"
-            Text="_Pages:" />
+            Text="Pages:" />
 
         <TextBox
             x:Name="PagesTextBox"
@@ -42,11 +47,12 @@
             Grid.Column="1"
             HorizontalAlignment="Stretch" />
 
+        <!-- Namespace selection -->
         <TextBlock
             Grid.Row="2"
             Grid.Column="0"
             VerticalAlignment="Center"
-            Text="_Namespace:" />
+            Text="Namespace:" />
 
         <ComboBox
             x:Name="NamespaceComboBox"
@@ -54,22 +60,25 @@
             Grid.Column="1"
             HorizontalAlignment="Stretch" />
 
+        <!-- Commands -->
         <StackPanel
             Grid.Row="4"
             Grid.ColumnSpan="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <Button
-                MinWidth="90"
+                Classes="twain-primary-button"
                 Content="OK"
                 Click="OkButton_Click" />
 
             <Button
-                MinWidth="90"
+                Classes="twain-command-button"
                 Content="Cancel"
                 Click="CancelButton_Click" />
+
         </StackPanel>
+
     </Grid>
 </Window>
