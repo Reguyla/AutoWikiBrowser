@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -20,6 +21,7 @@
         RowDefinitions="Auto,Auto,Auto,Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- New title -->
         <Grid
             x:Name="NewTitlePanel"
             Grid.Row="0"
@@ -35,6 +37,7 @@
                 Grid.Column="1" />
         </Grid>
 
+        <!-- Expiry -->
         <Grid
             x:Name="ExpiryPanel"
             Grid.Row="1"
@@ -51,6 +54,7 @@
                 Grid.Column="1" />
         </Grid>
 
+        <!-- Summary -->
         <Grid
             Grid.Row="2"
             ColumnDefinitions="Auto,*"
@@ -66,6 +70,7 @@
                 IsEditable="True" />
         </Grid>
 
+        <!-- Protection options -->
         <StackPanel
             x:Name="ProtectionPanel"
             Grid.Row="3"
@@ -80,9 +85,9 @@
                     Grid.Column="0"
                     Spacing="{DynamicResource TwainSpacingSmall}">
 
-                <TextBlock
-                    Classes="twain-section-heading"
-                    Text="Create/Edit" />
+                    <TextBlock
+                        Classes="twain-section-heading"
+                        Text="Create/Edit" />
 
                     <ListBox
                         x:Name="EditProtectionListBox"
@@ -94,9 +99,9 @@
                     Grid.Column="1"
                     Spacing="{DynamicResource TwainSpacingSmall}">
 
-                <TextBlock
-                    Classes="twain-section-heading"
-                    Text="Move" />
+                    <TextBlock
+                        Classes="twain-section-heading"
+                        Text="Move" />
 
                     <ListBox
                         x:Name="MoveProtectionListBox"
@@ -123,6 +128,7 @@
                 IsVisible="False" />
         </StackPanel>
 
+        <!-- Move options and commands -->
         <Grid
             Grid.Row="4"
             RowDefinitions="Auto,Auto"
@@ -148,6 +154,7 @@
                     Content="Watch" />
             </StackPanel>
 
+            <!-- Commands -->
             <StackPanel
                 Grid.Row="1"
                 Orientation="Horizontal"
@@ -156,12 +163,12 @@
 
                 <Button
                     x:Name="OkButton"
-                    Width="90"
+                    Classes="twain-primary-button"
                     Content="OK"
                     Click="OkButton_Click" />
 
                 <Button
-                    Width="90"
+                    Classes="twain-command-button"
                     Content="Cancel"
                     Click="CancelButton_Click" />
             </StackPanel>
