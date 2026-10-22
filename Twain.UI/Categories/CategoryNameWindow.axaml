@@ -19,24 +19,27 @@
         RowSpacing="{DynamicResource TwainSpacingMedium}"
         ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
+        <!-- Category namespace -->
         <TextBlock
             x:Name="CategoryNamespaceTextBlock"
             Grid.Row="0"
             Grid.Column="0"
             VerticalAlignment="Center" />
 
+        <!-- Category name -->
         <TextBox
             x:Name="CategoryNameTextBox"
             Grid.Row="0"
             Grid.Column="1"
             VerticalAlignment="Center" />
 
+        <!-- Commands -->
         <Button
             Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="2"
+            Classes="twain-primary-button"
             HorizontalAlignment="Right"
-            MinWidth="80"
             Content="OK"
             IsDefault="True"
             Click="OkButton_Click" />
