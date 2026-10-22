@@ -1,5 +1,5 @@
+
 <UserControl
-    Background="{DynamicResource TwainApplicationBackgroundBrush}"
     x:Class="Twain.UI.BotSettings.BotSettingsWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -18,15 +18,17 @@
         RowDefinitions="*,Auto">
 
         <Grid
-            Margin="16"
-            RowDefinitions="*,Auto">
+            Margin="{DynamicResource TwainContentPadding}"
+            RowDefinitions="*,Auto"
+            RowSpacing="{DynamicResource TwainSpacingLarge}">
 
             <ScrollViewer>
-                <StackPanel Spacing="16">
+                <StackPanel Spacing="{DynamicResource TwainSpacingLarge}">
 
                     <!-- Automatic saving -->
                     <Border Classes="twain-section">
-                        <StackPanel Spacing="10">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
                             <TextBlock
                                 Classes="twain-section-heading"
                                 Text="Automatic saving" />
@@ -38,6 +40,7 @@
 
                             <Grid
                                 ColumnDefinitions="Auto,120,*"
+                                ColumnSpacing="{DynamicResource TwainSpacingSmall}"
                                 IsEnabled="{Binding AutoSaveEnabled}">
 
                                 <TextBlock
@@ -46,7 +49,6 @@
 
                                 <NumericUpDown
                                     Grid.Column="1"
-                                    Margin="8,0"
                                     Minimum="0"
                                     Value="{Binding AutoSaveDelay}" />
 
@@ -58,6 +60,7 @@
 
                             <Grid
                                 ColumnDefinitions="Auto,120,*"
+                                ColumnSpacing="{DynamicResource TwainSpacingSmall}"
                                 IsEnabled="{Binding AutoSaveEnabled}">
 
                                 <TextBlock
@@ -66,7 +69,6 @@
 
                                 <NumericUpDown
                                     Grid.Column="1"
-                                    Margin="8,0"
                                     Minimum="0"
                                     Value="{Binding MaximumEdits}" />
 
@@ -84,7 +86,8 @@
 
                     <!-- Nudge behavior -->
                     <Border Classes="twain-section">
-                        <StackPanel Spacing="10">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
                             <TextBlock
                                 Classes="twain-section-heading"
                                 Text="Nudge timer" />
@@ -101,13 +104,14 @@
 
                             <StackPanel
                                 Orientation="Horizontal"
-                                Spacing="12">
+                                Spacing="{DynamicResource TwainSpacingMedium}">
 
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     Text="{Binding NudgeCount, StringFormat='Total nudges: {0}'}" />
 
                                 <Button
+                                    Classes="twain-command-button"
                                     Command="{Binding ResetNudgeCountCommand}"
                                     Content="Reset counter"
                                     IsEnabled="{Binding AutoSaveEnabled}" />
@@ -117,7 +121,8 @@
 
                     <!-- Completion action -->
                     <Border Classes="twain-section">
-                        <StackPanel Spacing="10">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
                             <TextBlock
                                 Classes="twain-section-heading"
                                 Text="After processing" />
@@ -129,7 +134,7 @@
                             <StackPanel
                                 Margin="20,0,0,0"
                                 IsEnabled="{Binding AutomaticShutdownEnabled}"
-                                Spacing="6">
+                                Spacing="{DynamicResource TwainSpacingSmall}">
 
                                 <RadioButton
                                     x:Name="ShutdownRadioButton"
@@ -160,20 +165,20 @@
                 </StackPanel>
             </ScrollViewer>
 
+            <!-- Commands -->
             <StackPanel
                 Grid.Row="1"
-                Margin="0,16,0,0"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal"
-                Spacing="8">
+                Spacing="{DynamicResource TwainSpacingMedium}">
 
                 <Button
-                    MinWidth="88"
+                    Classes="twain-command-button"
                     Click="CancelButton_Click"
                     Content="Cancel" />
 
                 <Button
-                    MinWidth="88"
+                    Classes="twain-primary-button"
                     Click="OkButton_Click"
                     Content="OK" />
             </StackPanel>
