@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,28 +14,33 @@
     MinWidth="800"
     MinHeight="420"
     WindowStartupLocation="CenterOwner"
-    Title="List comparer">
+    Title="List comparer"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
         ColumnDefinitions="*,Auto,*,2*"
         ColumnSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- First list -->
         <GroupBox Header="List 1">
             <lists:ListMakerControl
                 x:Name="ListMaker1"
                 NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
         </GroupBox>
 
+        <!-- Comparison command -->
         <Button
             x:Name="CompareButton"
+            Classes="twain-primary-button"
             Grid.Column="1"
-            Width="80"
             VerticalAlignment="Center"
             Content="Compare"
             IsEnabled="False"
             Click="CompareButton_Click" />
 
+        <!-- Second list -->
         <GroupBox
             Grid.Column="2"
             Header="List 2">
@@ -44,6 +50,7 @@
                 NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
         </GroupBox>
 
+        <!-- Comparison results -->
         <GroupBox
             Grid.Column="3"
             Header="Results">
@@ -56,6 +63,7 @@
                     ColumnDefinitions="*,*,*"
                     ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
+                    <!-- Unique in List 1 -->
                     <Grid
                         RowDefinitions="Auto,Auto,*,Auto"
                         RowSpacing="{DynamicResource TwainSpacingSmall}">
@@ -70,6 +78,7 @@
 
                         <ListBox
                             x:Name="OnlyList1ListBox"
+                            Classes="twain-listbox"
                             Grid.Row="2"
                             SelectionMode="Multiple">
 
@@ -106,23 +115,28 @@
 
                         <StackPanel
                             Grid.Row="3"
-                            Orientation="Horizontal"
+                            Orientation="Vertical"
                             Spacing="{DynamicResource TwainSpacingSmall}">
 
                             <Button
                                 x:Name="SaveOnlyList1Button"
+                                Classes="twain-command-button"
+                                HorizontalAlignment="Stretch"
                                 Content="Save list"
                                 IsEnabled="False"
                                 Click="SaveOnlyList1Button_Click" />
 
                             <Button
                                 x:Name="UseOnlyList1Button"
+                                Classes="twain-command-button"
+                                HorizontalAlignment="Stretch"
                                 Content="Use list"
                                 IsEnabled="False"
                                 Click="UseOnlyList1Button_Click" />
                         </StackPanel>
                     </Grid>
 
+                    <!-- Common pages -->
                     <Grid
                         Grid.Column="1"
                         RowDefinitions="Auto,Auto,*,Auto"
@@ -138,6 +152,7 @@
 
                         <ListBox
                             x:Name="CommonListBox"
+                            Classes="twain-listbox"
                             Grid.Row="2"
                             SelectionMode="Multiple">
 
@@ -174,23 +189,28 @@
 
                         <StackPanel
                             Grid.Row="3"
-                            Orientation="Horizontal"
+                            Orientation="Vertical"
                             Spacing="{DynamicResource TwainSpacingSmall}">
 
                             <Button
                                 x:Name="SaveCommonButton"
+                                Classes="twain-command-button"
+                                HorizontalAlignment="Stretch"
                                 Content="Save list"
                                 IsEnabled="False"
                                 Click="SaveCommonButton_Click" />
 
                             <Button
                                 x:Name="UseCommonButton"
+                                Classes="twain-command-button"
+                                HorizontalAlignment="Stretch"
                                 Content="Use list"
                                 IsEnabled="False"
                                 Click="UseCommonButton_Click" />
                         </StackPanel>
                     </Grid>
 
+                    <!-- Unique in List 2 -->
                     <Grid
                         Grid.Column="2"
                         RowDefinitions="Auto,Auto,*,Auto"
@@ -204,10 +224,11 @@
                             Grid.Row="1"
                             Text="0 pages" />
 
-                        <ListBox
-                            x:Name="OnlyList2ListBox"
-                            Grid.Row="2"
-                            SelectionMode="Multiple">
+                            <ListBox
+                                x:Name="OnlyList2ListBox"
+                                Classes="twain-listbox"
+                                Grid.Row="2"
+                                SelectionMode="Multiple">
 
                             <ListBox.ContextMenu>
                                 <ContextMenu>
@@ -242,17 +263,21 @@
 
                         <StackPanel
                             Grid.Row="3"
-                            Orientation="Horizontal"
+                            Orientation="Vertical"
                             Spacing="{DynamicResource TwainSpacingSmall}">
 
                             <Button
                                 x:Name="SaveOnlyList2Button"
+                                Classes="twain-command-button"
+                                HorizontalAlignment="Stretch"
                                 Content="Save list"
                                 IsEnabled="False"
                                 Click="SaveOnlyList2Button_Click" />
 
                             <Button
                                 x:Name="UseOnlyList2Button"
+                                Classes="twain-command-button"
+                                HorizontalAlignment="Stretch"
                                 Content="Use list"
                                 IsEnabled="False"
                                 Click="UseOnlyList2Button_Click" />
@@ -260,35 +285,42 @@
                     </Grid>
                 </Grid>
 
-                <StackPanel
+                <!-- Results options and clearing -->
+                <Grid
                     Grid.Row="1"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Left"
-                    Spacing="{DynamicResource TwainSpacingSmall}">
+                    ColumnDefinitions="*,Auto"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Text="Save format:" />
+                    <StackPanel
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Left"
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
-                    <ComboBox
-                        x:Name="SaveFormatComboBox"
-                        Width="180"
-                        SelectedIndex="0">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="Save format:" />
 
-                        <ComboBoxItem Content="Wiki text" />
-                        <ComboBoxItem Content="Plain text" />
-                        <ComboBoxItem Content="CSV" />
-                        <ComboBoxItem Content="CSV with Wikitext" />
-                    </ComboBox>
-                </StackPanel>
+                        <ComboBox
+                            x:Name="SaveFormatComboBox"
+                            Width="180"
+                            SelectedIndex="0">
 
-                <Button
-                    x:Name="ClearButton"
-                    Grid.Row="1"
-                    HorizontalAlignment="Right"
-                    Content="Clear all"
-                    IsEnabled="False"
-                    Click="ClearButton_Click" />
+                            <ComboBoxItem Content="Wiki text" />
+                            <ComboBoxItem Content="Plain text" />
+                            <ComboBoxItem Content="CSV" />
+                            <ComboBoxItem Content="CSV with Wikitext" />
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Button
+                        x:Name="ClearButton"
+                        Classes="twain-command-button"
+                        Grid.Column="1"
+                        Content="Clear all"
+                        IsEnabled="False"
+                        Click="ClearButton_Click" />
+                </Grid>
             </Grid>
         </GroupBox>
     </Grid>

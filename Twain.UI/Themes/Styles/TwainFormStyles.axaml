@@ -80,4 +80,23 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    
+    <!-- Standard ListBox -->
+    <Style Selector="ListBox.twain-listbox">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainControlBackgroundBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderSubtleBrush}" />
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource TwainBorderThickness}" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource TwainControlCornerRadius}" />
+    </Style>
+
+    <!-- Standard ListBox item spacing -->
+    <Style Selector="ListBox.twain-listbox ListBoxItem">
+        <Setter Property="Padding" Value="8,5" />
+    </Style>
+
+
 </Styles>
