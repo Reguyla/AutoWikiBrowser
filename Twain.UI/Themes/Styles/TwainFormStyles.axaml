@@ -59,5 +59,25 @@
     <Setter Property="BorderBrush"
             Value="{DynamicResource TwainBorderSubtleBrush}" />
     <Setter Property="BorderThickness" Value="0,0,1,1" />
-</Style>
+    </Style>
+        
+    <!-- Standard command buttons -->
+    <Style Selector="Button.twain-command-button">
+        <Setter Property="MinWidth" Value="90" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- Primary action buttons -->
+    <Style Selector="Button.twain-primary-button">
+        <Setter Property="MinWidth" Value="100" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="16,6" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
 </Styles>

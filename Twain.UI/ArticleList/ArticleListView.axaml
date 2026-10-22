@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.ArticleList.ArticleListView"
     xmlns="https://github.com/avaloniaui"
@@ -14,7 +15,9 @@
         <vm:ArticleListViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="*,Auto">
+    <Grid
+        RowDefinitions="*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <ListBox
             Grid.Row="0"
@@ -26,17 +29,18 @@
 
         <StackPanel
             Grid.Row="1"
-            Margin="0,8,0,0"
             Orientation="Horizontal"
             Spacing="{DynamicResource TwainSpacingMedium}">
 
-            <Button
-                Command="{Binding AddArticleCommand}"
-                Content="Add" />
+        <Button
+            Classes="twain-command-button"
+            Command="{Binding AddArticleCommand}"
+            Content="Add" />
 
-            <Button
-                Command="{Binding RemoveSelectedArticleCommand}"
-                Content="Remove" />
+        <Button
+            Classes="twain-command-button"
+            Command="{Binding RemoveSelectedArticleCommand}"
+            Content="Remove" />
 
         </StackPanel>
 
