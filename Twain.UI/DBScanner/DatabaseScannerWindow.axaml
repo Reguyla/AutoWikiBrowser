@@ -8,16 +8,18 @@
     Height="700"
     MinWidth="850"
     MinHeight="600"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
       <Grid RowDefinitions="Auto,*,Auto"
-          Margin="12">
+          Margin="{DynamicResource TwainContentPadding}">
         <!-- Dump selection -->
         <Grid Grid.Row="0"
               RowDefinitions="Auto,Auto"
               ColumnDefinitions="Auto,*,Auto"
-              ColumnSpacing="8"
-              RowSpacing="8"
+              ColumnSpacing="{DynamicResource TwainSpacingSmall}"
+              RowSpacing="{DynamicResource TwainSpacingSmall}"
               Margin="0,0,0,12">
 
             <TextBlock Grid.Row="0"
@@ -30,7 +32,7 @@
                      Name="DumpLocationTextBox"
                      IsReadOnly="True" />
 
-            <Button Grid.Row="0"
+            <Button Classes="twain-command-button" Grid.Row="0"
                     Grid.Column="2"
                     Name="BrowseButton"
                     Content="Browse..."
@@ -45,7 +47,7 @@
                   Grid.Column="1"
                   Grid.ColumnSpan="2"
                   ColumnDefinitions="*,Auto,Auto,150"
-                  ColumnSpacing="10">
+                  ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
                 <TextBox Grid.Column="0"
                          Name="StartFromTextBox"
@@ -79,12 +81,12 @@
         <TabControl Grid.Row="1"
                     Name="ScannerTabs">
         
-        <TabItem Header="Dump information">
-            <Grid Margin="12"
+        <TabItem Classes="twain-tab" Header="Dump information">
+            <Grid Margin="{DynamicResource TwainContentPadding}"
                   RowDefinitions="Auto,Auto,Auto,Auto"
                   ColumnDefinitions="Auto,*"
-                  ColumnSpacing="12"
-                  RowSpacing="10"
+                  ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                  RowSpacing="{DynamicResource TwainSpacingMedium}"
                   MaxWidth="700"
                   HorizontalAlignment="Left">
 
@@ -135,13 +137,13 @@
             </Grid>
         </TabItem>
 
-        <TabItem Header="Text">
+        <TabItem Classes="twain-tab" Header="Text">
 
-            <Grid Margin="12"
+            <Grid Margin="{DynamicResource TwainContentPadding}"
                     RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                     ColumnDefinitions="Auto,*,Auto"
-                    ColumnSpacing="10"
-                    RowSpacing="10">
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                 <CheckBox Grid.Row="0"
                             Grid.Column="0"
@@ -201,12 +203,12 @@
             </Grid>
         </TabItem>
 
-            <TabItem Header="Title">
-                <Grid Margin="12"
+            <TabItem Classes="twain-tab" Header="Title">
+                <Grid Margin="{DynamicResource TwainContentPadding}"
                       RowDefinitions="Auto,Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*"
-                      ColumnSpacing="10"
-                      RowSpacing="10">
+                      ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                      RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                     <CheckBox Grid.Row="0"
                               Grid.Column="0"
@@ -245,8 +247,8 @@
                 </Grid>
             </TabItem>
 
-                <TabItem Header="Namespaces">
-                    <Grid Margin="12">
+                <TabItem Classes="twain-tab" Header="Namespaces">
+                    <Grid Margin="{DynamicResource TwainContentPadding}">
                         <controls:NamespacesControl
                             Name="NamespacesControl"
                             HorizontalAlignment="Left"
@@ -254,12 +256,12 @@
                     </Grid>
                 </TabItem>
 
-            <TabItem Header="Revision">
-                <Grid Margin="12"
+            <TabItem Classes="twain-tab" Header="Revision">
+                <Grid Margin="{DynamicResource TwainContentPadding}"
                       RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*"
-                      ColumnSpacing="10"
-                      RowSpacing="10">
+                      ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                      RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                     <CheckBox Grid.Row="0"
                               Grid.Column="0"
@@ -295,9 +297,9 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Protection">
-                <StackPanel Margin="12"
-                            Spacing="10"
+            <TabItem Classes="twain-tab" Header="Protection">
+                <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                            Spacing="{DynamicResource TwainSpacingMedium}"
                             MaxWidth="500"
                             HorizontalAlignment="Left">
 
@@ -312,12 +314,12 @@
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Properties">
-                <Grid Margin="12"
+            <TabItem Classes="twain-tab" Header="Properties">
+                <Grid Margin="{DynamicResource TwainContentPadding}"
                       RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,Auto,Auto"
-                      ColumnSpacing="10"
-                      RowSpacing="10">
+                      ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                      RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock Grid.Row="0"
                                Grid.Column="0"
@@ -396,9 +398,9 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="AWB checks">
+            <TabItem Classes="twain-tab" Header="AWB checks">
                 <ScrollViewer>
-                    <WrapPanel Margin="12"
+                    <WrapPanel Margin="{DynamicResource TwainContentPadding}"
                                 Orientation="Horizontal">
 
                         <CheckBox Name="NoBoldTitleCheckBox"
@@ -465,13 +467,13 @@
                 </ScrollViewer>
             </TabItem>
 
-             <TabItem Header="Results">
-                <TabControl Margin="12">
+             <TabItem Classes="twain-tab" Header="Results">
+                <TabControl Margin="{DynamicResource TwainContentPadding}" Classes="twain-tabs">
 
-                    <TabItem Header="Articles">
-                        <Grid Margin="12"
+                    <TabItem Classes="twain-tab" Header="Articles">
+                        <Grid Margin="{DynamicResource TwainContentPadding}"
                               RowDefinitions="*,Auto"
-                              RowSpacing="8">
+                              RowSpacing="{DynamicResource TwainSpacingSmall}">
 
                             <ListBox Grid.Row="0"
                                      Name="ResultsListBox"
@@ -479,7 +481,7 @@
 
                             <Grid Grid.Row="1"
                                   ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                                  ColumnSpacing="12">
+                                  ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
                                 <TextBlock Grid.Column="0"
                                            Name="ResultCountTextBlock"
@@ -498,42 +500,38 @@
                                            Text="0%"
                                            VerticalAlignment="Center" />
 
-                                <Button Grid.Column="3"
+                                <Button Classes="twain-command-button" Grid.Column="3"
                                         Name="ClearResultsButton"
                                         Content="Clear"
-                                        MinWidth="70"
                                         Click="ClearResultsButton_Click" />
 
-                                <Button Grid.Column="4"
+                                <Button Classes="twain-command-button" Grid.Column="4"
                                         Name="SaveResultsButton"
                                         Content="Save list..."
-                                        MinWidth="80"
                                         Click="SaveResultsButton_Click" />
 
-                                <Button Grid.Column="5"
+                                <Button Classes="twain-command-button" Grid.Column="5"
                                         Name="RemoveSelectedButton"
                                         Content="Remove selected"
-                                        MinWidth="110"
                                         Click="RemoveSelectedButton_Click" />
 
-                                <Button Grid.Column="6"
+                                <Button Classes="twain-command-button" Grid.Column="6"
                                         Name="CopySelectedButton"
                                         Content="Copy selected"
-                                        MinWidth="100"
                                         Click="CopySelectedButton_Click" />
 
                             </Grid>
                         </Grid>
                     </TabItem>
 
-                    <TabItem Header="Wiki list">
-                        <Grid Margin="12"
+                    <TabItem Classes="twain-tab" Header="Wiki list">
+                        <Grid Margin="{DynamicResource TwainContentPadding}"
                               RowDefinitions="Auto,*,Auto"
-                              RowSpacing="8">
+                              RowSpacing="{DynamicResource TwainSpacingSmall}">
 
                             <StackPanel Grid.Row="0"
                                         Orientation="Horizontal"
-                                        Spacing="12">
+                                        Spacing="{DynamicResource TwainSpacingMedium}">
 
                             <CheckBox Name="WikiHeadingCheckBox"
                                       Content="Headings"
@@ -556,7 +554,7 @@
                                           Content="Numbered list"
                                           IsChecked="True" />
 
-                                <Button Name="GenerateWikiListButton"
+                                <Button Classes="twain-primary-button" Name="GenerateWikiListButton"
                                         Content="Generate"
                                         Click="GenerateWikiListButton_Click" />
 
@@ -573,17 +571,17 @@
                             <StackPanel Grid.Row="2"
                                         Orientation="Horizontal"
                                         HorizontalAlignment="Right"
-                                        Spacing="8">
+                                        Spacing="{DynamicResource TwainSpacingSmall}">
 
-                                <Button Name="ClearWikiListButton"
+                                <Button Classes="twain-command-button" Name="ClearWikiListButton"
                                         Content="Clear"
                                         Click="ClearWikiListButton_Click" />
 
-                                <Button Name="CopyWikiListButton"
+                                <Button Classes="twain-command-button" Name="CopyWikiListButton"
                                         Content="Copy"
                                         Click="CopyWikiListButton_Click" />
 
-                                <Button Name="SaveWikiListButton"
+                                <Button Classes="twain-command-button" Name="SaveWikiListButton"
                                         Content="Save..."
                                         Click="SaveWikiListButton_Click" />
 
@@ -600,21 +598,21 @@
         <!-- Scanner controls -->
         <Grid Grid.Row="2"
               ColumnDefinitions="Auto,Auto,*,Auto,Auto"
-              ColumnSpacing="8"
+              ColumnSpacing="{DynamicResource TwainSpacingSmall}"
               Margin="0,12,0,0">
 
-            <Button Name="ResetButton"
+            <Button Classes="twain-command-button" Name="ResetButton"
                     Content="Reset"
                     Click="ResetButton_Click" />
 
-            <Button Grid.Column="1"
+            <Button Classes="twain-command-button" Grid.Column="1"
                     Name="FilterButton"
                     Content="Filter..."
                     Click="FilterButton_Click" />
 
             <StackPanel Grid.Column="3"
                         Orientation="Horizontal"
-                        Spacing="8"
+                        Spacing="{DynamicResource TwainSpacingSmall}"
                         VerticalAlignment="Center">
 
                 <TextBlock Text="Limit:"
@@ -627,10 +625,9 @@
                                Width="150" />
             </StackPanel>
 
-            <Button Grid.Column="4"
+            <Button Classes="twain-primary-button" Grid.Column="4"
                     Name="StartButton"
                     Content="Start"
-                    MinWidth="90"
                     Click="StartButton_Click" />
         </Grid>
 
