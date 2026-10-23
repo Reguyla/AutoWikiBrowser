@@ -98,5 +98,26 @@
         <Setter Property="Padding" Value="8,5" />
     </Style>
 
+    <!-- Compact Options expander headings -->
+    <Style Selector="TextBlock.twain-compact-expander-heading">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    
+    <!-- Compact expandable groups for narrow option panels. -->
+    <Style Selector="Expander.twain-expander.twain-compact-expander">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+
+    <!-- Reduce padding on the Expander header button. -->
+    <Style Selector="Expander.twain-compact-expander /template/ ToggleButton#PART_HorizontalHeader">
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+
 
 </Styles>

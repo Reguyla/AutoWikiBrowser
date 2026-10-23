@@ -9,16 +9,18 @@
 
                 <StackPanel Spacing="6" Margin="8">
 
-                    <Expander
-                        Classes="twain-expander"
-                        HorizontalAlignment="Stretch"
-                        IsExpanded="True">
 
-                        <Expander.Header>
-                            <TextBlock
-                                Classes="twain-section-heading"
-                                Text="Start" />
-                        </Expander.Header>
+                <Expander
+                    Classes="twain-expander twain-compact-expander"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="True">
+
+                    <Expander.Header>
+                        <TextBlock
+                            Classes="twain-compact-expander-heading"
+                            Text="Start" />
+                    </Expander.Header>
+
 
                         <StackPanel
                             MaxWidth="460"
@@ -147,13 +149,13 @@
                     </StackPanel>
 
                 </Expander><Expander
-    Classes="twain-expander"
-    HorizontalAlignment="Stretch"
-    IsExpanded="False">
-    <Expander.Header>
-        <TextBlock Classes="twain-section-heading" Text="Options" />
-    </Expander.Header>
-    <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
+                    Classes="twain-expander twain-compact-expander"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="False">
+                    <Expander.Header>
+                        <TextBlock Classes="twain-compact-expander-heading" Text="Options" />
+                    </Expander.Header>
+                    <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
 
                     <Border Classes="twain-section">
@@ -212,13 +214,13 @@
             </StackPanel>
 
             </Expander><Expander
-    Classes="twain-expander"
-    HorizontalAlignment="Stretch"
-    IsExpanded="False" x:Name="SkipExpander">
-    <Expander.Header>
-        <TextBlock Classes="twain-section-heading" Text="Skip" />
-    </Expander.Header>
-    <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
+                Classes="twain-expander twain-compact-expander"
+                HorizontalAlignment="Stretch"
+                IsExpanded="False" x:Name="SkipExpander">
+                <Expander.Header>
+                    <TextBlock Classes="twain-compact-expander-heading" Text="Skip" />
+                </Expander.Header>
+                <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
 
                     <Border Classes="twain-section">
@@ -395,13 +397,13 @@
             </StackPanel>
 
             </Expander><Expander
-    Classes="twain-expander"
-    HorizontalAlignment="Stretch"
-    IsExpanded="False">
-    <Expander.Header>
-        <TextBlock Classes="twain-section-heading" Text="More" />
-    </Expander.Header>
-    <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
+                Classes="twain-expander twain-compact-expander"
+                HorizontalAlignment="Stretch"
+                IsExpanded="False">
+                <Expander.Header>
+                    <TextBlock Classes="twain-compact-expander-heading" Text="More" />
+                </Expander.Header>
+                <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
 
                     <Border Classes="twain-section">
@@ -518,13 +520,13 @@
             </StackPanel>
 
             </Expander><Expander
-    Classes="twain-expander"
-    HorizontalAlignment="Stretch"
-    IsExpanded="False">
-    <Expander.Header>
-        <TextBlock Classes="twain-section-heading" Text="Disambig" />
-    </Expander.Header>
-    <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
+                Classes="twain-expander twain-compact-expander"
+                HorizontalAlignment="Stretch"
+                IsExpanded="False">
+                <Expander.Header>
+                    <TextBlock Classes="twain-compact-expander-heading" Text="Disambig" />
+                </Expander.Header>
+                <StackPanel MaxWidth="460" Margin="8" HorizontalAlignment="Stretch" Spacing="{DynamicResource TwainSpacingLarge}">
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
