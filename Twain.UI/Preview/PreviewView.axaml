@@ -1,13 +1,18 @@
+
 <UserControl
     x:Class="Twain.UI.Preview.PreviewView"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}">
 
-    <Grid>
+    <Grid
+        Background="{DynamicResource TwainApplicationBackgroundBrush}">
+
         <NativeWebView
             x:Name="PreviewWebView"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />
+
     </Grid>
 
 </UserControl>
