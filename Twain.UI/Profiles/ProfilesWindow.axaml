@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.Profiles.ProfilesWindow"
     xmlns="https://github.com/avaloniaui"
@@ -7,9 +8,9 @@
     Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="12"
+        Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="*,Auto,Auto"
-        RowSpacing="8">
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <!-- Saved profiles -->
         <Border
@@ -18,7 +19,10 @@
             Margin="0"
             MinHeight="0">
 
-            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+            <Grid
+                RowDefinitions="Auto,*,Auto"
+                RowSpacing="{DynamicResource TwainSpacingMedium}">
+
                 <TextBlock
                     Grid.Row="0"
                     Classes="twain-section-heading"
@@ -66,34 +70,35 @@
                 <StackPanel
                     Grid.Row="2"
                     Orientation="Horizontal"
-                    Spacing="8">
+                    Spacing="{DynamicResource TwainSpacingSmall}">
 
                     <Button
                         x:Name="LoginButton"
+                        Classes="twain-primary-button"
                         Content="Login"
-                        MinWidth="80"
                         IsEnabled="False"
                         Click="LoginButton_Click" />
 
                     <Button
                         x:Name="AddButton"
+                        Classes="twain-command-button"
                         Content="Add..."
-                        MinWidth="80"
                         Click="AddButton_Click" />
 
                     <Button
                         x:Name="EditButton"
+                        Classes="twain-command-button"
                         Content="Edit..."
-                        MinWidth="80"
                         IsEnabled="False"
                         Click="EditButton_Click" />
 
                     <Button
                         x:Name="DeleteButton"
+                        Classes="twain-command-button"
                         Content="Delete"
-                        MinWidth="80"
                         IsEnabled="False"
                         Click="DeleteButton_Click" />
+
                 </StackPanel>
             </Grid>
         </Border>
@@ -104,17 +109,17 @@
             Classes="twain-section"
             Margin="0">
 
-            <StackPanel Spacing="10">
+            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
                 <TextBlock
                     Classes="twain-section-heading"
                     Text="Quick login" />
 
                 <Grid
-                    Margin="8"
                     ColumnDefinitions="Auto,*,Auto"
                     RowDefinitions="Auto,Auto,Auto"
-                    ColumnSpacing="8"
-                    RowSpacing="8">
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock
                         Grid.Row="0"
@@ -146,7 +151,7 @@
                         x:Name="QuickLoginButton"
                         Grid.Row="1"
                         Grid.Column="2"
-                        MinWidth="80"
+                        Classes="twain-primary-button"
                         Content="Login"
                         IsEnabled="False"
                         Click="QuickLoginButton_Click" />
@@ -166,20 +171,24 @@
                         HorizontalAlignment="Left"
                         Content="Save password"
                         IsEnabled="False" />
+
                 </Grid>
             </StackPanel>
         </Border>
 
-        <!-- Window actions -->
+        <!-- View actions -->
         <StackPanel
             Grid.Row="2"
             Orientation="Horizontal"
-            HorizontalAlignment="Right">
+            HorizontalAlignment="Right"
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
             <Button
+                Classes="twain-command-button"
                 Content="Close"
-                MinWidth="80"
                 Click="CloseButton_Click" />
+
         </StackPanel>
+
     </Grid>
 </UserControl>
