@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.SkipOptions.SkipOptionsWindow"
     xmlns="https://github.com/avaloniaui"
@@ -7,23 +8,26 @@
     CanResize="False"
     ShowInTaskbar="False"
     Title="Skip options"
-    Closing="SkipOptionsWindow_Closing">
+    Closing="SkipOptionsWindow_Closing"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="12"
-        RowDefinitions="Auto,Auto,*,Auto">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Instructions -->
         <TextBlock
             Grid.Row="0"
-            Margin="0,0,0,10"
             Text="Select the changes that should cause the page to be skipped:"
             TextWrapping="Wrap" />
 
+        <!-- Select all / none -->
         <StackPanel
             Grid.Row="1"
-            Margin="0,0,0,10"
             Orientation="Horizontal"
-            Spacing="16">
+            Spacing="{DynamicResource TwainSpacingLarge}">
 
             <CheckBox
                 x:Name="CheckAll"
@@ -37,66 +41,91 @@
 
         </StackPanel>
 
-        <ScrollViewer
+        <!-- Skip conditions -->
+        <Border
             Grid.Row="2"
-            VerticalScrollBarVisibility="Auto">
+            Classes="twain-section"
+            Margin="0"
+            MinHeight="0">
 
-            <StackPanel Spacing="6">
+            <Grid
+                RowDefinitions="Auto,*"
+                RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-                <CheckBox
-                    x:Name="BoldTitleOption"
-                    Content="Title boldened" />
+                <TextBlock
+                    Grid.Row="0"
+                    Classes="twain-section-heading"
+                    Text="Skip conditions" />
 
-                <CheckBox
-                    x:Name="BulletedExternalLinkOption"
-                    Content="External link bulleted" />
+                <ScrollViewer
+                    Grid.Row="1"
+                    VerticalScrollBarVisibility="Auto">
 
-                <CheckBox
-                    x:Name="BadLinksOption"
-                    Content="Bad links fixed" />
+                    <StackPanel
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
-                <CheckBox
-                    x:Name="UnicodeOption"
-                    Content="Unicodification" />
+                        <CheckBox
+                            x:Name="BoldTitleOption"
+                            Content="Title boldened" />
 
-                <CheckBox
-                    x:Name="AutoTagOption"
-                    Content="Auto tag changes" />
+                        <CheckBox
+                            x:Name="BulletedExternalLinkOption"
+                            Content="External link bulleted" />
 
-                <CheckBox
-                    x:Name="HeaderErrorOption"
-                    Content="Header error fixed" />
+                        <CheckBox
+                            x:Name="BadLinksOption"
+                            Content="Bad links fixed" />
 
-                <CheckBox
-                    x:Name="DefaultSortOption">
-                    {{defaultsort}} added
-                </CheckBox>
+                        <CheckBox
+                            x:Name="UnicodeOption"
+                            Content="Unicodification" />
 
-                <CheckBox
-                    x:Name="UserTalkTemplatesOption"
-                    Content="User talk templates subst'd" />
+                        <CheckBox
+                            x:Name="AutoTagOption"
+                            Content="Auto tag changes" />
 
-                <CheckBox
-                    x:Name="CitationTemplateDatesOption"
-                    Content="Citation templates dates fixed" />
+                        <CheckBox
+                            x:Name="HeaderErrorOption"
+                            Content="Header error fixed" />
 
-                <CheckBox
-                    x:Name="HumanCategoriesOption"
-                    Content="Human category changes" />
+                        <CheckBox
+                            x:Name="DefaultSortOption">
+                            {{defaultsort}} added
+                        </CheckBox>
 
-            </StackPanel>
+                        <CheckBox
+                            x:Name="UserTalkTemplatesOption"
+                            Content="User talk templates subst'd" />
 
-        </ScrollViewer>
+                        <CheckBox
+                            x:Name="CitationTemplateDatesOption"
+                            Content="Citation templates dates fixed" />
 
-        <Button
+                        <CheckBox
+                            x:Name="HumanCategoriesOption"
+                            Content="Human category changes" />
+
+                    </StackPanel>
+
+                </ScrollViewer>
+
+            </Grid>
+        </Border>
+
+        <!-- Close -->
+        <StackPanel
             Grid.Row="3"
-            Width="80"
-            Margin="0,12,0,0"
-            HorizontalAlignment="Right"
-            Content="Close"
-            IsDefault="True"
-            IsCancel="True"
-            Click="CloseButton_Click" />
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
+
+            <Button
+                Classes="twain-primary-button"
+                Content="Close"
+                IsDefault="True"
+                IsCancel="True"
+                Click="CloseButton_Click" />
+
+        </StackPanel>
 
     </Grid>
 
