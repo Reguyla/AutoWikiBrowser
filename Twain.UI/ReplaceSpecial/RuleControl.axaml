@@ -1,13 +1,15 @@
+
 <UserControl
     x:Class="Twain.UI.ReplaceSpecial.RuleControl"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         RowDefinitions="Auto,Auto,*"
         ColumnDefinitions="Auto,*,Auto"
-        ColumnSpacing="8"
-        RowSpacing="8">
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <!-- Rule name -->
         <TextBlock
@@ -53,17 +55,22 @@
         <TabControl
             Grid.Row="2"
             Grid.Column="0"
-            Grid.ColumnSpan="3">
+            Grid.ColumnSpan="3"
+            Classes="twain-tabs">
 
             <!-- Find tab -->
-            <TabItem Header="Find">
+            <TabItem
+                Classes="twain-tab"
+                Header="Find">
 
                 <Grid
+                    Margin="{DynamicResource TwainContentPadding}"
                     RowDefinitions="*,Auto,*,Auto,Auto"
                     ColumnDefinitions="*,*,Auto"
-                    ColumnSpacing="8"
-                    RowSpacing="8">
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+                    <!-- Find text -->
                     <TextBox
                         x:Name="ReplaceTextBox"
                         Grid.Row="0"
@@ -79,6 +86,7 @@
                         Grid.ColumnSpan="3"
                         Text="Replace with:" />
 
+                    <!-- Replacement text -->
                     <TextBox
                         x:Name="WithTextBox"
                         Grid.Row="2"
@@ -88,16 +96,17 @@
                         TextWrapping="NoWrap"
                         MinHeight="100" />
 
+                    <!-- Find options -->
                     <StackPanel
                         Grid.Row="3"
                         Grid.Column="0"
                         Orientation="Horizontal"
-                        Spacing="8">
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
-                    <CheckBox
-                        x:Name="ReplaceIsRegexCheckBox"
-                        Content="Regular expression"
-                        IsCheckedChanged="ReplaceIsRegexCheckBox_IsCheckedChanged" />
+                        <CheckBox
+                            x:Name="ReplaceIsRegexCheckBox"
+                            Content="Regular expression"
+                            IsCheckedChanged="ReplaceIsRegexCheckBox_IsCheckedChanged" />
 
                         <CheckBox
                             x:Name="ReplaceIsMultilineCheckBox"
@@ -109,7 +118,7 @@
                         Grid.Row="4"
                         Grid.Column="0"
                         Orientation="Horizontal"
-                        Spacing="8">
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
                         <CheckBox
                             x:Name="ReplaceIsCaseSensitiveCheckBox"
@@ -121,12 +130,13 @@
 
                     </StackPanel>
 
+                    <!-- Replacement count -->
                     <StackPanel
                         Grid.Row="3"
                         Grid.RowSpan="2"
                         Grid.Column="1"
                         VerticalAlignment="Center"
-                        Spacing="4">
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
                         <TextBlock
                             Text="Apply No. of times" />
@@ -146,6 +156,7 @@
                         Grid.Row="3"
                         Grid.RowSpan="2"
                         Grid.Column="2"
+                        Classes="twain-command-button"
                         VerticalAlignment="Bottom"
                         Content="Test..."
                         IsEnabled="False" />
@@ -155,14 +166,18 @@
             </TabItem>
 
             <!-- If tab -->
-            <TabItem Header="If">
+            <TabItem
+                Classes="twain-tab"
+                Header="If">
 
                 <Grid
+                    Margin="{DynamicResource TwainContentPadding}"
                     RowDefinitions="Auto,*,Auto,*,Auto,Auto"
                     ColumnDefinitions="*,*,Auto"
-                    ColumnSpacing="8"
-                    RowSpacing="8">
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+                    <!-- Contains condition -->
                     <TextBlock
                         Grid.Row="0"
                         Grid.Column="0"
@@ -178,6 +193,7 @@
                         TextWrapping="NoWrap"
                         MinHeight="100" />
 
+                    <!-- Not contains condition -->
                     <TextBlock
                         Grid.Row="2"
                         Grid.Column="0"
@@ -193,16 +209,17 @@
                         TextWrapping="NoWrap"
                         MinHeight="100" />
 
+                    <!-- Condition options -->
                     <StackPanel
                         Grid.Row="4"
                         Grid.Column="0"
                         Orientation="Horizontal"
-                        Spacing="8">
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
-                    <CheckBox
-                        x:Name="IfIsRegexCheckBox"
-                        Content="Regular expression"
-                        IsCheckedChanged="IfIsRegexCheckBox_IsCheckedChanged" />
+                        <CheckBox
+                            x:Name="IfIsRegexCheckBox"
+                            Content="Regular expression"
+                            IsCheckedChanged="IfIsRegexCheckBox_IsCheckedChanged" />
 
                         <CheckBox
                             x:Name="IfIsMultilineCheckBox"
@@ -214,7 +231,7 @@
                         Grid.Row="5"
                         Grid.Column="0"
                         Orientation="Horizontal"
-                        Spacing="8">
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
                         <CheckBox
                             x:Name="IfIsCaseSensitiveCheckBox"
@@ -226,11 +243,13 @@
 
                     </StackPanel>
 
+                    <!-- Condition test -->
                     <Button
                         x:Name="TestIfButton"
                         Grid.Row="4"
                         Grid.RowSpan="2"
                         Grid.Column="2"
+                        Classes="twain-command-button"
                         VerticalAlignment="Bottom"
                         Content="Test..."
                         IsEnabled="False"
