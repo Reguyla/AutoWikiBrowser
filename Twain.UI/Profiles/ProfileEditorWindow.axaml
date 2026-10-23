@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Profiles.ProfileEditorWindow"
     xmlns="https://github.com/avaloniaui"
@@ -6,70 +7,90 @@
     Width="440"
     SizeToContent="Height"
     CanResize="False"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid Margin="16"
-          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-          ColumnDefinitions="Auto,*"
-          ColumnSpacing="12"
-          RowSpacing="10">
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+        ColumnDefinitions="Auto,*"
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <TextBlock Grid.Row="0"
-                   Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="Username:" />
+        <!-- Username -->
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Username:" />
 
-        <TextBox x:Name="UsernameTextBox"
-                 Grid.Row="0"
-                 Grid.Column="1"
-                 MinWidth="280" />
+        <TextBox
+            x:Name="UsernameTextBox"
+            Grid.Row="0"
+            Grid.Column="1"
+            MinWidth="280" />
 
-        <TextBlock Grid.Row="1"
-                   Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="Password:" />
+        <!-- Password -->
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Password:" />
 
-        <TextBox x:Name="PasswordTextBox"
-                 Grid.Row="1"
-                 Grid.Column="1"
-                 PasswordChar="●" />
+        <TextBox
+            x:Name="PasswordTextBox"
+            Grid.Row="1"
+            Grid.Column="1"
+            PasswordChar="●" />
 
-        <TextBlock Grid.Row="2"
-                   Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="Default settings:" />
+        <!-- Default settings -->
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Default settings:" />
 
-        <TextBox x:Name="DefaultSettingsTextBox"
-                 Grid.Row="2"
-                 Grid.Column="1" />
+        <TextBox
+            x:Name="DefaultSettingsTextBox"
+            Grid.Row="2"
+            Grid.Column="1" />
 
-        <TextBlock Grid.Row="3"
-                   Grid.Column="0"
-                   VerticalAlignment="Top"
-                   Text="Notes:" />
+        <!-- Notes -->
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="0"
+            VerticalAlignment="Top"
+            Text="Notes:" />
 
-        <TextBox x:Name="NotesTextBox"
-                 Grid.Row="3"
-                 Grid.Column="1"
-                 MinHeight="70"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap" />
+        <TextBox
+            x:Name="NotesTextBox"
+            Grid.Row="3"
+            Grid.Column="1"
+            MinHeight="70"
+            AcceptsReturn="True"
+            TextWrapping="Wrap" />
 
-        <StackPanel Grid.Row="4"
-                    Grid.ColumnSpan="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,6,0,0"
-                    Spacing="8">
+        <!-- Actions -->
+        <StackPanel
+            Grid.Row="4"
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Margin="0,6,0,0"
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
-            <Button Content="Cancel"
-                    MinWidth="80"
-                    Click="CancelButton_Click" />
+            <Button
+                Classes="twain-command-button"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
 
-            <Button Content="Save"
-                    MinWidth="80"
-                    IsDefault="True"
-                    Click="SaveButton_Click" />
+            <Button
+                Classes="twain-primary-button"
+                Content="Save"
+                IsDefault="True"
+                Click="SaveButton_Click" />
 
         </StackPanel>
 
