@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,18 +9,22 @@
     MinWidth="620"
     MinHeight="520"
     WindowStartupLocation="CenterOwner"
-    Opened="ListFilterWindow_Opened">
+    Opened="ListFilterWindow_Opened"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- Namespace filtering -->
         <GroupBox Header="Namespaces">
             <Grid
                 ColumnDefinitions="*,*"
                 ColumnSpacing="{DynamicResource TwainSpacingLarge}">
 
+                <!-- Content namespaces -->
                 <Grid
                     RowDefinitions="Auto,180"
                     RowSpacing="{DynamicResource TwainSpacingMedium}">
@@ -31,12 +36,14 @@
 
                     <ListBox
                         x:Name="ContentNamespaceList"
+                        Classes="twain-listbox"
                         Grid.Row="1"
                         SelectionMode="Multiple"
                         ScrollViewer.VerticalScrollBarVisibility="Auto"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
                 </Grid>
 
+                <!-- Talk namespaces -->
                 <Grid
                     Grid.Column="1"
                     RowDefinitions="Auto,180"
@@ -49,6 +56,7 @@
 
                     <ListBox
                         x:Name="TalkNamespaceList"
+                        Classes="twain-listbox"
                         Grid.Row="1"
                         SelectionMode="Multiple"
                         ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -57,6 +65,7 @@
             </Grid>
         </GroupBox>
 
+        <!-- Title filtering -->
         <GroupBox
             Grid.Row="1"
             Header="Title filters">
@@ -98,6 +107,7 @@
             </Grid>
         </GroupBox>
 
+        <!-- Comparison list filtering -->
         <GroupBox
             Grid.Row="2"
             Header="Compare with another list">
@@ -125,16 +135,19 @@
                         Text="Articles in the comparison list" />
                 </Grid>
 
+                <!-- Comparison list commands -->
                 <StackPanel
                     Grid.Row="1"
                     Orientation="Horizontal"
                     Spacing="{DynamicResource TwainSpacingMedium}">
 
                     <Button
+                        Classes="twain-command-button"
                         Content="Get list..."
                         Click="GetComparisonListButton_Click" />
 
                     <Button
+                        Classes="twain-command-button"
                         Content="Clear"
                         Click="ClearComparisonListButton_Click" />
 
@@ -147,12 +160,14 @@
 
                 <ListBox
                     x:Name="ComparisonList"
+                    Classes="twain-listbox"
                     Grid.Row="2"
                     MinHeight="120"
                     SelectionMode="Multiple" />
             </Grid>
         </GroupBox>
 
+        <!-- List cleanup options -->
         <StackPanel
             Grid.Row="3"
             Orientation="Horizontal"
@@ -167,12 +182,14 @@
                 Content="Sort A–Z" />
         </StackPanel>
 
+        <!-- Integration placeholder -->
         <TextBlock
             Grid.Row="4"
             VerticalAlignment="Top"
             Text="List management controls will be connected during ListMaker integration."
             TextWrapping="Wrap" />
 
+        <!-- Completion commands -->
         <StackPanel
             Grid.Row="5"
             Orientation="Horizontal"
@@ -180,14 +197,17 @@
             Spacing="{DynamicResource TwainSpacingMedium}">
 
             <Button
+                Classes="twain-primary-button"
                 Content="Apply"
                 IsDefault="True"
                 Click="ApplyButton_Click" />
 
             <Button
+                Classes="twain-command-button"
                 Content="Cancel"
                 IsCancel="True"
                 Click="CancelButton_Click" />
         </StackPanel>
+
     </Grid>
 </Window>
