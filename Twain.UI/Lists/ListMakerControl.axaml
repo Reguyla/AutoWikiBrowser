@@ -1,3 +1,4 @@
+
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,13 +8,17 @@
         RowDefinitions="*,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-    <ListBox
-        x:Name="ArticleListBox"
-        SelectionMode="Multiple"
-        SelectionChanged="ArticleListBox_SelectionChanged"
-        ScrollViewer.VerticalScrollBarVisibility="Auto"
-        ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+        <!-- Article list -->
+        <ListBox
+            x:Name="ArticleListBox"
+            Classes="twain-listbox"
+            Grid.Row="0"
+            SelectionMode="Multiple"
+            SelectionChanged="ArticleListBox_SelectionChanged"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto" />
 
+        <!-- Article count and commands -->
         <Grid
             Grid.Row="1"
             ColumnDefinitions="*,Auto"
@@ -21,6 +26,7 @@
 
             <TextBlock
                 x:Name="ArticleCountText"
+                Grid.Column="0"
                 VerticalAlignment="Center"
                 Text="0 pages" />
 
@@ -29,17 +35,20 @@
                 Orientation="Horizontal"
                 Spacing="{DynamicResource TwainSpacingMedium}">
 
-            <Button
-                x:Name="RemoveButton"
-                Content="Remove"
-                IsEnabled="False"
-                Click="RemoveButton_Click" />
+                <Button
+                    x:Name="RemoveButton"
+                    Classes="twain-command-button"
+                    Content="Remove"
+                    IsEnabled="False"
+                    Click="RemoveButton_Click" />
 
-            <Button
-                x:Name="FilterButton"
-                Content="Filter"
-                IsEnabled="False"
-                Click="FilterButton_Click" />
+                <Button
+                    x:Name="FilterButton"
+                    Classes="twain-command-button"
+                    Content="Filter"
+                    IsEnabled="False"
+                    Click="FilterButton_Click" />
+
             </StackPanel>
         </Grid>
     </Grid>
