@@ -1,14 +1,17 @@
+
 <UserControl
     x:Class="Twain.UI.ReplaceSpecial.TemplateParamRuleControl"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
         RowDefinitions="Auto,Auto,Auto,Auto"
         ColumnDefinitions="Auto,*"
-        ColumnSpacing="8"
-        RowSpacing="8">
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Rule name -->
         <TextBlock
             Grid.Row="0"
             Grid.Column="0"
@@ -21,12 +24,14 @@
             Grid.Column="1"
             TextChanged="NameTextBox_TextChanged" />
 
+        <!-- Rule enabled -->
         <CheckBox
             x:Name="EnabledCheckBox"
             Grid.Row="1"
             Grid.Column="1"
             Content="Enabled" />
 
+        <!-- Parameter name -->
         <TextBlock
             Grid.Row="2"
             Grid.Column="0"
@@ -38,6 +43,7 @@
             Grid.Row="2"
             Grid.Column="1" />
 
+        <!-- Replacement parameter name -->
         <TextBlock
             Grid.Row="3"
             Grid.Column="0"
