@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.ReplaceSpecial.ReplaceSpecialWindow"
     xmlns="https://github.com/avaloniaui"
@@ -9,11 +10,15 @@
     Height="600"
     MinWidth="700"
     MinHeight="450"
-    WindowStartupLocation="CenterOwner">
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid RowDefinitions="Auto,*"
-          ColumnDefinitions="*">
+    <Grid
+        RowDefinitions="Auto,*"
+        ColumnDefinitions="*">
 
+        <!-- Main menu -->
         <Menu Grid.Row="0">
             <MenuItem Header="_File">
                 <MenuItem
@@ -22,162 +27,219 @@
             </MenuItem>
 
             <MenuItem Header="_Edit">
-                <MenuItem Header="_Undo"
-                          Command="{Binding UndoCommand}" />
+                <MenuItem
+                    Header="_Undo"
+                    Command="{Binding UndoCommand}" />
 
-                <MenuItem Header="_Redo"
-                          Command="{Binding RedoCommand}" />
+                <MenuItem
+                    Header="_Redo"
+                    Command="{Binding RedoCommand}" />
 
                 <Separator />
 
-                <MenuItem Header="_Cut"
-                            Click="Cut_Click" />
+                <MenuItem
+                    Header="_Cut"
+                    Click="Cut_Click" />
 
-                <MenuItem Header="_Copy"
-                            Click="Copy_Click" />
+                <MenuItem
+                    Header="_Copy"
+                    Click="Copy_Click" />
 
-                <MenuItem Header="_Paste"
-                            Click="Paste_Click" />
+                <MenuItem
+                    Header="_Paste"
+                    Click="Paste_Click" />
 
-                <MenuItem Header="_Delete"
-                            Command="{Binding DeleteRuleCommand}" />
+                <MenuItem
+                    Header="_Delete"
+                    Command="{Binding DeleteRuleCommand}" />
 
                 <Button Content="New Rule">
                     <Button.Flyout>
                         <MenuFlyout>
-                            <MenuItem Header="Find and replace"
-                                      Command="{Binding AddRuleCommand}" />
+                            <MenuItem
+                                Header="Find and replace"
+                                Command="{Binding AddRuleCommand}" />
 
-                            <MenuItem Header="In template call"
-                                      Command="{Binding AddInTemplateRuleCommand}" />
+                            <MenuItem
+                                Header="In template call"
+                                Command="{Binding AddInTemplateRuleCommand}" />
 
-                            <MenuItem Header="Template parameter"
-                                      Command="{Binding AddTemplateParamRuleCommand}" />
+                            <MenuItem
+                                Header="Template parameter"
+                                Command="{Binding AddTemplateParamRuleCommand}" />
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
-
             </MenuItem>
 
             <MenuItem Header="_Rule">
                 <MenuItem Header="_New">
-                    <MenuItem Header="Find and replace"
-                              Command="{Binding AddRuleCommand}" />
+                    <MenuItem
+                        Header="Find and replace"
+                        Command="{Binding AddRuleCommand}" />
 
-                    <MenuItem Header="In template call"
-                              Command="{Binding AddInTemplateRuleCommand}" />
+                    <MenuItem
+                        Header="In template call"
+                        Command="{Binding AddInTemplateRuleCommand}" />
 
-                    <MenuItem Header="Template parameter"
-                              Command="{Binding AddTemplateParamRuleCommand}" />
+                    <MenuItem
+                        Header="Template parameter"
+                        Command="{Binding AddTemplateParamRuleCommand}" />
                 </MenuItem>
 
                 <MenuItem Header="New _subrule">
-                    <MenuItem Header="Find and replace"
-                              Command="{Binding AddSubruleCommand}" />
+                    <MenuItem
+                        Header="Find and replace"
+                        Command="{Binding AddSubruleCommand}" />
 
-                    <MenuItem Header="In template call"
-                              Command="{Binding AddInTemplateSubruleCommand}" />
+                    <MenuItem
+                        Header="In template call"
+                        Command="{Binding AddInTemplateSubruleCommand}" />
 
-                    <MenuItem Header="Template parameter"
-                              Command="{Binding AddTemplateParamSubruleCommand}" />
+                    <MenuItem
+                        Header="Template parameter"
+                        Command="{Binding AddTemplateParamSubruleCommand}" />
                 </MenuItem>
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Row="1"
-              Margin="8"
-              ColumnDefinitions="300,Auto,*">
+        <!-- Rule management workspace -->
+        <Grid
+            Grid.Row="1"
+            Margin="{DynamicResource TwainContentPadding}"
+            ColumnDefinitions="300,Auto,*">
 
-            <Grid Grid.Column="0"
-                  RowDefinitions="*,Auto">
+            <!-- Rule tree and commands -->
+            <Border
+                Grid.Column="0"
+                Classes="twain-section"
+                Margin="0"
+                MinHeight="0">
 
-            <TreeView
-                x:Name="RulesTreeView"
-                ItemsSource="{Binding Rules}"
-                SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
+                <Grid
+                    RowDefinitions="Auto,*,Auto"
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-                <TreeView.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="_New rule">
-                            <MenuItem Header="_Find and replace"
-                                      Command="{Binding AddRuleCommand}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Classes="twain-section-heading"
+                        Text="Rules" />
 
-                            <MenuItem Header="_In template call"
-                                      Command="{Binding AddInTemplateRuleCommand}" />
+                    <TreeView
+                        x:Name="RulesTreeView"
+                        Grid.Row="1"
+                        ItemsSource="{Binding Rules}"
+                        SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
 
-                            <MenuItem Header="_Template parameter"
-                                      Command="{Binding AddTemplateParamRuleCommand}" />
-                        </MenuItem>
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="_New rule">
+                                    <MenuItem
+                                        Header="_Find and replace"
+                                        Command="{Binding AddRuleCommand}" />
 
-                        <MenuItem Header="New _subrule">
-                            <MenuItem Header="_Find and replace"
-                                      Command="{Binding AddSubruleCommand}" />
+                                    <MenuItem
+                                        Header="_In template call"
+                                        Command="{Binding AddInTemplateRuleCommand}" />
 
-                            <MenuItem Header="_In template call"
-                                      Command="{Binding AddInTemplateSubruleCommand}" />
+                                    <MenuItem
+                                        Header="_Template parameter"
+                                        Command="{Binding AddTemplateParamRuleCommand}" />
+                                </MenuItem>
 
-                            <MenuItem Header="_Template parameter"
-                                      Command="{Binding AddTemplateParamSubruleCommand}" />
-                        </MenuItem>
+                                <MenuItem Header="New _subrule">
+                                    <MenuItem
+                                        Header="_Find and replace"
+                                        Command="{Binding AddSubruleCommand}" />
 
-                        <Separator />
+                                    <MenuItem
+                                        Header="_In template call"
+                                        Command="{Binding AddInTemplateSubruleCommand}" />
 
-                        <MenuItem Header="_Cut"
-                                  Click="Cut_Click" />
+                                    <MenuItem
+                                        Header="_Template parameter"
+                                        Command="{Binding AddTemplateParamSubruleCommand}" />
+                                </MenuItem>
 
-                        <MenuItem Header="_Copy"
-                                  Click="Copy_Click" />
+                                <Separator />
 
-                        <MenuItem Header="_Paste"
-                                  Click="Paste_Click" />
+                                <MenuItem
+                                    Header="_Cut"
+                                    Click="Cut_Click" />
 
-                        <MenuItem Header="_Delete"
-                                  Command="{Binding DeleteRuleCommand}" />
+                                <MenuItem
+                                    Header="_Copy"
+                                    Click="Copy_Click" />
 
-                        <Separator />
+                                <MenuItem
+                                    Header="_Paste"
+                                    Click="Paste_Click" />
 
-                        <MenuItem Header="_Expand all"
-                                  Click="ExpandAll_Click" />
+                                <MenuItem
+                                    Header="_Delete"
+                                    Command="{Binding DeleteRuleCommand}" />
 
-                        <MenuItem Header="_Collapse all"
-                                  Click="CollapseAll_Click" />
-                    </ContextMenu>
-                </TreeView.ContextMenu>
+                                <Separator />
 
-                <TreeView.ItemTemplate>
-                    <TreeDataTemplate
-                        DataType="vm:ReplaceSpecialRuleViewModel"
-                        ItemsSource="{Binding Children}">
-                        <TextBlock Text="{Binding Name}" />
-                    </TreeDataTemplate>
-                </TreeView.ItemTemplate>
+                                <MenuItem
+                                    Header="_Expand all"
+                                    Click="ExpandAll_Click" />
 
-            </TreeView>
+                                <MenuItem
+                                    Header="_Collapse all"
+                                    Click="CollapseAll_Click" />
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
 
-                <StackPanel Grid.Row="1"
-                            Margin="0,8,0,0"
-                            Orientation="Horizontal"
-                            Spacing="8">
+                        <TreeView.ItemTemplate>
+                            <TreeDataTemplate
+                                DataType="vm:ReplaceSpecialRuleViewModel"
+                                ItemsSource="{Binding Children}">
 
-                    <Button Content="Up"
+                                <TextBlock Text="{Binding Name}" />
+
+                            </TreeDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+
+                    <!-- Rule ordering commands -->
+                    <StackPanel
+                        Grid.Row="2"
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingSmall}">
+
+                        <Button
+                            Classes="twain-command-button"
+                            Content="Up"
                             Command="{Binding MoveRuleUpCommand}" />
 
-                    <Button Content="Down"
+                        <Button
+                            Classes="twain-command-button"
+                            Content="Down"
                             Command="{Binding MoveRuleDownCommand}" />
 
-                    <Button Content="Delete"
+                        <Button
+                            Classes="twain-command-button"
+                            Content="Delete"
                             Command="{Binding DeleteRuleCommand}" />
-                </StackPanel>
-            </Grid>
 
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Resizable divider -->
             <GridSplitter
                 Grid.Column="1"
                 Width="6"
                 Margin="6,0"
                 ResizeDirection="Columns" />
 
-            <Border Grid.Column="2"
-                    Padding="12">
+            <!-- Rule editor -->
+            <Border
+                Grid.Column="2"
+                Classes="twain-section"
+                Margin="0"
+                MinHeight="0">
 
                 <Grid x:Name="RuleEditorHost">
 
@@ -189,6 +251,7 @@
 
                 </Grid>
             </Border>
+
         </Grid>
     </Grid>
 </Window>
