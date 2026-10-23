@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Summaries.SummaryEditorWindow"
     xmlns="https://github.com/avaloniaui"
@@ -5,52 +6,66 @@
     Width="633"
     Height="365"
     CanResize="False"
-    Title="Default Edit Summary editor">
+    Title="Default Edit Summary editor"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="12"
-        RowDefinitions="Auto,*,Auto">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="Auto,*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Description -->
         <TextBlock
             Grid.Row="0"
-            Margin="0,0,0,6"
-            Text="Default _Edit Summaries (AWB will use these as the start of the page edit summary):" />
+            Text="Default Edit Summaries (Twain will use these as the start of the page edit summary):"
+            TextWrapping="Wrap" />
 
-        <ScrollViewer
+        <!-- Edit summaries -->
+        <Border
             Grid.Row="1"
-            VerticalScrollBarVisibility="Visible"
-            HorizontalScrollBarVisibility="Auto">
+            Classes="twain-section"
+            Margin="0"
+            Padding="0"
+            MinHeight="0">
 
-            <TextBox
-                x:Name="SummariesTextBox"
-                AcceptsReturn="True"
-                AcceptsTab="True"
-                TextWrapping="NoWrap" />
+            <ScrollViewer
+                VerticalScrollBarVisibility="Visible"
+                HorizontalScrollBarVisibility="Auto">
 
-        </ScrollViewer>
+                <TextBox
+                    x:Name="SummariesTextBox"
+                    AcceptsReturn="True"
+                    AcceptsTab="True"
+                    TextWrapping="NoWrap"
+                    MinHeight="0" />
 
+            </ScrollViewer>
+
+        </Border>
+
+        <!-- Actions -->
         <Grid
             Grid.Row="2"
-            Margin="0,6,0,0"
-            ColumnDefinitions="Auto,*,Auto,Auto">
+            ColumnDefinitions="Auto,*,Auto,Auto"
+            ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
             <Button
                 Grid.Column="0"
-                Width="75"
+                Classes="twain-command-button"
                 Content="_Sort"
                 Click="SortButton_Click" />
 
             <Button
                 Grid.Column="2"
-                Width="75"
-                Margin="0,0,6,0"
+                Classes="twain-primary-button"
                 Content="OK"
                 IsDefault="True"
                 Click="OkButton_Click" />
 
             <Button
                 Grid.Column="3"
-                Width="75"
+                Classes="twain-command-button"
                 Content="Cancel"
                 IsCancel="True"
                 Click="CancelButton_Click" />
