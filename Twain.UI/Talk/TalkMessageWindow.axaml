@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Talk.TalkMessageWindow"
     xmlns="https://github.com/avaloniaui"
@@ -8,26 +9,40 @@
     ShowInTaskbar="False"
     Topmost="True"
     WindowStartupLocation="CenterScreen"
-    Title="New messages">
+    Title="New messages"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        RowDefinitions="Auto,*"
-        Margin="24">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <TextBlock
+        <!-- Talk page notification -->
+        <Border
             Grid.Row="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Text="You have new messages."
-            TextAlignment="Center" />
+            Classes="twain-section"
+            Margin="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
 
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="You have new messages."
+                TextAlignment="Center"
+                TextWrapping="Wrap"
+                FontSize="16"
+                FontWeight="SemiBold" />
+
+        </Border>
+
+        <!-- View messages -->
         <Button
             Grid.Row="1"
-            Width="259"
-            Height="55"
-            Margin="0,16,0,0"
+            Classes="twain-primary-button"
+            MinWidth="140"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
             Content="_View"
             IsDefault="True"
             Click="ViewButton_Click" />
