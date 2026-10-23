@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,32 +9,43 @@
     CanResize="False"
     ShowInTaskbar="False"
     SystemDecorations="None"
-    WindowStartupLocation="CenterScreen">
+    WindowStartupLocation="CenterScreen"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid RowDefinitions="*,Auto,Auto">
+    <Grid
+        RowDefinitions="*,Auto,Auto">
 
+        <!-- Splash artwork -->
         <Image
             Grid.Row="0"
             Source="avares://Twain.UI/Assets/TwainSplash.png"
             Stretch="Uniform" />
 
+        <!-- Startup information -->
         <StackPanel
             Grid.Row="1"
             Margin="16,8"
-            Spacing="4">
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
             <TextBlock
                 x:Name="VersionTextBlock"
                 HorizontalAlignment="Center"
+                TextAlignment="Center"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
                 Text="Twain" />
 
             <TextBlock
                 x:Name="StageTextBlock"
                 HorizontalAlignment="Center"
-                TextAlignment="Center" />
+                TextAlignment="Center"
+                TextWrapping="Wrap"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}" />
 
         </StackPanel>
 
+        <!-- Startup progress -->
         <ProgressBar
             x:Name="StartupProgressBar"
             Grid.Row="2"
