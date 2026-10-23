@@ -8,25 +8,27 @@
     MinHeight="560"
     CanResize="True"
     WindowStartupLocation="CenterOwner"
-    Title="User Settings">
+    Title="User Settings"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid RowDefinitions="*,Auto">
 
-        <TabControl Margin="12">
+        <TabControl Classes="twain-tabs"
+                    Margin="{DynamicResource TwainContentPadding}">
 
-            <TabItem Header="Site">
+            <TabItem Classes="twain-tab" Header="Site">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12"
-                                Spacing="10">
+                    <Border Classes="twain-section" Margin="0">
+                    <StackPanel Margin="0"
+                                Spacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock Text="Wiki"
-                                   FontWeight="SemiBold"
-                                   FontSize="16" />
+                        <TextBlock Classes="twain-section-heading" Text="Wiki" />
 
                         <Grid ColumnDefinitions="180,*"
                               RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                              ColumnSpacing="12"
-                              RowSpacing="8">
+                              ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                              RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
@@ -56,7 +58,7 @@
                             <Grid Grid.Row="2"
                                   Grid.Column="1"
                                   ColumnDefinitions="*,Auto"
-                                  ColumnSpacing="8">
+                                  ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                                 <ComboBox x:Name="CustomProjectComboBox"
                                           IsEditable="True"
@@ -87,7 +89,7 @@
                             <Grid Grid.Row="4"
                                   Grid.Column="1"
                                   ColumnDefinitions="Auto,*"
-                                  ColumnSpacing="8">
+                                  ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                                 <CheckBox x:Name="UseCustomDomainCheckBox"
                                           VerticalAlignment="Center"
@@ -101,21 +103,21 @@
                             <CheckBox x:Name="SuppressAwbCheckBox"
                                       Grid.Row="5"
                                       Grid.Column="1"
-                                      Content="Suppress AutoWikiBrowser attribution" />
+                                      Content="Suppress Twain attribution" />
                         </Grid>
 
                     </StackPanel>
+                                    </Border>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="General">
+            <TabItem Classes="twain-tab" Header="General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12"
-                                Spacing="10">
+                    <Border Classes="twain-section" Margin="0">
+                    <StackPanel Margin="0"
+                                Spacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock Text="Application behavior"
-                                   FontWeight="SemiBold"
-                                   FontSize="16" />
+                        <TextBlock Classes="twain-section-heading" Text="Application behavior" />
 
                         <CheckBox x:Name="AlwaysConfirmExitCheckBox"
                                   Content="Always confirm before exiting" />
@@ -150,19 +152,20 @@
                         <CheckBox x:Name="ClearPageListCheckBox"
                                   Content="Clear page list when project changes" />
                     </StackPanel>
+                                    </Border>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Editor">
+            <TabItem Classes="twain-tab" Header="Editor">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12"
-                                Spacing="12">
+                    <Border Classes="twain-section" Margin="0">
+                    <StackPanel Margin="0"
+                                Spacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock Text="Editor"
-                                   FontWeight="SemiBold"
-                                   FontSize="16" />
+                        <TextBlock Classes="twain-section-heading" Text="Editor" />
 
-                        <Button x:Name="ChooseFontButton"
+                        <Button Classes="twain-command-button"
+                                 x:Name="ChooseFontButton"
                                 HorizontalAlignment="Left"
                                 Content="Choose editor font..." />
 
@@ -176,8 +179,8 @@
 
                         <Grid ColumnDefinitions="180,*"
                               RowDefinitions="Auto,Auto"
-                              ColumnSpacing="12"
-                              RowSpacing="8">
+                              ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                              RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
@@ -197,32 +200,33 @@
                             <Grid Grid.Row="1"
                                   Grid.Column="1"
                                   ColumnDefinitions="*,Auto"
-                                  ColumnSpacing="8">
+                                  ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                                 <TextBox x:Name="AutoSaveFileTextBox" />
 
-                                <Button x:Name="ChooseAutoSaveFileButton"
+                                <Button Classes="twain-command-button"
+                                         x:Name="ChooseAutoSaveFileButton"
                                         Grid.Column="1"
                                         Content="Browse..." />
                             </Grid>
                         </Grid>
                     </StackPanel>
+                                    </Border>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Processing">
+            <TabItem Classes="twain-tab" Header="Processing">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12"
-                                Spacing="10">
+                    <Border Classes="twain-section" Margin="0">
+                    <StackPanel Margin="0"
+                                Spacing="{DynamicResource TwainSpacingMedium}">
 
-                        <TextBlock Text="Article behavior"
-                                   FontWeight="SemiBold"
-                                   FontSize="16" />
+                        <TextBlock Classes="twain-section-heading" Text="Article behavior" />
 
                         <Grid ColumnDefinitions="260,*"
                               RowDefinitions="Auto,Auto,Auto,Auto"
-                              ColumnSpacing="12"
-                              RowSpacing="8">
+                              ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                              RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
@@ -266,47 +270,49 @@
                                   Content="Generate diff in bot mode" />
 
                         <CheckBox x:Name="AddUsingAwbToActionSummariesCheckBox"
-                                  Content="Add AutoWikiBrowser attribution to action summaries" />
+                                  Content="Add Twain attribution to action summaries" />
                     </StackPanel>
+                                    </Border>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Alerts">
-                <Grid Margin="12"
-                      RowDefinitions="Auto,*,Auto"
-                      RowSpacing="10">
+            <TabItem Classes="twain-tab" Header="Alerts">
+                <Border Classes="twain-section" Margin="0">
+                  <Grid RowDefinitions="Auto,*,Auto"
+                      RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-                    <TextBlock Text="Enabled alerts"
-                               FontWeight="SemiBold"
-                               FontSize="16" />
+                    <TextBlock Classes="twain-section-heading" Text="Enabled alerts" />
 
                     <ScrollViewer Grid.Row="1">
                         <StackPanel x:Name="AlertsPanel"
-                                    Spacing="6" />
+                                    Spacing="{DynamicResource TwainSpacingSmall}" />
                     </ScrollViewer>
 
                     <TextBlock Grid.Row="2"
                                Text="When no alerts are selected, all alerts are treated as enabled."
                                TextWrapping="Wrap"
                                Opacity="0.75" />
-                </Grid>
+                  </Grid>
+                </Border>
             </TabItem>
 
         </TabControl>
 
         <Grid Grid.Row="1"
-              Margin="12"
+              Margin="{DynamicResource TwainContentPadding}"
               ColumnDefinitions="*,Auto,Auto"
-              ColumnSpacing="8">
+              ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
-        <Button x:Name="OkButton"
+        <Button Classes="twain-primary-button"
+                 x:Name="OkButton"
                 Grid.Column="1"
                 MinWidth="90"
                 IsDefault="True"
                 Click="OkButton_Click"
                 Content="OK" />
 
-        <Button x:Name="CancelButton"
+        <Button Classes="twain-command-button"
+                 x:Name="CancelButton"
                 Grid.Column="2"
                 MinWidth="90"
                 IsCancel="True"
