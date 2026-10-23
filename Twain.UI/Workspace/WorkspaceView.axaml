@@ -16,7 +16,8 @@
     x:DataType="vm:WorkspaceViewModel"
     d:DesignWidth="1100"
     d:DesignHeight="700"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <UserControl.Resources>
 
@@ -54,6 +55,7 @@
     Grid.RowSpan="2"
     Grid.Column="0"
     Padding="12"
+    Background="{DynamicResource TwainSurfaceBrush}"
     BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
     BorderThickness="0,0,1,0">
 
@@ -122,7 +124,7 @@
         HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto">
 
-        <StackPanel Spacing="6">
+        <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
             <!-- Keep the toggle accessible in both navigation states. -->
             <Button
@@ -453,6 +455,7 @@ Article alerts for the currently processed article.
         <Border
             Grid.Row="0"
             Padding="12,10"
+            Background="{DynamicResource TwainSelectionBrush}"
             BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
             BorderThickness="0,0,0,1">
 
@@ -558,6 +561,7 @@ Article alerts for the currently processed article.
         Grid.Row="1"
         Grid.Column="2"
         Padding="12,6"
+        Background="{DynamicResource TwainSurfaceBrush}"
         BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
         BorderThickness="0,1,0,0">
 
