@@ -13,7 +13,7 @@
     d:DesignHeight="300"
     mc:Ignorable="d">
 
-    <!-- Shared pane frame. -->
+    <!-- Shared workspace pane frame -->
     <Border
         Background="{DynamicResource TwainSurfaceBrush}"
         BorderBrush="{DynamicResource TwainBorderBrush}"
@@ -23,7 +23,7 @@
 
         <Grid RowDefinitions="Auto,*">
 
-            <!-- Shared pane title bar. -->
+            <!-- Shared pane title bar -->
             <Border
                 Grid.Row="0"
                 MinHeight="{DynamicResource TwainPaneHeaderHeight}"
@@ -44,12 +44,13 @@
             <!--
                 Pane-specific content host.
 
-                Avoid additional margin, padding, and clipping
-                around the content. NativeWebView needs the
-                available space for the Diff presentation.
+                Do not add margins, padding, or clipping here.
+                NativeWebView and Monaco require the full
+                available content area.
             -->
             <Border
                 Grid.Row="1"
+                MinHeight="0"
                 Background="{DynamicResource TwainRaisedSurfaceBrush}"
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
                 BorderThickness="0">
@@ -61,6 +62,7 @@
 
                     <ContentControl.DataTemplates>
 
+                        <!-- Make List pane -->
                         <DataTemplate
                             DataType="listViewModels:MakeListViewModel">
 
