@@ -190,7 +190,7 @@
     <value>3</value>
   </data>
   <data name="txtPrompt.Text" xml:space="preserve">
-    <value>AutoWikiBrowser has finished processing all pages and has been set to {0}. If you would like to stop this, press cancel. Ok will {0} the computer now. </value>
+    <value>Twain has finished processing all pages and has been set to {0}. If you would like to stop this, press cancel. Ok will {0} the computer now. </value>
   </data>
   <data name="&gt;&gt;txtPrompt.Name" xml:space="preserve">
     <value>txtPrompt</value>

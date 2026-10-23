@@ -19,7 +19,7 @@ public partial class ShutdownNotificationWindow :
     private string _shutdownType = string.Empty;
 
     private string _promptTemplate =
-        "AutoWikiBrowser has finished processing. The requested action is {0}.";
+        "Twain has finished processing. The requested action is {0}.";
 
     /// <summary>
     /// Initializes a new instance of the

@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Shutdown.ShutdownNotificationWindow"
     xmlns="https://github.com/avaloniaui"
@@ -7,41 +8,56 @@
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterScreen"
-    Title="Shutdown notification">
+    Title="Shutdown notification"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="32,29,32,26"
-        RowDefinitions="*,Auto,Auto">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="*,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
+        <!-- Shutdown message -->
         <TextBlock
             x:Name="PromptText"
             Grid.Row="0"
             TextWrapping="Wrap"
             VerticalAlignment="Top" />
 
-        <TextBlock
-            x:Name="TimerText"
+        <!-- Shutdown countdown -->
+        <Border
             Grid.Row="1"
-            Margin="173,8,0,16"
-            HorizontalAlignment="Left"
-            Text="Time until shutdown: 120" />
+            Classes="twain-section"
+            HorizontalAlignment="Center"
+            Margin="0"
+            Padding="16,10">
 
+            <TextBlock
+                x:Name="TimerText"
+                HorizontalAlignment="Center"
+                FontSize="16"
+                FontWeight="SemiBold"
+                Text="Time until shutdown: 120" />
+
+        </Border>
+
+        <!-- Actions -->
         <StackPanel
             Grid.Row="2"
             HorizontalAlignment="Center"
             Orientation="Horizontal"
-            Spacing="16">
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
             <Button
-                Width="200"
-                Height="55"
+                Classes="twain-primary-button"
+                MinWidth="120"
                 Content="OK"
                 IsDefault="True"
                 Click="OkButton_Click" />
 
             <Button
-                Width="200"
-                Height="55"
+                Classes="twain-command-button"
+                MinWidth="120"
                 Content="Cancel"
                 IsCancel="True"
                 Click="CancelButton_Click" />
