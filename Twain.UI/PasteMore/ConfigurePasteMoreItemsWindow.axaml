@@ -1,3 +1,4 @@
+
 <Window
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -10,12 +11,16 @@
     MinWidth="360"
     MinHeight="320"
     WindowStartupLocation="CenterOwner"
-    CanResize="True">
+    CanResize="True"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
     <Grid
-        Margin="12"
-        RowDefinitions="*,Auto">
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="*,Auto"
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
+        <!-- Configurable Paste More entries -->
         <ScrollViewer
             Grid.Row="0"
             HorizontalScrollBarVisibility="Disabled"
@@ -28,7 +33,8 @@
 
                         <Grid
                             Margin="0,3"
-                            ColumnDefinitions="40,*">
+                            ColumnDefinitions="40,*"
+                            ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                             <TextBlock
                                 Grid.Column="0"
@@ -37,6 +43,7 @@
 
                             <TextBox
                                 Grid.Column="1"
+                                HorizontalAlignment="Stretch"
                                 Text="{Binding Text, Mode=TwoWay}" />
 
                         </Grid>
@@ -47,27 +54,26 @@
 
         </ScrollViewer>
 
+        <!-- Completion commands -->
         <StackPanel
             Grid.Row="1"
-            Margin="0,12,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
-        <Button
-            Content="OK"
-            MinWidth="80"
-            IsDefault="True"
-            Click="OkButton_Click" />
+            <Button
+                Classes="twain-primary-button"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
 
-        <Button
-            Content="Cancel"
-            MinWidth="80"
-            IsCancel="True"
-            Click="CancelButton_Click" />
+            <Button
+                Classes="twain-command-button"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
 
         </StackPanel>
 
     </Grid>
-
 </Window>
