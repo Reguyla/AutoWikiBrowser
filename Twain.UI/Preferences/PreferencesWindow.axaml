@@ -11,20 +11,21 @@
             x:Name="PreferencesTabs"
             Classes="twain-tabs"
             Grid.Row="0"
-            Margin="12">
+            Margin="{DynamicResource TwainContentPadding}">
 
            <TabItem Classes="twain-tab" Header="General">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel
-                    Margin="12"
-                    Spacing="10">
+                    Margin="{DynamicResource TwainContentPadding}"
+                    Spacing="{DynamicResource TwainSpacingMedium}">
 
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                 <TextBlock Classes="twain-section-heading" Text="Appearance" />
 
                 <Grid
                     ColumnDefinitions="Auto,*"
-                    ColumnSpacing="12"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
                     Margin="0,4,0,0">
 
                     <TextBlock
@@ -56,7 +57,7 @@
                 </Border>
 
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 <TextBlock Classes="twain-section-heading" Text="Application processing" />
 
                 <CheckBox
@@ -84,7 +85,7 @@
 
                 <Grid
                     ColumnDefinitions="Auto,*"
-                    ColumnSpacing="12"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
                     Margin="0,4,0,0">
 
                     <TextBlock
@@ -108,7 +109,7 @@
                 </Border>
 
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 <TextBlock Classes="twain-section-heading" Text="Bot processing" />
 
                 <CheckBox
@@ -125,7 +126,7 @@
                 </Border>
 
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 <TextBlock Classes="twain-section-heading" Text="Logging" />
 
                 <CheckBox
@@ -135,15 +136,16 @@
                 </Border>
 
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Classes="twain-tab" Header="Site">
-                <Border Classes="twain-section" Margin="12">
+                <Border Classes="twain-section" Margin="{DynamicResource TwainContentPadding}">
                 <Grid
                     ColumnDefinitions="Auto,*"
                     RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-                    ColumnSpacing="12"
-                    RowSpacing="10">
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock
                         Grid.Row="0"
@@ -227,12 +229,13 @@
             </TabItem>
 
             <TabItem Classes="twain-tab" Header="Editing">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel
-                    Margin="12"
-                    Spacing="10">
+                    Margin="{DynamicResource TwainContentPadding}"
+                    Spacing="{DynamicResource TwainSpacingMedium}">
 
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock Classes="twain-section-heading" Text="Edit summary settings" />
 
                     <CheckBox
@@ -248,7 +251,7 @@
                     </StackPanel>
                 </Border>
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                 <TextBlock Classes="twain-section-heading" Text="Save settings" />
                     
                     <CheckBox
@@ -262,7 +265,7 @@
 
                     <Grid
                         ColumnDefinitions="Auto,*"
-                        ColumnSpacing="12">
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
                         <TextBlock
                             Grid.Column="0"
@@ -272,7 +275,7 @@
                         <Grid
                             Grid.Column="1"
                             ColumnDefinitions="*,Auto"
-                            ColumnSpacing="8">
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
                             <TextBox
                                 x:Name="AutoSaveFileTextBox"
@@ -281,6 +284,7 @@
 
                             <Button
                                 x:Name="SetAutoSaveFileButton"
+                                Classes="twain-command-button"
                                 Grid.Column="1"
                                 Content="Browse..."
                                 Click="SetAutoSaveFileButton_Click" />
@@ -290,7 +294,7 @@
 
                         <Grid
                             ColumnDefinitions="Auto,Auto,*"
-                            ColumnSpacing="8">
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
                             <TextBlock
                                 x:Name="AutoSavePeriodLabel"
@@ -318,7 +322,7 @@
 
                     <StackPanel
                         Orientation="Horizontal"
-                        Spacing="16">
+                        Spacing="{DynamicResource TwainSpacingLarge}">
 
                         <CheckBox
                             x:Name="FlashCheckBox"
@@ -332,16 +336,16 @@
                     </StackPanel>
                 </Border>
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
-<StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+<StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock Classes="twain-section-heading" Text="Editor appearance" />
 
                     <Grid
                         ColumnDefinitions="Auto,*"
                         RowDefinitions="Auto,Auto"
-                        ColumnSpacing="12"
-                        RowSpacing="10">
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                         <TextBlock
                             Grid.Row="0"
@@ -394,15 +398,17 @@
                 </Border>
 
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Classes="twain-tab" Header="Tools">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel
-                    Margin="12"
-                    Spacing="12">
+                    Margin="{DynamicResource TwainContentPadding}"
+                    Spacing="{DynamicResource TwainSpacingMedium}">
 
                 <Border Classes="twain-section">
-                    <StackPanel Spacing="10">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock Classes="twain-section-heading" Text="Current article list" />
 
                     <TextBlock
@@ -412,8 +418,8 @@
                     <Grid
                         ColumnDefinitions="*,Auto"
                         RowDefinitions="Auto,Auto,Auto"
-                        ColumnSpacing="12"
-                        RowSpacing="10">
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                         <TextBlock
                             Grid.Row="0"
@@ -475,13 +481,14 @@
                 </Border>
 
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Classes="twain-tab" Header="Alerts">
-                <Border Classes="twain-section" Margin="12">
+                <Border Classes="twain-section" Margin="{DynamicResource TwainContentPadding}">
                 <Grid
                     RowDefinitions="Auto,*"
-                    RowSpacing="10">
+                    RowSpacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock
                         Grid.Row="0"
@@ -509,10 +516,11 @@
             Margin="12,0,12,12"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
-            Spacing="8">
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
         <Button
             x:Name="OkButton"
+            Classes="twain-primary-button"
             MinWidth="90"
             Content="OK"
             IsEnabled="True"
@@ -521,6 +529,7 @@
 
             <Button
                 x:Name="CancelButton"
+                Classes="twain-command-button"
                 MinWidth="90"
                 Content="Cancel"
                 IsCancel="True"
