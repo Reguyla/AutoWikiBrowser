@@ -1,3 +1,4 @@
+
 <Window
     x:Class="Twain.UI.Controls.Lists.ProtectionLevelWindow"
     xmlns="https://github.com/avaloniaui"
@@ -7,59 +8,82 @@
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
-    Title="Protection">
+    Title="Protection"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
-    <Grid Margin="16"
-          RowDefinitions="*,Auto"
-          ColumnDefinitions="*,*"
-          RowSpacing="12"
-          ColumnSpacing="12">
+    <Grid
+        Margin="{DynamicResource TwainContentPadding}"
+        RowDefinitions="*,Auto"
+        ColumnDefinitions="*,*"
+        RowSpacing="{DynamicResource TwainSpacingMedium}"
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <StackPanel Grid.Row="0"
-                    Grid.Column="0"
-                    Spacing="6">
+        <!-- Protection type -->
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <TextBlock Text="Type"
-                       FontWeight="SemiBold" />
+            <TextBlock
+                Text="Type"
+                FontWeight="SemiBold" />
 
-            <ListBox x:Name="TypeListBox"
-                     SelectedIndex="0">
+            <ListBox
+                x:Name="TypeListBox"
+                Classes="twain-listbox"
+                SelectedIndex="0">
+
                 <ListBoxItem Content="Edit protection" />
                 <ListBoxItem Content="Move protection" />
                 <ListBoxItem Content="Edit &amp; Move protection" />
+
             </ListBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="0"
-                    Grid.Column="1"
-                    Spacing="6">
+        <!-- Protection level -->
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="1"
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <TextBlock Text="Level"
-                       FontWeight="SemiBold" />
+            <TextBlock
+                Text="Level"
+                FontWeight="SemiBold" />
 
-            <ListBox x:Name="LevelListBox"
-                     SelectedIndex="0">
+            <ListBox
+                x:Name="LevelListBox"
+                Classes="twain-listbox"
+                SelectedIndex="0">
+
                 <ListBoxItem Content="Autoconfirmed" />
                 <ListBoxItem Content="Sysop" />
                 <ListBoxItem Content="Autoconfirmed &amp; Sysop" />
+
             </ListBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="1"
-                    Grid.ColumnSpan="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8">
+        <!-- Completion commands -->
+        <StackPanel
+            Grid.Row="1"
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button Content="_OK"
-                    Width="90"
-                    IsDefault="True"
-                    Click="OkButton_Click" />
+            <Button
+                Classes="twain-primary-button"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
 
-            <Button Content="_Cancel"
-                    Width="90"
-                    IsCancel="True"
-                    Click="CancelButton_Click" />
+            <Button
+                Classes="twain-command-button"
+                Content="Cancel"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
         </StackPanel>
+
     </Grid>
 </Window>
