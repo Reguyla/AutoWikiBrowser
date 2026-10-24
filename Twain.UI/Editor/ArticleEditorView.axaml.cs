@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Editing;
+using Twain.Core.Parse;
 
 namespace Twain.UI.Editor;
 
@@ -109,6 +110,42 @@ public partial class ArticleEditorView : UserControl
         if (messageType == "saveTextToFile")
         {
             await SaveTextToFileAsync();
+            return;
+        }
+
+        if (messageType == "removeExcessWhitespace")
+        {
+            if (DataContext is ArticleEditorViewModel)
+            {
+                string originalText =
+                    message.RootElement
+                        .GetProperty("text")
+                        .GetString()
+                    ?? string.Empty;
+
+                // The legacy parser expects CRLF line endings.
+                string normalizedText = originalText
+                    .Replace("\r\n", "\n")
+                    .Replace("\r", "\n")
+                    .Replace("\n", "\r\n");
+
+                string processedText =
+                    Parsers.RemoveExcessWhitespace(normalizedText);
+
+                // Monaco uses LF line endings.
+                processedText = processedText
+                    .Replace("\r\n", "\n");
+
+                string originalJson =
+                    JsonSerializer.Serialize(originalText);
+
+                string processedJson =
+                    JsonSerializer.Serialize(processedText);
+
+                await EditorWebView.InvokeScript(
+                    $"window.twainEditor.applyProcessedText({originalJson}, {processedJson});");
+            }
+
             return;
         }
 

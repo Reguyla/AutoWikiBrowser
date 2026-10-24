@@ -3624,4 +3624,22 @@ public partial class Parsers
             articleText,
             string.Empty);
     }
+
+    /// <summary>
+    /// Removes excess whitespace from article text while
+    /// preserving protected wikitext regions.
+    /// </summary>
+    public static string RemoveExcessWhitespace(
+        string articleText)
+    {
+        ArgumentNullException.ThrowIfNull(articleText);
+
+        HideText hideText = new(false, true, true);
+
+        string text = hideText.Hide(articleText);
+
+        text = RemoveAllWhiteSpace(text);
+
+        return hideText.AddBack(text);
+    }
 }

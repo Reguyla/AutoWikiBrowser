@@ -70,6 +70,19 @@
                                 });
 
                                 editor.addAction({
+                                    id: "twain.redo",
+                                    label: "Redo",
+                                    keybindings: [
+                                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY
+                                    ],
+                                    contextMenuGroupId: "1_modification",
+                                    contextMenuOrder: 2,
+                                    run: function (activeEditor) {
+                                        activeEditor.trigger("keyboard", "redo", null);
+                                    }
+                                });
+
+                                editor.addAction({
                                     id: "twain.selectAll",
                                     label: "Select All",
                                     contextMenuGroupId: "2_editing",
@@ -124,6 +137,61 @@
                                             "twain.contextMenu",
                                             "editor.action.gotoLine",
                                             null
+                                        );
+                                    }
+                                });
+
+                                // Wrap the selected article text in a wiki comment.
+                                editor.addAction({
+                                    id: "twain.commentSelected",
+                                    label: "Comment Selected",
+                                    contextMenuGroupId: "5_processing",
+                                    contextMenuOrder: 4,
+                                    precondition: "editorHasSelection",
+
+                                    run: function (activeEditor) {
+                                        const selection = activeEditor.getSelection();
+                                        const model = activeEditor.getModel();
+
+                                        if (!selection || !model || selection.isEmpty()) {
+                                            return;
+                                        }
+
+                                        const selectedText =
+                                            model.getValueInRange(selection);
+
+                                        const commentedText =
+                                            "<!-- " + selectedText + " -->";
+
+                                        activeEditor.pushUndoStop();
+
+                                        activeEditor.executeEdits(
+                                            "twain.commentSelected",
+                                            [{
+                                                range: selection,
+                                                text: commentedText,
+                                                forceMoveMarkers: true
+                                            }]
+                                        );
+
+                                        activeEditor.pushUndoStop();
+                                        activeEditor.focus();
+                                    }
+                                });
+
+                                // Remove excess whitespace using Twain.Core.
+                                editor.addAction({
+                                    id: "twain.removeExcessWhitespace",
+                                    label: "Fix All Excess Whitespace",
+                                    contextMenuGroupId: "5_processing",
+                                    contextMenuOrder: 2,
+
+                                    run: function (activeEditor) {
+                                        invokeCSharpAction(
+                                            JSON.stringify({
+                                                type: "removeExcessWhitespace",
+                                                text: activeEditor.getValue()
+                                            })
                                         );
                                     }
                                 });
@@ -193,24 +261,56 @@
                                     }));
                             });
 
-                        window.twainEditor = {
-                            setPasteMoreItems:
-                                function (items) {
-                                    pasteMoreItems =
-                                        Array.isArray(items)
-                                            ? items.slice(0, 10)
-                                            : [];
-
-                                    for (let index = 0; index < 10; index++) {
-                                        const text = pasteMoreItems[index];
-                                        const hasValue =
-                                            typeof text === "string" &&
-                                            text.trim().length > 0;
-
-                                        if (pasteMoreContextKeys[index]) {
-                                            pasteMoreContextKeys[index].set(hasValue);
-                                        }
+                            window.twainEditor = {
+                                applyProcessedText: function (originalText, newText) {
+                                    if (!editor) {
+                                        return false;
                                     }
+
+                                    const model = editor.getModel();
+
+                                    if (!model || model.getValue() !== originalText) {
+                                        return false;
+                                    }
+
+                                    if (originalText === newText) {
+                                        return true;
+                                    }
+
+                                    editor.pushUndoStop();
+
+                                    editor.executeEdits(
+                                        "twain.processArticle",
+                                        [{
+                                            range: model.getFullModelRange(),
+                                            text: newText,
+                                            forceMoveMarkers: true
+                                        }]
+                                    );
+
+                                    editor.pushUndoStop();
+                                    editor.focus();
+
+                                    return true;
+                                },
+
+                                setPasteMoreItems:
+                                    function (items) {
+                                        pasteMoreItems =
+                                            Array.isArray(items)
+                                                ? items.slice(0, 10)
+                                                : [];
+
+                                        for (let index = 0; index < 10; index++) {
+                                            const text = pasteMoreItems[index];
+                                            const hasValue =
+                                                typeof text === "string" &&
+                                                text.trim().length > 0;
+
+                                            if (pasteMoreContextKeys[index]) {
+                                                pasteMoreContextKeys[index].set(hasValue);
+                                            }
+                                        }
                                 },
 
                                 undo: function () {
@@ -219,6 +319,12 @@
                                     }
 
                                     editor.trigger("twain", "undo", null);
+                                },
+
+                                redo: function () {
+                                    if (editor) {
+                                        editor.trigger("twain", "redo", null);
+                                    }
                                 },
 
                                 cut: function () {
