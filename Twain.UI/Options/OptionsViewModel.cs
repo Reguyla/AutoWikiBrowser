@@ -60,6 +60,12 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     private bool _findAndReplaceEnabled;
 
     /// <summary>
+    /// Gets or sets whether article processing uses pre-parse mode.
+    /// </summary>
+    [ObservableProperty]
+    private bool _preParseMode;
+
+    /// <summary>
     /// Gets or sets whether an article should be skipped when no replacement is made.
     /// </summary>
     [ObservableProperty]
@@ -739,6 +745,12 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     private bool _isProcessing;
 
     /// <summary>
+    /// Gets or sets whether an article is actively loading or processing.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isProcessingActive;
+
+    /// <summary>
     /// Gets or sets whether the article list contains an article that can be started.
     /// </summary>
     [ObservableProperty]
@@ -755,8 +767,14 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     /// </summary>
     public bool IsStartEnabled =>
         CanStartProcessing &&
-        !IsProcessing &&
+        !IsProcessingActive &&
         IsWikiAuthenticated;
+
+    partial void OnIsProcessingActiveChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsStartEnabled));
+        OnPropertyChanged(nameof(IsStopEnabled));
+    }
 
     /// <summary>
     /// Gets a value indicating whether processing can be stopped.
@@ -934,6 +952,8 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
 
             AutoTaggerEnabled =
                 AutoTag,
+
+            PreParseMode =  PreParseMode,
 
             DisambiguationEnabled =
                 DisambiguationEnabled,

@@ -484,6 +484,10 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void StartProcessing()
     {
+        if (Options.IsProcessingActive)
+        {
+            return;
+        }
         // Verify the actual session before starting an API operation.
         if (!Session.User.IsLoggedIn)
         {
@@ -519,6 +523,7 @@ public partial class WorkspaceViewModel : ObservableObject
             article.Name;
 
         Options.IsProcessing = true;
+        Options.IsProcessingActive = true;
 
         if (BotSettings.AutoSaveEnabled &&
             BotSettings.NudgeEnabled)
@@ -675,7 +680,7 @@ public partial class WorkspaceViewModel : ObservableObject
             Article? nextArticle =
                 currentIndex < MakeList.Articles.Count
                     ? MakeList.Articles[currentIndex]
-                    : null;
+                    : MakeList.Articles.FirstOrDefault();
 
             CurrentArticle = null;
             CurrentArticleName = string.Empty;
@@ -693,6 +698,10 @@ public partial class WorkspaceViewModel : ObservableObject
 
             MakeList.SelectedArticle =
                 nextArticle;
+
+            // The previous article has been saved.
+            // Allow the next article to begin processing.
+            Options.IsProcessingActive = false;
 
             StartProcessing();
         });
@@ -725,6 +734,10 @@ public partial class WorkspaceViewModel : ObservableObject
         _autoSaveCancellation?.Dispose();
         _autoSaveCancellation = null;
 
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+        _nudgeCancellation = null;
+
         Dispatcher.UIThread.Post(() =>
         {
             if (IsPreviewLoading)
@@ -732,6 +745,13 @@ public partial class WorkspaceViewModel : ObservableObject
                 IsPreviewLoading = false;
                 PreviewError = exception.Message;
                 IsPreviewVisible = false;
+            }
+            else if (Options.IsProcessingActive)
+            {
+                // The article operation failed.
+                // Restore Start without automatically retrying.
+                Options.IsProcessingActive = false;
+                Options.IsProcessing = false;
             }
 
             ErrorHandler.HandleException(exception);
@@ -781,7 +801,8 @@ public partial class WorkspaceViewModel : ObservableObject
     [RelayCommand]
     private void StopProcessing()
     {
-        if (!Options.IsProcessing)
+        if (!Options.IsProcessing &&
+            !Options.IsProcessingActive)
         {
             return;
         }
@@ -796,6 +817,7 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Session.Editor.Abort();
 
+        Options.IsProcessingActive = false;
         Options.IsProcessing = false;
     }
 
@@ -966,10 +988,15 @@ public partial class WorkspaceViewModel : ObservableObject
             await Task.Delay(50);
         }
 
+        // Stop may have been pressed while waiting.
         if (!Options.IsProcessing)
         {
             return;
         }
+
+        // The previous operation has been aborted.
+        // Allow StartProcessing to retry the article.
+        Options.IsProcessingActive = false;
 
         StartProcessing();
     }
@@ -1015,6 +1042,10 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Options.ResetArticleStatistics();
 
+        // The current article has been skipped.
+        // Allow processing to begin for the next article.
+        Options.IsProcessingActive = false;
+
         StartProcessing();
     }
 
@@ -1024,6 +1055,13 @@ public partial class WorkspaceViewModel : ObservableObject
     {
         Dispatcher.UIThread.Post(() =>
         {
+            // Ignore completion callbacks after processing has stopped.
+            if (!Options.IsProcessing ||
+                !Options.IsProcessingActive)
+            {
+                return;
+            }
+
             _nudgeCancellation?.Cancel();
             _nudgeCancellation?.Dispose();
             _nudgeCancellation = null;
@@ -1074,8 +1112,24 @@ public partial class WorkspaceViewModel : ObservableObject
                 dependencies,
                 callbacks);
 
+            // Core may have requested that processing stop.
+            // Do not continue updating the article or schedule
+            // an automatic save after the workflow was aborted.
+            if (!Options.IsProcessing)
+            {
+                return;
+            }
+
             Editor.Document.CurrentText =
                 CurrentArticle.ArticleText;
+
+            // Core processing has completed.
+            // Keep the article available for review and saving.
+            if (!BotSettings.AutoSaveEnabled &&
+                !Options.PreParseMode)
+            {
+                Options.IsProcessingActive = false;
+            }
 
             if (BotSettings.AutoSaveEnabled)
             {

@@ -88,6 +88,11 @@
 
                         </Grid>
                      
+                            <CheckBox
+                                Content="Use pre-parse mode"
+                                IsChecked="{Binding PreParseMode}"
+                                HorizontalAlignment="Left"
+                                Margin="0,4,0,0" />
                         </StackPanel>
                     </Border>
 
