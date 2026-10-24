@@ -58,14 +58,15 @@
                                 editor.addAction({
                                     id: "twain.undo",
                                     label: "Undo",
-                                    contextMenuGroupId: "2_editing",
+                                    contextMenuGroupId: "0_undo_redo",
                                     contextMenuOrder: 1,
 
                                     run: function (activeEditor) {
                                         activeEditor.trigger(
                                             "twain.contextMenu",
                                             "undo",
-                                            null);
+                                            null
+                                        );
                                     }
                                 });
 
@@ -75,10 +76,15 @@
                                     keybindings: [
                                         monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY
                                     ],
-                                    contextMenuGroupId: "1_modification",
+                                    contextMenuGroupId: "0_undo_redo",
                                     contextMenuOrder: 2,
+
                                     run: function (activeEditor) {
-                                        activeEditor.trigger("keyboard", "redo", null);
+                                        activeEditor.trigger(
+                                            "twain.contextMenu",
+                                            "redo",
+                                            null
+                                        );
                                     }
                                 });
 
@@ -147,7 +153,6 @@
                                     label: "Comment Selected",
                                     contextMenuGroupId: "5_processing",
                                     contextMenuOrder: 4,
-                                    precondition: "editorHasSelection",
 
                                     run: function (activeEditor) {
                                         const selection = activeEditor.getSelection();
@@ -191,6 +196,34 @@
                                             JSON.stringify({
                                                 type: "removeExcessWhitespace",
                                                 text: activeEditor.getValue()
+                                            })
+                                        );
+                                    }
+                                });
+
+                                // Convert HTML entities in the selected text to Unicode.
+                                editor.addAction({
+                                    id: "twain.unicodify",
+                                    label: "Unicodify",
+                                    contextMenuGroupId: "5_processing",
+                                    contextMenuOrder: 3,
+
+                                    run: function (activeEditor) {
+                                        const selection = activeEditor.getSelection();
+                                        const model = activeEditor.getModel();
+
+                                        if (!selection || !model || selection.isEmpty()) {
+                                            return;
+                                        }
+
+                                        invokeCSharpAction(
+                                            JSON.stringify({
+                                                type: "unicodify",
+                                                text: model.getValueInRange(selection),
+                                                startLine: selection.startLineNumber,
+                                                startColumn: selection.startColumn,
+                                                endLine: selection.endLineNumber,
+                                                endColumn: selection.endColumn
                                             })
                                         );
                                     }
@@ -283,6 +316,56 @@
                                         "twain.processArticle",
                                         [{
                                             range: model.getFullModelRange(),
+                                            text: newText,
+                                            forceMoveMarkers: true
+                                        }]
+                                    );
+
+                                    editor.pushUndoStop();
+                                    editor.focus();
+
+                                    return true;
+                                },
+
+                                applyProcessedSelection: function (
+                                    originalText,
+                                    newText,
+                                    startLine,
+                                    startColumn,
+                                    endLine,
+                                    endColumn
+                                    ) {
+                                    if (!editor) {
+                                        return false;
+                                    }
+
+                                    const model = editor.getModel();
+
+                                    if (!model) {
+                                        return false;
+                                    }
+
+                                    const range = new monaco.Range(
+                                        startLine,
+                                        startColumn,
+                                        endLine,
+                                        endColumn
+                                    );
+
+                                    if (model.getValueInRange(range) !== originalText) {
+                                        return false;
+                                    }
+
+                                    if (originalText === newText) {
+                                        return true;
+                                    }
+
+                                    editor.pushUndoStop();
+
+                                    editor.executeEdits(
+                                        "twain.unicodify",
+                                        [{
+                                            range: range,
                                             text: newText,
                                             forceMoveMarkers: true
                                         }]

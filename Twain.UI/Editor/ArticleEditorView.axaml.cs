@@ -149,6 +149,45 @@ public partial class ArticleEditorView : UserControl
             return;
         }
 
+        if (messageType == "unicodify")
+        {
+            string originalText =
+                message.RootElement
+                    .GetProperty("text")
+                    .GetString()
+                ?? string.Empty;
+
+            int startLine =
+                message.RootElement.GetProperty("startLine").GetInt32();
+
+            int startColumn =
+                message.RootElement.GetProperty("startColumn").GetInt32();
+
+            int endLine =
+                message.RootElement.GetProperty("endLine").GetInt32();
+
+            int endColumn =
+                message.RootElement.GetProperty("endColumn").GetInt32();
+
+            Parsers parser = new();
+
+            string processedText =
+                parser.Unicodify(originalText);
+
+            string originalJson =
+                JsonSerializer.Serialize(originalText);
+
+            string processedJson =
+                JsonSerializer.Serialize(processedText);
+
+            await EditorWebView.InvokeScript(
+                $"window.twainEditor.applyProcessedSelection(" +
+                $"{originalJson}, {processedJson}, " +
+                $"{startLine}, {startColumn}, {endLine}, {endColumn});");
+
+            return;
+        }
+
         if (messageType == "textChanged" &&
             DataContext is ArticleEditorViewModel viewModel)
         {
