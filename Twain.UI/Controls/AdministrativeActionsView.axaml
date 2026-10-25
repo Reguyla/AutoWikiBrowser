@@ -1,0 +1,60 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.Options"
+    x:Class="Twain.UI.Controls.Processing.AdministrativeActionsView"
+    x:DataType="vm:OptionsViewModel">
+
+    <Border Classes="twain-section">
+        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                Classes="twain-section-heading"
+                Text="Administrative Actions" />
+
+            <!-- Page management -->
+            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
+
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Text="Page Management" />
+
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                    RowSpacing="{DynamicResource TwainSpacingSmall}"
+                    RowDefinitions="Auto,Auto">
+
+                    <Button
+                        x:Name="DeleteButton"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        Content="Delete"
+                        IsEnabled="{Binding CanDeleteCurrentPage}" />
+
+                    <Button
+                        x:Name="MoveButton"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        Content="Move"
+                        IsEnabled="{Binding CanMoveCurrentPage}" />
+
+                    <Button
+                        x:Name="ProtectButton"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        HorizontalAlignment="Stretch"
+                        Content="Protect"
+                        IsEnabled="{Binding CanProtectCurrentPage}" />
+
+                </Grid>
+
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+
+</UserControl>

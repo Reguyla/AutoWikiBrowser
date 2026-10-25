@@ -1,0 +1,108 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.Options"
+    x:Class="Twain.UI.Controls.Processing.ProcessingActionsView"
+    x:DataType="vm:OptionsViewModel">
+
+    <Border Classes="twain-section">
+        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+            <TextBlock
+                Classes="twain-section-heading"
+                Text="Processing" />
+
+            <!-- Primary processing controls -->
+            <Grid
+                ColumnDefinitions="*,*"
+                RowDefinitions="Auto,Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+                <Button
+                    x:Name="StartButton"
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Stretch"
+                    Content="Start"
+                    IsEnabled="{Binding IsStartEnabled}"
+                    Command="{Binding StartProcessingCommand}" />
+
+                <Button
+                    x:Name="StopButton"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Stretch"
+                    Content="Stop"
+                    Command="{Binding StopProcessingCommand}"
+                    IsEnabled="{Binding IsStopEnabled}" />
+
+                <Button
+                    x:Name="PreviewButton"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    Content="Preview"
+                    Command="{Binding ShowPreviewCommand}"
+                    IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
+
+                <Button
+                    x:Name="DiffButton"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    Content="Diff"
+                    Command="{Binding ShowDiffCommand}"
+                    IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
+
+            </Grid>
+
+            <!-- Save and skip controls -->
+            <Grid
+                ColumnDefinitions="*,*"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+            <Button
+                x:Name="SkipButton"
+                Grid.Column="0"
+                HorizontalAlignment="Stretch"
+                FontWeight="SemiBold"
+                Content="Skip"
+                Command="{Binding SkipProcessingCommand}"
+                IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
+
+                <Button
+                    x:Name="SaveButton"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    FontWeight="SemiBold"
+                    Content="Save"
+                    IsEnabled="{Binding IsSaveEnabled}"
+                    Command="{Binding SaveProcessingCommand}" />
+
+            </Grid>
+
+            <!-- Additional processing actions -->
+            <Grid
+                ColumnDefinitions="*,*"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <Button
+                    x:Name="WatchButton"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    Content="Watch" />
+
+                <Button
+                    x:Name="FalsePositiveButton"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    Content="False Positive"
+                    IsVisible="{Binding ShowFalsePositiveAction}" />
+
+            </Grid>
+
+        </StackPanel>
+    </Border>
+
+</UserControl>

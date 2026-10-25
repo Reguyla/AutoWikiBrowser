@@ -881,6 +881,62 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public Action? SaveProcessingRequested { get; set; }
 
     /// <summary>
+    /// Gets or sets the action invoked when article processing is stopped.
+    /// </summary>
+    public Action? StopProcessingRequested { get; set; }
+
+    /// <summary>
+    /// Requests that the workspace stop article processing.
+    /// </summary>
+    [RelayCommand]
+    private void StopProcessing()
+    {
+        StopProcessingRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Gets or sets the action invoked when the current article is skipped.
+    /// </summary>
+    public Action? SkipProcessingRequested { get; set; }
+
+    /// <summary>
+    /// Requests that the workspace skip the current article.
+    /// </summary>
+    [RelayCommand]
+    private void SkipProcessing()
+    {
+        SkipProcessingRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Gets or sets the action invoked when article preview is requested.
+    /// </summary>
+    public Action? ShowPreviewRequested { get; set; }
+
+    /// <summary>
+    /// Gets or sets the action invoked when the article diff is requested.
+    /// </summary>
+    public Action? ShowDiffRequested { get; set; }
+
+    /// <summary>
+    /// Requests a preview of the current article.
+    /// </summary>
+    [RelayCommand]
+    private void ShowPreview()
+    {
+        ShowPreviewRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Requests the article diff.
+    /// </summary>
+    [RelayCommand]
+    private void ShowDiff()
+    {
+        ShowDiffRequested?.Invoke();
+    }
+
+    /// <summary>
     /// Requests that article processing begin.
     /// </summary>
     [RelayCommand]

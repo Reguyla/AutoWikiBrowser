@@ -1,4 +1,14 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:Twain.UI.Options" x:Class="Twain.UI.Options.OptionsView" x:DataType="vm:OptionsViewModel" d:DesignWidth="320" d:DesignHeight="500" mc:Ignorable="d">
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:processingControls="using:Twain.UI.Controls.Processing"
+             xmlns:vm="using:Twain.UI.Options"
+             x:Class="Twain.UI.Options.OptionsView"
+             x:DataType="vm:OptionsViewModel"
+             d:DesignWidth="320"
+             d:DesignHeight="500"
+             mc:Ignorable="d">
 
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
@@ -43,64 +53,41 @@
 
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource TwainSpacingLarge}">
+<StackPanel
+    Orientation="Vertical"
+    Spacing="{DynamicResource TwainSpacingSmall}">
 
-                        <CheckBox Content="Lock" IsChecked="{Binding EditSummaryLocked}"/>
+    <!-- Summary and minor edit options -->
+    <StackPanel
+        Orientation="Horizontal"
+        Spacing="{DynamicResource TwainSpacingLarge}">
 
-                        <CheckBox Content="Minor edit" IsChecked="{Binding MinorEdit}"/>
+        <CheckBox
+            Content="Lock"
+            IsChecked="{Binding EditSummaryLocked}" />
 
-                    </StackPanel>
+        <CheckBox
+            Content="Minor edit"
+            IsChecked="{Binding MinorEdit}" />
+
+    </StackPanel>
+
+    <!-- Pre-parse option -->
+    <CheckBox
+        Content="Use pre-parse mode"
+        IsChecked="{Binding PreParseMode}" />
+
+</StackPanel>
 
                         </StackPanel>
+
                     </Border>
 
-                    <Border Classes="twain-section">
-                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                        <TextBlock Classes="twain-section-heading" Text="Processing"/>
+                    <!-- Standard article-processing actions -->
+                    <processingControls:ProcessingActionsView />
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource TwainSpacingSmall}">
-
-                        <Button x:Name="StartButton" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Command="{Binding StartProcessingCommand}" Content="Start" IsEnabled="{Binding IsStartEnabled}"/>
-
-                            <Button x:Name="StopButton" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Content="Stop"/>
-
-                            <Button x:Name="PreviewButton" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" Content="Preview"/>
-
-                            <Button x:Name="DiffButton" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" Content="Diff"/>
-
-                            <Button x:Name="DeleteButton" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" Content="Delete" IsEnabled="{Binding CanDeleteCurrentPage}"/>
-
-                            <Button x:Name="MoveButton" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" Content="Move" IsEnabled="{Binding CanMoveCurrentPage}"/>
-
-                            <Button x:Name="ProtectButton" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Stretch" Content="Protect" IsEnabled="{Binding CanProtectCurrentPage}"/>
-
-                            <Button x:Name="WatchButton" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch" Content="Watch"/>
-
-                            <Button x:Name="FalsePositiveButton" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Stretch" Content="False Positive" IsVisible="{Binding ShowFalsePositiveAction}"/>
-
-                        </Grid>
-
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                            <Button x:Name="SkipButton" Grid.Column="0" HorizontalAlignment="Stretch" FontWeight="SemiBold" Content="Skip"/>
-
-                            <Button x:Name="SaveButton"
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Stretch"
-                                    FontWeight="SemiBold"
-                                    Content="Save"
-                                    IsEnabled="{Binding IsSaveEnabled}"
-                                    Command="{Binding SaveProcessingCommand}" />
-
-                        </Grid>
-                     
-                            <CheckBox
-                                Content="Use pre-parse mode"
-                                IsChecked="{Binding PreParseMode}"
-                                HorizontalAlignment="Left"
-                                Margin="0,4,0,0" />
-                        </StackPanel>
-                    </Border>
+                    <!-- Administrative actions -->
+                    <processingControls:AdministrativeActionsView />
 
                     <Border Classes="twain-section">
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">

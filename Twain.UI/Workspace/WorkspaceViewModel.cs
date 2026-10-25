@@ -466,6 +466,18 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.SaveProcessingRequested =
             SaveProcessing;
 
+        Options.StopProcessingRequested =
+           StopProcessing;
+
+        Options.SkipProcessingRequested =
+            SkipProcessing;
+
+        Options.ShowPreviewRequested =
+           ShowPreview;
+
+        Options.ShowDiffRequested =
+            ShowDiff;
+
         Panes =
         [
             CreatePane(
