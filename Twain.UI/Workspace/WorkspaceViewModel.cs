@@ -884,8 +884,8 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             _pendingSaveOperationId = Session.Editor.SaveWithId(
                 articleText,
-                Editor.EditSummary,
-                Editor.IsMinorEdit,
+                Options.EditSummary,
+                Options.MinorEdit,
                 WatchOptions.NoChange);
 
             if (_pendingSaveOperationId == 0)
