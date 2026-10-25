@@ -296,8 +296,7 @@ public partial class MakeListViewModel : ObservableObject
     /// <see langword="true"/> when the article was found and removed; otherwise,
     /// <see langword="false"/>.
     /// </returns>
-    public bool RemoveArticle(
-        string articleName)
+    public bool RemoveArticle(string articleName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(articleName);
 
@@ -309,8 +308,35 @@ public partial class MakeListViewModel : ObservableObject
                         articleName,
                         StringComparison.Ordinal));
 
-        return article is not null &&
-               Articles.Remove(article);
+        if (article is null)
+        {
+            return false;
+        }
+
+        int removedIndex = Articles.IndexOf(article);
+
+        if (!Articles.Remove(article))
+        {
+            return false;
+        }
+
+        if (Articles.Count == 0)
+        {
+            SelectedArticle = null;
+        }
+        else if (SelectedArticle is null ||
+                 ReferenceEquals(SelectedArticle, article) ||
+                 !Articles.Contains(SelectedArticle))
+        {
+            int nextIndex =
+                removedIndex < Articles.Count
+                    ? removedIndex
+                    : 0;
+
+            SelectedArticle = Articles[nextIndex];
+        }
+
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanMakeList))]

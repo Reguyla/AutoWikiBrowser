@@ -876,6 +876,11 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public Action? StartProcessingRequested { get; set; }
 
     /// <summary>
+    /// Requests that the workspace save the current article.
+    /// </summary>
+    public Action? SaveProcessingRequested { get; set; }
+
+    /// <summary>
     /// Requests that article processing begin.
     /// </summary>
     [RelayCommand]
@@ -887,6 +892,15 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
         }
 
         StartProcessingRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Requests that the workspace save the current article.
+    /// </summary>
+    [RelayCommand]
+    private void SaveProcessing()
+    {
+        SaveProcessingRequested?.Invoke();
     }
 
     /// <summary>

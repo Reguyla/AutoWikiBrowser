@@ -26,9 +26,33 @@ public delegate void AsyncOpenEditHandler(AsyncApiEdit sender, PageInfo pageInfo
 
 public delegate void AsyncSaveEventHandler(AsyncApiEdit sender, SaveInfo saveInfo);
 
+/// <summary>
+/// Handles completion of a Save operation with its unique identifier.
+/// </summary>
+public delegate void AsyncSaveCompletedWithIdEventHandler(
+    AsyncApiEdit sender,
+    SaveInfo saveInfo,
+    long saveOperationId);
+
 public delegate void AsyncStringEventHandler(AsyncApiEdit sender, string result);
 
 public delegate void AsyncExceptionEventHandler(AsyncApiEdit sender, Exception ex);
+
+/// <summary>
+/// Handles a failed asynchronous API operation.
+/// </summary>
+public delegate void AsyncOperationFailedEventHandler(
+    AsyncApiEdit sender,
+    string operation,
+    Exception exception);
+
+/// <summary>
+/// Handles a failed Save operation with its operation identifier.
+/// </summary>
+public delegate void AsyncSaveFailedWithIdEventHandler(
+    AsyncApiEdit sender,
+    Exception exception,
+    long saveOperationId);
 
 public delegate void AsyncMaxlagEventHandler(AsyncApiEdit sender, double maxlag, int retryAfter);
 
@@ -44,6 +68,33 @@ public class AsyncApiEdit
     private Task ActiveModernOperation;
     private CancellationTokenSource ActiveModernCancellation;
     private bool InCrossThreadCall;
+
+    /// <summary>
+    /// Identifies the current asynchronous operation generation.
+    /// Incremented when an operation starts or is invalidated.
+    /// </summary>
+    private long _operationGeneration;
+
+    /// <summary>
+    /// Identifies the most recently started Save operation.
+    /// Unlike the general operation generation, this value
+    /// is not invalidated by Abort().
+    /// </summary>
+    private long _saveOperationGeneration;
+
+    /// <summary>
+    /// Gets the identifier assigned to the most recently started Save operation.
+    /// </summary>
+    public long LastSaveOperationId
+    {
+        get
+        {
+            lock (ModernSyncRoot)
+            {
+                return _saveOperationGeneration;
+            }
+        }
+    }
 
     public AsyncApiEdit(string url)
         : this(url, null)
@@ -157,9 +208,28 @@ public class AsyncApiEdit
 
     public event AsyncOpenEditHandler OpenComplete;
     public event AsyncSaveEventHandler SaveComplete;
+
+    /// <summary>
+    /// Raised when a Save completes, including its operation identifier.
+    /// </summary>
+    public event AsyncSaveCompletedWithIdEventHandler SaveCompletedWithId;
+
     public event AsyncStringEventHandler PreviewComplete;
 
     public event AsyncExceptionEventHandler ExceptionCaught;
+
+    /// <summary>
+    /// Raised when an asynchronous API operation fails.
+    /// Includes the operation name for operation-specific handling.
+    /// </summary>
+    public event AsyncOperationFailedEventHandler OperationFailed;
+
+    /// <summary>
+    /// Occurs when a Save operation fails, providing the
+    /// identifier of the failed Save operation.
+    /// </summary>
+    public event AsyncSaveFailedWithIdEventHandler? SaveFailedWithId;
+
     public event AsyncMaxlagEventHandler MaxlagExceeded;
     public event AsyncEventHandler LoggedOff;
 
@@ -182,7 +252,8 @@ public class AsyncApiEdit
         switch (operation)
         {
             case "Open":
-                if (OpenComplete != null) OpenComplete(this, Page);
+                if (OpenComplete != null)
+                    OpenComplete(this, (PageInfo)result);
                 break;
             case "Save":
                 if (SaveComplete != null) SaveComplete(this, (SaveInfo)result);
@@ -196,6 +267,8 @@ public class AsyncApiEdit
     protected virtual void OnOperationFailed(string operation, Exception ex)
     {
         Tools.WriteDebug("ApiEdit", ex.Message);
+
+        CallEvent(OperationFailed, this, operation, ex);
 
         if (ex is MaxlagException)
         {
@@ -313,7 +386,7 @@ public class AsyncApiEdit
         return completion.Task;
     }
 
-    private void InvokeModernFunction<TResult>(
+    private long InvokeModernFunction<TResult>(
         string operation,
         ModernOperationFactory<TResult> operationFactory)
     {
@@ -327,6 +400,19 @@ public class AsyncApiEdit
         }
 
         CancellationTokenSource cancellation = new();
+
+        long operationGeneration;
+        long saveOperationGeneration = 0;
+
+        lock (ModernSyncRoot)
+        {
+            operationGeneration = ++_operationGeneration;
+
+            if (operation == "Save")
+            {
+                saveOperationGeneration = ++_saveOperationGeneration;
+            }
+        }
 
         State = EditState.Working;
 
@@ -348,7 +434,7 @@ public class AsyncApiEdit
 
             State = EditState.Failed;
             CallModernFailure(operation, ex);
-            return;
+            return 0;
         }
 
         lock (ModernSyncRoot)
@@ -363,21 +449,39 @@ public class AsyncApiEdit
                 CompleteModernOperation(
                     operation,
                     completedTask,
-                    cancellation);
+                    cancellation,
+                    operationGeneration,
+                    saveOperationGeneration);
             },
-            CancellationToken.None,
+                    CancellationToken.None,
             TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);
+
+        return saveOperationGeneration;
     }
 
     private void CompleteModernOperation<TResult>(
         string operation,
         Task<TResult> completedTask,
-        CancellationTokenSource cancellation)
+        CancellationTokenSource cancellation,
+        long operationGeneration,
+        long saveOperationGeneration)
     {
+        bool isCurrentOperation = false;
+
         try
         {
-            bool cancelled = completedTask.IsCanceled;
+            lock (ModernSyncRoot)
+            {
+                isCurrentOperation =
+                    operationGeneration == _operationGeneration;
+            }
+
+            bool cancelled =
+                completedTask.IsCanceled ||
+                (operation != "Save" &&
+                 (cancellation.IsCancellationRequested ||
+                  !isCurrentOperation));
             Exception failure = null;
             TResult result = default(TResult);
 
@@ -398,46 +502,153 @@ public class AsyncApiEdit
 
             ClearModernOperation(completedTask, cancellation);
 
+            if (!isCurrentOperation && operation != "Save")
+            {
+                return;
+            }
+
             if (cancelled)
             {
-                State = EditState.Aborted;
+                if (isCurrentOperation)
+                {
+                    State = EditState.Aborted;
 
-                if (Aborted != null)
-                    CallEvent(Aborted, this);
+                    if (Aborted != null)
+                    {
+                        CallEvent(Aborted, this);
+                    }
+                }
+
+                if (operation == "Save")
+                {
+                    try
+                    {
+                        CallEvent(
+                            SaveFailedWithId,
+                            this,
+                            new OperationCanceledException(
+                                "The Save operation was cancelled."),
+                            saveOperationGeneration);
+                    }
+                    catch (Exception callbackException)
+                    {
+                        Tools.WriteDebug(
+                            "ApiEdit",
+                            "Save cancellation callback failed: " +
+                            callbackException.Message);
+                    }
+                }
 
                 return;
             }
 
             if (failure != null)
             {
-                SynchronousEditor.Reset();
+                if (isCurrentOperation)
+                {
+                    SynchronousEditor.Reset();
+                    State = EditState.Failed;
+                }
 
-                State = EditState.Failed;
+                if (operation == "Save")
+                {
+                    try
+                    {
+                        CallEvent(
+                            SaveFailedWithId,
+                            this,
+                            failure,
+                            saveOperationGeneration);
+                    }
+                    catch (Exception callbackException)
+                    {
+                        Tools.WriteDebug(
+                            "ApiEdit",
+                            "Save failure callback failed: " +
+                            callbackException.Message);
+                    }
+                }
+
                 CallModernFailure(operation, failure);
                 return;
             }
 
-            State = EditState.Ready;
+            if (isCurrentOperation)
+            {
+                State = EditState.Ready;
+            }
+
+            if (operation == "Save" &&
+                result is SaveInfo saveInfo)
+            {
+                try
+                {
+                    CallEvent(
+                        SaveCompletedWithId,
+                        this,
+                        saveInfo,
+                        saveOperationGeneration);
+                }
+                catch (Exception callbackException)
+                {
+                    Tools.WriteDebug(
+                        "ApiEdit",
+                        "Save completion callback failed: " +
+                        callbackException.Message);
+                }
+            }
 
             // No state changes past this point; the callback may launch another operation.
-            CallEvent(
-                new OperationEndedInternal(OnOperationComplete),
-                operation,
-                result);
+            try
+            {
+                CallEvent(
+                    new OperationEndedInternal(OnOperationComplete),
+                    operation,
+                    result);
+            }
+            catch (Exception callbackException)
+            {
+                Tools.WriteDebug(
+                    "ApiEdit",
+                    "Operation completion callback failed: " +
+                    callbackException.Message);
+            }
         }
         catch (Exception ex)
         {
             ClearModernOperation(completedTask, cancellation);
 
-            try
+            if (isCurrentOperation)
             {
-                SynchronousEditor.Reset();
+                try
+                {
+                    SynchronousEditor.Reset();
+                }
+                catch
+                {
+                }
+
+                State = EditState.Failed;
             }
-            catch
+            if (operation == "Save")
             {
+                try
+                {
+                    CallEvent(
+                        SaveFailedWithId,
+                        this,
+                        ex,
+                        saveOperationGeneration);
+                }
+                catch (Exception callbackException)
+                {
+                    Tools.WriteDebug(
+                        "ApiEdit",
+                        "Save failure callback failed: " +
+                        callbackException.Message);
+                }
             }
 
-            State = EditState.Failed;
             CallModernFailure(operation, ex);
         }
     }
@@ -446,7 +657,7 @@ public class AsyncApiEdit
         string operation,
         Exception exception)
     {
-        if (operation != null && exception is ApiException)
+        if (operation != null)
         {
             CallEvent(
                 new OperationFailedInternal(OnOperationFailed),
@@ -616,6 +827,31 @@ public class AsyncApiEdit
                     contentModel,
                     cancellationToken);
             });
+    }
+
+    /// <summary>
+    /// Starts a Save operation and returns its operation identifier.
+    /// </summary>
+    /// <returns>
+    /// The assigned Save operation ID, or zero if initialization failed.
+    /// </returns>
+    public long SaveWithId(
+        string pageText,
+        string summary,
+        bool minor,
+        WatchOptions watch,
+        string contentModel = "wikitext")
+    {
+        return InvokeModernFunction<SaveInfo>(
+            "Save",
+            cancellationToken =>
+                ModernEditor.SaveAsync(
+                    pageText,
+                    summary,
+                    minor,
+                    watch,
+                    contentModel,
+                    cancellationToken));
     }
 
     public void Watch(string title)
@@ -794,6 +1030,7 @@ public class AsyncApiEdit
 
         lock (ModernSyncRoot)
         {
+            _operationGeneration++;
             modernCancellation = ActiveModernCancellation;
         }
 

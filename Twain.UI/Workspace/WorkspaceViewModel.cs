@@ -243,6 +243,19 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private readonly SessionCounters _sessionCounters = new();
 
+    private Article? _pendingSaveArticle;
+
+    /// <summary>
+    /// Identifies the Save operation associated with the pending article.
+    /// </summary>
+    private long _pendingSaveOperationId;
+
+    /// <summary>
+    /// Indicates that a Save request is being started and its
+    /// operation identifier has not yet been recorded.
+    /// </summary>
+    private bool _pendingSaveInitialization;
+
     /// <summary>
     /// Cancels the pending nudge timer for the current article.
     /// </summary>
@@ -370,14 +383,17 @@ public partial class WorkspaceViewModel : ObservableObject
         Session.OpenComplete +=
             Editor_OpenComplete;
 
-        Session.SaveComplete +=
-            Editor_SaveComplete;
+        Session.Editor.SaveCompletedWithId +=
+            Editor_SaveCompletedWithId;
 
         Session.PreviewComplete +=
            Editor_PreviewComplete;
 
         Session.ExceptionCaught +=
             Editor_ExceptionCaught;
+
+        Session.Editor.SaveFailedWithId +=
+            Editor_SaveFailedWithId;
 
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
@@ -446,6 +462,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Options.StartProcessingRequested =
            StartProcessing;
+
+        Options.SaveProcessingRequested =
+            SaveProcessing;
 
         Panes =
         [
@@ -624,17 +643,62 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Handles successful Save completion with its operation identifier.
+    /// </summary>
+    private void Editor_SaveCompletedWithId(
+        AsyncApiEdit editor,
+        SaveInfo saveInfo,
+        long saveOperationId)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_pendingSaveArticle is null ||
+                _pendingSaveOperationId != saveOperationId)
+            {
+                return;
+            }
+
+            if (!Options.IsProcessing)
+            {
+                _pendingSaveArticle = null;
+                _pendingSaveOperationId = 0;
+                return;
+            }
+
+            if (!ReferenceEquals(CurrentArticle, _pendingSaveArticle))
+            {
+                return;
+            }
+
+            Editor_SaveComplete(editor, saveInfo);
+        });
+    }
+
+    /// <summary>
     /// Handles completion of a successful article save.
     /// </summary>
     private void Editor_SaveComplete(
         AsyncApiEdit editor,
         SaveInfo saveInfo)
     {
+        Article? completedArticle = CurrentArticle;
+
         Dispatcher.UIThread.Post(() =>
         {
+            if (!Options.IsProcessing)
+            {
+                return;
+            }
+
             if (CurrentArticle is null)
             {
                 StopProcessing();
+                return;
+            }
+
+            if (_pendingSaveArticle is null ||
+               !ReferenceEquals(CurrentArticle, _pendingSaveArticle))
+            {
                 return;
             }
 
@@ -663,6 +727,9 @@ public partial class WorkspaceViewModel : ObservableObject
                 StopProcessing();
                 return;
             }
+
+            _pendingSaveArticle = null;
+            _pendingSaveOperationId = 0;
 
             _sessionCounters.NumberOfEdits++;
             OnPropertyChanged(nameof(TotalEdits));
@@ -759,6 +826,27 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Handles a failed Save operation using its operation identifier.
+    /// </summary>
+    private void Editor_SaveFailedWithId(
+        AsyncApiEdit editor,
+        Exception exception,
+        long saveOperationId)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_pendingSaveArticle is null ||
+                _pendingSaveOperationId != saveOperationId)
+            {
+                return;
+            }
+
+            _pendingSaveArticle = null;
+            _pendingSaveOperationId = 0;
+        });
+    }
+
+    /// <summary>
     /// Saves the current article text to the active wiki.
     /// </summary>
     [RelayCommand]
@@ -766,7 +854,8 @@ public partial class WorkspaceViewModel : ObservableObject
     {
         if (!Options.IsProcessing ||
             CurrentArticle is null ||
-            Session.Editor.IsActive)
+            Session.Editor.IsActive ||
+            _pendingSaveArticle is not null)
         {
             return;
         }
@@ -788,38 +877,63 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
-        Session.Editor.Save(
-            articleText,
-            Editor.EditSummary,
-            Editor.IsMinorEdit,
-            WatchOptions.NoChange);
+        _pendingSaveArticle = CurrentArticle;
+        _pendingSaveInitialization = true;
+
+        try
+        {
+            _pendingSaveOperationId = Session.Editor.SaveWithId(
+                articleText,
+                Editor.EditSummary,
+                Editor.IsMinorEdit,
+                WatchOptions.NoChange);
+
+            if (_pendingSaveOperationId == 0)
+            {
+                _pendingSaveArticle = null;
+                return;
+            }
+        }
+        catch
+        {
+            _pendingSaveArticle = null;
+            _pendingSaveOperationId = 0;
+            throw;
+        }
+        finally
+        {
+            _pendingSaveInitialization = false;
+        }
     }
 
-    /// <summary>
-    /// Stops the active article-processing workflow.
-    /// </summary>
-    [RelayCommand]
-    private void StopProcessing()
-    {
-        if (!Options.IsProcessing &&
-            !Options.IsProcessingActive)
+        /// <summary>
+        /// Stops the active article-processing workflow.
+        /// </summary>
+        [RelayCommand]
+        private void StopProcessing()
         {
-            return;
+            if (!Options.IsProcessing &&
+                !Options.IsProcessingActive)
+            {
+                return;
+            }
+
+            _autoSaveCancellation?.Cancel();
+            _autoSaveCancellation?.Dispose();
+            _autoSaveCancellation = null;
+
+            _nudgeCancellation?.Cancel();
+            _nudgeCancellation?.Dispose();
+            _nudgeCancellation = null;
+
+        if (Session.Editor.IsActive)
+        {
+            Session.Editor.Abort();
         }
 
-        _autoSaveCancellation?.Cancel();
-        _autoSaveCancellation?.Dispose();
-        _autoSaveCancellation = null;
-
-        _nudgeCancellation?.Cancel();
-        _nudgeCancellation?.Dispose();
-        _nudgeCancellation = null;
-
-        Session.Editor.Abort();
-
         Options.IsProcessingActive = false;
-        Options.IsProcessing = false;
-    }
+            Options.IsProcessing = false;
+        }
 
     /// <summary>
     /// Completes article processing after the article queue has been exhausted.
@@ -1046,6 +1160,12 @@ public partial class WorkspaceViewModel : ObservableObject
         // Allow processing to begin for the next article.
         Options.IsProcessingActive = false;
 
+        if (MakeList.Articles.Count == 0)
+        {
+            CompleteProcessing();
+            return;
+        }
+
         StartProcessing();
     }
 
@@ -1068,6 +1188,8 @@ public partial class WorkspaceViewModel : ObservableObject
 
             CurrentArticle =
                 new Article(page);
+
+            Options.CanSaveCurrentArticle = true;
 
             // Reset the previous article's preview.
             IsPreviewVisible = false;

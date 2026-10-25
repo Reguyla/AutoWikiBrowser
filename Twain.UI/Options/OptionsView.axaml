@@ -84,7 +84,13 @@
 
                             <Button x:Name="SkipButton" Grid.Column="0" HorizontalAlignment="Stretch" FontWeight="SemiBold" Content="Skip"/>
 
-                            <Button x:Name="SaveButton" Grid.Column="1" HorizontalAlignment="Stretch" FontWeight="SemiBold" Content="Save" IsEnabled="{Binding IsSaveEnabled}"/>
+                            <Button x:Name="SaveButton"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    FontWeight="SemiBold"
+                                    Content="Save"
+                                    IsEnabled="{Binding IsSaveEnabled}"
+                                    Command="{Binding SaveProcessingCommand}" />
 
                         </Grid>
                      
