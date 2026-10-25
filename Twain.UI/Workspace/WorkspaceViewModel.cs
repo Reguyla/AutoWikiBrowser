@@ -496,6 +496,12 @@ public partial class WorkspaceViewModel : ObservableObject
                     BuiltInPaneIds.Diff),
                 Diff)
         ];
+
+        // Open editing options from the Page Editor header.
+        PaneViewModel articleEditorPane = Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
+        articleEditorPane.HeaderAction = ShowOptions;
     }
 
     /// <summary>

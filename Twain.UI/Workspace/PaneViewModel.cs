@@ -68,6 +68,16 @@ public sealed partial class PaneViewModel : ObservableObject
     public string Title => Definition.Title;
 
     /// <summary>
+    /// Gets or sets the action invoked by the pane's optional header button.
+    /// </summary>
+    public Action? HeaderAction { get; set; }
+
+    /// <summary>
+    /// Gets whether the pane has an available header action.
+    /// </summary>
+    public bool HasHeaderAction => HeaderAction is not null;
+
+    /// <summary>
     /// Gets the general role performed by the pane.
     /// </summary>
     public PaneKind Kind => Definition.Kind;
@@ -95,5 +105,14 @@ public sealed partial class PaneViewModel : ObservableObject
         {
             IsVisible = false;
         }
+    }
+
+    /// <summary>
+    /// Executes the optional pane header action.
+    /// </summary>
+    [RelayCommand]
+    private void ExecuteHeaderAction()
+    {
+        HeaderAction?.Invoke();
     }
 }

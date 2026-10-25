@@ -80,7 +80,29 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
-    
+    <!-- Compact action buttons displayed in workspace pane headers. -->
+    <Style Selector="Button.twain-pane-header-button">
+        <Setter Property="MinWidth" Value="28" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource TwainControlCornerRadius}" />
+    </Style>
+
+    <!-- Highlight pane-header buttons when hovered. -->
+    <Style Selector="Button.twain-pane-header-button:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+    </Style>
+
     <!-- Standard ListBox -->
     <Style Selector="ListBox.twain-listbox">
         <Setter Property="Background"

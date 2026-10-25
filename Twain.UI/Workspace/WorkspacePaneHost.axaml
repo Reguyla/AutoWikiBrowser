@@ -23,23 +23,44 @@
 
         <Grid RowDefinitions="Auto,*">
 
-            <!-- Shared pane title bar -->
-            <Border
-                Grid.Row="0"
-                MinHeight="{DynamicResource TwainPaneHeaderHeight}"
-                Padding="12,6"
-                Background="{DynamicResource TwainSelectionBrush}"
-                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                BorderThickness="0,0,0,1">
+        <!-- Shared pane title bar -->
+        <Border
+            Grid.Row="0"
+            MinHeight="{DynamicResource TwainPaneHeaderHeight}"
+            Padding="12,6"
+            Background="{DynamicResource TwainSelectionBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,0,0,1">
 
+            <Grid ColumnDefinitions="*,Auto">
+
+                <!-- Pane title -->
                 <TextBlock
+                    Grid.Column="0"
                     VerticalAlignment="Center"
                     FontSize="{DynamicResource TwainFontSizeMedium}"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource TwainTextPrimaryBrush}"
                     Text="{Binding Title}" />
 
-            </Border>
+                <!-- Optional pane header action -->
+                <Button
+                    Grid.Column="1"
+                    Classes="twain-pane-header-button"
+                    IsVisible="{Binding HasHeaderAction}"
+                    Command="{Binding ExecuteHeaderActionCommand}"
+                    ToolTip.Tip="Editing settings">
+
+                    <PathIcon
+                        Width="16"
+                        Height="16"
+                        Data="M 12,3 L 14,6 L 18,5 L 19,9 L 22,12 L 19,15 L 18,19 L 14,18 L 12,21 L 10,18 L 6,19 L 5,15 L 2,12 L 5,9 L 6,5 L 10,6 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9" />
+
+                </Button>
+
+            </Grid>
+
+        </Border>
 
             <!--
                 Pane-specific content host.
