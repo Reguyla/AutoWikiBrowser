@@ -1134,7 +1134,67 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Skips the current article and continues processing the next article.
+    /// Removes the current article from the processing queue,
+    /// updates the appropriate session counter, and advances
+    /// to the next article.
+    /// </summary>
+    /// <param name="wasSaved">
+    /// True when the article was successfully saved;
+    /// false when the article was skipped.
+    /// </param>
+    private void CompleteCurrentArticle(bool wasSaved)
+    {
+        if (!Options.IsProcessing || CurrentArticle is null)
+        {
+            return;
+        }
+
+        // Remove the completed article from Make List.
+        if (!MakeList.RemoveArticle(CurrentArticle.Name))
+        {
+            StopProcessing();
+            return;
+        }
+
+        // Update the appropriate session counter.
+        if (wasSaved)
+        {
+            _sessionCounters.NumberOfEdits++;
+            OnPropertyChanged(nameof(TotalEdits));
+        }
+        else
+        {
+            _sessionCounters.NumberOfIgnoredEdits++;
+            OnPropertyChanged(nameof(SkippedArticles));
+        }
+
+        BotSettings.CurrentArticleNudgeCount = 0;
+
+        // Clear the completed article.
+        CurrentArticle = null;
+        CurrentArticleName = string.Empty;
+
+        Editor.Document.CurrentText = string.Empty;
+
+        Options.ResetArticleStatistics();
+
+        // Allow processing to begin for the next article.
+        Options.IsProcessingActive = false;
+
+        // Check whether the queue is exhausted.
+        if (MakeList.Articles.Count == 0)
+        {
+            CompleteProcessing();
+            return;
+        }
+
+        // MakeList.RemoveArticle() maintains the selection.
+        StartProcessing();
+    }
+
+    /// <summary>
+    /// Skips the current article and continues processing
+    /// the next article.
     /// </summary>
     [RelayCommand]
     private void SkipProcessing()
@@ -1144,47 +1204,24 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
+        // Cancel any pending automatic save.
         _autoSaveCancellation?.Cancel();
         _autoSaveCancellation?.Dispose();
         _autoSaveCancellation = null;
 
+        // Cancel the current article's nudge timer.
         _nudgeCancellation?.Cancel();
         _nudgeCancellation?.Dispose();
         _nudgeCancellation = null;
 
+        // Record that the user skipped this article.
         CurrentArticle.Trace.UserSkipped();
 
+        // Reset the API editor before advancing.
         Session.Editor.Reset();
 
-        if (!MakeList.RemoveArticle(CurrentArticle.Name))
-        {
-            StopProcessing();
-            return;
-        }
-
-        _sessionCounters.NumberOfIgnoredEdits++;
-        OnPropertyChanged(nameof(SkippedArticles));
-
-        BotSettings.CurrentArticleNudgeCount = 0;
-
-        CurrentArticle = null;
-        CurrentArticleName = string.Empty;
-
-        Editor.Document.CurrentText = string.Empty;
-
-        Options.ResetArticleStatistics();
-
-        // The current article has been skipped.
-        // Allow processing to begin for the next article.
-        Options.IsProcessingActive = false;
-
-        if (MakeList.Articles.Count == 0)
-        {
-            CompleteProcessing();
-            return;
-        }
-
-        StartProcessing();
+        // Complete the article without counting an edit.
+        CompleteCurrentArticle(wasSaved: false);
     }
 
     private void Editor_OpenComplete(
