@@ -167,7 +167,11 @@ public class AsyncApiEdit
     /// </summary>
     public bool IsActive
     {
-        get { return State == EditState.Working; }
+        get
+        {
+            return State == EditState.Working ||
+                   ModernEditor.IsActive;
+        }
     }
 
     /// <summary>
@@ -854,6 +858,42 @@ public class AsyncApiEdit
                     cancellationToken));
     }
 
+    /// <summary>
+    /// Saves the current article asynchronously and returns
+    /// when the wiki Save operation completes.
+    /// </summary>
+    /// <param name="pageText">The article text to save.</param>
+    /// <param name="summary">The edit summary.</param>
+    /// <param name="minor">Whether this is a minor edit.</param>
+    /// <param name="watch">The watchlist behavior.</param>
+    /// <param name="contentModel">The article content model.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>
+    /// Information about the completed Save operation.
+    /// </returns>
+    public Task<SaveInfo> SaveArticleAsync(
+        string pageText,
+        string summary,
+        bool minor,
+        WatchOptions watch,
+        string contentModel = "wikitext",
+        CancellationToken cancellationToken = default)
+    {
+        if (IsModernOperationActive)
+        {
+            throw new InvocationException(
+                "An asynchronous call is already being performed.");
+        }
+
+        return ModernEditor.SaveAsync(
+            pageText,
+            summary,
+            minor,
+            watch,
+            contentModel,
+            cancellationToken);
+    }
+
     public void Watch(string title)
     {
         InvokeModernAction(
@@ -1027,6 +1067,12 @@ public class AsyncApiEdit
         if (InCrossThreadCall) return; // otherwise we'll deadlock
 
         CancellationTokenSource modernCancellation;
+
+        // Cancel operations started directly through the task-based editor.
+        if (ModernEditor.CancelCurrentOperation())
+        {
+            return;
+        }
 
         lock (ModernSyncRoot)
         {

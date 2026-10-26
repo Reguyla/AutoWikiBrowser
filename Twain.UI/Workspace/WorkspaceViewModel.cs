@@ -464,7 +464,7 @@ public partial class WorkspaceViewModel : ObservableObject
            StartProcessing;
 
         Options.SaveProcessingRequested =
-            SaveProcessing;
+            () => _ = SaveProcessing();
 
         Options.StopProcessingRequested =
            StopProcessing;
@@ -865,10 +865,11 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Saves the current article text to the active wiki.
+    /// Saves the current article to the active wiki and advances
+    /// processing only after the Save operation succeeds.
     /// </summary>
     [RelayCommand]
-    private void SaveProcessing()
+    private async Task SaveProcessing()
     {
         if (!Options.IsProcessing ||
             CurrentArticle is null ||
@@ -887,47 +888,73 @@ public partial class WorkspaceViewModel : ObservableObject
                 "Attempted to save a page that does not match the active session page.");
         }
 
-        string articleText =
-            Editor.Document.CurrentText;
+        string articleText = Editor.Document.CurrentText;
 
         if (string.IsNullOrEmpty(articleText))
         {
             return;
         }
 
-        _pendingSaveArticle = CurrentArticle;
-        _pendingSaveInitialization = true;
+        Article savingArticle = CurrentArticle;
+
+        _pendingSaveArticle = savingArticle;
+
+        bool saveCompleted = false;
 
         try
         {
-            _pendingSaveOperationId = Session.Editor.SaveWithId(
+            SaveInfo saveInfo = await Session.Editor.SaveArticleAsync(
                 articleText,
                 Options.EditSummary,
                 Options.MinorEdit,
                 WatchOptions.NoChange);
 
-            if (_pendingSaveOperationId == 0)
+            // Processing may have been stopped while the Save was running.
+            if (!Options.IsProcessing)
             {
-                _pendingSaveArticle = null;
                 return;
             }
+
+            // Ensure the completed Save still belongs to the active article.
+            if (!ReferenceEquals(CurrentArticle, savingArticle))
+            {
+                return;
+            }
+
+            // The wiki has confirmed the Save.
+            // The existing completion handler removes the article,
+            // updates the edit counter, and starts the next article.
+            saveCompleted = true;
+
+            Editor_SaveComplete(Session.Editor, saveInfo);
         }
-        catch
+        catch (OperationCanceledException)
         {
-            _pendingSaveArticle = null;
-            _pendingSaveOperationId = 0;
-            throw;
+            // The Save was cancelled before successful completion.
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
         }
         finally
         {
-            _pendingSaveInitialization = false;
+            // Editor_SaveComplete clears the pending article after
+            // its UI-dispatched completion logic executes.
+            //
+            // Only clear it here if the Save did not reach that handler.
+            if (!saveCompleted &&
+                ReferenceEquals(_pendingSaveArticle, savingArticle))
+            {
+                _pendingSaveArticle = null;
+                _pendingSaveOperationId = 0;
+            }
         }
     }
 
-        /// <summary>
-        /// Stops the active article-processing workflow.
-        /// </summary>
-        [RelayCommand]
+    /// <summary>
+    /// Stops the active article-processing workflow.
+    /// </summary>
+    [RelayCommand]
         private void StopProcessing()
         {
             if (!Options.IsProcessing &&
