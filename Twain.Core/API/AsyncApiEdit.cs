@@ -1062,40 +1062,63 @@ public class AsyncApiEdit
             });
     }
 
+    /// <summary>
+    /// Requests cancellation of the active API operation.
+    /// Preserves legacy operation tracking while supporting
+    /// operations started directly through the task-based editor.
+    /// </summary>
     public void Abort()
     {
-        if (InCrossThreadCall) return; // otherwise we'll deadlock
+        if (InCrossThreadCall)
+        {
+            return; // Avoid deadlocking during a cross-thread callback.
+        }
 
         CancellationTokenSource modernCancellation;
+        bool hasTrackedOperation;
 
-        // Cancel operations started directly through the task-based editor.
+        lock (ModernSyncRoot)
+        {
+            hasTrackedOperation =
+                ActiveModernOperation != null &&
+                !ActiveModernOperation.IsCompleted;
+
+            modernCancellation = ActiveModernCancellation;
+        }
+
+        // Cancel operations started through InvokeModernFunction().
+        // Do not invalidate their generation: the completion handler
+        // must still update the legacy editor's state to Aborted.
+        if (hasTrackedOperation)
+        {
+            if (modernCancellation != null)
+            {
+                try
+                {
+                    modernCancellation.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The operation finished while cancellation was requested.
+                }
+
+                Wait();
+            }
+
+            return;
+        }
+
+        // Handle operations started directly through SaveArticleAsync().
         if (ModernEditor.CancelCurrentOperation())
         {
             return;
         }
 
-        lock (ModernSyncRoot)
-        {
-            _operationGeneration++;
-            modernCancellation = ActiveModernCancellation;
-        }
-
-        if (modernCancellation != null)
-        {
-            try
-            {
-                modernCancellation.Cancel();
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-
-            Wait();
-            return;
-        }
-
+        // No operation is currently active.
         if (Aborted != null)
+        {
             Aborted(this);
+        }
 
         State = EditState.Aborted;
     }

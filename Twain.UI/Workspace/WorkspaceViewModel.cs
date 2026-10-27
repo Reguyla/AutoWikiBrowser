@@ -694,31 +694,27 @@ public partial class WorkspaceViewModel : ObservableObject
 
     /// <summary>
     /// Handles completion of a successful article save.
+    /// Records confirmed saves even when processing has been stopped,
+    /// but only advances the article queue while processing is active.
     /// </summary>
     private void Editor_SaveComplete(
         AsyncApiEdit editor,
         SaveInfo saveInfo)
     {
-        Article? completedArticle = CurrentArticle;
-
         Dispatcher.UIThread.Post(() =>
         {
-            if (!Options.IsProcessing)
-            {
-                return;
-            }
-
             if (CurrentArticle is null)
             {
-                StopProcessing();
                 return;
             }
 
             if (_pendingSaveArticle is null ||
-               !ReferenceEquals(CurrentArticle, _pendingSaveArticle))
+                !ReferenceEquals(CurrentArticle, _pendingSaveArticle))
             {
                 return;
             }
+
+            bool continueProcessing = Options.IsProcessing;
 
             int currentIndex =
                 MakeList.Articles
@@ -742,10 +738,18 @@ public partial class WorkspaceViewModel : ObservableObject
             if (currentIndex < 0 ||
                 !MakeList.RemoveArticle(CurrentArticle.Name))
             {
-                StopProcessing();
+                _pendingSaveArticle = null;
+                _pendingSaveOperationId = 0;
+
+                if (continueProcessing)
+                {
+                    StopProcessing();
+                }
+
                 return;
             }
 
+            // The wiki confirmed the Save.
             _pendingSaveArticle = null;
             _pendingSaveOperationId = 0;
 
@@ -754,11 +758,20 @@ public partial class WorkspaceViewModel : ObservableObject
 
             BotSettings.CurrentArticleNudgeCount = 0;
 
-            if (BotSettings.AutoSaveEnabled &&
+            // Preserve maximum-edits enforcement.
+            if (continueProcessing &&
+                BotSettings.AutoSaveEnabled &&
                 BotSettings.MaximumEdits > 0 &&
                 _sessionCounters.NumberOfEdits >= BotSettings.MaximumEdits)
             {
                 StopProcessing();
+                return;
+            }
+
+            // A successful Save after Stop must be recorded,
+            // but processing must not restart automatically.
+            if (!continueProcessing)
+            {
                 return;
             }
 
@@ -770,8 +783,7 @@ public partial class WorkspaceViewModel : ObservableObject
             CurrentArticle = null;
             CurrentArticleName = string.Empty;
 
-            Editor.Document.CurrentText =
-                string.Empty;
+            Editor.Document.CurrentText = string.Empty;
 
             Options.ResetArticleStatistics();
 
@@ -781,11 +793,8 @@ public partial class WorkspaceViewModel : ObservableObject
                 return;
             }
 
-            MakeList.SelectedArticle =
-                nextArticle;
+            MakeList.SelectedArticle = nextArticle;
 
-            // The previous article has been saved.
-            // Allow the next article to begin processing.
             Options.IsProcessingActive = false;
 
             StartProcessing();
@@ -865,8 +874,9 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Saves the current article to the active wiki and advances
-    /// processing only after the Save operation succeeds.
+    /// Saves the current article to the active wiki.
+    /// A confirmed Save is recorded even if processing was stopped
+    /// while the request was running.
     /// </summary>
     [RelayCommand]
     private async Task SaveProcessing()
@@ -909,28 +919,27 @@ public partial class WorkspaceViewModel : ObservableObject
                 Options.MinorEdit,
                 WatchOptions.NoChange);
 
-            // Processing may have been stopped while the Save was running.
-            if (!Options.IsProcessing)
-            {
-                return;
-            }
-
-            // Ensure the completed Save still belongs to the active article.
+            // A successful API response confirms that the wiki
+            // accepted the edit, even if Stop was pressed.
+            //
+            // Editor_SaveComplete records the edit and removes
+            // the article from Make List. It only advances when
+            // Options.IsProcessing is still true.
             if (!ReferenceEquals(CurrentArticle, savingArticle))
             {
                 return;
             }
 
-            // The wiki has confirmed the Save.
-            // The existing completion handler removes the article,
-            // updates the edit counter, and starts the next article.
             saveCompleted = true;
 
             Editor_SaveComplete(Session.Editor, saveInfo);
         }
         catch (OperationCanceledException)
         {
-            // The Save was cancelled before successful completion.
+            // Cancellation was requested and the API operation
+            // did not return a confirmed successful result.
+            //
+            // The article remains in Make List.
         }
         catch (Exception ex)
         {
@@ -938,10 +947,11 @@ public partial class WorkspaceViewModel : ObservableObject
         }
         finally
         {
-            // Editor_SaveComplete clears the pending article after
-            // its UI-dispatched completion logic executes.
+            // Successful saves are finalized by Editor_SaveComplete
+            // after its UI-dispatched callback executes.
             //
-            // Only clear it here if the Save did not reach that handler.
+            // Failed or cancelled operations release the pending
+            // article immediately.
             if (!saveCompleted &&
                 ReferenceEquals(_pendingSaveArticle, savingArticle))
             {
