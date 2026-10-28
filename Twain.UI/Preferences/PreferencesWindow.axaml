@@ -21,9 +21,12 @@
 
                 <Border Classes="twain-section">
                     <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                <TextBlock Classes="twain-section-heading" Text="Appearance" />
 
-                <Grid
+                        <TextBlock
+                            Classes="twain-section-heading"
+                            Text="Editor appearance" />
+
+                    <Grid
                     ColumnDefinitions="Auto,*"
                     ColumnSpacing="{DynamicResource TwainSpacingMedium}"
                     Margin="0,4,0,0">
@@ -48,13 +51,66 @@
 
                 </Grid>
                 
-                <CheckBox
-                    x:Name="ShowProcessingToolbarCheckBox"
-                    Content="Show processing toolbar"
-                    IsChecked="True"
-                    Margin="0,8,0,0" />
+                         <CheckBox
+                            x:Name="ShowProcessingToolbarCheckBox"
+                            Content="Show processing toolbar"
+                            IsChecked="True"
+                            Margin="0,8,0,0" />
+
+                        <Grid
+                            ColumnDefinitions="Auto,*"
+                        RowDefinitions="Auto,Auto"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Font family:" />
+
+                        <ComboBox
+                            x:Name="EditorFontComboBox"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MinWidth="200"
+                            IsEditable="True">
+                            <ComboBoxItem Content="Cascadia Mono" />
+                            <ComboBoxItem Content="Cascadia Code" />
+                            <ComboBoxItem Content="Consolas" />
+                            <ComboBoxItem Content="Courier New" />
+                            <ComboBoxItem Content="Arial" />
+                        </ComboBox>
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Font size:" />
+
+                        <NumericUpDown
+                            x:Name="EditorFontSizeNumericUpDown"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Width="120"
+                            HorizontalAlignment="Left"
+                            Minimum="8"
+                            Maximum="36"
+                            Increment="1"
+                            Value="10" />
+
+                    </Grid>
+
+                    <CheckBox
+                        x:Name="EditorWordWrapCheckBox"
+                        Content="Enable word wrap" />
+
+                    <CheckBox
+                        x:Name="EditorLineNumbersCheckBox"
+                        Content="Show line numbers" />
+
                     </StackPanel>
-                </Border>
+                    </Border>
 
                 <Border Classes="twain-section">
                     <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
@@ -110,28 +166,97 @@
 
                 <Border Classes="twain-section">
                     <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-<TextBlock Classes="twain-section-heading" Text="Bot processing" />
-
-                <CheckBox
-                    x:Name="DiffInBotModeCheckBox"
-                    Content="Preview the Diff in Bot Mode" />
-
-                <CheckBox
-                    x:Name="IgnoreNoBotsCheckBox"
-                    Grid.Row="7"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Content="Ignore {{bots}} and {{nobots}} restrictions" />
-                    </StackPanel>
-                </Border>
-
-                <Border Classes="twain-section">
-                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 <TextBlock Classes="twain-section-heading" Text="Logging" />
 
                 <CheckBox
                     x:Name="LoggingCheckBox"
                     Content="Enable Logging" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                <TextBlock Classes="twain-section-heading" Text="Autosave &amp; Notifications" />
+                    
+                    <CheckBox
+                        x:Name="SaveArticleListCheckBox"
+                        Content="Save page list with settings" />
+
+                    <CheckBox
+                        x:Name="AutoSaveEditCheckBox"
+                        Content="Automatically save edit box"
+                        IsCheckedChanged="AutoSaveEditCheckBox_IsCheckedChanged" />
+
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Autosave file:" />
+
+                        <Grid
+                            Grid.Column="1"
+                            ColumnDefinitions="*,Auto"
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                            <TextBox
+                                x:Name="AutoSaveFileTextBox"
+                                Grid.Column="0"
+                                MinWidth="260" />
+
+                            <Button
+                                x:Name="SetAutoSaveFileButton"
+                                Classes="twain-command-button"
+                                Grid.Column="1"
+                                Content="Browse..."
+                                Click="SetAutoSaveFileButton_Click" />
+
+                        </Grid>
+                    </Grid>
+
+                        <Grid
+                            ColumnDefinitions="Auto,Auto,*"
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                            <TextBlock
+                                x:Name="AutoSavePeriodLabel"
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Text="Autosave every:" />
+
+                            <NumericUpDown
+                                x:Name="AutoSavePeriodNumericUpDown"
+                                Grid.Column="1"
+                                Width="120"
+                                Minimum="1"
+                                Maximum="86400"
+                                Value="60" />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Text="seconds" />
+
+                        </Grid>
+
+
+                    <TextBlock Classes="twain-section-heading" Text="When ready to save:" />
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingLarge}">
+
+                        <CheckBox
+                            x:Name="FlashCheckBox"
+                            Content="Flash" />
+
+                        <CheckBox
+                            x:Name="BeepCheckBox"
+                            Content="Beep" />
+
+                    </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -228,6 +353,79 @@
                 </Border>
             </TabItem>
 
+                        <TabItem Classes="twain-tab" Header="Processing">
+                <ScrollViewer
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+
+                    <StackPanel
+                        Margin="{DynamicResource TwainContentPadding}"
+                        Spacing="{DynamicResource TwainSpacingMedium}">
+
+                        <!-- General fixes -->
+                        <Border Classes="twain-section">
+                            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+                                <TextBlock
+                                    Classes="twain-section-heading"
+                                    Text="General fixes" />
+
+                                <CheckBox
+                                    x:Name="ReplaceReferenceTagsCheckBox"
+                                    Content="Replace reference tags" />
+
+                                <CheckBox
+                                    x:Name="RestrictDefaultSortCheckBox"
+                                    Content="Restrict DEFAULTSORT changes" />
+
+                                <CheckBox
+                                    x:Name="RestrictOrphanTaggingCheckBox"
+                                    Content="Restrict orphan tagging to pages without links" />
+
+                                <CheckBox
+                                    x:Name="NoMosComplianceFixesCheckBox"
+                                    Content="Do not apply WP:MOS fixes" />
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Article handling -->
+                        <Border Classes="twain-section">
+                            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+                                <TextBlock
+                                    Classes="twain-section-heading"
+                                    Text="Article handling" />
+
+                                <CheckBox
+                                    x:Name="FollowRedirectsCheckBox"
+                                    Content="Follow redirects" />
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Bot processing-->
+                       <Border Classes="twain-section">
+                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Classes="twain-section-heading" Text="Bot processing" />
+
+                <CheckBox
+                    x:Name="DiffInBotModeCheckBox"
+                    Content="Preview the Diff in Bot Mode" />
+
+                <CheckBox
+                    x:Name="IgnoreNoBotsCheckBox"
+                    Grid.Row="7"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Content="Ignore {{bots}} and {{nobots}} restrictions" />
+                    </StackPanel>
+                </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <TabItem Classes="twain-tab" Header="Editing">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel
@@ -248,154 +446,43 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
                     Content="Suppress &quot;using Twain&quot; in edit summary" />
+
+                <CheckBox
+                    x:Name="NoSectionEditSummariesCheckBox"
+                    Content="Do not use section edit summaries" />
                     </StackPanel>
                 </Border>
-                <Border Classes="twain-section">
-                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                <TextBlock Classes="twain-section-heading" Text="Save settings" />
-                    
-                    <CheckBox
-                        x:Name="SaveArticleListCheckBox"
-                        Content="Save page list with settings" />
 
-                    <CheckBox
-                        x:Name="AutoSaveEditCheckBox"
-                        Content="Automatically save edit box"
-                        IsCheckedChanged="AutoSaveEditCheckBox_IsCheckedChanged" />
-
-                    <Grid
-                        ColumnDefinitions="Auto,*"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                        <TextBlock
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="Autosave file:" />
-
-                        <Grid
-                            Grid.Column="1"
-                            ColumnDefinitions="*,Auto"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                            <TextBox
-                                x:Name="AutoSaveFileTextBox"
-                                Grid.Column="0"
-                                MinWidth="260" />
-
-                            <Button
-                                x:Name="SetAutoSaveFileButton"
-                                Classes="twain-command-button"
-                                Grid.Column="1"
-                                Content="Browse..."
-                                Click="SetAutoSaveFileButton_Click" />
-
-                        </Grid>
-                    </Grid>
-
-                        <Grid
-                            ColumnDefinitions="Auto,Auto,*"
-                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                    <!-- Editor behavior and highlighting -->
+                    <Border Classes="twain-section">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 
                             <TextBlock
-                                x:Name="AutoSavePeriodLabel"
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Text="Autosave every:" />
+                                Classes="twain-section-heading"
+                                Text="Editor behavior &amp; highlighting" />
 
-                            <NumericUpDown
-                                x:Name="AutoSavePeriodNumericUpDown"
-                                Grid.Column="1"
-                                Width="120"
-                                Minimum="1"
-                                Maximum="86400"
-                                Value="60" />
+                            <CheckBox
+                                x:Name="AutoFocusEditorCheckBox"
+                                Content="AutoFocus at end of edit box" />
 
-                            <TextBlock
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Text="seconds" />
+                            <CheckBox
+                                x:Name="HighlightSyntaxCheckBox"
+                                Content="Highlight syntax in edit box" />
 
-                        </Grid>
+                            <CheckBox
+                                x:Name="HighlightFindMatchesCheckBox"
+                                Content="Highlight find matches" />
 
+                            <CheckBox
+                                x:Name="HighlightErrorsCheckBox"
+                                Content="Highlight errors" />
 
-                    <TextBlock Classes="twain-section-heading" Text="When ready to save:" />
+                            <CheckBox
+                                x:Name="HighlightRedLinksCheckBox"
+                                Content="Highlight red links" />
 
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Spacing="{DynamicResource TwainSpacingLarge}">
-
-                        <CheckBox
-                            x:Name="FlashCheckBox"
-                            Content="Flash" />
-
-                        <CheckBox
-                            x:Name="BeepCheckBox"
-                            Content="Beep" />
-
-                    </StackPanel>
-                    </StackPanel>
-                </Border>
-                <Border Classes="twain-section">
-                    <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-<StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-
-                    <TextBlock Classes="twain-section-heading" Text="Editor appearance" />
-
-                    <Grid
-                        ColumnDefinitions="Auto,*"
-                        RowDefinitions="Auto,Auto"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                        RowSpacing="{DynamicResource TwainSpacingMedium}">
-
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="Font family:" />
-
-                        <ComboBox
-                            x:Name="EditorFontComboBox"
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            MinWidth="200"
-                            IsEditable="True">
-                            <ComboBoxItem Content="Cascadia Mono" />
-                            <ComboBoxItem Content="Cascadia Code" />
-                            <ComboBoxItem Content="Consolas" />
-                            <ComboBoxItem Content="Courier New" />
-                            <ComboBoxItem Content="Arial" />
-                        </ComboBox>
-
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="Font size:" />
-
-                        <NumericUpDown
-                            x:Name="EditorFontSizeNumericUpDown"
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Width="120"
-                            HorizontalAlignment="Left"
-                            Minimum="8"
-                            Maximum="36"
-                            Increment="1"
-                            Value="10" />
-
-                    </Grid>
-
-                    <CheckBox
-                        x:Name="EditorWordWrapCheckBox"
-                        Content="Enable word wrap" />
-
-                    <CheckBox
-                        x:Name="EditorLineNumbersCheckBox"
-                        Content="Show line numbers" />
-
-                    </StackPanel>
-                    </StackPanel>
-                </Border>
+                        </StackPanel>
+                    </Border>
 
                 </StackPanel>
                 </ScrollViewer>
