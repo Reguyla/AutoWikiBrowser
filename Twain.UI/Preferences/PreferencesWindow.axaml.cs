@@ -233,6 +233,18 @@ public partial class PreferencesWindow : UserControl
         EditorLineNumbersCheckBox.IsChecked =
             general.EditorLineNumbers;
 
+        ReplaceReferenceTagsCheckBox.IsChecked =
+           general.ReplaceReferenceTags;
+
+        RestrictDefaultSortCheckBox.IsChecked =
+            general.restrictDefaultsortAddition;
+
+        RestrictOrphanTaggingCheckBox.IsChecked =
+            general.restrictOrphanTagging;
+
+        NoMosComplianceFixesCheckBox.IsChecked =
+            general.noMOSComplianceFixes;
+
         PrefMinimize = general.Minimize;
         LowThreadPriority = general.LowThreadPriority;
         PrefSaveArticleList = general.SaveArticleList;
@@ -395,6 +407,18 @@ public partial class PreferencesWindow : UserControl
 
         general.EditorLineNumbers =
             EditorLineNumbersCheckBox.IsChecked == true;
+
+        general.ReplaceReferenceTags =
+           ReplaceReferenceTagsCheckBox.IsChecked == true;
+
+        general.restrictDefaultsortAddition =
+            RestrictDefaultSortCheckBox.IsChecked == true;
+
+        general.restrictOrphanTagging =
+            RestrictOrphanTaggingCheckBox.IsChecked == true;
+
+        general.noMOSComplianceFixes =
+            NoMosComplianceFixesCheckBox.IsChecked == true;
 
         general.Minimize = PrefMinimize;
         general.LowThreadPriority = LowThreadPriority;

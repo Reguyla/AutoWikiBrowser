@@ -974,7 +974,8 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     /// <returns>
     /// The processing options represented by the current workspace state.
     /// </returns>
-    public MainProcessOptions CreateMainProcessOptions()
+    public MainProcessOptions CreateMainProcessOptions(
+       UserPrefs preferences)
     {
         return new MainProcessOptions
         {
@@ -989,6 +990,18 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
 
             GeneralFixesEnabled =
                 ApplyGeneralFixes,
+
+            ReplaceReferenceTags =
+               preferences.General.ReplaceReferenceTags,
+
+            RestrictDefaultSortChanges =
+                preferences.General.restrictDefaultsortAddition,
+
+            RestrictOrphanTagging =
+               preferences.General.restrictOrphanTagging,
+
+            NoMosComplianceFixes =
+                preferences.General.noMOSComplianceFixes,
 
             RegexTypoFixEnabled =
                 EnableTypoCorrection,

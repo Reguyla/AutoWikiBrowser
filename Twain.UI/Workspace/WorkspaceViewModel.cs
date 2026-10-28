@@ -1310,7 +1310,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 CurrentArticle.ArticleText);
 
             MainProcessOptions options =
-                Options.CreateMainProcessOptions();
+                Options.CreateMainProcessOptions(Preferences);
 
             MainProcessDependencies dependencies =
                 CreateMainProcessDependencies();
