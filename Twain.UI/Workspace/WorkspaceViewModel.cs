@@ -356,6 +356,62 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Reprocesses the current editor contents using the active
+    /// article-processing options without advancing the article list.
+    /// </summary>
+    [RelayCommand]
+    private void ReparseProcessing()
+    {
+        if (CurrentArticle is null ||
+            !Options.IsProcessing ||
+            Options.IsProcessingActive ||
+            Session.IsBusy ||
+            Session.Editor.IsActive ||
+            _pendingSaveArticle is not null)
+        {
+            return;
+        }
+
+        Article article = CurrentArticle;
+
+        string editorText = Editor.Document.CurrentText;
+
+        // Preserve manual edits before running the processing pipeline.
+        article.AWBChangeArticleText(
+            "Reparse",
+            editorText,
+            false);
+
+        MainProcessOptions options =
+            Options.CreateMainProcessOptions(Preferences);
+
+        MainProcessDependencies dependencies =
+            CreateMainProcessDependencies();
+
+        MainProcessCallbacks callbacks =
+            CreateMainProcessCallbacks();
+
+        // Reparse is not normal article-list processing.
+        _mainProcess.ProcessPageCore(
+            article,
+            false,
+            options,
+            Session,
+            dependencies,
+            callbacks);
+
+        // Processing may have been aborted by a callback.
+        if (!Options.IsProcessing ||
+            !ReferenceEquals(CurrentArticle, article))
+        {
+            return;
+        }
+
+        // Update the editor without resetting its original-text baseline.
+        Editor.Document.CurrentText = article.ArticleText;
+    }
+
+    /// <summary>
     /// Initializes the standard Twain editing workspace.
     /// </summary>
     public WorkspaceViewModel(
@@ -462,6 +518,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Options.StartProcessingRequested =
            StartProcessing;
+
+        Options.ReparseProcessingRequested =
+           ReparseProcessing;
 
         Options.SaveProcessingRequested =
             () => _ = SaveProcessing();

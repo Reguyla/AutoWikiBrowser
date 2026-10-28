@@ -53,31 +53,31 @@
 
                     </Grid>
 
-<StackPanel
-    Orientation="Vertical"
-    Spacing="{DynamicResource TwainSpacingSmall}">
+                <StackPanel
+                    Orientation="Vertical"
+                    Spacing="{DynamicResource TwainSpacingSmall}">
 
-    <!-- Summary and minor edit options -->
-    <StackPanel
-        Orientation="Horizontal"
-        Spacing="{DynamicResource TwainSpacingLarge}">
+                    <!-- Summary and minor edit options -->
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingLarge}">
 
-        <CheckBox
-            Content="Lock"
-            IsChecked="{Binding EditSummaryLocked}" />
+                        <CheckBox
+                            Content="Lock"
+                            IsChecked="{Binding EditSummaryLocked}" />
 
-        <CheckBox
-            Content="Minor edit"
-            IsChecked="{Binding MinorEdit}" />
+                        <CheckBox
+                            Content="Minor edit"
+                            IsChecked="{Binding MinorEdit}" />
 
-    </StackPanel>
+                    </StackPanel>
 
-    <!-- Pre-parse option -->
-    <CheckBox
-        Content="Use pre-parse mode"
-        IsChecked="{Binding PreParseMode}" />
+                    <!-- Pre-parse option -->
+                    <CheckBox
+                        Content="Use pre-parse mode"
+                        IsChecked="{Binding PreParseMode}" />
 
-</StackPanel>
+                </StackPanel>
 
                         </StackPanel>
 

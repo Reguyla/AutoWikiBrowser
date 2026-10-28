@@ -12,22 +12,32 @@
                 Classes="twain-section-heading"
                 Text="Processing" />
 
-            <!-- Primary processing controls -->
             <Grid
                 ColumnDefinitions="*,*"
-                RowDefinitions="Auto,Auto,Auto"
+                RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                 ColumnSpacing="{DynamicResource TwainSpacingMedium}"
                 RowSpacing="{DynamicResource TwainSpacingSmall}">
 
+                <!-- Start and Reparse -->
                 <Button
                     x:Name="StartButton"
                     Grid.Row="0"
-                    Grid.ColumnSpan="2"
+                    Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     Content="Start"
                     IsEnabled="{Binding IsStartEnabled}"
                     Command="{Binding StartProcessingCommand}" />
 
+                <Button
+                    x:Name="ReparseButton"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    Content="Reparse"
+                    Command="{Binding ReparseProcessingCommand}"
+                    IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
+
+                <!-- Stop -->
                 <Button
                     x:Name="StopButton"
                     Grid.Row="1"
@@ -37,6 +47,7 @@
                     Command="{Binding StopProcessingCommand}"
                     IsEnabled="{Binding IsStopEnabled}" />
 
+                <!-- Review actions -->
                 <Button
                     x:Name="PreviewButton"
                     Grid.Row="2"
@@ -55,50 +66,42 @@
                     Command="{Binding ShowDiffCommand}"
                     IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
 
-            </Grid>
-
-            <!-- Save and skip controls -->
-            <Grid
-                ColumnDefinitions="*,*"
-                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-            <Button
-                x:Name="SkipButton"
-                Grid.Column="0"
-                HorizontalAlignment="Stretch"
-                FontWeight="SemiBold"
-                Content="Skip"
-                Command="{Binding SkipProcessingCommand}"
-                IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
-
-                <Button
-                    x:Name="SaveButton"
-                    Grid.Column="1"
-                    HorizontalAlignment="Stretch"
-                    FontWeight="SemiBold"
-                    Content="Save"
-                    IsEnabled="{Binding IsSaveEnabled}"
-                    Command="{Binding SaveProcessingCommand}" />
-
-            </Grid>
-
-            <!-- Additional processing actions -->
-            <Grid
-                ColumnDefinitions="*,*"
-                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
+                <!-- Secondary actions -->
                 <Button
                     x:Name="WatchButton"
+                    Grid.Row="3"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     Content="Watch" />
 
                 <Button
                     x:Name="FalsePositiveButton"
+                    Grid.Row="3"
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
                     Content="False Positive"
                     IsVisible="{Binding ShowFalsePositiveAction}" />
+
+                <!-- Final workflow actions -->
+                <Button
+                    x:Name="SkipButton"
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    FontWeight="SemiBold"
+                    Content="Skip"
+                    Command="{Binding SkipProcessingCommand}"
+                    IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
+
+                <Button
+                    x:Name="SaveButton"
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    FontWeight="SemiBold"
+                    Content="Save"
+                    IsEnabled="{Binding IsSaveEnabled}"
+                    Command="{Binding SaveProcessingCommand}" />
 
             </Grid>
 

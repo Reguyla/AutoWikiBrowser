@@ -876,6 +876,21 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public Action? StartProcessingRequested { get; set; }
 
     /// <summary>
+    /// Requests that the current article be reprocessed
+    /// using the active processing options.
+    /// </summary>
+    public Action? ReparseProcessingRequested { get; set; }
+
+    /// <summary>
+    /// Requests reparsing of the current article.
+    /// </summary>
+    [RelayCommand]
+    private void ReparseProcessing()
+    {
+        ReparseProcessingRequested?.Invoke();
+    }
+
+    /// <summary>
     /// Requests that the workspace save the current article.
     /// </summary>
     public Action? SaveProcessingRequested { get; set; }
