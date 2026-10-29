@@ -57,6 +57,32 @@
                             IsChecked="True"
                             Margin="0,8,0,0" />
 
+                    <!-- Processing toolbar appearance -->
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                        Margin="0,4,0,8">
+
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="Processing toolbar display:" />
+
+                        <ComboBox
+                            x:Name="ToolbarDisplayModeComboBox"
+                            Grid.Column="1"
+                            MinWidth="200"
+                            HorizontalAlignment="Left"
+                            SelectedIndex="1">
+
+                            <ComboBoxItem Content="Icons only" />
+                            <ComboBoxItem Content="Icons and text" />
+                            <ComboBoxItem Content="Text only" />
+
+                        </ComboBox>
+
+                    </Grid>
+
                         <Grid
                             ColumnDefinitions="Auto,*"
                         RowDefinitions="Auto,Auto"

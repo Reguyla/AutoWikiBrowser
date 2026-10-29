@@ -1,4 +1,4 @@
-﻿
+﻿using Twain.UI.Controls.Processing;
 using Twain.UI.Themes;
 
 namespace Twain.UI.Settings;
@@ -20,4 +20,11 @@ public sealed class ApplicationAppearanceSettings
     /// should be displayed by default.
     /// </summary>
     public bool ShowProcessingToolbar { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets how processing toolbar buttons
+    /// display their icons and text.
+    /// </summary>
+    public ToolbarDisplayMode ToolbarDisplayMode { get; set; } =
+        ToolbarDisplayMode.IconsAndText;
 }

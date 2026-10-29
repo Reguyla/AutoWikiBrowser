@@ -62,20 +62,6 @@
     Orientation="Horizontal"
     Spacing="{DynamicResource TwainSpacingMedium}">
 
-    <!-- Temporary toolbar display-mode selector -->
-    <ComboBox
-        Width="150"
-        VerticalAlignment="Center"
-        SelectedItem="{Binding ToolbarDisplayMode, Mode=TwoWay}">
-
-        <ComboBox.Items>
-            <x:Static Member="processing:ToolbarDisplayMode.IconsOnly" />
-            <x:Static Member="processing:ToolbarDisplayMode.IconsAndText" />
-            <x:Static Member="processing:ToolbarDisplayMode.TextOnly" />
-        </ComboBox.Items>
-
-    </ComboBox>
-
         <!-- Start -->
         <Button
             Classes="workflow-action"

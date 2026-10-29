@@ -7,6 +7,7 @@ using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.AWBSettings;
 using Twain.Core.Settings;
+using Twain.UI.Controls.Processing;
 using Twain.UI.Settings;
 using Twain.UI.Themes;
 
@@ -53,10 +54,40 @@ public partial class PreferencesWindow : UserControl
     }
 
     /// <summary>
+    /// Loads the processing toolbar display mode into Preferences.
+    /// </summary>
+    public void LoadProcessingToolbarDisplayMode(
+        ToolbarDisplayMode displayMode)
+    {
+        ProcessingToolbarDisplayMode = displayMode;
+    }
+
+    /// <summary>
     /// Gets whether the processing toolbar should be displayed.
     /// </summary>
     public bool ShowProcessingToolbar =>
         ShowProcessingToolbarCheckBox.IsChecked == true;
+
+    /// <summary>
+    /// Gets or sets how processing toolbar buttons display
+    /// their icons and text.
+    /// </summary>
+    public ToolbarDisplayMode ProcessingToolbarDisplayMode
+    {
+        get => ToolbarDisplayModeComboBox.SelectedIndex switch
+        {
+            0 => ToolbarDisplayMode.IconsOnly,
+            2 => ToolbarDisplayMode.TextOnly,
+            _ => ToolbarDisplayMode.IconsAndText
+        };
+
+        set => ToolbarDisplayModeComboBox.SelectedIndex = value switch
+        {
+            ToolbarDisplayMode.IconsOnly => 0,
+            ToolbarDisplayMode.TextOnly => 2,
+            _ => 1
+        };
+    }
 
     /// <summary>
     /// Gets the theme currently selected in Preferences.

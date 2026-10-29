@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using System.ComponentModel;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
+using Twain.UI.Controls.Processing;
 using Twain.UI.Profiles;
 using Twain.UI.Settings;
 using Twain.UI.Shell;
@@ -162,6 +163,10 @@ public partial class WorkspaceView : UserControl
         PreferencesView.LoadAppearanceSettings(
             shellViewModel.AppearanceSettings);
 
+        // Load the currently active processing toolbar display mode.
+        PreferencesView.LoadProcessingToolbarDisplayMode(
+            workspace.Options.ToolbarDisplayMode);
+
         workspace.ShowPreferencesCommand.Execute(null);
     }
 
@@ -319,12 +324,20 @@ public partial class WorkspaceView : UserControl
             shellViewModel.AppearanceSettings.Theme =
                 PreferencesView.SelectedTheme;
 
-            // Persist both appearance preferences together.
+            // Remember the processing toolbar display mode.
+            shellViewModel.AppearanceSettings.ToolbarDisplayMode =
+                PreferencesView.ProcessingToolbarDisplayMode;
+
+            // Persist the application appearance preferences.
             ApplicationAppearanceSettingsStore.Save(
                 shellViewModel.AppearanceSettings);
 
             // Apply the accepted preference to the current shell.
             shellViewModel.IsToolbarExpanded = showToolbar;
+
+            // Apply the accepted processing toolbar display mode.
+            workspace.Options.ToolbarDisplayMode =
+                PreferencesView.ProcessingToolbarDisplayMode;
 
             if (workspace.Editor.ApplyAppearanceRequested
                 is { } applyAppearance)
