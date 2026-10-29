@@ -1,0 +1,207 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.Options"
+    xmlns:processing="using:Twain.UI.Controls.Processing"
+    x:Class="Twain.UI.Controls.Processing.ProcessingToolbarView"
+    x:DataType="vm:OptionsViewModel">
+
+    <UserControl.Styles>
+
+        <!-- Shared processing toolbar button appearance -->
+        <Style Selector="Button.workflow-action">
+            <Setter Property="MinWidth" Value="44" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainRaisedSurfaceBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainBorderSubtleBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius"
+                    Value="{DynamicResource TwainControlCornerRadius}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource TwainTextPrimaryBrush}" />
+        </Style>
+
+        <Style Selector="Button.workflow-action:pointerover">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainAccentHoverBrush}" />
+        </Style>
+
+        <Style Selector="Button.workflow-action:pressed">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainAccentPressedBrush}" />
+        </Style>
+
+        <Style Selector="Button.workflow-action:disabled">
+            <Setter Property="Background"
+                    Value="{DynamicResource TwainControlBackgroundDisabledBrush}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource TwainTextDisabledBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TwainBorderSubtleBrush}" />
+        </Style>
+
+        <!-- Consistent icon dimensions -->
+        <Style Selector="Button.workflow-action PathIcon">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+    </UserControl.Styles>
+
+<StackPanel
+    Orientation="Horizontal"
+    Spacing="{DynamicResource TwainSpacingMedium}">
+
+    <!-- Temporary toolbar display-mode selector -->
+    <ComboBox
+        Width="150"
+        VerticalAlignment="Center"
+        SelectedItem="{Binding ToolbarDisplayMode, Mode=TwoWay}">
+
+        <ComboBox.Items>
+            <x:Static Member="processing:ToolbarDisplayMode.IconsOnly" />
+            <x:Static Member="processing:ToolbarDisplayMode.IconsAndText" />
+            <x:Static Member="processing:ToolbarDisplayMode.TextOnly" />
+        </ComboBox.Items>
+
+    </ComboBox>
+
+        <!-- Start -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding StartProcessingCommand}"
+            IsEnabled="{Binding IsStartEnabled}"
+            ToolTip.Tip="Start processing">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 6,3 L 21,12 L 6,21 Z"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Start"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+        <!-- Stop -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding StopProcessingCommand}"
+            IsEnabled="{Binding IsStopEnabled}"
+            ToolTip.Tip="Stop processing">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 5,5 L 19,5 L 19,19 L 5,19 Z"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Stop"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+        <!-- Save -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding SaveProcessingCommand}"
+            IsEnabled="{Binding IsSaveEnabled}"
+            ToolTip.Tip="Save article">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 4,3 L 18,3 L 21,6 L 21,21 L 3,21 L 3,3 Z M 7,3 L 7,10 L 17,10 L 17,3 M 7,21 L 7,13 L 17,13 L 17,21"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Save"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+        <!-- Skip -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding SkipProcessingCommand}"
+            IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
+            ToolTip.Tip="Skip article">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 4,4 L 14,12 L 4,20 Z M 14,4 L 24,12 L 14,20 Z"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Skip"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+        <!-- Reparse -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding ReparseProcessingCommand}"
+            IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
+            ToolTip.Tip="Reparse article">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 20,7 A 9,9 0 1 0 21,12 M 20,3 L 20,9 L 14,9"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Reparse"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+        <!-- Preview -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding ShowPreviewCommand}"
+            IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
+            ToolTip.Tip="Preview article">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 2,12 Q 12,2 22,12 Q 12,22 2,12 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Preview"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+        <!-- Diff -->
+        <Button
+            Classes="workflow-action"
+            Command="{Binding ShowDiffCommand}"
+            IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
+            ToolTip.Tip="Show article differences">
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon
+                    Data="M 3,4 L 10,4 L 10,20 L 3,20 Z M 14,4 L 21,4 L 21,20 L 14,20 Z M 5,9 L 8,9 M 16,9 L 19,9 M 5,14 L 8,14 M 16,14 L 19,14"
+                    IsVisible="{Binding ShowToolbarIcons}" />
+                <TextBlock
+                    Text="Diff"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowToolbarText}" />
+            </StackPanel>
+        </Button>
+
+    </StackPanel>
+
+</UserControl>

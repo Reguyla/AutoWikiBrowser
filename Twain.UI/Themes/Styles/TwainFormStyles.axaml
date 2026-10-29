@@ -141,5 +141,9 @@
         <Setter Property="MinHeight" Value="0" />
     </Style>
 
-
+    <!-- Center content in all standard buttons. -->
+    <Style Selector="Button">
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
 </Styles>

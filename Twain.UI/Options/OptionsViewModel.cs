@@ -8,6 +8,7 @@ using Twain.Core.Plugin;
 using Twain.Core.Processing;
 using Twain.Core.ReplaceSpecial;
 using Twain.Core.Settings;
+using Twain.UI.Controls.Processing;
 using Twain.UI.FindReplace;
 using Twain.UI.Templates;
 
@@ -40,6 +41,27 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     /// </summary>
     [ObservableProperty]
     private bool _unicodifyWholePage = true;
+
+    /// <summary>
+    /// Determines how action buttons are displayed in the processing toolbar.
+    /// </summary>
+    [NotifyPropertyChangedFor(nameof(ShowToolbarIcons))]
+    [NotifyPropertyChangedFor(nameof(ShowToolbarText))]
+    [ObservableProperty]
+    private ToolbarDisplayMode _toolbarDisplayMode =
+        ToolbarDisplayMode.IconsAndText;
+
+    /// <summary>
+    /// Gets whether processing toolbar icons should be displayed.
+    /// </summary>
+    public bool ShowToolbarIcons =>
+        ToolbarDisplayMode != ToolbarDisplayMode.TextOnly;
+
+    /// <summary>
+    /// Gets whether processing toolbar labels should be displayed.
+    /// </summary>
+    public bool ShowToolbarText =>
+        ToolbarDisplayMode != ToolbarDisplayMode.IconsOnly;
 
     /// <summary>
     /// Gets or sets whether typo correction is enabled.
