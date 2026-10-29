@@ -7,7 +7,7 @@ using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.AWBSettings;
 using Twain.Core.Settings;
-using Twain.UI.Controls.Processing;
+using Twain.UI.Controls;
 using Twain.UI.Settings;
 using Twain.UI.Themes;
 
@@ -56,10 +56,10 @@ public partial class PreferencesWindow : UserControl
     /// <summary>
     /// Loads the processing toolbar display mode into Preferences.
     /// </summary>
-    public void LoadProcessingToolbarDisplayMode(
-        ToolbarDisplayMode displayMode)
+    public void LoadProcessingDisplayMode(
+        DisplayMode displayMode)
     {
-        ProcessingToolbarDisplayMode = displayMode;
+        ProcessingDisplayMode = displayMode;
     }
 
     /// <summary>
@@ -72,21 +72,49 @@ public partial class PreferencesWindow : UserControl
     /// Gets or sets how processing toolbar buttons display
     /// their icons and text.
     /// </summary>
-    public ToolbarDisplayMode ProcessingToolbarDisplayMode
+    public DisplayMode ProcessingDisplayMode
     {
-        get => ToolbarDisplayModeComboBox.SelectedIndex switch
+        get => DisplayModeComboBox.SelectedIndex switch
         {
-            0 => ToolbarDisplayMode.IconsOnly,
-            2 => ToolbarDisplayMode.TextOnly,
-            _ => ToolbarDisplayMode.IconsAndText
+            0 => DisplayMode.IconsOnly,
+            2 => DisplayMode.TextOnly,
+            _ => DisplayMode.IconsAndText
         };
 
-        set => ToolbarDisplayModeComboBox.SelectedIndex = value switch
+        set => DisplayModeComboBox.SelectedIndex = value switch
         {
-            ToolbarDisplayMode.IconsOnly => 0,
-            ToolbarDisplayMode.TextOnly => 2,
+            DisplayMode.IconsOnly => 0,
+            DisplayMode.TextOnly => 2,
             _ => 1
         };
+    }
+
+    /// <summary>
+    /// Gets or sets the selected navigation display mode.
+    /// </summary>
+    public DisplayMode NavigationDisplayMode
+    {
+        get => NavigationDisplayModeComboBox.SelectedIndex switch
+        {
+            0 => DisplayMode.IconsOnly,
+            2 => DisplayMode.TextOnly,
+            _ => DisplayMode.IconsAndText
+        };
+
+        set => NavigationDisplayModeComboBox.SelectedIndex = value switch
+        {
+            DisplayMode.IconsOnly => 0,
+            DisplayMode.TextOnly => 2,
+            _ => 1
+        };
+    }
+
+    /// <summary>
+    /// Loads the current navigation display mode into Preferences.
+    /// </summary>
+    public void LoadNavigationDisplayMode(DisplayMode displayMode)
+    {
+        NavigationDisplayMode = displayMode;
     }
 
     /// <summary>

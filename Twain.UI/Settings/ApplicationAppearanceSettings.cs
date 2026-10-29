@@ -1,4 +1,4 @@
-﻿using Twain.UI.Controls.Processing;
+﻿using Twain.UI.Controls;
 using Twain.UI.Themes;
 
 namespace Twain.UI.Settings;
@@ -25,6 +25,12 @@ public sealed class ApplicationAppearanceSettings
     /// Gets or sets how processing toolbar buttons
     /// display their icons and text.
     /// </summary>
-    public ToolbarDisplayMode ToolbarDisplayMode { get; set; } =
-        ToolbarDisplayMode.IconsAndText;
+    public DisplayMode DisplayMode { get; set; } =
+        DisplayMode.IconsAndText;
+
+    /// <summary>
+    /// Gets or sets how icons and labels appear in the navigation pane.
+    /// </summary>
+    public DisplayMode NavigationDisplayMode { get; set; } =
+        DisplayMode.IconsAndText;
 }

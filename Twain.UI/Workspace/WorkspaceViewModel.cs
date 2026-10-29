@@ -19,6 +19,7 @@ using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
 using Twain.UI.BotSettings;
+using Twain.UI.Controls;
 using Twain.UI.Diff;
 using Twain.UI.Editor;
 using Twain.UI.Options;
@@ -37,13 +38,44 @@ public partial class WorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private string _currentArticleName = string.Empty;
 
-    /// <summary>Whether the navigation uses its compact icon-only layout.</summary>
+    /// <summary>
+    /// Whether navigation is using its compact layout.
+    /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNavigationExpanded))]
+    [NotifyPropertyChangedFor(nameof(ShowNavigationIcons))]
+    [NotifyPropertyChangedFor(nameof(ShowNavigationText))]
     private bool _isNavigationCollapsed;
 
-    /// <summary>Whether navigation labels and section headings are visible.</summary>
+    /// <summary>
+    /// Whether navigation is currently expanded.
+    /// </summary>
     public bool IsNavigationExpanded => !IsNavigationCollapsed;
+
+    /// <summary>
+    /// Controls how navigation items display icons and text.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowNavigationIcons))]
+    [NotifyPropertyChangedFor(nameof(ShowNavigationText))]
+    private DisplayMode _navigationDisplayMode =
+        DisplayMode.IconsAndText;
+
+    /// <summary>
+    /// Whether navigation icons should be visible.
+    /// Collapsed navigation always displays icons.
+    /// </summary>
+    public bool ShowNavigationIcons =>
+        IsNavigationCollapsed ||
+        NavigationDisplayMode != DisplayMode.TextOnly;
+
+    /// <summary>
+    /// Whether navigation labels should be visible.
+    /// Collapsed navigation always hides labels.
+    /// </summary>
+    public bool ShowNavigationText =>
+        !IsNavigationCollapsed &&
+        NavigationDisplayMode != DisplayMode.IconsOnly;
 
     [RelayCommand]
     private void ToggleNavigation()

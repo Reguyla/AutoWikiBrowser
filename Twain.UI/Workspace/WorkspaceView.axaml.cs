@@ -164,8 +164,12 @@ public partial class WorkspaceView : UserControl
             shellViewModel.AppearanceSettings);
 
         // Load the currently active processing toolbar display mode.
-        PreferencesView.LoadProcessingToolbarDisplayMode(
-            workspace.Options.ToolbarDisplayMode);
+        PreferencesView.LoadProcessingDisplayMode(
+            workspace.Options.DisplayMode);
+
+        // Load the currently active navigation display mode.
+        PreferencesView.LoadNavigationDisplayMode(
+            workspace.NavigationDisplayMode);
 
         workspace.ShowPreferencesCommand.Execute(null);
     }
@@ -325,8 +329,12 @@ public partial class WorkspaceView : UserControl
                 PreferencesView.SelectedTheme;
 
             // Remember the processing toolbar display mode.
-            shellViewModel.AppearanceSettings.ToolbarDisplayMode =
-                PreferencesView.ProcessingToolbarDisplayMode;
+            shellViewModel.AppearanceSettings.DisplayMode =
+                PreferencesView.ProcessingDisplayMode;
+
+            // Remember the navigation pane display mode.
+            shellViewModel.AppearanceSettings.NavigationDisplayMode =
+                PreferencesView.NavigationDisplayMode;
 
             // Persist the application appearance preferences.
             ApplicationAppearanceSettingsStore.Save(
@@ -336,8 +344,12 @@ public partial class WorkspaceView : UserControl
             shellViewModel.IsToolbarExpanded = showToolbar;
 
             // Apply the accepted processing toolbar display mode.
-            workspace.Options.ToolbarDisplayMode =
-                PreferencesView.ProcessingToolbarDisplayMode;
+            workspace.Options.DisplayMode =
+                PreferencesView.ProcessingDisplayMode;
+
+            // Apply the accepted navigation display mode.
+            workspace.NavigationDisplayMode =
+                PreferencesView.NavigationDisplayMode;
 
             if (workspace.Editor.ApplyAppearanceRequested
                 is { } applyAppearance)

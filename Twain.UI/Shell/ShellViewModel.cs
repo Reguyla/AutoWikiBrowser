@@ -50,8 +50,12 @@ public sealed partial class ShellViewModel : ViewModelBase
                 Preferences);
 
         // Restore the saved processing toolbar display mode.
-        Workspace.Options.ToolbarDisplayMode =
-            AppearanceSettings.ToolbarDisplayMode;
+        Workspace.Options.DisplayMode =
+            AppearanceSettings.DisplayMode;
+
+        // Restore the saved navigation pane display mode.
+        Workspace.NavigationDisplayMode =
+            AppearanceSettings.NavigationDisplayMode;
 
         Workspace.Options.IsWikiAuthenticated = IsLoggedIn;
     }

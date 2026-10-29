@@ -69,7 +69,7 @@
                             Text="Processing toolbar display:" />
 
                         <ComboBox
-                            x:Name="ToolbarDisplayModeComboBox"
+                            x:Name="DisplayModeComboBox"
                             Grid.Column="1"
                             MinWidth="200"
                             HorizontalAlignment="Left"
@@ -82,6 +82,33 @@
                         </ComboBox>
 
                     </Grid>
+
+                        <!-- Navigation pane appearance -->
+
+                        <Grid
+                            ColumnDefinitions="Auto,*"
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                            Margin="0,4,0,8">
+
+                            <TextBlock
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Text="Navigation display:" />
+
+                            <ComboBox
+                                x:Name="NavigationDisplayModeComboBox"
+                                Grid.Column="1"
+                                MinWidth="200"
+                                HorizontalAlignment="Left"
+                                SelectedIndex="1">
+
+                                <ComboBoxItem Content="Icons only" />
+                                <ComboBoxItem Content="Icons and text" />
+                                <ComboBoxItem Content="Text only" />
+
+                            </ComboBox>
+
+                        </Grid>
 
                         <Grid
                             ColumnDefinitions="Auto,*"

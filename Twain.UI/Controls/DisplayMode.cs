@@ -1,9 +1,9 @@
-﻿namespace Twain.UI.Controls.Processing;
+﻿namespace Twain.UI.Controls;
 
 /// <summary>
 /// Defines how action buttons are displayed in the processing toolbar.
 /// </summary>
-public enum ToolbarDisplayMode
+public enum DisplayMode
 {
     /// <summary>
     /// Displays only the action icons.
