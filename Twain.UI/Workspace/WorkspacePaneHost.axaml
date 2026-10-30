@@ -49,13 +49,25 @@
                     Classes="twain-pane-header-button"
                     IsVisible="{Binding HasHeaderAction}"
                     Command="{Binding ExecuteHeaderActionCommand}"
-                    ToolTip.Tip="Editing settings">
+                    ToolTip.Tip="{Binding HeaderActionToolTip}">
 
+                    <Grid Width="16" Height="16">
+
+                    <!-- Settings icon -->
                     <PathIcon
                         Width="16"
                         Height="16"
+                        IsVisible="{Binding ShowSettingsHeaderIcon}"
                         Data="M 12,3 L 14,6 L 18,5 L 19,9 L 22,12 L 19,15 L 18,19 L 14,18 L 12,21 L 10,18 L 6,19 L 5,15 L 2,12 L 5,9 L 6,5 L 10,6 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9" />
 
+                    <!-- Filter icon -->
+                    <PathIcon
+                        Width="16"
+                        Height="16"
+                        IsVisible="{Binding ShowFilterHeaderIcon}"
+                        Data="M3,4 H21 L14,12 V20 L10,22 V12 Z" />
+
+                    </Grid>
                 </Button>
 
             </Grid>

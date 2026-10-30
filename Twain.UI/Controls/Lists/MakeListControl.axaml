@@ -16,6 +16,7 @@
     </UserControl.Resources>
 
     <Grid
+        Margin="{DynamicResource TwainWorkspacePadding}"
         RowDefinitions="Auto,Auto,*"
         RowSpacing="{DynamicResource TwainSpacingSmall}">
 

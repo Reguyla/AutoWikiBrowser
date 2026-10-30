@@ -40,6 +40,19 @@ public partial class MakeListViewModel : ObservableObject
     private string _manualArticleTitle = string.Empty;
 
     /// <summary>
+    /// Requests that the article-list filtering dialog be opened.
+    /// </summary>
+    public Action? ShowFilterRequested { get; set; }
+
+    /// <summary>
+    /// Opens the article-list filtering dialog when a handler is available.
+    /// </summary>
+    public void RequestShowFilter()
+    {
+        ShowFilterRequested?.Invoke();
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether list generation is in progress.
     /// </summary>
     [ObservableProperty]

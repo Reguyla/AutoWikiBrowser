@@ -605,6 +605,14 @@ public partial class WorkspaceViewModel : ObservableObject
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
         articleEditorPane.HeaderAction = ShowOptions;
+
+        // Open article-list filtering from the Make List header.
+        PaneViewModel makeListPane = Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleList);
+
+        makeListPane.HeaderAction = MakeList.RequestShowFilter;
+        makeListPane.HeaderActionToolTip = "Filter article list";
+        makeListPane.HeaderActionIcon = PaneHeaderActionIcon.Filter;
     }
 
     /// <summary>
@@ -1618,6 +1626,19 @@ public partial class WorkspaceViewModel : ObservableObject
     /// Gets the view model for the article editor pane.
     /// </summary>
     public ArticleEditorViewModel Editor { get; }
+
+    /// <summary>
+    /// Requests that the article-list filtering dialog be opened.
+    /// </summary>
+    public Action? ShowFilterRequested { get; set; }
+
+    /// <summary>
+    /// Opens the article-list filtering dialog when a handler is available.
+    /// </summary>
+    public void RequestShowFilter()
+    {
+        ShowFilterRequested?.Invoke();
+    }
 
     /// <summary>
     /// Navigates the article editor to a line selected in the diff.

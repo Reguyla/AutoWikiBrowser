@@ -73,6 +73,29 @@ public sealed partial class PaneViewModel : ObservableObject
     public Action? HeaderAction { get; set; }
 
     /// <summary>
+    /// Gets or sets the tooltip displayed for the pane's header action.
+    /// </summary>
+    public string HeaderActionToolTip { get; set; } = "Editing settings";
+
+    /// <summary>
+    /// Gets or sets the icon displayed for the pane's header action.
+    /// </summary>
+    public PaneHeaderActionIcon HeaderActionIcon { get; set; } =
+        PaneHeaderActionIcon.Settings;
+
+    /// <summary>
+    /// Gets whether the pane header should display a settings icon.
+    /// </summary>
+    public bool ShowSettingsHeaderIcon =>
+        HeaderActionIcon == PaneHeaderActionIcon.Settings;
+
+    /// <summary>
+    /// Gets whether the pane header should display a filter icon.
+    /// </summary>
+    public bool ShowFilterHeaderIcon =>
+        HeaderActionIcon == PaneHeaderActionIcon.Filter;
+
+    /// <summary>
     /// Gets whether the pane has an available header action.
     /// </summary>
     public bool HasHeaderAction => HeaderAction is not null;
@@ -115,4 +138,20 @@ public sealed partial class PaneViewModel : ObservableObject
     {
         HeaderAction?.Invoke();
     }
+}
+
+    /// <summary>
+    /// Identifies the icon displayed by a workspace pane header action.
+    /// </summary>
+    public enum PaneHeaderActionIcon
+{
+    /// <summary>
+    /// Displays a settings icon.
+    /// </summary>
+    Settings,
+
+    /// <summary>
+    /// Displays a filtering icon.
+    /// </summary>
+    Filter
 }

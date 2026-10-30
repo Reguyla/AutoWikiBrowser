@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,31 @@ public partial class MakeListControl : UserControl
     public MakeListControl()
     {
         InitializeComponent();
+
+        DataContextChanged += MakeListControl_DataContextChanged;
+    }
+
+    /// <summary>
+    /// Connects the article-list filter request to this control.
+    /// </summary>
+    private void MakeListControl_DataContextChanged(
+        object? sender,
+        EventArgs e)
+    {
+        if (DataContext is MakeListViewModel viewModel)
+        {
+            viewModel.ShowFilterRequested = ShowFilterDialog;
+        }
+    }
+
+    /// <summary>
+    /// Opens the existing article-list filtering dialog.
+    /// </summary>
+    private void ShowFilterDialog()
+    {
+        FilterMenuItem_Click(
+            this,
+            new Avalonia.Interactivity.RoutedEventArgs());
     }
 
     private void RemoveButton_Click(
