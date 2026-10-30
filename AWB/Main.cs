@@ -33,6 +33,7 @@ using Twain.Core.CustomModules;
 using Twain.Core.DiffHtml;
 using Twain.Core.Disambiguation;
 using Twain.Core.Editing;
+using Twain.Core.EditSummaries;
 using Twain.Core.Exceptions;
 using Twain.Core.Links;
 using Twain.Core.Lists.Providers;

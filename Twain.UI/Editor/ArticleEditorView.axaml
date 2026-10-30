@@ -14,11 +14,35 @@
         <vm:ArticleEditorViewModel />
     </Design.DataContext>
 
-    <Grid>
+    <Grid RowDefinitions="Auto,*"
+          RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+        <!-- Calculated edit summary -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="Auto,*"
+            ColumnSpacing="{DynamicResource TwainSpacingSmall}"
+            Margin="4,4,4,0">
+
+            <TextBlock
+                Grid.Column="0"
+                Text="Edit summary:"
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+            <TextBox
+                Grid.Column="1"
+                Text="{Binding CalculatedEditSummary, Mode=TwoWay}"
+                Watermark="Calculated edit summary"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Stretch" />
+
+        </Grid>
 
         <!-- Monaco article editor -->
         <NativeWebView
             x:Name="EditorWebView"
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />
 

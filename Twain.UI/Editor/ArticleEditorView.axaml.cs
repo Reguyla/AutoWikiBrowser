@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.VisualTree;
-using Twain.Core.Editing;
-using Twain.UI.PasteMore;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
@@ -9,7 +8,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Editing;
+using Twain.Core.Editing;
 using Twain.Core.Parse;
+using Twain.UI.PasteMore;
 
 namespace Twain.UI.Editor;
 

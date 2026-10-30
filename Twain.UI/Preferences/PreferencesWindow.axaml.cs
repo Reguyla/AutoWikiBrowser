@@ -322,6 +322,9 @@ public partial class PreferencesWindow : UserControl
         PrefBeep = general.Beep;
         PrefSuppressUsingAWB = general.SuppressUsingAWB;
 
+        NoSectionEditSummariesCheckBox.IsChecked =
+               general.noSectionEditSummary;
+
         PrefAutoSaveEditBoxEnabled =
             general.AutoSaveEdit.Enabled;
 
@@ -496,6 +499,9 @@ public partial class PreferencesWindow : UserControl
         general.Flash = PrefFlash;
         general.Beep = PrefBeep;
         general.SuppressUsingAWB = PrefSuppressUsingAWB;
+
+        general.noSectionEditSummary =
+           NoSectionEditSummariesCheckBox.IsChecked == true;
 
         general.AutoSaveEdit.Enabled =
             PrefAutoSaveEditBoxEnabled;

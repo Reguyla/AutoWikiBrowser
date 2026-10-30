@@ -12,6 +12,7 @@ using Twain.Core.API;
 using Twain.Core.AWBSettings;
 using Twain.Core.CustomModules;
 using Twain.Core.Editing;
+using Twain.Core.EditSummaries;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
 using Twain.Core.Processing;
@@ -1024,9 +1025,16 @@ public partial class WorkspaceViewModel : ObservableObject
 
         try
         {
+            string finalSummary = EditSummaryBuilder.Build(
+                Options.EditSummary,
+                savingArticle.EditSummary,
+                savingArticle.OriginalArticleText,
+                articleText,
+                !Preferences.General.noSectionEditSummary);
+
             SaveInfo saveInfo = await Session.Editor.SaveArticleAsync(
                 articleText,
-                Options.EditSummary,
+                finalSummary,
                 Options.MinorEdit,
                 WatchOptions.NoChange);
 

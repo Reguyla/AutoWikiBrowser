@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Threading.Tasks;
 using Twain.Core.AWBSettings;
 
 namespace Twain.UI.Editor;
@@ -11,7 +12,7 @@ namespace Twain.UI.Editor;
 /// article text. The initial Avalonia text box can therefore be replaced with
 /// Monaco without changing the workspace or pane-host infrastructure.
 /// </remarks>
-public sealed class ArticleEditorViewModel : ViewModelBase
+public sealed partial class ArticleEditorViewModel : ViewModelBase
 {
     /// <summary>
     /// Initializes the article editor with a temporary standalone document.
@@ -26,6 +27,13 @@ public sealed class ArticleEditorViewModel : ViewModelBase
             new ArticleDocumentViewModel())
     {
     }
+
+
+    /// <summary>
+    /// Gets or sets the calculated edit summary displayed above the article editor.
+    /// </summary>
+    [ObservableProperty]
+    private string _calculatedEditSummary = string.Empty;
 
     /// <summary>
     /// Initializes the article editor for the specified document.
@@ -77,24 +85,6 @@ public sealed class ArticleEditorViewModel : ViewModelBase
 
     private string _editSummary = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the edit summary used when saving the current article.
-    /// </summary>
-    public string EditSummary
-    {
-        get => _editSummary;
-
-        set
-        {
-            if (_editSummary == value)
-            {
-                return;
-            }
-
-            _editSummary = value;
-            OnPropertyChanged();
-        }
-    }
     private bool _isMinorEdit;
 
     /// <summary>
