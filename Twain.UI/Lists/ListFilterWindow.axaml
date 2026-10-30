@@ -125,8 +125,9 @@
                         Width="200"
                         SelectedIndex="0">
 
-                        <ComboBoxItem Content="Remove matching articles" />
-                        <ComboBoxItem Content="Keep matching articles" />
+                    <ComboBoxItem Content="Difference — remove matching articles" />
+                    <ComboBoxItem Content="Intersection — keep matching articles" />
+                    <ComboBoxItem Content="Symmetric difference — keep articles unique to either list" />
                     </ComboBox>
 
                     <TextBlock

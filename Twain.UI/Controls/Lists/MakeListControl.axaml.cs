@@ -461,7 +461,7 @@ public partial class MakeListControl : UserControl
                 configuration.UseRegex,
                 configuration.RemoveDuplicates,
                 configuration.ComparisonArticleTitles.Count > 0,
-                configuration.IntersectComparisonList,
+                configuration.ComparisonOperation,
                 configuration.SortAscending);
 
         viewModel.ReplaceArticles(filteredArticles);

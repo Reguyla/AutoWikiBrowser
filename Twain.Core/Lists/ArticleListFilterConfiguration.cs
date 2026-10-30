@@ -51,10 +51,26 @@ public sealed class ArticleListFilterConfiguration
     public bool SortAscending { get; set; }
 
     /// <summary>
-    /// Gets or sets whether the comparison list should be intersected with
-    /// the source list instead of removing matching articles.
+    /// Gets or sets the operation used when comparing article lists.
     /// </summary>
-    public bool IntersectComparisonList { get; set; }
+    public ArticleListSetOperation ComparisonOperation { get; set; }
+        = ArticleListSetOperation.Difference;
+
+    /// <summary>
+    /// Gets or sets whether the comparison operation is an intersection.
+    /// </summary>
+    /// <remarks>
+    /// Retained temporarily for compatibility with existing callers.
+    /// </remarks>
+    [Obsolete("Use ComparisonOperation instead.")]
+    public bool IntersectComparisonList
+    {
+        get => ComparisonOperation == ArticleListSetOperation.Intersection;
+
+        set => ComparisonOperation = value
+            ? ArticleListSetOperation.Intersection
+            : ArticleListSetOperation.Difference;
+    }
 
     /// <summary>
     /// Gets or sets the article titles used by the comparison-list filter.

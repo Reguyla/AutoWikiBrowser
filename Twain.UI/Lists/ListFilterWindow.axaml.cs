@@ -186,9 +186,7 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
             Configuration.SortAscending;
 
         OperationComboBox.SelectedIndex =
-            Configuration.IntersectComparisonList
-                ? 1
-                : 0;
+            (int)Configuration.ComparisonOperation;
 
         _comparisonArticleTitles =
             new List<string>(
@@ -229,8 +227,8 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
         Configuration.SortAscending =
             SortCheckBox.IsChecked == true;
 
-        Configuration.IntersectComparisonList =
-            OperationComboBox.SelectedIndex != 0;
+        Configuration.ComparisonOperation =
+            (ArticleListSetOperation)OperationComboBox.SelectedIndex;
 
 
         Configuration.NamespaceIds.Clear();

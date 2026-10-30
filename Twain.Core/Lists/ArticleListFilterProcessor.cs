@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Lists;
+﻿using Microsoft.CodeAnalysis;
+
+namespace Twain.Core.Lists;
 
 /// <summary>
 /// Provides article-list filtering operations that are independent of the UI.
@@ -108,39 +110,71 @@ public static class ArticleListFilterProcessor
     }
 
     /// <summary>
-    /// Filters an article list against another article collection.
+    /// Filters an article list using the specified set operation.
     /// </summary>
     /// <param name="articles">
-    /// The source articles to filter.
+    /// The original article collection.
     /// </param>
     /// <param name="filterArticles">
-    /// The articles used as the comparison set.
+    /// The comparison article collection.
     /// </param>
-    /// <param name="intersect">
-    /// When <see langword="true"/>, keeps only articles found in both collections.
-    /// When <see langword="false"/>, removes articles found in
-    /// <paramref name="filterArticles"/>.
+    /// <param name="operation">
+    /// The set operation to perform.
     /// </param>
     /// <returns>
-    /// The filtered article list.
+    /// The resulting article collection.
     /// </returns>
+    public static List<Article> FilterByArticleSet(
+        IEnumerable<Article> articles,
+        IEnumerable<Article> filterArticles,
+        ArticleListSetOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+        ArgumentNullException.ThrowIfNull(filterArticles);
+
+        HashSet<Article> result = new(articles);
+
+        switch (operation)
+        {
+            case ArticleListSetOperation.Difference:
+                result.ExceptWith(filterArticles);
+                break;
+
+            case ArticleListSetOperation.Intersection:
+                result.IntersectWith(filterArticles);
+                break;
+
+            case ArticleListSetOperation.SymmetricDifference:
+                result.SymmetricExceptWith(filterArticles);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(operation),
+                    operation,
+                    "Unsupported article-list set operation.");
+        }
+
+        return result.ToList();
+    }
+
+    /// <summary>
+    /// Filters an article list using the legacy intersection flag.
+    /// </summary>
+    /// <remarks>
+    /// Retained temporarily for compatibility with existing callers.
+    /// </remarks>
     public static List<Article> FilterByArticleSet(
         IEnumerable<Article> articles,
         IEnumerable<Article> filterArticles,
         bool intersect)
     {
-        ArgumentNullException.ThrowIfNull(articles);
-        ArgumentNullException.ThrowIfNull(filterArticles);
-
-        HashSet<Article> result =
-            new(articles);
-
-        if (intersect)
-            result.IntersectWith(filterArticles);
-        else
-            result.ExceptWith(filterArticles);
-
-        return result.ToList();
+        return FilterByArticleSet(
+            articles,
+            filterArticles,
+            intersect
+                ? ArticleListSetOperation.Intersection
+                : ArticleListSetOperation.Difference);
     }
 
     /// <summary>
@@ -176,8 +210,8 @@ public static class ArticleListFilterProcessor
     /// <param name="applySetFilter">
     /// Whether the article-set operation should be applied.
     /// </param>
-    /// <param name="intersect">
-    /// Whether the set operation is an intersection rather than a difference.
+    /// <param name="operation">
+    /// The set operation to perform when comparing article collections.
     /// </param>
     /// <param name="sortAlphabetically">
     /// Whether the resulting articles should be sorted alphabetically.
@@ -196,7 +230,7 @@ public static class ArticleListFilterProcessor
         bool useRegex,
         bool removeDuplicates,
         bool applySetFilter,
-        bool intersect,
+        ArticleListSetOperation operation,
         bool sortAlphabetically)
     {
         ArgumentNullException.ThrowIfNull(articles);
@@ -220,7 +254,7 @@ public static class ArticleListFilterProcessor
                 FilterByArticleSet(
                     result,
                     filterArticles,
-                    intersect);
+                    operation);
         }
 
         result =
@@ -246,5 +280,42 @@ public static class ArticleListFilterProcessor
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Applies article-list filters using the legacy intersection flag.
+    /// </summary>
+    /// <remarks>
+    /// Retained temporarily while callers migrate to ArticleListSetOperation.
+    /// </remarks>
+    public static List<Article> Apply(
+        IEnumerable<Article> articles,
+        IEnumerable<Article> filterArticles,
+        IEnumerable<int> selectedNamespaces,
+        string containsText,
+        string doesNotContainText,
+        bool filterContains,
+        bool filterDoesNotContain,
+        bool useRegex,
+        bool removeDuplicates,
+        bool applySetFilter,
+        bool intersect,
+        bool sortAlphabetically)
+    {
+        return Apply(
+            articles,
+            filterArticles,
+            selectedNamespaces,
+            containsText,
+            doesNotContainText,
+            filterContains,
+            filterDoesNotContain,
+            useRegex,
+            removeDuplicates,
+            applySetFilter,
+            intersect
+                ? ArticleListSetOperation.Intersection
+                : ArticleListSetOperation.Difference,
+            sortAlphabetically);
     }
 }
