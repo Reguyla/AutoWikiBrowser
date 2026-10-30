@@ -398,13 +398,13 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Classes="twain-tab" Header="AWB checks">
+            <TabItem Classes="twain-tab" Header="Twain checks">
                 <ScrollViewer>
                     <WrapPanel Margin="{DynamicResource TwainContentPadding}"
                                 Orientation="Horizontal">
 
                         <CheckBox Name="NoBoldTitleCheckBox"
-                                    Content="Has title AWB will embolden"
+                                    Content="Has title Twain will embolden"
                                     Width="240"
                                     Margin="0,0,12,10" />
 
@@ -429,7 +429,7 @@
                                     Margin="0,0,12,10" />
 
                         <CheckBox Name="BadLinksCheckBox"
-                                    Content="Has bad links AWB will fix"
+                                    Content="Has bad links Twain will fix"
                                     Width="240"
                                     Margin="0,0,12,10" />
 
@@ -449,12 +449,12 @@
                                     Margin="0,0,12,10" />
 
                         <CheckBox Name="CiteTemplateDatesCheckBox"
-                                    Content="Citation dates AWB will fix"
+                                    Content="Citation dates Twain will fix"
                                     Width="240"
                                     Margin="0,0,12,10" />
 
                         <CheckBox Name="TypoCheckBox"
-                                    Content="Typos AWB will fix"
+                                    Content="Typos Twain will fix"
                                     Width="240"
                                     Margin="0,0,12,10" />
 
