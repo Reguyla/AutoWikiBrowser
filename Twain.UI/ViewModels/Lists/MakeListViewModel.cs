@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using Twain.Core;
 using Twain.Core.AWBSettings;
@@ -69,6 +71,13 @@ public partial class MakeListViewModel : ObservableObject
     /// Gets the number of articles currently displayed.
     /// </summary>
     public int ArticleCount => Articles.Count;
+
+    /// <summary>
+    /// Gets the formatted article count for display in the workspace header.
+    /// </summary>
+    public string ArticleCountText =>
+        $"{ArticleCount.ToString("N0", CultureInfo.CurrentCulture)} " +
+        (ArticleCount == 1 ? "page" : "pages");
 
     /// <summary>
     /// Gets the list providers available to the Make List region.
@@ -142,6 +151,8 @@ public partial class MakeListViewModel : ObservableObject
 
         _session = session;
 
+        Articles.CollectionChanged += Articles_CollectionChanged;
+
         foreach (IListProvider provider in
                  ListProviderRegistry.Providers
                      .OrderBy(provider => provider.DisplayText,
@@ -155,6 +166,17 @@ public partial class MakeListViewModel : ObservableObject
 
         SelectedProvider = Providers.FirstOrDefault(
             provider => provider.GetType().Name == "CategoryListProvider");
+    }
+
+    /// <summary>
+    /// Updates article-count properties whenever the article list changes.
+    /// </summary>
+    private void Articles_CollectionChanged(
+        object? sender,
+        NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(ArticleCount));
+        OnPropertyChanged(nameof(ArticleCountText));
     }
 
     private void ConfigureProvider(IListProvider provider)

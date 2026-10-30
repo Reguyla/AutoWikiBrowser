@@ -32,7 +32,8 @@
             BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
             BorderThickness="0,0,0,1">
 
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto"
+                  ColumnSpacing="8">
 
                 <!-- Pane title -->
                 <TextBlock
@@ -43,9 +44,21 @@
                     Foreground="{DynamicResource TwainTextPrimaryBrush}"
                     Text="{Binding Title}" />
 
+                <!-- Optional pane status indicator -->
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    FontSize="{DynamicResource TwainFontSizeSmall}"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                    Text="{Binding HeaderStatusText}"
+                    IsVisible="{Binding HasHeaderStatus}"
+                    TextTrimming="CharacterEllipsis"
+                    MaxWidth="140" />
+
                 <!-- Optional pane header action -->
                 <Button
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Classes="twain-pane-header-button"
                     IsVisible="{Binding HasHeaderAction}"
                     Command="{Binding ExecuteHeaderActionCommand}"

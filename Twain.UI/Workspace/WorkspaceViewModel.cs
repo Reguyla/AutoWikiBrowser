@@ -613,6 +613,18 @@ public partial class WorkspaceViewModel : ObservableObject
         makeListPane.HeaderAction = MakeList.RequestShowFilter;
         makeListPane.HeaderActionToolTip = "Filter article list";
         makeListPane.HeaderActionIcon = PaneHeaderActionIcon.Filter;
+
+        // Display the current article count in the Make List pane header.
+        makeListPane.HeaderStatusText = MakeList.ArticleCountText;
+
+        // Keep the pane header synchronized with the article list.
+        MakeList.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MakeListViewModel.ArticleCountText))
+            {
+                makeListPane.HeaderStatusText = MakeList.ArticleCountText;
+            }
+        };
     }
 
     /// <summary>

@@ -101,6 +101,23 @@ public sealed partial class PaneViewModel : ObservableObject
     public bool HasHeaderAction => HeaderAction is not null;
 
     /// <summary>
+    /// Gets or sets the optional status text displayed in the pane header.
+    /// </summary>
+    /// <remarks>
+    /// This can represent article counts, alerts, processing progress,
+    /// or other pane-specific status information.
+    /// </remarks>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasHeaderStatus))]
+    private string _headerStatusText = string.Empty;
+
+    /// <summary>
+    /// Gets whether the pane has status information to display.
+    /// </summary>
+    public bool HasHeaderStatus =>
+        !string.IsNullOrWhiteSpace(HeaderStatusText);
+
+    /// <summary>
     /// Gets the general role performed by the pane.
     /// </summary>
     public PaneKind Kind => Definition.Kind;
