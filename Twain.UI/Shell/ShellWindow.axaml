@@ -15,7 +15,7 @@
     Background="{DynamicResource TwainApplicationBackgroundBrush}"
     Foreground="{DynamicResource TwainTextPrimaryBrush}"
     Icon="/Assets/Twainlogo.ico"
-    Title="Twain"
+    Title="{Binding WindowTitle}"
     mc:Ignorable="d">
 
     <Design.DataContext>

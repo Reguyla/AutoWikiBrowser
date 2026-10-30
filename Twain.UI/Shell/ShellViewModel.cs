@@ -1,6 +1,7 @@
 ﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.IO;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.AWBSettings;
@@ -48,6 +49,16 @@ public sealed partial class ShellViewModel : ViewModelBase
             new WorkspaceViewModel(
                 Session,
                 Preferences);
+
+        // Refresh the window title when the active article changes.
+        Workspace.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName ==
+                nameof(WorkspaceViewModel.CurrentArticleName))
+            {
+                OnPropertyChanged(nameof(WindowTitle));
+            }
+        };
 
         // Restore the saved processing toolbar display mode.
         Workspace.Options.DisplayMode =
@@ -197,7 +208,33 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// <summary>
     /// Gets the path of the currently opened or saved settings file.
     /// </summary>
-    public string? CurrentSettingsFile { get; private set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WindowTitle))]
+    private string? _currentSettingsFile;
+
+    /// <summary>
+    /// Gets the application window title, including the active settings
+    /// filename and current article when available.
+    /// </summary>
+    public string WindowTitle
+    {
+        get
+        {
+            string title = "Twain";
+
+            if (!string.IsNullOrWhiteSpace(CurrentSettingsFile))
+            {
+                title += $" — {Path.GetFileName(CurrentSettingsFile)}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(Workspace.CurrentArticleName))
+            {
+                title += $" — {Workspace.CurrentArticleName}";
+            }
+
+            return title;
+        }
+    }
 
     /// <summary>
     /// Loads an AWB-compatible XML settings file into
