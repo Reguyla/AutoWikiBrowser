@@ -342,4 +342,90 @@ public class ArticleSectionComparerTests
 
         Assert.That(result, Is.Empty);
     }
+
+    [Test]
+    public void GetModifiedSections_BlankLineAddedWithinSection_ReturnsSection()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "First paragraph.\r\n" +
+            "Second paragraph.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        const string modified =
+            "== History ==\r\n" +
+            "First paragraph.\r\n" +
+            "\r\n" +
+            "Second paragraph.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        Assert.That(
+            ArticleSectionComparer.GetModifiedSections(original, modified),
+            Is.EqualTo(new[] { "History" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_BlankLineRemovedWithinSection_ReturnsSection()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "First paragraph.\r\n" +
+            "\r\n" +
+            "Second paragraph.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        const string modified =
+            "== History ==\r\n" +
+            "First paragraph.\r\n" +
+            "Second paragraph.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        Assert.That(
+            ArticleSectionComparer.GetModifiedSections(original, modified),
+            Is.EqualTo(new[] { "History" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_TrailingSpaceChanged_ReturnsSection()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "History content.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        const string modified =
+            "== History ==\r\n" +
+            "History content. \r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        Assert.That(
+            ArticleSectionComparer.GetModifiedSections(original, modified),
+            Is.EqualTo(new[] { "History" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_ReorderedSectionsWithDifferentLineEndings_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "History content.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        const string modified =
+            "== References ==\r\n" +
+            "Reference content.\r\n" +
+            "== History ==\r\n" +
+            "History content.";
+
+        Assert.That(
+            ArticleSectionComparer.GetModifiedSections(original, modified),
+            Is.Empty);
+    }
 }

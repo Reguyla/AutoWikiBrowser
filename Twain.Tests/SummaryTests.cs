@@ -669,4 +669,75 @@ public class SummaryTests : RequiresInitialization
             result,
             Is.EqualTo("Updated default sort"));
     }
+
+    [Test]
+    public void GetModifiedSections_AddDefaultSort_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_RemoveDefaultSort_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_CategoryAndDefaultSortChange_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}\r\n" +
+            "[[Category:Writers]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Jones, John}}\r\n" +
+            "[[Category:Authors]]";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.Empty);
+    }
+
+    [Test]
+    public void ModifiedSection_AddDefaultSort_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}";
+
+        Assert.That(
+            Summary.ModifiedSection(original, modified),
+            Is.Empty);
+    }
 }
