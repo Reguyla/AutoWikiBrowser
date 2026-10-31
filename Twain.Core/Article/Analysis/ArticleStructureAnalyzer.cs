@@ -367,4 +367,17 @@ public static class ArticleStructureAnalyzer
         // Only recognize explicitly configured prefixes.
         return options.TrailingInterwikiPrefixes.Contains(prefix);
     }
+
+    /// <summary>
+    /// Normalizes a category declaration missing its final closing bracket
+    /// so section comparisons can recognize the surrounding metadata block.
+    /// </summary>
+    private static string NormalizeMalformedCategories(string articleText)
+    {
+        return Regex.Replace(
+            articleText,
+            @"(?m)^([ \t]*\[\[\s*Category\s*:[^\[\]\r\n]*\])(?=\r?$)",
+            "$1]",
+            RegexOptions.IgnoreCase);
+    }
 }

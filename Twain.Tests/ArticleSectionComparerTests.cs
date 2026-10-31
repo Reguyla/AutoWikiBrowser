@@ -428,4 +428,92 @@ public class ArticleSectionComparerTests
             ArticleSectionComparer.GetModifiedSections(original, modified),
             Is.Empty);
     }
+
+    [Test]
+    public void GetModifiedSections_CategoryChangeAfterDefaultSort_DoesNotModifyReferences()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "\r\n" +
+            "== References ==\r\n" +
+            "{{Refbegin}}\r\n" +
+            "* Example reference.\r\n" +
+            "{{Refend}}\r\n" +
+            "\r\n" +
+            "{{Wikipedia|John Wilson Danenhower}}\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Danenhower, John Wilson}}\r\n" +
+            "[[Category:American polar explorers]]\r\n" +
+            "[[Category:United States Navy officers]]\r\n" +
+            "[[Category:American memoirists]]\r\n" +
+            "[[Category:Graduates of the United States Naval Academy Class of 1870]]\r\n" +
+            "[[Category:People from Annapolis, Maryland]]\r\n";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "\r\n" +
+            "== References ==\r\n" +
+            "{{Refbegin}}\r\n" +
+            "* Example reference.\r\n" +
+            "{{Refend}}\r\n" +
+            "\r\n" +
+            "{{Wikipedia|John Wilson Danenhower}}\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Danenhower, John Wilson}}\r\n" +
+            "[[Category:American polar explorers]]\r\n" +
+            "[[Category:United States Navy officers]]\r\n" +
+            "[[Category:American memoirists]]\r\n" +
+            "[[Category:Graduates of the United States Naval Academy Class of 1870]]\r\n" +
+            "[[Category:People from Annapolis, Maryland|Danenhower]]\r\n";
+
+        IReadOnlyList<string> result =
+            ArticleSectionComparer.GetModifiedSections(
+                original,
+                modified);
+
+        Assert.That(
+            result,
+            Is.Empty,
+            "Category-only changes must not be attributed to References.");
+    }
+
+    [Test]
+    public void GetModifiedSections_MalformedCategoryFixed_DoesNotModifyReferences()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "{{Refbegin}}\r\n" +
+            "* Example reference.\r\n" +
+            "{{Refend}}\r\n" +
+            "\r\n" +
+            "{{Wikipedia|John Wilson Danenhower}}\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Danenhower, John Wilson}}\r\n" +
+            "[[Category:American polar explorers]]\r\n" +
+            "[[Category:Graduates of the United States Naval Academy Class of 1870]\r\n" +
+            "[[Category:People from Annapolis, Maryland]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "{{Refbegin}}\r\n" +
+            "* Example reference.\r\n" +
+            "{{Refend}}\r\n" +
+            "\r\n" +
+            "{{Wikipedia|John Wilson Danenhower}}\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Danenhower, John Wilson}}\r\n" +
+            "[[Category:American polar explorers]]\r\n" +
+            "[[Category:Graduates of the United States Naval Academy Class of 1870]]\r\n" +
+            "[[Category:People from Annapolis, Maryland]]";
+
+        IReadOnlyList<string> result =
+            ArticleSectionComparer.GetModifiedSections(
+                original,
+                modified);
+
+        Assert.That(
+            result,
+            Is.Empty,
+            "Correcting malformed category markup must not modify References.");
+    }
 }

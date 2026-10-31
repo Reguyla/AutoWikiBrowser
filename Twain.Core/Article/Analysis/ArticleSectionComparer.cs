@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Twain.Core.ArticleAnalysis;
+﻿namespace Twain.Core.ArticleAnalysis;
 
 /// <summary>
 /// Compares the logical content of article sections while excluding
@@ -16,6 +13,9 @@ public static class ArticleSectionComparer
     /// <remarks>
     /// Sections are matched by heading. If the section structure is
     /// ambiguous, an empty collection is returned.
+    ///
+    /// Malformed category declarations are normalized for comparison
+    /// without modifying the original article text.
     /// </remarks>
     public static IReadOnlyList<string> GetModifiedSections(
         string originalText,
@@ -26,10 +26,10 @@ public static class ArticleSectionComparer
         ArgumentNullException.ThrowIfNull(modifiedText);
 
         ArticleStructure before =
-            ArticleStructureAnalyzer.Analyze(originalText, options);
+            AnalyzeForComparison(originalText, options);
 
         ArticleStructure after =
-            ArticleStructureAnalyzer.Analyze(modifiedText, options);
+            AnalyzeForComparison(modifiedText, options);
 
         if (before.AllSections.Count() != after.AllSections.Count())
         {
@@ -72,9 +72,12 @@ public static class ArticleSectionComparer
                 return Array.Empty<string>();
             }
 
+            string updatedContent =
+                GetComparableContent(section);
+
             if (!string.Equals(
                     originalContent,
-                    GetComparableContent(section),
+                    updatedContent,
                     StringComparison.Ordinal))
             {
                 modifiedSections.Add(heading);
@@ -82,6 +85,40 @@ public static class ArticleSectionComparer
         }
 
         return modifiedSections;
+    }
+
+    /// <summary>
+    /// Analyzes article structure after normalizing malformed category
+    /// declarations for section comparison.
+    /// </summary>
+    /// <remarks>
+    /// Normalization is applied only to a temporary string.
+    /// The original article text is never modified.
+    /// </remarks>
+    private static ArticleStructure AnalyzeForComparison(
+        string articleText,
+        ArticleAnalysisOptions? options)
+    {
+        string normalizedText =
+            NormalizeMalformedCategories(articleText);
+
+        return ArticleStructureAnalyzer.Analyze(
+            normalizedText,
+            options);
+    }
+
+    /// <summary>
+    /// Normalizes standalone category declarations missing their
+    /// final closing bracket.
+    /// </summary>
+    private static string NormalizeMalformedCategories(
+        string articleText)
+    {
+        return Regex.Replace(
+            articleText,
+            @"(?m)^([ \t]*\[\[\s*Category\s*:[^\[\]\r\n]*\])(?=\r?$)",
+            "$1]",
+            RegexOptions.IgnoreCase);
     }
 
     /// <summary>
