@@ -557,4 +557,63 @@ public class ArticleSectionComparerTests
             "Correcting malformed category markup must not be reported " +
             "as a modification to the References section.");
     }
+
+    [Test]
+    public void GetModifiedSections_DefaultSortChanged_DoesNotModifyFinalSection()
+    {
+        const string original =
+            "== Expedition records ==\r\n" +
+            "* Example expedition record.\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Smith, John}}\r\n" +
+            "[[Category:American explorers]]";
+
+        const string modified =
+            "== Expedition records ==\r\n" +
+            "* Example expedition record.\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Smith, Jonathan}}\r\n" +
+            "[[Category:American explorers]]";
+
+        IReadOnlyList<string> result =
+            ArticleSectionComparer.GetModifiedSections(
+                original,
+                modified);
+
+        Assert.That(
+            result,
+            Is.Empty,
+            "Changing DEFAULTSORT metadata must not modify the final section, " +
+            "regardless of its heading.");
+    }
+
+    [Test]
+    public void GetModifiedSections_DefaultSortAndSectionChanged_DetectsSection()
+    {
+        const string original =
+            "== Expedition records ==\r\n" +
+            "* First expedition.\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Smith, John}}\r\n" +
+            "[[Category:American explorers]]";
+
+        const string modified =
+            "== Expedition records ==\r\n" +
+            "* First expedition.\r\n" +
+            "* Second expedition.\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Smith, Jonathan}}\r\n" +
+            "[[Category:American explorers]]";
+
+        IReadOnlyList<string> result =
+            ArticleSectionComparer.GetModifiedSections(
+                original,
+                modified);
+
+        Assert.That(
+            result,
+            Is.EqualTo(new[] { "Expedition records" }),
+            "Changing DEFAULTSORT alongside section content must " +
+            "still identify the modified section.");
+    }
 }

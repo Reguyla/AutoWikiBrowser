@@ -196,10 +196,13 @@ public static class EditSummaryBuilder
                     : summary;
             }
 
-            // Avoid adding a second section prefix.
+            // Preserve an existing section prefix while still reporting
+            // category changes.
             if (summary.StartsWith("/*", StringComparison.Ordinal))
             {
-                return summary;
+                return categoriesChanged
+                    ? $"{summary}; Updated categories"
+                    : summary;
             }
 
             if (categoriesChanged)

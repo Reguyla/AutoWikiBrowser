@@ -293,4 +293,38 @@ public class EditSummaryBuilderTests
             result,
             Is.EqualTo("General cleanup"));
     }
+
+    [Test]
+    public void Build_ExistingSectionPrefixAndCategoryChange_PreservesPrefix()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "Original history.\r\n" +
+            "\r\n" +
+            "[[Category:Old category]]";
+
+        const string modified =
+            "== History ==\r\n" +
+            "Updated history.\r\n" +
+            "\r\n" +
+            "[[Category:New category]]";
+
+        string result = EditSummaryBuilder.Build(
+            "/* History */ Corrected dates",
+            string.Empty,
+            original,
+            modified,
+            includeSectionSummary: true);
+
+        Assert.That(
+            result,
+            Is.EqualTo("/* History */ Corrected dates; Updated categories"),
+            "The existing section prefix must remain at the beginning " +
+            "while category changes are reported.");
+
+        Assert.That(
+            Summary.IsCorrect(result),
+            Is.True,
+            "The combined edit summary must pass existing validation.");
+    }
 }
