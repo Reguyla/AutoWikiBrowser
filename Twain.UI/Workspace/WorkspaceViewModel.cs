@@ -1025,12 +1025,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
         try
         {
-            string finalSummary = EditSummaryBuilder.Build(
-                Options.EditSummary,
-                savingArticle.EditSummary,
-                savingArticle.OriginalArticleText,
-                articleText,
-                !Preferences.General.noSectionEditSummary);
+            // Save exactly the summary displayed in the article editor,
+            // including any manual changes made by the user.
+            string finalSummary = Editor.CalculatedEditSummary;
 
             SaveInfo saveInfo = await Session.Editor.SaveArticleAsync(
                 articleText,
@@ -1380,6 +1377,25 @@ public partial class WorkspaceViewModel : ObservableObject
         CompleteCurrentArticle(wasSaved: false);
     }
 
+    /// <summary>
+    /// Updates the calculated edit summary displayed above the article editor.
+    /// </summary>
+    private void UpdateCalculatedEditSummary()
+    {
+        if (CurrentArticle is null)
+        {
+            Editor.CalculatedEditSummary = string.Empty;
+            return;
+        }
+
+        Editor.CalculatedEditSummary = EditSummaryBuilder.Build(
+            Options.EditSummary,
+            CurrentArticle.EditSummary,
+            CurrentArticle.OriginalArticleText,
+            Editor.Document.CurrentText,
+            !Preferences.General.noSectionEditSummary);
+    }
+
     private void Editor_OpenComplete(
         AsyncApiEdit editor,
         PageInfo page)
@@ -1399,6 +1415,8 @@ public partial class WorkspaceViewModel : ObservableObject
 
             CurrentArticle =
                 new Article(page);
+
+            Editor.CalculatedEditSummary = string.Empty;
 
             Options.CanSaveCurrentArticle = true;
 
@@ -1455,6 +1473,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
             Editor.Document.CurrentText =
                 CurrentArticle.ArticleText;
+
+            // Display the calculated summary for the processed article.
+            UpdateCalculatedEditSummary();
 
             // Core processing has completed.
             // Keep the article available for review and saving.

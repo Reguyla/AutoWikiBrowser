@@ -42,16 +42,4 @@ public sealed record EditSummaryContribution
     /// </summary>
     public string? ShortDescription { get; init; }
 
-    /// <summary>
-    /// Gets the contribution's position in the final summary.
-    /// Lower values appear first.
-    /// </summary>
-    public int DisplayOrder { get; init; }
-
-    /// <summary>
-    /// Gets the importance of retaining this contribution
-    /// when the summary exceeds the permitted length.
-    /// Higher values indicate greater importance.
-    /// </summary>
-    public int RetentionPriority { get; init; }
 }

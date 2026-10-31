@@ -62,6 +62,87 @@ public static class Summary
     }
 
     /// <summary>
+    /// Returns the names of sections whose contents changed between
+    /// two versions of an article.
+    /// </summary>
+    /// <remarks>
+    /// Sections are matched by their headings rather than their positions.
+    /// Reordered sections are not considered modified when their contents
+    /// remain unchanged.
+    ///
+    /// If the section structure cannot be matched reliably, an empty
+    /// collection is returned.
+    /// </remarks>
+    public static IReadOnlyList<string> GetModifiedSections(
+        string originalText,
+        string articleText)
+    {
+        ArgumentNullException.ThrowIfNull(originalText);
+        ArgumentNullException.ThrowIfNull(articleText);
+
+        string[] sectionsBefore = Tools.SplitToSections(originalText);
+        string[] sectionsAfter = Tools.SplitToSections(articleText);
+
+        if (sectionsBefore.Length != sectionsAfter.Length)
+        {
+            return Array.Empty<string>();
+        }
+
+        static string GetHeading(string section)
+        {
+            string heading = WikiRegexes.Headings
+                .Match(section)
+                .Groups[1]
+                .Value
+                .Trim();
+
+            return string.IsNullOrEmpty(heading)
+                ? "top"
+                : heading;
+        }
+
+        var beforeByHeading = new Dictionary<string, string>(
+            StringComparer.Ordinal);
+
+        foreach (string section in sectionsBefore)
+        {
+            string heading = GetHeading(section);
+
+            // Duplicate headings make matching ambiguous.
+            if (!beforeByHeading.TryAdd(heading, section))
+            {
+                return Array.Empty<string>();
+            }
+        }
+
+        var modifiedSections = new List<string>();
+        var matchedHeadings = new HashSet<string>(
+            StringComparer.Ordinal);
+
+        foreach (string section in sectionsAfter)
+        {
+            string heading = GetHeading(section);
+
+            // A new, renamed, or duplicate heading makes matching ambiguous.
+            if (!beforeByHeading.TryGetValue(heading, out string? originalSection)
+                || !matchedHeadings.Add(heading))
+            {
+                return Array.Empty<string>();
+            }
+
+            if (!string.Equals(
+                originalSection,
+                section,
+                StringComparison.Ordinal))
+            {
+                modifiedSections.Add(heading);
+            }
+        }
+
+        return modifiedSections;
+    }
+
+    /// <summary>
     /// Matches trailing whitespace followed by a single wikilink at the end of
     /// an edit summary.
     /// </summary>

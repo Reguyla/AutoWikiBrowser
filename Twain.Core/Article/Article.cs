@@ -365,15 +365,25 @@ public Article()
     }
 
     /// <summary>
-    /// Clears all accumulated edit summary text for the current article.
+    /// Collects structured edit-summary contributions generated
+    /// while processing the current article.
     /// </summary>
     /// <remarks>
-    /// Called before beginning a new processing pass to ensure the edit
-    /// summary reflects only the changes generated during the current run.
+    /// The collector is independent of the legacy edit summary.
+    /// Both systems are maintained during the transition to
+    /// structured edit-summary generation.
     /// </remarks>
+    [XmlIgnore]
+    public EditSummaryCollector EditSummaryCollector { get; } = new();
+
+    /// <summary>
+    /// Clears the accumulated edit summary and structured
+    /// contributions before a new processing pass.
+    /// </summary>
     public void ResetEditSummary()
     {
         summary.Length = 0;
+        EditSummaryCollector.Clear();
     }
 
     /// <summary>

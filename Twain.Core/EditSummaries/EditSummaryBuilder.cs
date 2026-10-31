@@ -46,11 +46,10 @@ public static class EditSummaryBuilder
 
         if (includeSectionSummary)
         {
-            summary =
-                Summary.AddSectionEditSummary(
-                    summary,
-                    originalArticleText,
-                    currentArticleText);
+            summary = AddModifiedSections(
+                summary,
+                originalArticleText,
+                currentArticleText);
         }
 
         return summary;
@@ -133,7 +132,7 @@ public static class EditSummaryBuilder
 
         if (includeSectionSummary)
         {
-            summary = Summary.AddSectionEditSummary(
+            summary = AddModifiedSections(
                 summary,
                 originalArticleText,
                 currentArticleText);
@@ -151,5 +150,54 @@ public static class EditSummaryBuilder
                 byteLength <= policy.MaximumBytes &&
                 Summary.IsCorrect(summary)
         };
+    }
+
+    /// <summary>
+    /// Adds a description of the modified article sections to an edit summary.
+    /// </summary>
+    /// <remarks>
+    /// A single modified section uses the traditional MediaWiki section prefix.
+    /// Multiple modified sections use a descriptive summary instead.
+    /// </remarks>
+    private static string AddModifiedSections(
+        string summary,
+        string originalArticleText,
+        string currentArticleText)
+    {
+        IReadOnlyList<string> modifiedSections =
+            Summary.GetModifiedSections(
+                originalArticleText,
+                currentArticleText);
+
+        if (modifiedSections.Count == 0)
+        {
+            return summary;
+        }
+
+        // Preserve the traditional MediaWiki section prefix.
+        if (modifiedSections.Count == 1)
+        {
+            string section = modifiedSections[0];
+
+            return section == "top"
+                ? summary
+                : $"/* {section} */ {summary}".TrimEnd();
+        }
+
+        string description;
+
+        if (modifiedSections.Count == 2)
+        {
+            description =
+                $"Updated {modifiedSections[0]} and {modifiedSections[1]}";
+        }
+        else
+        {
+            description = "Updated multiple sections";
+        }
+
+        return string.IsNullOrWhiteSpace(summary)
+            ? description
+            : $"{description}; {summary}";
     }
 }

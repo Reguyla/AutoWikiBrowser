@@ -27,25 +27,31 @@ public sealed class EditSummaryPolicy
                     new(10, 100),
 
                 [EditSummaryCategory.GeneralFixes] =
-                    new(20, 90),
+                   new(20, 90),
+
+                [EditSummaryCategory.MetadataCleanup] =
+                   new(30, 75),
+
+                [EditSummaryCategory.CategoryChanges] =
+                    new(40, 85),
 
                 [EditSummaryCategory.CustomModule] =
-                    new(30, 95),
+                    new(50, 95),
 
                 [EditSummaryCategory.TypoCorrections] =
-                    new(40, 70),
+                   new(60, 70),
 
                 [EditSummaryCategory.FindReplace] =
-                    new(50, 60),
+                   new(70, 60),
 
                 [EditSummaryCategory.AdvancedFindReplace] =
-                    new(60, 60),
+                    new(80, 60),
 
                 [EditSummaryCategory.Disambiguation] =
-                    new(70, 80),
+                   new(90, 80),
 
                 [EditSummaryCategory.Other] =
-                    new(80, 50)
+                   new(100, 50)
             });
 
     /// <summary>
