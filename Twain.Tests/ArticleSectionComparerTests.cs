@@ -1,0 +1,322 @@
+﻿using NUnit.Framework;
+using Twain.Core.ArticleAnalysis;
+
+namespace Twain.Tests;
+
+[TestFixture]
+public class ArticleSectionComparerTests
+{
+    [Test]
+    public void GetModifiedSections_CategoryOnlyChange_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military personnel]]";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_SectionContentChange_ReturnsSection()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Updated reference.\r\n" +
+            "[[Category:Military history]]";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.EqualTo(new[] { "References" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_CategoryAndContentChange_ReturnsSection()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Updated reference.\r\n" +
+            "[[Category:Military personnel]]";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.EqualTo(new[] { "References" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_UnchangedArticle_ReturnsEmpty()
+    {
+        const string article =
+            "== History ==\r\n" +
+            "Original history.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            article,
+            article);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_SectionCountChanged_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "Original history.";
+
+        const string modified =
+            "== History ==\r\n" +
+            "Original history.\r\n" +
+            "== References ==\r\n" +
+            "New references.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_AddFirstCategory_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_RemoveLastCategory_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_ReorderedSections_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "History content.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        const string modified =
+            "== References ==\r\n" +
+            "Reference content.\r\n" +
+            "== History ==\r\n" +
+            "History content.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_RenamedHeading_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "Original content.";
+
+        const string modified =
+            "== Background ==\r\n" +
+            "Original content.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_DuplicateHeadings_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "First history section.\r\n" +
+            "== History ==\r\n" +
+            "Second history section.";
+
+        const string modified =
+            "== History ==\r\n" +
+            "Updated first section.\r\n" +
+            "== History ==\r\n" +
+            "Second history section.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSectionByPosition_CategoryOnlyChange_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military personnel]]";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSectionByPosition_SectionChange_ReturnsHeading()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Updated reference.";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(result, Is.EqualTo("References"));
+    }
+
+    [Test]
+    public void GetModifiedSectionByPosition_RenamedHeading_ReturnsNewHeading()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "Original content.";
+
+        const string modified =
+            "== Background ==\r\n" +
+            "Original content.";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(result, Is.EqualTo("Background"));
+    }
+
+    [Test]
+    public void GetModifiedSectionByPosition_MultipleChanges_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "Original history.\r\n" +
+            "== References ==\r\n" +
+            "Original references.";
+
+        const string modified =
+            "== History ==\r\n" +
+            "Updated history.\r\n" +
+            "== References ==\r\n" +
+            "Updated references.";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSectionByPosition_LeadChange_ReturnsTop()
+    {
+        const string original =
+            "Original introduction.\r\n" +
+            "== History ==\r\n" +
+            "History content.";
+
+        const string modified =
+            "Updated introduction.\r\n" +
+            "== History ==\r\n" +
+            "History content.";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(result, Is.EqualTo("top"));
+    }
+
+    [Test]
+    public void GetModifiedSectionByPosition_AddedLeadSection_ReturnsEmpty()
+    {
+        const string original =
+            "==foo==\r\nbar";
+
+        const string modified =
+            "test\r\n==foo==\r\nbar";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(result, Is.Empty);
+    }
+}

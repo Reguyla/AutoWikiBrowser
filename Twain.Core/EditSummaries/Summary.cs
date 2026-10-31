@@ -14,6 +14,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+using Twain.Core.ArticleAnalysis;
+
 namespace Twain.Core.EditSummaries;
 
 /// <summary>
@@ -24,41 +26,42 @@ public static class Summary
     public const int MaxLength = 255;
 
     /// <summary>
-    /// Returns the name of modified section, top for zeroth section, or empty string if more than one section has changed or no changes
+    /// Returns the name of the single modified section, or an empty string
+    /// when no section changed or the changes affect multiple sections.
     /// </summary>
-    /// <param name="originalText"></param>
-    /// <param name="articleText"></param>
-    /// <returns></returns>
-    public static string ModifiedSection(string originalText, string articleText)
+    /// <remarks>
+    /// Uses positional section matching to preserve legacy behavior,
+    /// including returning the new heading when a section is renamed.
+    ///
+    /// Recognized trailing article metadata is excluded from comparisons.
+    /// </remarks>
+    public static string ModifiedSection(
+        string originalText,
+        string articleText)
     {
-        string[] sectionsBefore = Tools.SplitToSections(originalText),
-        sectionsAfter = Tools.SplitToSections(articleText);
+        return ArticleSectionComparer.GetModifiedSectionByPosition(
+            originalText,
+            articleText);
+    }
 
-        // if number of sections has changed, can't provide section edit summary
-        if (sectionsAfter.Length != sectionsBefore.Length)
-            return string.Empty;
+    /// <summary>
+    /// Compares the legacy and modern section identification results.
+    /// Intended for migration validation only.
+    /// </summary>
+    internal static (string Legacy, string Modern) CompareModifiedSectionImplementations(
+        string originalText,
+        string articleText)
+    {
+        string legacyResult = ModifiedSection(
+            originalText,
+            articleText);
 
-        int sectionsChanged = 0, sectionChangeNumber = 0;
+        string modernResult =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                originalText,
+                articleText);
 
-        for (int i = 0; i < sectionsAfter.Length; i++)
-        {
-            if (!sectionsBefore[i].Equals(sectionsAfter[i]))
-            {
-                sectionsChanged++;
-                sectionChangeNumber = i;
-            }
-
-            // if multiple sections changed, can't provide section edit summary
-            if (sectionsChanged > 1)
-                return string.Empty;
-        }
-
-        if (sectionsChanged == 0)
-            return string.Empty;
-
-        // so SectionsChanged == 1, get heading name from regex, or return "top" if zeroth section
-        string heading = WikiRegexes.Headings.Match(sectionsAfter[sectionChangeNumber]).Groups[1].Value.Trim();
-        return string.IsNullOrEmpty(heading) ? "top" : heading;
+        return (legacyResult, modernResult);
     }
 
     /// <summary>

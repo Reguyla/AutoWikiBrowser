@@ -480,4 +480,134 @@ public class SummaryTests : RequiresInitialization
             Summary.GetModifiedSections(original, modified),
             Is.Empty);
     }
+
+    [Test]
+    public void GetModifiedSections_CategoryOnlyChange_ReturnsNoSections()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "\r\n" +
+            "[[Category:Military personnel]]";
+
+        var result = Summary.GetModifiedSections(original, modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void ModifiedSection_CategoryOnlyChange_ReturnsEmpty()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "\r\n" +
+            "[[Category:Military personnel]]";
+
+        string result = Summary.ModifiedSection(original, modified);
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_ReferencesChange_ReturnsReferences()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Updated reference.\r\n" +
+            "[[Category:Military history]]";
+
+        var result = Summary.GetModifiedSections(original, modified);
+
+        Assert.That(result, Is.EquivalentTo(new[] { "References" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_CategoryAndReferencesChange_ReturnsReferences()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Updated reference.\r\n" +
+            "[[Category:Military personnel]]";
+
+        var result = Summary.GetModifiedSections(original, modified);
+
+        Assert.That(result, Is.EquivalentTo(new[] { "References" }));
+    }
+
+    [Test]
+    public void AddSectionEditSummary_CategoryOnlyChange_DoesNotAddPrefix()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military history]]";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "[[Category:Military personnel]]";
+
+        string result = Summary.AddSectionEditSummary(
+            "Updated categories",
+            original,
+            modified);
+
+        Assert.That(result, Is.EqualTo("Updated categories"));
+    }
+
+    [Test]
+    public void AddSectionEditSummary_ReferencesChange_AddsPrefix()
+    {
+        const string original =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Example reference.";
+
+        const string modified =
+            "Article introduction.\r\n" +
+            "== References ==\r\n" +
+            "* Updated reference.";
+
+        string result = Summary.AddSectionEditSummary(
+            "Updated references",
+            original,
+            modified);
+
+        Assert.That(
+            result,
+            Is.EqualTo("/* References */ Updated references"));
+    }
 }
