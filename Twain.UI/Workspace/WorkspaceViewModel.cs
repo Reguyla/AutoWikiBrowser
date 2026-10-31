@@ -442,6 +442,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
         // Update the editor without resetting its original-text baseline.
         Editor.Document.CurrentText = article.ArticleText;
+
+        // Refresh the calculated edit summary after reprocessing.
+        UpdateCalculatedEditSummary();
     }
 
     /// <summary>
@@ -1025,9 +1028,16 @@ public partial class WorkspaceViewModel : ObservableObject
 
         try
         {
-            // Save exactly the summary displayed in the article editor,
+            // Preserve the summary displayed in the article editor,
             // including any manual changes made by the user.
             string finalSummary = Editor.CalculatedEditSummary;
+
+            // Verify that any existing section prefix still matches
+            // the actual changes in the article before saving.
+            finalSummary = Summary.CorrectSectionEditSummary(
+                finalSummary,
+                savingArticle.OriginalArticleText,
+                articleText);
 
             SaveInfo saveInfo = await Session.Editor.SaveArticleAsync(
                 articleText,

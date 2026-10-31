@@ -179,9 +179,19 @@ public static class EditSummaryBuilder
         {
             string section = modifiedSections[0];
 
-            return section == "top"
-                ? summary
-                : $"/* {section} */ {summary}".TrimEnd();
+            // Changes to the article introduction do not require a section prefix.
+            if (section == "top")
+            {
+                return summary;
+            }
+
+            // Avoid adding a second section prefix when one already exists.
+            if (summary.StartsWith("/*", StringComparison.Ordinal))
+            {
+                return summary;
+            }
+
+            return $"/* {section} */ {summary}".TrimEnd();
         }
 
         string description;
