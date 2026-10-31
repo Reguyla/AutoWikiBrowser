@@ -143,10 +143,10 @@ public static class ArticleSectionComparer
         ArgumentNullException.ThrowIfNull(modifiedText);
 
         ArticleStructure before =
-            ArticleStructureAnalyzer.Analyze(originalText, options);
+            AnalyzeForComparison(originalText, options);
 
         ArticleStructure after =
-            ArticleStructureAnalyzer.Analyze(modifiedText, options);
+            AnalyzeForComparison(modifiedText, options);
 
         ArticleSection[] sectionsBefore =
             before.AllSections.ToArray();

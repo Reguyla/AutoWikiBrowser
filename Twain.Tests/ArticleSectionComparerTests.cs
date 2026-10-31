@@ -516,4 +516,45 @@ public class ArticleSectionComparerTests
             Is.Empty,
             "Correcting malformed category markup must not modify References.");
     }
+
+    [Test]
+    public void GetModifiedSectionByPosition_MalformedCategoryFixed_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "{{Refbegin}}\r\n" +
+            "* Example reference.\r\n" +
+            "{{Refend}}\r\n" +
+            "\r\n" +
+            "{{Wikipedia|John Wilson Danenhower}}\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Danenhower, John Wilson}}\r\n" +
+            "[[Category:American polar explorers]]\r\n" +
+            "[[Category:Graduates of the United States Naval Academy Class of 1870]\r\n" +
+            "[[Category:People from Annapolis, Maryland]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "{{Refbegin}}\r\n" +
+            "* Example reference.\r\n" +
+            "{{Refend}}\r\n" +
+            "\r\n" +
+            "{{Wikipedia|John Wilson Danenhower}}\r\n" +
+            "\r\n" +
+            "{{DEFAULTSORT:Danenhower, John Wilson}}\r\n" +
+            "[[Category:American polar explorers]]\r\n" +
+            "[[Category:Graduates of the United States Naval Academy Class of 1870]]\r\n" +
+            "[[Category:People from Annapolis, Maryland]]";
+
+        string result =
+            ArticleSectionComparer.GetModifiedSectionByPosition(
+                original,
+                modified);
+
+        Assert.That(
+            result,
+            Is.Empty,
+            "Correcting malformed category markup must not be reported " +
+            "as a modification to the References section.");
+    }
 }
