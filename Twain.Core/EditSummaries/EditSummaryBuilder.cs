@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.EditSummaries;
+﻿using Twain.Core.ArticleAnalysis;
+
+namespace Twain.Core.EditSummaries;
 
 /// <summary>
 /// Builds an article edit summary from the configured summary,
@@ -153,11 +155,13 @@ public static class EditSummaryBuilder
     }
 
     /// <summary>
-    /// Adds a description of the modified article sections to an edit summary.
+    /// Adds descriptions of modified article sections and categories
+    /// to an edit summary.
     /// </summary>
     /// <remarks>
     /// A single modified section uses the traditional MediaWiki section prefix.
     /// Multiple modified sections use a descriptive summary instead.
+    /// Category changes are reported separately from article sections.
     /// </remarks>
     private static string AddModifiedSections(
         string summary,
@@ -169,9 +173,15 @@ public static class EditSummaryBuilder
                 originalArticleText,
                 currentArticleText);
 
+        bool categoriesChanged = HaveCategoriesChanged(
+            originalArticleText,
+            currentArticleText);
+
         if (modifiedSections.Count == 0)
         {
-            return summary;
+            return categoriesChanged
+                ? PrependDescription("Updated categories", summary)
+                : summary;
         }
 
         // Preserve the traditional MediaWiki section prefix.
@@ -179,16 +189,24 @@ public static class EditSummaryBuilder
         {
             string section = modifiedSections[0];
 
-            // Changes to the article introduction do not require a section prefix.
             if (section == "top")
+            {
+                return categoriesChanged
+                    ? PrependDescription("Updated categories", summary)
+                    : summary;
+            }
+
+            // Avoid adding a second section prefix.
+            if (summary.StartsWith("/*", StringComparison.Ordinal))
             {
                 return summary;
             }
 
-            // Avoid adding a second section prefix when one already exists.
-            if (summary.StartsWith("/*", StringComparison.Ordinal))
+            if (categoriesChanged)
             {
-                return summary;
+                return PrependDescription(
+                    $"Updated {section} section and categories",
+                    summary);
             }
 
             return $"/* {section} */ {summary}".TrimEnd();
@@ -206,6 +224,52 @@ public static class EditSummaryBuilder
             description = "Updated multiple sections";
         }
 
+        if (categoriesChanged)
+        {
+            description += " and categories";
+        }
+
+        return PrependDescription(description, summary);
+    }
+
+    /// <summary>
+    /// Determines whether the article's recognized category declarations
+    /// changed between the original and current versions.
+    /// </summary>
+    private static bool HaveCategoriesChanged(
+        string originalArticleText,
+        string currentArticleText)
+    {
+        ArticleStructure original =
+            ArticleStructureAnalyzer.Analyze(originalArticleText);
+
+        ArticleStructure current =
+            ArticleStructureAnalyzer.Analyze(currentArticleText);
+
+        string[] originalCategories = original.TrailingMetadata
+            .Where(metadata => metadata.Type == ArticleMetadataType.Category)
+            .Select(metadata => metadata.Text)
+            .OrderBy(text => text, StringComparer.Ordinal)
+            .ToArray();
+
+        string[] currentCategories = current.TrailingMetadata
+            .Where(metadata => metadata.Type == ArticleMetadataType.Category)
+            .Select(metadata => metadata.Text)
+            .OrderBy(text => text, StringComparer.Ordinal)
+            .ToArray();
+
+        return !originalCategories.SequenceEqual(
+            currentCategories,
+            StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// Prepends a descriptive change summary to the configured summary.
+    /// </summary>
+    private static string PrependDescription(
+        string description,
+        string summary)
+    {
         return string.IsNullOrWhiteSpace(summary)
             ? description
             : $"{description}; {summary}";

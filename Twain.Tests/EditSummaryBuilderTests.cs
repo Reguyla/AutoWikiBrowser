@@ -217,4 +217,80 @@ public class EditSummaryBuilderTests
             result.TrimStart(),
             Is.EqualTo("General cleanup"));
     }
+
+    [Test]
+    public void Build_CategoryOnlyChange_AddsCategoryDescription()
+    {
+        const string originalText =
+            "== References ==\n" +
+            "Reference content.\n" +
+            "[[Category:Military history]]";
+
+        const string modifiedText =
+            "== References ==\n" +
+            "Reference content.\n" +
+            "[[Category:Military personnel]]";
+
+        string result = EditSummaryBuilder.Build(
+            "General cleanup",
+            string.Empty,
+            originalText,
+            modifiedText,
+            includeSectionSummary: true);
+
+        Assert.That(
+            result,
+            Is.EqualTo("Updated categories; General cleanup"));
+    }
+
+    [Test]
+    public void Build_SectionAndCategoryChange_ReportsBoth()
+    {
+        const string originalText =
+            "== History ==\n" +
+            "Original history.\n" +
+            "[[Category:Military history]]";
+
+        const string modifiedText =
+            "== History ==\n" +
+            "Updated history.\n" +
+            "[[Category:Military personnel]]";
+
+        string result = EditSummaryBuilder.Build(
+            "General cleanup",
+            string.Empty,
+            originalText,
+            modifiedText,
+            includeSectionSummary: true);
+
+        Assert.That(
+            result,
+            Is.EqualTo(
+                "Updated History section and categories; General cleanup"));
+    }
+
+    [Test]
+    public void Build_CategoryReordering_DoesNotAddCategoryDescription()
+    {
+        const string originalText =
+            "Article content.\n" +
+            "[[Category:Military history]]\n" +
+            "[[Category:Military personnel]]";
+
+        const string modifiedText =
+            "Article content.\n" +
+            "[[Category:Military personnel]]\n" +
+            "[[Category:Military history]]";
+
+        string result = EditSummaryBuilder.Build(
+            "General cleanup",
+            string.Empty,
+            originalText,
+            modifiedText,
+            includeSectionSummary: true);
+
+        Assert.That(
+            result,
+            Is.EqualTo("General cleanup"));
+    }
 }
