@@ -130,9 +130,15 @@ public static class Summary
                 return Array.Empty<string>();
             }
 
+            string originalContent =
+                RemoveCategoryLinks(originalSection);
+
+            string updatedContent =
+                RemoveCategoryLinks(section);
+
             if (!string.Equals(
-                originalSection,
-                section,
+                originalContent,
+                updatedContent,
                 StringComparison.Ordinal))
             {
                 modifiedSections.Add(heading);
@@ -141,6 +147,30 @@ public static class Summary
 
         return modifiedSections;
     }
+
+    /// <summary>
+    /// Removes category links from section text so that category-only
+    /// changes do not count as modifications to article sections.
+    /// </summary>
+    /// <remarks>
+    /// Category links represent page-level metadata rather than
+    /// content belonging to the preceding article section.
+    /// </remarks>
+    private static string RemoveCategoryLinks(string sectionText)
+    {
+        string normalized = CategoryLinkRegex.Replace(
+            sectionText,
+            string.Empty);
+
+        return normalized.TrimEnd();
+    }
+
+    /// <summary>
+    /// Matches standard MediaWiki category links, including optional sort keys.
+    /// </summary>
+    private static readonly Regex CategoryLinkRegex = new(
+        @"\[\[\s*Category\s*:[^\[\]\r\n]*\]\]",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Matches trailing whitespace followed by a single wikilink at the end of

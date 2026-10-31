@@ -1388,12 +1388,37 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
-        Editor.CalculatedEditSummary = EditSummaryBuilder.Build(
+        string originalText = CurrentArticle.OriginalArticleText;
+        string currentText = Editor.Document.CurrentText;
+
+        IReadOnlyList<string> modifiedSections =
+            Summary.GetModifiedSections(originalText, currentText);
+
+        string calculatedSummary = EditSummaryBuilder.Build(
             Options.EditSummary,
             CurrentArticle.EditSummary,
-            CurrentArticle.OriginalArticleText,
-            Editor.Document.CurrentText,
+            originalText,
+            currentText,
             !Preferences.General.noSectionEditSummary);
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[EditSummary] Modified sections: " +
+            $"{string.Join(", ", modifiedSections)}");
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[EditSummary] Configured summary: {Options.EditSummary}");
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[EditSummary] Article summary: {CurrentArticle.EditSummary}");
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[EditSummary] Calculated summary: {calculatedSummary}");
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[EditSummary] Original length: {originalText.Length}; " +
+            $"Current length: {currentText.Length}");
+
+        Editor.CalculatedEditSummary = calculatedSummary;
     }
 
     private void Editor_OpenComplete(

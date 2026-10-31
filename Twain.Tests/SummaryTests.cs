@@ -196,7 +196,7 @@ public class SummaryTests : RequiresInitialization
         Assert.That(
             result,
             Is.EqualTo(
-                "Updated History and References; General cleanup, Fixed references"));
+                "Updated History and References sections; General cleanup, Fixed references"));
     }
 
     [Test]
@@ -363,7 +363,7 @@ public class SummaryTests : RequiresInitialization
         Assert.That(
             result.Text,
             Is.EqualTo(
-                "Updated History and References; General cleanup"));
+                "Updated History and References sections; General cleanup"));
     }
 
     [Test]
@@ -394,5 +394,90 @@ public class SummaryTests : RequiresInitialization
         Assert.That(
             result.Text,
             Is.EqualTo("General cleanup"));
+    }
+
+    [Test]
+    public void EditSummaryBuilder_LeadAndNamedSection_UsesSectionDescription()
+    {
+        const string original =
+            "Original introduction\r\n" +
+            "== Engagement ==\r\nOriginal engagement text\r\n" +
+            "== References ==\r\nOriginal references";
+
+        const string modified =
+            "Updated introduction\r\n" +
+            "== Engagement ==\r\nUpdated engagement text\r\n" +
+            "== References ==\r\nOriginal references";
+
+        string result = EditSummaryBuilder.Build(
+            "General cleanup",
+            string.Empty,
+            original,
+            modified,
+            true);
+
+        Assert.That(
+            result,
+            Is.EqualTo(
+                "Updated top and Engagement sections; General cleanup"));
+    }
+
+    [Test]
+    public void GetModifiedSections_CategoryOnlyChanges_DoesNotModifyReferences()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "{{reflist}}\r\n" +
+            "[[Category:American explorers]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "{{reflist}}\r\n" +
+            "[[Category:United States Navy officers]]";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_SectionAndCategoryChanges_ReportsOnlySection()
+    {
+        const string original =
+            "== Biography ==\r\n" +
+            "Original biography\r\n" +
+            "== References ==\r\n" +
+            "{{reflist}}\r\n" +
+            "[[Category:American explorers]]";
+
+        const string modified =
+            "== Biography ==\r\n" +
+            "Updated biography\r\n" +
+            "== References ==\r\n" +
+            "{{reflist}}\r\n" +
+            "[[Category:United States Navy officers]]";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.EqualTo(new[] { "Biography" }));
+    }
+
+    [Test]
+    public void GetModifiedSections_AddedCategory_DoesNotModifyReferences()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "{{reflist}}\r\n" +
+            "[[Category:American explorers]]";
+
+        const string modified =
+            "== References ==\r\n" +
+            "{{reflist}}\r\n" +
+            "[[Category:American explorers]]\r\n" +
+            "[[Category:United States Navy officers]]";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.Empty);
     }
 }

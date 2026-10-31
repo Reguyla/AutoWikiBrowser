@@ -1373,22 +1373,62 @@ public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates 
     }
 
     /// <summary>
-    /// Fix spelling mistakes
+    /// Applies regex-based typo corrections and records any resulting
+    /// edit-summary contribution.
     /// </summary>
-    /// <param name="regexTypos">A RegExTypoFix object</param>
-    /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
-    public void PerformTypoFixes(RegExTypoFix regexTypos, bool skipIfNoChange)
+    /// <param name="regexTypos">
+    /// The typo correction processor.
+    /// </param>
+    /// <param name="skipIfNoChange">
+    /// Whether to skip the article when no typo corrections are made.
+    /// </param>
+    public void PerformTypoFixes(
+        RegExTypoFix regexTypos,
+        bool skipIfNoChange)
     {
-        string tmpEditSummary;
-        bool noChange;
-        string strTemp = regexTypos.PerformTypoFixes(mArticleText, out noChange, out tmpEditSummary, Name);
+        ArgumentNullException.ThrowIfNull(regexTypos);
+
+        string originalText = mArticleText;
+
+        string updatedText = regexTypos.PerformTypoFixes(
+            originalText,
+            out bool noChange,
+            out string tmpEditSummary,
+            Name);
 
         if (noChange && skipIfNoChange)
-            Trace.AWBSkipped("No typo fixes");
-        else if (!noChange)
         {
-            AWBChangeArticleText(tmpEditSummary, strTemp, false);
-            AppendToSummary(tmpEditSummary);
+            Trace.AWBSkipped("No typo fixes");
+            return;
+        }
+
+        if (noChange)
+        {
+            return;
+        }
+
+        AWBChangeArticleText(
+            tmpEditSummary,
+            updatedText,
+            false);
+
+        // Preserve the existing legacy edit-summary behavior.
+        AppendToSummary(tmpEditSummary);
+
+        // Only record a structured contribution when the article text
+        // actually changed and a description was supplied.
+        if (!string.Equals(
+                originalText,
+                updatedText,
+                StringComparison.Ordinal)
+            && !string.IsNullOrWhiteSpace(tmpEditSummary))
+        {
+            EditSummaryCollector.Add(
+                new EditSummaryContribution
+                {
+                    Category = EditSummaryCategory.TypoCorrections,
+                    Description = tmpEditSummary.Trim()
+                });
         }
     }
 

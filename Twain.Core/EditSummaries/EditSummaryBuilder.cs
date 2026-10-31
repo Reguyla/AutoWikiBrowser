@@ -189,7 +189,7 @@ public static class EditSummaryBuilder
         if (modifiedSections.Count == 2)
         {
             description =
-                $"Updated {modifiedSections[0]} and {modifiedSections[1]}";
+                $"Updated {modifiedSections[0]} and {modifiedSections[1]} sections";
         }
         else
         {
