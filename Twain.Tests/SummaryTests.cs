@@ -610,4 +610,63 @@ public class SummaryTests : RequiresInitialization
             result,
             Is.EqualTo("/* References */ Updated references"));
     }
+
+    [Test]
+    public void GetModifiedSections_DefaultSortOnlyChange_ReturnsEmpty()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Jones, John}}";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.Empty);
+    }
+
+    [Test]
+    public void GetModifiedSections_DefaultSortAndContentChange_ReturnsSection()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Updated reference.\r\n" +
+            "{{DEFAULTSORT:Jones, John}}";
+
+        Assert.That(
+            Summary.GetModifiedSections(original, modified),
+            Is.EqualTo(new[] { "References" }));
+    }
+
+    [Test]
+    public void AddSectionEditSummary_DefaultSortOnlyChange_DoesNotAddPrefix()
+    {
+        const string original =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Smith, John}}";
+
+        const string modified =
+            "== References ==\r\n" +
+            "* Example reference.\r\n" +
+            "{{DEFAULTSORT:Jones, John}}";
+
+        string result = Summary.AddSectionEditSummary(
+            "Updated default sort",
+            original,
+            modified);
+
+        Assert.That(
+            result,
+            Is.EqualTo("Updated default sort"));
+    }
 }

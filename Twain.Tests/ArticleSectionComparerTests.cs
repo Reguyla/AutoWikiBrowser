@@ -319,4 +319,27 @@ public class ArticleSectionComparerTests
 
         Assert.That(result, Is.Empty);
     }
+
+    [Test]
+    public void GetModifiedSections_ReorderedSectionsWithLeadingWhitespace_ReturnsEmpty()
+    {
+        const string original =
+            "== History ==\r\n" +
+            "History content.\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        const string modified =
+            "\r\n" +
+            "== References ==\r\n" +
+            "Reference content.\r\n" +
+            "== History ==\r\n" +
+            "History content.";
+
+        var result = ArticleSectionComparer.GetModifiedSections(
+            original,
+            modified);
+
+        Assert.That(result, Is.Empty);
+    }
 }

@@ -47,7 +47,7 @@ public static class ArticleSectionComparer
 
             if (!beforeByHeading.TryAdd(
                     heading,
-                    section.LogicalContent))
+                    GetComparableContent(section)))
             {
                 return Array.Empty<string>();
             }
@@ -74,7 +74,7 @@ public static class ArticleSectionComparer
 
             if (!string.Equals(
                     originalContent,
-                    section.LogicalContent,
+                    GetComparableContent(section),
                     StringComparison.Ordinal))
             {
                 modifiedSections.Add(heading);
@@ -177,5 +177,25 @@ public static class ArticleSectionComparer
         return changedSection.IsLead
             ? "top"
             : changedSection.Title;
+    }
+
+    /// <summary>
+    /// Normalizes structural line breaks at section boundaries
+    /// without removing trailing spaces or tabs.
+    /// </summary>
+    private static string GetComparableContent(
+        ArticleSection section)
+    {
+        string content = section.LogicalContent;
+
+        // The lead may contain only whitespace preceding the first heading.
+        // This is structural separation rather than meaningful lead content.
+        if (section.IsLead && string.IsNullOrWhiteSpace(content))
+        {
+            return string.Empty;
+        }
+
+        // Normalize line endings at section boundaries.
+        return content.TrimEnd('\r', '\n');
     }
 }
