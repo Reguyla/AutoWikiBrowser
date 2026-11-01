@@ -648,43 +648,59 @@ public static class TalkPageFixes
     private static readonly Regex WikiProject = new Regex(@"^[Ww]iki ?[Pp]roject ");
 
     /// <summary>
-    /// Adds WikiProject banner shell when needed (>= 3 WikiProject templates and no WikiProject banner shell)
+    /// Adds WikiProject banner shell when needed (>= 3 WikiProject templates
+    /// and no WikiProject banner shell).
     /// </summary>
-    /// <param name="articletext">The talk page text</param>
-    /// <returns>The updated talk page text</returns>
+    /// <param name="articletext">The talk page text.</param>
+    /// <returns>The updated talk page text.</returns>
     private static string AddWikiProjectBannerShell(string articletext)
     {
-        int wikiProjectTemplates = 0;
-        string WPBS1 = "", articletextLocal = articletext;
+        if (WikiRegexes.WikiProjectBannerShellTemplate.IsMatch(articletext))
+            return articletext;
 
-        if (!WikiRegexes.WikiProjectBannerShellTemplate.IsMatch(articletextLocal))
+        var comments = WikiRegexes.Comments.Matches(articletext);
+
+        var wikiProjectMatches = WikiRegexes.NestedTemplates
+            .Matches(articletext)
+            .Cast<Match>()
+            .Where(m =>
+                WikiProject.IsMatch(Tools.GetTemplateName(m.Value)) &&
+                !comments.Cast<Match>().Any(comment =>
+                    m.Index < comment.Index + comment.Length &&
+                    m.Index + m.Length > comment.Index))
+            .ToList();
+
+        if (wikiProjectMatches.Count <= WikiProjectsWPBS)
+            return articletext;
+
+        // Preserve the original order of the WikiProject templates.
+        string WPBS1 = string.Concat(
+            wikiProjectMatches.Select(m => Tools.Newline(m.Value)));
+
+        // Remove templates in reverse order to preserve match positions.
+        string articletextLocal = articletext;
+
+        foreach (Match match in wikiProjectMatches.AsEnumerable().Reverse())
         {
-            foreach (Match m in WikiRegexes.NestedTemplates.Matches(articletextLocal))
-            {
-                if (!WikiProject.IsMatch(Tools.GetTemplateName(m.Value)))
-                    continue;
-
-                wikiProjectTemplates++;
-                WPBS1 += Tools.Newline(m.Value);
-                articletextLocal = articletextLocal.Replace(m.Value, string.Empty);
-            }
-
-            if (wikiProjectTemplates > WikiProjectsWPBS)
-            {
-                // add a WikiProject banner shell
-                articletext = @"{{WikiProject banner shell|1=" + WPBS1 + Tools.Newline(@"}}")
-                    + articletextLocal;
-
-                // clean up excess whitespace
-                string zerothSection = WikiRegexes.ZerothSection.Match(articletext).Value;
-                string restOfArticle = articletext.Replace(zerothSection, string.Empty);
-
-                zerothSection = WikiRegexes.ThreeOrMoreNewlines.Replace(zerothSection, "\r\n\r\n");
-
-                articletext = zerothSection + restOfArticle;
-            }
+            articletextLocal = articletextLocal.Remove(
+                match.Index,
+                match.Length);
         }
 
-        return articletext;
+        // Add a WikiProject banner shell.
+        articletext = @"{{WikiProject banner shell|1="
+            + WPBS1
+            + Tools.Newline(@"}}")
+            + articletextLocal;
+
+        // Clean up excess whitespace.
+        string zerothSection = WikiRegexes.ZerothSection.Match(articletext).Value;
+        string restOfArticle = articletext.Replace(zerothSection, string.Empty);
+
+        zerothSection = WikiRegexes.ThreeOrMoreNewlines.Replace(
+            zerothSection,
+            "\r\n\r\n");
+
+        return zerothSection + restOfArticle;
     }
 }

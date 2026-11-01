@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using Twain.Core;
-using Twain.Core.Parse;
 using Twain.Core.TalkPages;
 
 namespace Twain.Tests;
@@ -8,6 +7,15 @@ namespace Twain.Tests;
 [TestFixture]
 public class WikiProjectTests : RequiresInitialization
 {
+    private string ArticleText = string.Empty;
+
+    private void TalkGenFixes()
+    {
+        TalkPageFixes.ProcessTalkPage(
+            ref ArticleText,
+            DEFAULTSORT.NoChange);
+    }
+
     [Test]
     public void WikiProjectBannerShellRedirects()
     {
@@ -265,5 +273,508 @@ public class WikiProjectTests : RequiresInitialization
         Assert.That(TalkPageFixes.WPBiography(c + @"{{blp}}"), Is.EqualTo(c + @"{{blp}}"), "no change when not living");
 
         Assert.That(TalkPageFixes.WPBiography(a + @"{{blp}}"), Is.EqualTo(a), "blp template removed when living=y");
+    }
+
+    [Test]
+    public void MoveBannersAndSpacing()
+    {
+        string articleText = @"==Untitled==" + "\r\n" + @"some text";
+        string articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with header");
+
+        articleText = @"{{afd-merged-from|George Piggins Medal|George Piggins Medal|10 June 2012}}
+
+{{User:WildBot/m04|sect={{User:WildBot/m03|1|History of rugby league#Professional rugby begins in Australia|schism}}|m04}}
+{{ArticleHistory
+|action1=FAC
+
+|currentstatus=GA
+|topic=Everydaylife}}
+{{WikiProject banner shell|1=
+{{WikiProject Rugby league|class=GA|importance=High}}
+}}
+
+== older entries ==
+The";
+
+        articleText2 = @"{{ArticleHistory
+|action1=FAC
+
+|currentstatus=GA
+|topic=Everydaylife}}
+{{afd-merged-from|George Piggins Medal|George Piggins Medal|10 June 2012}}
+{{WikiProject banner shell|1=
+{{WikiProject Rugby league|class=GA|importance=High}}
+}}
+
+{{User:WildBot/m04|sect={{User:WildBot/m03|1|History of rugby league#Professional rugby begins in Australia|schism}}|m04}}
+
+== older entries ==
+The";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "unknown templates get below known ones");
+
+        articleText = @"{{Talk header}}
+{{WikiProject banner shell|1=
+{{WikiProject Architecture|class=Start |importance=Low }}
+{{WikiProject Virginia|class=Start |importance=Low }}
+{{WikiProject National Register of Historic Places|class=start|importance=low}}
+{{Image requested|in=Virginia}}
+}}";
+        articleText2 = @"{{Talk header}}
+{{WikiProject banner shell|1=
+{{WikiProject Architecture|class=Start |importance=Low }}
+{{WikiProject Virginia|class=Start |importance=Low }}
+{{WikiProject National Register of Historic Places|class=start|importance=low}}
+}}
+{{Image requested|in=Virginia}}
+";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "image requested is moved away from WPBS; at some point we could fix the whitespace inside WPBS");
+
+        articleText = @"{{Talk header|search=yes}}
+
+==Random header==
+Some text";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with talk header");
+
+        articleText = @"{{Not a forum}}
+
+==Random header==
+Some text";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with not a forum");
+
+        articleText = @"{{Random template}}
+
+==Random header==
+Some text";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with a random template");
+
+        articleText = @"{{Random template}}
+{{Yet another random template}}
+
+==Random header==
+Some text";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with two random templates");
+
+        articleText = @"{{Skip to talk}}
+{{Talk header}}
+{{Random template}}
+
+==Random header==
+Some text";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with two skt, th and a random template");
+
+        articleText = @"{{Skip to talk}}
+{{Not a forum}}
+{{Random template}}
+
+==Random header==
+Some text";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with skt, naf and a random template");
+
+        articleText = @"{{Not a forum}}
+{{Skip to talk}}
+{{Random template}}
+
+==Random header==
+Some text";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "moves skip to talk on the top 1");
+
+        articleText = @"{{Talk header}}
+{{Skip to talk}}
+{{Random template}}
+
+==Random header==
+Some text";
+        articleText2 = @"{{Skip to talk}}
+{{Talk header}}
+{{Random template}}
+
+==Random header==
+Some text";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "moves skip to talk on the top 2");
+
+        articleText = @"{{Talk header}}
+{{WikiProject banner shell|1=
+{{WikiProject Iraq|class=C|importance=mid}}
+{{WikiProject Crime|class=C|importance=low}}
+{{WikiProject Terrorism|class=C|importance=low}}
+}}
+{{image requested}}
+
+== Reliable sources ==";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "No change, heading whitespace not affected");
+    }
+
+    [Test]
+    public void MoveTalkHeader()
+    {
+        string talkheader = @"{{talk header|noarchive=no|search=no|arpol=no|wp=no|disclaimer=no|shortcut1|shortcut2}}", talkrest = @"==hello==
+hello talk";
+        string articleText = talkrest + "\r\n" + talkheader;
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+
+        Assert.That(articleText, Is.EqualTo(talkheader.Replace("{{talk", @"{{Talk") + "\r\n" + talkrest + "\r\n"), "move talk header");
+
+        // handles {{talk header}} on same line as other template
+        string WPBS = @"{{WikiProject banner shell|blp=yes|1=
+{{OH-Project|class=B|importance=Low|nested=yes}}
+{{WPBiography|living=yes|class=B|priority=Low|filmbio-work-group=yes|nested=yes|listas=Parker, Sarah Jessica}}
+{{WikiProject Cincinnati|class=B|importance=mid|nested=yes}}
+}}", rest = "\r\n\r\n" + @"==Song Jessie by Joshua Kadison==
+In the article it says that above mentioned";
+        articleText = WPBS + @"{{Talkheader}}" + rest;
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+
+        Assert.That(articleText, Is.EqualTo(@"{{Talk header}}" + "\r\n" + WPBS + rest), "talk header on same line as other template");
+
+        // no change if already at top
+        articleText = talkheader + "\r\n" + talkrest;
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(talkheader + "\r\n" + talkrest), "talk header already on top");
+
+        // no change if no talk header
+        articleText = talkrest;
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(talkrest), "no talk header");
+
+        talkheader = @"{{Talk header}}";
+        talkrest = @"==hello==
+hello talk";
+        articleText = talkrest + "\r\n" + talkheader + "\r\n{{GA nominee}}";
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+
+        Assert.That(articleText, Is.EqualTo("{{GA nominee}}\r\n" + talkheader + "\r\n" + talkrest + "\r\n"), "GA nominee involved");
+    }
+
+    [Test]
+    public void AddWikiProjectBannerShellThroughTalkGenFixes()
+    {
+        const string AllCommented = @"<!-- {{WikiProject a|text}}
+{{WikiProject b|text}}
+{{WikiProject c|text}
+{{WikiProject d|text}} -->";
+
+        ArticleText = AllCommented;
+        TalkGenFixes();
+
+        TestContext.WriteLine("Expected:");
+        TestContext.WriteLine(AllCommented);
+
+        TestContext.WriteLine("Actual:");
+        TestContext.WriteLine(ArticleText);
+
+        Assert.That(ArticleText, Is.EqualTo(AllCommented),
+            "no WikiProject banner shell addition when templates all commented out");
+
+        string a = @"{{Talk header}}
+{{WikiProject banner shell|1=
+{{WikiProject a |text}}
+{{WikiProject b|text}}
+{{WikiProject Biography|living=yes}}
+{{WikiProject c|text}}
+| blp=yes
+}}
+";
+
+        ArticleText = @"{{Talk header}}
+{{WikiProject a |text}}
+{{WikiProject b|text}}
+{{WikiProject Biography|living=yes}}
+{{WikiProject c|text}}";
+
+        TalkGenFixes();
+        Assert.That(ArticleText, Is.EqualTo(a), "Adds WikiProject banner shell below talk header");
+
+        a = @"{{Talk header}}
+{{WikiProject banner shell|1=
+{{WikiProject a |text}}
+{{WikiProject d|text}}
+{{WikiProject c|text}}
+}}
+";
+
+        ArticleText = @"{{Talk header}}
+{{WikiProject a |text}}
+{{WikiProject d|text}}
+{{WikiProject c|text}}";
+
+        TalkGenFixes();
+        Assert.That(ArticleText, Is.EqualTo(a), "Adds WikiProject banner shell when 3 wikiproject links");
+
+        ArticleText = @"{{Talk header}}
+{{wikiProject a |text}}
+{{wikiProject d|text}}
+{{wiki project c|text}}";
+
+        TalkGenFixes();
+        Assert.That(ArticleText, Is.EqualTo(a.Replace("WikiProject c", "wiki project c").Replace("WikiProject a", "wikiProject a").Replace("WikiProject d", "wikiProject d")), "Adds WikiProject banner shell when 3 wikiProject links, wikiproject name variations");
+    }
+
+    [Test]
+    public void AddWikiProjectBannerShellWhitespace()
+    {
+        ArticleText = @"{{WikiProject Biography|living=yes}}
+{{WikiProject a |text}}
+{{WikiProject b|text}}
+{{WikiProject c|text}}";
+
+        string a = @"{{WikiProject banner shell|1=
+{{WikiProject Biography|living=yes}}
+{{WikiProject a |text}}
+{{WikiProject b|text}}
+{{WikiProject c|text}}
+| blp=yes
+}}
+";
+
+        TalkGenFixes();
+        Assert.That(ArticleText, Is.EqualTo(a), "Adds WikiProject banner shell when 3 wikiproject links, cleans whitespace");
+
+        ArticleText = @"{{WikiProject Biography|living=yes}}
+{{WikiProject a |text}}
+{{WikiProject b|text}}
+{{WikiProject c|text}}
+
+==First==
+Word.
+
+Second.";
+
+        a = @"{{WikiProject banner shell|1=
+{{WikiProject Biography|living=yes}}
+{{WikiProject a |text}}
+{{WikiProject b|text}}
+{{WikiProject c|text}}
+| blp=yes
+}}
+
+==First==
+Word.
+
+Second.";
+
+        TalkGenFixes();
+        Assert.That(ArticleText, Is.EqualTo(a), "Adds WikiProject banner shell when 3 wikiproject links, cleans whitespace");
+    }
+
+    [Test]
+    public void MoveBanners()
+    {
+        string a = @"{{Skip to talk}}", b = @"{{Talk header}}", c = @"{{GA nominee}}", d = @"{{Controversial}}", e = @"{{Not a forum}}", f = @"{{British English}}", g = @"{{FailedGA}}";
+        string correct = c + "\r\n" + a + "\r\n" + b + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + g + "\r\n";
+        string articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefg with newlines");
+
+        articleText = a + b + c + d + e + f + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefg");
+
+        articleText = b + a + c + d + e + f + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefg without newlines");
+
+        articleText = a + c + b + d + e + f + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "acbdefg");
+
+        articleText = a + b + c + e + d + f + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcedfg");
+
+        articleText = a + e + c + b + d + f + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "aecbdfg");
+
+        articleText = a + e + c + b + d + g + f;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "aecbdgf");
+
+        articleText = a + c + d + e + f + b + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "acdefbg");
+
+        articleText = f + a + c + b + d + e + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "facbdeg");
+
+        articleText = f + e + d + c + b + a + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "fedcbag");
+
+        string h = @"{{WikiProject banner shell|1={{WikiProject Greece|class=}}}}", i = @"{{Image requested}}", j = @"{{Connected contributor|John Doe}}";
+
+        correct = correct + h + "\r\n";
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefgh");
+
+        correct = correct + i + "\r\n";
+
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghi");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + i;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgi");
+
+        correct = correct + j + "\r\n";
+
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghij");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + j + "\r\n" + i;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgji");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + j + "\r\n" + i + "\r\n" + "\r\n" + "\r\n";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgji with newlines at the end");
+
+        articleText = b + "\r\n" + "\r\n" + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + j + "\r\n" + "\r\n" + "\r\n" + i + "\r\n" + "\r\n" + "\r\n";
+
+        string k = @"{{To do}}", m = @"{{Find sources notice}}", n = @"{{Split from|foo}}";
+
+        correct = correct + k + "\r\n";
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghijk");
+
+        string cop = correct + @"{{Copied}}" + "\r\n";
+        articleText = cop;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(cop), "Templates including {{Copied}}");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + k + "\r\n" + g + "\r\n" + j + "\r\n" + i + "\r\n" + h;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefkgjih");
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgji with newlines at the end and in the middle");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + k + "\r\n" + g + "\r\n" + j + "\r\n" + i + "\r\n" + h;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefkgjlih");
+
+        correct = correct + m + "\r\n" + n + "\r\n";
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghijklmn");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + k + "\r\n" + n + "\r\n" + g + "\r\n" + j + "\r\n" + m + "\r\n" + i + "\r\n" + h;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefkngjmlih");
+
+        articleText = @"{{some other template}}" + "\r\n" + @"==Untitled==" + "\r\n" + @"some text";
+        string articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if nothing is detected; starts with template");
+
+        articleText = @"{{GA|21:12, 11 May 2013 (UTC)|topic=Geography|page=1|oldid=554646767}}
+{{WikiProject banner shell|1=
+{{WikiProject Canada|geography=yes|class=Start|importance=Mid|bc=yes}}
+{{WikiProject Protected areas|class=Start|importance=Mid}}
+{{WikiProject Greece|class=Start}}
+}}
+{{DYK talk|17 April|2013|entry=... that Canada}}
+{{some random template}}";
+        articleText2 = @"{{GA|21:12, 11 May 2013 (UTC)|topic=Geography|page=1|oldid=554646767}}
+{{DYK talk|17 April|2013|entry=... that Canada}}
+{{WikiProject banner shell|1=
+{{WikiProject Canada|geography=yes|class=Start|importance=Mid|bc=yes}}
+{{WikiProject Protected areas|class=Start|importance=Mid}}
+{{WikiProject Greece|class=Start}}
+}}
+
+{{some random template}}";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "articleilestonene templates above wikiproject banners; contains WPBS");
+
+        articleText = @"{{GA|21:12, 11 May 2013 (UTC)|topic=Geography|page=1|oldid=554646767}}
+{{WikiProject Canada|geography=yes|class=Start|importance=Mid|bc=yes}}
+{{WikiProject Protected areas|class=Start|importance=Mid}}
+{{some random template}}";
+        articleText2 = articleText;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(articleText2), "no changes if everything is in place; contains 2 Wikiprojects");
+    }
+
+    [Test]
+    public void MoveBannersAndWikiProjects()
+    {
+        string a = @"{{Skip to talk}}", b = @"{{Talk header}}", c = @"{{GA nominee}}", d = @"{{Controversial}}", e = @"{{Not a forum}}", f = @"{{British English}}", g = @"{{FailedGA}}", h = @"{{WikiProject Greece|class=}}", i = @"{{Image requested}}", j = @"{{Connected contributor|John Doe}}";
+        string correct = c + "\r\n" + a + "\r\n" + b + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + g + "\r\n" + h + "\r\n" + i + "\r\n";
+        string articleText = correct;
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghi");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + i;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgi");
+
+        articleText = h + "\r\n" + c + "\r\n" + a + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + b + "\r\n" + g + "\r\n" + i;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "hcadefbgi");
+
+        articleText = d + "\r\n" + c + "\r\n" + a + "\r\n" + h + "\r\n" + f + "\r\n" + e + "\r\n" + b + "\r\n" + i + "\r\n" + g;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "dcahfebig");
+
+        correct = correct + j + "\r\n";
+
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghij");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + j + "\r\n" + i;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgji");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + j + "\r\n" + i + "\r\n" + "\r\n" + "\r\n";
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgji with newlines at the end");
+
+        articleText = b + "\r\n" + "\r\n" + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + h + "\r\n" + g + "\r\n" + j + "\r\n" + "\r\n" + "\r\n" + i + "\r\n" + "\r\n" + "\r\n";
+
+        string k = @"{{To do}}";
+
+        correct = correct + k + "\r\n";
+        articleText = correct;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "abcdefghijk");
+
+        articleText = b + "\r\n" + a + "\r\n" + c + "\r\n" + d + "\r\n" + e + "\r\n" + f + "\r\n" + k + "\r\n" + g + "\r\n" + j + "\r\n" + i + "\r\n" + h;
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefkgjih");
+
+        TalkPageFixes.ProcessTalkPage(ref articleText, DEFAULTSORT.NoChange);
+        Assert.That(articleText, Is.EqualTo(correct), "bacdefhgji with newlines at the end and in the middle");
     }
 }
