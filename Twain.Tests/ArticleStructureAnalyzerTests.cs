@@ -768,4 +768,36 @@ public class ArticleStructureAnalyzerTests
                 Is.EqualTo(result.TrailingMetadata[0].StartIndex));
         });
     }
+
+    [Test]
+    public void Analyze_HeadingBeyondSixEquals_DoesNotThrow()
+    {
+        const string articleText =
+            "== History ==\r\n" +
+            "Original history.\r\n" +
+            "\r\n" +
+            "======= Invalid heading =======\r\n" +
+            "Additional content.\r\n" +
+            "\r\n" +
+            "== References ==\r\n" +
+            "Reference content.";
+
+        ArticleStructure result = ArticleStructureAnalyzer.Analyze(articleText);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Sections, Has.Count.EqualTo(2));
+
+            Assert.That(result.Sections[0].Title, Is.EqualTo("History"));
+            Assert.That(result.Sections[1].Title, Is.EqualTo("References"));
+
+            Assert.That(
+                result.Sections[0].Content,
+                Does.Contain("======= Invalid heading ======="));
+
+            Assert.That(
+                result.Sections[0].Content,
+                Does.Contain("Additional content."));
+        });
+    }
 }

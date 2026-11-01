@@ -22,7 +22,16 @@ public static class ArticleStructureAnalyzer
 
         options ??= new ArticleAnalysisOptions();
 
-        MatchCollection headings = WikiRegexes.Headings.Matches(articleText);
+        List<Match> headings = WikiRegexes.Headings
+            .Matches(articleText)
+            .Cast<Match>()
+            .Where(match =>
+            {
+                int level = GetHeadingLevel(match.Value);
+
+                return level >= 1 && level <= 6;
+            })
+            .ToList();
 
         List<ArticleSection> sections = new();
 
