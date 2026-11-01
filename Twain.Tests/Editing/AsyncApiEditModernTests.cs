@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Twain.Core.API;
 
-namespace Twain.Tests;
+namespace Twain.Tests.Editing;
 
 /// <summary>
 /// Tests the task-based AsyncApiEditModern wrapper without network access.

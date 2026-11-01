@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Twain.Core.ArticleAnalysis;
 
-namespace Twain.Tests;
+namespace Twain.Tests.Articles;
 
 [TestFixture]
 public class ArticleSectionComparerTests

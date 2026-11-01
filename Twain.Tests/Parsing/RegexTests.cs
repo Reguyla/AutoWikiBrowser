@@ -3,7 +3,7 @@ using NUnit.Framework.Legacy;
 using System.Text.RegularExpressions;
 using Twain.Core;
 
-namespace Twain.Tests;
+namespace Twain.Tests.Parsing;
 
 /// <summary>
 /// This is the base class for every regex test. It contains helper functions that simplify checks.

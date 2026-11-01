@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Twain.Core.EditSummaries;
 
-namespace Twain.Tests;
+namespace Twain.Tests.Editing;
 
 [TestFixture]
 public class EditSummaryBuilderTests

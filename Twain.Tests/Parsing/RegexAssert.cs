@@ -27,7 +27,7 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Text.RegularExpressions;
 
-namespace Twain.Tests;
+namespace Twain.Tests.Parsing;
 
 public static class RegexAssert
 {

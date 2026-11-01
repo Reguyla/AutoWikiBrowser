@@ -2,6 +2,7 @@
 using NUnit.Framework.Legacy;
 using System.Text.RegularExpressions;
 using Twain.Core;
+using Twain.Tests.Parsing;
 
 namespace Twain.Tests;
 

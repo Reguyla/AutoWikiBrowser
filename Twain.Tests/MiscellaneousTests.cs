@@ -7,6 +7,7 @@ using Twain.Core.Parse;
 using Twain.Core.Processing;
 using Twain.Core.ReplaceSpecial;
 using Twain.Core.TalkPages;
+using Twain.Tests.Parsing;
 
 namespace Twain.Tests;
 
