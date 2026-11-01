@@ -276,6 +276,12 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private readonly SessionCounters _sessionCounters = new();
 
+    /// <summary>
+    /// The original Make List entry currently being processed.
+    /// This may differ from CurrentArticle when a redirect is resolved.
+    /// </summary>
+    private Article? _activeQueueArticle;
+
     private Article? _pendingSaveArticle;
 
     /// <summary>
@@ -671,6 +677,8 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
+        _activeQueueArticle = article;
+
         CurrentArticleName =
             article.Name;
 
@@ -831,27 +839,17 @@ public partial class WorkspaceViewModel : ObservableObject
 
             bool continueProcessing = Options.IsProcessing;
 
-            int currentIndex =
-                MakeList.Articles
-                    .Select(
-                        (article, index) =>
-                            new
-                            {
-                                article,
-                                index
-                            })
-                    .Where(
-                        item =>
-                            string.Equals(
-                                item.article.Name,
-                                CurrentArticle.Name,
-                                StringComparison.Ordinal))
-                    .Select(item => item.index)
-                    .DefaultIfEmpty(-1)
-                    .First();
+            // Preserve the original Make List entry, which may differ
+            // from CurrentArticle when MediaWiki resolves a redirect.
+            Article? queueArticle = _activeQueueArticle;
+
+            int currentIndex = queueArticle is null
+                ? -1
+                : MakeList.Articles.IndexOf(queueArticle);
 
             if (currentIndex < 0 ||
-                !MakeList.RemoveArticle(CurrentArticle.Name))
+                queueArticle is null ||
+                !MakeList.RemoveArticle(queueArticle.Name))
             {
                 _pendingSaveArticle = null;
                 _pendingSaveOperationId = 0;
@@ -867,6 +865,9 @@ public partial class WorkspaceViewModel : ObservableObject
             // The wiki confirmed the Save.
             _pendingSaveArticle = null;
             _pendingSaveOperationId = 0;
+
+            // The original queue entry has been removed.
+            _activeQueueArticle = null;
 
             _sessionCounters.NumberOfEdits++;
             OnPropertyChanged(nameof(TotalEdits));
@@ -1313,11 +1314,14 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         // Remove the completed article from Make List.
-        if (!MakeList.RemoveArticle(CurrentArticle.Name))
+        if (_activeQueueArticle is null ||
+            !MakeList.RemoveArticle(_activeQueueArticle.Name))
         {
             StopProcessing();
             return;
         }
+
+        _activeQueueArticle = null;
 
         // Update the appropriate session counter.
         if (wasSaved)
