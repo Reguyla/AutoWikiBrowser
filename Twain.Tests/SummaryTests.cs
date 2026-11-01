@@ -419,7 +419,7 @@ public class SummaryTests : RequiresInitialization
         Assert.That(
             result,
             Is.EqualTo(
-                "Updated top and Engagement sections; General cleanup"));
+                "Updated lead and Engagement sections; General cleanup"));
     }
 
     [Test]
