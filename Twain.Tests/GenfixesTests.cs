@@ -1021,4 +1021,15 @@ Second.";
         TalkGenFixes();
         Assert.That(ArticleText, Is.EqualTo(a), "Adds WikiProject banner shell when 3 wikiproject links, cleans whitespace");
     }
+
+    [Test]
+    public void CanDoGeneralFixes()
+    {
+        Article a = new Article("A", "ABC");
+        ClassicAssert.IsTrue(a.CanDoGeneralFixes);
+
+        ClassicAssert.IsFalse(a.CanDoTalkGeneralFixes);
+        a = new Article("Talk:A", "ABC");
+        ClassicAssert.IsTrue(a.CanDoTalkGeneralFixes);
+    }
 }

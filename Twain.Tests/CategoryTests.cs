@@ -26,6 +26,7 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Twain.Core;
 using Twain.Core.Parse;
+using Twain.Core.Processing;
 
 namespace Twain.Tests;
 
@@ -962,5 +963,31 @@ died 2002
         Assert.That(Parsers.FixCategories(@"[[[[Category:London]]]"), Is.EqualTo(@"[[Category:London]]"));
         Assert.That(Parsers.FixCategories(@"[[[[Category:London]]]]"), Is.EqualTo(@"[[Category:London]]"));
         Assert.That(Parsers.FixCategories(@"[[Category:London]]"), Is.EqualTo(@"[[Category:London]]"));
+    }
+
+    [Test]
+    public void Categorisation()
+    {
+        Article theArticle = new Article("Category:Hello", "Text [[Category:Foo]]");
+        Parsers p = new Parsers(500, true);
+
+        theArticle.Categorisation(
+            CategorisationOptions.ReCat,
+            p,
+            false,
+            "Foo",
+            "Foo2",
+            false);
+
+        Assert.That(theArticle.ArticleText, Is.EqualTo("Text [[Category:Foo2]]"), "Category rename operation");
+    }
+
+    [Test]
+    public void FixPeopleCategories()
+    {
+        Parsers p = new Parsers();
+        Article a = new Article("A", "ABC");
+        a.FixPeopleCategories(p, true);
+        Assert.That(a.ArticleText, Is.EqualTo("ABC"));
     }
 }

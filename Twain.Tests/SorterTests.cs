@@ -2594,4 +2594,12 @@ Andy
 {{distinguish|A}}";
         Assert.That(parser2.SortMetaData(x, "Test"), Is.EqualTo(x), "No sorting of zeroth section templates for redirects");
     }
+
+    [Test]
+    public void SetDefaultSort()
+    {
+        Article a = new Article("A", "ABC");
+        a.SetDefaultSort("en", true);
+        Assert.That(a.ArticleText, Is.EqualTo("ABC"));
+    }
 }
