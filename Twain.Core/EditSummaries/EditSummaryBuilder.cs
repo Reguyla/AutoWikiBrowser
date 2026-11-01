@@ -191,9 +191,11 @@ public static class EditSummaryBuilder
 
             if (section == "top")
             {
-                return categoriesChanged
-                    ? PrependDescription("Updated categories", summary)
-                    : summary;
+                string leadDescription = categoriesChanged
+                    ? "Updated lead section; Updated categories"
+                    : "Updated lead section";
+
+                return PrependDescription(leadDescription, summary);
             }
 
             // Preserve an existing section prefix while still reporting
@@ -219,8 +221,16 @@ public static class EditSummaryBuilder
 
         if (modifiedSections.Count == 2)
         {
+            string firstSection = modifiedSections[0] == "top"
+                ? "lead"
+                : modifiedSections[0];
+
+            string secondSection = modifiedSections[1] == "top"
+                ? "lead"
+                : modifiedSections[1];
+
             description =
-                $"Updated {modifiedSections[0]} and {modifiedSections[1]} sections";
+                $"Updated {firstSection} and {secondSection} sections";
         }
         else
         {

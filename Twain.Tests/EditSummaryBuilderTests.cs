@@ -327,4 +327,128 @@ public class EditSummaryBuilderTests
             Is.True,
             "The combined edit summary must pass existing validation.");
     }
+
+    [TestFixture]
+    public class LeadSectionEditSummaryTests
+    {
+        private const string GeneralSummary = "General summary";
+
+        [Test]
+        public void Build_LeadChanged_ReportsLeadSection()
+        {
+            const string original =
+                "Original introduction.\n\n" +
+                "== History ==\n" +
+                "History text.";
+
+            const string modified =
+                "Updated introduction.\n\n" +
+                "== History ==\n" +
+                "History text.";
+
+            string result = BuildSummary(original, modified);
+
+            Assert.That(
+                result,
+                Is.EqualTo("Updated lead section; General summary"));
+        }
+
+        [Test]
+        public void Build_LeadAndCategoriesChanged_ReportsBothSeparately()
+        {
+            const string original =
+                "Original introduction.\n\n" +
+                "== History ==\n" +
+                "History text.\n\n" +
+                "[[Category:Old category]]";
+
+            const string modified =
+                "Updated introduction.\n\n" +
+                "== History ==\n" +
+                "History text.\n\n" +
+                "[[Category:New category]]";
+
+            string result = BuildSummary(original, modified);
+
+            Assert.That(
+                result,
+                Is.EqualTo(
+                    "Updated lead section; Updated categories; General summary"));
+        }
+
+        [Test]
+        public void Build_CategoriesOnly_ReportsCategories()
+        {
+            const string original =
+                "Original introduction.\n\n" +
+                "== History ==\n" +
+                "History text.\n\n" +
+                "[[Category:Old category]]";
+
+            const string modified =
+                "Original introduction.\n\n" +
+                "== History ==\n" +
+                "History text.\n\n" +
+                "[[Category:New category]]";
+
+            string result = BuildSummary(original, modified);
+
+            Assert.That(
+                result,
+                Is.EqualTo("Updated categories; General summary"));
+        }
+    }
+
+        [Test]
+        public void Build_NamedSectionChanged_PreservesSectionPrefix()
+        {
+            const string original =
+                "Introduction.\n\n" +
+                "== History ==\n" +
+                "Original history.";
+
+            const string modified =
+                "Introduction.\n\n" +
+                "== History ==\n" +
+                "Updated history.";
+
+            string result = BuildSummary(original, modified);
+
+            Assert.That(
+                result,
+                Is.EqualTo("/* History */ General summary"));
+        }
+
+        [Test]
+        public void Build_LeadAndNamedSectionChanged_ReportsBoth()
+        {
+            const string original =
+                "Original introduction.\n\n" +
+                "== History ==\n" +
+                "Original history.";
+
+            const string modified =
+                "Updated introduction.\n\n" +
+                "== History ==\n" +
+                "Updated history.";
+
+            string result = BuildSummary(original, modified);
+
+            Assert.That(
+                result,
+                Is.EqualTo(
+                    "Updated lead and History sections; General summary"));
+        }
+
+    private static string BuildSummary(
+        string original,
+        string modified)
+    {
+        return EditSummaryBuilder.Build(
+            "General summary",
+            string.Empty,
+            original,
+            modified,
+            true);
+    }
 }
