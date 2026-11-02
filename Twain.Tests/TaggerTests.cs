@@ -48,7 +48,14 @@ public class TaggerTests : RequiresParser
     {
 #if DEBUG
         Variables.SetProjectLangCode("en");
+        WikiRegexes.MakeLangSpecificRegexes();
 #endif
+
+        Globals.UnitTestIntValue = 0;
+        Globals.UnitTestBoolValue = false;
+
+        noChange = false;
+        summary = string.Empty;
     }
 
     [Test]
