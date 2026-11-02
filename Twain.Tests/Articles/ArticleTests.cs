@@ -190,4 +190,87 @@ http://www.site.com
         Assert.That(a.DisplayTitle, Is.EqualTo(null));
     }
 
+    [Test]
+    public void NamespacelessName()
+    {
+        Assert.That(new Article("Foo").NamespacelessName, Is.EqualTo("Foo"));
+        Assert.That(new Article("Category:Foo").NamespacelessName, Is.EqualTo("Foo"));
+        Assert.That(new Article("Category:Category:Foo").NamespacelessName, Is.EqualTo("Category:Foo"));
+
+        // TODO: uncomment when Namespace.Determine() will support non-normalised names
+        // Assert.AreEqual("Foo", new Article("Category : Foo").NamespacelessName);
+
+        // this behaviour has changed in recent MW versions
+        // Assert.AreEqual("", new Article("Category:").NamespacelessName);
+        // Assert.AreEqual("", new Article("Category: ").NamespacelessName);
+    }
+
+    [Test]
+    public void ContainsComparers()
+    {
+        IArticleComparer containsComparer = ArticleComparerFactory.Create("foo\nbar",
+                                                                          false,
+                                                                          false,
+                                                                          false, // singleline
+                                                                          false); // multiline
+
+        IArticleComparer notContainsComparer = ArticleComparerFactory.Create("foo\nbar",
+                                                                             false,
+                                                                             false,
+                                                                             false, // singleline
+                                                                             false); // multiline
+
+        Article a = new Article("A", "Now foo\nbar");
+        ClassicAssert.IsTrue(notContainsComparer.Matches(a), "does not contain comparer");
+        ClassicAssert.IsTrue(containsComparer.Matches(a), "it contains comparer");
+
+        a = new Article("A", @"Now foo-bar");
+        ClassicAssert.IsFalse(notContainsComparer.Matches(a), "not contains is false");
+        ClassicAssert.IsFalse(containsComparer.Matches(a), "contains is false");
+    }
+
+    [Test]
+    public void Comparers()
+    {
+        Article a = new Article("A"), b = new Article("B"), z = new Article("Z"), one = new Article("1"), diacritic = new Article("Ș"),
+            dollar = new Article("$");
+
+        Assert.That(a.CompareTo(b), Is.EqualTo(-1), "A just before B");
+        Assert.That(a.CompareTo(a), Is.EqualTo(0), "equal");
+        Assert.That(b.CompareTo(a), Is.EqualTo(1), "B just after A");
+        Assert.That(one.CompareTo(a), Is.EqualTo(-16), "1 before A");
+        Assert.That(z.CompareTo(diacritic), Is.EqualTo(-446), "Diacritics later than Latin");
+        Assert.That(one.CompareTo(diacritic), Is.EqualTo(-487), "Diacritics later than numbers");
+        Assert.That(a.CompareTo(dollar), Is.EqualTo(29), "Keyboard characters before Latin");
+    }
+
+
+    [Test]
+    public void FixLinks()
+    {
+        Article a = new Article("a", @"A [[_B ]]");
+        a.FixLinks(false);
+        ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
+
+        a = new Article("a", @"A [[ B_]]");
+        a.FixLinks(true);
+        ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
+
+        a = new Article("a", @"A [[B]]");
+        a.FixLinks(true);
+        ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
+
+        a = new Article("a", @"A [[B]]");
+        a.FixLinks(false);
+        ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
+    }
+
+    [Test]
+    public void CiteTemplateDates()
+    {
+        Parsers Parser = new Parsers();
+        Article a = new Article("a", @"A [[B]]");
+        a.CiteTemplateDates(Parser, true);
+        ClassicAssert.IsTrue(a.ArticleText.Contains("[[B]]"));
+    }
 }
