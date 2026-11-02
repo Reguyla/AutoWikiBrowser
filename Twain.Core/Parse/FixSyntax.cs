@@ -914,16 +914,19 @@ public partial class Parsers
         {
             articleText = WikiRegexes.UrlTemplate.Replace(
                 articleText,
-                m => m.Value.Replace("[http](http://http://)", "http://"));
+                m => m.Value.Replace(
+                    "http://http://",
+                    "http://",
+                    StringComparison.OrdinalIgnoreCase));
         }
 
         if (badHttpLinks && !SyntaxRegexHTTPNumber.IsMatch(articleText))
         {
             articleText = MissingColonInHttpLink.Replace(articleText, "$1://$2");
             articleText = SingleTripleSlashInHttpLink.Replace(articleText, "$1://$2");
-            articleText = articleText.Replace("[http](https://http://)", "https://");
-            articleText = articleText.Replace("https:// www.", "[www](https://www)");
-            articleText = articleText.Replace("http:// www.", "[www](http://www)");
+            articleText = articleText.Replace("https://http://", "https://", StringComparison.OrdinalIgnoreCase);
+            articleText = articleText.Replace("https:// www.", "https://www.");
+            articleText = articleText.Replace("http:// www.", "http://www.");
             articleText = articleText.Replace("[http%3A//", "[http://");
             articleText = articleText.Replace("[https%3A//", "[https://");
         }
