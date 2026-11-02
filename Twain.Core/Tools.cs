@@ -1632,20 +1632,45 @@ public static class Tools
             RegexOptions.Multiline);
 
     /// <summary>
-    /// Turns an HTML list into a wiki style list using the input bullet style (with space)
+    /// Turns an HTML list into a wiki-style list using the specified bullet style.
+    /// Preserves blank lines between entries.
     /// </summary>
-    /// <param name="text">HTML text to convert to list</param>
-    /// <param name="bullet">List style to use (# or *)</param>
+    /// <param name="text">HTML text to convert to a list.</param>
+    /// <param name="bullet">List style to use (# or *).</param>
+    /// <returns>The converted wiki-style list.</returns>
     public static string HTMLListToWiki(string text, string bullet)
     {
-        text = text.Replace("\r\n\r\n", "\r\n");
-        text = Regex.Replace(text, "<br ?/?>", "", RegexOptions.IgnoreCase);
-        text = Regex.Replace(text, "</?(ol|ul|li)>", "", RegexOptions.IgnoreCase);
-        text = Regex.Replace(text, "^</?(ol|ul|li)>\r\n", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
-        text = Regex.Replace(text, @"^(\:|\*|#|\(? ?\d{1,3}\b ?\)|\d{1,3}\b\.?)", "", RegexOptions.Multiline);
+        // Remove HTML line breaks.
+        text = Regex.Replace(
+            text,
+            @"<br ?/?>",
+            "",
+            RegexOptions.IgnoreCase);
 
-        // add bullet to start of each line, but not empty lines or lines with just whitespace
-        return WholeLine.Replace(text, m => bullet + " " + m.Groups[1].Value.TrimStart());
+        // Remove HTML list tags.
+        text = Regex.Replace(
+            text,
+            @"</?(ol|ul|li)>",
+            "",
+            RegexOptions.IgnoreCase);
+
+        text = Regex.Replace(
+            text,
+            @"^</?(ol|ul|li)>\r\n",
+            "",
+            RegexOptions.Multiline | RegexOptions.IgnoreCase);
+
+        // Remove existing list markers and numbering.
+        text = Regex.Replace(
+            text,
+            @"^(:|\*|#|\(\s*\d{1,3}\s*\)|\d{1,3}[.)]|\d{1,3}(?!\d)\s+)",
+            "",
+            RegexOptions.Multiline);
+
+        // Add the requested bullet only to nonempty lines.
+        return WholeLine.Replace(
+            text,
+            m => bullet + " " + m.Groups[1].Value.TrimStart());
     }
 
     /// <summary>
