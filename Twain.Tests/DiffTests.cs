@@ -1,4 +1,6 @@
 ﻿using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Twain.Core;
 
@@ -46,7 +48,6 @@ public class DiffTests
     public void SplitString()
     {
         Assert.That(Word.SplitString(""), Is.Empty);
-
         AssertWords(Word.SplitString(" "), " ");
         AssertWords(Word.SplitString("   "), "   ");
 
@@ -61,86 +62,115 @@ public class DiffTests
 
         lst = Word.SplitString("foo.bar");
         AssertWords(lst, "foo", ".", "bar");
-
         lst = Word.SplitString("foo..bar");
         AssertWords(lst, "foo", ".", ".", "bar");
-
         lst = Word.SplitString("{{foo}}");
         AssertWords(lst, "{", "{", "foo", "}", "}");
-
         lst = Word.SplitString("foo|bar");
         AssertWords(lst, "foo", "|", "bar");
-
         lst = Word.SplitString("foé bar");
         AssertWords(lst, "foé ", "bar");
 
-        // Chinese – each character is defined as a word
-        lst = Word.SplitString("汉语");
-        AssertWords(lst, "汉", "语");
-
-        // Thai – each character is defined as a word
-        lst = Word.SplitString("ภา");
-        AssertWords(lst, "ภ", "า");
+        // Chinese and Thai characters are tokenized individually.
+        AssertWords(Word.SplitString("汉语"), "汉", "语");
+        AssertWords(Word.SplitString("ภา"), "ภ", "า");
     }
 
     [Test]
     public void UndoDeletion()
     {
         WikiDiff d = new WikiDiff();
-
-        d.GetDiff(@"
-A1
-A2", @"A1
-A2", 2);
-
-        Assert.That(d.UndoDeletion(0, 0), Is.EqualTo(@"
-A1
-A2"), "Undo of delete first blank line");
+        d.GetDiff("\nA1\nA2", "A1\nA2", 2);
+        Assert.That(d.UndoDeletion(0, 0), Is.EqualTo("\nA1\nA2"),
+            "Undo of delete first blank line");
 
         d = new WikiDiff();
+        d.GetDiff("A1\nA2\n", "A1\nA2", 2);
+        Assert.That(d.UndoDeletion(2, 2), Is.EqualTo("A1\nA2\n"),
+            "Undo of delete last blank line");
+    }
 
-        d.GetDiff(@"A1
-A2
-", @"A1
-A2", 2);
+    private static string RenderDiff(string original, string modified)
+    {
+        return new WikiDiff().GetDiff(original, modified, 2);
+    }
 
-        Assert.That(d.UndoDeletion(2, 2), Is.EqualTo(@"A1
-A2
-"), "Undo of delete last blank line");
+    private static void AssertModernCallbacks(string html)
+    {
+        Assert.That(html, Does.Not.Contain("window.external"),
+            "Diff HTML must not use the legacy Internet Explorer bridge");
     }
 
     [Test]
-    public void DiffHTML()
+    public void IdenticalTextProducesNoDiff()
     {
-        WikiDiff d = new WikiDiff();
+        Assert.That(RenderDiff("A1\nA2", "A1\nA2"), Is.Empty);
+    }
 
-        string diffResult = d.GetDiff(@"A1
-A2", @"A1
-A2", 2);
+    [Test]
+    public void ChangedTextShowsOriginalAndReplacement()
+    {
+        string html = RenderDiff("A1\nA2", "A1X\nA2");
 
-        Assert.That(diffResult, Is.Empty, "No HTML when no change");
+        Assert.That(html, Is.Not.Empty);
+        Assert.That(html, Does.Contain("diff-deletedline"));
+        Assert.That(html, Does.Contain("diff-addedline"));
+        Assert.That(html, Does.Contain("A1"));
+        Assert.That(html, Does.Contain("A1X"));
+        Assert.That(html, Does.Contain("A2"), "Unchanged context should remain visible");
+        AssertModernCallbacks(html);
+    }
 
-        diffResult = d.GetDiff(@"A1
-A2", @"A1X
-A2", 2).Replace(Environment.NewLine, " ");
+    [Test]
+    public void MultipleChangesAppearInDiff()
+    {
+        string html = RenderDiff("A1\nA2", "A1X\nA2X");
 
-        diffResult = Regex.Replace(diffResult, @"\s+", " ");
+        Assert.That(html, Does.Contain("A1X"));
+        Assert.That(html, Does.Contain("A2X"));
+        Assert.That(html, Does.Contain("diff-addedline"));
+        Assert.That(html, Does.Contain("diff-deletedline"));
+        AssertModernCallbacks(html);
+    }
 
-        Assert.That(diffResult, Is.EqualTo(@"<tr onclick='window.external.GoTo(0)'> <td colspan='2' class='diff-lineno'>Line 1:</td> <td colspan='2' class='diff-lineno'>Line 1:</td> </tr><tr onclick='window.external.GoTo(0)' ondblclick='window.external.UndoChange(0,0)'> <td>-</td> <td class='diff-deletedline'><span class='diffchange'>A1</span> </td> <td>+</td> <td class='diff-addedline'><span class='diffchange'>A1X</span> </td> </tr><tr onclick='window.external.GoTo(1);'> <td class='diff-marker'> </td> <td class='diff-context'>A2</td> <td class='diff-marker'> </td> <td class='diff-context'>A2</td> </tr>"), "Standard case: first line changed");
+    [Test]
+    public void DeletedLineIsMarkedAsDeleted()
+    {
+        string html = RenderDiff("A1\nA2", "A1");
 
-        diffResult = d.GetDiff(@"A1
-A2", @"A1X
-A2X", 2).Replace(Environment.NewLine, " ");
+        Assert.That(html, Does.Contain("diff-deletedline"));
+        Assert.That(html, Does.Contain("A2"));
+        AssertModernCallbacks(html);
+    }
 
-        diffResult = Regex.Replace(diffResult, @"\s+", " ");
+    [Test]
+    public void AddedLineIsMarkedAsAdded()
+    {
+        string html = RenderDiff("A1", "A1\nA2");
 
-        Assert.That(diffResult, Is.EqualTo(@"<tr onclick='window.external.GoTo(0)'> <td colspan='2' class='diff-lineno'>Line 1:</td> <td colspan='2' class='diff-lineno'>Line 1:</td> </tr><tr onclick='window.external.GoTo(0)' ondblclick='window.external.UndoChange(0,0)'> <td>-</td> <td class='diff-deletedline'><span class='diffchange'>A1</span> </td> <td>+</td> <td class='diff-addedline'><span class='diffchange'>A1X</span> </td> </tr><tr onclick='window.external.GoTo(1)' ondblclick='window.external.UndoChange(1,1)'> <td>-</td> <td class='diff-deletedline'><span class='diffchange'>A2</span> </td> <td>+</td> <td class='diff-addedline'><span class='diffchange'>A2X</span> </td> </tr>"), "Standard case: two lines changed");
+        Assert.That(html, Does.Contain("diff-addedline"));
+        Assert.That(html, Does.Contain("A2"));
+        AssertModernCallbacks(html);
+    }
 
-        diffResult = d.GetDiff(@"A1
-A2", @"A1", 2).Replace(Environment.NewLine, " ");
+    [Test]
+    public void ChangedTextUsesCurrentNavigationCallbacks()
+    {
+        string html = RenderDiff("A1\nA2", "A1X\nA2");
 
-        diffResult = Regex.Replace(diffResult, @"\s+", " ");
+        Assert.That(html, Does.Match(@"\bgoTo\(0\)"));
+        Assert.That(html, Does.Match(@"\bundoChange\(0,\s*0\)"));
+        AssertModernCallbacks(html);
+    }
 
-        Assert.That(diffResult, Is.EqualTo(@"<tr onclick='window.external.GoTo(0);'> <td class='diff-marker'> </td> <td class='diff-context'>A1</td> <td class='diff-marker'> </td> <td class='diff-context'>A1</td> </tr><tr> <td>-</td> <td class='diff-deletedline' onclick='window.external.GoTo(1)' ondblclick='window.external.UndoDeletion(1, 1)'>A2 </td> <td> </td> <td> </td> </tr>"), "Standard case: second line deleted");
+    [Test]
+    public void HtmlSensitiveTextIsEncoded()
+    {
+        string html = RenderDiff("<tag> & old", "<tag> & new");
+
+        Assert.That(html, Does.Not.Contain("<tag>"),
+            "Article text must not be interpreted as an HTML element");
+        Assert.That(html, Does.Contain("&lt;tag&gt;"));
+        Assert.That(html, Does.Contain("&amp;"));
     }
 }

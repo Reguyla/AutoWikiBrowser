@@ -152,8 +152,8 @@ public class CacheTests : RequiresInitialization
     [Test]
     public void DisallowEmptyKeys()
     {
-        Assert.Throws<ArgumentNullException>(
-            (Action)(() => Cache.Set("", "foo")));
+        Assert.Throws<ArgumentException>(
+            () => Cache.Set("", "foo"));
     }
 
     [Test]

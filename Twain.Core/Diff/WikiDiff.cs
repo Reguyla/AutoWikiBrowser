@@ -26,25 +26,33 @@ public class WikiDiff
 {
     private string[] LeftLines;
     private string[] RightLines;
+    private string _lineEnding = "\r\n";
     private Diff diff;
     private StringBuilder Result;
     private int ContextLines;
 
     /// <summary>
-    /// Renders diff
+    /// Renders diff.
     /// </summary>
-    /// <param name="leftText">Earlier version of the text</param>
-    /// <param name="rightText">Later version of the text</param>
-    /// <param name="contextLines">Number of unchanged lines to show around changed ones</param>
-    /// <returns>HTML diff</returns>
+    /// <param name="leftText">Earlier version of the text.</param>
+    /// <param name="rightText">Later version of the text.</param>
+    /// <param name="contextLines">Number of unchanged lines to show around changed ones.</param>
+    /// <returns>HTML diff.</returns>
     public string GetDiff(string leftText, string rightText, int contextLines)
     {
         Result = new StringBuilder(500000);
-        LeftLines = leftText.Split(new[] { "\r\n" }, StringSplitOptions.None);
-        RightLines = rightText.Split(new[] { "\r\n" }, StringSplitOptions.None);
+
+        // Preserve the current article's line-ending convention for undo operations.
+        _lineEnding = DetectLineEnding(rightText, leftText);
+
+        // Support Windows, Linux, and macOS line endings.
+        LeftLines = Regex.Split(leftText, @"\r\n|\n|\r");
+        RightLines = Regex.Split(rightText, @"\r\n|\n|\r");
+
         ContextLines = contextLines;
 
         diff = new Diff(LeftLines, RightLines, true, true);
+
         foreach (Diff.Hunk h in diff)
         {
             if (h.Same)
@@ -56,7 +64,27 @@ public class WikiDiff
                 RenderDifference(h);
             }
         }
+
         return Result.ToString();
+    }
+
+    private static string DetectLineEnding(string preferredText, string fallbackText)
+    {
+        static string? FindLineEnding(string text)
+        {
+            int index = text.IndexOf('\n');
+
+            if (index >= 0)
+                return index > 0 && text[index - 1] == '\r'
+                    ? "\r\n"
+                    : "\n";
+
+            return text.Contains('\r') ? "\r" : null;
+        }
+
+        return FindLineEnding(preferredText)
+            ?? FindLineEnding(fallbackText)
+            ?? Environment.NewLine;
     }
 
     #region High-level diff stuff
@@ -152,7 +180,7 @@ public class WikiDiff
 
         if (Variables.RTL)
         {
-            Result.AppendFormat(@"<tr onclick=' goTo({1})'ondblclick='undoChange({0},{1})'>
+            Result.AppendFormat(@"<tr onclick='goTo({1})' ondblclick='undoChange({0},{1})'>
   <td>+</td>
   <td class='diff-addedline'>", rightLine, leftLine);
             Result.Append(right);
@@ -165,7 +193,7 @@ public class WikiDiff
         }
         else
         {
-            Result.AppendFormat(@"<tr onclick=' goTo({1})'ondblclick='undoChange({0},{1})'>
+            Result.AppendFormat(@"<tr onclick='goTo({1})' ondblclick='undoChange({0},{1})'>
   <td>-</td>
   <td class='diff-deletedline'>", leftLine, rightLine);
             Result.Append(left);
@@ -341,7 +369,7 @@ public class WikiDiff
     {
         RightLines[right] = LeftLines[left];
 
-        return string.Join("\r\n", RightLines);
+        return string.Join(_lineEnding, RightLines);
     }
 
     public string UndoAddition(int right)
@@ -349,14 +377,17 @@ public class WikiDiff
         StringBuilder s = new StringBuilder();
 
         for (int i = 0; i < RightLines.Length; i++)
+        {
             if (i != right)
             {
                 if (s.Length > 0)
                 {
-                    s.Append("\r\n");
+                    s.Append(_lineEnding);
                 }
+
                 s.Append(RightLines[i]);
             }
+        }
 
         return s.ToString();
     }
@@ -371,25 +402,30 @@ public class WikiDiff
             {
                 if (s.Length > 0)
                 {
-                    s.Append("\r\n");
+                    s.Append(_lineEnding);
                 }
+
                 s.Append(LeftLines[left]);
             }
-            // specifically handle case of deletion of first line being a blank line
-            if (s.Length > 0 || (i == 0 && i == left && string.IsNullOrEmpty(LeftLines[left])))
+
+            // Specifically handle deletion of the first blank line.
+            if (s.Length > 0 ||
+                (i == 0 && i == left && string.IsNullOrEmpty(LeftLines[left])))
             {
-                s.Append("\r\n");
+                s.Append(_lineEnding);
             }
+
             s.Append(RightLines[i]);
         }
 
-        // if have deletions at end then right will be >= RightLines.Length so append LeftLines[left]
+        // Handle deletions at the end of the article.
         if (left >= RightLines.Length || right >= RightLines.Length)
         {
             if (s.Length > 0)
             {
-                s.Append("\r\n");
+                s.Append(_lineEnding);
             }
+
             s.Append(LeftLines[left]);
         }
 
