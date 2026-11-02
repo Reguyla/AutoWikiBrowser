@@ -911,31 +911,105 @@ public partial class Parsers
     /// <returns>
     /// The article text after applicable whitespace normalization has been performed.
     /// </returns>
+    /// <summary>
+    /// Removes or normalizes excessive whitespace and blank lines in article text.
+    /// </summary>
+    /// <param name="articleText">The wiki text of the article.</param>
+    /// <param name="fixOptionalWhitespace">
+    /// Indicates whether optional cosmetic whitespace should be normalized.
+    /// </param>
+    /// <returns>The article text after whitespace normalization.</returns>
     public static string RemoveWhiteSpace(
         string articleText,
         bool fixOptionalWhitespace)
     {
-        //Remove <br /> if followed by double newline, NOT in blockquotes
-        if (BrTwoNewlines.IsMatch(articleText) && !WikiRegexes.Blockquote.IsMatch(articleText))
+        // Remove <br /> if followed by double newline, except in blockquotes.
+        if (BrTwoNewlines.IsMatch(articleText) &&
+            !WikiRegexes.Blockquote.IsMatch(articleText))
         {
             while (BrTwoNewlines.IsMatch(articleText))
-                articleText = BrTwoNewlines.Replace(articleText.Trim(), "\r\n\r\n");
+            {
+                articleText = BrTwoNewlines.Replace(
+                    articleText.Trim(),
+                    "\r\n\r\n");
+            }
         }
 
+        // Normalize spaces preceding consecutive newlines.
         while (SpacesThenTwoNewline.IsMatch(articleText))
-            articleText = SpacesThenTwoNewline.Replace(articleText, "\r\n\r\n");
+        {
+            articleText = SpacesThenTwoNewline.Replace(
+                articleText,
+                "\r\n\r\n");
+        }
 
+        // Normalize excessive blank lines.
         articleText = NormalizeExcessiveNewlines(articleText);
 
-        articleText = NewlinesBelowExternalLinks.Replace(articleText, "==External links==\r\n*");
-        // For bulleted vertical lists, do not separate items by leaving blank lines between them (or lines with just spaces).
+        // Correct spacing below External links headings.
+        articleText = NewlinesBelowExternalLinks.Replace(
+            articleText,
+            "==External links==\r\n*");
+
+        // Remove unnecessary blank lines within bulleted lists,
+        // but preserve separators between two established list groups.
         // WP:LISTGAP
         while (NewlinesWithinLists.IsMatch(articleText))
-            articleText = NewlinesWithinLists.Replace(articleText, "$1\r\n*");
+        {
+            string updated = NewlinesWithinLists.Replace(
+                articleText,
+                match =>
+                {
+                    // The existing regex includes the first list item
+                    // and the marker of the second list item.
+                    string before = articleText[..match.Index];
 
-        articleText = HorizontalRule.Replace(articleText.Trim(), "");
+                    string after =
+                        articleText[(match.Index + match.Length)..];
 
-        return articleText.Replace("\r\n|\r\n\r\n", "\r\n|\r\n").Trim();
+                    // Determine whether another list item immediately
+                    // precedes the first matched item.
+                    bool hasPreviousListItem =
+                        Regex.IsMatch(
+                            before,
+                            @"(?:^|\r\n)\*[^\r\n]*$");
+
+                    // Determine whether the second matched item is
+                    // immediately followed by another list item.
+                    bool hasFollowingListItem =
+                        Regex.IsMatch(
+                            after,
+                            @"^[^\r\n]*\r\n\*[^\r\n]*");
+
+                    // A blank line between two established list groups
+                    // may separate independent lists. Preserve it.
+                    if (hasPreviousListItem && hasFollowingListItem)
+                    {
+                        return match.Value;
+                    }
+
+                    // Otherwise, remove the unnecessary blank line.
+                    return match.Groups[1].Value + "\r\n*";
+                });
+
+            // Stop when no additional changes are possible.
+            if (updated == articleText)
+            {
+                break;
+            }
+
+            articleText = updated;
+        }
+
+        // Restore the original horizontal-rule cleanup.
+        articleText = HorizontalRule.Replace(
+            articleText.Trim(),
+            "");
+
+        // Restore the original final whitespace normalization.
+        return articleText
+            .Replace("\r\n|\r\n\r\n", "\r\n|\r\n")
+            .Trim();
     }
 
     /// <summary>
