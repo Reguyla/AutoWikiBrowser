@@ -7,15 +7,17 @@ namespace Twain.Tests;
 
 public class RequiresParser2 : RequiresInitialization
 {
-    protected Parsers parser2;
+    protected Parsers parser2 = null!;
 
-    public RequiresParser2()
+    [SetUp]
+    public void InitializeParser()
     {
         parser2 = new Parsers();
     }
 }
 
 [TestFixture]
+[NonParallelizable]
 public class SorterTests : RequiresParser2
 {
     [Test]
@@ -2400,17 +2402,20 @@ __FORCETOC__";
         Assert.That(parser2.SortMetaData(magicWord, "foo"), Is.EqualTo(magicWord), "magic word below cats");
     }
 
+
     [Test]
     public void SortOtherLanguages()
     {
 #if DEBUG
-        Variables.SetProjectLangCode("ru");
-        WikiRegexes.MakeLangSpecificRegexes();
+        try
+        {
+            Variables.SetProjectLangCode("ru");
+            WikiRegexes.MakeLangSpecificRegexes();
 
-        parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "en", "zh" };
-        parser2.Sorter.SortInterwikis = false;
+            parser2.Sorter.PossibleInterwikis = new System.Collections.Generic.List<string> { "en", "zh" };
+            parser2.Sorter.SortInterwikis = false;
 
-        const string before = @"== Литература ==
+            const string before = @"== Литература ==
 * Taylor, Peter. (1989).
 {{ref-en}}
 
@@ -2438,36 +2443,41 @@ __FORCETOC__";
 [[en:Utricularia pobeguinii]]
 [[zh:波贝甘狸藻]]";
 
-        Assert.That(parser2.SortMetaData(before, "a"), Is.EqualTo(after), "Even if RemoveStubs not run on ru-wiki, no excess whitespace left from meta data sorting");
+            Assert.That(parser2.SortMetaData(before, "a"), Is.EqualTo(after),
+                "Even if RemoveStubs not run on ru-wiki, no excess whitespace left from meta data sorting");
 
-        Variables.SetProjectLangCode("uk");
-        WikiRegexes.MakeLangSpecificRegexes();
+            Variables.SetProjectLangCode("uk");
+            WikiRegexes.MakeLangSpecificRegexes();
 
-        string beforeUK = @"Andy
+            string beforeUK = @"Andy
 {{botanist-stub}}
 [[Category:ABC]]", afterUK = @"Andy
 
 {{botanist-stub}}
 
 [[Category:ABC]]";
-        Assert.That(parser2.SortMetaData(beforeUK, "a"), Is.EqualTo(afterUK), "uk sort order: stubs NOT below categories");
 
-        Variables.SetProjectLangCode("uk");
-        WikiRegexes.MakeLangSpecificRegexes();
+            Assert.That(parser2.SortMetaData(beforeUK, "a"), Is.EqualTo(afterUK),
+                "uk sort order: stubs NOT below categories");
 
-        string beforeDK = @"Andy
+            Variables.SetProjectLangCode("uk");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            string beforeDK = @"Andy
 {{botanist-dk-stub}}
 [[Category:ABC]]", afterDK = @"Andy
 
 {{botanist-dk-stub}}
 
 [[Category:ABC]]";
-        Assert.That(parser2.SortMetaData(beforeDK, "a"), Is.EqualTo(afterDK), "dk sort order: stubs NOT below categories");
 
-        Variables.SetProjectLangCode("sl");
-        WikiRegexes.MakeLangSpecificRegexes();
+            Assert.That(parser2.SortMetaData(beforeDK, "a"), Is.EqualTo(afterDK),
+                "dk sort order: stubs NOT below categories");
 
-        string beforeSl = @"Andy
+            Variables.SetProjectLangCode("sl");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            string beforeSl = @"Andy
 {{botanist-stub}}
 {{Persondata}}
 [[Category:ABC]]", afterSl = @"Andy
@@ -2477,12 +2487,14 @@ __FORCETOC__";
 [[Category:ABC]]
 
 {{Persondata}}";
-        Assert.That(parser2.SortMetaData(beforeSl, "a"), Is.EqualTo(afterSl), "Sl sort order");
 
-        Variables.SetProjectLangCode("de");
-        WikiRegexes.MakeLangSpecificRegexes();
+            Assert.That(parser2.SortMetaData(beforeSl, "a"), Is.EqualTo(afterSl),
+                "Sl sort order");
 
-        string beforeDe = @"Andy
+            Variables.SetProjectLangCode("de");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            string beforeDe = @"Andy
 {{botanist-stub}}
 {{Personendaten}}
 [[Category:ABC]]
@@ -2495,12 +2507,14 @@ __FORCETOC__";
 {{Personendaten}}
 
 [[en:Test]]";
-        Assert.That(parser2.SortMetaData(beforeDe, "a"), Is.EqualTo(afterDe), "De sort order");
 
-        Variables.SetProjectLangCode("it");
-        WikiRegexes.MakeLangSpecificRegexes();
+            Assert.That(parser2.SortMetaData(beforeDe, "a"), Is.EqualTo(afterDe),
+                "De sort order");
 
-        string beforeIt = @"{{S|foo}}
+            Variables.SetProjectLangCode("it");
+            WikiRegexes.MakeLangSpecificRegexes();
+
+            string beforeIt = @"{{S|foo}}
 
 Andy
 {{Persondata}}
@@ -2513,10 +2527,13 @@ Andy
 [[Category:ABC]]
 
 [[en:Test]]";
-        Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt), "It sort order");
 
-        Variables.SetProjectSimple("it", ProjectEnum.wikiquote);
-        string afterIt2 = @"{{S|foo}}
+            Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt),
+                "It sort order");
+
+            Variables.SetProjectSimple("it", ProjectEnum.wikiquote);
+
+            string afterIt2 = @"{{S|foo}}
 
 Andy
 
@@ -2524,12 +2541,20 @@ Andy
 [[Category:ABC]]
 
 [[en:Test]]";
-        Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt2), "It wikiquote sort order");
 
-        Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
-        WikiRegexes.MakeLangSpecificRegexes();
+            Assert.That(parser2.SortMetaData(beforeIt, "a"), Is.EqualTo(afterIt2),
+                "It wikiquote sort order");
+        }
+        finally
+        {
+            // Always restore the default wiki configuration,
+            // including when an assertion fails.
+            Variables.SetProjectSimple("en", ProjectEnum.wikipedia);
+            WikiRegexes.MakeLangSpecificRegexes();
+        }
 #endif
     }
+
 
     [Test]
     public void CommentedReferences()
