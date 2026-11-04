@@ -107,8 +107,13 @@ public class MetaDataSorter
     // can safely become static readonly. Preserve InterLangRegex as instance state
     // until its dynamic initialization and mutation behavior is fully understood.
     // Generated dynamically using Variables.Stub.
-    private readonly Regex InterLangRegex =
-        new Regex(@"", RegexOptions.IgnoreCase);
+    /// <summary>
+    /// Matches recognized interwiki comments immediately following a wiki link.
+    /// Ordinary HTML comments are deliberately excluded.
+    /// </summary>
+    private static readonly Regex InterLangRegex = new(
+        @"(?<=\]\])<!--\s*(?:other languages|interwikis|other wikis|interwiki links to this article in other languages,\s*below)\s*-->",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary>
     /// Matches category marker comments used during metadata processing.
@@ -2126,9 +2131,23 @@ en, sq, ru
             // only move templates NOT currently in 'see also'
             if (m.Index < seeAlsoIndex || m.Index > (seeAlsoIndex + seeAlsoSectionString.Length))
             {
-                // remove template, also remove newline after template if template on its own line
-                articleText = Regex.Replace(articleText, @"^" + Regex.Escape(TemplateFound) + @" *(?:\r\n)?", "", RegexOptions.Multiline);
+                // Remove templates occupying their own line, including surrounding
+                // horizontal whitespace and the following newline.
+                articleText = Regex.Replace(
+                    articleText,
+                    @"^[ \t]*" + Regex.Escape(TemplateFound) + @"[ \t]*(?:\r\n|\n|\r)?",
+                    "",
+                    RegexOptions.Multiline);
 
+                // Remove the separator before a template when it appears
+                // at the end of a line after other content.
+                articleText = Regex.Replace(
+                    articleText,
+                    @"[ \t]+" + Regex.Escape(TemplateFound) + @"(?=\r?$|\n)",
+                    "",
+                    RegexOptions.Multiline);
+
+                // Handle any remaining occurrences without changing surrounding text.
                 articleText = articleText.Replace(TemplateFound, "");
 
                 // place template at top of see also section
