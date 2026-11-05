@@ -1759,7 +1759,8 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Evaluates alerts for the currently processed article.
+    /// Evaluates alerts for the currently processed article,
+    /// respecting the user's alert preferences.
     /// </summary>
     private void UpdateArticleAlerts()
     {
@@ -1771,16 +1772,23 @@ public partial class WorkspaceViewModel : ObservableObject
 
         string articleText = Editor.Document.CurrentText;
 
+        List<int> enabledAlertIds =
+            Preferences.General.AlertPreferences;
+
+        // Legacy settings use an empty list to mean all alerts enabled.
+        bool allAlertsEnabled = enabledAlertIds.Count == 0;
+
         ArticleAlertResult result = ArticleAlertEvaluator.Evaluate(
             CurrentArticle,
             articleText,
             articleText,
             Options.WordCount,
             Options.CategoryCount,
-            true,
-            new List<int>(),
+            allAlertsEnabled,
+            enabledAlertIds,
             Options.EnableTypoCorrection);
 
         Options.UpdateAlerts(result.Alerts);
     }
+
 }
