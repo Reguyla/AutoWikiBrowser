@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>Twain.UI</RootNamespace>
@@ -72,6 +72,10 @@
 
   <ItemGroup>
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.10.94" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
   </ItemGroup>
 
 </Project>

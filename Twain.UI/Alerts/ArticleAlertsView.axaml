@@ -1,0 +1,76 @@
+
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.ViewModels.Workspaces"
+    x:Class="Twain.UI.Alerts.ArticleAlertsView"
+    x:DataType="vm:WorkspaceViewModel"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
+
+    <Border
+        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+        BorderThickness="1"
+        CornerRadius="4">
+
+        <Grid RowDefinitions="Auto,*">
+
+            <!-- Header -->
+            <Border
+                Grid.Row="0"
+                Padding="12,10"
+                Background="{DynamicResource TwainSelectionBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="0,0,0,1">
+
+                <Grid ColumnDefinitions="*,Auto">
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Text="Article Alerts"
+                        FontWeight="SemiBold"
+                        VerticalAlignment="Center" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Text="{Binding Options.Alerts.Count}"
+                        Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                        VerticalAlignment="Center" />
+
+                </Grid>
+            </Border>
+
+            <!-- Alert results -->
+            <ScrollViewer
+                Grid.Row="1"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled">
+
+                <ItemsControl
+                    Margin="8"
+                    ItemsSource="{Binding Options.Alerts}">
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:CompileBindings="False">
+                            <Border
+                                Margin="0,0,0,6"
+                                Padding="10"
+                                Background="{DynamicResource TwainSurfaceBrush}"
+                                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4">
+
+                                <TextBlock
+                                    Text="{Binding}"
+                                    TextWrapping="Wrap" />
+
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+            </ScrollViewer>
+
+        </Grid>
+    </Border>
+</UserControl>

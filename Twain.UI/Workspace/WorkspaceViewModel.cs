@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Twain.Core;
+using Twain.Core.Alerts;
 using Twain.Core.API;
 using Twain.Core.AWBSettings;
 using Twain.Core.CustomModules;
@@ -1513,6 +1514,9 @@ public partial class WorkspaceViewModel : ObservableObject
             Editor.Document.CurrentText =
                 CurrentArticle.ArticleText;
 
+            // Evaluate alerts for the processed article.
+            UpdateArticleAlerts();
+
             // Display the calculated summary for the processed article.
             UpdateCalculatedEditSummary();
 
@@ -1752,5 +1756,31 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.SaveToPreferences(Preferences);
         MakeList.SaveToPreferences(Preferences);
         CustomModuleState.LoadFromPreferences(Preferences);
+    }
+
+    /// <summary>
+    /// Evaluates alerts for the currently processed article.
+    /// </summary>
+    private void UpdateArticleAlerts()
+    {
+        if (CurrentArticle is null)
+        {
+            Options.ResetAlerts();
+            return;
+        }
+
+        string articleText = Editor.Document.CurrentText;
+
+        ArticleAlertResult result = ArticleAlertEvaluator.Evaluate(
+            CurrentArticle,
+            articleText,
+            articleText,
+            Options.WordCount,
+            Options.CategoryCount,
+            true,
+            new List<int>(),
+            Options.EnableTypoCorrection);
+
+        Options.UpdateAlerts(result.Alerts);
     }
 }
