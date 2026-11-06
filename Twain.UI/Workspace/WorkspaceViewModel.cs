@@ -1975,10 +1975,17 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         if (alertText.StartsWith(
-            "Targetless links",
+            "Links with no target",
             StringComparison.OrdinalIgnoreCase))
         {
             return result.TargetlessLinks;
+        }
+
+        if (alertText.StartsWith(
+            "Links with double pipes",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.DoublePipeLinks;
         }
 
         if (alertText.StartsWith(
@@ -1989,21 +1996,20 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         if (alertText.StartsWith(
-            "Invalid citation parameters",
+            "Invalid citation parameter(s)",
             StringComparison.OrdinalIgnoreCase))
         {
             return result.BadCiteParameters;
         }
-
         if (alertText.StartsWith(
-            "Unclosed tags",
+            "Unclosed tag(s)",
             StringComparison.OrdinalIgnoreCase))
         {
             return result.UnclosedTags;
         }
 
         if (alertText.StartsWith(
-            "Headers with wikilinks",
+            "Headers with wikilink(s)",
             StringComparison.OrdinalIgnoreCase))
         {
             return result.WikilinkedHeaders;
