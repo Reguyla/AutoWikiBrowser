@@ -1830,7 +1830,6 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.UpdateAlerts(result.Alerts);
     }
 
-
     /// <summary>
     /// Gets the location of the first unbalanced bracket
     /// in the current article.
@@ -1877,65 +1876,14 @@ public partial class WorkspaceViewModel : ObservableObject
         return (first.Key, first.Value);
     }
 
-
     /// <summary>
-    /// Gets the first known location associated with an article alert.
+    /// Gets the first detected location associated with an article alert.
     /// </summary>
-    /// <param name="alertText">
-    /// The alert description displayed in the Alerts panel.
-    /// </param>
-    /// <returns>
-    /// The character offset and selection length,
-    /// or null when no location is available.
-    /// </returns>
     public (int Offset, int Length)? GetAlertLocation(
         string alertText)
     {
-        if (CurrentArticle is null ||
-            CurrentAlertResult is null ||
-            string.IsNullOrWhiteSpace(alertText))
-        {
-            return null;
-        }
-
-        Dictionary<int, int>? locations = null;
-
-        if (alertText.StartsWith(
-            "Unbalanced brackets",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.UnbalancedBrackets;
-        }
-        else if (alertText.StartsWith(
-            "Targetless links",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.TargetlessLinks;
-        }
-        else if (alertText.StartsWith(
-            "Dead links",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.DeadLinks;
-        }
-        else if (alertText.StartsWith(
-            "Invalid citation parameters",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.BadCiteParameters;
-        }
-        else if (alertText.StartsWith(
-            "Unclosed tags",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.UnclosedTags;
-        }
-        else if (alertText.StartsWith(
-            "Headers with wikilinks",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.WikilinkedHeaders;
-        }
+        Dictionary<int, int>? locations =
+            ResolveAlertLocations(alertText);
 
         if (locations is null || locations.Count == 0)
         {
@@ -1951,56 +1899,13 @@ public partial class WorkspaceViewModel : ObservableObject
 
     /// <summary>
     /// Returns the next location for an alert, cycling through
-    /// all detected occurrences in document order.
+    /// detected occurrences in document order.
     /// </summary>
     public (int Offset, int Length)? GetNextAlertLocation(
         string alertText)
     {
-        if (CurrentArticle is null ||
-            CurrentAlertResult is null ||
-            string.IsNullOrWhiteSpace(alertText))
-        {
-            return null;
-        }
-
-        Dictionary<int, int>? locations = null;
-
-        if (alertText.StartsWith(
-            "Unbalanced brackets",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.UnbalancedBrackets;
-        }
-        else if (alertText.StartsWith(
-            "Targetless links",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.TargetlessLinks;
-        }
-        else if (alertText.StartsWith(
-            "Dead links",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.DeadLinks;
-        }
-        else if (alertText.StartsWith(
-            "Invalid citation parameters",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.BadCiteParameters;
-        }
-        else if (alertText.StartsWith(
-            "Unclosed tags",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.UnclosedTags;
-        }
-        else if (alertText.StartsWith(
-            "Headers with wikilinks",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            locations = CurrentAlertResult.WikilinkedHeaders;
-        }
+        Dictionary<int, int>? locations =
+            ResolveAlertLocations(alertText);
 
         if (locations is null || locations.Count == 0)
         {
@@ -2027,5 +1932,75 @@ public partial class WorkspaceViewModel : ObservableObject
 
         return (location.Key, location.Value);
     }
+
+
+
+    /// <summary>
+    /// Gets the detected locations associated with an article alert.
+    /// </summary>
+    /// <param name="alertText">
+    /// The alert description displayed in the Alerts panel.
+    /// </param>
+    /// <returns>
+    /// The matching location dictionary, or null if the alert
+    /// has no supported navigation locations.
+    /// </returns>
+    private Dictionary<int, int>? ResolveAlertLocations(
+        string alertText)
+    {
+        if (CurrentArticle is null ||
+            CurrentAlertResult is null ||
+            string.IsNullOrWhiteSpace(alertText))
+        {
+            return null;
+        }
+
+        ArticleAlertResult result = CurrentAlertResult;
+
+        if (alertText.StartsWith(
+            "Unbalanced brackets",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.UnbalancedBrackets;
+        }
+
+        if (alertText.StartsWith(
+            "Targetless links",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.TargetlessLinks;
+        }
+
+        if (alertText.StartsWith(
+            "Dead links",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.DeadLinks;
+        }
+
+        if (alertText.StartsWith(
+            "Invalid citation parameters",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.BadCiteParameters;
+        }
+
+        if (alertText.StartsWith(
+            "Unclosed tags",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.UnclosedTags;
+        }
+
+        if (alertText.StartsWith(
+            "Headers with wikilinks",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.WikilinkedHeaders;
+        }
+
+        return null;
+    }
+
 
 }
