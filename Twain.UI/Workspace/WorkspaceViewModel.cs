@@ -49,6 +49,21 @@ public partial class WorkspaceViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowNavigationText))]
     private bool _isNavigationCollapsed;
 
+    private string? _lastNavigatedAlert;
+    private int _lastAlertLocationIndex = -1;
+
+
+    /// <summary>
+    /// Resets alert navigation when the article or its
+    /// detected issues change.
+    /// </summary>
+    private void ResetAlertNavigation()
+    {
+        _lastNavigatedAlert = null;
+        _lastAlertLocationIndex = -1;
+    }
+
+
     /// <summary>
     /// Whether navigation is currently expanded.
     /// </summary>
@@ -1777,6 +1792,8 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void UpdateArticleAlerts()
     {
+        ResetAlertNavigation();
+
         if (CurrentArticle is null)
         {
             CurrentAlertResult = null;
@@ -1929,6 +1946,86 @@ public partial class WorkspaceViewModel : ObservableObject
             locations.OrderBy(entry => entry.Key).First();
 
         return (first.Key, first.Value);
+    }
+
+
+    /// <summary>
+    /// Returns the next location for an alert, cycling through
+    /// all detected occurrences in document order.
+    /// </summary>
+    public (int Offset, int Length)? GetNextAlertLocation(
+        string alertText)
+    {
+        if (CurrentArticle is null ||
+            CurrentAlertResult is null ||
+            string.IsNullOrWhiteSpace(alertText))
+        {
+            return null;
+        }
+
+        Dictionary<int, int>? locations = null;
+
+        if (alertText.StartsWith(
+            "Unbalanced brackets",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.UnbalancedBrackets;
+        }
+        else if (alertText.StartsWith(
+            "Targetless links",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.TargetlessLinks;
+        }
+        else if (alertText.StartsWith(
+            "Dead links",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.DeadLinks;
+        }
+        else if (alertText.StartsWith(
+            "Invalid citation parameters",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.BadCiteParameters;
+        }
+        else if (alertText.StartsWith(
+            "Unclosed tags",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.UnclosedTags;
+        }
+        else if (alertText.StartsWith(
+            "Headers with wikilinks",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.WikilinkedHeaders;
+        }
+
+        if (locations is null || locations.Count == 0)
+        {
+            return null;
+        }
+
+        KeyValuePair<int, int>[] orderedLocations =
+            locations.OrderBy(entry => entry.Key).ToArray();
+
+        if (!string.Equals(
+            _lastNavigatedAlert,
+            alertText,
+            StringComparison.Ordinal))
+        {
+            _lastNavigatedAlert = alertText;
+            _lastAlertLocationIndex = -1;
+        }
+
+        _lastAlertLocationIndex =
+            (_lastAlertLocationIndex + 1) % orderedLocations.Length;
+
+        KeyValuePair<int, int> location =
+            orderedLocations[_lastAlertLocationIndex];
+
+        return (location.Key, location.Value);
     }
 
 }

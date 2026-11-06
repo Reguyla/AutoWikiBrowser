@@ -82,7 +82,7 @@ public partial class WorkspaceView : UserControl
         }
 
         (int Offset, int Length)? location =
-            viewModel.GetAlertLocation(alertText);
+            viewModel.GetNextAlertLocation(alertText);
 
         if (location is null)
         {
