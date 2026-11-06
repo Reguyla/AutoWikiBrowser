@@ -1839,4 +1839,96 @@ public partial class WorkspaceViewModel : ObservableObject
         return (first.Key, first.Value);
     }
 
+    /// <summary>
+    /// Gets the location of the first targetless link
+    /// in the current article.
+    /// </summary>
+    public (int Offset, int Length)? GetFirstTargetlessLink()
+    {
+        if (CurrentArticle is null ||
+            CurrentAlertResult is null ||
+            CurrentAlertResult.TargetlessLinks.Count == 0)
+        {
+            return null;
+        }
+
+        KeyValuePair<int, int> first =
+            CurrentAlertResult.TargetlessLinks
+                .OrderBy(entry => entry.Key)
+                .First();
+
+        return (first.Key, first.Value);
+    }
+
+
+    /// <summary>
+    /// Gets the first known location associated with an article alert.
+    /// </summary>
+    /// <param name="alertText">
+    /// The alert description displayed in the Alerts panel.
+    /// </param>
+    /// <returns>
+    /// The character offset and selection length,
+    /// or null when no location is available.
+    /// </returns>
+    public (int Offset, int Length)? GetAlertLocation(
+        string alertText)
+    {
+        if (CurrentArticle is null ||
+            CurrentAlertResult is null ||
+            string.IsNullOrWhiteSpace(alertText))
+        {
+            return null;
+        }
+
+        Dictionary<int, int>? locations = null;
+
+        if (alertText.StartsWith(
+            "Unbalanced brackets",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.UnbalancedBrackets;
+        }
+        else if (alertText.StartsWith(
+            "Targetless links",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.TargetlessLinks;
+        }
+        else if (alertText.StartsWith(
+            "Dead links",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.DeadLinks;
+        }
+        else if (alertText.StartsWith(
+            "Invalid citation parameters",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.BadCiteParameters;
+        }
+        else if (alertText.StartsWith(
+            "Unclosed tags",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.UnclosedTags;
+        }
+        else if (alertText.StartsWith(
+            "Headers with wikilinks",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            locations = CurrentAlertResult.WikilinkedHeaders;
+        }
+
+        if (locations is null || locations.Count == 0)
+        {
+            return null;
+        }
+
+        KeyValuePair<int, int> first =
+            locations.OrderBy(entry => entry.Key).First();
+
+        return (first.Key, first.Value);
+    }
+
 }

@@ -69,10 +69,8 @@ public partial class WorkspaceView : UserControl
         };
     }
 
-
     /// <summary>
-    /// Navigates to an issue when the user double-clicks
-    /// an article alert.
+    /// Navigates to the first detected location of an article alert.
     /// </summary>
     private async void ArticleAlertsPanel_AlertActivated(
         object? sender,
@@ -83,23 +81,17 @@ public partial class WorkspaceView : UserControl
             return;
         }
 
-        // Initially support unbalanced brackets.
-        if (!alertText.StartsWith(
-                "Unbalanced brackets",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
         (int Offset, int Length)? location =
-            viewModel.GetFirstUnbalancedBracket();
+            viewModel.GetAlertLocation(alertText);
 
         if (location is null)
         {
+            System.Diagnostics.Debug.WriteLine(
+                $"[ArticleAlerts] No navigation location: {alertText}");
+
             return;
         }
 
-        // Monaco is hosted inside a dynamically generated workspace pane.
         ArticleEditorView? editor =
             this.GetVisualDescendants()
                 .OfType<ArticleEditorView>()
@@ -118,8 +110,9 @@ public partial class WorkspaceView : UserControl
             location.Value.Length);
 
         System.Diagnostics.Debug.WriteLine(
-            $"[ArticleAlerts] Navigated to offset " +
-            $"{location.Value.Offset}, length {location.Value.Length}");
+            $"[ArticleAlerts] Navigated: {alertText}, " +
+            $"offset {location.Value.Offset}, " +
+            $"length {location.Value.Length}");
     }
 
 
