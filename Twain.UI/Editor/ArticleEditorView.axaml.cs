@@ -285,6 +285,41 @@ public partial class ArticleEditorView : UserControl
             $"window.twainEditor.selectText({start}, {length});");
     }
 
+
+    /// <summary>
+    /// Navigates to an article issue and selects its text.
+    /// </summary>
+    /// <param name="offset">
+    /// The zero-based character offset of the issue.
+    /// </param>
+    /// <param name="length">
+    /// The number of characters to select.
+    /// </param>
+    public async Task NavigateToIssueAsync(
+        int offset,
+        int length)
+    {
+        if (DataContext is not ArticleEditorViewModel viewModel)
+        {
+            return;
+        }
+
+        string articleText = viewModel.Document.CurrentText;
+
+        if (offset < 0 || offset >= articleText.Length)
+        {
+            return;
+        }
+
+        int selectionLength = Math.Clamp(
+            length,
+            1,
+            articleText.Length - offset);
+
+        await SelectTextAsync(offset, selectionLength);
+    }
+
+
     /// <summary>
     /// Gets the current zero-based caret offset in the Monaco editor.
     /// </summary>

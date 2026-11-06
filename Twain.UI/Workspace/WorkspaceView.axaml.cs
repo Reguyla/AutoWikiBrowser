@@ -1,10 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using System.ComponentModel;
+using System.Linq;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls.Processing;
+using Twain.UI.Editor;
 using Twain.UI.Profiles;
 using Twain.UI.Settings;
 using Twain.UI.Shell;
@@ -37,6 +40,8 @@ public partial class WorkspaceView : UserControl
     {
         InitializeComponent();
 
+        ArticleAlertsPanel.AlertActivated += ArticleAlertsPanel_AlertActivated;
+
         ProfilesView.Completed += ProfilesView_Completed;
         PreferencesView.Completed += PreferencesView_Completed;
         BotSettingsView.Completed += BotSettingsView_Completed;
@@ -63,6 +68,60 @@ public partial class WorkspaceView : UserControl
             UpdateOptionsSidebarLayout();
         };
     }
+
+
+    /// <summary>
+    /// Navigates to an issue when the user double-clicks
+    /// an article alert.
+    /// </summary>
+    private async void ArticleAlertsPanel_AlertActivated(
+        object? sender,
+        string alertText)
+    {
+        if (DataContext is not WorkspaceViewModel viewModel)
+        {
+            return;
+        }
+
+        // Initially support unbalanced brackets.
+        if (!alertText.StartsWith(
+                "Unbalanced brackets",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        (int Offset, int Length)? location =
+            viewModel.GetFirstUnbalancedBracket();
+
+        if (location is null)
+        {
+            return;
+        }
+
+        // Monaco is hosted inside a dynamically generated workspace pane.
+        ArticleEditorView? editor =
+            this.GetVisualDescendants()
+                .OfType<ArticleEditorView>()
+                .FirstOrDefault();
+
+        if (editor is null)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                "[ArticleAlerts] Monaco editor view not found.");
+
+            return;
+        }
+
+        await editor.NavigateToIssueAsync(
+            location.Value.Offset,
+            location.Value.Length);
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[ArticleAlerts] Navigated to offset " +
+            $"{location.Value.Offset}, length {location.Value.Length}");
+    }
+
 
     private void Navigation_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

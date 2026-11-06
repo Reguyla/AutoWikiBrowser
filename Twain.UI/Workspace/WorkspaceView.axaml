@@ -516,9 +516,10 @@
                 ResizeDirection="Columns"
                 ResizeBehavior="PreviousAndNext" />
 
-<!-- Article alerts for the currently processed article. -->
-<alerts:ArticleAlertsView
-    Grid.Column="4" />
+    <!-- Article alerts for the currently processed article. -->
+    <alerts:ArticleAlertsView
+        x:Name="ArticleAlertsPanel"
+        Grid.Column="4" />
 
         </Grid>
 

@@ -51,13 +51,15 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:CompileBindings="False">
-                            <Border
-                                Margin="0,0,0,6"
-                                Padding="10"
-                                Background="{DynamicResource TwainSurfaceBrush}"
-                                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4">
+                        <Border
+                            Margin="0,0,0,6"
+                            Padding="10"
+                            Background="{DynamicResource TwainSurfaceBrush}"
+                            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Cursor="Hand"
+                            PointerPressed="AlertItem_PointerPressed">
 
                                 <TextBlock
                                     Text="{Binding}"

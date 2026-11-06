@@ -97,6 +97,12 @@ public partial class WorkspaceViewModel : ObservableObject
     private string _editSummary = string.Empty;
 
     /// <summary>
+    /// Gets the most recent article alert evaluation,
+    /// including detected issue locations.
+    /// </summary>
+    public ArticleAlertResult? CurrentAlertResult { get; private set; }
+
+    /// <summary>
     /// Gets the number of successfully saved edits in this session.
     /// </summary>
     public int TotalEdits => _sessionCounters.NumberOfEdits;
@@ -449,6 +455,8 @@ public partial class WorkspaceViewModel : ObservableObject
 
         // Update the editor without resetting its original-text baseline.
         Editor.Document.CurrentText = article.ArticleText;
+
+        UpdateArticleAlerts();
 
         // Refresh the calculated edit summary after reprocessing.
         UpdateCalculatedEditSummary();
@@ -904,6 +912,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
             Options.ResetArticleStatistics();
 
+            CurrentAlertResult = null;
+            Options.ResetAlerts();
+
             if (nextArticle is null)
             {
                 CompleteProcessing();
@@ -1345,6 +1356,8 @@ public partial class WorkspaceViewModel : ObservableObject
         Editor.Document.CurrentText = string.Empty;
 
         Options.ResetArticleStatistics();
+        CurrentAlertResult = null;
+        Options.ResetAlerts();
 
         // Allow processing to begin for the next article.
         Options.IsProcessingActive = false;
@@ -1766,6 +1779,7 @@ public partial class WorkspaceViewModel : ObservableObject
     {
         if (CurrentArticle is null)
         {
+            CurrentAlertResult = null;
             Options.ResetAlerts();
             return;
         }
@@ -1778,17 +1792,51 @@ public partial class WorkspaceViewModel : ObservableObject
         // Legacy settings use an empty list to mean all alerts enabled.
         bool allAlertsEnabled = enabledAlertIds.Count == 0;
 
+        // The evaluator currently checks template patterns against article markup.
+        // Keep the full text until a dedicated extraction method is verified.
+        string templateSource = articleText;
+
         ArticleAlertResult result = ArticleAlertEvaluator.Evaluate(
             CurrentArticle,
             articleText,
-            articleText,
+            templateSource,
             Options.WordCount,
             Options.CategoryCount,
             allAlertsEnabled,
             enabledAlertIds,
             Options.EnableTypoCorrection);
 
+        // Preserve the complete evaluation for issue navigation.
+        CurrentAlertResult = result;
+
+        // Continue updating the existing Alerts panel.
         Options.UpdateAlerts(result.Alerts);
+    }
+
+
+    /// <summary>
+    /// Gets the location of the first unbalanced bracket
+    /// in the current article.
+    /// </summary>
+    /// <returns>
+    /// The character offset and selection length,
+    /// or null if no unbalanced bracket was detected.
+    /// </returns>
+    public (int Offset, int Length)? GetFirstUnbalancedBracket()
+    {
+        if (CurrentArticle is null ||
+            CurrentAlertResult is null ||
+            CurrentAlertResult.UnbalancedBrackets.Count == 0)
+        {
+            return null;
+        }
+
+        KeyValuePair<int, int> first =
+            CurrentAlertResult.UnbalancedBrackets
+                .OrderBy(entry => entry.Key)
+                .First();
+
+        return (first.Key, first.Value);
     }
 
 }
