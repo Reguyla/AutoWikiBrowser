@@ -50,8 +50,10 @@ public partial class WorkspaceViewModel : ObservableObject
     private bool _isNavigationCollapsed;
 
     private string? _lastNavigatedAlert;
+
     private int _lastAlertLocationIndex = -1;
 
+    private string? _alertEvaluatedText;
 
     /// <summary>
     /// Resets alert navigation when the article or its
@@ -1797,6 +1799,7 @@ public partial class WorkspaceViewModel : ObservableObject
         if (CurrentArticle is null)
         {
             CurrentAlertResult = null;
+            _alertEvaluatedText = null;
             Options.ResetAlerts();
             return;
         }
@@ -1823,8 +1826,9 @@ public partial class WorkspaceViewModel : ObservableObject
             enabledAlertIds,
             Options.EnableTypoCorrection);
 
-        // Preserve the complete evaluation for issue navigation.
+        // Preserve the evaluation and the exact text used.
         CurrentAlertResult = result;
+        _alertEvaluatedText = articleText;
 
         // Continue updating the existing Alerts panel.
         Options.UpdateAlerts(result.Alerts);
@@ -1896,7 +1900,6 @@ public partial class WorkspaceViewModel : ObservableObject
         return (first.Key, first.Value);
     }
 
-
     /// <summary>
     /// Returns the next location for an alert, cycling through
     /// detected occurrences in document order.
@@ -1933,8 +1936,6 @@ public partial class WorkspaceViewModel : ObservableObject
         return (location.Key, location.Value);
     }
 
-
-
     /// <summary>
     /// Gets the detected locations associated with an article alert.
     /// </summary>
@@ -1951,6 +1952,15 @@ public partial class WorkspaceViewModel : ObservableObject
         if (CurrentArticle is null ||
             CurrentAlertResult is null ||
             string.IsNullOrWhiteSpace(alertText))
+        {
+            return null;
+        }
+
+        // Prevent navigation using outdated character offsets.
+        if (!string.Equals(
+            _alertEvaluatedText,
+            Editor.Document.CurrentText,
+            StringComparison.Ordinal))
         {
             return null;
         }
