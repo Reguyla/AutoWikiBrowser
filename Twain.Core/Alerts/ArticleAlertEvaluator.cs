@@ -308,6 +308,9 @@ public static class ArticleAlertEvaluator
             result.UnknownMultipleIssuesParameters =
                 article.UnknownMultipleIssuesParameters();
 
+            result.UnknownMultipleIssuesParameterLocations =
+               article.UnknownMultipleIssuesParameterLocations();
+
             if (result.UnknownMultipleIssuesParameters.Count > 0)
             {
                 result.Alerts.Add(
@@ -395,6 +398,9 @@ public static class ArticleAlertEvaluator
         {
             result.UnknownWikiProjectBannerShellParameters =
                 article.UnknownWikiProjectBannerShellParameters();
+
+            result.UnknownWikiProjectBannerShellParameterLocations =
+               article.UnknownWikiProjectBannerShellParameterLocations();
 
             if (result.UnknownWikiProjectBannerShellParameters.Count > 0)
             {

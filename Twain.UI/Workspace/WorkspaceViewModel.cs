@@ -1996,6 +1996,13 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         if (alertText.StartsWith(
+            "Ambiguous citation dates",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.AmbiguousCiteDates;
+        }
+
+        if (alertText.StartsWith(
             "Invalid citation parameter(s)",
             StringComparison.OrdinalIgnoreCase))
         {
@@ -2009,10 +2016,31 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         if (alertText.StartsWith(
-            "Headers with wikilink(s)",
+            "Header(s) with wikilinks",
             StringComparison.OrdinalIgnoreCase))
         {
             return result.WikilinkedHeaders;
+        }
+
+        if (alertText.StartsWith(
+            "Duplicate parameter(s) in WPBannerShell",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.DuplicateBannerShellParameters;
+        }
+
+        if (alertText.StartsWith(
+            "Unknown parameters in Multiple issues",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.UnknownMultipleIssuesParameterLocations;
+        }
+
+        if (alertText.StartsWith(
+            "Unknown parameters in WikiProject banner shell",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.UnknownWikiProjectBannerShellParameterLocations;
         }
 
         return null;

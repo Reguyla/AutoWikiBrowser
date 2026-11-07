@@ -3585,6 +3585,48 @@ Message: {2}
     }
 
     /// <summary>
+    /// Returns the locations of unknown named parameters within a template call.
+    /// </summary>
+    /// <param name="templateCall">
+    /// The complete template invocation to inspect.
+    /// </param>
+    /// <param name="knownParameters">
+    /// The collection of recognized parameter names.
+    /// </param>
+    /// <returns>
+    /// A dictionary mapping each unknown parameter's starting offset
+    /// to its length, relative to the beginning of the template call.
+    /// </returns>
+    public static Dictionary<int, int> UnknownTemplateParameterLocations(
+        string templateCall,
+        List<string> knownParameters)
+    {
+        Dictionary<int, int> locations = new();
+
+        string pipeCleanedTemplate =
+            PipeCleanedTemplate(templateCall);
+
+        foreach (Match match in AnyParam.Matches(pipeCleanedTemplate))
+        {
+            string parameterName =
+                match.Groups[1].Value.Trim();
+
+            if (!knownParameters.Contains(
+                parameterName,
+                StringComparer.OrdinalIgnoreCase))
+            {
+                Group parameterGroup = match.Groups[1];
+
+                locations.Add(
+                    parameterGroup.Index,
+                    parameterGroup.Length);
+            }
+        }
+
+        return locations;
+    }
+
+    /// <summary>
     /// Matches one or more whitespace characters at the beginning of a string.
     /// </summary>
     private static readonly Regex StartWhitespace =

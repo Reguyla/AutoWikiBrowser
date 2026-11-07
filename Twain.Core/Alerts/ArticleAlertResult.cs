@@ -74,6 +74,24 @@ public sealed class ArticleAlertResult
         new();
 
     /// <summary>
+    /// Locations of unknown parameters in Multiple issues templates.
+    /// </summary>
+    public Dictionary<int, int> UnknownMultipleIssuesParameterLocations
+    {
+        get;
+        set;
+    } = new();
+
+    /// <summary>
+    /// Locations of unknown parameters in WikiProject banner shell templates.
+    /// </summary>
+    public Dictionary<int, int> UnknownWikiProjectBannerShellParameterLocations
+    {
+        get;
+        set;
+    } = new();
+
+    /// <summary>
     /// Gets duplicate WikiProject banner-shell parameter positions keyed by
     /// character offset, with the associated highlight length.
     /// </summary>

@@ -909,6 +909,76 @@ public Article()
     }
 
     /// <summary>
+    /// Returns the article-relative locations of unknown parameters
+    /// in the WikiProject banner shell template.
+    /// </summary>
+    public Dictionary<int, int> UnknownWikiProjectBannerShellParameterLocations()
+    {
+        Dictionary<int, int> locations = new();
+
+        if (NameSpaceKey != Namespace.Talk)
+            return locations;
+
+        Match templateMatch =
+            WikiRegexes.WikiProjectBannerShellTemplate.Match(ArticleText);
+
+        if (!templateMatch.Success)
+            return locations;
+
+        Dictionary<int, int> relativeLocations =
+            Tools.UnknownTemplateParameterLocations(
+                templateMatch.Value,
+                WikiProjectBannerShellKnowns);
+
+        foreach (KeyValuePair<int, int> location in relativeLocations)
+        {
+            locations.Add(
+                templateMatch.Index + location.Key,
+                location.Value);
+        }
+
+        return locations;
+    }
+
+    /// <summary>
+    /// Returns the article-relative locations of unknown parameters
+    /// in the Multiple issues template.
+    /// </summary>
+    public Dictionary<int, int> UnknownMultipleIssuesParameterLocations()
+    {
+        Dictionary<int, int> locations = new();
+
+        if (NameSpaceKey != Namespace.Mainspace)
+            return locations;
+
+        if (!WikiRegexes.MultipleIssues.IsMatch(
+            string.Join("", Parsers.GetAllTemplateDetail(ArticleText))))
+        {
+            return locations;
+        }
+
+        Match templateMatch =
+            WikiRegexes.MultipleIssues.Match(ArticleText);
+
+        if (!templateMatch.Success)
+            return locations;
+
+        Dictionary<int, int> relativeLocations =
+            Tools.UnknownTemplateParameterLocations(
+                templateMatch.Value,
+                MultipleIssuesKnowns);
+
+        foreach (KeyValuePair<int, int> location in relativeLocations)
+        {
+            locations.Add(
+                templateMatch.Index + location.Key,
+                location.Value);
+        }
+
+        return locations;
+    }
+
+    /// <summary>
     /// Contains the parameter names recognized by the Multiple Issues template.
     /// </summary>
     private static readonly List<string> MultipleIssuesKnowns =
