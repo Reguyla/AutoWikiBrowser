@@ -2057,6 +2057,13 @@ public partial class WorkspaceViewModel : ObservableObject
             return result.UserSignatures;
         }
 
+        if (alertText.StartsWith(
+            "Contains 'sic' tag",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return CurrentAlertResult.SicTagLocations;
+        }
+
         return null;
     }
 

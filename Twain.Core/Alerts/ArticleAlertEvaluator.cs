@@ -447,6 +447,9 @@ public static class ArticleAlertEvaluator
         if (shouldEvaluate &&
             article.HasSicTag)
         {
+            result.SicTagLocations =
+                Parsers.GetSicTagLocations(article.ArticleText);
+
             result.Alerts.Add(
                 "Contains 'sic' tag");
         }

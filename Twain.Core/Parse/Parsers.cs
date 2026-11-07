@@ -3443,6 +3443,35 @@ public partial class Parsers
         return TemplateExists(GetAllTemplates(articleText), SicTypo) || SicTag.IsMatch(articleText);
     }
 
+    ///TODO: Consider moving the Alerts logic to an alerts folder/process dedicated to alerts
+    /// <summary>
+    /// Returns the source locations of SIC and Typo markers in article text.
+    /// </summary>
+    /// <remarks>
+    /// Locations are zero-based offsets into the original article text.
+    /// </remarks>
+    public static Dictionary<int, int> GetSicTagLocations(string articleText)
+    {
+        Dictionary<int, int> locations = new();
+
+        // Locate SIC and Typo templates in the original article text.
+        foreach (Match match in WikiRegexes.NestedTemplates.Matches(articleText))
+        {
+            if (SicTypo.IsMatch(match.Value))
+            {
+                locations[match.Index] = match.Length;
+            }
+        }
+
+        // Locate bracketed SIC markers.
+        foreach (Match match in SicTag.Matches(articleText))
+        {
+            locations[match.Index] = match.Length;
+        }
+
+        return locations;
+    }
+
     /// <summary>
     /// Returns whether the input article text contains any {{dead link}} templates, ignoring comments
     /// </summary>

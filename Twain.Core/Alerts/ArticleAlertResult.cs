@@ -67,6 +67,11 @@ public sealed class ArticleAlertResult
         new();
 
     /// <summary>
+    /// Source locations of SIC and Typo markers in the article.
+    /// </summary>
+    public Dictionary<int, int> SicTagLocations { get; set; } = new();
+
+    /// <summary>
     /// Gets invalid citation-parameter positions keyed by character offset,
     /// with the associated highlight length.
     /// </summary>
