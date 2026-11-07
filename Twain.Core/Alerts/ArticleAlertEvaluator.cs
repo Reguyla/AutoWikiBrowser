@@ -271,6 +271,9 @@ public static class ArticleAlertEvaluator
                 ArticleAlertId.DisambiguationPageWithReferences) &&
             article.IsDisambiguationPageWithRefs)
         {
+            result.DisambiguationReferenceLocations =
+                article.DisambiguationReferenceLocations();
+
             result.Alerts.Add(
                 @"DAB page with <ref>s");
         }
@@ -281,8 +284,10 @@ public static class ArticleAlertEvaluator
                 ArticleAlertId.UnformattedReferences) &&
             article.HasBareReferences)
         {
-            result.Alerts.Add(
-                "Unformatted references");
+            result.BareReferenceLocations =
+                Parsers.GetBareReferenceLocations(article.ArticleText);
+
+            result.Alerts.Add("Unformatted references");
         }
 
         if (ArticleAlertHelper.IsAlertEnabled(

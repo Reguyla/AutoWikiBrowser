@@ -529,6 +529,31 @@ public Article()
     { get { return IsDisambiguationPage && WikiRegexes.Refs.IsMatch(mArticleText); } }
 
     /// <summary>
+    /// Returns the locations of references on a disambiguation page.
+    /// </summary>
+    /// <remarks>
+    /// Locations are zero-based offsets into the original article text.
+    /// Returns an empty dictionary when the article is not recognized
+    /// as a disambiguation page.
+    /// </remarks>
+    public Dictionary<int, int> DisambiguationReferenceLocations()
+    {
+        Dictionary<int, int> locations = new();
+
+        if (!IsDisambiguationPage)
+        {
+            return locations;
+        }
+
+        foreach (Match match in WikiRegexes.Refs.Matches(mArticleText))
+        {
+            locations[match.Index] = match.Length;
+        }
+
+        return locations;
+    }
+
+    /// <summary>
     /// Returns true if the article contains a &lt;ref>...&lt;/ref> reference after the {{reflist}} to show them
     /// </summary>
     // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests#.28Yet.29_more_reference_related_changes.

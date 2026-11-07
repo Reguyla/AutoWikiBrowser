@@ -72,6 +72,16 @@ public sealed class ArticleAlertResult
     public Dictionary<int, int> SicTagLocations { get; set; } = new();
 
     /// <summary>
+    /// Locations of references found on disambiguation pages.
+    /// </summary>
+    public Dictionary<int, int> DisambiguationReferenceLocations { get; set; } = new();
+
+    /// <summary>
+    /// Locations of unformatted references in the article.
+    /// </summary>
+    public Dictionary<int, int> BareReferenceLocations { get; set; } = new();
+
+    /// <summary>
     /// Gets invalid citation-parameter positions keyed by character offset,
     /// with the associated highlight length.
     /// </summary>

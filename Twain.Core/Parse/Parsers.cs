@@ -3632,6 +3632,7 @@ public partial class Parsers
         return false;
     }
 
+    ///TODO: Determine if anything else uses this besides Alerts and if not consolidate this with Alerts logic
     /// <summary>
     /// Determines whether the references section contains bare external links.
     /// </summary>
@@ -3668,6 +3669,42 @@ public partial class Parsers
                 : articleText.Substring(referencesIndex);
 
         return WikiRegexes.BareExternalLink.IsMatch(refsArea);
+    }
+
+    /// <summary>
+    /// Returns the locations of bare external links in the references section.
+    /// </summary>
+    /// <remarks>
+    /// Locations are zero-based offsets into the original article text.
+    /// </remarks>
+    public static Dictionary<int, int> GetBareReferenceLocations(string articleText)
+    {
+        Dictionary<int, int> locations = new();
+
+        int referencesIndex =
+            WikiRegexes.ReferencesHeader.Match(articleText).Index;
+
+        if (referencesIndex < 2)
+        {
+            return locations;
+        }
+
+        int externalLinksIndex =
+            WikiRegexes.ExternalLinksHeader.Match(articleText).Index;
+
+        string refsArea =
+            externalLinksIndex > referencesIndex
+                ? articleText.Substring(
+                    referencesIndex,
+                    externalLinksIndex - referencesIndex)
+                : articleText.Substring(referencesIndex);
+
+        foreach (Match match in WikiRegexes.BareExternalLink.Matches(refsArea))
+        {
+            locations[referencesIndex + match.Index] = match.Length;
+        }
+
+        return locations;
     }
     #endregion
 

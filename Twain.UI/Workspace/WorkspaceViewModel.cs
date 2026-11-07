@@ -2064,6 +2064,20 @@ public partial class WorkspaceViewModel : ObservableObject
             return CurrentAlertResult.SicTagLocations;
         }
 
+        if (alertText.StartsWith(
+            "DAB page with <ref>s",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return CurrentAlertResult.DisambiguationReferenceLocations;
+        }
+
+        if (alertText.StartsWith(
+            "Unformatted references",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return CurrentAlertResult.BareReferenceLocations;
+        }
+
         return null;
     }
 
