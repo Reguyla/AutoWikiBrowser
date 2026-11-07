@@ -2043,6 +2043,20 @@ public partial class WorkspaceViewModel : ObservableObject
             return result.UnknownWikiProjectBannerShellParameterLocations;
         }
 
+        if (alertText.StartsWith(
+            "See also section out of place",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.OtherErrors;
+        }
+
+        if (alertText.StartsWith(
+            "Editor's signature or link to user space",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return result.UserSignatures;
+        }
+
         return null;
     }
 
