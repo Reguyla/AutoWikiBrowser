@@ -2,8 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Twain.Core;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls.Processing;
@@ -26,6 +28,9 @@ public partial class WorkspaceView : UserControl
     private WorkspaceViewModel? _navigationViewModel;
     private GridLength _optionsSidebarWidth = new(425);
 
+    private string? _lastDuplicateWikilinkTarget;
+    private int _duplicateWikilinkIndex;
+
     /// <summary>
     /// Opens the application preferences window through the shell.
     /// </summary>
@@ -41,6 +46,8 @@ public partial class WorkspaceView : UserControl
         InitializeComponent();
 
         ArticleAlertsPanel.AlertActivated += ArticleAlertsPanel_AlertActivated;
+
+        OptionsView.DuplicateWikilinkActivated += OptionsView_DuplicateWikilinkActivated;
 
         ProfilesView.Completed += ProfilesView_Completed;
         PreferencesView.Completed += PreferencesView_Completed;
@@ -115,6 +122,64 @@ public partial class WorkspaceView : UserControl
             $"length {location.Value.Length}");
     }
 
+    /// <summary>
+    /// Navigates to successive occurrences of a duplicate wikilink.
+    /// </summary>
+    private async void OptionsView_DuplicateWikilinkActivated(
+        object? sender,
+        string selectedEntry)
+    {
+        if (DataContext is not WorkspaceViewModel viewModel)
+            return;
+
+        // Entries are formatted as "Target (count)".
+        int countSeparator = selectedEntry.LastIndexOf(" (", StringComparison.Ordinal);
+
+        if (countSeparator <= 0)
+            return;
+
+        string target = selectedEntry[..countSeparator];
+
+        string articleText = viewModel.Editor.Document.CurrentText;
+
+        Dictionary<int, int> locations =
+            Tools.GetDuplicateWikiLinkLocations(articleText, target);
+
+        if (locations.Count == 0)
+            return;
+
+        // Reset the cycle when a different target is selected.
+        if (!string.Equals(
+                _lastDuplicateWikilinkTarget,
+                target,
+                StringComparison.Ordinal))
+        {
+            _lastDuplicateWikilinkTarget = target;
+            _duplicateWikilinkIndex = 0;
+        }
+
+        KeyValuePair<int, int>[] orderedLocations =
+            locations.OrderBy(location => location.Key).ToArray();
+
+        if (_duplicateWikilinkIndex >= orderedLocations.Length)
+            _duplicateWikilinkIndex = 0;
+
+        KeyValuePair<int, int> location =
+            orderedLocations[_duplicateWikilinkIndex];
+
+        _duplicateWikilinkIndex =
+            (_duplicateWikilinkIndex + 1) % orderedLocations.Length;
+
+        ArticleEditorView? editor =
+            this.GetVisualDescendants()
+                .OfType<ArticleEditorView>()
+                .FirstOrDefault();
+
+        if (editor is null)
+            return;
+
+        await editor.NavigateToIssueAsync(location.Key, location.Value);
+    }
 
     private void Navigation_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

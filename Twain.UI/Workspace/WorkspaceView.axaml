@@ -405,8 +405,9 @@
                 BorderThickness="1"
                 CornerRadius="4"
                 IsVisible="{Binding IsOptionsVisible}">
-            <optionsViews:OptionsView
-                DataContext="{Binding Options}" />
+                <optionsViews:OptionsView
+                    x:Name="OptionsView"
+                    DataContext="{Binding Options}" />
         </Border>
 
         <GridSplitter Grid.Column="1"

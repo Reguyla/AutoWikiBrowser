@@ -137,7 +137,11 @@
 
                                 <TextBlock Classes="twain-section-heading" Text="Duplicate wikilinks"/>
 
-                                <ListBox x:Name="DuplicateWikilinksListBox" MinHeight="80" ItemsSource="{Binding DuplicateWikilinks}"/>
+                                <ListBox
+                                    x:Name="DuplicateWikilinksListBox"
+                                    DoubleTapped="DuplicateWikilinksListBox_DoubleTapped"
+                                    MinHeight="80"
+                                    ItemsSource="{Binding DuplicateWikilinks}"/>
 
                                 <Button x:Name="RemoveWikilinkButton" HorizontalAlignment="Left" Content="Delink"/>
 

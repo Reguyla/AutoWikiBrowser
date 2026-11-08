@@ -382,4 +382,5 @@ public class ArticleAlertTests : RequiresInitialization
                 Is.EqualTo(template.Length));
         });
     }
+
 }

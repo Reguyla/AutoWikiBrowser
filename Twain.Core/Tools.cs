@@ -1070,6 +1070,62 @@ public static class Tools
         return dupeWikiLinks;
     }
 
+    /// <summary>
+    /// Returns the original text positions and lengths of wikilinks
+    /// pointing to a duplicated target.
+    /// </summary>
+    public static Dictionary<int, int> GetDuplicateWikiLinkLocations(
+        string text,
+        string target)
+    {
+        Dictionary<int, int> locations = new();
+
+        if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(target))
+            return locations;
+
+        // Use the existing detection logic to confirm that the
+        // requested target is actually duplicated.
+        if (!DuplicateWikiLinks(text).Any(entry =>
+                entry.StartsWith(target + " (", StringComparison.Ordinal)))
+            return locations;
+
+        // Identify regions that must not contribute to link detection.
+        List<Match> excludedRegions = WikiRegexes.UnformattedText
+            .Matches(text)
+            .Cast<Match>()
+            .ToList();
+
+        foreach (Match match in WikiRegexes.SimpleWikiLink.Matches(text))
+        {
+            // Ignore links inside comments and other unformatted regions.
+            if (excludedRegions.Any(region =>
+                    match.Index >= region.Index &&
+                    match.Index < region.Index + region.Length))
+                continue;
+
+            string linkTarget = match.Value;
+
+            // Remove brackets and any piped display text.
+            int pipeIndex = linkTarget.IndexOf('|');
+
+            if (pipeIndex >= 0)
+                linkTarget = linkTarget.Substring(0, pipeIndex);
+
+            linkTarget = TurnFirstToUpper(
+                linkTarget.Trim("[] ".ToCharArray()));
+
+            if (!string.Equals(
+                    linkTarget,
+                    target,
+                    StringComparison.Ordinal))
+                continue;
+
+            locations.Add(match.Index, match.Length);
+        }
+
+        return locations;
+    }
+
     // Covered by ToolsTests.RemoveSyntax
     /// <summary>
     /// Removes underscores and wiki syntax from links

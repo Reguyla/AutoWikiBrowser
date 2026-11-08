@@ -1096,4 +1096,82 @@ http://example.com }}");
         Assert.That(Parsers.FixPipeTrick("[[Elgin, Kershaw County, South Carolina|]]"), Is.EqualTo("[[Elgin, Kershaw County, South Carolina|Elgin]]"));
         Assert.That(Parsers.FixPipeTrick("[[Wikipedia:Manual of Style (Persian)|]]"), Is.EqualTo("[[Wikipedia:Manual of Style (Persian)|Manual of Style]]"));
     }
+
+    [Test]
+    public void DuplicateWikilinkLocations()
+    {
+        const string text = """
+        [[London]] is the capital of England.
+
+        The history of [[London|the city]] spans centuries.
+
+        Many tourists visit [[london]] every year.
+        """;
+
+        Dictionary<int, int> locations =
+            Tools.GetDuplicateWikiLinkLocations(text, "London");
+
+        string[] expectedLinks =
+        [
+            "[[London]]",
+        "[[London|the city]]",
+        "[[london]]"
+        ];
+
+        Assert.That(locations.Count, Is.EqualTo(3));
+
+        foreach (string link in expectedLinks)
+        {
+            int expectedIndex = text.IndexOf(
+                link,
+                StringComparison.Ordinal);
+
+            Assert.That(
+                locations.ContainsKey(expectedIndex),
+                Is.True,
+                $"Missing location for {link}");
+
+            Assert.That(
+                locations[expectedIndex],
+                Is.EqualTo(link.Length),
+                $"Incorrect selection length for {link}");
+        }
+    }
+
+    [Test]
+    public void DuplicateWikilinkLocationsIgnoresExcludedLinks()
+    {
+        const string text = """
+        [[London]] is a city.
+        <!-- [[London]] is commented out. -->
+        [[Paris]] is another city.
+        [[London|the capital]] is in England.
+        [[Berlin]] appears only once.
+        """;
+
+        Dictionary<int, int> locations =
+            Tools.GetDuplicateWikiLinkLocations(text, "London");
+
+        Assert.That(locations.Count, Is.EqualTo(2));
+
+        int firstIndex = text.IndexOf(
+            "[[London]]",
+            StringComparison.Ordinal);
+
+        int secondIndex = text.IndexOf(
+            "[[London|the capital]]",
+            StringComparison.Ordinal);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(locations.ContainsKey(firstIndex), Is.True);
+            Assert.That(locations.ContainsKey(secondIndex), Is.True);
+        });
+
+        // A target appearing only once should return no locations.
+        Dictionary<int, int> berlinLocations =
+            Tools.GetDuplicateWikiLinkLocations(text, "Berlin");
+
+        Assert.That(berlinLocations, Is.Empty);
+    }
 }

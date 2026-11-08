@@ -33,6 +33,11 @@ public partial class OptionsView : UserControl
     }
 
     /// <summary>
+    /// Raised when the user requests navigation to a duplicate wikilink.
+    /// </summary>
+    public event EventHandler<string>? DuplicateWikilinkActivated;
+
+    /// <summary>
     /// Displays the additional skip options.
     /// </summary>
     /// <param name="sender">
@@ -255,6 +260,19 @@ public partial class OptionsView : UserControl
         }
 
         viewModel.PageExistenceSkip = value;
+    }
+
+    /// <summary>
+    /// Requests navigation to the selected duplicate wikilink.
+    /// </summary>
+    private void DuplicateWikilinksListBox_DoubleTapped(
+        object? sender,
+        Avalonia.Input.TappedEventArgs e)
+    {
+        if (DuplicateWikilinksListBox.SelectedItem is not string selected)
+            return;
+
+        DuplicateWikilinkActivated?.Invoke(this, selected);
     }
 
 }
