@@ -3511,6 +3511,48 @@ public partial class Parsers
     }
 
     /// <summary>
+    /// Returns the locations of No/More footnotes maintenance templates
+    /// when the article contains more than four references.
+    /// </summary>
+    /// <remarks>
+    /// Locations are zero-based offsets into the original article text.
+    /// </remarks>
+    public static Dictionary<int, int> GetMoreFootnotesTemplateLocations(
+        string articleText)
+    {
+        Dictionary<int, int> locations = new();
+
+        // Reuse the existing alert detection rules.
+        if (!HasMorefootnotesAndManyReferences(articleText))
+        {
+            return locations;
+        }
+
+        foreach (Match match in WikiRegexes.NestedTemplates.Matches(articleText))
+        {
+            if (!WikiRegexes.MoreNoFootnotes.IsMatch(match.Value))
+            {
+                continue;
+            }
+
+            // Ignore templates inside HTML comments.
+            bool insideComment = WikiRegexes.Comments
+                .Matches(articleText)
+                .Cast<Match>()
+                .Any(comment =>
+                    match.Index >= comment.Index &&
+                    match.Index < comment.Index + comment.Length);
+
+            if (!insideComment)
+            {
+                locations[match.Index] = match.Length;
+            }
+        }
+
+        return locations;
+    }
+
+    /// <summary>
     /// Matches a <c>{{GR}}</c> template that specifies a single decimal digit.
     /// </summary>
     /// <remarks>
@@ -3702,6 +3744,57 @@ public partial class Parsers
         foreach (Match match in WikiRegexes.BareExternalLink.Matches(refsArea))
         {
             locations[referencesIndex + match.Index] = match.Length;
+        }
+
+        return locations;
+    }
+
+    /// <summary>
+    /// Returns the locations of references appearing after the
+    /// references-display template.
+    /// </summary>
+    /// <remarks>
+    /// Locations are zero-based offsets into the original article text.
+    /// </remarks>
+    public static Dictionary<int, int> GetReferencesAfterReflistLocations(
+        string articleText)
+    {
+        Dictionary<int, int> locations = new();
+
+        // Preserve the existing alert detection rules.
+        if (!HasRefAfterReflist(articleText))
+        {
+            return locations;
+        }
+
+        Match referencesTemplate =
+            WikiRegexes.ReferencesTemplate.Match(articleText);
+
+        if (!referencesTemplate.Success)
+        {
+            return locations;
+        }
+
+        int startIndex =
+            referencesTemplate.Index + referencesTemplate.Length;
+
+        foreach (Match match in WikiRegexes.Refs.Matches(
+                     articleText.Substring(startIndex)))
+        {
+            int originalIndex = startIndex + match.Index;
+
+            // Ignore references inside HTML comments.
+            bool insideComment = WikiRegexes.Comments
+                .Matches(articleText)
+                .Cast<Match>()
+                .Any(comment =>
+                    originalIndex >= comment.Index &&
+                    originalIndex < comment.Index + comment.Length);
+
+            if (!insideComment)
+            {
+                locations[originalIndex] = match.Length;
+            }
         }
 
         return locations;

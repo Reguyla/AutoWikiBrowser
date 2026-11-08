@@ -2078,6 +2078,20 @@ public partial class WorkspaceViewModel : ObservableObject
             return CurrentAlertResult.BareReferenceLocations;
         }
 
+        if (alertText.StartsWith(
+            "Has a <ref> after <references/>",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return CurrentAlertResult.ReferencesAfterReflistLocations;
+        }
+
+        if (alertText.StartsWith(
+            "Has 'No/More footnotes' template yet many references",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return CurrentAlertResult.MoreFootnotesTemplateLocations;
+        }
+
         return null;
     }
 

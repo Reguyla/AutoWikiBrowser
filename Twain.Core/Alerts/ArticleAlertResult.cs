@@ -77,9 +77,20 @@ public sealed class ArticleAlertResult
     public Dictionary<int, int> DisambiguationReferenceLocations { get; set; } = new();
 
     /// <summary>
+    /// Locations of No/More footnotes maintenance templates
+    /// on articles containing more than four references.
+    /// </summary>
+    public Dictionary<int, int> MoreFootnotesTemplateLocations { get; set; } = new();
+
+    /// <summary>
     /// Locations of unformatted references in the article.
     /// </summary>
     public Dictionary<int, int> BareReferenceLocations { get; set; } = new();
+
+    /// <summary>
+    /// Locations of references appearing after the references-display template.
+    /// </summary>
+    public Dictionary<int, int> ReferencesAfterReflistLocations { get; set; } = new();
 
     /// <summary>
     /// Gets invalid citation-parameter positions keyed by character offset,

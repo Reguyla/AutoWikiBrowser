@@ -130,6 +130,9 @@ public static class ArticleAlertEvaluator
             article.NameSpaceKey == Namespace.Article &&
             article.HasMorefootnotesAndManyReferences)
         {
+            result.MoreFootnotesTemplateLocations =
+                Parsers.GetMoreFootnotesTemplateLocations(article.ArticleText);
+
             result.Alerts.Add(
                 "Has 'No/More footnotes' template yet many references");
         }
@@ -261,6 +264,9 @@ public static class ArticleAlertEvaluator
                 ArticleAlertId.ReferenceAfterReferences) &&
             article.HasRefAfterReflist)
         {
+            result.ReferencesAfterReflistLocations =
+                Parsers.GetReferencesAfterReflistLocations(article.ArticleText);
+
             result.Alerts.Add(
                 @"Has a <ref> after <references/>");
         }
