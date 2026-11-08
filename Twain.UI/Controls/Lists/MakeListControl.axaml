@@ -10,10 +10,13 @@
     x:DataType="vm:MakeListViewModel"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <converters:ArticleDisplayTitleConverter
-            x:Key="ArticleDisplayTitleConverter" />
-    </UserControl.Resources>
+<UserControl.Resources>
+    <converters:ArticleDisplayTitleConverter
+        x:Key="ArticleDisplayTitleConverter" />
+
+    <converters:PreparseRetainedConverter
+        x:Key="PreparseRetainedConverter" />
+</UserControl.Resources>
 
     <Grid
         Margin="{DynamicResource TwainWorkspacePadding}"
@@ -62,20 +65,29 @@
                 DoubleTapped="ArticleListBox_DoubleTapped"
                 KeyDown="ArticleListBox_KeyDown">
 
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="4,2">
+                        <Border.Background>
+                            <MultiBinding Converter="{StaticResource PreparseRetainedConverter}">
+                                <Binding />
+                                <Binding Path="#ArticleListBox.DataContext" />
+                                <Binding Path="#ArticleListBox.DataContext.PreparseHighlightVersion" />
+                            </MultiBinding>
+                        </Border.Background>
+
                         <TextBlock>
                             <TextBlock.Text>
                                 <MultiBinding
                                     Converter="{StaticResource ArticleDisplayTitleConverter}">
                                     <Binding />
-                                    <Binding
-                                        Path="#ArticleListBox.DataContext.FormatDisplayTitles" />
+                                    <Binding Path="#ArticleListBox.DataContext.FormatDisplayTitles" />
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
 
                 <ListBox.ContextMenu>
                     <ContextMenu>

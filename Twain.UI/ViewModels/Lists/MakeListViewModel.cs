@@ -27,6 +27,33 @@ public partial class MakeListViewModel : ObservableObject
     [ObservableProperty]
     private Article? _selectedArticle;
 
+    private readonly HashSet<Article> _preparseRetainedArticles =
+    new(ReferenceEqualityComparer.Instance);
+
+    public bool IsPreparseRetained(Article article) =>
+        _preparseRetainedArticles.Contains(article);
+
+    public void MarkPreparseRetained(Article article)
+    {
+        if (_preparseRetainedArticles.Add(article))
+        {
+            PreparseHighlightVersion++;
+            OnPropertyChanged(nameof(PreparseHighlightVersion));
+        }
+    }
+
+    public void ClearPreparseHighlights()
+    {
+        if (_preparseRetainedArticles.Count == 0)
+            return;
+
+        _preparseRetainedArticles.Clear();
+        PreparseHighlightVersion++;
+        OnPropertyChanged(nameof(PreparseHighlightVersion));
+    }
+
+    public int PreparseHighlightVersion { get; private set; }
+
     /// <summary>
     /// Gets or sets the source text used by the selected list provider.
     /// </summary>

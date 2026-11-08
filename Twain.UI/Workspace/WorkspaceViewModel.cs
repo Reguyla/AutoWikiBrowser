@@ -1577,7 +1577,7 @@ public partial class WorkspaceViewModel : ObservableObject
         switch (result.Outcome)
         {
             case ArticleProcessingOutcome.ChangesMade:
-                // Retain the article for subsequent manual review.
+                MakeList.MarkPreparseRetained(queueArticle);
                 break;
 
             case ArticleProcessingOutcome.NoChanges:
