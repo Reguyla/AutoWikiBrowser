@@ -38,6 +38,11 @@ public partial class OptionsView : UserControl
     public event EventHandler<string>? DuplicateWikilinkActivated;
 
     /// <summary>
+    /// Raised when the user requests removal of the selected duplicate wikilink.
+    /// </summary>
+    public event EventHandler? DuplicateWikilinkDelinkRequested;
+
+    /// <summary>
     /// Displays the additional skip options.
     /// </summary>
     /// <param name="sender">
@@ -273,6 +278,16 @@ public partial class OptionsView : UserControl
             return;
 
         DuplicateWikilinkActivated?.Invoke(this, selected);
+    }
+
+    /// <summary>
+    /// Requests delinking of the currently navigated duplicate wikilink.
+    /// </summary>
+    private void RemoveWikilinkButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        DuplicateWikilinkDelinkRequested?.Invoke(this, EventArgs.Empty);
     }
 
 }

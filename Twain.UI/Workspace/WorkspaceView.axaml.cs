@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Twain.Core;
+using Twain.Core.Parse;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls.Processing;
@@ -31,6 +32,9 @@ public partial class WorkspaceView : UserControl
     private string? _lastDuplicateWikilinkTarget;
     private int _duplicateWikilinkIndex;
 
+    private int _selectedDuplicateWikilinkOffset = -1;
+    private int _selectedDuplicateWikilinkLength;
+
     /// <summary>
     /// Opens the application preferences window through the shell.
     /// </summary>
@@ -48,6 +52,9 @@ public partial class WorkspaceView : UserControl
         ArticleAlertsPanel.AlertActivated += ArticleAlertsPanel_AlertActivated;
 
         OptionsView.DuplicateWikilinkActivated += OptionsView_DuplicateWikilinkActivated;
+
+        OptionsView.DuplicateWikilinkDelinkRequested +=
+           OptionsView_DuplicateWikilinkDelinkRequested;
 
         ProfilesView.Completed += ProfilesView_Completed;
         PreferencesView.Completed += PreferencesView_Completed;
@@ -74,6 +81,75 @@ public partial class WorkspaceView : UserControl
             UpdateNavigationLayout();
             UpdateOptionsSidebarLayout();
         };
+    }
+
+    /// <summary>
+    /// Removes the currently navigated duplicate wikilink while
+    /// preserving its displayed text.
+    /// </summary>
+    private async void OptionsView_DuplicateWikilinkDelinkRequested(
+        object? sender,
+        EventArgs e)
+    {
+        if (DataContext is not WorkspaceViewModel viewModel)
+            return;
+
+        if (_selectedDuplicateWikilinkOffset < 0 ||
+            _selectedDuplicateWikilinkLength < 4)
+            return;
+
+        string originalText =
+            viewModel.Editor.Document.CurrentText;
+
+        int offset = _selectedDuplicateWikilinkOffset;
+        int length = _selectedDuplicateWikilinkLength;
+
+        if (offset > originalText.Length - length)
+            return;
+
+        string selectedLink =
+            originalText.Substring(offset, length);
+
+        if (!selectedLink.StartsWith("[[", StringComparison.Ordinal) ||
+            !selectedLink.EndsWith("]]", StringComparison.Ordinal))
+            return;
+
+        // Ensure the stored occurrence still belongs to the
+        // duplicate target selected in Options.
+        if (string.IsNullOrEmpty(_lastDuplicateWikilinkTarget))
+            return;
+
+        Dictionary<int, int> locations =
+            Tools.GetDuplicateWikiLinkLocations(
+                originalText,
+                _lastDuplicateWikilinkTarget);
+
+        if (!locations.TryGetValue(offset, out int currentLength) ||
+            currentLength != length)
+            return;
+
+        string processedText =
+            Parsers.DelinkSelectedWikiLink(
+                originalText,
+                offset,
+                length);
+
+        ArticleEditorView? editor =
+            this.GetVisualDescendants()
+                .OfType<ArticleEditorView>()
+                .FirstOrDefault();
+
+        if (editor is null)
+            return;
+
+        await editor.ApplyProcessedTextAsync(
+            originalText,
+            processedText);
+
+        _selectedDuplicateWikilinkOffset = -1;
+        _selectedDuplicateWikilinkLength = 0;
+        _lastDuplicateWikilinkTarget = null;
+        _duplicateWikilinkIndex = 0;
     }
 
     /// <summary>
@@ -177,6 +253,9 @@ public partial class WorkspaceView : UserControl
 
         if (editor is null)
             return;
+
+        _selectedDuplicateWikilinkOffset = location.Key;
+        _selectedDuplicateWikilinkLength = location.Value;
 
         await editor.NavigateToIssueAsync(location.Key, location.Value);
     }

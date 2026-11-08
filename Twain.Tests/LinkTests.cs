@@ -1174,4 +1174,24 @@ http://example.com }}");
 
         Assert.That(berlinLocations, Is.Empty);
     }
+
+    [Test]
+    public void DelinkSelectedWikiLink()
+    {
+        const string text =
+            "[[London]] and [[London|the city]] and [[london]]";
+
+        int offset = text.IndexOf(
+            "[[London|the city]]",
+            StringComparison.Ordinal);
+
+        string result = Parsers.DelinkSelectedWikiLink(
+            text,
+            offset,
+            "[[London|the city]]".Length);
+
+        Assert.That(
+            result,
+            Is.EqualTo("[[London]] and the city and [[london]]"));
+    }
 }

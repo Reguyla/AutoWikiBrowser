@@ -143,7 +143,10 @@
                                     MinHeight="80"
                                     ItemsSource="{Binding DuplicateWikilinks}"/>
 
-                                <Button x:Name="RemoveWikilinkButton" HorizontalAlignment="Left" Content="Delink"/>
+                                <Button x:Name="RemoveWikilinkButton"
+                                        HorizontalAlignment="Left"
+                                        Content="Delink"
+                                        Click="RemoveWikilinkButton_Click"/>
 
                             </StackPanel>
                     </Border>

@@ -319,6 +319,38 @@ public partial class ArticleEditorView : UserControl
         await SelectTextAsync(offset, selectionLength);
     }
 
+    /// <summary>
+    /// Applies processed article text through Monaco's undoable
+    /// replacement mechanism.
+    /// </summary>
+    public async Task ApplyProcessedTextAsync(
+        string originalText,
+        string processedText)
+    {
+        if (DataContext is not ArticleEditorViewModel viewModel)
+            return;
+
+        if (!string.Equals(
+                viewModel.Document.CurrentText,
+                originalText,
+                StringComparison.Ordinal))
+            return;
+
+        if (string.Equals(
+                originalText,
+                processedText,
+                StringComparison.Ordinal))
+            return;
+
+        string originalJson =
+            JsonSerializer.Serialize(originalText);
+
+        string processedJson =
+            JsonSerializer.Serialize(processedText);
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.applyProcessedText({originalJson}, {processedJson});");
+    }
 
     /// <summary>
     /// Gets the current zero-based caret offset in the Monaco editor.

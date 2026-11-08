@@ -482,6 +482,51 @@ public partial class Parsers
         return DuplicateUnpipedLinks.Replace(articleText, "[[$1]]$2$1");
     }
 
+    /// <summary>
+    /// Removes wikilink markup from a single selected wikilink,
+    /// preserving its displayed text.
+    /// </summary>
+    /// <param name="articleText">The complete article text.</param>
+    /// <param name="offset">Starting position of the selected wikilink.</param>
+    /// <param name="length">Length of the selected wikilink.</param>
+    /// <returns>The article text with the selected link delinked.</returns>
+    public static string DelinkSelectedWikiLink(
+        string articleText,
+        int offset,
+        int length)
+    {
+        if (string.IsNullOrEmpty(articleText) ||
+            offset < 0 ||
+            length < 4 ||
+            offset > articleText.Length - length)
+        {
+            return articleText;
+        }
+
+        string link = articleText.Substring(offset, length);
+
+        if (!link.StartsWith("[[", StringComparison.Ordinal) ||
+            !link.EndsWith("]]", StringComparison.Ordinal))
+        {
+            return articleText;
+        }
+
+        string content = link.Substring(2, link.Length - 4);
+
+        int pipeIndex = content.IndexOf('|');
+
+        string replacement = pipeIndex >= 0
+            ? content[(pipeIndex + 1)..]
+            : content;
+
+        // Do not alter empty or unsupported pipe-trick links.
+        if (string.IsNullOrEmpty(replacement))
+            return articleText;
+
+        return articleText.Remove(offset, length)
+            .Insert(offset, replacement);
+    }
+
     private static readonly Regex PipeTrickLinkBracket = new Regex(@"\[\[(.*?)( *\(.*\) *)\|\]\]");
     private static readonly Regex PipeTrickLinkComma = new Regex(@"\[\[(.*?)(,.*)\|\]\]");
 
