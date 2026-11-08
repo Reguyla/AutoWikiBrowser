@@ -534,30 +534,7 @@ public partial class WorkspaceViewModel : ObservableObject
             () => StopProcessing(),
             message => System.Diagnostics.Debug.WriteLine(message));
 
-        BotSettings.CanUseBotMode =
-            Session.IsBot || Session.IsSysop;
-
-        _mainProcess =
-            new MainProcess(
-                new Parsers());
-
-        Session.OpenComplete +=
-            Editor_OpenComplete;
-
-        Session.Editor.SaveCompletedWithId +=
-            Editor_SaveCompletedWithId;
-
-        Session.PreviewComplete +=
-           Editor_PreviewComplete;
-
-        Session.ExceptionCaught +=
-            Editor_ExceptionCaught;
-
-        Session.Editor.SaveFailedWithId +=
-            Editor_SaveFailedWithId;
-
-        WorkspaceLayout layout =
-            BuiltInWorkspaceLayouts.CreateDefaultEditing();
+        _mainProcess = new MainProcess(new Parsers());
 
         ArticleEditingSession editingSession = new(
             """
@@ -566,49 +543,52 @@ public partial class WorkspaceViewModel : ObservableObject
         Edit this text to produce an updated version.
         """);
 
-        ArticleDocumentViewModel document = new(
-            editingSession);
+        ArticleDocumentViewModel document = new(editingSession);
 
         Editor = new ArticleEditorViewModel(
             document,
             Preferences);
 
-        Diff = new DiffViewModel(
-           document);
+        Diff = new DiffViewModel(document);
 
-        document.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName !=
-                nameof(ArticleDocumentViewModel.CurrentText))
-            {
-                return;
-            }
-
-            Options.UpdateArticleStatistics(
-                ArticleStatisticsCalculator.Calculate(
-                    document.CurrentText));
-        };
-
-        Diff.GoToLineRequested =
-           GoToDiffLineAsync;
-
-        MakeList = new MakeListViewModel(
-            Session);
-
+        MakeList = new MakeListViewModel(Session);
         Options = new OptionsViewModel();
 
-        _statisticsTimer.Interval = TimeSpan.FromMinutes(1);
+        WorkspaceLayout layout =
+            BuiltInWorkspaceLayouts.CreateDefaultEditing();
 
-        _statisticsTimer.Tick += (_, _) =>
-        {
-            _sessionCounters.GenerateEditStatistics();
+        Panes = CreateWorkspacePanes(layout);
 
-            OnPropertyChanged(nameof(PagesPerMinute));
-            OnPropertyChanged(nameof(EditsPerMinute));
-        };
+        InitializeProcessing();
+        InitializeEditor(document);
+        InitializeWorkspaceOptions();
+        InitializeStatisticsTimer();
+        ConfigureWorkspacePanes();
+    }
 
-        _statisticsTimer.Start();
+    private void InitializeProcessing()
+    {
 
+        BotSettings.CanUseBotMode =
+            Session.IsBot || Session.IsSysop;
+
+        Session.OpenComplete += Editor_OpenComplete;
+
+        Session.Editor.SaveCompletedWithId +=
+            Editor_SaveCompletedWithId;
+
+        Session.PreviewComplete +=
+            Editor_PreviewComplete;
+
+        Session.ExceptionCaught +=
+            Editor_ExceptionCaught;
+
+        Session.Editor.SaveFailedWithId +=
+            Editor_SaveFailedWithId;
+    }
+
+    private void InitializeWorkspaceOptions()
+    {
         MakeList.Articles.CollectionChanged +=
             MakeListArticles_CollectionChanged;
 
@@ -622,64 +602,77 @@ public partial class WorkspaceViewModel : ObservableObject
             FindNext;
 
         Options.StartProcessingRequested =
-           StartProcessing;
+            StartProcessing;
 
         Options.ReparseProcessingRequested =
-           ReparseProcessing;
+            ReparseProcessing;
 
         Options.SaveProcessingRequested =
             () => _ = SaveProcessing();
 
         Options.StopProcessingRequested =
-           StopProcessing;
+            StopProcessing;
 
         Options.SkipProcessingRequested =
             SkipProcessing;
 
         Options.ShowPreviewRequested =
-           ShowPreview;
+            ShowPreview;
 
         Options.ShowDiffRequested =
             ShowDiff;
+    }
 
-        Panes =
-        [
-            CreatePane(
-                BuiltInPaneDefinitions.ArticleEditor,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.ArticleEditor),
-                        Editor),
+    private void InitializeStatisticsTimer()
+    {
+        _statisticsTimer.Interval =
+            TimeSpan.FromMinutes(1);
 
-            CreatePane(
-                BuiltInPaneDefinitions.ArticleList,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.ArticleList),
-                MakeList),
+        _statisticsTimer.Tick += (_, _) =>
+        {
+            _sessionCounters.GenerateEditStatistics();
 
-            CreatePane(
-                BuiltInPaneDefinitions.Options,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.Options),
-                Options),
+            OnPropertyChanged(nameof(PagesPerMinute));
+            OnPropertyChanged(nameof(EditsPerMinute));
+        };
 
-            CreatePane(
-                BuiltInPaneDefinitions.Diff,
-                FindState(
-                    layout,
-                    BuiltInPaneIds.Diff),
-                Diff)
-        ];
+        _statisticsTimer.Start();
+    }
 
-        // Open editing options from the Page Editor header.
+    private ObservableCollection<PaneViewModel> CreateWorkspacePanes(
+        WorkspaceLayout layout)
+    {
+        return new ObservableCollection<PaneViewModel>
+    {
+        CreatePane(
+            BuiltInPaneDefinitions.ArticleEditor,
+            FindState(layout, BuiltInPaneIds.ArticleEditor),
+            Editor),
+
+        CreatePane(
+            BuiltInPaneDefinitions.ArticleList,
+            FindState(layout, BuiltInPaneIds.ArticleList),
+            MakeList),
+
+        CreatePane(
+            BuiltInPaneDefinitions.Options,
+            FindState(layout, BuiltInPaneIds.Options),
+            Options),
+
+        CreatePane(
+            BuiltInPaneDefinitions.Diff,
+            FindState(layout, BuiltInPaneIds.Diff),
+            Diff)
+      };
+    }
+
+    private void ConfigureWorkspacePanes()
+    {
         PaneViewModel articleEditorPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
         articleEditorPane.HeaderAction = ShowOptions;
 
-        // Open article-list filtering from the Make List header.
         PaneViewModel makeListPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleList);
 
@@ -687,17 +680,36 @@ public partial class WorkspaceViewModel : ObservableObject
         makeListPane.HeaderActionToolTip = "Filter article list";
         makeListPane.HeaderActionIcon = PaneHeaderActionIcon.Filter;
 
-        // Display the current article count in the Make List pane header.
         makeListPane.HeaderStatusText = MakeList.ArticleCountText;
 
-        // Keep the pane header synchronized with the article list.
         MakeList.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(MakeListViewModel.ArticleCountText))
+            if (e.PropertyName ==
+                nameof(MakeListViewModel.ArticleCountText))
             {
-                makeListPane.HeaderStatusText = MakeList.ArticleCountText;
+                makeListPane.HeaderStatusText =
+                    MakeList.ArticleCountText;
             }
         };
+    }
+
+    private void InitializeEditor(
+        ArticleDocumentViewModel document)
+    {
+        document.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName !=
+                nameof(ArticleDocumentViewModel.CurrentText))
+            {
+                return;
+            }
+
+            Options.UpdateArticleStatistics(
+                ArticleStatisticsCalculator.Calculate(
+                    document.CurrentText));
+        };
+
+        Diff.GoToLineRequested = GoToDiffLineAsync;
     }
 
     /// <summary>
