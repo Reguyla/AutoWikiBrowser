@@ -1701,126 +1701,153 @@ public partial class WorkspaceViewModel : ObservableObject
     {
         Dispatcher.UIThread.Post(() =>
         {
-            // Ignore completion callbacks after processing has stopped.
+            // Ignore callbacks after processing has stopped.
             if (!Options.IsProcessing ||
                 !Options.IsProcessingActive)
             {
                 return;
             }
 
-            _nudgeCancellation?.Cancel();
-            _nudgeCancellation?.Dispose();
-            _nudgeCancellation = null;
-
-            CurrentArticle =
-                new Article(page);
-
-            Editor.CalculatedEditSummary = string.Empty;
-
-            Options.CanSaveCurrentArticle = true;
-
-            // Reset the previous article's preview.
-            IsPreviewVisible = false;
-            PreviewHtml = string.Empty;
-            PreviewError = string.Empty;
-            IsPreviewLoading = false;
-
-            Article? queuedArticle =
-                MakeList.Articles.FirstOrDefault(
-                    article =>
-                        string.Equals(
-                            article.Name,
-                            CurrentArticle.Name,
-                            StringComparison.Ordinal));
-
-            if (queuedArticle is not null)
-            {
-                queuedArticle.DisplayTitle =
-                    CurrentArticle.DisplayTitle;
-            }
-
-            CurrentArticleName =
-                CurrentArticle.Name;
-
-            Editor.Document.LoadArticle(
-                CurrentArticle.ArticleText);
-
-            MainProcessOptions options =
-                Options.CreateMainProcessOptions(Preferences);
-
-            MainProcessDependencies dependencies =
-                CreateMainProcessDependencies();
-
-            MainProcessCallbacks callbacks =
-                CreateMainProcessCallbacks();
-
-            Article article = CurrentArticle;
+            InitializeOpenedArticle(page);
 
             ArticleProcessingResult result =
-                _mainProcess.ProcessPageWithResult(
-                    article,
-                    true,
-                    options,
-                    Session,
-                    dependencies,
-                    callbacks);
+                ProcessOpenedArticle();
 
-            // Core may have requested that processing stop.
-            // Do not continue updating the article or schedule
-            // an automatic save after the workflow was aborted.
+            // Core may have stopped processing.
             if (!Options.IsProcessing)
             {
                 return;
             }
 
-            // Preparse automatically filters and advances the article list.
-            // It must not enter the normal editor-review or save workflow.
             if (IsPreparseRunning)
             {
-                if (!result.Completed &&
-                    result.Outcome != ArticleProcessingOutcome.Failed)
-                {
-                    StopProcessing();
-                    return;
-                }
-
-                CompletePreparseArticle(result);
+                HandlePreparseProcessingResult(result);
                 return;
             }
 
-            Editor.Document.CurrentText =
-                CurrentArticle.ArticleText;
-
-            // Evaluate alerts for the processed article.
-            UpdateArticleAlerts();
-
-            // Display the calculated summary for the processed article.
-            UpdateCalculatedEditSummary();
-
-            // Core processing has completed.
-            // Keep the article available for review and saving.
-            if (!BotSettings.AutoSaveEnabled &&
-                !Options.PreParseMode)
-            {
-                Options.IsProcessingActive = false;
-            }
-
-            // Preparse must never save articles, even when
-            // automatic saving is enabled in Bot Settings.
-            if (!Options.PreParseMode &&
-                !IsPreparseRunning &&
-                BotSettings.AutoSaveEnabled)
-            {
-                if (BotSettings.AutoSaveDelay == 0)
-                {
-                    _ = SaveProcessing();
-                }
-                else
-                {
-                    _ = ScheduleAutoSaveAsync();
-                }
-            }
+            CompleteNormalArticleProcessing();
         });
+    }
+
+    /// <summary>
+    /// Initializes the newly opened article and resets
+    /// state associated with the previous article.
+    /// </summary>
+    private void InitializeOpenedArticle(PageInfo page)
+    {
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+        _nudgeCancellation = null;
+
+        CurrentArticle = new Article(page);
+
+        Editor.CalculatedEditSummary = string.Empty;
+
+        Options.CanSaveCurrentArticle = true;
+
+        // Reset the previous article's preview.
+        IsPreviewVisible = false;
+        PreviewHtml = string.Empty;
+        PreviewError = string.Empty;
+        IsPreviewLoading = false;
+
+        Article? queuedArticle =
+            MakeList.Articles.FirstOrDefault(
+                article =>
+                    string.Equals(
+                        article.Name,
+                        CurrentArticle.Name,
+                        StringComparison.Ordinal));
+
+        if (queuedArticle is not null)
+        {
+            queuedArticle.DisplayTitle =
+                CurrentArticle.DisplayTitle;
+        }
+
+        CurrentArticleName = CurrentArticle.Name;
+
+        Editor.Document.LoadArticle(
+            CurrentArticle.ArticleText);
+    }
+
+    /// <summary>
+    /// Runs the configured article-processing pipeline.
+    /// </summary>
+    private ArticleProcessingResult ProcessOpenedArticle()
+    {
+        MainProcessOptions options =
+            Options.CreateMainProcessOptions(Preferences);
+
+        MainProcessDependencies dependencies =
+            CreateMainProcessDependencies();
+
+        MainProcessCallbacks callbacks =
+            CreateMainProcessCallbacks();
+
+        Article article = CurrentArticle!;
+
+        return _mainProcess.ProcessPageWithResult(
+            article,
+            true,
+            options,
+            Session,
+            dependencies,
+            callbacks);
+    }
+
+    /// <summary>
+    /// Handles the result of unattended Preparse processing.
+    /// </summary>
+    private void HandlePreparseProcessingResult(
+        ArticleProcessingResult result)
+    {
+        if (!result.Completed &&
+            result.Outcome != ArticleProcessingOutcome.Failed)
+        {
+            StopProcessing();
+            return;
+        }
+
+        CompletePreparseArticle(result);
+    }
+
+    /// <summary>
+    /// Updates the editor after normal article processing
+    /// and schedules automatic saving when enabled.
+    /// </summary>
+    private void CompleteNormalArticleProcessing()
+    {
+        Editor.Document.CurrentText =
+            CurrentArticle!.ArticleText;
+
+        // Evaluate alerts for the processed article.
+        UpdateArticleAlerts();
+
+        // Display the calculated edit summary.
+        UpdateCalculatedEditSummary();
+
+        // Keep the article available for manual review.
+        if (!BotSettings.AutoSaveEnabled &&
+            !Options.PreParseMode)
+        {
+            Options.IsProcessingActive = false;
+        }
+
+        // Preparse must never save articles.
+        if (!Options.PreParseMode &&
+            !IsPreparseRunning &&
+            BotSettings.AutoSaveEnabled)
+        {
+            if (BotSettings.AutoSaveDelay == 0)
+            {
+                _ = SaveProcessing();
+            }
+            else
+            {
+                _ = ScheduleAutoSaveAsync();
+            }
+        }
     }
 
     /// <summary>
