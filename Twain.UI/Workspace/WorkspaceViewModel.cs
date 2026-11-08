@@ -56,6 +56,18 @@ public partial class WorkspaceViewModel : ObservableObject
     private string? _alertEvaluatedText;
 
     /// <summary>
+    /// Identifies how an article completed processing.
+    /// </summary>
+    private enum ArticleCompletionKind
+    {
+        Saved,
+        Skipped,
+        PreparseRetained,
+        PreparseRemoved,
+        PreparseError
+    }
+
+    /// <summary>
     /// Resets alert navigation when the article or its
     /// detected issues change.
     /// </summary>
@@ -917,32 +929,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 return;
             }
 
-            Article? nextArticle =
-                currentIndex < MakeList.Articles.Count
-                    ? MakeList.Articles[currentIndex]
-                    : MakeList.Articles.FirstOrDefault();
-
-            CurrentArticle = null;
-            CurrentArticleName = string.Empty;
-
-            Editor.Document.CurrentText = string.Empty;
-
-            Options.ResetArticleStatistics();
-
-            CurrentAlertResult = null;
-            Options.ResetAlerts();
-
-            if (nextArticle is null)
-            {
-                CompleteProcessing();
-                return;
-            }
-
-            MakeList.SelectedArticle = nextArticle;
-
-            Options.IsProcessingActive = false;
-
-            StartProcessing();
+            AdvanceToNextArticle(currentIndex);
         });
     }
 
@@ -1327,24 +1314,43 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Removes the current article from the processing queue,
-    /// updates the appropriate session counter, and advances
-    /// to the next article.
+    /// Completes a skipped article, removes its original queue
+    /// entry, and advances to the next article.
     /// </summary>
-    /// <param name="wasSaved">
-    /// True when the article was successfully saved;
-    /// false when the article was skipped.
-    /// </param>
-    private void CompleteCurrentArticle(bool wasSaved)
+    private void CompleteCurrentArticle()
     {
-        if (!Options.IsProcessing || CurrentArticle is null)
+        if (!Options.IsProcessing ||
+            CurrentArticle is null ||
+            _pendingSaveArticle is not null ||
+            Session.Editor.IsActive)
         {
             return;
         }
 
-        // Remove the completed article from Make List.
-        if (_activeQueueArticle is null ||
-            !MakeList.RemoveArticle(_activeQueueArticle.Name))
+        _autoSaveCancellation?.Cancel();
+        _autoSaveCancellation?.Dispose();
+        _autoSaveCancellation = null;
+
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+        _nudgeCancellation = null;
+
+        // Record the manual skip before clearing the article.
+        CurrentArticle.Trace.UserSkipped();
+
+        Session.Editor.Reset();
+
+        // Use the original queue entry, which may differ from
+        // CurrentArticle when a redirect was followed.
+        Article? queueArticle = _activeQueueArticle;
+
+        int currentIndex = queueArticle is null
+            ? -1
+            : MakeList.Articles.IndexOf(queueArticle);
+
+        if (currentIndex < 0 ||
+            queueArticle is null ||
+            !MakeList.RemoveArticle(queueArticle.Name))
         {
             StopProcessing();
             return;
@@ -1352,75 +1358,68 @@ public partial class WorkspaceViewModel : ObservableObject
 
         _activeQueueArticle = null;
 
-        // Update the appropriate session counter.
-        if (wasSaved)
+        _sessionCounters.NumberOfIgnoredEdits++;
+        OnPropertyChanged(nameof(SkippedArticles));
+
+        AdvanceToNextArticle(currentIndex);
+    }
+
+    /// <summary>
+    /// Clears the completed article and advances to the next
+    /// available entry in Make List.
+    /// </summary>
+    /// <param name="completedIndex">
+    /// The original position of the completed queue entry,
+    /// captured before that entry was removed.
+    /// </param>
+    private void AdvanceToNextArticle(int completedIndex)
+    {
+        if (!Options.IsProcessing)
         {
-            _sessionCounters.NumberOfEdits++;
-            OnPropertyChanged(nameof(TotalEdits));
-        }
-        else
-        {
-            _sessionCounters.NumberOfIgnoredEdits++;
-            OnPropertyChanged(nameof(SkippedArticles));
+            return;
         }
 
-        BotSettings.CurrentArticleNudgeCount = 0;
+        Article? nextArticle =
+            completedIndex >= 0 &&
+            completedIndex < MakeList.Articles.Count
+                ? MakeList.Articles[completedIndex]
+                : MakeList.Articles.FirstOrDefault();
 
-        // Clear the completed article.
         CurrentArticle = null;
         CurrentArticleName = string.Empty;
 
         Editor.Document.CurrentText = string.Empty;
 
         Options.ResetArticleStatistics();
+
         CurrentAlertResult = null;
         Options.ResetAlerts();
 
-        // Allow processing to begin for the next article.
-        Options.IsProcessingActive = false;
+        BotSettings.CurrentArticleNudgeCount = 0;
 
-        // Check whether the queue is exhausted.
-        if (MakeList.Articles.Count == 0)
+        if (nextArticle is null)
         {
             CompleteProcessing();
             return;
         }
 
-        // MakeList.RemoveArticle() maintains the selection.
+        MakeList.SelectedArticle = nextArticle;
+
+        Options.IsProcessingActive = false;
+
         StartProcessing();
     }
 
     /// <summary>
-    /// Skips the current article and continues processing
-    /// the next article.
+    /// Skips the current article and advances to the next.
     /// </summary>
     [RelayCommand]
     private void SkipProcessing()
     {
-        if (!Options.IsProcessing || CurrentArticle is null)
-        {
-            return;
-        }
-
-        // Cancel any pending automatic save.
-        _autoSaveCancellation?.Cancel();
-        _autoSaveCancellation?.Dispose();
-        _autoSaveCancellation = null;
-
-        // Cancel the current article's nudge timer.
-        _nudgeCancellation?.Cancel();
-        _nudgeCancellation?.Dispose();
-        _nudgeCancellation = null;
-
-        // Record that the user skipped this article.
-        CurrentArticle.Trace.UserSkipped();
-
-        // Reset the API editor before advancing.
-        Session.Editor.Reset();
-
-        // Complete the article without counting an edit.
-        CompleteCurrentArticle(wasSaved: false);
+        CompleteCurrentArticle();
     }
+
+
 
     /// <summary>
     /// Updates the calculated edit summary displayed above the article editor.
