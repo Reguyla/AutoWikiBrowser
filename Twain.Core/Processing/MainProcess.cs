@@ -1,6 +1,8 @@
-﻿using Twain.Core.Disambiguation;
+﻿using Twain.Core;
+using Twain.Core.Disambiguation;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
+using Twain.Core.Processing;
 
 namespace Twain.Core.Processing;
 
@@ -549,31 +551,50 @@ public sealed class MainProcess
     }
 
     /// <summary>
-    /// Fully processes a page using the supplied processing configuration and
-    /// processing dependencies.
+    /// Fully processes a page using the supplied processing configuration
+    /// and dependencies.
     /// </summary>
-    /// <param name="article">
-    /// The page to process.
-    /// </param>
-    /// <param name="mainProcess">
-    /// <see langword="true"/> when the page is being processed for the normal save
-    /// workflow; otherwise, <see langword="false"/> for reparsing, prefetching, and
-    /// similar operations.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <param name="session">
-    /// The active wiki session used during article processing.
-    /// </param>
-    /// <param name="dependencies">
-    /// The configured processing dependencies used throughout the article-processing
-    /// pipeline.
-    /// </param>
-    /// <param name="callbacks">
-    /// The application-owned callbacks used by the article-processing pipeline.
-    /// </param>
     public void ProcessPageCore(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options,
+        Session session,
+        MainProcessDependencies dependencies,
+        MainProcessCallbacks callbacks)
+    {
+        _ = ProcessPageWithResult(
+            article,
+            mainProcess,
+            options,
+            session,
+            dependencies,
+            callbacks);
+    }
+
+    /// <summary>
+    /// Processes an article and returns its processing outcome.
+    /// </summary>
+    public ArticleProcessingResult ProcessPageWithResult(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options,
+        Session session,
+        MainProcessDependencies dependencies,
+        MainProcessCallbacks callbacks)
+    {
+        return ProcessPageInternal(
+            article,
+            mainProcess,
+            options,
+            session,
+            dependencies,
+            callbacks);
+    }
+
+    /// <summary>
+    /// Executes the article-processing pipeline and captures its result.
+    /// </summary>
+    private ArticleProcessingResult ProcessPageInternal(
         Article article,
         bool mainProcess,
         MainProcessOptions options,
@@ -584,6 +605,8 @@ public sealed class MainProcess
         Variables.Profiler.Start(
             "ProcessPage(\"" + article.Name + "\")");
 
+        // A completed pipeline is distinguished from an early exit.
+        // The existing processing stages remain in their original order.
         try
         {
             if (!ApplyInitialProcessing(
@@ -593,12 +616,12 @@ public sealed class MainProcess
                     dependencies.NoParse,
                     out bool process))
             {
-                return;
+                return CreateInterruptedResult(article);
             }
 
             if (!callbacks.RunExtensionProcessing(article))
             {
-                return;
+                return CreateInterruptedResult(article);
             }
 
             ApplyWholeArticleUnicodify(
@@ -617,14 +640,14 @@ public sealed class MainProcess
                     dependencies.ReplaceSpecial,
                     false))
             {
-                return;
+                return CreateInterruptedResult(article);
             }
 
             if (!ApplyCategorisationChanges(
                     article,
                     options))
             {
-                return;
+                return CreateInterruptedResult(article);
             }
 
             Variables.Profiler.Profile("Categories");
@@ -680,7 +703,7 @@ public sealed class MainProcess
                         _userTalkTemplatesRegex,
                         session))
                 {
-                    return;
+                    return CreateInterruptedResult(article);
                 }
             }
 
@@ -712,7 +735,7 @@ public sealed class MainProcess
                     dependencies.ReplaceSpecial,
                     true))
             {
-                return;
+                return CreateInterruptedResult(article);
             }
 
             ApplyAppendOrPrependText(
@@ -725,7 +748,7 @@ public sealed class MainProcess
                     article,
                     options))
             {
-                return;
+                return CreateInterruptedResult(article);
             }
 
             Variables.Profiler.Profile("Files");
@@ -736,21 +759,76 @@ public sealed class MainProcess
                     session))
             {
                 callbacks.AbortProcessing();
-                return;
+
+                return new ArticleProcessingResult
+                {
+                    Outcome = ArticleProcessingOutcome.Failed,
+                    HasTextChanges = !article.NoArticleTextChanged,
+                    WasSkipped = article.SkipArticle,
+                    Completed = false
+                };
             }
 
             Variables.Profiler.Profile("Disambiguate");
+
+            // Processing reached the end of the pipeline.
+            bool hasChanges = !article.NoArticleTextChanged;
+            bool wasSkipped = article.SkipArticle;
+
+            return new ArticleProcessingResult
+            {
+                Outcome = DetermineOutcome(
+                    completed: true,
+                    wasSkipped: wasSkipped,
+                    hasTextChanges: hasChanges),
+
+                HasTextChanges = hasChanges,
+                WasSkipped = wasSkipped,
+                Completed = true
+            };
         }
         catch (Exception ex)
         {
             callbacks.HandleProcessingException(
                 article,
                 ex);
+
+            return new ArticleProcessingResult
+            {
+                Outcome = ArticleProcessingOutcome.Failed,
+                HasTextChanges = !article.NoArticleTextChanged,
+                WasSkipped = article.SkipArticle,
+                Completed = false,
+                Error = ex
+            };
         }
         finally
         {
             Variables.Profiler.Flush();
         }
+    }
+
+    /// <summary>
+    /// Creates a result when processing exits before reaching the
+    /// end of the pipeline.
+    /// </summary>
+    private static ArticleProcessingResult CreateInterruptedResult(
+        Article article)
+    {
+        bool wasSkipped = article.SkipArticle;
+        bool hasTextChanges = !article.NoArticleTextChanged;
+
+        return new ArticleProcessingResult
+        {
+            Outcome = DetermineOutcome(
+                completed: false,
+                wasSkipped: wasSkipped,
+                hasTextChanges: hasTextChanges),
+
+            HasTextChanges = hasTextChanges,
+            WasSkipped = wasSkipped,
+            Completed = false
+        };
     }
 
     /// <summary>
@@ -1011,5 +1089,25 @@ public sealed class MainProcess
 
             return string.Empty;
         }
+    }
+
+    internal static ArticleProcessingOutcome DetermineOutcome(
+    bool completed,
+    bool wasSkipped,
+    bool hasTextChanges,
+    bool failed = false)
+    {
+        if (failed)
+            return ArticleProcessingOutcome.Failed;
+
+        if (wasSkipped)
+            return ArticleProcessingOutcome.Skipped;
+
+        if (!completed)
+            return ArticleProcessingOutcome.Failed;
+
+        return hasTextChanges
+            ? ArticleProcessingOutcome.ChangesMade
+            : ArticleProcessingOutcome.NoChanges;
     }
 }
