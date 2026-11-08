@@ -713,15 +713,36 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Begins processing the first article in the current article list.
+    /// Begins processing the selected article or the next Preparse article.
     /// </summary>
     private void StartProcessing()
     {
-        if (Options.IsProcessingActive)
+        if (!CanBeginProcessing())
         {
             return;
         }
-        // Verify the actual session before starting an API operation.
+
+        Article? article = GetNextProcessingArticle();
+
+        if (article is null)
+        {
+            return;
+        }
+
+        BeginArticleProcessing(article);
+    }
+
+    /// <summary>
+    /// Verifies that processing can begin and that the session
+    /// has the necessary permissions.
+    /// </summary>
+    private bool CanBeginProcessing()
+    {
+        if (Options.IsProcessingActive)
+        {
+            return false;
+        }
+
         if (!Session.User.IsLoggedIn)
         {
             Options.IsWikiAuthenticated = false;
@@ -731,21 +752,17 @@ public partial class WorkspaceViewModel : ObservableObject
                 StopProcessing();
             }
 
-            return;
+            return false;
         }
 
-        Article? article =
-            MakeList.SelectedArticle ??
-            MakeList.Articles.FirstOrDefault();
-
-        if (article is null ||
-            Session.IsBusy)
+        if (Session.IsBusy ||
+            (MakeList.SelectedArticle is null &&
+             MakeList.Articles.Count == 0))
         {
-            return;
+            return false;
         }
 
         // Automatic-save permissions apply only to normal editing.
-        // Preparse processes articles without saving them.
         if (!Options.PreParseMode &&
             !IsPreparseRunning &&
             BotSettings.AutoSaveEnabled &&
@@ -753,38 +770,56 @@ public partial class WorkspaceViewModel : ObservableObject
              (!Session.IsBot && !Session.IsSysop)))
         {
             BotSettings.AutoSaveEnabled = false;
-            return;
+            return false;
         }
 
-        // Create a stable queue snapshot for unattended Preparse.
-        // Normal editing continues to use the existing Make List workflow.
-        if (Options.PreParseMode || IsPreparseRunning)
+        return true;
+    }
+
+    /// <summary>
+    /// Gets the next article to process, using a stable queue
+    /// snapshot when Preparse is active.
+    /// </summary>
+    private Article? GetNextProcessingArticle()
+    {
+        Article? article =
+            MakeList.SelectedArticle ??
+            MakeList.Articles.FirstOrDefault();
+
+        if (!Options.PreParseMode &&
+            !IsPreparseRunning)
         {
-            if (_preparseQueue is null)
-            {
-                _preparseQueue = MakeList.Articles.ToList();
-
-                // Preparse the entire article list from the beginning.
-                _preparseQueueIndex = 0;
-            }
-
-            // Always process the next entry in the snapshot rather
-            // than selecting a previously retained article.
-            if (_preparseQueueIndex >= _preparseQueue.Count)
-            {
-                _preparseQueue = null;
-                _preparseQueueIndex = 0;
-                CompleteProcessing(allowAutomaticShutdown: false);
-                return;
-            }
-
-            article = _preparseQueue[_preparseQueueIndex];
+            return article;
         }
 
+        if (_preparseQueue is null)
+        {
+            _preparseQueue = MakeList.Articles.ToList();
+            _preparseQueueIndex = 0;
+        }
+
+        if (_preparseQueueIndex >= _preparseQueue.Count)
+        {
+            _preparseQueue = null;
+            _preparseQueueIndex = 0;
+
+            CompleteProcessing(
+                allowAutomaticShutdown: false);
+
+            return null;
+        }
+
+        return _preparseQueue[_preparseQueueIndex];
+    }
+
+    /// <summary>
+    /// Initializes processing state and opens the selected article.
+    /// </summary>
+    private void BeginArticleProcessing(Article article)
+    {
         _activeQueueArticle = article;
 
-        CurrentArticleName =
-            article.Name;
+        CurrentArticleName = article.Name;
 
         Options.IsProcessing = true;
         Options.IsProcessingActive = true;
