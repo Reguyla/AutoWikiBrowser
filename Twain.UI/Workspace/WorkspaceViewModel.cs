@@ -466,18 +466,27 @@ public partial class WorkspaceViewModel : ObservableObject
         MainProcessCallbacks callbacks =
             CreateMainProcessCallbacks();
 
-        // Reparse is not normal article-list processing.
-        _mainProcess.ProcessPageCore(
-            article,
-            false,
-            options,
-            Session,
-            dependencies,
-            callbacks);
+        // Reparse uses the shared processing pipeline but does not
+        // advance the article list or save the article.
+        ArticleProcessingResult result =
+            _mainProcess.ProcessPageWithResult(
+                article,
+                false,
+                options,
+                Session,
+                dependencies,
+                callbacks);
 
         // Processing may have been aborted by a callback.
         if (!Options.IsProcessing ||
             !ReferenceEquals(CurrentArticle, article))
+        {
+            return;
+        }
+
+        // Do not update the editor with an incomplete or failed result.
+        if (!result.Completed ||
+            result.Outcome == ArticleProcessingOutcome.Failed)
         {
             return;
         }
