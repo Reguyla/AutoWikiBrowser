@@ -318,6 +318,22 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private Article? _activeQueueArticle;
 
+    /// <summary>
+    /// Snapshot of the article-list entries scheduled for the
+    /// current Preparse run.
+    /// </summary>
+    private List<Article>? _preparseQueue;
+
+    /// <summary>
+    /// Position of the next article in the Preparse snapshot.
+    /// </summary>
+    private int _preparseQueueIndex;
+
+    /// <summary>
+    /// Indicates whether an unattended Preparse run is active.
+    /// </summary>
+    private bool IsPreparseRunning => _preparseQueue is not null;
+
     private Article? _pendingSaveArticle;
 
     /// <summary>
@@ -716,12 +732,41 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
-        if (BotSettings.AutoSaveEnabled &&
+        // Automatic-save permissions apply only to normal editing.
+        // Preparse processes articles without saving them.
+        if (!Options.PreParseMode &&
+            !IsPreparseRunning &&
+            BotSettings.AutoSaveEnabled &&
             (!Session.User.IsLoggedIn ||
              (!Session.IsBot && !Session.IsSysop)))
         {
             BotSettings.AutoSaveEnabled = false;
             return;
+        }
+
+        // Create a stable queue snapshot for unattended Preparse.
+        // Normal editing continues to use the existing Make List workflow.
+        if (Options.PreParseMode || IsPreparseRunning)
+        {
+            if (_preparseQueue is null)
+            {
+                _preparseQueue = MakeList.Articles.ToList();
+
+                // Preparse the entire article list from the beginning.
+                _preparseQueueIndex = 0;
+            }
+
+            // Always process the next entry in the snapshot rather
+            // than selecting a previously retained article.
+            if (_preparseQueueIndex >= _preparseQueue.Count)
+            {
+                _preparseQueue = null;
+                _preparseQueueIndex = 0;
+                CompleteProcessing(allowAutomaticShutdown: false);
+                return;
+            }
+
+            article = _preparseQueue[_preparseQueueIndex];
         }
 
         _activeQueueArticle = article;
@@ -732,7 +777,10 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.IsProcessing = true;
         Options.IsProcessingActive = true;
 
-        if (BotSettings.AutoSaveEnabled &&
+        // Preparse does not use the automatic-save nudge workflow.
+        if (!Options.PreParseMode &&
+            !IsPreparseRunning &&
+            BotSettings.AutoSaveEnabled &&
             BotSettings.NudgeEnabled)
         {
             _ = ScheduleNudgeAsync();
@@ -975,6 +1023,15 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(() =>
         {
+            // Stopping processing intentionally cancels any active
+            // HTTP request. This is expected behavior, not an error.
+            if (exception is OperationCanceledException &&
+                !Options.IsProcessing &&
+                !Options.IsProcessingActive)
+            {
+                return;
+            }
+
             if (IsPreviewLoading)
             {
                 IsPreviewLoading = false;
@@ -985,8 +1042,7 @@ public partial class WorkspaceViewModel : ObservableObject
             {
                 // The article operation failed.
                 // Restore Start without automatically retrying.
-                Options.IsProcessingActive = false;
-                Options.IsProcessing = false;
+                StopProcessing();
             }
 
             ErrorHandler.HandleException(exception);
@@ -1022,7 +1078,11 @@ public partial class WorkspaceViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveProcessing()
     {
-        if (!Options.IsProcessing ||
+        // Preparse is a read-only processing workflow.
+        // Never submit edits while Preparse is active.
+        if (Options.PreParseMode ||
+            IsPreparseRunning ||
+            !Options.IsProcessing ||
             CurrentArticle is null ||
             Session.Editor.IsActive ||
             _pendingSaveArticle is not null)
@@ -1140,14 +1200,25 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Options.IsProcessingActive = false;
             Options.IsProcessing = false;
-        }
+
+        // Discard the temporary Preparse snapshot.
+        // Articles retained in Make List are not affected.
+        _preparseQueue = null;
+        _preparseQueueIndex = 0;
+    }
 
     /// <summary>
     /// Completes article processing after the article queue has been exhausted.
     /// </summary>
-    private async void CompleteProcessing()
+    private async void CompleteProcessing(bool allowAutomaticShutdown = true)
     {
         StopProcessing();
+
+        // Preparse must not trigger an automatic system shutdown.
+        if (!allowAutomaticShutdown)
+        {
+            return;
+        }
 
         if (!BotSettings.AutomaticShutdownEnabled ||
             ConfirmShutdownRequested is null)
@@ -1428,7 +1499,110 @@ public partial class WorkspaceViewModel : ObservableObject
         CompleteCurrentArticle();
     }
 
+    /// <summary>
+    /// Advances to the next article in the Preparse snapshot.
+    /// Retained articles remain in Make List but are not
+    /// processed again during the same run.
+    /// </summary>
+    private void AdvancePreparseQueue()
+    {
+        if (!IsPreparseRunning ||
+            !Options.IsProcessing)
+        {
+            return;
+        }
 
+        // The user disabled Preparse while the current article
+        // was being processed. Finish this article, then stop.
+        if (!Options.PreParseMode)
+        {
+            StopProcessing();
+            return;
+        }
+
+        _preparseQueueIndex++;
+
+        if (_preparseQueueIndex >= _preparseQueue!.Count)
+        {
+            // The Preparse snapshot has been exhausted.
+            _preparseQueue = null;
+            _preparseQueueIndex = 0;
+
+            CompleteProcessing(allowAutomaticShutdown: false);
+            return;
+        }
+
+        Article nextArticle =
+            _preparseQueue[_preparseQueueIndex];
+
+        // Clear the previous article's workspace state.
+        CurrentArticle = null;
+        CurrentArticleName = string.Empty;
+        _activeQueueArticle = null;
+
+        Editor.Document.CurrentText = string.Empty;
+        Editor.CalculatedEditSummary = string.Empty;
+
+        Options.ResetArticleStatistics();
+
+        CurrentAlertResult = null;
+        Options.ResetAlerts();
+
+        // Select the next snapshot entry, even when previously
+        // processed articles were retained in Make List.
+        MakeList.SelectedArticle = nextArticle;
+
+        Options.IsProcessingActive = false;
+
+        StartProcessing();
+    }
+
+    /// <summary>
+    /// Completes Preparse processing for an article, retaining
+    /// articles with changes or errors and removing articles
+    /// that were unchanged or skipped.
+    /// </summary>
+    private void CompletePreparseArticle(
+        ArticleProcessingResult result)
+    {
+        if (!IsPreparseRunning ||
+            !Options.IsProcessing ||
+            _activeQueueArticle is null)
+        {
+            return;
+        }
+
+        Article queueArticle = _activeQueueArticle;
+
+        switch (result.Outcome)
+        {
+            case ArticleProcessingOutcome.ChangesMade:
+                // Retain the article for subsequent manual review.
+                break;
+
+            case ArticleProcessingOutcome.NoChanges:
+            case ArticleProcessingOutcome.Skipped:
+                // Remove articles that do not require editing.
+                if (!MakeList.RemoveArticle(queueArticle.Name))
+                {
+                    StopProcessing();
+                    return;
+                }
+                break;
+
+            case ArticleProcessingOutcome.Failed:
+                // Preserve the failed article in Make List.
+                // Stop Preparse and require an explicit restart.
+                StopProcessing();
+                return;
+
+            default:
+                StopProcessing();
+                return;
+        }
+
+        AdvancePreparseQueue();
+    }
 
     /// <summary>
     /// Updates the calculated edit summary displayed above the article editor.
@@ -1533,19 +1707,37 @@ public partial class WorkspaceViewModel : ObservableObject
             MainProcessCallbacks callbacks =
                 CreateMainProcessCallbacks();
 
-            _mainProcess.ProcessPageCore(
-                CurrentArticle,
-                true,
-                options,
-                Session,
-                dependencies,
-                callbacks);
+            Article article = CurrentArticle;
+
+            ArticleProcessingResult result =
+                _mainProcess.ProcessPageWithResult(
+                    article,
+                    true,
+                    options,
+                    Session,
+                    dependencies,
+                    callbacks);
 
             // Core may have requested that processing stop.
             // Do not continue updating the article or schedule
             // an automatic save after the workflow was aborted.
             if (!Options.IsProcessing)
             {
+                return;
+            }
+
+            // Preparse automatically filters and advances the article list.
+            // It must not enter the normal editor-review or save workflow.
+            if (IsPreparseRunning)
+            {
+                if (!result.Completed &&
+                    result.Outcome != ArticleProcessingOutcome.Failed)
+                {
+                    StopProcessing();
+                    return;
+                }
+
+                CompletePreparseArticle(result);
                 return;
             }
 
@@ -1566,11 +1758,15 @@ public partial class WorkspaceViewModel : ObservableObject
                 Options.IsProcessingActive = false;
             }
 
-            if (BotSettings.AutoSaveEnabled)
+            // Preparse must never save articles, even when
+            // automatic saving is enabled in Bot Settings.
+            if (!Options.PreParseMode &&
+                !IsPreparseRunning &&
+                BotSettings.AutoSaveEnabled)
             {
                 if (BotSettings.AutoSaveDelay == 0)
                 {
-                    SaveProcessing();
+                    _ = SaveProcessing();
                 }
                 else
                 {

@@ -972,7 +972,20 @@ public class AsyncApiEditModern
                    // begins. This prevents a canceled operation from being started.
                    linkedCancellation.Token.ThrowIfCancellationRequested();
 
-                   TResult result = operation(linkedCancellation.Token);
+                   TResult result;
+
+                   try
+                   {
+                       result = operation(linkedCancellation.Token);
+                   }
+                   catch (OperationCanceledException)
+                       when (linkedCancellation.IsCancellationRequested)
+                   {
+                       // Cancellation was explicitly requested for this operation.
+                       // Let the task complete as canceled rather than treating it
+                       // as an ordinary API failure.
+                       throw;
+                   }
 
                    // Do not check cancellation again here.
                    //
