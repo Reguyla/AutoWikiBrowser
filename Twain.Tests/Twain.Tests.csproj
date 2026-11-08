@@ -26,6 +26,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Twain.Core\Twain.Core.csproj" />
+		<ProjectReference Include="..\Twain.UI\Twain.UI.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
