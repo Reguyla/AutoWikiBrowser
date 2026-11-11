@@ -324,11 +324,9 @@ public static class OptionsPreferencesMapper
 
         IRule clone = (IRule)rule.Clone();
 
-        clone.Children = rule.Children is null
-            ? null
-            : rule.Children
-                .Select(CloneAdvancedRule)
-                .ToList();
+        clone.Children = rule.Children?
+            .Select(CloneAdvancedRule)
+            .ToList() ?? [];
 
         return clone;
     }

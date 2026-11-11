@@ -60,7 +60,7 @@ public abstract class IRule : ICloneable
     /// <remarks>
     /// This legacy mutable collection field is retained for compatibility.
     /// </remarks>
-    public List<IRule> Children;
+    public List<IRule>? Children;
 
     /// <summary>
     /// Gets or sets the display name of the rule.
