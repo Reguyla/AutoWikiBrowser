@@ -97,6 +97,11 @@ public partial class DiffView : UserControl
         object? sender,
         WebMessageReceivedEventArgs e)
     {
+        if (string.IsNullOrWhiteSpace(e.Body))
+        {
+            return;
+        }
+
         using JsonDocument message =
             JsonDocument.Parse(e.Body);
 

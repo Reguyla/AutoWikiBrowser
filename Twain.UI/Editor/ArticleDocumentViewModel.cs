@@ -76,7 +76,7 @@ public sealed partial class ArticleDocumentViewModel : ObservableObject
 
         _session.LoadArticle(articleText);
 
-        _currentText = articleText;
+        CurrentText = articleText;
 
         OnPropertyChanged(nameof(OriginalText));
         OnPropertyChanged(nameof(CurrentText));

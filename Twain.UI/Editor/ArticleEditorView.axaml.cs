@@ -1,13 +1,10 @@
 using Avalonia.Controls;
-using Avalonia.VisualTree;
-using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twain.Core;
-using Twain.Core.Editing;
 using Twain.Core.Editing;
 using Twain.Core.Parse;
 using Twain.UI.PasteMore;
@@ -85,6 +82,11 @@ public partial class ArticleEditorView : UserControl
         object? sender,
         WebMessageReceivedEventArgs e)
     {
+        if (string.IsNullOrWhiteSpace(e.Body))
+        {
+            return;
+        }
+
         using JsonDocument message =
             JsonDocument.Parse(e.Body);
 
@@ -360,7 +362,7 @@ public partial class ArticleEditorView : UserControl
     /// </returns>
     public async Task<int> GetCaretOffsetAsync()
     {
-        string result =
+        string? result =
             await EditorWebView.InvokeScript(
                 "window.twainEditor.getCaretOffset();");
 
@@ -379,7 +381,7 @@ public partial class ArticleEditorView : UserControl
     /// </returns>
     public async Task<int> GetSelectionStartAsync()
     {
-        string result =
+        string? result =
             await EditorWebView.InvokeScript(
                 "window.twainEditor.getSelectionStart();");
 
