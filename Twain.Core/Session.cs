@@ -529,11 +529,7 @@ public class Session
     /// </returns>
     private static bool ShouldEnforcePublicAwbVersionGate()
     {
-#if DEBUG
         return false;
-#else
-    return !AllowForkReleaseVersionGateBypass;
-#endif
     }
 
     /// <summary>
