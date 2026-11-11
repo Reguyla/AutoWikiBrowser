@@ -524,24 +524,19 @@ public partial class WorkspaceViewModel : ObservableObject
         UserPrefs preferences)
     {
         ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(preferences);
 
         Session = session;
         Preferences = preferences;
-
-        TwainHost = new TwainHost(
-            Session,
-            () => Options.IsProcessing,
-            () => StopProcessing(),
-            message => System.Diagnostics.Debug.WriteLine(message));
 
         _mainProcess = new MainProcess(new Parsers());
 
         ArticleEditingSession editingSession = new(
             """
-        This is the original article text.
+    This is the original article text.
 
-        Edit this text to produce an updated version.
-        """);
+    Edit this text to produce an updated version.
+    """);
 
         ArticleDocumentViewModel document = new(editingSession);
 
@@ -553,6 +548,12 @@ public partial class WorkspaceViewModel : ObservableObject
 
         MakeList = new MakeListViewModel(Session);
         Options = new OptionsViewModel();
+
+        TwainHost = new TwainHost(
+            Session,
+            () => Options.IsProcessing,
+            () => StopProcessing(),
+            message => System.Diagnostics.Debug.WriteLine(message));
 
         WorkspaceLayout layout =
             BuiltInWorkspaceLayouts.CreateDefaultEditing();
@@ -1357,7 +1358,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 return;
             }
 
-            SaveProcessing();
+            await SaveProcessing();
         }
         catch (OperationCanceledException)
         {
