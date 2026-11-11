@@ -1444,7 +1444,7 @@ public partial class WorkspaceViewModel : ObservableObject
     /// Completes a skipped article, removes its original queue
     /// entry, and advances to the next article.
     /// </summary>
-    private void CompleteCurrentArticle()
+    private void CompleteCurrentArticle(bool manualSkip = true)
     {
         if (!Options.IsProcessing ||
             CurrentArticle is null ||
@@ -1462,8 +1462,12 @@ public partial class WorkspaceViewModel : ObservableObject
         _nudgeCancellation?.Dispose();
         _nudgeCancellation = null;
 
-        // Record the manual skip before clearing the article.
-        CurrentArticle.Trace.UserSkipped();
+        // Manual skips are recorded here.
+        // Automatic skip reasons are recorded by the processing logic.
+        if (manualSkip)
+        {
+            CurrentArticle.Trace.UserSkipped();
+        }
 
         Session.Editor.Reset();
 
@@ -1722,6 +1726,12 @@ public partial class WorkspaceViewModel : ObservableObject
             if (IsPreparseRunning)
             {
                 HandlePreparseProcessingResult(result);
+                return;
+            }
+
+            if (result.Outcome == ArticleProcessingOutcome.Skipped)
+            {
+                CompleteCurrentArticle(manualSkip: false);
                 return;
             }
 

@@ -772,6 +772,17 @@ public sealed class MainProcess
             Variables.Profiler.Profile("Disambiguate");
 
             // Processing reached the end of the pipeline.
+            if (mainProcess && !article.SkipArticle)
+            {
+                string? skipReason =
+                    GetArticleChangeSkipReason(article, options);
+
+                if (skipReason is not null)
+                {
+                    article.AWBSkip(skipReason);
+                }
+            }
+
             bool hasChanges = !article.NoArticleTextChanged;
             bool wasSkipped = article.SkipArticle;
 
