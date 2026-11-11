@@ -281,6 +281,9 @@ public partial class PreferencesWindow : UserControl
         GeneralPrefs general =
            preferences.General;
 
+        FollowRedirectsCheckBox.IsChecked =
+            general.BypassRedirect;
+
         EditorFontComboBox.Text = general.TextBoxFont;
 
         EditorFontSizeNumericUpDown.Value =
@@ -454,6 +457,9 @@ public partial class PreferencesWindow : UserControl
 
         GeneralPrefs general =
             preferences.General;
+
+        general.BypassRedirect =
+           FollowRedirectsCheckBox.IsChecked == true;
 
         general.TextBoxFont =
             string.IsNullOrWhiteSpace(EditorFontComboBox.Text)

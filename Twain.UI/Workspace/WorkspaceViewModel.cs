@@ -833,9 +833,13 @@ public partial class WorkspaceViewModel : ObservableObject
             _ = ScheduleNudgeAsync();
         }
 
+        bool followRedirects =
+            Preferences.General.BypassRedirect &&
+            !Options.SkipRedirects;
+
         Session.Editor.Open(
             article.Name,
-            true);
+            followRedirects);
     }
 
     /// <summary>
@@ -1713,6 +1717,29 @@ public partial class WorkspaceViewModel : ObservableObject
             }
 
             InitializeOpenedArticle(page);
+
+            // Before-processing skip: redirect page.
+            if (!IsPreparseRunning &&
+                Options.SkipRedirects &&
+                Tools.IsRedirect(page.Text))
+            {
+                CurrentArticle!.AWBSkip("Page is a redirect");
+
+                CompleteCurrentArticle(manualSkip: false);
+                return;
+            }
+
+            // Before-processing skip: page is in use.
+            // Keep Preparse on its existing path for now.
+            if (!IsPreparseRunning &&
+                Options.SkipIfInUse &&
+                CurrentArticle!.IsInUse)
+            {
+                CurrentArticle.AWBSkip("Page contains {{inuse}}");
+
+                CompleteCurrentArticle(manualSkip: false);
+                return;
+            }
 
             ArticleProcessingResult result =
                 ProcessOpenedArticle();

@@ -124,6 +124,9 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     [ObservableProperty]
     private string _appendPrependText = string.Empty;
 
+    [ObservableProperty]
+    private bool _followRedirects;
+
     /// <summary>
     /// Gets or sets whether metadata should be sorted after appending or prepending.
     /// </summary>
