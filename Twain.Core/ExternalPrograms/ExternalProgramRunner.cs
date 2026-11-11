@@ -1,5 +1,4 @@
-﻿using Twain.Core;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Twain.Core.ExternalPrograms;
 

@@ -56,7 +56,8 @@ namespace Twain.Core
         public static Func<
             DialogRequest,
             Task<DialogSelection?>>?
-            ShowDialogAsync  { get; set; }
+            ShowDialogAsync
+        { get; set; }
 
         /// <summary>
         /// Creates a snapshot of the current template-substitution settings for

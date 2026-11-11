@@ -1,7 +1,4 @@
-﻿using System.CodeDom.Compiler;
-using System.Text;
-
-namespace Twain.Core.CustomModules;
+﻿namespace Twain.Core.CustomModules;
 
 /// <summary>
 /// Provides shared interpretation and formatting of custom-module compiler

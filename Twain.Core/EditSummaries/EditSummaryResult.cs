@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Twain.Core.EditSummaries;
+﻿namespace Twain.Core.EditSummaries;
 
 /// <summary>
 /// Represents the result of assembling an article's edit summary.

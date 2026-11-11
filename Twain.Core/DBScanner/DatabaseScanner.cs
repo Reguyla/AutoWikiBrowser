@@ -20,7 +20,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
-using System.Xml;
 using Twain.Core.Background;
 using Twain.Core.Controls.Lists;
 using Twain.Core.Lists;

@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using Twain.Core.API;
 using Twain.Core.DBScanner;
 using Twain.Core.Lists;
 using Twain.Core.Lists.Providers;

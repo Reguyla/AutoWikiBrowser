@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 using System.Windows.Forms;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using Twain.Core.API;
 using Twain.Core.Controls;
@@ -130,11 +129,11 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     public bool PreProcessed;
 
     #region Constructors
-  /// <summary>
-/// Initializes a new instance of the <see cref="Article"/> class with an
-/// unknown existence state.
-/// </summary>
-public Article()
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Article"/> class with an
+    /// unknown existence state.
+    /// </summary>
+    public Article()
     {
         Exists = Exists.Unknown;
     }
@@ -1343,77 +1342,77 @@ public Article()
         }
     }
 
-/// <summary>
-/// Describes the degree of change made by Find and Replace processing.
-/// </summary>
-enum FaRChange
-{
     /// <summary>
-    /// Find and Replace processing has not been run.
+    /// Describes the degree of change made by Find and Replace processing.
     /// </summary>
-    NotRun,
-
-    /// <summary>
-    /// Find and Replace processing made no changes.
-    /// </summary>
-    NoChange,
-
-    /// <summary>
-    /// Find and Replace processing made a minor change.
-    /// </summary>
-    MinorChange,
-
-    /// <summary>
-    /// Find and Replace processing made a major change.
-    /// </summary>
-    MajorChange
-}
-
-/// <summary>
-/// The Find and Replace change state recorded before the main processing stage.
-/// </summary>
-private FaRChange _before = FaRChange.NotRun;
-
-/// <summary>
-/// The Find and Replace change state recorded after the main processing stage.
-/// </summary>
-private FaRChange _after = FaRChange.NotRun;
-
-/// <summary>
-/// Records the degree of change made by Find and Replace processing.
-/// </summary>
-/// <param name="after">
-/// <see langword="true"/> to record the result for the post-processing stage;
-/// otherwise, records the result for the pre-processing stage.
-/// </param>
-/// <param name="value">
-/// The degree of change to record.
-/// </param>
-private void SetFaRChange(
-    bool after,
-    FaRChange value)
-{
-    if (after)
+    enum FaRChange
     {
-        _after = value;
-    }
-    else
-    {
-        _before = value;
-    }
-}
+        /// <summary>
+        /// Find and Replace processing has not been run.
+        /// </summary>
+        NotRun,
 
-/// <summary>
-/// Process a "find and replace"
-/// </summary>
-/// <param name="findAndReplace">A FindandReplace object</param>
-/// <param name="substTemplates">A SubstTemplates object</param>
-/// <param name="replaceSpecial">An MWB ReplaceSpecial object</param>
-/// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
-/// <param name="skipIfOnlyMinorChange"></param>
-/// <param name="onlyApplyAfter">False if "before", true if "after"</param>
-public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates substTemplates,
-                                      ReplaceSpecial.ReplaceSpecial replaceSpecial, bool skipIfNoChange, bool skipIfOnlyMinorChange, bool onlyApplyAfter)
+        /// <summary>
+        /// Find and Replace processing made no changes.
+        /// </summary>
+        NoChange,
+
+        /// <summary>
+        /// Find and Replace processing made a minor change.
+        /// </summary>
+        MinorChange,
+
+        /// <summary>
+        /// Find and Replace processing made a major change.
+        /// </summary>
+        MajorChange
+    }
+
+    /// <summary>
+    /// The Find and Replace change state recorded before the main processing stage.
+    /// </summary>
+    private FaRChange _before = FaRChange.NotRun;
+
+    /// <summary>
+    /// The Find and Replace change state recorded after the main processing stage.
+    /// </summary>
+    private FaRChange _after = FaRChange.NotRun;
+
+    /// <summary>
+    /// Records the degree of change made by Find and Replace processing.
+    /// </summary>
+    /// <param name="after">
+    /// <see langword="true"/> to record the result for the post-processing stage;
+    /// otherwise, records the result for the pre-processing stage.
+    /// </param>
+    /// <param name="value">
+    /// The degree of change to record.
+    /// </param>
+    private void SetFaRChange(
+        bool after,
+        FaRChange value)
+    {
+        if (after)
+        {
+            _after = value;
+        }
+        else
+        {
+            _before = value;
+        }
+    }
+
+    /// <summary>
+    /// Process a "find and replace"
+    /// </summary>
+    /// <param name="findAndReplace">A FindandReplace object</param>
+    /// <param name="substTemplates">A SubstTemplates object</param>
+    /// <param name="replaceSpecial">An MWB ReplaceSpecial object</param>
+    /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
+    /// <param name="skipIfOnlyMinorChange"></param>
+    /// <param name="onlyApplyAfter">False if "before", true if "after"</param>
+    public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates substTemplates,
+                                          ReplaceSpecial.ReplaceSpecial replaceSpecial, bool skipIfNoChange, bool skipIfOnlyMinorChange, bool onlyApplyAfter)
     {
         // return if no find&replace rules enabled
         if (!findAndReplace.HasProcessingReplacements(onlyApplyAfter) && !replaceSpecial.HasRules && !substTemplates.HasSubstitutions)
@@ -1642,43 +1641,43 @@ public void PerformFindAndReplace(FindandReplace findAndReplace, SubstTemplates 
         return anyChanges;
     }
 
-/// <summary>
-/// Determines whether general article conversions should be applied to the
-/// current page.
-/// </summary>
-/// <returns>
-/// <see langword="true"/> when general conversions should be applied;
-/// otherwise, <see langword="false"/>.
-/// </returns>
-/// <remarks>
-/// General conversions are excluded for template documentation and sandbox
-/// subpages, and for category pages on Wikimedia Commons.
-/// </remarks>
-private bool ShouldApplyGeneralConversions()
-{
-    int pageNamespace =
-        Namespace.Determine(Name);
+    /// <summary>
+    /// Determines whether general article conversions should be applied to the
+    /// current page.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when general conversions should be applied;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// General conversions are excluded for template documentation and sandbox
+    /// subpages, and for category pages on Wikimedia Commons.
+    /// </remarks>
+    private bool ShouldApplyGeneralConversions()
+    {
+        int pageNamespace =
+            Namespace.Determine(Name);
 
-    bool isTemplateDocumentationOrSandbox =
-        pageNamespace.Equals(Namespace.Template) &&
-        (Name.EndsWith("/doc") ||
-         Name.EndsWith("/sandbox"));
+        bool isTemplateDocumentationOrSandbox =
+            pageNamespace.Equals(Namespace.Template) &&
+            (Name.EndsWith("/doc") ||
+             Name.EndsWith("/sandbox"));
 
-    bool isCommonsCategory =
-        Variables.IsCommons &&
-        pageNamespace.Equals(Namespace.Category);
+        bool isCommonsCategory =
+            Variables.IsCommons &&
+            pageNamespace.Equals(Namespace.Category);
 
-    return !isTemplateDocumentationOrSandbox &&
-        !isCommonsCategory;
-}
+        return !isTemplateDocumentationOrSandbox &&
+            !isCommonsCategory;
+    }
 
-/// <summary>
-/// Sets Default Sort on Article if Necessary / clean diacritics
-/// </summary>
-/// <param name="langCode">The wiki's language code</param>
-/// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
-/// <param name="restrictDefaultsortAddition"></param>
-public void SetDefaultSort(string langCode, bool skipIfNoChange, bool restrictDefaultsortAddition)
+    /// <summary>
+    /// Sets Default Sort on Article if Necessary / clean diacritics
+    /// </summary>
+    /// <param name="langCode">The wiki's language code</param>
+    /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
+    /// <param name="restrictDefaultsortAddition"></param>
+    public void SetDefaultSort(string langCode, bool skipIfNoChange, bool restrictDefaultsortAddition)
     {
         if ((langCode.Equals("en") || langCode.Equals("simple")) && Variables.IsWikimediaProject && !Variables.IsWikimediaMonolingualProject)
         {
@@ -1787,24 +1786,24 @@ public void SetDefaultSort(string langCode, bool skipIfNoChange, bool restrictDe
             AWBChangeArticleText("Emboldened titles", strTemp, false);
     }
 
-/// <summary>
-/// Indicates whether custom module processing has modified the article.
-/// </summary>
-private bool _customModuleMadeChanges;
+    /// <summary>
+    /// Indicates whether custom module processing has modified the article.
+    /// </summary>
+    private bool _customModuleMadeChanges;
 
-/// <summary>
-/// Sends the current article to a custom module for processing and applies
-/// the returned article text and edit summary.
-/// </summary>
-/// <param name="module">The custom module to execute.</param>
-/// <exception cref="ArgumentNullException">
-/// Thrown when <paramref name="module"/> is <see langword="null"/>.
-/// </exception>
-/// <exception cref="InvalidOperationException">
-/// Thrown when the module returns invalid article text or appears to return
-/// article content as its edit summary.
-/// </exception>
-public void SendPageToCustomModule(IModule module)
+    /// <summary>
+    /// Sends the current article to a custom module for processing and applies
+    /// the returned article text and edit summary.
+    /// </summary>
+    /// <param name="module">The custom module to execute.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="module"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the module returns invalid article text or appears to return
+    /// article content as its edit summary.
+    /// </exception>
+    public void SendPageToCustomModule(IModule module)
     {
         if (module == null)
             throw new ArgumentNullException(nameof(module));
@@ -2080,201 +2079,201 @@ public void SendPageToCustomModule(IModule module)
     {
         mArticleText = newText;
     }
-#endregion
+    #endregion
 
-#region Misc subroutines
-/// <summary>
-/// Appends the pending plugin edit summary to the article's edit summary and
-/// clears the pending plugin summary.
-/// </summary>
-public void AppendPluginEditSummary()
-{
-    if (mPluginEditSummary.Length > 0)
+    #region Misc subroutines
+    /// <summary>
+    /// Appends the pending plugin edit summary to the article's edit summary and
+    /// clears the pending plugin summary.
+    /// </summary>
+    public void AppendPluginEditSummary()
     {
-        AppendToSummary(
-            mPluginEditSummary.Trim());
-
-        mPluginEditSummary = string.Empty;
-    }
-}
-
-/// <summary>
-/// Hides supported portions of the article text from subsequent processing.
-/// </summary>
-/// <param name="removeText">
-/// The text-hiding processor to apply to the article text.
-/// </param>
-public void HideText(HideText removeText)
-{
-    mArticleText =
-        removeText.Hide(mArticleText);
-}
-
-/// <summary>
-/// Restores article text previously hidden by <see cref="HideText(HideText)"/>.
-/// </summary>
-/// <param name="removeText">
-/// The text-hiding processor used to restore the hidden article text.
-/// </param>
-public void UnHideText(HideText removeText)
-{
-    mArticleText =
-        removeText.AddBack(mArticleText);
-}
-
-/// <summary>
-/// Hides additional portions of the article text from subsequent processing.
-/// </summary>
-/// <param name="removeText">
-/// The text-hiding processor to apply to the article text.
-/// </param>
-public void HideMoreText(HideText removeText)
-{
-    mArticleText =
-        removeText.HideMore(mArticleText);
-}
-
-/// <summary>
-/// Restores article text previously hidden by
-/// <see cref="HideMoreText(HideText)"/>.
-/// </summary>
-/// <param name="removeText">
-/// The text-hiding processor used to restore the additional hidden article
-/// text.
-/// </param>
-public void UnHideMoreText(HideText removeText)
-{
-    mArticleText =
-        removeText.AddBackMore(mArticleText);
-}
-#endregion
-
-#region Overrides
-/// <summary>
-/// Returns the article's full title.
-/// </summary>
-/// <returns>
-/// The article title.
-/// </returns>
-public override string ToString()
-{
-    return Name;
-}
-
-/// <summary>
-/// Returns a hash code based on the article title.
-/// </summary>
-/// <returns>
-/// A hash code for the article.
-/// </returns>
-public override int GetHashCode()
-{
-    return Name.GetHashCode();
-}
-
-/// <summary>
-/// Determines whether this article has the same title as another article or
-/// as the supplied string.
-/// </summary>
-/// <param name="obj">
-/// The object to compare with this article.
-/// </param>
-/// <returns>
-/// <see langword="true"/> when <paramref name="obj"/> is an
-/// <see cref="Article"/> with the same title or a matching title string;
-/// otherwise, <see langword="false"/>.
-/// </returns>
-public override bool Equals(object obj)
-{
-    Article article = obj as Article;
-
-    if (article == null)
-    {
-        if (obj is string)
+        if (mPluginEditSummary.Length > 0)
         {
-            return Name == obj as string;
+            AppendToSummary(
+                mPluginEditSummary.Trim());
+
+            mPluginEditSummary = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Hides supported portions of the article text from subsequent processing.
+    /// </summary>
+    /// <param name="removeText">
+    /// The text-hiding processor to apply to the article text.
+    /// </param>
+    public void HideText(HideText removeText)
+    {
+        mArticleText =
+            removeText.Hide(mArticleText);
+    }
+
+    /// <summary>
+    /// Restores article text previously hidden by <see cref="HideText(HideText)"/>.
+    /// </summary>
+    /// <param name="removeText">
+    /// The text-hiding processor used to restore the hidden article text.
+    /// </param>
+    public void UnHideText(HideText removeText)
+    {
+        mArticleText =
+            removeText.AddBack(mArticleText);
+    }
+
+    /// <summary>
+    /// Hides additional portions of the article text from subsequent processing.
+    /// </summary>
+    /// <param name="removeText">
+    /// The text-hiding processor to apply to the article text.
+    /// </param>
+    public void HideMoreText(HideText removeText)
+    {
+        mArticleText =
+            removeText.HideMore(mArticleText);
+    }
+
+    /// <summary>
+    /// Restores article text previously hidden by
+    /// <see cref="HideMoreText(HideText)"/>.
+    /// </summary>
+    /// <param name="removeText">
+    /// The text-hiding processor used to restore the additional hidden article
+    /// text.
+    /// </param>
+    public void UnHideMoreText(HideText removeText)
+    {
+        mArticleText =
+            removeText.AddBackMore(mArticleText);
+    }
+    #endregion
+
+    #region Overrides
+    /// <summary>
+    /// Returns the article's full title.
+    /// </summary>
+    /// <returns>
+    /// The article title.
+    /// </returns>
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    /// <summary>
+    /// Returns a hash code based on the article title.
+    /// </summary>
+    /// <returns>
+    /// A hash code for the article.
+    /// </returns>
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
+    }
+
+    /// <summary>
+    /// Determines whether this article has the same title as another article or
+    /// as the supplied string.
+    /// </summary>
+    /// <param name="obj">
+    /// The object to compare with this article.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when <paramref name="obj"/> is an
+    /// <see cref="Article"/> with the same title or a matching title string;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public override bool Equals(object obj)
+    {
+        Article article = obj as Article;
+
+        if (article == null)
+        {
+            if (obj is string)
+            {
+                return Name == obj as string;
+            }
+
+            return false;
         }
 
-        return false;
+        return this == article;
     }
 
-    return this == article;
-}
-
-/// <summary>
-/// Determines whether this article has the same title as another article.
-/// </summary>
-/// <param name="article">
-/// The article to compare with this article.
-/// </param>
-/// <returns>
-/// <see langword="true"/> when the articles have the same title; otherwise,
-/// <see langword="false"/>.
-/// </returns>
-public bool Equals(Article article)
-{
-    return this == article;
-}
-
-/// <summary>
-/// Compares this article with another article by title using ordinal string
-/// comparison.
-/// </summary>
-/// <param name="other">
-/// The article to compare with this article.
-/// </param>
-/// <returns>
-/// A value less than zero if this article sorts before
-/// <paramref name="other"/>, zero if their titles are equal, or a value
-/// greater than zero if this article sorts after <paramref name="other"/>.
-/// </returns>
-/// <remarks>
-/// Ordinal comparison sorts by Unicode code point to match MediaWiki's
-/// expected article-title sorting behavior.
-/// </remarks>
-public int CompareTo(Article other)
-{
-    return string.CompareOrdinal(
-        Name,
-        other.Name);
-}
-
-#endregion
-
-/// <summary>
-/// Determines whether two articles have the same title.
-/// </summary>
-/// <param name="a">
-/// The first article to compare.
-/// </param>
-/// <param name="b">
-/// The second article to compare.
-/// </param>
-/// <returns>
-/// <see langword="true"/> when both references are the same instance, both
-/// are <see langword="null"/>, or their titles are equal; otherwise,
-/// <see langword="false"/>.
-/// </returns>
-public static bool operator ==(
-    Article a,
-    Article b)
-{
-    // If both are null, or both reference the same instance, return true.
-    if (ReferenceEquals(a, b))
+    /// <summary>
+    /// Determines whether this article has the same title as another article.
+    /// </summary>
+    /// <param name="article">
+    /// The article to compare with this article.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the articles have the same title; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    public bool Equals(Article article)
     {
-        return true;
+        return this == article;
     }
 
-    if ((object)a == null ||
-        (object)b == null)
+    /// <summary>
+    /// Compares this article with another article by title using ordinal string
+    /// comparison.
+    /// </summary>
+    /// <param name="other">
+    /// The article to compare with this article.
+    /// </param>
+    /// <returns>
+    /// A value less than zero if this article sorts before
+    /// <paramref name="other"/>, zero if their titles are equal, or a value
+    /// greater than zero if this article sorts after <paramref name="other"/>.
+    /// </returns>
+    /// <remarks>
+    /// Ordinal comparison sorts by Unicode code point to match MediaWiki's
+    /// expected article-title sorting behavior.
+    /// </remarks>
+    public int CompareTo(Article other)
     {
-        return false;
+        return string.CompareOrdinal(
+            Name,
+            other.Name);
     }
 
-    return a.Name == b.Name;
-}
+    #endregion
 
-public static bool operator !=(Article a, Article b)
+    /// <summary>
+    /// Determines whether two articles have the same title.
+    /// </summary>
+    /// <param name="a">
+    /// The first article to compare.
+    /// </param>
+    /// <param name="b">
+    /// The second article to compare.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when both references are the same instance, both
+    /// are <see langword="null"/>, or their titles are equal; otherwise,
+    /// <see langword="false"/>.
+    /// </returns>
+    public static bool operator ==(
+        Article a,
+        Article b)
+    {
+        // If both are null, or both reference the same instance, return true.
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        if ((object)a == null ||
+            (object)b == null)
+        {
+            return false;
+        }
+
+        return a.Name == b.Name;
+    }
+
+    public static bool operator !=(Article a, Article b)
     {
         return !(a == b);
     }

@@ -335,11 +335,11 @@ public partial class SpecialPageListProvider : Form, IListProvider
         bool NamespacesEnabled)
         GetProviderCapabilities(
             ISpecialPageProvider provider)
-        {
-            ArgumentNullException.ThrowIfNull(provider);
+    {
+        ArgumentNullException.ThrowIfNull(provider);
 
-            return (
-                provider.UserInputTextBoxEnabled,
-                provider.NamespacesEnabled);
-        }
+        return (
+            provider.UserInputTextBoxEnabled,
+            provider.NamespacesEnabled);
+    }
 }

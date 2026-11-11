@@ -1004,100 +1004,100 @@ public class SiteInfo : IXmlSerializable
 
     #endregion
 }
+/// <summary>
+/// Provides the base class for exceptions representing errors encountered
+/// while interacting with a wiki.
+/// </summary>
+public abstract class WikiException : Exception
+{
     /// <summary>
-    /// Provides the base class for exceptions representing errors encountered
-    /// while interacting with a wiki.
+    /// Initializes a new instance of the <see cref="WikiException"/> class
+    /// with the specified error message.
     /// </summary>
-    public abstract class WikiException : Exception
+    /// <param name="text">
+    /// The message that describes the error.
+    /// </param>
+    protected WikiException(string text)
+        : base(text)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WikiException"/> class
-        /// with the specified error message.
-        /// </summary>
-        /// <param name="text">
-        /// The message that describes the error.
-        /// </param>
-        protected WikiException(string text)
-            : base(text)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WikiException"/> class
-        /// with the specified error message and underlying exception.
-        /// </summary>
-        /// <param name="text">
-        /// The message that describes the error.
-        /// </param>
-        /// <param name="innerException">
-        /// The exception that caused the current exception.
-        /// </param>
-        protected WikiException(
-            string text,
-            Exception innerException)
-            : base(text, innerException)
-        {
-        }
     }
 
     /// <summary>
-    /// Represents an error encountered while connecting to or resolving a
-    /// configured wiki site.
+    /// Initializes a new instance of the <see cref="WikiException"/> class
+    /// with the specified error message and underlying exception.
     /// </summary>
-    public class WikiUrlException : WikiException
+    /// <param name="text">
+    /// The message that describes the error.
+    /// </param>
+    /// <param name="innerException">
+    /// The exception that caused the current exception.
+    /// </param>
+    protected WikiException(
+        string text,
+        Exception innerException)
+        : base(text, innerException)
     {
-        private const string ExceptionMessage =
-            "Can't connect to given wiki site.";
+    }
+}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WikiUrlException"/> class.
-        /// </summary>
-        public WikiUrlException()
-            : base(ExceptionMessage)
-        {
-        }
+/// <summary>
+/// Represents an error encountered while connecting to or resolving a
+/// configured wiki site.
+/// </summary>
+public class WikiUrlException : WikiException
+{
+    private const string ExceptionMessage =
+        "Can't connect to given wiki site.";
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WikiUrlException"/> class
-        /// with the exception that caused the connection failure.
-        /// </summary>
-        /// <param name="innerException">
-        /// The exception that caused the current exception.
-        /// </param>
-        public WikiUrlException(Exception innerException)
-            : base(ExceptionMessage, innerException)
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WikiUrlException"/> class.
+    /// </summary>
+    public WikiUrlException()
+        : base(ExceptionMessage)
+    {
     }
 
     /// <summary>
-    /// Represents an error returned when the current user does not have
-    /// permission to read from the MediaWiki API.
+    /// Initializes a new instance of the <see cref="WikiUrlException"/> class
+    /// with the exception that caused the connection failure.
     /// </summary>
-    public class ReadApiDeniedException : WikiException
+    /// <param name="innerException">
+    /// The exception that caused the current exception.
+    /// </param>
+    public WikiUrlException(Exception innerException)
+        : base(ExceptionMessage, innerException)
     {
-        private const string ExceptionMessage =
-            "Read permission is required to use this module.";
-
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="ReadApiDeniedException"/> class.
-        /// </summary>
-        public ReadApiDeniedException()
-            : base(ExceptionMessage)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="ReadApiDeniedException"/> class with the exception that
-        /// caused the permission failure.
-        /// </summary>
-        /// <param name="innerException">
-        /// The exception that caused the current exception.
-        /// </param>
-        public ReadApiDeniedException(Exception innerException)
-            : base(ExceptionMessage, innerException)
-        {
-        }
     }
+}
+
+/// <summary>
+/// Represents an error returned when the current user does not have
+/// permission to read from the MediaWiki API.
+/// </summary>
+public class ReadApiDeniedException : WikiException
+{
+    private const string ExceptionMessage =
+        "Read permission is required to use this module.";
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ReadApiDeniedException"/> class.
+    /// </summary>
+    public ReadApiDeniedException()
+        : base(ExceptionMessage)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the
+    /// <see cref="ReadApiDeniedException"/> class with the exception that
+    /// caused the permission failure.
+    /// </summary>
+    /// <param name="innerException">
+    /// The exception that caused the current exception.
+    /// </param>
+    public ReadApiDeniedException(Exception innerException)
+        : base(ExceptionMessage, innerException)
+    {
+    }
+}

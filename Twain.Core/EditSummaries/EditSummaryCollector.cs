@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Twain.Core;
+﻿namespace Twain.Core;
 
 /// <summary>
 /// Collects edit-summary contributions generated during article processing.

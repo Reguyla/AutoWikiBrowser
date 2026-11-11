@@ -24,7 +24,8 @@ public sealed class MainProcessCallbacks
     /// processing and updates application-owned statistics and UI state.
     /// </summary>
     public required Action<Article, bool, List<TypoStat>?>
-        ApplyRegexTypoProcessing { get; init; }
+        ApplyRegexTypoProcessing
+    { get; init; }
 
     /// <summary>
     /// Gets or initializes the callback that aborts the current application
@@ -37,5 +38,6 @@ public sealed class MainProcessCallbacks
     /// article-processing pipeline.
     /// </summary>
     public required Action<Article, Exception>
-        HandleProcessingException { get; init; }
+        HandleProcessingException
+    { get; init; }
 }

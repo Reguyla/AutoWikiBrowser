@@ -1,7 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Twain.Core.Parse;
-
-namespace Twain.Core.ArticleAnalysis;
+﻿namespace Twain.Core.ArticleAnalysis;
 
 /// <summary>
 /// Provides read-only analysis of MediaWiki article sections.
