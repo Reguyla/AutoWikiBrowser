@@ -1,8 +1,8 @@
 ﻿using Avalonia;
 using System.Diagnostics;
 using System.Text;
-using Twain.Diagnostics;
 using Twain.Desktop.Updates;
+using Twain.Diagnostics;
 using Twain.UI.BotSettings;
 using Velopack;
 
