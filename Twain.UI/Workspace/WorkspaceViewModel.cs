@@ -341,12 +341,6 @@ public partial class WorkspaceViewModel : ObservableObject
     private long _pendingSaveOperationId;
 
     /// <summary>
-    /// Indicates that a Save request is being started and its
-    /// operation identifier has not yet been recorded.
-    /// </summary>
-    private bool _pendingSaveInitialization;
-
-    /// <summary>
     /// Cancels the pending nudge timer for the current article.
     /// </summary>
     private CancellationTokenSource? _nudgeCancellation;
