@@ -152,6 +152,11 @@ public partial class CustomModule : Avalonia.Controls.UserControl
         object? sender,
         WebMessageReceivedEventArgs e)
     {
+        if (string.IsNullOrWhiteSpace(e.Body))
+        {
+            return;
+        }
+
         try
         {
             using JsonDocument document =
