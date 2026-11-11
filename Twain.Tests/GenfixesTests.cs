@@ -919,7 +919,7 @@ End of.
 [TestFixture]
 public class TalkGenfixesTests : GenfixesTestsBase
 {
- 
+
 
     [Test]
     public void CanDoGeneralFixes()

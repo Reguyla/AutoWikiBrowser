@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Twain.Core.ArticleAnalysis;
 
 namespace Twain.Tests.Articles;

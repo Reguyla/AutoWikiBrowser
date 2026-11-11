@@ -399,46 +399,46 @@ public class EditSummaryBuilderTests
         }
     }
 
-        [Test]
-        public void Build_NamedSectionChanged_PreservesSectionPrefix()
-        {
-            const string original =
-                "Introduction.\n\n" +
-                "== History ==\n" +
-                "Original history.";
+    [Test]
+    public void Build_NamedSectionChanged_PreservesSectionPrefix()
+    {
+        const string original =
+            "Introduction.\n\n" +
+            "== History ==\n" +
+            "Original history.";
 
-            const string modified =
-                "Introduction.\n\n" +
-                "== History ==\n" +
-                "Updated history.";
+        const string modified =
+            "Introduction.\n\n" +
+            "== History ==\n" +
+            "Updated history.";
 
-            string result = BuildSummary(original, modified);
+        string result = BuildSummary(original, modified);
 
-            Assert.That(
-                result,
-                Is.EqualTo("/* History */ General summary"));
-        }
+        Assert.That(
+            result,
+            Is.EqualTo("/* History */ General summary"));
+    }
 
-        [Test]
-        public void Build_LeadAndNamedSectionChanged_ReportsBoth()
-        {
-            const string original =
-                "Original introduction.\n\n" +
-                "== History ==\n" +
-                "Original history.";
+    [Test]
+    public void Build_LeadAndNamedSectionChanged_ReportsBoth()
+    {
+        const string original =
+            "Original introduction.\n\n" +
+            "== History ==\n" +
+            "Original history.";
 
-            const string modified =
-                "Updated introduction.\n\n" +
-                "== History ==\n" +
-                "Updated history.";
+        const string modified =
+            "Updated introduction.\n\n" +
+            "== History ==\n" +
+            "Updated history.";
 
-            string result = BuildSummary(original, modified);
+        string result = BuildSummary(original, modified);
 
-            Assert.That(
-                result,
-                Is.EqualTo(
-                    "Updated lead and History sections; General summary"));
-        }
+        Assert.That(
+            result,
+            Is.EqualTo(
+                "Updated lead and History sections; General summary"));
+    }
 
     private static string BuildSummary(
         string original,

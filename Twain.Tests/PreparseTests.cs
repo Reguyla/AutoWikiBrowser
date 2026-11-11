@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Twain.Core;
 using Twain.UI.ViewModels.Lists;
 

@@ -1,9 +1,7 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Twain.Core;
-using Twain.Core.Parse;
 using Twain.Core.TalkPages;
-using Twain.Tests.Articles;
 
 namespace Twain.Tests;
 
