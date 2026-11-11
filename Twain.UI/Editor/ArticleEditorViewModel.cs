@@ -75,7 +75,8 @@ public sealed partial class ArticleEditorViewModel : ViewModelBase
         bool,
         bool,
         string,
-        Task>? FindNextRequested { get; set; }
+        Task>? FindNextRequested
+    { get; set; }
 
     /// <summary>
     /// Gets or sets the action used to navigate the article editor

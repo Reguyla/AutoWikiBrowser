@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
@@ -1229,21 +1228,21 @@ public partial class WorkspaceViewModel : ObservableObject
     /// Stops the active article-processing workflow.
     /// </summary>
     [RelayCommand]
-        private void StopProcessing()
+    private void StopProcessing()
+    {
+        if (!Options.IsProcessing &&
+            !Options.IsProcessingActive)
         {
-            if (!Options.IsProcessing &&
-                !Options.IsProcessingActive)
-            {
-                return;
-            }
+            return;
+        }
 
-            _autoSaveCancellation?.Cancel();
-            _autoSaveCancellation?.Dispose();
-            _autoSaveCancellation = null;
+        _autoSaveCancellation?.Cancel();
+        _autoSaveCancellation?.Dispose();
+        _autoSaveCancellation = null;
 
-            _nudgeCancellation?.Cancel();
-            _nudgeCancellation?.Dispose();
-            _nudgeCancellation = null;
+        _nudgeCancellation?.Cancel();
+        _nudgeCancellation?.Dispose();
+        _nudgeCancellation = null;
 
         if (Session.Editor.IsActive)
         {
@@ -1251,7 +1250,7 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         Options.IsProcessingActive = false;
-            Options.IsProcessing = false;
+        Options.IsProcessing = false;
 
         // Discard the temporary Preparse snapshot.
         // Articles retained in Make List are not affected.

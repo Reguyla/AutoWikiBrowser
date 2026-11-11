@@ -1,6 +1,4 @@
-﻿using Avalonia.Controls;
-using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Twain.Core.ReplaceSpecial;
 
 namespace Twain.UI.ReplaceSpecial;

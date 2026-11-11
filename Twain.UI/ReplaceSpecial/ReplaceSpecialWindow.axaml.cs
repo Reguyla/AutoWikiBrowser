@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.VisualTree;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core.ReplaceSpecial;
 

@@ -115,7 +115,7 @@ public partial class App : Application
                     ShowSubstTemplatesDialogAsync(
                         desktop,
                         request);
-         }
+        }
 
         base.OnFrameworkInitializationCompleted();
     }

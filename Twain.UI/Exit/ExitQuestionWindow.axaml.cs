@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Interactivity;
 
 namespace Twain.UI.Exit;

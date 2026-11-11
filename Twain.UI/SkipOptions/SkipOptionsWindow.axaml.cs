@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using System.Collections.Generic;
 using Twain.Core.Plugin;
 using Twain.Core.Settings;
 

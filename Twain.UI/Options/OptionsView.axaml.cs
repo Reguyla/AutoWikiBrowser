@@ -1,11 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using CommunityToolkit.Mvvm.Input;
-using System.Collections.Generic;
 using Twain.Core;
 using Twain.Core.Disambiguation;
-using Twain.Core.ReplaceSpecial;
 using Twain.UI.FindReplace;
 using Twain.UI.ReplaceSpecial;
 using Twain.UI.Templates;

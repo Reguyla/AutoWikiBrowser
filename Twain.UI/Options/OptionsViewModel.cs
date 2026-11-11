@@ -10,7 +10,6 @@ using Twain.Core.ReplaceSpecial;
 using Twain.Core.Settings;
 using Twain.UI.Controls;
 using Twain.UI.FindReplace;
-using Twain.UI.Templates;
 
 namespace Twain.UI.Options;
 
@@ -1076,7 +1075,7 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
             AutoTaggerEnabled =
                 AutoTag,
 
-            PreParseMode =  PreParseMode,
+            PreParseMode = PreParseMode,
 
             DisambiguationEnabled =
                 DisambiguationEnabled,

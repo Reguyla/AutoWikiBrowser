@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Twain.Core;
 using Twain.Core.Profiles;
 
 namespace Twain.UI.Profiles;

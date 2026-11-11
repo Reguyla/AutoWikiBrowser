@@ -5,7 +5,6 @@ using Avalonia.Media;
 using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
-using Twain.Core.API;
 using Twain.Core.Profiles;
 
 namespace Twain.UI.Profiles;

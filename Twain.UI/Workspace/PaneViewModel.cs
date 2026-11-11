@@ -157,10 +157,10 @@ public sealed partial class PaneViewModel : ObservableObject
     }
 }
 
-    /// <summary>
-    /// Identifies the icon displayed by a workspace pane header action.
-    /// </summary>
-    public enum PaneHeaderActionIcon
+/// <summary>
+/// Identifies the icon displayed by a workspace pane header action.
+/// </summary>
+public enum PaneHeaderActionIcon
 {
     /// <summary>
     /// Displays a settings icon.

@@ -107,9 +107,9 @@ public partial class DabWindow : Window
     private void DabControl_Changed(
         object? sender,
         EventArgs e)
-        {
-            UpdateDoneButtonState();
-        }
+    {
+        UpdateDoneButtonState();
+    }
 
     /// <summary>
     /// Updates whether the dialog can be completed based on the state

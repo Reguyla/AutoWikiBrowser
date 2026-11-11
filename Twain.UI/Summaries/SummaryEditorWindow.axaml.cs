@@ -1,6 +1,5 @@
 using Avalonia.Interactivity;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Twain.UI.Summaries;
 

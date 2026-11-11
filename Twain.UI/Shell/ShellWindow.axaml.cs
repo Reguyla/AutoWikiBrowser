@@ -2,18 +2,13 @@
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using System.Threading.Tasks;
-using Twain.Core.AWBSettings;
-using Twain.CustomModules;
 using Twain.UI.About;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
 using Twain.UI.ExternalPrograms;
-using Twain.UI.Preferences;
-using Twain.UI.Profiles;
 using Twain.UI.Shell;
-using Twain.UI.Views.Workspaces;
 
 namespace Twain.UI.Views.Shell;
 

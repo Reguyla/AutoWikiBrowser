@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using Twain.Core.ReplaceSpecial;
 using Twain.UI.Controls;
 
@@ -322,9 +321,9 @@ public partial class RuleControl : Avalonia.Controls.UserControl
     private void ReplaceIsRegexCheckBox_IsCheckedChanged(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            UpdateRegexOptionControls();
-        }
+    {
+        UpdateRegexOptionControls();
+    }
 
     private void IfIsRegexCheckBox_IsCheckedChanged(
         object? sender,

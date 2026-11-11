@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Twain.Core.AWBSettings;
 using Twain.Core.ReplaceSpecial;
 

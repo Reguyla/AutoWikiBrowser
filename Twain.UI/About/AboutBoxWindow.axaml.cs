@@ -1,6 +1,5 @@
-using System;
-using System.Reflection;
 using Avalonia.Interactivity;
+using System.Reflection;
 using Twain.Core.Controls;
 
 namespace Twain.UI.About;

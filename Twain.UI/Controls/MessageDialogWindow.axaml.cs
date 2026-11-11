@@ -1,5 +1,4 @@
 using Avalonia.Interactivity;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace Twain.UI.Controls;
 

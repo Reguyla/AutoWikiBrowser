@@ -195,7 +195,7 @@ public partial class DatabaseScannerWindow : Window
             IgnoreComments =
                 IgnoreCommentsCheckBox.IsChecked == true,
 
-             Priority =
+            Priority =
                 PriorityComboBox.SelectedIndex switch
                 {
                     0 => ThreadPriority.Highest,

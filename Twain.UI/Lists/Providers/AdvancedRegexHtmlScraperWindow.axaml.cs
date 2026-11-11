@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Twain.Core.Lists.Providers;
 using Twain.UI.Controls;
-using Twain.UI.Lists.Providers;
 
 namespace Twain.UI.Lists.Providers;
 
