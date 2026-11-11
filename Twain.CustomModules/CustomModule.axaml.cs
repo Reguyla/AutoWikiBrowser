@@ -1,11 +1,8 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Controls;
 using Avalonia.Media;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -199,33 +196,33 @@ public partial class CustomModule : Avalonia.Controls.UserControl
     /// <summary>
     /// Saves the current custom-module source code to a local file.
     /// </summary>
-        private async Task SaveCodeToFileAsync()
+    private async Task SaveCodeToFileAsync()
+    {
+        var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+
+        if (storageProvider is null)
         {
-            var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+            return;
+        }
 
-            if (storageProvider is null)
-            {
-                return;
-            }
-
-            var file = await storageProvider.SaveFilePickerAsync(
-                new Avalonia.Platform.Storage.FilePickerSaveOptions
+        var file = await storageProvider.SaveFilePickerAsync(
+            new Avalonia.Platform.Storage.FilePickerSaveOptions
             {
                 Title = "Save Custom Module Source",
                 SuggestedFileName =
-                    Compiler?.ToString()?.Contains(
-                        "Visual Basic",
-                        StringComparison.OrdinalIgnoreCase) == true
-                        ? "CustomModule.vb"
-                        : "CustomModule.cs",
+                Compiler?.ToString()?.Contains(
+                    "Visual Basic",
+                    StringComparison.OrdinalIgnoreCase) == true
+                    ? "CustomModule.vb"
+                    : "CustomModule.cs",
                 FileTypeChoices =
-                [
-                    new Avalonia.Platform.Storage.FilePickerFileType(
+            [
+                new Avalonia.Platform.Storage.FilePickerFileType(
                     "Source files")
                 {
                     Patterns = ["*.cs", "*.vb"]
                 }
-                ]
+            ]
             });
 
         if (file is null)
@@ -590,9 +587,9 @@ public partial class CustomModule : Avalonia.Controls.UserControl
                 : "Custom Module Compilation Warnings";
 
         if (TopLevel.GetTopLevel(this) is Window owner)
-            {
-                _ = errorDialog.ShowDialog(owner);
-            }
+        {
+            _ = errorDialog.ShowDialog(owner);
+        }
 
         return !results.Errors.HasErrors;
     }
@@ -610,9 +607,9 @@ public partial class CustomModule : Avalonia.Controls.UserControl
             "Custom Module Error";
 
         if (TopLevel.GetTopLevel(this) is Window owner)
-            {
-                await errorDialog.ShowDialog(owner);
-            }
+        {
+            await errorDialog.ShowDialog(owner);
+        }
     }
 
     /// <summary>
@@ -792,9 +789,9 @@ public partial class CustomModule : Avalonia.Controls.UserControl
             guideWindow.Close();
 
         if (TopLevel.GetTopLevel(this) is Window owner)
-            {
-                await guideWindow.ShowDialog(owner);
-            }
+        {
+            await guideWindow.ShowDialog(owner);
+        }
     }
 
     private void ManualMenuItem_Click(
