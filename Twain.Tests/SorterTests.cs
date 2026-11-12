@@ -5,7 +5,7 @@ using Twain.Core.Parse;
 
 namespace Twain.Tests;
 
-public class RequiresParser2 : RequiresInitialization
+public abstract class RequiresParser2 : RequiresInitialization
 {
     protected Parsers parser2 = null!;
 

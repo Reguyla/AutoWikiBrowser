@@ -762,6 +762,8 @@ en, sq, ru
 
         int newlineCount =
             Variables.LangCode.Equals("ru") ||
+            Variables.LangCode.Equals("uk") ||
+            Variables.LangCode.Equals("de") ||
             Variables.LangCode.Equals("sl") ||
             Variables.LangCode.Equals("ar") ||
             Variables.LangCode.Equals("arz") ||
