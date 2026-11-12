@@ -22,10 +22,6 @@ public partial class ArticleEditorView : UserControl
 {
     private ArticleDocumentViewModel? _subscribedDocument;
     private readonly ArticleSearchHelper.ArticleSearchState _searchState = new();
-    private string _lastSearchText = string.Empty;
-    private bool _lastSearchIsRegex;
-    private bool _lastSearchCaseSensitive;
-    private string _lastSearchArticleName = string.Empty;
     private bool _updatingDocumentFromMonaco;
     private readonly PasteMoreConfiguration _pasteMore = new();
 
