@@ -46,7 +46,7 @@
         <TextBox
             Grid.Row="1"
             Text="{Binding SourceText}"
-            Watermark="{Binding SourcePrompt}"
+            PlaceholderText="{Binding SourcePrompt}"
             IsEnabled="{Binding IsSourceTextEnabled}" />
 
         <!-- Article list and manual entry -->
@@ -211,7 +211,7 @@
 
                 <TextBox
                     Text="{Binding ManualArticleTitle}"
-                    Watermark="Article title" />
+                    PlaceholderText="Article title" />
 
                 <Button
                     Grid.Column="1"

@@ -51,7 +51,7 @@
 
                 <TextBox Grid.Column="0"
                          Name="StartFromTextBox"
-                         Watermark="Article title" />
+                         PlaceholderText="Article title" />
 
                 <CheckBox Grid.Column="1"
                           Name="IgnoreRedirectsCheckBox"

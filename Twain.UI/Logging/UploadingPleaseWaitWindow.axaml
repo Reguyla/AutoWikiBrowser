@@ -7,7 +7,7 @@
     Height="130"
     CanResize="False"
     ShowInTaskbar="False"
-    SystemDecorations="BorderOnly"
+    WindowDecorations="BorderOnly"
     WindowStartupLocation="CenterOwner"
     Title="Uploading..."
     Background="{DynamicResource TwainApplicationBackgroundBrush}"

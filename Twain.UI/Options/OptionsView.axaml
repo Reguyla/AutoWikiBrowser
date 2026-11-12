@@ -425,7 +425,7 @@
 
                     </StackPanel>
 
-                    <TextBox AcceptsReturn="True" MinHeight="80" IsEnabled="{Binding AppendPrependEnabled}" Text="{Binding AppendPrependText}" TextWrapping="Wrap" Watermark="Message, including title in wiki format"/>
+                    <TextBox AcceptsReturn="True" MinHeight="80" IsEnabled="{Binding AppendPrependEnabled}" Text="{Binding AppendPrependText}" TextWrapping="Wrap" PlaceholderText="Message, including title in wiki format"/>
 
                     <StackPanel
                         Margin="20,0,0,0"

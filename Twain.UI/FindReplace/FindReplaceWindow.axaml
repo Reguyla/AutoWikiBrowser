@@ -54,7 +54,7 @@
 
             <TextBox
                 Width="250"
-                Watermark="Search Find and Replace"
+                PlaceholderText="Search Find and Replace"
                 Text="{Binding SearchText, Mode=TwoWay}" />
 
             <Button

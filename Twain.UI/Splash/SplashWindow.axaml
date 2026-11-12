@@ -8,7 +8,7 @@
     Height="340"
     CanResize="False"
     ShowInTaskbar="False"
-    SystemDecorations="None"
+    WindowDecorations="None"
     WindowStartupLocation="CenterScreen"
     Background="{DynamicResource TwainApplicationBackgroundBrush}"
     Foreground="{DynamicResource TwainTextPrimaryBrush}">

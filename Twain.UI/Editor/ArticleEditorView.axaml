@@ -33,7 +33,7 @@
             <TextBox
                 Grid.Column="1"
                 Text="{Binding CalculatedEditSummary, Mode=TwoWay}"
-                Watermark="Calculated edit summary"
+                PlaceholderText="Calculated edit summary"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Stretch" />
 
