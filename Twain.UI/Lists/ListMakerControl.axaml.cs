@@ -214,7 +214,7 @@ public partial class ListMakerControl : UserControl
                 ArticleListFilterProcessor.FilterByArticleSet(
                     articles,
                     comparisonArticles,
-                    _filterConfiguration.IntersectComparisonList);
+                    _filterConfiguration.ComparisonOperation);
         }
 
         _articleList.ReplaceWith(articles);
