@@ -481,11 +481,11 @@ hello talk";
         ArticleText = AllCommented;
         TalkGenFixes();
 
-        TestContext.WriteLine("Expected:");
-        TestContext.WriteLine(AllCommented);
+        TestContext.Out.WriteLine("Expected:");
+        TestContext.Out.WriteLine(AllCommented);
 
-        TestContext.WriteLine("Actual:");
-        TestContext.WriteLine(ArticleText);
+        TestContext.Out.WriteLine("Actual:");
+        TestContext.Out.WriteLine(ArticleText);
 
         Assert.That(ArticleText, Is.EqualTo(AllCommented),
             "no WikiProject banner shell addition when templates all commented out");
