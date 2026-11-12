@@ -326,29 +326,35 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     }
 
     private void ContentNamespacesCheckBox_Click(
-    object? sender,
-    Avalonia.Interactivity.RoutedEventArgs e)
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
     {
-        ContentNamespaceList.SelectedItems.Clear();
+        if (ContentNamespaceList.SelectedItems is not { } selectedItems)
+            return;
+
+        selectedItems.Clear();
 
         if (ContentNamespacesCheckBox.IsChecked != true)
             return;
 
         foreach (NamespaceFilterItem item in _contentNamespaceItems)
-            ContentNamespaceList.SelectedItems.Add(item);
+            selectedItems.Add(item);
     }
 
     private void TalkNamespacesCheckBox_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        TalkNamespaceList.SelectedItems.Clear();
+        if (TalkNamespaceList.SelectedItems is not { } selectedItems)
+            return;
+
+        selectedItems.Clear();
 
         if (TalkNamespacesCheckBox.IsChecked != true)
             return;
 
         foreach (NamespaceFilterItem item in _talkNamespaceItems)
-            TalkNamespaceList.SelectedItems.Add(item);
+            selectedItems.Add(item);
     }
 
     /// <summary>
@@ -386,16 +392,22 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     {
         List<int> namespaceIds = new();
 
-        foreach (NamespaceFilterItem item in
-            ContentNamespaceList.SelectedItems.Cast<NamespaceFilterItem>())
+        if (ContentNamespaceList.SelectedItems is { } contentSelectedItems)
         {
-            namespaceIds.Add(item.Id);
+            foreach (NamespaceFilterItem item in
+                contentSelectedItems.Cast<NamespaceFilterItem>())
+            {
+                namespaceIds.Add(item.Id);
+            }
         }
 
-        foreach (NamespaceFilterItem item in
-            TalkNamespaceList.SelectedItems.Cast<NamespaceFilterItem>())
+        if (TalkNamespaceList.SelectedItems is { } talkSelectedItems)
         {
-            namespaceIds.Add(item.Id);
+            foreach (NamespaceFilterItem item in
+                talkSelectedItems.Cast<NamespaceFilterItem>())
+            {
+                namespaceIds.Add(item.Id);
+            }
         }
 
         namespaceIds.Sort();
@@ -409,22 +421,32 @@ public partial class ListFilterWindow : Avalonia.Controls.Window
     /// <param name="namespaceIds">
     /// The namespace identifiers to select.
     /// </param>
+    /// <summary>
+    /// Selects the namespaces having the specified identifiers.
+    /// </summary>
     private void SelectNamespaces(
         ICollection<int> namespaceIds)
     {
-        ContentNamespaceList.SelectedItems.Clear();
-        TalkNamespaceList.SelectedItems.Clear();
-
-        foreach (NamespaceFilterItem item in _contentNamespaceItems)
+        if (ContentNamespaceList.SelectedItems is { } contentSelectedItems)
         {
-            if (namespaceIds.Contains(item.Id))
-                ContentNamespaceList.SelectedItems.Add(item);
+            contentSelectedItems.Clear();
+
+            foreach (NamespaceFilterItem item in _contentNamespaceItems)
+            {
+                if (namespaceIds.Contains(item.Id))
+                    contentSelectedItems.Add(item);
+            }
         }
 
-        foreach (NamespaceFilterItem item in _talkNamespaceItems)
+        if (TalkNamespaceList.SelectedItems is { } talkSelectedItems)
         {
-            if (namespaceIds.Contains(item.Id))
-                TalkNamespaceList.SelectedItems.Add(item);
+            talkSelectedItems.Clear();
+
+            foreach (NamespaceFilterItem item in _talkNamespaceItems)
+            {
+                if (namespaceIds.Contains(item.Id))
+                    talkSelectedItems.Add(item);
+            }
         }
     }
 }
