@@ -797,7 +797,7 @@ public partial class DatabaseScannerWindow : Window
                 _filterConfiguration.UseRegex,
                 _filterConfiguration.RemoveDuplicates,
                 comparisonArticles.Count > 0,
-                _filterConfiguration.IntersectComparisonList,
+                _filterConfiguration.ComparisonOperation,
                 _filterConfiguration.SortAscending);
 
         ResultsListBox.ItemsSource =
