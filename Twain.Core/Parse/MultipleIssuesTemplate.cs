@@ -67,7 +67,7 @@ public partial class Parsers
                     articleText, MultipleIssuesZeroTag);
             }
         }
-            int sectionTags = TemplateCount(alltemplates, WikiRegexes.MultipleIssuesSectionMaintenanceTemplates);
+        int sectionTags = TemplateCount(alltemplates, WikiRegexes.MultipleIssuesSectionMaintenanceTemplates);
 
         if (hasMI || TemplateCount(alltemplates, WikiRegexes.MultipleIssuesArticleMaintenanceTemplates) > 1 ||
             sectionTags > 1)

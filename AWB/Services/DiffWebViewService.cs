@@ -1,6 +1,5 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
-using System.Windows.Forms;
 using Twain.Core;
 
 namespace AutoWikiBrowser.Services.Diff;

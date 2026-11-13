@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using Twain.Core.ReplaceSpecial;
 using Rule = Twain.Core.ReplaceSpecial.Rule;
@@ -367,10 +366,10 @@ public partial class ReplaceSpecialViewModel : ObservableObject
         return false;
     }
 
-/// <summary>
-/// Creates a new find and replace rule beneath the currently selected rule.
-/// </summary>
-[RelayCommand(CanExecute = nameof(CanAddSubrule))]
+    /// <summary>
+    /// Creates a new find and replace rule beneath the currently selected rule.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanAddSubrule))]
     public void AddSubrule()
     {
         AddChildRule(

@@ -36,7 +36,6 @@ using Twain.Core.Editing;
 using Twain.Core.EditSummaries;
 using Twain.Core.Exceptions;
 using Twain.Core.Links;
-using Twain.Core.Lists.Providers;
 using Twain.Core.Navigation;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
@@ -707,7 +706,7 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     /// <summary>
     /// Tracks whether the database scanner should use the current article list.
     /// </summary>
-private CurrentArticleListMode _dbScannerUseCurrentArticleList;
+    private CurrentArticleListMode _dbScannerUseCurrentArticleList;
 
     /// <summary>
     /// Indicates whether the user should be alerted by flashing the window.
@@ -8475,7 +8474,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     }
 
     #region PasteMore
- 
+
     /// <summary>
     /// Inserts the configured text for the selected Paste More menu item at the
     /// current editor selection and closes the context menu.
