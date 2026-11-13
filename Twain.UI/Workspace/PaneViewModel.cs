@@ -86,6 +86,30 @@ public sealed partial class PaneViewModel : ObservableObject
     /// </summary>
     private Action? _editOnWikiAction;
 
+    /// <summary>
+    /// Gets or sets whether the current article
+    /// is on the user's watchlist.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WatchlistToolTip))]
+    private bool _isArticleWatched;
+
+    /// <summary>
+    /// Gets or sets whether watchlist status
+    /// is available for the current article.
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasWatchlistStatus;
+
+    /// <summary>
+    /// Gets the tooltip describing the article's
+    /// current watchlist status.
+    /// </summary>
+    public string WatchlistToolTip =>
+        IsArticleWatched
+            ? "Article is on your watchlist"
+            : "Article is not on your watchlist";
+
     public Action? EditOnWikiAction
     {
         get => _editOnWikiAction;

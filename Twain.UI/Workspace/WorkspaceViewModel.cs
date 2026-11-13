@@ -898,6 +898,9 @@ public partial class WorkspaceViewModel : ObservableObject
         PaneViewModel articleEditorPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
+        articleEditorPane.HasWatchlistStatus = false;
+        articleEditorPane.IsArticleWatched = false;
+
         articleEditorPane.LastEditTimestamp = string.Empty;
 
         _activeQueueArticle = article;
@@ -1863,6 +1866,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
         PaneViewModel articleEditorPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
+        articleEditorPane.IsArticleWatched = page.IsWatched;
+        articleEditorPane.HasWatchlistStatus = true;
 
         if (DateTimeOffset.TryParse(
                 page.Timestamp,
