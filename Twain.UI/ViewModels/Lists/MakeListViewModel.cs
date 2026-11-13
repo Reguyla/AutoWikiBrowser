@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.AWBSettings;
 using Twain.Core.Lists;
@@ -135,6 +136,170 @@ public partial class MakeListViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _formatDisplayTitles;
+
+    /// <summary>
+    /// Gets or sets whether watched articles are highlighted
+    /// in the Make List panel.
+    /// </summary>
+    [ObservableProperty]
+    private bool _highlightWatchedArticles;
+
+    /// <summary>
+    /// Loads watchlist information when highlighting is enabled.
+    /// </summary>
+    partial void OnHighlightWatchedArticlesChanged(bool value)
+    {
+        if (value && !IsWatchlistLoading)
+        {
+            _ = LoadWatchedArticlesSafelyAsync();
+        }
+    }
+
+    /// <summary>
+    /// Loads watchlist information and handles retrieval failures.
+    /// </summary>
+    private async Task LoadWatchedArticlesSafelyAsync()
+    {
+        try
+        {
+            await LoadWatchedArticlesAsync();
+        }
+        catch (Exception ex)
+        {
+            ResetWatchedArticles();
+            HighlightWatchedArticles = false;
+
+            ErrorHandler.HandleException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Stores watched article titles for the active wiki session.
+    /// </summary>
+    private readonly HashSet<string> _watchedArticleTitles =
+        new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Gets whether watchlist information has been loaded.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isWatchlistLoaded;
+
+    /// <summary>
+    /// Gets whether a watchlist lookup is currently running.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isWatchlistLoading;
+
+    /// <summary>
+    /// Gets whether the specified article is on the loaded watchlist.
+    /// </summary>
+    public bool IsArticleWatched(string articleTitle)
+    {
+        return IsWatchlistLoaded &&
+               _watchedArticleTitles.Contains(articleTitle);
+    }
+
+    /// <summary>
+    /// Notifies article-list bindings that watchlist highlighting
+    /// should be refreshed.
+    /// </summary>
+    public int WatchlistHighlightVersion { get; private set; }
+
+    private void RefreshWatchlistHighlight()
+    {
+        WatchlistHighlightVersion++;
+        OnPropertyChanged(nameof(WatchlistHighlightVersion));
+    }
+
+    /// <summary>
+    /// Replaces the cached watched article titles.
+    /// </summary>
+    public void UpdateWatchedArticles(IEnumerable<string> titles)
+    {
+        ArgumentNullException.ThrowIfNull(titles);
+
+        _watchedArticleTitles.Clear();
+
+        foreach (string title in titles)
+        {
+            _watchedArticleTitles.Add(title);
+        }
+
+        IsWatchlistLoaded = true;
+
+        RefreshWatchlistHighlight();
+    }
+
+    /// <summary>
+    /// Updates the cached watchlist status of a single article
+    /// after a successful Watch/Unwatch operation.
+    /// </summary>
+    public void UpdateArticleWatchStatus(string articleTitle, bool isWatched)
+    {
+        if (!IsWatchlistLoaded)
+            return;
+
+        bool changed = isWatched
+            ? _watchedArticleTitles.Add(articleTitle)
+            : _watchedArticleTitles.Remove(articleTitle);
+
+        if (changed)
+            RefreshWatchlistHighlight();
+    }
+
+    /// <summary>
+    /// Clears the cached watchlist information.
+    /// </summary>
+    public void ResetWatchedArticles()
+    {
+        _watchedArticleTitles.Clear();
+        IsWatchlistLoaded = false;
+
+        RefreshWatchlistHighlight();
+    }
+
+    /// <summary>
+    /// Loads the current user's watched article titles
+    /// using the active wiki session.
+    /// </summary>
+    public async Task LoadWatchedArticlesAsync()
+    {
+        if (IsWatchlistLoading)
+            return;
+
+        IsWatchlistLoading = true;
+
+        try
+        {
+            MyWatchlistListProvider provider = new();
+
+            provider.SetSession(_session);
+
+            // Run the synchronous API provider without
+            // blocking the Avalonia UI thread.
+
+            List<Article> watchedArticles =
+                await Task.Run(() => provider.MakeList());
+
+            UpdateWatchedArticles(
+                watchedArticles.Select(article => article.Name));
+
+            // The legacy provider currently limits retrieval to 25,000 pages.
+            // Reaching that limit may mean the watchlist is incomplete.
+            if (watchedArticles.Count >= 25000)
+            {
+                StatusText =
+                    "Watchlist retrieval reached the current limit of " +
+                    "25,000 pages. Some watched articles may not be highlighted.";
+            }
+
+        }
+        finally
+        {
+            IsWatchlistLoading = false;
+        }
+    }
 
     /// <summary>
     /// Gets the list providers that can generate additional articles

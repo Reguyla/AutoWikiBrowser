@@ -967,7 +967,11 @@ public partial class WorkspaceViewModel : ObservableObject
             {
                 articleEditorPane.IsArticleWatched = !wasWatched;
                 Options.IsCurrentArticleWatched = !wasWatched;
+
             }
+            MakeList.UpdateArticleWatchStatus(
+                articleTitle,
+                !wasWatched);
         }
         catch (Exception ex)
         {
