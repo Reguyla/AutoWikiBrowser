@@ -30,6 +30,7 @@ public sealed partial class PaneViewModel : ObservableObject
         Definition = definition;
         State = state;
         Content = content;
+        _title = definition.Title;
         _isVisible = state.IsVisible;
     }
 
@@ -48,6 +49,51 @@ public sealed partial class PaneViewModel : ObservableObject
     /// </remarks>
     public PaneState State { get; }
 
+    private Action? _historyAction;
+
+    /// <summary>
+    /// Gets or sets the action used to open article history.
+    /// </summary>
+    public Action? HistoryAction
+    {
+        get => _historyAction;
+        set
+        {
+            if (SetProperty(ref _historyAction, value))
+            {
+                OnPropertyChanged(nameof(HasHistoryAction));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets whether the History action is available.
+    /// </summary>
+    public bool HasHistoryAction => HistoryAction is not null;
+
+    /// <summary>
+    /// Executes the article history action.
+    /// </summary>
+    [RelayCommand]
+    private void OpenHistory()
+    {
+        HistoryAction?.Invoke();
+    }
+
+    /// <summary>
+    /// Gets or sets the latest article revision timestamp
+    /// displayed in the pane header.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasLastEditTimestamp))]
+    private string _lastEditTimestamp = string.Empty;
+
+    /// <summary>
+    /// Gets whether the header has a revision timestamp to display.
+    /// </summary>
+    public bool HasLastEditTimestamp =>
+        !string.IsNullOrWhiteSpace(LastEditTimestamp);
+
     /// <summary>
     /// Gets the content presented within the pane.
     /// </summary>
@@ -63,9 +109,10 @@ public sealed partial class PaneViewModel : ObservableObject
     public PaneId Id => Definition.Id;
 
     /// <summary>
-    /// Gets the user-facing pane title.
+    /// Gets or sets the user-facing pane title.
     /// </summary>
-    public string Title => Definition.Title;
+    [ObservableProperty]
+    private string _title = string.Empty;
 
     /// <summary>
     /// Gets or sets the action invoked by the pane's optional header button.

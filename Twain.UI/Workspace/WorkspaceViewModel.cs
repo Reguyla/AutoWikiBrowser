@@ -667,6 +667,24 @@ public partial class WorkspaceViewModel : ObservableObject
 
         articleEditorPane.HeaderAction = ShowOptions;
 
+        articleEditorPane.HistoryAction = OpenArticleHistory;
+
+        articleEditorPane.Title =
+            string.IsNullOrWhiteSpace(CurrentArticleName)
+                ? "Page Editor"
+                : CurrentArticleName;
+
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(CurrentArticleName))
+            {
+                articleEditorPane.Title =
+                    string.IsNullOrWhiteSpace(CurrentArticleName)
+                        ? "Page Editor"
+                        : CurrentArticleName;
+            }
+        };
+
         PaneViewModel makeListPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleList);
 
@@ -685,6 +703,39 @@ public partial class WorkspaceViewModel : ObservableObject
                     MakeList.ArticleCountText;
             }
         };
+    }
+
+    /// <summary>
+    /// Opens the current article's revision history
+    /// on the connected MediaWiki site.
+    /// </summary>
+    private void OpenArticleHistory()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentArticleName))
+            return;
+
+        string wikiUrl = Session.Editor.URL;
+
+        string historyUrl =
+            wikiUrl +
+            "index.php?title=" +
+            Uri.EscapeDataString(CurrentArticleName) +
+            "&action=history";
+
+        try
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = historyUrl,
+                    UseShellExecute = true
+                });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to open article history: {ex}");
+        }
     }
 
     private void InitializeEditor(
@@ -811,6 +862,11 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void BeginArticleProcessing(Article article)
     {
+        PaneViewModel articleEditorPane = Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
+        articleEditorPane.LastEditTimestamp = string.Empty;
+
         _activeQueueArticle = article;
 
         CurrentArticleName = article.Name;
@@ -1771,6 +1827,23 @@ public partial class WorkspaceViewModel : ObservableObject
         _nudgeCancellation = null;
 
         CurrentArticle = new Article(page);
+
+        PaneViewModel articleEditorPane = Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
+        if (DateTimeOffset.TryParse(
+                page.Timestamp,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AssumeUniversal,
+                out DateTimeOffset lastEdit))
+        {
+            articleEditorPane.LastEditTimestamp =
+                $"Last edit: {lastEdit.UtcDateTime:yyyy-MM-dd HH:mm} UTC";
+        }
+        else
+        {
+            articleEditorPane.LastEditTimestamp = string.Empty;
+        }
 
         Editor.CalculatedEditSummary = string.Empty;
 

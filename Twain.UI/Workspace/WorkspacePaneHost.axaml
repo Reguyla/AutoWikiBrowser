@@ -32,7 +32,7 @@
             BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
             BorderThickness="0,0,0,1">
 
-            <Grid ColumnDefinitions="*,Auto,Auto"
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
                   ColumnSpacing="8">
 
                 <!-- Pane title -->
@@ -43,10 +43,41 @@
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource TwainTextPrimaryBrush}"
                     Text="{Binding Title}" />
+                
+                <!-- Last article revision -->
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    FontSize="{DynamicResource TwainFontSizeSmall}"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                    Text="{Binding LastEditTimestamp}"
+                    IsVisible="{Binding HasLastEditTimestamp}"
+                    TextTrimming="CharacterEllipsis"
+                    MaxWidth="220" />
+ 
+                <!-- Article revision history -->
+                <Button
+                    Grid.Column="2"
+                    Classes="twain-pane-header-button"
+                    Command="{Binding OpenHistoryCommand}"
+                    IsVisible="{Binding HasHistoryAction}"
+                    ToolTip.Tip="Open article revision history"
+                    Padding="10,2"
+                    MinWidth="65"
+                    HorizontalAlignment="Center">
+
+                    <TextBlock
+                        Text="History"
+                        TextDecorations="Underline"
+                        TextWrapping="NoWrap"
+                        FontSize="{DynamicResource TwainFontSizeSmall}"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+                </Button>
 
                 <!-- Optional pane status indicator -->
                 <TextBlock
-                    Grid.Column="1"
+                    Grid.Column="3"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
                     FontSize="{DynamicResource TwainFontSizeSmall}"
@@ -58,7 +89,7 @@
 
                 <!-- Optional pane header action -->
                 <Button
-                    Grid.Column="2"
+                    Grid.Column="4"
                     Classes="twain-pane-header-button"
                     IsVisible="{Binding HasHeaderAction}"
                     Command="{Binding ExecuteHeaderActionCommand}"
