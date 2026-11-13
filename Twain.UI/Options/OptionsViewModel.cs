@@ -70,6 +70,14 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public string WatchButtonText =>
         IsCurrentArticleWatched ? "Unwatch" : "Watch";
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanToggleArticleWatch))]
+    private bool _isWatchOperationRunning;
+
+    public bool CanToggleArticleWatch =>
+        AreArticleProcessingControlsEnabled &&
+        !IsWatchOperationRunning;
+
     /// <summary>
     /// Requests a watchlist change for the current article.
     /// </summary>
@@ -856,6 +864,7 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
         OnPropertyChanged(nameof(AreArticleProcessingControlsEnabled));
         OnPropertyChanged(nameof(CanFind));
         OnPropertyChanged(nameof(IsSaveEnabled));
+        OnPropertyChanged(nameof(CanToggleArticleWatch));
     }
 
     /// <summary>

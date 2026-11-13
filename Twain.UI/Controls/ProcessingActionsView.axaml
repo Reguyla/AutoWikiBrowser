@@ -74,7 +74,7 @@
                     HorizontalAlignment="Stretch"
                     Content="{Binding WatchButtonText}"
                     Command="{Binding ToggleArticleWatchCommand}"
-                    IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
+                    IsEnabled="{Binding CanToggleArticleWatch}" />
 
                 <Button
                     x:Name="FalsePositiveButton"

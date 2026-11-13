@@ -954,6 +954,7 @@ public partial class WorkspaceViewModel : ObservableObject
         bool wasWatched = articleEditorPane.IsArticleWatched;
 
         _isWatchOperationRunning = true;
+        Options.IsWatchOperationRunning = true;
 
         try
         {
@@ -970,12 +971,12 @@ public partial class WorkspaceViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine(
-                $"Watchlist operation failed: {ex}");
+            ErrorHandler.HandleException(ex);
         }
         finally
         {
             _isWatchOperationRunning = false;
+            Options.IsWatchOperationRunning = false;
         }
     }
 
