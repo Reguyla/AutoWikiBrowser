@@ -474,58 +474,92 @@ public partial class Parsers
     /// declarations are left unchanged because this routine cannot safely determine
     /// which value should be retained.
     /// </remarks>
+
+
     private static bool TryNormalizeDuplicateDefaultSorts(
         ref string articleText,
         ref MatchCollection defaultSortMatches)
     {
-        if (defaultSortMatches.Count <= 1 &&
-            (defaultSortMatches.Count == 0 ||
-             defaultSortMatches[0].Value
-                 .ToUpper()
-                 .Contains("DEFAULTSORT")))
-        {
+        if (defaultSortMatches.Count <= 1)
             return true;
-        }
 
-        bool allDefaultSortsMatch =
-            false;
-
-        string previousDefaultSort =
-            string.Empty;
-
-        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Feature_requests/Archive_5#Detect_multiple_DEFAULTSORT
-        foreach (Match defaultSortMatch in defaultSortMatches)
-        {
-            if (previousDefaultSort.Length == 0)
-            {
-                previousDefaultSort =
-                    defaultSortMatch.Value;
-
-                allDefaultSortsMatch = true;
-            }
-            else
-            {
-                allDefaultSortsMatch =
-                    defaultSortMatch.Value ==
-                    previousDefaultSort;
-            }
-        }
-
-        if (!allDefaultSortsMatch)
+        if (!AllDefaultSortsMatch(defaultSortMatches))
             return false;
 
-        articleText =
-            WikiRegexes.Defaultsort.Replace(
-                articleText,
-                "",
-                defaultSortMatches.Count - 1);
+        articleText = RemoveDuplicateDefaultSorts(
+            articleText,
+            defaultSortMatches);
 
         defaultSortMatches =
-            WikiRegexes.Defaultsort.Matches(
-                articleText);
+            WikiRegexes.Defaultsort.Matches(articleText);
 
         return true;
     }
+
+    private static bool AllDefaultSortsMatch(
+        MatchCollection defaultSortMatches)
+    {
+        if (defaultSortMatches.Count <= 1)
+            return true;
+
+        string firstValue = defaultSortMatches[0].Value;
+
+        for (int i = 1; i < defaultSortMatches.Count; i++)
+        {
+            if (!string.Equals(
+                    firstValue,
+                    defaultSortMatches[i].Value,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static string RemoveDuplicateDefaultSorts(
+        string articleText,
+        MatchCollection defaultSortMatches)
+    {
+        StringBuilder result = new(articleText);
+
+        // Remove all but the last declaration.
+        // Work backward to preserve the original match indices.
+        for (int i = defaultSortMatches.Count - 2; i >= 0; i--)
+        {
+            Match current = defaultSortMatches[i];
+
+            int length = current.Length;
+
+            if (i > 0)
+            {
+                Match next = defaultSortMatches[i + 1];
+
+                int gapStart = current.Index + current.Length;
+                int gapLength = next.Index - gapStart;
+
+                // Remove the trailing newline when duplicate
+                // declarations occupy consecutive lines.
+                if (gapLength == 2 &&
+                    articleText.AsSpan(gapStart, gapLength)
+                        .SequenceEqual("\r\n"))
+                {
+                    length += 2;
+                }
+                else if (gapLength == 1 &&
+                         articleText[gapStart] == '\n')
+                {
+                    length++;
+                }
+            }
+
+            result.Remove(current.Index, length);
+        }
+
+        return result.ToString();
+    }
+
 
     /// <summary>
     /// Normalizes an existing English-language DEFAULTSORT declaration when the
