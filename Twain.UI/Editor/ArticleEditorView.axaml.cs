@@ -579,6 +579,23 @@ public partial class ArticleEditorView : UserControl
     }
 
     /// <summary>
+    /// Shows or hides the Edit Bar.
+    /// </summary>
+    public void SetEditToolbarVisibility(bool visible)
+    {
+        EditToolbar.IsVisible = visible;
+    }
+
+    /// <summary>
+    /// Applies the selected Edit Bar button display mode.
+    /// </summary>
+    public void SetEditToolbarDisplayMode(
+        EditToolbarDisplayMode mode)
+    {
+        EditToolbar.SetDisplayMode(mode);
+    }
+
+    /// <summary>
     /// Saves the current article text to a local text file.
     /// </summary>
     private async Task SaveTextToFileAsync()

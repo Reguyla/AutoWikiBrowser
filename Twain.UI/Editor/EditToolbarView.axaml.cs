@@ -12,6 +12,8 @@ public partial class EditToolbarView : UserControl
     public EditToolbarView()
     {
         InitializeComponent();
+
+        DataContext = ToolbarState;
     }
 
     private void FormattingButton_Click(
@@ -26,4 +28,17 @@ public partial class EditToolbarView : UserControl
 
         FormattingRequested?.Invoke(this, actionId);
     }
+
+    private readonly EditToolbarViewModel _toolbarState = new();
+
+    public EditToolbarViewModel ToolbarState => _toolbarState;
+
+    /// <summary>
+    /// Updates the Edit Bar button display mode.
+    /// </summary>
+    public void SetDisplayMode(EditToolbarDisplayMode mode)
+    {
+        ToolbarState.DisplayMode = mode;
+    }
+
 }

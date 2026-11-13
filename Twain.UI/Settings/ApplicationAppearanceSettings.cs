@@ -22,6 +22,18 @@ public sealed class ApplicationAppearanceSettings
     public bool ShowProcessingToolbar { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets whether the Edit Bar is displayed.
+    /// </summary>
+    public bool ShowEditBar { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets how Edit Bar buttons display
+    /// their icons and text.
+    /// </summary>
+    public DisplayMode EditBarDisplayMode { get; set; } =
+        DisplayMode.TextOnly;
+
+    /// <summary>
     /// Gets or sets how processing toolbar buttons
     /// display their icons and text.
     /// </summary>

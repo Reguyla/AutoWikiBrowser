@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -46,6 +47,21 @@ public partial class WorkspaceView : UserControl
     public WorkspaceView()
     {
         InitializeComponent();
+
+        AttachedToVisualTree += (_, _) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (TopLevel.GetTopLevel(this) is not ShellWindow shell ||
+                    shell.DataContext is not ShellViewModel shellViewModel)
+                {
+                    return;
+                }
+
+                ApplyEditBarAppearance(
+                    shellViewModel.AppearanceSettings);
+            }, DispatcherPriority.Loaded);
+        };
 
         ArticleAlertsPanel.AlertActivated += ArticleAlertsPanel_AlertActivated;
 
@@ -530,9 +546,18 @@ public partial class WorkspaceView : UserControl
             shellViewModel.AppearanceSettings.NavigationDisplayMode =
                 PreferencesView.NavigationDisplayMode;
 
+            // Remember the Edit Bar visibility and display mode.
+            shellViewModel.AppearanceSettings.ShowEditBar =
+                PreferencesView.ShowEditBar;
+
+            shellViewModel.AppearanceSettings.EditBarDisplayMode =
+                PreferencesView.EditBarDisplayMode;
+
             // Persist the application appearance preferences.
             ApplicationAppearanceSettingsStore.Save(
                 shellViewModel.AppearanceSettings);
+
+            ApplyEditBarAppearance(shellViewModel.AppearanceSettings);
 
             // Apply the accepted preference to the current shell.
             shellViewModel.IsToolbarExpanded = showToolbar;
@@ -557,6 +582,39 @@ public partial class WorkspaceView : UserControl
         }
 
         workspace.ShowEditingCommand.Execute(null);
+    }
+
+    /// <summary>
+    /// Applies the Edit Bar appearance preferences.
+    /// </summary>
+    private void ApplyEditBarAppearance(
+        ApplicationAppearanceSettings settings)
+    {
+        ArticleEditorView? editor =
+            this.GetVisualDescendants()
+                .OfType<ArticleEditorView>()
+                .FirstOrDefault();
+
+        if (editor is null)
+        {
+            return;
+        }
+
+        editor.SetEditToolbarVisibility(settings.ShowEditBar);
+
+        EditToolbarDisplayMode mode =
+            settings.EditBarDisplayMode switch
+            {
+                Twain.UI.Controls.DisplayMode.IconsOnly =>
+                    EditToolbarDisplayMode.Icons,
+
+                Twain.UI.Controls.DisplayMode.TextOnly =>
+                    EditToolbarDisplayMode.Text,
+
+                _ => EditToolbarDisplayMode.IconsAndText
+            };
+
+        editor.SetEditToolbarDisplayMode(mode);
     }
 
     private void ProfilesView_Completed(

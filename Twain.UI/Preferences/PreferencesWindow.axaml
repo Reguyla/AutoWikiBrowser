@@ -50,38 +50,62 @@
 
 
                 </Grid>
-                
-                         <CheckBox
-                            x:Name="ShowProcessingToolbarCheckBox"
-                            Content="Show processing toolbar"
-                            IsChecked="True"
-                            Margin="0,8,0,0" />
 
-                    <!-- Processing toolbar appearance -->
-                    <Grid
-                        ColumnDefinitions="Auto,*"
-                        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                        Margin="0,4,0,8">
+                        <!-- Toolbar appearance -->
+                        <Grid
+                            ColumnDefinitions="Auto,200"
+                            RowDefinitions="Auto,Auto"
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                            RowSpacing="{DynamicResource TwainSpacingMedium}"
+                            Margin="0,8,0,8">
 
-                        <TextBlock
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Text="Processing toolbar display:" />
+                            <!-- Processing toolbar -->
+                            <CheckBox
+                                x:Name="ShowProcessingToolbarCheckBox"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Content="Show processing toolbar"
+                                IsChecked="True"
+                                VerticalAlignment="Center" />
 
-                        <ComboBox
-                            x:Name="DisplayModeComboBox"
-                            Grid.Column="1"
-                            MinWidth="200"
-                            HorizontalAlignment="Left"
-                            SelectedIndex="1">
+                            <ComboBox
+                                x:Name="DisplayModeComboBox"
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                SelectedIndex="1"
+                                IsEnabled="{Binding #ShowProcessingToolbarCheckBox.IsChecked}">
 
-                            <ComboBoxItem Content="Icons only" />
-                            <ComboBoxItem Content="Icons and text" />
-                            <ComboBoxItem Content="Text only" />
+                                <ComboBoxItem Content="Icons only" />
+                                <ComboBoxItem Content="Icons and text" />
+                                <ComboBoxItem Content="Text only" />
 
-                        </ComboBox>
+                            </ComboBox>
 
-                    </Grid>
+                            <!-- Edit Bar -->
+                            <CheckBox
+                                x:Name="ShowEditBarCheckBox"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Content="Show Edit Bar"
+                                IsChecked="False"
+                                VerticalAlignment="Center" />
+
+                            <ComboBox
+                                x:Name="EditBarDisplayModeComboBox"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                SelectedIndex="2"
+                                IsEnabled="{Binding #ShowEditBarCheckBox.IsChecked}">
+
+                                <ComboBoxItem Content="Icons only" />
+                                <ComboBoxItem Content="Icons and text" />
+                                <ComboBoxItem Content="Text only" />
+
+                            </ComboBox>
+
+                        </Grid>
 
                         <!-- Navigation pane appearance -->
 

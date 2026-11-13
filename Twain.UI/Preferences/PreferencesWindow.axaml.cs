@@ -44,6 +44,7 @@ public partial class PreferencesWindow : UserControl
     /// <summary>
     /// Initializes the application-wide appearance controls.
     /// </summary>
+
     public void LoadAppearanceSettings(
         ApplicationAppearanceSettings settings)
     {
@@ -51,6 +52,10 @@ public partial class PreferencesWindow : UserControl
 
         ShowProcessingToolbarCheckBox.IsChecked =
             settings.ShowProcessingToolbar;
+
+        ShowEditBar = settings.ShowEditBar;
+
+        EditBarDisplayMode = settings.EditBarDisplayMode;
     }
 
     /// <summary>
@@ -88,6 +93,38 @@ public partial class PreferencesWindow : UserControl
             _ => 1
         };
     }
+
+
+    /// <summary>
+    /// Gets or sets whether the Edit Bar should be displayed.
+    /// </summary>
+    public bool ShowEditBar
+    {
+        get => ShowEditBarCheckBox.IsChecked == true;
+        set => ShowEditBarCheckBox.IsChecked = value;
+    }
+
+    /// <summary>
+    /// Gets or sets how Edit Bar buttons display
+    /// their icons and text.
+    /// </summary>
+    public DisplayMode EditBarDisplayMode
+    {
+        get => EditBarDisplayModeComboBox.SelectedIndex switch
+        {
+            0 => DisplayMode.IconsOnly,
+            2 => DisplayMode.TextOnly,
+            _ => DisplayMode.IconsAndText
+        };
+
+        set => EditBarDisplayModeComboBox.SelectedIndex = value switch
+        {
+            DisplayMode.IconsOnly => 0,
+            DisplayMode.TextOnly => 2,
+            _ => 1
+        };
+    }
+
 
     /// <summary>
     /// Gets or sets the selected navigation display mode.

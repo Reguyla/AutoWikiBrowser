@@ -24,7 +24,7 @@
         <editorControls:EditToolbarView
             x:Name="EditToolbar"
             Grid.Row="0"
-            IsVisible="True" />
+            IsVisible="False" />
 
         <!-- Calculated edit summary -->
         <Grid

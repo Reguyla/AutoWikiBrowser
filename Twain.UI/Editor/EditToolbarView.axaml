@@ -2,7 +2,9 @@
 <UserControl
     x:Class="Twain.UI.Editor.EditToolbarView"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Twain.UI.Editor"
+    x:DataType="vm:EditToolbarViewModel">
 
     <Border
         Padding="4"
@@ -20,70 +22,271 @@
                 Orientation="Horizontal"
                 Spacing="4">
 
-                <Button Content="B"
-                        Tag="twain.format.bold"
-                        FontWeight="Bold"
-                        ToolTip.Tip="Bold"
-                        Click="FormattingButton_Click" />
+                <!-- Bold -->
+                <Button
+                    Tag="twain.format.bold"
+                    ToolTip.Tip="Bold"
+                    Click="FormattingButton_Click">
 
-                <Button Content="I"
-                        Tag="twain.format.italic"
-                        FontStyle="Italic"
-                        FontWeight="SemiBold"
-                        MinWidth="26"
-                        HorizontalContentAlignment="Center"
-                        ToolTip.Tip="Italic"
-                        Click="FormattingButton_Click" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
 
-                <Button Content="[]"
-                        Tag="twain.format.internalLink"
-                        ToolTip.Tip="Internal link"
-                        Click="FormattingButton_Click" />
+                        <TextBlock
+                            Text="B"
+                            FontFamily="Arial"
+                            FontSize="16"
+                            FontWeight="ExtraBold"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
 
-                <Button Content="ExtLink"
-                        Tag="twain.format.externalLink"
-                        ToolTip.Tip="External link"
-                        Click="FormattingButton_Click" />
+                        <TextBlock
+                            Text="Bold"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
 
-                <Button Content="&lt;math&gt;"
-                        Tag="twain.format.math"
-                        ToolTip.Tip="Math"
-                        Click="FormattingButton_Click" />
+                    </StackPanel>
+                </Button>
 
-                <Button Content="&lt;nowiki&gt;"
-                        Tag="twain.format.nowiki"
-                        ToolTip.Tip="Nowiki"
-                        Click="FormattingButton_Click" />
+                <!-- Italic -->
+                <Button
+                    Tag="twain.format.italic"
+                    ToolTip.Tip="Italic"
+                    Click="FormattingButton_Click">
 
-                <Button Content="—"
-                        Tag="twain.format.horizontalRule"
-                        ToolTip.Tip="Horizontal rule"
-                        Click="FormattingButton_Click" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
 
-                <Button Content="#R"
-                        Tag="twain.format.redirect"
-                        ToolTip.Tip="Redirect"
-                        Click="FormattingButton_Click" />
+                        <TextBlock
+                            Text="I"
+                            FontFamily="Georgia"
+                            FontSize="17"
+                            FontWeight="Bold"
+                            FontStyle="Italic"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
 
-                <Button Content="&lt;s&gt;"
-                        Tag="twain.format.strikethrough"
-                        ToolTip.Tip="Strikethrough"
-                        Click="FormattingButton_Click" />
+                        <TextBlock
+                            Text="Italic"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
 
-                <Button Content="&lt;sup&gt;"
-                        Tag="twain.format.superscript"
-                        ToolTip.Tip="Superscript"
-                        Click="FormattingButton_Click" />
+                    </StackPanel>
+                </Button>
 
-                <Button Content="&lt;sub&gt;"
-                        Tag="twain.format.subscript"
-                        ToolTip.Tip="Subscript"
-                        Click="FormattingButton_Click" />
+                <!-- Internal Link -->
+                <Button
+                    Tag="twain.format.internalLink"
+                    ToolTip.Tip="Internal link"
+                    Click="FormattingButton_Click">
 
-                <Button Content="Comment"
-                        Tag="twain.commentSelected"
-                        ToolTip.Tip="Comment selected text"
-                        Click="FormattingButton_Click" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="[[ ]]"
+                            FontWeight="Bold"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Internal link"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- External Link -->
+                <Button
+                    Tag="twain.format.externalLink"
+                    ToolTip.Tip="External link"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="🔗"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="External link"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Math -->
+                <Button
+                    Tag="twain.format.math"
+                    ToolTip.Tip="Math"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="∑"
+                            FontSize="16"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Math"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Nowiki -->
+                <Button
+                    Tag="twain.format.nowiki"
+                    ToolTip.Tip="Nowiki"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="&lt;/&gt;"
+                            FontWeight="Bold"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Nowiki"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Horizontal Rule -->
+                <Button
+                    Tag="twain.format.horizontalRule"
+                    ToolTip.Tip="Horizontal rule"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="━"
+                            FontSize="16"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Horizontal rule"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Redirect -->
+                <Button
+                    Tag="twain.format.redirect"
+                    ToolTip.Tip="Redirect"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="↪"
+                            FontSize="16"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Redirect"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Strikethrough -->
+                <Button
+                    Tag="twain.format.strikethrough"
+                    ToolTip.Tip="Strikethrough"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="S̶"
+                            FontWeight="Bold"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Strikethrough"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Superscript -->
+                <Button
+                    Tag="twain.format.superscript"
+                    ToolTip.Tip="Superscript"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="x²"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Superscript"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Subscript -->
+                <Button
+                    Tag="twain.format.subscript"
+                    ToolTip.Tip="Subscript"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="x₂"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Subscript"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
+
+                <!-- Comment -->
+                <Button
+                    Tag="twain.commentSelected"
+                    ToolTip.Tip="Comment selected text"
+                    Click="FormattingButton_Click">
+
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+
+                        <TextBlock
+                            Text="&lt;!-- --&gt;"
+                            FontWeight="Bold"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowIcons}" />
+
+                        <TextBlock
+                            Text="Comment"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowText}" />
+
+                    </StackPanel>
+                </Button>
 
             </StackPanel>
         </ScrollViewer>
