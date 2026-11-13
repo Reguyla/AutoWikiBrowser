@@ -746,6 +746,12 @@ public partial class Parsers
             pages,
             page);
 
+        newValue = NormalizeCitationDateLeadingZeros(
+            newValue,
+            paramsFound,
+            ref TheDate,
+            ref accessdate);
+
         newValue = NormalizeCitationDates(
             newValue,
             TheDate,
@@ -774,6 +780,15 @@ public partial class Parsers
             id,
             ISBN,
             ISSN);
+
+        newValue = NormalizeCitationIsbn(
+            newValue,
+            paramsFound,
+            ISBN);
+
+        newValue = NormalizeCitationTitleQuotes(
+            newValue,
+            paramsFound);
 
         newValue = NormalizeCitationIssn(newValue, paramsFound, ISSN);
 
