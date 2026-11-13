@@ -72,7 +72,9 @@
                     Grid.Row="3"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
-                    Content="Watch" />
+                    Content="{Binding WatchButtonText}"
+                    Command="{Binding ToggleArticleWatchCommand}"
+                    IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
 
                 <Button
                     x:Name="FalsePositiveButton"

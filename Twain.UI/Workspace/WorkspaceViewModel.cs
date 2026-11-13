@@ -595,6 +595,9 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.FindNextRequested =
             FindNext;
 
+        Options.ToggleArticleWatchRequested =
+            ToggleArticleWatchAsync;
+
         Options.StartProcessingRequested =
             StartProcessing;
 
@@ -900,6 +903,7 @@ public partial class WorkspaceViewModel : ObservableObject
 
         articleEditorPane.HasWatchlistStatus = false;
         articleEditorPane.IsArticleWatched = false;
+        Options.IsCurrentArticleWatched = false;
 
         articleEditorPane.LastEditTimestamp = string.Empty;
 
@@ -926,6 +930,53 @@ public partial class WorkspaceViewModel : ObservableObject
         Session.Editor.Open(
             article.Name,
             followRedirects);
+    }
+
+    private bool _isWatchOperationRunning;
+
+    [RelayCommand]
+    private async Task ToggleArticleWatchAsync()
+    {
+        if (_isWatchOperationRunning ||
+            string.IsNullOrWhiteSpace(CurrentArticleName) ||
+            Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        var articleEditorPane = Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
+        if (!articleEditorPane.HasWatchlistStatus)
+            return;
+
+        string articleTitle = CurrentArticleName;
+        bool wasWatched = articleEditorPane.IsArticleWatched;
+
+        _isWatchOperationRunning = true;
+
+        try
+        {
+            if (wasWatched)
+                await Task.Run(() => Session.Editor.Unwatch(articleTitle));
+            else
+                await Task.Run(() => Session.Editor.Watch(articleTitle));
+
+            if (CurrentArticleName == articleTitle)
+            {
+                articleEditorPane.IsArticleWatched = !wasWatched;
+                Options.IsCurrentArticleWatched = !wasWatched;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Watchlist operation failed: {ex}");
+        }
+        finally
+        {
+            _isWatchOperationRunning = false;
+        }
     }
 
     /// <summary>
@@ -1868,6 +1919,7 @@ public partial class WorkspaceViewModel : ObservableObject
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
         articleEditorPane.IsArticleWatched = page.IsWatched;
+        Options.IsCurrentArticleWatched = page.IsWatched;
         articleEditorPane.HasWatchlistStatus = true;
 
         if (DateTimeOffset.TryParse(

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.AWBSettings;
 using Twain.Core.Plugin;
@@ -55,6 +56,31 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     /// </summary>
     public bool ShowToolbarIcons =>
         DisplayMode != DisplayMode.TextOnly;
+
+    /// <summary>
+    /// Gets or sets whether the current article is on the user's watchlist.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WatchButtonText))]
+    private bool _isCurrentArticleWatched;
+
+    /// <summary>
+    /// Gets the appropriate label for the watchlist button.
+    /// </summary>
+    public string WatchButtonText =>
+        IsCurrentArticleWatched ? "Unwatch" : "Watch";
+
+    /// <summary>
+    /// Requests a watchlist change for the current article.
+    /// </summary>
+    public Func<Task>? ToggleArticleWatchRequested { get; set; }
+
+    [RelayCommand]
+    private async Task ToggleArticleWatchAsync()
+    {
+        if (ToggleArticleWatchRequested is not null)
+            await ToggleArticleWatchRequested();
+    }
 
     /// <summary>
     /// Gets whether processing toolbar labels should be displayed.
