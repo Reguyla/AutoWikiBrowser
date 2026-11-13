@@ -32,7 +32,7 @@
             BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
             BorderThickness="0,0,0,1">
 
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto"
                   ColumnSpacing="8">
 
                 <!-- Pane title -->
@@ -75,9 +75,26 @@
 
                 </Button>
 
+                <!-- Edit article on wiki -->
+                <Button
+                    Grid.Column="3"
+                    Classes="twain-pane-header-button"
+                    Command="{Binding EditOnWikiCommand}"
+                    IsVisible="{Binding HasEditOnWikiAction}"
+                    ToolTip.Tip="Edit article on wiki"
+                    Padding="4,2">
+
+                    <PathIcon
+                        Width="16"
+                        Height="16"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Data="M 12,20 H 21 M 16.5,3.5 A 2.121,2.121 0 0 1 19.5,6.5 L 7,19 L 3,21 L 5,17 Z" />
+
+                </Button>
+
                 <!-- Optional pane status indicator -->
                 <TextBlock
-                    Grid.Column="3"
+                    Grid.Column="4"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
                     FontSize="{DynamicResource TwainFontSizeSmall}"
@@ -89,7 +106,7 @@
 
                 <!-- Optional pane header action -->
                 <Button
-                    Grid.Column="4"
+                    Grid.Column="5"
                     Classes="twain-pane-header-button"
                     IsVisible="{Binding HasHeaderAction}"
                     Command="{Binding ExecuteHeaderActionCommand}"

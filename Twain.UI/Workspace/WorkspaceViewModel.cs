@@ -666,8 +666,8 @@ public partial class WorkspaceViewModel : ObservableObject
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
         articleEditorPane.HeaderAction = ShowOptions;
-
         articleEditorPane.HistoryAction = OpenArticleHistory;
+        articleEditorPane.EditOnWikiAction = OpenArticleOnWiki;
 
         articleEditorPane.Title =
             string.IsNullOrWhiteSpace(CurrentArticleName)
@@ -703,6 +703,39 @@ public partial class WorkspaceViewModel : ObservableObject
                     MakeList.ArticleCountText;
             }
         };
+    }
+
+    /// <summary>
+    /// Opens the current article in the connected
+    /// MediaWiki site's editing interface.
+    /// </summary>
+    private void OpenArticleOnWiki()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentArticleName))
+            return;
+
+        string wikiUrl = Session.Editor.URL;
+
+        string editUrl =
+            wikiUrl +
+            "index.php?title=" +
+            Uri.EscapeDataString(CurrentArticleName) +
+            "&action=edit";
+
+        try
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = editUrl,
+                    UseShellExecute = true
+                });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to open article on wiki: {ex}");
+        }
     }
 
     /// <summary>

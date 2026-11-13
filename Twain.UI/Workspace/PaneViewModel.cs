@@ -81,6 +81,40 @@ public sealed partial class PaneViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Action used to open the current article
+    /// in the wiki's editing interface.
+    /// </summary>
+    private Action? _editOnWikiAction;
+
+    public Action? EditOnWikiAction
+    {
+        get => _editOnWikiAction;
+        set
+        {
+            if (SetProperty(ref _editOnWikiAction, value))
+            {
+                OnPropertyChanged(nameof(HasEditOnWikiAction));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets whether the Edit on Wiki action is available.
+    /// </summary>
+    public bool HasEditOnWikiAction =>
+        EditOnWikiAction is not null;
+
+    /// <summary>
+    /// Opens the current article in the wiki's editor.
+    /// </summary>
+    [RelayCommand]
+    private void EditOnWiki()
+    {
+        EditOnWikiAction?.Invoke();
+    }
+
+
+    /// <summary>
     /// Gets or sets the latest article revision timestamp
     /// displayed in the pane header.
     /// </summary>
