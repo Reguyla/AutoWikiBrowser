@@ -37,6 +37,24 @@ public partial class ArticleEditorView : UserControl
 
         EditorWebView.WebMessageReceived +=
             EditorWebView_WebMessageReceived;
+
+        EditToolbar.FormattingRequested +=
+            EditToolbar_FormattingRequested;
+    }
+
+    /// <summary>
+    /// Executes an existing Monaco formatting action
+    /// requested by the Edit Bar.
+    /// </summary>
+    private async void EditToolbar_FormattingRequested(
+        object? sender,
+        string actionId)
+    {
+        string actionJson =
+            JsonSerializer.Serialize(actionId);
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.runFormattingAction({actionJson});");
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+
 <UserControl
     x:Class="Twain.UI.Editor.ArticleEditorView"
     xmlns="https://github.com/avaloniaui"
@@ -5,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Twain.UI.Editor"
+    xmlns:editorControls="using:Twain.UI.Editor"
     x:DataType="vm:ArticleEditorViewModel"
     d:DesignWidth="700"
     d:DesignHeight="450"
@@ -14,12 +16,19 @@
         <vm:ArticleEditorViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*"
-          RowSpacing="{DynamicResource TwainSpacingSmall}">
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+        <!-- Optional Edit Bar -->
+        <editorControls:EditToolbarView
+            x:Name="EditToolbar"
+            Grid.Row="0"
+            IsVisible="True" />
 
         <!-- Calculated edit summary -->
         <Grid
-            Grid.Row="0"
+            Grid.Row="1"
             ColumnDefinitions="Auto,*"
             ColumnSpacing="{DynamicResource TwainSpacingSmall}"
             Margin="4,4,4,0">
@@ -42,7 +51,7 @@
         <!-- Monaco article editor -->
         <NativeWebView
             x:Name="EditorWebView"
-            Grid.Row="1"
+            Grid.Row="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />
 

@@ -1,0 +1,91 @@
+
+<UserControl
+    x:Class="Twain.UI.Editor.EditToolbarView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border
+        Padding="4"
+        Margin="4,0,4,0"
+        Background="{DynamicResource TwainSurfaceBrush}"
+        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+        BorderThickness="1"
+        CornerRadius="4">
+
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Disabled">
+
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="4">
+
+                <Button Content="B"
+                        Tag="twain.format.bold"
+                        FontWeight="Bold"
+                        ToolTip.Tip="Bold"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="I"
+                        Tag="twain.format.italic"
+                        FontStyle="Italic"
+                        FontWeight="SemiBold"
+                        MinWidth="26"
+                        HorizontalContentAlignment="Center"
+                        ToolTip.Tip="Italic"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="[]"
+                        Tag="twain.format.internalLink"
+                        ToolTip.Tip="Internal link"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="ExtLink"
+                        Tag="twain.format.externalLink"
+                        ToolTip.Tip="External link"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="&lt;math&gt;"
+                        Tag="twain.format.math"
+                        ToolTip.Tip="Math"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="&lt;nowiki&gt;"
+                        Tag="twain.format.nowiki"
+                        ToolTip.Tip="Nowiki"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="—"
+                        Tag="twain.format.horizontalRule"
+                        ToolTip.Tip="Horizontal rule"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="#R"
+                        Tag="twain.format.redirect"
+                        ToolTip.Tip="Redirect"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="&lt;s&gt;"
+                        Tag="twain.format.strikethrough"
+                        ToolTip.Tip="Strikethrough"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="&lt;sup&gt;"
+                        Tag="twain.format.superscript"
+                        ToolTip.Tip="Superscript"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="&lt;sub&gt;"
+                        Tag="twain.format.subscript"
+                        ToolTip.Tip="Subscript"
+                        Click="FormattingButton_Click" />
+
+                <Button Content="Comment"
+                        Tag="twain.commentSelected"
+                        ToolTip.Tip="Comment selected text"
+                        Click="FormattingButton_Click" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</UserControl>

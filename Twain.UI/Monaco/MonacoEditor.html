@@ -747,6 +747,21 @@
                     }
                 },
 
+                runFormattingAction: function (actionId) {
+                    if (!editor) {
+                        return;
+                    }
+
+                    const action = editor.getAction(actionId);
+
+                    if (!action) {
+                        console.warn("Unknown Monaco formatting action:", actionId);
+                        return;
+                    }
+
+                    return action.run();
+                },
+
                 setText:
                     function (text) {
                         if (!editor) {
