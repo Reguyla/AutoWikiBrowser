@@ -54,10 +54,20 @@ public partial class Parsers
 
             // Remove multiple issues with zero tags, fix excess newlines
             if (alltemplatesD.Any(t => t != WikiRegexes.MultipleIssues.Replace(t, MultipleIssuesZeroTag)))
-                articleText = WikiRegexes.MultipleIssues.Replace(articleText, MultipleIssuesZeroTag);
-        }
+            {
+                // Remove empty Multiple issues templates and their associated
+                // trailing blank lines without changing unrelated article spacing.
+                articleText = Regex.Replace(
+                    articleText,
+                    @"\{\{Multiple[ _]issues\s*\|\s*\}\}(?:\r\n|\n)*",
+                    string.Empty,
+                    RegexOptions.IgnoreCase);
 
-        int sectionTags = TemplateCount(alltemplates, WikiRegexes.MultipleIssuesSectionMaintenanceTemplates);
+                articleText = WikiRegexes.MultipleIssues.Replace(
+                    articleText, MultipleIssuesZeroTag);
+            }
+        }
+            int sectionTags = TemplateCount(alltemplates, WikiRegexes.MultipleIssuesSectionMaintenanceTemplates);
 
         if (hasMI || TemplateCount(alltemplates, WikiRegexes.MultipleIssuesArticleMaintenanceTemplates) > 1 ||
             sectionTags > 1)
@@ -148,6 +158,34 @@ public partial class Parsers
             zerothsection = zerothsection.Replace(MI, Regex.Replace(MI, @"\s*}}$", (newstyleMI ? "" : "|") + "\r\n" + t + "\r\n}}"));
         }
 
+        // Remove excess blank lines immediately following the
+        // Multiple issues template after maintenance tags are moved.
+        Match miMatch = WikiRegexes.MultipleIssues.Match(zerothsection);
+
+        if (miMatch.Success)
+        {
+            int end = miMatch.Index + miMatch.Length;
+
+            Match excessNewlines = Regex.Match(
+                zerothsection.Substring(end),
+                @"^(?:\r\n|\n){3,}");
+
+            if (excessNewlines.Success)
+            {
+                string replacement = excessNewlines.Value.Contains("\r\n")
+                    ? "\r\n\r\n"
+                    : "\n\n";
+
+                zerothsection = zerothsection.Remove(
+                    end,
+                    excessNewlines.Length);
+
+                zerothsection = zerothsection.Insert(
+                    end,
+                    replacement);
+            }
+        }
+
         // clean up again in case of duplicate tags
         zerothsection = WikiRegexes.MultipleIssues.Replace(zerothsection, MultipleIssuesDeDupe);
         return WikiRegexes.MultipleIssues.Replace(zerothsection, MultipleIssuesSingleTagME);
@@ -233,19 +271,18 @@ public partial class Parsers
     }
 
     /// <summary>
-    /// Merge multiple {{multiple issues}} templates in zeroth section into one
+    /// Merges multiple {{multiple issues}} templates in the zeroth section.
     /// </summary>
-    /// <returns>The M.</returns>
-    /// <param name="articleText">Article text.</param>
     private string MergeMultipleMI(string articleText)
     {
-        string originalArticleText = articleText, mi = string.Empty;
+        string originalArticleText = articleText;
+        string mi = string.Empty;
 
         articleText = WikiRegexes.MultipleIssues.Replace(articleText, m =>
         {
             string tags = Tools.GetTemplateArgument(m.Value, 1);
 
-            // do not process if a MI section template
+            // Do not process section-specific MI templates.
             if (tags.Contains("{{") || tags.Equals(""))
             {
                 mi += tags;
@@ -255,18 +292,26 @@ public partial class Parsers
             return m.Value;
         });
 
-        // do nothing if found a MI section template
+        // Preserve the original article if a section-specific
+        // Multiple issues template remains.
         if (WikiRegexes.MultipleIssues.IsMatch(articleText))
             return originalArticleText;
 
-        // extract and de-duplicate tags
+        // Extract and deduplicate maintenance tags.
         List<string> miTags = DeduplicateMaintenanceTags(
             (from Match m in WikiRegexes.NestedTemplates.Matches(mi)
              select m.Value).ToList());
 
-        mi = string.Join("\r\n", miTags.ToArray());
+        mi = string.Join("\r\n", miTags);
 
-        return @"{{Multiple issues|" + "\r\n" + mi + "\r\n" + @"}}" + articleText;
+        // Remove the blank lines left by the original MI templates.
+        // Preserve the remaining article content.
+        articleText = articleText.TrimStart('\r', '\n');
+
+        return "{{Multiple issues|\r\n" +
+               mi +
+               "\r\n}}\r\n\r\n" +
+               articleText;
     }
 
     /// <summary>
