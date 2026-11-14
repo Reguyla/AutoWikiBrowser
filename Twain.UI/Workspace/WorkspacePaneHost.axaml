@@ -14,14 +14,17 @@
     mc:Ignorable="d">
 
     <!-- Shared workspace pane frame -->
+
     <Border
         Background="{DynamicResource TwainSurfaceBrush}"
-        BorderBrush="{DynamicResource TwainBorderBrush}"
-        BorderThickness="{DynamicResource TwainBorderThickness}"
-        CornerRadius="{DynamicResource TwainPaneCornerRadius}"
+        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+        BorderThickness="1"
+        CornerRadius="0"
         IsVisible="{Binding IsVisible}">
 
+
         <Grid RowDefinitions="Auto,*">
+
 
             <!-- Shared pane title bar -->
             <Border
@@ -30,7 +33,9 @@
                 Padding="12,4"
                 Background="{DynamicResource TwainPaneHeaderBrush}"
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-                BorderThickness="0,0,0,1">
+                BorderThickness="0,0,0,1"
+                CornerRadius="0">
+
 
                 <Grid
                     ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto"
