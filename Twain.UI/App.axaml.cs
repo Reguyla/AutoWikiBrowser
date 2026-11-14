@@ -69,7 +69,10 @@ public partial class App : Application
 
         // Only apply themes currently supported by Twain.
         if (appearanceSettings.Theme is not
-            (TwainTheme.Classic or TwainTheme.Legacy))
+            (TwainTheme.Classic or 
+             TwainTheme.Legacy or
+             TwainTheme.ModernLight or
+             TwainTheme.ModernDark))
         {
             appearanceSettings.Theme = TwainTheme.Classic;
         }
