@@ -6,9 +6,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Class="Twain.UI.Controls.MessageDialogWindow"
     mc:Ignorable="d"
-    d:DesignWidth="420"
+    d:DesignWidth="440"
     d:DesignHeight="180"
-    Width="420"
+    Width="440"
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
@@ -21,39 +21,58 @@
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
         <!-- Dialog message -->
-        <TextBlock
-            x:Name="MessageTextBlock"
-            TextWrapping="Wrap" />
+        <Border
+            Grid.Row="0"
+            Padding="16"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-        <!-- Commands -->
-        <StackPanel
-            x:Name="ButtonsPanel"
+            <TextBlock
+                x:Name="MessageTextBlock"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                TextWrapping="Wrap" />
+
+        </Border>
+
+        <!-- Dialog commands -->
+        <Border
             Grid.Row="1"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Spacing="{DynamicResource TwainSpacingSmall}">
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-            <Button
-                x:Name="YesButton"
-                Classes="twain-primary-button"
-                Content="Yes"
-                IsVisible="False"
-                Click="YesButton_Click" />
+            <StackPanel
+                x:Name="ButtonsPanel"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button
-                x:Name="NoButton"
-                Classes="twain-command-button"
-                Content="No"
-                IsVisible="False"
-                Click="NoButton_Click" />
+                <Button
+                    x:Name="YesButton"
+                    Classes="twain-primary-button"
+                    Content="Yes"
+                    IsVisible="False"
+                    Click="YesButton_Click" />
 
-            <Button
-                x:Name="OkButton"
-                Classes="twain-command-button"
-                Content="OK"
-                IsDefault="True"
-                Click="OkButton_Click" />
+                <Button
+                    x:Name="NoButton"
+                    Classes="twain-command-button"
+                    Content="No"
+                    IsVisible="False"
+                    Click="NoButton_Click" />
 
-        </StackPanel>
+                <Button
+                    x:Name="OkButton"
+                    Classes="twain-command-button"
+                    Content="OK"
+                    IsDefault="True"
+                    Click="OkButton_Click" />
+
+            </StackPanel>
+
+        </Border>
+
     </Grid>
 </Window>
