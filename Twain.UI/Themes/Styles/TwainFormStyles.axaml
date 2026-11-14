@@ -1,76 +1,83 @@
+
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- ========================================================= -->
+    <!-- SECTIONS AND HEADINGS                                     -->
+    <!-- ========================================================= -->
+
     <Style Selector="Border.twain-section">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSurfaceBrush}" />
         <Setter Property="BorderBrush"
                 Value="{DynamicResource TwainBorderSubtleBrush}" />
-
         <Setter Property="BorderThickness"
-                Value="1" />
-
+                Value="{DynamicResource TwainBorderThickness}" />
         <Setter Property="CornerRadius"
-                Value="4" />
-
+                Value="{DynamicResource TwainPaneCornerRadius}" />
         <Setter Property="Padding"
-                Value="10" />
-
-        <Setter Property="Margin"
-                Value="0,0,0,8" />
+                Value="{DynamicResource TwainPanePadding}" />
+        <Setter Property="Margin" Value="0,0,0,8" />
     </Style>
 
-    <!-- Shared headings for grouped form sections. -->
     <Style Selector="TextBlock.twain-section-heading">
         <Setter Property="FontSize"
                 Value="{DynamicResource TwainFontSizeMedium}" />
-
-        <Setter Property="FontWeight"
-                Value="Bold" />
-
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground"
                 Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
     </Style>
 
-    <!-- Shared styling for expandable form groups. -->
-    <Style Selector="Expander.twain-expander">
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-    </Style>
+    <!-- ========================================================= -->
+    <!-- STANDARD COMMAND BUTTONS                                  -->
+    <!-- ========================================================= -->
 
-    <!-- Shared tab container styling. -->
-    <Style Selector="TabControl.twain-tabs">
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-        <Setter Property="VerticalAlignment" Value="Stretch" />
-    </Style>
-
-    <!-- Shared tab header typography. -->
-    <Style Selector="TabItem.twain-tab">
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground"
-                Value="{DynamicResource TwainTextPrimaryBrush}" />
-    </Style>
-
-    <!-- Shared styling for DataGrid column headers. -->
-    <Style Selector="DataGrid.twain-datagrid DataGridColumnHeader">
-    <Setter Property="Background"
-            Value="{DynamicResource TwainPaneHeaderBrush}" />
-    <Setter Property="Foreground"
-            Value="{DynamicResource TwainTextPrimaryBrush}" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Padding" Value="10,6" />
-    <Setter Property="BorderBrush"
-            Value="{DynamicResource TwainBorderSubtleBrush}" />
-    <Setter Property="BorderThickness" Value="0,0,1,1" />
-    </Style>
-        
-    <!-- Standard command buttons -->
     <Style Selector="Button.twain-command-button">
         <Setter Property="MinWidth" Value="90" />
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background"
+                Value="{DynamicResource TwainRaisedSurfaceBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderBrush}" />
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource TwainBorderThickness}" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource TwainControlCornerRadius}" />
     </Style>
 
-    <!-- Primary action buttons -->
+    <Style Selector="Button.twain-command-button:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainAccentHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.twain-command-button:pressed">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainAccentPressedBrush}" />
+    </Style>
+
+    <Style Selector="Button.twain-command-button:disabled">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainControlBackgroundDisabledBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextDisabledBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderSubtleBrush}" />
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- PRIMARY ACTION BUTTONS                                    -->
+    <!-- ========================================================= -->
+
     <Style Selector="Button.twain-primary-button">
         <Setter Property="MinWidth" Value="100" />
         <Setter Property="MinHeight" Value="32" />
@@ -78,14 +85,47 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background"
+                Value="{DynamicResource TwainAccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainAccentBrush}" />
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource TwainBorderThickness}" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource TwainControlCornerRadius}" />
     </Style>
 
-    <!-- Compact action buttons displayed in workspace pane headers. -->
+    <Style Selector="Button.twain-primary-button:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainAccentHoverBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainAccentHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.twain-primary-button:pressed">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainAccentPressedBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainAccentPressedBrush}" />
+    </Style>
+
+    <Style Selector="Button.twain-primary-button:disabled">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainControlBackgroundDisabledBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextDisabledBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderSubtleBrush}" />
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- WORKSPACE PANE HEADER BUTTONS                              -->
+    <!-- ========================================================= -->
+
     <Style Selector="Button.twain-pane-header-button">
         <Setter Property="MinWidth" Value="28" />
         <Setter Property="MinHeight" Value="28" />
-        <Setter Property="Width" Value="28" />
-        <Setter Property="Height" Value="28" />
         <Setter Property="Padding" Value="4" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -97,13 +137,92 @@
                 Value="{DynamicResource TwainControlCornerRadius}" />
     </Style>
 
-    <!-- Highlight pane-header buttons when hovered. -->
     <Style Selector="Button.twain-pane-header-button:pointerover">
         <Setter Property="Background"
                 Value="{DynamicResource TwainSelectionBrush}" />
     </Style>
 
-    <!-- Standard ListBox -->
+    <Style Selector="Button.twain-pane-header-button:pressed">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainAccentPressedBrush}" />
+    </Style>
+
+    <Style Selector="Button.twain-pane-header-button:disabled">
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextDisabledBrush}" />
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- TABS                                                      -->
+    <!-- ========================================================= -->
+
+    <Style Selector="TabControl.twain-tabs">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSurfaceBrush}" />
+    </Style>
+
+    <Style Selector="TabItem.twain-tab">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextSecondaryBrush}" />
+        <Setter Property="Background"
+                Value="{DynamicResource TwainRaisedSurfaceBrush}" />
+        <Setter Property="Padding" Value="12,8" />
+    </Style>
+
+    <Style Selector="TabItem.twain-tab:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="TabItem.twain-tab:selected">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSurfaceBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainAccentBrush}" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- DATA GRID                                                 -->
+    <!-- ========================================================= -->
+
+    <Style Selector="DataGrid.twain-datagrid">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainControlBackgroundBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderSubtleBrush}" />
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource TwainBorderThickness}" />
+    </Style>
+
+    <Style Selector="DataGrid.twain-datagrid DataGridColumnHeader">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainPaneHeaderBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TwainBorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+    </Style>
+
+    <Style Selector="DataGrid.twain-datagrid DataGridRow:selected">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- LIST BOX                                                  -->
+    <!-- ========================================================= -->
+
     <Style Selector="ListBox.twain-listbox">
         <Setter Property="Background"
                 Value="{DynamicResource TwainControlBackgroundBrush}" />
@@ -115,35 +234,50 @@
                 Value="{DynamicResource TwainControlCornerRadius}" />
     </Style>
 
-    <!-- Standard ListBox item spacing -->
     <Style Selector="ListBox.twain-listbox ListBoxItem">
         <Setter Property="Padding" Value="8,5" />
-    </Style>
-
-    <!-- Compact Options expander headings -->
-    <Style Selector="TextBlock.twain-compact-expander-heading">
-        <Setter Property="FontSize" Value="15" />
-        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground"
                 Value="{DynamicResource TwainTextPrimaryBrush}" />
-        <Setter Property="Margin" Value="0" />
     </Style>
-    
-    <!-- Compact expandable groups for narrow option panels. -->
+
+    <Style Selector="ListBox.twain-listbox ListBoxItem:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.twain-listbox ListBoxItem:selected">
+        <Setter Property="Background"
+                Value="{DynamicResource TwainSelectionBrush}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- EXPANDERS                                                 -->
+    <!-- ========================================================= -->
+
+    <Style Selector="Expander.twain-expander">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
     <Style Selector="Expander.twain-expander.twain-compact-expander">
         <Setter Property="Padding" Value="0" />
         <Setter Property="MinHeight" Value="0" />
     </Style>
 
-    <!-- Reduce padding on the Expander header button. -->
+    <Style Selector="TextBlock.twain-compact-expander-heading">
+        <Setter Property="FontSize"
+                Value="{DynamicResource TwainFontSizeLarge}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TwainTextPrimaryBrush}" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- Fluent Expander template header. -->
     <Style Selector="Expander.twain-compact-expander /template/ ToggleButton#PART_HorizontalHeader">
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="MinHeight" Value="0" />
     </Style>
 
-    <!-- Center content in all standard buttons. -->
-    <Style Selector="Button">
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-    </Style>
 </Styles>

@@ -23,141 +23,154 @@
 
         <Grid RowDefinitions="Auto,*">
 
-        <!-- Shared pane title bar -->
-        <Border
-            Grid.Row="0"
-            MinHeight="{DynamicResource TwainPaneHeaderHeight}"
-            Padding="12,6"
-            Background="{DynamicResource TwainSelectionBrush}"
-            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-            BorderThickness="0,0,0,1">
+            <!-- Shared pane title bar -->
+            <Border
+                Grid.Row="0"
+                MinHeight="{DynamicResource TwainPaneHeaderHeight}"
+                Padding="12,4"
+                Background="{DynamicResource TwainPaneHeaderBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="0,0,0,1">
 
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto"
-                  ColumnSpacing="8">
+                <Grid
+                    ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto"
+                    ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
-                <!-- Pane title -->
-                <TextBlock
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="{DynamicResource TwainFontSizeMedium}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                    Text="{Binding Title}" />
-                
-                <!-- Last article revision -->
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    FontSize="{DynamicResource TwainFontSizeSmall}"
-                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                    Text="{Binding LastEditTimestamp}"
-                    IsVisible="{Binding HasLastEditTimestamp}"
-                    TextTrimming="CharacterEllipsis"
-                    MaxWidth="220" />
- 
-                <!-- Article revision history -->
-                <Button
-                    Grid.Column="2"
-                    Classes="twain-pane-header-button"
-                    Command="{Binding OpenHistoryCommand}"
-                    IsVisible="{Binding HasHistoryAction}"
-                    ToolTip.Tip="Open article revision history"
-                    Padding="10,2"
-                    MinWidth="65"
-                    HorizontalAlignment="Center">
-
+                    <!-- Pane title -->
                     <TextBlock
-                        Text="History"
-                        TextDecorations="Underline"
-                        TextWrapping="NoWrap"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="{DynamicResource TwainFontSizeMedium}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                        Text="{Binding Title}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap" />
+
+                    <!-- Last article revision -->
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
                         FontSize="{DynamicResource TwainFontSizeSmall}"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+                        Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                        Text="{Binding LastEditTimestamp}"
+                        IsVisible="{Binding HasLastEditTimestamp}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        MaxWidth="180" />
 
-                </Button>
+                    <!-- Article revision history -->
+                    <Button
+                        Grid.Column="2"
+                        Classes="twain-pane-header-button"
+                        Command="{Binding OpenHistoryCommand}"
+                        IsVisible="{Binding HasHistoryAction}"
+                        ToolTip.Tip="Open article revision history"
+                        Padding="10,2"
+                        MinWidth="65"
+                        HorizontalAlignment="Center">
 
-                <!-- Edit article on wiki -->
-                <Button
-                    Grid.Column="3"
-                    Classes="twain-pane-header-button"
-                    Command="{Binding EditOnWikiCommand}"
-                    IsVisible="{Binding HasEditOnWikiAction}"
-                    ToolTip.Tip="Edit article on wiki"
-                    Padding="4,2">
+                        <TextBlock
+                            Text="History"
+                            TextDecorations="Underline"
+                            TextWrapping="NoWrap"
+                            FontSize="{DynamicResource TwainFontSizeSmall}"
+                            Foreground="{DynamicResource TwainTextPrimaryBrush}" />
 
-                    <PathIcon
-                        Width="16"
-                        Height="16"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        Data="M 12,20 H 21 M 16.5,3.5 A 2.121,2.121 0 0 1 19.5,6.5 L 7,19 L 3,21 L 5,17 Z" />
+                    </Button>
 
-                </Button>
+                    <!-- Edit article on wiki -->
+                    <Button
+                        Grid.Column="3"
+                        Classes="twain-pane-header-button"
+                        Command="{Binding EditOnWikiCommand}"
+                        IsVisible="{Binding HasEditOnWikiAction}"
+                        ToolTip.Tip="Edit article on wiki"
+                        Padding="4,2">
 
-                <!-- Article watchlist status -->
-                <Grid Grid.Column="4"
-                      IsVisible="{Binding HasWatchlistStatus}">
+                        <PathIcon
+                            Width="16"
+                            Height="16"
+                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                            Data="M 12,20 H 21 M 16.5,3.5 A 2.121,2.121 0 0 1 19.5,6.5 L 7,19 L 3,21 L 5,17 Z" />
 
-                    <!-- Watched article: filled star -->
-                    <PathIcon
-                        Width="16"
-                        Height="16"
-                        IsVisible="{Binding IsArticleWatched}"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        ToolTip.Tip="{Binding WatchlistToolTip}"
-                        Data="M12 2 L15.09 8.26 L22 9.27 L17 14.14 L18.18 21.02 L12 17.77 L5.82 21.02 L7 14.14 L2 9.27 L8.91 8.26 Z" />
+                    </Button>
 
-                    <!-- Unwatched article: outlined star -->
-                    <PathIcon
-                        Width="16"
-                        Height="16"
-                        IsVisible="{Binding !IsArticleWatched}"
-                        Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                        ToolTip.Tip="{Binding WatchlistToolTip}"
-                        Data="M12 2 L15.09 8.26 L22 9.27 L17 14.14 L18.18 21.02 L12 17.77 L5.82 21.02 L7 14.14 L2 9.27 L8.91 8.26 Z M12 4.8 L9.84 9.17 L5.02 9.87 L8.51 13.27 L7.69 18.07 L12 15.8 L16.31 18.07 L15.49 13.27 L18.98 9.87 L14.16 9.17 Z" />
+                    <!-- Article watchlist status -->
+                    <Grid
+                        Grid.Column="4"
+                        Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding HasWatchlistStatus}"
+                        ToolTip.Tip="{Binding WatchlistToolTip}">
 
-                </Grid>
+                        <!-- Watched article -->
+                        <PathIcon
+                            Width="16"
+                            Height="16"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsArticleWatched}"
+                            Foreground="{DynamicResource TwainAccentBrush}"
+                            Data="M12 2 L15.09 8.26 L22 9.27 L17 14.14 L18.18 21.02 L12 17.77 L5.82 21.02 L7 14.14 L2 9.27 L8.91 8.26 Z" />
 
-                <!-- Optional pane status indicator -->
-                <TextBlock
-                    Grid.Column="5"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Right"
-                    FontSize="{DynamicResource TwainFontSizeSmall}"
-                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                    Text="{Binding HeaderStatusText}"
-                    IsVisible="{Binding HasHeaderStatus}"
-                    TextTrimming="CharacterEllipsis"
-                    MaxWidth="140" />
-
-                <!-- Optional pane header action -->
-                <Button
-                    Grid.Column="6"
-                    Classes="twain-pane-header-button"
-                    IsVisible="{Binding HasHeaderAction}"
-                    Command="{Binding ExecuteHeaderActionCommand}"
-                    ToolTip.Tip="{Binding HeaderActionToolTip}">
-
-                    <Grid Width="16" Height="16">
-
-                    <!-- Settings icon -->
-                    <PathIcon
-                        Width="16"
-                        Height="16"
-                        IsVisible="{Binding ShowSettingsHeaderIcon}"
-                        Data="M 12,3 L 14,6 L 18,5 L 19,9 L 22,12 L 19,15 L 18,19 L 14,18 L 12,21 L 10,18 L 6,19 L 5,15 L 2,12 L 5,9 L 6,5 L 10,6 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9" />
-
-                    <!-- Filter icon -->
-                    <PathIcon
-                        Width="16"
-                        Height="16"
-                        IsVisible="{Binding ShowFilterHeaderIcon}"
-                        Data="M3,4 H21 L14,12 V20 L10,22 V12 Z" />
+                        <!-- Unwatched article -->
+                        <PathIcon
+                            Width="16"
+                            Height="16"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding !IsArticleWatched}"
+                            Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                            Data="M12 2 L15.09 8.26 L22 9.27 L17 14.14 L18.18 21.02 L12 17.77 L5.82 21.02 L7 14.14 L2 9.27 L8.91 8.26 Z M12 4.8 L9.84 9.17 L5.02 9.87 L8.51 13.27 L7.69 18.07 L12 15.8 L16.31 18.07 L15.49 13.27 L18.98 9.87 L14.16 9.17 Z" />
 
                     </Grid>
-                </Button>
 
-            </Grid>
+                    <!-- Optional pane status indicator -->
+                    <TextBlock
+                        Grid.Column="5"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        FontSize="{DynamicResource TwainFontSizeSmall}"
+                        Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                        Text="{Binding HeaderStatusText}"
+                        IsVisible="{Binding HasHeaderStatus}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        MaxWidth="120" />
 
-        </Border>
+                    <!-- Optional pane header action -->
+                    <Button
+                        Grid.Column="6"
+                        Classes="twain-pane-header-button"
+                        IsVisible="{Binding HasHeaderAction}"
+                        Command="{Binding ExecuteHeaderActionCommand}"
+                        ToolTip.Tip="{Binding HeaderActionToolTip}">
+
+                        <Grid Width="16" Height="16">
+
+                            <!-- Settings icon -->
+                            <PathIcon
+                                Width="16"
+                                Height="16"
+                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                                IsVisible="{Binding ShowSettingsHeaderIcon}"
+                                Data="M 12,3 L 14,6 L 18,5 L 19,9 L 22,12 L 19,15 L 18,19 L 14,18 L 12,21 L 10,18 L 6,19 L 5,15 L 2,12 L 5,9 L 6,5 L 10,6 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9" />
+
+                            <!-- Filter icon -->
+                            <PathIcon
+                                Width="16"
+                                Height="16"
+                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                                IsVisible="{Binding ShowFilterHeaderIcon}"
+                                Data="M3,4 H21 L14,12 V20 L10,22 V12 Z" />
+
+                        </Grid>
+                    </Button>
+
+                </Grid>
+            </Border>
 
             <!--
                 Pane-specific content host.
@@ -191,11 +204,9 @@
                     </ContentControl.DataTemplates>
 
                 </ContentControl>
-
             </Border>
 
         </Grid>
-
     </Border>
 
 </UserControl>

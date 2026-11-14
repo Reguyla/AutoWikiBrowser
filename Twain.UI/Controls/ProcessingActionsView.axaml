@@ -1,3 +1,4 @@
+
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -21,18 +22,22 @@
                 <!-- Start and Reparse -->
                 <Button
                     x:Name="StartButton"
+                    Classes="twain-primary-button"
                     Grid.Row="0"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="Start"
                     IsEnabled="{Binding IsStartEnabled}"
                     Command="{Binding StartProcessingCommand}" />
 
                 <Button
                     x:Name="ReparseButton"
+                    Classes="twain-command-button"
                     Grid.Row="0"
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="Reparse"
                     Command="{Binding ReparseProcessingCommand}"
                     IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
@@ -40,9 +45,11 @@
                 <!-- Stop -->
                 <Button
                     x:Name="StopButton"
+                    Classes="twain-command-button"
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="Stop"
                     Command="{Binding StopProcessingCommand}"
                     IsEnabled="{Binding IsStopEnabled}" />
@@ -50,18 +57,22 @@
                 <!-- Review actions -->
                 <Button
                     x:Name="PreviewButton"
+                    Classes="twain-command-button"
                     Grid.Row="2"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="Preview"
                     Command="{Binding ShowPreviewCommand}"
                     IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
 
                 <Button
                     x:Name="DiffButton"
+                    Classes="twain-command-button"
                     Grid.Row="2"
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="Diff"
                     Command="{Binding ShowDiffCommand}"
                     IsEnabled="{Binding AreArticleProcessingControlsEnabled}" />
@@ -69,27 +80,33 @@
                 <!-- Secondary actions -->
                 <Button
                     x:Name="WatchButton"
+                    Classes="twain-command-button"
                     Grid.Row="3"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="{Binding WatchButtonText}"
                     Command="{Binding ToggleArticleWatchCommand}"
                     IsEnabled="{Binding CanToggleArticleWatch}" />
 
                 <Button
                     x:Name="FalsePositiveButton"
+                    Classes="twain-command-button"
                     Grid.Row="3"
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     Content="False Positive"
                     IsVisible="{Binding ShowFalsePositiveAction}" />
 
                 <!-- Final workflow actions -->
                 <Button
                     x:Name="SkipButton"
+                    Classes="twain-command-button"
                     Grid.Row="4"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     FontWeight="SemiBold"
                     Content="Skip"
                     Command="{Binding SkipProcessingCommand}"
@@ -97,9 +114,11 @@
 
                 <Button
                     x:Name="SaveButton"
+                    Classes="twain-primary-button"
                     Grid.Row="4"
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
+                    MinHeight="34"
                     FontWeight="SemiBold"
                     Content="Save"
                     IsEnabled="{Binding IsSaveEnabled}"

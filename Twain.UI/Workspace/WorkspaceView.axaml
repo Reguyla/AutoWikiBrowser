@@ -62,62 +62,69 @@
 
 
     <Border.Styles>
-
-        <!-- Standard navigation buttons -->
-        <Style Selector="Button">
+        <!-- Navigation-only styles. All colors come from the active Twain theme. -->
+        <Style Selector="Button.twain-nav-action">
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TwainTextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{DynamicResource TwainControlCornerRadius}" />
+        </Style>
+        <Style Selector="Button.twain-nav-action:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}" />
+        </Style>
+        <Style Selector="Button.twain-nav-action:pressed">
+            <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentPressedBrush}" />
+        </Style>
+        <Style Selector="Button.twain-nav-action:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource TwainTextDisabledBrush}" />
         </Style>
 
-        <!-- Selectable navigation buttons -->
-        <Style Selector="ToggleButton">
+        <Style Selector="ToggleButton.twain-nav-toggle">
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TwainTextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{DynamicResource TwainControlCornerRadius}" />
         </Style>
-
-        <!-- Hover: subtle surface highlight -->
-        <Style Selector="ToggleButton:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainSurfaceBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainBorderBrush}" />
+        <Style Selector="ToggleButton.twain-nav-toggle:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}" />
         </Style>
-
-        <!-- Pressed: stronger accent -->
-        <Style Selector="ToggleButton:pressed">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainSelectionBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainAccentPressedBrush}" />
+        <Style Selector="ToggleButton.twain-nav-toggle:pressed">
+            <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentPressedBrush}" />
         </Style>
-
-        <!-- Selected: persistent navigation highlight -->
-        <Style Selector="ToggleButton:checked">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainSelectionBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainAccentBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+        <Style Selector="ToggleButton.twain-nav-toggle:checked">
+            <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TwainTextPrimaryBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
-
-        <!-- Selected and hovered: preserve selection -->
-        <Style Selector="ToggleButton:checked:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainSelectionBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainAccentHoverBrush}" />
+        <Style Selector="ToggleButton.twain-nav-toggle:checked:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentHoverBrush}" />
         </Style>
-
-        <!-- Shared navigation icons -->
+        <Style Selector="ToggleButton.twain-nav-toggle:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource TwainTextDisabledBrush}" />
+        </Style>
         <Style Selector="PathIcon">
             <Setter Property="Width" Value="18" />
             <Setter Property="Height" Value="18" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-
     </Border.Styles>
 
 
@@ -128,7 +135,7 @@
         <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
 
             <!-- Keep the toggle accessible in both navigation states. -->
-            <Button
+            <Button Classes="twain-nav-action"
                 Command="{Binding ToggleNavigationCommand}"
                 ToolTip.Tip="Collapse or expand navigation"
                 HorizontalContentAlignment="Center"
@@ -163,7 +170,7 @@
                 Foreground="{DynamicResource TwainTextSecondaryBrush}"
                 Text="Editing Options" />
 
-            <ToggleButton Command="{Binding ShowEditingCommand}"
+            <ToggleButton Classes="twain-nav-toggle" Command="{Binding ShowEditingCommand}"
                 ToolTip.Tip="Editing View" IsChecked="{Binding IsEditingSelected, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                 <!-- Editing View: document with text -->
@@ -174,7 +181,7 @@
                 </StackPanel>
             </ToggleButton>
 
-            <ToggleButton Command="{Binding ShowOptionsCommand}"
+            <ToggleButton Classes="twain-nav-toggle" Command="{Binding ShowOptionsCommand}"
                 ToolTip.Tip="Options" IsChecked="{Binding IsOptionsVisible, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                 <!-- Options: adjustment sliders -->
@@ -207,7 +214,7 @@
                 Foreground="{DynamicResource TwainTextSecondaryBrush}"
                 Text="User Settings" />
 
-            <ToggleButton Click="ProfilesButton_Click"
+            <ToggleButton Classes="twain-nav-toggle" Click="ProfilesButton_Click"
                 ToolTip.Tip="Profiles" IsChecked="{Binding IsProfilesVisible, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 12,3 A 4,4 0 1 1 12,11 A 4,4 0 1 1 12,3 M 4,21 L 4,18 C 4,13 20,13 20,18 L 20,21 Z" />
@@ -215,7 +222,7 @@
                 </StackPanel>
             </ToggleButton>
 
-            <ToggleButton Click="PreferencesButton_Click"
+            <ToggleButton Classes="twain-nav-toggle" Click="PreferencesButton_Click"
                 ToolTip.Tip="Preferences" IsChecked="{Binding IsPreferencesVisible, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 12,3 L 14,6 L 18,5 L 19,9 L 22,12 L 19,15 L 18,19 L 14,18 L 12,21 L 10,18 L 6,19 L 5,15 L 2,12 L 5,9 L 6,5 L 10,6 Z M 12,9 A 3,3 0 1 1 12,15 A 3,3 0 1 1 12,9" />
@@ -223,7 +230,7 @@
                 </StackPanel>
             </ToggleButton>
 
-            <ToggleButton Click="BotSettingsButton_Click"
+            <ToggleButton Classes="twain-nav-toggle" Click="BotSettingsButton_Click"
                 ToolTip.Tip="Bot settings" IsChecked="{Binding IsBotSettingsVisible, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 5,7 L 19,7 L 19,19 L 5,19 Z M 12,3 L 12,7 M 8,11 L 10,11 L 10,13 L 8,13 Z M 14,11 L 16,11 L 16,13 L 14,13 Z M 9,16 L 15,16" />
@@ -231,14 +238,14 @@
                 </StackPanel>
             </ToggleButton>
 
-            <Button Click="OpenSettingsButton_Click" ToolTip.Tip="Open settings">
+            <Button Classes="twain-nav-action" Click="OpenSettingsButton_Click" ToolTip.Tip="Open settings">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 4,3 L 15,3 L 20,8 L 20,21 L 4,21 Z M 14,3 L 14,9 L 20,9 M 8,14 L 16,14 M 8,18 L 16,18" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="Open settings" />
                 </StackPanel>
             </Button>
 
-            <Button Click="SaveSettingsButton_Click" ToolTip.Tip="Save settings">
+            <Button Classes="twain-nav-action" Click="SaveSettingsButton_Click" ToolTip.Tip="Save settings">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 4,3 L 18,3 L 21,6 L 21,21 L 3,21 L 3,3 Z M 7,3 L 7,10 L 17,10 L 17,3 M 7,21 L 7,13 L 17,13 L 17,21" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="Save settings" />
@@ -246,7 +253,7 @@
             </Button>
 
             <!-- Save As: two overlapping floppy disks -->
-            <Button
+            <Button Classes="twain-nav-action"
                 Click="SaveSettingsAsButton_Click"
                 ToolTip.Tip="Save settings as...">
 
@@ -299,7 +306,7 @@
                 Foreground="{DynamicResource TwainTextSecondaryBrush}"
                 Text="Tools" />
 
-            <ToggleButton Click="CustomModulesButton_Click"
+            <ToggleButton Classes="twain-nav-toggle" Click="CustomModulesButton_Click"
                 ToolTip.Tip="Custom Modules" IsChecked="{Binding IsCustomModulesVisible, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 8,5 L 3,12 L 8,19 M 16,5 L 21,12 L 16,19 M 14,3 L 10,21" />
@@ -307,14 +314,14 @@
                 </StackPanel>
             </ToggleButton>
 
-            <Button Click="ListComparerButton_Click" ToolTip.Tip="List Comparer">
+            <Button Classes="twain-nav-action" Click="ListComparerButton_Click" ToolTip.Tip="List Comparer">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 3,4 L 10,4 L 10,20 L 3,20 Z M 14,4 L 21,4 L 21,20 L 14,20 Z M 5,9 L 8,9 M 16,9 L 19,9 M 5,14 L 8,14 M 16,14 L 19,14" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="List Comparer" />
                 </StackPanel>
             </Button>
 
-            <Button Click="ListSplitterButton_Click" ToolTip.Tip="List Splitter">
+            <Button Classes="twain-nav-action" Click="ListSplitterButton_Click" ToolTip.Tip="List Splitter">
                 <StackPanel Orientation="Horizontal" Spacing="10">
 
                     <!-- List Splitter: one input branching into two outputs -->
@@ -341,21 +348,21 @@
                 </StackPanel>
             </Button>
 
-            <Button Click="DatabaseScannerButton_Click" ToolTip.Tip="Database Scanner">
+            <Button Classes="twain-nav-action" Click="DatabaseScannerButton_Click" ToolTip.Tip="Database Scanner">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 4,5 C 4,2 20,2 20,5 L 20,19 C 20,22 4,22 4,19 Z M 4,5 C 4,9 20,9 20,5 M 4,12 C 4,16 20,16 20,12" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="Database Scanner" />
                 </StackPanel>
             </Button>
 
-            <Button Click="ExternalProcessingButton_Click" ToolTip.Tip="External Processing">
+            <Button Classes="twain-nav-action" Click="ExternalProcessingButton_Click" ToolTip.Tip="External Processing">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 4,5 L 14,5 L 14,9 M 4,19 L 14,19 L 14,15 M 11,12 L 21,12 M 17,8 L 21,12 L 17,16" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="External Processing" />
                 </StackPanel>
             </Button>
 
-            <Button Click="RegexTesterButton_Click" ToolTip.Tip="Regex Tester">
+            <Button Classes="twain-nav-action" Click="RegexTesterButton_Click" ToolTip.Tip="Regex Tester">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 5,5 L 19,5 L 19,19 L 5,19 Z M 8,10 L 11,13 L 8,16 M 13,16 L 17,16" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="Regex Tester" />
@@ -366,14 +373,14 @@
 
             <!-- Application -->
 
-            <Button Click="AboutButton_Click" ToolTip.Tip="About">
+            <Button Classes="twain-nav-action" Click="AboutButton_Click" ToolTip.Tip="About">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 12,2 A 10,10 0 1 1 12,22 A 10,10 0 1 1 12,2 M 12,10 L 12,17 M 12,6 L 12,8" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="About" />
                 </StackPanel>
             </Button>
 
-            <Button Click="ExitButton_Click" ToolTip.Tip="Exit">
+            <Button Classes="twain-nav-action" Click="ExitButton_Click" ToolTip.Tip="Exit">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon IsVisible="{Binding ShowNavigationIcons}" Data="M 10,4 L 4,4 L 4,20 L 10,20 M 13,7 L 19,12 L 13,17 M 8,12 L 19,12" />
                     <TextBlock IsVisible="{Binding ShowNavigationText}" VerticalAlignment="Center" Text="Exit" />

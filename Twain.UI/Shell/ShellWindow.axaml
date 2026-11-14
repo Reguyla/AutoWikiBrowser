@@ -25,49 +25,22 @@
 
     <Grid RowDefinitions="Auto,*">
 
-        <!-- Main toolbar -->
+        <!-- Main toolbar: presentation is supplied by shared Twain styles. -->
         <Border
             Grid.Row="0"
-            Padding="{DynamicResource TwainContentPadding}"
-            Background="{DynamicResource TwainSurfaceBrush}"
+            Padding="12,8"
+            Background="{DynamicResource TwainToolbarBrush}"
             BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
             BorderThickness="0,0,0,1">
 
-            <Border.Styles>
-                <!-- Styles are scoped to the six primary workflow buttons. -->
-                <Style Selector="Button.workflow-action">
-                    <Setter Property="MinWidth" Value="110" />
-                    <Setter Property="Height" Value="44" />
-                    <Setter Property="Padding" Value="12,6" />
-                    <Setter Property="Background" Value="{DynamicResource TwainRaisedSurfaceBrush}" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}" />
-                    <Setter Property="BorderThickness" Value="1" />
-                    <Setter Property="CornerRadius" Value="{DynamicResource TwainControlCornerRadius}" />
-                    <Setter Property="Foreground" Value="{DynamicResource TwainTextPrimaryBrush}" />
-                </Style>
+            <Grid
+                ColumnDefinitions="Auto,Auto,*,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-                <Style Selector="Button.workflow-action:pointerover">
-                    <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentHoverBrush}" />
-                </Style>
-
-                <Style Selector="Button.workflow-action:pressed">
-                    <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource TwainAccentPressedBrush}" />
-                </Style>
-
-                <Style Selector="Button.workflow-action:disabled">
-                    <Setter Property="Background" Value="{DynamicResource TwainControlBackgroundDisabledBrush}" />
-                    <Setter Property="Foreground" Value="{DynamicResource TwainTextDisabledBrush}" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource TwainBorderSubtleBrush}" />
-                </Style>
-            </Border.Styles>
-
-            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                <!-- Always-visible processing toolbar toggle -->
+                <!-- Always-visible processing toolbar toggle. -->
                 <Button
                     Grid.Column="0"
+                    Classes="twain-command-button"
                     MinWidth="36"
                     Padding="8,6"
                     VerticalAlignment="Center"
@@ -75,94 +48,90 @@
                     Content="{Binding ToolbarToggleText}"
                     ToolTip.Tip="Show or hide processing buttons" />
 
-                <!-- Shared article-processing toolbar -->
+                <!-- Shared article-processing toolbar. -->
                 <processingControls:ProcessingToolbarView
                     Grid.Column="1"
+                    VerticalAlignment="Center"
                     DataContext="{Binding Workspace.Options}"
                     IsVisible="{Binding #TwainShellWindow.DataContext.IsToolbarExpanded,
                                         DataType=vm:ShellViewModel}" />
 
-                <!-- Update status -->
+
+                <!-- Update status: occupies the remaining toolbar width. -->
                 <TextBlock
                     Grid.Column="2"
-                    Margin="16,0"
+                    Margin="10,0"
                     VerticalAlignment="Center"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
                     Text="{Binding UpdateStatusMessage}"
                     TextWrapping="Wrap" />
 
-                <!-- Authentication controls -->
+
+                <!-- Authentication and update controls. -->
                 <StackPanel
                     Grid.Column="3"
                     Orientation="Horizontal"
-                    Spacing="{DynamicResource TwainSpacingMedium}">
-
-                <StackPanel
-                    Orientation="Horizontal"
                     VerticalAlignment="Center"
                     Spacing="{DynamicResource TwainSpacingMedium}">
 
-                <!-- Authentication status indicator -->
-                <TextBlock
-                    x:Name="AuthenticationIndicator"
-                    Classes.logged-in="{Binding IsLoggedIn}"
-                    VerticalAlignment="Center"
-                    FontSize="18"
-                    FontWeight="Bold">
-
-                    <TextBlock.Styles>
-                        <Style Selector="TextBlock">
-                            <Setter Property="Text" Value="✕" />
-                            <Setter Property="Foreground" Value="#C62828" />
-                        </Style>
-
-                        <Style Selector="TextBlock.logged-in">
-                            <Setter Property="Text" Value="✓" />
-                            <Setter Property="Foreground" Value="#2E7D32" />
-                        </Style>
-                    </TextBlock.Styles>
-
-                </TextBlock>
-
-                    <!-- Existing authentication information -->
                     <StackPanel
+                        Orientation="Horizontal"
                         VerticalAlignment="Center"
-                        Spacing="2">
+                        Spacing="{DynamicResource TwainSpacingSmall}">
 
+                        <!-- Keep both a symbol and text for login status. -->
                         <TextBlock
-                            Foreground="{DynamicResource TwainTextPrimaryBrush}"
-                            Text="{Binding LoginStatusText}" />
+                            x:Name="AuthenticationIndicator"
+                            Classes.logged-in="{Binding IsLoggedIn}"
+                            VerticalAlignment="Center"
+                            FontSize="18"
+                            FontWeight="Bold">
+                            <TextBlock.Styles>
+                                <Style Selector="TextBlock">
+                                    <Setter Property="Text" Value="✕" />
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                </Style>
+                                <Style Selector="TextBlock.logged-in">
+                                    <Setter Property="Text" Value="✓" />
+                                    <Setter Property="Foreground" Value="#2E7D32" />
+                                </Style>
+                            </TextBlock.Styles>
+                        </TextBlock>
 
-                        <TextBlock
-                            FontSize="11"
-                            Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                            Text="{Binding ActiveWikiText}" />
-
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Spacing="2">
+                            <TextBlock
+                                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                                Text="{Binding LoginStatusText}" />
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                Text="{Binding ActiveWikiText}" />
+                        </StackPanel>
                     </StackPanel>
-
-                </StackPanel>
 
                     <Button
                         Classes="twain-command-button"
+                        VerticalAlignment="Center"
                         Click="LoginProfilesMenuItem_Click"
                         Content="{Binding LoginButtonText}" />
 
                     <Button
                         Classes="twain-command-button"
+                        VerticalAlignment="Center"
                         Command="{Binding InstallUpdateCommand}"
                         Content="Update and Restart"
                         IsVisible="{Binding IsUpdateAvailable}" />
-
                 </StackPanel>
-
             </Grid>
         </Border>
 
-        <!-- Main workspace -->
+        <!-- Main workspace: existing navigation and editing layout. -->
         <workspaceViews:WorkspaceView
             x:Name="MainWorkspaceView"
             Grid.Row="1"
             DataContext="{Binding Workspace}" />
 
     </Grid>
-
 </Window>

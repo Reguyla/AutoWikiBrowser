@@ -1,55 +1,24 @@
+
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:Twain.UI.Options"
-    xmlns:processing="using:Twain.UI.Controls.Processing"
     x:Class="Twain.UI.Controls.Processing.ProcessingToolbarView"
     x:DataType="vm:OptionsViewModel">
 
     <UserControl.Styles>
 
-        <!-- Shared processing toolbar button appearance -->
+        <!-- Shared toolbar dimensions.
+             Colors and interaction states come from TwainFormStyles. -->
         <Style Selector="Button.workflow-action">
             <Setter Property="MinWidth" Value="44" />
-            <Setter Property="Height" Value="44" />
+            <Setter Property="Height" Value="40" />
             <Setter Property="Padding" Value="10,6" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainRaisedSurfaceBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainBorderSubtleBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius"
-                    Value="{DynamicResource TwainControlCornerRadius}" />
-            <Setter Property="Foreground"
-                    Value="{DynamicResource TwainTextPrimaryBrush}" />
         </Style>
 
-        <Style Selector="Button.workflow-action:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainSelectionBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainAccentHoverBrush}" />
-        </Style>
-
-        <Style Selector="Button.workflow-action:pressed">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainSelectionBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainAccentPressedBrush}" />
-        </Style>
-
-        <Style Selector="Button.workflow-action:disabled">
-            <Setter Property="Background"
-                    Value="{DynamicResource TwainControlBackgroundDisabledBrush}" />
-            <Setter Property="Foreground"
-                    Value="{DynamicResource TwainTextDisabledBrush}" />
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource TwainBorderSubtleBrush}" />
-        </Style>
-
-        <!-- Consistent icon dimensions -->
+        <!-- Consistent icon dimensions. -->
         <Style Selector="Button.workflow-action PathIcon">
             <Setter Property="Width" Value="18" />
             <Setter Property="Height" Value="18" />
@@ -58,13 +27,14 @@
 
     </UserControl.Styles>
 
-<StackPanel
-    Orientation="Horizontal"
-    Spacing="{DynamicResource TwainSpacingMedium}">
+    <StackPanel
+        Orientation="Horizontal"
+        VerticalAlignment="Center"
+        Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Start -->
+        <!-- Start: primary processing action -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-primary-button"
             Command="{Binding StartProcessingCommand}"
             IsEnabled="{Binding IsStartEnabled}"
             ToolTip.Tip="Start processing">
@@ -82,7 +52,7 @@
 
         <!-- Stop -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-command-button"
             Command="{Binding StopProcessingCommand}"
             IsEnabled="{Binding IsStopEnabled}"
             ToolTip.Tip="Stop processing">
@@ -100,7 +70,7 @@
 
         <!-- Save -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-command-button"
             Command="{Binding SaveProcessingCommand}"
             IsEnabled="{Binding IsSaveEnabled}"
             ToolTip.Tip="Save article">
@@ -118,7 +88,7 @@
 
         <!-- Skip -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-command-button"
             Command="{Binding SkipProcessingCommand}"
             IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
             ToolTip.Tip="Skip article">
@@ -136,7 +106,7 @@
 
         <!-- Reparse -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-command-button"
             Command="{Binding ReparseProcessingCommand}"
             IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
             ToolTip.Tip="Reparse article">
@@ -154,7 +124,7 @@
 
         <!-- Preview -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-command-button"
             Command="{Binding ShowPreviewCommand}"
             IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
             ToolTip.Tip="Preview article">
@@ -172,7 +142,7 @@
 
         <!-- Diff -->
         <Button
-            Classes="workflow-action"
+            Classes="workflow-action twain-command-button"
             Command="{Binding ShowDiffCommand}"
             IsEnabled="{Binding AreArticleProcessingControlsEnabled}"
             ToolTip.Tip="Show article differences">

@@ -38,8 +38,7 @@ public static class ThemeManager
                 "avares://Twain.UI/Themes/LegacyTheme.axaml",
 
             TwainTheme.ModernLight =>
-                throw new NotSupportedException(
-                    "Modern Light has not been implemented yet."),
+                "avares://Twain.UI/Themes/ModernLightTheme.axaml",
 
             TwainTheme.ModernDark =>
                 throw new NotSupportedException(

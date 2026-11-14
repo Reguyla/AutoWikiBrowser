@@ -36,17 +36,18 @@
                         VerticalAlignment="Center"
                         Text="Select theme:" />
 
+                    <ComboBox
+                        x:Name="ThemeComboBox"
+                        Grid.Column="1"
+                        MinWidth="240"
+                        SelectionChanged="ThemeComboBox_SelectionChanged">
 
-                        <ComboBox
-                            x:Name="ThemeComboBox"
-                            Grid.Column="1"
-                            MinWidth="240"
-                            SelectionChanged="ThemeComboBox_SelectionChanged">
+                        <ComboBoxItem Content="Classic (Original)" />
+                        <ComboBoxItem Content="Legacy (AWB-inspired)" />
+                        <ComboBoxItem Content="Modern Light" />
 
-                            <ComboBoxItem Content="Classic (Original)" />
-                            <ComboBoxItem Content="Legacy (AWB-inspired)" />
+                    </ComboBox>
 
-                        </ComboBox>
 
 
                 </Grid>

@@ -1,3 +1,4 @@
+
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,48 +7,64 @@
     x:DataType="vm:OptionsViewModel">
 
     <Border Classes="twain-section">
-        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+        <StackPanel
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
+            <!-- Section heading -->
             <TextBlock
                 Classes="twain-section-heading"
                 Text="Administrative Actions" />
 
             <!-- Page management -->
-            <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
+            <StackPanel
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
                 <TextBlock
                     FontWeight="SemiBold"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
                     Text="Page Management" />
 
                 <Grid
                     ColumnDefinitions="*,*"
+                    RowDefinitions="Auto,Auto"
                     ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                    RowSpacing="{DynamicResource TwainSpacingSmall}"
-                    RowDefinitions="Auto,Auto">
+                    RowSpacing="{DynamicResource TwainSpacingSmall}">
 
+                    <!-- Delete page -->
                     <Button
                         x:Name="DeleteButton"
+                        Classes="twain-command-button"
                         Grid.Row="0"
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
+                        MinHeight="34"
                         Content="Delete"
+                        ToolTip.Tip="Delete the current page"
                         IsEnabled="{Binding CanDeleteCurrentPage}" />
 
+                    <!-- Move page -->
                     <Button
                         x:Name="MoveButton"
+                        Classes="twain-command-button"
                         Grid.Row="0"
                         Grid.Column="1"
                         HorizontalAlignment="Stretch"
+                        MinHeight="34"
                         Content="Move"
+                        ToolTip.Tip="Move or rename the current page"
                         IsEnabled="{Binding CanMoveCurrentPage}" />
 
+                    <!-- Protect page -->
                     <Button
                         x:Name="ProtectButton"
+                        Classes="twain-command-button"
                         Grid.Row="1"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         HorizontalAlignment="Stretch"
+                        MinHeight="34"
                         Content="Protect"
+                        ToolTip.Tip="Manage protection for the current page"
                         IsEnabled="{Binding CanProtectCurrentPage}" />
 
                 </Grid>
