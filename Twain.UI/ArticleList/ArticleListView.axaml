@@ -15,34 +15,44 @@
         <vm:ArticleListViewModel />
     </Design.DataContext>
 
-    <Grid
-        RowDefinitions="*,Auto"
-        RowSpacing="{DynamicResource TwainSpacingMedium}">
+    <Grid RowDefinitions="*,Auto">
 
+        <!-- Article list -->
         <ListBox
             Grid.Row="0"
+            Margin="0,0,0,4"
+            Padding="4"
             Background="{DynamicResource TwainControlBackgroundBrush}"
             BorderBrush="{DynamicResource TwainBorderBrush}"
             BorderThickness="{DynamicResource TwainBorderThickness}"
             ItemsSource="{Binding Articles}"
             SelectedItem="{Binding SelectedArticle}" />
 
-        <StackPanel
+        <!-- Command footer -->
+        <Border
             Grid.Row="1"
-            Orientation="Horizontal"
-            Spacing="{DynamicResource TwainSpacingMedium}">
+            Padding="8,8,8,4"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-        <Button
-            Classes="twain-command-button"
-            Command="{Binding AddArticleCommand}"
-            Content="Add" />
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="{DynamicResource TwainSpacingMedium}">
 
-        <Button
-            Classes="twain-command-button"
-            Command="{Binding RemoveSelectedArticleCommand}"
-            Content="Remove" />
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding AddArticleCommand}"
+                    Content="Add" />
 
-        </StackPanel>
+                <Button
+                    Classes="twain-command-button"
+                    Command="{Binding RemoveSelectedArticleCommand}"
+                    Content="Remove" />
+
+            </StackPanel>
+
+        </Border>
 
     </Grid>
 

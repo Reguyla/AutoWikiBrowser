@@ -133,17 +133,31 @@
                     </Grid>
 
                     <!-- Optional pane status indicator -->
-                    <TextBlock
+                    <Border
                         Grid.Column="5"
+                        MinWidth="24"
+                        MinHeight="20"
+                        MaxWidth="120"
+                        Padding="6,2"
+                        CornerRadius="10"
+                        Background="{DynamicResource TwainSurfaceBrush}"
+                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                        BorderThickness="1"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Right"
-                        FontSize="{DynamicResource TwainFontSizeSmall}"
-                        Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                        Text="{Binding HeaderStatusText}"
-                        IsVisible="{Binding HasHeaderStatus}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="NoWrap"
-                        MaxWidth="120" />
+                        IsVisible="{Binding HasHeaderStatus}">
+
+                        <TextBlock
+                            FontSize="{DynamicResource TwainFontSizeSmall}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                            Text="{Binding HeaderStatusText}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+
+                    </Border>
 
                     <!-- Optional pane header action -->
                     <Button

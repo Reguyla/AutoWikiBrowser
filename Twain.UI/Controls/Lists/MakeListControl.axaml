@@ -52,16 +52,17 @@
             PlaceholderText="{Binding SourcePrompt}"
             IsEnabled="{Binding IsSourceTextEnabled}" />
 
-        <!-- Article list and manual entry -->
-        <Grid
-            Grid.Row="2"
-            RowDefinitions="Auto,*"
-            RowSpacing="{DynamicResource TwainSpacingSmall}">
+            <!-- Article list and manual entry -->
+            <Grid
+                Grid.Row="2"
+                RowDefinitions="Auto,Auto,*"
+                RowSpacing="{DynamicResource TwainSpacingSmall}">
 
             <!-- Article list -->
             <ListBox
                 x:Name="ArticleListBox"
-                Grid.Row="1"
+                Grid.Row="2"
+                Padding="4"
                 ItemsSource="{Binding Articles}"
                 SelectedItem="{Binding SelectedArticle, Mode=TwoWay}"
                 SelectionMode="Multiple"
@@ -230,27 +231,29 @@
             </ListBox>
 
             <!-- Manual article entry -->
-            <Grid
+            <TextBox
                 Grid.Row="0"
-                ColumnDefinitions="*,Auto,Auto"
-                ColumnSpacing="{DynamicResource TwainSpacingSmall}">
+                Text="{Binding ManualArticleTitle}"
+                PlaceholderText="Article title"
+                HorizontalAlignment="Stretch" />
 
-                <TextBox
-                    Text="{Binding ManualArticleTitle}"
-                    PlaceholderText="Article title" />
+            <!-- Manual article commands -->
+            <StackPanel
+                Grid.Row="1"
+                Orientation="Horizontal"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
                 <Button
-                    Grid.Column="1"
                     Classes="twain-command-button"
                     Content="Add"
                     Command="{Binding AddArticleCommand}" />
 
                 <Button
-                    Grid.Column="2"
                     Classes="twain-command-button"
                     Content="Remove"
                     Click="RemoveButton_Click" />
-            </Grid>
+
+            </StackPanel>
 
         </Grid>
     </Grid>
