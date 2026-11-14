@@ -7,54 +7,85 @@
     x:Class="Twain.UI.Controls.RegexTesterWindow"
     mc:Ignorable="d"
     d:DesignWidth="760"
-    d:DesignHeight="560"
+    d:DesignHeight="640"
     Width="760"
-    Height="560"
+    Height="640"
     MinWidth="600"
-    MinHeight="420"
+    MinHeight="500"
     WindowStartupLocation="CenterOwner"
     Title="Regex Tester"
     Background="{DynamicResource TwainApplicationBackgroundBrush}"
     Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
+    <!-- Main window layout -->
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
-        RowDefinitions="Auto,*,Auto"
+        RowDefinitions="Auto,Auto,*,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <!-- Find, replace, and options -->
-        <Grid
+        <!-- Description -->
+        <TextBlock
             Grid.Row="0"
-            ColumnDefinitions="Auto,*,Auto"
+            Text="Test regular expressions against sample text, inspect matches and capture groups, and preview replacements."
+            TextWrapping="Wrap"
+            Foreground="{DynamicResource TwainTextSecondaryBrush}"
+            FontSize="{DynamicResource TwainFontSizeSmall}" />
+
+        <!-- Find, Replace, and Regex Options -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,Auto"
             RowDefinitions="Auto,Auto"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}"
             RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-            <TextBlock
+            <!-- Find and Replace expressions -->
+            <Grid
                 Grid.Row="0"
                 Grid.Column="0"
-                VerticalAlignment="Top"
-                Margin="0,5,0,0"
-                Text="Find:" />
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                RowSpacing="{DynamicResource TwainSpacingSmall}">
 
-            <TextBox
-                x:Name="FindTextBox"
-                Grid.Row="0"
-                Grid.Column="1"
-                MinHeight="72"
-                AcceptsReturn="True"
-                TextWrapping="NoWrap"
-                FontFamily="Consolas"
-                TextChanged="ConditionsChanged"
-                ToolTip.Tip="The regular expression to find" />
+                <TextBlock
+                    Grid.Row="0"
+                    Text="Find:"
+                    FontWeight="SemiBold" />
+
+                <TextBox
+                    x:Name="FindTextBox"
+                    Grid.Row="1"
+                    Height="72"
+                    AcceptsReturn="True"
+                    TextWrapping="NoWrap"
+                    FontFamily="Consolas"
+                    TextChanged="ConditionsChanged"
+                    ToolTip.Tip="The regular expression to find" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Text="Replace:"
+                    FontWeight="SemiBold"
+                    Margin="0,4,0,0" />
+
+                <TextBox
+                    x:Name="ReplaceTextBox"
+                    Grid.Row="3"
+                    Height="72"
+                    AcceptsReturn="True"
+                    TextWrapping="NoWrap"
+                    FontFamily="Consolas"
+                    TextChanged="ConditionsChanged"
+                    ToolTip.Tip="The replacement expression" />
+
+            </Grid>
 
             <!-- Regex options -->
             <Border
                 Grid.Row="0"
-                Grid.Column="2"
-                Grid.RowSpan="2"
+                Grid.Column="1"
                 Classes="twain-section"
-                Margin="0">
+                Margin="0"
+                VerticalAlignment="Stretch">
 
                 <StackPanel
                     Spacing="{DynamicResource TwainSpacingMedium}">
@@ -96,57 +127,50 @@
                             Grid.Column="1"
                             Content="Explicit capture"
                             ToolTip.Tip="Only named or explicitly numbered groups capture substrings." />
+
                     </Grid>
                 </StackPanel>
             </Border>
 
-            <TextBlock
+            <!-- Regex commands -->
+            <StackPanel
                 Grid.Row="1"
                 Grid.Column="0"
-                VerticalAlignment="Center"
-                Text="Replace:" />
-
-            <Grid
-                Grid.Row="1"
-                Grid.Column="1"
-                ColumnDefinitions="*,Auto,Auto,Auto"
-                ColumnSpacing="{DynamicResource TwainSpacingSmall}">
-
-                <TextBox
-                    x:Name="ReplaceTextBox"
-                    Grid.Column="0"
-                    FontFamily="Consolas"
-                    TextChanged="ConditionsChanged"
-                    ToolTip.Tip="The replacement expression" />
+                Grid.ColumnSpan="2"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
                 <Button
                     x:Name="FindButton"
-                    Grid.Column="1"
                     Classes="twain-command-button"
                     Content="Find"
+                    MinWidth="85"
                     IsEnabled="False"
                     Click="FindButton_Click" />
 
                 <Button
                     x:Name="ReplaceButton"
-                    Grid.Column="2"
                     Classes="twain-command-button"
                     Content="Replace"
+                    MinWidth="85"
                     IsEnabled="False"
                     Click="ReplaceButton_Click" />
 
                 <Button
                     x:Name="HelpButton"
-                    Grid.Column="3"
                     Classes="twain-command-button"
                     Content="Help"
+                    MinWidth="85"
                     Click="HelpButton_Click" />
-            </Grid>
+
+            </StackPanel>
+
         </Grid>
 
         <!-- Input and output -->
         <Grid
-            Grid.Row="1"
+            Grid.Row="2"
             RowDefinitions="*,Auto,*"
             RowSpacing="{DynamicResource TwainSpacingSmall}">
 
@@ -169,6 +193,7 @@
                     FontFamily="Consolas"
                     TextChanged="ConditionsChanged"
                     ToolTip.Tip="Enter or paste the text to be searched here" />
+
             </Grid>
 
             <!-- Resizable divider -->
@@ -203,13 +228,15 @@
                         AcceptsReturn="True"
                         TextWrapping="NoWrap"
                         FontFamily="Consolas" />
+
                 </Grid>
             </Grid>
+
         </Grid>
 
         <!-- Status -->
         <Grid
-            Grid.Row="2"
+            Grid.Row="3"
             ColumnDefinitions="Auto,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
@@ -217,12 +244,15 @@
                 x:Name="ProgressBar"
                 Width="100"
                 Height="16"
-                IsIndeterminate="False" />
+                IsIndeterminate="False"
+                IsVisible="False" />
 
             <TextBlock
                 x:Name="StatusText"
                 Grid.Column="1"
                 VerticalAlignment="Center" />
+
         </Grid>
+
     </Grid>
 </Window>
