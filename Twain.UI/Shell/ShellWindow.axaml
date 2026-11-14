@@ -19,10 +19,6 @@
     Title="{Binding WindowTitle}"
     mc:Ignorable="d">
 
-    <Design.DataContext>
-        <vm:ShellViewModel />
-    </Design.DataContext>
-
     <Grid RowDefinitions="Auto,*">
 
         <!-- Main toolbar: presentation is supplied by shared Twain styles. -->
