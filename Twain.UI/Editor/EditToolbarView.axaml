@@ -1,4 +1,3 @@
-
 <UserControl
     x:Class="Twain.UI.Editor.EditToolbarView"
     xmlns="https://github.com/avaloniaui"
@@ -12,7 +11,7 @@
         Background="{DynamicResource TwainSurfaceBrush}"
         BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
         BorderThickness="1"
-        CornerRadius="4">
+        CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
         <ScrollViewer
             HorizontalScrollBarVisibility="Auto"
@@ -24,6 +23,7 @@
 
                 <!-- Bold -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.bold"
                     ToolTip.Tip="Bold"
                     Click="FormattingButton_Click">
@@ -48,6 +48,7 @@
 
                 <!-- Italic -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.italic"
                     ToolTip.Tip="Italic"
                     Click="FormattingButton_Click">
@@ -73,6 +74,7 @@
 
                 <!-- Internal Link -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.internalLink"
                     ToolTip.Tip="Internal link"
                     Click="FormattingButton_Click">
@@ -95,6 +97,7 @@
 
                 <!-- External Link -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.externalLink"
                     ToolTip.Tip="External link"
                     Click="FormattingButton_Click">
@@ -116,6 +119,7 @@
 
                 <!-- Math -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.math"
                     ToolTip.Tip="Math"
                     Click="FormattingButton_Click">
@@ -138,6 +142,7 @@
 
                 <!-- Nowiki -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.nowiki"
                     ToolTip.Tip="Nowiki"
                     Click="FormattingButton_Click">
@@ -160,6 +165,7 @@
 
                 <!-- Horizontal Rule -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.horizontalRule"
                     ToolTip.Tip="Horizontal rule"
                     Click="FormattingButton_Click">
@@ -182,6 +188,7 @@
 
                 <!-- Redirect -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.redirect"
                     ToolTip.Tip="Redirect"
                     Click="FormattingButton_Click">
@@ -204,6 +211,7 @@
 
                 <!-- Strikethrough -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.strikethrough"
                     ToolTip.Tip="Strikethrough"
                     Click="FormattingButton_Click">
@@ -226,6 +234,7 @@
 
                 <!-- Superscript -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.superscript"
                     ToolTip.Tip="Superscript"
                     Click="FormattingButton_Click">
@@ -247,6 +256,7 @@
 
                 <!-- Subscript -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.format.subscript"
                     ToolTip.Tip="Subscript"
                     Click="FormattingButton_Click">
@@ -268,6 +278,7 @@
 
                 <!-- Comment -->
                 <Button
+                    Classes="twain-command-button"
                     Tag="twain.commentSelected"
                     ToolTip.Tip="Comment selected text"
                     Click="FormattingButton_Click">
@@ -292,3 +303,4 @@
         </ScrollViewer>
     </Border>
 </UserControl>
+
