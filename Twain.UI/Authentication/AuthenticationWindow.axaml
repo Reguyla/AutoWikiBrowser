@@ -4,7 +4,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Authentication Required"
-    Width="420"
+    Width="440"
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
@@ -13,53 +13,96 @@
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
-        RowDefinitions="Auto,Auto,Auto,Auto"
-        ColumnDefinitions="Auto,*"
-        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-        RowSpacing="{DynamicResource TwainSpacingMedium}">
+        RowDefinitions="Auto,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Instructions -->
-        <TextBlock
+        <!-- Dialog heading and instructions -->
+        <StackPanel
             Grid.Row="0"
-            Grid.ColumnSpan="2"
-            Text="Enter the HTTP authentication credentials for this site."
-            TextWrapping="Wrap" />
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Username -->
-        <TextBlock
+            <TextBlock
+                Text="Authentication Required"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+            <TextBlock
+                Text="Enter the HTTP authentication credentials for this site."
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                TextWrapping="Wrap" />
+
+        </StackPanel>
+
+        <!-- Credential fields -->
+        <Border
             Grid.Row="1"
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            Text="Username:" />
+            Padding="16"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-        <TextBox
-            x:Name="UsernameTextBox"
-            Grid.Row="1"
-            Grid.Column="1"
-            MinWidth="260" />
+            <Grid
+                ColumnDefinitions="Auto,*"
+                RowDefinitions="Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <!-- Password -->
-        <TextBlock
+                <!-- Username -->
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Username:" />
+
+                <TextBox
+                    x:Name="UsernameTextBox"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    MinWidth="240" />
+
+                <!-- Password -->
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Password:" />
+
+                <TextBox
+                    x:Name="PasswordTextBox"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    PasswordChar="●" />
+
+            </Grid>
+        </Border>
+
+        <!-- Dialog commands -->
+        <Border
             Grid.Row="2"
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            Text="Password:" />
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-        <TextBox
-            x:Name="PasswordTextBox"
-            Grid.Row="2"
-            Grid.Column="1"
-            PasswordChar="●" />
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="{DynamicResource TwainSpacingMedium}">
 
-        <!-- Commands -->
-        <Button
-            Grid.Row="3"
-            Grid.Column="1"
-            Classes="twain-primary-button"
-            HorizontalAlignment="Right"
-            Content="Login"
-            IsDefault="True"
-            Click="LoginButton_Click" />
+                <Button
+                    Classes="twain-command-button"
+                    Content="Cancel"
+                    IsCancel="True" />
+
+                <Button
+                    Classes="twain-primary-button"
+                    Content="Login"
+                    IsDefault="True"
+                    Click="LoginButton_Click" />
+
+            </StackPanel>
+        </Border>
 
     </Grid>
 </Window>
