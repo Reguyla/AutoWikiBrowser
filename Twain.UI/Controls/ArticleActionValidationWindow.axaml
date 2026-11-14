@@ -3,7 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="Twain.UI.Controls.ArticleActionValidationWindow"
-    Width="420"
+    Width="440"
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
@@ -13,21 +13,58 @@
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
-        RowDefinitions="Auto,Auto"
+        RowDefinitions="Auto,Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Validation message -->
-        <TextBlock
-            x:Name="MessageTextBlock"
-            TextWrapping="Wrap" />
+        <!-- Dialog heading -->
+        <StackPanel
+            Grid.Row="0"
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Commands -->
-        <Button
+            <TextBlock
+                Text="Validation error"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+            <TextBlock
+                Text="The requested action could not be completed."
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                TextWrapping="Wrap" />
+
+        </StackPanel>
+
+        <!-- Validation message -->
+        <Border
             Grid.Row="1"
-            Classes="twain-command-button"
-            HorizontalAlignment="Right"
-            Content="OK"
-            Click="OkButton_Click" />
+            Padding="16"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+            <TextBlock
+                x:Name="MessageTextBlock"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                TextWrapping="Wrap" />
+
+        </Border>
+
+        <!-- Dialog commands -->
+        <Border
+            Grid.Row="2"
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
+
+            <Button
+                Classes="twain-command-button"
+                HorizontalAlignment="Right"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
+
+        </Border>
 
     </Grid>
 </Window>
