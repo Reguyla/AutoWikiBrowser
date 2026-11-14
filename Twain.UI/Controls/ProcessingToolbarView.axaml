@@ -28,6 +28,7 @@
     </UserControl.Styles>
 
     <StackPanel
+        x:Name="WorkflowToolbarPanel"
         Orientation="Horizontal"
         VerticalAlignment="Center"
         Spacing="{DynamicResource TwainSpacingSmall}">
