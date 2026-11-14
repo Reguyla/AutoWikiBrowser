@@ -4,7 +4,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Width="460"
-    Height="190"
+    MinHeight="180"
+    SizeToContent="Height"
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
@@ -15,37 +16,71 @@
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="Auto,Auto,Auto"
-        RowSpacing="{DynamicResource TwainSpacingMedium}">
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Status message -->
-        <TextBlock
-            x:Name="StatusTextBlock"
+        <!-- Status heading and message -->
+        <StackPanel
             Grid.Row="0"
-            TextWrapping="Wrap" />
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Progress indicator -->
-        <GroupBox
-            x:Name="ProgressGroupBox"
+            <TextBlock
+                Text="Please wait"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+            <TextBlock
+                x:Name="StatusTextBlock"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                TextWrapping="Wrap"
+                MinHeight="24" />
+
+        </StackPanel>
+
+        <!-- Progress section -->
+        <Border
             Grid.Row="1"
-            Header="Progress">
+            Padding="12"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-            <ProgressBar
-                x:Name="ProgressBar"
-                Minimum="0"
-                Maximum="1"
-                Value="0"
-                Height="18"
-                Margin="8" />
-        </GroupBox>
+            <StackPanel
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Commands -->
-        <Button
+                <TextBlock
+                    Text="Progress"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+                <ProgressBar
+                    x:Name="ProgressBar"
+                    Minimum="0"
+                    Maximum="1"
+                    Value="0"
+                    Height="12"
+                    HorizontalAlignment="Stretch" />
+
+            </StackPanel>
+
+        </Border>
+
+        <!-- Dialog commands -->
+        <Border
             Grid.Row="2"
-            Classes="twain-command-button"
-            Content="_Cancel"
-            HorizontalAlignment="Right"
-            IsCancel="True"
-            Click="CancelButton_Click" />
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
+
+            <Button
+                Classes="twain-command-button"
+                Content="_Cancel"
+                HorizontalAlignment="Right"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
+        </Border>
 
     </Grid>
 </Window>
