@@ -7,6 +7,7 @@
     x:DataType="vm:OptionsViewModel">
 
     <Border Classes="twain-section">
+
         <StackPanel
             Spacing="{DynamicResource TwainSpacingMedium}">
 
@@ -25,17 +26,14 @@
                     Text="Page Management" />
 
                 <Grid
-                    ColumnDefinitions="*,*"
-                    RowDefinitions="Auto,Auto"
-                    ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                    RowSpacing="{DynamicResource TwainSpacingSmall}">
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                     <!-- Delete page -->
                     <Button
                         x:Name="DeleteButton"
-                        Classes="twain-command-button"
-                        Grid.Row="0"
                         Grid.Column="0"
+                        Classes="twain-command-button"
                         HorizontalAlignment="Stretch"
                         MinHeight="34"
                         Content="Delete"
@@ -45,9 +43,8 @@
                     <!-- Move page -->
                     <Button
                         x:Name="MoveButton"
-                        Classes="twain-command-button"
-                        Grid.Row="0"
                         Grid.Column="1"
+                        Classes="twain-command-button"
                         HorizontalAlignment="Stretch"
                         MinHeight="34"
                         Content="Move"
@@ -57,10 +54,8 @@
                     <!-- Protect page -->
                     <Button
                         x:Name="ProtectButton"
+                        Grid.Column="2"
                         Classes="twain-command-button"
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
                         HorizontalAlignment="Stretch"
                         MinHeight="34"
                         Content="Protect"
@@ -72,6 +67,6 @@
             </StackPanel>
 
         </StackPanel>
-    </Border>
 
+    </Border>
 </UserControl>
