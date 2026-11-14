@@ -21,7 +21,7 @@
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
         RowDefinitions="*,Auto"
-        RowSpacing="{DynamicResource TwainSpacingLarge}">
+        RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <!-- Article list -->
         <lists:ListMakerControl
@@ -29,40 +29,48 @@
             NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
 
         <!-- Split and save controls -->
-        <Grid
+        <Border
             Grid.Row="1"
-            ColumnDefinitions="Auto,Auto,*,Auto,Auto"
-            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-            <TextBlock
-                VerticalAlignment="Center"
-                Text="Pages per file:" />
+            <Grid
+                ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
-            <NumericUpDown
-                x:Name="PagesPerFile"
-                Grid.Column="1"
-                Width="110"
-                Minimum="100"
-                Maximum="100000"
-                Increment="10"
-                Value="100" />
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Pages per file:" />
 
-            <Button
-                x:Name="SaveTextButton"
-                Grid.Column="3"
-                Classes="twain-primary-button"
-                Content="Save text files"
-                IsEnabled="False"
-                Click="SaveTextButton_Click" />
+                <NumericUpDown
+                    x:Name="PagesPerFile"
+                    Grid.Column="1"
+                    Width="110"
+                    Minimum="100"
+                    Maximum="100000"
+                    Increment="10"
+                    Value="100" />
 
-            <Button
-                x:Name="SaveSettingsButton"
-                Grid.Column="4"
-                Classes="twain-primary-button"
-                Content="Save settings files"
-                IsEnabled="False"
-                Click="SaveSettingsButton_Click" />
+                <Button
+                    x:Name="SaveTextButton"
+                    Grid.Column="3"
+                    Classes="twain-command-button"
+                    Content="Save text files"
+                    IsEnabled="False"
+                    Click="SaveTextButton_Click" />
 
-        </Grid>
+                <Button
+                    x:Name="SaveSettingsButton"
+                    Grid.Column="4"
+                    Classes="twain-command-button"
+                    Content="Save settings files"
+                    IsEnabled="False"
+                    Click="SaveSettingsButton_Click" />
+
+            </Grid>
+        </Border>
+
     </Grid>
 </Window>
