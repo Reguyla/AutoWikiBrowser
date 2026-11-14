@@ -4,52 +4,63 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid
-        RowDefinitions="Auto,Auto"
-        ColumnDefinitions="*,*"
-        ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-        RowSpacing="{DynamicResource TwainSpacingSmall}">
+    <Border
+        Padding="12"
+        Background="{DynamicResource TwainSurfaceBrush}"
+        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+        BorderThickness="1"
+        CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-        <!-- Create/Edit protection -->
-        <StackPanel
-            Grid.Row="0"
-            Grid.Column="0"
-            Spacing="{DynamicResource TwainSpacingSmall}">
+        <Grid
+            RowDefinitions="Auto,Auto"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+            RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-            <TextBlock
-                Classes="twain-section-heading"
-                Text="Create/Edit" />
+            <!-- Create/Edit protection -->
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="0"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <ListBox
-                Name="EditProtectionListBox"
-                Height="70"
-                SelectionChanged="EditProtectionListBox_SelectionChanged" />
-        </StackPanel>
+                <TextBlock
+                    Classes="twain-section-heading"
+                    Text="Create/Edit" />
 
-        <!-- Move protection -->
-        <StackPanel
-            Grid.Row="0"
-            Grid.Column="1"
-            Spacing="{DynamicResource TwainSpacingSmall}">
+                <ListBox
+                    x:Name="EditProtectionListBox"
+                    Height="100"
+                    SelectionChanged="EditProtectionListBox_SelectionChanged" />
 
-            <TextBlock
-                Classes="twain-section-heading"
-                Text="Move" />
+            </StackPanel>
 
-            <ListBox
-                Name="MoveProtectionListBox"
-                Height="70"
-                IsEnabled="False"
-                SelectionChanged="MoveProtectionListBox_SelectionChanged" />
-        </StackPanel>
+            <!-- Move protection -->
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="1"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Move permissions -->
-        <CheckBox
-            Grid.Row="1"
-            Grid.Column="1"
-            Name="UnlockMoveCheckBox"
-            Content="Unlock move permissions"
-            IsCheckedChanged="UnlockMoveCheckBox_IsCheckedChanged" />
+                <TextBlock
+                    Classes="twain-section-heading"
+                    Text="Move" />
 
-    </Grid>
+                <ListBox
+                    x:Name="MoveProtectionListBox"
+                    Height="100"
+                    IsEnabled="False"
+                    SelectionChanged="MoveProtectionListBox_SelectionChanged" />
+
+            </StackPanel>
+
+            <!-- Move permissions -->
+            <CheckBox
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                x:Name="UnlockMoveCheckBox"
+                Content="Unlock move permissions"
+                IsCheckedChanged="UnlockMoveCheckBox_IsCheckedChanged" />
+
+        </Grid>
+    </Border>
 </UserControl>
