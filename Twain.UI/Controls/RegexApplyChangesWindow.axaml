@@ -17,33 +17,53 @@
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
         <!-- Confirmation message -->
-        <TextBlock
-            Text="Do you want to apply your changes?"
-            TextWrapping="Wrap" />
+        <Border
+            Grid.Row="0"
+            Padding="16"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+            <TextBlock
+                Text="Do you want to apply your changes?"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}"
+                TextWrapping="Wrap" />
+
+        </Border>
 
         <!-- Commands -->
-        <StackPanel
+        <Border
             Grid.Row="1"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Spacing="{DynamicResource TwainSpacingSmall}">
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-            <Button
-                Classes="twain-primary-button"
-                Content="Apply"
-                Click="ApplyButton_Click" />
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button
-                Classes="twain-command-button"
-                Content="Discard"
-                Click="DiscardButton_Click" />
+                <Button
+                    Classes="twain-primary-button"
+                    Content="Apply"
+                    IsDefault="True"
+                    Click="ApplyButton_Click" />
 
-            <Button
-                Classes="twain-command-button"
-                Content="Cancel"
-                IsCancel="True"
-                Click="CancelButton_Click" />
+                <Button
+                    Classes="twain-command-button"
+                    Content="Discard"
+                    Click="DiscardButton_Click" />
 
-        </StackPanel>
+                <Button
+                    Classes="twain-command-button"
+                    Content="Cancel"
+                    IsCancel="True"
+                    Click="CancelButton_Click" />
+
+            </StackPanel>
+
+        </Border>
+
     </Grid>
 </Window>
