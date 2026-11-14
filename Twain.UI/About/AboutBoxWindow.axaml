@@ -3,8 +3,8 @@
     x:Class="Twain.UI.About.AboutBoxWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Width="900"
-    Height="620"
+    Width="760"
+    Height="540"
     MinWidth="700"
     MinHeight="500"
     CanResize="False"
@@ -20,22 +20,53 @@
         RowSpacing="{DynamicResource TwainSpacingLarge}">
 
         <!-- Application identity -->
-        <StackPanel
+        <Border
             Grid.Row="0"
-            Spacing="{DynamicResource TwainSpacingSmall}">
+            Padding="16"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-            <TextBlock
-                Text="Twain"
-                FontSize="28"
-                FontWeight="SemiBold" />
+            <Grid ColumnDefinitions="72,*" ColumnSpacing="16">
 
-            <TextBlock
-                x:Name="VersionText"
-                Text="Version"
-                FontSize="14" />
-        </StackPanel>
+                <!-- Twain application logo -->
+                <Image
+                    Grid.Column="0"
+                    Width="64"
+                    Height="64"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Stretch="Uniform"
+                    Source="avares://Twain.UI/Assets/Twainlogo.ico" />
 
-        <!-- Project information -->
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Spacing="{DynamicResource TwainSpacingSmall}">
+
+                    <TextBlock
+                        Text="Twain"
+                        FontSize="28"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+
+                    <TextBlock
+                        x:Name="VersionText"
+                        Text="Version"
+                        FontSize="14"
+                        Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+
+                    <TextBlock
+                        Text="A modern, cross-platform evolution of AutoWikiBrowser"
+                        TextWrapping="Wrap"
+                        Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- About description and feedback -->
         <StackPanel
             Grid.Row="1"
             Spacing="{DynamicResource TwainSpacingSmall}">
@@ -45,82 +76,134 @@
                 Text="About Twain" />
 
             <TextBlock
-                Text="Twain is a modern, cross-platform evolution of AutoWikiBrowser."
-                TextWrapping="Wrap" />
-
-            <TextBlock
                 Text="Twain builds on the history and open-source work of the AutoWikiBrowser project while providing a modernized application architecture and user interface."
                 TextWrapping="Wrap" />
+
+            <!-- Feedback and contributions -->
+            <TextBlock
+                Classes="twain-section-heading"
+                Margin="0,8,0,0"
+                Text="Feedback and contributions" />
+
+            <TextBlock
+                Text="Help improve Twain by reporting bugs or suggesting new features."
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="{DynamicResource TwainSpacingMedium}">
+
+                <TextBlock
+                    Text="Report a bug (coming soon)"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+
+                <TextBlock
+                    Text="Request an enhancement (coming soon)"
+                    Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+
+            </StackPanel>
         </StackPanel>
 
-        <!-- Details -->
+        <!-- Information panels -->
         <Grid
             Grid.Row="2"
             ColumnDefinitions="*,*"
             ColumnSpacing="{DynamicResource TwainSpacingLarge}">
 
             <!-- Environment and project history -->
-            <StackPanel
+            <Border
                 Grid.Column="0"
-                Spacing="{DynamicResource TwainSpacingMedium}">
+                Padding="14"
+                Background="{DynamicResource TwainSurfaceBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-                <TextBlock
-                    Classes="twain-section-heading"
-                    Text="Environment" />
-
-                <TextBlock
-                    x:Name="EnvironmentText"
-                    TextWrapping="Wrap" />
-
-                <TextBlock
-                    Classes="twain-section-heading"
-                    Text="Project history" />
-
-                <Button
-                    x:Name="AutoWikiBrowserButton"
-                    HorizontalAlignment="Left"
-                    Padding="0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Click="AutoWikiBrowserButton_Click">
+                <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
 
                     <TextBlock
-                        Text="AutoWikiBrowser on Wikipedia"
-                        TextDecorations="Underline" />
-                </Button>
-            </StackPanel>
+                        Classes="twain-section-heading"
+                        Text="Environment" />
 
-            <!-- License information -->
-            <StackPanel
+                    <TextBlock
+                        x:Name="EnvironmentText"
+                        TextWrapping="Wrap" />
+
+                    <Border
+                        Height="1"
+                        Margin="0,8"
+                        Background="{DynamicResource TwainBorderSubtleBrush}" />
+
+                    <TextBlock
+                        Classes="twain-section-heading"
+                        Text="Project history" />
+
+                    <Button
+                        x:Name="AutoWikiBrowserButton"
+                        HorizontalAlignment="Left"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Foreground="{DynamicResource TwainAccentBrush}"
+                        Click="AutoWikiBrowserButton_Click">
+
+                        <TextBlock
+                            Text="AutoWikiBrowser on Wikipedia"
+                            Foreground="{DynamicResource TwainAccentBrush}"
+                            TextDecorations="Underline" />
+                    </Button>
+
+                </StackPanel>
+            </Border>
+
+            <!-- License and details -->
+            <Border
                 Grid.Column="1"
-                Spacing="{DynamicResource TwainSpacingMedium}">
+                Padding="14"
+                Background="{DynamicResource TwainSurfaceBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource TwainControlCornerRadius}">
 
-                <TextBlock
-                    Classes="twain-section-heading"
-                    Text="License and details" />
+                <Grid RowDefinitions="Auto,*" RowSpacing="10">
 
-                <ScrollViewer
-                    VerticalScrollBarVisibility="Auto"
-                    HorizontalScrollBarVisibility="Disabled"
-                    MinHeight="280">
+                    <TextBlock
+                        Grid.Row="0"
+                        Classes="twain-section-heading"
+                        Text="License and details" />
 
                     <TextBox
+                        Grid.Row="1"
                         x:Name="DetailsText"
                         IsReadOnly="True"
                         AcceptsReturn="True"
-                        TextWrapping="Wrap" />
-                </ScrollViewer>
-            </StackPanel>
+                        TextWrapping="Wrap"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                </Grid>
+            </Border>
         </Grid>
 
-        <!-- Commands -->
-        <Button
+        <!-- Footer -->
+        <Grid
             Grid.Row="3"
-            Classes="twain-command-button"
-            Content="_OK"
-            HorizontalAlignment="Right"
-            IsDefault="True"
-            IsCancel="True"
-            Click="OkButton_Click" />
+            RowDefinitions="Auto,Auto"
+            RowSpacing="10">
+
+            <Border
+                Grid.Row="0"
+                Height="1"
+                Background="{DynamicResource TwainBorderSubtleBrush}" />
+
+            <Button
+                Grid.Row="1"
+                Classes="twain-command-button"
+                Content="_OK"
+                MinWidth="90"
+                HorizontalAlignment="Right"
+                IsDefault="True"
+                IsCancel="True"
+                Click="OkButton_Click" />
+        </Grid>
     </Grid>
 </Window>
