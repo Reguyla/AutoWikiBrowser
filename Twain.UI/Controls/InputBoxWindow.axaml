@@ -4,8 +4,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Width="500"
-    Height="180"
     MinWidth="420"
+    SizeToContent="Height"
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
@@ -22,12 +22,14 @@
         <TextBlock
             x:Name="PromptTextBlock"
             Grid.Row="0"
+            Foreground="{DynamicResource TwainTextPrimaryBrush}"
             TextWrapping="Wrap" />
 
         <!-- User input -->
         <TextBox
             x:Name="InputTextBox"
             Grid.Row="1"
+            MinHeight="32"
             TextChanged="InputTextBox_TextChanged" />
 
         <!-- Validation message -->
@@ -35,27 +37,36 @@
             x:Name="ValidationTextBlock"
             Grid.Row="2"
             IsVisible="False"
+            Foreground="{DynamicResource TwainTextSecondaryBrush}"
             TextWrapping="Wrap" />
 
         <!-- Commands -->
-        <StackPanel
+        <Border
             Grid.Row="3"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Spacing="{DynamicResource TwainSpacingSmall}">
+            Margin="0,4,0,0"
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-            <Button
-                Classes="twain-primary-button"
-                Content="_OK"
-                IsDefault="True"
-                Click="OkButton_Click" />
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="{DynamicResource TwainSpacingSmall}">
 
-            <Button
-                Classes="twain-command-button"
-                Content="_Cancel"
-                IsCancel="True"
-                Click="CancelButton_Click" />
+                <Button
+                    Classes="twain-primary-button"
+                    Content="_OK"
+                    IsDefault="True"
+                    Click="OkButton_Click" />
 
-        </StackPanel>
+                <Button
+                    Classes="twain-command-button"
+                    Content="_Cancel"
+                    IsCancel="True"
+                    Click="CancelButton_Click" />
+
+            </StackPanel>
+        </Border>
+
     </Grid>
 </Window>
