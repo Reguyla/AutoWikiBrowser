@@ -15,131 +15,114 @@
       <Grid RowDefinitions="Auto,*,Auto"
           Margin="{DynamicResource TwainContentPadding}">
         <!-- Dump selection -->
-        <Grid Grid.Row="0"
-              RowDefinitions="Auto,Auto"
-              ColumnDefinitions="Auto,*,Auto"
-              ColumnSpacing="{DynamicResource TwainSpacingSmall}"
-              RowSpacing="{DynamicResource TwainSpacingSmall}"
-              Margin="0,0,0,12">
-
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       Text="Database dump:"
-                       VerticalAlignment="Center" />
-
-            <TextBox Grid.Row="0"
-                     Grid.Column="1"
-                     Name="DumpLocationTextBox"
-                     IsReadOnly="True" />
-
-            <Button Classes="twain-command-button" Grid.Row="0"
-                    Grid.Column="2"
-                    Name="BrowseButton"
-                    Content="Browse..."
-                    Click="BrowseButton_Click" />
-
-            <TextBlock Grid.Row="1"
-                       Grid.Column="0"
-                       Text="Start from:"
-                       VerticalAlignment="Center" />
-
-            <Grid Grid.Row="1"
-                  Grid.Column="1"
-                  Grid.ColumnSpan="2"
-                  ColumnDefinitions="*,Auto,Auto,150"
-                  ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                <TextBox Grid.Column="0"
-                         Name="StartFromTextBox"
-                         PlaceholderText="Article title" />
-
-                <CheckBox Grid.Column="1"
-                          Name="IgnoreRedirectsCheckBox"
-                          Content="Ignore redirects"
-                          IsChecked="True"
-                          VerticalAlignment="Center" />
-
-                <TextBlock Grid.Column="2"
-                           Text="Priority:"
-                           VerticalAlignment="Center" />
-
-                <ComboBox Grid.Column="3"
-                          Name="PriorityComboBox"
-                          SelectedIndex="2">
-                    <ComboBoxItem Content="Highest" />
-                    <ComboBoxItem Content="Above normal" />
-                    <ComboBoxItem Content="Normal" />
-                    <ComboBoxItem Content="Below normal" />
-                    <ComboBoxItem Content="Lowest" />
-                </ComboBox>
-
-            </Grid>
-
-        </Grid>
+        <Border Grid.Row="0"
+                Classes="twain-section"
+                Margin="0,0,0,12">
+            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                <TextBlock Classes="twain-section-heading"
+                           Text="Database dump" />
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      RowDefinitions="Auto,Auto"
+                      ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                      RowSpacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="Database dump:"
+                               VerticalAlignment="Center" />
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Name="DumpLocationTextBox"
+                             IsReadOnly="True" />
+                    <Button Grid.Row="0" Grid.Column="2"
+                            Name="BrowseButton"
+                            Classes="twain-command-button"
+                            Content="Browse..."
+                            Click="BrowseButton_Click" />
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="Start from:"
+                               VerticalAlignment="Center" />
+                    <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="*,Auto,Auto,150"
+                          ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                        <TextBox Grid.Column="0" Name="StartFromTextBox"
+                                 PlaceholderText="Article title" />
+                        <CheckBox Grid.Column="1" Name="IgnoreRedirectsCheckBox"
+                                  Content="Ignore redirects" IsChecked="True"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="Priority:"
+                                   VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="3" Name="PriorityComboBox"
+                                  SelectedIndex="2">
+                            <ComboBoxItem Content="Highest" />
+                            <ComboBoxItem Content="Above normal" />
+                            <ComboBoxItem Content="Normal" />
+                            <ComboBoxItem Content="Below normal" />
+                            <ComboBoxItem Content="Lowest" />
+                        </ComboBox>
+                    </Grid>
+                </Grid>
+            </StackPanel>
+        </Border>
 
         <!-- Scanner configuration -->
+        <!-- Left-side section navigation. Keep ScannerTabs as a TabControl so
+             existing SelectedIndex/SelectedItem logic and tab content remain intact. -->
         <TabControl Grid.Row="1"
-                    Name="ScannerTabs">
+                    Name="ScannerTabs"
+                    TabStripPlacement="Left">
+            <TabControl.Styles>
+                <!-- Scope the navigation sizing to this scanner only. -->
+                <Style Selector="TabItem.scanner-nav-item">
+                    <Setter Property="Width" Value="210" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="FontSize" Value="13" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Setter Property="Padding" Value="12,8" />
+                    <Setter Property="Margin" Value="0,0,0,2" />
+                    <Setter Property="Foreground" Value="{DynamicResource TwainTextPrimaryBrush}" />
+                </Style>
+                <Style Selector="TabItem.scanner-nav-item:selected">
+                    <Setter Property="Background" Value="{DynamicResource TwainSelectionBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </Style>
+            </TabControl.Styles>
         
-        <TabItem Classes="twain-tab" Header="Dump information">
-            <Grid Margin="{DynamicResource TwainContentPadding}"
-                  RowDefinitions="Auto,Auto,Auto,Auto"
-                  ColumnDefinitions="Auto,*"
-                  ColumnSpacing="{DynamicResource TwainSpacingMedium}"
-                  RowSpacing="{DynamicResource TwainSpacingMedium}"
-                  MaxWidth="700"
-                  HorizontalAlignment="Left">
-
-                <TextBlock Grid.Row="0"
-                           Grid.Column="0"
-                           Text="Site name:"
-                           VerticalAlignment="Center" />
-
-                <TextBox Grid.Row="0"
-                         Grid.Column="1"
-                         Name="DumpSiteNameTextBox"
-                         Width="500"
-                         IsReadOnly="True" />
-
-                <TextBlock Grid.Row="1"
-                           Grid.Column="0"
-                           Text="Base URL:"
-                           VerticalAlignment="Center" />
-
-                <TextBox Grid.Row="1"
-                         Grid.Column="1"
-                         Name="DumpBaseUrlTextBox"
-                         Width="500"
-                         IsReadOnly="True" />
-
-                <TextBlock Grid.Row="2"
-                           Grid.Column="0"
-                           Text="Generator:"
-                           VerticalAlignment="Center" />
-
-                <TextBox Grid.Row="2"
-                         Grid.Column="1"
-                         Name="DumpGeneratorTextBox"
-                         Width="500"
-                         IsReadOnly="True" />
-
-                <TextBlock Grid.Row="3"
-                           Grid.Column="0"
-                           Text="Case:"
-                           VerticalAlignment="Center" />
-
-                <TextBox Grid.Row="3"
-                         Grid.Column="1"
-                         Name="DumpCaseTextBox"
-                         Width="500"
-                         IsReadOnly="True" />
-
-            </Grid>
+        <TabItem Classes="twain-tab scanner-nav-item" Header="Dump information">
+            <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                        Spacing="{DynamicResource TwainSpacingMedium}">
+                <TextBlock Text="Information read from the selected MediaWiki XML dump."
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                           FontSize="{DynamicResource TwainFontSizeSmall}" />
+                <Border Classes="twain-section" MaxWidth="760"
+                        HorizontalAlignment="Stretch">
+                    <Grid ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto"
+                          ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+                          RowSpacing="{DynamicResource TwainSpacingMedium}">
+                        <TextBlock Grid.Row="0" Text="Site name:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Name="DumpSiteNameTextBox" IsReadOnly="True" />
+                        <TextBlock Grid.Row="1" Text="Base URL:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Name="DumpBaseUrlTextBox" IsReadOnly="True" />
+                        <TextBlock Grid.Row="2" Text="Generator:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Name="DumpGeneratorTextBox" IsReadOnly="True" />
+                        <TextBlock Grid.Row="3" Text="Case:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Name="DumpCaseTextBox" IsReadOnly="True" />
+                    </Grid>
+                </Border>
+            </StackPanel>
         </TabItem>
 
-        <TabItem Classes="twain-tab" Header="Text">
+        <TabItem Classes="twain-tab scanner-nav-item" Header="Text">
 
-            <Grid Margin="{DynamicResource TwainContentPadding}"
+            <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                            Spacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Text="Filter articles by text content, with optional regular-expression matching."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                               FontSize="{DynamicResource TwainFontSizeSmall}" />
+                    <Border Classes="twain-section"
+                            HorizontalAlignment="Stretch">
+                        <Grid 
                     RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                     ColumnDefinitions="Auto,*,Auto"
                     ColumnSpacing="{DynamicResource TwainSpacingMedium}"
@@ -201,10 +184,20 @@
                             Content="Ignore &lt;!-- comments --&gt;" />
 
             </Grid>
+                </Border>
+            </StackPanel>
         </TabItem>
 
-            <TabItem Classes="twain-tab" Header="Title">
-                <Grid Margin="{DynamicResource TwainContentPadding}"
+            <TabItem Classes="twain-tab scanner-nav-item" Header="Title">
+                <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                            Spacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Text="Filter articles by title text or a regular expression."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                               FontSize="{DynamicResource TwainFontSizeSmall}" />
+                    <Border Classes="twain-section"
+                            HorizontalAlignment="Stretch">
+                        <Grid 
                       RowDefinitions="Auto,Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*"
                       ColumnSpacing="{DynamicResource TwainSpacingMedium}"
@@ -245,9 +238,11 @@
                               Content="Case sensitive" />
 
                 </Grid>
-            </TabItem>
+                    </Border>
+            </StackPanel>
+        </TabItem>
 
-                <TabItem Classes="twain-tab" Header="Namespaces">
+                <TabItem Classes="twain-tab scanner-nav-item" Header="Namespaces">
                     <Grid Margin="{DynamicResource TwainContentPadding}">
                         <controls:NamespacesControl
                             Name="NamespacesControl"
@@ -256,8 +251,16 @@
                     </Grid>
                 </TabItem>
 
-            <TabItem Classes="twain-tab" Header="Revision">
-                <Grid Margin="{DynamicResource TwainContentPadding}"
+            <TabItem Classes="twain-tab scanner-nav-item" Header="Revision">
+                <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                            Spacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Text="Limit matches to articles with revisions in the selected date range."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                               FontSize="{DynamicResource TwainFontSizeSmall}" />
+                    <Border Classes="twain-section"
+                            HorizontalAlignment="Stretch">
+                        <Grid 
                       RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*"
                       ColumnSpacing="{DynamicResource TwainSpacingMedium}"
@@ -295,27 +298,41 @@
                                         Width="180" />
 
                 </Grid>
-            </TabItem>
+                    </Border>
+            </StackPanel>
+        </TabItem>
 
-            <TabItem Classes="twain-tab" Header="Protection">
+            <TabItem Classes="twain-tab scanner-nav-item" Header="Protection">
                 <StackPanel Margin="{DynamicResource TwainContentPadding}"
-                            Spacing="{DynamicResource TwainSpacingMedium}"
-                            MaxWidth="500"
-                            HorizontalAlignment="Left">
-
-                    <CheckBox Name="CheckProtectionCheckBox"
-                              Content="Check page protection"
-                              IsCheckedChanged="CheckProtectionCheckBox_IsCheckedChanged" />
-
-                    <controls:EditProtectControl
-                        Name="ProtectionControl"
-                        IsEnabled="False" />
-
+                            Spacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Text="Filter articles according to their page protection settings."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                               FontSize="{DynamicResource TwainFontSizeSmall}" />
+                    <Border Classes="twain-section" MaxWidth="600"
+                            HorizontalAlignment="Stretch">
+                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                            <CheckBox Name="CheckProtectionCheckBox"
+                                      Content="Check page protection"
+                                      IsCheckedChanged="CheckProtectionCheckBox_IsCheckedChanged" />
+                            <controls:EditProtectControl
+                                Name="ProtectionControl"
+                                IsEnabled="False" />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </TabItem>
 
-            <TabItem Classes="twain-tab" Header="Properties">
-                <Grid Margin="{DynamicResource TwainContentPadding}"
+            <TabItem Classes="twain-tab scanner-nav-item" Header="Properties">
+                <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                            Spacing="{DynamicResource TwainSpacingMedium}">
+                    <TextBlock Text="Filter articles by character count, link count, and word count."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                               FontSize="{DynamicResource TwainFontSizeSmall}" />
+                    <Border Classes="twain-section"
+                            HorizontalAlignment="Stretch">
+                        <Grid 
                       RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,Auto,Auto"
                       ColumnSpacing="{DynamicResource TwainSpacingMedium}"
@@ -396,207 +413,229 @@
                                    IsEnabled="False" />
 
                 </Grid>
-            </TabItem>
+                    </Border>
+            </StackPanel>
+        </TabItem>
 
-            <TabItem Classes="twain-tab" Header="Twain checks">
-                <ScrollViewer>
-                    <WrapPanel Margin="{DynamicResource TwainContentPadding}"
-                                Orientation="Horizontal">
-
-                        <CheckBox Name="NoBoldTitleCheckBox"
-                                    Content="Has title Twain will embolden"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="PeopleCategoriesCheckBox"
-                                    Content="Human birth/death cats"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="UnbalancedBracketsCheckBox"
-                                    Content="Unbalanced brackets"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="SimpleLinksCheckBox"
-                                    Content="Has simple links"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="ReorderReferencesCheckBox"
-                                    Content="References to reorder"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="BadLinksCheckBox"
-                                    Content="Has bad links Twain will fix"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="HtmlEntitiesCheckBox"
-                                    Content="Has HTML entities"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="SectionErrorsCheckBox"
-                                    Content="Section error"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="UnbulletedLinksCheckBox"
-                                    Content="Unbulleted links"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="CiteTemplateDatesCheckBox"
-                                    Content="Citation dates Twain will fix"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="TypoCheckBox"
-                                    Content="Typos Twain will fix"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                        <CheckBox Name="MissingDefaultSortCheckBox"
-                                    Content="Missing DEFAULTSORT"
-                                    Width="240"
-                                    Margin="0,0,12,10" />
-
-                    </WrapPanel>
+            <TabItem Classes="twain-tab scanner-nav-item" Header="Twain checks">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="{DynamicResource TwainContentPadding}"
+                                Spacing="{DynamicResource TwainSpacingMedium}"
+                                MaxWidth="800" HorizontalAlignment="Left">
+                        <TextBlock Text="Select article conditions to identify during a database scan."
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                   FontSize="{DynamicResource TwainFontSizeSmall}" />
+                        <Border Classes="twain-section">
+                            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+                                <TextBlock Classes="twain-section-heading" Text="Article conditions" />
+                                <Grid ColumnDefinitions="*,*"
+                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                                      ColumnSpacing="{DynamicResource TwainSpacingLarge}"
+                                      RowSpacing="{DynamicResource TwainSpacingMedium}">
+                                    <CheckBox Grid.Row="0" Grid.Column="0"
+                                              Name="NoBoldTitleCheckBox"
+                                              Content="Has title Twain will embolden" />
+                                    <CheckBox Grid.Row="0" Grid.Column="1"
+                                              Name="PeopleCategoriesCheckBox"
+                                              Content="Human birth/death cats" />
+                                    <CheckBox Grid.Row="1" Grid.Column="0"
+                                              Name="UnbalancedBracketsCheckBox"
+                                              Content="Unbalanced brackets" />
+                                    <CheckBox Grid.Row="1" Grid.Column="1"
+                                              Name="SimpleLinksCheckBox"
+                                              Content="Has simple links" />
+                                    <CheckBox Grid.Row="2" Grid.Column="0"
+                                              Name="ReorderReferencesCheckBox"
+                                              Content="References to reorder" />
+                                    <CheckBox Grid.Row="2" Grid.Column="1"
+                                              Name="BadLinksCheckBox"
+                                              Content="Has bad links Twain will fix" />
+                                    <CheckBox Grid.Row="3" Grid.Column="0"
+                                              Name="HtmlEntitiesCheckBox"
+                                              Content="Has HTML entities" />
+                                    <CheckBox Grid.Row="3" Grid.Column="1"
+                                              Name="SectionErrorsCheckBox"
+                                              Content="Section error" />
+                                    <CheckBox Grid.Row="4" Grid.Column="0"
+                                              Name="UnbulletedLinksCheckBox"
+                                              Content="Unbulleted links" />
+                                    <CheckBox Grid.Row="4" Grid.Column="1"
+                                              Name="CiteTemplateDatesCheckBox"
+                                              Content="Citation dates Twain will fix" />
+                                    <CheckBox Grid.Row="5" Grid.Column="0"
+                                              Name="TypoCheckBox"
+                                              Content="Typos Twain will fix" />
+                                    <CheckBox Grid.Row="5" Grid.Column="1"
+                                              Name="MissingDefaultSortCheckBox"
+                                              Content="Missing DEFAULTSORT" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-             <TabItem Classes="twain-tab" Header="Results">
-                <TabControl Margin="{DynamicResource TwainContentPadding}" Classes="twain-tabs">
+            <TabItem Classes="twain-tab scanner-nav-item" Header="Results">
+                <Grid Margin="{DynamicResource TwainContentPadding}"
+                      RowDefinitions="Auto,*"
+                      RowSpacing="{DynamicResource TwainSpacingSmall}">
+                    <TextBlock Grid.Row="0"
+                               Text="Review matching articles or generate a wiki-formatted list."
+                               Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                               FontSize="{DynamicResource TwainFontSizeSmall}"
+                               TextWrapping="Wrap" />
 
-                    <TabItem Classes="twain-tab" Header="Articles">
-                        <Grid Margin="{DynamicResource TwainContentPadding}"
-                              RowDefinitions="*,Auto"
-                              RowSpacing="{DynamicResource TwainSpacingSmall}">
+                    <TabControl Grid.Row="1" Classes="twain-tabs">
+                        <TabItem Classes="twain-tab" Header="Articles">
+                            <Grid Margin="{DynamicResource TwainContentPadding}"
+                                  RowDefinitions="Auto,*,Auto,Auto"
+                                  RowSpacing="{DynamicResource TwainSpacingMedium}">
+                                <TextBlock Grid.Row="0"
+                                           Text="Articles matching the selected scan criteria."
+                                           Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                           FontSize="{DynamicResource TwainFontSizeSmall}" />
 
-                            <ListBox Grid.Row="0"
-                                     Name="ResultsListBox"
-                                     SelectionMode="Multiple" />
+                                <ListBox Grid.Row="1"
+                                         Name="ResultsListBox"
+                                         MinHeight="120"
+                                         SelectionMode="Multiple" />
 
-                            <Grid Grid.Row="1"
-                                  ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                                  ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                                <!-- Scan status is independent of result-list actions. -->
+                                <Grid Grid.Row="2"
+                                      ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                                    <TextBlock Grid.Column="0"
+                                               Name="ResultCountTextBlock"
+                                               Text="0 matches"
+                                               VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1"
+                                                 Name="ScanProgressBar"
+                                                 Minimum="0"
+                                                 Maximum="100"
+                                                 Value="0"
+                                                 VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2"
+                                               Name="ProgressTextBlock"
+                                               Text="0%"
+                                               VerticalAlignment="Center" />
+                                </Grid>
 
-                                <TextBlock Grid.Column="0"
-                                           Name="ResultCountTextBlock"
-                                           Text="0 matches"
-                                           VerticalAlignment="Center" />
-
-                                <ProgressBar Grid.Column="1"
-                                             Name="ScanProgressBar"
-                                             Minimum="0"
-                                             Maximum="100"
-                                             Value="0"
-                                             VerticalAlignment="Center" />
-
-                                <TextBlock Grid.Column="2"
-                                           Name="ProgressTextBlock"
-                                           Text="0%"
-                                           VerticalAlignment="Center" />
-
-                                <Button Classes="twain-command-button" Grid.Column="3"
-                                        Name="ClearResultsButton"
-                                        Content="Clear"
-                                        Click="ClearResultsButton_Click" />
-
-                                <Button Classes="twain-command-button" Grid.Column="4"
-                                        Name="SaveResultsButton"
-                                        Content="Save list..."
-                                        Click="SaveResultsButton_Click" />
-
-                                <Button Classes="twain-command-button" Grid.Column="5"
-                                        Name="RemoveSelectedButton"
-                                        Content="Remove selected"
-                                        Click="RemoveSelectedButton_Click" />
-
-                                <Button Classes="twain-command-button" Grid.Column="6"
-                                        Name="CopySelectedButton"
-                                        Content="Copy selected"
-                                        Click="CopySelectedButton_Click" />
-
+                                <Border Grid.Row="3"
+                                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                                        BorderThickness="0,1,0,0"
+                                        Padding="0,10,0,0">
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                Spacing="{DynamicResource TwainSpacingSmall}">
+                                        <Button Classes="twain-command-button"
+                                                Name="ClearResultsButton"
+                                                Content="Clear"
+                                                Click="ClearResultsButton_Click" />
+                                        <Button Classes="twain-command-button"
+                                                Name="SaveResultsButton"
+                                                Content="Save list..."
+                                                Click="SaveResultsButton_Click" />
+                                        <Button Classes="twain-command-button"
+                                                Name="RemoveSelectedButton"
+                                                Content="Remove selected"
+                                                Click="RemoveSelectedButton_Click" />
+                                        <Button Classes="twain-command-button"
+                                                Name="CopySelectedButton"
+                                                Content="Copy selected"
+                                                Click="CopySelectedButton_Click" />
+                                    </StackPanel>
+                                </Border>
                             </Grid>
-                        </Grid>
-                    </TabItem>
+                        </TabItem>
 
-                    <TabItem Classes="twain-tab" Header="Wiki list">
-                        <Grid Margin="{DynamicResource TwainContentPadding}"
-                              RowDefinitions="Auto,*,Auto"
-                              RowSpacing="{DynamicResource TwainSpacingSmall}">
+                        <TabItem Classes="twain-tab" Header="Wiki list">
+                            <Grid Margin="{DynamicResource TwainContentPadding}"
+                                  RowDefinitions="Auto,*,Auto"
+                                  RowSpacing="{DynamicResource TwainSpacingMedium}">
+                                <Border Grid.Row="0" Classes="twain-section">
+                                    <StackPanel Spacing="{DynamicResource TwainSpacingSmall}">
+                                        <TextBlock Classes="twain-section-heading"
+                                                   Text="Wiki list options" />
+                                        <TextBlock Text="Format the matching articles as a wiki list."
+                                                   Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                                   FontSize="{DynamicResource TwainFontSizeSmall}" />
+                                        <WrapPanel Orientation="Horizontal">
+                                            <CheckBox Name="WikiHeadingCheckBox"
+                                                      Content="Headings"
+                                                      Margin="0,0,12,8"
+                                                      IsCheckedChanged="WikiHeadingCheckBox_IsCheckedChanged" />
+                                            <TextBlock Text="Every:"
+                                                       Margin="0,0,8,8"
+                                                       VerticalAlignment="Center" />
+                                            <NumericUpDown Name="WikiHeadingSpacingNumericUpDown"
+                                                           Width="80"
+                                                           Margin="0,0,16,8"
+                                                           Minimum="1"
+                                                           Maximum="1000"
+                                                           Value="25"
+                                                           IsEnabled="False" />
+                                            <CheckBox Name="WikiAlphabeticalHeaderCheckBox"
+                                                      Content="Alphabetical headers"
+                                                      Margin="0,0,16,8" />
+                                            <CheckBox Name="WikiNumberedListCheckBox"
+                                                      Content="Numbered list"
+                                                      Margin="0,0,16,8"
+                                                      IsChecked="True" />
+                                            <Button Classes="twain-primary-button"
+                                                    Name="GenerateWikiListButton"
+                                                    Content="Generate"
+                                                    Margin="0,0,0,8"
+                                                    Click="GenerateWikiListButton_Click" />
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
 
-                            <StackPanel Grid.Row="0"
-                                        Orientation="Horizontal"
-                                        Spacing="{DynamicResource TwainSpacingMedium}">
+                                <TextBox Grid.Row="1"
+                                         Name="WikiListTextBox"
+                                         MinHeight="120"
+                                         AcceptsReturn="True"
+                                         TextWrapping="NoWrap"
+                                         IsReadOnly="True"
+                                         FontFamily="Consolas"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Auto" />
 
-                            <CheckBox Name="WikiHeadingCheckBox"
-                                      Content="Headings"
-                                      IsCheckedChanged="WikiHeadingCheckBox_IsCheckedChanged" />
-
-                                <TextBlock Text="Every:"
-                                           VerticalAlignment="Center" />
-
-                                <NumericUpDown Name="WikiHeadingSpacingNumericUpDown"
-                                               Width="80"
-                                               Minimum="1"
-                                               Maximum="1000"
-                                               Value="25"
-                                               IsEnabled="False" />
-
-                                <CheckBox Name="WikiAlphabeticalHeaderCheckBox"
-                                          Content="Alphabetical headers" />
-
-                                <CheckBox Name="WikiNumberedListCheckBox"
-                                          Content="Numbered list"
-                                          IsChecked="True" />
-
-                                <Button Classes="twain-primary-button" Name="GenerateWikiListButton"
-                                        Content="Generate"
-                                        Click="GenerateWikiListButton_Click" />
-
-                            </StackPanel>
-
-                            <TextBox Grid.Row="1"
-                                     Name="WikiListTextBox"
-                                     AcceptsReturn="True"
-                                     TextWrapping="NoWrap"
-                                     IsReadOnly="True"
-                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Auto" />
-
-                            <StackPanel Grid.Row="2"
-                                        Orientation="Horizontal"
-                                        HorizontalAlignment="Right"
-                                        Spacing="{DynamicResource TwainSpacingSmall}">
-
-                                <Button Classes="twain-command-button" Name="ClearWikiListButton"
-                                        Content="Clear"
-                                        Click="ClearWikiListButton_Click" />
-
-                                <Button Classes="twain-command-button" Name="CopyWikiListButton"
-                                        Content="Copy"
-                                        Click="CopyWikiListButton_Click" />
-
-                                <Button Classes="twain-command-button" Name="SaveWikiListButton"
-                                        Content="Save..."
-                                        Click="SaveWikiListButton_Click" />
-
-                            </StackPanel>
-
-                        </Grid>
-                    </TabItem>
-
-                </TabControl>
+                                <Border Grid.Row="2"
+                                        BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                                        BorderThickness="0,1,0,0"
+                                        Padding="0,10,0,0">
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                Spacing="{DynamicResource TwainSpacingSmall}">
+                                        <Button Classes="twain-command-button"
+                                                Name="ClearWikiListButton"
+                                                Content="Clear"
+                                                Click="ClearWikiListButton_Click" />
+                                        <Button Classes="twain-command-button"
+                                                Name="CopyWikiListButton"
+                                                Content="Copy"
+                                                Click="CopyWikiListButton_Click" />
+                                        <Button Classes="twain-command-button"
+                                                Name="SaveWikiListButton"
+                                                Content="Save..."
+                                                Click="SaveWikiListButton_Click" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
             </TabItem>
 
         </TabControl>
 
         <!-- Scanner controls -->
-        <Grid Grid.Row="2"
+        <Border Grid.Row="2"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,12,0,0">
+        <Grid
               ColumnDefinitions="Auto,Auto,*,Auto,Auto"
               ColumnSpacing="{DynamicResource TwainSpacingSmall}"
               Margin="0,12,0,0">
@@ -630,6 +669,7 @@
                     Content="Start"
                     Click="StartButton_Click" />
         </Grid>
+        </Border>
 
     </Grid>
 </Window>
