@@ -1829,8 +1829,6 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             originalArticleText,
             updatedArticleText);
 
-        // Validation will be added in the next step.
-
         _customModuleMadeChanges =
             !string.Equals(
                 updatedArticleText,
@@ -1844,11 +1842,30 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             updatedArticleText,
             false);
 
-        processArticleEventArgs.EditSummary = editSummary;
+
+        string effectiveEditSummary =
+            _customModuleMadeChanges && !skipArticle &&
+            string.IsNullOrWhiteSpace(editSummary)
+                ? "Custom module: Changes made"
+                : editSummary;
+
+        processArticleEventArgs.EditSummary = effectiveEditSummary;
         processArticleEventArgs.Skip = skipArticle;
 
         if (!skipArticle)
+        {
+            if (_customModuleMadeChanges)
+            {
+                EditSummaryCollector.Add(
+                    new EditSummaryContribution
+                    {
+                        Category = EditSummaryCategory.CustomModule,
+                        Description = effectiveEditSummary.Trim()
+                    });
+            }
+
             AppendPluginEditSummary();
+        }
     }
 
     /// <summary>
