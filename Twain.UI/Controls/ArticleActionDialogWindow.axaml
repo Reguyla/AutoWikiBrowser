@@ -8,7 +8,8 @@
     mc:Ignorable="d"
     d:DesignWidth="520"
     d:DesignHeight="360"
-    Width="520"
+    Width="540"
+    MinHeight="180"
     SizeToContent="Height"
     CanResize="False"
     WindowStartupLocation="CenterOwner"
@@ -18,14 +19,14 @@
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
-        RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
         <!-- New title -->
         <Grid
             x:Name="NewTitlePanel"
             Grid.Row="0"
-            ColumnDefinitions="Auto,*"
+            ColumnDefinitions="110,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
@@ -41,7 +42,7 @@
         <Grid
             x:Name="ExpiryPanel"
             Grid.Row="1"
-            ColumnDefinitions="Auto,*"
+            ColumnDefinitions="110,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}"
             IsVisible="False">
 
@@ -57,7 +58,7 @@
         <!-- Summary -->
         <Grid
             Grid.Row="2"
-            ColumnDefinitions="Auto,*"
+            ColumnDefinitions="110,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
@@ -67,6 +68,7 @@
             <ComboBox
                 x:Name="SummaryComboBox"
                 Grid.Column="1"
+                HorizontalAlignment="Stretch"
                 IsEditable="True" />
         </Grid>
 
@@ -74,92 +76,116 @@
         <StackPanel
             x:Name="ProtectionPanel"
             Grid.Row="3"
+            IsVisible="False" />
+
+            <Border
+                Padding="12"
+                Background="{DynamicResource TwainSurfaceBrush}"
+                BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+                <StackPanel
+                    Spacing="{DynamicResource TwainSpacingMedium}">
+
+                <TextBlock
+                    Classes="twain-section-heading"
+                    Text="Protection settings" />
+
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                    <StackPanel
+                        Grid.Column="0"
+                        Spacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock
+                            FontWeight="SemiBold"
+                            Text="Create/Edit" />
+
+                        <ListBox
+                            x:Name="EditProtectionListBox"
+                            Height="100"
+                            SelectionChanged="EditProtectionSelectionChanged" />
+
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Column="1"
+                        Spacing="{DynamicResource TwainSpacingSmall}">
+
+                        <TextBlock
+                            FontWeight="SemiBold"
+                            Text="Move" />
+
+                        <ListBox
+                            x:Name="MoveProtectionListBox"
+                            Height="100"
+                            IsEnabled="False"
+                            SelectionChanged="MoveProtectionSelectionChanged" />
+
+                    </StackPanel>
+                </Grid>
+
+                <CheckBox
+                    x:Name="UnlockMovePermissionsCheckBox"
+                    Content="Unlock move permissions"
+                    Click="UnlockMovePermissionsCheckBox_Click" />
+
+                <CheckBox
+                    x:Name="CascadingProtectionCheckBox"
+                    Content="Cascading protection"
+                    IsEnabled="False"
+                    ToolTip.Tip="Automatically protect any pages transcluded in this page" />
+
+                <CheckBox
+                    x:Name="AutoProtectAllCheckBox"
+                    Content="Auto Protect All"
+                    IsVisible="False" />
+
+            </StackPanel>
+        </Border>
+
+        <!-- Move options -->
+        <StackPanel
+            x:Name="MoveOptionsPanel"
+            Grid.Row="4"
+            Orientation="Horizontal"
+            HorizontalAlignment="Left"
             Spacing="{DynamicResource TwainSpacingMedium}"
             IsVisible="False">
 
-            <Grid
-                ColumnDefinitions="*,*"
-                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
-
-                <StackPanel
-                    Grid.Column="0"
-                    Spacing="{DynamicResource TwainSpacingSmall}">
-
-                    <TextBlock
-                        Classes="twain-section-heading"
-                        Text="Create/Edit" />
-
-                    <ListBox
-                        x:Name="EditProtectionListBox"
-                        Height="90"
-                        SelectionChanged="EditProtectionSelectionChanged" />
-                </StackPanel>
-
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="{DynamicResource TwainSpacingSmall}">
-
-                    <TextBlock
-                        Classes="twain-section-heading"
-                        Text="Move" />
-
-                    <ListBox
-                        x:Name="MoveProtectionListBox"
-                        Height="90"
-                        IsEnabled="False"
-                        SelectionChanged="MoveProtectionSelectionChanged" />
-                </StackPanel>
-            </Grid>
+            <CheckBox
+                x:Name="DealWithAssociatedTalkPageCheckBox"
+                Content="Move associated talk page" />
 
             <CheckBox
-                x:Name="UnlockMovePermissionsCheckBox"
-                Content="Unlock move permissions"
-                Click="UnlockMovePermissionsCheckBox_Click" />
+                x:Name="NoRedirectCheckBox"
+                Content="No Redirect" />
 
             <CheckBox
-                x:Name="CascadingProtectionCheckBox"
-                Content="Cascading protection"
-                IsEnabled="False"
-                ToolTip.Tip="Automatically protect any pages transcluded in this page" />
+                x:Name="WatchCheckBox"
+                Content="Watch" />
 
-            <CheckBox
-                x:Name="AutoProtectAllCheckBox"
-                Content="Auto Protect All"
-                IsVisible="False" />
         </StackPanel>
 
-        <!-- Move options and commands -->
-        <Grid
-            Grid.Row="4"
-            RowDefinitions="Auto,Auto"
-            RowSpacing="{DynamicResource TwainSpacingMedium}">
+        <!-- Dialog commands -->
+        <Border
+            Grid.Row="5"
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
             <StackPanel
-                x:Name="MoveOptionsPanel"
-                Orientation="Horizontal"
-                HorizontalAlignment="Center"
-                Spacing="{DynamicResource TwainSpacingMedium}"
-                IsVisible="False">
-
-                <CheckBox
-                    x:Name="DealWithAssociatedTalkPageCheckBox"
-                    Content="Move associated talk page" />
-
-                <CheckBox
-                    x:Name="NoRedirectCheckBox"
-                    Content="No Redirect" />
-
-                <CheckBox
-                    x:Name="WatchCheckBox"
-                    Content="Watch" />
-            </StackPanel>
-
-            <!-- Commands -->
-            <StackPanel
-                Grid.Row="1"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right"
-                Spacing="{DynamicResource TwainSpacingSmall}">
+                Spacing="{DynamicResource TwainSpacingMedium}">
+
+                <Button
+                    Classes="twain-command-button"
+                    Content="Cancel"
+                    Click="CancelButton_Click" />
 
                 <Button
                     x:Name="OkButton"
@@ -167,11 +193,8 @@
                     Content="OK"
                     Click="OkButton_Click" />
 
-                <Button
-                    Classes="twain-command-button"
-                    Content="Cancel"
-                    Click="CancelButton_Click" />
             </StackPanel>
-        </Grid>
+        </Border>
+
     </Grid>
 </Window>
