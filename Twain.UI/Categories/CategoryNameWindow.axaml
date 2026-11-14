@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Category"
     Width="460"
-    Height="150"
+    MinHeight="180"
+    SizeToContent="Height"
     CanResize="False"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterOwner"
@@ -14,35 +15,71 @@
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
-        RowDefinitions="Auto,Auto"
-        ColumnDefinitions="Auto,*"
-        RowSpacing="{DynamicResource TwainSpacingMedium}"
-        ColumnSpacing="{DynamicResource TwainSpacingSmall}">
+        RowDefinitions="Auto,Auto,Auto"
+        RowSpacing="{DynamicResource TwainSpacingLarge}">
 
-        <!-- Category namespace -->
-        <TextBlock
-            x:Name="CategoryNamespaceTextBlock"
+        <!-- Dialog heading -->
+        <StackPanel
             Grid.Row="0"
-            Grid.Column="0"
-            VerticalAlignment="Center" />
+            Spacing="{DynamicResource TwainSpacingSmall}">
 
-        <!-- Category name -->
-        <TextBox
-            x:Name="CategoryNameTextBox"
-            Grid.Row="0"
-            Grid.Column="1"
-            VerticalAlignment="Center" />
+            <TextBlock
+                Text="Category"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}" />
 
-        <!-- Commands -->
-        <Button
+            <TextBlock
+                Text="Enter the name of the category."
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                TextWrapping="Wrap" />
+
+        </StackPanel>
+
+        <!-- Category entry -->
+        <Border
             Grid.Row="1"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Classes="twain-primary-button"
-            HorizontalAlignment="Right"
-            Content="OK"
-            IsDefault="True"
-            Click="OkButton_Click" />
+            Padding="12"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+            <Grid
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+                <!-- Category namespace -->
+                <TextBlock
+                    x:Name="CategoryNamespaceTextBlock"
+                    Grid.Column="0"
+                    VerticalAlignment="Center" />
+
+                <!-- Category name -->
+                <TextBox
+                    x:Name="CategoryNameTextBox"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- Dialog commands -->
+        <Border
+            Grid.Row="2"
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
+
+            <Button
+                Classes="twain-primary-button"
+                HorizontalAlignment="Right"
+                Content="OK"
+                IsDefault="True"
+                Click="OkButton_Click" />
+
+        </Border>
 
     </Grid>
 </Window>
