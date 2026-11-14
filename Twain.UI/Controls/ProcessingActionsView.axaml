@@ -99,6 +99,15 @@
                     Content="False Positive"
                     IsVisible="{Binding ShowFalsePositiveAction}" />
 
+                <!-- Workflow separator -->
+                <Border
+                    Grid.Row="4"
+                    Grid.ColumnSpan="2"
+                    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+                    BorderThickness="0,1,0,0"
+                    Margin="0,6,0,0"
+                    IsHitTestVisible="False" />
+
                 <!-- Final workflow actions -->
                 <Button
                     x:Name="SkipButton"
@@ -106,6 +115,8 @@
                     Grid.Row="4"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    Margin="0,12,0,0"
                     MinHeight="34"
                     FontWeight="SemiBold"
                     Content="Skip"
@@ -118,6 +129,8 @@
                     Grid.Row="4"
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    Margin="0,12,0,0"
                     MinHeight="34"
                     FontWeight="SemiBold"
                     Content="Save"
