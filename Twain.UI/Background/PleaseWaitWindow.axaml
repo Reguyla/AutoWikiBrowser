@@ -39,6 +39,7 @@
 
         <!-- Progress section -->
         <Border
+            x:Name="ProgressGroupBox"
             Grid.Row="1"
             Padding="12"
             Background="{DynamicResource TwainSurfaceBrush}"
@@ -49,10 +50,11 @@
             <StackPanel
                 Spacing="{DynamicResource TwainSpacingSmall}">
 
-                <TextBlock
-                    Text="Progress"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource TwainTextPrimaryBrush}" />
+            <TextBlock
+                x:Name="ProgressHeaderTextBlock"
+                Text="Progress"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource TwainTextPrimaryBrush}" />
 
                 <ProgressBar
                     x:Name="ProgressBar"

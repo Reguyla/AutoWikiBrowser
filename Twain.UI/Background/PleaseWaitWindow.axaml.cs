@@ -95,7 +95,7 @@ public partial class PleaseWaitWindow : Avalonia.Controls.Window
         ProgressBar.Value =
             safeCompleted;
 
-        ProgressGroupBox.Header =
+        ProgressHeaderTextBlock.Text =
             $"{completed}/{total} complete";
     }
 
