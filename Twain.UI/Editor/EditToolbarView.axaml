@@ -55,14 +55,12 @@
 
                     <StackPanel Orientation="Horizontal" Spacing="4">
 
-                        <TextBlock
-                            Text="I"
-                            FontFamily="Georgia"
-                            FontSize="17"
-                            FontWeight="Bold"
-                            FontStyle="Italic"
-                            VerticalAlignment="Center"
-                            IsVisible="{Binding ShowIcons}" />
+                    <TextBlock
+                        Text="B"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding ShowIcons}" />
 
                         <TextBlock
                             Text="Italic"
