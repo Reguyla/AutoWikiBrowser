@@ -3,8 +3,8 @@
     x:Class="Twain.UI.Controls.NamespacesControl"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Width="360"
-    Height="280">
+    MinWidth="320"
+    MinHeight="200">
 
     <Grid
         ColumnDefinitions="*,*"
@@ -17,27 +17,28 @@
             RowSpacing="{DynamicResource TwainSpacingSmall}">
 
             <CheckBox
-                Name="SubjectCheckBox"
+                x:Name="SubjectCheckBox"
                 Content="Subject"
                 IsCheckedChanged="SubjectCheckBox_IsCheckedChanged" />
 
             <Border
                 Grid.Row="1"
+                Background="{DynamicResource TwainControlBackgroundBrush}"
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
                 BorderThickness="{DynamicResource TwainBorderThickness}"
                 CornerRadius="{DynamicResource TwainControlCornerRadius}"
-                Background="{DynamicResource TwainControlBackgroundBrush}"
-                Padding="4">
+                Padding="6">
 
                 <ScrollViewer
                     VerticalScrollBarVisibility="Auto"
                     HorizontalScrollBarVisibility="Disabled">
 
                     <StackPanel
-                        Name="SubjectPanel"
-                        Spacing="0" />
+                        x:Name="SubjectPanel"
+                        Spacing="2" />
 
                 </ScrollViewer>
+
             </Border>
         </Grid>
 
@@ -48,27 +49,28 @@
             RowSpacing="{DynamicResource TwainSpacingSmall}">
 
             <CheckBox
-                Name="TalkCheckBox"
+                x:Name="TalkCheckBox"
                 Content="Talk"
                 IsCheckedChanged="TalkCheckBox_IsCheckedChanged" />
 
             <Border
                 Grid.Row="1"
+                Background="{DynamicResource TwainControlBackgroundBrush}"
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
                 BorderThickness="{DynamicResource TwainBorderThickness}"
                 CornerRadius="{DynamicResource TwainControlCornerRadius}"
-                Background="{DynamicResource TwainControlBackgroundBrush}"
-                Padding="4">
+                Padding="6">
 
                 <ScrollViewer
                     VerticalScrollBarVisibility="Auto"
                     HorizontalScrollBarVisibility="Disabled">
 
                     <StackPanel
-                        Name="TalkPanel"
-                        Spacing="0" />
+                        x:Name="TalkPanel"
+                        Spacing="2" />
 
                 </ScrollViewer>
+
             </Border>
         </Grid>
 
