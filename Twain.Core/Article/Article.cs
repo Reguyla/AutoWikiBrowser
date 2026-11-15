@@ -1849,7 +1849,24 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 ? "Custom module: Changes made"
                 : editSummary;
 
-        processArticleEventArgs.EditSummary = effectiveEditSummary;
+        if (!string.IsNullOrWhiteSpace(editSummary))
+        {
+            string moduleSummary = editSummary.Trim();
+
+            if (!moduleSummary.StartsWith(
+                    "Custom Module:",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                moduleSummary = $"Custom Module: {moduleSummary}";
+            }
+
+            processArticleEventArgs.EditSummary = moduleSummary;
+        }
+        else
+        {
+            processArticleEventArgs.EditSummary = string.Empty;
+        }
+
         processArticleEventArgs.Skip = skipArticle;
 
         if (!skipArticle)
