@@ -2263,7 +2263,7 @@ public partial class WorkspaceViewModel : ObservableObject
     {
         Options.SaveToPreferences(Preferences);
         MakeList.SaveToPreferences(Preferences);
-        CustomModuleState.LoadFromPreferences(Preferences);
+        CustomModuleState.SaveToPreferences(Preferences);
     }
 
     /// <summary>
