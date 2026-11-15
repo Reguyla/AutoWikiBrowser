@@ -30,13 +30,12 @@
 
                     <StackPanel Orientation="Horizontal" Spacing="4">
 
-                        <TextBlock
-                            Text="B"
-                            FontFamily="Arial"
-                            FontSize="16"
-                            FontWeight="ExtraBold"
-                            VerticalAlignment="Center"
-                            IsVisible="{Binding ShowIcons}" />
+                    <TextBlock
+                        Text="B"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding ShowIcons}" />
 
                         <TextBlock
                             Text="Bold"
@@ -45,6 +44,8 @@
 
                     </StackPanel>
                 </Button>
+
+                <StackPanel Orientation="Horizontal" Spacing="4">
 
                 <!-- Italic -->
                 <Button
@@ -55,12 +56,22 @@
 
                     <StackPanel Orientation="Horizontal" Spacing="4">
 
-                    <TextBlock
-                        Text="B"
-                        FontSize="16"
-                        FontWeight="Bold"
+                    <Path
+                        Width="8"
+                        Height="8"
+                        Stretch="Uniform"
+                        Stroke="{DynamicResource TwainTextPrimaryBrush}"
+                        StrokeThickness="2"
+                        StrokeLineCap="Round"
+                        Data="M 8,2 L 13,2 M 11,2 L 5,12 M 3,12 L 8,12"
                         VerticalAlignment="Center"
-                        IsVisible="{Binding ShowIcons}" />
+                        IsVisible="{Binding ShowIcons}">
+
+                        <Path.RenderTransform>
+                            <TranslateTransform X="0" Y="2" />
+                        </Path.RenderTransform>
+
+                    </Path>
 
                         <TextBlock
                             Text="Italic"
@@ -69,6 +80,8 @@
 
                     </StackPanel>
                 </Button>
+
+                </StackPanel>
 
                 <!-- Internal Link -->
                 <Button
