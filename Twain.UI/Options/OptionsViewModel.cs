@@ -90,6 +90,34 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
             await ToggleArticleWatchRequested();
     }
 
+    [RelayCommand]
+    private void DeleteCurrentPage()
+    {
+        if (!CanDeleteCurrentPage)
+            return;
+
+        DeleteCurrentPageRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void MoveCurrentPage()
+    {
+        if (!CanMoveCurrentPage)
+            return;
+
+        MoveCurrentPageRequested?.Invoke();
+    }
+
+
+    [RelayCommand]
+    private void ProtectCurrentPage()
+    {
+        if (!CanProtectCurrentPage)
+            return;
+
+        ProtectCurrentPageRequested?.Invoke();
+    }
+
     /// <summary>
     /// Gets whether processing toolbar labels should be displayed.
     /// </summary>
@@ -933,6 +961,15 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     /// Gets or sets the action invoked when article processing is started.
     /// </summary>
     public Action? StartProcessingRequested { get; set; }
+
+    /// <summary>
+    /// Requests deletion of the current article.
+    /// </summary>
+    public Action? DeleteCurrentPageRequested { get; set; }
+
+    public Action? MoveCurrentPageRequested { get; set; }
+
+    public Action? ProtectCurrentPageRequested { get; set; }
 
     /// <summary>
     /// Requests that the current article be reprocessed

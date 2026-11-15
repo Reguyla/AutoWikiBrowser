@@ -30,15 +30,16 @@
                     ColumnSpacing="{DynamicResource TwainSpacingSmall}">
 
                     <!-- Delete page -->
-                    <Button
-                        x:Name="DeleteButton"
-                        Grid.Column="0"
-                        Classes="twain-command-button"
-                        HorizontalAlignment="Stretch"
-                        MinHeight="34"
-                        Content="Delete"
-                        ToolTip.Tip="Delete the current page"
-                        IsEnabled="{Binding CanDeleteCurrentPage}" />
+                <Button
+                    x:Name="DeleteButton"
+                    Grid.Column="0"
+                    Classes="twain-command-button"
+                    HorizontalAlignment="Stretch"
+                    MinHeight="34"
+                    Content="Delete"
+                    ToolTip.Tip="Delete the current page"
+                    IsEnabled="{Binding CanDeleteCurrentPage}"
+                    Command="{Binding DeleteCurrentPageCommand}" />
 
                     <!-- Move page -->
                     <Button
@@ -49,7 +50,8 @@
                         MinHeight="34"
                         Content="Move"
                         ToolTip.Tip="Move or rename the current page"
-                        IsEnabled="{Binding CanMoveCurrentPage}" />
+                        IsEnabled="{Binding CanMoveCurrentPage}"
+                        Command="{Binding MoveCurrentPageCommand}" />
 
                     <!-- Protect page -->
                     <Button
@@ -60,7 +62,9 @@
                         MinHeight="34"
                         Content="Protect"
                         ToolTip.Tip="Manage protection for the current page"
-                        IsEnabled="{Binding CanProtectCurrentPage}" />
+                        IsEnabled="{Binding CanProtectCurrentPage}"
+                        Command="{Binding ProtectCurrentPageCommand}" />
+
 
                 </Grid>
 

@@ -601,6 +601,15 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.StartProcessingRequested =
             StartProcessing;
 
+        Options.DeleteCurrentPageRequested =
+            RequestDeleteCurrentPage;
+
+        Options.MoveCurrentPageRequested =
+           RequestMoveCurrentPage;
+
+        Options.ProtectCurrentPageRequested =
+            RequestProtectCurrentPage;
+
         Options.ReparseProcessingRequested =
             ReparseProcessing;
 
@@ -620,6 +629,59 @@ public partial class WorkspaceViewModel : ObservableObject
             ShowDiff;
     }
 
+    /// <summary>
+    /// Requests the administrative Delete dialog for the current page.
+    /// </summary>
+    private void RequestDeleteCurrentPage()
+    {
+        if (CurrentArticle is null ||
+            !Options.CanDeleteCurrentPage ||
+            Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        DeleteCurrentPageRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Requests the administrative Move dialog for the current page.
+    /// </summary>
+    private void RequestMoveCurrentPage()
+    {
+        if (CurrentArticle is null ||
+            !Options.CanMoveCurrentPage ||
+            Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        MoveCurrentPageRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Requests the administrative Protect dialog for the current page.
+    /// </summary>
+    private void RequestProtectCurrentPage()
+    {
+        if (CurrentArticle is null ||
+            !Options.CanProtectCurrentPage ||
+            Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        ProtectCurrentPageRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Requests that the UI display the Delete dialog.
+    /// </summary>
+    public Action? DeleteCurrentPageRequested { get; set; }
+
+    public Action? MoveCurrentPageRequested { get; set; }
+
+    public Action? ProtectCurrentPageRequested { get; set; }
     private void InitializeStatisticsTimer()
     {
         _statisticsTimer.Interval =
@@ -1919,6 +1981,18 @@ public partial class WorkspaceViewModel : ObservableObject
         _nudgeCancellation = null;
 
         CurrentArticle = new Article(page);
+
+        // Update administrative action availability for the opened page.
+        Options.CanDeleteCurrentPage =
+            page.Exists &&
+            Session.User.CanDeletePage(page);
+
+        Options.CanMoveCurrentPage =
+            page.Exists &&
+            Session.User.CanMovePage(page);
+
+        Options.CanProtectCurrentPage =
+            Session.User.CanProtectPage(page);
 
         PaneViewModel articleEditorPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);

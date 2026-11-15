@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Twain.Core;
+using Twain.Core.Controls;
 using Twain.Core.Parse;
 using Twain.CustomModules;
 using Twain.UI.BotSettings;
+using Twain.UI.Controls;
 using Twain.UI.Editor;
 using Twain.UI.Settings;
 using Twain.UI.Shell;
@@ -90,11 +92,106 @@ public partial class WorkspaceView : UserControl
             {
                 ProfilesView.SetSession(_navigationViewModel.Session);
                 _navigationViewModel.PropertyChanged += Navigation_PropertyChanged;
+
+                _navigationViewModel.DeleteCurrentPageRequested =
+                    OpenDeleteArticleDialog;
+
+                _navigationViewModel.MoveCurrentPageRequested =
+                   OpenMoveArticleDialog;
+
+                _navigationViewModel.ProtectCurrentPageRequested =
+                    OpenProtectArticleDialog;
             }
 
             UpdateNavigationLayout();
             UpdateOptionsSidebarLayout();
         };
+    }
+
+    /// <summary>
+    /// Opens the Avalonia Delete dialog for the current article.
+    /// </summary>
+    private async void OpenDeleteArticleDialog()
+    {
+        if (DataContext is not WorkspaceViewModel workspace ||
+            workspace.CurrentArticle is null ||
+            !workspace.Options.CanDeleteCurrentPage ||
+            workspace.Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+        {
+            return;
+        }
+
+        ArticleActionDialogWindow dialog =
+            new(ArticleAction.Delete);
+
+        bool confirmed = await dialog.ShowDialog<bool>(shell);
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        // The MediaWiki Delete API will be connected in the next step.
+        // No deletion is performed here.
+    }
+
+    /// <summary>
+    /// Opens the Avalonia Move dialog for the current article.
+    /// </summary>
+    private async void OpenMoveArticleDialog()
+    {
+        if (DataContext is not WorkspaceViewModel workspace ||
+            workspace.CurrentArticle is null ||
+            workspace.Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+            return;
+
+        ArticleActionDialogWindow dialog =
+            new(ArticleAction.Move);
+
+        bool confirmed = await dialog.ShowDialog<bool>(shell);
+
+        if (!confirmed)
+            return;
+
+        // MediaWiki Move API integration follows.
+        // No page move is performed here.
+    }
+
+    /// <summary>
+    /// Opens the Avalonia Protect dialog for the current article.
+    /// </summary>
+    private async void OpenProtectArticleDialog()
+    {
+        if (DataContext is not WorkspaceViewModel workspace ||
+            workspace.CurrentArticle is null ||
+            workspace.Session.Editor.IsActive)
+        {
+            return;
+        }
+
+        if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+            return;
+
+        ArticleActionDialogWindow dialog =
+            new(ArticleAction.Protect);
+
+        bool confirmed = await dialog.ShowDialog<bool>(shell);
+
+        if (!confirmed)
+            return;
+
+        // MediaWiki Protect API integration follows.
+        // No protection change is performed here.
     }
 
     /// <summary>

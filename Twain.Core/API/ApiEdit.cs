@@ -1911,6 +1911,9 @@ public class ApiEdit : IApiEdit
         XmlDocument xml =
             CheckForErrors(result, "userinfo");
 
+        XmlNode? rightsNode =
+            xml.SelectSingleNode("/api/query/userinfo/rights");
+
         User = new UserInfo(xml);
     }
 

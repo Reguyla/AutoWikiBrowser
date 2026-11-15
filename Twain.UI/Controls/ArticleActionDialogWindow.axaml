@@ -76,7 +76,7 @@
         <StackPanel
             x:Name="ProtectionPanel"
             Grid.Row="3"
-            IsVisible="False" />
+            IsVisible="False">
 
             <Border
                 Padding="12"
@@ -146,6 +146,7 @@
 
             </StackPanel>
         </Border>
+        </StackPanel>
 
         <!-- Move options -->
         <StackPanel
@@ -164,37 +165,43 @@
                 x:Name="NoRedirectCheckBox"
                 Content="No Redirect" />
 
-            <CheckBox
-                x:Name="WatchCheckBox"
-                Content="Watch" />
-
         </StackPanel>
 
-        <!-- Dialog commands -->
-        <Border
-            Grid.Row="5"
-            Padding="0,12,0,0"
-            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-            BorderThickness="0,1,0,0">
+<!-- Dialog commands -->
+<Border
+    Grid.Row="5"
+    Padding="0,12,0,0"
+    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+    BorderThickness="0,1,0,0">
 
-            <StackPanel
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                Spacing="{DynamicResource TwainSpacingMedium}">
+    <Grid ColumnDefinitions="Auto,*">
 
-                <Button
-                    Classes="twain-command-button"
-                    Content="Cancel"
-                    Click="CancelButton_Click" />
+        <CheckBox
+            x:Name="WatchCheckBox"
+            Grid.Column="0"
+            Content="Watch"
+            VerticalAlignment="Center" />
 
-                <Button
-                    x:Name="OkButton"
-                    Classes="twain-primary-button"
-                    Content="OK"
-                    Click="OkButton_Click" />
+        <StackPanel
+            Grid.Column="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="{DynamicResource TwainSpacingMedium}">
 
-            </StackPanel>
-        </Border>
+            <Button
+                Classes="twain-command-button"
+                Content="Cancel"
+                Click="CancelButton_Click" />
+
+            <Button
+                x:Name="OkButton"
+                Classes="twain-primary-button"
+                Content="OK"
+                Click="OkButton_Click" />
+
+        </StackPanel>
+    </Grid>
+</Border>
 
     </Grid>
 </Window>

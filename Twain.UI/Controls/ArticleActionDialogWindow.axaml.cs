@@ -186,14 +186,16 @@ public partial class ArticleActionDialogWindow : Avalonia.Controls.Window
     }
 
     private void EditProtectionSelectionChanged(
-    object? sender,
-    SelectionChangedEventArgs e)
+        object? sender,
+        SelectionChangedEventArgs e)
     {
-        if (UnlockMovePermissionsCheckBox.IsChecked == true)
-            return;
+        if (UnlockMovePermissionsCheckBox.IsChecked != true)
+        {
+            MoveProtectionListBox.SelectedIndex =
+                EditProtectionListBox.SelectedIndex;
+        }
 
-        MoveProtectionListBox.SelectedIndex =
-            EditProtectionListBox.SelectedIndex;
+        UpdateCascadingProtectionState();
     }
 
     private void MoveProtectionSelectionChanged(
