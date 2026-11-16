@@ -28,195 +28,194 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.txtNewTitle = new System.Windows.Forms.TextBox();
-            this.lblNewTitle = new System.Windows.Forms.Label();
-            this.lblSummary = new System.Windows.Forms.Label();
-            this.btnOk = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.cmboSummary = new System.Windows.Forms.ComboBox();
-            this.lblExpiry = new System.Windows.Forms.Label();
-            this.txtExpiry = new System.Windows.Forms.TextBox();
-            this.chkAutoProtect = new System.Windows.Forms.CheckBox();
-            this.chkCascadingProtection = new System.Windows.Forms.CheckBox();
-            this.chkNoRedirect = new System.Windows.Forms.CheckBox();
-            this.toolTip = new Twain.Core.Controls.AWBToolTip(this.components);
-            this.chkWatch = new System.Windows.Forms.CheckBox();
-            this.MoveDelete = new Twain.Core.Controls.EditProtectControl();
-            this.chkDealWithAssoc = new System.Windows.Forms.CheckBox();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            txtNewTitle = new System.Windows.Forms.TextBox();
+            lblNewTitle = new System.Windows.Forms.Label();
+            lblSummary = new System.Windows.Forms.Label();
+            btnOk = new System.Windows.Forms.Button();
+            btnCancel = new System.Windows.Forms.Button();
+            cmboSummary = new System.Windows.Forms.ComboBox();
+            lblExpiry = new System.Windows.Forms.Label();
+            txtExpiry = new System.Windows.Forms.TextBox();
+            chkAutoProtect = new System.Windows.Forms.CheckBox();
+            chkCascadingProtection = new System.Windows.Forms.CheckBox();
+            chkNoRedirect = new System.Windows.Forms.CheckBox();
+            toolTip = new AWBToolTip(components);
+            chkWatch = new System.Windows.Forms.CheckBox();
+            MoveDelete = new EditProtectControl();
+            chkDealWithAssoc = new System.Windows.Forms.CheckBox();
+            SuspendLayout();
             // 
             // txtNewTitle
             // 
-            this.txtNewTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtNewTitle.Location = new System.Drawing.Point(62, 12);
-            this.txtNewTitle.Name = "txtNewTitle";
-            this.txtNewTitle.Size = new System.Drawing.Size(349, 20);
-            this.txtNewTitle.TabIndex = 1;
+            txtNewTitle.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            txtNewTitle.Location = new System.Drawing.Point(62, 12);
+            txtNewTitle.Name = "txtNewTitle";
+            txtNewTitle.Size = new System.Drawing.Size(349, 23);
+            txtNewTitle.TabIndex = 1;
             // 
             // lblNewTitle
             // 
-            this.lblNewTitle.AutoSize = true;
-            this.lblNewTitle.Location = new System.Drawing.Point(8, 15);
-            this.lblNewTitle.Name = "lblNewTitle";
-            this.lblNewTitle.Size = new System.Drawing.Size(51, 13);
-            this.lblNewTitle.TabIndex = 0;
-            this.lblNewTitle.Text = "&New title:";
+            lblNewTitle.AutoSize = true;
+            lblNewTitle.Location = new System.Drawing.Point(8, 15);
+            lblNewTitle.Name = "lblNewTitle";
+            lblNewTitle.Size = new System.Drawing.Size(57, 15);
+            lblNewTitle.TabIndex = 0;
+            lblNewTitle.Text = "&New title:";
             // 
             // lblSummary
             // 
-            this.lblSummary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblSummary.AutoSize = true;
-            this.lblSummary.Location = new System.Drawing.Point(9, 41);
-            this.lblSummary.Name = "lblSummary";
-            this.lblSummary.Size = new System.Drawing.Size(50, 13);
-            this.lblSummary.TabIndex = 4;
-            this.lblSummary.Text = "Summary";
+            lblSummary.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lblSummary.AutoSize = true;
+            lblSummary.Location = new System.Drawing.Point(9, 41);
+            lblSummary.Name = "lblSummary";
+            lblSummary.Size = new System.Drawing.Size(58, 15);
+            lblSummary.TabIndex = 4;
+            lblSummary.Text = "Summary";
             // 
             // btnOk
             // 
-            this.btnOk.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(137, 182);
-            this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 23);
-            this.btnOk.TabIndex = 11;
-            this.btnOk.Text = "OK";
-            this.btnOk.UseVisualStyleBackColor = true;
+            btnOk.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
+            btnOk.Location = new System.Drawing.Point(137, 182);
+            btnOk.Name = "btnOk";
+            btnOk.Size = new System.Drawing.Size(75, 23);
+            btnOk.TabIndex = 11;
+            btnOk.Text = "OK";
+            btnOk.UseVisualStyleBackColor = true;
             // 
             // btnCancel
             // 
-            this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(218, 182);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 12;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            btnCancel.Location = new System.Drawing.Point(218, 182);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new System.Drawing.Size(75, 23);
+            btnCancel.TabIndex = 12;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = true;
             // 
             // cmboSummary
             // 
-            this.cmboSummary.FormattingEnabled = true;
-            this.cmboSummary.Location = new System.Drawing.Point(62, 38);
-            this.cmboSummary.Name = "cmboSummary";
-            this.cmboSummary.Size = new System.Drawing.Size(349, 21);
-            this.cmboSummary.TabIndex = 5;
+            cmboSummary.FormattingEnabled = true;
+            cmboSummary.Location = new System.Drawing.Point(62, 38);
+            cmboSummary.Name = "cmboSummary";
+            cmboSummary.Size = new System.Drawing.Size(349, 23);
+            cmboSummary.TabIndex = 5;
             // 
             // lblExpiry
             // 
-            this.lblExpiry.AutoSize = true;
-            this.lblExpiry.Location = new System.Drawing.Point(8, 41);
-            this.lblExpiry.Name = "lblExpiry";
-            this.lblExpiry.Size = new System.Drawing.Size(38, 13);
-            this.lblExpiry.TabIndex = 2;
-            this.lblExpiry.Text = "&Expiry:";
+            lblExpiry.AutoSize = true;
+            lblExpiry.Location = new System.Drawing.Point(8, 41);
+            lblExpiry.Name = "lblExpiry";
+            lblExpiry.Size = new System.Drawing.Size(41, 15);
+            lblExpiry.TabIndex = 2;
+            lblExpiry.Text = "&Expiry:";
             // 
             // txtExpiry
             // 
-            this.txtExpiry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtExpiry.Location = new System.Drawing.Point(62, 38);
-            this.txtExpiry.Name = "txtExpiry";
-            this.txtExpiry.Size = new System.Drawing.Size(349, 20);
-            this.txtExpiry.TabIndex = 3;
+            txtExpiry.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            txtExpiry.Location = new System.Drawing.Point(62, 38);
+            txtExpiry.Name = "txtExpiry";
+            txtExpiry.Size = new System.Drawing.Size(349, 23);
+            txtExpiry.TabIndex = 3;
             // 
             // chkAutoProtect
             // 
-            this.chkAutoProtect.AutoSize = true;
-            this.chkAutoProtect.Location = new System.Drawing.Point(148, 162);
-            this.chkAutoProtect.Name = "chkAutoProtect";
-            this.chkAutoProtect.Size = new System.Drawing.Size(99, 17);
-            this.chkAutoProtect.TabIndex = 8;
-            this.chkAutoProtect.Text = "Auto &Protect All";
-            this.chkAutoProtect.UseVisualStyleBackColor = true;
-            this.chkAutoProtect.Visible = false;
+            chkAutoProtect.AutoSize = true;
+            chkAutoProtect.Location = new System.Drawing.Point(148, 162);
+            chkAutoProtect.Name = "chkAutoProtect";
+            chkAutoProtect.Size = new System.Drawing.Size(110, 19);
+            chkAutoProtect.TabIndex = 8;
+            chkAutoProtect.Text = "Auto &Protect All";
+            chkAutoProtect.UseVisualStyleBackColor = true;
+            chkAutoProtect.Visible = false;
             // 
             // chkCascadingProtection
             // 
-            this.chkCascadingProtection.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.chkCascadingProtection.AutoSize = true;
-            this.chkCascadingProtection.Enabled = false;
-            this.chkCascadingProtection.Location = new System.Drawing.Point(23, 162);
-            this.chkCascadingProtection.Name = "chkCascadingProtection";
-            this.chkCascadingProtection.Size = new System.Drawing.Size(126, 17);
-            this.chkCascadingProtection.TabIndex = 7;
-            this.chkCascadingProtection.Text = "&Cascading protection";
-            this.chkCascadingProtection.UseVisualStyleBackColor = true;
+            chkCascadingProtection.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            chkCascadingProtection.AutoSize = true;
+            chkCascadingProtection.Enabled = false;
+            chkCascadingProtection.Location = new System.Drawing.Point(23, 160);
+            chkCascadingProtection.Name = "chkCascadingProtection";
+            chkCascadingProtection.Size = new System.Drawing.Size(139, 19);
+            chkCascadingProtection.TabIndex = 7;
+            chkCascadingProtection.Text = "&Cascading protection";
+            chkCascadingProtection.UseVisualStyleBackColor = true;
             // 
             // chkNoRedirect
             // 
-            this.chkNoRedirect.AutoSize = true;
-            this.chkNoRedirect.Location = new System.Drawing.Point(253, 162);
-            this.chkNoRedirect.Name = "chkNoRedirect";
-            this.chkNoRedirect.Size = new System.Drawing.Size(83, 17);
-            this.chkNoRedirect.TabIndex = 9;
-            this.chkNoRedirect.Text = "&No Redirect";
-            this.chkNoRedirect.UseVisualStyleBackColor = true;
-            this.chkNoRedirect.Visible = false;
+            chkNoRedirect.AutoSize = true;
+            chkNoRedirect.Location = new System.Drawing.Point(253, 162);
+            chkNoRedirect.Name = "chkNoRedirect";
+            chkNoRedirect.Size = new System.Drawing.Size(88, 19);
+            chkNoRedirect.TabIndex = 9;
+            chkNoRedirect.Text = "&No Redirect";
+            chkNoRedirect.UseVisualStyleBackColor = true;
+            chkNoRedirect.Visible = false;
             // 
             // chkWatch
             // 
-            this.chkWatch.AutoSize = true;
-            this.chkWatch.Location = new System.Drawing.Point(342, 162);
-            this.chkWatch.Name = "chkWatch";
-            this.chkWatch.Size = new System.Drawing.Size(58, 17);
-            this.chkWatch.TabIndex = 10;
-            this.chkWatch.Text = "&Watch";
-            this.chkWatch.UseVisualStyleBackColor = true;
-            this.chkWatch.Visible = false;
+            chkWatch.AutoSize = true;
+            chkWatch.Location = new System.Drawing.Point(342, 162);
+            chkWatch.Name = "chkWatch";
+            chkWatch.Size = new System.Drawing.Size(60, 19);
+            chkWatch.TabIndex = 10;
+            chkWatch.Text = "&Watch";
+            chkWatch.UseVisualStyleBackColor = true;
+            chkWatch.Visible = false;
             // 
             // MoveDelete
             // 
-            this.MoveDelete.Location = new System.Drawing.Point(62, 64);
-            this.MoveDelete.Name = "MoveDelete";
-            this.MoveDelete.Size = new System.Drawing.Size(313, 101);
-            this.MoveDelete.TabIndex = 6;
-            this.MoveDelete.TextBoxIndexChanged += new System.EventHandler(this.MoveDelete_TextBoxIndexChanged);
+            MoveDelete.Location = new System.Drawing.Point(62, 64);
+            MoveDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MoveDelete.Name = "MoveDelete";
+            MoveDelete.Size = new System.Drawing.Size(313, 101);
+            MoveDelete.TabIndex = 6;
+            MoveDelete.TextBoxIndexChanged += MoveDelete_TextBoxIndexChanged;
             // 
             // chkDealWithAssoc
             // 
-            this.chkDealWithAssoc.AutoSize = true;
-            this.chkDealWithAssoc.Location = new System.Drawing.Point(93, 162);
-            this.chkDealWithAssoc.Name = "chkDealWithAssoc";
-            this.chkDealWithAssoc.Size = new System.Drawing.Size(154, 17);
-            this.chkDealWithAssoc.TabIndex = 13;
-            this.chkDealWithAssoc.Text = "Move associated talk page";
-            this.chkDealWithAssoc.UseVisualStyleBackColor = true;
-            this.chkDealWithAssoc.Visible = false;
+            chkDealWithAssoc.AutoSize = true;
+            chkDealWithAssoc.Location = new System.Drawing.Point(93, 162);
+            chkDealWithAssoc.Name = "chkDealWithAssoc";
+            chkDealWithAssoc.Size = new System.Drawing.Size(165, 19);
+            chkDealWithAssoc.TabIndex = 13;
+            chkDealWithAssoc.Text = "Move associated talk page";
+            chkDealWithAssoc.UseVisualStyleBackColor = true;
+            chkDealWithAssoc.Visible = false;
             // 
             // ArticleActionDialog
             // 
-            this.AcceptButton = this.btnOk;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(413, 209);
-            this.Controls.Add(this.chkDealWithAssoc);
-            this.Controls.Add(this.chkWatch);
-            this.Controls.Add(this.chkNoRedirect);
-            this.Controls.Add(this.chkAutoProtect);
-            this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.chkCascadingProtection);
-            this.Controls.Add(this.txtExpiry);
-            this.Controls.Add(this.lblExpiry);
-            this.Controls.Add(this.cmboSummary);
-            this.Controls.Add(this.lblSummary);
-            this.Controls.Add(this.txtNewTitle);
-            this.Controls.Add(this.lblNewTitle);
-            this.Controls.Add(this.MoveDelete);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.MaximumSize = new System.Drawing.Size(429, 243);
-            this.MinimumSize = new System.Drawing.Size(429, 100);
-            this.Name = "ArticleActionDialog";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Enter details";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ArticleActionDialog_FormClosing);
-            this.Load += new System.EventHandler(this.ArticleActionDialog_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AcceptButton = btnOk;
+            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            CancelButton = btnCancel;
+            ClientSize = new System.Drawing.Size(413, 204);
+            Controls.Add(chkDealWithAssoc);
+            Controls.Add(chkWatch);
+            Controls.Add(chkNoRedirect);
+            Controls.Add(chkAutoProtect);
+            Controls.Add(btnCancel);
+            Controls.Add(btnOk);
+            Controls.Add(chkCascadingProtection);
+            Controls.Add(txtExpiry);
+            Controls.Add(lblExpiry);
+            Controls.Add(cmboSummary);
+            Controls.Add(lblSummary);
+            Controls.Add(txtNewTitle);
+            Controls.Add(lblNewTitle);
+            Controls.Add(MoveDelete);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            MaximumSize = new System.Drawing.Size(429, 243);
+            MinimumSize = new System.Drawing.Size(429, 100);
+            Name = "ArticleActionDialog";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Enter details";
+            FormClosing += ArticleActionDialog_FormClosing;
+            Load += ArticleActionDialog_Load;
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 

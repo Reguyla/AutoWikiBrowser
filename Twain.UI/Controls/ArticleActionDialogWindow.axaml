@@ -6,8 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Class="Twain.UI.Controls.ArticleActionDialogWindow"
     mc:Ignorable="d"
-    d:DesignWidth="520"
-    d:DesignHeight="360"
+    d:DesignWidth="540"
+    d:DesignHeight="400"
     Width="540"
     MinHeight="180"
     SizeToContent="Height"
@@ -19,14 +19,30 @@
 
     <Grid
         Margin="{DynamicResource TwainContentPadding}"
-        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+        <!-- Current page identification -->
+        <Border
+            Grid.Row="0"
+            Padding="12"
+            Background="{DynamicResource TwainSurfaceBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="1"
+            CornerRadius="{DynamicResource TwainControlCornerRadius}">
+
+            <TextBlock
+                x:Name="CurrentPageMessageText"
+                FontSize="14"
+                TextWrapping="Wrap" />
+
+        </Border>
 
         <!-- New title -->
         <Grid
             x:Name="NewTitlePanel"
-            Grid.Row="0"
-            ColumnDefinitions="110,*"
+            Grid.Row="1"
+            ColumnDefinitions="140,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
@@ -36,13 +52,14 @@
             <TextBox
                 x:Name="NewTitleTextBox"
                 Grid.Column="1" />
+
         </Grid>
 
         <!-- Expiry -->
         <Grid
             x:Name="ExpiryPanel"
-            Grid.Row="1"
-            ColumnDefinitions="110,*"
+            Grid.Row="2"
+            ColumnDefinitions="140,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}"
             IsVisible="False">
 
@@ -53,15 +70,17 @@
             <TextBox
                 x:Name="ExpiryTextBox"
                 Grid.Column="1" />
+
         </Grid>
 
         <!-- Summary -->
         <Grid
-            Grid.Row="2"
-            ColumnDefinitions="110,*"
+            Grid.Row="3"
+            ColumnDefinitions="140,*"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
             <TextBlock
+                x:Name="SummaryLabelText"
                 VerticalAlignment="Center"
                 Text="Summary:" />
 
@@ -70,12 +89,13 @@
                 Grid.Column="1"
                 HorizontalAlignment="Stretch"
                 IsEditable="True" />
+
         </Grid>
 
         <!-- Protection options -->
         <StackPanel
             x:Name="ProtectionPanel"
-            Grid.Row="3"
+            Grid.Row="4"
             IsVisible="False">
 
             <Border
@@ -88,70 +108,79 @@
                 <StackPanel
                     Spacing="{DynamicResource TwainSpacingMedium}">
 
-                <TextBlock
-                    Classes="twain-section-heading"
-                    Text="Protection settings" />
+                    <TextBlock
+                        Classes="twain-section-heading"
+                        Text="Protection settings" />
 
-                <Grid
-                    ColumnDefinitions="*,*"
-                    ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+                    <Grid
+                        ColumnDefinitions="*,*"
+                        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
+                        <!-- Create/Edit protection -->
+                        <StackPanel
+                            Grid.Column="0"
+                            Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Text="Create/Edit" />
+
+                            <ListBox
+                                x:Name="EditProtectionListBox"
+                                Height="100"
+                                SelectionChanged="EditProtectionSelectionChanged" />
+
+                        </StackPanel>
+
+                        <!-- Move protection -->
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="{DynamicResource TwainSpacingSmall}">
+
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Text="Move" />
+
+                            <ListBox
+                                x:Name="MoveProtectionListBox"
+                                Height="100"
+                                IsEnabled="False"
+                                SelectionChanged="MoveProtectionSelectionChanged" />
+
+                        </StackPanel>
+
+                    </Grid>
+
+                    <!-- Protection checkboxes -->
                     <StackPanel
-                        Grid.Column="0"
                         Spacing="{DynamicResource TwainSpacingSmall}">
 
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Text="Create/Edit" />
+                        <CheckBox
+                            x:Name="UnlockMovePermissionsCheckBox"
+                            Content="Unlock move permissions"
+                            Click="UnlockMovePermissionsCheckBox_Click" />
 
-                        <ListBox
-                            x:Name="EditProtectionListBox"
-                            Height="100"
-                            SelectionChanged="EditProtectionSelectionChanged" />
-
-                    </StackPanel>
-
-                    <StackPanel
-                        Grid.Column="1"
-                        Spacing="{DynamicResource TwainSpacingSmall}">
-
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Text="Move" />
-
-                        <ListBox
-                            x:Name="MoveProtectionListBox"
-                            Height="100"
+                        <CheckBox
+                            x:Name="CascadingProtectionCheckBox"
+                            Content="Cascading protection"
                             IsEnabled="False"
-                            SelectionChanged="MoveProtectionSelectionChanged" />
+                            ToolTip.Tip="Automatically protect any pages transcluded in this page" />
+
+                        <CheckBox
+                            x:Name="AutoProtectAllCheckBox"
+                            Content="Auto Protect All"
+                            IsVisible="False" />
 
                     </StackPanel>
-                </Grid>
 
-                <CheckBox
-                    x:Name="UnlockMovePermissionsCheckBox"
-                    Content="Unlock move permissions"
-                    Click="UnlockMovePermissionsCheckBox_Click" />
-
-                <CheckBox
-                    x:Name="CascadingProtectionCheckBox"
-                    Content="Cascading protection"
-                    IsEnabled="False"
-                    ToolTip.Tip="Automatically protect any pages transcluded in this page" />
-
-                <CheckBox
-                    x:Name="AutoProtectAllCheckBox"
-                    Content="Auto Protect All"
-                    IsVisible="False" />
-
-            </StackPanel>
-        </Border>
+                </StackPanel>
+            </Border>
         </StackPanel>
 
         <!-- Move options -->
         <StackPanel
             x:Name="MoveOptionsPanel"
-            Grid.Row="4"
+            Grid.Row="5"
             Orientation="Horizontal"
             HorizontalAlignment="Left"
             Spacing="{DynamicResource TwainSpacingMedium}"
@@ -167,41 +196,41 @@
 
         </StackPanel>
 
-<!-- Dialog commands -->
-<Border
-    Grid.Row="5"
-    Padding="0,12,0,0"
-    BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
-    BorderThickness="0,1,0,0">
+        <!-- Dialog commands -->
+        <Border
+            Grid.Row="6"
+            Padding="0,12,0,0"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
 
-    <Grid ColumnDefinitions="Auto,*">
+            <Grid ColumnDefinitions="Auto,*">
 
-        <CheckBox
-            x:Name="WatchCheckBox"
-            Grid.Column="0"
-            Content="Watch"
-            VerticalAlignment="Center" />
+                <CheckBox
+                    x:Name="WatchCheckBox"
+                    Grid.Column="0"
+                    Content="Watch"
+                    VerticalAlignment="Center" />
 
-        <StackPanel
-            Grid.Column="1"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Spacing="{DynamicResource TwainSpacingMedium}">
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="{DynamicResource TwainSpacingMedium}">
 
-            <Button
-                Classes="twain-command-button"
-                Content="Cancel"
-                Click="CancelButton_Click" />
+                    <Button
+                        Classes="twain-command-button"
+                        Content="Cancel"
+                        Click="CancelButton_Click" />
 
-            <Button
-                x:Name="OkButton"
-                Classes="twain-primary-button"
-                Content="OK"
-                Click="OkButton_Click" />
+                    <Button
+                        x:Name="OkButton"
+                        Classes="twain-primary-button"
+                        Content="OK"
+                        Click="OkButton_Click" />
 
-        </StackPanel>
-    </Grid>
-</Border>
+                </StackPanel>
+            </Grid>
+        </Border>
 
     </Grid>
 </Window>

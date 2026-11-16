@@ -127,7 +127,10 @@ public partial class WorkspaceView : UserControl
         }
 
         ArticleActionDialogWindow dialog =
-            new(ArticleAction.Delete);
+            new(ArticleAction.Delete)
+            {
+                CurrentPageTitle = workspace.CurrentArticle.Name
+            };
 
         bool confirmed = await dialog.ShowDialog<bool>(shell);
 
@@ -156,7 +159,11 @@ public partial class WorkspaceView : UserControl
             return;
 
         ArticleActionDialogWindow dialog =
-            new(ArticleAction.Move);
+            new(ArticleAction.Move)
+            {
+                CurrentPageTitle = workspace.CurrentArticle.Name,
+                NewTitle = workspace.CurrentArticle.Name
+            };
 
         bool confirmed = await dialog.ShowDialog<bool>(shell);
 
@@ -183,7 +190,10 @@ public partial class WorkspaceView : UserControl
             return;
 
         ArticleActionDialogWindow dialog =
-            new(ArticleAction.Protect);
+            new(ArticleAction.Protect)
+            {
+                CurrentPageTitle = workspace.CurrentArticle.Name
+            };
 
         bool confirmed = await dialog.ShowDialog<bool>(shell);
 

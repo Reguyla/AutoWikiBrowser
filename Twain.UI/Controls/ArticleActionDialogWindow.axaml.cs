@@ -1,5 +1,9 @@
+
+using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Twain.Core.Controls;
 
 namespace Twain.UI.Controls;
@@ -7,11 +11,13 @@ namespace Twain.UI.Controls;
 /// <summary>
 /// Collects the options required for move, delete, and protection actions.
 /// </summary>
-public partial class ArticleActionDialogWindow : Avalonia.Controls.Window
+public partial class ArticleActionDialogWindow : Window
 {
     private readonly ArticleAction _currentAction;
 
     private readonly ObservableCollection<ProtectionLevel> _protectionLevels = [];
+
+    private string _currentPageTitle = string.Empty;
 
     /// <summary>
     /// Initializes a preview instance of the dialog.
@@ -24,16 +30,38 @@ public partial class ArticleActionDialogWindow : Avalonia.Controls.Window
     /// <summary>
     /// Initializes the dialog for the supplied article action.
     /// </summary>
-    public ArticleActionDialogWindow(
-        ArticleAction action)
+    public ArticleActionDialogWindow(ArticleAction action)
     {
         InitializeComponent();
 
         _currentAction = action;
 
+        SummaryLabelText.Text = action switch
+        {
+            ArticleAction.Delete => "Deletion reason:",
+            ArticleAction.Move => "Move reason:",
+            ArticleAction.Protect => "Protection reason:",
+            _ => "Summary:"
+        };
+
         ConfigureAction();
         PopulateSummaries();
         PopulateProtectionLevels();
+
+        UpdateCurrentPageMessage();
+    }
+
+    /// <summary>
+    /// Gets or sets the title of the page being acted upon.
+    /// </summary>
+    public string CurrentPageTitle
+    {
+        get => _currentPageTitle;
+        set
+        {
+            _currentPageTitle = value;
+            UpdateCurrentPageMessage();
+        }
     }
 
     /// <summary>
@@ -115,6 +143,31 @@ public partial class ArticleActionDialogWindow : Avalonia.Controls.Window
     /// </summary>
     public bool DealWithAssocTalkPage =>
         DealWithAssociatedTalkPageCheckBox.IsChecked == true;
+
+    /// <summary>
+    /// Updates the action description and italicized page title.
+    /// </summary>
+    private void UpdateCurrentPageMessage()
+    {
+        string actionText = _currentAction switch
+        {
+            ArticleAction.Delete => "delete",
+            ArticleAction.Move => "move",
+            ArticleAction.Protect => "protect",
+            _ => "modify"
+        };
+
+        CurrentPageMessageText.Inlines?.Clear();
+
+        CurrentPageMessageText.Inlines?.Add(
+            new Run($"You are about to {actionText}: "));
+
+        CurrentPageMessageText.Inlines?.Add(
+            new Run(_currentPageTitle)
+            {
+                FontStyle = FontStyle.Italic
+            });
+    }
 
     private void ConfigureAction()
     {
@@ -213,7 +266,9 @@ public partial class ArticleActionDialogWindow : Avalonia.Controls.Window
                 MoveProtectionListBox.SelectedIndex);
 
         if (!CascadingProtectionCheckBox.IsEnabled)
+        {
             CascadingProtectionCheckBox.IsChecked = false;
+        }
     }
 
     private async void OkButton_Click(
@@ -292,13 +347,15 @@ public partial class ArticleActionDialogWindow : Avalonia.Controls.Window
     }
 
     private ProtectionLevel? FindProtectionLevel(
-    string group)
+        string group)
     {
         foreach (ProtectionLevel level in
             _protectionLevels)
         {
             if (level.Group == group)
+            {
                 return level;
+            }
         }
 
         return null;
