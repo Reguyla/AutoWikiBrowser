@@ -55,23 +55,77 @@
 
         </Grid>
 
-        <!-- Expiry -->
+
+<!-- Protection expiration -->
+<StackPanel
+    x:Name="ExpiryPanel"
+    Grid.Row="2"
+    Spacing="{DynamicResource TwainSpacingSmall}"
+    IsVisible="False">
+
+    <Grid
+        ColumnDefinitions="140,*"
+        ColumnSpacing="{DynamicResource TwainSpacingMedium}">
+
+        <TextBlock
+            VerticalAlignment="Center"
+            Text="Expiry:" />
+
+        <ComboBox
+            x:Name="ExpiryComboBox"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch"
+            SelectedIndex="0"
+            SelectionChanged="ExpiryComboBox_SelectionChanged">
+
+            <ComboBoxItem Content="Indefinite" />
+            <ComboBoxItem Content="1 day" />
+            <ComboBoxItem Content="1 week" />
+            <ComboBoxItem Content="1 month" />
+            <ComboBoxItem Content="6 months" />
+            <ComboBoxItem Content="Custom expiration" />
+
+        </ComboBox>
+
+    </Grid>
+
+        <!-- Only displayed when Custom expiration is selected -->
         <Grid
-            x:Name="ExpiryPanel"
-            Grid.Row="2"
+            x:Name="CustomExpiryPanel"
             ColumnDefinitions="140,*"
+            RowDefinitions="Auto,Auto"
             ColumnSpacing="{DynamicResource TwainSpacingMedium}"
+            RowSpacing="{DynamicResource TwainSpacingSmall}"
             IsVisible="False">
 
             <TextBlock
+                Grid.Row="0"
                 VerticalAlignment="Center"
-                Text="Expiry:" />
+                Text="Expiration date:" />
+
+            <DatePicker
+                x:Name="CustomExpiryDatePicker"
+                Grid.Row="0"
+                Grid.Column="1"
+                HorizontalAlignment="Stretch" />
+
+            <TextBlock
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                Text="Time (UTC):" />
 
             <TextBox
-                x:Name="ExpiryTextBox"
-                Grid.Column="1" />
+                x:Name="CustomExpiryTimeTextBox"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="110"
+                HorizontalAlignment="Left"
+                IsReadOnly="False"
+                IsEnabled="True"
+                Watermark="HH:mm" />
 
         </Grid>
+        </StackPanel>
 
         <!-- Summary -->
         <Grid

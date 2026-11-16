@@ -108,11 +108,72 @@ public partial class ArticleActionDialogWindow : Window
             value);
     }
 
+
     /// <summary>
-    /// Gets the protection expiry value.
+    /// Gets the selected protection expiration in a format
+    /// suitable for the MediaWiki API.
     /// </summary>
-    public string ProtectExpiry =>
-        ExpiryTextBox.Text ?? string.Empty;
+    public string ProtectExpiry
+    {
+        get
+        {
+            return ExpiryComboBox.SelectedIndex switch
+            {
+                0 => "infinite",
+                1 => "1 day",
+                2 => "1 week",
+                3 => "1 month",
+                4 => "6 months",
+                5 => GetCustomExpiry(),
+                _ => string.Empty
+            };
+        }
+    }
+
+    private void ExpiryComboBox_SelectionChanged(
+        object? sender,
+        SelectionChangedEventArgs e)
+    {
+        if (CustomExpiryPanel is null)
+            return;
+
+        CustomExpiryPanel.IsVisible =
+            ExpiryComboBox.SelectedIndex == 5;
+    }
+
+    /// <summary>
+    /// Returns the custom expiration as a UTC timestamp.
+    /// </summary>
+    private string GetCustomExpiry()
+    {
+        DateTimeOffset? selectedDate =
+            CustomExpiryDatePicker.SelectedDate;
+
+        if (selectedDate is null)
+            return string.Empty;
+
+        if (!TimeSpan.TryParseExact(
+                CustomExpiryTimeTextBox.Text,
+                @"hh\:mm",
+                System.Globalization.CultureInfo.InvariantCulture,
+                out TimeSpan selectedTime))
+        {
+            return string.Empty;
+        }
+
+        DateTime utcDateTime = new(
+            selectedDate.Value.Year,
+            selectedDate.Value.Month,
+            selectedDate.Value.Day,
+            selectedTime.Hours,
+            selectedTime.Minutes,
+            0,
+            DateTimeKind.Utc);
+
+        return utcDateTime.ToString(
+            "yyyy-MM-ddTHH:mm:ssZ",
+            System.Globalization.CultureInfo.InvariantCulture);
+    }
 
     /// <summary>
     /// Gets whether cascading protection is selected.
@@ -271,10 +332,36 @@ public partial class ArticleActionDialogWindow : Window
         }
     }
 
+
     private async void OkButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
+        // Validate custom protection expiration first.
+        if (_currentAction == ArticleAction.Protect &&
+            ExpiryComboBox.SelectedIndex == 5)
+        {
+            string customExpiry = GetCustomExpiry();
+
+            if (string.IsNullOrEmpty(customExpiry) ||
+                !DateTime.TryParse(
+                    customExpiry,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.AdjustToUniversal,
+                    out DateTime expiryDate) ||
+                expiryDate <= DateTime.UtcNow)
+            {
+                ArticleActionValidationWindow validationWindow =
+                    new(
+                        "Invalid expiration",
+                        "Please enter a valid future expiration date and time in UTC.");
+
+                await validationWindow.ShowDialog(this);
+                return;
+            }
+        }
+
+        // Validate the remaining action fields.
         string errorMessage =
             ArticleActionHelper.Validate(
                 _currentAction,
@@ -296,12 +383,12 @@ public partial class ArticleActionDialogWindow : Window
                     errorMessage);
 
             await validationWindow.ShowDialog(this);
-
             return;
         }
 
         Close(true);
     }
+
 
     private void CancelButton_Click(
         object? sender,
