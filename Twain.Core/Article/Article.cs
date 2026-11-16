@@ -2417,186 +2417,35 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes);
 
             // Categories and images.
-            FixPeopleCategories(
+            ApplyCategoryAndImageGeneralFixes(
                 parsers,
-                skip.SkipNoPeopleCategoriesFixed);
-            Variables.Profiler.Profile("FixPeopleCategories");
+                skip);
 
-            AWBChangeArticleText(
-                "Fix categories",
-                Parsers.FixCategories(ArticleText),
-                true);
-            Variables.Profiler.Profile("FixCategories");
-
-            AWBChangeArticleText(
-                "Fix images",
-                Parsers.FixImages(ArticleText),
-                true);
-            Variables.Profiler.Profile("FixImages");
-
-            // Citation dates.
-            CiteTemplateDates(
+            // Citation, link, and template processing.
+            ApplyCitationAndLinkGeneralFixes(
                 parsers,
-                skip.SkipNoCiteTemplateDatesFixed);
-            Variables.Profiler.Profile("CiteTemplateDates");
-
-            // Link processing.
-            FixLinks(skip.SkipNoBadLink);
-            Variables.Profiler.Profile("FixLinks");
-
-            if (IsGeneralFixEnabled(
-                    enabledGeneralFixes,
-                    GeneralFixId.SimplifyLinks))
-            {
-                AWBChangeArticleText(
-                    "Simplify links",
-                    Parsers.SimplifyLinks(ArticleText),
-                    true);
-
-                Variables.Profiler.Profile("SimplifyLinks");
-            }
-
-            // Citation templates.
-            AWBChangeArticleText(
-                "Fix citation templates",
-                Parsers.FixCitationTemplates(ArticleText),
-                true,
-                true);
-            Variables.Profiler.Profile("FixCitationTemplates");
-
-            // Main article templates.
-            AWBChangeArticleText(
-                "Fix main article",
-                Parsers.FixMainArticle(ArticleText),
-                true);
-            Variables.Profiler.Profile("FixMainArticle");
-
-            // Reference list tags.
-            if (replaceReferenceTags &&
-                !Variables.LangCode.Equals("de"))
-            {
-                AWBChangeArticleText(
-                    "Fix reference tags",
-                    Parsers.FixReferenceListTags(ArticleText),
-                    true);
-
-                Variables.Profiler.Profile("FixReferenceListTags");
-            }
-
-            // Empty links and templates.
-            AWBChangeArticleText(
-                "Fix empty links and templates",
-                Parsers.FixEmptyLinksAndTemplates(ArticleText),
-                true);
-            Variables.Profiler.Profile("FixEmptyLinksAndTemplates");
+                skip,
+                replaceReferenceTags,
+                enabledGeneralFixes);
 
             // Reference processing.
-            AWBChangeArticleText(
-                "Fix empty references",
-                Parsers.SimplifyReferenceTags(ArticleText),
-                true);
-            Variables.Profiler.Profile("FixEmptyReferences");
-
-            AWBChangeArticleText(
-                "FixReferenceTags",
-                Parsers.FixReferenceTags(ArticleText),
-                true);
-            Variables.Profiler.Profile("FixReferenceTags");
-
-            AWBChangeArticleText(
-                "DuplicateNamedReferences",
-                Parsers.DuplicateNamedReferences(ArticleText),
-                true);
-            Variables.Profiler.Profile("DuplicateNamedReferences");
-
-            AWBChangeArticleText(
-                "DuplicateUnnamedReferences",
-                Parsers.DuplicateUnnamedReferences(ArticleText),
-                true);
-            Variables.Profiler.Profile("DuplicateUnnamedReferences");
-
-            AWBChangeArticleText(
-                "SameRefDifferentName",
-                Parsers.SameRefDifferentName(ArticleText),
-                true);
-            Variables.Profiler.Profile("SameRefDifferentName");
-
-            AWBChangeArticleText(
-                "Refs after punctuation",
-                Parsers.RefsAfterPunctuation(ArticleText),
-                true);
-            Variables.Profiler.Profile("RefsAfterPunctuation");
-
-            // ReorderReferences is excluded from en-wp, uk-wiki,
-            // and ru-wiki general fixes.
-            // T154089, T387784, T418701
-            if (!Variables.IsWikipediaEN &&
-                Variables.LangCode != "uk" &&
-                Variables.LangCode != "ru")
-            {
-                AWBChangeArticleText(
-                    "ReorderReferences",
-                    Parsers.ReorderReferences(ArticleText),
-                    true);
-
-                Variables.Profiler.Profile("ReorderReferences");
-            }
-
-            // Significant fix: add missing reference list.
-            AWBChangeArticleText(
-                "Add missing {{reflist}}",
-                Parsers.AddMissingReflist(ArticleText),
-                true,
-                true);
-            Variables.Profiler.Profile("AddMissingReflist");
+            ApplyReferenceGeneralFixes();
         }
 
         // Restore hidden article text.
         UnHideText(removeText);
         Variables.Profiler.Profile("UnHideText");
 
-        // Final date processing for non-redirect articles.
-        if (!Tools.IsRedirect(ArticleText) &&
-            IsGeneralFixEnabled(
-                enabledGeneralFixes,
-                GeneralFixId.FixDatesA))
-        {
-            // FixDates performs its own hiding.
-            AWBChangeArticleText(
-                "Fix dates 2",
-                parsers.FixDatesA(ArticleText).Trim(),
-                true);
-
-            Variables.Profiler.Profile("FixDates2");
-        }
-
-        // Run for both redirects and non-redirects.
-        // Must execute after FixPeopleCategories.
-        SetDefaultSort(
-            Variables.LangCode,
-            skip.SkipNoDefaultSortAdded,
-            restrictDefaultsortAddition);
-        Variables.Profiler.Profile("SetDefaultSort");
-
-        // Requires unhidden text.
-        AWBChangeArticleText(
-            "FixImageSelfLinks",
-            parsers.FixImageSelfLinks(ArticleText),
-            true);
-
-        // Metadata sorting requires unhidden text to preserve
-        // appropriate comment/category relationships.
-        AWBChangeArticleText(
-            "Sort meta data",
-            parsers.SortMetaData(ArticleText, Name),
-            true);
-        Variables.Profiler.Profile("SortMetaData");
+        ApplyFinalGeneralFixes(
+            parsers,
+            skip,
+            restrictDefaultsortAddition,
+            enabledGeneralFixes);
 
         AfterGeneralFixesTextChanged();
 
         Variables.Profiler.Profile("End of general fixes");
     }
-
 
     private void ApplyInitialGeneralFixes(
         Parsers parsers,
@@ -2822,6 +2671,203 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             }
         }
     }
+
+    private void ApplyCategoryAndImageGeneralFixes(
+        Parsers parsers,
+        ISkipOptions skip)
+    {
+        FixPeopleCategories(
+            parsers,
+            skip.SkipNoPeopleCategoriesFixed);
+        Variables.Profiler.Profile("FixPeopleCategories");
+
+        AWBChangeArticleText(
+            "Fix categories",
+            Parsers.FixCategories(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixCategories");
+
+        AWBChangeArticleText(
+            "Fix images",
+            Parsers.FixImages(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixImages");
+    }
+
+    private void ApplyCitationAndLinkGeneralFixes(
+        Parsers parsers,
+        ISkipOptions skip,
+        bool replaceReferenceTags,
+        IReadOnlySet<GeneralFixId>? enabledGeneralFixes)
+    {
+        // Citation dates.
+        CiteTemplateDates(
+            parsers,
+            skip.SkipNoCiteTemplateDatesFixed);
+        Variables.Profiler.Profile("CiteTemplateDates");
+
+        // Link processing.
+        FixLinks(skip.SkipNoBadLink);
+        Variables.Profiler.Profile("FixLinks");
+
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.SimplifyLinks))
+        {
+            AWBChangeArticleText(
+                "Simplify links",
+                Parsers.SimplifyLinks(ArticleText),
+                true);
+
+            Variables.Profiler.Profile("SimplifyLinks");
+        }
+
+        // Citation templates.
+        AWBChangeArticleText(
+            "Fix citation templates",
+            Parsers.FixCitationTemplates(ArticleText),
+            true,
+            true);
+        Variables.Profiler.Profile("FixCitationTemplates");
+
+        // Main article templates.
+        AWBChangeArticleText(
+            "Fix main article",
+            Parsers.FixMainArticle(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixMainArticle");
+
+        // Reference list tags.
+        if (replaceReferenceTags &&
+            !Variables.LangCode.Equals("de"))
+        {
+            AWBChangeArticleText(
+                "Fix reference tags",
+                Parsers.FixReferenceListTags(ArticleText),
+                true);
+
+            Variables.Profiler.Profile("FixReferenceListTags");
+        }
+
+        // Empty links and templates.
+        AWBChangeArticleText(
+            "Fix empty links and templates",
+            Parsers.FixEmptyLinksAndTemplates(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixEmptyLinksAndTemplates");
+    }
+
+
+    private void ApplyReferenceGeneralFixes()
+    {
+        // Simplify reference tags.
+        AWBChangeArticleText(
+            "Fix empty references",
+            Parsers.SimplifyReferenceTags(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixEmptyReferences");
+
+        // Fix reference tags.
+        AWBChangeArticleText(
+            "FixReferenceTags",
+            Parsers.FixReferenceTags(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixReferenceTags");
+
+        // Consolidate duplicate named references.
+        AWBChangeArticleText(
+            "DuplicateNamedReferences",
+            Parsers.DuplicateNamedReferences(ArticleText),
+            true);
+        Variables.Profiler.Profile("DuplicateNamedReferences");
+
+        // Consolidate duplicate unnamed references.
+        AWBChangeArticleText(
+            "DuplicateUnnamedReferences",
+            Parsers.DuplicateUnnamedReferences(ArticleText),
+            true);
+        Variables.Profiler.Profile("DuplicateUnnamedReferences");
+
+        // Consolidate identical references with different names.
+        AWBChangeArticleText(
+            "SameRefDifferentName",
+            Parsers.SameRefDifferentName(ArticleText),
+            true);
+        Variables.Profiler.Profile("SameRefDifferentName");
+
+        // Move references after punctuation.
+        AWBChangeArticleText(
+            "Refs after punctuation",
+            Parsers.RefsAfterPunctuation(ArticleText),
+            true);
+        Variables.Profiler.Profile("RefsAfterPunctuation");
+
+        // Preserve wiki-specific restrictions.
+        // T154089, T387784, T418701
+        if (!Variables.IsWikipediaEN &&
+            Variables.LangCode != "uk" &&
+            Variables.LangCode != "ru")
+        {
+            AWBChangeArticleText(
+                "ReorderReferences",
+                Parsers.ReorderReferences(ArticleText),
+                true);
+
+            Variables.Profiler.Profile("ReorderReferences");
+        }
+
+        // Significant fix: add missing reference list.
+        AWBChangeArticleText(
+            "Add missing {{reflist}}",
+            Parsers.AddMissingReflist(ArticleText),
+            true,
+            true);
+        Variables.Profiler.Profile("AddMissingReflist");
+    }
+
+    private void ApplyFinalGeneralFixes(
+        Parsers parsers,
+        ISkipOptions skip,
+        bool restrictDefaultsortAddition,
+        IReadOnlySet<GeneralFixId>? enabledGeneralFixes)
+    {
+        // Final date processing for non-redirect articles.
+        if (!Tools.IsRedirect(ArticleText) &&
+            IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixDatesA))
+        {
+            // FixDates performs its own hiding.
+            AWBChangeArticleText(
+                "Fix dates 2",
+                parsers.FixDatesA(ArticleText).Trim(),
+                true);
+
+            Variables.Profiler.Profile("FixDates2");
+        }
+
+        // Run for both redirects and non-redirects.
+        // Must execute after FixPeopleCategories.
+        SetDefaultSort(
+            Variables.LangCode,
+            skip.SkipNoDefaultSortAdded,
+            restrictDefaultsortAddition);
+        Variables.Profiler.Profile("SetDefaultSort");
+
+        // Requires unhidden text.
+        AWBChangeArticleText(
+            "FixImageSelfLinks",
+            parsers.FixImageSelfLinks(ArticleText),
+            true);
+
+        // Metadata sorting requires unhidden text.
+        AWBChangeArticleText(
+            "Sort meta data",
+            parsers.SortMetaData(ArticleText, Name),
+            true);
+        Variables.Profiler.Profile("SortMetaData");
+    }
+
 
     private static bool IsGeneralFixEnabled(
         IReadOnlySet<GeneralFixId>? enabledGeneralFixes,
