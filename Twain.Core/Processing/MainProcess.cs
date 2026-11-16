@@ -343,7 +343,8 @@ public sealed class MainProcess
             skip,
             options.ReplaceReferenceTags,
             options.RestrictDefaultSortChanges,
-            options.NoMosComplianceFixes);
+            options.NoMosComplianceFixes,
+            options.EnabledGeneralFixes);
     }
 
     /// <summary>

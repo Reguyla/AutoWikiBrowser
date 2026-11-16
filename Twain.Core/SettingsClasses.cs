@@ -28,6 +28,7 @@ How to enable a new setting:
 
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using Twain.Core.GeneralFixes;
 
 namespace Twain.Core.AWBSettings;
 
@@ -448,6 +449,12 @@ public class GeneralPrefs
     public bool LoggingEnabled = true;
 
     public List<int> AlertPreferences = new();
+
+    /// <summary>
+    /// Stores the editor's individual general-fix selections.
+    /// </summary>
+    public GeneralFixPreferences GeneralFixPreferences = new();
+
 }
 
 [Serializable]

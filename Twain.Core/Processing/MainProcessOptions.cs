@@ -1,4 +1,6 @@
-﻿namespace Twain.Core.Processing;
+﻿using Twain.Core.GeneralFixes;
+
+namespace Twain.Core.Processing;
 
 /// <summary>
 /// Specifies the image operation applied during article processing.
@@ -91,6 +93,22 @@ public sealed class MainProcessOptions
     /// Gets a value indicating whether general fixes are enabled.
     /// </summary>
     public bool GeneralFixesEnabled { get; init; }
+
+    /// <summary>
+    /// Gets the individual general fixes enabled for this processing pass.
+    /// A null value uses the catalog defaults.
+    /// </summary>
+    public IReadOnlySet<GeneralFixId>? EnabledGeneralFixes { get; init; }
+
+    /// <summary>
+    /// Determines whether an individual general fix is enabled.
+    /// </summary>
+    public bool IsGeneralFixEnabled(GeneralFixId fixId)
+    {
+        return GeneralFixesEnabled &&
+            (EnabledGeneralFixes?.Contains(fixId)
+                ?? GeneralFixCatalog.IsEnabledByDefault(fixId));
+    }
 
     /// <summary>
     /// Gets a value indicating whether legacy reference-list markup should be

@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System.Collections.Generic;
+using Twain.Core.GeneralFixes;
 
 namespace Twain.UI.Preferences.GeneralFixes;
 
@@ -11,11 +12,61 @@ namespace Twain.UI.Preferences.GeneralFixes;
 /// </summary>
 public partial class GeneralFixesView : UserControl
 {
-    private readonly List<CheckBox> _fixCheckBoxes = new();
+    private readonly Dictionary<GeneralFixId, CheckBox>
+        _fixCheckBoxes = new();
 
     public GeneralFixesView()
     {
         InitializeComponent();
+        PopulateFixControls();
+    }
+
+    /// <summary>
+    /// Creates checkboxes for all registered general fixes.
+    /// </summary>
+    private void PopulateFixControls()
+    {
+        _fixCheckBoxes.Clear();
+
+        FormattingFixesPanel.Children.Clear();
+        LinksFixesPanel.Children.Clear();
+        ReferencesFixesPanel.Children.Clear();
+        StructureFixesPanel.Children.Clear();
+
+        foreach (GeneralFixDefinition fix in GeneralFixCatalog.Fixes)
+        {
+
+            CheckBox checkBox = new()
+            {
+                Content = fix.Name,
+                IsChecked = fix.EnabledByDefault
+            };
+
+            // Display the fix description when hovering.
+            ToolTip.SetTip(checkBox, fix.Description);
+
+
+            _fixCheckBoxes.Add(fix.Id, checkBox);
+
+            StackPanel panel = fix.Category switch
+            {
+                GeneralFixCategory.DatesAndFormatting =>
+                    FormattingFixesPanel,
+
+                GeneralFixCategory.LinksAndTemplates =>
+                    LinksFixesPanel,
+
+                GeneralFixCategory.ReferencesAndCitations =>
+                    ReferencesFixesPanel,
+
+                GeneralFixCategory.ArticleStructureAndMetadata =>
+                    StructureFixesPanel,
+
+                _ => StructureFixesPanel
+            };
+
+            panel.Children.Add(checkBox);
+        }
     }
 
     /// <summary>
@@ -43,9 +94,43 @@ public partial class GeneralFixesView : UserControl
     /// </summary>
     private void SetAllFixes(bool enabled)
     {
-        foreach (CheckBox checkBox in _fixCheckBoxes)
+        foreach (CheckBox checkBox in _fixCheckBoxes.Values)
         {
             checkBox.IsChecked = enabled;
+        }
+    }
+
+    /// <summary>
+    /// Returns the identifiers of all enabled fixes.
+    /// </summary>
+    public List<GeneralFixId> GetEnabledFixes()
+    {
+        List<GeneralFixId> enabledFixes = new();
+
+        foreach (KeyValuePair<GeneralFixId, CheckBox> fix
+                 in _fixCheckBoxes)
+        {
+            if (fix.Value.IsChecked == true)
+            {
+                enabledFixes.Add(fix.Key);
+            }
+        }
+
+        return enabledFixes;
+    }
+
+    /// <summary>
+    /// Updates the controls from a collection of enabled fixes.
+    /// </summary>
+    public void SetEnabledFixes(
+        IEnumerable<GeneralFixId> enabledFixes)
+    {
+        HashSet<GeneralFixId> enabled = new(enabledFixes);
+
+        foreach (KeyValuePair<GeneralFixId, CheckBox> fix
+                 in _fixCheckBoxes)
+        {
+            fix.Value.IsChecked = enabled.Contains(fix.Key);
         }
     }
 }

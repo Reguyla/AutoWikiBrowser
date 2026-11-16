@@ -22,6 +22,7 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using Twain.Core.API;
 using Twain.Core.Controls;
+using Twain.Core.GeneralFixes;
 using Twain.Core.Logging;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
@@ -2339,51 +2340,54 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     private readonly HideText HiderHideExtLinksImages = new HideText(true, true, true);
 
     /// <summary>
-    /// Performs numerous minor improvements to the page text
+    /// Performs the configured general fixes on the article.
     /// </summary>
-    /// <param name="parsers">A parser object</param>
-    /// <param name="removeText"></param>
-    /// <param name="skip">Skip options</param>
-    /// <param name="replaceReferenceTags">If true, &lt;div class="references-small">&lt;references/>&lt;/div> and so on
-    /// <param name="restrictDefaultsortAddition"></param>
-    /// <param name="noMOSComplianceFixes"></param>
-    /// will be replaced with {{reflist}}</param>
-    /// <param name="restrictDefaultsortAddition"></param>
-    /// <param name="noMOSComplianceFixes"></param>
-    public void PerformGeneralFixes(Parsers parsers, HideText removeText, ISkipOptions skip, bool replaceReferenceTags, bool restrictDefaultsortAddition, bool noMOSComplianceFixes)
+    /// <param name="parsers">The parser used for general fixes.</param>
+    /// <param name="removeText">The text-hiding helper.</param>
+    /// <param name="skip">The configured skip options.</param>
+    /// <param name="replaceReferenceTags">
+    /// Whether to replace legacy reference-list markup.
+    /// </param>
+    /// <param name="restrictDefaultsortAddition">
+    /// Whether to restrict automatic DEFAULTSORT changes.
+    /// </param>
+    /// <param name="noMOSComplianceFixes">
+    /// Whether to exclude Manual of Style compliance fixes.
+    /// </param>
+    /// <param name="enabledGeneralFixes">
+    /// The individual general fixes enabled for this processing pass.
+    /// Null indicates catalog defaults.
+    /// </param>
+
+    public void PerformGeneralFixes(
+        Parsers parsers,
+        HideText removeText,
+        ISkipOptions skip,
+        bool replaceReferenceTags,
+        bool restrictDefaultsortAddition,
+        bool noMOSComplianceFixes,
+        IReadOnlySet<GeneralFixId>? enabledGeneralFixes = null)
+
     { // TODO: 2009-01-28 review which of the genfixes below should be labeled 'significant'
         BeforeGeneralFixesTextChanged();
 
-        // two flags for FixDates functionality
+        // Preserve the original date-context flags before initial fixes.
         string zeroth = WikiRegexes.ZerothSection.Match(ArticleText).Value;
-        bool CircaLink = WikiRegexes.CircaLinkTemplate.IsMatch(ArticleText), Floruit = (!zeroth.Contains(@"[[floruit|fl.]]") && WikiRegexes.UnlinkedFloruit.IsMatch(zeroth));
+
+        bool circaLink = WikiRegexes.CircaLinkTemplate.IsMatch(ArticleText);
+
+        bool floruit =
+            !zeroth.Contains(@"[[floruit|fl.]]") &&
+            WikiRegexes.UnlinkedFloruit.IsMatch(zeroth);
 
         HideMoreText(HiderHideExtLinksImages);
         Variables.Profiler.Profile("HideMoreText");
 
-        AWBChangeArticleText("Fix temperatures", Parsers.FixTemperatures(ArticleText), true);
-        Variables.Profiler.Profile("FixTemperatures");
-
-        if (!noMOSComplianceFixes)
-        {
-            AWBChangeArticleText("Fix non-breaking spaces", parsers.FixNonBreakingSpaces(ArticleText), true);
-            Variables.Profiler.Profile("FixNonBreakingSpaces");
-
-            AWBChangeArticleText("Mdashes", parsers.Mdashes(ArticleText, Name), true);
-            Variables.Profiler.Profile("Mdashes");
-
-            AWBChangeArticleText("Fix Date Ordinals/Of", parsers.FixDateOrdinalsAndOf(ArticleText, Name), true, true);
-            Variables.Profiler.Profile("FixDateOrdinalsAndOf");
-        }
-
-        AWBChangeArticleText("FixBrParagraphs", parsers.FixBrParagraphs(ArticleText).Trim(), true);
-        Variables.Profiler.Profile("FixBrParagraphs");
-
-        if (!Tools.IsRedirect(ArticleText))
-        {
-            AWBChangeArticleText("Fix dates 1", parsers.FixDatesB(ArticleText, CircaLink, Floruit).Trim(), true);
-            Variables.Profiler.Profile("FixDates1");
-        }
+        ApplyInitialGeneralFixes(
+            parsers,
+            noMOSComplianceFixes,
+            circaLink,
+            floruit);
 
         UnHideMoreText(HiderHideExtLinksImages);
         Variables.Profiler.Profile("UnHideMoreText");
@@ -2536,6 +2540,58 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         Variables.Profiler.Profile("End of general fixes");
     }
+
+
+    private void ApplyInitialGeneralFixes(
+        Parsers parsers,
+        bool noMOSComplianceFixes,
+        bool circaLink,
+        bool floruit)
+    {
+        AWBChangeArticleText(
+            "Fix temperatures",
+            Parsers.FixTemperatures(ArticleText),
+            true);
+        Variables.Profiler.Profile("FixTemperatures");
+
+        if (!noMOSComplianceFixes)
+        {
+            AWBChangeArticleText(
+                "Fix non-breaking spaces",
+                parsers.FixNonBreakingSpaces(ArticleText),
+                true);
+            Variables.Profiler.Profile("FixNonBreakingSpaces");
+
+            AWBChangeArticleText(
+                "Mdashes",
+                parsers.Mdashes(ArticleText, Name),
+                true);
+            Variables.Profiler.Profile("Mdashes");
+
+            AWBChangeArticleText(
+                "Fix Date Ordinals/Of",
+                parsers.FixDateOrdinalsAndOf(ArticleText, Name),
+                true,
+                true);
+            Variables.Profiler.Profile("FixDateOrdinalsAndOf");
+        }
+
+        AWBChangeArticleText(
+            "FixBrParagraphs",
+            parsers.FixBrParagraphs(ArticleText).Trim(),
+            true);
+        Variables.Profiler.Profile("FixBrParagraphs");
+
+        if (!Tools.IsRedirect(ArticleText))
+        {
+            AWBChangeArticleText(
+                "Fix dates 1",
+                parsers.FixDatesB(ArticleText, circaLink, floruit).Trim(),
+                true);
+            Variables.Profiler.Profile("FixDates1");
+        }
+    }
+
 
     /// <summary>
     /// Preforms general fixes suitable for all pages: trims whitespace

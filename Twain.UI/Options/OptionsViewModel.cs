@@ -1100,7 +1100,10 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
                 SkipIfOnlyMinorReplacement,
 
             GeneralFixesEnabled =
-                ApplyGeneralFixes,
+               ApplyGeneralFixes,
+
+            EnabledGeneralFixes =
+                preferences.General.GeneralFixPreferences.GetEnabledFixes(),
 
             ReplaceReferenceTags =
                preferences.General.ReplaceReferenceTags,

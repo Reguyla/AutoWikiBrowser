@@ -397,6 +397,9 @@ public partial class PreferencesWindow : UserControl
 
         AlertPreferences =
             general.AlertPreferences;
+
+        GeneralFixesControl.SetEnabledFixes(
+            general.GeneralFixPreferences.GetEnabledFixes());
     }
 
     /// <summary>
@@ -565,6 +568,9 @@ public partial class PreferencesWindow : UserControl
 
         general.AlertPreferences =
             AlertPreferences;
+
+        general.GeneralFixPreferences.SetEnabledFixes(
+            GeneralFixesControl.GetEnabledFixes());
 
         ToolsPrefs tools =
             preferences.Tool;
