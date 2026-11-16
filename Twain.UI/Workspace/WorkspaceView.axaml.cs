@@ -6,7 +6,9 @@ using Avalonia.VisualTree;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Twain.Core;
+using Twain.Core.API;
 using Twain.Core.Controls;
 using Twain.Core.Parse;
 using Twain.CustomModules;
@@ -155,6 +157,12 @@ public partial class WorkspaceView : UserControl
             return;
         }
 
+        if (!workspace.Session.Page.Exists)
+            return;
+
+        if (!workspace.Session.User.CanMovePage(workspace.Session.Page))
+            return;
+
         if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
             return;
 
@@ -170,8 +178,103 @@ public partial class WorkspaceView : UserControl
         if (!confirmed)
             return;
 
-        // MediaWiki Move API integration follows.
-        // No page move is performed here.
+        if (workspace.CurrentArticle is null ||
+            workspace.Session.Editor.IsActive ||
+            !string.Equals(
+                workspace.CurrentArticle.Name,
+                dialog.CurrentPageTitle,
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (string.Equals(
+            workspace.CurrentArticle.Name,
+            dialog.NewTitle,
+            StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        string originalTitle = workspace.CurrentArticle.Name;
+        string newTitle = dialog.NewTitle;
+
+        var editor = workspace.Session.Editor;
+
+        Exception? moveError = null;
+
+        void OnMoveFailed(
+            AsyncApiEdit sender,
+            string operation,
+            Exception exception)
+        {
+            if (operation == "Move")
+                moveError = exception;
+        }
+
+        editor.OperationFailed += OnMoveFailed;
+
+        try
+        {
+            editor.Move(
+                originalTitle,
+                newTitle,
+                dialog.Summary,
+                dialog.DealWithAssocTalkPage,
+                dialog.NoRedirect,
+                dialog.Watch);
+
+            await Task.Run(() => editor.Wait());
+        }
+
+        catch (Exception ex)
+        {
+            await new ArticleActionValidationWindow(
+                "Move failed",
+                $"Unable to move \"{originalTitle}\" to \"{newTitle}\".\n\n" +
+                ex.Message)
+                .ShowDialog(shell);
+
+            return;
+        }
+
+        finally
+        {
+            editor.OperationFailed -= OnMoveFailed;
+        }
+
+        bool succeeded =
+            editor.State == AsyncApiEdit.EditState.Ready;
+
+        if (!succeeded)
+        {
+            await new ArticleActionValidationWindow(
+                "Move failed",
+                $"The move from \"{originalTitle}\" to \"{newTitle}\" failed.\n\n" +
+                (moveError?.Message ?? "The API operation did not complete successfully."))
+                .ShowDialog(shell);
+
+            return;
+        }
+
+        int articleIndex = workspace.MakeList.Articles
+            .ToList()
+            .FindIndex(article =>
+                string.Equals(
+                    article.Name,
+                    originalTitle,
+                    StringComparison.Ordinal));
+
+        if (articleIndex >= 0)
+        {
+            Article movedArticle = new(newTitle);
+
+            workspace.MakeList.Articles[articleIndex] = movedArticle;
+            workspace.MakeList.SelectedArticle = movedArticle;
+        }
+
+        workspace.MakeList.StatusText =
+            $"Moved {originalTitle} to {newTitle}.";
     }
 
     /// <summary>

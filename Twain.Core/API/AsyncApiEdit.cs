@@ -66,6 +66,7 @@ public class AsyncApiEdit
     private readonly object ModernSyncRoot = new object();
 
     private Task ActiveModernOperation;
+    private Task ActiveModernCompletion;
     private CancellationTokenSource ActiveModernCancellation;
     private bool InCrossThreadCall;
 
@@ -157,8 +158,8 @@ public class AsyncApiEdit
         get { return mState; }
         protected set
         {
-            CallEvent(StateChanged, this);
             mState = value;
+            CallEvent(StateChanged, this);
         }
     }
 
@@ -170,6 +171,7 @@ public class AsyncApiEdit
         get
         {
             return State == EditState.Working ||
+                   IsModernOperationActive ||
                    ModernEditor.IsActive;
         }
     }
@@ -183,7 +185,7 @@ public class AsyncApiEdit
 
         lock (ModernSyncRoot)
         {
-            modernOperation = ActiveModernOperation;
+            modernOperation = ActiveModernCompletion ?? ActiveModernOperation;
         }
 
         if (modernOperation == null)
@@ -191,7 +193,7 @@ public class AsyncApiEdit
 
         if (ParentControl != null && !ParentControl.InvokeRequired)
         {
-            while (IsModernOperationActive)
+            while (!modernOperation.IsCompleted)
                 Application.DoEvents();
         }
         else
@@ -312,11 +314,15 @@ public class AsyncApiEdit
         else
         {
             InCrossThreadCall = true;
-            if (!ParentControl.IsDisposed)
+            try
             {
-                ParentControl.Invoke(method, args);
+                if (!ParentControl.IsDisposed)
+                    ParentControl.Invoke(method, args);
             }
-            InCrossThreadCall = false;
+            finally
+            {
+                InCrossThreadCall = false;
+            }
         }
     }
 
@@ -326,8 +332,10 @@ public class AsyncApiEdit
         {
             lock (ModernSyncRoot)
             {
-                return ActiveModernOperation != null &&
-                       !ActiveModernOperation.IsCompleted;
+                return (ActiveModernOperation != null &&
+                        !ActiveModernOperation.IsCompleted) ||
+                       (ActiveModernCompletion != null &&
+                        !ActiveModernCompletion.IsCompleted);
             }
         }
     }
@@ -390,86 +398,137 @@ public class AsyncApiEdit
         return completion.Task;
     }
 
+
     private long InvokeModernFunction<TResult>(
         string operation,
         ModernOperationFactory<TResult> operationFactory)
     {
         if (operationFactory == null)
-            throw new ArgumentNullException("operationFactory");
-
-        if (IsModernOperationActive)
-        {
-            throw new InvocationException(
-                "An asynchronous call is already being performed");
-        }
+            throw new ArgumentNullException(nameof(operationFactory));
 
         CancellationTokenSource cancellation = new();
+
+        TaskCompletionSource<bool> completion = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
 
         long operationGeneration;
         long saveOperationGeneration = 0;
 
+        // Reserve the operation before starting the API request.
         lock (ModernSyncRoot)
         {
+            if ((ActiveModernOperation != null &&
+                 !ActiveModernOperation.IsCompleted) ||
+                (ActiveModernCompletion != null &&
+                 !ActiveModernCompletion.IsCompleted))
+            {
+                cancellation.Dispose();
+
+                throw new InvocationException(
+                    "An asynchronous call is already being performed");
+            }
+
             operationGeneration = ++_operationGeneration;
 
             if (operation == "Save")
             {
                 saveOperationGeneration = ++_saveOperationGeneration;
             }
-        }
 
-        State = EditState.Working;
+            ActiveModernCancellation = cancellation;
+            ActiveModernOperation = null;
+            ActiveModernCompletion = completion.Task;
+        }
 
         Task<TResult> task;
 
         try
         {
+            State = EditState.Working;
+
             task = operationFactory(cancellation.Token);
 
             if (task == null)
+            {
                 throw new InvalidOperationException(
                     "Modern operation did not return a task.");
+            }
         }
         catch (Exception ex)
         {
-            cancellation.Dispose();
+            lock (ModernSyncRoot)
+            {
+                if (operationGeneration == _operationGeneration &&
+                    ReferenceEquals(ActiveModernCancellation, cancellation))
+                {
+                    ActiveModernCancellation = null;
+                    ActiveModernOperation = null;
+                }
+            }
 
-            SynchronousEditor.Reset();
+            try
+            {
+                SynchronousEditor.Reset();
+                State = EditState.Failed;
+                // Allow failure handlers to start another operation.
+                ReleaseModernCompletion(completion.Task);
+                CallModernFailure(operation, ex);
+            }
+            finally
+            {
+                ReleaseModernCompletion(completion.Task);
+                completion.TrySetResult(true);
+                cancellation.Dispose();
+            }
 
-            State = EditState.Failed;
-            CallModernFailure(operation, ex);
             return 0;
         }
 
         lock (ModernSyncRoot)
         {
-            ActiveModernCancellation = cancellation;
-            ActiveModernOperation = task;
+            if (operationGeneration == _operationGeneration &&
+                ReferenceEquals(ActiveModernCancellation, cancellation))
+            {
+                ActiveModernOperation = task;
+            }
         }
 
+        // Signal completion only after the legacy completion handler
+        // has processed the API result.
         task.ContinueWith(
             delegate (Task<TResult> completedTask)
             {
-                CompleteModernOperation(
-                    operation,
-                    completedTask,
-                    cancellation,
-                    operationGeneration,
-                    saveOperationGeneration);
+                try
+                {
+                    CompleteModernOperation(
+                        operation,
+                        completedTask,
+                        cancellation,
+                        operationGeneration,
+                        saveOperationGeneration,
+                        completion.Task);
+                }
+                finally
+                {
+                    ReleaseModernCompletion(completion.Task);
+                    completion.TrySetResult(true);
+                }
             },
-                    CancellationToken.None,
+            CancellationToken.None,
             TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);
 
         return saveOperationGeneration;
     }
 
+
     private void CompleteModernOperation<TResult>(
         string operation,
         Task<TResult> completedTask,
         CancellationTokenSource cancellation,
         long operationGeneration,
-        long saveOperationGeneration)
+        long saveOperationGeneration,
+        Task completionTask)
     {
         bool isCurrentOperation = false;
 
@@ -580,6 +639,16 @@ public class AsyncApiEdit
             if (isCurrentOperation)
             {
                 State = EditState.Ready;
+                // Open/Save/Preview completion callbacks may start the next
+                // operation. Other operations (including Move) keep their
+                // reservation until all failure/success processing finishes.
+            }
+
+            if (isCurrentOperation &&
+                (operation == "Open" || operation == "Save" ||
+                 operation == "Preview"))
+            {
+                ReleaseModernCompletion(completionTask);
             }
 
             if (operation == "Save" &&
@@ -673,6 +742,17 @@ public class AsyncApiEdit
             CallEvent(
                 new ExceptionCaughtInternal(OnExceptionCaught),
                 exception);
+        }
+    }
+
+    // Release only this operation's reservation. A callback may have
+    // already started another operation with a different completion task.
+    private void ReleaseModernCompletion(Task completionTask)
+    {
+        lock (ModernSyncRoot)
+        {
+            if (ReferenceEquals(ActiveModernCompletion, completionTask))
+                ActiveModernCompletion = null;
         }
     }
 
@@ -1080,8 +1160,10 @@ public class AsyncApiEdit
         lock (ModernSyncRoot)
         {
             hasTrackedOperation =
-                ActiveModernOperation != null &&
-                !ActiveModernOperation.IsCompleted;
+                (ActiveModernCompletion != null &&
+                 !ActiveModernCompletion.IsCompleted) ||
+                (ActiveModernOperation != null &&
+                 !ActiveModernOperation.IsCompleted);
 
             modernCancellation = ActiveModernCancellation;
         }
@@ -1101,10 +1183,9 @@ public class AsyncApiEdit
                 {
                     // The operation finished while cancellation was requested.
                 }
-
-                Wait();
             }
 
+            Wait();
             return;
         }
 
