@@ -2404,8 +2404,13 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
         else
         {
-            AWBChangeArticleText("Fix whitespace in links", Parsers.FixLinkWhitespace(ArticleText, Name), true);
-            Variables.Profiler.Profile("FixLinkWhitespace");
+            if (IsGeneralFixEnabled(enabledGeneralFixes, GeneralFixId.FixLinkWhitespace))
+            {
+                AWBChangeArticleText(
+                    "Fix whitespace in links",
+                    Parsers.FixLinkWhitespace(ArticleText, Name),
+                    true);
+            }
 
             BulletExternalLinks(skip.SkipNoBulletedLink);
             Variables.Profiler.Profile("BulletExternalLinks");
@@ -2437,13 +2442,23 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             bool changesByMF = MinorFixes(Variables.LangCode, skip.SkipNoHeaderError);
             Variables.Profiler.Profile("MinorFixes");
 
-            if (changesByMF) // call EmboldenTitles again: zeroth section may have changed now
+            if (changesByMF)
             {
                 EmboldenTitles(parsers, false);
                 Variables.Profiler.Profile("EmboldenTitles");
 
-                BulletExternalLinks(skip.SkipNoBulletedLink);
-                Variables.Profiler.Profile("BulletExternalLinks");
+                if (IsGeneralFixEnabled(
+                    enabledGeneralFixes,
+                    GeneralFixId.BulletExternalLinks))
+                {
+                    if (IsGeneralFixEnabled(
+                        enabledGeneralFixes,
+                        GeneralFixId.BulletExternalLinks))
+                    {
+                        BulletExternalLinks(skip.SkipNoBulletedLink);
+                        Variables.Profiler.Profile("BulletExternalLinks");
+                    }
+                }
             }
 
             FixPeopleCategories(parsers, skip.SkipNoPeopleCategoriesFixed);
