@@ -2612,13 +2612,19 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             true);
         Variables.Profiler.Profile("FixSyntax");
 
-        AWBChangeArticleText(
-            "Template redirects",
-            Parsers.TemplateRedirects(
-                ArticleText,
-                WikiRegexes.TemplateRedirects),
-            true);
-        Variables.Profiler.Profile("TemplateRedirects");
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.TemplateRedirects))
+        {
+            AWBChangeArticleText(
+                "Template redirects",
+                Parsers.TemplateRedirects(
+                    ArticleText,
+                    WikiRegexes.TemplateRedirects),
+                true);
+
+            Variables.Profiler.Profile("TemplateRedirects");
+        }
 
         AWBChangeArticleText(
             "Rename Template Parameters",
