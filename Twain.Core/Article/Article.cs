@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using Twain.Core;
 using Twain.Core.API;
 using Twain.Core.Controls;
 using Twain.Core.GeneralFixes;
@@ -2359,6 +2360,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// Null indicates catalog defaults.
     /// </param>
 
+
     public void PerformGeneralFixes(
         Parsers parsers,
         HideText removeText,
@@ -2367,8 +2369,8 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         bool restrictDefaultsortAddition,
         bool noMOSComplianceFixes,
         IReadOnlySet<GeneralFixId>? enabledGeneralFixes = null)
-
-    { // TODO: 2009-01-28 review which of the genfixes below should be labeled 'significant'
+    {
+        // TODO: 2009-01-28 review which of the genfixes below should be labeled 'significant'
         BeforeGeneralFixesTextChanged();
 
         // Preserve the original date-context flags before initial fixes.
@@ -2387,7 +2389,8 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             parsers,
             noMOSComplianceFixes,
             circaLink,
-            floruit);
+            floruit,
+            enabledGeneralFixes);
 
         UnHideMoreText(HiderHideExtLinksImages);
         Variables.Profiler.Profile("UnHideMoreText");
@@ -2516,10 +2519,17 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         UnHideText(removeText);
         Variables.Profiler.Profile("UnHideText");
 
-        if (!Tools.IsRedirect(ArticleText))
+        if (!Tools.IsRedirect(ArticleText) &&
+            IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixDatesA))
         {
-            // FixDates does its own hiding
-            AWBChangeArticleText("Fix dates 2", parsers.FixDatesA(ArticleText).Trim(), true);
+            // FixDates does its own hiding.
+            AWBChangeArticleText(
+                "Fix dates 2",
+                parsers.FixDatesA(ArticleText).Trim(),
+                true);
+
             Variables.Profiler.Profile("FixDates2");
         }
 
@@ -2541,57 +2551,107 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         Variables.Profiler.Profile("End of general fixes");
     }
 
-
     private void ApplyInitialGeneralFixes(
         Parsers parsers,
         bool noMOSComplianceFixes,
         bool circaLink,
-        bool floruit)
+        bool floruit,
+        IReadOnlySet<GeneralFixId>? enabledGeneralFixes)
     {
-        AWBChangeArticleText(
-            "Fix temperatures",
-            Parsers.FixTemperatures(ArticleText),
-            true);
-        Variables.Profiler.Profile("FixTemperatures");
-
-        if (!noMOSComplianceFixes)
+        // Temperature fixes are independent of MOS restrictions.
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixTemperatures))
         {
             AWBChangeArticleText(
-                "Fix non-breaking spaces",
-                parsers.FixNonBreakingSpaces(ArticleText),
+                "Fix temperatures",
+                Parsers.FixTemperatures(ArticleText),
                 true);
-            Variables.Profiler.Profile("FixNonBreakingSpaces");
 
-            AWBChangeArticleText(
-                "Mdashes",
-                parsers.Mdashes(ArticleText, Name),
-                true);
-            Variables.Profiler.Profile("Mdashes");
-
-            AWBChangeArticleText(
-                "Fix Date Ordinals/Of",
-                parsers.FixDateOrdinalsAndOf(ArticleText, Name),
-                true,
-                true);
-            Variables.Profiler.Profile("FixDateOrdinalsAndOf");
+            Variables.Profiler.Profile("FixTemperatures");
         }
 
-        AWBChangeArticleText(
-            "FixBrParagraphs",
-            parsers.FixBrParagraphs(ArticleText).Trim(),
-            true);
-        Variables.Profiler.Profile("FixBrParagraphs");
+        // Preserve the existing MOS compliance restriction.
+        if (!noMOSComplianceFixes)
+        {
+            if (IsGeneralFixEnabled(
+                    enabledGeneralFixes,
+                    GeneralFixId.FixNonBreakingSpaces))
+            {
+                AWBChangeArticleText(
+                    "Fix non-breaking spaces",
+                    parsers.FixNonBreakingSpaces(ArticleText),
+                    true);
 
-        if (!Tools.IsRedirect(ArticleText))
+                Variables.Profiler.Profile("FixNonBreakingSpaces");
+            }
+
+            // Normalize dashes and related punctuation.
+            if (IsGeneralFixEnabled(
+                    enabledGeneralFixes,
+                    GeneralFixId.Mdashes))
+            {
+                AWBChangeArticleText(
+                    "Mdashes",
+                    parsers.Mdashes(ArticleText, Name),
+                    true);
+
+                Variables.Profiler.Profile("Mdashes");
+            }
+
+            // Normalize date ordinals and "of" expressions.
+            if (IsGeneralFixEnabled(
+                    enabledGeneralFixes,
+                    GeneralFixId.FixDateOrdinalsAndOf))
+            {
+                AWBChangeArticleText(
+                    "Fix Date Ordinals/Of",
+                    parsers.FixDateOrdinalsAndOf(ArticleText, Name),
+                    true,
+                    true);
+
+                Variables.Profiler.Profile("FixDateOrdinalsAndOf");
+            }
+        }
+
+        // Normalize paragraph breaks.
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixBrParagraphs))
+        {
+            AWBChangeArticleText(
+                "FixBrParagraphs",
+                parsers.FixBrParagraphs(ArticleText).Trim(),
+                true);
+
+            Variables.Profiler.Profile("FixBrParagraphs");
+        }
+
+        // Date normalization for non-redirect articles.
+        if (!Tools.IsRedirect(ArticleText) &&
+            IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixDatesB))
         {
             AWBChangeArticleText(
                 "Fix dates 1",
-                parsers.FixDatesB(ArticleText, circaLink, floruit).Trim(),
+                parsers.FixDatesB(
+                    ArticleText,
+                    circaLink,
+                    floruit).Trim(),
                 true);
+
             Variables.Profiler.Profile("FixDates1");
         }
     }
 
+    private static bool IsGeneralFixEnabled(
+        IReadOnlySet<GeneralFixId>? enabledGeneralFixes,
+        GeneralFixId fixId)
+    {
+        return enabledGeneralFixes?.Contains(fixId)
+            ?? GeneralFixCatalog.IsEnabledByDefault(fixId);
+    }
 
     /// <summary>
     /// Preforms general fixes suitable for all pages: trims whitespace

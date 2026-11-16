@@ -54,10 +54,26 @@ public class RequiresParser : RequiresInitialization
     }
 }
 
+
 [TestFixture]
 public class MOSTests : RequiresParser
 {
     public GenfixesTestsBase genFixes = new GenfixesTestsBase();
+
+    [Test]
+    public void FixDatesB_NormalizesYearRanges()
+    {
+        const string input =
+            "The organization operated from 1990-2000, before merging.\r\n" +
+            "The program ran between 1965-68, according to records.\r\n" +
+            "The company operated from 2000-present.";
+
+        string result = parser.FixDatesB(input, false, false);
+
+        Assert.That(result, Does.Contain("1990–2000"));
+        Assert.That(result, Does.Contain("1965–68"));
+        Assert.That(result, Does.Contain("2000–present"));
+    }
 
     [Test]
     public void TestFixDateMonthOfYear()

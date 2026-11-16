@@ -332,6 +332,12 @@ public partial class Parsers
         return HiderHideExtLinksImages.AddBackMore(articleText);
     }
 
+    // TODO Phase II: Review paragraph tag replacement logic.
+    // Replacing adjacent <p> and </p> tags with CRLF pairs can
+    // produce excessive blank lines when the source already
+    // contains paragraph spacing. Preserve legacy behavior
+    // for Phase I; investigate newline normalization and
+    // add regression tests before changing this.
     /// <summary>
     /// Remove &lt;br /&gt;'s where not needed
     /// </summary>
