@@ -118,31 +118,73 @@ public partial class WorkspaceView : UserControl
         if (DataContext is not WorkspaceViewModel workspace ||
             workspace.CurrentArticle is null ||
             !workspace.Options.CanDeleteCurrentPage ||
-            workspace.Session.Editor.IsActive)
-        {
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.CanDeletePage(workspace.Session.Page))
             return;
-        }
 
         if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
+            return;
+
+        string title = workspace.CurrentArticle.Name;
+        ArticleActionDialogWindow dialog = new(ArticleAction.Delete)
         {
+            CurrentPageTitle = title
+        };
+
+        if (!await dialog.ShowDialog<bool>(shell))
+            return;
+
+        if (workspace.CurrentArticle is null ||
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.CanDeletePage(workspace.Session.Page) ||
+            !string.Equals(workspace.CurrentArticle.Name, title, StringComparison.Ordinal))
+            return;
+
+        var editor = workspace.Session.Editor;
+        Exception? operationError = null;
+
+        void OnFailed(AsyncApiEdit sender, string operation, Exception exception)
+        {
+            if (operation == "Delete")
+                operationError = exception;
+        }
+
+        editor.OperationFailed += OnFailed;
+        try
+        {
+            editor.Delete(title, dialog.Summary, dialog.Watch);
+            await Task.Run(() => editor.Wait());
+        }
+        catch (Exception ex)
+        {
+            await new ArticleActionValidationWindow(
+                "Delete failed", $"Unable to delete \"{title}\".\n\n{ex.Message}")
+                .ShowDialog(shell);
+            return;
+        }
+        finally
+        {
+            editor.OperationFailed -= OnFailed;
+        }
+
+        if (editor.State != AsyncApiEdit.EditState.Ready || operationError is not null)
+        {
+            await new ArticleActionValidationWindow(
+                "Delete failed",
+                $"Deletion of \"{title}\" failed.\n\n" +
+                (operationError?.Message ?? "The API operation did not complete successfully."))
+                .ShowDialog(shell);
             return;
         }
 
-        ArticleActionDialogWindow dialog =
-            new(ArticleAction.Delete)
-            {
-                CurrentPageTitle = workspace.CurrentArticle.Name
-            };
+        int index = workspace.MakeList.Articles.ToList().FindIndex(article =>
+            string.Equals(article.Name, title, StringComparison.Ordinal));
+        if (index >= 0)
+            workspace.MakeList.Articles.RemoveAt(index);
 
-        bool confirmed = await dialog.ShowDialog<bool>(shell);
-
-        if (!confirmed)
-        {
-            return;
-        }
-
-        // The MediaWiki Delete API will be connected in the next step.
-        // No deletion is performed here.
+        workspace.MakeList.StatusText = $"Deleted {title}.";
     }
 
     /// <summary>
@@ -284,27 +326,77 @@ public partial class WorkspaceView : UserControl
     {
         if (DataContext is not WorkspaceViewModel workspace ||
             workspace.CurrentArticle is null ||
-            workspace.Session.Editor.IsActive)
-        {
+            !workspace.Options.CanProtectCurrentPage ||
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.IsSysop)
             return;
-        }
 
         if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
             return;
 
-        ArticleActionDialogWindow dialog =
-            new(ArticleAction.Protect)
-            {
-                CurrentPageTitle = workspace.CurrentArticle.Name
-            };
+        string title = workspace.CurrentArticle.Name;
+        ArticleActionDialogWindow dialog = new(ArticleAction.Protect)
+        {
+            CurrentPageTitle = title
+        };
 
-        bool confirmed = await dialog.ShowDialog<bool>(shell);
-
-        if (!confirmed)
+        if (!await dialog.ShowDialog<bool>(shell))
             return;
 
-        // MediaWiki Protect API integration follows.
-        // No protection change is performed here.
+        if (workspace.CurrentArticle is null ||
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.IsSysop ||
+            !string.Equals(workspace.CurrentArticle.Name, title, StringComparison.Ordinal))
+            return;
+
+        var editor = workspace.Session.Editor;
+        Exception? operationError = null;
+
+        void OnFailed(AsyncApiEdit sender, string operation, Exception exception)
+        {
+            if (operation == "Protect")
+                operationError = exception;
+        }
+
+        editor.OperationFailed += OnFailed;
+        try
+        {
+            editor.Protect(
+                title,
+                dialog.Summary,
+                dialog.ProtectExpiry,
+                dialog.EditProtectionLevel,
+                dialog.MoveProtectionLevel,
+                dialog.CascadingProtection,
+                dialog.Watch);
+
+            await Task.Run(() => editor.Wait());
+        }
+        catch (Exception ex)
+        {
+            await new ArticleActionValidationWindow(
+                "Protect failed", $"Unable to protect \"{title}\".\n\n{ex.Message}")
+                .ShowDialog(shell);
+            return;
+        }
+        finally
+        {
+            editor.OperationFailed -= OnFailed;
+        }
+
+        if (editor.State != AsyncApiEdit.EditState.Ready || operationError is not null)
+        {
+            await new ArticleActionValidationWindow(
+                "Protect failed",
+                $"Protection of \"{title}\" failed.\n\n" +
+                (operationError?.Message ?? "The API operation did not complete successfully."))
+                .ShowDialog(shell);
+            return;
+        }
+
+        workspace.MakeList.StatusText = $"Updated protection for {title}.";
     }
 
     /// <summary>
