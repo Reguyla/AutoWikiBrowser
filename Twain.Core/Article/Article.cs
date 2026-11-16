@@ -2400,14 +2400,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (Tools.IsRedirect(ArticleText))
         {
-            AWBChangeArticleText("Redirect tagger", Parsers.RedirectTagger(ArticleText, Name), true);
-            Variables.Profiler.Profile("RedirectTagger");
-
-            AWBChangeArticleText("Fix syntax redirects", Parsers.FixSyntaxRedirects(ArticleText), true);
-            Variables.Profiler.Profile("FixSyntaxRedirects");
-
-            AWBChangeArticleText("Simplify links", Parsers.SimplifyLinks(ArticleText), true);
-            Variables.Profiler.Profile("SimplifyLinks");
+            ApplyRedirectGeneralFixes(enabledGeneralFixes);
         }
         else
         {
@@ -2644,6 +2637,48 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             Variables.Profiler.Profile("FixDates1");
         }
     }
+
+
+    private void ApplyRedirectGeneralFixes(
+        IReadOnlySet<GeneralFixId>? enabledGeneralFixes)
+    {
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.RedirectTagger))
+        {
+            AWBChangeArticleText(
+                "Redirect tagger",
+                Parsers.RedirectTagger(ArticleText, Name),
+                true);
+
+            Variables.Profiler.Profile("RedirectTagger");
+        }
+
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixSyntaxRedirects))
+        {
+            AWBChangeArticleText(
+                "Fix syntax redirects",
+                Parsers.FixSyntaxRedirects(ArticleText),
+                true);
+
+            Variables.Profiler.Profile("FixSyntaxRedirects");
+        }
+
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.SimplifyLinks))
+        {
+            AWBChangeArticleText(
+                "Simplify links",
+                Parsers.SimplifyLinks(ArticleText),
+                true);
+
+            Variables.Profiler.Profile("SimplifyLinks");
+        }
+    }
+
 
     private static bool IsGeneralFixEnabled(
         IReadOnlySet<GeneralFixId>? enabledGeneralFixes,

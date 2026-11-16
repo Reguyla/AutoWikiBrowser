@@ -54,7 +54,6 @@ public class RequiresParser : RequiresInitialization
     }
 }
 
-
 [TestFixture]
 public class MOSTests : RequiresParser
 {
@@ -73,6 +72,26 @@ public class MOSTests : RequiresParser
         Assert.That(result, Does.Contain("1990–2000"));
         Assert.That(result, Does.Contain("1965–68"));
         Assert.That(result, Does.Contain("2000–present"));
+    }
+
+    [Test]
+    public void RecognizesRedirectWithoutSpace()
+    {
+        const string input = "#redirect[[Canadair CL-89]]";
+
+        Assert.That(
+            Tools.IsRedirect(input),
+            Is.True);
+    }
+
+    [Test]
+    public void FixSyntaxRedirects_PreservesUnspacedRedirect()
+    {
+        const string input = "#redirect[[Canadair CL-89]]";
+
+        string result = Parsers.FixSyntaxRedirects(input);
+
+        Assert.That(result, Is.EqualTo(input));
     }
 
     [Test]
