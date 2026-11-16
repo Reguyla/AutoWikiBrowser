@@ -733,6 +733,10 @@ public partial class WorkspaceViewModel : ObservableObject
         articleEditorPane.HeaderAction = ShowOptions;
         articleEditorPane.HistoryAction = OpenArticleHistory;
         articleEditorPane.EditOnWikiAction = OpenArticleOnWiki;
+        articleEditorPane.AdministrativeOptions = Options;
+        articleEditorPane.DeletePageAction = RequestDeleteCurrentPage;
+        articleEditorPane.MovePageAction = RequestMoveCurrentPage;
+        articleEditorPane.ProtectPageAction = RequestProtectCurrentPage;
 
         articleEditorPane.Title =
             string.IsNullOrWhiteSpace(CurrentArticleName)

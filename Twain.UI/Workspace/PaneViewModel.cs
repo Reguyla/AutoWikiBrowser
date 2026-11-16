@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Twain.Core.Workspaces.Panes;
+using Twain.UI.Options;
 
 namespace Twain.UI.ViewModels.Workspaces;
 
@@ -260,6 +261,35 @@ public sealed partial class PaneViewModel : ObservableObject
     {
         HeaderAction?.Invoke();
     }
+        private OptionsViewModel? _administrativeOptions;
+
+    public OptionsViewModel? AdministrativeOptions
+    {
+        get => _administrativeOptions;
+        set
+        {
+            if (SetProperty(ref _administrativeOptions, value))
+            {
+                OnPropertyChanged(nameof(HasAdministrativeActions));
+            }
+        }
+    }
+
+    public bool HasAdministrativeActions =>
+        AdministrativeOptions is not null;
+
+    public Action? DeletePageAction { get; set; }
+    public Action? MovePageAction { get; set; }
+    public Action? ProtectPageAction { get; set; }
+
+    [RelayCommand]
+    private void DeletePage() => DeletePageAction?.Invoke();
+
+    [RelayCommand]
+    private void MovePage() => MovePageAction?.Invoke();
+
+    [RelayCommand]
+    private void ProtectPage() => ProtectPageAction?.Invoke();
 }
 
 /// <summary>
