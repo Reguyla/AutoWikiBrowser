@@ -1,0 +1,104 @@
+
+<UserControl
+    x:Class="Twain.UI.Preferences.GeneralFixes.GeneralFixesView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
+
+    <Grid RowDefinitions="Auto,Auto,*"
+          Margin="{DynamicResource TwainContentPadding}"
+          RowSpacing="{DynamicResource TwainSpacingMedium}">
+
+        <!-- Heading -->
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock
+                Classes="twain-section-heading"
+                Text="General Fixes" />
+
+            <TextBlock
+                Text="Select which general fixes Twain should apply when processing articles."
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Selection buttons -->
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            Spacing="{DynamicResource TwainSpacingMedium}">
+
+            <Button
+                x:Name="SelectAllButton"
+                Classes="twain-command-button"
+                Content="Select All"
+                Click="SelectAllButton_Click" />
+
+            <Button
+                x:Name="SelectNoneButton"
+                Classes="twain-command-button"
+                Content="Select None"
+                Click="SelectNoneButton_Click" />
+
+        </StackPanel>
+
+        <!-- General fixes categories -->
+        <ScrollViewer
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+
+            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="6">
+                        <TextBlock
+                            Classes="twain-section-heading"
+                            Text="Dates and Formatting" />
+
+                        <StackPanel
+                            x:Name="FormattingFixesPanel"
+                            Spacing="6" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="6">
+                        <TextBlock
+                            Classes="twain-section-heading"
+                            Text="Links and Templates" />
+
+                        <StackPanel
+                            x:Name="LinksFixesPanel"
+                            Spacing="6" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="6">
+                        <TextBlock
+                            Classes="twain-section-heading"
+                            Text="References and Citations" />
+
+                        <StackPanel
+                            x:Name="ReferencesFixesPanel"
+                            Spacing="6" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="twain-section">
+                    <StackPanel Spacing="6">
+                        <TextBlock
+                            Classes="twain-section-heading"
+                            Text="Article Structure and Metadata" />
+
+                        <StackPanel
+                            x:Name="StructureFixesPanel"
+                            Spacing="6" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>

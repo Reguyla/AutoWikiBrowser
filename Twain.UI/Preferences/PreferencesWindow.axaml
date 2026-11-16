@@ -2,6 +2,8 @@
     x:Class="Twain.UI.Preferences.PreferencesWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:generalFixes="clr-namespace:Twain.UI.Preferences.GeneralFixes"
+
     Background="{DynamicResource TwainApplicationBackgroundBrush}"
     Foreground="{DynamicResource TwainTextPrimaryBrush}">
 
@@ -672,6 +674,12 @@
 
                 </Grid>
                 </Border>
+            </TabItem>
+
+            <!-- General Fixes -->
+            <TabItem Classes="twain-tab" Header="General Fixes">
+                <generalFixes:GeneralFixesView
+                    x:Name="GeneralFixesControl" />
             </TabItem>
 
         </TabControl>
