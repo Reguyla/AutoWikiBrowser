@@ -1840,7 +1840,24 @@ public partial class WorkspaceViewModel : ObservableObject
         switch (result.Outcome)
         {
             case ArticleProcessingOutcome.ChangesMade:
-                MakeList.MarkPreparseRetained(queueArticle);
+                // With Skip if No Alerts enabled, retain changed
+                // articles only when at least one alert was found.
+                if (Options.SkipIfNoAlerts &&
+                    Options.Alerts.Count == 0)
+                {
+                    CurrentArticle!.AWBSkip("Page has no alerts");
+
+                    if (!MakeList.RemoveArticle(queueArticle.Name))
+                    {
+                        StopProcessing();
+                        return;
+                    }
+                }
+                else
+                {
+                    MakeList.MarkPreparseRetained(queueArticle);
+                }
+
                 break;
 
             case ArticleProcessingOutcome.NoChanges:
@@ -2087,6 +2104,22 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
+        // Evaluate alerts only when needed for Preparse filtering.
+        if (Options.SkipIfNoAlerts &&
+            result.Completed &&
+            result.Outcome != ArticleProcessingOutcome.Failed &&
+            result.Outcome != ArticleProcessingOutcome.Skipped)
+        {
+            Editor.Document.CurrentText = CurrentArticle!.ArticleText;
+            UpdateArticleAlerts();
+        }
+
+        System.Diagnostics.Debug.WriteLine(
+    $"[Preparse] Article={CurrentArticle?.Name}, " +
+    $"Outcome={result.Outcome}, " +
+    $"SkipIfNoAlerts={Options.SkipIfNoAlerts}, " +
+    $"AlertCount={Options.Alerts.Count}");
+
         CompletePreparseArticle(result);
     }
 
@@ -2101,6 +2134,17 @@ public partial class WorkspaceViewModel : ObservableObject
 
         // Evaluate alerts for the processed article.
         UpdateArticleAlerts();
+
+        // Preserve legacy AWB behavior: skip articles with no
+        // enabled alerts when the option is selected.
+        if (Options.SkipIfNoAlerts &&
+            Options.Alerts.Count == 0)
+        {
+            CurrentArticle!.AWBSkip("Page has no alerts");
+
+            CompleteCurrentArticle(manualSkip: false);
+            return;
+        }
 
         // Display the calculated edit summary.
         UpdateCalculatedEditSummary();
