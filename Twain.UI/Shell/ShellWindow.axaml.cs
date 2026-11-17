@@ -41,6 +41,9 @@ public partial class ShellWindow : Window
 
         viewModel.Workspace.ConfirmShutdownRequested =
             ConfirmShutdownAsync;
+
+        viewModel.Workspace.ConfirmSpamFilterRetryRequested =
+            ConfirmSpamFilterRetryAsync;
     }
 
     /// <summary>
@@ -242,6 +245,71 @@ public partial class ShellWindow : Window
                 shutdownAction);
 
         return await window.ShowDialog<bool>(this);
+    }
+
+    /// <summary>
+    /// Asks whether to retry an edit rejected by the wiki's
+    /// spam blacklist.
+    /// </summary>
+    public async Task<bool> ConfirmSpamFilterRetryAsync(
+        string blockedUrl)
+    {
+        var retryButton = new Button
+        {
+            Content = "Retry",
+            MinWidth = 90
+        };
+
+        var skipButton = new Button
+        {
+            Content = "Skip Article",
+            MinWidth = 90
+        };
+
+        var dialog = new Window
+        {
+            Title = "Spam Blacklist",
+            Width = 440,
+            SizeToContent = SizeToContent.Height,
+            CanResize = false,
+            WindowStartupLocation =
+                WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Avalonia.Thickness(20),
+                Spacing = 16,
+                Children =
+            {
+                new TextBlock
+                {
+                    Text =
+                        "The wiki rejected this edit because " +
+                        "of its spam blacklist.\n\n" +
+                        $"Blocked URL: {blockedUrl}\n\n" +
+                        "Would you like to retry the edit?",
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                },
+                new StackPanel
+                {
+                    Orientation =
+                        Avalonia.Layout.Orientation.Horizontal,
+                    HorizontalAlignment =
+                        Avalonia.Layout.HorizontalAlignment.Right,
+                    Spacing = 10,
+                    Children =
+                    {
+                        retryButton,
+                        skipButton
+                    }
+                }
+            }
+            }
+        };
+
+        retryButton.Click += (_, _) => dialog.Close(true);
+        skipButton.Click += (_, _) => dialog.Close(false);
+
+        return await dialog.ShowDialog<bool>(this);
     }
 
     /// <summary>

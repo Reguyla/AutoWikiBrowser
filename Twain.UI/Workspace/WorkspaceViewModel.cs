@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.API;
@@ -351,6 +352,14 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     public Func<BotShutdownAction, Task<bool>>?
         ConfirmShutdownRequested
+    { get; set; }
+
+    /// <summary>
+    /// Requests confirmation before retrying an edit rejected
+    /// by the wiki's spam blacklist.
+    /// </summary>
+    public Func<string, Task<bool>>?
+        ConfirmSpamFilterRetryRequested
     { get; set; }
 
     /// <summary>
@@ -1337,8 +1346,7 @@ public partial class WorkspaceViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveProcessing()
     {
-        // Preparse is a read-only processing workflow.
-        // Never submit edits while Preparse is active.
+        // Preparse must never submit edits.
         if (Options.PreParseMode ||
             IsPreparseRunning ||
             !Options.IsProcessing ||
@@ -1366,51 +1374,106 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         Article savingArticle = CurrentArticle;
-
         _pendingSaveArticle = savingArticle;
 
         bool saveCompleted = false;
 
         try
         {
-            // Preserve the summary displayed in the article editor,
-            // including any manual changes made by the user.
+            // Preserve the editor's displayed summary, including
+            // any manual changes.
             string finalSummary = Editor.CalculatedEditSummary;
 
-            // Verify that any existing section prefix still matches
-            // the actual changes in the article before saving.
             finalSummary = Summary.CorrectSectionEditSummary(
                 finalSummary,
                 savingArticle.OriginalArticleText,
                 articleText);
 
-            SaveInfo saveInfo = await Session.Editor.SaveArticleAsync(
-                articleText,
-                finalSummary,
-                Options.MinorEdit,
-                WatchOptions.NoChange);
+                try
+                {
+                    SaveInfo saveInfo =
+                        await Session.Editor.SaveArticleAsync(
+                            articleText,
+                            finalSummary,
+                            Options.MinorEdit,
+                            WatchOptions.NoChange);
 
-            // A successful API response confirms that the wiki
-            // accepted the edit, even if Stop was pressed.
-            //
-            // Editor_SaveComplete records the edit and removes
-            // the article from Make List. It only advances when
-            // Options.IsProcessing is still true.
-            if (!ReferenceEquals(CurrentArticle, savingArticle))
-            {
-                return;
-            }
+                    // A confirmed API success must be recorded,
+                    // even if processing was stopped meanwhile.
+                    if (!ReferenceEquals(
+                            CurrentArticle,
+                            savingArticle))
+                    {
+                        return;
+                    }
 
-            saveCompleted = true;
+                    saveCompleted = true;
+                    Editor_SaveComplete(
+                        Session.Editor,
+                        saveInfo);
 
-            Editor_SaveComplete(Session.Editor, saveInfo);
+                    return;
+                }
+                catch (SpamlistException ex)
+                {
+                    // Stop may have been pressed during the save.
+                    if (!Options.IsProcessing ||
+                        !ReferenceEquals(CurrentArticle, savingArticle))
+                    {
+                        ErrorHandler.HandleException(ex);
+                        return;
+                    }
+
+                    // Automatically skip when the option is enabled
+                    // or Twain is running in bot mode.
+                    if (Options.SkipIfSpamFilterBlocked ||
+                        BotSettings.AutoSaveEnabled)
+                    {
+                        // The API rejected the save.
+                        // Release pending state before advancing.
+                        _pendingSaveArticle = null;
+                        _pendingSaveOperationId = 0;
+
+                        savingArticle.AWBSkip(ex.URL);
+                        CompleteCurrentArticle(manualSkip: false);
+                        return;
+                    }
+
+                    // Interactive mode: ask whether to retry.
+                    bool retry =
+                        ConfirmSpamFilterRetryRequested is not null &&
+                        await ConfirmSpamFilterRetryRequested(ex.URL);
+
+                    // Stop may have been pressed while the dialog was open.
+                    if (!Options.IsProcessing ||
+                        !ReferenceEquals(CurrentArticle, savingArticle))
+                    {
+                        return;
+                    }
+
+                    if (!retry)
+                    {
+                        // The editor chose to skip the rejected article.
+                        _pendingSaveArticle = null;
+                        _pendingSaveOperationId = 0;
+
+                        savingArticle.AWBSkip(ex.URL);
+                        CompleteCurrentArticle(manualSkip: false);
+                        return;
+                    }
+
+                    // The editor chose Retry.
+                    // Leave the article loaded so the blocked URL
+                    // can be corrected before another save attempt.
+                    //
+                    // Returning releases pending-save state in finally.
+                    // The article remains in Make List.
+                    return;
+                }
         }
         catch (OperationCanceledException)
         {
-            // Cancellation was requested and the API operation
-            // did not return a confirmed successful result.
-            //
-            // The article remains in Make List.
+            // No confirmed save. Leave the article in Make List.
         }
         catch (Exception ex)
         {
@@ -1418,13 +1481,12 @@ public partial class WorkspaceViewModel : ObservableObject
         }
         finally
         {
-            // Successful saves are finalized by Editor_SaveComplete
-            // after its UI-dispatched callback executes.
-            //
-            // Failed or cancelled operations release the pending
-            // article immediately.
+            // Successful saves are finalized by Editor_SaveComplete.
+            // Failed or cancelled operations release pending state.
             if (!saveCompleted &&
-                ReferenceEquals(_pendingSaveArticle, savingArticle))
+                ReferenceEquals(
+                    _pendingSaveArticle,
+                    savingArticle))
             {
                 _pendingSaveArticle = null;
                 _pendingSaveOperationId = 0;
