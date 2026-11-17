@@ -163,6 +163,7 @@ public partial class PreferencesWindow : UserControl
             0 => TwainTheme.Classic,
             1 => TwainTheme.Legacy,
             2 => TwainTheme.ModernLight,
+            3 => TwainTheme.ModernDark,
             _ => ThemeManager.CurrentTheme
         };
 
@@ -181,6 +182,7 @@ public partial class PreferencesWindow : UserControl
                 TwainTheme.Classic => 0,
                 TwainTheme.Legacy => 1,
                 TwainTheme.ModernLight => 2,
+                TwainTheme.ModernDark => 3,
                 _ => 0
             };
 
@@ -205,6 +207,7 @@ public partial class PreferencesWindow : UserControl
                 0 => TwainTheme.Classic,
                 1 => TwainTheme.Legacy,
                 2 => TwainTheme.ModernLight,
+                3 => TwainTheme.ModernDark,
                 _ => ThemeManager.CurrentTheme
             };
 

@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Twain.UI.Themes;
 
 namespace Twain.UI.Diff;
 
@@ -19,6 +20,46 @@ public partial class DiffView : UserControl
 
         DiffWebView.WebMessageReceived +=
             DiffWebView_WebMessageReceived;
+
+        AttachedToVisualTree += DiffView_AttachedToVisualTree;
+        DetachedFromVisualTree += DiffView_DetachedFromVisualTree;
+    }
+
+    /// <summary>
+    /// Subscribes to theme changes while the Diff viewer is displayed.
+    /// </summary>
+    private void DiffView_AttachedToVisualTree(
+        object? sender,
+        Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+        ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
+
+        // Refresh in case the theme changed while detached.
+        _ = LoadDiffHtmlAsync();
+    }
+
+    /// <summary>
+    /// Stops listening for theme changes when the Diff viewer is removed.
+    /// </summary>
+    private void DiffView_DetachedFromVisualTree(
+        object? sender,
+        Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+    }
+
+    /// <summary>
+    /// Regenerates the Diff HTML when the application theme changes.
+    /// </summary>
+    private void ThemeManager_ThemeChanged(
+        object? sender,
+        EventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine(
+            $"Diff theme changed: {ThemeManager.CurrentTheme}");
+
+        _ = LoadDiffHtmlAsync();
     }
 
     private void DiffWebView_AdapterCreated(

@@ -12,6 +12,11 @@ public static class ThemeManager
     private static ResourceInclude? _activeThemeResources;
 
     /// <summary>
+    /// Raised after the application theme changes successfully.
+    /// </summary>
+    public static event EventHandler? ThemeChanged;
+
+    /// <summary>
     /// Gets the currently selected theme.
     /// </summary>
     public static TwainTheme CurrentTheme { get; private set; }
@@ -41,8 +46,7 @@ public static class ThemeManager
                 "avares://Twain.UI/Themes/ModernLightTheme.axaml",
 
             TwainTheme.ModernDark =>
-                throw new NotSupportedException(
-                    "Modern Dark has not been implemented yet."),
+                "avares://Twain.UI/Themes/ModernDarkTheme.axaml",
 
             _ => throw new ArgumentOutOfRangeException(nameof(theme))
         };
@@ -69,5 +73,7 @@ public static class ThemeManager
             theme == TwainTheme.ModernDark
                 ? ThemeVariant.Dark
                 : ThemeVariant.Light;
+
+        ThemeChanged?.Invoke(null, EventArgs.Empty);
     }
 }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.DiffHtml;
 using Twain.UI.Editor;
+using Twain.UI.Themes;
 
 namespace Twain.UI.Diff;
 
@@ -75,7 +76,8 @@ public sealed class DiffViewModel : ViewModelBase
             _diff,
             _document.OriginalText,
             _document.CurrentText,
-            0);
+            0,
+            ThemeManager.CurrentTheme == TwainTheme.ModernDark);
 
     /// <summary>
     /// Requests navigation to the specified zero-based line in the
