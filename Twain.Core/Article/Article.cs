@@ -1588,11 +1588,20 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
     }
 
+
     /// <summary>
-    /// Fixes some crap
+    /// Applies minor article corrections while preserving
+    /// existing change detection and skip behavior.
     /// </summary>
-    /// <param name="langCode">The wiki's language code</param>
-    /// <param name="skipIfNoChange">True if the article should be skipped if no changes are made</param>
+    /// <param name="langCode">The wiki's language code.</param>
+    /// <param name="skipIfNoChange">
+    /// True if the article should be skipped when no qualifying
+    /// changes are made.
+    /// </param>
+    /// <param name="enabledGeneralFixes">
+    /// The enabled General Fixes selections.
+    /// Null indicates catalog defaults.
+    /// </param>
     protected bool MinorFixes(
         string langCode,
         bool skipIfNoChange,
@@ -1602,7 +1611,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         AWBChangeArticleText(
             "Fixed interwikis",
-            Parsers.InterwikiConversions(mArticleText, out noInterwikiChanges),
+            Parsers.InterwikiConversions(
+                mArticleText,
+                out noInterwikiChanges),
             true);
 
         if (langCode != "en" && langCode != "simple")
@@ -1611,14 +1622,43 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         string originalText = mArticleText;
         string updatedText = mArticleText;
 
+        // Preserve existing general conversion restrictions.
         if (ShouldApplyGeneralConversions())
+        {
             updatedText = Parsers.Conversions(updatedText);
+        }
 
-        updatedText = Parsers.FixSyntaxMainspace(updatedText, Name);
-        updatedText = Parsers.FixLivingThingsRelatedDates(updatedText);
+        // Fix wiki syntax in mainspace.
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixSyntax))
+        {
+            updatedText = Parsers.FixSyntaxMainspace(
+                updatedText,
+                Name);
+        }
 
-        bool noHeadingChanges;
-        updatedText = Parsers.FixHeadings(updatedText, Name, out noHeadingChanges);
+        // Fix living-things-related dates.
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixLivingThingsRelatedDates))
+        {
+            updatedText =
+                Parsers.FixLivingThingsRelatedDates(updatedText);
+        }
+
+        // Fix headings.
+        bool noHeadingChanges = true;
+
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixHeadings))
+        {
+            updatedText = Parsers.FixHeadings(
+                updatedText,
+                Name,
+                out noHeadingChanges);
+        }
 
         bool anyChanges = !string.Equals(
             originalText,
@@ -1633,11 +1673,17 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (!noHeadingChanges)
         {
-            AWBChangeArticleText("Fixed header errors", updatedText, true);
+            AWBChangeArticleText(
+                "Fixed header errors",
+                updatedText,
+                true);
         }
         else
         {
-            AWBChangeArticleText("Fixed minor formatting issues", updatedText, true);
+            AWBChangeArticleText(
+                "Fixed minor formatting issues",
+                updatedText,
+                true);
 
             if (skipIfNoChange)
                 Trace.AWBSkipped("No header errors");
@@ -1645,6 +1691,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         return anyChanges;
     }
+
 
     /// <summary>
     /// Determines whether general article conversions should be applied to the
