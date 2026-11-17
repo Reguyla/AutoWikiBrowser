@@ -2605,12 +2605,18 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
 
         // Does significant fixes; call before MinorFixes.
-        AWBChangeArticleText(
-            "Fix syntax",
-            Parsers.FixSyntax(ArticleText),
-            true,
-            true);
-        Variables.Profiler.Profile("FixSyntax");
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixSyntax))
+        {
+            AWBChangeArticleText(
+                "Fix syntax",
+                Parsers.FixSyntax(ArticleText),
+                true,
+                true);
+
+            Variables.Profiler.Profile("FixSyntax");
+        }
 
         if (IsGeneralFixEnabled(
                 enabledGeneralFixes,
@@ -2626,13 +2632,20 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             Variables.Profiler.Profile("TemplateRedirects");
         }
 
-        AWBChangeArticleText(
-            "Rename Template Parameters",
-            Parsers.RenameTemplateParameters(
-                ArticleText,
-                WikiRegexes.RenamedTemplateParameters),
-            true);
-        Variables.Profiler.Profile("RenameTemplateParameters");
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.RenameTemplateParameters))
+        {
+            AWBChangeArticleText(
+                "Rename Template Parameters",
+                Parsers.RenameTemplateParameters(
+                    ArticleText,
+                    WikiRegexes.RenamedTemplateParameters),
+                true);
+
+            Variables.Profiler.Profile("RenameTemplateParameters");
+        }
+
     }
 
     private void ApplyArticleFormattingGeneralFixes(
@@ -2640,8 +2653,13 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         ISkipOptions skip,
         IReadOnlySet<GeneralFixId>? enabledGeneralFixes)
     {
+
         // Must run before MinorFixes.
-        if (Variables.IsWikipediaEN)
+        // This fix applies only to English Wikipedia.
+        if (Variables.IsWikipediaEN &&
+            IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.MultipleIssues))
         {
             AWBChangeArticleText(
                 "Fixes for {{Multiple issues}}",
@@ -2737,11 +2755,17 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         Variables.Profiler.Profile("FixCitationTemplates");
 
         // Main article templates.
-        AWBChangeArticleText(
-            "Fix main article",
-            Parsers.FixMainArticle(ArticleText),
-            true);
-        Variables.Profiler.Profile("FixMainArticle");
+        if (IsGeneralFixEnabled(
+                enabledGeneralFixes,
+                GeneralFixId.FixMainArticle))
+        {
+            AWBChangeArticleText(
+                "Fix main article",
+                Parsers.FixMainArticle(ArticleText),
+                true);
+
+            Variables.Profiler.Profile("FixMainArticle");
+        }
 
         // Reference list tags.
         if (replaceReferenceTags &&
@@ -2762,7 +2786,6 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             true);
         Variables.Profiler.Profile("FixEmptyLinksAndTemplates");
     }
-
 
     private void ApplyReferenceGeneralFixes()
     {
