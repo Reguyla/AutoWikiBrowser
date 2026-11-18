@@ -66,7 +66,7 @@ font-size: 150%;'>No changes</h2>
             "<head>" +
             "<meta charset=\"utf-8\">" +
             WikiDiff.DiffHead() +
-            (darkTheme ? DarkDiffStyles : string.Empty) +
+            (darkTheme ? DarkDiffStyles : LightDiffStyles) +
             "</head>" +
             "<body>" +
             tableHeader +
@@ -130,6 +130,15 @@ font-size: 150%;'>No changes</h2>
     </style>
     """;
 
+    private const string LightDiffStyles = """
+    <style type="text/css">
+    html, body {
+        background-color: #FFFFFF !important;
+        color: #000000;
+    }
+    </style>
+    """;
+
     /// <summary>
     /// Builds the appropriate HTML diff document for the supplied article text.
     /// </summary>
@@ -161,15 +170,11 @@ font-size: 150%;'>No changes</h2>
                 currentText,
                 StringComparison.Ordinal))
         {
-            if (!darkTheme)
-            {
-                return BuildNoChangesHtml();
-            }
-
             return BuildNoChangesHtml()
                 .Replace(
                     "</head>",
-                    DarkDiffStyles + "</head>",
+                    (darkTheme ? DarkDiffStyles : LightDiffStyles)
+                        + "</head>",
                     StringComparison.Ordinal);
         }
 
