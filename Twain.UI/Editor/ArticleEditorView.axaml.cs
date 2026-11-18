@@ -8,6 +8,7 @@ using Twain.Core;
 using Twain.Core.Editing;
 using Twain.Core.Parse;
 using Twain.UI.PasteMore;
+using Twain.UI.Themes;
 
 namespace Twain.UI.Editor;
 
@@ -25,6 +26,8 @@ public partial class ArticleEditorView : UserControl
     private bool _updatingDocumentFromMonaco;
     private readonly PasteMoreConfiguration _pasteMore = new();
 
+    private bool _monacoReady;
+
     /// <summary>
     /// Initializes the article editor view.
     /// </summary>
@@ -40,6 +43,60 @@ public partial class ArticleEditorView : UserControl
 
         EditToolbar.FormattingRequested +=
             EditToolbar_FormattingRequested;
+
+        AttachedToVisualTree += ArticleEditorView_AttachedToVisualTree;
+        DetachedFromVisualTree += ArticleEditorView_DetachedFromVisualTree;
+    }
+
+    /// <summary>
+    /// Subscribes to application theme changes while the editor is displayed.
+    /// </summary>
+    private void ArticleEditorView_AttachedToVisualTree(
+        object? sender,
+        Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+        ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
+
+        _ = ApplyMonacoThemeAsync();
+    }
+
+    /// <summary>
+    /// Stops listening for theme changes when the editor is detached.
+    /// </summary>
+    private void ArticleEditorView_DetachedFromVisualTree(
+        object? sender,
+        Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+    }
+
+    /// <summary>
+    /// Updates Monaco when Twain's application theme changes.
+    /// </summary>
+    private void ThemeManager_ThemeChanged(
+        object? sender,
+        EventArgs e)
+    {
+        _ = ApplyMonacoThemeAsync();
+    }
+
+    /// <summary>
+    /// Applies Twain's current theme to Monaco without reloading the editor.
+    /// </summary>
+    private async Task ApplyMonacoThemeAsync()
+    {
+        if (!_monacoReady)
+        {
+            return;
+        }
+
+        string themeJson =
+            JsonSerializer.Serialize(
+                ThemeManager.CurrentTheme.ToString());
+
+        await EditorWebView.InvokeScript(
+            $"window.twainEditor.setTheme({themeJson});");
     }
 
     /// <summary>
@@ -111,8 +168,11 @@ public partial class ArticleEditorView : UserControl
 
         if (messageType == "ready")
         {
+            _monacoReady = true;
+
             await LoadDocumentTextAsync();
             await ApplyEditorAppearanceAsync();
+            await ApplyMonacoThemeAsync();
 
             return;
         }
