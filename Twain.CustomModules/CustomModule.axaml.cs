@@ -29,6 +29,10 @@ public partial class CustomModule : Avalonia.Controls.UserControl
 
     private bool _isInitializing;
 
+    private bool _monacoReady;
+
+    private string _requestedTheme = "ModernLight";
+
     /// <summary>
     /// Initializes the custom module window.
     /// </summary>
@@ -36,8 +40,6 @@ public partial class CustomModule : Avalonia.Controls.UserControl
         : this(new CustomModuleState(), null)
     {
     }
-
-    private bool _monacoReady;
 
     /// <summary>
     /// Initializes the custom module window using the supplied application host.
@@ -175,6 +177,7 @@ public partial class CustomModule : Avalonia.Controls.UserControl
                     _monacoReady = true;
                     UpdateMonacoCode();
                     _ = ApplyEditorAppearanceAsync();
+                    _ = ApplyThemeAsync(_requestedTheme);
                     break;
 
                 case "textChanged":
@@ -196,6 +199,26 @@ public partial class CustomModule : Avalonia.Controls.UserControl
         {
             // Ignore messages that are not valid JSON.
         }
+    }
+
+    /// <summary>
+    /// Applies the requested theme to the Custom Modules Monaco editor.
+    /// Remembers the theme if Monaco has not finished loading.
+    /// </summary>
+    public async Task ApplyThemeAsync(string themeName)
+    {
+        _requestedTheme = themeName;
+
+        if (!_monacoReady)
+        {
+            return;
+        }
+
+        string themeJson =
+            JsonSerializer.Serialize(_requestedTheme);
+
+        await CodeEditorWebView.InvokeScript(
+            $"window.twainEditor.setTheme({themeJson});");
     }
 
     /// <summary>

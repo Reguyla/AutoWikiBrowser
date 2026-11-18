@@ -17,6 +17,7 @@ using Twain.UI.Controls;
 using Twain.UI.Editor;
 using Twain.UI.Settings;
 using Twain.UI.Shell;
+using Twain.UI.Themes;
 using Twain.UI.ViewModels.Workspaces;
 using Twain.UI.Views.Shell;
 
@@ -51,6 +52,11 @@ public partial class WorkspaceView : UserControl
     public WorkspaceView()
     {
         InitializeComponent();
+
+        ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
+
+        DetachedFromVisualTree += WorkspaceView_DetachedFromVisualTree;
+        AttachedToVisualTree += WorkspaceView_AttachedToVisualTree;
 
         AttachedToVisualTree += (_, _) =>
         {
@@ -108,6 +114,53 @@ public partial class WorkspaceView : UserControl
             UpdateNavigationLayout();
             UpdateOptionsSidebarLayout();
         };
+    }
+
+    /// <summary>
+    /// Reconnects theme notifications when the workspace is attached.
+    /// </summary>
+    private void WorkspaceView_AttachedToVisualTree(
+        object? sender,
+        VisualTreeAttachmentEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+        ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
+
+        _ = ApplyCustomModuleThemeAsync();
+    }
+
+    /// <summary>
+    /// Disconnects theme notifications when the workspace is detached.
+    /// </summary>
+    private void WorkspaceView_DetachedFromVisualTree(
+        object? sender,
+        VisualTreeAttachmentEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+    }
+
+    /// <summary>
+    /// Updates the embedded Custom Modules editor when Twain's theme changes.
+    /// </summary>
+    private void ThemeManager_ThemeChanged(
+        object? sender,
+        EventArgs e)
+    {
+        _ = ApplyCustomModuleThemeAsync();
+    }
+
+    /// <summary>
+    /// Passes the current application theme to the Custom Modules Monaco editor.
+    /// </summary>
+    private async Task ApplyCustomModuleThemeAsync()
+    {
+        if (_customModuleView is null)
+        {
+            return;
+        }
+
+        await _customModuleView.ApplyThemeAsync(
+            ThemeManager.CurrentTheme.ToString());
     }
 
     /// <summary>
@@ -652,6 +705,10 @@ public partial class WorkspaceView : UserControl
         };
 
         CustomModulesHost.Content = _customModuleView;
+
+        // Apply the active theme immediately.
+        // CustomModule remembers it if Monaco is still loading.
+        _ = ApplyCustomModuleThemeAsync();
     }
 
     /// <summary>
