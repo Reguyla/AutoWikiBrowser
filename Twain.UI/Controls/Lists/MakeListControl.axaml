@@ -19,6 +19,9 @@
 
     <converters:PreparseRetainedConverter
         x:Key="PreparseRetainedConverter" />
+
+    <converters:PreparseRetainedForegroundConverter
+        x:Key="PreparseRetainedForegroundConverter" />
 </UserControl.Resources>
 
     <Grid
@@ -71,7 +74,7 @@
 
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="4,2">
+                <Border Padding="4,2">
                         <Border.Background>
                             <MultiBinding Converter="{StaticResource PreparseRetainedConverter}">
                                 <Binding />
@@ -96,15 +99,23 @@
                             </TextBlock.IsVisible>
                         </TextBlock>
 
-                        <!-- Article title -->
-                        <TextBlock>
-                            <TextBlock.Text>
-                                <MultiBinding Converter="{StaticResource ArticleDisplayTitleConverter}">
-                                    <Binding />
-                                    <Binding Path="#ArticleListBox.DataContext.FormatDisplayTitles" />
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
+                    <!-- Article title -->
+                    <TextBlock>
+                        <TextBlock.Foreground>
+                            <MultiBinding Converter="{StaticResource PreparseRetainedForegroundConverter}">
+                                <Binding />
+                                <Binding Path="#ArticleListBox.DataContext" />
+                                <Binding Path="#ArticleListBox.DataContext.PreparseHighlightVersion" />
+                            </MultiBinding>
+                        </TextBlock.Foreground>
+
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource ArticleDisplayTitleConverter}">
+                                <Binding />
+                                <Binding Path="#ArticleListBox.DataContext.FormatDisplayTitles" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
 
                     </StackPanel>
                     </Border>
