@@ -1,13 +1,10 @@
-﻿
-namespace Twain.UI.Themes;
+﻿namespace Twain.UI.Themes;
 
 /// <summary>
 /// Identifies the available application themes.
 /// </summary>
 public enum TwainTheme
 {
-    Classic,
-    Legacy,
-    ModernLight,
-    ModernDark
+    ModernLight = 2,
+    ModernDark = 3
 }

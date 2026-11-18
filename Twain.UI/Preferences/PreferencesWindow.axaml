@@ -44,8 +44,6 @@
                         MinWidth="240"
                         SelectionChanged="ThemeComboBox_SelectionChanged">
 
-                        <ComboBoxItem Content="Classic (Original)" />
-                        <ComboBoxItem Content="Legacy (AWB-inspired)" />
                         <ComboBoxItem Content="Modern Light" />
                         <ComboBoxItem Content="Modern Dark" />
 

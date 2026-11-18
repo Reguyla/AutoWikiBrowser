@@ -68,13 +68,11 @@ public partial class App : Application
         ApplicationAppearanceSettingsStore.Load();
 
         // Only apply themes currently supported by Twain.
+        // Retired or unknown theme values fall back to Modern Light.
         if (appearanceSettings.Theme is not
-            (TwainTheme.Classic or 
-             TwainTheme.Legacy or
-             TwainTheme.ModernLight or
-             TwainTheme.ModernDark))
+            (TwainTheme.ModernLight or TwainTheme.ModernDark))
         {
-            appearanceSettings.Theme = TwainTheme.Classic;
+            appearanceSettings.Theme = TwainTheme.ModernLight;
         }
 
         ThemeManager.ApplyTheme(appearanceSettings.Theme);

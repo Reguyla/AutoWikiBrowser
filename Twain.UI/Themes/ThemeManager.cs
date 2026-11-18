@@ -20,7 +20,7 @@ public static class ThemeManager
     /// Gets the currently selected theme.
     /// </summary>
     public static TwainTheme CurrentTheme { get; private set; }
-        = TwainTheme.Classic;
+        = TwainTheme.ModernLight;
 
     /// <summary>
     /// Applies a theme to the running application.
@@ -28,20 +28,18 @@ public static class ThemeManager
     public static void ApplyTheme(TwainTheme theme)
     {
         Application? application = Application.Current;
-
         if (application is null)
-        {
             return;
+
+        // Unsupported or retired themes fall back to Modern Light.
+        if (theme != TwainTheme.ModernLight &&
+            theme != TwainTheme.ModernDark)
+        {
+            theme = TwainTheme.ModernLight;
         }
 
         string resourcePath = theme switch
         {
-            TwainTheme.Classic =>
-                "avares://Twain.UI/Themes/ClassicTheme.axaml",
-
-            TwainTheme.Legacy =>
-                "avares://Twain.UI/Themes/LegacyTheme.axaml",
-
             TwainTheme.ModernLight =>
                 "avares://Twain.UI/Themes/ModernLightTheme.axaml",
 
@@ -54,9 +52,7 @@ public static class ThemeManager
         var resources = application.Resources.MergedDictionaries;
 
         if (_activeThemeResources is not null)
-        {
             resources.Remove(_activeThemeResources);
-        }
 
         var newThemeResources = new ResourceInclude(
             new Uri("avares://Twain.UI/"))

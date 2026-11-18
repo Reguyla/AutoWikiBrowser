@@ -160,10 +160,8 @@ public partial class PreferencesWindow : UserControl
     public TwainTheme SelectedTheme =>
         ThemeComboBox.SelectedIndex switch
         {
-            0 => TwainTheme.Classic,
-            1 => TwainTheme.Legacy,
-            2 => TwainTheme.ModernLight,
-            3 => TwainTheme.ModernDark,
+            0 => TwainTheme.ModernLight,
+            1 => TwainTheme.ModernDark,
             _ => ThemeManager.CurrentTheme
         };
 
@@ -179,10 +177,8 @@ public partial class PreferencesWindow : UserControl
         ThemeComboBox.SelectedIndex =
             _originalTheme switch
             {
-                TwainTheme.Classic => 0,
-                TwainTheme.Legacy => 1,
-                TwainTheme.ModernLight => 2,
-                TwainTheme.ModernDark => 3,
+                TwainTheme.ModernLight => 0,
+                TwainTheme.ModernDark => 1,
                 _ => 0
             };
 
@@ -204,10 +200,8 @@ public partial class PreferencesWindow : UserControl
         TwainTheme selectedTheme =
             ThemeComboBox.SelectedIndex switch
             {
-                0 => TwainTheme.Classic,
-                1 => TwainTheme.Legacy,
-                2 => TwainTheme.ModernLight,
-                3 => TwainTheme.ModernDark,
+                0 => TwainTheme.ModernLight,
+                1 => TwainTheme.ModernDark,
                 _ => ThemeManager.CurrentTheme
             };
 

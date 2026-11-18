@@ -13,7 +13,7 @@ public sealed class ApplicationAppearanceSettings
     /// Gets or sets the selected application theme.
     /// </summary>
     public TwainTheme Theme { get; set; } =
-        TwainTheme.Classic;
+        TwainTheme.ModernLight;
 
     /// <summary>
     /// Gets or sets whether the processing toolbar
