@@ -42,13 +42,34 @@
                 BorderBrush="{DynamicResource TwainBorderSubtleBrush}"
                 BorderThickness="0,0,0,1">
 
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
 
                     <TextBlock
                         Grid.Column="0"
                         Text="Article Alerts"
                         FontWeight="SemiBold"
                         VerticalAlignment="Center" />
+
+                        <!-- Alert configuration shortcut -->
+                        <Button
+                            Grid.Column="2"
+                            Width="28"
+                            Height="28"
+                            Padding="5"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ToolTip.Tip="Configure alerts"
+                            AutomationProperties.Name="Configure alerts"
+                            Click="AlertsSettingsButton_Click">
+
+                            <PathIcon
+                                Width="16"
+                                Height="16"
+                                Data="M19.4 15A1.65 1.65 0 0 0 19.73 16.82L19.79 16.88L17.88 18.79L17.82 18.73A1.65 1.65 0 0 0 16 18.4A1.65 1.65 0 0 0 15 19.9V20H12.3V19.9A1.65 1.65 0 0 0 11.3 18.4A1.65 1.65 0 0 0 9.48 18.73L9.42 18.79L7.51 16.88L7.57 16.82A1.65 1.65 0 0 0 7.9 15A1.65 1.65 0 0 0 6.4 14H6.3V11.3H6.4A1.65 1.65 0 0 0 7.9 10.3A1.65 1.65 0 0 0 7.57 8.48L7.51 8.42L9.42 6.51L9.48 6.57A1.65 1.65 0 0 0 11.3 6.9A1.65 1.65 0 0 0 12.3 5.4V5.3H15V5.4A1.65 1.65 0 0 0 16 6.9A1.65 1.65 0 0 0 17.82 6.57L17.88 6.51L19.79 8.42L19.73 8.48A1.65 1.65 0 0 0 19.4 10.3A1.65 1.65 0 0 0 20.9 11.3H21V14H20.9A1.65 1.65 0 0 0 19.4 15ZM13.65 10.3A2.35 2.35 0 1 0 13.65 15A2.35 2.35 0 0 0 13.65 10.3Z"/>
+
+                        </Button>
 
                     <!-- Alert count -->
                     <Border
@@ -69,6 +90,8 @@
                             Foreground="{DynamicResource TwainTextSecondaryBrush}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center" />
+
+
 
                     </Border>
 

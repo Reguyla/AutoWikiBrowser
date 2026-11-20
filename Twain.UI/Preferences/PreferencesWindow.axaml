@@ -650,7 +650,10 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Classes="twain-tab" Header="Alerts">
+            <TabItem
+                x:Name="AlertsTab"
+                Classes="twain-tab"
+                Header="Alerts">
                 <Border Classes="twain-section" Margin="{DynamicResource TwainContentPadding}">
                 <Grid
                     RowDefinitions="Auto,*"

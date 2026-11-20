@@ -179,8 +179,24 @@
 
                         </StackPanel>
 
-                            <Button x:Name="AutoChangesSkipOptionsButton" Grid.Column="1" VerticalAlignment="Center" Click="AutoChangesSkipOptionsButton_Click" Content="Auto changes&#10;skip options"/>
+                            <Button
+                                x:Name="AutoChangesSkipOptionsButton"
+                                Grid.Column="1"
+                                Width="34"
+                                Height="34"
+                                Padding="7"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Click="AutoChangesSkipOptionsButton_Click"
+                                ToolTip.Tip="Automatic changes skip options"
+                                AutomationProperties.Name="Automatic changes skip options">
 
+                                <PathIcon
+                                    Width="18"
+                                    Height="18"
+                                    Data="M3 4H21L14 12V19L10 21V12L3 4Z"/>
+
+                            </Button>
                     </Grid>
                         </StackPanel>
                     </Border>
@@ -386,32 +402,6 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="twain-section">
-                        <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-                    <TextBlock Classes="twain-section-heading" Text="Auto changes skip options"/>
-
-                            <StackPanel
-                                Orientation="Horizontal"
-                                Spacing="{DynamicResource TwainSpacingSmall}">
-
-                                <Button
-                                    Content="Check all"
-                                    Command="{Binding SelectAllAutoChangeSkipOptionsCommand}"/>
-
-                                <Button
-                                    Content="Check none"
-                                    Command="{Binding ClearAutoChangeSkipOptionsCommand}"/>
-
-                            </StackPanel>
-                    <ItemsControl ItemsSource="{Binding AutoChangeSkipOptions}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Margin="0,2" Content="{Binding Description}" IsChecked="{Binding IsSelected}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                        </StackPanel>
-                    </Border>
             </StackPanel>
 
             </Expander><Expander

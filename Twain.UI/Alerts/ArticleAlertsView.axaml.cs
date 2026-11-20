@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Twain.UI.Alerts;
 
@@ -12,6 +13,11 @@ public partial class ArticleAlertsView : UserControl
     /// Raised when the user double-clicks an alert.
     /// </summary>
     public event EventHandler<string>? AlertActivated;
+
+    /// <summary>
+    /// Raised when the user requests alert configuration.
+    /// </summary>
+    public event EventHandler? SettingsRequested;
 
     public ArticleAlertsView()
     {
@@ -39,5 +45,15 @@ public partial class ArticleAlertsView : UserControl
         AlertActivated?.Invoke(this, alertText);
 
         e.Handled = true;
+    }
+
+    /// <summary>
+    /// Requests navigation to the Alerts preferences.
+    /// </summary>
+    private void AlertsSettingsButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        SettingsRequested?.Invoke(this, EventArgs.Empty);
     }
 }

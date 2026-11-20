@@ -75,6 +75,9 @@ public partial class WorkspaceView : UserControl
 
         ArticleAlertsPanel.AlertActivated += ArticleAlertsPanel_AlertActivated;
 
+        ArticleAlertsPanel.SettingsRequested +=
+           ArticleAlertsPanel_SettingsRequested;
+
         OptionsView.DuplicateWikilinkActivated += OptionsView_DuplicateWikilinkActivated;
 
         OptionsView.DuplicateWikilinkDelinkRequested +=
@@ -114,6 +117,16 @@ public partial class WorkspaceView : UserControl
             UpdateNavigationLayout();
             UpdateOptionsSidebarLayout();
         };
+    }
+
+    /// <summary>
+    /// Opens Preferences directly on the Alerts tab.
+    /// </summary>
+    private void ArticleAlertsPanel_SettingsRequested(
+        object? sender,
+        EventArgs e)
+    {
+        OpenAlertsPreferences();
     }
 
     /// <summary>
@@ -741,6 +754,16 @@ public partial class WorkspaceView : UserControl
             workspace.NavigationDisplayMode);
 
         workspace.ShowPreferencesCommand.Execute(null);
+    }
+
+    /// <summary>
+    /// Opens Preferences directly on the Alerts tab.
+    /// </summary>
+    private void OpenAlertsPreferences()
+    {
+        OpenEmbeddedPreferences();
+
+        PreferencesView.SelectAlertsTab();
     }
 
     /// <summary>

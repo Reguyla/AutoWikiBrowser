@@ -1118,6 +1118,14 @@ public partial class PreferencesWindow : UserControl
     }
 
     /// <summary>
+    /// Selects the Alerts preferences tab.
+    /// </summary>
+    public void SelectAlertsTab()
+    {
+        PreferencesTabs.SelectedItem = AlertsTab;
+    }
+
+    /// <summary>
     /// Gets or sets the enabled alert identifiers.
     /// </summary>
     /// <remarks>
