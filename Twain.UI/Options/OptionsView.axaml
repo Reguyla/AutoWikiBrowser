@@ -390,6 +390,19 @@
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock Classes="twain-section-heading" Text="Auto changes skip options"/>
 
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="{DynamicResource TwainSpacingSmall}">
+
+                                <Button
+                                    Content="Check all"
+                                    Command="{Binding SelectAllAutoChangeSkipOptionsCommand}"/>
+
+                                <Button
+                                    Content="Check none"
+                                    Command="{Binding ClearAutoChangeSkipOptionsCommand}"/>
+
+                            </StackPanel>
                     <ItemsControl ItemsSource="{Binding AutoChangeSkipOptions}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

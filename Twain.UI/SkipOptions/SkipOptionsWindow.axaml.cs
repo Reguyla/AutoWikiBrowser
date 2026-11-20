@@ -20,6 +20,8 @@ public partial class SkipOptionsWindow :
 {
     private readonly Dictionary<int, CheckBox> _optionCheckBoxes;
 
+    public event EventHandler? OptionsDismissed;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SkipOptionsWindow"/> window.
     /// </summary>
@@ -191,6 +193,7 @@ public partial class SkipOptionsWindow :
         object? sender,
         RoutedEventArgs e)
     {
+        OptionsDismissed?.Invoke(this, EventArgs.Empty);
         Hide();
     }
 
@@ -203,6 +206,8 @@ public partial class SkipOptionsWindow :
         WindowClosingEventArgs e)
     {
         e.Cancel = true;
+
+        OptionsDismissed?.Invoke(this, EventArgs.Empty);
         Hide();
     }
 

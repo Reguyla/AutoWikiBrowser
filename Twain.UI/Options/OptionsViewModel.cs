@@ -691,6 +691,26 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
         }
     }
 
+    [RelayCommand]
+    private void SelectAllAutoChangeSkipOptions()
+    {
+        foreach (AutoChangeSkipOptionViewModel option
+                 in AutoChangeSkipOptions)
+        {
+            option.IsSelected = true;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearAutoChangeSkipOptions()
+    {
+        foreach (AutoChangeSkipOptionViewModel option
+                 in AutoChangeSkipOptions)
+        {
+            option.IsSelected = false;
+        }
+    }
+
     public bool SkipNoUnicode =>
     IsAutoChangeSkipOptionSelected(
         SkipOptionsHelper.UnicodeOptionId);

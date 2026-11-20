@@ -2160,7 +2160,8 @@ public partial class WorkspaceViewModel : ObservableObject
         ArticleProcessingResult result)
     {
         if (!result.Completed &&
-            result.Outcome != ArticleProcessingOutcome.Failed)
+            result.Outcome != ArticleProcessingOutcome.Failed &&
+            result.Outcome != ArticleProcessingOutcome.Skipped)
         {
             StopProcessing();
             return;
@@ -2175,12 +2176,6 @@ public partial class WorkspaceViewModel : ObservableObject
             Editor.Document.CurrentText = CurrentArticle!.ArticleText;
             UpdateArticleAlerts();
         }
-
-        System.Diagnostics.Debug.WriteLine(
-    $"[Preparse] Article={CurrentArticle?.Name}, " +
-    $"Outcome={result.Outcome}, " +
-    $"SkipIfNoAlerts={Options.SkipIfNoAlerts}, " +
-    $"AlertCount={Options.Alerts.Count}");
 
         CompletePreparseArticle(result);
     }

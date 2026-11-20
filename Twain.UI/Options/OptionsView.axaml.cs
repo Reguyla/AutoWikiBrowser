@@ -5,6 +5,7 @@ using Twain.Core;
 using Twain.Core.Disambiguation;
 using Twain.UI.FindReplace;
 using Twain.UI.ReplaceSpecial;
+using Twain.UI.SkipOptions;
 using Twain.UI.Templates;
 
 namespace Twain.UI.Options;
@@ -20,6 +21,8 @@ namespace Twain.UI.Options;
 public partial class OptionsView : UserControl
 {
     private ReplaceSpecialWindow? _replaceSpecialWindow;
+
+    private SkipOptionsWindow? _skipOptionsWindow;
 
     /// <summary>
     /// Initializes the options view.
@@ -48,11 +51,59 @@ public partial class OptionsView : UserControl
     /// <param name="e">
     /// The event data associated with the click.
     /// </param>
+    /// <summary>
+    /// Opens the automatic-change skip options window.
+    /// </summary>
     private void AutoChangesSkipOptionsButton_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        SkipExpander.IsExpanded = true;
+        if (DataContext is not OptionsViewModel viewModel)
+        {
+            return;
+        }
+
+        if (_skipOptionsWindow is null)
+        {
+            _skipOptionsWindow = new SkipOptionsWindow();
+
+            _skipOptionsWindow.SelectedItems =
+                [.. viewModel.SelectedAutoChangeSkipOptions];
+
+            _skipOptionsWindow.OptionsDismissed +=
+                SkipOptionsWindow_OptionsDismissed;
+        }
+
+        if (_skipOptionsWindow.IsVisible)
+        {
+            _skipOptionsWindow.Activate();
+            return;
+        }
+
+        // Refresh selections from the active view model.
+        _skipOptionsWindow.SelectedItems =
+            [.. viewModel.SelectedAutoChangeSkipOptions];
+
+        _skipOptionsWindow.Show();
+        _skipOptionsWindow.Activate();
+    }
+
+    /// <summary>
+    /// Saves the selected automatic-change skip options
+    /// to the active workspace settings.
+    /// </summary>
+    private void SkipOptionsWindow_OptionsDismissed(
+        object? sender,
+        EventArgs e)
+    {
+        if (_skipOptionsWindow is null ||
+            DataContext is not OptionsViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.SelectedAutoChangeSkipOptions =
+            [.. _skipOptionsWindow.SelectedItems];
     }
 
     /// <summary>
