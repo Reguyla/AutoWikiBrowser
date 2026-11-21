@@ -258,17 +258,10 @@ public partial class WorkspaceView : UserControl
     private async void OpenMoveArticleDialog()
     {
         if (DataContext is not WorkspaceViewModel workspace ||
-            workspace.CurrentArticle is null ||
-            workspace.Session.Editor.IsActive)
+            !CanMoveCurrentArticle(workspace))
         {
             return;
         }
-
-        if (!workspace.Session.Page.Exists)
-            return;
-
-        if (!workspace.Session.User.CanMovePage(workspace.Session.Page))
-            return;
 
         if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
             return;
@@ -288,14 +281,7 @@ public partial class WorkspaceView : UserControl
 
         _lastMoveReason = dialog.Summary;
 
-        if (workspace.CurrentArticle is null ||
-            workspace.Session.Editor.IsActive ||
-            !workspace.Session.Page.Exists ||
-            !workspace.Session.User.CanMovePage(workspace.Session.Page) ||
-            !string.Equals(
-                workspace.CurrentArticle.Name,
-                dialog.CurrentPageTitle,
-                StringComparison.Ordinal))
+        if (!CanMoveCurrentArticle(workspace, dialog.CurrentPageTitle))
         {
             return;
         }
@@ -357,21 +343,7 @@ public partial class WorkspaceView : UserControl
             return;
         }
 
-        int articleIndex = workspace.MakeList.Articles
-            .ToList()
-            .FindIndex(article =>
-                string.Equals(
-                    article.Name,
-                    originalTitle,
-                    StringComparison.Ordinal));
-
-        if (articleIndex >= 0)
-        {
-            Article movedArticle = new(newTitle);
-
-            workspace.MakeList.Articles[articleIndex] = movedArticle;
-            workspace.MakeList.SelectedArticle = movedArticle;
-        }
+        UpdateMovedArticleInList(workspace, originalTitle, newTitle);
 
         workspace.MakeList.StatusText =
             $"Moved {originalTitle} to {newTitle}.";
@@ -568,6 +540,56 @@ public partial class WorkspaceView : UserControl
         if (index >= 0)
         {
             workspace.MakeList.Articles.RemoveAt(index);
+        }
+    }
+
+    /// <summary>
+    /// Determines whether the current article can be moved.
+    /// Also verifies that the selected article has not changed
+    /// while the Move dialog was open.
+    /// </summary>
+    private static bool CanMoveCurrentArticle(
+        WorkspaceViewModel workspace,
+        string? expectedTitle = null)
+    {
+        if (workspace.CurrentArticle is null ||
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.CanMovePage(workspace.Session.Page))
+        {
+            return false;
+        }
+
+        return expectedTitle is null ||
+            string.Equals(
+                workspace.CurrentArticle.Name,
+                expectedTitle,
+                StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Updates the workspace article list and selection
+    /// after a successful page move.
+    /// </summary>
+    private static void UpdateMovedArticleInList(
+        WorkspaceViewModel workspace,
+        string originalTitle,
+        string newTitle)
+    {
+        int index = workspace.MakeList.Articles
+            .ToList()
+            .FindIndex(article =>
+                string.Equals(
+                    article.Name,
+                    originalTitle,
+                    StringComparison.Ordinal));
+
+        if (index >= 0)
+        {
+            Article movedArticle = new(newTitle);
+
+            workspace.MakeList.Articles[index] = movedArticle;
+            workspace.MakeList.SelectedArticle = movedArticle;
         }
     }
 
