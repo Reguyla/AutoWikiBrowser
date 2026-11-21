@@ -187,12 +187,10 @@ public partial class WorkspaceView : UserControl
     private async void OpenDeleteArticleDialog()
     {
         if (DataContext is not WorkspaceViewModel workspace ||
-            workspace.CurrentArticle is null ||
-            !workspace.Options.CanDeleteCurrentPage ||
-            workspace.Session.Editor.IsActive ||
-            !workspace.Session.Page.Exists ||
-            !workspace.Session.User.CanDeletePage(workspace.Session.Page))
+            !CanDeleteCurrentArticle(workspace))
+        {
             return;
+        }
 
         if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
             return;
@@ -209,12 +207,10 @@ public partial class WorkspaceView : UserControl
 
         _lastDeleteReason = dialog.Summary;
 
-        if (workspace.CurrentArticle is null ||
-            workspace.Session.Editor.IsActive ||
-            !workspace.Session.Page.Exists ||
-            !workspace.Session.User.CanDeletePage(workspace.Session.Page) ||
-            !string.Equals(workspace.CurrentArticle.Name, title, StringComparison.Ordinal))
+        if (!CanDeleteCurrentArticle(workspace, title))
+        {
             return;
+        }
 
         var editor = workspace.Session.Editor;
         Exception? operationError = null;
@@ -232,9 +228,11 @@ public partial class WorkspaceView : UserControl
         }
         catch (Exception ex)
         {
-            await new ArticleActionValidationWindow(
-                "Delete failed", $"Unable to delete \"{title}\".\n\n{ex.Message}")
-                .ShowDialog(shell);
+            await ShowArticleActionErrorAsync(
+                shell,
+                "Delete",
+                $"Unable to delete \"{title}\".\n\n{ex.Message}");
+
             return;
         }
 
@@ -249,10 +247,7 @@ public partial class WorkspaceView : UserControl
             return;
         }
 
-        int index = workspace.MakeList.Articles.ToList().FindIndex(article =>
-            string.Equals(article.Name, title, StringComparison.Ordinal));
-        if (index >= 0)
-            workspace.MakeList.Articles.RemoveAt(index);
+        RemoveArticleFromList(workspace, title);
 
         workspace.MakeList.StatusText = $"Deleted {title}.";
     }
@@ -527,6 +522,53 @@ public partial class WorkspaceView : UserControl
         }
 
         return operationError;
+    }
+
+    /// <summary>
+    /// Determines whether the current article can be deleted.
+    /// Also verifies that the article has not changed while
+    /// the confirmation dialog was open.
+    /// </summary>
+    private static bool CanDeleteCurrentArticle(
+        WorkspaceViewModel workspace,
+        string? expectedTitle = null)
+    {
+        if (workspace.CurrentArticle is null ||
+            !workspace.Options.CanDeleteCurrentPage ||
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.CanDeletePage(workspace.Session.Page))
+        {
+            return false;
+        }
+
+        return expectedTitle is null ||
+            string.Equals(
+                workspace.CurrentArticle.Name,
+                expectedTitle,
+                StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Removes an article from the workspace article list
+    /// after a successful administrative action.
+    /// </summary>
+    private static void RemoveArticleFromList(
+        WorkspaceViewModel workspace,
+        string title)
+    {
+        int index = workspace.MakeList.Articles
+            .ToList()
+            .FindIndex(article =>
+                string.Equals(
+                    article.Name,
+                    title,
+                    StringComparison.Ordinal));
+
+        if (index >= 0)
+        {
+            workspace.MakeList.Articles.RemoveAt(index);
+        }
     }
 
     /// <summary>
