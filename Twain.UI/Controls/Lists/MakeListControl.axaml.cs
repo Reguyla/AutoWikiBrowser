@@ -9,6 +9,7 @@ using Twain.Core;
 using Twain.Core.Lists;
 using Twain.Core.Lists.Providers;
 using Twain.UI.Lists;
+using Twain.UI.Lists.Providers;
 using Twain.UI.ViewModels.Lists;
 
 namespace Twain.UI.Controls.Lists;
@@ -32,6 +33,9 @@ public partial class MakeListControl : UserControl
         if (DataContext is MakeListViewModel viewModel)
         {
             viewModel.ShowFilterRequested = ShowFilterDialog;
+
+            viewModel.ShowSpecialPageDialogRequestedAsync =
+                ShowSpecialPageDialogAsync;
         }
     }
 
@@ -417,6 +421,26 @@ public partial class MakeListControl : UserControl
         viewModel.AddFromSelectedArticles(
             provider,
             selectedArticles);
+    }
+
+    private async Task<SpecialPageListService.DialogSelection?>
+    ShowSpecialPageDialogAsync(
+        SpecialPageListService.DialogRequest request)
+    {
+        Window? owner = TopLevel.GetTopLevel(this) as Window;
+
+        if (owner is null)
+        {
+            return null;
+        }
+
+        SpecialPageListProviderWindow dialog = new(request);
+
+        bool accepted = await dialog.ShowDialog<bool>(owner);
+
+        return accepted
+            ? dialog.CreateSelection()
+            : null;
     }
 
     private async void FilterMenuItem_Click(

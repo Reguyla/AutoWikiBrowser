@@ -75,6 +75,16 @@ public partial class MakeListViewModel : ObservableObject
     public Action? ShowFilterRequested { get; set; }
 
     /// <summary>
+    /// Requests the Avalonia Special Pages dialog and returns
+    /// the user's selection, or null when cancelled.
+    /// </summary>
+    public Func<
+        SpecialPageListService.DialogRequest,
+        Task<SpecialPageListService.DialogSelection?>>?
+        ShowSpecialPageDialogRequestedAsync
+    { get; set; }
+
+    /// <summary>
     /// Opens the article-list filtering dialog when a handler is available.
     /// </summary>
     public void RequestShowFilter()
@@ -567,49 +577,89 @@ public partial class MakeListViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanMakeList))]
-    private void MakeList()
+    private async Task MakeListAsync()
     {
-        if (SelectedProvider is null)
+        if (SelectedProvider is null || IsBusy)
             return;
+
+        IListProvider provider = SelectedProvider;
 
         IsBusy = true;
         StatusText = "Generating list...";
 
         try
         {
-            string[] sourceValues =
-                ListGenerationProcessor.ParseSourceValues(SourceText);
+            List<Article> generatedArticles;
 
-            sourceValues =
-                ListGenerationProcessor.PrepareSourceValues(
-                    SelectedProvider,
-                    sourceValues);
-
-            ListGenerationRequest request =
-                new(
-                    SelectedProvider,
-                    sourceValues);
-
-            ListGenerationResult result =
-                ListGenerationProcessor.Generate(request);
-
-            if (!result.Succeeded)
+            if (provider is SpecialPageListProvider)
             {
-                StatusText =
-                    string.IsNullOrWhiteSpace(result.ErrorMessage)
-                        ? $"Unable to generate list: {result.Failure}"
-                        : result.ErrorMessage;
+                if (ShowSpecialPageDialogRequestedAsync is null)
+                {
+                    StatusText = "Special Pages dialog is unavailable.";
+                    return;
+                }
 
-                return;
+                SpecialPageListService service = new(_session);
+
+                SpecialPageListService.DialogSelection? selection =
+                    await ShowSpecialPageDialogRequestedAsync(
+                        service.CreateDialogRequest());
+
+                if (selection is null)
+                {
+                    StatusText = "Special Pages list generation cancelled.";
+                    return;
+                }
+
+                generatedArticles = await Task.Run(
+                    () => service.MakeList(selection));
+            }
+            else
+            {
+                string[] sourceValues =
+                    ListGenerationProcessor.ParseSourceValues(SourceText);
+
+                sourceValues =
+                    ListGenerationProcessor.PrepareSourceValues(
+                        provider,
+                        sourceValues);
+
+                ListGenerationRequest request = new(
+                    provider,
+                    sourceValues);
+
+                ListGenerationResult result =
+                    await Task.Run(
+                        () => ListGenerationProcessor.Generate(request));
+
+                if (!result.Succeeded)
+                {
+                    StatusText =
+                        string.IsNullOrWhiteSpace(result.ErrorMessage)
+                            ? $"Unable to generate list: {result.Failure}"
+                            : result.ErrorMessage;
+
+                    return;
+                }
+
+                generatedArticles = result.Articles.ToList();
             }
 
             Articles.Clear();
 
-            foreach (Article article in result.Articles)
+            foreach (Article article in generatedArticles)
+            {
                 Articles.Add(article);
+            }
 
             StatusText =
-                $"{Articles.Count} article{(Articles.Count == 1 ? string.Empty : "s")}";
+                $"{Articles.Count} article" +
+                $"{(Articles.Count == 1 ? string.Empty : "s")}";
+        }
+        catch (Exception exception)
+        {
+            StatusText = $"Unable to generate list: {exception.Message}";
+            ErrorHandler.HandleException(exception);
         }
         finally
         {

@@ -25,8 +25,8 @@ public partial class SpecialPageListProviderWindow : Window
         SourceComboBox.SelectedItem as SpecialPageProviderOption;
 
     public SpecialPageListProviderWindow(
-    SpecialPageListProvider.DialogRequest request)
-    : this()
+        SpecialPageListService.DialogRequest request)
+        : this()
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -44,14 +44,14 @@ public partial class SpecialPageListProviderWindow : Window
     /// The selected provider, namespace, and page criteria, or
     /// <see langword="null"/> when no provider is selected.
     /// </returns>
-    public SpecialPageListProvider.DialogSelection? CreateSelection()
+    public SpecialPageListService.DialogSelection? CreateSelection()
     {
         if (SelectedProvider is not { } provider)
         {
             return null;
         }
 
-        return new SpecialPageListProvider.DialogSelection(
+        return new SpecialPageListService.DialogSelection(
             provider.Index,
             NamespaceText,
             PagesText);
