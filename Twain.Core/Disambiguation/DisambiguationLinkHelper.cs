@@ -58,18 +58,33 @@ public static class DisambiguationLinkHelper
     }
 
     /// <summary>
-    /// Loads disambiguation links from the supplied page input and formats the
-    /// resulting article titles as variant text.
+    /// Loads disambiguation links using the active wiki session
+    /// and formats the resulting article titles.
     /// </summary>
-    /// <param name="text">
-    /// The disambiguation-page input text.
-    /// </param>
-    /// <returns>
-    /// The resulting article titles formatted as newline-separated text,
-    /// excluding likely year articles.
-    /// </returns>
     public static string LoadVariantsText(
-        string text)
+        string text,
+        Session session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        string[] linkTitles =
+            ParseLinkTitles(text);
+
+        LinksOnPageListProvider provider = new();
+
+        provider.SetSession(session);
+
+        IEnumerable<Article> articles =
+            provider.MakeList(linkTitles);
+
+        return BuildVariantsText(articles);
+    }
+
+    /// <summary>
+    /// Loads disambiguation variants using the legacy
+    /// list-provider session resolution.
+    /// </summary>
+    public static string LoadVariantsText(string text)
     {
         string[] linkTitles =
             ParseLinkTitles(text);

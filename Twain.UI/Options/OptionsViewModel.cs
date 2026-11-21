@@ -616,6 +616,11 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     public Func<string>? DisambiguationSourceProvider { get; set; }
 
     /// <summary>
+    /// Provides the active wiki session for disambiguation link loading.
+    /// </summary>
+    public Func<Session?>? DisambiguationSessionProvider { get; set; }
+
+    /// <summary>
     /// Populates the disambiguation link from the current list source when
     /// the link has not already been entered.
     /// </summary>

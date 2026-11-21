@@ -601,6 +601,9 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.DisambiguationSourceProvider =
             () => MakeList.SourceText;
 
+        Options.DisambiguationSessionProvider =
+            () => Session;
+
         Options.FindNextRequested =
             FindNext;
 

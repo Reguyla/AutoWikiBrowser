@@ -256,9 +256,19 @@ public partial class OptionsView : UserControl
 
         try
         {
+            Twain.Core.Session? session =
+                viewModel.DisambiguationSessionProvider?.Invoke();
+
+            if (session is null)
+            {
+                throw new InvalidOperationException(
+                    "An active wiki session is required to load disambiguation links.");
+            }
+
             viewModel.DisambiguationVariants =
                 DisambiguationLinkHelper.LoadVariantsText(
-                    viewModel.DisambiguationLink);
+                    viewModel.DisambiguationLink,
+                    session);
         }
         catch (Exception ex)
         {
