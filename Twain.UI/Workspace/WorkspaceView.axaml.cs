@@ -355,12 +355,10 @@ public partial class WorkspaceView : UserControl
     private async void OpenProtectArticleDialog()
     {
         if (DataContext is not WorkspaceViewModel workspace ||
-            workspace.CurrentArticle is null ||
-            !workspace.Options.CanProtectCurrentPage ||
-            workspace.Session.Editor.IsActive ||
-            !workspace.Session.Page.Exists ||
-            !workspace.Session.User.IsSysop)
+            !CanProtectCurrentArticle(workspace))
+        {
             return;
+        }
 
         if (TopLevel.GetTopLevel(this) is not ShellWindow shell)
             return;
@@ -379,12 +377,10 @@ public partial class WorkspaceView : UserControl
 
         _lastProtectReason = dialog.Summary;
 
-        if (workspace.CurrentArticle is null ||
-            workspace.Session.Editor.IsActive ||
-            !workspace.Session.Page.Exists ||
-            !workspace.Session.User.IsSysop ||
-            !string.Equals(workspace.CurrentArticle.Name, title, StringComparison.Ordinal))
+        if (!CanProtectCurrentArticle(workspace, title))
+        {
             return;
+        }
 
         var editor = workspace.Session.Editor;
         Exception? operationError = null;
@@ -591,6 +587,31 @@ public partial class WorkspaceView : UserControl
             workspace.MakeList.Articles[index] = movedArticle;
             workspace.MakeList.SelectedArticle = movedArticle;
         }
+    }
+
+    /// <summary>
+    /// Determines whether the current article can be protected.
+    /// Also verifies that the selected article has not changed
+    /// while the Protect dialog was open.
+    /// </summary>
+    private static bool CanProtectCurrentArticle(
+        WorkspaceViewModel workspace,
+        string? expectedTitle = null)
+    {
+        if (workspace.CurrentArticle is null ||
+            !workspace.Options.CanProtectCurrentPage ||
+            workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.IsSysop)
+        {
+            return false;
+        }
+
+        return expectedTitle is null ||
+            string.Equals(
+                workspace.CurrentArticle.Name,
+                expectedTitle,
+                StringComparison.Ordinal);
     }
 
     /// <summary>
