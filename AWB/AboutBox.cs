@@ -44,7 +44,7 @@ internal sealed partial class AboutBox : Form
         lblRevision.Text = $"SVN {Variables.Revision}";
 
         txtWarning.Text =
-            Twain.Core.Controls.AboutBox.GetDetailedMessage(
+            Twain.Core.Controls.AboutInformation.GetDetailedMessage(
                 typeof(AboutBox).Assembly);
 
         // TODO (.NET10 / WebView2):

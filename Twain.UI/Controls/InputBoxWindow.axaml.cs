@@ -58,6 +58,15 @@ public partial class InputBoxWindow : Avalonia.Controls.Window
 
         _validator =
             validator;
+
+        Opened += (_, _) =>
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                InputTextBox.Focus();
+                InputTextBox.SelectAll();
+            });
+        };
     }
 
     /// <summary>
