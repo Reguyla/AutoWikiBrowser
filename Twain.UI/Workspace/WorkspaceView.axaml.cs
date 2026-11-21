@@ -219,21 +219,16 @@ public partial class WorkspaceView : UserControl
         var editor = workspace.Session.Editor;
         Exception? operationError = null;
 
-        void OnFailed(AsyncApiEdit sender, string operation, Exception exception)
-        {
-            if (operation == "Delete")
-                operationError = exception;
-        }
-
-        editor.OperationFailed += OnFailed;
         try
         {
             string summary = GetAdministrativeActionSummary(
                 dialog.Summary,
                 shell);
 
-            editor.Delete(title, summary, dialog.Watch);
-            await Task.Run(() => editor.Wait());
+            operationError = await ExecuteArticleActionAsync(
+                editor,
+                "Delete",
+                () => editor.Delete(title, summary, dialog.Watch));
         }
         catch (Exception ex)
         {
@@ -241,10 +236,6 @@ public partial class WorkspaceView : UserControl
                 "Delete failed", $"Unable to delete \"{title}\".\n\n{ex.Message}")
                 .ShowDialog(shell);
             return;
-        }
-        finally
-        {
-            editor.OperationFailed -= OnFailed;
         }
 
         if (editor.State != AsyncApiEdit.EditState.Ready || operationError is not null)
@@ -326,19 +317,7 @@ public partial class WorkspaceView : UserControl
         string newTitle = dialog.NewTitle;
 
         var editor = workspace.Session.Editor;
-
         Exception? moveError = null;
-
-        void OnMoveFailed(
-            AsyncApiEdit sender,
-            string operation,
-            Exception exception)
-        {
-            if (operation == "Move")
-                moveError = exception;
-        }
-
-        editor.OperationFailed += OnMoveFailed;
 
         try
         {
@@ -346,18 +325,17 @@ public partial class WorkspaceView : UserControl
                 dialog.Summary,
                 shell);
 
-
-            editor.Move(
-                originalTitle,
-                newTitle,
-                summary,
-                dialog.DealWithAssocTalkPage,
-                dialog.NoRedirect,
-                dialog.Watch);
-
-            await Task.Run(() => editor.Wait());
+            moveError = await ExecuteArticleActionAsync(
+                editor,
+                "Move",
+                () => editor.Move(
+                    originalTitle,
+                    newTitle,
+                    summary,
+                    dialog.DealWithAssocTalkPage,
+                    dialog.NoRedirect,
+                    dialog.Watch));
         }
-
         catch (Exception ex)
         {
             await ShowArticleActionErrorAsync(
@@ -367,11 +345,6 @@ public partial class WorkspaceView : UserControl
                 ex.Message);
 
             return;
-        }
-
-        finally
-        {
-            editor.OperationFailed -= OnMoveFailed;
         }
 
         bool succeeded =
@@ -448,30 +421,23 @@ public partial class WorkspaceView : UserControl
 
         var editor = workspace.Session.Editor;
         Exception? operationError = null;
-
-        void OnFailed(AsyncApiEdit sender, string operation, Exception exception)
-        {
-            if (operation == "Protect")
-                operationError = exception;
-        }
-
-        editor.OperationFailed += OnFailed;
         try
         {
             string summary = GetAdministrativeActionSummary(
                 dialog.Summary,
                 shell);
 
-            editor.Protect(
-                title,
-                summary,
-                dialog.ProtectExpiry,
-                dialog.EditProtectionLevel,
-                dialog.MoveProtectionLevel,
-                dialog.CascadingProtection,
-                dialog.Watch);
-
-            await Task.Run(() => editor.Wait());
+            operationError = await ExecuteArticleActionAsync(
+                editor,
+                "Protect",
+                () => editor.Protect(
+                    title,
+                    summary,
+                    dialog.ProtectExpiry,
+                    dialog.EditProtectionLevel,
+                    dialog.MoveProtectionLevel,
+                    dialog.CascadingProtection,
+                    dialog.Watch));
         }
         catch (Exception ex)
         {
@@ -481,10 +447,6 @@ public partial class WorkspaceView : UserControl
                 $"Unable to protect \"{title}\".\n\n{ex.Message}");
 
             return;
-        }
-        finally
-        {
-            editor.OperationFailed -= OnFailed;
         }
 
         if (editor.State != AsyncApiEdit.EditState.Ready || operationError is not null)
@@ -530,6 +492,41 @@ public partial class WorkspaceView : UserControl
             $"{action} failed",
             message)
             .ShowDialog(shell);
+    }
+
+    /// <summary>
+    /// Executes an administrative API operation and captures
+    /// any failure reported by the editor.
+    /// </summary>
+    private static async Task<Exception?> ExecuteArticleActionAsync(
+        AsyncApiEdit editor,
+        string operationName,
+        Action execute)
+    {
+        Exception? operationError = null;
+
+        void OnFailed(
+            AsyncApiEdit sender,
+            string operation,
+            Exception exception)
+        {
+            if (operation == operationName)
+                operationError = exception;
+        }
+
+        editor.OperationFailed += OnFailed;
+
+        try
+        {
+            execute();
+            await Task.Run(() => editor.Wait());
+        }
+        finally
+        {
+            editor.OperationFailed -= OnFailed;
+        }
+
+        return operationError;
     }
 
     /// <summary>
