@@ -591,7 +591,7 @@ public partial class MakeListViewModel : ObservableObject
         {
             List<Article> generatedArticles;
 
-            if (provider is SpecialPageListProvider)
+            if (provider is SpecialPageListAdapter)
             {
                 if (ShowSpecialPageDialogRequestedAsync is null)
                 {
