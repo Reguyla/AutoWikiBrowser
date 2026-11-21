@@ -1699,9 +1699,23 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Session.Editor.Abort();
 
-        while (Session.IsBusy)
+        // Do not wait indefinitely for an aborted operation to finish.
+        // Never restart processing while the previous API operation is active.
+        TimeSpan timeout = TimeSpan.FromSeconds(10);
+        TimeSpan elapsed = TimeSpan.Zero;
+
+        while (Session.IsBusy && elapsed < timeout)
         {
             await Task.Delay(50);
+            elapsed += TimeSpan.FromMilliseconds(50);
+        }
+
+        if (Session.IsBusy)
+        {
+            // The previous operation did not terminate cleanly.
+            // Stop processing rather than risk overlapping API requests.
+            StopProcessing();
+            return;
         }
 
         // Stop may have been pressed while waiting.
@@ -2214,6 +2228,16 @@ public partial class WorkspaceViewModel : ObservableObject
             !Options.PreParseMode)
         {
             Options.IsProcessingActive = false;
+        }
+
+        // Do not schedule another automatic save after reaching
+        // the configured maximum number of successful edits.
+        if (BotSettings.AutoSaveEnabled &&
+            BotSettings.MaximumEdits > 0 &&
+            TotalEdits >= BotSettings.MaximumEdits)
+        {
+            StopProcessing();
+            return;
         }
 
         // Preparse must never save articles.

@@ -1185,7 +1185,9 @@ public class AsyncApiEdit
                 }
             }
 
-            Wait();
+            // Cancellation is asynchronous. The operation's completion
+            // handler will update its state and release its reservation.
+            // Do not block the calling thread while waiting for it.
             return;
         }
 

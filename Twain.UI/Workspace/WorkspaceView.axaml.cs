@@ -1004,12 +1004,14 @@ public partial class WorkspaceView : UserControl
         };
 
         // Reset the actual processing counters, not just the editable copy.
-        _editingBotSettings.ResetLiveNudgeCounters = () =>
+        BotSettingsViewModel editingSettings = _editingBotSettings;
+
+        editingSettings.ResetLiveNudgeCounters = () =>
         {
             current.ResetNudgeCountCommand.Execute(null);
 
-            _editingBotSettings.NudgeCount = current.NudgeCount;
-            _editingBotSettings.CurrentArticleNudgeCount =
+            editingSettings.NudgeCount = current.NudgeCount;
+            editingSettings.CurrentArticleNudgeCount =
                 current.CurrentArticleNudgeCount;
         };
 
