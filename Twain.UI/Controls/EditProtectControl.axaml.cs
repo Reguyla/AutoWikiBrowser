@@ -24,8 +24,8 @@ public partial class EditProtectControl : UserControl
 
     public bool CascadingEnabled =>
         ProtectionLevelHelper.IsCascadingEnabled(
-            EditProtectionListBox.SelectedIndex,
-            MoveProtectionListBox.SelectedIndex);
+            EditProtectionLevel,
+            MoveProtectionLevel);
 
     public string EditProtectionLevel
     {

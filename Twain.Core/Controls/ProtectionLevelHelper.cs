@@ -73,6 +73,18 @@ public static class ProtectionLevelHelper
             _ => null
         };
     }
+
+/// <summary>
+/// Determines whether cascading protection is available
+/// for the selected protection groups.
+/// </summary>
+public static bool IsCascadingEnabled(
+    string editProtectionLevel,
+    string moveProtectionLevel)
+    {
+        return editProtectionLevel == "sysop" &&
+               moveProtectionLevel == "sysop";
+    }
 }
 
 /// <summary>

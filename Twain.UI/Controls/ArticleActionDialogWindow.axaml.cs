@@ -103,9 +103,21 @@ public partial class ArticleActionDialogWindow : Window
         get => GetSelectedProtectionLevel(
             MoveProtectionListBox);
 
-        set => SelectProtectionLevel(
-            MoveProtectionListBox,
-            value);
+        set
+        {
+            // Preserve independently configured move protection.
+            if (value != EditProtectionLevel)
+            {
+                UnlockMovePermissionsCheckBox.IsChecked = true;
+                MoveProtectionListBox.IsEnabled = true;
+            }
+
+            SelectProtectionLevel(
+                MoveProtectionListBox,
+                value);
+
+            UpdateCascadingProtectionState();
+        }
     }
 
 
@@ -255,6 +267,9 @@ public partial class ArticleActionDialogWindow : Window
 
         MoveOptionsPanel.IsVisible =
             _currentAction == ArticleAction.Move;
+
+        WatchCheckBox.IsVisible =
+           _currentAction == ArticleAction.Move;
     }
 
     private void PopulateSummaries()
@@ -323,8 +338,8 @@ public partial class ArticleActionDialogWindow : Window
     {
         CascadingProtectionCheckBox.IsEnabled =
             ArticleActionHelper.IsCascadingProtectionAvailable(
-                EditProtectionListBox.SelectedIndex,
-                MoveProtectionListBox.SelectedIndex);
+                EditProtectionLevel,
+                MoveProtectionLevel);
 
         if (!CascadingProtectionCheckBox.IsEnabled)
         {

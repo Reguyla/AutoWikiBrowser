@@ -168,11 +168,11 @@ public static class ArticleActionHelper
     /// selected edit and move protection levels.
     /// </summary>
     public static bool IsCascadingProtectionAvailable(
-        int editSelectedIndex,
-        int moveSelectedIndex)
+        string editProtectionLevel,
+        string moveProtectionLevel)
     {
         return ProtectionLevelHelper.IsCascadingEnabled(
-            editSelectedIndex,
-            moveSelectedIndex);
+            editProtectionLevel,
+            moveProtectionLevel);
     }
 }

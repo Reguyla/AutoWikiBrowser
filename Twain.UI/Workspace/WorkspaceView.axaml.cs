@@ -33,6 +33,11 @@ public partial class WorkspaceView : UserControl
     private WorkspaceViewModel? _navigationViewModel;
     private GridLength _optionsSidebarWidth = new(425);
 
+    // Remember the last administrative action reasons.
+    private static string _lastMoveReason = string.Empty;
+    private static string _lastDeleteReason = string.Empty;
+    private static string _lastProtectReason = string.Empty;
+
     private string? _lastDuplicateWikilinkTarget;
     private int _duplicateWikilinkIndex;
 
@@ -195,11 +200,14 @@ public partial class WorkspaceView : UserControl
         string title = workspace.CurrentArticle.Name;
         ArticleActionDialogWindow dialog = new(ArticleAction.Delete)
         {
-            CurrentPageTitle = title
+            CurrentPageTitle = title,
+            Summary = _lastDeleteReason
         };
 
         if (!await dialog.ShowDialog<bool>(shell))
             return;
+
+        _lastDeleteReason = dialog.Summary;
 
         if (workspace.CurrentArticle is null ||
             workspace.Session.Editor.IsActive ||
@@ -220,7 +228,11 @@ public partial class WorkspaceView : UserControl
         editor.OperationFailed += OnFailed;
         try
         {
-            editor.Delete(title, dialog.Summary, dialog.Watch);
+            string summary = GetAdministrativeActionSummary(
+                dialog.Summary,
+                shell);
+
+            editor.Delete(title, summary, dialog.Watch);
             await Task.Run(() => editor.Wait());
         }
         catch (Exception ex)
@@ -237,11 +249,12 @@ public partial class WorkspaceView : UserControl
 
         if (editor.State != AsyncApiEdit.EditState.Ready || operationError is not null)
         {
-            await new ArticleActionValidationWindow(
-                "Delete failed",
+            await ShowArticleActionErrorAsync(
+                shell,
+                "Delete",
                 $"Deletion of \"{title}\" failed.\n\n" +
-                (operationError?.Message ?? "The API operation did not complete successfully."))
-                .ShowDialog(shell);
+                (operationError?.Message ?? "The API operation did not complete successfully."));
+
             return;
         }
 
@@ -278,7 +291,8 @@ public partial class WorkspaceView : UserControl
             new(ArticleAction.Move)
             {
                 CurrentPageTitle = workspace.CurrentArticle.Name,
-                NewTitle = workspace.CurrentArticle.Name
+                NewTitle = workspace.CurrentArticle.Name,
+                Summary = _lastMoveReason
             };
 
         bool confirmed = await dialog.ShowDialog<bool>(shell);
@@ -286,8 +300,12 @@ public partial class WorkspaceView : UserControl
         if (!confirmed)
             return;
 
+        _lastMoveReason = dialog.Summary;
+
         if (workspace.CurrentArticle is null ||
             workspace.Session.Editor.IsActive ||
+            !workspace.Session.Page.Exists ||
+            !workspace.Session.User.CanMovePage(workspace.Session.Page) ||
             !string.Equals(
                 workspace.CurrentArticle.Name,
                 dialog.CurrentPageTitle,
@@ -324,10 +342,15 @@ public partial class WorkspaceView : UserControl
 
         try
         {
+            string summary = GetAdministrativeActionSummary(
+                dialog.Summary,
+                shell);
+
+
             editor.Move(
                 originalTitle,
                 newTitle,
-                dialog.Summary,
+                summary,
                 dialog.DealWithAssocTalkPage,
                 dialog.NoRedirect,
                 dialog.Watch);
@@ -337,11 +360,11 @@ public partial class WorkspaceView : UserControl
 
         catch (Exception ex)
         {
-            await new ArticleActionValidationWindow(
-                "Move failed",
+            await ShowArticleActionErrorAsync(
+                shell,
+                "Move",
                 $"Unable to move \"{originalTitle}\" to \"{newTitle}\".\n\n" +
-                ex.Message)
-                .ShowDialog(shell);
+                ex.Message);
 
             return;
         }
@@ -352,15 +375,16 @@ public partial class WorkspaceView : UserControl
         }
 
         bool succeeded =
-            editor.State == AsyncApiEdit.EditState.Ready;
+            editor.State == AsyncApiEdit.EditState.Ready &&
+            moveError is null;
 
         if (!succeeded)
         {
-            await new ArticleActionValidationWindow(
-                "Move failed",
+            await ShowArticleActionErrorAsync(
+                shell,
+                "Move",
                 $"The move from \"{originalTitle}\" to \"{newTitle}\" failed.\n\n" +
-                (moveError?.Message ?? "The API operation did not complete successfully."))
-                .ShowDialog(shell);
+                (moveError?.Message ?? "The API operation did not complete successfully."));
 
             return;
         }
@@ -404,11 +428,16 @@ public partial class WorkspaceView : UserControl
         string title = workspace.CurrentArticle.Name;
         ArticleActionDialogWindow dialog = new(ArticleAction.Protect)
         {
-            CurrentPageTitle = title
+            CurrentPageTitle = title,
+            EditProtectionLevel = workspace.Session.Page.EditProtection,
+            MoveProtectionLevel = workspace.Session.Page.MoveProtection,
+            Summary = _lastProtectReason
         };
 
         if (!await dialog.ShowDialog<bool>(shell))
             return;
+
+        _lastProtectReason = dialog.Summary;
 
         if (workspace.CurrentArticle is null ||
             workspace.Session.Editor.IsActive ||
@@ -429,9 +458,13 @@ public partial class WorkspaceView : UserControl
         editor.OperationFailed += OnFailed;
         try
         {
+            string summary = GetAdministrativeActionSummary(
+                dialog.Summary,
+                shell);
+
             editor.Protect(
                 title,
-                dialog.Summary,
+                summary,
                 dialog.ProtectExpiry,
                 dialog.EditProtectionLevel,
                 dialog.MoveProtectionLevel,
@@ -442,9 +475,11 @@ public partial class WorkspaceView : UserControl
         }
         catch (Exception ex)
         {
-            await new ArticleActionValidationWindow(
-                "Protect failed", $"Unable to protect \"{title}\".\n\n{ex.Message}")
-                .ShowDialog(shell);
+            await ShowArticleActionErrorAsync(
+                shell,
+                "Protect",
+                $"Unable to protect \"{title}\".\n\n{ex.Message}");
+
             return;
         }
         finally
@@ -454,15 +489,47 @@ public partial class WorkspaceView : UserControl
 
         if (editor.State != AsyncApiEdit.EditState.Ready || operationError is not null)
         {
-            await new ArticleActionValidationWindow(
-                "Protect failed",
+            await ShowArticleActionErrorAsync(
+                shell,
+                "Protect",
                 $"Protection of \"{title}\" failed.\n\n" +
-                (operationError?.Message ?? "The API operation did not complete successfully."))
-                .ShowDialog(shell);
+                (operationError?.Message ?? "The API operation did not complete successfully."));
+
             return;
         }
 
         workspace.MakeList.StatusText = $"Updated protection for {title}.";
+    }
+
+    /// <summary>
+    /// Applies the optional application identification tag
+    /// to an administrative action summary.
+    /// </summary>
+    private static string GetAdministrativeActionSummary(
+        string summary,
+        ShellWindow shell)
+    {
+        if (shell.DataContext is ShellViewModel shellViewModel &&
+            shellViewModel.Preferences.General.AddUsingAWBToActionSummaries)
+        {
+            return summary + " (" + Variables.SummaryTag.Trim() + ")";
+        }
+
+        return summary;
+    }
+
+    /// <summary>
+    /// Displays an administrative action failure message.
+    /// </summary>
+    private static async Task ShowArticleActionErrorAsync(
+        ShellWindow shell,
+        string action,
+        string message)
+    {
+        await new ArticleActionValidationWindow(
+            $"{action} failed",
+            message)
+            .ShowDialog(shell);
     }
 
     /// <summary>
