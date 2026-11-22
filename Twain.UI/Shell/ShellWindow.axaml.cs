@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using System.Linq;
 using System.Threading.Tasks;
 using Twain.UI.About;
 using Twain.UI.BotSettings;
@@ -184,6 +185,7 @@ public partial class ShellWindow : Window
     /// Opens the list comparer window.
     /// </summary>
 
+
     public async void OpenListComparer()
     {
         if (DataContext is not ShellViewModel viewModel)
@@ -191,17 +193,153 @@ public partial class ShellWindow : Window
             return;
         }
 
-        ListComparerWindow window =
-            new(viewModel.Workspace.Session);
+        var workspace = viewModel.Workspace;
+        var articles = workspace.MakeList.Articles.ToList();
 
-        window.UseListRequested += (_, articles) =>
+        int preference =
+            workspace.Preferences.Tool.ListComparerUseCurrentArticleList;
+
+        bool useCurrentList = false;
+
+        switch (preference)
         {
-            viewModel.Workspace.MakeList.ReplaceArticles(articles);
+            case 0: // Ask
+                if (articles.Count > 0)
+                {
+                    var yesButton = new Button
+                    {
+                        Content = "Yes",
+                        MinWidth = 90
+                    };
+
+                    var noButton = new Button
+                    {
+                        Content = "No",
+                        MinWidth = 90
+                    };
+
+                    var dialog = new Window
+                    {
+                        Title = "Copy Article List?",
+                        Width = 440,
+                        SizeToContent = SizeToContent.Height,
+                        CanResize = false,
+                        WindowStartupLocation =
+                            WindowStartupLocation.CenterOwner,
+                        Content = new StackPanel
+                        {
+                            Margin = new Avalonia.Thickness(20),
+                            Spacing = 16,
+                            Children =
+                        {
+                            new TextBlock
+                            {
+                                Text =
+                                    "Would you like to copy your current " +
+                                    "Article List to the List Comparer?",
+                                TextWrapping =
+                                    Avalonia.Media.TextWrapping.Wrap
+                            },
+                            new StackPanel
+                            {
+                                Orientation =
+                                    Avalonia.Layout.Orientation.Horizontal,
+                                HorizontalAlignment =
+                                    Avalonia.Layout.HorizontalAlignment.Right,
+                                Spacing = 10,
+                                Children =
+                                {
+                                    yesButton,
+                                    noButton
+                                }
+                            }
+                        }
+                        }
+                    };
+
+                    yesButton.Click += (_, _) => dialog.Close(true);
+                    noButton.Click += (_, _) => dialog.Close(false);
+
+                    useCurrentList =
+                        await dialog.ShowDialog<bool>(this);
+                }
+                break;
+
+            case 1: // Always
+                useCurrentList = true;
+                break;
+
+            case 2: // Never
+            default:
+                useCurrentList = false;
+                break;
+        }
+
+        ListComparerWindow window =
+            useCurrentList
+                ? new ListComparerWindow(workspace.Session, articles)
+                : new ListComparerWindow(workspace.Session);
+
+
+        window.UseListRequested += async (_, selectedArticles) =>
+        {
+            if (workspace.Options.IsProcessing)
+            {
+                var okButton = new Button
+                {
+                    Content = "OK",
+                    MinWidth = 90
+                };
+
+                var dialog = new Window
+                {
+                    Title = "Article Processing Active",
+                    Width = 440,
+                    SizeToContent = SizeToContent.Height,
+                    CanResize = false,
+                    WindowStartupLocation =
+                        WindowStartupLocation.CenterOwner,
+                    Content = new StackPanel
+                    {
+                        Margin = new Avalonia.Thickness(20),
+                        Spacing = 16,
+                        Children =
+                {
+                    new TextBlock
+                    {
+                        Text =
+                            "The article list cannot be replaced " +
+                            "while Twain is processing articles. " +
+                            "Stop processing before using this list.",
+                        TextWrapping =
+                            Avalonia.Media.TextWrapping.Wrap
+                    },
+                    new StackPanel
+                    {
+                        Orientation =
+                            Avalonia.Layout.Orientation.Horizontal,
+                        HorizontalAlignment =
+                            Avalonia.Layout.HorizontalAlignment.Right,
+                        Children = { okButton }
+                    }
+                }
+                    }
+                };
+
+                okButton.Click += (_, _) => dialog.Close();
+
+                await dialog.ShowDialog(window);
+                return;
+            }
+
+            workspace.MakeList.ReplaceArticles(selectedArticles);
             window.Close();
         };
 
+
         await window.ShowDialog(this);
     }
+
 
 
     private void ListComparerMenuItem_Click(

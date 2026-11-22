@@ -15,7 +15,7 @@ namespace Twain.UI.ViewModels.Lists;
 /// <summary>
 /// Provides presentation state for the Make List workspace region.
 /// </summary>
-public partial class MakeListViewModel : ObservableObject
+public partial class MakeListViewModel : ObservableObject, IDisposable
 {
     /// <summary>
     /// Gets the articles currently displayed in the Make List region.
@@ -398,6 +398,19 @@ public partial class MakeListViewModel : ObservableObject
 
         OnPropertyChanged(nameof(AddFromSelectedProviders));
     }
+
+
+    /// <summary>
+    /// Releases event subscriptions held by this view model.
+    /// </summary>
+    public void Dispose()
+    {
+        ListProviderRegistry.ProviderAdded -= OnProviderAdded;
+        Articles.CollectionChanged -= Articles_CollectionChanged;
+
+        GC.SuppressFinalize(this);
+    }
+
 
     [RelayCommand(CanExecute = nameof(CanAddArticle))]
     private void AddArticle()

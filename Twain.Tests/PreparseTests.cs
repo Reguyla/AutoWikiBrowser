@@ -28,6 +28,14 @@ public class PreparseTests
             Is.True);
     }
 
+
+    [TearDown]
+    public void TearDown()
+    {
+        _makeList?.Dispose();
+    }
+
+
     [Test]
     public void UnprocessedArticle_IsNotHighlighted()
     {

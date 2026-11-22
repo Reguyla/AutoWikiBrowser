@@ -61,6 +61,20 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
         UpdateInputListCounts();
     }
 
+
+    /// <summary>
+    /// Releases the temporary list view models when
+    /// the List Comparer window closes.
+    /// </summary>
+    protected override void OnClosed(EventArgs e)
+    {
+        _list1ViewModel.Dispose();
+        _list2ViewModel.Dispose();
+
+        base.OnClosed(e);
+    }
+
+
     /// <summary>
     /// Initializes a list comparer with articles in the first list.
     /// </summary>
