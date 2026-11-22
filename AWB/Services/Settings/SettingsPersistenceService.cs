@@ -1,5 +1,5 @@
 ﻿using Twain.Core;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 
 namespace AutoWikiBrowser.Services.Settings;
 

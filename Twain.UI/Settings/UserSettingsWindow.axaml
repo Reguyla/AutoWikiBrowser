@@ -100,7 +100,7 @@
                                          Grid.Column="1" />
                             </Grid>
 
-                            <CheckBox x:Name="SuppressAwbCheckBox"
+                            <CheckBox x:Name="SuppressTwainCheckBox"
                                       Grid.Row="5"
                                       Grid.Column="1"
                                       Content="Suppress Twain attribution" />

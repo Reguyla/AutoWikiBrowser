@@ -309,7 +309,7 @@ public sealed class MainProcess
 
         if (options.SkipIfNoRegexTypo)
         {
-            article.Trace.AWBSkipped(
+            article.Trace.TwainSkipped(
                 "No typo fixes (Title blacklisted from RegExTypoFix Typo Fixing)");
         }
 
@@ -416,7 +416,7 @@ public sealed class MainProcess
         ICollection<string> noParse,
         out bool applyStandardProcessing)
     {
-        article.AWBChangeArticleText(
+        article.TwainChangeArticleText(
             "Fixes for Unicode compatibility",
             _parser.FixUnicode(article.ArticleText),
             true);
@@ -429,7 +429,7 @@ public sealed class MainProcess
                 article.ArticleText,
                 session.User.Name))
         {
-            article.AWBSkip(
+            article.TwainSkip(
                 "Restricted by {{bots}}/{{nobots}}");
 
             return false;
@@ -778,7 +778,7 @@ public sealed class MainProcess
 
                 if (skipReason is not null)
                 {
-                    article.AWBSkip(skipReason);
+                    article.TwainSkip(skipReason);
                 }
             }
 

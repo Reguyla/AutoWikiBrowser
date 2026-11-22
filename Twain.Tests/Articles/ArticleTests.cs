@@ -110,23 +110,23 @@ http://www.site.com
     public void Changes()
     {
         Article a = new Article("A", "ABC");
-        a.AWBChangeArticleText("test", "ABC D", false);
+        a.TwainChangeArticleText("test", "ABC D", false);
         ClassicAssert.IsFalse(a.OnlyWhiteSpaceChanged);
         ClassicAssert.IsFalse(a.OnlyCasingChanged);
 
         a = new Article("A", "ABC");
-        a.AWBChangeArticleText("test", "AB C", false);
+        a.TwainChangeArticleText("test", "AB C", false);
         ClassicAssert.IsTrue(a.OnlyWhiteSpaceChanged);
         ClassicAssert.IsTrue(a.OnlyWhiteSpaceAndCasingChanged);
         ClassicAssert.IsFalse(a.OnlyCasingChanged);
         ClassicAssert.IsFalse(a.NoArticleTextChanged);
 
         a = new Article("A", "ABC");
-        a.AWBChangeArticleText("test", "ABc", false);
+        a.TwainChangeArticleText("test", "ABc", false);
         ClassicAssert.IsTrue(a.OnlyCasingChanged);
 
         a = new Article("A", "ABC");
-        a.AWBChangeArticleText("test", "ABC", false);
+        a.TwainChangeArticleText("test", "ABC", false);
         ClassicAssert.IsTrue(a.NoArticleTextChanged);
         ClassicAssert.IsFalse(a.OnlyMinorGeneralFixesChanged);
     }

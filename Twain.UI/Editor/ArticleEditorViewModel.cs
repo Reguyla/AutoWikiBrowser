@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Threading.Tasks;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 
 namespace Twain.UI.Editor;
 

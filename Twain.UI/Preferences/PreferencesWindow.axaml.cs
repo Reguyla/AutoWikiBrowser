@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Twain.Core;
 using Twain.Core.Alerts;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.Settings;
 using Twain.UI.Controls;
 using Twain.UI.Settings;
@@ -356,13 +356,13 @@ public partial class PreferencesWindow : UserControl
         PrefDiffInBotMode = general.DiffInBotMode;
         PrefShowTimer = general.TimerEnabled;
 
-        PrefAddUsingAWBOnArticleAction =
-            general.AddUsingAWBToActionSummaries;
+        PrefAddUsingTwainOnArticleAction =
+            general.AddUsingTwainToActionSummaries;
 
         PrefIgnoreNoBots = general.IgnoreNoBots;
         PrefFlash = general.Flash;
         PrefBeep = general.Beep;
-        PrefSuppressUsingAWB = general.SuppressUsingAWB;
+        PrefSuppressUsingTwain = general.SuppressUsingTwain;
 
         NoSectionEditSummariesCheckBox.IsChecked =
                general.noSectionEditSummary;
@@ -473,9 +473,6 @@ public partial class PreferencesWindow : UserControl
 
         UpdateDomainControls();
 
-        SuppressAwbCheckBox.IsEnabled =
-            state.SupportsCustomConnectionSettings;
-
         UpdateOkButtonState();
     }
 
@@ -540,13 +537,13 @@ public partial class PreferencesWindow : UserControl
         general.DiffInBotMode = PrefDiffInBotMode;
         general.TimerEnabled = PrefShowTimer;
 
-        general.AddUsingAWBToActionSummaries =
-            PrefAddUsingAWBOnArticleAction;
+        general.AddUsingTwainToActionSummaries =
+            PrefAddUsingTwainOnArticleAction;
 
         general.IgnoreNoBots = PrefIgnoreNoBots;
         general.Flash = PrefFlash;
         general.Beep = PrefBeep;
-        general.SuppressUsingAWB = PrefSuppressUsingAWB;
+        general.SuppressUsingTwain = PrefSuppressUsingTwain;
 
         general.noSectionEditSummary =
            NoSectionEditSummariesCheckBox.IsChecked == true;
@@ -744,12 +741,12 @@ public partial class PreferencesWindow : UserControl
             : "https://";
 
     /// <summary>
-    /// Gets or sets whether AWB identification should be suppressed.
+    /// Gets or sets whether Twain identification should be suppressed.
     /// </summary>
-    public bool PrefSuppressUsingAWB
+    public bool PrefSuppressUsingTwain
     {
-        get => SuppressAwbCheckBox.IsChecked == true;
-        set => SuppressAwbCheckBox.IsChecked = value;
+        get => SuppressTwainCheckBox.IsChecked == true;
+        set => SuppressTwainCheckBox.IsChecked = value;
     }
 
     /// <summary>
@@ -918,12 +915,12 @@ public partial class PreferencesWindow : UserControl
     }
 
     /// <summary>
-    /// Gets or sets whether AWB identification should be added on article actions.
+    /// Gets or sets whether Twain identification should be added on article actions.
     /// </summary>
-    public bool PrefAddUsingAWBOnArticleAction
+    public bool PrefAddUsingTwainOnArticleAction
     {
-        get => AddUsingAwbCheckBox.IsChecked == true;
-        set => AddUsingAwbCheckBox.IsChecked = value;
+        get => AddUsingTwainCheckBox.IsChecked == true;
+        set => AddUsingTwainCheckBox.IsChecked = value;
     }
 
     /// <summary>

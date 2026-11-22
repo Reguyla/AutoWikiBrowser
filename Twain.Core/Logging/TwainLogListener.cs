@@ -34,7 +34,7 @@ namespace Twain.Core.Logging;
 /// depend on UI-specific types.
 /// </remarks>
 [Serializable]
-public class AWBLogListener : ListViewItem, IAWBTraceListener
+public class TwainLogListener : ListViewItem, ITwainTraceListener
 {
     /// <summary>
     /// Default edit summary used when adding an individual log entry.
@@ -74,7 +74,7 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     /// <summary>
     /// Gets the prefix used for AWB logging edit summaries.
     /// </summary>
-    public static string AWBLoggingEditSummary =>
+    public static string TwainLoggingEditSummary =>
         "(" + Variables.WPAWB + " Logging) ";
 
     private bool Datestamped;
@@ -90,7 +90,7 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     /// </summary>
     public string URLLong;
 
-    #region AWB Interface
+    #region Twain Interface
 
     /// <summary>
     /// Gets a value indicating whether the article was skipped.
@@ -103,7 +103,7 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     /// <param name="articleTitle">
     /// The full title of the article being processed.
     /// </param>
-    public AWBLogListener(string articleTitle)
+    public TwainLogListener(string articleTitle)
     {
         Text = articleTitle;
         ArticleTitle = articleTitle;
@@ -121,9 +121,9 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     /// Records that the current article was skipped by AutoWikiBrowser.
     /// </summary>
     /// <param name="reason">The reason the article was skipped.</param>
-    public void AWBSkipped(string reason)
+    public void TwainSkipped(string reason)
     {
-        Skip("AWB", reason);
+        Skip("Twain", reason);
     }
 
     /// <summary>
@@ -512,7 +512,7 @@ public class AWBLogListener : ListViewItem, IAWBTraceListener
     }
 
     /// <summary>
-    /// Prevents consumers of <see cref="AWBLogListener"/> from directly
+    /// Prevents consumers of <see cref="TwainLogListener"/> from directly
     /// accessing the underlying subitem collection.
     /// </summary>
     /// <exception cref="NotImplementedException">

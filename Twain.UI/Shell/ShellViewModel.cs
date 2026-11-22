@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.IO;
 using System.Threading.Tasks;
 using Twain.Core;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.Updates;
 using Twain.UI.Settings;
 using Twain.UI.ViewModels.Workspaces;
@@ -237,7 +237,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Loads an AWB-compatible XML settings file into
+    /// Loads a Twain-compatible XML settings file into
     /// the existing shared preferences instance.
     /// </summary>
     /// <param name="file">The settings file to load.</param>
@@ -274,7 +274,7 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     /// <summary>
     /// Saves the current workspace preferences to the active
-    /// AWB-compatible XML settings file.
+    /// Twain-compatible XML settings file.
     /// </summary>
     public void SaveSettings()
     {
@@ -289,7 +289,7 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     /// <summary>
     /// Saves the current workspace preferences to the specified
-    /// AWB-compatible XML settings file.
+    /// Twain-compatible XML settings file.
     /// </summary>
     /// <param name="file">The destination settings file.</param>
     public void SaveSettingsAs(string file)
@@ -299,7 +299,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         // Copy the current Avalonia workspace settings into UserPrefs.
         Workspace.UpdatePreferencesForSave();
 
-        // Serialize the shared preferences using the existing AWB format.
+        // Serialize the shared preferences using the existing Twin format.
         UserPrefs.SavePrefs(Preferences, file);
 
         // Only update the active filename after saving succeeds.

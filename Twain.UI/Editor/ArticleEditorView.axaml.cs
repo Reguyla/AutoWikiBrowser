@@ -546,7 +546,7 @@ public partial class ArticleEditorView : UserControl
     /// <see langword="false"/>.
     /// </param>
     /// <param name="articleName">
-    /// The current article name used when expanding AWB search keywords.
+    /// The current article name used when expanding Twain search keywords.
     /// </param>
     public async Task FindNextAsync(
         string searchText,

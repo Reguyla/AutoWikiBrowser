@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.Lists;
 using Twain.Core.Lists.Providers;
 
@@ -979,7 +979,7 @@ public partial class MakeListViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Restores the Make List state from AWB preferences.
+    /// Restores the Make List state from preferences.
     /// </summary>
     public void LoadFromPreferences(UserPrefs preferences)
     {
@@ -998,7 +998,7 @@ public partial class MakeListViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Copies the current Make List state into AWB preferences.
+    /// Copies the current Make List state into preferences.
     /// </summary>
     public void SaveToPreferences(UserPrefs preferences)
     {

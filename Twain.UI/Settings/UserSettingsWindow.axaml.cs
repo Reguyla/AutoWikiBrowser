@@ -370,9 +370,9 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Gets or sets whether AWB attribution is added to action summaries.
+    /// Gets or sets whether Twain attribution is added to action summaries.
     /// </summary>
-    public bool AddUsingAwbToActionSummaries
+    public bool AddUsingTwainToActionSummaries
     {
         get =>
             AddUsingAwbToActionSummariesCheckBox.IsChecked == true;
@@ -655,7 +655,7 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
             supportsCustomConnectionSettings &&
             UseCustomDomainCheckBox.IsChecked == true;
 
-        SuppressAwbCheckBox.IsEnabled =
+        SuppressTwainCheckBox.IsEnabled =
             supportsCustomConnectionSettings;
 
         if (UserSettingsHelper.RequiresHttps(project))
@@ -703,15 +703,15 @@ public partial class UserSettingsWindow : Avalonia.Controls.Window
     }
 
     /// <summary>
-    /// Gets or sets whether AWB attribution is suppressed for supported custom sites.
+    /// Gets or sets whether Twain attribution is suppressed for supported custom sites.
     /// </summary>
     public bool SuppressAwb
     {
         get =>
-            SuppressAwbCheckBox.IsChecked == true;
+            SuppressTwainCheckBox.IsChecked == true;
 
         set =>
-            SuppressAwbCheckBox.IsChecked = value;
+            SuppressTwainCheckBox.IsChecked = value;
     }
 
     /// <summary>

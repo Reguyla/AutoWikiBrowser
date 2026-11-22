@@ -230,7 +230,7 @@
             this.listMaker1.SelectedProvider = "CategoryListProvider";
             this.listMaker1.Size = new System.Drawing.Size(212, 358);
             this.listMaker1.SourceText = string.Empty;
-            this.listMaker1.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
+            this.listMaker1.SpecialFilterSettings = ((Twain.Core.TwainSettings.SpecialFilterPrefs)(resources.GetObject("listMaker1.SpecialFilterSettings")));
             this.listMaker1.TabIndex = 14;
             // 
             // gbList2
@@ -251,7 +251,7 @@
             this.listMaker2.SelectedProvider = "CategoryListProvider";
             this.listMaker2.Size = new System.Drawing.Size(212, 358);
             this.listMaker2.SourceText = string.Empty;
-            this.listMaker2.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker2.SpecialFilterSettings")));
+            this.listMaker2.SpecialFilterSettings = ((Twain.Core.TwainSettings.SpecialFilterPrefs)(resources.GetObject("listMaker2.SpecialFilterSettings")));
             this.listMaker2.TabIndex = 14;
             // 
             // gbResults

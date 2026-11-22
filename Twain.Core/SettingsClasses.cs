@@ -30,7 +30,7 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using Twain.Core.GeneralFixes;
 
-namespace Twain.Core.AWBSettings;
+namespace Twain.Core.TwainSettings;
 
 // mother class
 [Serializable, XmlRoot("AutoWikiBrowserPreferences")]
@@ -106,7 +106,7 @@ public class UserPrefs
     public List<PluginPrefs> Plugin = new();
 
     /// <summary>
-    /// Loads user preferences from an AWB settings file.
+    /// Loads user preferences from an Twain settings file.
     /// </summary>
     /// <param name="file">The path of the settings file to load.</param>
     /// <returns>
@@ -133,7 +133,7 @@ public class UserPrefs
                 StringComparison.Ordinal))
         {
             throw new InvalidDataException(
-                "This file uses an old settings format unsupported by this version of AWB.");
+                "This file uses an old settings format unsupported by this version of Twain.");
         }
 
         if (string.IsNullOrWhiteSpace(settings))
@@ -155,11 +155,11 @@ public class UserPrefs
 
         return serializer.Deserialize(reader) as UserPrefs
             ?? throw new InvalidDataException(
-                $"The settings file '{file}' did not contain valid AWB user preferences.");
+                $"The settings file '{file}' did not contain valid Twain user preferences.");
     }
 
     /// <summary>
-    /// Saves user preferences to an AWB-compatible XML settings file.
+    /// Saves user preferences to an XML settings file.
     /// </summary>
     /// <param name="prefs">The preferences to save.</param>
     /// <param name="file">The destination file path.</param>
@@ -343,7 +343,7 @@ public class EditPrefs
 
     /// <summary>
     /// Enables automatic article saving in bot mode.
-    /// Defaults to false for older AWB settings files.
+    /// Defaults to false for older Twain settings files.
     /// </summary>
     public bool AutoSaveEnabled = false;
 
@@ -467,8 +467,8 @@ public class GeneralPrefs
     public bool Minimize = false;
     public bool LockSummary = false;
     public bool SaveArticleList = true;
-    public bool SuppressUsingAWB = false;
-    public bool AddUsingAWBToActionSummaries = false;
+    public bool SuppressUsingTwain = false;
+    public bool AddUsingTwainToActionSummaries = false;
     public bool IgnoreNoBots = false;
     public bool ClearPageListOnProjectChange = false;
 

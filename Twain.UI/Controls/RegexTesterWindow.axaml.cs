@@ -113,7 +113,7 @@ public partial class RegexTesterWindow : Avalonia.Controls.Window
     /// Gets or sets the title of the article currently being tested.
     /// </summary>
     /// <remarks>
-    /// When supplied, AWB replacement keywords are expanded before a
+    /// When supplied, Twain replacement keywords are expanded before a
     /// replacement operation is executed.
     /// </remarks>
     public string? ArticleTitle { get; set; }

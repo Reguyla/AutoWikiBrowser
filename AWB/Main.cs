@@ -2981,7 +2981,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
             default:
                 if (!string.IsNullOrEmpty(reason))
                 {
-                    TheArticle.Trace.AWBSkipped(reason);
+                    TheArticle.Trace.TwainSkipped(reason);
                 }
 
                 break;
@@ -3223,7 +3223,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         if (!stackTrace.Contains(
                 "System.Text.RegularExpressions"))
         {
-            article.Trace.AWBSkipped(
+            article.Trace.TwainSkipped(
                 "Exception: " + exception.Message);
         }
         else
@@ -6165,7 +6165,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
             PrefClearPageListOnProjectChange = _clearPageListOnProjectChange,
 
             PrefShowTimer = ShowMovingAverageTimer,
-            PrefAddUsingAWBOnArticleAction = Article.AddUsingAWBOnArticleAction,
+            PrefAddUsingAWBOnArticleAction = Article.AddUsingTwainOnArticleAction,
             PrefSuppressUsingAWB = _suppressUsingAWB,
 
             PrefListComparerUseCurrentArticleList =
@@ -6233,7 +6233,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         _suppressUsingAWB =
             myPrefs.PrefSuppressUsingAWB;
 
-        Article.AddUsingAWBOnArticleAction =
+        Article.AddUsingTwainOnArticleAction =
             myPrefs.PrefAddUsingAWBOnArticleAction;
 
         _ignoreNoBots =
@@ -8295,7 +8295,7 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         StartProgressBar();
 
         // Refresh the article text to include any manual changes from the editor.
-        TheArticle.AWBChangeArticleText(
+        TheArticle.TwainChangeArticleText(
             "Reparse",
             ArticleEditor.Text,
             false);

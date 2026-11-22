@@ -182,7 +182,7 @@ public partial class ArticleActionLogControl : UserControl
         EventArgs e)
     {
         if (sender is not ListView listView ||
-            listView.FocusedItem is not AWBLogListener logEntry)
+            listView.FocusedItem is not TwainLogListener logEntry)
         {
             return;
         }

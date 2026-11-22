@@ -3803,7 +3803,7 @@ namespace AutoWikiBrowser
             this.listMaker.SelectedProvider = "CategoryListProvider";
             this.listMaker.Size = new System.Drawing.Size(209, 356);
             this.listMaker.SourceText = string.Empty;
-            this.listMaker.SpecialFilterSettings = ((Twain.Core.AWBSettings.SpecialFilterPrefs)(resources.GetObject("listMaker.SpecialFilterSettings")));
+            this.listMaker.SpecialFilterSettings = ((Twain.Core.TwainSettings.SpecialFilterPrefs)(resources.GetObject("listMaker.SpecialFilterSettings")));
             this.listMaker.TabIndex = 0;
             // 
             // EditBoxTab

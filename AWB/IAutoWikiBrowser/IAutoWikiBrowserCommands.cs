@@ -73,7 +73,7 @@ partial class MainForm
         Save();
     }
 
-    void IAutoWikiBrowserCommands.AddLogItem(bool skipped, AWBLogListener logListener)
+    void IAutoWikiBrowserCommands.AddLogItem(bool skipped, TwainLogListener logListener)
     { if (_loggingEnabled) logControl.AddLog(skipped, logListener); }
     void IAutoWikiBrowserCommands.ShowHelp(string url)
     {

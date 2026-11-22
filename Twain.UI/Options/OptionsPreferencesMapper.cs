@@ -1,11 +1,11 @@
 ﻿using System.Linq;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.ReplaceSpecial;
 
 namespace Twain.UI.Options;
 
 /// <summary>
-/// Maps shared AWB preferences to and from the editing options view model.
+/// Maps shared Twain preferences to and from the editing options view model.
 /// </summary>
 public static class OptionsPreferencesMapper
 {

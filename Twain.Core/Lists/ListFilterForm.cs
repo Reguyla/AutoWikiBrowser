@@ -44,7 +44,7 @@ namespace Twain.Core.Lists
         }
 
         private List<Article> _list = new();
-        private static AWBSettings.SpecialFilterPrefs _prefs;
+        private static TwainSettings.SpecialFilterPrefs _prefs;
 
         private void btnApply_Click(
             object sender,
@@ -247,11 +247,11 @@ namespace Twain.Core.Lists
         [Browsable(false)]
         [Localizable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public AWBSettings.SpecialFilterPrefs Settings
+        public TwainSettings.SpecialFilterPrefs Settings
         {
             get
             {
-                _prefs = new AWBSettings.SpecialFilterPrefs
+                _prefs = new TwainSettings.SpecialFilterPrefs
                 {
                     namespaceValues = pageNamespaces.GetSelectedNamespaces(),
                     filterTitlesThatContain = chkContains.Checked,

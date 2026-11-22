@@ -1,4 +1,4 @@
-﻿using Twain.Core.AWBSettings;
+﻿using Twain.Core.TwainSettings;
 
 namespace Twain.Core.Profiles;
 

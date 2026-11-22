@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.CustomModules;
 using Twain.Core.Plugin;
 

@@ -435,7 +435,7 @@ public partial class WorkspaceView : UserControl
         ShellWindow shell)
     {
         if (shell.DataContext is ShellViewModel shellViewModel &&
-            shellViewModel.Preferences.General.AddUsingAWBToActionSummaries)
+            shellViewModel.Preferences.General.AddUsingTwainToActionSummaries)
         {
             return summary + " (" + Variables.SummaryTag.Trim() + ")";
         }

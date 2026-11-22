@@ -118,7 +118,7 @@ public interface IAutoWikiBrowserCommands
     /// </summary>
     /// <param name="skipped">True if the article was skipped and needs to be added to the Skipped list on the AWB log tab, false if it should be added to the Saved articles list</param>
     /// <param name="logListener">An AWBLogListener object - basically an object inherited from ListViewItem, which implements IMyTraceListener, and which represents a wiki article for logging purposes.</param>
-    void AddLogItem(bool skipped, AWBLogListener logListener);
+    void AddLogItem(bool skipped, TwainLogListener logListener);
 
     /// <summary>
     /// For the purposes of the logging tab, mark the page as Skipped and provide a reason.

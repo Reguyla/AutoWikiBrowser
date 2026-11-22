@@ -87,7 +87,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <summary>
     /// The log listener associated with this article.
     /// </summary>
-    protected AWBLogListener mAWBLogListener;
+    protected TwainLogListener mAWBLogListener;
 
     /// <summary>
     /// The current article text.
@@ -117,7 +117,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// <summary>
     /// Gets the trace listener associated with this article.
     /// </summary>
-    public virtual IAWBTraceListener Trace
+    public virtual ITwainTraceListener Trace
     {
         get
         {
@@ -273,7 +273,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         // Initialize a log listener and add it to the configured trace collections.
         mAWBLogListener =
-            new AWBLogListener(Name);
+            new TwainLogListener(Name);
 
         if (currentTraceManager != null)
         {
@@ -322,10 +322,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     // Read-write properties should be marked with the [XmlIgnore] attribute
 
     /// <summary>
-    /// AWBLogListener object representing a log entry for the underlying article
+    /// TwainLogListener object representing a log entry for the underlying article
     /// </summary>
     [XmlIgnore]
-    public AWBLogListener LogListener
+    public TwainLogListener LogListener
     { get { return mAWBLogListener; } } //set { mAWBLogListener = value; } }
 
     /// <summary>
@@ -591,7 +591,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     { get { return (NameSpaceKey == Namespace.Article && Parsers.HasSeeAlsoAfterNotesReferencesOrExternalLinks(mArticleText)); } }
 
     /// <summary>
-    /// Returns true if the article should be skipped; check after each call to a worker member. See AWB main.cs.
+    /// Returns true if the article should be skipped; check after each call to a worker member.
     /// </summary>
     [XmlIgnore]
     public bool SkipArticle
@@ -648,13 +648,13 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     { get { return Parsers.DeterminePredominantDateLocale(mArticleText); } }
     #endregion
 
-    #region AWB worker subroutines
+    #region Twain worker subroutines
     /// <summary>
-    /// AWB skips the article; passed through to the underlying AWBLogListener object
+    /// Twain skips the article; passed through to the underlying TwainLogListener object
     /// </summary>
     /// <param name="reason">The reason for skipping</param>
-    public void AWBSkip(string reason)
-    { Trace.AWBSkipped(reason); }
+    public void TwainSkip(string reason)
+    { Trace.TwainSkipped(reason); }
 
     /// <summary>
     /// Returns whether any changes between current article text and parsed article text have an effect on rendering
@@ -823,11 +823,11 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         {
             HideMoreText(removeText);
             string strTemp = parsers.Unicodify(mArticleText, out noChange);
-            AWBChangeArticleText("Page Unicodified", strTemp, false);
+            TwainChangeArticleText("Page Unicodified", strTemp, false);
             UnHideMoreText(removeText);
         }
         else if (skipIfNoChange)
-            Trace.AWBSkipped("No Unicodification");
+            Trace.TwainSkipped("No Unicodification");
     }
 
     /// <summary>
@@ -1126,9 +1126,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
 
         if (noChange && skipIfNoChange)
-            Trace.AWBSkipped("No File Changed");
+            Trace.TwainSkipped("No File Changed");
         else if (!noChange)
-            AWBChangeArticleText("File replacement applied", strTemp, false);
+            TwainChangeArticleText("File replacement applied", strTemp, false);
     }
 
     /// <summary>
@@ -1186,10 +1186,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
 
         if (noChange && skipIfNoChange)
-            Trace.AWBSkipped("No Category Changed");
+            Trace.TwainSkipped("No Category Changed");
         else if (!noChange)
         {
-            AWBChangeArticleText(action, strTemp, false);
+            TwainChangeArticleText(action, strTemp, false);
             _categorisationMadeChanges = true;
         }
     }
@@ -1254,7 +1254,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (!generalFixesEnabled)
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix categories",
                 Parsers.FixCategories(ArticleText),
                 true);
@@ -1303,14 +1303,14 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (append)
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Appended your message",
                 ArticleText + newlines + message,
                 false);
         }
         else
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Prepended your message",
                 message + newlines + ArticleText,
                 false);
@@ -1334,13 +1334,13 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
         if (_before == FaRChange.MinorChange || _after == FaRChange.MinorChange)
         {
-            Trace.AWBSkipped("Only minor Find And Replace Changes");
+            Trace.TwainSkipped("Only minor Find And Replace Changes");
         }
         else if ((_before == FaRChange.NoChange && !findAndReplace.HasAfterProcessingReplacements)
                  || (_before == FaRChange.NotRun && _after == FaRChange.NoChange)
                  || (_before == FaRChange.NoChange && _after == FaRChange.NoChange))
         {
-            Trace.AWBSkipped("No Find And Replace Changes");
+            Trace.TwainSkipped("No Find And Replace Changes");
         }
     }
 
@@ -1463,7 +1463,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             SetFaRChange(onlyApplyAfter, FaRChange.MajorChange);
         }
 
-        AWBChangeArticleText("Find and replace applied" + editSummary,
+        TwainChangeArticleText("Find and replace applied" + editSummary,
                              Tools.ConvertToLocalLineEndings(changedTextByAdvFar), true);
         AppendToSummary(editSummary);
     }
@@ -1494,7 +1494,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (noChange && skipIfNoChange)
         {
-            Trace.AWBSkipped("No typo fixes");
+            Trace.TwainSkipped("No typo fixes");
             return;
         }
 
@@ -1503,7 +1503,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             return;
         }
 
-        AWBChangeArticleText(
+        TwainChangeArticleText(
             tmpEditSummary,
             updatedText,
             false);
@@ -1541,10 +1541,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         string strTemp = parsers.Tagger(mArticleText, Name, restrictOrphanTagging, out noChange, ref tmpEditSummary);
 
         if (skipIfNoChange && noChange)
-            Trace.AWBSkipped("No Tag changed");
+            Trace.TwainSkipped("No Tag changed");
         else if (!noChange)
         {
-            AWBChangeArticleText("Auto tagger changes applied " + tmpEditSummary, strTemp, false);
+            TwainChangeArticleText("Auto tagger changes applied " + tmpEditSummary, strTemp, false);
             AppendToSummary(tmpEditSummary);
         }
     }
@@ -1576,10 +1576,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             session);
 
         if (skipIfNoChange && noChange)
-            Trace.AWBSkipped("No Tag changed");
+            Trace.TwainSkipped("No Tag changed");
         else if (!noChange)
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Auto tagger changes applied " + tmpEditSummary,
                 strTemp,
                 false);
@@ -1609,7 +1609,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     {
         bool noInterwikiChanges;
 
-        AWBChangeArticleText(
+        TwainChangeArticleText(
             "Fixed interwikis",
             Parsers.InterwikiConversions(
                 mArticleText,
@@ -1667,26 +1667,26 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (skipIfNoChange && !anyChanges)
         {
-            Trace.AWBSkipped("No header errors");
+            Trace.TwainSkipped("No header errors");
             return false;
         }
 
         if (!noHeadingChanges)
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fixed header errors",
                 updatedText,
                 true);
         }
         else
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fixed minor formatting issues",
                 updatedText,
                 true);
 
             if (skipIfNoChange)
-                Trace.AWBSkipped("No header errors");
+                Trace.TwainSkipped("No header errors");
         }
 
         return anyChanges;
@@ -1737,9 +1737,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             string strTemp = Parsers.ChangeToDefaultSort(mArticleText, Name, out noChange, restrictDefaultsortAddition);
 
             if (skipIfNoChange && noChange)
-                Trace.AWBSkipped("No DefaultSort Added");
+                Trace.TwainSkipped("No DefaultSort Added");
             else if (!noChange)
-                AWBChangeArticleText("DefaultSort Added/Diacritics cleaned", strTemp, true);
+                TwainChangeArticleText("DefaultSort Added/Diacritics cleaned", strTemp, true);
         }
     }
 
@@ -1764,9 +1764,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         string strTemp = parsers.CiteTemplateDates(mArticleText, out noChange);
 
         if (skipIfNoChange && noChange)
-            Trace.AWBSkipped("No Citation template dates fixed");
+            Trace.TwainSkipped("No Citation template dates fixed");
         else if (!noChange)
-            AWBChangeArticleText("Citation template dates fixed", strTemp, true);
+            TwainChangeArticleText("Citation template dates fixed", strTemp, true);
     }
 
     /// <summary>
@@ -1790,9 +1790,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             noChange = false;
 
         if (skipIfNoChange && noChange)
-            Trace.AWBSkipped("No human category changes");
+            Trace.TwainSkipped("No human category changes");
         else if (!noChange)
-            AWBChangeArticleText("Human category changes", strTemp, true);
+            TwainChangeArticleText("Human category changes", strTemp, true);
     }
 
     /// <summary>
@@ -1804,9 +1804,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         bool noChange;
         string strTemp = Parsers.FixLinks(mArticleText, Name, out noChange);
         if (noChange && skipIfNoChange)
-            Trace.AWBSkipped("No bad links");
+            Trace.TwainSkipped("No bad links");
         else if (!noChange)
-            AWBChangeArticleText("Fixed links", strTemp, false);
+            TwainChangeArticleText("Fixed links", strTemp, false);
     }
 
     /// <summary>
@@ -1818,9 +1818,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         bool noChange;
         string strTemp = Parsers.BulletExternalLinks(mArticleText, out noChange);
         if (skipIfNoChange && noChange)
-            Trace.AWBSkipped("No missing bulleted links");
+            Trace.TwainSkipped("No missing bulleted links");
         else if (!noChange)
-            AWBChangeArticleText("Bulleted external links", strTemp, false);
+            TwainChangeArticleText("Bulleted external links", strTemp, false);
     }
 
     /// <summary>
@@ -1833,9 +1833,9 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         bool noChange;
         string strTemp = parsers.BoldTitle(mArticleText, Name, out noChange);
         if (skipIfNoChange && noChange)
-            Trace.AWBSkipped("No Titles to embolden");
+            Trace.TwainSkipped("No Titles to embolden");
         else if (!noChange)
-            AWBChangeArticleText("Emboldened titles", strTemp, false);
+            TwainChangeArticleText("Emboldened titles", strTemp, false);
     }
 
     /// <summary>
@@ -1889,7 +1889,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         // Take updated article text even when skipArticle is true so that
         // re-parse mode retains changes made by the custom module.
-        AWBChangeArticleText(
+        TwainChangeArticleText(
             "Custom module changes",
             updatedArticleText,
             false);
@@ -2106,11 +2106,11 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     {
         if (noChange && skipIfNoChange)
         {
-            Trace.AWBSkipped("No disambiguation");
+            Trace.TwainSkipped("No disambiguation");
         }
         else if (!noChange)
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Disambiguated " + dabLinkText,
                 articleText,
                 false);
@@ -2134,26 +2134,26 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// A subroutine allowing AWB to modify the article text. Passes through to ChangeArticleText()
+    /// A subroutine allowing Twain to modify the article text. Passes through to ChangeArticleText()
     /// </summary>
-    public void AWBChangeArticleText(string reason, string newText, bool checkIfChanged)
+    public void TwainChangeArticleText(string reason, string newText, bool checkIfChanged)
     {
-        ChangeArticleText("AWB", reason, newText, checkIfChanged);
+        ChangeArticleText("Twain", reason, newText, checkIfChanged);
     }
 
     /// <summary>
-    /// A subroutine allowing AWB to modify the article text. Passes through to ChangeArticleText()
+    /// A subroutine allowing Twain to modify the article text. Passes through to ChangeArticleText()
     /// </summary>
     /// <param name="reason">Why the text was changed</param>
     /// <param name="newText">The new text</param>
     /// <param name="checkIfChanged">Check if the new text does differ from the existing text before logging it; exits silently if this param is true and there was no change</param>
     /// <param name="performsSignificantChanges">indicates whether the general fix function makes 'significant' changes</param>
-    public void AWBChangeArticleText(string reason, string newText, bool checkIfChanged, bool performsSignificantChanges)
+    public void TwainChangeArticleText(string reason, string newText, bool checkIfChanged, bool performsSignificantChanges)
     {
         if (performsSignificantChanges && (newText != mArticleText))
             _generalFixesSignificantChange = true;
 
-        AWBChangeArticleText(reason, newText, checkIfChanged);
+        TwainChangeArticleText(reason, newText, checkIfChanged);
     }
 
     /// <summary>
@@ -2510,7 +2510,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixTemperatures))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix temperatures",
                 Parsers.FixTemperatures(ArticleText),
                 true);
@@ -2525,7 +2525,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                     enabledGeneralFixes,
                     GeneralFixId.FixNonBreakingSpaces))
             {
-                AWBChangeArticleText(
+                TwainChangeArticleText(
                     "Fix non-breaking spaces",
                     parsers.FixNonBreakingSpaces(ArticleText),
                     true);
@@ -2538,7 +2538,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                     enabledGeneralFixes,
                     GeneralFixId.Mdashes))
             {
-                AWBChangeArticleText(
+                TwainChangeArticleText(
                     "Mdashes",
                     parsers.Mdashes(ArticleText, Name),
                     true);
@@ -2551,7 +2551,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                     enabledGeneralFixes,
                     GeneralFixId.FixDateOrdinalsAndOf))
             {
-                AWBChangeArticleText(
+                TwainChangeArticleText(
                     "Fix Date Ordinals/Of",
                     parsers.FixDateOrdinalsAndOf(ArticleText, Name),
                     true,
@@ -2566,7 +2566,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixBrParagraphs))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "FixBrParagraphs",
                 parsers.FixBrParagraphs(ArticleText).Trim(),
                 true);
@@ -2580,7 +2580,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixDatesB))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix dates 1",
                 parsers.FixDatesB(
                     ArticleText,
@@ -2600,7 +2600,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.RedirectTagger))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Redirect tagger",
                 Parsers.RedirectTagger(ArticleText, Name),
                 true);
@@ -2612,7 +2612,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixSyntaxRedirects))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix syntax redirects",
                 Parsers.FixSyntaxRedirects(ArticleText),
                 true);
@@ -2624,7 +2624,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.SimplifyLinks))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Simplify links",
                 Parsers.SimplifyLinks(ArticleText),
                 true);
@@ -2641,7 +2641,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
             enabledGeneralFixes,
             GeneralFixId.FixLinkWhitespace))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix whitespace in links",
                 Parsers.FixLinkWhitespace(ArticleText, Name),
                 true);
@@ -2660,7 +2660,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixSyntax))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix syntax",
                 Parsers.FixSyntax(ArticleText),
                 true,
@@ -2673,7 +2673,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.TemplateRedirects))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Template redirects",
                 Parsers.TemplateRedirects(
                     ArticleText,
@@ -2687,7 +2687,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.RenameTemplateParameters))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Rename Template Parameters",
                 Parsers.RenameTemplateParameters(
                     ArticleText,
@@ -2712,7 +2712,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.MultipleIssues))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fixes for {{Multiple issues}}",
                 parsers.MultipleIssues(ArticleText),
                 true);
@@ -2781,7 +2781,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixCategories))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix categories",
                 Parsers.FixCategories(ArticleText),
                 true);
@@ -2794,7 +2794,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixImages))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix images",
                 Parsers.FixImages(ArticleText),
                 true);
@@ -2835,7 +2835,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.SimplifyLinks))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Simplify links",
                 Parsers.SimplifyLinks(ArticleText),
                 true);
@@ -2848,7 +2848,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixCitationTemplates))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix citation templates",
                 Parsers.FixCitationTemplates(ArticleText),
                 true,
@@ -2862,7 +2862,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixMainArticle))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix main article",
                 Parsers.FixMainArticle(ArticleText),
                 true);
@@ -2877,7 +2877,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixReferenceListTags))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix reference tags",
                 Parsers.FixReferenceListTags(ArticleText),
                 true);
@@ -2890,7 +2890,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixEmptyLinksAndTemplates))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix empty links and templates",
                 Parsers.FixEmptyLinksAndTemplates(ArticleText),
                 true);
@@ -2907,7 +2907,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.SimplifyReferenceTags))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix empty references",
                 Parsers.SimplifyReferenceTags(ArticleText),
                 true);
@@ -2920,7 +2920,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixReferenceTags))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "FixReferenceTags",
                 Parsers.FixReferenceTags(ArticleText),
                 true);
@@ -2933,7 +2933,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.DuplicateNamedReferences))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "DuplicateNamedReferences",
                 Parsers.DuplicateNamedReferences(ArticleText),
                 true);
@@ -2946,7 +2946,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.DuplicateUnnamedReferences))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "DuplicateUnnamedReferences",
                 Parsers.DuplicateUnnamedReferences(ArticleText),
                 true);
@@ -2959,7 +2959,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.SameRefDifferentName))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "SameRefDifferentName",
                 Parsers.SameRefDifferentName(ArticleText),
                 true);
@@ -2972,7 +2972,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.RefsAfterPunctuation))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Refs after punctuation",
                 Parsers.RefsAfterPunctuation(ArticleText),
                 true);
@@ -2989,7 +2989,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.ReorderReferences))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "ReorderReferences",
                 Parsers.ReorderReferences(ArticleText),
                 true);
@@ -3002,7 +3002,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.AddMissingReflist))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Add missing {{reflist}}",
                 Parsers.AddMissingReflist(ArticleText),
                 true,
@@ -3025,7 +3025,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 GeneralFixId.FixDatesA))
         {
             // FixDates performs its own hiding.
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Fix dates 2",
                 parsers.FixDatesA(ArticleText).Trim(),
                 true);
@@ -3052,7 +3052,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.FixImageSelfLinks))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "FixImageSelfLinks",
                 parsers.FixImageSelfLinks(ArticleText),
                 true);
@@ -3063,7 +3063,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 enabledGeneralFixes,
                 GeneralFixId.SortMetaData))
         {
-            AWBChangeArticleText(
+            TwainChangeArticleText(
                 "Sort meta data",
                 parsers.SortMetaData(ArticleText, Name),
                 true);
@@ -3141,7 +3141,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         HideText(removeText);
         Variables.Profiler.Profile("HideText");
 
-        AWBChangeArticleText("Subst user talk warnings",
+        TwainChangeArticleText("Subst user talk warnings",
                              Parsers.SubstUserTemplates(ArticleText, Name, userTalkTemplatesRegex), true);
 
         Variables.Profiler.Profile("SubstUserTemplates");
@@ -3151,7 +3151,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (skipIfNoChange && (originalText.Equals(ArticleText)))
         {
-            Trace.AWBSkipped("No user talk templates subst'd");
+            Trace.TwainSkipped("No user talk templates subst'd");
         }
     }
 
@@ -3168,7 +3168,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
 
         if (articleText != ArticleText)
         {
-            AWBChangeArticleText("Talk Page general fixes", articleText, false);
+            TwainChangeArticleText("Talk Page general fixes", articleText, false);
         }
 
         UnHideText(removeText);
@@ -3302,13 +3302,13 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     }
 
     /// <summary>
-    /// Setting: Add "Using AWB" to the summary when deleting or protecting an article?
+    /// Setting: Add "Using Twain" to the summary when deleting or protecting an article?
     /// </summary>
-    public static bool AddUsingAWBOnArticleAction;
+    public static bool AddUsingTwainOnArticleAction;
 
     private static string ArticleActionSummary(ArticleActionDialog dlgArticleAction)
     {
-        return AddUsingAWBOnArticleAction
+        return AddUsingTwainOnArticleAction
             ? dlgArticleAction.Summary + " (" + Variables.SummaryTag.Trim() + ")"
             : dlgArticleAction.Summary;
     }

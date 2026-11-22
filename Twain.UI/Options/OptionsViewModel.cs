@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.Plugin;
 using Twain.Core.Processing;
 using Twain.Core.ReplaceSpecial;
@@ -1240,7 +1240,7 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     }
 
     /// <summary>
-    /// Loads processing options from the shared AWB preferences.
+    /// Loads processing options from the shared Twain preferences.
     /// </summary>
     public void LoadFromPreferences(UserPrefs preferences)
     {
@@ -1248,7 +1248,7 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     }
 
     /// <summary>
-    /// Copies the current editing options into the shared AWB preferences.
+    /// Copies the current editing options into the shared Twain preferences.
     /// </summary>
     public void SaveToPreferences(UserPrefs preferences)
     {

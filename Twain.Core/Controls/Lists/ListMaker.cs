@@ -1501,7 +1501,7 @@ public partial class ListMaker : UserControl, IList<Article>
     [Browsable(false)]
     [Localizable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public AWBSettings.SpecialFilterPrefs SpecialFilterSettings
+    public TwainSettings.SpecialFilterPrefs SpecialFilterSettings
     {
         get { return _specialFilter.Settings; }
         set

@@ -2,7 +2,7 @@ using Avalonia.Platform.Storage;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.ExternalPrograms;
 
 namespace Twain.UI.ExternalPrograms;

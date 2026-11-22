@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using AutoWikiBrowser.Services.Settings;
 using Twain.Core;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.Plugin;
 using Twain.Core.Settings;
 
@@ -625,7 +625,7 @@ partial class MainForm
             TimerEnabled = ShowMovingAverageTimer,
             SortListAlphabetically =
                 sortAlphabeticallyToolStripMenuItem.Checked,
-            AddIgnoredToLog = Article.AddUsingAWBOnArticleAction,
+            AddIgnoredToLog = Article.AddUsingTwainOnArticleAction,
             TextBoxSize = (int)txtEdit.Font.Size,
             TextBoxFont = txtEdit.Font.Name,
             LowThreadPriority = LowThreadPriority,
@@ -635,9 +635,9 @@ partial class MainForm
             AutoSaveEdit = MakeEditBoxAutoSavePrefs(),
             LockSummary = chkLock.Checked,
             EditToolbarEnabled = EditToolBarVisible,
-            SuppressUsingAWB = _suppressUsingAWB,
-            AddUsingAWBToActionSummaries =
-                Article.AddUsingAWBOnArticleAction,
+            SuppressUsingTwain = _suppressUsingAWB,
+            AddUsingTwainToActionSummaries =
+                Article.AddUsingTwainOnArticleAction,
             filterNonMainSpace =
                 filterOutNonMainSpaceToolStripMenuItem.Checked,
             AutoFilterDuplicates =
@@ -1308,10 +1308,10 @@ partial class MainForm
             preferences.AutoSaveEdit.SaveFile;
 
         _suppressUsingAWB =
-            preferences.SuppressUsingAWB;
+            preferences.SuppressUsingTwain;
 
-        Article.AddUsingAWBOnArticleAction =
-            preferences.AddUsingAWBToActionSummaries;
+        Article.AddUsingTwainOnArticleAction =
+            preferences.AddUsingTwainToActionSummaries;
 
         _loggingEnabled =
             preferences.LoggingEnabled;

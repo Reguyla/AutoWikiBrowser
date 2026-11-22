@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.API;
-using Twain.Core.AWBSettings;
+using Twain.Core.TwainSettings;
 using Twain.Core.CustomModules;
 using Twain.Core.Editing;
 using Twain.Core.EditSummaries;
@@ -470,7 +470,7 @@ public partial class WorkspaceViewModel : ObservableObject
         string editorText = Editor.Document.CurrentText;
 
         // Preserve manual edits before running the processing pipeline.
-        article.AWBChangeArticleText(
+        article.TwainChangeArticleText(
             "Reparse",
             editorText,
             false);
@@ -1441,7 +1441,7 @@ public partial class WorkspaceViewModel : ObservableObject
                         _pendingSaveArticle = null;
                         _pendingSaveOperationId = 0;
 
-                        savingArticle.AWBSkip(ex.URL);
+                        savingArticle.TwainSkip(ex.URL);
                         CompleteCurrentArticle(manualSkip: false);
                         return;
                     }
@@ -1464,7 +1464,7 @@ public partial class WorkspaceViewModel : ObservableObject
                         _pendingSaveArticle = null;
                         _pendingSaveOperationId = 0;
 
-                        savingArticle.AWBSkip(ex.URL);
+                        savingArticle.TwainSkip(ex.URL);
                         CompleteCurrentArticle(manualSkip: false);
                         return;
                     }
@@ -1633,7 +1633,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 "System.Text.RegularExpressions",
                 StringComparison.Ordinal))
         {
-            article.Trace.AWBSkipped(
+            article.Trace.TwainSkipped(
                 "Exception: " + exception.Message);
         }
 
@@ -1961,7 +1961,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 if (Options.SkipIfNoAlerts &&
                     Options.Alerts.Count == 0)
                 {
-                    CurrentArticle!.AWBSkip("Page has no alerts");
+                    CurrentArticle!.TwainSkip("Page has no alerts");
 
                     if (!MakeList.RemoveArticle(queueArticle.Name))
                     {
@@ -2064,7 +2064,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 Options.SkipRedirects &&
                 Tools.IsRedirect(page.Text))
             {
-                CurrentArticle!.AWBSkip("Page is a redirect");
+                CurrentArticle!.TwainSkip("Page is a redirect");
 
                 CompleteCurrentArticle(manualSkip: false);
                 return;
@@ -2076,7 +2076,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 Options.SkipIfInUse &&
                 CurrentArticle!.IsInUse)
             {
-                CurrentArticle.AWBSkip("Page contains {{inuse}}");
+                CurrentArticle.TwainSkip("Page contains {{inuse}}");
 
                 CompleteCurrentArticle(manualSkip: false);
                 return;
@@ -2246,12 +2246,12 @@ public partial class WorkspaceViewModel : ObservableObject
         // Evaluate alerts for the processed article.
         UpdateArticleAlerts();
 
-        // Preserve legacy AWB behavior: skip articles with no
+        // Preserve legacy Twain behavior: skip articles with no
         // enabled alerts when the option is selected.
         if (Options.SkipIfNoAlerts &&
             Options.Alerts.Count == 0)
         {
-            CurrentArticle!.AWBSkip("Page has no alerts");
+            CurrentArticle!.TwainSkip("Page has no alerts");
 
             CompleteCurrentArticle(manualSkip: false);
             return;
@@ -2522,7 +2522,7 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Copies the current workspace options into the shared AWB preferences.
+    /// Copies the current workspace options into the shared Twain preferences.
     /// </summary>
     public void UpdatePreferencesForSave()
     {

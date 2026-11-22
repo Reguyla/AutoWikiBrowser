@@ -136,9 +136,9 @@ public interface IMyTraceListener
     void WriteTemplateAdded(string templateName, string pluginName);
 }
 
-public interface IAWBTraceListener : IMyTraceListener
+public interface ITwainTraceListener : IMyTraceListener
 {
-    void AWBSkipped(string reason);
+    void TwainSkipped(string reason);
     void UserSkipped();
     void PluginSkipped();
 }

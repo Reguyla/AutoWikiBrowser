@@ -348,7 +348,7 @@ public partial class ShellWindow : Window
     }
 
     /// <summary>
-    /// Opens an AWB-compatible XML settings file.
+    /// Opens a compatible XML settings file.
     /// </summary>
     public async Task OpenSettingsAsync()
     {
@@ -396,7 +396,7 @@ public partial class ShellWindow : Window
     }
 
     /// <summary>
-    /// Saves the current AWB-compatible settings file.
+    /// Saves the current settings file.
     /// Opens Save As if no settings file has been selected.
     /// </summary>
     public async Task SaveSettingsAsync()
@@ -426,7 +426,7 @@ public partial class ShellWindow : Window
 
     /// <summary>
     /// Prompts for a destination and saves the current
-    /// AWB-compatible XML settings.
+    /// Twain-compatible XML settings.
     /// </summary>
     public async Task SaveSettingsAsAsync()
     {

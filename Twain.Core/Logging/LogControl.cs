@@ -28,7 +28,7 @@ namespace Twain.Core.Logging;
 public partial class LogControl : UserControl
 {
     protected ListMaker listMaker;
-    protected readonly List<AWBLogListener> FilteredItems = new List<AWBLogListener>();
+    protected readonly List<TwainLogListener> FilteredItems = new List<TwainLogListener>();
     private Twain.Core.Controls.AWBToolTip tooltip = new AWBToolTip();
 
     #region Public
@@ -44,7 +44,7 @@ public partial class LogControl : UserControl
         ResizeListView(lvSaved);
     }
 
-    public delegate void LogAddedToControl(bool skipped, AWBLogListener logListener);
+    public delegate void LogAddedToControl(bool skipped, TwainLogListener logListener);
     public event LogAddedToControl LogAdded;
 
     /// <summary>
@@ -53,7 +53,7 @@ public partial class LogControl : UserControl
     /// </summary>
     /// <param name="skipped"></param>
     /// <param name="logListener"></param>
-    public void AddLog(bool skipped, AWBLogListener logListener)
+    public void AddLog(bool skipped, TwainLogListener logListener)
     {
         if (skipped)
         {
@@ -85,8 +85,8 @@ public partial class LogControl : UserControl
     #endregion
 
     #region Private/Protected
-    private static AWBLogListener SelectedItem(object sender)
-    { return ((AWBLogListener)MenuItemOwner(sender).SelectedItems[0]); }
+    private static TwainLogListener SelectedItem(object sender)
+    { return ((TwainLogListener)MenuItemOwner(sender).SelectedItems[0]); }
 
     /// <summary>
     /// Returns the ListView object from which the menu item was clicked
@@ -134,7 +134,7 @@ public partial class LogControl : UserControl
 
     private string Filter
     {
-        get { return ((AWBLogListener)lvIgnored.SelectedItems[0]).SkipReason; }
+        get { return ((TwainLogListener)lvIgnored.SelectedItems[0]).SkipReason; }
     }
     #endregion
 
@@ -179,12 +179,12 @@ public partial class LogControl : UserControl
     {
         try
         {
-            ((AWBLogListener)((ListView)sender).FocusedItem).OpenInBrowser();
+            ((TwainLogListener)((ListView)sender).FocusedItem).OpenInBrowser();
         }
         catch { }
     }
 
-    private AWBLogListener previousLogListenerItem = new(string.Empty);
+    private TwainLogListener previousLogListenerItem = new(string.Empty);
 
     private void LogLists_MouseMove(object sender, MouseEventArgs e)
     {
@@ -193,7 +193,7 @@ public partial class LogControl : UserControl
             return;
 
         // find list view item under mouse, if any
-        AWBLogListener currentLogListenerItem = (AWBLogListener)((ListView)sender).GetItemAt(e.X, e.Y);
+        TwainLogListener currentLogListenerItem = (TwainLogListener)((ListView)sender).GetItemAt(e.X, e.Y);
 
         // if same item, don't redisplay tooltip (avoid rapidly flickering tooltip)
         if (currentLogListenerItem != null && currentLogListenerItem != previousLogListenerItem)
@@ -239,7 +239,7 @@ public partial class LogControl : UserControl
         {
             StringBuilder strList = new StringBuilder();
 
-            foreach (AWBLogListener a in listview.Items)
+            foreach (TwainLogListener a in listview.Items)
             {
                 strList.AppendLine(a.Output(logFileType));
             }
@@ -312,7 +312,7 @@ public partial class LogControl : UserControl
 
     private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        foreach (AWBLogListener item in CurrentlySelectedListView().SelectedItems)
+        foreach (TwainLogListener item in CurrentlySelectedListView().SelectedItems)
         {
             item.OpenInBrowser();
         }
@@ -320,7 +320,7 @@ public partial class LogControl : UserControl
 
     private void openHistoryInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        foreach (AWBLogListener item in CurrentlySelectedListView().SelectedItems)
+        foreach (TwainLogListener item in CurrentlySelectedListView().SelectedItems)
         {
             item.OpenHistoryInBrowser();
         }
@@ -328,7 +328,7 @@ public partial class LogControl : UserControl
 
     private void openDiffInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        foreach (AWBLogListener item in CurrentlySelectedListView().SelectedItems)
+        foreach (TwainLogListener item in CurrentlySelectedListView().SelectedItems)
         {
             item.OpenDiffInBrowser();
         }
@@ -345,7 +345,7 @@ public partial class LogControl : UserControl
         string filterBy = Filter;
 
         lvIgnored.BeginUpdate();
-        foreach (AWBLogListener item in lvIgnored.Items)
+        foreach (TwainLogListener item in lvIgnored.Items)
         {
             if ((compareMatch && String.Compare(item.SkipReason, filterBy, StringComparison.OrdinalIgnoreCase) == 0) // match
                 || (!compareMatch && String.Compare(item.SkipReason, filterBy, StringComparison.OrdinalIgnoreCase) != 0)) // no match
@@ -386,7 +386,7 @@ public partial class LogControl : UserControl
     {
         if (MenuItemOwner(sender) == lvIgnored)
         {
-            foreach (AWBLogListener log in FilteredItems)
+            foreach (TwainLogListener log in FilteredItems)
             { // AddRange accepts only an array or a ListViewItemCollection (the latter is only creatable by passing a listview object to the creator)
                 lvIgnored.Items.Add(log);
             }

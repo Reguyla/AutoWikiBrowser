@@ -516,11 +516,11 @@
                     <TextBlock Classes="twain-section-heading" Text="Edit summary settings" />
 
                     <CheckBox
-                        x:Name="AddUsingAwbCheckBox"
+                        x:Name="AddUsingTwainCheckBox"
                         Content="Add &quot;using Twain&quot; when deleting or protecting pages" />
 
                 <CheckBox
-                    x:Name="SuppressAwbCheckBox"
+                    x:Name="SuppressTwainCheckBox"
                     Grid.Row="6"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"

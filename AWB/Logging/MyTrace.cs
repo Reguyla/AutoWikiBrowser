@@ -26,7 +26,7 @@ namespace AutoWikiBrowser.Logging;
 /// Coordinates application logging and forwards AWB-specific logging events
 /// to the configured trace listeners.
 /// </summary>
-internal sealed class MyTrace : TraceManager, IAWBTraceListener
+internal sealed class MyTrace : TraceManager, ITwainTraceListener
 {
     /// <summary>
     /// Initializes configured log listeners and records the start of logging.
@@ -43,7 +43,7 @@ internal sealed class MyTrace : TraceManager, IAWBTraceListener
                 }
 
                 listener.Value.WriteBulletedLine(
-                    AWBLogListener.LoggingStartButtonClicked,
+                    TwainLogListener.LoggingStartButtonClicked,
                     true,
                     false,
                     true);
@@ -148,11 +148,11 @@ internal sealed class MyTrace : TraceManager, IAWBTraceListener
     /// <param name="reason">
     /// The reason the page was skipped.
     /// </param>
-    public void AWBSkipped(string reason)
+    public void TwainSkipped(string reason)
     {
         foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
         {
-            ((IAWBTraceListener)listener.Value).AWBSkipped(reason);
+            ((ITwainTraceListener)listener.Value).TwainSkipped(reason);
         }
     }
 
@@ -163,7 +163,7 @@ internal sealed class MyTrace : TraceManager, IAWBTraceListener
     {
         foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
         {
-            ((IAWBTraceListener)listener.Value).PluginSkipped();
+            ((ITwainTraceListener)listener.Value).PluginSkipped();
         }
     }
 
@@ -174,7 +174,7 @@ internal sealed class MyTrace : TraceManager, IAWBTraceListener
     {
         foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
         {
-            ((IAWBTraceListener)listener.Value).UserSkipped();
+            ((ITwainTraceListener)listener.Value).UserSkipped();
         }
     }
 
