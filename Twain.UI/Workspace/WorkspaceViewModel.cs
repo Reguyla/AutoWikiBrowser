@@ -2493,7 +2493,7 @@ public partial class WorkspaceViewModel : ObservableObject
         MakeList.LoadFromPreferences(Preferences);
         CustomModuleState.LoadFromPreferences(Preferences);
 
-        // Restore legacy-compatible Bot Settings.
+        // Restore Bot Settings from persisted preferences.
         BotSettings.AutoSaveDelay =
             Preferences.Editprefs.AutoDelay;
 
@@ -2502,6 +2502,18 @@ public partial class WorkspaceViewModel : ObservableObject
 
         BotSettings.SuppressUsingTwain =
             Preferences.Editprefs.SupressTag;
+
+        BotSettings.AutoSaveEnabled =
+           Preferences.Editprefs.AutoSaveEnabled;
+
+        BotSettings.NudgeEnabled =
+           Preferences.Editprefs.NudgeEnabled;
+
+        BotSettings.SkipAfterRepeatedNudge =
+            Preferences.Editprefs.SkipAfterRepeatedNudge;
+
+        BotSettings.AutomaticShutdownEnabled =
+           Preferences.Editprefs.AutomaticShutdownEnabled;
     }
 
     /// <summary>
@@ -2513,7 +2525,7 @@ public partial class WorkspaceViewModel : ObservableObject
         MakeList.SaveToPreferences(Preferences);
         CustomModuleState.SaveToPreferences(Preferences);
 
-        // Persist legacy-compatible Bot Settings.
+        // Persist Bot Settings to preferences.
         Preferences.Editprefs.AutoDelay =
             BotSettings.AutoSaveDelay;
 
@@ -2522,6 +2534,18 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Preferences.Editprefs.SupressTag =
             BotSettings.SuppressUsingTwain;
+
+        Preferences.Editprefs.AutoSaveEnabled =
+            BotSettings.AutoSaveEnabled;
+
+        Preferences.Editprefs.NudgeEnabled =
+           BotSettings.NudgeEnabled;
+
+        Preferences.Editprefs.SkipAfterRepeatedNudge =
+            BotSettings.SkipAfterRepeatedNudge;
+
+        Preferences.Editprefs.AutomaticShutdownEnabled =
+            BotSettings.AutomaticShutdownEnabled;
     }
 
     /// <summary>

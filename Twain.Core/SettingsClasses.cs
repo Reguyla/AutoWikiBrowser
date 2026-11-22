@@ -90,6 +90,8 @@ public class UserPrefs
     public string Protocol = "https://";
     public string LoginDomain = string.Empty;
 
+    public bool AutoSaveEnabled = false;
+
     public ListPrefs List;
     public FaRPrefs FindAndReplace;
     public EditPrefs Editprefs;
@@ -338,7 +340,34 @@ public class EditPrefs
     public int AutoDelay = 10;
     public int BotMaxEdits = 0;
     public bool SupressTag = false;
+
+    /// <summary>
+    /// Enables automatic article saving in bot mode.
+    /// Defaults to false for older AWB settings files.
+    /// </summary>
+    public bool AutoSaveEnabled = false;
+
     public bool RegexTypoFix = false;
+
+    /// <summary>
+    /// Enables the nudge timer when processing becomes stuck.
+    /// </summary>
+    public bool NudgeEnabled = false;
+
+    /// <summary>
+    /// Skips an article after repeated nudge failures.
+    /// </summary>
+    public bool SkipAfterRepeatedNudge = false;
+
+    /// <summary>
+    /// Enables a system action when processing completes.
+    /// </summary>
+    public bool AutomaticShutdownEnabled = false;
+
+    /// <summary>
+    /// Selected system action to perform after processing.
+    /// </summary>
+    public string ShutdownAction = "Shutdown";
 }
 
 // skip options
