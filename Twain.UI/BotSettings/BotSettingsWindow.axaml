@@ -35,8 +35,7 @@
 
                             <CheckBox
                                 Content="Auto save"
-                                IsChecked="{Binding AutoSaveEnabled}"
-                                IsEnabled="{Binding CanUseBotMode}" />
+                                IsChecked="{Binding AutoSaveEnabled}" />
 
 
                             <!-- Automatic saving limits -->
