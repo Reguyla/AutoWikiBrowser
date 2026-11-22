@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Controls.Lists;
+using Twain.UI.ViewModels.Lists;
 
 namespace Twain.UI.Controls.Lists;
 
@@ -19,6 +20,9 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     private readonly List<Article> _onlyInList2 = new();
     private readonly List<Article> _common = new();
 
+    private readonly MakeListViewModel _list1ViewModel;
+    private readonly MakeListViewModel _list2ViewModel;
+
     /// <summary>
     /// Raised when the user requests that a comparison result be used
     /// as the application's article list.
@@ -28,47 +32,46 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     /// <summary>
     /// Initializes a new empty list comparer window.
     /// </summary>
-    public ListComparerWindow()
+    public ListComparerWindow(Session session)
     {
+        ArgumentNullException.ThrowIfNull(session);
+
         InitializeComponent();
 
-        ListMaker1.MakeListEnabled = true;
-        ListMaker2.MakeListEnabled = true;
+        _list1ViewModel = new MakeListViewModel(session);
+        _list2ViewModel = new MakeListViewModel(session);
+
+        ListMaker1.DataContext = _list1ViewModel;
+        ListMaker2.DataContext = _list2ViewModel;
+
+        _list1ViewModel.Articles.CollectionChanged += (_, _) =>
+        {
+            UpdateControlState();
+            UpdateInputListCounts();
+        };
+
+        _list2ViewModel.Articles.CollectionChanged += (_, _) =>
+        {
+            UpdateControlState();
+            UpdateInputListCounts();
+        };
 
         UpdateControlState();
         UpdateResultCounts();
+        UpdateInputListCounts();
     }
 
     /// <summary>
-    /// Initializes a new list comparer window with articles in the first list.
+    /// Initializes a list comparer with articles in the first list.
     /// </summary>
-    /// <param name="articles">
-    /// The articles with which to populate the first comparison list.
-    /// </param>
     public ListComparerWindow(
+        Session session,
         IEnumerable<Article> articles)
-        : this()
+        : this(session)
     {
         ArgumentNullException.ThrowIfNull(articles);
 
-        ListMaker1.AddArticles(articles);
-    }
-
-    /// <summary>
-    /// Updates controls whose enabled state depends on the number of articles
-    /// in either comparison input list.
-    /// </summary>
-    /// <param name="sender">
-    /// The list maker that raised the article-count change event.
-    /// </param>
-    /// <param name="e">
-    /// The event data.
-    /// </param>
-    private void ListMaker_NoOfArticlesChanged(
-        object? sender,
-        EventArgs e)
-    {
-        UpdateControlState();
+        _list1ViewModel.ReplaceArticles(articles);
     }
 
     /// <summary>
@@ -87,8 +90,8 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     {
         ListComparisonResult result =
             ListComparerProcessor.Compare(
-                ListMaker1.GetArticleList(),
-                ListMaker2.GetArticleList());
+                _list1ViewModel.Articles.ToList(),
+                _list2ViewModel.Articles.ToList());
 
         _onlyInList1.Clear();
         _onlyInList1.AddRange(
@@ -103,6 +106,15 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
             result.Common);
 
         RefreshResultLists();
+    }
+
+    private void UpdateInputListCounts()
+    {
+        List1CountText.Text =
+            $"{_list1ViewModel.Articles.Count:N0} pages";
+
+        List2CountText.Text =
+            $"{_list2ViewModel.Articles.Count:N0} pages";
     }
 
     /// <summary>
@@ -159,8 +171,8 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     private void UpdateControlState()
     {
         CompareButton.IsEnabled =
-            ListMaker1.Count > 0 &&
-            ListMaker2.Count > 0;
+            _list1ViewModel.Articles.Count > 0 &&
+            _list2ViewModel.Articles.Count > 0;
     }
 
     /// <summary>
@@ -735,7 +747,7 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
             return;
 
         AddResultToListMaker(
-            ListMaker1,
+            _list1ViewModel,
             sourceListBox);
     }
 
@@ -760,7 +772,7 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
             return;
 
         AddResultToListMaker(
-            ListMaker2,
+            _list2ViewModel,
             sourceListBox);
     }
 
@@ -786,33 +798,28 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
         return contextMenu.PlacementTarget as ListBox;
     }
 
+    private void CloseButton_Click(
+    object? sender,
+    Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Close();
+    }
+
     /// <summary>
-    /// Adds all articles displayed in a comparison-result list to the
-    /// supplied ListMaker.
+    /// Adds all articles displayed in a comparison-result list
+    /// to the destination list view model.
     /// </summary>
-    /// <param name="listMaker">
-    /// The destination ListMaker.
-    /// </param>
-    /// <param name="sourceListBox">
-    /// The comparison-result list containing the articles to transfer.
-    /// </param>
     private static void AddResultToListMaker(
-        Twain.UI.Lists.ListMakerControl listMaker,
+        MakeListViewModel destination,
         ListBox sourceListBox)
     {
-        List<Article> articles = new();
-
         foreach (object? item in sourceListBox.Items)
         {
             if (item is Article article)
-                articles.Add(article);
+            {
+                destination.Articles.Add(article);
+            }
         }
-
-        if (articles.Count == 0)
-            return;
-
-        listMaker.AddArticles(
-            articles);
     }
 
 }

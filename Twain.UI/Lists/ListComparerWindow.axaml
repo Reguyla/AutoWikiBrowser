@@ -4,15 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:lists="using:Twain.UI.Lists"
+    xmlns:makeList="using:Twain.UI.Controls.Lists"
     x:Class="Twain.UI.Controls.Lists.ListComparerWindow"
     mc:Ignorable="d"
-    d:DesignWidth="1000"
-    d:DesignHeight="520"
-    Width="1000"
-    Height="520"
-    MinWidth="800"
-    MinHeight="420"
+    d:DesignWidth="1450"
+    d:DesignHeight="650"
+    Width="1450"
+    Height="650"
+    MinWidth="1100"
+    MinHeight="500"
     WindowStartupLocation="CenterOwner"
     Title="List comparer"
     Background="{DynamicResource TwainApplicationBackgroundBrush}"
@@ -24,10 +24,25 @@
         ColumnSpacing="{DynamicResource TwainSpacingLarge}">
 
         <!-- First list -->
-        <GroupBox Header="List 1">
-            <lists:ListMakerControl
-                x:Name="ListMaker1"
-                NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
+        <GroupBox>
+            <GroupBox.Header>
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      MinWidth="280">
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Text="List 1" />
+
+                    <TextBlock
+                        x:Name="List1CountText"
+                        Grid.Column="2"
+                        Text="0 pages"
+                        Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+                </Grid>
+            </GroupBox.Header>
+
+            <makeList:MakeListControl
+                x:Name="ListMaker1" />
         </GroupBox>
 
         <!-- Comparison command -->
@@ -40,15 +55,27 @@
             IsEnabled="False"
             Click="CompareButton_Click" />
 
-        <!-- Second list -->
-        <GroupBox
-            Grid.Column="2"
-            Header="List 2">
+            <!-- Second list -->
+            <GroupBox Grid.Column="2">
+                <GroupBox.Header>
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          MinWidth="280">
 
-            <lists:ListMakerControl
-                x:Name="ListMaker2"
-                NoOfArticlesChanged="ListMaker_NoOfArticlesChanged" />
-        </GroupBox>
+                        <TextBlock
+                            Grid.Column="0"
+                            Text="List 2" />
+
+                        <TextBlock
+                            x:Name="List2CountText"
+                            Grid.Column="2"
+                            Text="0 pages"
+                            Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+                    </Grid>
+                </GroupBox.Header>
+
+                <makeList:MakeListControl
+                    x:Name="ListMaker2" />
+            </GroupBox>
 
         <!-- Comparison results -->
         <GroupBox
@@ -313,13 +340,25 @@
                         </ComboBox>
                     </StackPanel>
 
-                    <Button
-                        x:Name="ClearButton"
-                        Classes="twain-command-button"
+                    <StackPanel
                         Grid.Column="1"
-                        Content="Clear all"
-                        IsEnabled="False"
-                        Click="ClearButton_Click" />
+                        Orientation="Horizontal"
+                        Spacing="{DynamicResource TwainSpacingSmall}">
+
+                        <Button
+                            x:Name="ClearButton"
+                            Classes="twain-command-button"
+                            Content="Clear all"
+                            IsEnabled="False"
+                            Click="ClearButton_Click" />
+
+                        <Button
+                            Classes="twain-command-button"
+                            Content="Close"
+                            MinWidth="85"
+                            Click="CloseButton_Click" />
+
+                    </StackPanel>
                 </Grid>
             </Grid>
         </GroupBox>

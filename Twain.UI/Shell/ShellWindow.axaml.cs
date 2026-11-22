@@ -183,12 +183,26 @@ public partial class ShellWindow : Window
     /// <summary>
     /// Opens the list comparer window.
     /// </summary>
+
     public async void OpenListComparer()
     {
-        ListComparerWindow window = new();
+        if (DataContext is not ShellViewModel viewModel)
+        {
+            return;
+        }
+
+        ListComparerWindow window =
+            new(viewModel.Workspace.Session);
+
+        window.UseListRequested += (_, articles) =>
+        {
+            viewModel.Workspace.MakeList.ReplaceArticles(articles);
+            window.Close();
+        };
 
         await window.ShowDialog(this);
     }
+
 
     private void ListComparerMenuItem_Click(
         object? sender,
