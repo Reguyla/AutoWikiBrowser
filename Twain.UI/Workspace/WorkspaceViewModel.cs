@@ -1387,12 +1387,9 @@ public partial class WorkspaceViewModel : ObservableObject
             // any manual changes.
             string finalSummary = Editor.CalculatedEditSummary;
 
-            finalSummary = Summary.CorrectSectionEditSummary(
-                finalSummary,
-                savingArticle.OriginalArticleText,
-                articleText);
+            finalSummary = AppendUsingTwainSummary(finalSummary);
 
-                try
+            try
                 {
                     SaveInfo saveInfo =
                         await Session.Editor.SaveArticleAsync(
@@ -1495,6 +1492,41 @@ public partial class WorkspaceViewModel : ObservableObject
                 _pendingSaveOperationId = 0;
             }
         }
+    }
+
+    /// <summary>
+    /// Appends the application attribution when appropriate,
+    /// respecting the current bot settings and wiki configuration.
+    /// </summary>
+    private string AppendUsingTwainSummary(string summary)
+    {
+        // Preserve the legacy bot-account suppression behavior.
+        if (Session.IsBot &&
+            BotSettings.SuppressUsingTwain)
+        {
+            return summary;
+        }
+
+        // Legacy attribution applies only to Wikimedia projects.
+        if (!Variables.IsWikimediaProject)
+        {
+            return summary;
+        }
+
+        // MediaWiki edit tags already identify the application.
+        if (Variables.TagEdits)
+        {
+            return summary;
+        }
+
+        string attribution = Variables.SummaryTag;
+
+        if (string.IsNullOrEmpty(attribution))
+        {
+            return summary;
+        }
+
+        return Summary.Trim(summary) + attribution;
     }
 
     /// <summary>
@@ -2460,6 +2492,16 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.LoadFromPreferences(Preferences);
         MakeList.LoadFromPreferences(Preferences);
         CustomModuleState.LoadFromPreferences(Preferences);
+
+        // Restore legacy-compatible Bot Settings.
+        BotSettings.AutoSaveDelay =
+            Preferences.Editprefs.AutoDelay;
+
+        BotSettings.MaximumEdits =
+            Preferences.Editprefs.BotMaxEdits;
+
+        BotSettings.SuppressUsingTwain =
+            Preferences.Editprefs.SupressTag;
     }
 
     /// <summary>
@@ -2470,6 +2512,16 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.SaveToPreferences(Preferences);
         MakeList.SaveToPreferences(Preferences);
         CustomModuleState.SaveToPreferences(Preferences);
+
+        // Persist legacy-compatible Bot Settings.
+        Preferences.Editprefs.AutoDelay =
+            BotSettings.AutoSaveDelay;
+
+        Preferences.Editprefs.BotMaxEdits =
+            BotSettings.MaximumEdits;
+
+        Preferences.Editprefs.SupressTag =
+            BotSettings.SuppressUsingTwain;
     }
 
     /// <summary>
