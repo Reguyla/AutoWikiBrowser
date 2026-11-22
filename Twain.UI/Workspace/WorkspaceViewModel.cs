@@ -1387,20 +1387,27 @@ public partial class WorkspaceViewModel : ObservableObject
             // any manual changes.
             string finalSummary = Editor.CalculatedEditSummary;
 
+            // Correct an invalid section prefix before saving.
+            finalSummary = Summary.CorrectSectionEditSummary(
+                finalSummary,
+                savingArticle.OriginalArticleText,
+                articleText);
+
+            // Apply attribution to the final submitted summary.
             finalSummary = AppendUsingTwainSummary(finalSummary);
 
             try
-                {
-                    SaveInfo saveInfo =
-                        await Session.Editor.SaveArticleAsync(
-                            articleText,
-                            finalSummary,
-                            Options.MinorEdit,
-                            WatchOptions.NoChange);
+            {
+                SaveInfo saveInfo =
+                    await Session.Editor.SaveArticleAsync(
+                        articleText,
+                        finalSummary,
+                        Options.MinorEdit,
+                        WatchOptions.NoChange);
 
-                    // A confirmed API success must be recorded,
-                    // even if processing was stopped meanwhile.
-                    if (!ReferenceEquals(
+                // A confirmed API success must be recorded,
+                // even if processing was stopped meanwhile.
+                if (!ReferenceEquals(
                             CurrentArticle,
                             savingArticle))
                     {
@@ -1495,25 +1502,23 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Appends the application attribution when appropriate,
-    /// respecting the current bot settings and wiki configuration.
+    /// Appends Twain attribution to the edit summary when enabled,
+    /// regardless of the current MediaWiki project.
+    /// </summary>
+    /// <summary>
+    /// Appends application attribution to the edit summary unless
+    /// the user has explicitly disabled it.
     /// </summary>
     private string AppendUsingTwainSummary(string summary)
     {
-        // Preserve the legacy bot-account suppression behavior.
-        if (Session.IsBot &&
-            BotSettings.SuppressUsingTwain)
+        // Attribution is enabled by default for all users and wikis.
+        if (BotSettings.SuppressUsingTwain)
         {
             return summary;
         }
 
-        // Legacy attribution applies only to Wikimedia projects.
-        if (!Variables.IsWikimediaProject)
-        {
-            return summary;
-        }
-
-        // MediaWiki edit tags already identify the application.
+        // Avoid duplicating attribution when an application edit tag
+        // already identifies Twain.
         if (Variables.TagEdits)
         {
             return summary;
