@@ -1952,6 +1952,7 @@ public partial class WorkspaceViewModel : ObservableObject
         }
 
         Article queueArticle = _activeQueueArticle;
+        bool articleSkipped = false;
 
         switch (result.Outcome)
         {
@@ -1968,6 +1969,8 @@ public partial class WorkspaceViewModel : ObservableObject
                         StopProcessing();
                         return;
                     }
+
+                    articleSkipped = true;
                 }
                 else
                 {
@@ -1984,6 +1987,8 @@ public partial class WorkspaceViewModel : ObservableObject
                     StopProcessing();
                     return;
                 }
+
+                articleSkipped = true;
                 break;
 
             case ArticleProcessingOutcome.Failed:
@@ -1995,6 +2000,14 @@ public partial class WorkspaceViewModel : ObservableObject
             default:
                 StopProcessing();
                 return;
+        }
+
+        // Count only articles successfully removed by Preparse.
+        // Retained articles and failed processing are not skips.
+        if (articleSkipped)
+        {
+            _sessionCounters.NumberOfIgnoredEdits++;
+            OnPropertyChanged(nameof(SkippedArticles));
         }
 
         AdvancePreparseQueue();
