@@ -243,7 +243,7 @@ public static class Namespace
     }
 
     /// <summary>
-    /// Checks if given namespaces are sufficient for AWB to function properly and
+    /// Checks if given namespaces are sufficient for Twain to function properly and
     /// that their format is expected.
     /// </summary>
     /// <param name="namespaces">namespaces to verify</param>

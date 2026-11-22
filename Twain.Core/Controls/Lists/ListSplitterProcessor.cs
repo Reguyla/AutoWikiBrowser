@@ -218,7 +218,7 @@ public static class ListSplitterProcessor
     }
 
     /// <summary>
-    /// Saves the supplied articles to numbered AWB settings files.
+    /// Saves the supplied articles to numbered Twain settings files.
     /// </summary>
     /// <param name="prefs">
     /// The user preferences used as the basis for each settings file.

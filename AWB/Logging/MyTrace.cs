@@ -23,7 +23,7 @@ using Twain.Core.Logging;
 namespace AutoWikiBrowser.Logging;
 
 /// <summary>
-/// Coordinates application logging and forwards AWB-specific logging events
+/// Coordinates application logging and forwards Twain-specific logging events
 /// to the configured trace listeners.
 /// </summary>
 internal sealed class MyTrace : TraceManager, ITwainTraceListener
@@ -37,7 +37,7 @@ internal sealed class MyTrace : TraceManager, ITwainTraceListener
         {
             foreach (KeyValuePair<string, IMyTraceListener> listener in Listeners)
             {
-                if (listener.Key == "AWB")
+                if (listener.Key == "Twain")
                 {
                     continue;
                 }
@@ -56,7 +56,7 @@ internal sealed class MyTrace : TraceManager, ITwainTraceListener
     }
 
     /// <summary>
-    /// Handles a logging configuration error and stops the current AWB
+    /// Handles a logging configuration error and stops the current Twain
     /// operation.
     /// </summary>
     /// <param name="ex">
@@ -79,7 +79,7 @@ internal sealed class MyTrace : TraceManager, ITwainTraceListener
     /// Gets a value indicating whether any non-default log listener is open.
     /// </summary>
     internal bool HaveOpenFile =>
-        Listeners.Any(listener => listener.Key != "AWB");
+        Listeners.Any(listener => listener.Key != "Twain");
 
     /// <summary>
     /// Adds or replaces a trace listener with the specified key.
@@ -140,10 +140,10 @@ internal sealed class MyTrace : TraceManager, ITwainTraceListener
     // the application layer decide whether the current operation should stop.
     //
     // TODO: Confirm whether every registered IMyTraceListener is required to
-    // implement IAWBTraceListener. If not, replace direct casts with guarded
+    // implement ITwainTraceListener. If not, replace direct casts with guarded
     // interface checks.
     /// <summary>
-    /// Records that AutoWikiBrowser skipped the current page.
+    /// Records that Twain skipped the current page.
     /// </summary>
     /// <param name="reason">
     /// The reason the page was skipped.

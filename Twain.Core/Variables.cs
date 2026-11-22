@@ -130,7 +130,7 @@ public static partial class Variables
         IndexPHP = "index.php";
         ApiPHP = "api.php";
         TypoSummaryTag = "typos fixed: ";
-        AWBDefaultSummaryTag();
+        TwainDefaultSummaryTag();
         mSummaryTag = "using ";
         Protocol = "http://";
         NotificationsEnabled = true;
@@ -469,7 +469,7 @@ public static partial class Variables
     public static string TypoSummaryTag { get; private set; }
 
     // TODO: Replace legacy edit-summary tag construction with a focused summary
-    // formatter that does not depend on global state or historical AWB naming.
+    // formatter that does not depend on global state or historical Twain naming.
 
     /// <summary>
     /// Stores the localized equivalent of <c>using</c> used when constructing the
@@ -498,7 +498,7 @@ public static partial class Variables
         {
             if (TagEdits)
             {
-                // If we're applying an edit tag, don't append "using AWB" to the
+                // If we're applying an edit tag, don't append "using Twain" to the
                 // edit summary.
                 return string.Empty;
             }
@@ -507,7 +507,7 @@ public static partial class Variables
                 " " +
                 mSummaryTag +
                 " " +
-                WPAWB;
+                WPTwain;
 
             text +=
                 " (" +
@@ -522,7 +522,7 @@ public static partial class Variables
     /// Gets the wiki-text link or name used to identify AutoWikiBrowser in edit
     /// summaries.
     /// </summary>
-    public static string WPAWB { get; private set; }
+    public static string WPTwain { get; private set; }
 
     /// <summary>
     /// Creates an empty alias collection for each namespace in the supplied
@@ -557,10 +557,10 @@ public static partial class Variables
     /// Restores the default AutoWikiBrowser attribution text used in edit
     /// summaries.
     /// </summary>
-    private static void AWBDefaultSummaryTag()
+    private static void TwainDefaultSummaryTag()
     {
         mSummaryTag = "using ";
-        WPAWB = "[[Project:AWB|AWB]]";
+        WPTwain = "Twain";
     }
 
     /// <summary>
@@ -717,13 +717,13 @@ public static partial class Variables
     /// <returns>
     /// A formatted wiki-text line containing the application link and version.
     /// </returns>
-    // TODO: Move AWB-branded diagnostic/log formatting out of Variables during the
+    // TODO: Move Twain-branded diagnostic/log formatting out of Variables during the
     // broader Twain naming and diagnostics cleanup.
     public static string AWBVersionString(string version)
     {
         return
             "*" +
-            WPAWB +
+            WPTwain +
             " version " +
             version +
             Environment.NewLine;
@@ -1056,7 +1056,7 @@ public static partial class Variables
                 RegexOptions.Compiled);
 
         TypoSummaryTag = "typos fixed: ";
-        AWBDefaultSummaryTag();
+        TwainDefaultSummaryTag();
         mSummaryTag = "using";
         NotificationsEnabled = true;
     }
@@ -1360,7 +1360,7 @@ public static partial class Variables
         Namespaces[829] = "Module talk:";
 
         mSummaryTag = "using";
-        WPAWB = "[[Project:AWB|AWB]]";
+        WPTwain = "Twain";
 
         NamespaceAliases = CanonicalNamespaceAliases;
 
@@ -1410,7 +1410,7 @@ public static partial class Variables
                 if (projectName == ProjectEnum.wikipedia)
                 {
                     SetToEnglish();
-                    WPAWB = "[[WP:AWB|AWB]]";
+                    WPTwain = "Twain";
                 }
 
                 TypoSummaryTag =
@@ -1419,7 +1419,7 @@ public static partial class Variables
 
             case "ar":
                 mSummaryTag = string.Empty;
-                WPAWB = "باستخدام [[Project:أوب|أوب]]";
+                WPTwain = "باستخدام [[Project:أوب|أوب]]";
                 Stub =
                     @"[^{}|]*?(?:[Ss]tub|بذرة|بذور)[^{}]*?";
                 TypoSummaryTag =
@@ -1428,7 +1428,7 @@ public static partial class Variables
 
             case "arz":
                 mSummaryTag = string.Empty;
-                WPAWB = "عن طريق [[Project:AWB|اوب]]";
+                WPTwain = "عن طريق [[Project:AWB|اوب]]";
                 Stub =
                     @"[^{}|]*?(?:[Ss]tub|تقاوى|بذرة)[^{}]*?";
                 TypoSummaryTag =
@@ -1441,12 +1441,12 @@ public static partial class Variables
 
             case "bg":
                 mSummaryTag = "редактирано с";
-                WPAWB = "AWB";
+                WPTwain = "Twain";
                 break;
 
             case "bn":
                 mSummaryTag = string.Empty;
-                WPAWB =
+                WPTwain =
                     "[[Project:অউব্রা|অউব্রা]] ব্যবহার করে";
                 TypoSummaryTag =
                     "বানান সংশোধন: ";
@@ -1454,14 +1454,14 @@ public static partial class Variables
 
             case "ca":
                 mSummaryTag = string.Empty;
-                WPAWB =
+                WPTwain =
                     "[[Viquipèdia:AutoWikiBrowser|AWB]]";
                 break;
 
             case "cs":
                 mSummaryTag = "za použití";
-                WPAWB =
-                    "[[Wikipedie:AutoWikiBrowser|AWB]]";
+                WPTwain =
+                    "Twain";
                 Stub =
                     @"[^{}|]*?([Pp]ahýl)";
                 break;
@@ -1473,7 +1473,7 @@ public static partial class Variables
 
             case "da":
                 mSummaryTag = "ved brug af";
-                WPAWB = "[[en:WP:AWB|AWB]]";
+                WPTwain = "Twain";
                 break;
 
             case "de":
@@ -1495,7 +1495,7 @@ public static partial class Variables
 
             case "eo":
                 mSummaryTag = "per";
-                WPAWB =
+                WPTwain =
                     "[[Vikipedio:AutoWikiBrowser|AWB]]";
                 TypoSummaryTag =
                     "Skribmaniero: ";
@@ -1503,43 +1503,43 @@ public static partial class Variables
 
             case "es":
                 mSummaryTag = "(Usando";
-                WPAWB =
-                    "[[:w:WP:AWB|AWB]])";
+                WPTwain =
+                    "Twain)";
                 break;
 
             case "fa":
                 mSummaryTag = string.Empty;
-                WPAWB =
-                    "با استفاده از [[Project:AutoWikiBrowser|AWB]]";
+                WPTwain =
+                    "با استفاده از Twain";
                 break;
 
             case "fr":
                 mSummaryTag = "avec";
-                WPAWB =
-                    "[[Wikipédia:AutoWikiBrowser|AWB]]";
+                WPTwain =
+                    "Twain";
                 break;
 
             case "he":
                 mSummaryTag = "באמצעות";
-                WPAWB =
-                    "[[ויקיפדיה:AutoWikiBrowser|AWB]]";
+                WPTwain =
+                    "Twain";
                 break;
 
             case "hi":
                 mSummaryTag = string.Empty;
-                WPAWB =
+                WPTwain =
                     "[[विकिपीडिया:ऑटोविकिब्राउज़र|AWB]] के साथ";
                 break;
 
             case "hu":
                 mSummaryTag = string.Empty;
-                WPAWB =
-                    "[[Wikipédia:AutoWikiBrowser|AWB]]";
+                WPTwain =
+                    "Twain";
                 break;
 
             case "hy":
                 mSummaryTag = "oգտվելով";
-                WPAWB =
+                WPTwain =
                     "[[Վիքիպեդիա:ԱվտոՎիքիԲրաուզեր|ԱՎԲ]]";
                 Stub =
                     @"[^{}|]*?([Ss]tub|Անավարտ|Զարգացնել[^{}]*?)";
@@ -1552,8 +1552,8 @@ public static partial class Variables
 
             case "ku":
                 mSummaryTag = string.Empty;
-                WPAWB =
-                    "[[Wîkîpediya:AutoWikiBrowser|AWB]]";
+                WPTwain =
+                    "Twain";
                 break;
 
             case "ms":
@@ -1562,7 +1562,7 @@ public static partial class Variables
 
             case "ne":
                 mSummaryTag = string.Empty;
-                WPAWB =
+                WPTwain =
                     "स्वतःविकी ब्राउजर प्रयोग गर्दै";
                 break;
 
@@ -1619,7 +1619,7 @@ public static partial class Variables
 
             case "sr":
                 mSummaryTag = "користећи";
-                WPAWB = "[[Project:AWB|AWB]]";
+                WPTwain = "Twain";
                 UntitledHeading =
                     "Први поднаслов";
                 break;
@@ -1634,8 +1634,8 @@ public static partial class Variables
 
             case "tr":
                 mSummaryTag = string.Empty;
-                WPAWB =
-                    "[[Vikipedi:AWB|AWB]] ile ";
+                WPTwain =
+                    "Twain ile ";
                 TypoSummaryTag =
                     "yazış şekli: ";
                 break;
@@ -1662,7 +1662,7 @@ public static partial class Variables
                 Stub =
                     ".*?(?:小作品|[Ss]tub)";
                 mSummaryTag = "由";
-                WPAWB =
+                WPTwain =
                     "[[维基百科:自动维基浏览器|自动维基浏览器]]协助";
                 UntitledHeading =
                     "無標題";
@@ -1670,14 +1670,14 @@ public static partial class Variables
 
             case "zh-classical":
                 mSummaryTag = "藉";
-                WPAWB =
+                WPTwain =
                     "[[維基大典:自動維基瀏覽器|自動維基瀏覽器]]之助";
                 break;
 
             case "zh-yue":
                 mSummaryTag = "用";
-                WPAWB =
-                    "[[Wikipedia:AutoWikiBrowser|AWB]]幫手";
+                WPTwain =
+                    "Twain幫手";
                 break;
 
                 // Add additional language-specific overrides here only when required.

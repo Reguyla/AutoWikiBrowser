@@ -239,8 +239,8 @@ namespace Twain.Core.Lists
         /// Gets or sets the special-filter settings represented by this form.
         /// </summary>
         /// <remarks>
-        /// This property builds or applies an AWB settings object from the current
-        /// state of the form's child controls. It is used by AWB's own configuration
+        /// This property builds or applies an Twain settings object from the current
+        /// state of the form's child controls. It is used by Twain's configuration
         /// handling and must not be serialized independently by the Windows Forms
         /// designer.
         /// </remarks>

@@ -93,7 +93,7 @@ public sealed class CustomModuleState
     }
 
     /// <summary>
-    /// Restores custom module settings from AWB preferences.
+    /// Restores custom module settings from Twain preferences.
     /// </summary>
     public void LoadFromPreferences(UserPrefs preferences)
     {
@@ -109,7 +109,7 @@ public sealed class CustomModuleState
     }
 
     /// <summary>
-    /// Copies the current custom module settings into AWB preferences.
+    /// Copies the current custom module settings into Twain preferences.
     /// </summary>
     public void SaveToPreferences(UserPrefs preferences)
     {

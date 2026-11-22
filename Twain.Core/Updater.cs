@@ -33,7 +33,7 @@ public static class Updater
     static Updater()
     {
         AWBDirectory = Path.GetDirectoryName(Application.ExecutablePath) + "\\";
-        Result = AWBEnabledStatus.None;
+        Result = TwainEnabledStatus.None;
         NewerVersions = new();
     }
 
@@ -41,7 +41,7 @@ public static class Updater
     /// Available Enabled statuses for AWB
     /// </summary>
     [Flags]
-    public enum AWBEnabledStatus
+    public enum TwainEnabledStatus
     {
         None = 0,
         Error = 1,
@@ -53,7 +53,7 @@ public static class Updater
     /// <summary>
     /// Last AWBEnabledStatus Result from CheckPage Check
     /// </summary>
-    public static AWBEnabledStatus Result { get; private set; }
+    public static TwainEnabledStatus Result { get; private set; }
 
     /// <summary>
     /// Text (JSON) of the Current AWB Global CheckPage (en.wp)
@@ -142,7 +142,7 @@ public static class Updater
     /// </remarks>
     private static void UpdateFunc()
     {
-        Result = AWBEnabledStatus.Error;
+        Result = TwainEnabledStatus.Error;
 
         try
         {
@@ -170,10 +170,10 @@ public static class Updater
                 IsCurrentVersionEnabled(
                     validEnabledVersions,
                     currentVersionText)
-                    ? AWBEnabledStatus.Enabled
-                    : AWBEnabledStatus.Disabled;
+                    ? TwainEnabledStatus.Enabled
+                    : TwainEnabledStatus.Disabled;
 
-            if (Result == AWBEnabledStatus.Disabled)
+            if (Result == TwainEnabledStatus.Disabled)
             {
                 return;
             }
@@ -186,7 +186,7 @@ public static class Updater
             if (newerVersions.Count > 0)
             {
                 NewerVersions.AddRange(newerVersions);
-                Result |= AWBEnabledStatus.OptionalUpdate;
+                Result |= TwainEnabledStatus.OptionalUpdate;
             }
         }
         catch (Exception ex)
@@ -196,7 +196,7 @@ public static class Updater
                 or WebException
                 or HttpRequestException)
         {
-            Result = AWBEnabledStatus.Error;
+            Result = TwainEnabledStatus.Error;
         }
     }
 

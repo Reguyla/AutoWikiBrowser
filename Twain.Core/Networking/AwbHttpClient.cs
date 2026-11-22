@@ -205,7 +205,7 @@ namespace Twain.Core.Networking
         /// Optional Twain instance containing the current session.
         /// </param>
         /// <param name="userAgent">
-        /// Optional explicit user-agent. When omitted, the appropriate AWB
+        /// Optional explicit user-agent. When omitted, the appropriate Twain
         /// user-agent is selected from the supplied session.
         /// </param>
         /// <returns>A configured HTTP client.</returns>

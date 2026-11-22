@@ -30,10 +30,10 @@ public static class RegistryUtils
     private const string KeyPrefix = "Software\\AutoWikiBrowser\\";
 
     /// <summary>
-    /// Gets a string value from an AWB registry subkey.
+    /// Gets a string value from a Twain registry subkey.
     /// </summary>
     /// <param name="keyNameSuffix">
-    /// The registry subkey and value name below the AWB registry area.
+    /// The registry subkey and value name below the Twain registry area.
     /// </param>
     /// <param name="defaultValue">
     /// The value returned when the requested registry value does not exist.
@@ -66,9 +66,9 @@ public static class RegistryUtils
     }
 
     /// <summary>
-    /// Writes a string value to an AWB registry subkey.
+    /// Writes a string value to an Twain registry subkey.
     /// </summary>
-    /// <param name="keyNameSuffix">The registry subkey below the AWB registry area.</param>
+    /// <param name="keyNameSuffix">The registry subkey below the Twain registry area.</param>
     /// <param name="valueName">The name of the registry value.</param>
     /// <param name="value">The value to write.</param>
     public static void SetValue(
@@ -81,9 +81,9 @@ public static class RegistryUtils
     }
 
     /// <summary>
-    /// Opens or creates a writable registry key in the AWB registry area.
+    /// Opens or creates a writable registry key in the Twain registry area.
     /// </summary>
-    /// <param name="keyNameSuffix">The registry subkey below the AWB registry area.</param>
+    /// <param name="keyNameSuffix">The registry subkey below the Twain registry area.</param>
     /// <returns>The writable registry key.</returns>
     /// <remarks>
     /// The caller is responsible for disposing the returned registry key.
@@ -97,9 +97,9 @@ public static class RegistryUtils
     }
 
     /// <summary>
-    /// Opens a read-only registry key in the AWB registry area.
+    /// Opens a read-only registry key in the Twain registry area.
     /// </summary>
-    /// <param name="keyNameSuffix">The registry subkey below the AWB registry area.</param>
+    /// <param name="keyNameSuffix">The registry subkey below the Twain registry area.</param>
     /// <returns>The registry key, or null if it does not exist.</returns>
     /// <remarks>
     /// The caller is responsible for disposing the returned registry key.
@@ -111,7 +111,7 @@ public static class RegistryUtils
     /// <summary>
     /// Deletes a registry subkey.
     /// </summary>
-    /// <param name="keyNameSuffix">The registry subkey below the AWB registry area.</param>
+    /// <param name="keyNameSuffix">The registry subkey below the Twain registry area.</param>
     /// <param name="throwOnMissingSubKey">
     /// Whether to throw an exception when the subkey does not exist.
     /// </param>
@@ -125,7 +125,7 @@ public static class RegistryUtils
     /// <summary>
     /// Deletes a registry subkey.
     /// </summary>
-    /// <param name="keyNameSuffix">The registry subkey below the AWB registry area.</param>
+    /// <param name="keyNameSuffix">The registry subkey below the Twain registry area.</param>
     public static void DeleteSubKey(string keyNameSuffix) =>
         Registry.CurrentUser.DeleteSubKey(
             BuildKeyName(keyNameSuffix));

@@ -2309,7 +2309,7 @@ Message: {2}
     }
 
     /// <summary>
-    /// Copies text to the clipboard and keeps it available after AWB exits.
+    /// Copies text to the clipboard and keeps it available after Twain exits.
     /// </summary>
     /// <param name="text">The text to copy.</param>
     public static void CopyToClipboard(string text)
@@ -2322,7 +2322,7 @@ Message: {2}
     /// </summary>
     /// <param name="data">The data to place on the clipboard.</param>
     /// <param name="copy">
-    /// Whether the clipboard data should remain available after AWB exits.
+    /// Whether the clipboard data should remain available after Twain exits.
     /// </param>
     public static void CopyToClipboard(object data, bool copy)
     {
@@ -4343,7 +4343,7 @@ Message: {2}
     /// </param>
     /// <returns>
     /// true if the exception was handled and the caller should retry;
-    /// false if the exception should be rethrown.
+    /// false if the exception should be re-thrown.
     /// </returns>
     public static bool HandleHttpException(HttpRequestException exception)
     {
@@ -4364,13 +4364,13 @@ Message: {2}
     }
 
     /// <summary>
-    /// Gets the cookie container associated with the supplied AWB session and URL.
+    /// Gets the cookie container associated with the supplied Twain session and URL.
     /// </summary>
     /// <param name="url">
     /// The URL for which cookies are requested.
     /// </param>
     /// <param name="awb">
-    /// The AWB instance containing the session and editor information.
+    /// The Twain instance containing the session and editor information.
     /// </param>
     /// <returns>
     /// The session editor's cookie container when the URL belongs to that editor;
@@ -4405,7 +4405,7 @@ Message: {2}
     }
 
     /// <summary>
-    /// Gets the appropriate user-agent string for the supplied AWB session.
+    /// Gets the appropriate user-agent string for the supplied Twain session.
     /// </summary>
     /// <param name="awb">
     /// Optional instance containing the current session.

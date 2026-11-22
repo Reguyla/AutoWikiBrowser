@@ -168,7 +168,7 @@ public class NoFlickerExtendedListView : ListView, IListViewItemComparerFactory
 
                 continue;
             }
-            // Performance: Skipped By is "User" or "AWB" only so is always defined by header size not content
+            // Performance: Skipped By is "User" or "Twain" only so is always defined by header size not content
             else if (head.Text.Equals("Skipped By") && Items.Count <= 1)
             {
                 head.AutoResize(ColumnHeaderAutoResizeStyle.HeaderSize);

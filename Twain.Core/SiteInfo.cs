@@ -724,7 +724,7 @@ public class SiteInfo : IXmlSerializable
     public string CategoryCollation { get; private set; }
 
     /// <summary>
-    /// Returns whether an AWB tag has been defined on Special:Tags
+    /// Returns whether a Twain tag has been defined on Special:Tags
     /// </summary>
     public bool IsAWBTagDefined { get; private set; }
 

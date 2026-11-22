@@ -25,7 +25,7 @@ namespace Twain.Core.Logging;
 /// Represents a log entry for an article processed by AutoWikiBrowser.
 /// </summary>
 /// <remarks>
-/// The listener receives processing information through the AWB logging
+/// The listener receives processing information through the Twain logging
 /// interfaces and formats that information as a <see cref="ListViewItem"/>
 /// suitable for display in the processed or skipped article lists.
 ///
@@ -72,10 +72,10 @@ public class TwainLogListener : ListViewItem, ITwainTraceListener
     public const string StringPluginSkipped = "Plugin sent skip event";
 
     /// <summary>
-    /// Gets the prefix used for AWB logging edit summaries.
+    /// Gets the prefix used for Twain logging edit summaries.
     /// </summary>
     public static string TwainLoggingEditSummary =>
-        "(" + Variables.WPAWB + " Logging) ";
+        "(" + Variables.WPTwain + " Logging) ";
 
     private bool Datestamped;
     private bool HaveSkipInfo;

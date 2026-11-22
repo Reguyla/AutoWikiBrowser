@@ -103,7 +103,7 @@ public class Session
     public string CheckPageJSONText { get; private set; }
 
     /// <summary>
-    /// Gets or sets the raw JSON text used for the current wiki's AWB
+    /// Gets or sets the raw JSON text used for the current wiki's Twain
     /// configuration.
     /// </summary>
     public string ConfigJSONText { get; set; }
@@ -484,7 +484,7 @@ public class Session
     }
 
     /// <summary>
-    /// Gets the legacy URL for the current wiki's AWB configuration page.
+    /// Gets the legacy URL for the current wiki's Twain configuration page.
     /// </summary>
     /// <remarks>
     /// New configuration loading uses the wiki's actual project namespace.
@@ -502,7 +502,7 @@ public class Session
     }
 
     /// <summary>
-    /// Determines whether the global version result marks the current AWB
+    /// Determines whether the global version result marks the current Twain
     /// version as disabled.
     /// </summary>
     /// <param name="versionStatus">
@@ -513,18 +513,18 @@ public class Session
     /// <see langword="false"/>.
     /// </returns>
     private static bool IsPublicAwbVersionDisabled(
-        Updater.AWBEnabledStatus versionStatus)
+        Updater.TwainEnabledStatus versionStatus)
     {
-        return (versionStatus & Updater.AWBEnabledStatus.Disabled) ==
-               Updater.AWBEnabledStatus.Disabled;
+        return (versionStatus & Updater.TwainEnabledStatus.Disabled) ==
+               Updater.TwainEnabledStatus.Disabled;
     }
 
     /// <summary>
-    /// Determines whether the legacy public AWB version gate should prevent
+    /// Determines whether the legacy public Twain version gate should prevent
     /// the current application from continuing.
     /// </summary>
     /// <returns>
-    /// <see langword="true"/> when the public AWB version gate should be
+    /// <see langword="true"/> when the public Twain version gate should be
     /// enforced; otherwise, <see langword="false"/>.
     /// </returns>
     private static bool ShouldEnforcePublicAwbVersionGate()
@@ -631,7 +631,7 @@ public class Session
     }
 
     /// <summary>
-    /// Attempts to load the local AWB registration configuration from the
+    /// Attempts to load the local Twain registration configuration from the
     /// current wiki's <c>CheckPageJSON</c> page.
     /// </summary>
     /// <returns>
@@ -643,7 +643,7 @@ public class Session
     /// <para>
     /// Many third-party MediaWiki installations do not host the optional
     /// <c>Project:AutoWikiBrowser/CheckPageJSON</c> page used by Wikimedia
-    /// projects. In those cases, AWB continues using the normal registration
+    /// projects. In those cases, Twain continues using the normal registration
     /// logic without a local user list rather than treating the missing page
     /// as a fatal error.
     /// </para>
@@ -1044,14 +1044,14 @@ public class Session
 
             // TODO: Move update/version-policy checks out of Session when the
             // legacy updater is replaced.
-            if (Updater.Result == Updater.AWBEnabledStatus.None)
+            if (Updater.Result == Updater.TwainEnabledStatus.None)
             {
                 Updater.CheckForUpdates();
             }
 
             Updater.WaitForCompletion();
 
-            Updater.AWBEnabledStatus versionStatus = Updater.Result;
+            Updater.TwainEnabledStatus versionStatus = Updater.Result;
             VersionCheckPage = Updater.GlobalVersionPage;
 
             if (IsPublicAwbVersionDisabled(versionStatus) &&
