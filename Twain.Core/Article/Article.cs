@@ -1901,9 +1901,10 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 ? "Custom module: Changes made"
                 : editSummary;
 
-        if (!string.IsNullOrWhiteSpace(editSummary))
+
+        if (!string.IsNullOrWhiteSpace(effectiveEditSummary))
         {
-            string moduleSummary = editSummary.Trim();
+            string moduleSummary = effectiveEditSummary.Trim();
 
             if (!moduleSummary.StartsWith(
                     "Custom Module:",
@@ -1918,6 +1919,7 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         {
             processArticleEventArgs.EditSummary = string.Empty;
         }
+
 
         processArticleEventArgs.Skip = skipArticle;
 
