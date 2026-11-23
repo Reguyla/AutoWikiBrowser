@@ -232,6 +232,7 @@ public static class ListSplitterProcessor
     /// <param name="articlesPerFile">
     /// The maximum number of articles written to each settings file.
     /// </param>
+
     public static void SaveSettingsFiles(
         UserPrefs prefs,
         List<Article> articles,
@@ -252,19 +253,31 @@ public static class ListSplitterProcessor
 
         int baseIndex = 0;
 
-        for (int i = 1; i <= groupCount; i++)
+        // Preserve the active article list so generating
+        // settings files does not permanently modify preferences.
+        var originalArticleList = prefs.List.ArticleList;
+
+        try
         {
-            prefs.List.ArticleList =
-                CreateArticleGroup(
-                    articles,
-                    baseIndex,
-                    articlesPerFile);
+            for (int i = 1; i <= groupCount; i++)
+            {
+                prefs.List.ArticleList =
+                    CreateArticleGroup(
+                        articles,
+                        baseIndex,
+                        articlesPerFile);
 
-            UserPrefs.SavePrefs(
-                prefs,
-                CreateNumberedPath(path, i));
+                UserPrefs.SavePrefs(
+                    prefs,
+                    CreateNumberedPath(path, i));
 
-            baseIndex += articlesPerFile;
+                baseIndex += articlesPerFile;
+            }
+        }
+        finally
+        {
+            prefs.List.ArticleList = originalArticleList;
         }
     }
+
 }

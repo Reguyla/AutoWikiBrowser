@@ -1550,13 +1550,6 @@ namespace AutoWikiBrowser
             this.launchListComparerToolStripMenuItem.Text = "List &comparer";
             this.launchListComparerToolStripMenuItem.Click += new System.EventHandler(this.launchListComparerToolStripMenuItem_Click);
             // 
-            // launchListSplitterToolStripMenuItem
-            // 
-            this.launchListSplitterToolStripMenuItem.Name = "launchListSplitterToolStripMenuItem";
-            this.launchListSplitterToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.launchListSplitterToolStripMenuItem.Text = "List &splitter";
-            this.launchListSplitterToolStripMenuItem.Click += new System.EventHandler(this.launchListSplitterToolStripMenuItem_Click);
-            // 
             // toolStripSeparator21
             // 
             this.toolStripSeparator21.Name = "toolStripSeparator21";

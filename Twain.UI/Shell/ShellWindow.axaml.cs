@@ -340,8 +340,6 @@ public partial class ShellWindow : Window
         await window.ShowDialog(this);
     }
 
-
-
     private void ListComparerMenuItem_Click(
         object? sender,
         RoutedEventArgs e)
@@ -352,12 +350,21 @@ public partial class ShellWindow : Window
     /// <summary>
     /// Opens the list splitter window.
     /// </summary>
+
     public async void OpenListSplitter()
     {
-        ListSplitterWindow window = new();
+        if (DataContext is not ShellViewModel viewModel)
+            return;
+
+        var workspace = viewModel.Workspace;
+
+        ListSplitterWindow window = new(
+            workspace.Session,
+            workspace.Preferences);
 
         await window.ShowDialog(this);
     }
+
 
     private void ListSplitterMenuItem_Click(
         object? sender,

@@ -8,8 +8,10 @@ public enum ArticleListOutputFormat
     WikiText = 1,
     PlainText = 2,
     Csv = 3,
-    CsvWikiText = 4
+    CsvWikiText = 4,
+    TwainSettingsXml = 5
 }
+
 
 /// <summary>
 /// Formats article collections for saving or exporting.

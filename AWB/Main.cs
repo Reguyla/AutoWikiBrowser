@@ -158,7 +158,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // MainForm once List Comparer, List Splitter, and database search launch
     // workflows are consolidated.
     private ListComparer _comparer;
-    private ListSplitter _splitter;
     private Twain.Core.DBScanner.DatabaseScanner _dataBaseScanner;
 
     // --------------------------------------------------------------------
@@ -7342,82 +7341,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
 
         return new ListComparer(
             listMaker);
-    }
-
-    // TODO(Twain): Move ListSplitter creation behind a shared service when
-    // auxiliary tool creation is separated from the legacy WinForms UI.
-
-    /// <summary>
-    /// Opens the List Splitter and optionally initializes it with the current
-    /// article list, depending on the user's preferences.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void launchListSplitterToolStripMenuItem_Click(
-        object sender,
-        EventArgs e)
-    {
-        bool useCurrentArticleList =
-            ShouldListSplitterUseCurrentArticleList();
-
-        _splitter =
-            CreateListSplitter(
-                useCurrentArticleList);
-
-        _splitter.Show(this);
-    }
-
-    /// <summary>
-    /// Determines whether the List Splitter should use the current article list,
-    /// prompting the user when the configured preference requires confirmation.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> to use the current article list; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private bool ShouldListSplitterUseCurrentArticleList()
-    {
-        switch (_listSplitterUseCurrentArticleList)
-        {
-            case CurrentArticleListMode.Ask:
-                return listMaker.Any() &&
-                    MessageBox.Show(
-                        "Would you like to copy your current Article List to the ListSplitter?",
-                        "Copy Article List?",
-                        MessageBoxButtons.YesNo) == DialogResult.Yes;
-
-            case CurrentArticleListMode.Always:
-                return true;
-
-            case CurrentArticleListMode.Never:
-                return false;
-
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>
-    /// Creates the List Splitter configured for the requested article-list
-    /// behavior.
-    /// </summary>
-    /// <param name="useCurrentArticleList">
-    /// <see langword="true"/> to initialize the splitter with the current
-    /// article list; otherwise, <see langword="false"/>.
-    /// </param>
-    /// <returns>The configured List Splitter.</returns>
-    private ListSplitter CreateListSplitter(
-        bool useCurrentArticleList)
-    {
-        if (useCurrentArticleList)
-        {
-            return new ListSplitter(
-                MakePrefs(),
-                listMaker.GetArticleList());
-        }
-
-        return new ListSplitter(
-            MakePrefs());
     }
 
     /// <summary>
