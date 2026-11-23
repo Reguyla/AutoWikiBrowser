@@ -2,10 +2,12 @@ using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Controls.Lists;
+using Twain.Core.TwainSettings;
 using Twain.UI.ViewModels.Lists;
 
 namespace Twain.UI.Controls.Lists;
@@ -19,7 +21,7 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     private readonly List<Article> _onlyInList1 = new();
     private readonly List<Article> _onlyInList2 = new();
     private readonly List<Article> _common = new();
-
+    private readonly UserPrefs _prefs;
     private readonly MakeListViewModel _list1ViewModel;
     private readonly MakeListViewModel _list2ViewModel;
 
@@ -32,11 +34,16 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     /// <summary>
     /// Initializes a new empty list comparer window.
     /// </summary>
-    public ListComparerWindow(Session session)
+    public ListComparerWindow(
+        Session session,
+        UserPrefs prefs)
     {
         ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(prefs);
 
         InitializeComponent();
+
+        _prefs = prefs;
 
         _list1ViewModel = new MakeListViewModel(session);
         _list2ViewModel = new MakeListViewModel(session);
@@ -74,14 +81,14 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
         base.OnClosed(e);
     }
 
-
     /// <summary>
     /// Initializes a list comparer with articles in the first list.
     /// </summary>
     public ListComparerWindow(
         Session session,
+        UserPrefs prefs,
         IEnumerable<Article> articles)
-        : this(session)
+        : this(session, prefs)
     {
         ArgumentNullException.ThrowIfNull(articles);
 
@@ -348,20 +355,35 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     /// <returns>
     /// A task representing the asynchronous save operation.
     /// </returns>
+
     private async Task SaveResultListAsync(
         IEnumerable<Article> articles,
         string suggestedFileName)
     {
+        ArticleListOutputFormat format =
+            GetSelectedOutputFormat();
+
+        string extension =
+            ArticleListOutputFormatInfo.GetExtension(format)
+                .TrimStart('.');
+
+        string baseFileName =
+            Path.GetFileNameWithoutExtension(suggestedFileName);
+
         IStorageFile? file =
             await StorageProvider.SaveFilePickerAsync(
                 new FilePickerSaveOptions
                 {
-                    SuggestedFileName = suggestedFileName,
+                    Title = "Save article list",
+                    SuggestedFileName =
+                        $"{baseFileName}.{extension}",
+                    DefaultExtension = extension,
                     FileTypeChoices =
                     [
-                        new FilePickerFileType("Text files")
+                        new FilePickerFileType(
+                        $"{extension.ToUpperInvariant()} files")
                     {
-                        Patterns = ["*.txt"]
+                        Patterns = [$"*.{extension}"]
                     }
                     ]
                 });
@@ -369,25 +391,25 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
         if (file is null)
             return;
 
-        string? path =
-            file.TryGetLocalPath();
+        string? path = file.TryGetLocalPath();
 
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrWhiteSpace(path))
             return;
 
-        ArticleListOutputFormat format =
-            GetSelectedOutputFormat();
-
-        string text =
-            ArticleListOutputFormatter.Format(
+        try
+        {
+            ArticleListExporter.Save(
                 articles,
-                format);
-
-        Tools.WriteTextFileAbsolutePath(
-            text,
-            path,
-            false);
+                path,
+                format,
+                _prefs);
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
     }
+
 
     /// <summary>
     /// Gets the article-list output format selected in the save-format control.
@@ -395,6 +417,7 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
     /// <returns>
     /// The selected article-list output format.
     /// </returns>
+
     private ArticleListOutputFormat GetSelectedOutputFormat()
     {
         return SaveFormatComboBox.SelectedIndex switch
@@ -403,9 +426,11 @@ public partial class ListComparerWindow : Avalonia.Controls.Window
             1 => ArticleListOutputFormat.PlainText,
             2 => ArticleListOutputFormat.Csv,
             3 => ArticleListOutputFormat.CsvWikiText,
+            4 => ArticleListOutputFormat.TwainSettingsXml,
             _ => ArticleListOutputFormat.WikiText
         };
     }
+
 
     /// <summary>
     /// Removes the selected articles from the List 1 unique results.

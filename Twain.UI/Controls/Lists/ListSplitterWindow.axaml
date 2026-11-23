@@ -23,9 +23,23 @@
         RowDefinitions="*,Auto"
         RowSpacing="{DynamicResource TwainSpacingMedium}">
 
-        <!-- Article list -->
-        <makeList:MakeListControl
-            x:Name="ListMaker" />
+        <!-- Article list and page count -->
+        <Grid
+            Grid.Row="0"
+            RowDefinitions="Auto,*"
+            RowSpacing="{DynamicResource TwainSpacingSmall}">
+
+            <TextBlock
+                x:Name="ArticleCountText"
+                Grid.Row="0"
+                Text="0 pages"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}" />
+
+            <makeList:MakeListControl
+                x:Name="ListMaker"
+                Grid.Row="1" />
+
+        </Grid>
 
         <!-- Split and save controls -->
         <Border
@@ -35,7 +49,7 @@
             BorderThickness="0,1,0,0">
 
             <Grid
-                ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+                ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto"
                 ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
                 <TextBlock
@@ -52,21 +66,32 @@
                     Increment="10"
                     Value="100" />
 
-                <Button
-                    x:Name="SaveTextButton"
+                <TextBlock
                     Grid.Column="3"
-                    Classes="twain-command-button"
-                    Content="Save text files"
-                    IsEnabled="False"
-                    Click="SaveTextButton_Click" />
+                    VerticalAlignment="Center"
+                    Text="Save as:" />
+
+                <ComboBox
+                    x:Name="SaveFormatComboBox"
+                    Grid.Column="4"
+                    Width="180"
+                    SelectedIndex="1">
+
+                    <ComboBoxItem Content="Wiki text" />
+                    <ComboBoxItem Content="Plain text" />
+                    <ComboBoxItem Content="CSV" />
+                    <ComboBoxItem Content="CSV with Wikitext" />
+                    <ComboBoxItem Content="Twain settings (XML)" />
+
+                </ComboBox>
 
                 <Button
-                    x:Name="SaveSettingsButton"
-                    Grid.Column="4"
+                    x:Name="SaveFilesButton"
+                    Grid.Column="5"
                     Classes="twain-command-button"
-                    Content="Save settings files"
+                    Content="Save split files"
                     IsEnabled="False"
-                    Click="SaveSettingsButton_Click" />
+                    Click="SaveFilesButton_Click" />
 
             </Grid>
         </Border>

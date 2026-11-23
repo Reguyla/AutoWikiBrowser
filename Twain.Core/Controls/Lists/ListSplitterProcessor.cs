@@ -217,6 +217,81 @@ public static class ListSplitterProcessor
         }
     }
 
+
+    /// <summary>
+    /// Saves an article list as numbered files using the
+    /// selected output format.
+    /// </summary>
+    /// <param name="articles">
+    /// The articles to split and save.
+    /// </param>
+    /// <param name="path">
+    /// The base output path selected by the user.
+    /// </param>
+    /// <param name="articlesPerFile">
+    /// The maximum number of articles in each file.
+    /// </param>
+    /// <param name="format">
+    /// The output format for the generated files.
+    /// </param>
+    /// <param name="prefs">
+    /// The user preferences required for XML settings export.
+    /// </param>
+    public static void SaveFiles(
+        List<Article> articles,
+        string path,
+        int articlesPerFile,
+        ArticleListOutputFormat format,
+        UserPrefs? prefs = null)
+    {
+        ArgumentNullException.ThrowIfNull(articles);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        if (articlesPerFile <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(articlesPerFile));
+        }
+
+        // Validate the selected format before writing files.
+        _ = ArticleListOutputFormatInfo.GetExtension(format);
+
+        if (ArticleListOutputFormatInfo.RequiresPreferences(format)
+            && prefs is null)
+        {
+            throw new ArgumentNullException(
+                nameof(prefs),
+                "Twain settings export requires user preferences.");
+        }
+
+        int groupCount = CalculateGroupCount(
+            articles.Count,
+            articlesPerFile);
+
+        int baseIndex = 0;
+
+        for (int i = 1; i <= groupCount; i++)
+        {
+            List<Article> group = CreateArticleGroup(
+                articles,
+                baseIndex,
+                articlesPerFile);
+
+            string numberedPath = CreateNumberedPath(
+                path,
+                i);
+
+            ArticleListExporter.Save(
+                group,
+                numberedPath,
+                format,
+                prefs);
+
+            baseIndex += articlesPerFile;
+        }
+    }
+
+
     /// <summary>
     /// Saves the supplied articles to numbered Twain settings files.
     /// </summary>

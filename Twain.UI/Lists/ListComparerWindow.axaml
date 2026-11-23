@@ -337,6 +337,7 @@
                             <ComboBoxItem Content="Plain text" />
                             <ComboBoxItem Content="CSV" />
                             <ComboBoxItem Content="CSV with Wikitext" />
+                            <ComboBoxItem Content="TwainSettingsXml" />
                         </ComboBox>
                     </StackPanel>
 

@@ -60,18 +60,98 @@ public partial class ListSplitterWindow : Window
         _listViewModel.ReplaceArticles(articles);
     }
 
+    private ArticleListOutputFormat GetSelectedOutputFormat()
+    {
+        return SaveFormatComboBox.SelectedIndex switch
+        {
+            0 => ArticleListOutputFormat.WikiText,
+            1 => ArticleListOutputFormat.PlainText,
+            2 => ArticleListOutputFormat.Csv,
+            3 => ArticleListOutputFormat.CsvWikiText,
+            4 => ArticleListOutputFormat.TwainSettingsXml,
+            _ => ArticleListOutputFormat.PlainText
+        };
+    }
+
+
+    private async void SaveFilesButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        ArticleListOutputFormat format = GetSelectedOutputFormat();
+
+        string extension =
+            ArticleListOutputFormatInfo.GetExtension(format)
+                .TrimStart('.');
+
+        IStorageFile? file = await StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "Save split article lists",
+                SuggestedFileName = GetSuggestedFileName(extension),
+                DefaultExtension = extension,
+                FileTypeChoices =
+                [
+                    new FilePickerFileType(
+                    $"{extension.ToUpperInvariant()} files")
+                {
+                    Patterns = [$"*.{extension}"]
+                }
+                ]
+            });
+
+        if (file is null)
+            return;
+
+        string? path = file.TryGetLocalPath();
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        try
+        {
+            ListSplitterProcessor.SaveFiles(
+                GetSortedArticles(),
+                path,
+                GetArticlesPerFile(),
+                format,
+                _prefs);
+
+            await ShowMessageAsync(
+                "Split article lists saved successfully.",
+                "List splitter");
+
+            _listViewModel.Articles.Clear();
+        }
+        catch (IOException ex)
+        {
+            await ShowMessageAsync(
+                ex.Message,
+                "Save error");
+        }
+        catch (Exception ex)
+        {
+            ErrorHandler.HandleException(ex);
+        }
+    }
+
+
     /// <summary>
-    /// Enables or disables save controls based on the
-    /// current article list.
+    /// Updates the article count and enables or disables
+    /// the save button based on the current article list.
     /// </summary>
     private void UpdateControlState()
     {
-        bool hasArticles =
-            _listViewModel.Articles.Count > 0;
+        int articleCount = _listViewModel.Articles.Count;
 
-        SaveTextButton.IsEnabled = hasArticles;
-        SaveSettingsButton.IsEnabled = hasArticles;
+        ArticleCountText.Text =
+            articleCount == 1
+                ? "1 page"
+                : $"{articleCount:N0} pages";
+
+        SaveFilesButton.IsEnabled = articleCount > 0;
     }
+
 
     /// <summary>
     /// Releases the temporary list view model.
@@ -102,122 +182,6 @@ public partial class ListSplitterWindow : Window
     private int GetArticlesPerFile()
     {
         return (int)(PagesPerFile.Value ?? 100);
-    }
-
-    /// <summary>
-    /// Saves the article list as numbered text files.
-    /// </summary>
-    private async void SaveTextButton_Click(
-        object? sender,
-        Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        IStorageFile? file =
-            await StorageProvider.SaveFilePickerAsync(
-                new FilePickerSaveOptions
-                {
-                    Title = "Save article list",
-                    SuggestedFileName =
-                        GetSuggestedFileName("txt"),
-                    DefaultExtension = "txt",
-                    FileTypeChoices =
-                    [
-                        new FilePickerFileType("Text files")
-                        {
-                            Patterns = ["*.txt"]
-                        }
-                    ]
-                });
-
-        if (file == null)
-            return;
-
-        string? path = file.TryGetLocalPath();
-
-        if (string.IsNullOrWhiteSpace(path))
-            return;
-
-        try
-        {
-            ListSplitterProcessor.SaveTextFiles(
-                GetSortedArticles(),
-                path,
-                GetArticlesPerFile());
-
-            await ShowMessageAsync(
-                "Lists saved to text files.",
-                "List splitter");
-
-            _listViewModel.Articles.Clear();
-        }
-        catch (IOException ex)
-        {
-            await ShowMessageAsync(
-                ex.Message,
-                "Save error");
-        }
-        catch (Exception ex)
-        {
-            ErrorHandler.HandleException(ex);
-        }
-    }
-
-    /// <summary>
-    /// Saves the article list as numbered Twain XML
-    /// settings files.
-    /// </summary>
-    private async void SaveSettingsButton_Click(
-        object? sender,
-        Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        IStorageFile? file =
-            await StorageProvider.SaveFilePickerAsync(
-                new FilePickerSaveOptions
-                {
-                    Title = "Save settings files",
-                    SuggestedFileName =
-                        GetSuggestedFileName("xml"),
-                    DefaultExtension = "xml",
-                    FileTypeChoices =
-                    [
-                        new FilePickerFileType("XML files")
-                        {
-                            Patterns = ["*.xml"]
-                        }
-                    ]
-                });
-
-        if (file == null)
-            return;
-
-        string? path = file.TryGetLocalPath();
-
-        if (string.IsNullOrWhiteSpace(path))
-            return;
-
-        try
-        {
-            ListSplitterProcessor.SaveSettingsFiles(
-                _prefs,
-                GetSortedArticles(),
-                path,
-                GetArticlesPerFile());
-
-            await ShowMessageAsync(
-                "Lists saved to Twain settings files.",
-                "List splitter");
-
-            _listViewModel.Articles.Clear();
-        }
-        catch (IOException ex)
-        {
-            await ShowMessageAsync(
-                ex.Message,
-                "Save error");
-        }
-        catch (Exception ex)
-        {
-            ErrorHandler.HandleException(ex);
-        }
     }
 
     /// <summary>

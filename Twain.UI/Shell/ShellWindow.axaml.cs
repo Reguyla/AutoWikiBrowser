@@ -277,9 +277,13 @@ public partial class ShellWindow : Window
 
         ListComparerWindow window =
             useCurrentList
-                ? new ListComparerWindow(workspace.Session, articles)
-                : new ListComparerWindow(workspace.Session);
-
+                ? new ListComparerWindow(
+                    workspace.Session,
+                    workspace.Preferences,
+                    articles)
+                : new ListComparerWindow(
+                    workspace.Session,
+                    workspace.Preferences);
 
         window.UseListRequested += async (_, selectedArticles) =>
         {
