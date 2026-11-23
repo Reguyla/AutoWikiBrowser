@@ -157,7 +157,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     // TODO(Twain): Move auxiliary tool lifetime and creation management out of
     // MainForm once List Comparer, List Splitter, and database search launch
     // workflows are consolidated.
-    private ListComparer _comparer;
     private Twain.Core.DBScanner.DatabaseScanner _dataBaseScanner;
 
     // --------------------------------------------------------------------
@@ -7265,82 +7264,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
     private void saveListToTextFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         listMaker.SaveList();
-    }
-
-    // TODO(Twain): Move ListComparer creation behind a shared service when
-    // auxiliary tool creation is separated from the legacy WinForms UI.
-
-    /// <summary>
-    /// Opens the List Comparer and optionally initializes it with the current
-    /// article list, depending on the user's preferences.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void launchListComparerToolStripMenuItem_Click(
-        object sender,
-        EventArgs e)
-    {
-        bool useCurrentArticleList =
-            ShouldListComparerUseCurrentArticleList();
-
-        _comparer =
-            CreateListComparer(
-                useCurrentArticleList);
-
-        _comparer.Show(this);
-    }
-
-    /// <summary>
-    /// Determines whether the List Comparer should use the current article list,
-    /// prompting the user when the configured preference requires confirmation.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> to use the current article list; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    private bool ShouldListComparerUseCurrentArticleList()
-    {
-        switch (_listComparerUseCurrentArticleList)
-        {
-            case CurrentArticleListMode.Ask:
-                return listMaker.Any() &&
-                    MessageBox.Show(
-                        "Would you like to copy your current Article List to the ListComparer?",
-                        "Copy Article List?",
-                        MessageBoxButtons.YesNo) == DialogResult.Yes;
-
-            case CurrentArticleListMode.Always:
-                return true;
-
-            case CurrentArticleListMode.Never:
-                return false;
-
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>
-    /// Creates the List Comparer configured for the requested article-list
-    /// behavior.
-    /// </summary>
-    /// <param name="useCurrentArticleList">
-    /// <see langword="true"/> to initialize the comparer with the current
-    /// article list; otherwise, <see langword="false"/>.
-    /// </param>
-    /// <returns>The configured List Comparer.</returns>
-    private ListComparer CreateListComparer(
-        bool useCurrentArticleList)
-    {
-        if (useCurrentArticleList)
-        {
-            return new ListComparer(
-                listMaker,
-                listMaker.GetArticleList());
-        }
-
-        return new ListComparer(
-            listMaker);
     }
 
     /// <summary>

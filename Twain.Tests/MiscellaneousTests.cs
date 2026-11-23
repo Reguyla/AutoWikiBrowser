@@ -83,86 +83,104 @@ public class TalkHeaderTests : RequiresInitialization
             ClassicAssert.IsFalse(InTemplateRule.TemplateUsedInText("Bert", @"<!--Bert}}--> was great"));
         }
     }
+}
 
-    [TestFixture]
-    public class ListComparerTests : RequiresInitialization
+[TestFixture]
+public class ListComparerTests
+{
+    [Test]
+    public void ListComparerSimple()
     {
-        [Test]
-        public void ListComparerSimple()
-        {
-            ListMaker LMaker = new();
-            LMaker.Add(new Article("A"));
-            LMaker.Add(new Article("B"));
-            LMaker.Add(new Article("C"));
-            LMaker.Add(new Article("C")); // duplicate, removed during compare
-            System.Windows.Forms.ListBox lb1 = new System.Windows.Forms.ListBox();
-            System.Windows.Forms.ListBox lb2 = new System.Windows.Forms.ListBox();
-            System.Windows.Forms.ListBox lb3 = new System.Windows.Forms.ListBox();
+        List<Article> list1 =
+        [
+            new("A"),
+            new("B"),
+            new("C"),
+            new("C")
+        ];
 
-            List<Article> articles = new();
-            articles.Add(new Article("A"));
-            articles.Add(new Article("D"));
-            articles.Add(new Article("E"));
+        List<Article> list2 =
+        [
+            new("A"),
+            new("D"),
+            new("E")
+        ];
 
-            ListComparer.CompareLists(LMaker, articles, lb1, lb2, lb3);
+        var result = ListComparerProcessor.Compare(
+            list1,
+            list2);
 
-            // unique in 1
-            ClassicAssert.IsTrue(lb1.Items.Contains("B"));
-            ClassicAssert.IsTrue(lb1.Items.Contains("C"));
-            ClassicAssert.IsFalse(lb1.Items.Contains("A"));
-            Assert.That(lb1.Items.Count, Is.EqualTo(2));
+        // Unique to list 1
+        Assert.That(
+            result.OnlyInList1.Select(a => a.Name),
+            Is.EquivalentTo(new[] { "B", "C" }));
 
-            // unique in 2
-            ClassicAssert.IsFalse(lb2.Items.Contains("A"));
-            ClassicAssert.IsTrue(lb2.Items.Contains("D"));
-            ClassicAssert.IsTrue(lb2.Items.Contains("E"));
-            Assert.That(lb2.Items.Count, Is.EqualTo(2));
+        Assert.That(result.OnlyInList1, Has.Count.EqualTo(2));
 
-            // common to both
-            ClassicAssert.IsTrue(lb3.Items.Contains("A"));
-            Assert.That(lb3.Items.Count, Is.EqualTo(1));
-        }
+        // Unique to list 2
+        Assert.That(
+            result.OnlyInList2.Select(a => a.Name),
+            Is.EquivalentTo(new[] { "D", "E" }));
 
-        [Test]
-        public void ListComparer10K()
-        {
-            const int big = 10000;
-            ListMaker LMakerC10K = new();
+        Assert.That(result.OnlyInList2, Has.Count.EqualTo(2));
 
-            for (int i = 0; i < big; i++)
-                LMakerC10K.Add(new Article(i.ToString()));
+        // Common to both
+        Assert.That(
+            result.Common.Select(a => a.Name),
+            Is.EquivalentTo(new[] { "A" }));
 
-            LMakerC10K.Add(new Article("A"));
-            LMakerC10K.Add(new Article("B"));
-
-            System.Windows.Forms.ListBox lb1 = new System.Windows.Forms.ListBox();
-            System.Windows.Forms.ListBox lb2 = new System.Windows.Forms.ListBox();
-            System.Windows.Forms.ListBox lb3 = new System.Windows.Forms.ListBox();
-
-            List<Article> articlesC = new();
-            for (int i = 0; i < big; i++)
-                articlesC.Add(new Article(i.ToString()));
-
-            articlesC.Add(new Article("C"));
-            articlesC.Add(new Article("D"));
-
-            ListComparer.CompareLists(LMakerC10K, articlesC, lb1, lb2, lb3);
-
-            // unique in 1
-            ClassicAssert.IsTrue(lb1.Items.Contains("A"));
-            ClassicAssert.IsTrue(lb1.Items.Contains("B"));
-
-            // unique in 2
-            ClassicAssert.IsTrue(lb2.Items.Contains("C"));
-            ClassicAssert.IsTrue(lb2.Items.Contains("D"));
-
-            // common to both
-            ClassicAssert.IsTrue(lb3.Items.Contains("1"));
-            Assert.That(lb3.Items.Count, Is.EqualTo(big));
-        }
+        Assert.That(result.Common, Has.Count.EqualTo(1));
     }
 
-    [TestFixture]
+    [Test]
+    public void ListComparer10K()
+    {
+        const int big = 10000;
+
+        List<Article> list1 = new();
+        List<Article> list2 = new();
+
+        for (int i = 0; i < big; i++)
+        {
+            list1.Add(new Article(i.ToString()));
+            list2.Add(new Article(i.ToString()));
+        }
+
+        list1.Add(new Article("A"));
+        list1.Add(new Article("B"));
+
+        list2.Add(new Article("C"));
+        list2.Add(new Article("D"));
+
+        var result = ListComparerProcessor.Compare(
+            list1,
+            list2);
+
+        // Unique to list 1
+        Assert.That(
+            result.OnlyInList1.Select(a => a.Name),
+            Is.EquivalentTo(new[] { "A", "B" }));
+
+        Assert.That(result.OnlyInList1, Has.Count.EqualTo(2));
+
+        // Unique to list 2
+        Assert.That(
+            result.OnlyInList2.Select(a => a.Name),
+            Is.EquivalentTo(new[] { "C", "D" }));
+
+        Assert.That(result.OnlyInList2, Has.Count.EqualTo(2));
+
+        // Common to both
+        Assert.That(result.Common, Has.Count.EqualTo(big));
+
+        Assert.That(
+            result.Common.Select(a => a.Name),
+            Does.Contain("1"));
+    }
+}
+
+
+[TestFixture]
     public class ListBoxArticleTests : RequiresInitialization
     {
         [Test]
@@ -480,4 +498,3 @@ public class TalkHeaderTests : RequiresInitialization
             Assert.That(st.SubstituteTemplates("Now {{Foo (bar)}}", "test"), Is.EqualTo("Now {{subst:foo (bar)}}"), "template name is escaped, casing handling");
         }
     }
-}

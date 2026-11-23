@@ -1543,13 +1543,6 @@ namespace AutoWikiBrowser
             this.launchDumpSearcherToolStripMenuItem.Text = "&Database scanner";
             this.launchDumpSearcherToolStripMenuItem.Click += new System.EventHandler(this.launchDumpSearcherToolStripMenuItem_Click);
             // 
-            // launchListComparerToolStripMenuItem
-            // 
-            this.launchListComparerToolStripMenuItem.Name = "launchListComparerToolStripMenuItem";
-            this.launchListComparerToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.launchListComparerToolStripMenuItem.Text = "List &comparer";
-            this.launchListComparerToolStripMenuItem.Click += new System.EventHandler(this.launchListComparerToolStripMenuItem_Click);
-            // 
             // toolStripSeparator21
             // 
             this.toolStripSeparator21.Name = "toolStripSeparator21";
