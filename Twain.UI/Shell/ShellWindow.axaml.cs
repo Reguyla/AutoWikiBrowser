@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using System.Linq;
 using System.Threading.Tasks;
+using Twain.Core;
 using Twain.UI.About;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls;
@@ -10,6 +11,7 @@ using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
 using Twain.UI.ExternalPrograms;
 using Twain.UI.Shell;
+using Twain.UI.Talk;
 
 namespace Twain.UI.Views.Shell;
 
@@ -28,14 +30,24 @@ public partial class ShellWindow : Window
         DataContextChanged += ShellWindow_DataContextChanged;
     }
 
-    /// <summary>
-    /// Connects shell-owned UI services to the active workspace.
-    /// </summary>
+    private ShellViewModel? _subscribedShellViewModel;
+
     private void ShellWindow_DataContextChanged(
         object? sender,
         EventArgs e)
     {
-        if (DataContext is not ShellViewModel viewModel)
+        if (_subscribedShellViewModel is not null)
+        {
+            _subscribedShellViewModel.NewTalkMessagesDetected -=
+                ShellViewModel_NewTalkMessagesDetected;
+
+            _subscribedShellViewModel.Workspace
+                .NewTalkMessagesNotificationRequested = null;
+        }
+
+        _subscribedShellViewModel = DataContext as ShellViewModel;
+
+        if (_subscribedShellViewModel is not ShellViewModel viewModel)
         {
             return;
         }
@@ -45,6 +57,77 @@ public partial class ShellWindow : Window
 
         viewModel.Workspace.ConfirmSpamFilterRetryRequested =
             ConfirmSpamFilterRetryAsync;
+
+        viewModel.NewTalkMessagesDetected +=
+            ShellViewModel_NewTalkMessagesDetected;
+
+        viewModel.Workspace.NewTalkMessagesNotificationRequested =
+            () => ShellViewModel_NewTalkMessagesDetected(
+                viewModel,
+                EventArgs.Empty);
+    }
+
+    private bool _talkMessageDialogVisible;
+
+    /// <summary>
+    /// Displays the talk-message notification when requested
+    /// by the active shell view model.
+    /// </summary>
+    private async void ShellViewModel_NewTalkMessagesDetected(
+        object? sender,
+        EventArgs e)
+    {
+        if (_talkMessageDialogVisible)
+        {
+            return;
+        }
+
+        if (DataContext is not ShellViewModel viewModel ||
+            !viewModel.IsLoggedIn)
+        {
+            return;
+        }
+
+        _talkMessageDialogVisible = true;
+
+        try
+        {
+            // Match legacy AWB behavior: stop processing before
+            // allowing the user to view new talk-page messages.
+            viewModel.Workspace.StopProcessingCommand.Execute(null);
+
+            // Require the wiki session to refresh its status.
+            viewModel.Session.RequireUpdate();
+
+            Activate();
+
+
+            TalkMessageWindow dialog = new();
+
+            bool viewMessages =
+                await dialog.ShowDialog<bool>(this);
+
+            if (!viewMessages)
+            {
+                return;
+            }
+
+            Tools.OpenUserTalkInBrowser(viewModel.Session.User.Name);
+
+            viewModel.Session.Editor.SynchronousEditor.ClearNewMessages();
+        }
+
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to display or process talk-message notification: {ex}");
+
+            ErrorHandler.HandleException(ex);
+        }
+        finally
+        {
+            _talkMessageDialogVisible = false;
+        }
     }
 
     /// <summary>

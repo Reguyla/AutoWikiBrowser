@@ -56,6 +56,11 @@ public partial class WorkspaceViewModel : ObservableObject
     private string? _alertEvaluatedText;
 
     /// <summary>
+    /// Requests the shell to display the new talk-message notification.
+    /// </summary>
+    public Action? NewTalkMessagesNotificationRequested { get; set; }
+
+    /// <summary>
     /// Identifies how an article completed processing.
     /// </summary>
     private enum ArticleCompletionKind
@@ -1303,6 +1308,14 @@ public partial class WorkspaceViewModel : ObservableObject
                 return;
             }
 
+            // MediaWiki requires the editor to review new talk messages.
+            // This is a notification, not an ordinary API failure.
+            if (exception is NewMessagesException)
+            {
+                NewTalkMessagesNotificationRequested?.Invoke();
+                return;
+            }
+
             if (IsPreviewLoading)
             {
                 IsPreviewLoading = false;
@@ -2071,6 +2084,16 @@ public partial class WorkspaceViewModel : ObservableObject
             }
 
             InitializeOpenedArticle(page);
+
+            // Legacy AWB checks for new talk messages after loading
+            // an article, but does not interrupt unattended Preparse.
+            if (!Options.PreParseMode &&
+                !IsPreparseRunning &&
+                Session.User.HasMessages)
+            {
+                NewTalkMessagesNotificationRequested?.Invoke();
+                return;
+            }
 
             // Before-processing skip: redirect page.
             if (!IsPreparseRunning &&

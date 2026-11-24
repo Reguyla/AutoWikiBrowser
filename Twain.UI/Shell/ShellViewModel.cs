@@ -19,6 +19,11 @@ public sealed partial class ShellViewModel : ViewModelBase
     private readonly IUpdateService? _updateService;
 
     /// <summary>
+    /// Raised when the authenticated user has new talk-page messages.
+    /// </summary>
+    public event EventHandler? NewTalkMessagesDetected;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ShellViewModel"/> class.
     /// </summary>
     /// <param name="updateService">
@@ -80,6 +85,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     /// Updates application state after the active wiki session
     /// has successfully authenticated.
     /// </summary>
+
     public void LoginCompleted()
     {
         Workspace.BotSettings.CanUseBotMode =
@@ -92,7 +98,14 @@ public sealed partial class ShellViewModel : ViewModelBase
         OnPropertyChanged(nameof(LoginStatusText));
         OnPropertyChanged(nameof(ActiveWikiText));
         OnPropertyChanged(nameof(LoginButtonText));
+
+        // Check the authenticated user's talk-message status.
+        if (IsLoggedIn && Session.User.HasMessages)
+        {
+            NewTalkMessagesDetected?.Invoke(this, EventArgs.Empty);
+        }
     }
+
 
     /// <summary>
     /// Gets whether the active wiki session is authenticated.
