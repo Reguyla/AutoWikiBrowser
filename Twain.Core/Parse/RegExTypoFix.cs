@@ -49,7 +49,8 @@ public class TyposDownloader : ITyposProvider
         "?title=Wikipedia:AutoWikiBrowser/Typos&action=raw";
 
     /// <summary>
-    /// Returns the full URL to the typo rules page e.g. https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/Typos
+    /// Resolves the configured typo-list source to an HTTP or HTTPS URL.
+    /// Local wiki page titles are resolved against the current wiki.
     /// </summary>
     public static string Url
     {
@@ -57,18 +58,17 @@ public class TyposDownloader : ITyposProvider
         {
             string typoListSource = Variables.RetfPath;
 
-            // Preserve an explicitly configured absolute URL.
             if (Uri.TryCreate(
                     typoListSource,
                     UriKind.Absolute,
-                    out Uri? absoluteUri))
+                    out Uri? absoluteUri) &&
+                (absoluteUri.Scheme == Uri.UriSchemeHttp ||
+                 absoluteUri.Scheme == Uri.UriSchemeHttps))
             {
                 return absoluteUri.AbsoluteUri;
             }
 
-            // For now, page-title-only configurations use the standard
-            // English Wikipedia typo list rather than the current wiki.
-            return EnglishWikipediaTypoListUrl;
+            return Variables.GetPlainTextURL(typoListSource);
         }
     }
 
@@ -433,8 +433,26 @@ public class RegExTypoFix
     /// <param name="loadThreaded">Whether to load typos on a new thread</param>
     /// <param name="provider">Typos provider to use</param>
     public RegExTypoFix(bool loadThreaded, ITyposProvider provider)
+        : this(loadThreaded, provider, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes regex typo fixing with an optional completion
+    /// handler registered before rule loading begins.
+    /// </summary>
+    public RegExTypoFix(
+        bool loadThreaded,
+        ITyposProvider provider,
+        BackgroundRequestComplete? completionHandler)
     {
         Source = provider;
+
+        if (completionHandler is not null)
+        {
+            Complete += completionHandler;
+        }
+
         if (!loadThreaded)
         {
             MakeRegexes();

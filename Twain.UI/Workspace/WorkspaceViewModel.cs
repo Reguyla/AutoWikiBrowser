@@ -52,6 +52,26 @@ public partial class WorkspaceViewModel : ObservableObject
 
     private RegExTypoFix? _regexTypos;
 
+    /// <summary>
+    /// Indicates whether regex typo rules are currently being loaded.
+    /// </summary>
+    private bool _loadingTypos;
+
+    /// <summary>
+    /// Gets or sets the current workspace processing status message.
+    /// </summary>
+    [ObservableProperty]
+    private string _processingStatusMessage = string.Empty;
+
+    /// <summary>
+    /// Indicates whether processing can proceed without waiting
+    /// for regex typo rules to finish loading.
+    /// </summary>
+    private bool IsRegexTypoProcessingReady =>
+        !_loadingTypos &&
+        (!Options.EnableTypoCorrection ||
+         _regexTypos?.TyposLoaded == true);
+
     private string? _lastNavigatedAlert;
 
     private int _lastAlertLocationIndex = -1;
@@ -463,7 +483,8 @@ public partial class WorkspaceViewModel : ObservableObject
     [RelayCommand]
     private void ReparseProcessing()
     {
-        if (CurrentArticle is null ||
+        if (!IsRegexTypoProcessingReady ||
+            CurrentArticle is null ||
             !Options.IsProcessing ||
             Options.IsProcessingActive ||
             Session.IsBusy ||
@@ -657,13 +678,25 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void OnRegexTypoFixEnabledChanged(bool enabled)
     {
-        if (!enabled || _regexTypos is not null)
+        if (!enabled)
+        {
+            Options.SkipIfNoRegexTypo = false;
+            return;
+        }
+
+        if (_loadingTypos || _regexTypos is not null)
         {
             return;
         }
 
-        _regexTypos = new RegExTypoFix();
-        _regexTypos.Complete += RegexTyposComplete;
+        _loadingTypos = true;
+
+        ProcessingStatusMessage = "Loading regex typo rules...";
+
+        _regexTypos = new RegExTypoFix(
+            true,
+            new TyposDownloader(),
+            RegexTyposComplete);
 
         System.Diagnostics.Debug.WriteLine(
             "Regex typo fixing initialization started.");
@@ -683,8 +716,13 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void ApplyRegexTypoLoadResult()
     {
+        _loadingTypos = false;
+
         if (_regexTypos?.TyposLoaded == true)
         {
+            ProcessingStatusMessage =
+                $"{_regexTypos.TypoCount:N0} regex typo rules loaded";
+
             System.Diagnostics.Debug.WriteLine(
                 $"Regex typo rules loaded: {_regexTypos.TypoCount}");
         }
@@ -692,6 +730,9 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             _regexTypos = null;
             Options.EnableTypoCorrection = false;
+
+            ProcessingStatusMessage =
+                "Unable to load regex typo rules";
 
             System.Diagnostics.Debug.WriteLine(
                 "Regex typo rule loading failed.");
@@ -954,6 +995,11 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private bool CanBeginProcessing()
     {
+        // Prevent processing until regex typo rules are ready.
+        if (!IsRegexTypoProcessingReady)
+        {
+            return false;
+        }
         if (Options.IsProcessingActive)
         {
             return false;
