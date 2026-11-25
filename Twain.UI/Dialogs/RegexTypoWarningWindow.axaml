@@ -1,0 +1,74 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Twain.UI.Dialogs.RegexTypoWarningWindow"
+    Title="Regex Typo Fixing"
+    Width="520"
+    SizeToContent="Height"
+    CanResize="False"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource TwainApplicationBackgroundBrush}"
+    Foreground="{DynamicResource TwainTextPrimaryBrush}">
+
+    <StackPanel Margin="20" Spacing="16">
+
+        <!-- Warning heading. -->
+        <TextBlock
+            Text="Review each edit before saving"
+            FontSize="18"
+            FontWeight="SemiBold"
+            TextWrapping="Wrap" />
+
+        <!-- Warning description. -->
+        <TextBlock
+            Text="Although regex typo rules are designed to be accurate, incorrect replacements may occur. Always review each edit before saving."
+            TextWrapping="Wrap" />
+
+        <!-- Download source description. -->
+        <TextBlock
+            Text="The latest typo rules will be downloaded from the following source:"
+            TextWrapping="Wrap" />
+
+        <!-- Configured typo-list source. -->
+        <Border
+            Padding="12"
+            BorderThickness="1"
+            CornerRadius="4"
+            Background="{DynamicResource TwainToolbarBrush}"
+            BorderBrush="{DynamicResource TwainBorderSubtleBrush}">
+
+            <SelectableTextBlock
+                x:Name="SourceUrlText"
+                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                TextWrapping="Wrap" />
+
+        </Border>
+
+        <!-- Dialog actions. -->
+        <StackPanel
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="8">
+
+            <Button
+                Classes="twain-command-button"
+                Content="Cancel"
+                MinWidth="90"
+                HorizontalContentAlignment="Center"
+                IsCancel="True"
+                Click="CancelButton_Click" />
+
+            <Button
+                Classes="twain-command-button"
+                Content="OK"
+                MinWidth="90"
+                HorizontalContentAlignment="Center"
+                IsDefault="True"
+                Click="OkButton_Click" />
+
+        </StackPanel>
+
+    </StackPanel>
+
+</Window>

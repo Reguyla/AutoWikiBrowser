@@ -391,6 +391,13 @@ public partial class WorkspaceViewModel : ObservableObject
     { get; set; }
 
     /// <summary>
+    /// Requests confirmation before downloading regex typo rules.
+    /// </summary>
+    public Func<string, Task<bool>>?
+        ConfirmRegexTypoLoadingRequested
+    { get; set; }
+
+    /// <summary>
     /// Gets or sets whether the upper document region
     /// is displaying the rendered article preview.
     /// </summary>
@@ -676,7 +683,7 @@ public partial class WorkspaceViewModel : ObservableObject
     /// <summary>
     /// Initializes regex typo fixing when the option is enabled.
     /// </summary>
-    private void OnRegexTypoFixEnabledChanged(bool enabled)
+    private async void OnRegexTypoFixEnabledChanged(bool enabled)
     {
         if (!enabled)
         {
@@ -691,15 +698,43 @@ public partial class WorkspaceViewModel : ObservableObject
 
         _loadingTypos = true;
 
-        ProcessingStatusMessage = "Loading regex typo rules...";
+        try
+        {
+            bool confirmed =
+                ConfirmRegexTypoLoadingRequested is not null &&
+                await ConfirmRegexTypoLoadingRequested(
+                    TyposDownloader.Url);
 
-        _regexTypos = new RegExTypoFix(
-            true,
-            new TyposDownloader(),
-            RegexTyposComplete);
+            if (!confirmed || !Options.EnableTypoCorrection)
+            {
+                _loadingTypos = false;
+                Options.EnableTypoCorrection = false;
+                ProcessingStatusMessage = string.Empty;
+                return;
+            }
 
-        System.Diagnostics.Debug.WriteLine(
-            "Regex typo fixing initialization started.");
+            ProcessingStatusMessage =
+                "Loading regex typo rules...";
+
+            _regexTypos = new RegExTypoFix(
+                true,
+                new TyposDownloader(),
+                RegexTyposComplete);
+
+            System.Diagnostics.Debug.WriteLine(
+                "Regex typo fixing initialization started.");
+        }
+        catch (Exception ex)
+        {
+            _loadingTypos = false;
+            _regexTypos = null;
+            Options.EnableTypoCorrection = false;
+
+            ProcessingStatusMessage =
+                "Unable to load regex typo rules";
+
+            System.Diagnostics.Debug.WriteLine(ex);
+        }
     }
 
     /// <summary>
