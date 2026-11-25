@@ -441,7 +441,7 @@ public class RegExTypoFix
             return;
         }
 
-        TypoThread = new BackgroundRequest(Complete);
+        TypoThread = new BackgroundRequest(null);
         TypoThread.Execute(MakeRegexes);
     }
 

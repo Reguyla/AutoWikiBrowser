@@ -10,13 +10,14 @@ using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.API;
-using Twain.Core.TwainSettings;
+using Twain.Core.Background;
 using Twain.Core.CustomModules;
 using Twain.Core.Editing;
 using Twain.Core.EditSummaries;
 using Twain.Core.Parse;
 using Twain.Core.Plugin;
 using Twain.Core.Processing;
+using Twain.Core.TwainSettings;
 using Twain.Core.Workspaces;
 using Twain.Core.Workspaces.Layouts;
 using Twain.Core.Workspaces.Panes;
@@ -48,6 +49,8 @@ public partial class WorkspaceViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowNavigationIcons))]
     [NotifyPropertyChangedFor(nameof(ShowNavigationText))]
     private bool _isNavigationCollapsed;
+
+    private RegExTypoFix? _regexTypos;
 
     private string? _lastNavigatedAlert;
 
@@ -556,6 +559,9 @@ public partial class WorkspaceViewModel : ObservableObject
         MakeList = new MakeListViewModel(Session);
         Options = new OptionsViewModel();
 
+        Options.RegexTypoFixEnabledChanged =
+           OnRegexTypoFixEnabledChanged;
+
         TwainHost = new TwainHost(
             Session,
             () => Options.IsProcessing,
@@ -644,6 +650,52 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Options.ShowDiffRequested =
             ShowDiff;
+    }
+
+    /// <summary>
+    /// Initializes regex typo fixing when the option is enabled.
+    /// </summary>
+    private void OnRegexTypoFixEnabledChanged(bool enabled)
+    {
+        if (!enabled || _regexTypos is not null)
+        {
+            return;
+        }
+
+        _regexTypos = new RegExTypoFix();
+        _regexTypos.Complete += RegexTyposComplete;
+
+        System.Diagnostics.Debug.WriteLine(
+            "Regex typo fixing initialization started.");
+    }
+
+    /// <summary>
+    /// Handles completion of regex typo rule loading.
+    /// </summary>
+    private void RegexTyposComplete(BackgroundRequest request)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(
+            ApplyRegexTypoLoadResult);
+    }
+
+    /// <summary>
+    /// Applies the result of regex typo rule loading.
+    /// </summary>
+    private void ApplyRegexTypoLoadResult()
+    {
+        if (_regexTypos?.TyposLoaded == true)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Regex typo rules loaded: {_regexTypos.TypoCount}");
+        }
+        else
+        {
+            _regexTypos = null;
+            Options.EnableTypoCorrection = false;
+
+            System.Diagnostics.Debug.WriteLine(
+                "Regex typo rule loading failed.");
+        }
     }
 
     /// <summary>
@@ -1084,6 +1136,9 @@ public partial class WorkspaceViewModel : ObservableObject
             FindAndReplace = _findAndReplace,
             SubstTemplates = _substTemplates,
             ReplaceSpecial = _replaceSpecial,
+            RegexTypos = _regexTypos?.TyposLoaded == true
+                ? _regexTypos
+                : null,
             NoRetf = _noRetf
         };
     }

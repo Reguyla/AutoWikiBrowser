@@ -131,6 +131,17 @@ public sealed partial class OptionsViewModel : ViewModelBase, ISkipOptions
     private bool _enableTypoCorrection;
 
     /// <summary>
+    /// Raised when the user or settings loader changes
+    /// the regex typo-fixing option.
+    /// </summary>
+    public Action<bool>? RegexTypoFixEnabledChanged { get; set; }
+
+    partial void OnEnableTypoCorrectionChanged(bool value)
+    {
+        RegexTypoFixEnabledChanged?.Invoke(value);
+    }
+
+    /// <summary>
     /// Gets or sets whether unchanged articles should be skipped.
     /// </summary>
     [ObservableProperty]
