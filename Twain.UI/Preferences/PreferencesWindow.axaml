@@ -431,8 +431,10 @@
                 </Grid>
                 </Border>
             </TabItem>
-
-                        <TabItem Classes="twain-tab" Header="Processing">
+                <TabItem
+                    x:Name="ProcessingTab"
+                    Classes="twain-tab"
+                    Header="Processing">
                 <ScrollViewer
                     VerticalScrollBarVisibility="Auto"
                     HorizontalScrollBarVisibility="Disabled">
@@ -487,19 +489,19 @@
                                     Content="Use custom typo list"
                                     IsCheckedChanged="TypoListSource_IsCheckedChanged" />
 
-                                <TextBox
-                                    x:Name="CustomTypoListUrlTextBox"
-                                    Watermark="Enter custom typo list URL"
-                                    IsEnabled="False"
-                                    HorizontalAlignment="Stretch"
-                                    TextChanged="CustomTypoListUrlTextBox_TextChanged" />
+                            <TextBox
+                                x:Name="CustomTypoListUrlTextBox"
+                                Watermark="Enter custom typo list URL"
+                                IsEnabled="False"
+                                HorizontalAlignment="Stretch"
+                                TextChanged="CustomTypoListUrlTextBox_TextChanged" />
 
-                                <TextBlock
-                                    x:Name="CustomTypoListUrlValidationText"
-                                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
-                                    TextWrapping="Wrap"
-                                    IsVisible="False"
-                                    Text="Enter a valid HTTP or HTTPS URL for the custom typo list." />
+                            <TextBlock
+                                x:Name="CustomTypoListUrlValidationText"
+                                Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                TextWrapping="Wrap"
+                                IsVisible="False"
+                                Text="Enter a valid HTTP or HTTPS URL for the custom typo list." />
 
                                 <TextBlock
                                     Foreground="{DynamicResource TwainTextSecondaryBrush}"

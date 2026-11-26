@@ -88,6 +88,9 @@ public partial class WorkspaceView : UserControl
         OptionsView.DuplicateWikilinkDelinkRequested +=
            OptionsView_DuplicateWikilinkDelinkRequested;
 
+        OptionsView.RegexTypoPreferencesRequested +=
+            OptionsView_RegexTypoPreferencesRequested;
+
         ProfilesView.Completed += ProfilesView_Completed;
         PreferencesView.Completed += PreferencesView_Completed;
         BotSettingsView.Completed += BotSettingsView_Completed;
@@ -122,6 +125,18 @@ public partial class WorkspaceView : UserControl
             UpdateNavigationLayout();
             UpdateOptionsSidebarLayout();
         };
+    }
+
+    /// <summary>
+    /// Opens Preferences directly on the Processing tab.
+    /// </summary>
+    private void OptionsView_RegexTypoPreferencesRequested(
+        object? sender,
+        EventArgs e)
+    {
+        OpenEmbeddedPreferences();
+
+        PreferencesView.SelectProcessingTab();
     }
 
     /// <summary>

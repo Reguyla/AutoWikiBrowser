@@ -107,6 +107,14 @@ public partial class PreferencesWindow : UserControl
     }
 
     /// <summary>
+    /// Selects the Processing preferences tab.
+    /// </summary>
+    public void SelectProcessingTab()
+    {
+        PreferencesTabs.SelectedItem = ProcessingTab;
+    }
+
+    /// <summary>
     /// Loads the processing toolbar display mode into Preferences.
     /// </summary>
     public void LoadProcessingDisplayMode(

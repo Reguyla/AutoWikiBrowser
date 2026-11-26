@@ -43,6 +43,21 @@ public partial class OptionsView : UserControl
     public event EventHandler? DuplicateWikilinkDelinkRequested;
 
     /// <summary>
+    /// Raised when the user requests regex typo fixing preferences.
+    /// </summary>
+    public event EventHandler? RegexTypoPreferencesRequested;
+
+    /// <summary>
+    /// Requests navigation to the regex typo fixing preferences.
+    /// </summary>
+    private void RegexTypoPreferencesButton_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        RegexTypoPreferencesRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
     /// Displays the additional skip options.
     /// </summary>
     /// <param name="sender">

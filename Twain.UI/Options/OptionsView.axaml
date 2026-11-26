@@ -227,8 +227,36 @@
                         <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
                     <TextBlock Classes="twain-section-heading" Text="Regex typo fixing"/>
 
-                    <CheckBox Content="Enable regex typo fixing" IsChecked="{Binding EnableTypoCorrection}"/>
+                        <Grid
+                            ColumnDefinitions="*,Auto"
+                            ColumnSpacing="{DynamicResource TwainSpacingMedium}">
 
+                            <CheckBox
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Content="Enable regex typo fixing"
+                                IsChecked="{Binding EnableTypoCorrection}"/>
+
+                            <Button
+                                x:Name="RegexTypoPreferencesButton"
+                                Click="RegexTypoPreferencesButton_Click"
+                                Grid.Column="1"
+                                Width="34"
+                                Height="34"
+                                Padding="7"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                ToolTip.Tip="Regex typo fixing preferences"
+                                AutomationProperties.Name="Regex typo fixing preferences">
+
+                                <PathIcon
+                                    Width="18"
+                                    Height="18"
+                                    Data="M10 2H14L15 5L18 6L21 5L23 9L21 12L23 15L21 19L18 18L15 19L14 22H10L9 19L6 18L3 19L1 15L3 12L1 9L3 5L6 6L9 5Z M12 8A4 4 0 1 0 12 16A4 4 0 1 0 12 8Z"/>
+
+                            </Button>
+
+                        </Grid>
                     <CheckBox Margin="20,0,0,0" Content="Skip if no typo fixed" IsChecked="{Binding SkipIfNoRegexTypo}" IsEnabled="{Binding EnableTypoCorrection}"/>
                         </StackPanel>
                     </Border>
