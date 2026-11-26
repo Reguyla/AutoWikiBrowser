@@ -423,6 +423,23 @@ public class GeneralPrefs
             Summaries.Add(s.ToString());
     }
 
+    /// <summary>
+    /// Indicates whether regex typo fixing uses the standard
+    /// English Wikipedia typo list.
+    /// </summary>
+    public bool UseWikipediaTypoList { get; set; } = true;
+
+    /// <summary>
+    /// Indicates whether regex typo fixing uses a custom
+    /// typo list supplied by the editor.
+    /// </summary>
+    public bool UseCustomTypoList { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the URL of the custom regex typo list.
+    /// </summary>
+    public string CustomTypoListUrl { get; set; } = string.Empty;
+
     public EditBoxAutoSavePrefs AutoSaveEdit;
     public string SelectedSummary = "Clean up";
     public List<string> Summaries = new();

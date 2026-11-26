@@ -700,10 +700,11 @@ public partial class WorkspaceViewModel : ObservableObject
 
         try
         {
+            string sourceUrl = TyposDownloader.Url;
+
             bool confirmed =
                 ConfirmRegexTypoLoadingRequested is not null &&
-                await ConfirmRegexTypoLoadingRequested(
-                    TyposDownloader.Url);
+                await ConfirmRegexTypoLoadingRequested(sourceUrl);
 
             if (!confirmed || !Options.EnableTypoCorrection)
             {
@@ -718,7 +719,7 @@ public partial class WorkspaceViewModel : ObservableObject
 
             _regexTypos = new RegExTypoFix(
                 true,
-                new TyposDownloader(),
+                new TyposDownloader(sourceUrl),
                 RegexTyposComplete);
 
             System.Diagnostics.Debug.WriteLine(

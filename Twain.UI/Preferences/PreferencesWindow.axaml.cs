@@ -31,6 +31,12 @@ public partial class PreferencesWindow : UserControl
     public event EventHandler<bool>? Completed;
 
     /// <summary>
+    /// Prevents recursive updates when changing the
+    /// selected regex typo list source.
+    /// </summary>
+    private bool _updatingTypoListSource;
+
+    /// <summary>
     /// Initializes a new preferences window.
     /// </summary>
     public PreferencesWindow()
@@ -56,6 +62,48 @@ public partial class PreferencesWindow : UserControl
         ShowEditBar = settings.ShowEditBar;
 
         EditBarDisplayMode = settings.EditBarDisplayMode;
+    }
+
+    /// <summary>
+    /// Maintains mutually exclusive regex typo list source
+    /// selections while allowing neither source to be selected.
+    /// </summary>
+    private void TypoListSource_IsCheckedChanged(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (_updatingTypoListSource ||
+            UseWikipediaTypoListCheckBox is null ||
+            UseCustomTypoListCheckBox is null ||
+            CustomTypoListUrlTextBox is null)
+        {
+            return;
+        }
+
+        _updatingTypoListSource = true;
+
+        try
+        {
+            if (sender == UseWikipediaTypoListCheckBox &&
+                UseWikipediaTypoListCheckBox.IsChecked == true)
+            {
+                UseCustomTypoListCheckBox.IsChecked = false;
+            }
+            else if (sender == UseCustomTypoListCheckBox &&
+                     UseCustomTypoListCheckBox.IsChecked == true)
+            {
+                UseWikipediaTypoListCheckBox.IsChecked = false;
+            }
+
+            CustomTypoListUrlTextBox.IsEnabled =
+                UseCustomTypoListCheckBox.IsChecked == true;
+
+            UpdateOkButtonState();
+        }
+        finally
+        {
+            _updatingTypoListSource = false;
+        }
     }
 
     /// <summary>
@@ -346,6 +394,31 @@ public partial class PreferencesWindow : UserControl
         NoMosComplianceFixesCheckBox.IsChecked =
             general.noMOSComplianceFixes;
 
+        // Restore regex typo list preferences.
+        _updatingTypoListSource = true;
+
+        try
+        {
+            UseWikipediaTypoListCheckBox.IsChecked =
+                general.UseWikipediaTypoList;
+
+            UseCustomTypoListCheckBox.IsChecked =
+                general.UseCustomTypoList &&
+                !general.UseWikipediaTypoList;
+
+            CustomTypoListUrlTextBox.Text =
+                general.CustomTypoListUrl;
+
+            CustomTypoListUrlTextBox.IsEnabled =
+                UseCustomTypoListCheckBox.IsChecked == true;
+        }
+        finally
+        {
+            _updatingTypoListSource = false;
+        }
+
+        UpdateOkButtonState();
+
         PrefMinimize = general.Minimize;
         LowThreadPriority = general.LowThreadPriority;
         PrefSaveArticleList = general.SaveArticleList;
@@ -527,6 +600,17 @@ public partial class PreferencesWindow : UserControl
         general.noMOSComplianceFixes =
             NoMosComplianceFixesCheckBox.IsChecked == true;
 
+        // Save regex typo list preferences.
+        general.UseWikipediaTypoList =
+            UseWikipediaTypoListCheckBox.IsChecked == true;
+
+        general.UseCustomTypoList =
+            UseCustomTypoListCheckBox.IsChecked == true;
+
+        general.CustomTypoListUrl =
+            CustomTypoListUrlTextBox.Text?.Trim() ??
+            string.Empty;
+
         general.Minimize = PrefMinimize;
         general.LowThreadPriority = LowThreadPriority;
         general.SaveArticleList = PrefSaveArticleList;
@@ -577,6 +661,53 @@ public partial class PreferencesWindow : UserControl
 
         tools.DatabaseScannerUseCurrentArticleList =
             PrefDBScannerUseCurrentArticleList;
+    }
+
+    /// <summary>
+    /// Validates the custom regex typo list URL when
+    /// the custom source is selected.
+    /// </summary>
+    private bool ValidateTypoListSource()
+    {
+        if (UseCustomTypoListCheckBox is null ||
+            CustomTypoListUrlTextBox is null ||
+            CustomTypoListUrlValidationText is null)
+        {
+            return true;
+        }
+
+        bool useCustom =
+            UseCustomTypoListCheckBox.IsChecked == true;
+
+        bool valid =
+            !useCustom ||
+            (Uri.TryCreate(
+                CustomTypoListUrlTextBox.Text?.Trim(),
+                UriKind.Absolute,
+                out Uri? uri) &&
+             (uri.Scheme == Uri.UriSchemeHttp ||
+              uri.Scheme == Uri.UriSchemeHttps) &&
+             !string.IsNullOrWhiteSpace(uri.Host));
+
+        CustomTypoListUrlValidationText.IsVisible = !valid;
+
+        return valid;
+    }
+
+    /// <summary>
+    /// Updates preference validation when the custom
+    /// typo list URL changes.
+    /// </summary>
+    private void CustomTypoListUrlTextBox_TextChanged(
+        object? sender,
+        TextChangedEventArgs e)
+    {
+        if (_updatingTypoListSource)
+        {
+            return;
+        }
+
+        UpdateOkButtonState();
     }
 
     /// <summary>
@@ -688,6 +819,15 @@ public partial class PreferencesWindow : UserControl
     /// </summary>
     private void UpdateOkButtonState()
     {
+        if (ProjectComboBox is null ||
+            CustomProjectComboBox is null ||
+            OkButton is null)
+        {
+            return;
+        }
+
+        bool validTypoListSource = ValidateTypoListSource();
+
         if (ProjectComboBox.SelectedItem is not ProjectEnum project)
         {
             OkButton.IsEnabled = false;
@@ -699,9 +839,10 @@ public partial class PreferencesWindow : UserControl
                 project);
 
         OkButton.IsEnabled =
-            !state.RequiresCustomProject ||
-            !string.IsNullOrWhiteSpace(
-                CustomProjectComboBox.Text);
+            validTypoListSource &&
+            (!state.RequiresCustomProject ||
+             !string.IsNullOrWhiteSpace(
+                 CustomProjectComboBox.Text));
     }
 
     /// <summary>

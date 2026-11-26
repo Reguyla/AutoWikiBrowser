@@ -193,7 +193,7 @@
 
                 <Border Classes="twain-section">
                     <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-<TextBlock Classes="twain-section-heading" Text="Application processing" />
+                <TextBlock Classes="twain-section-heading" Text="Application processing" />
 
                 <CheckBox
                     x:Name="MinimizeCheckBox"
@@ -245,7 +245,7 @@
 
                 <Border Classes="twain-section">
                     <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
-<TextBlock Classes="twain-section-heading" Text="Logging" />
+                <TextBlock Classes="twain-section-heading" Text="Logging" />
 
                 <CheckBox
                     x:Name="LoggingCheckBox"
@@ -464,6 +464,47 @@
                                 <CheckBox
                                     x:Name="NoMosComplianceFixesCheckBox"
                                     Content="Do not apply WP:MOS fixes" />
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Regex typo fixing -->
+                        <Border Classes="twain-section">
+                            <StackPanel Spacing="{DynamicResource TwainSpacingMedium}">
+
+                                <TextBlock
+                                    Classes="twain-section-heading"
+                                    Text="Regex typo fixing" />
+
+                                <CheckBox
+                                    x:Name="UseWikipediaTypoListCheckBox"
+                                    Content="Use Wikipedia typo list"
+                                    IsChecked="True"
+                                    IsCheckedChanged="TypoListSource_IsCheckedChanged" />
+
+                                <CheckBox
+                                    x:Name="UseCustomTypoListCheckBox"
+                                    Content="Use custom typo list"
+                                    IsCheckedChanged="TypoListSource_IsCheckedChanged" />
+
+                                <TextBox
+                                    x:Name="CustomTypoListUrlTextBox"
+                                    Watermark="Enter custom typo list URL"
+                                    IsEnabled="False"
+                                    HorizontalAlignment="Stretch"
+                                    TextChanged="CustomTypoListUrlTextBox_TextChanged" />
+
+                                <TextBlock
+                                    x:Name="CustomTypoListUrlValidationText"
+                                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                    TextWrapping="Wrap"
+                                    IsVisible="False"
+                                    Text="Enter a valid HTTP or HTTPS URL for the custom typo list." />
+
+                                <TextBlock
+                                    Foreground="{DynamicResource TwainTextSecondaryBrush}"
+                                    TextWrapping="Wrap"
+                                    Text="Always review typo corrections before saving. Use a typo list appropriate for the language of the current wiki." />
 
                             </StackPanel>
                         </Border>

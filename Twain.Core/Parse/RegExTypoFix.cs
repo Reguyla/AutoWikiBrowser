@@ -48,6 +48,23 @@ public class TyposDownloader : ITyposProvider
         "https://en.wikipedia.org/w/index.php" +
         "?title=Wikipedia:AutoWikiBrowser/Typos&action=raw";
 
+    private readonly string? _sourceUrl;
+
+    /// <summary>
+    /// Initializes a typo downloader using the configured wiki source.
+    /// </summary>
+    public TyposDownloader()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a typo downloader using an explicitly resolved source.
+    /// </summary>
+    public TyposDownloader(string sourceUrl)
+    {
+        _sourceUrl = sourceUrl;
+    }
+
     /// <summary>
     /// Resolves the configured typo-list source to an HTTP or HTTPS URL.
     /// Local wiki page titles are resolved against the current wiki.
@@ -91,7 +108,7 @@ public class TyposDownloader : ITyposProvider
         try
         {
             string text = string.Empty;
-            string sourceUrl = Url;
+            string sourceUrl = _sourceUrl ?? Url;
             Exception? sourceException = null;
 
             try
