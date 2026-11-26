@@ -1073,6 +1073,8 @@ public partial class WorkspaceView : UserControl
             PreferencesView.ApplyPreferences(
                 shellViewModel.Preferences);
 
+            workspace.ApplyRegexTypoListPreferences();
+
             shellViewModel.ApplySitePreferences();
 
             // Save the accepted application appearance preference.

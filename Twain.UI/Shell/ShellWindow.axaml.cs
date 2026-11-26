@@ -9,7 +9,6 @@ using Twain.UI.BotSettings;
 using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
-using Twain.UI.Dialogs;
 using Twain.UI.ExternalPrograms;
 using Twain.UI.Shell;
 using Twain.UI.Talk;
@@ -44,9 +43,6 @@ public partial class ShellWindow : Window
 
             _subscribedShellViewModel.Workspace
                 .NewTalkMessagesNotificationRequested = null;
-
-            _subscribedShellViewModel.Workspace
-                .ConfirmRegexTypoLoadingRequested = null;
         }
 
         _subscribedShellViewModel = DataContext as ShellViewModel;
@@ -62,9 +58,6 @@ public partial class ShellWindow : Window
         viewModel.Workspace.ConfirmSpamFilterRetryRequested =
             ConfirmSpamFilterRetryAsync;
 
-        viewModel.Workspace.ConfirmRegexTypoLoadingRequested =
-            ShowRegexTypoWarningAsync;
-
         viewModel.NewTalkMessagesDetected +=
             ShellViewModel_NewTalkMessagesDetected;
 
@@ -72,18 +65,6 @@ public partial class ShellWindow : Window
             () => ShellViewModel_NewTalkMessagesDetected(
                 viewModel,
                 EventArgs.Empty);
-    }
-
-    /// <summary>
-    /// Displays the regex typo loading warning and returns
-    /// whether the editor has confirmed the download.
-    /// </summary>
-    private async Task<bool> ShowRegexTypoWarningAsync(
-        string sourceUrl)
-    {
-        var dialog = new RegexTypoWarningWindow(sourceUrl);
-
-        return await dialog.ShowDialog<bool>(this);
     }
 
     private bool _talkMessageDialogVisible;

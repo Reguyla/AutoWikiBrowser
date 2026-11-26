@@ -6,7 +6,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Twain.Core;
 using Twain.Core.Alerts;
 using Twain.Core.API;
@@ -56,6 +55,11 @@ public partial class WorkspaceViewModel : ObservableObject
     /// Indicates whether regex typo rules are currently being loaded.
     /// </summary>
     private bool _loadingTypos;
+
+    /// <summary>
+    /// The source URL associated with the current regex typo rules.
+    /// </summary>
+    private string? _loadedTypoListSource;
 
     /// <summary>
     /// Gets or sets the current workspace processing status message.
@@ -391,13 +395,6 @@ public partial class WorkspaceViewModel : ObservableObject
     { get; set; }
 
     /// <summary>
-    /// Requests confirmation before downloading regex typo rules.
-    /// </summary>
-    public Func<string, Task<bool>>?
-        ConfirmRegexTypoLoadingRequested
-    { get; set; }
-
-    /// <summary>
     /// Gets or sets whether the upper document region
     /// is displaying the rendered article preview.
     /// </summary>
@@ -681,9 +678,80 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Initializes regex typo fixing when the option is enabled.
+    /// Resolves the regex typo list source selected
+    /// in the application preferences.
     /// </summary>
-    private async void OnRegexTypoFixEnabledChanged(bool enabled)
+    /// <returns>
+    /// The configured typo list URL, or null if no
+    /// valid source is configured.
+    /// </returns>
+    private string? ResolveRegexTypoListSource()
+    {
+        if (Preferences.General.UseWikipediaTypoList)
+        {
+            return TyposDownloader.EnglishWikipediaTypoListUrl;
+        }
+
+        if (Preferences.General.UseCustomTypoList)
+        {
+            if (Uri.TryCreate(
+                    Preferences.General.CustomTypoListUrl?.Trim(),
+                    UriKind.Absolute,
+                    out Uri? uri) &&
+                (uri.Scheme == Uri.UriSchemeHttp ||
+                 uri.Scheme == Uri.UriSchemeHttps) &&
+                !string.IsNullOrWhiteSpace(uri.Host))
+            {
+                return uri.AbsoluteUri;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Invalidates regex typo rules when the configured
+    /// source changes.
+    /// </summary>
+    public void ApplyRegexTypoListPreferences()
+    {
+        string? sourceUrl = ResolveRegexTypoListSource();
+
+        if (sourceUrl is not null &&
+            string.Equals(
+                _loadedTypoListSource,
+                sourceUrl,
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        bool wasEnabled = Options.EnableTypoCorrection;
+
+        Options.EnableTypoCorrection = false;
+        Options.SkipIfNoRegexTypo = false;
+
+        // Allow an active download to finish before
+        // discarding its results.
+        if (!_loadingTypos)
+        {
+            _regexTypos = null;
+            _loadedTypoListSource = null;
+        }
+
+        if (wasEnabled)
+        {
+            ProcessingStatusMessage = sourceUrl is null
+                ? "No typo list configured."
+                : "Typo list source changed. Reenable regex typo fixing to load the new rules.";
+        }
+    }
+
+    /// <summary>
+    /// Initializes regex typo fixing using the configured
+    /// typo list source.
+    /// </summary>
+    private void OnRegexTypoFixEnabledChanged(bool enabled)
     {
         if (!enabled)
         {
@@ -691,31 +759,50 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
-        if (_loadingTypos || _regexTypos is not null)
+        if (_loadingTypos)
         {
             return;
+        }
+
+        string? sourceUrl = ResolveRegexTypoListSource();
+
+        if (sourceUrl is null)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                Options.EnableTypoCorrection = false;
+
+                ProcessingStatusMessage =
+                    "No typo list configured. Select a typo list in Processing Preferences.";
+            });
+
+            return;
+        }
+
+        if (_regexTypos is not null)
+        {
+            if (_regexTypos.TyposLoaded &&
+                string.Equals(
+                    _loadedTypoListSource,
+                    sourceUrl,
+                    StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            // The configured source has changed.
+            _regexTypos = null;
+            _loadedTypoListSource = null;
         }
 
         _loadingTypos = true;
 
         try
         {
-            string sourceUrl = TyposDownloader.Url;
-
-            bool confirmed =
-                ConfirmRegexTypoLoadingRequested is not null &&
-                await ConfirmRegexTypoLoadingRequested(sourceUrl);
-
-            if (!confirmed || !Options.EnableTypoCorrection)
-            {
-                _loadingTypos = false;
-                Options.EnableTypoCorrection = false;
-                ProcessingStatusMessage = string.Empty;
-                return;
-            }
-
             ProcessingStatusMessage =
                 "Loading regex typo rules...";
+
+            _loadedTypoListSource = sourceUrl;
 
             _regexTypos = new RegExTypoFix(
                 true,
@@ -729,6 +816,8 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             _loadingTypos = false;
             _regexTypos = null;
+            _loadedTypoListSource = null;
+
             Options.EnableTypoCorrection = false;
 
             ProcessingStatusMessage =
@@ -754,6 +843,24 @@ public partial class WorkspaceViewModel : ObservableObject
     {
         _loadingTypos = false;
 
+        // Discard rules if the configured source changed
+        // while the download was in progress.
+        if (!string.Equals(
+                _loadedTypoListSource,
+                ResolveRegexTypoListSource(),
+                StringComparison.Ordinal))
+        {
+            _regexTypos = null;
+            _loadedTypoListSource = null;
+
+            Options.EnableTypoCorrection = false;
+
+            ProcessingStatusMessage =
+                "Typo list source changed. Downloaded rules discarded.";
+
+            return;
+        }
+
         if (_regexTypos?.TyposLoaded == true)
         {
             ProcessingStatusMessage =
@@ -764,14 +871,20 @@ public partial class WorkspaceViewModel : ObservableObject
         }
         else
         {
-            _regexTypos = null;
-            Options.EnableTypoCorrection = false;
+            string errorMessage =
+                _regexTypos?.LoadError ??
+                "Unable to load regex typo rules.";
 
-            ProcessingStatusMessage =
-                "Unable to load regex typo rules";
+            _regexTypos = null;
+            _loadedTypoListSource = null;
+
+            Options.EnableTypoCorrection = false;
+            Options.SkipIfNoRegexTypo = false;
+
+            ProcessingStatusMessage = errorMessage;
 
             System.Diagnostics.Debug.WriteLine(
-                "Regex typo rule loading failed.");
+                $"Regex typo rule loading failed: {errorMessage}");
         }
     }
 

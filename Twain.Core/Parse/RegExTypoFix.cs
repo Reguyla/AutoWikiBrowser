@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 using System.Threading;
-using System.Windows.Forms;
 using Twain.Core.Background;
 using Twain.Core.Controls;
 
@@ -44,7 +43,10 @@ public class TyposDownloader : ITyposProvider
 {
     private static readonly Regex TypoRegex = new Regex("<(?:Typo)?\\s+(?:word=\"(.*?)\"\\s+)?find=\"(.*?)\"\\s+replace=\"(.*?)\"\\s*/?>", RegexOptions.Compiled);
 
-    private const string EnglishWikipediaTypoListUrl =
+    /// <summary>
+    /// The standard English Wikipedia regex typo list URL.
+    /// </summary>
+    public const string EnglishWikipediaTypoListUrl =
         "https://en.wikipedia.org/w/index.php" +
         "?title=Wikipedia:AutoWikiBrowser/Typos&action=raw";
 
@@ -97,123 +99,62 @@ public class TyposDownloader : ITyposProvider
     }
 
     /// <summary>
-    /// Loads the typos from the rules page e.g. https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/Typos
-    /// Throws errors if any rules invalid or duplicate rules exist
+    /// Downloads and validates regex typo rules from the
+    /// configured typo list source.
     /// </summary>
-    /// <returns>Dictionary of typo rules</returns>
+    /// <returns>Dictionary of typo rules.</returns>
     public Dictionary<string, string> GetTypos()
     {
         Dictionary<string, string> typoStrings = new();
 
+        string sourceUrl = _sourceUrl ?? Url;
+        string text;
+
         try
         {
-            string text = string.Empty;
-            string sourceUrl = _sourceUrl ?? Url;
-            Exception? sourceException = null;
-
-            try
-            {
-                text = Tools.GetHTML(sourceUrl, Encoding.UTF8);
-            }
-            catch (Exception ex)
-            {
-                sourceException = ex;
-            }
-
-            if (string.IsNullOrEmpty(text))
-            {
-                // Do not offer to retry the same English Wikipedia source.
-                if (IsEnglishWikipediaTypoList(sourceUrl))
-                {
-                    MessageBox.Show(
-                        "There was a problem loading the typo list from English Wikipedia:" +
-                        "\r\n\r\n" +
-                        sourceException?.Message,
-                        "Typo list unavailable",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return typoStrings;
-                }
-
-                if (MessageBox.Show(
-                        "No list of typos was found at the configured location." +
-                        "\r\n\r\n" +
-                        "Would you like to use the list of typos from English Wikipedia?" +
-                        "\r\n\r\n" +
-                        "Only choose 'Yes' if this is an English-language wiki.",
-                        "Load from English Wikipedia?",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question) != DialogResult.Yes)
-                {
-                    return typoStrings;
-                }
-
-                try
-                {
-                    text = Tools.GetHTML(
-                        EnglishWikipediaTypoListUrl,
-                        Encoding.UTF8);
-                }
-                catch (Exception fallbackException)
-                {
-                    MessageBox.Show(
-                        "The configured typo list could not be loaded." +
-                        "\r\n\r\n" +
-                        "Configured source error:" +
-                        "\r\n" +
-                        (sourceException?.Message ??
-                         "No error details were available.") +
-                        "\r\n\r\n" +
-                        "English Wikipedia fallback error:" +
-                        "\r\n" +
-                        fallbackException.Message,
-                        "Typo list unavailable",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
-                    return typoStrings;
-                }
-            }
-
-            if (string.IsNullOrEmpty(text))
-                return typoStrings;
-
-            foreach (Match m in TypoRegex.Matches(text))
-            {
-                try
-                {
-                    typoStrings.Add(
-                        m.Groups[2].Value,
-                        m.Groups[3].Value);
-                }
-                catch (ArgumentException)
-                {
-                    RegExTypoFix.TypoError(
-                        "Duplicate typo rule '" +
-                        m.Groups[2].Value +
-                        "' found.");
-
-                    return new Dictionary<string, string>();
-                }
-            }
+            text = Tools.GetHTML(
+                sourceUrl,
+                Encoding.UTF8);
         }
         catch (Exception ex)
         {
-            ErrorHandler.HandleException(ex);
+            throw new InvalidOperationException(
+                "Unable to download the configured typo list.",
+                ex);
+        }
 
-            // Refuse to accept malformed typo lists to encourage people
-            // to correct errors.
-            return new Dictionary<string, string>();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new InvalidOperationException(
+                "The configured typo list is empty.");
+        }
+
+        foreach (Match m in TypoRegex.Matches(text))
+        {
+            string find = m.Groups[2].Value;
+            string replace = m.Groups[3].Value;
+
+            if (!typoStrings.TryAdd(find, replace))
+            {
+                throw new InvalidOperationException(
+                    $"Duplicate regex typo rule '{find}' found.");
+            }
+        }
+
+        if (typoStrings.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "No valid regex typo rules found at the configured source.");
         }
 
         return typoStrings;
     }
 }
-/// <summary>
-/// Represents a group of similar typo regexes
-/// </summary>
-class TypoGroup
+
+    /// <summary>
+    /// Represents a group of similar typo regexes
+    /// </summary>
+    class TypoGroup
 {
     /// <summary>
     /// Creates a group that holds similar typos
@@ -261,26 +202,32 @@ class TypoGroup
     }
 
     /// <summary>
-    /// Adds one typo regex to the list
+    /// Adds one typo regex to the list.
     /// </summary>
     public void Add(string typo, string replacement)
     {
         if (!IsSuitableTypo(typo))
         {
-            throw new ArgumentException("Typo \"" + typo + "\" is not suitable for this group.");
+            throw new ArgumentException(
+                "Typo \"" + typo +
+                "\" is not suitable for this group.");
         }
+
         Regex r;
+
         try
         {
             r = new Regex(typo, RegexOptions.Compiled);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            RegExTypoFix.TypoError("Error in typo '" + typo + "': " + ex.Message);
-            throw new TypoException();
+            throw new InvalidOperationException(
+                $"Invalid regex typo rule '{typo}': {ex.Message}",
+                ex);
         }
 
-        Typos.Add(new KeyValuePair<Regex, string>(r, replacement));
+        Typos.Add(
+            new KeyValuePair<Regex, string>(r, replacement));
     }
 
     /// <summary>
@@ -507,23 +454,17 @@ public class RegExTypoFix
     public bool TyposLoaded { get; private set; }
 
     /// <summary>
+    /// Gets the reason why regex typo rule loading failed,
+    /// or null if no loading error occurred.
+    /// </summary>
+    public string? LoadError { get; private set; }
+
+    /// <summary>
     ///
     /// </summary>
     private static readonly Regex IgnoreRegex = new Regex("\\(sic\\)|\\[sic\\]|\\[''sic''\\]|\\{\\{sic\\}\\}|spellfixno", RegexOptions.Compiled);
     private static readonly Regex RemoveTail = new Regex(@"(\s|\n|\r|\*|#|:|⌊⌊⌊⌊M?\d*⌋⌋⌋⌋)+$", RegexOptions.Compiled);
     private readonly List<TypoGroup> Groups = new List<TypoGroup>();
-
-    /// <summary>
-    /// Displays a typo rule error message and instructions for reloading the
-    /// typo definitions.
-    /// </summary>
-    /// <param name="error"></param>
-    internal static void TypoError(string error)
-    {
-        MessageBox.Show(error + "\r\n\r\nPlease visit the typo page at " + Variables.RetfPath +
-            " and fix this error, then click 'File → Refresh status/typos' menu item to reload typos.",
-            "RegexTypoFix error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
 
     /// <summary>
     /// Clears the existing typo groups, loads typo rules from the configured source,
@@ -536,6 +477,8 @@ public class RegExTypoFix
         {
             Groups.Clear();
             TypoCount = 0;
+            TyposLoaded = false;
+            LoadError = null;
 
             Groups.Add(new TypoGroup(20, @"^\\b(\(\[[A-M].*)\\b$", @"[^\\]\\\d", @"\b", @"\b"));
             Groups.Add(new TypoGroup(19, @"^\\b(\(\[[N-Z].*)\\b$", @"[^\\]\\\d", @"\b", @"\b"));
@@ -566,20 +509,19 @@ public class RegExTypoFix
                     grp.MakeGroups();
             }
         }
-        catch (TypoException)
+        catch (Exception ex)
         {
             Groups.Clear();
             TypoCount = 0;
             TyposLoaded = false;
-        }
-        catch (Exception ex)
-        {
-            TyposLoaded = false;
-            ErrorHandler.HandleException(ex);
+            LoadError = ex.Message;
+
+            System.Diagnostics.Debug.WriteLine(ex);
         }
         finally
         {
-            if (Complete != null) Complete(TypoThread);
+            if (Complete != null)
+                Complete(TypoThread);
         }
     }
 
