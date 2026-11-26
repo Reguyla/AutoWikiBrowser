@@ -25,10 +25,24 @@ public sealed partial class BotSettingsViewModel : ObservableObject
     public Action? ResetLiveNudgeCounters { get; set; }
 
     /// <summary>
+    /// Notifies the workspace when automatic saving is enabled
+    /// or disabled.
+    /// </summary>
+    public Action<bool>? AutoSaveEnabledChanged { get; set; }
+
+    /// <summary>
     /// Gets or sets whether automatic article saving is enabled.
     /// </summary>
     [ObservableProperty]
     private bool _autoSaveEnabled;
+
+    /// <summary>
+    /// Notifies the workspace of changes to bot-mode state.
+    /// </summary>
+    partial void OnAutoSaveEnabledChanged(bool value)
+    {
+        AutoSaveEnabledChanged?.Invoke(value);
+    }
 
     /// <summary>
     /// Gets or sets the delay, in seconds, between automatic saves.

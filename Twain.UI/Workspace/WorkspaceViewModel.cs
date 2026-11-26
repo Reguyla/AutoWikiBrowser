@@ -587,6 +587,9 @@ public partial class WorkspaceViewModel : ObservableObject
         Options.RegexTypoFixEnabledChanged =
            OnRegexTypoFixEnabledChanged;
 
+        BotSettings.AutoSaveEnabledChanged =
+            OnAutoSaveEnabledChanged;
+
         TwainHost = new TwainHost(
             Session,
             () => Options.IsProcessing,
@@ -743,7 +746,38 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             ProcessingStatusMessage = sourceUrl is null
                 ? "No typo list configured."
-                : "Typo list source changed. Reenable regex typo fixing to load the new rules.";
+                : "Typo list source changed. Re-enable regex typo fixing to load the new rules.";
+        }
+    }
+
+    /// <summary>
+    /// Applies processing restrictions when automatic
+    /// saving is enabled or disabled.
+    /// </summary>
+    private void OnAutoSaveEnabledChanged(bool enabled)
+    {
+        if (!enabled)
+        {
+            _autoSaveCancellation?.Cancel();
+            _autoSaveCancellation?.Dispose();
+            _autoSaveCancellation = null;
+
+            _nudgeCancellation?.Cancel();
+            _nudgeCancellation?.Dispose();
+            _nudgeCancellation = null;
+
+            return;
+        }
+
+        // Preserve the legacy custom-project exception.
+        if (Options.EnableTypoCorrection &&
+            !Variables.IsCustomProject)
+        {
+            Options.EnableTypoCorrection = false;
+            Options.SkipIfNoRegexTypo = false;
+
+            ProcessingStatusMessage =
+                "Regex typo fixing disabled because bot mode was enabled.";
         }
     }
 
@@ -757,6 +791,16 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             Options.SkipIfNoRegexTypo = false;
             return;
+        }
+
+        // Preserve the legacy restriction against enabling
+        // regex typo fixing while bot mode is active.
+        if (BotSettings.AutoSaveEnabled)
+        {
+            BotSettings.AutoSaveEnabled = false;
+
+            ProcessingStatusMessage =
+                "Bot mode disabled because regex typo fixing was enabled.";
         }
 
         if (_loadingTypos)
