@@ -4,11 +4,13 @@ using Avalonia.Platform.Storage;
 using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
+using Twain.Core.Disambiguation;
 using Twain.UI.About;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls;
 using Twain.UI.Controls.Lists;
 using Twain.UI.DBScanner;
+using Twain.UI.Disambiguation;
 using Twain.UI.ExternalPrograms;
 using Twain.UI.Shell;
 using Twain.UI.Talk;
@@ -43,6 +45,9 @@ public partial class ShellWindow : Window
 
             _subscribedShellViewModel.Workspace
                 .NewTalkMessagesNotificationRequested = null;
+
+            _subscribedShellViewModel.Workspace
+                .RequestDisambiguationAsync = null;
         }
 
         _subscribedShellViewModel = DataContext as ShellViewModel;
@@ -57,6 +62,9 @@ public partial class ShellWindow : Window
 
         viewModel.Workspace.ConfirmSpamFilterRetryRequested =
             ConfirmSpamFilterRetryAsync;
+
+        viewModel.Workspace.RequestDisambiguationAsync =
+            ShowDisambiguationAsync;
 
         viewModel.NewTalkMessagesDetected +=
             ShellViewModel_NewTalkMessagesDetected;
@@ -556,6 +564,29 @@ public partial class ShellWindow : Window
         skipButton.Click += (_, _) => dialog.Close(false);
 
         return await dialog.ShowDialog<bool>(this);
+    }
+
+    /// <summary>
+    /// Displays the interactive disambiguation dialog
+    /// for the supplied article.
+    /// </summary>
+    /// <returns>
+    /// Whether processing was aborted and the resulting article text.
+    /// </returns>
+    private async Task<(bool Abort, string ArticleText)>
+        ShowDisambiguationAsync(
+            Article article,
+            DisambiguationProcessor.DisambiguationPreparation preparation)
+    {
+        var (dialogResult, articleText) =
+            await DabWindow.ShowAsync(
+                this,
+                article.ArticleText,
+                preparation);
+
+        return (
+            dialogResult == DabDialogResult.Abort,
+            articleText);
     }
 
     /// <summary>

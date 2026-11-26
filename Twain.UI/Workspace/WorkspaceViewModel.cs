@@ -11,6 +11,7 @@ using Twain.Core.Alerts;
 using Twain.Core.API;
 using Twain.Core.Background;
 using Twain.Core.CustomModules;
+using Twain.Core.Disambiguation;
 using Twain.Core.Editing;
 using Twain.Core.EditSummaries;
 using Twain.Core.Parse;
@@ -395,6 +396,17 @@ public partial class WorkspaceViewModel : ObservableObject
     { get; set; }
 
     /// <summary>
+    /// Gets or sets the callback that requests interactive
+    /// disambiguation through the application shell.
+    /// </summary>
+    public Func<
+        Article,
+        DisambiguationProcessor.DisambiguationPreparation,
+        Task<(bool Abort, string ArticleText)>>?
+        RequestDisambiguationAsync
+    { get; set; }
+
+    /// <summary>
     /// Gets or sets whether the upper document region
     /// is displaying the rendered article preview.
     /// </summary>
@@ -485,7 +497,7 @@ public partial class WorkspaceViewModel : ObservableObject
     /// article-processing options without advancing the article list.
     /// </summary>
     [RelayCommand]
-    private void ReparseProcessing()
+    private async Task ReparseProcessingAsync()
     {
         if (!IsRegexTypoProcessingReady ||
             CurrentArticle is null ||
@@ -520,7 +532,7 @@ public partial class WorkspaceViewModel : ObservableObject
         // Reparse uses the shared processing pipeline but does not
         // advance the article list or save the article.
         ArticleProcessingResult result =
-            _mainProcess.ProcessPageWithResult(
+            await _mainProcess.ProcessPageWithResultAsync(
                 article,
                 false,
                 options,
@@ -662,7 +674,7 @@ public partial class WorkspaceViewModel : ObservableObject
             RequestProtectCurrentPage;
 
         Options.ReparseProcessingRequested =
-            ReparseProcessing;
+            () => ReparseProcessingCommand.Execute(null);
 
         Options.SaveProcessingRequested =
             () => _ = SaveProcessing();
@@ -1419,6 +1431,9 @@ public partial class WorkspaceViewModel : ObservableObject
 
             ApplyRegexTypoProcessing =
                 ApplyRegexTypoProcessing,
+
+            RequestDisambiguationAsync =
+                RequestDisambiguationAsync,
 
             AbortProcessing =
                 AbortProcessing,
@@ -2386,77 +2401,110 @@ public partial class WorkspaceViewModel : ObservableObject
         Editor.CalculatedEditSummary = calculatedSummary;
     }
 
+    /// <summary>
+    /// Handles completion of an article-open request.
+    /// </summary>
     private void Editor_OpenComplete(
         AsyncApiEdit editor,
         PageInfo page)
     {
-        Dispatcher.UIThread.Post(() =>
+        Dispatcher.UIThread.Post(async () =>
         {
-            // Ignore callbacks after processing has stopped.
-            if (!Options.IsProcessing ||
-                !Options.IsProcessingActive)
+            try
             {
-                return;
+                await HandleOpenedArticleAsync(page);
             }
-
-            InitializeOpenedArticle(page);
-
-            // Legacy AWB checks for new talk messages after loading
-            // an article, but does not interrupt unattended Preparse.
-            if (!Options.PreParseMode &&
-                !IsPreparseRunning &&
-                Session.User.HasMessages)
+            catch (Exception ex)
             {
-                NewTalkMessagesNotificationRequested?.Invoke();
-                return;
+                StopProcessing();
+                ErrorHandler.HandleException(ex);
             }
-
-            // Before-processing skip: redirect page.
-            if (!IsPreparseRunning &&
-                Options.SkipRedirects &&
-                Tools.IsRedirect(page.Text))
-            {
-                CurrentArticle!.TwainSkip("Page is a redirect");
-
-                CompleteCurrentArticle(manualSkip: false);
-                return;
-            }
-
-            // Before-processing skip: page is in use.
-            // Keep Preparse on its existing path for now.
-            if (!IsPreparseRunning &&
-                Options.SkipIfInUse &&
-                CurrentArticle!.IsInUse)
-            {
-                CurrentArticle.TwainSkip("Page contains {{inuse}}");
-
-                CompleteCurrentArticle(manualSkip: false);
-                return;
-            }
-
-            ArticleProcessingResult result =
-                ProcessOpenedArticle();
-
-            // Core may have stopped processing.
-            if (!Options.IsProcessing)
-            {
-                return;
-            }
-
-            if (IsPreparseRunning)
-            {
-                HandlePreparseProcessingResult(result);
-                return;
-            }
-
-            if (result.Outcome == ArticleProcessingOutcome.Skipped)
-            {
-                CompleteCurrentArticle(manualSkip: false);
-                return;
-            }
-
-            CompleteNormalArticleProcessing();
         });
+    }
+
+    /// <summary>
+    /// Processes the newly opened article and handles
+    /// the resulting processing outcome.
+    /// </summary>
+    private async Task HandleOpenedArticleAsync(PageInfo page)
+    {
+        // Ignore callbacks after processing has stopped.
+        if (!Options.IsProcessing ||
+            !Options.IsProcessingActive)
+        {
+            return;
+        }
+
+        InitializeOpenedArticle(page);
+
+        // Legacy AWB checks for new talk messages after loading
+        // an article, but does not interrupt unattended Preparse.
+        if (!Options.PreParseMode &&
+            !IsPreparseRunning &&
+            Session.User.HasMessages)
+        {
+            NewTalkMessagesNotificationRequested?.Invoke();
+            return;
+        }
+
+        // Before-processing skip: redirect page.
+        if (!IsPreparseRunning &&
+            Options.SkipRedirects &&
+            Tools.IsRedirect(page.Text))
+        {
+            CurrentArticle!.TwainSkip("Page is a redirect");
+
+            CompleteCurrentArticle(manualSkip: false);
+            return;
+        }
+
+        // Before-processing skip: page is in use.
+        // Keep Preparse on its existing path for now.
+        if (!IsPreparseRunning &&
+            Options.SkipIfInUse &&
+            CurrentArticle!.IsInUse)
+        {
+            CurrentArticle.TwainSkip("Page contains {{inuse}}");
+
+            CompleteCurrentArticle(manualSkip: false);
+            return;
+        }
+
+        Article article = CurrentArticle!;
+
+        ArticleProcessingResult result =
+            await ProcessOpenedArticleAsync();
+
+        // Core may have stopped processing, or the current
+        // article may have changed during asynchronous processing.
+        if (!Options.IsProcessing ||
+            !ReferenceEquals(CurrentArticle, article))
+        {
+            return;
+        }
+
+        if (IsPreparseRunning)
+        {
+            HandlePreparseProcessingResult(result);
+            return;
+        }
+
+        if (result.Outcome == ArticleProcessingOutcome.Skipped)
+        {
+            CompleteCurrentArticle(manualSkip: false);
+            return;
+        }
+
+        // Do not complete normal processing for an incomplete
+        // or failed processing result.
+        if (!result.Completed ||
+            result.Outcome == ArticleProcessingOutcome.Failed)
+        {
+            StopProcessing();
+            return;
+        }
+
+        CompleteNormalArticleProcessing();
     }
 
     /// <summary>
@@ -2535,9 +2583,9 @@ public partial class WorkspaceViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Runs the configured article-processing pipeline.
+    /// Asynchronously runs the configured article-processing pipeline.
     /// </summary>
-    private ArticleProcessingResult ProcessOpenedArticle()
+    private async Task<ArticleProcessingResult> ProcessOpenedArticleAsync()
     {
         MainProcessOptions options =
             Options.CreateMainProcessOptions(Preferences);
@@ -2550,7 +2598,7 @@ public partial class WorkspaceViewModel : ObservableObject
 
         Article article = CurrentArticle!;
 
-        return _mainProcess.ProcessPageWithResult(
+        return await _mainProcess.ProcessPageWithResultAsync(
             article,
             true,
             options,

@@ -1,4 +1,6 @@
-﻿using Twain.Core.Parse;
+﻿using Twain.Core.Disambiguation;
+using Twain.Core.Parse;
+using System.Threading.Tasks;
 
 namespace Twain.Core.Processing;
 
@@ -25,6 +27,21 @@ public sealed class MainProcessCallbacks
     /// </summary>
     public required Action<Article, bool, List<TypoStat>?>
         ApplyRegexTypoProcessing
+    { get; init; }
+
+    /// <summary>
+    /// Gets or initializes the callback that requests interactive
+    /// disambiguation through the application user interface.
+    /// </summary>
+    /// <remarks>
+    /// The callback returns the resulting article text and indicates
+    /// whether the current processing workflow should be aborted.
+    /// </remarks>
+    public Func<
+        Article,
+        DisambiguationProcessor.DisambiguationPreparation,
+        Task<(bool Abort, string ArticleText)>>?
+        RequestDisambiguationAsync
     { get; init; }
 
     /// <summary>

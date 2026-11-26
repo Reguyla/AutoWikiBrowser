@@ -558,4 +558,89 @@ public static class DisambiguationProcessor
 
         return !article.SkipArticle;
     }
+
+    /// <summary>
+    /// Applies the configured disambiguation operation using an
+    /// asynchronous application-owned dialog callback.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="callbacks">
+    /// The application-owned processing callbacks.
+    /// </param>
+    /// <returns>
+    /// The outcome of the disambiguation processing stage.
+    /// </returns>
+    public static async Task<DisambiguationProcessingOutcome>
+        ApplyDisambiguationAsync(
+            Article article,
+            MainProcessOptions options,
+            MainProcessCallbacks callbacks)
+    {
+        if (options.PreParseMode ||
+            !options.DisambiguationEnabled ||
+            options.DisambiguationLink.Length == 0 ||
+            options.DisambiguationVariants.Length == 0)
+        {
+            return DisambiguationProcessingOutcome.Continue;
+        }
+
+        string originalText = article.ArticleText;
+
+        DisambiguationPreparation preparation =
+            Prepare(
+                originalText,
+                options.DisambiguationLink,
+                options.DisambiguationVariants,
+                options.DisambiguationContextCharacters);
+
+        if (preparation.Variants.Count == 0 ||
+            preparation.Items.Count == 0)
+        {
+            article.ApplyDisambiguationResult(
+                options.DisambiguationLink,
+                originalText,
+                true,
+                options.SkipIfNoDisambiguation);
+
+            return article.SkipArticle
+                ? DisambiguationProcessingOutcome.Skipped
+                : DisambiguationProcessingOutcome.Continue;
+        }
+
+        var requestDisambiguation =
+            callbacks.RequestDisambiguationAsync
+            ?? throw new InvalidOperationException(
+                "The disambiguation dialog callback has not been configured.");
+
+        var (abort, articleText) =
+            await requestDisambiguation(
+                article,
+                preparation);
+
+        if (abort)
+        {
+            return DisambiguationProcessingOutcome.Aborted;
+        }
+
+        bool noChange =
+            string.Equals(
+                originalText,
+                articleText,
+                StringComparison.Ordinal);
+
+        article.ApplyDisambiguationResult(
+            options.DisambiguationLink,
+            articleText,
+            noChange,
+            options.SkipIfNoDisambiguation);
+
+        return article.SkipArticle
+            ? DisambiguationProcessingOutcome.Skipped
+            : DisambiguationProcessingOutcome.Continue;
+    }
 }

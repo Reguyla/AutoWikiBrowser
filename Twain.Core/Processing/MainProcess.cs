@@ -591,6 +591,49 @@ public sealed class MainProcess
     }
 
     /// <summary>
+    /// Asynchronously processes an article and returns its
+    /// processing outcome.
+    /// </summary>
+    /// <param name="article">
+    /// The article to process.
+    /// </param>
+    /// <param name="mainProcess">
+    /// Whether processing is part of the normal editing workflow.
+    /// </param>
+    /// <param name="options">
+    /// The processing options captured when processing began.
+    /// </param>
+    /// <param name="session">
+    /// The active wiki session.
+    /// </param>
+    /// <param name="dependencies">
+    /// The dependencies required by article processing.
+    /// </param>
+    /// <param name="callbacks">
+    /// The application-owned processing callbacks.
+    /// </param>
+    /// <returns>
+    /// The resulting article-processing outcome.
+    /// </returns>
+    public Task<ArticleProcessingResult> ProcessPageWithResultAsync(
+        Article article,
+        bool mainProcess,
+        MainProcessOptions options,
+        Session session,
+        MainProcessDependencies dependencies,
+        MainProcessCallbacks callbacks)
+    {
+        return Task.FromResult(
+            ProcessPageInternal(
+                article,
+                mainProcess,
+                options,
+                session,
+                dependencies,
+                callbacks));
+    }
+
+    /// <summary>
     /// Executes the article-processing pipeline and captures its result.
     /// </summary>
     private ArticleProcessingResult ProcessPageInternal(

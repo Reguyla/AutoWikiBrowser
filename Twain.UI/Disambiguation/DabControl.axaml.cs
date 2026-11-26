@@ -53,15 +53,12 @@ public partial class DabControl : UserControl
         CorrectionTextBox.Text ?? string.Empty;
 
     /// <summary>
-    /// Gets whether the current selection represents no change.
+    /// Gets whether the current correction leaves the
+    /// original wikilink unchanged.
     /// </summary>
-    /// <remarks>
-    /// This currently preserves the behavior of the legacy WinForms
-    /// disambiguation control.
-    /// </remarks>
     public bool NoChange =>
-        ChoiceComboBox.SelectedIndex == 0 &&
-        Result == _preparation?.Surroundings;
+        _preparation is not null &&
+        Result == _preparation.OriginalLink;
 
     /// <summary>
     /// Gets whether the current correction contains text that can be saved.
@@ -171,7 +168,34 @@ public partial class DabControl : UserControl
         object? sender,
         TextChangedEventArgs e)
     {
+        bool hasPipe = Result.Contains('|');
+
+        UnpipeButton.IsEnabled = hasPipe;
+        FlipButton.IsEnabled = hasPipe;
+
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Restores the original wikilink and resets the
+    /// disambiguation selection.
+    /// </summary>
+    private void ResetButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Reset();
+    }
+
+    /// <summary>
+    /// Discards manual correction edits and restores
+    /// the currently selected replacement.
+    /// </summary>
+    private void UndoButton_Click(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Undo();
     }
 
     /// <summary>
