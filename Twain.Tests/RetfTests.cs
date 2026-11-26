@@ -1,135 +1,206 @@
-﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
+﻿
+using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 using Twain.Core.Parse;
 
-namespace Twain.Tests;
+namespace Twain.Tests.Parsing;
 
+/// <summary>
+/// Provides an in-memory collection of regex typo rules
+/// without requiring an external wiki or network connection.
+/// </summary>
 public class TypoList : ITyposProvider
 {
-    readonly Dictionary<string, string> Typos;
+    private readonly Dictionary<string, string> _typos;
 
-    public TypoList(Dictionary<string, string> list)
+    public TypoList(Dictionary<string, string> typos)
     {
-        Typos = list;
+        _typos = typos;
     }
 
     public Dictionary<string, string> GetTypos()
     {
-        return Typos;
+        return _typos;
     }
 }
 
+/// <summary>
+/// Tests regex typo detection, correction, protected text,
+/// regex behavior, and edit-summary generation.
+/// </summary>
 [TestFixture]
-public class RetfTests : RequiresInitialization
+public class RegexTypoFixTests : RequiresInitialization
 {
-    #region Preparations
-    private RegExTypoFix Retf;
-    private readonly Dictionary<string, string> Typos = new();
-    private string Summary;
+    #region Test Preparation
+
+    private RegExTypoFix? _regexTypos;
+
+    private readonly Dictionary<string, string> _typos = new();
+
+    private string _summary = string.Empty;
 
     [SetUp]
     public void SetUp()
     {
-        Typos.Clear();
-        Retf = null;
+        _typos.Clear();
+        _regexTypos = null;
+        _summary = string.Empty;
     }
 
-    private string FixTypos(string articleText)
+    /// <summary>
+    /// Initializes the regex typo engine using the rules
+    /// configured for the current test.
+    /// </summary>
+    private RegExTypoFix GetTypoFixer()
     {
-        return FixTypos(articleText, "Test");
-    }
-
-    private string FixTypos(string articleText, string articleTitle)
-    {
-        if (Retf == null)
+        if (_regexTypos is not null)
         {
-            if (Typos.Count == 0) throw new Exception("You forgot to provide a list of typos!");
-            Retf = new RegExTypoFix(false, new TypoList(Typos));
+            return _regexTypos;
         }
 
-        bool noChange;
-        return Retf.PerformTypoFixes(articleText, out noChange, out Summary, articleTitle);
-    }
-
-    private bool DetectTypo(string articleText)
-    {
-        return DetectTypo(articleText, "Test");
-    }
-
-    private bool DetectTypo(string articleText, string articleTitle)
-    {
-        if (Retf == null)
+        if (_typos.Count == 0)
         {
-            if (Typos.Count == 0) throw new Exception("You forgot to provide a list of typos!");
-            Retf = new RegExTypoFix(false, new TypoList(Typos));
+            throw new InvalidOperationException(
+                "No regex typo rules have been configured for this test.");
         }
 
-        return Retf.DetectTypo(articleText, articleTitle);
+        _regexTypos = new RegExTypoFix(
+            false,
+            new TypoList(_typos));
+
+        Assert.That(
+            _regexTypos.TyposLoaded,
+            Is.True,
+            "The configured regex typo rules failed to load.");
+
+        return _regexTypos;
     }
 
-    private void AssertFix(string expected, string articleText, string articleTitle)
+    /// <summary>
+    /// Applies regex typo corrections and captures
+    /// the generated edit summary.
+    /// </summary>
+    private string FixTypos(
+        string articleText,
+        string articleTitle = "Test")
     {
-        Assert.That(FixTypos(articleText, articleTitle), Is.EqualTo(expected));
+        return GetTypoFixer().PerformTypoFixes(
+            articleText,
+            out _,
+            out _summary,
+            articleTitle);
     }
 
-    private void AssertFix(string expected, string articleText)
+    /// <summary>
+    /// Determines whether the article contains
+    /// a detectable regex typo.
+    /// </summary>
+    private bool DetectTypo(
+        string articleText,
+        string articleTitle = "Test")
     {
-        Assert.That(FixTypos(articleText), Is.EqualTo(expected));
+        return GetTypoFixer().DetectTypo(
+            articleText,
+            articleTitle);
     }
 
-    private void AssertNoFix(string articleText, string articleTitle)
+    /// <summary>
+    /// Verifies that typo correction produces
+    /// the expected article text.
+    /// </summary>
+    private void AssertFix(
+        string expected,
+        string articleText,
+        string articleTitle = "Test")
     {
-        Assert.That(FixTypos(articleText, articleTitle), Is.EqualTo(articleText));
+        Assert.That(
+            FixTypos(articleText, articleTitle),
+            Is.EqualTo(expected));
     }
 
-    private void AssertNoFix(string articleText)
+    /// <summary>
+    /// Verifies that typo correction leaves
+    /// the supplied article text unchanged.
+    /// </summary>
+    private void AssertNoFix(
+        string articleText,
+        string articleTitle = "Test")
     {
-        Assert.That(FixTypos(articleText), Is.EqualTo(articleText));
+        Assert.That(
+            FixTypos(articleText, articleTitle),
+            Is.EqualTo(articleText));
     }
+
     #endregion
 
-    [Test]
-    public void SimpleTypos()
-    {
-        Typos["foo"] = "bar";
+    #region Basic Typo Correction
 
-        AssertNoFix("");
+    [Test]
+    public void CorrectsSimpleTypos()
+    {
+        _typos["foo"] = "bar";
+
+        AssertNoFix(string.Empty);
         AssertNoFix("test");
 
-        AssertFix("the bars are cute", FixTypos("the foos are cute"));
-        AssertFix("the bars are cute bars", FixTypos("the foos are cute foos"));
+        AssertFix(
+            "the bars are cute",
+            "the foos are cute");
+
+        AssertFix(
+            "the bars are cute bars",
+            "the foos are cute foos");
     }
 
     [Test]
-    public void NoTypos()
+    public void RespectsSpellFixNo()
     {
-        Typos["foo"] = "bar";
+        _typos["foo"] = "bar";
+
         AssertNoFix("spellfixno foos are");
     }
 
     [Test]
-    public void DetectTypo()
+    public void DetectsTyposAndRespectsSic()
     {
-        Typos["foo"] = "bar";
-        ClassicAssert.IsTrue(DetectTypo("The foo was"));
-        ClassicAssert.IsTrue(DetectTypo("The foo was "));
-        ClassicAssert.IsFalse(DetectTypo("The x was"));
-        ClassicAssert.IsFalse(DetectTypo("The foo {{sic}} was"));
+        _typos["foo"] = "bar";
+
+        Assert.That(
+            DetectTypo("The foo was"),
+            Is.True);
+
+        Assert.That(
+            DetectTypo("The foo was "),
+            Is.True);
+
+        Assert.That(
+            DetectTypo("The x was"),
+            Is.False);
+
+        Assert.That(
+            DetectTypo("The foo {{sic}} was"),
+            Is.False);
     }
 
-    [Test]
-    public void CaseSensitivity()
-    {
-        Typos["foo"] = "bar";
-        Typos["[Bb]oz"] = "quux";
-        Typos["(?i:fubar)"] = "fur";
+    #endregion
 
-        // fixes matching case
+    #region Regex Behavior
+
+    [Test]
+    public void RespectsRegexCaseSensitivity()
+    {
+        _typos["foo"] = "bar";
+        _typos["[Bb]oz"] = "quux";
+        _typos["(?i:fubar)"] = "fur";
+
+        // Correct matching case.
         AssertFix("bars", "foos");
-        // ...but not mismatching
+
+        // Preserve nonmatching case.
         AssertNoFix("Foobar");
 
-        // should handle case-insensitive regex constructs properly
+        // Respect case-insensitive regex constructs.
         AssertFix("quux", "boz");
         AssertFix("quux", "Boz");
         AssertNoFix("BOZ");
@@ -137,97 +208,179 @@ public class RetfTests : RequiresInitialization
     }
 
     [Test]
-    public void DontChangeURLs()
+    public void PreservesRegexBackreferences()
     {
-        Typos["foo"] = "bar";
-        AssertNoFix("http://foo.com/asdfasdf/asdf.htm");
-        AssertNoFix(@"[http://foo.com/asdfasdf/asdf.htm Foo's best]");
-        AssertNoFix("http://foo.com/asdfasdf/foo.htm");
-    }
+        // Historical AWB regression:
+        // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_6#Rules_in_Finnish_Regex_TypoFix_list_not_always_applied
 
-    [Test]
-    // https://en.wikipedia.org/wiki/Wikipedia_talk:AutoWikiBrowser/Bugs/Archive_6#Rules_in_Finnish_Regex_TypoFix_list_not_always_applied
-    public void Backreferences()
-    {
-        Typos["(taht)"] = "that";
-        Typos[@"\b(a|the)\b\s+\1\b"] = "$1";
+        _typos["(taht)"] = "that";
+        _typos[@"\b(a|the)\b\s+\1\b"] = "$1";
 
-        // all rules must function separately
+        // Each rule must function independently.
         AssertFix("that", "taht");
         AssertFix("the", "the the");
-        AssertNoFix("a the"); // just in case
+        AssertNoFix("a the");
 
-        // matches from other rules must not pollute backreferences
+        // Matches from other rules must not interfere
+        // with regex backreferences.
         AssertFix("that the", "taht the the");
     }
 
     [Test]
-    public void SummaryTests()
+    public void AppliesRulesAcrossRegexGroups()
     {
-        Typos["f[oO0]{2}"] = "foo";
-        Typos[@"(?<=ten )bar"] = "BAR";
+        _typos[@"\booze\b"] = "booze!";
+        _typos[@"foo(\w*)\b"] = "bar$1";
+        _typos[@"\b(a|the)\b\s+\1\b"] = "$1";
 
-        AssertFix("foo foo", "foo fO0");
-        ClassicAssert.IsFalse(Summary.Contains("foo → foo"));
-        ClassicAssert.IsFalse(Summary.Contains("2"));
+        AssertFix(
+            "barwards viva the booze!",
+            "foowards viva the the ooze");
+    }
 
-        AssertFix("ten BAR", "ten bar");
-        ClassicAssert.IsTrue(Summary.Contains(@"bar → BAR"), "regex with lookbehind such that regex does not match its own match value still generates edit summary based on match value");
-        ClassicAssert.IsFalse(Summary.Contains("ten"), "for regex with lookbehind, edit summary based on match value without groups outside match value");
+    #endregion
+
+    #region Protected Text
+
+    [Test]
+    public void DoesNotChangeUrls()
+    {
+        _typos["foo"] = "bar";
+
+        AssertNoFix(
+            "http://foo.com/asdfasdf/asdf.htm");
+
+        AssertNoFix(
+            @"[http://foo.com/asdfasdf/asdf.htm Foo's best]");
+
+        AssertNoFix(
+            "http://foo.com/asdfasdf/foo.htm");
     }
 
     [Test]
-    public void FixLinkFaces()
+    public void CorrectsWikilinkDisplayText()
     {
-        Typos["foo"] = "bar";
+        _typos["foo"] = "bar";
 
+        // Preserve the wikilink target.
         AssertNoFix("[[foo]]");
-        AssertFix("[[Fred|bar]]", "[[Fred|foo]]");
+
+        // Correct the display text of a piped wikilink.
+        AssertFix(
+            "[[Fred|bar]]",
+            "[[Fred|foo]]");
     }
 
     [Test]
-    public void DontChangeWhenWikilinked()
+    public void RespectsWikilinkProtection()
     {
-        Typos["foo"] = "bar";
+        _typos["foo"] = "bar";
 
-        AssertNoFix("now [[foo]] was foo here"); // No change: typo matches wikilink
-        AssertNoFix("now [[foo|bo]] was foo here"); // No change: typo matches piped wikilink
-        AssertNoFix("now [[Mr foo oft]] was foo here"); // No change: typo matches within wikilink
-        AssertNoFix("now [[Mr foo oft]] was foo here [[Image:foo.png]] a"); // No change: typo matches within wikilink
+        // Preserve typos that match wikilink targets.
+        AssertNoFix(
+            "now [[foo]] was foo here");
 
-        AssertFix("now [[Image:foo.png]] was bar here", "now [[Image:foo.png]] was foo here"); // Change: typo matches image name which doesn't matter
-        AssertFix("now [[sv:foo]] was bar here", "now [[sv:foo]] was foo here");  // Change: typo matches interwiki name which doesn't matter
-        AssertFix("now [[Category:A foo]] was bar here", "now [[Category:A foo]] was foo here");  // Change: typo matches category name which doesn't matter
+        AssertNoFix(
+            "now [[foo|bo]] was foo here");
 
-        AssertFix("now bar [[Foo]] was", "now foo [[Foo]] was");
+        AssertNoFix(
+            "now [[Mr foo oft]] was foo here");
+
+        AssertNoFix(
+            "now [[Mr foo oft]] was foo here [[Image:foo.png]] a");
+
+        // Image names do not prevent corrections
+        // elsewhere in the article.
+        AssertFix(
+            "now [[Image:foo.png]] was bar here",
+            "now [[Image:foo.png]] was foo here");
+
+        // Interwiki links do not prevent corrections
+        // elsewhere in the article.
+        AssertFix(
+            "now [[sv:foo]] was bar here",
+            "now [[sv:foo]] was foo here");
+
+        // Category names do not prevent corrections
+        // elsewhere in the article.
+        AssertFix(
+            "now [[Category:A foo]] was bar here",
+            "now [[Category:A foo]] was foo here");
+
+        // Preserve case-sensitive wikilink behavior.
+        AssertFix(
+            "now bar [[Foo]] was",
+            "now foo [[Foo]] was");
     }
 
     [Test]
-    public void AllThreeGroups()
+    public void PreservesTemplatesLinksAndUrls()
     {
-        Typos[@"\booze\b"] = "booze!";
-        Typos[@"foo(\w*)\b"] = "bar$1";
-        Typos[@"\b(a|the)\b\s+\1\b"] = "$1";
+        _typos["(T|t)eh"] = "the";
 
-        AssertFix("barwards viva the booze!", "foowards viva the the ooze");
+        AssertNoFix(
+            @"{{teh}} http://tehcrappe.org/TehCrappe [[teh]] [http://tehcrappe.org/TehCrappe]");
     }
 
     [Test]
-    public void DontFixCertainStuff()
+    public void PreservesArticleTitleText()
     {
-        Typos["(T|t)eh"] = "the";
+        _typos["teh"] = "the";
+        _typos["foo"] = "bar";
 
-        AssertNoFix(@"{{teh}} http://tehcrappe.org/TehCrappe [[teh]] [http://tehcrappe.org/TehCrappe]");
+        AssertFix(
+            "teh bar",
+            "teh foo",
+            "teh");
+
+        AssertFix(
+            "teh bar",
+            "teh foo",
+            "teh crap");
+
+        AssertNoFix(
+            "teh home",
+            "teh");
     }
+
+    #endregion
+
+    #region Edit Summaries
 
     [Test]
-    public void DontChangeTitle()
+    public void GeneratesAccurateTypoEditSummaries()
     {
-        Typos["teh"] = "the";
-        Typos["foo"] = "bar";
+        _typos["f[oO0]{2}"] = "foo";
+        _typos[@"(?<=ten )bar"] = "BAR";
 
-        AssertFix("teh bar", "teh foo", "teh");
-        AssertFix("teh bar", "teh foo", "teh crap");
-        AssertNoFix("teh home", "teh");
+        AssertFix(
+            "foo foo",
+            "foo fO0");
+
+        Assert.That(
+            _summary,
+            Does.Not.Contain("foo → foo"),
+            "Unchanged text should not appear in the edit summary.");
+
+        Assert.That(
+            _summary,
+            Does.Not.Contain("2"),
+            "Unchanged matches should not contribute to the replacement count.");
+
+        AssertFix(
+            "ten BAR",
+            "ten bar");
+
+        Assert.That(
+            _summary,
+            Does.Contain("bar → BAR"),
+            "Regex with lookbehind should generate a summary based on the match value.");
+
+        Assert.That(
+            _summary,
+            Does.Not.Contain("ten"),
+            "The summary should not include groups outside the match value.");
     }
+
+    #endregion
 }
