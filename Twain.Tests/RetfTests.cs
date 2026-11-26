@@ -1,7 +1,7 @@
-﻿
-using System;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System.Threading;
+using System.Threading.Tasks;
+using Twain.Core.Background;
 using Twain.Core.Parse;
 
 namespace Twain.Tests.Parsing;
@@ -39,6 +39,112 @@ public class RegexTypoFixTests : RequiresInitialization
     private readonly Dictionary<string, string> _typos = new();
 
     private string _summary = string.Empty;
+
+    /// <summary>
+    /// Simulates a typo-list provider that fails during rule retrieval.
+    /// </summary>
+    private sealed class FailingTypoList : ITyposProvider
+    {
+        public Dictionary<string, string> GetTypos()
+        {
+            throw new InvalidOperationException(
+                "Simulated typo-list provider failure.");
+        }
+    }
+
+
+    private static readonly TimeSpan BackgroundLoadTimeout =
+        TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// Captures background-loading completion notifications
+    /// and allows tests to wait for worker termination.
+    /// </summary>
+    private sealed class BackgroundLoadObserver
+    {
+        private int _completionCount;
+
+        private readonly TaskCompletionSource<BackgroundRequest>
+            _completion = new(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public int CompletionCount =>
+            Volatile.Read(ref _completionCount);
+
+        public void OnCompleted(BackgroundRequest request)
+        {
+            Interlocked.Increment(ref _completionCount);
+            _completion.TrySetResult(request);
+        }
+
+        public void WaitForWorker()
+        {
+            Assert.That(
+                _completion.Task.Wait(BackgroundLoadTimeout),
+                Is.True,
+                "Background loading did not report completion.");
+
+            BackgroundRequest request = _completion.Task.Result;
+
+            Assert.That(
+                request,
+                Is.Not.Null,
+                "The completion callback did not provide a background request.");
+
+            Assert.That(
+                SpinWait.SpinUntil(
+                    () => (request.ThreadStatus() & ThreadState.Stopped)
+                        == ThreadState.Stopped,
+                    BackgroundLoadTimeout),
+                Is.True,
+                "The background worker did not terminate.");
+
+            Assert.That(
+                request.ErrorException,
+                Is.Null,
+                "The background worker encountered an unhandled exception.");
+        }
+    }
+
+    /// <summary>
+    /// Simulates a delayed typo-list provider whose completion
+    /// is controlled by the test.
+    /// </summary>
+    private sealed class DelayedTypoList : ITyposProvider
+    {
+        private readonly TaskCompletionSource<bool> _started =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        private readonly TaskCompletionSource<bool> _release =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public bool WaitUntilStarted()
+        {
+            return _started.Task.Wait(BackgroundLoadTimeout);
+        }
+
+        public void Release()
+        {
+            _release.TrySetResult(true);
+        }
+
+        public Dictionary<string, string> GetTypos()
+        {
+            _started.TrySetResult(true);
+
+            if (!_release.Task.Wait(BackgroundLoadTimeout))
+            {
+                throw new TimeoutException(
+                    "The delayed typo-list provider was not released.");
+            }
+
+            return new Dictionary<string, string>
+            {
+                ["teh"] = "the"
+            };
+        }
+    }
+
 
     [SetUp]
     public void SetUp()
@@ -134,6 +240,275 @@ public class RegexTypoFixTests : RequiresInitialization
 
     #endregion
 
+    #region Rule Loading
+
+    [Test]
+    public void LoadSingleValidRule()
+    {
+        _typos["teh"] = "the";
+
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos));
+
+        Assert.That(fixer.TyposLoaded, Is.True);
+        Assert.That(fixer.TypoCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void LoadMultipleValidRules()
+    {
+        _typos["teh"] = "the";
+        _typos["recieve"] = "receive";
+        _typos["seperate"] = "separate";
+
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos));
+
+        Assert.That(fixer.TyposLoaded, Is.True);
+        Assert.That(fixer.TypoCount, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void LoadEmptyTypoList()
+    {
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos));
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(fixer.TypoCount, Is.Zero);
+    }
+
+    [Test]
+    public void LoadInvalidRegexRule()
+    {
+        // An unclosed character class is invalid regex syntax.
+        _typos["["] = "replacement";
+
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos));
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(fixer.TypoCount, Is.Zero);
+        Assert.That(fixer.LoadError, Is.Not.Null.And.Not.Empty);
+    }
+
+
+    [Test]
+    public void LoadMixedValidAndInvalidRules()
+    {
+        _typos["teh"] = "the";
+        _typos["recieve"] = "receive";
+        _typos["["] = "replacement";
+
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos));
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(fixer.TypoCount, Is.Zero);
+        Assert.That(fixer.GetTypos(), Is.Empty);
+
+        Assert.That(
+            fixer.LoadError,
+            Does.Contain("Invalid regex typo rule"));
+    }
+
+    [Test]
+    public void ProviderThrowsException()
+    {
+        RegExTypoFix fixer = new(
+            false,
+            new FailingTypoList());
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(fixer.TypoCount, Is.Zero);
+        Assert.That(fixer.GetTypos(), Is.Empty);
+
+        Assert.That(
+            fixer.LoadError,
+            Is.EqualTo("Simulated typo-list provider failure."));
+    }
+
+    [Test]
+    public void FailedLoadPreventsCorrections()
+    {
+        _typos["teh"] = "the";
+        _typos["["] = "replacement";
+
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos));
+
+        const string articleText = "This is teh article.";
+
+        string result = fixer.PerformTypoFixes(
+            articleText,
+            out bool noChange,
+            out string summary,
+            "Test");
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(result, Is.EqualTo(articleText));
+        Assert.That(noChange, Is.True);
+        Assert.That(summary, Is.Empty);
+
+        Assert.That(
+            fixer.DetectTypo(articleText, "Test"),
+            Is.False);
+    }
+
+    [Test]
+    public void CompletionCallbackInvokedOnce()
+    {
+        _typos["teh"] = "the";
+
+        int completionCount = 0;
+
+        RegExTypoFix fixer = new(
+            false,
+            new TypoList(_typos),
+            _ => completionCount++);
+
+        Assert.That(fixer.TyposLoaded, Is.True);
+        Assert.That(fixer.LoadError, Is.Null);
+        Assert.That(completionCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void CompletionCallbackInvokedOnFailure()
+    {
+        int completionCount = 0;
+
+        RegExTypoFix fixer = new(
+            false,
+            new FailingTypoList(),
+            _ => completionCount++);
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(fixer.LoadError, Is.Not.Null.And.Not.Empty);
+        Assert.That(completionCount, Is.EqualTo(1));
+    }
+
+
+    #endregion
+
+
+    #region Background Rule Loading
+
+    [Test]
+    public void ThreadedLoadCompletesSuccessfully()
+    {
+        _typos["teh"] = "the";
+        _typos["recieve"] = "receive";
+
+        BackgroundLoadObserver observer = new();
+
+        RegExTypoFix fixer = new(
+            true,
+            new TypoList(_typos),
+            observer.OnCompleted);
+
+        observer.WaitForWorker();
+
+        Assert.That(fixer.TyposLoaded, Is.True);
+        Assert.That(fixer.TypoCount, Is.EqualTo(2));
+        Assert.That(fixer.GetTypos(), Has.Count.EqualTo(2));
+        Assert.That(fixer.LoadError, Is.Null);
+    }
+
+    [Test]
+    public void ThreadedLoadInvokesCallbackOnce()
+    {
+        _typos["teh"] = "the";
+
+        BackgroundLoadObserver observer = new();
+
+        RegExTypoFix fixer = new(
+            true,
+            new TypoList(_typos),
+            observer.OnCompleted);
+
+        observer.WaitForWorker();
+
+        Assert.That(fixer.TyposLoaded, Is.True);
+
+        Assert.That(
+            observer.CompletionCount,
+            Is.EqualTo(1),
+            "Background loading should report completion exactly once.");
+    }
+
+    [Test]
+    public void ThreadedLoadReportsProviderFailure()
+    {
+        BackgroundLoadObserver observer = new();
+
+        RegExTypoFix fixer = new(
+            true,
+            new FailingTypoList(),
+            observer.OnCompleted);
+
+        observer.WaitForWorker();
+
+        Assert.That(fixer.TyposLoaded, Is.False);
+        Assert.That(fixer.TypoCount, Is.Zero);
+        Assert.That(fixer.GetTypos(), Is.Empty);
+
+        Assert.That(
+            fixer.LoadError,
+            Is.EqualTo("Simulated typo-list provider failure."));
+
+        Assert.That(
+            observer.CompletionCount,
+            Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ThreadedLoadWaitsForProvider()
+    {
+        DelayedTypoList provider = new();
+        BackgroundLoadObserver observer = new();
+
+        RegExTypoFix fixer = new(
+            true,
+            provider,
+            observer.OnCompleted);
+
+        try
+        {
+            Assert.That(
+                provider.WaitUntilStarted(),
+                Is.True,
+                "The background provider did not start.");
+
+            Assert.That(fixer.TyposLoaded, Is.False);
+            Assert.That(fixer.TypoCount, Is.Zero);
+
+            Assert.That(
+                observer.CompletionCount,
+                Is.Zero,
+                "Completion was reported before the provider returned.");
+        }
+        finally
+        {
+            // Always release the provider, even if an assertion fails.
+            provider.Release();
+            observer.WaitForWorker();
+        }
+
+        Assert.That(fixer.TyposLoaded, Is.True);
+        Assert.That(fixer.TypoCount, Is.EqualTo(1));
+        Assert.That(fixer.LoadError, Is.Null);
+        Assert.That(observer.CompletionCount, Is.EqualTo(1));
+    }
+
+    #endregion
+
+
     #region Basic Typo Correction
 
     [Test]
@@ -184,6 +559,101 @@ public class RegexTypoFixTests : RequiresInitialization
     }
 
     #endregion
+
+
+    #region Processing Results
+
+    [Test]
+    public void PerformTypoFixesReportsNoChange()
+    {
+        _typos["teh"] = "the";
+
+        const string articleText = "This is the article.";
+
+        string result = GetTypoFixer().PerformTypoFixes(
+            articleText,
+            out bool noChange,
+            out _,
+            "Test");
+
+        Assert.That(result, Is.EqualTo(articleText));
+        Assert.That(noChange, Is.True);
+    }
+
+    [Test]
+    public void PerformTypoFixesReportsChange()
+    {
+        _typos["teh"] = "the";
+
+        const string articleText = "This is teh article.";
+
+        string result = GetTypoFixer().PerformTypoFixes(
+            articleText,
+            out bool noChange,
+            out string summary,
+            "Test");
+
+        Assert.That(result, Is.EqualTo("This is the article."));
+        Assert.That(noChange, Is.False);
+        Assert.That(summary, Does.Contain("teh → the"));
+    }
+
+    [Test]
+    public void PerformTypoFixesReportsMultipleCorrections()
+    {
+        _typos["teh"] = "the";
+
+        const string articleText = "teh first and teh second.";
+
+        string result = GetTypoFixer().PerformTypoFixes(
+            articleText,
+            out bool noChange,
+            out string summary,
+            "Test");
+
+        Assert.That(result, Is.EqualTo("the first and the second."));
+        Assert.That(noChange, Is.False);
+        Assert.That(summary, Does.Contain("teh → the (2)"));
+    }
+
+    [Test]
+    public void PerformTypoFixesReportsNoChangeForProtectedText()
+    {
+        _typos["teh"] = "the";
+
+        const string articleText = "This is teh {{sic}} article.";
+
+        string result = GetTypoFixer().PerformTypoFixes(
+            articleText,
+            out bool noChange,
+            out string summary,
+            "Test");
+
+        Assert.That(result, Is.EqualTo(articleText));
+        Assert.That(noChange, Is.True);
+        Assert.That(summary, Is.Empty);
+    }
+
+    [Test]
+    public void PerformTypoFixesReportsNoChangeForSelfMatches()
+    {
+        _typos["foo"] = "foo";
+
+        const string articleText = "This is foo.";
+
+        string result = GetTypoFixer().PerformTypoFixes(
+            articleText,
+            out bool noChange,
+            out string summary,
+            "Test");
+
+        Assert.That(result, Is.EqualTo(articleText));
+        Assert.That(noChange, Is.True);
+        Assert.That(summary, Does.Not.Contain("foo → foo"));
+    }
+
+    #endregion
+
 
     #region Regex Behavior
 
