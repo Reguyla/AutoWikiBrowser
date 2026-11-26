@@ -276,11 +276,12 @@ public sealed partial class ShellViewModel : ViewModelBase
         Preferences.Tool = loaded.Tool;
         Preferences.Plugin = loaded.Plugin;
 
+        // Apply the loaded wiki configuration before restoring
+        // processing options that depend on the active project.
+        ApplySitePreferences();
+
         // Refresh the workspace controls from the loaded preferences.
         Workspace.ApplyLoadedSettings();
-
-        // Apply the loaded wiki configuration to the active session.
-        ApplySitePreferences();
 
         CurrentSettingsFile = file;
     }

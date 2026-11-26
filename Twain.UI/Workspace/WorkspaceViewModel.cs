@@ -814,6 +814,21 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
+                // Ignore the deferred reset if typo fixing
+                // is no longer requested.
+                if (!Options.EnableTypoCorrection)
+                {
+                    return;
+                }
+
+                // Recheck the configured source in case the
+                // preferences changed before this action executed.
+                if (ResolveRegexTypoListSource() is not null)
+                {
+                    OnRegexTypoFixEnabledChanged(true);
+                    return;
+                }
+
                 Options.EnableTypoCorrection = false;
 
                 ProcessingStatusMessage =
@@ -897,10 +912,17 @@ public partial class WorkspaceViewModel : ObservableObject
             _regexTypos = null;
             _loadedTypoListSource = null;
 
-            Options.EnableTypoCorrection = false;
-
-            ProcessingStatusMessage =
-                "Typo list source changed. Downloaded rules discarded.";
+            // Load the newly configured source if regex
+            // typo fixing is still requested.
+            if (Options.EnableTypoCorrection)
+            {
+                OnRegexTypoFixEnabledChanged(true);
+            }
+            else
+            {
+                ProcessingStatusMessage =
+                    "Typo list source changed. Downloaded rules discarded.";
+            }
 
             return;
         }
@@ -2824,6 +2846,14 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     public void ApplyLoadedSettings()
     {
+        // Clear the previous bot-mode state before restoring
+        // the processing options from the loaded settings.
+        BotSettings.AutoSaveEnabled = false;
+
+        // Invalidate cached regex typo rules if the loaded
+        // settings specify a different typo list source.
+        ApplyRegexTypoListPreferences();
+
         Options.LoadFromPreferences(Preferences);
         MakeList.LoadFromPreferences(Preferences);
         CustomModuleState.LoadFromPreferences(Preferences);

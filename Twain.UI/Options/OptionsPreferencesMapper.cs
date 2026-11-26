@@ -73,6 +73,7 @@ public static class OptionsPreferencesMapper
         options.SkipIfOnlyMinorReplacement =
             preferences.SkipOptions.SkipMinorFindAndReplace;
         options.SkipIfNoRegexTypo =
+            options.EnableTypoCorrection &&
             preferences.SkipOptions.SkipNoRegexTypoFix;
         options.SkipIfNoDisambiguation =
             preferences.SkipOptions.SkipNoDisambiguation;
@@ -215,7 +216,9 @@ public static class OptionsPreferencesMapper
             options.SkipIfNoReplacement;
         preferences.SkipOptions.SkipMinorFindAndReplace =
             options.SkipIfOnlyMinorReplacement;
-        preferences.SkipOptions.SkipNoRegexTypoFix = options.SkipIfNoRegexTypo;
+        preferences.SkipOptions.SkipNoRegexTypoFix =
+            options.EnableTypoCorrection &&
+            options.SkipIfNoRegexTypo;
         preferences.SkipOptions.SkipNoDisambiguation =
             options.SkipIfNoDisambiguation;
 
