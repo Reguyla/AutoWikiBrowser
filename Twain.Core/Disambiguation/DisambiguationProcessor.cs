@@ -206,6 +206,228 @@ public static class DisambiguationProcessor
         string Result);
 
     /// <summary>
+    /// Identifies the type of correction made to an ambiguous link.
+    /// </summary>
+    public enum DisambiguationCorrectionType
+    {
+        Resolved,
+        Unlinked,
+        Tagged,
+        Removed,
+        Modified
+    }
+
+    /// <summary>
+    /// Describes an individual correction made during disambiguation.
+    /// </summary>
+    /// <remarks>
+    /// Preserves the original and replacement text for edit-summary
+    /// generation and future diagnostic reporting.
+    /// </remarks>
+    public sealed record DisambiguationCorrection(
+        DisambiguationCorrectionType CorrectionType,
+        string OriginalTarget,
+        string? ReplacementTarget,
+        string OriginalText,
+        string ReplacementText);
+
+    /// <summary>
+    /// Collects the individual corrections made during disambiguation.
+    /// </summary>
+    /// <param name="preparation">
+    /// The original prepared disambiguation occurrences.
+    /// </param>
+    /// <param name="results">
+    /// The final replacement results in occurrence order.
+    /// </param>
+    /// <returns>
+    /// The corrections made to the original ambiguous links.
+    /// </returns>
+    public static IReadOnlyList<DisambiguationCorrection> CollectCorrections(
+        DisambiguationPreparation preparation,
+        IReadOnlyList<DisambiguationResult> results)
+    {
+        ArgumentNullException.ThrowIfNull(preparation);
+        ArgumentNullException.ThrowIfNull(results);
+
+        if (preparation.Items.Count != results.Count)
+        {
+            throw new ArgumentException(
+                "The number of results must match the number of prepared occurrences.",
+                nameof(results));
+        }
+
+        var corrections = new List<DisambiguationCorrection>();
+
+        for (int index = 0; index < results.Count; index++)
+        {
+            DisambiguationItemPreparation item =
+                preparation.Items[index];
+
+            DisambiguationResult result = results[index];
+
+            if (result.NoChange ||
+                string.Equals(
+                    item.OriginalLink,
+                    result.Result,
+                    StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            corrections.Add(
+                ClassifyCorrection(item, result.Result));
+        }
+
+        return corrections;
+    }
+
+    /// <summary>
+    /// Classifies a correction by comparing the original ambiguous
+    /// link with its final replacement text.
+    /// </summary>
+    private static DisambiguationCorrection ClassifyCorrection(
+        DisambiguationItemPreparation item,
+        string replacement)
+    {
+        DisambiguationCorrectionType correctionType =
+            DisambiguationCorrectionType.Modified;
+
+        string? replacementTarget = null;
+
+        if (string.IsNullOrWhiteSpace(replacement))
+        {
+            correctionType =
+                DisambiguationCorrectionType.Removed;
+        }
+        else if (string.Equals(
+            replacement,
+            item.VisibleLink + item.LinkTrail,
+            StringComparison.Ordinal))
+        {
+            correctionType =
+                DisambiguationCorrectionType.Unlinked;
+        }
+        else
+        {
+            MatchCollection links = Regex.Matches(
+                replacement,
+                @"\[\[\s*([^\[\]\|]+)(?:\|[^\[\]]*)?\]\]");
+
+            if (links.Count == 1)
+            {
+                replacementTarget =
+                    links[0].Groups[1].Value.Trim();
+
+                if (string.Equals(
+                    item.RealLink,
+                    replacementTarget,
+                    StringComparison.Ordinal))
+                {
+                    if (Regex.IsMatch(
+                        replacement,
+                        @"\{\{\s*Disambiguation needed\s*(?:\||\}\})",
+                        RegexOptions.IgnoreCase))
+                    {
+                        correctionType =
+                            DisambiguationCorrectionType.Tagged;
+                    }
+                }
+                else
+                {
+                    correctionType =
+                        DisambiguationCorrectionType.Resolved;
+                }
+            }
+        }
+
+        return new DisambiguationCorrection(
+            correctionType,
+            item.RealLink,
+            replacementTarget,
+            item.OriginalLink,
+            replacement);
+    }
+
+    /// <summary>
+    /// Creates edit-summary contributions from the collected
+    /// disambiguation corrections.
+    /// </summary>
+    /// <remarks>
+    /// Identical correction types and link targets are grouped
+    /// together to provide accurate occurrence counts.
+    /// </remarks>
+    public static IReadOnlyList<EditSummaryContribution>
+        CreateSummaryContributions(
+            IReadOnlyList<DisambiguationCorrection> corrections)
+    {
+        ArgumentNullException.ThrowIfNull(corrections);
+
+        var contributions = new List<EditSummaryContribution>();
+
+        var groups = corrections.GroupBy(correction => new
+        {
+            correction.CorrectionType,
+            correction.OriginalTarget,
+            correction.ReplacementTarget
+        });
+
+        foreach (var group in groups)
+        {
+            int count = group.Count();
+
+            string description = FormatCorrectionDescription(
+                group.Key.CorrectionType,
+                group.Key.OriginalTarget,
+                group.Key.ReplacementTarget);
+
+            if (count > 1)
+            {
+                description += $" (x{count})";
+            }
+
+            contributions.Add(
+                new EditSummaryContribution
+                {
+                    Category = EditSummaryCategory.Disambiguation,
+                    Description = description,
+                    ShortDescription =
+                        $"Disambiguation: {group.Key.OriginalTarget}"
+                });
+        }
+
+        return contributions;
+    }
+
+    /// <summary>
+    /// Formats a description of an individual disambiguation
+    /// correction or group of identical corrections.
+    /// </summary>
+    private static string FormatCorrectionDescription(
+        DisambiguationCorrectionType correctionType,
+        string originalTarget,
+        string? replacementTarget)
+    {
+        return correctionType switch
+        {
+            DisambiguationCorrectionType.Resolved =>
+                $"Disambiguated: {originalTarget} → {replacementTarget}",
+
+            DisambiguationCorrectionType.Unlinked =>
+                $"Unlinked ambiguous link: {originalTarget}",
+
+            DisambiguationCorrectionType.Tagged =>
+                $"Tagged ambiguous link: {originalTarget}",
+
+            DisambiguationCorrectionType.Removed =>
+                $"Removed ambiguous link: {originalTarget}",
+
+            _ =>
+                $"Modified ambiguous link: {originalTarget}"
+        };
+    }
+
+    /// <summary>
     /// Prepares the data required to display one disambiguation occurrence.
     /// </summary>
     /// <param name="articleText">
