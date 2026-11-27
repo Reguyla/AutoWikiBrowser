@@ -67,25 +67,39 @@
                 Orientation="Horizontal"
                 Spacing="{DynamicResource TwainSpacingSmall}">
 
-                <Button
-                    Classes="twain-command-button"
-                    Content="_Page…">
+            <Button
+                Classes="twain-command-button"
+                Content="_Page…">
 
-                    <Button.Flyout>
-                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
 
-                            <MenuItem
-                                Header="Open in browser"
-                                Click="OpenInBrowser_Click" />
+                        <MenuItem
+                            Header="Open in browser"
+                            Click="OpenInBrowser_Click" />
 
-                            <MenuItem
-                                Header="Edit in browser"
-                                Click="EditInBrowser_Click" />
+                        <MenuItem
+                            Header="Edit in browser"
+                            Click="EditInBrowser_Click" />
 
-                        </MenuFlyout>
-                    </Button.Flyout>
+                        <Separator />
 
-                </Button>
+                        <MenuItem
+                            x:Name="WatchPageMenuItem"
+                            Header="Watch"
+                            IsEnabled="False"
+                            Click="WatchPage_Click" />
+
+                        <MenuItem
+                            x:Name="UnwatchPageMenuItem"
+                            Header="Unwatch"
+                            IsEnabled="False"
+                            Click="UnwatchPage_Click" />
+
+                    </MenuFlyout>
+                </Button.Flyout>
+
+            </Button>
 
                 <Button
                     Classes="twain-command-button"

@@ -24,12 +24,19 @@ public partial class DabWindow : Window
     /// </summary>
     private readonly string _articleTitle = string.Empty;
 
+    private Func<string, bool, Task<bool>>? _setWatchlistStatusAsync;
+    private bool _hasWatchlistStatus;
+    private bool _isArticleWatched;
+    private bool _isWatchOperationRunning;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DabWindow"/> class.
     /// </summary>
     public DabWindow()
     {
         InitializeComponent();
+
+        Closing += DabWindow_Closing;
     }
 
     /// <summary>
@@ -52,6 +59,21 @@ public partial class DabWindow : Window
         Title = $"Disambiguation — {articleTitle}";
 
         PopulateItems(preparation);
+    }
+
+    /// <summary>
+    /// Configures the watchlist status and operation for the current article.
+    /// </summary>
+    public void ConfigureWatchlist(
+        bool hasWatchlistStatus,
+        bool isArticleWatched,
+        Func<string, bool, Task<bool>> setWatchlistStatusAsync)
+    {
+        _hasWatchlistStatus = hasWatchlistStatus;
+        _isArticleWatched = isArticleWatched;
+        _setWatchlistStatusAsync = setWatchlistStatusAsync;
+
+        UpdateWatchlistMenuState();
     }
 
     /// <summary>
@@ -121,12 +143,12 @@ public partial class DabWindow : Window
     }
 
     /// <summary>
-    /// Updates whether the dialog can be completed based on the state
-    /// of all disambiguation controls.
+    /// Updates the availability of the Done button.
     /// </summary>
     private void UpdateDoneButtonState()
     {
         DoneButton.IsEnabled =
+            !_isWatchOperationRunning &&
             _items.Count > 0 &&
             _items.All(item => item.CanSave);
     }
@@ -155,6 +177,88 @@ public partial class DabWindow : Window
             return;
 
         Tools.EditArticleInBrowser(_articleTitle);
+    }
+
+    private async void WatchPage_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        await SetWatchlistStatusAsync(true);
+    }
+
+    private async void UnwatchPage_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        await SetWatchlistStatusAsync(false);
+    }
+
+    /// <summary>
+    /// Updates the article's watchlist status through the configured
+    /// workspace operation.
+    /// </summary>
+    private async Task SetWatchlistStatusAsync(bool watch)
+    {
+        if (_isWatchOperationRunning ||
+            !_hasWatchlistStatus ||
+            _setWatchlistStatusAsync is null ||
+            _isArticleWatched == watch)
+        {
+            return;
+        }
+
+        _isWatchOperationRunning = true;
+        UpdateWatchlistMenuState();
+
+        try
+        {
+            bool succeeded = await _setWatchlistStatusAsync(
+                _articleTitle,
+                watch);
+
+            if (succeeded)
+            {
+                _isArticleWatched = watch;
+            }
+        }
+        finally
+        {
+            _isWatchOperationRunning = false;
+            UpdateWatchlistMenuState();
+        }
+    }
+
+    /// <summary>
+    /// Updates the availability of the watchlist menu actions.
+    /// </summary>
+    private void UpdateWatchlistMenuState()
+    {
+        bool canChangeWatchlist =
+            _hasWatchlistStatus &&
+            !_isWatchOperationRunning &&
+            _setWatchlistStatusAsync is not null;
+
+        WatchPageMenuItem.IsEnabled =
+            canChangeWatchlist && !_isArticleWatched;
+
+        UnwatchPageMenuItem.IsEnabled =
+            canChangeWatchlist && _isArticleWatched;
+
+        UpdateDoneButtonState();
+    }
+
+    /// <summary>
+    /// Prevents the disambiguation dialog from closing while
+    /// a watchlist operation is in progress.
+    /// </summary>
+    private void DabWindow_Closing(
+        object? sender,
+        WindowClosingEventArgs e)
+    {
+        if (_isWatchOperationRunning)
+        {
+            e.Cancel = true;
+        }
     }
 
     /// <summary>
@@ -247,9 +351,17 @@ public partial class DabWindow : Window
         Window owner,
         string articleTitle,
         string articleText,
-        DisambiguationProcessor.DisambiguationPreparation preparation)
+        DisambiguationProcessor.DisambiguationPreparation preparation,
+        bool hasWatchlistStatus,
+        bool isArticleWatched,
+        Func<string, bool, Task<bool>> setWatchlistStatusAsync)
     {
         DabWindow window = new(articleTitle, preparation);
+
+        window.ConfigureWatchlist(
+            hasWatchlistStatus,
+            isArticleWatched,
+            setWatchlistStatusAsync);
 
         DabDialogResult result =
             await window.ShowDialog<DabDialogResult>(owner);
@@ -259,11 +371,10 @@ public partial class DabWindow : Window
             return (result, articleText);
         }
 
-        string newText =
-            DisambiguationProcessor.ApplyResults(
-                articleText,
-                preparation.Search,
-                window.Results);
+        string newText = DisambiguationProcessor.ApplyResults(
+            articleText,
+            preparation.Search,
+            window.Results);
 
         return (result, newText);
     }

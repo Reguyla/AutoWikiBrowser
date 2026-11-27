@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Twain.Core;
 using Twain.Core.Disambiguation;
+using Twain.Core.Workspaces.Panes;
 using Twain.UI.About;
 using Twain.UI.BotSettings;
 using Twain.UI.Controls;
@@ -573,17 +574,26 @@ public partial class ShellWindow : Window
     /// <returns>
     /// Whether processing was aborted and the resulting article text.
     /// </returns>
-    private async Task<(bool Abort, string ArticleText)>
-        ShowDisambiguationAsync(
-            Article article,
-            DisambiguationProcessor.DisambiguationPreparation preparation)
+    private async Task<(bool Abort, string ArticleText)> ShowDisambiguationAsync(
+        Article article,
+        DisambiguationProcessor.DisambiguationPreparation preparation)
     {
+        var workspace = _subscribedShellViewModel?.Workspace
+            ?? throw new InvalidOperationException(
+                "The workspace is not available.");
+
+        var articleEditorPane = workspace.Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
         var (dialogResult, articleText) =
             await DabWindow.ShowAsync(
                 this,
                 article.Name,
                 article.ArticleText,
-                preparation);
+                preparation,
+                articleEditorPane.HasWatchlistStatus,
+                articleEditorPane.IsArticleWatched,
+                workspace.SetArticleWatchStatusAsync);
 
         return (
             dialogResult == DabDialogResult.Abort,
