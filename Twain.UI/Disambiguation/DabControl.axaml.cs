@@ -165,11 +165,14 @@ public partial class DabControl : UserControl
                 });
         }
 
-        // Matched wikilink.
+        // Highlight the matched wikilink.
         ParagraphTextBlock.Inlines.Add(
             new Run
             {
-                Text = paragraph.Substring(matchStart, matchLength)
+                Text = paragraph.Substring(matchStart, matchLength),
+                FontWeight = Avalonia.Media.FontWeight.Bold,
+                Background = Avalonia.Media.Brushes.Khaki,
+                Foreground = Avalonia.Media.Brushes.Black
             });
 
         // Text following the matched wikilink.
