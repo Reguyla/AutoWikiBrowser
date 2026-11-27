@@ -581,6 +581,7 @@ public partial class ShellWindow : Window
         var (dialogResult, articleText) =
             await DabWindow.ShowAsync(
                 this,
+                article.Name,
                 article.ArticleText,
                 preparation);
 

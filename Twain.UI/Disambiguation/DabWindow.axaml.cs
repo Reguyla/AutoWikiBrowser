@@ -30,13 +30,19 @@ public partial class DabWindow : Window
     /// Initializes a new instance of the <see cref="DabWindow"/> class
     /// using prepared disambiguation data.
     /// </summary>
+    /// <param name="articleTitle">
+    /// The title of the article being disambiguated.
+    /// </param>
     /// <param name="preparation">
     /// The prepared disambiguation data for the current article.
     /// </param>
     public DabWindow(
+        string articleTitle,
         DisambiguationProcessor.DisambiguationPreparation preparation)
         : this()
     {
+        Title = $"Disambiguation — {articleTitle}";
+
         PopulateItems(preparation);
     }
 
@@ -204,6 +210,9 @@ public partial class DabWindow : Window
     /// <param name="owner">
     /// The window that owns the disambiguation dialog.
     /// </param>
+    /// <param name="articleTitle">
+    /// The title of the article being disambiguated.
+    /// </param>
     /// <param name="articleText">
     /// The original article text.
     /// </param>
@@ -217,10 +226,11 @@ public partial class DabWindow : Window
     /// </returns>
     public static async Task<(DabDialogResult DialogResult, string ArticleText)> ShowAsync(
         Window owner,
+        string articleTitle,
         string articleText,
         DisambiguationProcessor.DisambiguationPreparation preparation)
     {
-        DabWindow window = new(preparation);
+        DabWindow window = new(articleTitle, preparation);
 
         DabDialogResult result =
             await window.ShowDialog<DabDialogResult>(owner);
