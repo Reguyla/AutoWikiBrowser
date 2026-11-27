@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using System.Collections.Generic;
 using Twain.Core.Disambiguation;
 
@@ -98,7 +99,8 @@ public partial class DabControl : UserControl
         if (_preparation is null || _variants is null)
             return;
 
-        ParagraphTextBlock.Text = _preparation.ParagraphText;
+        PopulateParagraphContext();
+
         CorrectionTextBox.Text = _preparation.OriginalLink;
 
         ChoiceComboBox.Items.Clear();
@@ -118,6 +120,67 @@ public partial class DabControl : UserControl
 
         UnpipeButton.IsEnabled = hasPipe;
         FlipButton.IsEnabled = hasPipe;
+    }
+
+    /// <summary>
+    /// Displays the paragraph context as separate text segments
+    /// surrounding the matched wikilink.
+    /// </summary>
+    private void PopulateParagraphContext()
+    {
+        if (_preparation is null)
+            return;
+
+        string paragraph = _preparation.ParagraphText;
+
+        int matchStart = _preparation.MatchPosition;
+        int matchLength = _preparation.MatchLength;
+
+        ParagraphTextBlock.Inlines!.Clear();
+
+        // Fall back to plain text if the match boundaries are invalid.
+        if (matchStart < 0 ||
+            matchLength <= 0 ||
+            matchStart > paragraph.Length ||
+            matchLength > paragraph.Length - matchStart)
+        {
+            ParagraphTextBlock.Inlines.Add(
+                new Run
+                {
+                    Text = paragraph
+                });
+
+            return;
+        }
+
+        int matchEnd = matchStart + matchLength;
+
+        // Text preceding the matched wikilink.
+        if (matchStart > 0)
+        {
+            ParagraphTextBlock.Inlines.Add(
+                new Run
+                {
+                    Text = paragraph[..matchStart]
+                });
+        }
+
+        // Matched wikilink.
+        ParagraphTextBlock.Inlines.Add(
+            new Run
+            {
+                Text = paragraph.Substring(matchStart, matchLength)
+            });
+
+        // Text following the matched wikilink.
+        if (matchEnd < paragraph.Length)
+        {
+            ParagraphTextBlock.Inlines.Add(
+                new Run
+                {
+                    Text = paragraph[matchEnd..]
+                });
+        }
     }
 
     /// <summary>
