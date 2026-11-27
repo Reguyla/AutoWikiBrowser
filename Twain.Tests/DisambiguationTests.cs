@@ -318,4 +318,74 @@ public class DisambiguationTests
         Assert.Throws<ArgumentException>(() =>
             CollectCorrections(preparation, results));
     }
+
+    [Test]
+    public void ApplyResultsWithCorrections_ReturnsTextAndCorrections()
+    {
+        const string originalText =
+            "Example [[Matrix]] link.";
+
+        var preparation = PrepareArticle(originalText);
+
+        var results = new[]
+        {
+        new DisambiguationResult(
+            false,
+            "[[Matrix (mathematics)|Matrix]]")
+    };
+
+        var result = ApplyResultsWithCorrections(
+            originalText,
+            preparation,
+            results);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(
+                result.ArticleText,
+                Is.EqualTo(
+                    "Example [[Matrix (mathematics)|Matrix]] link."));
+
+            Assert.That(
+                result.Corrections,
+                Has.Count.EqualTo(1));
+        });
+
+        Assert.That(
+            result.Corrections[0].CorrectionType,
+            Is.EqualTo(
+                DisambiguationCorrectionType.Resolved));
+    }
+
+    [Test]
+    public void ApplyResultsWithCorrections_PreservesUnchangedText()
+    {
+        const string originalText =
+            "Example [[Matrix]] link.";
+
+        var preparation = PrepareArticle(originalText);
+
+        var results = new[]
+        {
+        new DisambiguationResult(
+            true,
+            "[[Matrix]]")
+    };
+
+        var result = ApplyResultsWithCorrections(
+            originalText,
+            preparation,
+            results);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(
+                result.ArticleText,
+                Is.EqualTo(originalText));
+
+            Assert.That(
+                result.Corrections,
+                Is.Empty);
+        });
+    }
 }

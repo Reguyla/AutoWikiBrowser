@@ -148,6 +148,29 @@ public static class DisambiguationProcessor
     }
 
     /// <summary>
+    /// Applies the selected disambiguation results and collects
+    /// the individual corrections made to the article.
+    /// </summary>
+    public static DisambiguationProcessingResult
+        ApplyResultsWithCorrections(
+            string articleText,
+            DisambiguationPreparation preparation,
+            IReadOnlyList<DisambiguationResult> results)
+    {
+        IReadOnlyList<DisambiguationCorrection> corrections =
+            CollectCorrections(preparation, results);
+
+        string updatedText = ApplyResults(
+            articleText,
+            preparation.Search,
+            results);
+
+        return new DisambiguationProcessingResult(
+            updatedText,
+            corrections);
+    }
+
+    /// <summary>
     /// Contains the prepared data required to begin a disambiguation operation.
     /// </summary>
     /// <param name="Variants">
@@ -230,6 +253,14 @@ public static class DisambiguationProcessor
         string? ReplacementTarget,
         string OriginalText,
         string ReplacementText);
+
+    /// <summary>
+    /// Contains the updated article text and the individual
+    /// corrections produced by a disambiguation operation.
+    /// </summary>
+    public sealed record DisambiguationProcessingResult(
+        string ArticleText,
+        IReadOnlyList<DisambiguationCorrection> Corrections);
 
     /// <summary>
     /// Collects the individual corrections made during disambiguation.

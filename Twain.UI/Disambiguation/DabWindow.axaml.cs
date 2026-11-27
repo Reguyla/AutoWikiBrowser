@@ -347,14 +347,17 @@ public partial class DabWindow : Window
     /// When the dialog is cancelled or aborted, the original article text
     /// is returned unchanged.
     /// </returns>
-    public static async Task<(DabDialogResult DialogResult, string ArticleText)> ShowAsync(
-        Window owner,
-        string articleTitle,
-        string articleText,
-        DisambiguationProcessor.DisambiguationPreparation preparation,
-        bool hasWatchlistStatus,
-        bool isArticleWatched,
-        Func<string, bool, Task<bool>> setWatchlistStatusAsync)
+    public static async Task<(
+        DabDialogResult DialogResult,
+        DisambiguationProcessor.DisambiguationProcessingResult ProcessingResult)>
+        ShowWithCorrectionsAsync(
+            Window owner,
+            string articleTitle,
+            string articleText,
+            DisambiguationProcessor.DisambiguationPreparation preparation,
+            bool hasWatchlistStatus,
+            bool isArticleWatched,
+            Func<string, bool, Task<bool>> setWatchlistStatusAsync)
     {
         DabWindow window = new(articleTitle, preparation);
 
@@ -368,14 +371,46 @@ public partial class DabWindow : Window
 
         if (result != DabDialogResult.Done)
         {
-            return (result, articleText);
+            return (
+                result,
+                new DisambiguationProcessor.DisambiguationProcessingResult(
+                    articleText,
+                    Array.Empty<
+                        DisambiguationProcessor.DisambiguationCorrection>()));
         }
 
-        string newText = DisambiguationProcessor.ApplyResults(
-            articleText,
-            preparation.Search,
-            window.Results);
+        var processingResult =
+            DisambiguationProcessor.ApplyResultsWithCorrections(
+                articleText,
+                preparation,
+                window.Results);
 
-        return (result, newText);
+        return (result, processingResult);
+    }
+
+    public static async Task<(
+    DabDialogResult DialogResult,
+    string ArticleText)> ShowAsync(
+        Window owner,
+        string articleTitle,
+        string articleText,
+        DisambiguationProcessor.DisambiguationPreparation preparation,
+        bool hasWatchlistStatus,
+        bool isArticleWatched,
+        Func<string, bool, Task<bool>> setWatchlistStatusAsync)
+    {
+        var (dialogResult, processingResult) =
+            await ShowWithCorrectionsAsync(
+                owner,
+                articleTitle,
+                articleText,
+                preparation,
+                hasWatchlistStatus,
+                isArticleWatched,
+                setWatchlistStatusAsync);
+
+        return (
+            dialogResult,
+            processingResult.ArticleText);
     }
 }
