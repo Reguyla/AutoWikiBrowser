@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Twain.Core;
 using Twain.Core.Disambiguation;
 
 namespace Twain.UI.Disambiguation;
@@ -17,6 +18,11 @@ public partial class DabWindow : Window
     /// Contains the disambiguation controls created for the current article.
     /// </summary>
     private readonly List<DabControl> _items = [];
+
+    /// <summary>
+    /// The title of the article currently being disambiguated.
+    /// </summary>
+    private readonly string _articleTitle = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DabWindow"/> class.
@@ -41,6 +47,8 @@ public partial class DabWindow : Window
         DisambiguationProcessor.DisambiguationPreparation preparation)
         : this()
     {
+        _articleTitle = articleTitle;
+
         Title = $"Disambiguation — {articleTitle}";
 
         PopulateItems(preparation);
@@ -51,11 +59,6 @@ public partial class DabWindow : Window
     /// disambiguation controls.
     /// </summary>
     internal StackPanel ItemsPanel => DisambiguationItemsPanel;
-
-    /// <summary>
-    /// Raised when the user requests the current page.
-    /// </summary>
-    public event EventHandler? PageRequested;
 
     /// <summary>
     /// Raised when the user requests that all manual changes be undone.
@@ -129,13 +132,29 @@ public partial class DabWindow : Window
     }
 
     /// <summary>
-    /// Handles a request to open or display the current page.
+    /// Opens the current article in the default web browser.
     /// </summary>
-    private void PageButton_Click(
+    private void OpenInBrowser_Click(
         object? sender,
         RoutedEventArgs e)
     {
-        PageRequested?.Invoke(this, EventArgs.Empty);
+        if (string.IsNullOrWhiteSpace(_articleTitle))
+            return;
+
+        Tools.OpenArticleInBrowser(_articleTitle);
+    }
+
+    /// <summary>
+    /// Opens the current article's editing page in the default web browser.
+    /// </summary>
+    private void EditInBrowser_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_articleTitle))
+            return;
+
+        Tools.EditArticleInBrowser(_articleTitle);
     }
 
     /// <summary>

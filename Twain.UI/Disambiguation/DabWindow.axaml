@@ -69,8 +69,23 @@
 
                 <Button
                     Classes="twain-command-button"
-                    Content="_Page…"
-                    Click="PageButton_Click" />
+                    Content="_Page…">
+
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+
+                            <MenuItem
+                                Header="Open in browser"
+                                Click="OpenInBrowser_Click" />
+
+                            <MenuItem
+                                Header="Edit in browser"
+                                Click="EditInBrowser_Click" />
+
+                        </MenuFlyout>
+                    </Button.Flyout>
+
+                </Button>
 
                 <Button
                     Classes="twain-command-button"
