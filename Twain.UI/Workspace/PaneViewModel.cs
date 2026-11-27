@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
 using Twain.Core.Workspaces.Panes;
 using Twain.UI.Options;
 
@@ -103,13 +104,30 @@ public sealed partial class PaneViewModel : ObservableObject
     private bool _hasWatchlistStatus;
 
     /// <summary>
-    /// Gets the tooltip describing the article's
-    /// current watchlist status.
+    /// Gets the tooltip describing the available watchlist action.
     /// </summary>
     public string WatchlistToolTip =>
         IsArticleWatched
-            ? "Article is on your watchlist"
-            : "Article is not on your watchlist";
+            ? "Remove article from your watchlist"
+            : "Add article to your watchlist";
+
+    /// <summary>
+    /// Gets or sets the action used to toggle the current article's
+    /// watchlist status.
+    /// </summary>
+    public Func<Task>? ToggleWatchlistAction { get; set; }
+
+    /// <summary>
+    /// Toggles the current article's watchlist status.
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleWatchlistAsync()
+    {
+        if (ToggleWatchlistAction is not null)
+        {
+            await ToggleWatchlistAction();
+        }
+    }
 
     public Action? EditOnWikiAction
     {

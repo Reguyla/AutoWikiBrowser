@@ -1086,6 +1086,8 @@ public partial class WorkspaceViewModel : ObservableObject
         articleEditorPane.HeaderAction = ShowOptions;
         articleEditorPane.HistoryAction = OpenArticleHistory;
         articleEditorPane.EditOnWikiAction = OpenArticleOnWiki;
+        articleEditorPane.ToggleWatchlistAction =
+            () => ToggleArticleWatchCommand.ExecuteAsync(null);
         articleEditorPane.AdministrativeOptions = Options;
         articleEditorPane.DeletePageAction = RequestDeleteCurrentPage;
         articleEditorPane.MovePageAction = RequestMoveCurrentPage;
@@ -1362,45 +1364,84 @@ public partial class WorkspaceViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleArticleWatchAsync()
     {
+        var articleEditorPane = Panes.Single(
+            pane => pane.Id == BuiltInPaneIds.ArticleEditor);
+
+        await SetArticleWatchStatusAsync(
+            CurrentArticleName,
+            !articleEditorPane.IsArticleWatched);
+    }
+
+    /// <summary>
+    /// Sets the watchlist status of the current article and updates
+    /// the corresponding workspace controls.
+    /// </summary>
+    /// <param name="articleTitle">
+    /// The title of the article whose watchlist status is being changed.
+    /// </param>
+    /// <param name="watch">
+    /// True to watch the article; false to unwatch it.
+    /// </param>
+    /// <returns>
+    /// True if the requested watchlist status was successfully applied.
+    /// </returns>
+    public async Task<bool> SetArticleWatchStatusAsync(
+        string articleTitle,
+        bool watch)
+    {
         if (_isWatchOperationRunning ||
-            string.IsNullOrWhiteSpace(CurrentArticleName) ||
-            Session.Editor.IsActive)
+            string.IsNullOrWhiteSpace(articleTitle) ||
+            !Session.User.IsLoggedIn ||
+            Session.Editor.IsActive ||
+            CurrentArticleName != articleTitle)
         {
-            return;
+            return false;
         }
 
         var articleEditorPane = Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
         if (!articleEditorPane.HasWatchlistStatus)
-            return;
+            return false;
 
-        string articleTitle = CurrentArticleName;
-        bool wasWatched = articleEditorPane.IsArticleWatched;
+        // No API request is needed if the article already has
+        // the requested watchlist status.
+        if (articleEditorPane.IsArticleWatched == watch)
+            return true;
 
         _isWatchOperationRunning = true;
         Options.IsWatchOperationRunning = true;
 
         try
         {
-            if (wasWatched)
-                await Task.Run(() => Session.Editor.Unwatch(articleTitle));
+            if (watch)
+            {
+                await Task.Run(
+                    () => Session.Editor.Watch(articleTitle));
+            }
             else
-                await Task.Run(() => Session.Editor.Watch(articleTitle));
+            {
+                await Task.Run(
+                    () => Session.Editor.Unwatch(articleTitle));
+            }
 
             if (CurrentArticleName == articleTitle)
             {
-                articleEditorPane.IsArticleWatched = !wasWatched;
-                Options.IsCurrentArticleWatched = !wasWatched;
-
+                articleEditorPane.IsArticleWatched = watch;
+                Options.IsCurrentArticleWatched = watch;
             }
+
             MakeList.UpdateArticleWatchStatus(
                 articleTitle,
-                !wasWatched);
+                watch);
+
+            return true;
         }
         catch (Exception ex)
         {
             ErrorHandler.HandleException(ex);
+
+            return false;
         }
         finally
         {
