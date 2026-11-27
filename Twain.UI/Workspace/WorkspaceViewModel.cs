@@ -324,6 +324,12 @@ public partial class WorkspaceViewModel : ObservableObject
 
     private readonly MainProcess _mainProcess;
 
+    /// <summary>
+    /// Indicates whether the Core article-processing pipeline
+    /// is currently executing or awaiting interactive input.
+    /// </summary>
+    private bool _isCoreProcessing;
+
     private readonly HideText _removeText =
     new(false, true, true);
 
@@ -499,7 +505,8 @@ public partial class WorkspaceViewModel : ObservableObject
     [RelayCommand]
     private async Task ReparseProcessingAsync()
     {
-        if (!IsRegexTypoProcessingReady ||
+        if (_isCoreProcessing ||
+            !IsRegexTypoProcessingReady ||
             CurrentArticle is null ||
             !Options.IsProcessing ||
             Options.IsProcessingActive ||
@@ -510,57 +517,66 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
-        Article article = CurrentArticle;
+        _isCoreProcessing = true;
 
-        string editorText = Editor.Document.CurrentText;
-
-        // Preserve manual edits before running the processing pipeline.
-        article.TwainChangeArticleText(
-            "Reparse",
-            editorText,
-            false);
-
-        MainProcessOptions options =
-            Options.CreateMainProcessOptions(Preferences);
-
-        MainProcessDependencies dependencies =
-            CreateMainProcessDependencies();
-
-        MainProcessCallbacks callbacks =
-            CreateMainProcessCallbacks();
-
-        // Reparse uses the shared processing pipeline but does not
-        // advance the article list or save the article.
-        ArticleProcessingResult result =
-            await _mainProcess.ProcessPageWithResultAsync(
-                article,
-                false,
-                options,
-                Session,
-                dependencies,
-                callbacks);
-
-        // Processing may have been aborted by a callback.
-        if (!Options.IsProcessing ||
-            !ReferenceEquals(CurrentArticle, article))
+        try
         {
-            return;
-        }
+            Article article = CurrentArticle;
 
-        // Do not update the editor with an incomplete or failed result.
-        if (!result.Completed ||
-            result.Outcome == ArticleProcessingOutcome.Failed)
+            string editorText = Editor.Document.CurrentText;
+
+            // Preserve manual edits before running the processing pipeline.
+            article.TwainChangeArticleText(
+                "Reparse",
+                editorText,
+                false);
+
+            MainProcessOptions options =
+                Options.CreateMainProcessOptions(Preferences);
+
+            MainProcessDependencies dependencies =
+                CreateMainProcessDependencies();
+
+            MainProcessCallbacks callbacks =
+                CreateMainProcessCallbacks();
+
+            // Reparse uses the shared processing pipeline but does not
+            // advance the article list or save the article.
+            ArticleProcessingResult result =
+                await _mainProcess.ProcessPageWithResultAsync(
+                    article,
+                    false,
+                    options,
+                    Session,
+                    dependencies,
+                    callbacks);
+
+            // Processing may have been aborted by a callback.
+            if (!Options.IsProcessing ||
+                !ReferenceEquals(CurrentArticle, article))
+            {
+                return;
+            }
+
+            // Do not update the editor with an incomplete or failed result.
+            if (!result.Completed ||
+                result.Outcome == ArticleProcessingOutcome.Failed)
+            {
+                return;
+            }
+
+            // Update the editor without resetting its original-text baseline.
+            Editor.Document.CurrentText = article.ArticleText;
+
+            UpdateArticleAlerts();
+
+            // Refresh the calculated edit summary after reprocessing.
+            UpdateCalculatedEditSummary();
+        }
+        finally
         {
-            return;
+            _isCoreProcessing = false;
         }
-
-        // Update the editor without resetting its original-text baseline.
-        Editor.Document.CurrentText = article.ArticleText;
-
-        UpdateArticleAlerts();
-
-        // Refresh the calculated edit summary after reprocessing.
-        UpdateCalculatedEditSummary();
     }
 
     /// <summary>
@@ -1227,7 +1243,8 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             return false;
         }
-        if (Options.IsProcessingActive)
+        if (_isCoreProcessing ||
+            Options.IsProcessingActive)
         {
             return false;
         }
@@ -1433,7 +1450,7 @@ public partial class WorkspaceViewModel : ObservableObject
                 ApplyRegexTypoProcessing,
 
             RequestDisambiguationAsync =
-                RequestDisambiguationAsync,
+               RequestArticleDisambiguationAsync,
 
             AbortProcessing =
                 AbortProcessing,
@@ -1441,6 +1458,41 @@ public partial class WorkspaceViewModel : ObservableObject
             HandleProcessingException =
                 HandleProcessingException
         };
+    }
+
+    /// <summary>
+    /// Requests interactive disambiguation and rejects the result
+    /// if the active article-processing operation has been stopped.
+    /// </summary>
+    private async Task<(bool Abort, string ArticleText)>
+        RequestArticleDisambiguationAsync(
+            Article article,
+            DisambiguationProcessor.DisambiguationPreparation preparation)
+    {
+        string originalText = article.ArticleText;
+
+        if (!Options.IsProcessing ||
+            !ReferenceEquals(CurrentArticle, article))
+        {
+            return (true, originalText);
+        }
+
+        var requestDisambiguation = RequestDisambiguationAsync
+            ?? throw new InvalidOperationException(
+                "The disambiguation dialog callback has not been configured.");
+
+        var result = await requestDisambiguation(
+            article,
+            preparation);
+
+        // Processing may have been stopped while the dialog was open.
+        if (!Options.IsProcessing ||
+            !ReferenceEquals(CurrentArticle, article))
+        {
+            return (true, originalText);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -1694,7 +1746,9 @@ public partial class WorkspaceViewModel : ObservableObject
     private async Task SaveProcessing()
     {
         // Preparse must never submit edits.
-        if (Options.PreParseMode ||
+        // Do not save while the Core processing pipeline is active.
+        if (_isCoreProcessing ||
+            Options.PreParseMode ||
             IsPreparseRunning ||
             !Options.IsProcessing ||
             CurrentArticle is null ||
@@ -2118,7 +2172,8 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private void CompleteCurrentArticle(bool manualSkip = true)
     {
-        if (!Options.IsProcessing ||
+        if (_isCoreProcessing ||
+            !Options.IsProcessing ||
             CurrentArticle is null ||
             _pendingSaveArticle is not null ||
             Session.Editor.IsActive)
@@ -2587,24 +2642,33 @@ public partial class WorkspaceViewModel : ObservableObject
     /// </summary>
     private async Task<ArticleProcessingResult> ProcessOpenedArticleAsync()
     {
-        MainProcessOptions options =
-            Options.CreateMainProcessOptions(Preferences);
+        _isCoreProcessing = true;
 
-        MainProcessDependencies dependencies =
-            CreateMainProcessDependencies();
+        try
+        {
+            MainProcessOptions options =
+                Options.CreateMainProcessOptions(Preferences);
 
-        MainProcessCallbacks callbacks =
-            CreateMainProcessCallbacks();
+            MainProcessDependencies dependencies =
+                CreateMainProcessDependencies();
 
-        Article article = CurrentArticle!;
+            MainProcessCallbacks callbacks =
+                CreateMainProcessCallbacks();
 
-        return await _mainProcess.ProcessPageWithResultAsync(
-            article,
-            true,
-            options,
-            Session,
-            dependencies,
-            callbacks);
+            Article article = CurrentArticle!;
+
+            return await _mainProcess.ProcessPageWithResultAsync(
+                article,
+                true,
+                options,
+                Session,
+                dependencies,
+                callbacks);
+        }
+        finally
+        {
+            _isCoreProcessing = false;
+        }
     }
 
     /// <summary>

@@ -581,13 +581,24 @@ public sealed class MainProcess
         MainProcessDependencies dependencies,
         MainProcessCallbacks callbacks)
     {
-        return ProcessPageInternal(
-            article,
-            mainProcess,
-            options,
-            session,
-            dependencies,
-            callbacks);
+        Task<ArticleProcessingResult> processingTask =
+            ProcessPageInternalAsync(
+                article,
+                mainProcess,
+                options,
+                session,
+                dependencies,
+                callbacks,
+                useAsyncDisambiguation: false);
+
+        if (!processingTask.IsCompleted)
+        {
+            throw new InvalidOperationException(
+                "Legacy synchronous processing cannot await " +
+                "asynchronous processing operations.");
+        }
+
+        return processingTask.GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -623,26 +634,27 @@ public sealed class MainProcess
         MainProcessDependencies dependencies,
         MainProcessCallbacks callbacks)
     {
-        return Task.FromResult(
-            ProcessPageInternal(
-                article,
-                mainProcess,
-                options,
-                session,
-                dependencies,
-                callbacks));
+        return ProcessPageInternalAsync(
+            article,
+            mainProcess,
+            options,
+            session,
+            dependencies,
+            callbacks,
+            useAsyncDisambiguation: true);
     }
 
     /// <summary>
     /// Executes the article-processing pipeline and captures its result.
     /// </summary>
-    private ArticleProcessingResult ProcessPageInternal(
+    private async Task<ArticleProcessingResult> ProcessPageInternalAsync(
         Article article,
         bool mainProcess,
         MainProcessOptions options,
         Session session,
         MainProcessDependencies dependencies,
-        MainProcessCallbacks callbacks)
+        MainProcessCallbacks callbacks,
+        bool useAsyncDisambiguation)
     {
         Variables.Profiler.Start(
             "ProcessPage(\"" + article.Name + "\")");
@@ -795,20 +807,47 @@ public sealed class MainProcess
 
             Variables.Profiler.Profile("Files");
 
-            if (!DisambiguationProcessor.ApplyDisambiguation(
-                    article,
-                    options,
-                    session))
+            // Use asynchronous disambiguation for Twain while preserving
+            // synchronous compatibility with the legacy AWB interface.
+            if (useAsyncDisambiguation)
             {
-                callbacks.AbortProcessing();
+                DisambiguationProcessingOutcome disambiguationOutcome =
+                    await DisambiguationProcessor.ApplyDisambiguationAsync(
+                        article,
+                        options,
+                        callbacks);
 
-                return new ArticleProcessingResult
+                if (disambiguationOutcome ==
+                    DisambiguationProcessingOutcome.Aborted)
                 {
-                    Outcome = ArticleProcessingOutcome.Failed,
-                    HasTextChanges = !article.NoArticleTextChanged,
-                    WasSkipped = article.SkipArticle,
-                    Completed = false
-                };
+                    callbacks.AbortProcessing();
+
+                    return new ArticleProcessingResult
+                    {
+                        Outcome = ArticleProcessingOutcome.Failed,
+                        HasTextChanges = !article.NoArticleTextChanged,
+                        WasSkipped = article.SkipArticle,
+                        Completed = false
+                    };
+                }
+            }
+            else
+            {
+                if (!DisambiguationProcessor.ApplyDisambiguation(
+                        article,
+                        options,
+                        session))
+                {
+                    callbacks.AbortProcessing();
+
+                    return new ArticleProcessingResult
+                    {
+                        Outcome = ArticleProcessingOutcome.Failed,
+                        HasTextChanges = !article.NoArticleTextChanged,
+                        WasSkipped = article.SkipArticle,
+                        Completed = false
+                    };
+                }
             }
 
             Variables.Profiler.Profile("Disambiguate");
