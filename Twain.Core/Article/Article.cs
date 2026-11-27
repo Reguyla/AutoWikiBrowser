@@ -2112,10 +2112,23 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
         }
         else if (!noChange)
         {
+            string editSummary =
+                "Disambiguation: " + dabLinkText;
+
             TwainChangeArticleText(
-                "Disambiguated " + dabLinkText,
+                editSummary,
                 articleText,
                 false);
+
+            AppendToSummary(editSummary);
+
+            EditSummaryCollector.Add(
+                new EditSummaryContribution
+                {
+                    Category = EditSummaryCategory.Disambiguation,
+                    Description = editSummary,
+                    ShortDescription = "Disambiguation"
+                });
         }
     }
 
