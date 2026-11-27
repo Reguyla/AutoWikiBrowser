@@ -1416,13 +1416,11 @@ public partial class WorkspaceViewModel : ObservableObject
         {
             if (watch)
             {
-                await Task.Run(
-                    () => Session.Editor.Watch(articleTitle));
+                await Session.Editor.WatchArticleAsync(articleTitle);
             }
             else
             {
-                await Task.Run(
-                    () => Session.Editor.Unwatch(articleTitle));
+                await Session.Editor.UnwatchArticleAsync(articleTitle);
             }
 
             if (CurrentArticleName == articleTitle)

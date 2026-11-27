@@ -998,6 +998,48 @@ public class AsyncApiEdit
             });
     }
 
+    /// <summary>
+    /// Adds the specified article to the user's watchlist asynchronously.
+    /// Returns when the wiki operation completes.
+    /// </summary>
+    /// <param name="title">The article title.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public Task WatchArticleAsync(
+        string title,
+        CancellationToken cancellationToken = default)
+    {
+        if (IsActive)
+        {
+            throw new InvocationException(
+                "An asynchronous call is already being performed.");
+        }
+
+        return ModernEditor.WatchAsync(
+            title,
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Removes the specified article from the user's watchlist asynchronously.
+    /// Returns when the wiki operation completes.
+    /// </summary>
+    /// <param name="title">The article title.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public Task UnwatchArticleAsync(
+        string title,
+        CancellationToken cancellationToken = default)
+    {
+        if (IsActive)
+        {
+            throw new InvocationException(
+                "An asynchronous call is already being performed.");
+        }
+
+        return ModernEditor.UnwatchAsync(
+            title,
+            cancellationToken);
+    }
+
     public void Delete(string title, string reason)
     {
         Delete(title, reason, false);
