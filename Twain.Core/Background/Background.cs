@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+using System.Collections.Concurrent;
 using System.Collections.Specialized;
 using System.Threading;
 using System.Windows.Forms;
@@ -484,38 +485,66 @@ public class BackgroundRequest
     }
 }
 
+/// TODO: Either move it into its own CrossThreadQueue.cs file
+/// or eliminate the wrapper entirely in favor of ConcurrentQueue<T>
 /// <summary>
-/// Thread-safe Queue-style container. Supports multiple writers and single reader.
+/// Provides a thread-safe FIFO queue supporting multiple
+/// producers and consumers.
 /// </summary>
-/// <typeparam name="T">Type to store</typeparam>
+/// <typeparam name="T">
+/// The type of item stored in the queue.
+/// </typeparam>
 public class CrossThreadQueue<T>
 {
-    private readonly Queue<T> Queue = new Queue<T>();
+    private readonly ConcurrentQueue<T> _queue = new();
 
+    /// <summary>
+    /// Adds an item to the end of the queue.
+    /// </summary>
     public void Add(T value)
     {
-        lock (Queue)
-        {
-            Queue.Enqueue(value);
-        }
+        _queue.Enqueue(value);
     }
 
+    /// <summary>
+    /// Removes and returns the item at the front of the queue.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// The queue is empty.
+    /// </exception>
     public T Remove()
     {
-        lock (Queue)
-        {
-            return Queue.Dequeue();
-        }
+        if (_queue.TryDequeue(out T? value))
+            return value;
+
+        throw new InvalidOperationException("The queue is empty.");
     }
 
-    public int Count
+    /// <summary>
+    /// Attempts to remove and return an item from the queue.
+    /// </summary>
+    public bool TryRemove(
+        [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
+        out T value)
     {
-        get
-        {
-            lock (Queue)
-            {
-                return Queue.Count;
-            }
-        }
+        return _queue.TryDequeue(out value);
+    }
+
+    /// <summary>
+    /// Gets the number of items currently in the queue.
+    /// </summary>
+    public int Count => _queue.Count;
+
+    /// <summary>
+    /// Gets whether the queue is currently empty.
+    /// </summary>
+    public bool IsEmpty => _queue.IsEmpty;
+
+    /// <summary>
+    /// Removes all items from the queue.
+    /// </summary>
+    public void Clear()
+    {
+        _queue.Clear();
     }
 }
