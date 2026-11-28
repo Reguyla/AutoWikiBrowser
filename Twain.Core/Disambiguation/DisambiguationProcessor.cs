@@ -757,62 +757,6 @@ public static class DisambiguationProcessor
     }
 
     /// <summary>
-    /// Applies the configured disambiguation operation to the supplied article.
-    /// </summary>
-    /// <param name="article">
-    /// The article to process.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <param name="session">
-    /// The active wiki session.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when processing may continue; otherwise,
-    /// <see langword="false"/> when disambiguation is aborted or the article
-    /// is skipped.
-    /// </returns>
-    public static bool ApplyDisambiguation(
-        Article article,
-        MainProcessOptions options,
-        Session session)
-    {
-        if (options.PreParseMode ||
-            !options.DisambiguationEnabled ||
-            options.DisambiguationLink.Length == 0 ||
-            options.DisambiguationVariants.Length == 0)
-        {
-            return true;
-        }
-
-        bool noChange;
-
-        DabForm dialog = new(session);
-
-        string articleText =
-            dialog.Disambiguate(
-                article.ArticleText,
-                article.Name,
-                options.DisambiguationLink,
-                options.DisambiguationVariants,
-                options.DisambiguationContextCharacters,
-                options.BotMode,
-                out noChange);
-
-        if (dialog.Abort)
-            return false;
-
-        article.ApplyDisambiguationResult(
-            options.DisambiguationLink,
-            articleText,
-            noChange,
-            options.SkipIfNoDisambiguation);
-
-        return !article.SkipArticle;
-    }
-
-    /// <summary>
     /// Applies the configured disambiguation operation using an
     /// asynchronous application-owned dialog callback.
     /// </summary>

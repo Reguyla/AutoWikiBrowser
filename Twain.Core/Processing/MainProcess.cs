@@ -550,82 +550,8 @@ public sealed class MainProcess
     }
 
     /// <summary>
-    /// Fully processes a page using the supplied processing configuration
-    /// and dependencies.
+    /// Processes an article asynchronously and returns its processing outcome.
     /// </summary>
-    public void ProcessPageCore(
-        Article article,
-        bool mainProcess,
-        MainProcessOptions options,
-        Session session,
-        MainProcessDependencies dependencies,
-        MainProcessCallbacks callbacks)
-    {
-        _ = ProcessPageWithResult(
-            article,
-            mainProcess,
-            options,
-            session,
-            dependencies,
-            callbacks);
-    }
-
-    /// <summary>
-    /// Processes an article and returns its processing outcome.
-    /// </summary>
-    public ArticleProcessingResult ProcessPageWithResult(
-        Article article,
-        bool mainProcess,
-        MainProcessOptions options,
-        Session session,
-        MainProcessDependencies dependencies,
-        MainProcessCallbacks callbacks)
-    {
-        Task<ArticleProcessingResult> processingTask =
-            ProcessPageInternalAsync(
-                article,
-                mainProcess,
-                options,
-                session,
-                dependencies,
-                callbacks,
-                useAsyncDisambiguation: false);
-
-        if (!processingTask.IsCompleted)
-        {
-            throw new InvalidOperationException(
-                "Legacy synchronous processing cannot await " +
-                "asynchronous processing operations.");
-        }
-
-        return processingTask.GetAwaiter().GetResult();
-    }
-
-    /// <summary>
-    /// Asynchronously processes an article and returns its
-    /// processing outcome.
-    /// </summary>
-    /// <param name="article">
-    /// The article to process.
-    /// </param>
-    /// <param name="mainProcess">
-    /// Whether processing is part of the normal editing workflow.
-    /// </param>
-    /// <param name="options">
-    /// The processing options captured when processing began.
-    /// </param>
-    /// <param name="session">
-    /// The active wiki session.
-    /// </param>
-    /// <param name="dependencies">
-    /// The dependencies required by article processing.
-    /// </param>
-    /// <param name="callbacks">
-    /// The application-owned processing callbacks.
-    /// </param>
-    /// <returns>
-    /// The resulting article-processing outcome.
-    /// </returns>
     public Task<ArticleProcessingResult> ProcessPageWithResultAsync(
         Article article,
         bool mainProcess,
@@ -640,8 +566,7 @@ public sealed class MainProcess
             options,
             session,
             dependencies,
-            callbacks,
-            useAsyncDisambiguation: true);
+            callbacks);
     }
 
     /// <summary>
@@ -653,8 +578,7 @@ public sealed class MainProcess
         MainProcessOptions options,
         Session session,
         MainProcessDependencies dependencies,
-        MainProcessCallbacks callbacks,
-        bool useAsyncDisambiguation)
+        MainProcessCallbacks callbacks)
     {
         Variables.Profiler.Start(
             "ProcessPage(\"" + article.Name + "\")");
@@ -807,47 +731,24 @@ public sealed class MainProcess
 
             Variables.Profiler.Profile("Files");
 
-            // Use asynchronous disambiguation for Twain while preserving
-            // synchronous compatibility with the legacy AWB interface.
-            if (useAsyncDisambiguation)
+            DisambiguationProcessingOutcome disambiguationOutcome =
+                await DisambiguationProcessor.ApplyDisambiguationAsync(
+                    article,
+                    options,
+                    callbacks);
+
+            if (disambiguationOutcome ==
+                DisambiguationProcessingOutcome.Aborted)
             {
-                DisambiguationProcessingOutcome disambiguationOutcome =
-                    await DisambiguationProcessor.ApplyDisambiguationAsync(
-                        article,
-                        options,
-                        callbacks);
+                callbacks.AbortProcessing();
 
-                if (disambiguationOutcome ==
-                    DisambiguationProcessingOutcome.Aborted)
+                return new ArticleProcessingResult
                 {
-                    callbacks.AbortProcessing();
-
-                    return new ArticleProcessingResult
-                    {
-                        Outcome = ArticleProcessingOutcome.Failed,
-                        HasTextChanges = !article.NoArticleTextChanged,
-                        WasSkipped = article.SkipArticle,
-                        Completed = false
-                    };
-                }
-            }
-            else
-            {
-                if (!DisambiguationProcessor.ApplyDisambiguation(
-                        article,
-                        options,
-                        session))
-                {
-                    callbacks.AbortProcessing();
-
-                    return new ArticleProcessingResult
-                    {
-                        Outcome = ArticleProcessingOutcome.Failed,
-                        HasTextChanges = !article.NoArticleTextChanged,
-                        WasSkipped = article.SkipArticle,
-                        Completed = false
-                    };
-                }
+                    Outcome = ArticleProcessingOutcome.Failed,
+                    HasTextChanges = !article.NoArticleTextChanged,
+                    WasSkipped = article.SkipArticle,
+                    Completed = false
+                };
             }
 
             Variables.Profiler.Profile("Disambiguate");

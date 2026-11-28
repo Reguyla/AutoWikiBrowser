@@ -2988,41 +2988,18 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         SkipPageReasonAlreadyProvided();
     }
 
+    /// TODO: LEGACY-REMOVAL
     /// <summary>
-    /// Processes a page using the processing options currently selected in the
-    /// user interface.
+    /// Legacy article processing has been retired.
+    /// Article processing is now handled by the Twain workspace.
     /// </summary>
-    /// <param name="theArticle">
-    /// The page to process.
-    /// </param>
-    /// <param name="mainProcess">
-    /// <see langword="true"/> when the page is being processed for the normal save
-    /// workflow; otherwise, <see langword="false"/> for reparsing, prefetching, and
-    /// similar operations.
-    /// </param>
     private void ProcessPage(
         Article theArticle,
         bool mainProcess)
     {
-        _typoStats = null;
-
-        MainProcessOptions options =
-            CreateMainProcessOptions();
-
-        MainProcessDependencies dependencies =
-            CreateMainProcessDependencies();
-
-        MainProcessCallbacks callbacks =
-            CreateMainProcessCallbacks();
-
-        _mainProcess.ProcessPageCore(
-            theArticle,
-            mainProcess,
-            options,
-            TheSession,
-            dependencies,
-            callbacks);
-
+        throw new NotSupportedException(
+            "Legacy article processing has been retired. " +
+            "Use the Twain application instead.");
     }
 
     /// <summary>
