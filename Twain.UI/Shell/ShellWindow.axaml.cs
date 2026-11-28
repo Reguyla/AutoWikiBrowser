@@ -590,8 +590,8 @@ public partial class ShellWindow : Window
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
         var (dialogResult, processingResult) =
-            await DabWindow.ShowWithCorrectionsAsync(
-                this,
+            await DabWindow.ShowAsync(
+                        this,
                 article.Name,
                 article.ArticleText,
                 preparation,

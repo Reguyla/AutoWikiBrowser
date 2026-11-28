@@ -350,7 +350,7 @@ public partial class DabWindow : Window
     public static async Task<(
         DabDialogResult DialogResult,
         DisambiguationProcessor.DisambiguationProcessingResult ProcessingResult)>
-        ShowWithCorrectionsAsync(
+        ShowAsync(
             Window owner,
             string articleTitle,
             string articleText,
@@ -386,31 +386,5 @@ public partial class DabWindow : Window
                 window.Results);
 
         return (result, processingResult);
-    }
-
-    public static async Task<(
-    DabDialogResult DialogResult,
-    string ArticleText)> ShowAsync(
-        Window owner,
-        string articleTitle,
-        string articleText,
-        DisambiguationProcessor.DisambiguationPreparation preparation,
-        bool hasWatchlistStatus,
-        bool isArticleWatched,
-        Func<string, bool, Task<bool>> setWatchlistStatusAsync)
-    {
-        var (dialogResult, processingResult) =
-            await ShowWithCorrectionsAsync(
-                owner,
-                articleTitle,
-                articleText,
-                preparation,
-                hasWatchlistStatus,
-                isArticleWatched,
-                setWatchlistStatusAsync);
-
-        return (
-            dialogResult,
-            processingResult.ArticleText);
     }
 }
