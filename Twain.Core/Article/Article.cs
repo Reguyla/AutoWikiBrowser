@@ -2049,41 +2049,6 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
                 + "processed article text.");
         }
     }
-
-    /// <summary>
-    /// Determines whether a custom-module edit summary appears to contain
-    /// complete article text rather than a short description of the changes.
-    /// </summary>
-    private static bool LooksLikeArticleText(
-        string editSummary,
-        string originalArticleText,
-        string updatedArticleText)
-    {
-        if (string.IsNullOrEmpty(editSummary))
-            return false;
-
-        if (string.Equals(
-            editSummary,
-            originalArticleText,
-            StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        if (string.Equals(
-            editSummary,
-            updatedArticleText,
-            StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        const int suspiciousSummaryLength = 1000;
-
-        return editSummary.Length > suspiciousSummaryLength
-            && (originalArticleText.Contains(editSummary, StringComparison.Ordinal)
-                || updatedArticleText.Contains(editSummary, StringComparison.Ordinal));
-    }
     #endregion
 
     /// <summary>
