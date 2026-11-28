@@ -590,36 +590,6 @@ public partial class FindandReplace : Form
             ((dataGridView1.CurrentRow != null)
             && ((bool)dataGridView1.CurrentRow.Cells["regex"].FormattedValue));
     }
-
-    private void testRegexToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        DataGridViewRow row = dataGridView1.CurrentRow;
-
-        if (row == null) return;
-
-        using (RegexTester t = new RegexTester(true))
-        {
-            dataGridView1.CommitEdit(DataGridViewDataErrorContexts.Commit);
-            t.Find = (string)row.Cells["find"].Value;
-            t.Replace = (string)row.Cells["replace"].Value;
-            t.Multiline = (bool)row.Cells["multi"].FormattedValue;
-            t.Singleline = (bool)row.Cells["single"].FormattedValue;
-            t.IgnoreCase = !(bool)row.Cells["casesensitive"].FormattedValue;
-
-            // TODO(Twain): Replace the legacy MainForm/EditBox dependency when the
-            // Avalonia find-and-replace UI is connected to the active editing session.
-            if (Variables.MainForm != null && Variables.MainForm.EditBox.Enabled)
-                t.ArticleText = Variables.MainForm.EditBox.Text;
-
-            if (t.ShowDialog(this) != DialogResult.OK) return;
-            row.Cells["find"].Value = t.Find;
-            row.Cells["replace"].Value = t.Replace;
-            row.Cells["multi"].Value = t.Multiline;
-            row.Cells["single"].Value = t.Singleline;
-            row.Cells["casesensitive"].Value = !t.IgnoreCase;
-            dataGridView1.RefreshEdit();
-        }
-    }
     #endregion
 
     private void txtSearch_TextChanged(object sender, EventArgs e)

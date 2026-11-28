@@ -160,22 +160,33 @@ public partial class RuleControl : UserControl
         contextMenu.Show(TestIf, 0, TestIf.Height);
     }
 
+    /// <summary>
+    /// Legacy replacement regex testing has been retired.
+    /// </summary>
     private void TestFind_Click(object sender, EventArgs e)
     {
-        RegexTester.Test(ParentForm, ReplaceTextbox, WithTextbox, ReplaceIsMultilineCheckBox,
-            ReplaceIsSinglelineCheckbox, ReplaceIsCaseSensitiveCheckBox);
+        // TODO: LEGACY-REMOVAL - Remove this handler when
+        // the legacy RuleControl is retired.
     }
 
-    private void testIfContainsToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Legacy If Contains regex testing has been retired.
+    /// </summary>
+    private void testIfContainsToolStripMenuItem_Click(
+        object sender, EventArgs e)
     {
-        RegexTester.Test(ParentForm, IfContainsTextBox, null, IfIsMultilineCheckbox,
-            IfIsSinglelineCheckBox, IfIsCaseSensitiveCheckBox);
+        // TODO: LEGACY-REMOVAL - Remove this handler when
+        // the legacy RuleControl is retired.
     }
 
-    private void testIfNotContainsToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Legacy If Not Contains regex testing has been retired.
+    /// </summary>
+    private void testIfNotContainsToolStripMenuItem_Click(
+        object sender, EventArgs e)
     {
-        RegexTester.Test(ParentForm, IfNotContainsTextBox, null, IfIsMultilineCheckbox,
-            IfIsSinglelineCheckBox, IfIsCaseSensitiveCheckBox);
+        // TODO: LEGACY-REMOVAL - Remove this handler when
+        // the legacy RuleControl is retired.
     }
 
     // event handlers for Ctrl+A / select all

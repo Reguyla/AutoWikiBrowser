@@ -1525,15 +1525,6 @@ namespace AutoWikiBrowser
             this.toolStripSeparator13.Name = "toolStripSeparator13";
             this.toolStripSeparator13.Size = new System.Drawing.Size(237, 6);
             // 
-            // testRegexToolStripMenuItem
-            // 
-            this.testRegexToolStripMenuItem.Name = "testRegexToolStripMenuItem";
-            this.testRegexToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.T)));
-            this.testRegexToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.testRegexToolStripMenuItem.Text = "Regex &tester";
-            this.testRegexToolStripMenuItem.Click += new System.EventHandler(this.launchRegexTester);
-            // 
             // launchDumpSearcherToolStripMenuItem
             // 
             this.launchDumpSearcherToolStripMenuItem.Name = "launchDumpSearcherToolStripMenuItem";

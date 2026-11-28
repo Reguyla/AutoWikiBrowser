@@ -148,7 +148,6 @@ public sealed partial class MainForm : Form, IAutoWikiBrowser
     private readonly CustomModule _customModule;
     private readonly ExternalProgram _externalProgram = new();
 
-    private RegexTester _regexTester;
 
     // --------------------------------------------------------------------
     // List Processing
@@ -9384,32 +9383,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         EventArgs e)
     {
         await _substTemplates.ShowConfigurationDialogAsync();
-    }
-
-    /// <summary>
-    /// Opens the Regex Tester and optionally transfers the currently selected
-    /// article text into the tester.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void launchRegexTester(object sender, EventArgs e)
-    {
-        if (_regexTester == null || _regexTester.IsDisposed)
-        {
-            _regexTester = new RegexTester();
-        }
-
-        if (ArticleEditor.HasSelection &&
-                    MessageBox.Show(
-                "Would you like to transfer the currently selected article text to the Regex Tester?",
-                "Transfer Article Text?",
-                MessageBoxButtons.YesNo) == DialogResult.Yes)
-        {
-            _regexTester.ArticleText = ArticleEditor.SelectedText;
-        }
-
-        _regexTester.Show();
-        _regexTester.BringToFront();
     }
 
     /// <summary>

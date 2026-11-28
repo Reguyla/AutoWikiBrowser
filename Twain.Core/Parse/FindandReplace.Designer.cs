@@ -297,13 +297,6 @@ namespace Twain.Core.Parse
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(235, 6);
             // 
-            // testRegexToolStripMenuItem
-            // 
-            this.testRegexToolStripMenuItem.Name = "testRegexToolStripMenuItem";
-            this.testRegexToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
-            this.testRegexToolStripMenuItem.Text = "Test regex...";
-            this.testRegexToolStripMenuItem.Click += new System.EventHandler(this.testRegexToolStripMenuItem_Click);
-            // 
             // createRetfRuleToolStripMenuItem
             // 
             this.createRetfRuleToolStripMenuItem.Name = "createRetfRuleToolStripMenuItem";

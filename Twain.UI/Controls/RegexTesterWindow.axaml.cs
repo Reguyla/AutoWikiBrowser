@@ -474,8 +474,8 @@ public partial class RegexTesterWindow : Avalonia.Controls.Window
     {
         _busy = busy;
 
-        ProgressBar.IsIndeterminate =
-            busy;
+        ProgressBar.IsVisible = busy;
+        ProgressBar.IsIndeterminate = busy;
 
         if (busy)
         {

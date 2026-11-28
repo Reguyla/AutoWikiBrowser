@@ -319,22 +319,14 @@ public partial class AdvancedRegexHtmlScraper : Form, IListProvider
         RegexTextBox.Paste();
     }
 
-    private void copyToRegexTesterToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Legacy Find and Replace regex testing has been retired.
+    /// </summary>
+    private void copyToRegexTesterToolStripMenuItem_Click(
+        object sender, EventArgs e)
     {
-        using (RegexTester t = new RegexTester(true))
-        {
-            t.Find = RegexTextBox.Text;
-            t.IgnoreCase = !CaseSensitiveCheckBox.Checked;
-            t.Multiline = MultiLineCheckBox.Checked;
-            t.Singleline = SingleLineCheckBox.Checked;
-
-            if (t.ShowDialog(this) != DialogResult.OK) return;
-
-            RegexTextBox.Text = t.Find;
-            CaseSensitiveCheckBox.Checked = t.IgnoreCase;
-            MultiLineCheckBox.Checked = t.Multiline;
-            SingleLineCheckBox.Checked = t.Singleline;
-        }
+        // TODO: LEGACY-REMOVAL - Remove this handler when
+        // the legacy Find and Replace interface is retired.
     }
 
     private void AdvancedRegexHtmlScraper_FormClosing(

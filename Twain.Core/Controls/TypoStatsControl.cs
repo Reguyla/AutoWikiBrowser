@@ -115,7 +115,11 @@ public partial class TypoStatsControl : NoFlickerExtendedListView
 
     private void contextMenu_Opening(object sender, CancelEventArgs e)
     {
-        miCopyFind.Enabled = miCopyReplace.Enabled = miTestRegex.Enabled = SelectedItems.Count > 0;
+        miCopyFind.Enabled = miCopyReplace.Enabled =
+            SelectedItems.Count > 0;
+
+        miTestRegex.Visible = false;
+
         miClear.Visible = miSaveLog.Visible = IsOverallStats;
     }
 
@@ -140,20 +144,13 @@ public partial class TypoStatsControl : NoFlickerExtendedListView
         Tools.CopyToClipboard(typo.Typo.Find);
     }
 
+    /// <summary>
+    /// Legacy regex testing functionality has been retired.
+    /// </summary>
     private void TestRegex(object sender, EventArgs e)
     {
-        TypoStatsListViewItem typo = SelectedItem;
-        if (typo == null) return;
-
-        using (RegexTester t = new RegexTester())
-        {
-            t.Find = typo.Typo.Find;
-            t.Replace = typo.Typo.Replace;
-            if (Variables.MainForm != null && Variables.MainForm.EditBox.Enabled)
-                t.ArticleText = Variables.MainForm.EditBox.Text;
-
-            t.ShowDialog(FindForm());
-        }
+        // TODO: LEGACY-REMOVAL - Remove this handler when
+        // the legacy TypoStatsControl is retired.
     }
 
     private void miSaveLog_Click(object sender, EventArgs e)
