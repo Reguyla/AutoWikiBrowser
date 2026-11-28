@@ -5132,30 +5132,6 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         chkNudge.Checked = enabled;
     }
 
-    // TODO (UI Modernization):
-    // Review whether the About window should be modal or limited to a single
-    // modeless instance, and ensure repeated menu selections cannot create
-    // unnecessary duplicate windows.
-    /// <summary>
-    /// Opens the application About dialog.
-    /// </summary>
-    /// <param name="sender">
-    /// The object that raised the event.
-    /// </param>
-    /// <param name="e">
-    /// The event data associated with the menu selection.
-    /// </param>
-    private void aboutToolStripMenuItem_Click(
-        object sender,
-        EventArgs e)
-    {
-        AboutBox aboutBox =
-            new AboutBox(
-                webBrowserHistory.Version.ToString());
-
-        aboutBox.Show(this);
-    }
-
     // TODO (UI Architecture):
     // Separate wiki-status evaluation from message boxes, dialog display, browser
     // navigation, and control updates so status checks can be tested without UI
