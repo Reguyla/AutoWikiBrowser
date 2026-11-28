@@ -4532,62 +4532,28 @@ $"Editor text assigned successfully. Editor length: {ArticleEditor.Text.Length}"
         UpdateTypoCount();
     }
 
-    // TODO (Shutdown Modernization):
-    // Review whether persistent settings should be saved when the user cancels
-    // the closing request, and whether CloseDownAWB() should run for shutdown
-    // reasons that cannot be cancelled, such as Windows session termination.
     /// <summary>
-    /// Handles the form-closing request, saves persistent settings, and optionally
-    /// asks the user to confirm that AWB should terminate.
+    /// Saves persistent settings and performs legacy application shutdown.
     /// </summary>
     /// <param name="sender">
     /// The object that raised the event.
     /// </param>
     /// <param name="e">
-    /// The form-closing event data, which may be updated to cancel closing.
+    /// The form-closing event data.
     /// </param>
-    /// <remarks>
-    /// Window settings are saved even when the user cancels the closing request,
-    /// preserving the existing behavior.
-    /// </remarks>
     private void MainForm_FormClosing(
         object sender,
         FormClosingEventArgs e)
     {
+        // TODO: LEGACY-REMOVAL - Delete this handler when the
+        // legacy AutoWikiBrowser main form is removed.
+        // Exit confirmation is now handled by Twain.
+
         SaveWindowSettings();
 
-        if (!Properties.Settings.Default.AskForTerminate)
-        {
-            Properties.Settings.Default.Save();
-            CloseDownAWB();
-            return;
-        }
-
-        TimeSpan elapsedTime = _sessionTimer.Elapsed;
-
-        using ExitQuestion dialog = new ExitQuestion(
-            elapsedTime,
-            _sessionCounters.NumberOfEdits,
-            string.Empty);
-
-        DialogResult result = dialog.ShowDialog(this);
-
-        Properties.Settings.Default.AskForTerminate =
-            !dialog.CheckBoxDontAskAgain;
-
-        // Preserve user settings even when closing is cancelled.
         Properties.Settings.Default.Save();
 
-        switch (result)
-        {
-            case DialogResult.OK:
-                CloseDownAWB();
-                break;
-
-            case DialogResult.Cancel:
-                e.Cancel = true;
-                break;
-        }
+        CloseDownAWB();
     }
 
     /// <summary>
