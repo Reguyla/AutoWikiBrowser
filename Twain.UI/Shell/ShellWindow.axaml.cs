@@ -574,19 +574,23 @@ public partial class ShellWindow : Window
     /// <returns>
     /// Whether processing was aborted and the resulting article text.
     /// </returns>
-    private async Task<(bool Abort, string ArticleText)> ShowDisambiguationAsync(
-        Article article,
-        DisambiguationProcessor.DisambiguationPreparation preparation)
+    private async Task<(
+        bool Abort,
+        DisambiguationProcessor.DisambiguationProcessingResult ProcessingResult)>
+        ShowDisambiguationAsync(
+            Article article,
+            DisambiguationProcessor.DisambiguationPreparation preparation)
     {
-        var workspace = _subscribedShellViewModel?.Workspace
+        var workspace =
+            _subscribedShellViewModel?.Workspace
             ?? throw new InvalidOperationException(
                 "The workspace is not available.");
 
         var articleEditorPane = workspace.Panes.Single(
             pane => pane.Id == BuiltInPaneIds.ArticleEditor);
 
-        var (dialogResult, articleText) =
-            await DabWindow.ShowAsync(
+        var (dialogResult, processingResult) =
+            await DabWindow.ShowWithCorrectionsAsync(
                 this,
                 article.Name,
                 article.ArticleText,
@@ -597,7 +601,7 @@ public partial class ShellWindow : Window
 
         return (
             dialogResult == DabDialogResult.Abort,
-            articleText);
+            processingResult);
     }
 
     /// <summary>

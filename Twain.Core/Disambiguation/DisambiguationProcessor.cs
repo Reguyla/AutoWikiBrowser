@@ -870,15 +870,15 @@ public static class DisambiguationProcessor
             ?? throw new InvalidOperationException(
                 "The disambiguation dialog callback has not been configured.");
 
-        var (abort, articleText) =
-            await requestDisambiguation(
-                article,
-                preparation);
+        var (abort, processingResult) =
+            await requestDisambiguation(article, preparation);
 
         if (abort)
         {
             return DisambiguationProcessingOutcome.Aborted;
         }
+
+        string articleText = processingResult.ArticleText;
 
         bool noChange =
             string.Equals(
@@ -890,7 +890,8 @@ public static class DisambiguationProcessor
             options.DisambiguationLink,
             articleText,
             noChange,
-            options.SkipIfNoDisambiguation);
+            options.SkipIfNoDisambiguation,
+            processingResult.Corrections);
 
         return article.SkipArticle
             ? DisambiguationProcessingOutcome.Skipped

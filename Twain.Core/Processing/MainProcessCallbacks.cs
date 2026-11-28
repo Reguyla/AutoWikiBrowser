@@ -40,7 +40,9 @@ public sealed class MainProcessCallbacks
     public Func<
         Article,
         DisambiguationProcessor.DisambiguationPreparation,
-        Task<(bool Abort, string ArticleText)>>?
+        Task<(
+            bool Abort,
+            DisambiguationProcessor.DisambiguationProcessingResult ProcessingResult)>>?
         RequestDisambiguationAsync
     { get; init; }
 

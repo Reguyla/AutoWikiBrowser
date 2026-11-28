@@ -408,7 +408,9 @@ public partial class WorkspaceViewModel : ObservableObject
     public Func<
         Article,
         DisambiguationProcessor.DisambiguationPreparation,
-        Task<(bool Abort, string ArticleText)>>?
+        Task<(
+            bool Abort,
+            DisambiguationProcessor.DisambiguationProcessingResult ProcessingResult)>>?
         RequestDisambiguationAsync
     { get; set; }
 
@@ -1503,20 +1505,29 @@ public partial class WorkspaceViewModel : ObservableObject
     /// Requests interactive disambiguation and rejects the result
     /// if the active article-processing operation has been stopped.
     /// </summary>
-    private async Task<(bool Abort, string ArticleText)>
+    private async Task<(
+        bool Abort,
+        DisambiguationProcessor.DisambiguationProcessingResult ProcessingResult)>
         RequestArticleDisambiguationAsync(
             Article article,
             DisambiguationProcessor.DisambiguationPreparation preparation)
     {
         string originalText = article.ArticleText;
 
+        var unchangedResult =
+            new DisambiguationProcessor.DisambiguationProcessingResult(
+                originalText,
+                Array.Empty<
+                    DisambiguationProcessor.DisambiguationCorrection>());
+
         if (!Options.IsProcessing ||
             !ReferenceEquals(CurrentArticle, article))
         {
-            return (true, originalText);
+            return (true, unchangedResult);
         }
 
-        var requestDisambiguation = RequestDisambiguationAsync
+        var requestDisambiguation =
+            RequestDisambiguationAsync
             ?? throw new InvalidOperationException(
                 "The disambiguation dialog callback has not been configured.");
 
@@ -1524,11 +1535,10 @@ public partial class WorkspaceViewModel : ObservableObject
             article,
             preparation);
 
-        // Processing may have been stopped while the dialog was open.
         if (!Options.IsProcessing ||
             !ReferenceEquals(CurrentArticle, article))
         {
-            return (true, originalText);
+            return (true, unchangedResult);
         }
 
         return result;

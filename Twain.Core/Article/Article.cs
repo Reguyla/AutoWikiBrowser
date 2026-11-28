@@ -23,6 +23,7 @@ using System.Xml.Serialization;
 using Twain.Core;
 using Twain.Core.API;
 using Twain.Core.Controls;
+using Twain.Core.Disambiguation;
 using Twain.Core.GeneralFixes;
 using Twain.Core.Logging;
 using Twain.Core.Parse;
@@ -2086,7 +2087,8 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     #endregion
 
     /// <summary>
-    /// Applies the result of a disambiguation operation to the article.
+    /// Applies the result of a disambiguation operation to the article
+    /// and records the associated edit-summary contributions.
     /// </summary>
     /// <param name="dabLinkText">
     /// The disambiguation link that was processed.
@@ -2098,37 +2100,65 @@ public class Article : IProcessArticleEventArgs, IComparable<Article>
     /// Whether the disambiguation operation left the article unchanged.
     /// </param>
     /// <param name="skipIfNoChange">
-    /// Whether the article should be skipped when no disambiguation change was made.
+    /// Whether the article should be skipped when no disambiguation
+    /// change was made.
+    /// </param>
+    /// <param name="corrections">
+    /// The individual corrections produced by the disambiguation
+    /// operation, when available.
     /// </param>
     public void ApplyDisambiguationResult(
         string dabLinkText,
         string articleText,
         bool noChange,
-        bool skipIfNoChange)
+        bool skipIfNoChange,
+        IReadOnlyList<
+            DisambiguationProcessor.DisambiguationCorrection>? corrections = null)
     {
-        if (noChange && skipIfNoChange)
+        if (noChange)
         {
-            Trace.TwainSkipped("No disambiguation");
+            if (skipIfNoChange)
+            {
+                Trace.TwainSkipped("No disambiguation");
+            }
+
+            return;
         }
-        else if (!noChange)
+
+        string fallbackSummary =
+            "Disambiguation: " + dabLinkText;
+
+        IReadOnlyList<EditSummaryContribution> contributions =
+            corrections is not null
+                ? DisambiguationProcessor.CreateSummaryContributions(
+                    corrections)
+                : Array.Empty<EditSummaryContribution>();
+
+        TwainChangeArticleText(
+            fallbackSummary,
+            articleText,
+            false);
+
+        if (contributions.Count == 0)
         {
-            string editSummary =
-                "Disambiguation: " + dabLinkText;
-
-            TwainChangeArticleText(
-                editSummary,
-                articleText,
-                false);
-
-            AppendToSummary(editSummary);
+            AppendToSummary(fallbackSummary);
 
             EditSummaryCollector.Add(
                 new EditSummaryContribution
                 {
                     Category = EditSummaryCategory.Disambiguation,
-                    Description = editSummary,
+                    Description = fallbackSummary,
                     ShortDescription = "Disambiguation"
                 });
+
+            return;
+        }
+
+        foreach (EditSummaryContribution contribution in contributions)
+        {
+            AppendToSummary(contribution.Description);
+
+            EditSummaryCollector.Add(contribution);
         }
     }
 
